@@ -104,7 +104,7 @@ proc build_executable_and_dwo_files { testname executable options args } {
     global subdir
     global srcdir
 
-    if { ! [regexp "^/" "$executable"] } then {
+    if {![regexp "^/" "$executable"]} {
 	set binfile [standard_output_file $executable]
     } else {
 	set binfile $executable
@@ -143,7 +143,7 @@ proc build_executable_and_dwo_files { testname executable options args } {
 	set s [lindex $spec 0]
 	set local_options [lindex $spec 1]
 
-	if { ! [regexp "^/" "$s"] } then {
+	if {![regexp "^/" "$s"]} {
 	    set s "$srcdir/$subdir/$s"
 	}
 
@@ -1685,7 +1685,7 @@ namespace eval Dwarf {
 	    proc base { addr } {
 		variable _debug_ranges_64_bit
 
-		if { $_debug_ranges_64_bit } then {
+		if {$_debug_ranges_64_bit} {
 		    _op .8byte 0xffffffffffffffff "Base Marker"
 		    _op .8byte $addr "Base Address"
 		} else {
@@ -1697,7 +1697,7 @@ namespace eval Dwarf {
 	    proc range { start end } {
 		variable _debug_ranges_64_bit
 
-		if { $_debug_ranges_64_bit } then {
+		if {$_debug_ranges_64_bit} {
 		    _op .8byte $start "Start Address"
 		    _op .8byte $end "End Address"
 		} else {
@@ -1709,7 +1709,7 @@ namespace eval Dwarf {
 	    uplevel $body
 
 	    # End of the sequence.
-	    if { $_debug_ranges_64_bit } then {
+	    if {$_debug_ranges_64_bit} {
 		_op .8byte 0x0 "End of Sequence Marker (Part 1)"
 		_op .8byte 0x0 "End of Sequence Marker (Part 2)"
 	    } else {

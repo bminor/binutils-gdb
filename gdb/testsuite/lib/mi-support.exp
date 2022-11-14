@@ -22,7 +22,7 @@ load_lib gdb-utils.exp
 # The variable mi_gdb_prompt is a regexp which matches the gdb mi prompt.
 # Set it if it is not already set.
 global mi_gdb_prompt
-if ![info exists mi_gdb_prompt] then {
+if {![info exists mi_gdb_prompt]} {
     set mi_gdb_prompt "\[(\]gdb\[)\] \r\n"
 }
 
@@ -727,19 +727,19 @@ proc mi_gdb_test { args } {
     global inferior_exited_re async
     upvar timeout timeout
 
-    if { [llength $args] >= 1 } then {
+    if {[llength $args] >= 1} {
 	set command [lindex $args 0]
     } else {
 	error "Not enough arguments in mi_gdb_test"
     }
 
-    if { [llength $args] >= 2 } then {
+    if {[llength $args] >= 2} {
 	set pattern [lindex $args 1]
     } else {
 	set pattern ".*"
     }
 
-    if { [llength $args] >= 3 } then {
+    if {[llength $args] >= 3} {
 	set message [lindex $args 2]
     } else {
 	set message $command
@@ -760,7 +760,7 @@ proc mi_gdb_test { args } {
 	error "Too many arguments in mi_gdb_test"
     }
 
-    if $verbose>2 then {
+    if {$verbose > 2} {
 	send_user "Sending \"$command\" to gdb\n"
 	send_user "Looking to match \"$pattern\"\n"
 	send_user "Message is \"$message\"\n"
@@ -819,7 +819,7 @@ proc mi_gdb_test { args } {
 	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
-	    if ![isnative] then {
+	    if {![isnative]} {
 		warning "Can`t communicate to remote target."
 	    }
 	    gdb_exit
@@ -839,7 +839,7 @@ proc mi_gdb_test { args } {
 	    # match a single mi output command.  If a second GDB/MI output 
 	    # response is sent, it will be in the buffer for the next 
 	    # time mi_gdb_test is called.
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		pass "$message"
 	    }
 	    set result 0
@@ -859,7 +859,7 @@ proc mi_gdb_test { args } {
 	    set result 1
 	}
 	 -re "$inferior_exited_re with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program exited)"
 	    } else {
 		set errmsg "$command (the program exited)"
@@ -868,7 +868,7 @@ proc mi_gdb_test { args } {
 	    return -1
 	}
 	 -re "The program is not being run.*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program is no longer running)"
 	    } else {
 		set errmsg "$command (the program is no longer running)"
@@ -877,7 +877,7 @@ proc mi_gdb_test { args } {
 	    return -1
 	}
 	 -re ".*$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message (unexpected output)"
 	    }
 	    set result 1
@@ -899,7 +899,7 @@ proc mi_gdb_test { args } {
 	     fail "$message"
 	}
 	timeout	{
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message (timeout)"
 	    }
 	    set result 1
@@ -1752,7 +1752,7 @@ proc mi_prepare_inline_tests { filename } {
 
     set mi_autotest_source $filename
 
-    if { ! [regexp "^/" "$filename"] } then {
+    if {![regexp "^/" "$filename"]} {
 	set filename "$srcdir/$subdir/$filename"
     }
 

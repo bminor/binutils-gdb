@@ -38,7 +38,7 @@ proc default_prompt_gdb_start { } {
     }
 
     if ![is_remote host] {
-	if { [which $GDB] == 0 } then {
+	if {[which $GDB] == 0} {
 	    perror "$GDB does not exist."
 	    exit 1
 	}

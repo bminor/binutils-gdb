@@ -227,7 +227,7 @@ if ![info exists INTERNAL_GDBFLAGS] {
 # but it's not clear what removing one of them will break.
 # See with_gdb_prompt for more details on prompt handling.
 global gdb_prompt
-if ![info exists gdb_prompt] then {
+if {![info exists gdb_prompt]} {
     set gdb_prompt "\\(gdb\\)"
 }
 
@@ -1145,7 +1145,7 @@ proc gdb_test_multiple { command message args } {
     regsub -all {\r} $patterns {\\r} patterns
     regsub -all {\n} $patterns {\\n} patterns
 
-    if $verbose>2 then {
+    if {$verbose > 2} {
 	send_user "Sending \"$command\" to gdb\n"
 	send_user "Looking to match \"$patterns\"\n"
 	send_user "Message is \"$message\"\n"
@@ -1216,7 +1216,7 @@ proc gdb_test_multiple { command message args } {
 
     append code {
 	-re "Ending remote debugging.*$prompt_regexp" {
-	    if ![isnative] then {
+	    if {![isnative]} {
 		warning "Can`t communicate to remote target."
 	    }
 	    gdb_exit
@@ -1234,7 +1234,7 @@ proc gdb_test_multiple { command message args } {
 	    set result 1
 	}
 	-re "$inferior_exited_re with code \[0-9\]+.*$prompt_regexp" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program exited)"
 	    } else {
 		set errmsg "$command (the program exited)"
@@ -1243,7 +1243,7 @@ proc gdb_test_multiple { command message args } {
 	    set result -1
 	}
 	-re "$inferior_exited_re normally.*$prompt_regexp" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program exited)"
 	    } else {
 		set errmsg "$command (the program exited)"
@@ -1252,7 +1252,7 @@ proc gdb_test_multiple { command message args } {
 	    set result -1
 	}
 	-re "The program is not being run.*$prompt_regexp" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		set errmsg "$message (the program is no longer running)"
 	    } else {
 		set errmsg "$command (the program is no longer running)"
@@ -1261,7 +1261,7 @@ proc gdb_test_multiple { command message args } {
 	    set result -1
 	}
 	-re "\r\n$prompt_regexp" {
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message"
 	    }
 	    set result 1
@@ -1321,7 +1321,7 @@ proc gdb_test_multiple { command message args } {
 	    set result -1
 	}
 	timeout	{
-	    if ![string match "" $message] then {
+	    if {![string match "" $message]} {
 		fail "$message (timeout)"
 	    }
 	    set result 1
@@ -1679,13 +1679,13 @@ proc test_print_reject { args } {
     global gdb_prompt
     global verbose
 
-    if [llength $args]==2 then {
+    if {[llength $args] == 2} {
 	set expectthis [lindex $args 1]
     } else {
 	set expectthis "should never match this bogus string"
     }
     set sendthis [lindex $args 0]
-    if $verbose>2 then {
+    if {$verbose > 2} {
 	send_user "Sending \"$sendthis\" to gdb\n"
 	send_user "Looking to match \"$expectthis\"\n"
     }
@@ -1772,7 +1772,7 @@ proc gdb_test_exact { args } {
     # case some users of gdb_test_exact already do the right thing.
     regsub -all "\r\n" $pattern "\n" pattern
     regsub -all "\n" $pattern "\r\n" pattern
-    if [llength $args]==3 then {
+    if {[llength $args] == 3} {
 	set message [lindex $args 2]
 	return [gdb_test $command $pattern $message]
     }
@@ -2250,7 +2250,7 @@ proc default_gdb_spawn { } {
     }
 
     if ![is_remote host] {
-	if { [which $GDB] == 0 } then {
+	if {[which $GDB] == 0} {
 	    perror "$GDB does not exist."
 	    exit 1
 	}
@@ -4597,7 +4597,7 @@ gdb_caching_proc universal_compile_options {
     # such an option is specified.
     set opt "additional_flags=-fdiagnostics-color=never"
     set lines [target_compile $src $obj object [list "quiet" $opt]]
-    if [string match "" $lines] then {
+    if {[string match "" $lines]} {
 	# Seems to have worked; use the option.
 	lappend options $opt
     }
@@ -4648,7 +4648,7 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 
     file delete $src
 
-    if ![string match "" $lines] then {
+    if {![string match "" $lines]} {
         verbose "$name:  compilation failed, returning 0" 2
         return 0
     }
@@ -5524,7 +5524,7 @@ proc can_spawn_for_attach { } {
     # We use exp_pid to get the inferior's pid, assuming that gives
     # back the pid of the program.  On remote boards, that would give
     # us instead the PID of e.g., the ssh client, etc.
-    if [is_remote target] then {
+    if {[is_remote target]} {
 	verbose -log "can't spawn for attach (target is remote)"
 	return 0
     }
@@ -6593,7 +6593,7 @@ proc test_debug_format {format} {
 proc setup_xfail_format { format } {
     set ret [test_debug_format $format]
 
-    if {$ret} then {
+    if {$ret} {
 	setup_xfail "*-*-*"
     }
     return $ret
@@ -6667,32 +6667,32 @@ proc gdb_get_line_number { text { file "" } } {
     global subdir
     global srcfile
 
-    if { "$file" == "" } then {
+    if {"$file" == ""} {
 	set file "$srcfile"
     }
-    if { ! [regexp "^/" "$file"] } then {
+    if {![regexp "^/" "$file"]} {
 	set file "$srcdir/$subdir/$file"
     }
 
-    if { [ catch { set fd [open "$file"] } message ] } then {
+    if {[catch { set fd [open "$file"] } message]} {
 	error "$message"
     }
 
     set found -1
     for { set line 1 } { 1 } { incr line } {
-	if { [ catch { set nchar [gets "$fd" body] } message ] } then {
+	if {[catch { set nchar [gets "$fd" body] } message]} {
 	    error "$message"
 	}
-	if { $nchar < 0 } then {
+	if {$nchar < 0} {
 	    break
 	}
-	if { [string first "$text" "$body"] >= 0 } then {
+	if {[string first "$text" "$body"] >= 0} {
 	    set found $line
 	    break
 	}
     }
 
-    if { [ catch { close "$fd" } message ] } then {
+    if {[catch { close "$fd" } message]} {
 	error "$message"
     }
 
@@ -6904,7 +6904,7 @@ gdb_caching_proc gdb_skip_float_test {
 	set lines [gdb_compile $src $exe executable $compile_flags]
 	file delete $src
 
-	if ![string match "" $lines] then {
+	if {![string match "" $lines]} {
 	    verbose "testfile compilation failed, returning 1" 2
 	    return 0
 	}
@@ -7148,7 +7148,7 @@ proc get_build_id { filename } {
 	set data [read $fi]
 	close $fi
 	file delete $tmp
-	if ![string compare $data ""] then {
+	if {![string compare $data ""]} {
 	    return ""
 	}
 	# Convert it to hex.
@@ -7364,7 +7364,7 @@ proc build_executable_from_specs {testname executable options args} {
     if [string match gdb_compile_shlib* $func] {
 	set sources_path {}
 	foreach {s local_options} $args {
-	    if { [regexp "^/" "$s"] } then {
+	    if {[regexp "^/" "$s"]} {
 		lappend sources_path "$s"
 	    } else {
 		lappend sources_path "$srcdir/$subdir/$s"
@@ -7374,7 +7374,7 @@ proc build_executable_from_specs {testname executable options args} {
     } elseif {[lsearch -exact $options rust] != -1} {
 	set sources_path {}
 	foreach {s local_options} $args {
-	    if { [regexp "^/" "$s"] } then {
+	    if {[regexp "^/" "$s"]} {
 		lappend sources_path "$s"
 	    } else {
 		lappend sources_path "$srcdir/$subdir/$s"
@@ -7385,7 +7385,7 @@ proc build_executable_from_specs {testname executable options args} {
 	set objects {}
 	set i 0
 	foreach {s local_options} $args {
-	    if { ! [regexp "^/" "$s"] } then {
+	    if {![regexp "^/" "$s"]} {
 		set s "$srcdir/$subdir/$s"
 	    }
 	    if  { [$func "${s}" "${binfile}${i}.o" object $local_options] != "" } {
@@ -8139,7 +8139,7 @@ proc parse_list { level listname argset prefix eval } {
 	    set pattern "$prefix$argument"
 	    set result [lsearch -exact $args $pattern]
 
-	    if {$result != -1} then {
+	    if {$result != -1} {
 		set value 1
 		set args [lreplace $args $result $result]
 	    } else {
@@ -8155,7 +8155,7 @@ proc parse_list { level listname argset prefix eval } {
 	    set pattern "$prefix[lindex $arg 0]"
 	    set result [lsearch -exact $args $pattern]
 
-	    if {$result != -1} then {
+	    if {$result != -1} {
 		set value [lindex $args [expr $result+1]]
 		if { $eval } {
 		    set value [uplevel [expr $level + 1] [list subst $value]]
@@ -8480,7 +8480,7 @@ proc cmp_file_string { file str msg } {
 	set file_contents [read $fp]
 	close $fp
     } error_message]
-    if { $caught_error } then {
+    if {$caught_error} {
 	error "$error_message"
 	fail "$msg"
 	return
