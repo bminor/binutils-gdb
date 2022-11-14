@@ -75,6 +75,17 @@
 #define Size32 Size=SIZE32
 #define Size64 Size=SIZE64
 
+#define AddrPrefixOpReg   OperandConstraint=ADDR_PREFIX_OP_REG | \
+                          No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf
+#define Anysize           OperandConstraint=ANY_SIZE
+#define DistinctDest      OperandConstraint=DISTINCT_DEST
+#define Implicit1stXmm0   OperandConstraint=IMPLICIT_1ST_XMM0
+#define ImplicitQuadGroup OperandConstraint=IMPLICIT_QUAD_GROUP
+#define NoDefMask         OperandConstraint=NO_DEFAULT_MASK
+#define RegKludge         OperandConstraint=REG_KLUDGE
+#define SwapSources       OperandConstraint=SWAP_SOURCES
+#define Ugh               OperandConstraint=UGH
+
 #define IgnoreSize	MnemonicSize=IGNORESIZE
 #define DefaultSize	MnemonicSize=DEFAULTSIZE
 
@@ -90,8 +101,6 @@
 #define HLEPrefixLock    PrefixOk=PrefixHLELock
 #define HLEPrefixRelease PrefixOk=PrefixHLERelease
 #define NoTrackPrefixOk  PrefixOk=PrefixNoTrack
-
-#define AddrPrefixOpReg AddrPrefixOpReg|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf
 
 #define Space0F    OpcodeSpace=SPACE_0F
 #define Space0F38  OpcodeSpace=SPACE_0F38

@@ -495,17 +495,35 @@ enum
   Size,
   /* check register size.  */
   CheckRegSize,
+  /* any memory size */
+#define ANY_SIZE 1
+  /* fake an extra reg operand for clr, imul and special register
+     processing for some instructions.  */
+#define REG_KLUDGE 2
+  /* deprecated fp insn, gets a warning */
+#define UGH 3
+  /* An implicit xmm0 as the first operand */
+#define IMPLICIT_1ST_XMM0 4
+  /* The second operand must be a vector register, {x,y,z}mmN, where N is a multiple of 4.
+     It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
+   */
+#define IMPLICIT_QUAD_GROUP 5
+  /* Two source operands are swapped.  */
+#define SWAP_SOURCES 6
+  /* Default mask isn't allowed.  */
+#define NO_DEFAULT_MASK 7
+  /* Address prefix changes register operand */
+#define ADDR_PREFIX_OP_REG 8
   /* Instrucion requires that destination must be distinct from source
      registers.  */
-  DistinctDest,
+#define DISTINCT_DEST 9
+  OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
 #define IGNORESIZE	1
   /* default insn size depends on mode */
 #define DEFAULTSIZE	2
   MnemonicSize,
-  /* any memory size */
-  Anysize,
   /* b suffix on instruction illegal */
   No_bSuf,
   /* w suffix on instruction illegal */
@@ -533,11 +551,6 @@ enum
   RegMem,
   /* quick test if branch instruction is MPX supported */
   BNDPrefixOk,
-  /* fake an extra reg operand for clr, imul and special register
-     processing for some instructions.  */
-  RegKludge,
-  /* An implicit xmm0 as the first operand */
-  Implicit1stXmm0,
 #define PrefixNone		0
 #define PrefixRep		1
 #define PrefixHLERelease	2 /* Okay with an XRELEASE (0xf3) prefix. */
@@ -548,16 +561,12 @@ enum
 #define PrefixHLELock		5 /* Okay with a LOCK prefix.  */
 #define PrefixHLEAny		6 /* Okay with or without a LOCK prefix.  */
   PrefixOk,
-  /* Address prefix changes register operand */
-  AddrPrefixOpReg,
   /* opcode is a prefix */
   IsPrefix,
   /* instruction has extension in 8 bit imm */
   ImmExt,
   /* instruction don't need Rex64 prefix.  */
   NoRex64,
-  /* deprecated fp insn, gets a warning */
-  Ugh,
   /* insn has VEX prefix:
 	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
@@ -700,17 +709,6 @@ enum
 #define DISP8_SHIFT_VL 7
   Disp8MemShift,
 
-  /* Default mask isn't allowed.  */
-  NoDefMask,
-
-  /* The second operand must be a vector register, {x,y,z}mmN, where N is a multiple of 4.
-     It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
-   */
-  ImplicitQuadGroup,
-
-  /* Two source operands are swapped.  */
-  SwapSources,
-
   /* Support encoding optimization.  */
   Optimize,
 
@@ -745,9 +743,8 @@ typedef struct i386_opcode_modifier
   unsigned int floatr:1;
   unsigned int size:2;
   unsigned int checkregsize:1;
-  unsigned int distinctdest:1;
+  unsigned int operandconstraint:4;
   unsigned int mnemonicsize:2;
-  unsigned int anysize:1;
   unsigned int no_bsuf:1;
   unsigned int no_wsuf:1;
   unsigned int no_lsuf:1;
@@ -758,14 +755,10 @@ typedef struct i386_opcode_modifier
   unsigned int isstring:2;
   unsigned int regmem:1;
   unsigned int bndprefixok:1;
-  unsigned int regkludge:1;
-  unsigned int implicit1stxmm0:1;
   unsigned int prefixok:3;
-  unsigned int addrprefixopreg:1;
   unsigned int isprefix:1;
   unsigned int immext:1;
   unsigned int norex64:1;
-  unsigned int ugh:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
@@ -780,9 +773,6 @@ typedef struct i386_opcode_modifier
   unsigned int staticrounding:1;
   unsigned int sae:1;
   unsigned int disp8memshift:3;
-  unsigned int nodefmask:1;
-  unsigned int implicitquadgroup:1;
-  unsigned int swapsources:1;
   unsigned int optimize:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
