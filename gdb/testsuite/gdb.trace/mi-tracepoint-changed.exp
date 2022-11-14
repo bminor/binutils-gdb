@@ -69,7 +69,7 @@ proc test_reconnect { } {
 	clean_restart $executable
 	gdb_load_shlib $lib_sl1
 	gdb_load_shlib $lib_sl2
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 	# Create tracepoints on marker and main, and leave them in the

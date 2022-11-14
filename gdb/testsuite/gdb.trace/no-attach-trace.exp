@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 # can start programs ("run"), such as e.g., extended-remote gdbserver.
 clean_restart $testfile
 
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return 1
 }

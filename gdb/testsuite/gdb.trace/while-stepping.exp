@@ -44,7 +44,7 @@ gdb_file_cmd $binfile
 
 gdb_delete_tracepoints
 set trcpt1 [gdb_gettpnum gdb_c_test]
-if { $trcpt1 <= 0 } then {
+if {$trcpt1 <= 0} {
     fail "could not find gdb_c_test function"
     return
 }

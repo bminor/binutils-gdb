@@ -796,7 +796,7 @@ proc gdb_trace_collection_test {} {
 
 runto_main
 
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return 1
 }

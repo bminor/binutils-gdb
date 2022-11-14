@@ -65,7 +65,7 @@ gdb_test "help tfind trace" "Select a trace frame by tracepoint number.*" \
 runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return 1
 
@@ -77,7 +77,7 @@ if { ![gdb_target_supports_trace] } then {
 # define relative source line numbers:
 # all subsequent line numbers are relative to this first one (baseline)
 set baseline  [gdb_find_recursion_test_baseline $srcfile]
-if { $baseline == -1 } then {
+if {$baseline == -1} {
     fail "could not find gdb_recursion_test function"
     return
 }
@@ -123,7 +123,7 @@ gdb_test_multiple "tstart" "6.1: tstart" {
     }
 }
 
-if { $return_me == 1 } then {
+if {$return_me == 1} {
     return -1
 }
 
@@ -154,7 +154,7 @@ gdb_test_multiple "tstop" "7.1: tstop" {
     }
 }
 
-if { $return_me == 1 } then {
+if {$return_me == 1} {
     return -1
 }
 
@@ -164,7 +164,7 @@ gdb_test "tstatus" "Trace stopped by a tstop command.*" \
 
 ## record starting PC
 set save_pc [gdb_readexpr "(unsigned long) \$pc"]
-if { $save_pc == -1 } then {
+if {$save_pc == -1} {
     fail "could not read PC"
     return
 }

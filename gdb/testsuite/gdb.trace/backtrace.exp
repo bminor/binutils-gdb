@@ -35,7 +35,7 @@ if ![runto_main] {
     return -1
 }
 
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return 1
 
@@ -106,7 +106,7 @@ all tests in this module will fail."
     }
 }
 
-if { $return_me == 1 } then {
+if {$return_me == 1} {
     return -1
 }
 

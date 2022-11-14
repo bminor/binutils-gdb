@@ -370,7 +370,7 @@ gdb_load_shlib $libipa
 if ![runto_main] {
     return -1
 }
-if { ![gdb_target_supports_trace] } then {
+if {![gdb_target_supports_trace]} {
     # At this point, the socket file has been created.  We must make sure it is
     # removed when we return here.  GDB detaches inferior so that the socket
     # file can be removed.  Note that GDB simply kill inferior doesn't remove
