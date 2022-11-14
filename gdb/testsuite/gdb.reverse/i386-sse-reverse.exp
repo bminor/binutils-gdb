@@ -24,7 +24,7 @@ if ![supports_reverse] {
 }
 
 
-if ![istarget "*86*-*linux*"] then {
+if {![istarget "*86*-*linux*"]} {
     verbose "Skipping i386 reverse tests."
     return
 }

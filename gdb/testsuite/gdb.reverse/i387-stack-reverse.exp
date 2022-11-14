@@ -16,7 +16,7 @@
 # This file is part of the gdb testsuite.
 
 
-if ![is_x86_like_target] then {
+if {![is_x86_like_target]} {
     verbose "Skipping i387 reverse float tests."
     return
 }
