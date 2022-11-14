@@ -241,7 +241,12 @@ if @<:@llength @<:@info commands try@:>@@:>@ then { puts yes } else { puts no }
 EOF
 fi`
 ])
-AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
+
+HAVE_TCL_TRY=false
+if test "${ac_cv_libctf_tcl_try}" = "yes"; then
+    HAVE_TCL_TRY=true
+fi
+AC_SUBST(HAVE_TCL_TRY)
 
 # Use a version script, if possible, or an -export-symbols-regex otherwise.
 decommented_version_script=

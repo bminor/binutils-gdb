@@ -72,7 +72,6 @@ EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS =
 
-if TCL_TRY
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
@@ -105,6 +104,7 @@ check-DEJAGNU: site.exp development.exp
 development.exp: $(BFDDIR)/development.sh
 	$(AM_V_GEN)$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+	echo "set have_tcl_try @HAVE_TCL_TRY@" >> $@
 
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
@@ -112,6 +112,5 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES += site.exp development.exp
-endif
 
 include doc/local.mk

@@ -21,6 +21,11 @@
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 #
 
+# Don't run anything if Tcl is too old to have try / catch.
+if { ! $have_tcl_try } {
+    log_and_exit
+}
+
 if ![info exists ld] then {
     set ld [findfile $base_dir/../ld/ld-new $base_dir/../ld/ld-new [transform ld]]
 }
