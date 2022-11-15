@@ -42,6 +42,10 @@ if {[build_executable $testfile.exp $testfile2 $srcfile2 $compile_options] == -1
     return -1
 }
 
+if { [is_remote target] } {
+    gdb_remote_download target [standard_output_file $testfile2]
+}
+
 # A few of these tests require a little more time than the standard
 # timeout allows.
 set oldtimeout $timeout

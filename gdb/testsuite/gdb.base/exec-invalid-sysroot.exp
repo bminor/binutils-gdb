@@ -33,6 +33,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $c
     return -1
 }
 
+if { [is_remote target] } {
+    gdb_remote_download target $binfile2
+}
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_options] != "" } {
     untested "failed to compile main testcase"
     return -1
