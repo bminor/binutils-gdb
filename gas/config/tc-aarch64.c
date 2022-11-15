@@ -30,6 +30,9 @@
 
 #ifdef OBJ_ELF
 #include "elf/aarch64.h"
+#include "dw2gencfi.h"
+#include "sframe.h"
+#include "gen-sframe.h"
 #endif
 
 #include "dw2gencfi.h"
@@ -71,6 +74,11 @@ enum aarch64_abi_type
   AARCH64_ABI_ILP32 = 2,
   AARCH64_ABI_LLP64 = 3
 };
+
+unsigned int aarch64_sframe_cfa_sp_reg;
+/* The other CFA base register for SFrame unwind info.  */
+unsigned int aarch64_sframe_cfa_fp_reg;
+unsigned int aarch64_sframe_cfa_ra_reg;
 
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "aarch64"
@@ -8403,6 +8411,50 @@ aarch64_init_frag (fragS * fragP, int max_chars)
       break;
     }
 }
+
+/* Whether SFrame unwind info is supported.  */
+
+bool
+aarch64_support_sframe_p (void)
+{
+  /* At this time, SFrame is supported for aarch64 only.  */
+  return (aarch64_abi == AARCH64_ABI_LP64);
+}
+
+/* Specify if RA tracking is needed.  */
+
+bool
+aarch64_sframe_ra_tracking_p (void)
+{
+  return true;
+}
+
+/* Specify the fixed offset to recover RA from CFA.
+   (useful only when RA tracking is not needed).  */
+
+offsetT
+aarch64_sframe_cfa_ra_offset (void)
+{
+  return (offsetT) SFRAME_CFA_FIXED_RA_INVALID;
+}
+
+/* Get the abi/arch indentifier for SFrame.  */
+
+unsigned char
+aarch64_sframe_get_abi_arch (void)
+{
+  unsigned char sframe_abi_arch = 0;
+
+  if (aarch64_support_sframe_p ())
+    {
+      sframe_abi_arch = target_big_endian
+	? SFRAME_ABI_AARCH64_ENDIAN_BIG
+	: SFRAME_ABI_AARCH64_ENDIAN_LITTLE;
+    }
+
+  return sframe_abi_arch;
+}
+
 #endif /* OBJ_ELF */
 
 /* Initialize the DWARF-2 unwind information for this procedure.  */
@@ -9688,6 +9740,12 @@ md_begin (void)
     mach = bfd_mach_aarch64;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
+#ifdef OBJ_ELF
+  /* FIXME - is there a better way to do it ?  */
+  aarch64_sframe_cfa_sp_reg = 31;
+  aarch64_sframe_cfa_fp_reg = 29; /* x29.  */
+  aarch64_sframe_cfa_ra_reg = 30;
+#endif
 }
 
 /* Command line processing.  */

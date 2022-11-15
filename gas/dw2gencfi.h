@@ -205,5 +205,6 @@ extern struct fde_entry *all_fde_data;
 #define CFI_EMIT_debug_frame            (1 << 1)
 #define CFI_EMIT_target                 (1 << 2)
 #define CFI_EMIT_eh_frame_compact       (1 << 3)
+#define CFI_EMIT_sframe                 (1 << 4)
 
 #endif /* DW2GENCFI_H */

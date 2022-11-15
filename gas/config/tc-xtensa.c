@@ -8616,6 +8616,7 @@ unrelaxed_frag_max_size (fragS *fragP)
     case rs_leb128:
     case rs_cfa:
     case rs_dwarf2dbg:
+    case rs_sframe:
       /* No further adjustments needed.  */
       break;
     case rs_machine_dependent:

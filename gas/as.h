@@ -261,7 +261,10 @@ enum _relax_state
   rs_cfa,
 
   /* Cross-fragment dwarf2 line number optimization.  */
-  rs_dwarf2dbg
+  rs_dwarf2dbg,
+
+  /* SFrame FRE type selection optimization.  */
+  rs_sframe
 };
 
 typedef enum _relax_state relax_stateT;
@@ -527,6 +530,11 @@ int eh_frame_estimate_size_before_relax (fragS *);
 int eh_frame_relax_frag (fragS *);
 void eh_frame_convert_frag (fragS *);
 int generic_force_reloc (struct fix *);
+
+/* SFrame FRE optimization.  */
+int sframe_estimate_size_before_relax (fragS *);
+int sframe_relax_frag (fragS *);
+void sframe_convert_frag (fragS *);
 
 #include "expr.h"		/* Before targ-*.h */
 

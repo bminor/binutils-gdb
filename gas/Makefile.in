@@ -166,10 +166,11 @@ am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 	dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) ecoff.$(OBJEXT) \
 	ehopt.$(OBJEXT) expr.$(OBJEXT) flonum-copy.$(OBJEXT) \
 	flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) frags.$(OBJEXT) \
-	hash.$(OBJEXT) input-file.$(OBJEXT) input-scrub.$(OBJEXT) \
-	listing.$(OBJEXT) literal.$(OBJEXT) macro.$(OBJEXT) \
-	messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
-	remap.$(OBJEXT) sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
+	gen-sframe.$(OBJEXT) hash.$(OBJEXT) input-file.$(OBJEXT) \
+	input-scrub.$(OBJEXT) listing.$(OBJEXT) literal.$(OBJEXT) \
+	macro.$(OBJEXT) messages.$(OBJEXT) output-file.$(OBJEXT) \
+	read.$(OBJEXT) remap.$(OBJEXT) sb.$(OBJEXT) \
+	sframe-opt.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
 	symbols.$(OBJEXT) write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -566,6 +567,7 @@ GAS_CFILES = \
 	flonum-konst.c \
 	flonum-mult.c \
 	frags.c \
+	gen-sframe.c \
 	hash.c \
 	input-file.c \
 	input-scrub.c \
@@ -577,6 +579,7 @@ GAS_CFILES = \
 	read.c \
 	remap.c \
 	sb.c \
+	sframe-opt.c \
 	stabs.c \
 	subsegs.c \
 	symbols.c \
@@ -598,6 +601,7 @@ HFILES = \
 	expr.h \
 	flonum.h \
 	frags.h \
+	gen-sframe.h \
 	hash.h \
 	input-file.h \
 	itbl-lex.h \
@@ -1302,6 +1306,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flonum-konst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flonum-mult.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frags.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen-sframe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input-scrub.Po@am__quote@
@@ -1316,6 +1321,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/remap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sframe-opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stabs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subsegs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbols.Po@am__quote@

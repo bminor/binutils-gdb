@@ -23,6 +23,7 @@
 #include "dw2gencfi.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
+#include "gen-sframe.h"
 
 #ifdef TARGET_USE_CFIPOP
 
@@ -100,6 +101,11 @@
 
 #ifndef tc_cfi_reloc_for_encoding
 #define tc_cfi_reloc_for_encoding(e) BFD_RELOC_NONE
+#endif
+
+/* Targets which support SFrame format will define this and return true.  */
+#ifndef support_sframe_p
+# define support_sframe_p() false
 #endif
 
 /* Private segment collection list.  */
@@ -1235,6 +1241,8 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	else if (strcmp (name, tc_cfi_section_name) == 0)
 	  sections |= CFI_EMIT_target;
 #endif
+	else if (startswith (name, ".sframe"))
+	    sections |= CFI_EMIT_sframe;
 	else
 	  {
 	    *input_line_pointer = c;
@@ -2492,6 +2500,28 @@ cfi_finish (void)
 #endif /* SUPPORT_COMPACT_EH */
 
       flag_traditional_format = save_flag_traditional_format;
+    }
+
+  cfi_sections_set = true;
+  /* Generate SFrame section if the user specifies:
+	- the command line option to gas, or
+	- .sframe in the .cfi_sections directive.  */
+  if (flag_gen_sframe || (all_cfi_sections & CFI_EMIT_sframe) != 0)
+    {
+      if (support_sframe_p ())
+	{
+	  segT sframe_seg;
+	  int alignment = ffs (DWARF2_ADDR_SIZE (stdoutput)) - 1;
+
+	  if (!SUPPORT_FRAME_LINKONCE)
+	    sframe_seg = get_cfi_seg (NULL, ".sframe",
+					 (SEC_ALLOC | SEC_LOAD | SEC_DATA
+					  | DWARF2_EH_FRAME_READ_ONLY),
+					 alignment);
+	  output_sframe (sframe_seg);
+	}
+      else
+	as_bad (_(".sframe not supported for target"));
     }
 
   cfi_sections_set = true;

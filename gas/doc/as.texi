@@ -4883,11 +4883,15 @@ Each expression is assembled into the next byte.
 @subsection @code{.cfi_sections @var{section_list}}
 @cindex @code{cfi_sections} directive
 @code{.cfi_sections} may be used to specify whether CFI directives
-should emit @code{.eh_frame} section and/or @code{.debug_frame} section.
-If @var{section_list} is @code{.eh_frame}, @code{.eh_frame} is emitted,
-if @var{section_list} is @code{.debug_frame}, @code{.debug_frame} is emitted.
-To emit both use @code{.eh_frame, .debug_frame}.  The default if this
-directive is not used is @code{.cfi_sections .eh_frame}.
+should emit @code{.eh_frame} section, @code{.debug_frame} section and/or
+@code{.sframe} section.  If @var{section_list} contains @code{.eh_frame},
+@code{.eh_frame} is emitted, if @var{section_list} contains
+@code{.debug_frame}, @code{.debug_frame} is emitted, and finally, if
+@var{section_list} contains @code{.sframe}, @code{.sframe} is emitted.
+To emit multiple sections, specify them together in a list.  For example, to
+emit both @code{.eh_frame} and @code{.debug_frame}, use
+@code{.eh_frame, .debug_frame}.  The default if this directive is not used
+is @code{.cfi_sections .eh_frame}.
 
 On targets that support compact unwinding tables these can be generated
 by specifying @code{.eh_frame_entry} instead of @code{.eh_frame}.

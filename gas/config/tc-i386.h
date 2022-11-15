@@ -362,6 +362,32 @@ extern bfd_vma x86_64_section_letter (int, const char **);
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 extern void x86_cleanup (void);
 #define md_cleanup() x86_cleanup ()
+
+/* Whether SFrame unwind info is supported.  */
+extern bool x86_support_sframe_p (void);
+#define support_sframe_p x86_support_sframe_p
+
+/* The stack-pointer register number for SFrame unwind info.  */
+extern unsigned int x86_sframe_cfa_sp_reg;
+#define SFRAME_CFA_SP_REG x86_sframe_cfa_sp_reg
+
+/* The frame-pointer register number for CFA unwind info.  */
+extern unsigned int x86_sframe_cfa_fp_reg;
+#define SFRAME_CFA_FP_REG x86_sframe_cfa_fp_reg
+
+/* Specify if RA tracking is needed.  */
+extern bool x86_sframe_ra_tracking_p (void);
+#define sframe_ra_tracking_p x86_sframe_ra_tracking_p
+
+/* Specify the fixed offset to recover RA from CFA.
+   (useful only when RA tracking is not needed).  */
+extern offsetT x86_sframe_cfa_ra_offset (void);
+#define sframe_cfa_ra_offset x86_sframe_cfa_ra_offset
+
+/* The abi/arch indentifier for SFrame.  */
+extern unsigned char x86_sframe_get_abi_arch (void);
+#define sframe_get_abi_arch x86_sframe_get_abi_arch
+
 #endif
 
 #ifdef TE_PE

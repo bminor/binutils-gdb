@@ -30,6 +30,8 @@
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "gen-sframe.h"
+#include "sframe.h"
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
 #include <limits.h>
@@ -591,6 +593,12 @@ static int use_big_obj = 0;
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 /* 1 if generating code for a shared library.  */
 static int shared = 0;
+
+unsigned int x86_sframe_cfa_sp_reg;
+/* The other CFA base register for SFrame unwind info.  */
+unsigned int x86_sframe_cfa_fp_reg;
+unsigned int x86_sframe_cfa_ra_reg;
+
 #endif
 
 /* 1 for intel syntax,
@@ -3099,6 +3107,10 @@ md_begin (void)
       x86_dwarf2_return_column = 16;
 #endif
       x86_cie_data_alignment = -8;
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+      x86_sframe_cfa_sp_reg = 7;
+      x86_sframe_cfa_fp_reg = 6;
+#endif
     }
   else
     {
@@ -9131,6 +9143,44 @@ x86_cleanup (void)
   if (seg && subseg)
     subseg_set (seg, subseg);
 }
+
+bool
+x86_support_sframe_p (void)
+{
+  /* At this time, SFrame unwind is supported for AMD64 ABI only.  */
+  return (x86_elf_abi == X86_64_ABI);
+}
+
+bool
+x86_sframe_ra_tracking_p (void)
+{
+  /* In AMD64, return address is always stored on the stack at a fixed offset
+     from the CFA (provided via x86_sframe_cfa_ra_offset ()).
+     Do not track explicitly via an SFrame Frame Row Entry.  */
+  return false;
+}
+
+offsetT
+x86_sframe_cfa_ra_offset (void)
+{
+  gas_assert (x86_elf_abi == X86_64_ABI);
+  return (offsetT) -8;
+}
+
+unsigned char
+x86_sframe_get_abi_arch (void)
+{
+  unsigned char sframe_abi_arch = 0;
+
+  if (x86_support_sframe_p ())
+    {
+      gas_assert (!target_big_endian);
+      sframe_abi_arch = SFRAME_ABI_AMD64_ENDIAN_LITTLE;
+    }
+
+  return sframe_abi_arch;
+}
+
 #endif
 
 static unsigned int

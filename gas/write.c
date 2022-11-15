@@ -487,6 +487,10 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
       dwarf2dbg_convert_frag (fragP);
       break;
 
+    case rs_sframe:
+      sframe_convert_frag (fragP);
+      break;
+
     case rs_machine_dependent:
       md_convert_frag (stdoutput, sec, fragP);
 
@@ -2781,6 +2785,11 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 	  address += dwarf2dbg_estimate_size_before_relax (fragP);
 	  break;
 
+	case rs_sframe:
+	  /* Initial estimate can be set to atleast 1 byte.  */
+	  address += sframe_estimate_size_before_relax (fragP);
+	  break;
+
 	default:
 	  BAD_CASE (fragP->fr_type);
 	  break;
@@ -3122,6 +3131,10 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 
 	      case rs_dwarf2dbg:
 		growth = dwarf2dbg_relax_frag (fragP);
+		break;
+
+	      case rs_sframe:
+		growth = sframe_relax_frag (fragP);
 		break;
 
 	      default:

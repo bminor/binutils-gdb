@@ -239,6 +239,35 @@ struct aarch64_segment_info_type
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP              1
 
+/* Whether SFrame unwind info is supported.  */
+extern bool aarch64_support_sframe_p (void);
+#define support_sframe_p aarch64_support_sframe_p
+
+/* The stack-pointer register number for SFrame unwind info.  */
+extern unsigned int aarch64_sframe_cfa_sp_reg;
+#define SFRAME_CFA_SP_REG aarch64_sframe_cfa_sp_reg
+
+/* The base-pointer register number for CFA unwind info.  */
+extern unsigned int aarch64_sframe_cfa_fp_reg;
+#define SFRAME_CFA_FP_REG aarch64_sframe_cfa_fp_reg
+
+/* The return address register number for CFA unwind info.  */
+extern unsigned int aarch64_sframe_cfa_ra_reg;
+#define SFRAME_CFA_RA_REG aarch64_sframe_cfa_ra_reg
+
+/* Specify if RA tracking is needed.  */
+extern bool aarch64_sframe_ra_tracking_p (void);
+#define sframe_ra_tracking_p aarch64_sframe_ra_tracking_p
+
+/* Specify the fixed offset to recover RA from CFA.
+   (useful only when RA tracking is not needed).  */
+extern offsetT aarch64_sframe_cfa_ra_offset (void);
+#define sframe_cfa_ra_offset aarch64_sframe_cfa_ra_offset
+
+/* The abi/arch indentifier for SFrame.  */
+unsigned char aarch64_sframe_get_abi_arch (void);
+#define sframe_get_abi_arch aarch64_sframe_get_abi_arch
+
 /* CFI hooks.  */
 #define tc_regname_to_dw2regnum            tc_aarch64_regname_to_dw2regnum
 #define tc_cfi_frame_initial_instructions  tc_aarch64_frame_initial_instructions

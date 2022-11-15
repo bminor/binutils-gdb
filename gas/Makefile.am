@@ -80,6 +80,7 @@ GAS_CFILES = \
 	flonum-konst.c \
 	flonum-mult.c \
 	frags.c \
+	gen-sframe.c \
 	hash.c \
 	input-file.c \
 	input-scrub.c \
@@ -91,6 +92,7 @@ GAS_CFILES = \
 	read.c \
 	remap.c \
 	sb.c \
+	sframe-opt.c \
 	stabs.c \
 	subsegs.c \
 	symbols.c \
@@ -113,6 +115,7 @@ HFILES = \
 	expr.h \
 	flonum.h \
 	frags.h \
+	gen-sframe.h \
 	hash.h \
 	input-file.h \
 	itbl-lex.h \
