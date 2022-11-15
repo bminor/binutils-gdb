@@ -94,7 +94,7 @@ do_proto_toplev()
     # built in the gold dir.  The disables speed the build a little.
     enables=
     disables=
-    for dir in binutils gas gdb gold gprof gprofng ld libctf libdecnumber readline sim; do
+    for dir in binutils gas gdb gold gprof gprofng libsframe ld libctf libdecnumber readline sim; do
 	case " $tool $support_files " in
 	    *" $dir "*) enables="$enables --enable-$dir" ;;
 	    *) disables="$disables --disable-$dir" ;;
@@ -304,7 +304,7 @@ gdb_tar_compress()
 }
 
 # The FSF "binutils" release includes gprof and ld.
-BINUTILS_SUPPORT_DIRS="bfd gas include libiberty libctf opcodes ld elfcpp gold gprof gprofng intl setup.com makefile.vms cpu zlib"
+BINUTILS_SUPPORT_DIRS="libsframe bfd gas include libiberty libctf opcodes ld elfcpp gold gprof gprofng intl setup.com makefile.vms cpu zlib"
 binutils_release()
 {
     compressors=$1
