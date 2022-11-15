@@ -337,6 +337,9 @@ COMMON int flag_execstack;
 /* TRUE if .note.GNU-stack section with SEC_CODE should be created */
 COMMON int flag_noexecstack;
 
+/* TRUE if .sframe section should be created.  */
+COMMON int flag_gen_sframe;
+
 /* name of emitted object file */
 COMMON const char *out_file_name;
 

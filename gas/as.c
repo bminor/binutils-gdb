@@ -315,6 +315,8 @@ Options:\n\
 #endif
   fprintf (stream, _("\
                           generate GNU Build notes if none are present in the input\n"));
+  fprintf (stream, _("\
+  --gsframe               generate SFrame unwind info\n"));
 #endif /* OBJ_ELF */
 
   fprintf (stream, _("\
@@ -499,7 +501,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_COMPRESS_DEBUG,
       OPTION_NOCOMPRESS_DEBUG,
       OPTION_NO_PAD_SECTIONS,
-      OPTION_MULTIBYTE_HANDLING  /* = STD_BASE + 40 */
+      OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
+      OPTION_SFRAME
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -530,6 +533,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"elf-stt-common", required_argument, NULL, OPTION_ELF_STT_COMMON}
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
+    ,{"gsframe", no_argument, NULL, OPTION_SFRAME}
 #endif
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF_2}
@@ -991,6 +995,10 @@ This program has absolutely no warranty.\n"));
 	  else
 	    as_fatal (_("Invalid --generate-missing-build-notes option: `%s'"),
 		      optarg);
+	  break;
+
+	case OPTION_SFRAME:
+	  flag_gen_sframe = 1;
 	  break;
 
 #endif /* OBJ_ELF */
