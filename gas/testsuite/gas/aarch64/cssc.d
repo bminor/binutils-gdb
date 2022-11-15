@@ -7,13 +7,6 @@
 Disassembly of section \.text:
 
 0+ <.*>:
-
-a.out:     file format elf64-littleaarch64
-
-
-Disassembly of section .text:
-
-0000000000000000 <.text>:
    0:	5ac02000 	abs	w0, w0
    4:	5ac02001 	abs	w1, w0
    8:	5ac02100 	abs	w0, w8
