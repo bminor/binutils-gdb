@@ -1001,6 +1001,7 @@ enum
   PREFIX_0F01_REG_5_MOD_3_RM_6,
   PREFIX_0F01_REG_5_MOD_3_RM_7,
   PREFIX_0F01_REG_7_MOD_3_RM_2,
+  PREFIX_0F01_REG_7_MOD_3_RM_5,
   PREFIX_0F01_REG_7_MOD_3_RM_6,
   PREFIX_0F01_REG_7_MOD_3_RM_7,
   PREFIX_0F09,
@@ -1281,6 +1282,7 @@ enum
   X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1,
   X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1,
+  X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_1,
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3,
   X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1,
@@ -3073,6 +3075,12 @@ static const struct dis386 prefix_table[][4] = {
     { "mcommit",	{ Skip_MODRM }, 0 },
   },
 
+  /* PREFIX_0F01_REG_7_MOD_3_RM_5 */
+  {
+    { "rdpru", { Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_1) },
+  },
+
   /* PREFIX_0F01_REG_7_MOD_3_RM_6 */
   {
     { "invlpgb",        { Skip_MODRM }, 0 },
@@ -4398,6 +4406,12 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "stui",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "rmpquery", { Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1 */
@@ -8777,7 +8791,7 @@ static const struct dis386 rm_table[][8] = {
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_2) },
     { "mwaitx",		{ { OP_Mwait, eBX_reg } }, PREFIX_OPCODE },
     { "clzero",		{ Skip_MODRM }, 0  },
-    { "rdpru",		{ Skip_MODRM }, 0  },
+    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_5) },
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_6) },
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_7) },
   },

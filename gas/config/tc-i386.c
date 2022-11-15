@@ -978,6 +978,7 @@ static const arch_entry cpu_arch[] =
   ARCH (znver1, ZNVER, ZNVER1, false),
   ARCH (znver2, ZNVER, ZNVER2, false),
   ARCH (znver3, ZNVER, ZNVER3, false),
+  ARCH (znver4, ZNVER, ZNVER4, false),
   ARCH (btver1, BT, BTVER1, false),
   ARCH (btver2, BT, BTVER2, false),
 
@@ -1106,6 +1107,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (msrlist, MSRLIST, ANY_MSRLIST, false),
   SUBARCH (avx_ne_convert, AVX_NE_CONVERT, ANY_AVX_NE_CONVERT, false),
   SUBARCH (rao_int, RAO_INT, ANY_RAO_INT, false),
+  SUBARCH (rmpquery, RMPQUERY, RMPQUERY, false),
 };
 
 #undef SUBARCH
@@ -4875,9 +4877,10 @@ md_assemble (char *line)
 
   /* All Intel opcodes have reversed operands except for "bound", "enter",
      "invlpg*", "monitor*", "mwait*", "tpause", "umwait", "pvalidate",
-     "rmpadjust", and "rmpupdate".  We also don't reverse intersegment "jmp"
-     and "call" instructions with 2 immediate operands so that the immediate
-     segment precedes the offset consistently in Intel and AT&T modes.  */
+     "rmpadjust", "rmpupdate", and "rmpquery".  We also don't reverse
+     intersegment "jmp" and "call" instructions with 2 immediate operands so
+     that the immediate segment precedes the offset consistently in Intel and
+     AT&T modes.  */
   if (intel_syntax
       && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)

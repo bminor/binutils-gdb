@@ -3113,6 +3113,13 @@ rmpadjust, 0xf30f01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg, { Acc|Dword|Qword }
 
 // SNP instructions end
 
+// RMPQUERY instruction
+
+rmpquery, 0xf30f01fd, None, CpuRMPQUERY|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+rmpquery, 0xf30f01fd, None, CpuRMPQUERY|Cpu64, AddrPrefixOpReg, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
+
+// RMPQUERY instruction end
+
 // RDPRU instruction
 
 rdpru, 0x0f01fd, None, CpuRDPRU, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
