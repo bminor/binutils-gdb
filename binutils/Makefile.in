@@ -741,6 +741,7 @@ OPCODES = ../opcodes/libopcodes.la
 @ENABLE_LIBCTF_TRUE@LIBCTF = ../libctf/libctf.la
 @ENABLE_LIBCTF_FALSE@LIBCTF_NOBFD = 
 @ENABLE_LIBCTF_TRUE@LIBCTF_NOBFD = ../libctf/libctf-nobfd.la
+LIBSFRAME = ../libsframe/libsframe.la
 LIBIBERTY = ../libiberty/libiberty.a
 POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
 EXPECT = expect

@@ -176,6 +176,8 @@ LIBCTF =
 LIBCTF_NOBFD =
 endif
 
+LIBSFRAME = ../libsframe/libsframe.la
+
 LIBIBERTY = ../libiberty/libiberty.a
 
 POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
