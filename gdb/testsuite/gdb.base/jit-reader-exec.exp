@@ -27,15 +27,19 @@ set testfile2 "jit-reader-execd"
 set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}]
 
-set compile_options [list debug additional_flags=-DPROGRAM=\"$binfile2\"]
-
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	 executable $compile_options] != ""} {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" \
+	 executable {debug}] != ""} {
     untested "failed to compile"
     return -1
 }
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" \
+if { [is_remote target] } {
+    set binfile2 [gdb_remote_download target $binfile2]
+}
+
+set compile_options [list debug additional_flags=-DPROGRAM=\"$binfile2\"]
+
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable $compile_options] != ""} {
     untested "failed to compile"
     return -1
