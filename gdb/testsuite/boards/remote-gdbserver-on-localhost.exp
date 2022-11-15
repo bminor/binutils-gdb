@@ -42,10 +42,8 @@ if { [board_info $board username] != $env(USER) } {
     # We're pretending that some local user account is remote target.
     # Make things a bit more realistic by restricting file permissions.
 
-    # Make sure remote target can't see files on build.  Note that we're
-    # currently using $objdir/output instead of $objdir because of gdbserver
-    # being accessed on the target using $objdir/../../gdbserver/gdbserver.
-    remote_exec build "chmod go-rx $objdir/outputs"
+    # Make sure remote target can't see files on build.
+    remote_exec build "chmod go-rx $objdir"
 
     # Make sure build can't see files on remote target.  We can't use
     # remote_exec target, because we're in the middle of parsing the
