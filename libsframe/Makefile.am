@@ -18,7 +18,12 @@
 #
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex subdir-objects
+AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex info-in-builddir subdir-objects
+
+# Variables that we might accumulate conditionally or in subdirs.
+info_TEXINFOS =
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 
 INCDIR = $(srcdir)/../include
 # include libctf for swap.h
@@ -35,5 +40,7 @@ endif
 
 libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
+
+include doc/local.mk
 
 include testsuite/local.mk

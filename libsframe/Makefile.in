@@ -14,6 +14,24 @@
 
 @SET_MAKE@
 
+#
+#   Copyright (C) 2019-2022 Free Software Foundation, Inc.
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not see
+# <http://www.gnu.org/licenses/>.
+#
+
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -89,8 +107,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@BUILD_INFO_TRUE@am__append_1 = doc/sframe-spec.texi
+@BUILD_INFO_TRUE@am__append_2 = texput.log
+@BUILD_INFO_TRUE@am__append_3 = doc/sframe-spec.info
 check_PROGRAMS = $(am__EXEEXT_1)
-@HAVE_COMPAT_DEJAGNU_TRUE@am__append_1 = testsuite/libsframe.decode/be-flipping \
+@HAVE_COMPAT_DEJAGNU_TRUE@am__append_4 = testsuite/libsframe.decode/be-flipping \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1
@@ -145,7 +166,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(infodir)" \
+	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libsframe_la_LIBADD =
 am_libsframe_la_OBJECTS = libsframe_la-sframe.lo \
@@ -226,6 +248,46 @@ DIST_SOURCES = $(libsframe_la_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_1_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_2_SOURCES) \
 	$(testsuite_libsframe_encode_encode_1_SOURCES)
+AM_V_DVIPS = $(am__v_DVIPS_@AM_V@)
+am__v_DVIPS_ = $(am__v_DVIPS_@AM_DEFAULT_V@)
+am__v_DVIPS_0 = @echo "  DVIPS   " $@;
+am__v_DVIPS_1 = 
+AM_V_MAKEINFO = $(am__v_MAKEINFO_@AM_V@)
+am__v_MAKEINFO_ = $(am__v_MAKEINFO_@AM_DEFAULT_V@)
+am__v_MAKEINFO_0 = @echo "  MAKEINFO" $@;
+am__v_MAKEINFO_1 = 
+AM_V_INFOHTML = $(am__v_INFOHTML_@AM_V@)
+am__v_INFOHTML_ = $(am__v_INFOHTML_@AM_DEFAULT_V@)
+am__v_INFOHTML_0 = @echo "  INFOHTML" $@;
+am__v_INFOHTML_1 = 
+AM_V_TEXI2DVI = $(am__v_TEXI2DVI_@AM_V@)
+am__v_TEXI2DVI_ = $(am__v_TEXI2DVI_@AM_DEFAULT_V@)
+am__v_TEXI2DVI_0 = @echo "  TEXI2DVI" $@;
+am__v_TEXI2DVI_1 = 
+AM_V_TEXI2PDF = $(am__v_TEXI2PDF_@AM_V@)
+am__v_TEXI2PDF_ = $(am__v_TEXI2PDF_@AM_DEFAULT_V@)
+am__v_TEXI2PDF_0 = @echo "  TEXI2PDF" $@;
+am__v_TEXI2PDF_1 = 
+AM_V_texinfo = $(am__v_texinfo_@AM_V@)
+am__v_texinfo_ = $(am__v_texinfo_@AM_DEFAULT_V@)
+am__v_texinfo_0 = -q
+am__v_texinfo_1 = 
+AM_V_texidevnull = $(am__v_texidevnull_@AM_V@)
+am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
+am__v_texidevnull_0 = > /dev/null
+am__v_texidevnull_1 = 
+INFO_DEPS = doc/sframe-spec.info
+am__TEXINFO_TEX_DIR = $(srcdir)
+DVIS = doc/sframe-spec.dvi
+PDFS = doc/sframe-spec.pdf
+PSS = doc/sframe-spec.ps
+HTMLS = doc/sframe-spec.html
+TEXINFOS = $(am__append_1)
+TEXI2DVI = texi2dvi
+TEXI2PDF = $(TEXI2DVI) --pdf --batch
+MAKEINFOHTML = $(MAKEINFO) --html
+AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
+DVIPS = dvips
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -258,6 +320,7 @@ AM_RECURSIVE_TARGETS = cscope
 DEJATOOL = $(PACKAGE)
 RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $$srcdir
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(srcdir)/doc/local.mk \
 	$(srcdir)/testsuite/libsframe.decode/local.mk \
 	$(srcdir)/testsuite/libsframe.encode/local.mk \
 	$(srcdir)/testsuite/local.mk $(top_srcdir)/../ar-lib \
@@ -418,7 +481,12 @@ top_srcdir = @top_srcdir@
 # <http://www.gnu.org/licenses/>.
 #
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
-AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex subdir-objects
+AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex info-in-builddir subdir-objects
+
+# Variables that we might accumulate conditionally or in subdirs.
+info_TEXINFOS = $(am__append_1)
+DISTCLEANFILES = $(am__append_2)
+MAINTAINERCLEANFILES = $(am__append_3)
 INCDIR = $(srcdir)/../include
 # include libctf for swap.h
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../libctf
@@ -429,6 +497,7 @@ AM_CFLAGS = @ac_libsframe_warn_cflags@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la
 libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
+@BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 
 # Setup the testing framework
 EXPECT = expect
@@ -450,10 +519,10 @@ all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .dvi .lo .o .obj .ps
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -475,7 +544,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__empty):
+$(srcdir)/doc/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/libsframe.decode/local.mk $(srcdir)/testsuite/libsframe.encode/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -726,6 +795,145 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+doc/$(am__dirstamp):
+	@$(MKDIR_P) doc
+	@: > doc/$(am__dirstamp)
+
+@BUILD_INFO_TRUE@doc/sframe-spec.info: doc/sframe-spec.texi 
+@BUILD_INFO_TRUE@	@test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir && mkdir $$backupdir && \
+@BUILD_INFO_TRUE@	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
+@BUILD_INFO_TRUE@	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
+@BUILD_INFO_TRUE@	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
+@BUILD_INFO_TRUE@	  done; \
+@BUILD_INFO_TRUE@	else :; fi && \
+@BUILD_INFO_TRUE@	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
+@BUILD_INFO_TRUE@	 -o $@ `test -f 'doc/sframe-spec.texi' || echo '$(srcdir)/'`doc/sframe-spec.texi; \
+@BUILD_INFO_TRUE@	then \
+@BUILD_INFO_TRUE@	  rc=0; \
+@BUILD_INFO_TRUE@	else \
+@BUILD_INFO_TRUE@	  rc=$$?; \
+@BUILD_INFO_TRUE@	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+@BUILD_INFO_TRUE@	fi; \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir; exit $$rc
+
+doc/sframe-spec.dvi: doc/sframe-spec.texi  doc/$(am__dirstamp)
+	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc' \
+	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
+	`test -f 'doc/sframe-spec.texi' || echo '$(srcdir)/'`doc/sframe-spec.texi
+
+doc/sframe-spec.pdf: doc/sframe-spec.texi  doc/$(am__dirstamp)
+	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc' \
+	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
+	`test -f 'doc/sframe-spec.texi' || echo '$(srcdir)/'`doc/sframe-spec.texi
+
+doc/sframe-spec.html: doc/sframe-spec.texi  doc/$(am__dirstamp)
+	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
+	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
+	 -o $(@:.html=.htp) `test -f 'doc/sframe-spec.texi' || echo '$(srcdir)/'`doc/sframe-spec.texi; \
+	then \
+	  rm -rf $@ && mv $(@:.html=.htp) $@; \
+	else \
+	  rm -rf $(@:.html=.htp); exit 1; \
+	fi
+.dvi.ps:
+	$(AM_V_DVIPS)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
+	$(DVIPS) $(AM_V_texinfo) -o $@ $<
+
+uninstall-dvi-am:
+	@$(NORMAL_UNINSTALL)
+	@list='$(DVIS)'; test -n "$(dvidir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(dvidir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(dvidir)/$$f"; \
+	done
+
+uninstall-html-am:
+	@$(NORMAL_UNINSTALL)
+	@list='$(HTMLS)'; test -n "$(htmldir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " rm -rf '$(DESTDIR)$(htmldir)/$$f'"; \
+	  rm -rf "$(DESTDIR)$(htmldir)/$$f"; \
+	done
+
+uninstall-info-am:
+	@$(PRE_UNINSTALL)
+	@if test -d '$(DESTDIR)$(infodir)' && $(am__can_run_installinfo); then \
+	  list='$(INFO_DEPS)'; \
+	  for file in $$list; do \
+	    relfile=`echo "$$file" | sed 's|^.*/||'`; \
+	    echo " install-info --info-dir='$(DESTDIR)$(infodir)' --remove '$(DESTDIR)$(infodir)/$$relfile'"; \
+	    if install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$$relfile"; \
+	    then :; else test ! -f "$(DESTDIR)$(infodir)/$$relfile" || exit 1; fi; \
+	  done; \
+	else :; fi
+	@$(NORMAL_UNINSTALL)
+	@list='$(INFO_DEPS)'; \
+	for file in $$list; do \
+	  relfile=`echo "$$file" | sed 's|^.*/||'`; \
+	  relfile_i=`echo "$$relfile" | sed 's|\.info$$||;s|$$|.i|'`; \
+	  (if test -d "$(DESTDIR)$(infodir)" && cd "$(DESTDIR)$(infodir)"; then \
+	     echo " cd '$(DESTDIR)$(infodir)' && rm -f $$relfile $$relfile-[0-9] $$relfile-[0-9][0-9] $$relfile_i[0-9] $$relfile_i[0-9][0-9]"; \
+	     rm -f $$relfile $$relfile-[0-9] $$relfile-[0-9][0-9] $$relfile_i[0-9] $$relfile_i[0-9][0-9]; \
+	   else :; fi); \
+	done
+
+uninstall-pdf-am:
+	@$(NORMAL_UNINSTALL)
+	@list='$(PDFS)'; test -n "$(pdfdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(pdfdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pdfdir)/$$f"; \
+	done
+
+uninstall-ps-am:
+	@$(NORMAL_UNINSTALL)
+	@list='$(PSS)'; test -n "$(psdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(psdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(psdir)/$$f"; \
+	done
+
+dist-info: $(INFO_DEPS)
+	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
+	list='$(INFO_DEPS)'; \
+	for base in $$list; do \
+	  case $$base in \
+	    $(srcdir)/*) base=`echo "$$base" | sed "s|^$$srcdirstrip/||"`;; \
+	  esac; \
+	  if test -f $$base; then d=.; else d=$(srcdir); fi; \
+	  base_i=`echo "$$base" | sed 's|\.info$$||;s|$$|.i|'`; \
+	  for file in $$d/$$base $$d/$$base-[0-9] $$d/$$base-[0-9][0-9] $$d/$$base_i[0-9] $$d/$$base_i[0-9][0-9]; do \
+	    if test -f $$file; then \
+	      relfile=`expr "$$file" : "$$d/\(.*\)"`; \
+	      test -f "$(distdir)/$$relfile" || \
+		cp -p $$file "$(distdir)/$$relfile"; \
+	    else :; fi; \
+	  done; \
+	done
+
+mostlyclean-aminfo:
+	-rm -rf doc/sframe-spec.t2d doc/sframe-spec.t2p
+
+clean-aminfo:
+	-test -z "doc/sframe-spec.dvi doc/sframe-spec.pdf doc/sframe-spec.ps \
+	  doc/sframe-spec.html" \
+	|| rm -rf doc/sframe-spec.dvi doc/sframe-spec.pdf doc/sframe-spec.ps \
+	  doc/sframe-spec.html
+
+maintainer-clean-aminfo:
+	@list='$(INFO_DEPS)'; for i in $$list; do \
+	  i_i=`echo "$$i" | sed 's|\.info$$||;s|$$|.i|'`; \
+	  echo " rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]"; \
+	  rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]; \
+	done
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
@@ -869,6 +1077,9 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-info
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -1004,9 +1215,9 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS) config.h
+all-am: Makefile $(INFO_DEPS) $(LTLIBRARIES) $(HEADERS) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1035,18 +1246,23 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f doc/$(am__dirstamp)
 	-rm -f testsuite/libsframe.decode/$(DEPDIR)/$(am__dirstamp)
 	-rm -f testsuite/libsframe.decode/$(am__dirstamp)
 	-rm -f testsuite/libsframe.encode/$(DEPDIR)/$(am__dirstamp)
 	-rm -f testsuite/libsframe.encode/$(am__dirstamp)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+@BUILD_INFO_FALSE@html-local:
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
+clean-am: clean-aminfo clean-checkPROGRAMS clean-generic \
+	clean-libLTLIBRARIES clean-libtool clean-noinstLTLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1058,42 +1274,133 @@ distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 
 dvi: dvi-am
 
-dvi-am:
+dvi-am: $(DVIS)
 
 html: html-am
 
-html-am:
+html-am: $(HTMLS) html-local
 
 info: info-am
 
-info-am:
+info-am: $(INFO_DEPS)
 
-install-data-am: install-includeHEADERS
+install-data-am: install-includeHEADERS install-info-am
 
 install-dvi: install-dvi-am
 
-install-dvi-am:
-
+install-dvi-am: $(DVIS)
+	@$(NORMAL_INSTALL)
+	@list='$(DVIS)'; test -n "$(dvidir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(dvidir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(dvidir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dvidir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dvidir)" || exit $$?; \
+	done
 install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
-install-html-am:
-
+install-html-am: $(HTMLS)
+	@$(NORMAL_INSTALL)
+	@list='$(HTMLS)'; list2=; test -n "$(htmldir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(htmldir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(htmldir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p" || test -d "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  $(am__strip_dir) \
+	  d2=$$d$$p; \
+	  if test -d "$$d2"; then \
+	    echo " $(MKDIR_P) '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(MKDIR_P) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
+	    echo " $(INSTALL_DATA) '$$d2'/* '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d2"/* "$(DESTDIR)$(htmldir)/$$f" || exit $$?; \
+	  else \
+	    list2="$$list2 $$d2"; \
+	  fi; \
+	done; \
+	test -z "$$list2" || { echo "$$list2" | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	done; }
 install-info: install-info-am
 
-install-info-am:
-
+install-info-am: $(INFO_DEPS)
+	@$(NORMAL_INSTALL)
+	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
+	list='$(INFO_DEPS)'; test -n "$(infodir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(infodir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(infodir)" || exit 1; \
+	fi; \
+	for file in $$list; do \
+	  case $$file in \
+	    $(srcdir)/*) file=`echo "$$file" | sed "s|^$$srcdirstrip/||"`;; \
+	  esac; \
+	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+	  file_i=`echo "$$file" | sed 's|\.info$$||;s|$$|.i|'`; \
+	  for ifile in $$d/$$file $$d/$$file-[0-9] $$d/$$file-[0-9][0-9] \
+	               $$d/$$file_i[0-9] $$d/$$file_i[0-9][0-9] ; do \
+	    if test -f $$ifile; then \
+	      echo "$$ifile"; \
+	    else : ; fi; \
+	  done; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(infodir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(infodir)" || exit $$?; done
+	@$(POST_INSTALL)
+	@if $(am__can_run_installinfo); then \
+	  list='$(INFO_DEPS)'; test -n "$(infodir)" || list=; \
+	  for file in $$list; do \
+	    relfile=`echo "$$file" | sed 's|^.*/||'`; \
+	    echo " install-info --info-dir='$(DESTDIR)$(infodir)' '$(DESTDIR)$(infodir)/$$relfile'";\
+	    install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$$relfile" || :;\
+	  done; \
+	else : ; fi
 install-man:
 
 install-pdf: install-pdf-am
 
-install-pdf-am:
-
+install-pdf-am: $(PDFS)
+	@$(NORMAL_INSTALL)
+	@list='$(PDFS)'; test -n "$(pdfdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pdfdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pdfdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pdfdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pdfdir)" || exit $$?; done
 install-ps: install-ps-am
 
-install-ps-am:
-
+install-ps-am: $(PSS)
+	@$(NORMAL_INSTALL)
+	@list='$(PSS)'; test -n "$(psdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(psdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(psdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(psdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(psdir)" || exit $$?; done
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
@@ -1101,47 +1408,62 @@ maintainer-clean: maintainer-clean-am
 	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -rf ./$(DEPDIR) testsuite/libsframe.decode/$(DEPDIR) testsuite/libsframe.encode/$(DEPDIR)
 	-rm -f Makefile
-maintainer-clean-am: distclean-am maintainer-clean-generic
+maintainer-clean-am: distclean-am maintainer-clean-aminfo \
+	maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-aminfo mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
-pdf-am:
+pdf-am: $(PDFS)
 
 ps: ps-am
 
-ps-am:
+ps-am: $(PSS)
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-dvi-am uninstall-html-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pdf-am uninstall-ps-am
 
 .MAKE: all check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-DEJAGNU \
-	check-am clean clean-checkPROGRAMS clean-cscope clean-generic \
-	clean-libLTLIBRARIES clean-libtool clean-noinstLTLIBRARIES \
-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	distcheck distclean distclean-DEJAGNU distclean-compile \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-includeHEADERS \
-	uninstall-libLTLIBRARIES
+	check-am clean clean-aminfo clean-checkPROGRAMS clean-cscope \
+	clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-noinstLTLIBRARIES cscope cscopelist-am ctags ctags-am \
+	dist dist-all dist-bzip2 dist-gzip dist-info dist-lzip \
+	dist-shar dist-tarZ dist-xz dist-zip distcheck distclean \
+	distclean-DEJAGNU distclean-compile distclean-generic \
+	distclean-hdr distclean-libtool distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am html-local \
+	info info-am install install-am install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-includeHEADERS \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-aminfo \
+	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-dvi-am uninstall-html-am uninstall-includeHEADERS \
+	uninstall-info-am uninstall-libLTLIBRARIES uninstall-pdf-am \
+	uninstall-ps-am
 
 .PRECIOUS: Makefile
 
+
+@BUILD_INFO_TRUE@html-local: doc/sframe-spec/index.html
+@BUILD_INFO_TRUE@doc/sframe-spec/index.html: doc/sframe-spec.texi doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_GEN)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+@BUILD_INFO_TRUE@	  --split=node -I$(srcdir) --output doc/sframe-spec $(srcdir)/doc/sframe-spec.texi
+
+# Workaround bug in automake: it can't handle conditionally building info pages
+# since GNU projects normally include info pages in the source distributions.
+@BUILD_INFO_FALSE@doc/sframe-spec.info:
 
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \

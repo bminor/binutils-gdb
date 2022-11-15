@@ -643,6 +643,8 @@ INSTALL_LIBBFD_TRUE
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
+BUILD_INFO_FALSE
+BUILD_INFO_TRUE
 COMPAT_DEJAGNU
 HAVE_COMPAT_DEJAGNU_FALSE
 HAVE_COMPAT_DEJAGNU_TRUE
@@ -11441,7 +11443,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11444 "configure"
+#line 11446 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11547,7 +11549,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11550 "configure"
+#line 11552 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12223,6 +12225,77 @@ fi
 COMPAT_DEJAGNU=$ac_cv_dejagnu_compat
 
 
+build_info=
+for ac_prog in makeinfo
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MAKEINFO+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MAKEINFO"; then
+  ac_cv_prog_MAKEINFO="$MAKEINFO" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MAKEINFO="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+MAKEINFO=$ac_cv_prog_MAKEINFO
+if test -n "$MAKEINFO"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MAKEINFO" >&5
+$as_echo "$MAKEINFO" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MAKEINFO" && break
+done
+test -n "$MAKEINFO" || MAKEINFO="makeinfo"
+
+if test "x$MAKEINFO" = "x"; then
+    MAKEINFO="@echo makeinfo missing; true"
+    build_info=
+else
+    BUILD_INFO=info
+    case "$MAKEINFO" in
+      */missing\ makeinfo*)
+	build_info=
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
+*** Makeinfo is missing. Info documentation will not be built." >&5
+$as_echo "$as_me: WARNING:
+*** Makeinfo is missing. Info documentation will not be built." >&2;}
+        ;;
+      *)
+	build_info=yes
+	;;
+    esac
+fi
+ if test "${build_info}" = yes; then
+  BUILD_INFO_TRUE=
+  BUILD_INFO_FALSE='#'
+else
+  BUILD_INFO_TRUE='#'
+  BUILD_INFO_FALSE=
+fi
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -12692,6 +12765,10 @@ fi
 
 if test -z "${HAVE_COMPAT_DEJAGNU_TRUE}" && test -z "${HAVE_COMPAT_DEJAGNU_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_COMPAT_DEJAGNU\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_INFO_TRUE}" && test -z "${BUILD_INFO_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_INFO\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then

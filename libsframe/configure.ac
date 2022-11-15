@@ -59,6 +59,27 @@ AM_CONDITIONAL([HAVE_COMPAT_DEJAGNU], [test "x$ac_cv_dejagnu_compat" = "xyes"])
 COMPAT_DEJAGNU=$ac_cv_dejagnu_compat
 AC_SUBST(COMPAT_DEJAGNU)
 
+dnl Check for makeinfo for building documentation
+build_info=
+AC_CHECK_PROGS([MAKEINFO], makeinfo, makeinfo, )
+if test "x$MAKEINFO" = "x"; then
+    MAKEINFO="@echo makeinfo missing; true"
+    build_info=
+else
+    BUILD_INFO=info
+    case "$MAKEINFO" in
+      */missing\ makeinfo*)
+	build_info=
+	AC_MSG_WARN([
+*** Makeinfo is missing. Info documentation will not be built.])
+        ;;
+      *)
+	build_info=yes
+	;;
+    esac
+fi
+AM_CONDITIONAL(BUILD_INFO, test "${build_info}" = yes)
+
 AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD
 
