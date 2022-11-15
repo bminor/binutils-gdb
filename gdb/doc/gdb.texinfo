@@ -18858,7 +18858,7 @@ terminated themselves.
 @item Child Activation Wait
 The task is waiting for created tasks to complete activation.
 
-@item Accept Statement
+@item Accept or Select Term
 The task is waiting on an accept or selective wait statement.
 
 @item Waiting on entry call
@@ -18881,8 +18881,20 @@ waiting on a terminate Phase.
 The task is sleeping waiting for tasks on terminate alternatives to
 finish terminating.
 
+@item Asynchronous Hold
+The task has been held by @code{Ada.Asynchronous_Task_Control.Hold_Task}.
+
+@item Activating
+The task has been created and is being made runnable.
+
+@item Selective Wait
+The task is waiting in a selective wait statement.
+
 @item Accepting RV with @var{taskno}
 The task is accepting a rendez-vous with the task @var{taskno}.
+
+@item Waiting on RV with @var{taskno}
+The task is waiting for a rendez-vous with the task @var{taskno}.
 @end table
 
 @item Name
