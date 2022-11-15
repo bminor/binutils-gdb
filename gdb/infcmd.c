@@ -1877,26 +1877,28 @@ finish_command (const char *arg, int from_tty)
   /* Find the function we will return from.  */
   frame_info_ptr callee_frame = get_selected_frame (NULL);
   sm->function = find_pc_function (get_frame_pc (callee_frame));
+  sm->return_buf = 0;    /* Initialize buffer address is not available.  */
 
   /* Determine the return convention.  If it is RETURN_VALUE_STRUCT_CONVENTION,
      attempt to determine the address of the return buffer.  */
-  enum return_value_convention return_value;
-  struct gdbarch *gdbarch = get_frame_arch (callee_frame);
+  if (sm->function != NULL)
+    {
+      enum return_value_convention return_value;
+      struct gdbarch *gdbarch = get_frame_arch (callee_frame);
 
-  struct type * val_type
-    = check_typedef (sm->function->type ()->target_type ());
+      struct type * val_type
+	= check_typedef (sm->function->type ()->target_type ());
 
-  return_value = gdbarch_return_value (gdbarch,
-				       read_var_value (sm->function, NULL,
-						       callee_frame),
-				       val_type, NULL, NULL, NULL);
+      return_value = gdbarch_return_value (gdbarch,
+					   read_var_value (sm->function, NULL,
+							   callee_frame),
+					   val_type, NULL, NULL, NULL);
 
-  if (return_value == RETURN_VALUE_STRUCT_CONVENTION
-      && val_type->code () != TYPE_CODE_VOID)
-    sm->return_buf = gdbarch_get_return_buf_addr (gdbarch, val_type,
-						  callee_frame);
-  else
-    sm->return_buf = 0;
+      if (return_value == RETURN_VALUE_STRUCT_CONVENTION
+	  && val_type->code () != TYPE_CODE_VOID)
+	sm->return_buf = gdbarch_get_return_buf_addr (gdbarch, val_type,
+						      callee_frame);
+    }
 
   /* Print info on the selected frame, including level number but not
      source.  */
