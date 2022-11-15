@@ -17,6 +17,9 @@
   not it generates deterministic output libraries.  If neither of these options
   are used the default is whatever was set when the binutils were configured.
   
+* readelf and objdump now have a newly added option --sframe which dumps the
+  SFrame section.
+
 Changes in 2.39:
 
 * Add --no-weak/-W option to nm to make it ignore weak symbols.
