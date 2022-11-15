@@ -1725,7 +1725,8 @@ coff_frob_section (segT sec)
   bfd_vma align_power = (bfd_vma) sec->alignment_power + OCTETS_PER_BYTE_POWER;
   bfd_vma mask = ((bfd_vma) 1 << align_power) - 1;
 
-  if (size & mask)
+  if (!do_not_pad_sections_to_alignment
+      && (size & mask) != 0)
     {
       bfd_vma new_size;
       fragS *last;
@@ -1740,7 +1741,10 @@ coff_frob_section (segT sec)
       while (fragp->fr_next != last)
 	fragp = fragp->fr_next;
       last->fr_address = size;
-      fragp->fr_offset += new_size - size;
+      if ((new_size - size) % fragp->fr_var == 0)
+	fragp->fr_offset += (new_size - size) / fragp->fr_var;
+      else
+	abort ();
     }
 #endif
 
