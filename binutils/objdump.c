@@ -58,6 +58,7 @@
 #include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
+#include "sframe-api.h"
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -108,6 +109,8 @@ static int dump_stab_section_info;	/* --stabs */
 static int dump_ctf_section_info;       /* --ctf */
 static char *dump_ctf_section_name;
 static char *dump_ctf_parent_name;	/* --ctf-parent */
+static int dump_sframe_section_info;	/* --sframe */
+static char *dump_sframe_section_name;
 static int do_demangle;			/* -C, --demangle */
 static bool disassemble;		/* -d */
 static bool disassemble_all;		/* -D */
@@ -322,6 +325,8 @@ usage (FILE *stream, int status)
       --ctf[=SECTION]      Display CTF info from SECTION, (default `.ctf')\n"));
 #endif
   fprintf (stream, _("\
+      --sframe[=SECTION]   Display SFrame info from SECTION, (default '.sframe')\n"));
+  fprintf (stream, _("\
   -t, --syms               Display the contents of the symbol table(s)\n"));
   fprintf (stream, _("\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"));
@@ -476,6 +481,7 @@ enum option_values
     OPTION_CTF,
     OPTION_CTF_PARENT,
 #endif
+    OPTION_SFRAME,
     OPTION_VISUALIZE_JUMPS,
     OPTION_DISASSEMBLER_COLOR
   };
@@ -530,6 +536,7 @@ static struct option long_options[]=
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
+  {"sframe", optional_argument, NULL, OPTION_SFRAME},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
   {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
@@ -4815,6 +4822,66 @@ dump_ctf (bfd *abfd ATTRIBUTE_UNUSED, const char *sect_name ATTRIBUTE_UNUSED,
 	  const char *parent_name ATTRIBUTE_UNUSED) {}
 #endif
 
+static bfd_byte*
+read_section_sframe (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
+		     bfd_vma *sframe_vma)
+{
+  asection *sframe_sect;
+  bfd_byte *contents;
+
+  sframe_sect = bfd_get_section_by_name (abfd, sect_name);
+  if (sframe_sect == NULL)
+    {
+      printf (_("No %s section present\n\n"),
+	      sanitize_string (sect_name));
+      return NULL;
+    }
+
+  if (!bfd_malloc_and_get_section (abfd, sframe_sect, &contents))
+    {
+      non_fatal (_("reading %s section of %s failed: %s"),
+		 sect_name, bfd_get_filename (abfd),
+		 bfd_errmsg (bfd_get_error ()));
+      exit_status = 1;
+      free (contents);
+      return NULL;
+    }
+
+  *size_ptr = bfd_section_size (sframe_sect);
+  *sframe_vma = bfd_section_vma (sframe_sect);
+
+  return contents;
+}
+
+static void
+dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
+		     const char * sect_name)
+{
+  sframe_decoder_ctx *sfd_ctx = NULL;
+  bfd_size_type sf_size;
+  bfd_byte *sframe_data = NULL;
+  bfd_vma sf_vma;
+  int err = 0;
+
+  if (sect_name == NULL)
+    sect_name = ".sframe";
+
+  sframe_data = read_section_sframe (abfd, sect_name, &sf_size, &sf_vma);
+
+  if (sframe_data == NULL)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  /* Decode the contents of the section.  */
+  sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
+  if (!sfd_ctx)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  printf (_("Contents of the SFrame section %s:"),
+	  sanitize_string (sect_name));
+  /* Dump the contents as text.  */
+  dump_sframe (sfd_ctx, sf_vma);
+}
+
 
 static void
 dump_bfd_private_header (bfd *abfd)
@@ -5568,6 +5635,8 @@ dump_bfd (bfd *abfd, bool is_mainfile)
     {
       if (dump_ctf_section_info)
 	dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
+      if (dump_sframe_section_info)
+	dump_section_sframe (abfd, dump_sframe_section_name);
       if (dump_stab_section_info)
 	dump_stabs (abfd);
       if (dump_reloc_info && ! disassemble)
@@ -6071,6 +6140,12 @@ main (int argc, char **argv)
 	  dump_ctf_parent_name = xstrdup (optarg);
 	  break;
 #endif
+	case OPTION_SFRAME:
+	  dump_sframe_section_info = true;
+	  if (optarg)
+	    dump_sframe_section_name = xstrdup (optarg);
+	  seenflag = true;
+	  break;
 	case 'G':
 	  dump_stab_section_info = true;
 	  seenflag = true;

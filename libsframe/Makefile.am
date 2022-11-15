@@ -33,7 +33,7 @@ include_HEADERS =
 noinst_LTLIBRARIES = libsframe.la
 endif
 
-libsframe_la_SOURCES = sframe.c sframe-error.c
+libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
 
 include testsuite/local.mk

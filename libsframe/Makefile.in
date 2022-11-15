@@ -149,7 +149,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libsframe_la_LIBADD =
 am_libsframe_la_OBJECTS = libsframe_la-sframe.lo \
-	libsframe_la-sframe-error.lo
+	libsframe_la-sframe-dump.lo libsframe_la-sframe-error.lo
 libsframe_la_OBJECTS = $(am_libsframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -427,7 +427,7 @@ AM_CFLAGS = @ac_libsframe_warn_cflags@
 @INSTALL_LIBBFD_FALSE@include_HEADERS = 
 @INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la
-libsframe_la_SOURCES = sframe.c sframe-error.c
+libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
 
 # Setup the testing framework
@@ -607,6 +607,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe-dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe-error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_be_flipping-be-flipping.Po@am__quote@
@@ -644,6 +645,13 @@ libsframe_la-sframe.lo: sframe.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sframe.c' object='libsframe_la-sframe.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframe_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libsframe_la-sframe.lo `test -f 'sframe.c' || echo '$(srcdir)/'`sframe.c
+
+libsframe_la-sframe-dump.lo: sframe-dump.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframe_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libsframe_la-sframe-dump.lo -MD -MP -MF $(DEPDIR)/libsframe_la-sframe-dump.Tpo -c -o libsframe_la-sframe-dump.lo `test -f 'sframe-dump.c' || echo '$(srcdir)/'`sframe-dump.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsframe_la-sframe-dump.Tpo $(DEPDIR)/libsframe_la-sframe-dump.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sframe-dump.c' object='libsframe_la-sframe-dump.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframe_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libsframe_la-sframe-dump.lo `test -f 'sframe-dump.c' || echo '$(srcdir)/'`sframe-dump.c
 
 libsframe_la-sframe-error.lo: sframe-error.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframe_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libsframe_la-sframe-error.lo -MD -MP -MF $(DEPDIR)/libsframe_la-sframe-error.Tpo -c -o libsframe_la-sframe-error.lo `test -f 'sframe-error.c' || echo '$(srcdir)/'`sframe-error.c

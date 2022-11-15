@@ -157,6 +157,9 @@ sframe_decoder_get_funcdesc (sframe_decoder_ctx *ctx,
 			     int32_t *func_start_address,
 			     unsigned char *func_info);
 
+/* SFrame textual dump.  */
+extern void
+dump_sframe (sframe_decoder_ctx *decoder, uint64_t addr);
 
 /* Get the base reg id from the FRE info.  Sets errp if fails.  */
 extern unsigned int

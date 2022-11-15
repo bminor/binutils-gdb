@@ -2262,6 +2262,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-wE}|@option{--dwarf=do-not-use-debuginfod}]
         [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
+        [@option{--sframe=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2850,6 +2851,8 @@ The @option{off} argument disables colored disassembly.
 Enable additional checks for consistency of Dwarf information.
 
 @include ctf.options.texi
+
+@include sframe.options.texi
 
 @item -G
 @itemx --stabs
@@ -4948,6 +4951,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--ctf-parent=}@var{section}]
         [@option{--ctf-symbols=}@var{section}]
         [@option{--ctf-strings=}@var{section}]
+        [@option{--sframe=}@var{section}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
