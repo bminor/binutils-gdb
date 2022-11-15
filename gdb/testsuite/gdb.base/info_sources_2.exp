@@ -20,6 +20,8 @@ if { [skip_shlib_tests] } {
     return 0
 }
 
+set is_remote_target [is_remote target]
+
 standard_testfile -test.c -lib.c
 set solib_name [standard_output_file ${testfile}-lib.so]
 
@@ -36,6 +38,8 @@ if {[gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable \
 }
 
 clean_restart ${binfile}
+
+set solib_name [gdb_load_shlib $solib_name]
 
 if ![runto foo] {
     untested "failed to run to function foo"
@@ -55,6 +59,7 @@ if ![runto foo] {
 # file is NOT listed for the given object file.
 proc run_info_sources { extra_args args } {
     global gdb_prompt srcdir subdir
+    global is_remote_target
 
     with_test_prefix "args: ${extra_args}" {
 
@@ -76,6 +81,9 @@ proc run_info_sources { extra_args args } {
 
 	    -re "^(\[^\r\n\]+):\r\n" {
 		set objfile_name $expect_out(1,string)
+		if { $is_remote_target } {
+		    set objfile_name [file tail $objfile_name]
+		}
 		exp_continue
 	    }
 
@@ -128,6 +136,10 @@ proc run_info_sources { extra_args args } {
 
 	    # Figure out the path for SOURCEFILE that we're looking for.
 	    set sourcepath [file normalize ${srcdir}/${subdir}/${sourcefile}]
+
+	    if { $is_remote_target } {
+		set objfile [file tail $objfile]
+	    }
 
 	    # Make sure we handle the case where there are no source files
 	    # associated with a particular objfile.
