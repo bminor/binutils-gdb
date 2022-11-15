@@ -54,6 +54,10 @@
 #include <sys/ldr.h>
 #include <sys/systemcfg.h>
 
+/* Header files for getting ppid in AIX of a child process.  */
+#include <procinfo.h>
+#include <sys/types.h>
+
 /* On AIX4.3+, sys/ldr.h provides different versions of struct ld_info for
    debugging 32-bit and 64-bit processes.  Define a typedef and macros for
    accessing fields in the appropriate structures.  */
@@ -91,10 +95,13 @@ public:
 
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
+  /* Fork detection related functions, For adding multi process debugging
+     support.  */
+  void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
+
 protected:
 
-  void post_startup_inferior (ptid_t ptid) override
-  { /* Nothing.  */ }
+  void post_startup_inferior (ptid_t ptid) override;
 
 private:
   enum target_xfer_status
@@ -106,6 +113,84 @@ private:
 };
 
 static rs6000_nat_target the_rs6000_nat_target;
+
+/* The below declaration is to track number of times, parent has
+   reported fork event before its children.  */
+
+static std::list<pid_t> aix_pending_parent;
+
+/* The below declaration is for a child process event that
+   is reported before its corresponding parent process in
+   the event of a fork ().  */
+
+static std::list<pid_t> aix_pending_children;
+
+static void
+aix_remember_child (pid_t pid)
+{
+  aix_pending_children.push_front (pid);
+}
+
+static void
+aix_remember_parent (pid_t pid)
+{
+  aix_pending_parent.push_front (pid);
+}
+
+/* This function returns a parent of a child process.  */
+
+static pid_t
+find_my_aix_parent (pid_t child_pid)
+{
+  struct procsinfo ProcessBuffer1;
+
+  if (getprocs (&ProcessBuffer1, sizeof (ProcessBuffer1),
+		NULL, 0, &child_pid, 1) != 1)
+    return 0;
+  else
+    return ProcessBuffer1.pi_ppid;
+}
+
+/* In the below function we check if there was any child
+   process pending.  If it exists we return it from the
+   list, otherwise we return a null.  */
+
+static pid_t
+has_my_aix_child_reported (pid_t parent_pid)
+{
+  pid_t child = 0;
+  auto it = std::find_if (aix_pending_children.begin (),
+			  aix_pending_children.end (),
+			  [=] (pid_t child_pid)
+			  {
+			    return find_my_aix_parent (child_pid) == parent_pid;
+			  });
+  if (it != aix_pending_children.end ())
+    {
+      child = *it;
+      aix_pending_children.erase (it);
+    }
+  return child;
+}
+
+/* In the below function we check if there was any parent
+   process pending.  If it exists we return it from the
+   list, otherwise we return a null.  */
+
+static pid_t
+has_my_aix_parent_reported (pid_t child_pid)
+{
+  pid_t my_parent = find_my_aix_parent (child_pid);
+  auto it = std::find (aix_pending_parent.begin (),
+		       aix_pending_parent.end (),
+		       my_parent);
+  if (it != aix_pending_parent.end ())
+    {
+      aix_pending_parent.erase (it);
+      return my_parent;
+    }
+  return 0;
+}
 
 /* Given REGNO, a gdb register number, return the corresponding
    number suitable for use as a ptrace() parameter.  Return -1 if
@@ -185,6 +270,47 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 	  req, id, hex_string (addr), data, (unsigned int)buf, ret);
 #endif
   return ret;
+}
+
+void rs6000_nat_target::post_startup_inferior (ptid_t ptid)
+{
+
+  /* In AIX to turn on multi process debugging in ptrace
+     PT_MULTI is the option to be passed,
+     with the process ID which can fork () and
+     the data parameter [fourth parameter] must be 1.  */
+
+  if (!ARCH64 ())
+    rs6000_ptrace32 (PT_MULTI, ptid.pid(), 0, 1, 0);
+  else
+    rs6000_ptrace64 (PT_MULTI, ptid.pid(), 0, 1, 0);
+}
+
+void
+rs6000_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
+				target_waitkind fork_kind, bool follow_child,
+				bool detach_fork)
+{
+
+  /* Once the fork event is detected the infrun.c code
+     calls the target_follow_fork to take care of
+     follow child and detach the child activity which is
+     done using the function below.  */
+
+  inf_ptrace_target::follow_fork (child_inf, child_ptid, fork_kind,
+				  follow_child, detach_fork);
+
+  /* If we detach fork and follow child we do not want the child
+     process to geneate events that ptrace can trace.  Hence we
+     detach it.  */
+
+  if (detach_fork && !follow_child)
+  {
+    if (ARCH64 ())
+      rs6000_ptrace64 (PT_DETACH, child_ptid.pid (), 0, 0, 0);
+    else
+      rs6000_ptrace32 (PT_DETACH, child_ptid.pid (), 0, 0, 0);
+  }
 }
 
 /* Fetch register REGNO from the inferior.  */
@@ -504,7 +630,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   pid_t pid;
   int status, save_errno;
 
-  do
+  while (1)
     {
       set_sigint_trap ();
 
@@ -529,17 +655,58 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       /* Ignore terminated detached child processes.  */
       if (!WIFSTOPPED (status) && find_inferior_pid (this, pid) == nullptr)
-	pid = -1;
+	continue;
+
+      /* Check for a fork () event.  */
+      if ((status & 0xff) == W_SFWTED)
+	{
+	  /* Checking whether it is a parent or a child event.  */
+
+	  /* If the event is a child we check if there was a parent
+	     event recorded before.  If yes we got the parent child
+	     relationship.  If not we push this child and wait for
+	     the next fork () event.  */
+	  if (find_inferior_pid (this, pid) == nullptr)
+	    {
+	      pid_t parent_pid = has_my_aix_parent_reported (pid);
+	      if (parent_pid > 0)
+		{
+		  ourstatus->set_forked (ptid_t (pid));
+		  return ptid_t (parent_pid);
+		}
+	      aix_remember_child (pid);
+	    }
+
+	  /* If the event is a parent we check if there was a child
+	     event recorded before.  If yes we got the parent child
+	     relationship.  If not we push this parent and wait for
+	     the next fork () event.  */
+	  else
+	    {
+	      pid_t child_pid = has_my_aix_child_reported (pid);
+	      if (child_pid > 0)
+		{
+		  ourstatus->set_forked (ptid_t (child_pid));
+		  return ptid_t (pid);
+		}
+	      aix_remember_parent (pid);
+	    }
+	  continue;
+	}
+
+      break;
     }
-  while (pid == -1);
 
   /* AIX has a couple of strange returns from wait().  */
 
   /* stop after load" status.  */
   if (status == 0x57c)
     ourstatus->set_loaded ();
-  /* signal 0.  I have no idea why wait(2) returns with this status word.  */
-  else if (status == 0x7f)
+  /* 0x7f is signal 0.  0x17f and 0x137f are status returned
+     if we follow parent, a switch is made to a child post parent
+     execution and child continues its execution [user switches
+     to child and presses continue].  */
+  else if (status == 0x7f || status == 0x17f || status == 0x137f)
     ourstatus->set_spurious ();
   /* A normal waitstatus.  Let the usual macros deal with it.  */
   else
