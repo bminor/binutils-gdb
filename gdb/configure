@@ -28548,7 +28548,8 @@ WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   LDFLAGS="-L../bfd -L../libiberty"
-  LIBS="-lbfd -liberty $LIBS"
+  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+  LIBS="-lbfd -liberty $intl $LIBS"
   CC="./libtool --quiet --mode=link $CC"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ELF support in BFD" >&5
 $as_echo_n "checking for ELF support in BFD... " >&6; }
@@ -28664,7 +28665,8 @@ fi
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   LDFLAGS="-L../bfd -L../libiberty"
-  LIBS="-lbfd -liberty $LIBS"
+  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+  LIBS="-lbfd -liberty $intl $LIBS"
   CC="./libtool --quiet --mode=link $CC"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mach-O support in BFD" >&5
 $as_echo_n "checking for Mach-O support in BFD... " >&6; }
