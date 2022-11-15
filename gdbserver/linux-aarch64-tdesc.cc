@@ -41,6 +41,11 @@ aarch64_linux_read_description (const aarch64_features &features)
     error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
 	   AARCH64_MAX_SVE_VQ);
 
+  if (features.svq > AARCH64_MAX_SVE_VQ)
+    error (_("Streaming svq is %" PRIu8 ", maximum supported value is %d"),
+	   features.svq,
+	   AARCH64_MAX_SVE_VQ);
+
   struct target_desc *tdesc = tdesc_aarch64_map[features];
 
   if (tdesc == NULL)
@@ -56,6 +61,8 @@ aarch64_linux_read_description (const aarch64_features &features)
 
       if (features.vq > 0)
 	expedited_registers.push_back ("vg");
+      if (features.svq > 0)
+	expedited_registers.push_back ("svg");
 
       expedited_registers.push_back (nullptr);
 
