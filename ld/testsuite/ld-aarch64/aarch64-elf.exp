@@ -457,3 +457,7 @@ run_dump_test "bti-pac-plt-2"
 run_dump_test "bti-warn"
 run_dump_test "weak-tls"
 run_dump_test "undef-tls"
+
+if { ![skip_sframe_tests] } {
+  run_dump_test "sframe-simple-1"
+}

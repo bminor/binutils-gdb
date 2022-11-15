@@ -383,7 +383,7 @@ selarchs="$f"
 tb=
 
 elf="elf.lo elflink.lo elf-attrs.lo elf-strtab.lo elf-eh-frame.lo
-     dwarf1.lo dwarf2.lo"
+     elf-sframe.lo dwarf1.lo dwarf2.lo"
 coffgen="coffgen.lo dwarf2.lo"
 coff="cofflink.lo $coffgen"
 ecoff="ecofflink.lo $coffgen"

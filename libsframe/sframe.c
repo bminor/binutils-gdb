@@ -1202,14 +1202,32 @@ sframe_encode (unsigned char ver, unsigned char flags, int abi_arch,
 /* Free the encoder context.  */
 
 void
-sframe_free_encoder (sframe_encoder_ctx *encoder)
+sframe_encoder_free (sframe_encoder_ctx **encoder)
 {
   if (encoder != NULL)
     {
-      free (encoder->sfe_funcdesc);
-      free (encoder->sfe_fres);
-      free (encoder->sfe_data);
-      free (encoder);
+      sframe_encoder_ctx *ectx = *encoder;
+      if (ectx == NULL)
+	return;
+
+      if (ectx->sfe_funcdesc != NULL)
+	{
+	  free (ectx->sfe_funcdesc);
+	  ectx->sfe_funcdesc = NULL;
+	}
+      if (ectx->sfe_fres != NULL)
+	{
+	  free (ectx->sfe_fres);
+	  ectx->sfe_fres = NULL;
+	}
+      if (ectx->sfe_data != NULL)
+	{
+	  free (ectx->sfe_data);
+	  ectx->sfe_data = NULL;
+	}
+
+      free (*encoder);
+      *encoder = NULL;
     }
 }
 

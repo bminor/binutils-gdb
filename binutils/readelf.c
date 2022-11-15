@@ -4604,6 +4604,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_GNU_STACK:	return "GNU_STACK";
     case PT_GNU_RELRO:  return "GNU_RELRO";
     case PT_GNU_PROPERTY: return "GNU_PROPERTY";
+    case PT_GNU_SFRAME: return "GNU_SFRAME";
 
     case PT_OPENBSD_RANDOMIZE: return "OPENBSD_RANDOMIZE";
     case PT_OPENBSD_WXNEEDED: return "OPENBSD_WXNEEDED";

@@ -187,7 +187,7 @@ sframe_encode (unsigned char ver, unsigned char flags, int abi,
 
 /* Free the encoder context.  */
 extern void
-sframe_free_encoder (sframe_encoder_ctx *encoder);
+sframe_encoder_free (sframe_encoder_ctx **encoder);
 
 /* Get the size of the SFrame header from the encoder ctx ENCODER.  */
 extern unsigned int

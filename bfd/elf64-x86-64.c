@@ -22,6 +22,7 @@
 #include "elfxx-x86.h"
 #include "dwarf2.h"
 #include "libiberty.h"
+#include "sframe.h"
 
 #include "opcode/i386.h"
 
@@ -818,6 +819,87 @@ static const bfd_byte elf_x86_64_eh_frame_non_lazy_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+static const sframe_frame_row_entry elf_x86_64_sframe_null_fre =
+{
+  0,
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* .sframe FRE covering the .plt section entry.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_plt0_fre1 =
+{
+  0, /* SFrame FRE start address.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* .sframe FRE covering the .plt section entry.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_plt0_fre2 =
+{
+  6, /* SFrame FRE start address.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* .sframe FRE covering the .plt section entry.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_pltn_fre1 =
+{
+  0, /* SFrame FRE start address.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* .sframe FRE covering the .plt section entry.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_pltn_fre2 =
+{
+  11, /* SFrame FRE start address.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* .sframe FRE covering the second .plt section entry.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_sec_pltn_fre1 =
+{
+  0, /* SFrame FRE start address.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+};
+
+/* SFrame helper object for non-lazy PLT.  Also used for IBT enabled PLT.  */
+static const struct elf_x86_sframe_plt elf_x86_64_sframe_non_lazy_plt =
+{
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLT0.  */
+  /* Array of SFrame FREs for plt0.  */
+  { &elf_x86_64_sframe_plt0_fre1, &elf_x86_64_sframe_plt0_fre2 },
+  LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLTn.  */
+  /* Array of SFrame FREs for plt.  */
+  { &elf_x86_64_sframe_sec_pltn_fre1, &elf_x86_64_sframe_null_fre },
+  0,
+  0, /* There is no second PLT necessary.  */
+  { &elf_x86_64_sframe_null_fre }
+};
+
+/* SFrame helper object for lazy PLT.  Also used for IBT enabled PLT.  */
+static const struct elf_x86_sframe_plt elf_x86_64_sframe_plt =
+{
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLT0.  */
+  /* Array of SFrame FREs for plt0.  */
+  { &elf_x86_64_sframe_plt0_fre1, &elf_x86_64_sframe_plt0_fre2 },
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLTn.  */
+  /* Array of SFrame FREs for plt.  */
+  { &elf_x86_64_sframe_pltn_fre1, &elf_x86_64_sframe_pltn_fre2 },
+  NON_LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLTn for second PLT.  */
+  /* FREs for second plt ( unwind info for .plt.got is
+     identical).  Used when IBT or non-lazy PLT is in effect.  */
+  { &elf_x86_64_sframe_sec_pltn_fre1 }
+};
+
 /* These are the standard parameters.  */
 static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_plt =
   {
@@ -970,7 +1052,6 @@ static const struct elf_x86_non_lazy_plt_layout elf_x32_non_lazy_ibt_plt =
     elf_x86_64_eh_frame_non_lazy_plt,	/* eh_frame_plt */
     sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
-
 
 static bool
 elf64_x86_64_elf_object_p (bfd *abfd)
@@ -5226,6 +5307,20 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
     {
       init_table.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
       init_table.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;
+    }
+
+  if (ABI_64_P (info->output_bfd))
+    {
+      init_table.sframe_lazy_plt = &elf_x86_64_sframe_plt;
+      init_table.sframe_non_lazy_plt = &elf_x86_64_sframe_non_lazy_plt;
+      init_table.sframe_lazy_ibt_plt = &elf_x86_64_sframe_plt;
+      init_table.sframe_non_lazy_ibt_plt = &elf_x86_64_sframe_non_lazy_plt;
+    }
+  else
+    {
+      /* SFrame is not supported for non AMD64.  */
+      init_table.sframe_lazy_plt = NULL;
+      init_table.sframe_non_lazy_plt = NULL;
     }
 
   if (ABI_64_P (info->output_bfd))

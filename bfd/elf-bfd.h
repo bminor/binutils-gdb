@@ -490,6 +490,40 @@ struct eh_frame_hdr_info
   u;
 };
 
+/* Additional information for each function (used at link time).  */
+struct sframe_func_bfdinfo
+{
+  /* Whether the function has been discarded from the final output.  */
+  bool func_deleted_p;
+  /* Relocation offset.  */
+  unsigned int func_r_offset;
+  /* Relocation index.  */
+  unsigned int func_reloc_index;
+};
+
+/* SFrame decoder info.
+   Contains all information for a decoded .sframe section.  */
+struct sframe_dec_info
+{
+  /* Decoder context.  */
+  struct sframe_decoder_ctx *sfd_ctx;
+  /* Number of function descriptor entries in this .sframe.  */
+  unsigned int sfd_fde_count;
+  /* Additional information for linking.  */
+  struct sframe_func_bfdinfo *sfd_func_bfdinfo;
+};
+
+/* SFrame encoder info.
+   Contains all information for an encoded .sframe section to be
+   written out.  */
+struct sframe_enc_info
+{
+  /* Encoder context.  */
+  struct sframe_encoder_ctx *sfe_ctx;
+  /* Output section.  */
+  asection *sframe_section;
+};
+
 /* Enum used to identify target specific extensions to the elf_obj_tdata
    and elf_link_hash_table structures.  Note the enums deliberately start
    from 1 so that we can detect an uninitialized field.  The generic value
@@ -667,6 +701,9 @@ struct elf_link_hash_table
 
   /* Used by eh_frame code when editing .eh_frame.  */
   struct eh_frame_hdr_info eh_info;
+
+  /* Used to link unwind data in .sframe sections.  */
+  struct sframe_enc_info sfe_info;
 
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
@@ -1944,6 +1981,10 @@ struct output_elf_obj_tdata
   /* Segment flags for the PT_GNU_STACK segment.  */
   unsigned int stack_flags;
 
+  /* Used to determine if PT_GNU_SFRAME segment header should be
+     created.  */
+  asection *sframe;
+
   /* Used to determine if the e_flags field has been initialized */
   bool flags_init;
 };
@@ -2125,6 +2166,7 @@ struct elf_obj_tdata
 #define elf_link_info(bfd)	(elf_tdata(bfd) -> o->link_info)
 #define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> o->next_file_pos)
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
+#define elf_sframe(bfd)		(elf_tdata(bfd) -> o->sframe)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_symtab_shndx_list(bfd)	(elf_tdata(bfd) -> symtab_shndx_list)
@@ -2438,6 +2480,18 @@ extern bool _bfd_elf_eh_frame_entry_present
   (struct bfd_link_info *);
 extern bool _bfd_elf_maybe_strip_eh_frame_hdr
   (struct bfd_link_info *);
+
+extern bool _bfd_elf_sframe_present
+  (struct bfd_link_info *);
+extern bool _bfd_elf_parse_sframe
+  (bfd *, struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
+extern bool _bfd_elf_discard_section_sframe
+  (asection *, bool (*) (bfd_vma, void *), struct elf_reloc_cookie *);
+extern bool _bfd_elf_merge_section_sframe
+  (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+extern bool _bfd_elf_write_section_sframe
+  (bfd *, struct bfd_link_info *);
+extern bool _bfd_elf_set_section_sframe (bfd *, struct bfd_link_info *);
 
 extern bool _bfd_elf_hash_symbol (struct elf_link_hash_entry *);
 

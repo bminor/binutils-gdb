@@ -628,15 +628,18 @@ AC_SUBST(EMULATION_LIBPATH)
 if test x${enable_static} = xno; then
   TESTBFDLIB="-Wl,--rpath,../bfd/.libs ../bfd/.libs/libbfd.so"
   TESTCTFLIB="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
+  TESTSFRAMELIB="-Wl,--rpath,../libsframe/.libs ../libsframe/.libs/libsframe.so"
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
   TESTCTFLIB="../libctf/.libs/libctf.a"
+  TESTSFRAMELIB="../libsframe/.libs/libsframe.a"
 fi
 if test "${enable_libctf}" = no; then
     TESTCTFLIB=
 fi
 AC_SUBST(TESTBFDLIB)
 AC_SUBST(TESTCTFLIB)
+AC_SUBST(TESTSFRAMELIB)
 
 target_vendor=${target_vendor=$host_vendor}
 case "$target_vendor" in

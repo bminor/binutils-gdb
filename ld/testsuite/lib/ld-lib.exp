@@ -1690,3 +1690,48 @@ proc skip_ctf_tests { } {
 
     return 1
 }
+
+# Check if the assembler supports SFrame.
+
+proc check_as_sframe { } {
+    global check_as_sframe_result
+    global as
+    if [info exists check_as_sframe_result] {
+	return $check_as_sframe_result
+    }
+
+    # SFrame generation needs CFI support
+    if { ![check_as_cfi] } {
+	set check_as_sframe_result 0;
+	return 0
+    }
+
+    set as_file "tmpdir/check_as_sframe.s"
+    set as_fh [open $as_file w 0666]
+    puts $as_fh "# Generated file. DO NOT EDIT"
+    puts $as_fh "\t.cfi_sections \".sframe\""
+    puts $as_fh "\t.cfi_startproc"
+    puts $as_fh "\t.cfi_endproc"
+    close $as_fh
+    remote_download host $as_file
+    verbose -log "Checking SFrame:"
+    set success [ld_assemble $as $as_file "/dev/null"]
+    #remote_file host delete $as_file
+    set check_as_sframe_result $success
+    return $success
+}
+
+proc skip_sframe_tests { } {
+# FIXME TODO
+#    global enable_libsframe
+#
+#    if {$enable_libsframe eq "no"} {
+#	return 1
+#    }
+
+    if [check_as_sframe] {
+	return 0
+    }
+
+    return 1
+}

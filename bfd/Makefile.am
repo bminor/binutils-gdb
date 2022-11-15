@@ -286,6 +286,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	elf-attrs.lo \
 	elf-eh-frame.lo \
+	elf-sframe.lo \
 	elf-ifunc.lo \
 	elf-m10200.lo \
 	elf-m10300.lo \
@@ -419,6 +420,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	elf-attrs.c \
 	elf-eh-frame.c \
+	elf-sframe.c \
 	elf-ifunc.c \
 	elf-m10200.c \
 	elf-m10300.c \
@@ -777,8 +779,8 @@ ofiles: stamp-ofiles ; @true
 # dependency tracking fragments are picked up in the Makefile.
 libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 EXTRA_libbfd_la_SOURCES = $(CFILES)
-libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS)
+libbfd_la_DEPENDENCIES = $(OFILES) ofiles ../libsframe/libsframe.la
+libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB) $(ZSTD_LIBS) ../libsframe/libsframe.la
 libbfd_la_LDFLAGS += -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build

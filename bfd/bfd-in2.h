@@ -994,6 +994,7 @@ typedef struct bfd_section
 #define SEC_INFO_TYPE_JUST_SYMS 4
 #define SEC_INFO_TYPE_TARGET    5
 #define SEC_INFO_TYPE_EH_FRAME_ENTRY 6
+#define SEC_INFO_TYPE_SFRAME  7
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;

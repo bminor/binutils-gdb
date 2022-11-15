@@ -972,6 +972,7 @@ EXTRA_ld_new_SOURCES += $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 # This is the real libbfd.a and libctf.a created by libtool.
 TESTBFDLIB = @TESTBFDLIB@
 TESTCTFLIB = @TESTCTFLIB@
+TESTSFRAMELIB = @TESTSFRAMELIB@
 
 check-DEJAGNU: site.exp
 	(cd .libs; test -e ldscripts || test ! -e ld-new || $(LN_S) ../ldscripts .)
@@ -989,6 +990,7 @@ check-DEJAGNU: site.exp
 		CXX_FOR_TARGET="$(CXX_FOR_TARGET)" \
 		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" CTFLIB="$(TESTCTFLIB) $(ZLIB)" \
+		SFRAMELIB="$(TESTSFRAMELIB)" \
 		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \
 		DO_COMPARE="`echo '$(do_compare)' | sed -e 's,\\$$,,g'`" \
 		$(RUNTESTFLAGS); \

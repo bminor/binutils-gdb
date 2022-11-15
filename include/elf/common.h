@@ -489,6 +489,7 @@
 #define PT_GNU_STACK	(PT_LOOS + 0x474e551) /* Stack flags */
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
 #define PT_GNU_PROPERTY	(PT_LOOS + 0x474e553) /* GNU property */
+#define PT_GNU_SFRAME	(PT_LOOS + 0x474e554) /* SFrame unwind information */
 
 /* OpenBSD segment types.  */
 #define PT_OPENBSD_RANDOMIZE (PT_LOOS + 0x5a3dbe6)  /* Fill with random data.  */
