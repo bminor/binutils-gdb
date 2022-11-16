@@ -24,16 +24,17 @@ if { [lsearch -exact $supported_archs "powerpc:common64"] == -1 } {
 standard_testfile
 
 set kobz2file ${srcdir}/${subdir}/cordic.ko.bz2
-set kofile [standard_output_file cordic.ko]
 set kodebugbz2file ${srcdir}/${subdir}/cordic.ko.debug.bz2
-set kodebugfile [standard_output_file cordic.ko.debug]
 
-if {[catch "system \"bzip2 -dc ${kobz2file} >${kofile}\""] != 0} {
-    untested "failed bzip2 for ${kobz2file}"
+set kofile [decompress_bz2 $kobz2file]
+if { $kofile == "" } {
+    untested "failed bzip2 for [file tail $kobz2file]"
     return -1
 }
-if {[catch "system \"bzip2 -dc ${kodebugbz2file} >${kodebugfile}\""] != 0} {
-    untested "failed bzip2 for ${kodebugbz2file}"
+
+set kodebugfile [decompress_bz2 $kodebugbz2file]
+if { $kodebugfile == "" } {
+    untested "failed bzip2 for [file tail $kodebugbz2file]"
     return -1
 }
 

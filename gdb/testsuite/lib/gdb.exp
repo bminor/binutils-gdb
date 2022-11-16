@@ -9291,5 +9291,27 @@ gdb_caching_proc have_epilogue_line_info {
     }
 }
 
+# Decompress file BZ2, and return it.
+
+proc decompress_bz2 { bz2 } {
+    set copy [standard_output_file [file tail $bz2]]
+    set copy [remote_download build $bz2 $copy]
+    if { $copy == "" } {
+	return $copy
+    }
+
+    set res [remote_exec build "bzip2" "-df $copy"]
+    if { [lindex $res 0] == -1 } {
+	return ""
+    }
+
+    set copy [regsub {.bz2$} $copy ""]
+    if { ![remote_file build exists $copy] } {
+	return ""
+    }
+
+    return $copy
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
