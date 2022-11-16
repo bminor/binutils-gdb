@@ -232,6 +232,8 @@ flonum-mult.c
 flonum.h
 frags.c
 frags.h
+gen-sframe.c
+gen-sframe.h
 hash.c
 hash.h
 input-file.c
@@ -254,6 +256,7 @@ read.h
 remap.c
 sb.c
 sb.h
+sframe-opt.c
 stabs.c
 subsegs.c
 subsegs.h
