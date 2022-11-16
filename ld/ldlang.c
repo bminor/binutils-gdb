@@ -422,6 +422,10 @@ walk_wild_section_match (lang_wild_statement_type *ptr,
 	return;
     }
 
+  /* If filename is excluded we're done.  */
+  if (walk_wild_file_in_exclude_list (ptr->exclude_name_list, file))
+    return;
+
   /* Check section name against each wildcard spec.  If there's no
      wildcard all sections match.  */
   sec = ptr->section_list;
@@ -920,9 +924,6 @@ resolve_wilds (void)
   LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
       //printf("XXX   %s\n", f->filename);
-      /* XXX if (walk_wild_file_in_exclude_list (s->exclude_name_list, f))
-	return;*/
-
       if (f->the_bfd == NULL
 	  || !bfd_check_format (f->the_bfd, bfd_archive))
 	resolve_wild_sections (f);
