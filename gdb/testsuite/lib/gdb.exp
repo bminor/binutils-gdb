@@ -9146,13 +9146,23 @@ gdb_caching_proc has_hw_wp_support {
     return $has_hw_wp_support
 }
 
-# Return a list of all the accepted values of the set command SET_CMD.
+# Return a list of all the accepted values of the set command
+# "SET_CMD SET_ARG".
+# For example get_set_option_choices "set architecture" "i386".
 
-proc get_set_option_choices {set_cmd} {
+proc get_set_option_choices { set_cmd {set_arg ""} } {
     set values {}
 
-    set cmd "complete $set_cmd "
-    set test "complete $set_cmd"
+    if { $set_arg == "" } {
+	# Add trailing space to signal that we need completion of the choices,
+	# not of set_cmd itself.
+	set cmd "complete $set_cmd "
+    } else {
+	set cmd "complete $set_cmd $set_arg"
+    }
+
+    # Set test name without trailing space.
+    set test [string trim $cmd]
 
     with_set max-completions unlimited {
 	gdb_test_multiple $cmd $test {
