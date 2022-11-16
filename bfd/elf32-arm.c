@@ -18110,6 +18110,11 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   bfd_size_type size;
   bfd *input_bfd;
 
+  if (info->strip == strip_all
+      && !info->emitrelocations
+      && !bfd_link_relocatable (info))
+    return true;
+
   htab = elf32_arm_hash_table (info);
   if (htab == NULL)
     return false;

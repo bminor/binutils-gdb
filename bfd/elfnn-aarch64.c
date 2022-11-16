@@ -8476,6 +8476,11 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
   output_arch_syminfo osi;
   struct elf_aarch64_link_hash_table *htab;
 
+  if (info->strip == strip_all
+      && !info->emitrelocations
+      && !bfd_link_relocatable (info))
+    return true;
+
   htab = elf_aarch64_hash_table (info);
 
   osi.finfo = finfo;

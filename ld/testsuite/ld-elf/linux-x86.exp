@@ -203,6 +203,21 @@ run_ld_link_exec_tests [list \
     ] \
 ]
 
+# Run-time tests which require working ifunc attribute support.
+if { [check_ifunc_attribute_available] } {
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run pr29797" \
+	    "-s" \
+	    "" \
+	    { pr29797.c } \
+	    "pr29797" \
+	    "pass.out" \
+	    "-O0" \
+	] \
+    ]
+}
+
 # Old gcc silently ignores __attribute__ ((aligned())) with too big alignment.
 proc compiler_honours_aligned { } {
     global CC_FOR_TARGET READELF srcdir subdir
