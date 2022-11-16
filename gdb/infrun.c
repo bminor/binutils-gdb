@@ -3605,14 +3605,6 @@ infrun_thread_stop_requested (ptid_t ptid)
     }
 }
 
-static void
-infrun_thread_thread_exit (struct thread_info *tp, int silent)
-{
-  if (target_last_proc_target == tp->inf->process_target ()
-      && target_last_wait_ptid == tp->ptid)
-    nullify_last_target_wait_ptid ();
-}
-
 /* Delete the step resume, single-step and longjmp/exception resume
    breakpoints of TP.  */
 
@@ -9966,7 +9958,6 @@ enabled by default on some platforms."),
 					      "infrun");
   gdb::observers::thread_stop_requested.attach (infrun_thread_stop_requested,
 						"infrun");
-  gdb::observers::thread_exit.attach (infrun_thread_thread_exit, "infrun");
   gdb::observers::inferior_exit.attach (infrun_inferior_exit, "infrun");
   gdb::observers::inferior_execd.attach (infrun_inferior_execd, "infrun");
 
