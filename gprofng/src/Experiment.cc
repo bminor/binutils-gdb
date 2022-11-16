@@ -1370,6 +1370,7 @@ Experiment::Experiment ()
   expt_name = NULL;
   arch_name = NULL;
   fndr_arch_name = NULL;
+  dyntext_name = NULL;
   logFile = NULL;
 
   dataDscrs = new Vector<DataDescriptor*>;
@@ -1432,6 +1433,7 @@ Experiment::~Experiment ()
   free (expt_name);
   free (arch_name);
   free (fndr_arch_name);
+  free (dyntext_name);
   delete jthreads_idx;
   delete cstack;
   delete cstackShowHide;
@@ -6052,11 +6054,10 @@ Experiment::fetch_pprocq ()
 int
 Experiment::read_dyntext_file ()
 {
-  char *data_file_name = dbe_sprintf ("%s/%s", expt_name, SP_DYNTEXT_FILE);
-  Data_window *dwin = new Data_window (data_file_name);
+  dyntext_name = dbe_sprintf ("%s/%s", expt_name, SP_DYNTEXT_FILE);
+  Data_window *dwin = new Data_window (dyntext_name);
   if (dwin->not_opened ())
     {
-      free (data_file_name);
       delete dwin;
       return 1;
     }
@@ -6089,7 +6090,7 @@ Experiment::read_dyntext_file ()
 	case DT_CODE:
 	  if (fp)
 	    {
-	      fp->img_fname = data_file_name;
+	      fp->img_fname = dyntext_name;
 	      fp->img_offset = offset + sizeof (DT_common);
 	      if ((platform != Intel) && (platform != Amd64))
 		{ //ARCH(SPARC)
@@ -6178,7 +6179,6 @@ Experiment::read_dyntext_file ()
       offset += cpcktsize;
     }
   free (progress_msg);
-  free (data_file_name);
   delete dwin;
   return 0;
 }
