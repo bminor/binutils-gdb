@@ -85,6 +85,20 @@ static const char * const task_states[] = {
   N_("Selective Wait")
 };
 
+/* Return a string representing the task state.  */
+static const char *
+get_state (unsigned value)
+{
+  if (value >= 0
+      && value <= ARRAY_SIZE (task_states)
+      && task_states[value][0] != '\0')
+    return _(task_states[value]);
+
+  static char buffer[100];
+  xsnprintf (buffer, sizeof (buffer), _("Unknown task state: %d"), value);
+  return buffer;
+}
+
 /* A longer description corresponding to each possible task state.  */
 static const char * const long_task_states[] = {
   N_("Unactivated"),
@@ -106,6 +120,21 @@ static const char * const long_task_states[] = {
   N_("Activating"),
   N_("Blocked in selective wait statement")
 };
+
+/* Return a string representing the task state.  This uses the long
+   descriptions.  */
+static const char *
+get_long_state (unsigned value)
+{
+  if (value >= 0
+      && value <= ARRAY_SIZE (long_task_states)
+      && long_task_states[value][0] != '\0')
+    return _(long_task_states[value]);
+
+  static char buffer[100];
+  xsnprintf (buffer, sizeof (buffer), _("Unknown task state: %d"), value);
+  return buffer;
+}
 
 /* The index of certain important fields in the Ada Task Control Block
    record and sub-records.  */
@@ -1182,7 +1211,7 @@ print_ada_task_info (struct ui_out *uiout,
 			  get_task_number_from_id (task_info->called_task,
 						   inf));
       else
-	uiout->field_string ("state", task_states[task_info->state]);
+	uiout->field_string ("state", get_state (task_info->state));
 
       /* Finally, print the task name, without quotes around it, as mi like
 	 is not expecting quotes, and in non mi-like no need for quotes
@@ -1276,7 +1305,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 		    target_taskno);
       }
     else
-      gdb_printf (_("State: %s"), _(long_task_states[task_info->state]));
+      gdb_printf (_("State: %s"), get_long_state (task_info->state));
 
     if (target_taskno)
       {
