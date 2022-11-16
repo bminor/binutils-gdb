@@ -291,6 +291,10 @@ go32exe_check_format (bfd *abfd)
   if (last_page_size != 0)
     stubsize += last_page_size - 512;
 
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  if (filesize != 0 && stubsize > filesize)
+    goto fail_format;
+
   /* Save now the stub to be used later.  Put the stub data to a temporary
      location first as tdata still does not exist.  It may not even
      be ever created if we are just checking the file format of ABFD.  */
