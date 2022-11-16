@@ -106,7 +106,7 @@ foreach symbol {__stack_user stack_used} {
 }
 
 if {"$core0file" != ""} {
-    gdb_test "gcore $core0file" "Saved corefile .*" "save a zeroed-threads corefile"
+    gdb_gcore_cmd $core0file "save a zeroed-threads corefile"
 }
 
 
