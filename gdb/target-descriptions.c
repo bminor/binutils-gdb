@@ -945,7 +945,24 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
     {
       /* First check for a predefined or target defined type.  */
       if (reg->tdesc_type)
-	arch_reg->type = make_gdb_type (gdbarch, reg->tdesc_type);
+	{
+	  if ((reg->type == "code_ptr" || reg->type == "data_ptr")
+	      && reg->bitsize != gdbarch_ptr_bit (gdbarch))
+	    {
+	      if (reg->bitsize == gdbarch_long_bit (gdbarch))
+		arch_reg->type = builtin_type (gdbarch)->builtin_long;
+	      else if (reg->bitsize == gdbarch_capability_bit (gdbarch))
+		arch_reg->type = builtin_type (gdbarch)->builtin_data_capability;
+	      else
+		{
+		  warning (_("Register \"%s\" has an unsupported size (%d bits)"),
+			   reg->name.c_str (), reg->bitsize);
+		  arch_reg->type = builtin_type (gdbarch)->builtin_data_ptr;
+		}
+	    }
+	  else
+	    arch_reg->type = make_gdb_type (gdbarch, reg->tdesc_type);
+	}
 
       /* Next try size-sensitive type shortcuts.  */
       else if (reg->type == "float")
