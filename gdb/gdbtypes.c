@@ -377,6 +377,8 @@ make_pointer_type (struct type *type, struct type **typeptr)
   ntype->set_tagged (gdbarch_ptr_bit (type->arch ())
 		     == gdbarch_capability_bit (type->arch ()));
   ntype->set_code (TYPE_CODE_PTR);
+  if (ntype->is_tagged ())
+    ntype->set_instance_flags (TYPE_INSTANCE_FLAG_CAPABILITY);
 
   /* Mark pointers as unsigned.  The target converts between pointers
      and addresses (CORE_ADDRs) using gdbarch_pointer_to_address and
@@ -389,6 +391,12 @@ make_pointer_type (struct type *type, struct type **typeptr)
     {
       TYPE_LENGTH (chain) = TYPE_LENGTH (ntype);
       chain->set_tagged (ntype->is_tagged ());
+      if (ntype->is_tagged ())
+	chain->set_instance_flags (chain->instance_flags ()
+				   | TYPE_INSTANCE_FLAG_CAPABILITY);
+      else
+	chain->set_instance_flags (chain->instance_flags ()
+				   & ~TYPE_INSTANCE_FLAG_CAPABILITY);
       chain = TYPE_CHAIN (chain);
     }
 
