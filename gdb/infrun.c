@@ -152,8 +152,18 @@ show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
 /* proceed and normal_stop use this to notify the user when the
    inferior stopped in a different thread than it had been running
    in.  */
+static thread_info_ref previous_thread;
 
-static ptid_t previous_inferior_ptid;
+/* See infrun.h.  */
+
+void
+update_previous_thread ()
+{
+  if (inferior_ptid == null_ptid)
+    previous_thread = nullptr;
+  else
+    previous_thread = thread_info_ref::new_reference (inferior_thread ());
+}
 
 /* If set (default for legacy reasons), when following a fork, GDB
    will detach from one of the fork branches, child or parent.
@@ -3151,7 +3161,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
     }
 
   /* We'll update this if & when we switch to a new thread.  */
-  previous_inferior_ptid = inferior_ptid;
+  update_previous_thread ();
 
   regcache = get_current_regcache ();
   gdbarch = regcache->arch ();
@@ -3434,7 +3444,7 @@ init_wait_for_inferior (void)
 
   nullify_last_target_wait_ptid ();
 
-  previous_inferior_ptid = inferior_ptid;
+  update_previous_thread ();
 }
 
 
@@ -8704,21 +8714,24 @@ normal_stop ()
      the current thread back to the thread the user had selected right
      after this event is handled, so we're not really switching, only
      informing of a stop.  */
-  if (!non_stop
-      && previous_inferior_ptid != inferior_ptid
-      && target_has_execution ()
-      && last.kind () != TARGET_WAITKIND_SIGNALLED
-      && last.kind () != TARGET_WAITKIND_EXITED
-      && last.kind () != TARGET_WAITKIND_NO_RESUMED)
+  if (!non_stop)
     {
-      SWITCH_THRU_ALL_UIS ()
+      if ((last.kind () != TARGET_WAITKIND_SIGNALLED
+	   && last.kind () != TARGET_WAITKIND_EXITED
+	   && last.kind () != TARGET_WAITKIND_NO_RESUMED)
+	  && target_has_execution ()
+	  && previous_thread != inferior_thread ())
 	{
-	  target_terminal::ours_for_output ();
-	  gdb_printf (_("[Switching to %s]\n"),
-		      target_pid_to_str (inferior_ptid).c_str ());
-	  annotate_thread_changed ();
+	  SWITCH_THRU_ALL_UIS ()
+	    {
+	      target_terminal::ours_for_output ();
+	      gdb_printf (_("[Switching to %s]\n"),
+			  target_pid_to_str (inferior_ptid).c_str ());
+	      annotate_thread_changed ();
+	    }
 	}
-      previous_inferior_ptid = inferior_ptid;
+
+      update_previous_thread ();
     }
 
   if (last.kind () == TARGET_WAITKIND_NO_RESUMED)
