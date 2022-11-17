@@ -150,8 +150,9 @@ show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
 }
 
 /* proceed and normal_stop use this to notify the user when the
-   inferior stopped in a different thread than it had been running
-   in.  */
+   inferior stopped in a different thread than it had been running in.
+   It can also be used to find for which thread normal_stop last
+   reported a stop.  */
 static thread_info_ref previous_thread;
 
 /* See infrun.h.  */
@@ -163,6 +164,14 @@ update_previous_thread ()
     previous_thread = nullptr;
   else
     previous_thread = thread_info_ref::new_reference (inferior_thread ());
+}
+
+/* See infrun.h.  */
+
+thread_info *
+get_previous_thread ()
+{
+  return previous_thread.get ();
 }
 
 /* If set (default for legacy reasons), when following a fork, GDB

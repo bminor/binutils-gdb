@@ -121,6 +121,9 @@ extern enum exec_direction_kind execution_direction;
    inferior_thread, or at nullptr, if there's no selected thread.  */
 extern void update_previous_thread ();
 
+/* Get a weak reference to 'previous_thread'.  */
+extern thread_info *get_previous_thread ();
+
 extern void start_remote (int from_tty);
 
 /* Clear out all variables saying what to do when inferior is
