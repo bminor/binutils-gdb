@@ -141,8 +141,8 @@ public:
   bool info_proc (const char *, enum info_proc_what) override;
 
 #if PR_MODEL_NATIVE == PR_MODEL_LP64
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+  int auxv_parse (const gdb_byte **readptr,
+		  const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
 #endif
 
@@ -169,11 +169,12 @@ static procfs_target the_procfs_target;
    is presented in 64-bit format.  We need to provide a custom parser
    to handle that.  */
 int
-procfs_target::auxv_parse (gdb_byte **readptr,
-			   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+procfs_target::auxv_parse (const gdb_byte **readptr,
+			   const gdb_byte *endptr, CORE_ADDR *typep,
+			   CORE_ADDR *valp)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
+  const gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;
@@ -559,15 +560,7 @@ enum { NOKILL, KILL };
 static void
 dead_procinfo (procinfo *pi, const char *msg, int kill_p)
 {
-  char procfile[80];
-
-  if (pi->pathname)
-    print_sys_errmsg (pi->pathname, errno);
-  else
-    {
-      xsnprintf (procfile, sizeof (procfile), "process %d", pi->pid);
-      print_sys_errmsg (procfile, errno);
-    }
+  print_sys_errmsg (pi->pathname, errno);
   if (kill_p == KILL)
     kill (pi->pid, SIGKILL);
 
@@ -2813,7 +2806,7 @@ procfs_target::create_inferior (const char *exec_file,
 	    len = p1 - p;
 	  else
 	    len = strlen (p);
-	  strncpy (tryname, p, len);
+	  memcpy (tryname, p, len);
 	  tryname[len] = '\0';
 	  strcat (tryname, "/");
 	  strcat (tryname, shell_file);
@@ -3170,6 +3163,7 @@ find_memory_regions_callback (struct prmap *map,
 		  (map->pr_mflags & MA_WRITE) != 0,
 		  (map->pr_mflags & MA_EXEC) != 0,
 		  1, /* MODIFIED is unknown, pass it as true.  */
+		  false,
 		  data);
 }
 
