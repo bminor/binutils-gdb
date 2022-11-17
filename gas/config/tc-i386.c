@@ -464,6 +464,16 @@ static const struct RC_name RC_NamesTable[] =
   {  saeonly,  STRING_COMMA_LEN ("sae") },
 };
 
+/* To be indexed by segment register number.  */
+static const unsigned char i386_seg_prefixes[] = {
+  ES_PREFIX_OPCODE,
+  CS_PREFIX_OPCODE,
+  SS_PREFIX_OPCODE,
+  DS_PREFIX_OPCODE,
+  FS_PREFIX_OPCODE,
+  GS_PREFIX_OPCODE
+};
+
 /* List of chars besides those in app.c:symbol_chars that can start an
    operand.  Used to prevent the scrubber eating vital white-space.  */
 const char extra_symbol_chars[] = "*%-([{}"

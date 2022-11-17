@@ -1014,4 +1014,3 @@ reg_entry;
 
 extern const reg_entry i386_regtab[];
 extern const unsigned int i386_regtab_size;
-extern const unsigned char i386_seg_prefixes[6];
