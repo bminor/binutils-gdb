@@ -389,24 +389,28 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       ui_file *logfile_p = logfile.get ();
       m_saved_output->file_to_delete = std::move (logfile);
 
-      /* If something is not being redirected, then a tee containing both the
-	 logfile and stdout.  */
-      ui_file *tee = nullptr;
-      if (!logging_redirect || !debug_redirect)
+      /* The new stdout and stderr only depend on whether logging
+	 redirection is being done.  */
+      ui_file *new_stdout = logfile_p;
+      ui_file *new_stderr = logfile_p;
+      if (!logging_redirect)
 	{
 	  m_saved_output->tee_to_delete.reset
 	    (new tee_file (gdb_stdout, logfile_p));
-	  tee = m_saved_output->tee_to_delete.get ();
+	  new_stdout = m_saved_output->tee_to_delete.get ();
+	  m_saved_output->stderr_to_delete.reset
+	    (new tee_file (gdb_stderr, logfile_p));
+	  new_stderr = m_saved_output->stderr_to_delete.get ();
 	}
 
       m_saved_output->log_to_delete.reset
-	(new timestamped_file (debug_redirect ? logfile_p : tee));
+	(new timestamped_file (debug_redirect ? logfile_p : new_stderr));
 
-      gdb_stdout = logging_redirect ? logfile_p : tee;
+      gdb_stdout = new_stdout;
       gdb_stdlog = m_saved_output->log_to_delete.get ();
-      gdb_stderr = logging_redirect ? logfile_p : tee;
-      gdb_stdtarg = logging_redirect ? logfile_p : tee;
-      gdb_stdtargerr = logging_redirect ? logfile_p : tee;
+      gdb_stderr = new_stderr;
+      gdb_stdtarg = new_stderr;
+      gdb_stdtargerr = new_stderr;
     }
   else
     {
