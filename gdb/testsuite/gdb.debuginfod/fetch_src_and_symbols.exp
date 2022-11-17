@@ -15,7 +15,7 @@
 
 # Test debuginfod functionality
 
-standard_testfile main.c
+standard_testfile
 
 load_lib dwarf.exp
 load_lib debuginfod-support.exp
