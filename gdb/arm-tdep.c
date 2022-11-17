@@ -3964,6 +3964,18 @@ struct frame_base arm_normal_base = {
   arm_normal_frame_base
 };
 
+struct arm_dwarf2_prev_register_cache
+{
+  /* Cached value of the coresponding stack pointer for the inner frame.  */
+  CORE_ADDR sp;
+  CORE_ADDR msp;
+  CORE_ADDR msp_s;
+  CORE_ADDR msp_ns;
+  CORE_ADDR psp;
+  CORE_ADDR psp_s;
+  CORE_ADDR psp_ns;
+};
+
 static struct value *
 arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
 			  int regnum)
@@ -3972,6 +3984,49 @@ arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   CORE_ADDR lr;
   ULONGEST cpsr;
+  arm_dwarf2_prev_register_cache *cache
+    = ((arm_dwarf2_prev_register_cache *)
+       dwarf2_frame_get_fn_data (this_frame, this_cache,
+				 arm_dwarf2_prev_register));
+
+  if (!cache)
+    {
+      const unsigned int size = sizeof (struct arm_dwarf2_prev_register_cache);
+      cache = ((arm_dwarf2_prev_register_cache *)
+	       dwarf2_frame_allocate_fn_data (this_frame, this_cache,
+					      arm_dwarf2_prev_register, size));
+
+      if (tdep->have_sec_ext)
+	{
+	  cache->sp
+	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+
+	  cache->msp_s
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_s_regnum);
+	  cache->msp_ns
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_ns_regnum);
+	  cache->psp_s
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_s_regnum);
+	  cache->psp_ns
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_ns_regnum);
+	}
+      else if (tdep->is_m)
+	{
+	  cache->sp
+	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+
+	  cache->msp
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_regnum);
+	  cache->psp
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_regnum);
+	}
+    }
 
   if (regnum == ARM_PC_REGNUM)
     {
@@ -4011,33 +4066,18 @@ arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
 
       if (tdep->have_sec_ext)
 	{
-	  CORE_ADDR sp
-	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
-	  CORE_ADDR msp_s
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_msp_s_regnum);
-	  CORE_ADDR msp_ns
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_msp_ns_regnum);
-	  CORE_ADDR psp_s
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_psp_s_regnum);
-	  CORE_ADDR psp_ns
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_psp_ns_regnum);
-
 	  bool is_msp = (regnum == tdep->m_profile_msp_regnum)
-	    && (msp_s == sp || msp_ns == sp);
+	    && (cache->msp_s == cache->sp || cache->msp_ns == cache->sp);
 	  bool is_msp_s = (regnum == tdep->m_profile_msp_s_regnum)
-	    && (msp_s == sp);
+	    && (cache->msp_s == cache->sp);
 	  bool is_msp_ns = (regnum == tdep->m_profile_msp_ns_regnum)
-	    && (msp_ns == sp);
+	    && (cache->msp_ns == cache->sp);
 	  bool is_psp = (regnum == tdep->m_profile_psp_regnum)
-	    && (psp_s == sp || psp_ns == sp);
+	    && (cache->psp_s == cache->sp || cache->psp_ns == cache->sp);
 	  bool is_psp_s = (regnum == tdep->m_profile_psp_s_regnum)
-	    && (psp_s == sp);
+	    && (cache->psp_s == cache->sp);
 	  bool is_psp_ns = (regnum == tdep->m_profile_psp_ns_regnum)
-	    && (psp_ns == sp);
+	    && (cache->psp_ns == cache->sp);
 
 	  override_with_sp_value = is_msp || is_msp_s || is_msp_ns
 	    || is_psp || is_psp_s || is_psp_ns;
@@ -4045,17 +4085,10 @@ arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
 	}
       else if (tdep->is_m)
 	{
-	  CORE_ADDR sp
-	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
-	  CORE_ADDR msp
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_msp_regnum);
-	  CORE_ADDR psp
-	    = get_frame_register_unsigned (this_frame,
-					   tdep->m_profile_psp_regnum);
-
-	  bool is_msp = (regnum == tdep->m_profile_msp_regnum) && (sp == msp);
-	  bool is_psp = (regnum == tdep->m_profile_psp_regnum) && (sp == psp);
+	  bool is_msp = (regnum == tdep->m_profile_msp_regnum)
+	    && (cache->sp == cache->msp);
+	  bool is_psp = (regnum == tdep->m_profile_psp_regnum)
+	    && (cache->sp == cache->psp);
 
 	  override_with_sp_value = is_msp || is_psp;
 	}
