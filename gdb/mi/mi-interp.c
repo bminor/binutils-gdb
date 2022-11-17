@@ -1275,21 +1275,16 @@ mi_interp::set_logging (ui_file_up logfile, bool logging_redirect,
     {
       mi->saved_raw_stdout = mi->raw_stdout;
 
-      /* If something is being redirected, then grab logfile.  */
-      ui_file *logfile_p = nullptr;
-      if (logging_redirect || debug_redirect)
-	{
-	  logfile_p = logfile.get ();
-	  mi->saved_raw_file_to_delete = logfile_p;
-	}
+      ui_file *logfile_p = logfile.get ();
+      mi->saved_raw_file_to_delete = logfile.release ();
 
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
       ui_file *tee = nullptr;
       if (!logging_redirect || !debug_redirect)
 	{
-	  tee = new tee_file (mi->raw_stdout, std::move (logfile));
-	  mi->saved_raw_file_to_delete = tee;
+	  tee = new tee_file (mi->raw_stdout, logfile_p);
+	  mi->saved_tee_to_delete = tee;
 	}
 
       mi->raw_stdout = logging_redirect ? logfile_p : tee;
@@ -1297,9 +1292,11 @@ mi_interp::set_logging (ui_file_up logfile, bool logging_redirect,
   else
     {
       delete mi->saved_raw_file_to_delete;
+      delete mi->saved_tee_to_delete;
       mi->raw_stdout = mi->saved_raw_stdout;
       mi->saved_raw_stdout = nullptr;
       mi->saved_raw_file_to_delete = nullptr;
+      mi->saved_tee_to_delete = nullptr;
     }
 
   mi->out->set_raw (mi->raw_stdout);

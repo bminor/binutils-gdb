@@ -384,9 +384,9 @@ stderr_file::stderr_file (FILE *stream)
 
 
 
-tee_file::tee_file (ui_file *one, ui_file_up &&two)
+tee_file::tee_file (ui_file *one, ui_file *two)
   : m_one (one),
-    m_two (std::move (two))
+    m_two (two)
 {}
 
 tee_file::~tee_file ()

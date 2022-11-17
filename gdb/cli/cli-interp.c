@@ -386,17 +386,18 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       m_saved_output->targ = gdb_stdtarg;
       m_saved_output->targerr = gdb_stdtargerr;
 
+      ui_file *logfile_p = logfile.get ();
+      m_saved_output->file_to_delete = std::move (logfile);
+
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
-      ui_file *logfile_p = logfile.get ();
       ui_file *tee = nullptr;
       if (!logging_redirect || !debug_redirect)
 	{
-	  tee = new tee_file (gdb_stdout, std::move (logfile));
-	  m_saved_output->file_to_delete.reset (tee);
+	  m_saved_output->tee_to_delete.reset
+	    (new tee_file (gdb_stdout, logfile_p));
+	  tee = m_saved_output->tee_to_delete.get ();
 	}
-      else
-	m_saved_output->file_to_delete = std::move (logfile);
 
       m_saved_output->log_to_delete.reset
 	(new timestamped_file (debug_redirect ? logfile_p : tee));

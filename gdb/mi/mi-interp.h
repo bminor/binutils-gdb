@@ -57,7 +57,7 @@ public:
      done.  */
   struct ui_file *saved_raw_stdout;
   struct ui_file *saved_raw_file_to_delete;
-
+  struct ui_file *saved_tee_to_delete;
 
   /* MI's builder.  */
   struct ui_out *mi_uiout;

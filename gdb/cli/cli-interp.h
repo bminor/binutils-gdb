@@ -41,6 +41,7 @@ private:
     ui_file *log;
     ui_file *targ;
     ui_file *targerr;
+    ui_file_up tee_to_delete;
     ui_file_up file_to_delete;
     ui_file_up log_to_delete;
   };
