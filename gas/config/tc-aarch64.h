@@ -239,6 +239,27 @@ struct aarch64_segment_info_type
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP              1
 
+/* CFI hooks.  */
+#define tc_regname_to_dw2regnum            tc_aarch64_regname_to_dw2regnum
+#define tc_cfi_frame_initial_instructions  tc_aarch64_frame_initial_instructions
+
+extern void aarch64_after_parse_args (void);
+#define md_after_parse_args() aarch64_after_parse_args ()
+
+# define EXTERN_FORCE_RELOC 			1
+# define tc_fix_adjustable(FIX) 		1
+
+/* Values passed to md_apply_fix don't include the symbol value.  */
+# define MD_APPLY_SYM_VALUE(FIX) 		0
+
+#else /* Neither OBJ_ELF nor OBJ_COFF.  */
+
+#define GLOBAL_OFFSET_TABLE_NAME "__GLOBAL_OFFSET_TABLE_"
+
+#endif /*  OBJ_ELF || OBJ_COFF.  */
+
+#ifdef OBJ_ELF
+
 /* Whether SFrame unwind info is supported.  */
 extern bool aarch64_support_sframe_p (void);
 #define support_sframe_p aarch64_support_sframe_p
@@ -268,25 +289,7 @@ extern offsetT aarch64_sframe_cfa_ra_offset (void);
 unsigned char aarch64_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch aarch64_sframe_get_abi_arch
 
-/* CFI hooks.  */
-#define tc_regname_to_dw2regnum            tc_aarch64_regname_to_dw2regnum
-#define tc_cfi_frame_initial_instructions  tc_aarch64_frame_initial_instructions
-
-extern void aarch64_after_parse_args (void);
-#define md_after_parse_args() aarch64_after_parse_args ()
-
-#else /* Not OBJ_ELF.  */
-#define GLOBAL_OFFSET_TABLE_NAME "__GLOBAL_OFFSET_TABLE_"
-#endif
-
-#if defined OBJ_ELF || defined OBJ_COFF
-
-# define EXTERN_FORCE_RELOC 			1
-# define tc_fix_adjustable(FIX) 		1
-/* Values passed to md_apply_fix don't include the symbol value.  */
-# define MD_APPLY_SYM_VALUE(FIX) 		0
-
-#endif
+#endif /* OBJ_ELF  */
 
 #define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)
 
