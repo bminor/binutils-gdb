@@ -706,6 +706,15 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   return false;
 }
 
+/* Set the last target status as TP having stopped.  */
+
+static void
+set_last_target_status_stopped (thread_info *tp)
+{
+  set_last_target_status (tp->inf->process_target (), tp->ptid,
+			  target_waitstatus {}.set_stopped (GDB_SIGNAL_0));
+}
+
 /* Tell the target to follow the fork we're stopped at.  Returns true
    if the inferior should be resumed; false, if the target for some
    reason decided it's best not to resume.  */
@@ -730,32 +739,33 @@ follow_fork ()
 
   if (!non_stop)
     {
-      process_stratum_target *wait_target;
-      ptid_t wait_ptid;
-      struct target_waitstatus wait_status;
+      thread_info *cur_thr = inferior_thread ();
 
-      /* Get the last target status returned by target_wait().  */
-      get_last_target_status (&wait_target, &wait_ptid, &wait_status);
+      ptid_t resume_ptid
+	= user_visible_resume_ptid (cur_thr->control.stepping_command);
+      process_stratum_target *resume_target
+	= user_visible_resume_target (resume_ptid);
 
-      /* If not stopped at a fork event, then there's nothing else to
-	 do.  */
-      if (wait_status.kind () != TARGET_WAITKIND_FORKED
-	  && wait_status.kind () != TARGET_WAITKIND_VFORKED)
-	return 1;
-
-      /* Check if we switched over from WAIT_PTID, since the event was
-	 reported.  */
-      if (wait_ptid != minus_one_ptid
-	  && (current_inferior ()->process_target () != wait_target
-	      || inferior_ptid != wait_ptid))
+      /* Check if there's a thread that we're about to resume, other
+	 than the current, with an unfollowed fork/vfork.  If so,
+	 switch back to it, to tell the target to follow it (in either
+	 direction).  We'll afterwards refuse to resume, and inform
+	 the user what happened.  */
+      for (thread_info *tp : all_non_exited_threads (resume_target,
+						     resume_ptid))
 	{
-	  /* We did.  Switch back to WAIT_PTID thread, to tell the
-	     target to follow it (in either direction).  We'll
-	     afterwards refuse to resume, and inform the user what
-	     happened.  */
-	  thread_info *wait_thread = find_thread_ptid (wait_target, wait_ptid);
-	  switch_to_thread (wait_thread);
-	  should_resume = false;
+	  if (tp == cur_thr)
+	    continue;
+
+	  if (tp->pending_follow.kind () != TARGET_WAITKIND_SPURIOUS)
+	    {
+	      infrun_debug_printf ("need to follow-fork [%s] first",
+				   tp->ptid.to_string ().c_str ());
+
+	      switch_to_thread (tp);
+	      should_resume = false;
+	      break;
+	    }
 	}
     }
 
@@ -819,21 +829,16 @@ follow_fork ()
 	  }
 	else
 	  {
-	    /* This makes sure we don't try to apply the "Switched
-	       over from WAIT_PID" logic above.  */
-	    nullify_last_target_wait_ptid ();
-
 	    /* If we followed the child, switch to it...  */
 	    if (follow_child)
 	      {
-		thread_info *child_thr = find_thread_ptid (parent_targ, child);
-		switch_to_thread (child_thr);
+		tp = find_thread_ptid (parent_targ, child);
+		switch_to_thread (tp);
 
 		/* ... and preserve the stepping state, in case the
 		   user was stepping over the fork call.  */
 		if (should_resume)
 		  {
-		    tp = inferior_thread ();
 		    tp->control.step_resume_breakpoint
 		      = step_resume_breakpoint;
 		    tp->control.step_range_start = step_range_start;
@@ -872,6 +877,8 @@ follow_fork ()
       break;
     }
 
+  if (!should_resume)
+    set_last_target_status_stopped (tp);
   return should_resume;
 }
 
