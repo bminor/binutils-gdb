@@ -372,8 +372,12 @@ make_output_phdrs (bfd *obfd, asection *osec)
   bfd_record_phdr (obfd, p_type, 1, p_flags, 0, 0, 0, 0, 1, &osec);
 }
 
-/* find_memory_region_ftype implementation.  DATA is 'bfd *' for the core file
-   GDB is creating.  */
+/* find_memory_region_ftype implementation.
+
+   MEMORY_TAGGED is true if the memory region contains memory tags, false
+   otherwise.
+
+   DATA is 'bfd *' for the core file GDB is creating.  */
 
 static int
 gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
@@ -462,6 +466,10 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 }
 
 /* gdbarch_find_memory_region callback for creating a memory tag section.
+
+   MEMORY_TAGGED is true if the memory region contains memory tags, false
+   otherwise.
+
    DATA is 'bfd *' for the core file GDB is creating.  */
 
 static int

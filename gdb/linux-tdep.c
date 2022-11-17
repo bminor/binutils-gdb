@@ -1695,7 +1695,10 @@ struct linux_make_mappings_data
 static linux_find_memory_region_ftype linux_make_mappings_callback;
 
 /* A callback for linux_find_memory_regions_full that updates the
-   mappings data for linux_make_mappings_corefile_notes.  */
+   mappings data for linux_make_mappings_corefile_notes.
+
+   MEMORY_TAGGED is true if the memory region contains memory tags, false
+   otherwise.  */
 
 static int
 linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
