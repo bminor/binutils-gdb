@@ -468,7 +468,11 @@ make_reference_type (struct type *type, struct type **typeptr,
      pointers!  */
 
   TYPE_LENGTH (ntype) = gdbarch_ptr_bit (type->arch ()) / TARGET_CHAR_BIT;
+  ntype->set_tagged (gdbarch_ptr_bit (type->arch ())
+		     == gdbarch_capability_bit (type->arch ()));
   ntype->set_code (refcode);
+  if (ntype->is_tagged ())
+    ntype->set_instance_flags (TYPE_INSTANCE_FLAG_CAPABILITY);
 
   *reftype = ntype;
 
@@ -477,6 +481,13 @@ make_reference_type (struct type *type, struct type **typeptr,
   while (chain != ntype)
     {
       TYPE_LENGTH (chain) = TYPE_LENGTH (ntype);
+      chain->set_tagged (ntype->is_tagged ());
+      if (ntype->is_tagged ())
+	chain->set_instance_flags (chain->instance_flags ()
+				   | TYPE_INSTANCE_FLAG_CAPABILITY);
+      else
+	chain->set_instance_flags (chain->instance_flags ()
+				   & ~TYPE_INSTANCE_FLAG_CAPABILITY);
       chain = TYPE_CHAIN (chain);
     }
 
@@ -1641,6 +1652,10 @@ smash_to_memberptr_type (struct type *type, struct type *self_type,
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
   TYPE_LENGTH (type) = gdbarch_ptr_bit (to_type->arch ()) / TARGET_CHAR_BIT;
+  type->set_tagged (gdbarch_ptr_bit (to_type->arch ())
+		    == gdbarch_capability_bit (to_type->arch ()));
+  if (type->is_tagged ())
+    type->set_instance_flags (TYPE_INSTANCE_FLAG_CAPABILITY);
 }
 
 /* Smash TYPE to be a type of pointer to methods type TO_TYPE.
@@ -1657,6 +1672,8 @@ smash_to_methodptr_type (struct type *type, struct type *to_type)
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, TYPE_SELF_TYPE (to_type));
   TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
+  type->set_contains_capability (gdbarch_ptr_bit (to_type->arch())
+				 == gdbarch_capability_bit (to_type->arch ()));
 }
 
 /* Smash TYPE to be a type of method of SELF_TYPE with type TO_TYPE.
