@@ -93,7 +93,7 @@ tui_register_format (frame_info_ptr frame, int regnum)
   tab_expansion_file stream;
 
   scoped_restore save_pagination
-    = make_scoped_restore (&pagination_enabled, 0);
+    = make_scoped_restore (&pagination_enabled, false);
   scoped_restore save_stdout
     = make_scoped_restore (&gdb_stdout, &stream);
 
