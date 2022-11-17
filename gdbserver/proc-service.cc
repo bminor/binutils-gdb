@@ -158,5 +158,5 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prfpregset_t *fpregs
 pid_t
 ps_getpid (gdb_ps_prochandle_t ph)
 {
-  return pid_of (current_thread);
+  return current_process ()->pid;
 }
