@@ -32,6 +32,22 @@ public:
 		    bool debug_redirect) override;
   void pre_command_loop () override;
   bool supports_command_editing () override;
+
+private:
+  struct saved_output_files
+  {
+    ui_file *out;
+    ui_file *err;
+    ui_file *log;
+    ui_file *targ;
+    ui_file *targerr;
+    ui_file_up file_to_delete;
+    ui_file_up log_to_delete;
+  };
+
+  /* These hold the pushed copies of the gdb output files.  If NULL
+     then nothing has yet been pushed.  */
+  std::unique_ptr<saved_output_files> m_saved_output;
 };
 
 /* Returns true if the current stop should be printed to

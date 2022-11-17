@@ -370,20 +370,6 @@ cli_interp::interp_ui_out ()
   return m_cli_uiout.get ();
 }
 
-/* These hold the pushed copies of the gdb output files.
-   If NULL then nothing has yet been pushed.  */
-struct saved_output_files
-{
-  ui_file *out;
-  ui_file *err;
-  ui_file *log;
-  ui_file *targ;
-  ui_file *targerr;
-  ui_file_up file_to_delete;
-  ui_file_up log_to_delete;
-};
-static std::unique_ptr<saved_output_files> saved_output;
-
 /* See cli-interp.h.  */
 
 void
@@ -392,12 +378,13 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
 {
   if (logfile != nullptr)
     {
-      saved_output.reset (new saved_output_files);
-      saved_output->out = gdb_stdout;
-      saved_output->err = gdb_stderr;
-      saved_output->log = gdb_stdlog;
-      saved_output->targ = gdb_stdtarg;
-      saved_output->targerr = gdb_stdtargerr;
+      gdb_assert (m_saved_output == nullptr);
+      m_saved_output.reset (new saved_output_files);
+      m_saved_output->out = gdb_stdout;
+      m_saved_output->err = gdb_stderr;
+      m_saved_output->log = gdb_stdlog;
+      m_saved_output->targ = gdb_stdtarg;
+      m_saved_output->targerr = gdb_stdtargerr;
 
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
@@ -406,29 +393,29 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       if (!logging_redirect || !debug_redirect)
 	{
 	  tee = new tee_file (gdb_stdout, std::move (logfile));
-	  saved_output->file_to_delete.reset (tee);
+	  m_saved_output->file_to_delete.reset (tee);
 	}
       else
-	saved_output->file_to_delete = std::move (logfile);
+	m_saved_output->file_to_delete = std::move (logfile);
 
-      saved_output->log_to_delete.reset
+      m_saved_output->log_to_delete.reset
 	(new timestamped_file (debug_redirect ? logfile_p : tee));
 
       gdb_stdout = logging_redirect ? logfile_p : tee;
-      gdb_stdlog = saved_output->log_to_delete.get ();
+      gdb_stdlog = m_saved_output->log_to_delete.get ();
       gdb_stderr = logging_redirect ? logfile_p : tee;
       gdb_stdtarg = logging_redirect ? logfile_p : tee;
       gdb_stdtargerr = logging_redirect ? logfile_p : tee;
     }
   else
     {
-      gdb_stdout = saved_output->out;
-      gdb_stderr = saved_output->err;
-      gdb_stdlog = saved_output->log;
-      gdb_stdtarg = saved_output->targ;
-      gdb_stdtargerr = saved_output->targerr;
+      gdb_stdout = m_saved_output->out;
+      gdb_stderr = m_saved_output->err;
+      gdb_stdlog = m_saved_output->log;
+      gdb_stdtarg = m_saved_output->targ;
+      gdb_stdtargerr = m_saved_output->targerr;
 
-      saved_output.reset (nullptr);
+      m_saved_output.reset (nullptr);
     }
 }
 
