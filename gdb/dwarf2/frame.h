@@ -66,6 +66,9 @@ enum dwarf2_frame_reg_rule
 
 /* Register state.  */
 
+typedef struct value *(*fn_prev_register) (frame_info_ptr this_frame,
+					   void **this_cache, int regnum);
+
 struct dwarf2_frame_state_reg
 {
   /* Each register save state can be described in terms of a CFA slot,
@@ -78,8 +81,7 @@ struct dwarf2_frame_state_reg
       const gdb_byte *start;
       ULONGEST len;
     } exp;
-    struct value *(*fn) (frame_info_ptr this_frame, void **this_cache,
-			 int regnum);
+    fn_prev_register fn;
   } loc;
   enum dwarf2_frame_reg_rule how;
 };
@@ -261,5 +263,36 @@ extern int dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 				  CORE_ADDR *text_offset_out,
 				  const gdb_byte **cfa_start_out,
 				  const gdb_byte **cfa_end_out);
+
+
+/* Allocate a new instance of the function unique data.
+
+   The main purpose of this custom function data object is to allow caching the
+   value of expensive lookups in the prev_register implementation.
+
+   THIS_FRAME is the frame that the custom data object should be associated
+   with.
+   THIS_CACHE is the dwarf2 cache object to store the pointer on.
+   COOKIE is the key for the prev_function implementation.
+   SIZE is the size of the custom data object to allocate.  */
+
+extern void *dwarf2_frame_allocate_fn_data (frame_info_ptr this_frame,
+					    void **this_cache,
+					    fn_prev_register cookie,
+					    unsigned long size);
+
+/* Retrieve the function unique data for this frame or NULL if none exists.
+
+   The main purpose of this custom function data object is to allow caching the
+   value of expensive lookups in the prev_register implementation.
+
+   THIS_FRAME is the frame that the custom data object should be associated
+   with.
+   THIS_CACHE is the dwarf2 cache object to store the pointer on.
+   COOKIE is the key for the prev_function implementation.  */
+
+extern void *dwarf2_frame_get_fn_data (frame_info_ptr this_frame,
+				       void **this_cache,
+				       fn_prev_register cookie);
 
 #endif /* dwarf2-frame.h */
