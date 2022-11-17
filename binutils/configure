@@ -13155,7 +13155,7 @@ $as_echo "#define HAVE_MMAP 1" >>confdefs.h
 fi
 rm -f conftest.mmap conftest.txt
 
-for ac_func in getc_unlocked mkdtemp mkstemp utimensat utimes
+for ac_func in getc_unlocked mkdtemp mkstemp utimensat utimes fseeko fseeko64
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
