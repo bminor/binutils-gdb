@@ -61,7 +61,7 @@ gdb_test_multiple "print \$fpscr" "FPSCR exists" {
 }
 
 # Step over invalid operation.
-gdb_test "next" "" ""
+gdb_test "next" "" "next over invalid operation"
 
 # Verify that the following bits are set (See Power ISA for details):
 #
@@ -75,7 +75,7 @@ gdb_test "print/t \$fpscr" " = 10100000001000010001000000000000" "FPSCR for inva
 gdb_continue_to_breakpoint "go to division by zero"
 
 # Step over division by zero.
-gdb_test "next" "" ""
+gdb_test "next" "" "next over division by zero"
 
 # Verify that the following bits are set (See Power ISA for details):
 #
