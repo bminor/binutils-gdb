@@ -34,7 +34,7 @@ clean_restart ${testfile}
 
 # Verify that "start" lands inside the right procedure.
 if { [gdb_start_cmd] < 0 } {
-    untested "start failed to land inside the right procedure"
+    fail "start failed to land inside the right procedure"
     return -1
 }
 

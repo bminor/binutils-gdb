@@ -19,6 +19,11 @@ if {![dwarf2_support]} {
     return 0
 }
 
+if { [use_gdb_stub] } {
+    unsupported "test requires running"
+    return
+}
+
 standard_testfile .c -dw.S
 
 # Make some DWARF for the test.
@@ -62,7 +67,7 @@ set have_index [exec_has_index_section $binfile]
 # that this was the real "main".
 
 if {[gdb_start_cmd] < 0} {
-    untested "could not start ${testfile}"
+    fail "could not start ${testfile}"
     return -1
 }
 
