@@ -1731,9 +1731,9 @@ linux_process_target::status_pending_p_callback (thread_info *thread,
 struct lwp_info *
 find_lwp_pid (ptid_t ptid)
 {
-  thread_info *thread = find_thread ([&] (thread_info *thr_arg)
+  long lwp = ptid.lwp () != 0 ? ptid.lwp () : ptid.pid ();
+  thread_info *thread = find_thread ([lwp] (thread_info *thr_arg)
     {
-      int lwp = ptid.lwp () != 0 ? ptid.lwp () : ptid.pid ();
       return thr_arg->id.lwp () == lwp;
     });
 
