@@ -74,5 +74,13 @@ insn.s +69 +0xf6.*
 insn.s +70 +0xfe.*
 insn.s +71 +0x108.*
 insn.s +72 +0x114.*
-insn.s +- +0x12a
+insn.s +74 +0x12a.*
+insn.s +75 +0x134.*
+insn.s +76 +0x13e.*
+insn.s +77 +0x154.*
+insn.s +78 +0x16a.*
+insn.s +79 +0x180.*
+insn.s +80 +0x196.*
+insn.s +81 +0x1ac.*
+insn.s +- +0x1c2
 #pass
