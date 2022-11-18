@@ -768,6 +768,19 @@
 #define NT_OPENBSD_XFPREGS	22
 #define NT_OPENBSD_WCOOKIE	23
 
+/* Note segments for core files on QNX systems.  Note name
+   must start with "QNX".  */
+#define QNT_DEBUG_FULLPATH 1
+#define QNT_DEBUG_RELOC    2
+#define QNT_STACK          3
+#define QNT_GENERATOR      4
+#define QNT_DEFAULT_LIB    5
+#define QNT_CORE_SYSINFO   6
+#define QNT_CORE_INFO      7
+#define QNT_CORE_STATUS    8
+#define QNT_CORE_GREG      9
+#define QNT_CORE_FPREG     10
+#define QNT_LINK_MAP       11
 
 /* Note segments for core files on Solaris systems.  Note name
    must start with "CORE".  */
