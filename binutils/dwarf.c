@@ -10545,7 +10545,7 @@ display_gdb_index (struct dwarf_section *section,
     {
       uint64_t low = byte_get_little_endian (address_table + i * 20, 8);
       uint64_t high = byte_get_little_endian (address_table + i * 20 + 8, 8);
-      uint32_t cu_index = byte_get_little_endian (address_table + i + 20 + 16, 4);
+      uint32_t cu_index = byte_get_little_endian (address_table + i * 20 + 16, 4);
 
       print_hex (low, 8);
       print_hex (high, 8);
