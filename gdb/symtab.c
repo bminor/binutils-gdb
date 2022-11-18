@@ -4928,6 +4928,7 @@ global_symbol_searcher::search () const
   if (m_symbol_name_regexp != NULL)
     {
       const char *symbol_name_regexp = m_symbol_name_regexp;
+      std::string symbol_name_regexp_holder;
 
       /* Make sure spacing is right for C++ operators.
 	 This is just a courtesy to make the matching less sensitive
@@ -4956,10 +4957,9 @@ global_symbol_searcher::search () const
 	  /* If wrong number of spaces, fix it.  */
 	  if (fix >= 0)
 	    {
-	      char *tmp = (char *) alloca (8 + fix + strlen (opname) + 1);
-
-	      sprintf (tmp, "operator%.*s%s", fix, " ", opname);
-	      symbol_name_regexp = tmp;
+	      symbol_name_regexp_holder
+		= string_printf ("operator%.*s%s", fix, " ", opname);
+	      symbol_name_regexp = symbol_name_regexp_holder.c_str ();
 	    }
 	}
 
