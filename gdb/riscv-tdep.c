@@ -2411,6 +2411,7 @@ struct riscv_call_info
   {
     xlen = riscv_abi_xlen (gdbarch);
     flen = riscv_abi_flen (gdbarch);
+    clen = riscv_abi_clen (gdbarch);
 
     /* Reduce the number of integer argument registers when using the
        embedded abi (i.e. rv32e).  */
@@ -2438,6 +2439,7 @@ struct riscv_call_info
      are just the results of calling RISCV_ABI_XLEN and RISCV_ABI_FLEN.  */
   int xlen;
   int flen;
+  int clen;
 };
 
 /* Return the number of registers available for use as parameters in the
@@ -2464,12 +2466,12 @@ riscv_arg_regs_available (struct riscv_arg_reg *reg)
 static bool
 riscv_assign_reg_location (struct riscv_arg_info::location *loc,
 			   struct riscv_arg_reg *reg,
-			   int length, int offset)
+			   int length, int offset, int base_regnum = 0)
 {
   if (reg->next_regnum <= reg->last_regnum)
     {
       loc->loc_type = riscv_arg_info::location::in_reg;
-      loc->loc_data.regno = reg->next_regnum;
+      loc->loc_data.regno = reg->next_regnum + base_regnum;
       reg->next_regnum++;
       loc->c_length = length;
       loc->c_offset = offset;
@@ -2568,6 +2570,44 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
 	    riscv_assign_stack_location (&ainfo->argloc[1],
 					 &cinfo->memory, len, cinfo->xlen);
 	}
+    }
+}
+
+static void
+riscv_call_arg_scalar_capabiliy (struct riscv_arg_info *ainfo,
+				 struct riscv_call_info *cinfo)
+{
+  if (ainfo->length > cinfo->clen)
+    {
+      /* Argument is going to be passed by reference.  */
+      ainfo->argloc[0].loc_type
+	= riscv_arg_info::location::by_ref;
+      cinfo->memory.ref_offset
+	= align_up (cinfo->memory.ref_offset, ainfo->align);
+      ainfo->argloc[0].loc_data.offset = cinfo->memory.ref_offset;
+      cinfo->memory.ref_offset += ainfo->length;
+      ainfo->argloc[0].c_length = ainfo->length;
+
+      /* The second location for this argument is given over to holding the
+	 address of the by-reference data.  Pass 0 for the offset as this
+	 is not part of the actual argument value.  */
+      if (!riscv_assign_reg_location (&ainfo->argloc[1],
+				      &cinfo->int_regs,
+				      cinfo->clen, 0,
+				      RISCV_CA0_REGNUM - RISCV_A0_REGNUM))
+	riscv_assign_stack_location (&ainfo->argloc[1],
+				     &cinfo->memory, cinfo->clen,
+				     cinfo->clen);
+    }
+  else
+    {
+      int align = std::max (ainfo->align, cinfo->clen);
+
+      if (!riscv_assign_reg_location(&ainfo->argloc[0],
+				     &cinfo->int_regs, cinfo->clen, 0,
+				     RISCV_CA0_REGNUM - RISCV_A0_REGNUM))
+	riscv_assign_stack_location (&ainfo->argloc[1],
+				     &cinfo->memory, cinfo->clen, align);
     }
 }
 
@@ -2908,12 +2948,21 @@ riscv_arg_location (struct gdbarch *gdbarch,
 
   switch (ainfo->type->code ())
     {
+    case TYPE_CODE_CAPABILITY:
+      riscv_call_arg_scalar_capabiliy (ainfo, cinfo);
+      break;
+    case TYPE_CODE_PTR:
+      if (ainfo->length == cinfo->clen)
+	{
+	  riscv_call_arg_scalar_capabiliy (ainfo, cinfo);
+	  break;
+	}
+      /* Fall through */
     case TYPE_CODE_INT:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_ENUM:
-    case TYPE_CODE_PTR:
     case TYPE_CODE_FIXED_POINT:
       if (ainfo->length <= cinfo->xlen)
 	{
@@ -3340,6 +3389,9 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		  regcache->cooked_read_part (regnum, 0,
 					      info.argloc[0].c_length,
 					      ptr);
+		  if (value_tagged (value))
+		    set_value_tag (value,
+				   regcache->raw_collect_tag (regnum));
 		}
 
 	      if (writebuf)
@@ -3348,6 +3400,13 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		  riscv_regcache_cooked_write (regnum, ptr,
 					       info.argloc[0].c_length,
 					       regcache, call_info.flen);
+		  if (register_has_tag (gdbarch, regnum))
+		    {
+		      if (value_tagged (value))
+			regcache->raw_supply_tag (regnum, value_tag (value));
+		      else
+			regcache->raw_supply_tag (regnum, false);
+		    }
 		}
 
 	      /* A return value in register can have a second part in a
