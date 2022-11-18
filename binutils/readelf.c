@@ -20723,6 +20723,38 @@ get_openbsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
 }
 
 static const char *
+get_qnx_elfcore_note_type (Filedata * filedata, unsigned e_type)
+{
+  switch (e_type)
+    {
+    case QNT_DEBUG_FULLPATH:
+      return _("QNX debug fullpath");
+    case QNT_DEBUG_RELOC:
+      return _("QNX debug relocation");
+    case QNT_STACK:
+      return _("QNX stack");
+    case QNT_GENERATOR:
+      return _("QNX generator");
+    case QNT_DEFAULT_LIB:
+      return _("QNX default library");
+    case QNT_CORE_SYSINFO:
+      return _("QNX core sysinfo");
+    case QNT_CORE_INFO:
+      return _("QNX core info");
+    case QNT_CORE_STATUS:
+      return _("QNX core status");
+    case QNT_CORE_GREG:
+      return _("QNX general registers");
+    case QNT_CORE_FPREG:
+      return _("QNX floating point registers");
+    case QNT_LINK_MAP:
+      return _("QNX link map");
+    }
+
+  return get_note_type (filedata, e_type);
+}
+
+static const char *
 get_stapsdt_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -21646,6 +21678,35 @@ print_amdgpu_note (Elf_Internal_Note *pnote)
 #endif
 }
 
+static bool
+print_qnx_note (Elf_Internal_Note *pnote)
+{
+  switch (pnote->type)
+    {
+    case QNT_STACK:
+      if (pnote->descsz != 12)
+	goto desc_size_fail;
+
+      printf (_("   Stack Size: 0x%" PRIx32 "\n"),
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata, 4));
+      printf (_("   Stack allocated: %" PRIx32 "\n"),
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 4, 4));
+      printf (_("   Executable: %s\n"),
+	      ((unsigned) byte_get ((unsigned char *) pnote->descdata + 8, 1)) ? "no": "yes");
+      break;
+
+    default:
+      print_note_contents_hex(pnote);
+    }
+  return true;
+
+desc_size_fail:
+  printf (_("  <corrupt - data size is too small>\n"));
+  error (_("corrupt QNX note: data size is too small\n"));
+  return false;
+}
+
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
@@ -21691,6 +21752,10 @@ process_note (Elf_Internal_Note *  pnote,
   else if (startswith (pnote->namedata, "OpenBSD"))
     /* OpenBSD-specific core file notes.  */
     nt = get_openbsd_elfcore_note_type (filedata, pnote->type);
+
+  else if (startswith (pnote->namedata, "QNX"))
+    /* QNX-specific core file notes.  */
+    nt = get_qnx_elfcore_note_type (filedata, pnote->type);
 
   else if (startswith (pnote->namedata, "SPU/"))
     {
@@ -21746,6 +21811,8 @@ process_note (Elf_Internal_Note *  pnote,
   else if (startswith (pnote->namedata, "AMDGPU")
 	   && pnote->type == NT_AMDGPU_METADATA)
     return print_amdgpu_note (pnote);
+  else if (startswith (pnote->namedata, "QNX"))
+    return print_qnx_note (pnote);
 
   print_note_contents_hex (pnote);
   return true;
