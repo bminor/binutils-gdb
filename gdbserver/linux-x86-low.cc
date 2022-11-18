@@ -335,9 +335,9 @@ ps_get_thread_area (struct ps_prochandle *ph,
 int
 x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
-#ifdef __x86_64__
   lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   gdb_assert (lwp != nullptr);
+#ifdef __x86_64__
   int use_64bit = is_64bit_tdesc (get_lwp_thread (lwp));
 
   if (use_64bit)
