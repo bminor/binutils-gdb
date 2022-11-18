@@ -2961,8 +2961,10 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	      sec = sections[symndx];
 
 	      /* PR 19623: Relocations against symbols in
-		 the absolute sections should ignored.  */
-	      if (bfd_is_abs_section (sec))
+		 the absolute sections should ignored.
+		 PR 29807: Also ignore relocs against file symbols or
+		 other such nonsense in fuzzed objects.  */
+	      if (sec == NULL || bfd_is_abs_section (sec))
 		continue;
 
 	      val = (sec->output_section->vma
