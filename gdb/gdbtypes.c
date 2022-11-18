@@ -5894,6 +5894,11 @@ arch_pointer_type (struct gdbarch *gdbarch,
   t = arch_type (gdbarch, TYPE_CODE_PTR, bit, name);
   TYPE_TARGET_TYPE (t) = target_type;
   t->set_is_unsigned (true);
+  if (bit == gdbarch_capability_bit (gdbarch))
+    {
+      t->set_tagged(true);
+      t->set_instance_flags (TYPE_INSTANCE_FLAG_CAPABILITY);
+    }
   return t;
 }
 
@@ -5909,6 +5914,7 @@ arch_capability_type (struct gdbarch *gdbarch,
 
   t = arch_type (gdbarch, TYPE_CODE_CAPABILITY, bit, name);
   t->set_is_unsigned (unsigned_p);
+  t->set_tagged(true);
   return t;
 }
 
@@ -6286,28 +6292,18 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
       builtin_type->builtin_intcap_t
 	= arch_capability_type (gdbarch, gdbarch_capability_bit (gdbarch), 0,
 				"__intcap_t");
-      builtin_type->builtin_intcap_t->set_tagged (true);
       builtin_type->builtin_uintcap_t
 	= arch_capability_type (gdbarch, gdbarch_capability_bit (gdbarch), 1,
 				"__uintcap_t");
-      builtin_type->builtin_uintcap_t->set_tagged (true);
 
       /* Capability pointer types.  */
       builtin_type->builtin_data_capability
 	= arch_pointer_type (gdbarch, gdbarch_capability_bit (gdbarch), "",
 			     builtin_type->builtin_void);
-      builtin_type->builtin_data_capability->set_instance_flags
-	(builtin_type->builtin_data_capability->instance_flags ()
-	 | TYPE_INSTANCE_FLAG_CAPABILITY);
-      builtin_type->builtin_data_capability->set_tagged (true);
 
       builtin_type->builtin_code_capability
 	= arch_pointer_type (gdbarch, gdbarch_capability_bit (gdbarch), "",
 			     lookup_function_type (builtin_type->builtin_void));
-      builtin_type->builtin_code_capability->set_instance_flags
-	(builtin_type->builtin_code_capability->instance_flags ()
-	 | TYPE_INSTANCE_FLAG_CAPABILITY);
-      builtin_type->builtin_code_capability->set_tagged (true);
     }
 
   /* This type represents a GDB internal function.  */
