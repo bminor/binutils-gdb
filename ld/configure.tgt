@@ -118,6 +118,9 @@ aarch64-*-linux*)	targ_emul=aarch64linux
 aarch64-*-haiku*)	targ_emul=aarch64haiku
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb armelf_haiku $targ_extra_libpath"
 			;;
+aarch64-*-nto*)		targ_emul=aarch64nto
+			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb"
+			;;
 aarch64-*-pe* | aarch64-*-mingw*)
 			targ_emul=aarch64pe
 			targ_extra_emuls="arm64pe"
