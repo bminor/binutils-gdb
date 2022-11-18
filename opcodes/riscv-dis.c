@@ -641,7 +641,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
    this is little-endian code.  */
 
 static int
-riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
+riscv_disassemble_insn (bfd_vma memaddr,
+			insn_t word,
+			const bfd_byte *packet,
+			disassemble_info *info)
 {
   const struct riscv_opcode *op;
   static bool init = false;
@@ -806,8 +809,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 					    ", ");
 	    (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
 					  "0x%02x",
-					  (unsigned int) (word & 0xff));
-            word >>= 8;
+					  (unsigned int) (*packet++));
           }
       }
       break;
@@ -983,6 +985,7 @@ riscv_data_length (bfd_vma memaddr,
 static int
 riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
 			insn_t data,
+			const bfd_byte *packet ATTRIBUTE_UNUSED,
 			disassemble_info *info)
 {
   info->display_endian = info->endian;
@@ -1037,7 +1040,8 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   bfd_vma dump_size;
   int status;
   enum riscv_seg_mstate mstate;
-  int (*riscv_disassembler) (bfd_vma, insn_t, struct disassemble_info *);
+  int (*riscv_disassembler) (bfd_vma, insn_t, const bfd_byte *,
+			     struct disassemble_info *);
 
   if (info->disassembler_options != NULL)
     {
@@ -1081,7 +1085,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     }
   insn = (insn_t) bfd_get_bits (packet, dump_size * 8, false);
 
-  return (*riscv_disassembler) (memaddr, insn, info);
+  return (*riscv_disassembler) (memaddr, insn, packet, info);
 }
 
 disassembler_ftype
