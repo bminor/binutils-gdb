@@ -70,7 +70,7 @@ gdb_test "break ctxobj-f.c:$bp_location" \
 global expect_out
 set test "continue to get_version_1"
 gdb_test_multiple "continue" $test {
-    -re "Breakpoint ($bkptno_num_re), get_version_1 \\(\\).*" {
+    -re "Breakpoint ($bkptno_num_re), get_version_1 \\(\\).*\r\n.*$gdb_prompt $" {
 	set bpno $expect_out(1,string)
 	pass $test
     }
@@ -110,7 +110,7 @@ gdb_test "print this_version_num == v" \
 # Do the same, but from get_version_2.
 set test "continue to get_version_2"
 gdb_test_multiple "continue" $test {
-    -re "Breakpoint ($bkptno_num_re), get_version_2 \\(\\).*" {
+    -re "Breakpoint ($bkptno_num_re), get_version_2 \\(\\).*\r\n.*$gdb_prompt $" {
 	set bpno $expect_out(1,string)
 	pass $test
     }

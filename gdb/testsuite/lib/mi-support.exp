@@ -1211,7 +1211,7 @@ proc mi_detect_async {} {
 # EXTRA can be a list of one, two or three elements.
 # The first element is the regular expression
 # for output expected right after *stopped, and before GDB prompt.
-# The third element is the regulation expression for the locno
+# The third element is the regular expression for the locno
 # right after bkptno field.  The locno regex should not include
 # the comma separating it from the following fields.
 #
