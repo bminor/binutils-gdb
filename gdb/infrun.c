@@ -1854,54 +1854,31 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
    discarded between events.  */
 struct execution_control_state
 {
-  execution_control_state ()
+  explicit execution_control_state (thread_info *thr = nullptr)
+    : ptid (thr == nullptr ? null_ptid : thr->ptid),
+      event_thread (thr)
   {
-    this->reset ();
   }
 
-  void reset ()
-  {
-    this->target = nullptr;
-    this->ptid = null_ptid;
-    this->event_thread = nullptr;
-    ws = target_waitstatus ();
-    stop_func_filled_in = 0;
-    stop_func_start = 0;
-    stop_func_end = 0;
-    stop_func_name = nullptr;
-    wait_some_more = 0;
-    hit_singlestep_breakpoint = 0;
-  }
-
-  process_stratum_target *target;
+  process_stratum_target *target = nullptr;
   ptid_t ptid;
   /* The thread that got the event, if this was a thread event; NULL
      otherwise.  */
   struct thread_info *event_thread;
 
   struct target_waitstatus ws;
-  int stop_func_filled_in;
-  CORE_ADDR stop_func_start;
-  CORE_ADDR stop_func_end;
-  const char *stop_func_name;
-  int wait_some_more;
+  int stop_func_filled_in = 0;
+  CORE_ADDR stop_func_start = 0;
+  CORE_ADDR stop_func_end = 0;
+  const char *stop_func_name = nullptr;
+  int wait_some_more = 0;
 
   /* True if the event thread hit the single-step breakpoint of
      another thread.  Thus the event doesn't cause a stop, the thread
      needs to be single-stepped past the single-step breakpoint before
      we can switch back to the original stepping thread.  */
-  int hit_singlestep_breakpoint;
+  int hit_singlestep_breakpoint = 0;
 };
-
-/* Clear ECS and set it to point at TP.  */
-
-static void
-reset_ecs (struct execution_control_state *ecs, struct thread_info *tp)
-{
-  ecs->reset ();
-  ecs->event_thread = tp;
-  ecs->ptid = tp->ptid;
-}
 
 static void keep_going_pass_signal (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
@@ -1955,8 +1932,6 @@ start_step_over (void)
 
   for (thread_info *tp : range)
     {
-      struct execution_control_state ecss;
-      struct execution_control_state *ecs = &ecss;
       step_over_what step_what;
       int must_be_in_line;
 
@@ -2027,10 +2002,10 @@ start_step_over (void)
 	continue;
 
       switch_to_thread (tp);
-      reset_ecs (ecs, tp);
-      keep_going_pass_signal (ecs);
+      execution_control_state ecs (tp);
+      keep_going_pass_signal (&ecs);
 
-      if (!ecs->wait_some_more)
+      if (!ecs.wait_some_more)
 	error (_("Command aborted."));
 
       /* If the thread's step over could not be initiated because no buffers
@@ -3161,8 +3136,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   struct regcache *regcache;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
-  struct execution_control_state ecss;
-  struct execution_control_state *ecs = &ecss;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
      "set follow-fork-mode" command; otherwise, we'll just proceed
@@ -3374,10 +3347,10 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	    infrun_debug_printf ("resuming %s",
 				 tp->ptid.to_string ().c_str ());
 
-	    reset_ecs (ecs, tp);
+	    execution_control_state ecs (tp);
 	    switch_to_thread (tp);
-	    keep_going_pass_signal (ecs);
-	    if (!ecs->wait_some_more)
+	    keep_going_pass_signal (&ecs);
+	    if (!ecs.wait_some_more)
 	      error (_("Command aborted."));
 	  }
       }
@@ -3390,10 +3363,10 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 		  && cur_thr->inf->thread_waiting_for_vfork_done != nullptr))
       {
 	/* The thread wasn't started, and isn't queued, run it now.  */
-	reset_ecs (ecs, cur_thr);
+	execution_control_state ecs (cur_thr);
 	switch_to_thread (cur_thr);
-	keep_going_pass_signal (ecs);
-	if (!ecs->wait_some_more)
+	keep_going_pass_signal (&ecs);
+	if (!ecs.wait_some_more)
 	  error (_("Command aborted."));
       }
 
@@ -4001,8 +3974,7 @@ wait_for_inferior (inferior *inf)
 
   while (1)
     {
-      struct execution_control_state ecss;
-      struct execution_control_state *ecs = &ecss;
+      execution_control_state ecs;
 
       overlay_cache_invalid = 1;
 
@@ -4012,16 +3984,16 @@ wait_for_inferior (inferior *inf)
 	 don't get any event.  */
       target_dcache_invalidate ();
 
-      ecs->ptid = do_target_wait_1 (inf, minus_one_ptid, &ecs->ws, 0);
-      ecs->target = inf->process_target ();
+      ecs.ptid = do_target_wait_1 (inf, minus_one_ptid, &ecs.ws, 0);
+      ecs.target = inf->process_target ();
 
       if (debug_infrun)
-	print_target_wait_results (minus_one_ptid, ecs->ptid, ecs->ws);
+	print_target_wait_results (minus_one_ptid, ecs.ptid, ecs.ws);
 
       /* Now figure out what to do with the result of the result.  */
-      handle_inferior_event (ecs);
+      handle_inferior_event (&ecs);
 
-      if (!ecs->wait_some_more)
+      if (!ecs.wait_some_more)
 	break;
     }
 
@@ -4147,8 +4119,7 @@ fetch_inferior_event ()
 {
   INFRUN_SCOPED_DEBUG_ENTER_EXIT;
 
-  struct execution_control_state ecss;
-  struct execution_control_state *ecs = &ecss;
+  execution_control_state ecs;
   int cmd_done = 0;
 
   /* Events are always processed with the main UI as current UI.  This
@@ -4198,27 +4169,27 @@ fetch_inferior_event ()
        the event.  */
     scoped_disable_commit_resumed disable_commit_resumed ("handling event");
 
-    if (!do_target_wait (ecs, TARGET_WNOHANG))
+    if (!do_target_wait (&ecs, TARGET_WNOHANG))
       {
 	infrun_debug_printf ("do_target_wait returned no event");
 	disable_commit_resumed.reset_and_commit ();
 	return;
       }
 
-    gdb_assert (ecs->ws.kind () != TARGET_WAITKIND_IGNORE);
+    gdb_assert (ecs.ws.kind () != TARGET_WAITKIND_IGNORE);
 
     /* Switch to the target that generated the event, so we can do
        target calls.  */
-    switch_to_target_no_thread (ecs->target);
+    switch_to_target_no_thread (ecs.target);
 
     if (debug_infrun)
-      print_target_wait_results (minus_one_ptid, ecs->ptid, ecs->ws);
+      print_target_wait_results (minus_one_ptid, ecs.ptid, ecs.ws);
 
     /* If an error happens while handling the event, propagate GDB's
        knowledge of the executing state to the frontend/user running
        state.  */
-    ptid_t finish_ptid = !target_is_non_stop_p () ? minus_one_ptid : ecs->ptid;
-    scoped_finish_thread_state finish_state (ecs->target, finish_ptid);
+    ptid_t finish_ptid = !target_is_non_stop_p () ? minus_one_ptid : ecs.ptid;
+    scoped_finish_thread_state finish_state (ecs.target, finish_ptid);
 
     /* Get executed before scoped_restore_current_thread above to apply
        still for the thread which has thrown the exception.  */
@@ -4228,13 +4199,13 @@ fetch_inferior_event ()
       = make_scope_exit (delete_just_stopped_threads_infrun_breakpoints);
 
     /* Now figure out what to do with the result of the result.  */
-    handle_inferior_event (ecs);
+    handle_inferior_event (&ecs);
 
-    if (!ecs->wait_some_more)
+    if (!ecs.wait_some_more)
       {
-	struct inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
+	struct inferior *inf = find_inferior_ptid (ecs.target, ecs.ptid);
 	bool should_stop = true;
-	struct thread_info *thr = ecs->event_thread;
+	struct thread_info *thr = ecs.event_thread;
 
 	delete_just_stopped_threads_infrun_breakpoints ();
 
@@ -4243,7 +4214,7 @@ fetch_inferior_event ()
 
 	if (!should_stop)
 	  {
-	    keep_going (ecs);
+	    keep_going (&ecs);
 	  }
 	else
 	  {
@@ -4252,7 +4223,7 @@ fetch_inferior_event ()
 
 	    stop_all_threads_if_all_stop_mode ();
 
-	    clean_up_just_stopped_threads_fsms (ecs);
+	    clean_up_just_stopped_threads_fsms (&ecs);
 
 	    if (thr != nullptr && thr->thread_fsm () != nullptr)
 	      should_notify_stop
@@ -4281,7 +4252,7 @@ fetch_inferior_event ()
 	       selected.".  */
 	    if (!non_stop
 		&& cmd_done
-		&& ecs->ws.kind () != TARGET_WAITKIND_NO_RESUMED)
+		&& ecs.ws.kind () != TARGET_WAITKIND_NO_RESUMED)
 	      restore_thread.dont_restore ();
 	  }
       }
@@ -5977,14 +5948,11 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
 	}
       else
 	{
-	  struct execution_control_state ecss;
-	  struct execution_control_state *ecs = &ecss;
-
 	  infrun_debug_printf ("restart threads: [%s] continuing",
 			       tp->ptid.to_string ().c_str ());
-	  reset_ecs (ecs, tp);
+	  execution_control_state ecs (tp);
 	  switch_to_thread (tp);
-	  keep_going_pass_signal (ecs);
+	  keep_going_pass_signal (&ecs);
 	}
     }
 }
@@ -7660,8 +7628,7 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
       if (thr->state != THREAD_RUNNING)
 	continue;
 
-      execution_control_state ecs;
-      reset_ecs (&ecs, thr);
+      execution_control_state ecs (thr);
       switch_to_thread (thr);
       keep_going (&ecs);
       return;
@@ -7676,8 +7643,6 @@ static bool
 keep_going_stepped_thread (struct thread_info *tp)
 {
   frame_info_ptr frame;
-  struct execution_control_state ecss;
-  struct execution_control_state *ecs = &ecss;
 
   /* If the stepping thread exited, then don't try to switch back and
      resume it, which could fail in several different ways depending
@@ -7708,7 +7673,7 @@ keep_going_stepped_thread (struct thread_info *tp)
 
   infrun_debug_printf ("resuming previously stepped thread");
 
-  reset_ecs (ecs, tp);
+  execution_control_state ecs (tp);
   switch_to_thread (tp);
 
   tp->set_stop_pc (regcache_read_pc (get_thread_regcache (tp)));
@@ -7757,7 +7722,7 @@ keep_going_stepped_thread (struct thread_info *tp)
     {
       infrun_debug_printf ("expected thread still hasn't advanced");
 
-      keep_going_pass_signal (ecs);
+      keep_going_pass_signal (&ecs);
     }
 
   return true;
