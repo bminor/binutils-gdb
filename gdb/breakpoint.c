@@ -4574,18 +4574,17 @@ command_line_is_silent (struct command_line *cmd)
   return cmd && (strcmp ("silent", cmd->line) == 0);
 }
 
-/* Sets the $_hit_bpnum and $_hit_locno to the bpnum and locno of bs.  */
+/* Sets the $_hit_bpnum and $_hit_locno to bpnum and locno.
+   A locno 0 is changed to 1 to e.g. let the user do
+     (gdb) disable $_hit_bpnum.$_hit_locno
+   for a single location breakpoint.  */
+
 static void
-set_hit_convenience_vars (bpstat *bs)
+set_hit_convenience_vars (int bpnum, int locno)
 {
-  const struct breakpoint *b = bs->breakpoint_at;
-  if (b != nullptr)
-    {
-      int locno = bpstat_locno (bs);
-      set_internalvar_integer (lookup_internalvar ("_hit_bpnum"), b->number);
-      set_internalvar_integer (lookup_internalvar ("_hit_locno"),
-			       (locno > 0 ? locno : 1));
-    }
+  set_internalvar_integer (lookup_internalvar ("_hit_bpnum"), bpnum);
+  set_internalvar_integer (lookup_internalvar ("_hit_locno"),
+			   (locno > 0 ? locno : 1));
 }
 
 /* Execute all the commands associated with all the breakpoints at
@@ -4602,7 +4601,6 @@ bpstat_do_actions_1 (bpstat **bsp)
 {
   bpstat *bs;
   bool again = false;
-  bpstat *bs_print_hit_var;
 
   /* Avoid endless recursion if a `source' command is contained
      in bs->commands.  */
@@ -4618,29 +4616,39 @@ bpstat_do_actions_1 (bpstat **bsp)
   bs = *bsp;
 
   /* The $_hit_* convenience variables are set before running the
-     commands of bs.  In case we have several bs, after the loop,
-     we set again the variables to the first bs to print.  */
-  bs_print_hit_var = nullptr;
+     commands of BS.  In case we have several bs, after the loop,
+     we set again the variables to the first printed bpnum and locno.
+     For multiple breakpoints, this ensures the variables are set to the
+     breakpoint printed for the user. */
+  int printed_hit_bpnum = -1;
+  int printed_hit_locno = -1;
 
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
       struct command_line *cmd = NULL;
 
-      /* Set the _hit_* convenience variables before running the commands of
-	 each bs.  If this is the first bs to be printed, remember it so as to
-	 set the convenience variable again to this bs after the loop so that in
-	 case of multiple breakpoints, the variables are set to the breakpoint
-	 printed for the user.  */
-      set_hit_convenience_vars (bs);
-      if (bs_print_hit_var == nullptr && bs->print)
-	bs_print_hit_var = bs;
+      /* Set the _hit_* convenience variables before running BS's commands.  */
+      {
+	const struct breakpoint *b = bs->breakpoint_at;
+	if (b != nullptr)
+	  {
+	    int locno = bpstat_locno (bs);
+
+	    set_hit_convenience_vars (b->number, locno);
+	    if (printed_hit_locno == -1 && bs->print)
+	      {
+		printed_hit_bpnum = b->number;
+		printed_hit_locno = locno;
+	      }
+	  }
+      }
 
       /* Take ownership of the BSP's command tree, if it has one.
 
 	 The command tree could legitimately contain commands like
 	 'step' and 'next', which call clear_proceed_status, which
-	 frees stop_bpstat's command tree.  To make sure this doesn't
+	 frees the bpstat BS and its command tree.  To make sure this doesn't
 	 free the tree we're executing out from under us, we need to
 	 take ownership of the tree ourselves.  Since a given bpstat's
 	 commands are only executed once, we don't need to copy it; we
@@ -4659,6 +4667,8 @@ bpstat_do_actions_1 (bpstat **bsp)
       while (cmd != NULL)
 	{
 	  execute_control_command (cmd);
+	  /* After execute_control_command, if breakpoint_proceeded is true,
+	     BS has been freed and cannot be accessed anymore.  */
 
 	  if (breakpoint_proceeded)
 	    break;
@@ -4693,9 +4703,9 @@ bpstat_do_actions_1 (bpstat **bsp)
     }
 
   /* Now that we have executed the commands of all bs, set the _hit_*
-     convenience variables to the printed bs.  */
-  if (bs_print_hit_var != nullptr)
-    set_hit_convenience_vars (bs_print_hit_var);
+     convenience variables to the printed values.  */
+  if (printed_hit_locno != -1)
+    set_hit_convenience_vars (printed_hit_bpnum, printed_hit_locno);
 
   return again;
 }
