@@ -4486,7 +4486,7 @@ bpstat_locno (const bpstat *bs)
 
   int locno = 0;
 
-  if (b != nullptr && b->loc->next != nullptr)
+  if (b != nullptr && b->loc != nullptr && b->loc->next != nullptr)
     {
       const bp_location *bl_i;
 
