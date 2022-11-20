@@ -188,6 +188,7 @@ apply_patches ()
 }
 
 apply_patches "patches/0001-use-windows-stat"
+apply_patches "patches/0002-no-solaris-_gl_attribute_dealloc"
 
 # Regenerate all necessary files...
 aclocal &&
