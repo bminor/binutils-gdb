@@ -368,12 +368,12 @@ proc break_cond_on_syscall { syscall follow_fork detach_on_fork } {
 		if { $detach_on_fork == "off" } {
 		    gdb_test "inferior 1"
 		    gdb_test "break marker" "Breakpoint.*at.*"
-		    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		    gdb_test "continue" "Continuing\\..*Breakpoint $::bkptno_numopt_re, marker \\(\\) at.*" \
 			"continue to marker"
 		}
 	    } else {
 		gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
-		gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
+		gdb_test "continue" "Continuing\\..*Breakpoint $::bkptno_numopt_re, marker \\(\\) at.*" \
 		    "continue to marker"
 	    }
 	}
