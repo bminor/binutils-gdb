@@ -311,38 +311,32 @@ proc gdb_version { } {
     return [default_gdb_version]
 }
 
-#
 # gdb_unload -- unload a file if one is loaded
-# Return 0 on success, -1 on error.
 #
+# Returns the same as gdb_test_multiple.
 
-proc gdb_unload {} {
+proc gdb_unload { {msg "file"} } {
     global GDB
     global gdb_prompt
-    send_gdb "file\n"
-    gdb_expect 60 {
-	-re "No executable file now\[^\r\n\]*\[\r\n\]" { exp_continue }
-	-re "No symbol file now\[^\r\n\]*\[\r\n\]" { exp_continue }
-	-re "A program is being debugged already.*Are you sure you want to change the file.*y or n. $" {
+    return [gdb_test_multiple "file" $msg {
+	-re "A program is being debugged already.\r\nAre you sure you want to change the file. .y or n. $" {
 	    send_gdb "y\n" answer
 	    exp_continue
 	}
-	-re "Discard symbol table from .*y or n.*$" {
+
+	-re "No executable file now\\.\r\n" {
+	    exp_continue
+	}
+
+	-re "Discard symbol table from `.*'. .y or n. $" {
 	    send_gdb "y\n" answer
 	    exp_continue
 	}
-	-re "$gdb_prompt $" {}
-	-re "A problem internal to GDB has been detected" {
-	    perror "Couldn't unload file in $GDB (GDB internal error)."
-	    gdb_internal_error_resync
-	    return -1
+
+	-re -wrap "No symbol file now\\." {
+	    pass $gdb_test_name
 	}
-	timeout {
-	    perror "couldn't unload file in $GDB (timeout)."
-	    return -1
-	}
-    }
-    return 0
+    }]
 }
 
 # Many of the tests depend on setting breakpoints at various places and

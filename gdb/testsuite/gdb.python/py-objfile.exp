@@ -92,7 +92,9 @@ gdb_test "python print (objfile.progspace)" "<gdb\.Progspace object at .*>" \
   "Get objfile program space"
 gdb_test "python print (objfile.is_valid())" "True" \
   "Get objfile validity"
-gdb_unload
+
+gdb_unload "unload 1"
+
 gdb_test "python print (objfile.is_valid())" "False" \
   "Get objfile validity after unload"
 
@@ -103,9 +105,8 @@ gdb_test "python print (objfile.random_attribute)" "42" \
 
 # Verify invalid objfile handling.
 
-if { [gdb_unload] < 0 } {
-    fail "unload all files"
-    return -1
+if { [gdb_unload "unload 2"] != 0 } {
+    return
 }
 
 gdb_test "python print(objfile.filename)" "None" \
