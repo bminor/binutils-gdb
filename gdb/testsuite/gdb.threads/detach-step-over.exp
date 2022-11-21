@@ -58,24 +58,18 @@ set bp_lineno [gdb_get_line_number "Set breakpoint here"]
 
 # The test proper.  See description above.
 proc test {condition_eval target_non_stop non_stop displaced} {
-    global binfile srcfile
-    global gdb_prompt
-    global decimal
-    global bp_lineno
-    global GDBFLAGS
-
     # Number of threads started by the program.
     set n_threads 10
 
-    save_vars { GDBFLAGS } {
-	append GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
-	append GDBFLAGS " -ex \"set non-stop $non_stop\""
-	append GDBFLAGS " -ex \"set displaced $displaced\""
-	append GDBFLAGS " -ex \"set schedule-multiple on\""
-	clean_restart $binfile
+    save_vars { ::GDBFLAGS } {
+	append ::GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
+	append ::GDBFLAGS " -ex \"set non-stop $non_stop\""
+	append ::GDBFLAGS " -ex \"set displaced $displaced\""
+	append ::GDBFLAGS " -ex \"set schedule-multiple on\""
+	clean_restart $::binfile
     }
 
-    set test_spawn_id [spawn_wait_for_attach $binfile]
+    set test_spawn_id [spawn_wait_for_attach $::binfile]
     set testpid [spawn_id_get_pid $test_spawn_id]
 
     set any "\[^\r\n\]*"
@@ -83,7 +77,7 @@ proc test {condition_eval target_non_stop non_stop displaced} {
     gdb_test "add-inferior" "Added inferior 2.*"
     gdb_test "inferior 2" "Switching to .*"
 
-    gdb_load $binfile
+    gdb_load $::binfile
     if ![runto setup_done] then {
 	fail "can't run to setup_done"
 	kill_wait_spawned_process $test_spawn_id
@@ -95,7 +89,7 @@ proc test {condition_eval target_non_stop non_stop displaced} {
     # Get the PID of the test process.
     set pid_inf2 ""
     gdb_test_multiple "p mypid" "get pid of inferior 2" {
-	-re " = ($decimal)\r\n$gdb_prompt $" {
+	-re " = ($::decimal)\r\n$::gdb_prompt $" {
 	    set pid_inf2 $expect_out(1,string)
 	    pass $gdb_test_name
 	}
@@ -124,13 +118,13 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 			# Prevent -readnow timeout.
 			exp_continue
 		    }
-		    -re "is a zombie - the process has already terminated.*$gdb_prompt " {
+		    -re "is a zombie - the process has already terminated.*$::gdb_prompt " {
 			fail $gdb_test_name
 		    }
-		    -re "Unable to attach: .*$gdb_prompt " {
+		    -re "Unable to attach: .*$::gdb_prompt " {
 			fail $gdb_test_name
 		    }
-		    -re "\r\n$gdb_prompt " {
+		    -re "\r\n$::gdb_prompt " {
 			if { $saw_attaching } {
 			    set attached 1
 			    pass $test
@@ -173,7 +167,7 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 	    }
 
 	    # Set threads stepping over a breakpoint continuously.
-	    gdb_test "break $srcfile:$bp_lineno if 0" "Breakpoint.*" \
+	    gdb_test "break $::srcfile:$::bp_lineno if 0" "Breakpoint.*" \
 		"break LOC if 0"
 
 	    if {$attempt < $attempts} {
@@ -192,7 +186,7 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 
 	    set cont_cmd_re [string_to_regexp $cont_cmd]
 	    gdb_test_multiple $cont_cmd "" {
-		-re "^$cont_cmd_re\r\nContinuing\.\r\n$gdb_prompt " {
+		-re "^$cont_cmd_re\r\nContinuing\.\r\n$::gdb_prompt " {
 		    pass $gdb_test_name
 		}
 	    }
@@ -208,14 +202,14 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 		    incr running_count
 		    exp_continue
 		}
-		-re "Cannot execute this command while the target is running.*$gdb_prompt $" {
+		-re "Cannot execute this command while the target is running.*$::gdb_prompt $" {
 		    # Testing against a remote server that doesn't do
 		    # non-stop mode.  Explicitly interrupt.  This
 		    # doesn't test the same code paths in GDB, but
 		    # it's still something.
 		    set interrupted 1
 		    gdb_test_multiple "interrupt" "" {
-			-re "$gdb_prompt " {
+			-re "$::gdb_prompt " {
 			    gdb_test_multiple "" $gdb_test_name {
 				-re "received signal SIGINT, Interrupt" {
 				    pass $gdb_test_name
@@ -224,7 +218,7 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 			}
 		    }
 		}
-		-re "$gdb_prompt $" {
+		-re "$::gdb_prompt $" {
 		    gdb_assert {$running_count == ($n_threads + 1) * 2} $gdb_test_name
 		}
 	    }
