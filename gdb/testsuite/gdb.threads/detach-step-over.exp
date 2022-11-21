@@ -284,6 +284,56 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
     kill_wait_spawned_process $test_spawn_id
 }
 
+# Similar to the proc above, but this time, instead of detaching using
+# the 'detach' command, we quit GDB, this will also trigger a detach, but
+# through a slightly different path, which can expose different bugs.
+proc_with_prefix test_detach_quit {condition_eval target_non_stop \
+	non_stop displaced} {
+    # If debugging with target remote, check whether the all-stop variant
+    # of the RSP is being used.  If so, we can't run the background tests.
+    if {!$non_stop
+	&& [target_info exists gdb_protocol]
+	&& ([target_info gdb_protocol] == "remote"
+	    || [target_info gdb_protocol] == "extended-remote")} {
+	start_gdb_for_test $condition_eval $target_non_stop \
+	    $non_stop $displaced
+
+	gdb_test_multiple "maint show target-non-stop" "" {
+	    -wrap -re "(is|currently) on.*" {
+	    }
+	    -wrap -re "(is|currently) off.*" {
+		return
+	    }
+	}
+    }
+
+    set test_spawn_id [spawn_wait_for_attach $::binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
+
+    set attempts 3
+    for {set attempt 1} { $attempt <= $attempts } { incr attempt } {
+	with_test_prefix "iter $attempt" {
+
+	    start_gdb_for_test $condition_eval $target_non_stop \
+		$non_stop $displaced
+
+	    if {![prepare_test_iter $testpid $non_stop \
+		      $attempt $attempts "$::decimal"]} {
+		kill_wait_spawned_process $test_spawn_id
+		return
+	    }
+
+	    gdb_test_multiple "with confirm off -- quit" "" {
+		eof {
+		    pass $gdb_test_name
+		}
+	    }
+	}
+    }
+
+    kill_wait_spawned_process $test_spawn_id
+}
+
 # The test program exits after a while, in case GDB crashes.  Make it
 # wait at least as long as we may wait before declaring a time out
 # failure.
@@ -330,6 +380,8 @@ foreach_with_prefix breakpoint-condition-evaluation {"host" "target"} {
 
 	    foreach_with_prefix displaced {"off" "auto"} {
 		test_detach_command ${breakpoint-condition-evaluation} \
+		    ${target-non-stop} ${non-stop} ${displaced}
+		test_detach_quit ${breakpoint-condition-evaluation} \
 		    ${target-non-stop} ${non-stop} ${displaced}
 	    }
 	}

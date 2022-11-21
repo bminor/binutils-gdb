@@ -2535,6 +2535,9 @@ target_preopen (int from_tty)
 void
 target_detach (inferior *inf, int from_tty)
 {
+  /* Thread's don't need to be resumed until the end of this function.  */
+  scoped_disable_commit_resumed disable_commit_resumed ("detaching");
+
   /* After we have detached, we will clear the register cache for this inferior
      by calling registers_changed_ptid.  We must save the pid_ptid before
      detaching, as the target detach method will clear inf->pid.  */
@@ -2565,6 +2568,8 @@ target_detach (inferior *inf, int from_tty)
      inferior_ptid matches save_pid_ptid, but in our case, it does not
      call it, as inferior_ptid has been reset.  */
   reinit_frame_cache ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 void
