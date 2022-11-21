@@ -2427,6 +2427,15 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_RISCV_SUB6:
+	  {
+	    bfd_vma old_value = bfd_get (howto->bitsize, input_bfd,
+					 contents + rel->r_offset);
+	    relocation = (old_value & ~howto->dst_mask)
+			 | (((old_value & howto->dst_mask) - relocation)
+			    & howto->dst_mask);
+	  }
+	  break;
+
 	case R_RISCV_SUB8:
 	case R_RISCV_SUB16:
 	case R_RISCV_SUB32:

@@ -994,6 +994,10 @@ riscv_elf_add_sub_reloc (bfd *abfd,
       relocation = old_value + relocation;
       break;
     case R_RISCV_SUB6:
+      relocation = (old_value & ~howto->dst_mask)
+		   | (((old_value & howto->dst_mask) - relocation)
+		      & howto->dst_mask);
+      break;
     case R_RISCV_SUB8:
     case R_RISCV_SUB16:
     case R_RISCV_SUB32:
