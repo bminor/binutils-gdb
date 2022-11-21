@@ -1161,7 +1161,9 @@ proc gdb_test_multiple { command message args } {
 	    if { $foo < [expr $len - 1] } {
 		set str [string range "$string" 0 $foo]
 		if { [send_gdb "$str"] != "" } {
-		    perror "Couldn't send $command to GDB."
+		    verbose -log "Couldn't send $command to GDB."
+		    unresolved $message
+		    return -1
 		}
 		# since we're checking if each line of the multi-line
 		# command are 'accepted' by GDB here,
@@ -1180,7 +1182,9 @@ proc gdb_test_multiple { command message args } {
 	}
 	if { "$string" != "" } {
 	    if { [send_gdb "$string"] != "" } {
-		perror "Couldn't send $command to GDB."
+		verbose -log "Couldn't send $command to GDB."
+		unresolved $message
+		return -1
 	    }
 	}
     }
