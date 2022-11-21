@@ -2168,6 +2168,9 @@ svr4_create_probe_breakpoints (svr4_info *info, struct gdbarch *gdbarch,
 	{
 	  CORE_ADDR address = p->get_relocated_address (objfile);
 
+	  solib_debug_printf ("name=%s, addr=%s", probe_info[i].name,
+			      paddress (gdbarch, address));
+
 	  create_solib_event_breakpoint (gdbarch, address);
 	  register_solib_event_probe (info, objfile, p, address, action);
 	}
@@ -2185,6 +2188,9 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
 					struct obj_section *os,
 					bool with_prefix)
 {
+  SOLIB_SCOPED_DEBUG_START_END ("objfile=%s, with_prefix=%d",
+				os->objfile->original_name, with_prefix);
+
   std::vector<probe *> probes[NUM_PROBES];
 
   for (int i = 0; i < NUM_PROBES; i++)
@@ -2204,6 +2210,7 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
 	}
 
       probes[i] = find_probes_in_objfile (os->objfile, "rtld", name);
+      solib_debug_printf ("probe=%s, num found=%zu", name, probes[i].size ());
 
       /* Ensure at least one probe for the current name was found.  */
       if (probes[i].empty ())
@@ -2256,6 +2263,7 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
     }
 
   /* All probes found.  Now create them.  */
+  solib_debug_printf ("using probes interface");
   svr4_create_probe_breakpoints (info, gdbarch, probes, os->objfile);
   return true;
 }
@@ -2281,7 +2289,11 @@ svr4_create_solib_event_breakpoints (svr4_info *info, struct gdbarch *gdbarch,
   if (os == nullptr
       || (!svr4_find_and_create_probe_breakpoints (info, gdbarch, os, false)
 	  && !svr4_find_and_create_probe_breakpoints (info, gdbarch, os, true)))
-    create_solib_event_breakpoint (gdbarch, address);
+    {
+      solib_debug_printf ("falling back to r_brk breakpoint: addr=%s",
+			  paddress (gdbarch, address));
+      create_solib_event_breakpoint (gdbarch, address);
+    }
 }
 
 /* Helper function for gdb_bfd_lookup_symbol.  */
