@@ -56,11 +56,11 @@ standard_testfile
 
 set bp_lineno [gdb_get_line_number "Set breakpoint here"]
 
-# The test proper.  See description above.
-proc test {condition_eval target_non_stop non_stop displaced} {
-    # Number of threads started by the program.
-    set n_threads 10
+# Number of threads started by the program.
+set n_threads 10
 
+# Start GDB, configuring various settings according to the arguments.
+proc start_gdb_for_test {condition_eval target_non_stop non_stop displaced} {
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
 	append ::GDBFLAGS " -ex \"set non-stop $non_stop\""
@@ -69,10 +69,137 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 	clean_restart $::binfile
     }
 
+    gdb_test_no_output "set breakpoint condition-evaluation $condition_eval"
+}
+
+# Use the 'attach' command to attach to process with pid TESTPID.  Return true
+# if we believe GDB has attached and we are back at the GDB prompt, otherwise,
+# return false.
+proc attach_to {testpid} {
+    with_timeout_factor 2 {
+	set attached 0
+	set saw_attaching 0
+	gdb_test_multiple "attach $testpid" "attach" {
+	    -re "Attaching to program.*process $testpid\r\n" {
+		set saw_attaching 1
+		exp_continue
+	    }
+	    -re "new threads in iteration" {
+		# Seen when "set debug libthread_db" is on.
+		exp_continue
+	    }
+	    -re "Reading symbols from|Expanding full symbols from" {
+		# Prevent -readnow timeout.
+		exp_continue
+	    }
+	    -re "is a zombie - the process has already terminated.*$::gdb_prompt " {
+		fail $gdb_test_name
+	    }
+	    -re "Unable to attach: .*$::gdb_prompt " {
+		fail $gdb_test_name
+	    }
+	    -re "\r\n$::gdb_prompt " {
+		if { $saw_attaching } {
+		    set attached 1
+		    pass $gdb_test_name
+		} else {
+		    fail $gdb_test_name
+		}
+	    }
+	}
+    }
+
+    return $attached
+}
+
+# After attaching to a multi-threaded inferior in non-stop mode, we expect to
+# see a stop message from each thread.  This proc waits for all of these stop
+# messages.  TID_RE is a regexp used to match the thread-id of the stopped
+# thread.
+#
+# Return true if we saw a stop from each of the expected threads (based on the
+# global N_THREADS value), otherwise, return false.
+proc check_stops_after_non_stop_attach {tid_re} {
+    set any "\[^\r\n\]*"
+
+    # In non-stop, we will see one stop per thread after the prompt.
+    set stops 0
+    set test "seen all stops"
+    for {set thread 1} { $thread <= $::n_threads } { incr thread } {
+	if {[gdb_test_multiple "" $test {
+	    -re "Thread ${tid_re} ${any} stopped" {
+		incr stops
+	    }
+	}] != 0} {
+	    break
+	}
+    }
+
+    # If we haven't seen all stops, then the
+    # gdb_test_multiple in the loop above will have
+    # already issued a FAIL.
+    if {$stops != $::n_threads} {
+	return false
+    }
+    pass $test
+    return true
+}
+
+# Prepare for a single test iteration.  TESTPID is the pid of the process GDB
+# will be attached too.  NON_STOP indicates if GDB is configured in non-stop
+# mode or not.  ATTEMPT is the current attempt number, and ATTEMPTS is the
+# maximum number of attempts we plan to run.  TID_RE is a string used to match
+# against a thread-id in GDB's stop messages.
+#
+# Return true if everything is prepared correctly, otherwise return false.
+proc prepare_test_iter {testpid non_stop attempt attempts tid_re} {
+    if {![attach_to $testpid]} {
+	return false
+    }
+
+    if {$non_stop} {
+	if {![check_stops_after_non_stop_attach $tid_re]} {
+	    return false
+	}
+    }
+
+    gdb_test "break ${::srcfile}:${::bp_lineno} if 0" "Breakpoint.*" \
+	"break LOC if 0"
+
+    if {$attempt < $attempts} {
+	# Kick the time out timer for another round.
+	gdb_test "print again = 1" " = 1" "reset timer in the inferior"
+	# Show the time we had left in the logs, in case
+	# something goes wrong.
+	gdb_test "print seconds_left" " = .*"
+    }
+
+    if {$non_stop} {
+	set cont_cmd "continue -a &"
+    } else {
+	set cont_cmd "continue &"
+    }
+
+    set cont_cmd_re [string_to_regexp $cont_cmd]
+    gdb_test_multiple $cont_cmd "" {
+	-re "^$cont_cmd_re\r\nContinuing\.\r\n$::gdb_prompt " {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Wait a bit, to give time for the threads to hit the
+    # breakpoint.
+    sleep 1
+
+    return true
+}
+
+# The test proper.  See the description at the top of the file.
+proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop displaced} {
     set test_spawn_id [spawn_wait_for_attach $::binfile]
     set testpid [spawn_id_get_pid $test_spawn_id]
 
-    set any "\[^\r\n\]*"
+    start_gdb_for_test $condition_eval $target_non_stop $non_stop $displaced
 
     gdb_test "add-inferior" "Added inferior 2.*"
     gdb_test "inferior 2" "Switching to .*"
@@ -83,8 +210,6 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 	kill_wait_spawned_process $test_spawn_id
 	return
     }
-
-    gdb_test_no_output "set breakpoint condition-evaluation $condition_eval"
 
     # Get the PID of the test process.
     set pid_inf2 ""
@@ -100,100 +225,11 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 	with_test_prefix "iter $attempt" {
 	    gdb_test "inferior 1" "Switching to .*"
 
-	    with_timeout_factor 2 {
-		set attached 0
-		set saw_attaching 0
-		set eperm 0
-		set test "attach"
-		gdb_test_multiple "attach $testpid" $test {
-		    -re "Attaching to program.*process $testpid\r\n" {
-			set saw_attaching 1
-			exp_continue
-		    }
-		    -re "new threads in iteration" {
-			# Seen when "set debug libthread_db" is on.
-			exp_continue
-		    }
-		    -re "Reading symbols from|Expanding full symbols from" {
-			# Prevent -readnow timeout.
-			exp_continue
-		    }
-		    -re "is a zombie - the process has already terminated.*$::gdb_prompt " {
-			fail $gdb_test_name
-		    }
-		    -re "Unable to attach: .*$::gdb_prompt " {
-			fail $gdb_test_name
-		    }
-		    -re "\r\n$::gdb_prompt " {
-			if { $saw_attaching } {
-			    set attached 1
-			    pass $test
-			} else {
-			    fail $test
-			}
-		    }
-		}
-	    }
-
-	    if {!$attached} {
+	    if {![prepare_test_iter $testpid $non_stop \
+		      $attempt $attempts "$::decimal\.$::decimal"]} {
 		kill_wait_spawned_process $test_spawn_id
 		return
 	    }
-
-	    if {$non_stop} {
-		# In non-stop, we will see one stop per thread after
-		# the prompt.
-		set stops 0
-		set tid_re "$::decimal\.$::decimal"
-		set test "seen all stops"
-		for {set thread 1} { $thread <= $n_threads } { incr thread } {
-		    if {[gdb_test_multiple "" $test {
-			-re "Thread ${tid_re} ${any} stopped" {
-			    incr stops
-			}
-		    }] != 0} {
-			break
-		    }
-		}
-
-		# If we haven't seen all stops, then the
-		# gdb_test_multiple in the loop above will have
-		# already issued a FAIL.
-		if {$stops != $n_threads} {
-		    kill_wait_spawned_process $test_spawn_id
-		    return
-		}
-		pass $test
-	    }
-
-	    # Set threads stepping over a breakpoint continuously.
-	    gdb_test "break $::srcfile:$::bp_lineno if 0" "Breakpoint.*" \
-		"break LOC if 0"
-
-	    if {$attempt < $attempts} {
-		# Kick the time out timer for another round.
-		gdb_test "print again = 1" " = 1" "reset timer in the inferior"
-		# Show the time we had left in the logs, in case
-		# something goes wrong.
-		gdb_test "print seconds_left" " = .*"
-	    }
-
-	    if {$non_stop} {
-		set cont_cmd "continue -a &"
-	    } else {
-		set cont_cmd "continue &"
-	    }
-
-	    set cont_cmd_re [string_to_regexp $cont_cmd]
-	    gdb_test_multiple $cont_cmd "" {
-		-re "^$cont_cmd_re\r\nContinuing\.\r\n$::gdb_prompt " {
-		    pass $gdb_test_name
-		}
-	    }
-
-	    # Wait a bit, to give time for the threads to hit the
-	    # breakpoint.
-	    sleep 1
 
 	    set running_count 0
 	    set interrupted 0
@@ -219,7 +255,8 @@ proc test {condition_eval target_non_stop non_stop displaced} {
 		    }
 		}
 		-re "$::gdb_prompt $" {
-		    gdb_assert {$running_count == ($n_threads + 1) * 2} $gdb_test_name
+		    gdb_assert {$running_count == ($::n_threads + 1) * 2} \
+			$gdb_test_name
 		}
 	    }
 
@@ -292,7 +329,8 @@ foreach_with_prefix breakpoint-condition-evaluation {"host" "target"} {
 	    }
 
 	    foreach_with_prefix displaced {"off" "auto"} {
-		test ${breakpoint-condition-evaluation} ${target-non-stop} ${non-stop} ${displaced}
+		test_detach_command ${breakpoint-condition-evaluation} \
+		    ${target-non-stop} ${non-stop} ${displaced}
 	    }
 	}
     }
