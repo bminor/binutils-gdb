@@ -2526,6 +2526,12 @@ can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @option{-i} option.
 
+For most architectures it is possible to supply an architecture
+name and a machine name, separated by a colon.  For example
+@samp{foo:bar} would refer to the @samp{bar} machine type in the
+@samp{foo} architecture.  This can be helpful if objdump has been
+configured to support multiple architectures.
+
 If the target is an ARM architecture then this switch has an
 additional effect.  It restricts the disassembly to only those
 instructions supported by the architecture specified by @var{machine}.

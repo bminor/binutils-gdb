@@ -1,3 +1,13 @@
+2022-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29764
+	* testsuite/gas/arm/cpu-cortex-a76ae.d: Add arm prefix to the -m
+	option passed to objdump.
+	* testsuite/gas/arm/cpu-cortex-a77.d: Likewise.
+	* testsuite/gas/aarch64/cpu-cortex-a76ae.d: Add aarch64 prefix to
+	the -m option passed to objdump.
+	* testsuite/gas/aarch64/cpu-cortex-a77.d: Likewise.
+
 2022-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/rx/mvtacgu.d: Update expected disassembly.

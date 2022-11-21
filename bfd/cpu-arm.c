@@ -210,6 +210,15 @@ scan (const struct bfd_arch_info *info, const char *string)
   if (strcasecmp (string, info->printable_name) == 0)
     return true;
 
+  /* If there is a prefix of "arm:" then skip it.  */
+  const char * colon;
+  if ((colon = strchr (string, ':')) != NULL)
+    {
+      if (strncasecmp (string, "arm", colon - string) != 0)
+	return false;
+      string = colon + 1;
+    }
+
   /* Next check for a processor name instead of an Architecture name.  */
   for (i = sizeof (processors) / sizeof (processors[0]); i--;)
     {

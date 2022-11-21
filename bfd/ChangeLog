@@ -1,3 +1,9 @@
+2022-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29764
+	* cpu-arm.c (scan): Accept machine names prefixed with "arm:".
+	* cpu-aarch64.c (scan): Accept machine names prefixed with "aarch64:".
+
 2022-10-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 29699
