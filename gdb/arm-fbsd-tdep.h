@@ -35,6 +35,7 @@
 
 extern const struct regset arm_fbsd_gregset;
 extern const struct regset arm_fbsd_vfpregset;
+extern const struct regset arm_fbsd_tls_regset;
 
 /* Flags passed in AT_HWCAP. */
 #define	HWCAP_VFP		0x00000040
