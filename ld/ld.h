@@ -98,8 +98,9 @@ struct wildcard_spec
 {
   const char *name;
   struct name_list *exclude_name_list;
-  sort_type sorted;
   struct flag_info *section_flag_list;
+  size_t namelen, prefixlen, suffixlen;
+  sort_type sorted;
 };
 
 struct wildcard_list

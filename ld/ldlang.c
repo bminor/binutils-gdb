@@ -169,12 +169,73 @@ stat_alloc (size_t size)
   return obstack_alloc (&stat_obstack, size);
 }
 
+/* Code for handling simple wildcards without going through fnmatch,
+   which can be expensive because of charset translations etc.  */
+
+/* A simple wild is a literal string followed by a single '*',
+   where the literal part is at least 4 characters long.  */
+
+static bool
+is_simple_wild (const char *name)
+{
+  size_t len = strcspn (name, "*?[");
+  return len >= 4 && name[len] == '*' && name[len + 1] == '\0';
+}
+
+static bool
+match_simple_wild (const char *pattern, const char *name)
+{
+  /* The first four characters of the pattern are guaranteed valid
+     non-wildcard characters.  So we can go faster.  */
+  if (pattern[0] != name[0] || pattern[1] != name[1]
+      || pattern[2] != name[2] || pattern[3] != name[3])
+    return false;
+
+  pattern += 4;
+  name += 4;
+  while (*pattern != '*')
+    if (*name++ != *pattern++)
+      return false;
+
+  return true;
+}
+
 static int
 name_match (const char *pattern, const char *name)
 {
+  if (is_simple_wild (pattern))
+    return !match_simple_wild (pattern, name);
   if (wildcardp (pattern))
     return fnmatch (pattern, name, 0);
   return strcmp (pattern, name);
+}
+
+/* Given an analyzed wildcard_spec SPEC, match it against NAME,
+   returns zero on a match, non-zero if there's no match.  */
+
+static int
+spec_match (const struct wildcard_spec *spec, const char *name)
+{
+  size_t nl = spec->namelen;
+  size_t pl = spec->prefixlen;
+  size_t sl = spec->suffixlen;
+  int r;
+  if (pl && (r = memcmp (spec->name, name, pl)))
+    return r;
+  if (sl)
+    {
+      size_t inputlen = strlen (name);
+      if (inputlen < sl)
+	return 1;
+      r = memcmp (spec->name + nl - sl, name + inputlen - sl, sl);
+      if (r)
+	return r;
+    }
+  if (nl == pl + sl + 1 && spec->name[pl] == '*')
+    return 0;
+  else if (nl > pl)
+    return fnmatch (spec->name + pl, name + pl, 0);
+  return name[nl];
 }
 
 static char *
@@ -349,7 +410,7 @@ walk_wild_section_general (lang_wild_statement_type *ptr,
 	    {
 	      const char *sname = bfd_section_name (s);
 
-	      skip = name_match (sec->spec.name, sname) != 0;
+	      skip = spec_match (&sec->spec, sname) != 0;
 	    }
 
 	  if (!skip)
@@ -395,37 +456,6 @@ find_section (lang_input_statement_type *file,
 			      section_iterator_callback, &cb_data);
   *multiple_sections_found = cb_data.multiple_sections_found;
   return cb_data.found_section;
-}
-
-/* Code for handling simple wildcards without going through fnmatch,
-   which can be expensive because of charset translations etc.  */
-
-/* A simple wild is a literal string followed by a single '*',
-   where the literal part is at least 4 characters long.  */
-
-static bool
-is_simple_wild (const char *name)
-{
-  size_t len = strcspn (name, "*?[");
-  return len >= 4 && name[len] == '*' && name[len + 1] == '\0';
-}
-
-static bool
-match_simple_wild (const char *pattern, const char *name)
-{
-  /* The first four characters of the pattern are guaranteed valid
-     non-wildcard characters.  So we can go faster.  */
-  if (pattern[0] != name[0] || pattern[1] != name[1]
-      || pattern[2] != name[2] || pattern[3] != name[3])
-    return false;
-
-  pattern += 4;
-  name += 4;
-  while (*pattern != '*')
-    if (*name++ != *pattern++)
-      return false;
-
-  return true;
 }
 
 /* Return the numerical value of the init_priority attribute from
@@ -821,6 +851,24 @@ wild_spec_can_overlap (const char *name1, const char *name2)
   return memcmp (name1, name2, min_prefix_len) == 0;
 }
 
+/* Like strcspn() but start to look from the end to beginning of
+   S.  Returns the length of the suffix of S consisting entirely
+   of characters not in REJECT.  */
+
+static size_t
+rstrcspn (const char *s, const char *reject)
+{
+  size_t len = strlen (s), sufflen = 0;
+  while (len--)
+    {
+      char c = s[len];
+      if (strchr (reject, c) != 0)
+	break;
+      sufflen++;
+    }
+  return sufflen;
+}
+
 /* Select specialized code to handle various kinds of wildcard
    statements.  */
 
@@ -839,6 +887,19 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
   ptr->handler_data[2] = NULL;
   ptr->handler_data[3] = NULL;
   ptr->tree = NULL;
+
+  for (sec = ptr->section_list; sec != NULL; sec = sec->next)
+    {
+      if (sec->spec.name)
+	{
+	  sec->spec.namelen = strlen (sec->spec.name);
+	  sec->spec.prefixlen = strcspn (sec->spec.name, "?*[");
+	  sec->spec.suffixlen = rstrcspn (sec->spec.name + sec->spec.prefixlen,
+					  "?*]");
+	}
+      else
+	sec->spec.namelen = sec->spec.prefixlen = sec->spec.suffixlen = 0;
+    }
 
   /* Count how many wildcard_specs there are, and how many of those
      actually use wildcards in the name.  Also, bail out if any of the
