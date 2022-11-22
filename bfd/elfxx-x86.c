@@ -2932,7 +2932,7 @@ _bfd_x86_elf_always_size_sections (bfd *output_bfd,
 {
   asection *tls_sec = elf_hash_table (info)->tls_sec;
 
-  if (tls_sec)
+  if (tls_sec && !bfd_link_relocatable (info))
     {
       struct elf_link_hash_entry *tlsbase;
 
