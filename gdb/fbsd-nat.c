@@ -1744,7 +1744,7 @@ fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->supply_regset (regset, regnum, regs, size);
+      regset->supply_regset (regset, regcache, regnum, regs, size);
       return true;
     }
   return false;
@@ -1768,7 +1768,7 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
       if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->collect_regset (regset, regnum, regs, size);
+      regset->collect_regset (regset, regcache, regnum, regs, size);
 
       if (ptrace (store_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
@@ -1813,7 +1813,7 @@ fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
       if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->supply_regset (regset, regnum, regs, size);
+      regset->supply_regset (regset, regcache, regnum, regs, size);
       return true;
     }
   return false;
@@ -1838,7 +1838,7 @@ fbsd_nat_target::store_regset (struct regcache *regcache, int regnum, int note,
       if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      regcache->collect_regset (regset, regnum, regs, size);
+      regset->collect_regset (regset, regcache, regnum, regs, size);
 
       if (ptrace (PT_SETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't write registers"));
