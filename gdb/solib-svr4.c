@@ -1977,17 +1977,22 @@ svr4_handle_solib_event (void)
   if (info->probes_table == NULL)
     return;
 
+  pc = regcache_read_pc (get_current_regcache ());
+  pa = solib_event_probe_at (info, pc);
+  if (pa == nullptr)
+    {
+      /* When some solib ops sits above us, it can respond to a solib event
+	 by calling in here.  This is done assuming that if the current event
+	 is not an SVR4 solib event, calling here should be a no-op.  */
+      return;
+    }
+
   /* If anything goes wrong we revert to the original linker
      interface.  */
   auto cleanup = make_scope_exit ([info] ()
     {
       disable_probes_interface (info);
     });
-
-  pc = regcache_read_pc (get_current_regcache ());
-  pa = solib_event_probe_at (info, pc);
-  if (pa == NULL)
-    return;
 
   action = solib_event_probe_action (pa);
   if (action == PROBES_INTERFACE_FAILED)
