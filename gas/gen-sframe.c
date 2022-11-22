@@ -202,25 +202,25 @@ struct sframe_fre_offset_func_map
 static unsigned int
 sframe_fre_offset_func_map_index (unsigned int offset_size)
 {
-  unsigned int index = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX;
+  unsigned int idx = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX;
 
   switch (offset_size)
     {
       case SFRAME_FRE_OFFSET_1B:
-	index = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_1B;
+	idx = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_1B;
 	break;
       case SFRAME_FRE_OFFSET_2B:
-	index = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_2B;
+	idx = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_2B;
 	break;
       case SFRAME_FRE_OFFSET_4B:
-	index = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_4B;
+	idx = SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_4B;
 	break;
       default:
 	/* Not supported in SFrame.  */
 	break;
     }
 
-  return index;
+  return idx;
 }
 
 /* Mapping from offset size to the output function to emit the value.  */
@@ -445,7 +445,7 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   expressionS exp;
   unsigned int fre_addr_size;
 
-  unsigned int index = 0;
+  unsigned int idx = 0;
   unsigned int fre_write_offsets = 0;
 
   fre_addr_size = 4; /* 4 bytes by default.   FIXME tie it to fre_type? */
@@ -475,23 +475,23 @@ output_sframe_row_entry (symbolS *fde_start_addr,
 				     fre_offset_size);
   out_one (fre_info);
 
-  index = sframe_fre_offset_func_map_index (fre_offset_size);
-  gas_assert (index < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
+  idx = sframe_fre_offset_func_map_index (fre_offset_size);
+  gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
 
   /* Write out the offsets in order - cfa, bp, ra.  */
-  fre_offset_func_map[index].out_func (sframe_fre->cfa_offset);
+  fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
   fre_write_offsets++;
 
 #ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
-      fre_offset_func_map[index].out_func (sframe_fre->ra_offset);
+      fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
       fre_write_offsets++;
     }
 #endif
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
-      fre_offset_func_map[index].out_func (sframe_fre->bp_offset);
+      fre_offset_func_map[idx].out_func (sframe_fre->bp_offset);
       fre_write_offsets++;
     }
 
