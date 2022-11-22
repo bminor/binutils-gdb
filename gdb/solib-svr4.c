@@ -2205,15 +2205,34 @@ svr4_find_and_create_probe_breakpoints (svr4_info *info,
 
       probes[i] = find_probes_in_objfile (os->objfile, "rtld", name);
 
-      /* The "map_failed" probe did not exist in early
-	 versions of the probes code in which the probes'
-	 names were prefixed with "rtld_".  */
-      if (with_prefix && streq (name, "rtld_map_failed"))
-	continue;
-
       /* Ensure at least one probe for the current name was found.  */
       if (probes[i].empty ())
-	return false;
+	{
+	  /* The "map_failed" probe did not exist in early versions of the
+	     probes code in which the probes' names were prefixed with
+	     "rtld_".
+
+	     Additionally, the "map_failed" probe was accidentally removed
+	     from glibc 2.35 and 2.36, when changes in glibc meant the
+	     probe could no longer be reached, and the compiler optimized
+	     the probe away.  In this case the probe name doesn't have the
+	     "rtld_" prefix.
+
+	     To handle this, and give GDB as much flexibility as possible,
+	     we make the rule that, if a probe isn't required for the
+	     correct operation of GDB (i.e. its action is DO_NOTHING), then
+	     we will still use the probes interface, even if that probe is
+	     missing.
+
+	     The only (possible) downside of this is that, if the user has
+	     'set stop-on-solib-events on' in effect, then they might get
+	     fewer events using the probes interface than with the classic
+	     non-probes interface.  */
+	  if (probe_info[i].action == DO_NOTHING)
+	    continue;
+	  else
+	    return false;
+	}
 
       /* Ensure probe arguments can be evaluated.  */
       for (probe *p : probes[i])
