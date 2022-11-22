@@ -178,14 +178,6 @@
 #define offsetof(TYPE, MEMBER) ((size_t) &(((TYPE *) 0)->MEMBER))
 #endif
 
-#if defined (HAVE_FSEEKO64)
-#define FSEEK_FUNC fseeko64
-#elif defined (HAVE_FSEEKO)
-#define FSEEK_FUNC fseeko
-#else
-#define FSEEK_FUNC fseek
-#endif
-
 typedef struct elf_section_list
 {
   Elf_Internal_Shdr *        hdr;
@@ -373,6 +365,36 @@ enum versioned_symbol_info
   symbol_public
 };
 
+static int
+fseek64 (FILE *stream, int64_t offset, int whence)
+{
+#if defined (HAVE_FSEEKO64)
+  off64_t o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseeko64 (stream, o, whence);
+#elif defined (HAVE_FSEEKO)
+  off_t o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseeko (stream, o, whence);
+#else
+  long o = offset;
+  if (o != offset)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+  return fseek (stream, o, whence);
+#endif
+}
+
 static const char * get_symbol_version_string
   (Filedata *, bool, const char *, unsigned long, unsigned,
    Elf_Internal_Sym *, enum versioned_symbol_info *, unsigned short *);
@@ -490,8 +512,8 @@ get_data (void *var,
       return NULL;
     }
 
-  if (FSEEK_FUNC (filedata->handle, filedata->archive_file_offset + offset,
-	     SEEK_SET))
+  if (fseek64 (filedata->handle, filedata->archive_file_offset + offset,
+	       SEEK_SET))
     {
       if (reason)
 	error (_("Unable to seek to 0x%lx for %s\n"),
@@ -6291,9 +6313,9 @@ the .dynamic section is not the same as the dynamic segment\n"));
 	  if (segment->p_offset >= filedata->file_size
 	      || segment->p_filesz > filedata->file_size - segment->p_offset
 	      || segment->p_filesz - 1 >= (size_t) -2
-	      || FSEEK_FUNC (filedata->handle,
-			filedata->archive_file_offset + (long) segment->p_offset,
-			SEEK_SET))
+	      || fseek64 (filedata->handle,
+			  filedata->archive_file_offset + segment->p_offset,
+			  SEEK_SET))
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
@@ -11064,11 +11086,12 @@ get_num_dynamic_syms (Filedata * filedata)
 	  && filedata->file_header.e_ident[EI_CLASS] == ELFCLASS64)
 	hash_ent_size = 8;
 
-      if (FSEEK_FUNC (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, filedata->dynamic_info[DT_HASH],
-				     sizeof nb + sizeof nc)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       filedata->dynamic_info[DT_HASH],
+				       sizeof nb + sizeof nc)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_hash;
@@ -11117,12 +11140,12 @@ get_num_dynamic_syms (Filedata * filedata)
       uint64_t buckets_vma;
       unsigned long hn;
 
-      if (FSEEK_FUNC (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata,
-				     filedata->dynamic_info_DT_GNU_HASH,
-				     sizeof nb)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       filedata->dynamic_info_DT_GNU_HASH,
+				       sizeof nb)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11143,10 +11166,10 @@ get_num_dynamic_syms (Filedata * filedata)
       else
 	buckets_vma += bitmaskwords * 8;
 
-      if (FSEEK_FUNC (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, buckets_vma, 4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata, buckets_vma, 4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11173,13 +11196,13 @@ get_num_dynamic_syms (Filedata * filedata)
 
       maxchain -= filedata->gnusymidx;
 
-      if (FSEEK_FUNC (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata,
-				     buckets_vma + 4 * (filedata->ngnubuckets
-							+ maxchain),
-				      4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata,
+				       buckets_vma + 4 * (filedata->ngnubuckets
+							  + maxchain),
+				       4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11200,12 +11223,12 @@ get_num_dynamic_syms (Filedata * filedata)
 	}
       while ((byte_get (nb, 4) & 1) == 0);
 
-      if (FSEEK_FUNC (filedata->handle,
-		 (filedata->archive_file_offset
-		  + offset_from_vma (filedata, (buckets_vma
-						+ 4 * filedata->ngnubuckets),
-				     4)),
-		 SEEK_SET))
+      if (fseek64 (filedata->handle,
+		   (filedata->archive_file_offset
+		    + offset_from_vma (filedata, (buckets_vma
+						  + 4 * filedata->ngnubuckets),
+				       4)),
+		   SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
 	  goto no_gnu_hash;
@@ -11219,12 +11242,12 @@ get_num_dynamic_syms (Filedata * filedata)
 
       if (filedata->dynamic_info_DT_MIPS_XHASH)
 	{
-	  if (FSEEK_FUNC (filedata->handle,
-		     (filedata->archive_file_offset
-		      + offset_from_vma (filedata, (buckets_vma
-						    + 4 * (filedata->ngnubuckets
-							   + maxchain)), 4)),
-		     SEEK_SET))
+	  if (fseek64 (filedata->handle,
+		       (filedata->archive_file_offset
+			+ offset_from_vma (filedata, (buckets_vma
+						      + 4 * (filedata->ngnubuckets
+							     + maxchain)), 4)),
+		       SEEK_SET))
 	    {
 	      error (_("Unable to seek to start of dynamic information\n"));
 	      goto no_gnu_hash;
@@ -22618,7 +22641,7 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 	      ret = false;
 	    }
 
-	  if (FSEEK_FUNC (filedata->handle, current_pos, SEEK_SET) != 0)
+	  if (fseek64 (filedata->handle, current_pos, SEEK_SET) != 0)
 	    {
 	      error (_("%s: failed to seek back to start of object files "
 		       "in the archive\n"),
@@ -22645,7 +22668,7 @@ process_archive (Filedata * filedata, bool is_thin_archive)
       char * qualified_name;
 
       /* Read the next archive header.  */
-      if (FSEEK_FUNC (filedata->handle, arch.next_arhdr_offset, SEEK_SET) != 0)
+      if (fseek64 (filedata->handle, arch.next_arhdr_offset, SEEK_SET) != 0)
 	{
 	  error (_("%s: failed to seek to next archive header\n"),
 		 arch.file_name);
@@ -22755,8 +22778,8 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 
 	  /* The nested archive file will have been opened and setup by
 	     get_archive_member_name.  */
-	  if (FSEEK_FUNC (nested_arch.file, filedata->archive_file_offset,
-		     SEEK_SET) != 0)
+	  if (fseek64 (nested_arch.file, filedata->archive_file_offset,
+		       SEEK_SET) != 0)
 	    {
 	      error (_("%s: failed to seek to archive member.\n"),
 		     nested_arch.file_name);
