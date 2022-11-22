@@ -313,6 +313,17 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4675 \(vstval\) at cfa\+2316
   DW_CFA_offset_extended_sf: r4676 \(vsip\) at cfa\+2320
   DW_CFA_offset_extended_sf: r4736 \(vsatp\) at cfa\+2560
+  DW_CFA_offset_extended_sf: r4944 \(miselect\) at cfa\+3392
+  DW_CFA_offset_extended_sf: r4945 \(mireg\) at cfa\+3396
+  DW_CFA_offset_extended_sf: r4956 \(mtopei\) at cfa\+3440
+  DW_CFA_offset_extended_sf: r8112 \(mtopi\) at cfa\+16064
+  DW_CFA_offset_extended_sf: r4872 \(mvien\) at cfa\+3104
+  DW_CFA_offset_extended_sf: r4873 \(mvip\) at cfa\+3108
+  DW_CFA_offset_extended_sf: r4883 \(midelegh\) at cfa\+3148
+  DW_CFA_offset_extended_sf: r4884 \(mieh\) at cfa\+3152
+  DW_CFA_offset_extended_sf: r4888 \(mvienh\) at cfa\+3168
+  DW_CFA_offset_extended_sf: r4889 \(mviph\) at cfa\+3172
+  DW_CFA_offset_extended_sf: r4948 \(miph\) at cfa\+3408
   DW_CFA_offset_extended_sf: r4876 \(mstateen0\) at cfa\+3120
   DW_CFA_offset_extended_sf: r4877 \(mstateen1\) at cfa\+3124
   DW_CFA_offset_extended_sf: r4878 \(mstateen2\) at cfa\+3128
@@ -333,6 +344,27 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5661 \(hstateen1h\) at cfa\+6260
   DW_CFA_offset_extended_sf: r5662 \(hstateen2h\) at cfa\+6264
   DW_CFA_offset_extended_sf: r5663 \(hstateen3h\) at cfa\+6268
+  DW_CFA_offset_extended_sf: r4432 \(siselect\) at cfa\+1344
+  DW_CFA_offset_extended_sf: r4433 \(sireg\) at cfa\+1348
+  DW_CFA_offset_extended_sf: r4444 \(stopei\) at cfa\+1392
+  DW_CFA_offset_extended_sf: r7600 \(stopi\) at cfa\+14016
+  DW_CFA_offset_extended_sf: r4372 \(sieh\) at cfa\+1104
+  DW_CFA_offset_extended_sf: r4436 \(siph\) at cfa\+1360
+  DW_CFA_offset_extended_sf: r5640 \(hvien\) at cfa\+6176
+  DW_CFA_offset_extended_sf: r5641 \(hvictl\) at cfa\+6180
+  DW_CFA_offset_extended_sf: r5702 \(hviprio1\) at cfa\+6424
+  DW_CFA_offset_extended_sf: r5703 \(hviprio2\) at cfa\+6428
+  DW_CFA_offset_extended_sf: r4688 \(vsiselect\) at cfa\+2368
+  DW_CFA_offset_extended_sf: r4689 \(vsireg\) at cfa\+2372
+  DW_CFA_offset_extended_sf: r4700 \(vstopei\) at cfa\+2416
+  DW_CFA_offset_extended_sf: r7856 \(vstopi\) at cfa\+15040
+  DW_CFA_offset_extended_sf: r5651 \(hidelegh\) at cfa\+6220
+  DW_CFA_offset_extended_sf: r5656 \(hvienh\) at cfa\+6240
+  DW_CFA_offset_extended_sf: r5717 \(hviph\) at cfa\+6484
+  DW_CFA_offset_extended_sf: r5718 \(hviprio1h\) at cfa\+6488
+  DW_CFA_offset_extended_sf: r5719 \(hviprio2h\) at cfa\+6492
+  DW_CFA_offset_extended_sf: r4628 \(vsieh\) at cfa\+2128
+  DW_CFA_offset_extended_sf: r4692 \(vsiph\) at cfa\+2384
   DW_CFA_offset_extended_sf: r7584 \(scountovf\) at cfa\+13952
   DW_CFA_offset_extended_sf: r5923 \(mhpmevent3h\) at cfa\+7308
   DW_CFA_offset_extended_sf: r5924 \(mhpmevent4h\) at cfa\+7312
