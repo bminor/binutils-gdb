@@ -401,9 +401,9 @@ arm_cache_init (struct arm_prologue_cache *cache, frame_info_ptr frame)
   else if (tdep->is_m)
     {
       cache->msp_s
-	= get_frame_register_unsigned (frame, tdep->m_profile_msp_s_regnum);
+	= get_frame_register_unsigned (frame, tdep->m_profile_msp_regnum);
       cache->psp_s
-	= get_frame_register_unsigned (frame, tdep->m_profile_psp_s_regnum);
+	= get_frame_register_unsigned (frame, tdep->m_profile_psp_regnum);
 
       /* Identify what sp is alias for (msp or psp).  */
       if (cache->msp_s == cache->sp)
