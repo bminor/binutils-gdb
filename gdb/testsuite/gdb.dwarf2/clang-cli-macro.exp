@@ -26,9 +26,6 @@ load_lib dwarf.exp
 if {![dwarf2_support]} {
     return 0
 }
-if {![test_compiler_info gcc-*-*]} {
-    untested "dwarf assembler needs GCC"
-}
 
 standard_testfile .c .S
 
