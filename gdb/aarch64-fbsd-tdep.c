@@ -50,6 +50,14 @@ static const struct regcache_map_entry aarch64_fbsd_fpregmap[] =
     { 0 }
   };
 
+/* Register numbers are relative to tdep->tls_regnum.  */
+
+static const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
+  {
+    { 1, 0, 8 },	/* tpidr */
+    { 0 }
+  };
+
 /* In a signal frame, sp points to a 'struct sigframe' which is
    defined as:
 
@@ -135,6 +143,34 @@ const struct regset aarch64_fbsd_fpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
+static void
+aarch64_fbsd_supply_tls_regset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  regcache->supply_regset (regset, tdep->tls_regnum, regnum, buf, size);
+}
+
+static void
+aarch64_fbsd_collect_tls_regset (const struct regset *regset,
+				 const struct regcache *regcache,
+				 int regnum, void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  regcache->collect_regset (regset, tdep->tls_regnum, regnum, buf, size);
+}
+
+const struct regset aarch64_fbsd_tls_regset =
+  {
+    aarch64_fbsd_tls_regmap,
+    aarch64_fbsd_supply_tls_regset, aarch64_fbsd_collect_tls_regset
+  };
+
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
@@ -151,23 +187,9 @@ aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &aarch64_fbsd_fpregset, NULL, cb_data);
 
   if (tdep->has_tls ())
-    {
-      const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
-	{
-	  { 1, tdep->tls_regnum, 8 },
-	  { 0 }
-	};
-
-      const struct regset aarch64_fbsd_tls_regset =
-	{
-	  aarch64_fbsd_tls_regmap,
-	  regcache_supply_regset, regcache_collect_regset
-	};
-
-      cb (".reg-aarch-tls", AARCH64_FBSD_SIZEOF_TLSREGSET,
-	  AARCH64_FBSD_SIZEOF_TLSREGSET, &aarch64_fbsd_tls_regset,
-	  "TLS register", cb_data);
-    }
+    cb (".reg-aarch-tls", AARCH64_FBSD_SIZEOF_TLSREGSET,
+	AARCH64_FBSD_SIZEOF_TLSREGSET, &aarch64_fbsd_tls_regset,
+	"TLS register", cb_data);
 }
 
 /* Implement the "core_read_description" gdbarch method.  */

@@ -92,22 +92,8 @@ aarch64_fbsd_nat_target::fetch_registers (struct regcache *regcache,
   gdbarch *gdbarch = regcache->arch ();
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   if (tdep->has_tls ())
-    {
-      const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
-	{
-	  { 1, tdep->tls_regnum, 8 },
-	  { 0 }
-	};
-
-      const struct regset aarch64_fbsd_tls_regset =
-	{
-	  aarch64_fbsd_tls_regmap,
-	  regcache_supply_regset, regcache_collect_regset
-	};
-
-      fetch_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
-			      &aarch64_fbsd_tls_regset);
-    }
+    fetch_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
+			    &aarch64_fbsd_tls_regset, tdep->tls_regnum);
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
@@ -125,22 +111,8 @@ aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
   gdbarch *gdbarch = regcache->arch ();
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   if (tdep->has_tls ())
-    {
-      const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
-	{
-	  { 1, tdep->tls_regnum, 8 },
-	  { 0 }
-	};
-
-      const struct regset aarch64_fbsd_tls_regset =
-	{
-	  aarch64_fbsd_tls_regmap,
-	  regcache_supply_regset, regcache_collect_regset
-	};
-
-      store_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
-			      &aarch64_fbsd_tls_regset);
-    }
+    store_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
+			    &aarch64_fbsd_tls_regset, tdep->tls_regnum);
 }
 
 /* Implement the target read_description method.  */

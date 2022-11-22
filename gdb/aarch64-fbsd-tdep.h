@@ -37,5 +37,6 @@
 
 extern const struct regset aarch64_fbsd_gregset;
 extern const struct regset aarch64_fbsd_fpregset;
+extern const struct regset aarch64_fbsd_tls_regset;
 
 #endif /* AARCH64_FBSD_TDEP_H */
