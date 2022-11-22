@@ -11082,7 +11082,7 @@ display_debug_not_supported (struct dwarf_section *section,
    Note: does *not* initialise the allocated memory to zero.  */
 
 void *
-cmalloc (size_t nmemb, size_t size)
+cmalloc (uint64_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
@@ -11096,13 +11096,13 @@ cmalloc (size_t nmemb, size_t size)
    Note: does *not* initialise the allocated memory to zero.  */
 
 void *
-xcmalloc (size_t nmemb, size_t size)
+xcmalloc (uint64_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     {
       fprintf (stderr,
-	       _("Attempt to allocate an array with an excessive number of elements: %#zx\n"),
+	       _("Attempt to allocate an array with an excessive number of elements: %#" PRIx64 "\n"),
 	       nmemb);
       xexit (1);
     }
@@ -11115,12 +11115,12 @@ xcmalloc (size_t nmemb, size_t size)
    Note: does *not* initialise any new memory to zero.  */
 
 void *
-xcrealloc (void *ptr, size_t nmemb, size_t size)
+xcrealloc (void *ptr, uint64_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     {
-      error (_("Attempt to re-allocate an array with an excessive number of elements: %#zx\n"),
+      error (_("Attempt to re-allocate an array with an excessive number of elements: %#" PRIx64 "\n"),
 	     nmemb);
       xexit (1);
     }
@@ -11131,12 +11131,12 @@ xcrealloc (void *ptr, size_t nmemb, size_t size)
 /* Like xcalloc, but verifies that the first parameter is not too large.  */
 
 void *
-xcalloc2 (size_t nmemb, size_t size)
+xcalloc2 (uint64_t nmemb, size_t size)
 {
   /* Check for overflow.  */
   if (nmemb >= ~(size_t) 0 / size)
     {
-      error (_("Attempt to allocate a zero'ed array with an excessive number of elements: %#zx\n"),
+      error (_("Attempt to allocate a zero'ed array with an excessive number of elements: %#" PRIx64 "\n"),
 	     nmemb);
       xexit (1);
     }

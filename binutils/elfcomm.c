@@ -530,7 +530,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
       /* PR 17531: file: 01068045.  */
       if (arch->longnames_size < 8)
 	{
-	  error (_("%s: long name table is too small, (size = %ld)\n"),
+	  error (_("%s: long name table is too small, (size = %" PRId64 ")\n"),
 		 file_name, arch->longnames_size);
 	  return 1;
 	}
@@ -538,7 +538,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
       if ((off_t) arch->longnames_size > file_size
 	  || (signed long) arch->longnames_size < 0)
 	{
-	  error (_("%s: long name table is too big, (size = 0x%lx)\n"),
+	  error (_("%s: long name table is too big, (size = %#" PRIx64 ")\n"),
 		 file_name, arch->longnames_size);
 	  return 1;
 	}
