@@ -496,11 +496,21 @@ gdb_continue_to_end
 
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
-#
-gdb_test_no_output "set breakpoint pending off"
-gdb_test "break 999" \
-    "No line 999 in the current file." \
-    "break on non-existent source line"
+
+proc_with_prefix test_break_nonexistent_line {} {
+    clean_restart break
+
+    if ![runto_main] then {
+	return
+    }
+
+    gdb_test_no_output "set breakpoint pending off"
+    gdb_test "break 999" \
+	"No line 999 in the current file." \
+	"break on non-existent source line"
+}
+
+test_break_nonexistent_line
 
 proc_with_prefix test_break_default {} {
     clean_restart break
