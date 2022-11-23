@@ -656,34 +656,40 @@ gdb_test_multiple "finish" "finish from called function" {
 
 # Verify that GDB responds gracefully to a "finish" command with
 # arguments.
-#
-if ![runto_main] then {
-    return
-}
 
-send_gdb "finish 123\n"
-gdb_expect {
-  -re "The \"finish\" command does not take any arguments.\r\n$gdb_prompt $"\
-          {pass "finish with arguments disallowed"}
-  -re "$gdb_prompt $"\
-          {fail "finish with arguments disallowed"}
-  timeout {fail "(timeout) finish with arguments disallowed"}
-}
+proc_with_prefix test_finish_arguments {} {
+    clean_restart break
 
-# Verify that GDB responds gracefully to a request to "finish" from
-# the outermost frame.  On a stub that never exits, this will just
-# run to the stubs routine, so we don't get this error...  Thus the 
-# second condition.
-#
-
-gdb_test_multiple "finish" "finish from outermost frame disallowed" {
-    -re "\"finish\" not meaningful in the outermost frame.\r\n$gdb_prompt $" {
-	pass "finish from outermost frame disallowed"
+    if ![runto_main] then {
+	return
     }
-    -re "Run till exit from.*\r\n$gdb_prompt $" {
-	pass "finish from outermost frame disallowed"
+
+    send_gdb "finish 123\n"
+    gdb_expect {
+      -re "The \"finish\" command does not take any arguments.\r\n$::gdb_prompt $"\
+	      {pass "finish with arguments disallowed"}
+      -re "$::gdb_prompt $"\
+	      {fail "finish with arguments disallowed"}
+      timeout {fail "(timeout) finish with arguments disallowed"}
+    }
+
+    # Verify that GDB responds gracefully to a request to "finish" from
+    # the outermost frame.  On a stub that never exits, this will just
+    # run to the stubs routine, so we don't get this error...  Thus the
+    # second condition.
+    #
+
+    gdb_test_multiple "finish" "finish from outermost frame disallowed" {
+	-re "\"finish\" not meaningful in the outermost frame.\r\n$::gdb_prompt $" {
+	    pass "finish from outermost frame disallowed"
+	}
+	-re "Run till exit from.*\r\n$::gdb_prompt $" {
+	    pass "finish from outermost frame disallowed"
+	}
     }
 }
+
+test_finish_arguments
 
 #********
 
