@@ -773,67 +773,64 @@ test_next_with_recursion
 # build a new file with optimization enabled so that we can try breakpoints
 # on targets with optimized prologues
 
-if { [prepare_for_testing "failed to prepare" "breako2" {break.c break1.c} {debug nowarnings optimize=-O2}] } {
+if { [build_executable "failed to prepare" "breako2" {break.c break1.c} {debug nowarnings optimize=-O2}] } {
     return -1
 }
 
-#
-# test break at function
-#
-gdb_test "break -q main" \
-    "Breakpoint.*at.* file .*, line.*" \
-    "breakpoint function, optimized file"
+proc_with_prefix test_break_optimized_prologue {} {
+    clean_restart breako2
 
-#
-# test break at function
-#
-gdb_test "break marker4" \
-    "Breakpoint.*at.* file .*$srcfile1, line.*" \
-    "breakpoint small function, optimized file"
+    # test break at function
+    gdb_test "break -q main" \
+	"Breakpoint.*at.* file .*, line.*" \
+	"breakpoint function, optimized file"
 
-#
-# run until the breakpoint at main is hit. For non-stubs-using targets.
-#
-gdb_run_cmd
+    # test break at function
+    gdb_test "break marker4" \
+	"Breakpoint.*at.* file .*$::srcfile1, line.*" \
+	"breakpoint small function, optimized file"
 
-set test "run until function breakpoint, optimized file"
-gdb_test_multiple "" $test {
-    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $" {
-	pass $test
+    # run until the breakpoint at main is hit. For non-stubs-using targets.
+    gdb_run_cmd
+
+    set test "run until function breakpoint, optimized file"
+    gdb_test_multiple "" $test {
+	-re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$::srcfile:$::bp_location6.*$::bp_location6\[\t \]+if .argc.* \{.*$::gdb_prompt $" {
+	    pass $test
+	}
+	-re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$::gdb_prompt $" {
+	    pass "$test (code motion)"
+	}
     }
-    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $" {
-	pass "$test (code motion)"
-    }
+
+    # run until the breakpoint at a small function
+    #
+    # Add a second pass pattern.  The behavior differs here between stabs
+    # and dwarf for one-line functions.  Stabs preserves two line symbols
+    # (one before the prologue and one after) with the same line number,
+    # but dwarf regards these as duplicates and discards one of them.
+    # Therefore the address after the prologue (where the breakpoint is)
+    # has no exactly matching line symbol, and GDB reports the breakpoint
+    # as if it were in the middle of a line rather than at the beginning.
+
+    set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $::srcfile1]
+
+    gdb_test_multiple "continue" \
+	"run until breakpoint set at small function, optimized file" {
+	    -re "Breakpoint $::decimal, marker4 \\(d=(d@entry=)?177601976\\) at .*$::srcfile1:$bp_location14\[\r\n\]+$bp_location14\[\t \]+void marker4.*" {
+		pass "run until breakpoint set at small function, optimized file (line bp_location14)"
+	    }
+	    -re "Breakpoint $::decimal, factorial \\(.*\\) .*\{\r\n$::gdb_prompt" {
+		# GCC 4.3 emits bad line number information - see gcc/36748.
+		if { [test_compiler_info "gcc-4-3-*"] } {
+		    setup_xfail *-*-*
+		}
+		fail "run until breakpoint set at small function, optimized file"
+	    }
+	}
 }
 
-#
-# run until the breakpoint at a small function
-#
-
-#
-# Add a second pass pattern.  The behavior differs here between stabs
-# and dwarf for one-line functions.  Stabs preserves two line symbols
-# (one before the prologue and one after) with the same line number, 
-# but dwarf regards these as duplicates and discards one of them.
-# Therefore the address after the prologue (where the breakpoint is)
-# has no exactly matching line symbol, and GDB reports the breakpoint
-# as if it were in the middle of a line rather than at the beginning.
-
-set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile1]
-
-gdb_test_multiple "continue" \
-    "run until breakpoint set at small function, optimized file" {
-	-re "Breakpoint $decimal, marker4 \\(d=(d@entry=)?177601976\\) at .*$srcfile1:$bp_location14\[\r\n\]+$bp_location14\[\t \]+void marker4.*" {
-	    pass "run until breakpoint set at small function, optimized file (line bp_location14)"
-	}
-	-re "Breakpoint $decimal, factorial \\(.*\\) .*\{\r\n$gdb_prompt" {
-	    # GCC 4.3 emits bad line number information - see gcc/36748.
-	    if { [test_compiler_info "gcc-4-3-*"] } {
-		setup_xfail *-*-*
-	    }
-	    fail "run until breakpoint set at small function, optimized file"
-	}
-    }
+test_break_optimized_prologue
 
 # test that 'rbreak' on a symbol that may be from a shared library doesn't
 # cause a "Junk at end of arguments." error.
