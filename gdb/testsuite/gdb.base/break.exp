@@ -533,75 +533,81 @@ gdb_test "break if (1)" \
 
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
-#
-if ![runto_main] then {
-    return
-}
 
-gdb_test_multiple "break $bp_location1" \
-    "set to-be-silent break bp_location1" {
-	-re "Breakpoint (\[0-9\]*) at .*, line $bp_location1.*$gdb_prompt $" {
-	    set bpno $expect_out(1,string)
-	    pass "set to-be-silent break bp_location1"
-	}
+proc_with_prefix test_break_silent_and_more {} {
+    clean_restart break
+
+    if ![runto_main] then {
+	return
     }
 
-gdb_test "commands $bpno\nsilent\nend" ">end" "set silent break bp_location1"
+    gdb_test_multiple "break $::bp_location1" \
+	"set to-be-silent break bp_location1" {
+	    -re "Breakpoint (\[0-9\]*) at .*, line $::bp_location1.*$::gdb_prompt $" {
+		set bpno $expect_out(1,string)
+		pass "set to-be-silent break bp_location1"
+	    }
+	}
 
-gdb_test "info break $bpno" \
-    "\[0-9\]*\[ \t\]*breakpoint.*:$bp_location1\r\n\[ \t\]*silent.*" \
-    "info silent break bp_location1"
+    gdb_test "commands $bpno\nsilent\nend" ">end" "set silent break bp_location1"
 
-gdb_test "continue" "Continuing." \
-    "hit silent break bp_location1"
+    gdb_test "info break $bpno" \
+	"\[0-9\]*\[ \t\]*breakpoint.*:$::bp_location1\r\n\[ \t\]*silent.*" \
+	"info silent break bp_location1"
 
-gdb_test "bt" "#0  main .* at .*:$bp_location1.*" \
-    "stopped for silent break bp_location1"
+    gdb_test "continue" "Continuing." \
+	"hit silent break bp_location1"
 
-# Verify the $_hit_bpnum convenience variable is set to the silent hit bpno.
-gdb_test "printf \"%d\\n\", \$_hit_bpnum" "$bpno" \
-    "Silent breakpoint hit \$_hit_bpnum is silent $bpno"
- 
-# Verify that GDB can at least parse a breakpoint with the
-# "thread" keyword.  (We won't attempt to test here that a
-# thread-specific breakpoint really triggers appropriately.
-# The gdb.threads subdirectory contains tests for that.)
-#
-set bp_location12 [gdb_get_line_number "set breakpoint 12 here"]
-gdb_test "break $bp_location12 thread 999" "Unknown thread 999.*" \
-    "thread-specific breakpoint on non-existent thread disallowed"
+    gdb_test "bt" "#0  main .* at .*:$::bp_location1.*" \
+	"stopped for silent break bp_location1"
 
-gdb_test "break $bp_location12 thread foo" \
-    "Invalid thread ID: foo" \
-    "thread-specific breakpoint on bogus thread ID disallowed"
+    # Verify the $_hit_bpnum convenience variable is set to the silent hit bpno.
+    gdb_test "printf \"%d\\n\", \$_hit_bpnum" "$bpno" \
+	"Silent breakpoint hit \$_hit_bpnum is silent $bpno"
 
-# Verify that GDB responds gracefully to a breakpoint command with
-# trailing garbage.
-#
-gdb_test "break $bp_location12 foo" \
-    "malformed linespec error: unexpected string, \"foo\".*" \
-    "breakpoint with trailing garbage disallowed"
+    # Verify that GDB can at least parse a breakpoint with the
+    # "thread" keyword.  (We won't attempt to test here that a
+    # thread-specific breakpoint really triggers appropriately.
+    # The gdb.threads subdirectory contains tests for that.)
+    #
+    set bp_location12 [gdb_get_line_number "set breakpoint 12 here"]
+    gdb_test "break $bp_location12 thread 999" "Unknown thread 999.*" \
+	"thread-specific breakpoint on non-existent thread disallowed"
 
-# Verify that GDB responds gracefully to a "clear" command that has
-# no matching breakpoint.  (First, get us off the current source line,
-# which we know has a breakpoint.)
-#
-gdb_test "next" "marker1.*" "step over breakpoint"
+    gdb_test "break $bp_location12 thread foo" \
+	"Invalid thread ID: foo" \
+	"thread-specific breakpoint on bogus thread ID disallowed"
 
-gdb_test "clear 81" "No breakpoint at 81.*" \
-    "clear line has no breakpoint disallowed"
+    # Verify that GDB responds gracefully to a breakpoint command with
+    # trailing garbage.
+    #
+    gdb_test "break $bp_location12 foo" \
+	"malformed linespec error: unexpected string, \"foo\".*" \
+	"breakpoint with trailing garbage disallowed"
 
-gdb_test "clear" "No breakpoint at this line.*" \
-    "clear current line has no breakpoint disallowed"
+    # Verify that GDB responds gracefully to a "clear" command that has
+    # no matching breakpoint.  (First, get us off the current source line,
+    # which we know has a breakpoint.)
+    #
+    gdb_test "next" "marker1.*" "step over breakpoint"
 
-# Verify that we can set and clear multiple breakpoints.
-#
-# We don't test that it deletes the correct breakpoints.  We do at
-# least test that it deletes more than one breakpoint.
-#
-gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #1"
-gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #2"
-gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
+    gdb_test "clear 81" "No breakpoint at 81.*" \
+	"clear line has no breakpoint disallowed"
+
+    gdb_test "clear" "No breakpoint at this line.*" \
+	"clear current line has no breakpoint disallowed"
+
+    # Verify that we can set and clear multiple breakpoints.
+    #
+    # We don't test that it deletes the correct breakpoints.  We do at
+    # least test that it deletes more than one breakpoint.
+    #
+    gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #1"
+    gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #2"
+    gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
+}
+
+test_break_silent_and_more
 
 # Verify that a breakpoint can be set via a convenience variable.
 
