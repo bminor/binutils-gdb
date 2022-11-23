@@ -868,18 +868,18 @@ gdb_test_multiple "" $test {
     }
 }
 
-#
 # Test break via convenience variable with file name
-#
 
-with_test_prefix "set line:file breakpoint via convenience variable" {
+proc_with_prefix test_break_file_line_convenience_var {} {
+    clean_restart breako2
+
     set line [gdb_get_line_number "set breakpoint 1 here"]
     gdb_test_no_output "set \$l = $line"
 
     set line_actual "-1"
-    set test "break ${srcfile}:\$l"
+    set test "break $::srcfile:\$l"
     gdb_test_multiple "$test" $test {
-	-re "Breakpoint $decimal at $hex: file .*break\\.c, line ($decimal)\\.\r\n$gdb_prompt $" {
+	-re "Breakpoint $::decimal at $::hex: file .*break\\.c, line ($::decimal)\\.\r\n$::gdb_prompt $" {
 	    # Save the actual line number on which the breakpoint was
 	    # actually set. On some systems (Eg: Ubuntu 16.04 with GCC
 	    # version 5.4.0), that line gets completely inlined, including
@@ -892,10 +892,12 @@ with_test_prefix "set line:file breakpoint via convenience variable" {
 
     gdb_test_no_output "set \$foo=81.5" \
 	"set convenience variable \$foo to 81.5"
-    gdb_test "break $srcfile:\$foo" \
+    gdb_test "break $::srcfile:\$foo" \
 	"Convenience variables used in line specs must have integer values.*" \
 	"non-integer convenience variable disallowed"
 }
+
+test_break_file_line_convenience_var
 
 # Test that commands can be cleared without error.
 
