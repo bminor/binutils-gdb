@@ -478,21 +478,27 @@ gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 # Verify that catchpoints for fork, vfork and exec don't trigger
 # inappropriately.  (There are no calls to those system functions
 # in this test program.)
-#
-if ![runto_main] then {
-    return
+
+proc_with_prefix test_no_break_on_catchpoint {} {
+    clean_restart break
+
+    if ![runto_main] then {
+	return
+    }
+
+    gdb_test "catch fork" "Catchpoint \[0-9\]+ \\(fork\\)" \
+	"set catch fork, never expected to trigger"
+
+    gdb_test "catch vfork" "Catchpoint \[0-9\]+ \\(vfork\\)" \
+	"set catch vfork, never expected to trigger"
+
+    gdb_test "catch exec" "Catchpoint \[0-9\]+ \\(exec\\)" \
+	"set catch exec, never expected to trigger"
+
+    gdb_continue_to_end
 }
 
-gdb_test "catch fork" "Catchpoint \[0-9\]+ \\(fork\\)" \
-    "set catch fork, never expected to trigger"
-
-gdb_test "catch vfork" "Catchpoint \[0-9\]+ \\(vfork\\)" \
-    "set catch vfork, never expected to trigger"
-
-gdb_test "catch exec" "Catchpoint \[0-9\]+ \\(exec\\)" \
-    "set catch exec, never expected to trigger"
-
-gdb_continue_to_end
+test_no_break_on_catchpoint
 
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
