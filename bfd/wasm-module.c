@@ -359,6 +359,7 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
  error_return:
   if (symbols)
     bfd_release (abfd, symbols);
+  tdata->symcount = 0;
   return false;
 }
 
