@@ -828,13 +828,17 @@ arm_m_addr_is_lockup (CORE_ADDR addr)
    For more details see "B1.5.8 Exception return behavior"
    in both ARMv6-M and ARMv7-M Architecture Reference Manuals.
 
-   In the ARMv8-M Architecture Technical Reference also adds
-   for implementations without the Security Extension:
+   From ARMv8-M Architecture Technical Reference, D1.2.95
+   FType, Mode and SPSEL bits are to be considered when the Security
+   Extension is not implemented.
 
-   EXC_RETURN    Condition
-   0xFFFFFFB0    Return to Handler mode.
-   0xFFFFFFB8    Return to Thread mode using the main stack.
-   0xFFFFFFBC    Return to Thread mode using the process stack.  */
+   EXC_RETURN    Return To        Return Stack    Frame Type
+   0xFFFFFFA0    Handler mode     Main            Extended
+   0xFFFFFFA8    Thread mode      Main            Extended
+   0xFFFFFFAC    Thread mode      Process         Extended
+   0xFFFFFFB0    Handler mode     Main            Standard
+   0xFFFFFFB8    Thread mode      Main            Standard
+   0xFFFFFFBC    Thread mode      Process         Standard  */
 
 static int
 arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -859,6 +863,9 @@ arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
       switch (addr)
 	{
 	  /* Values from ARMv8-M Architecture Technical Reference.  */
+	case 0xffffffa0:
+	case 0xffffffa8:
+	case 0xffffffac:
 	case 0xffffffb0:
 	case 0xffffffb8:
 	case 0xffffffbc:
