@@ -4238,7 +4238,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
 	      relocs = (arelent **) xmalloc (reloc_size);
 
-	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
+	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, syms);
 	      if (reloc_count <= 0)
 		free (relocs);
 	      else

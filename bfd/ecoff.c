@@ -1612,7 +1612,8 @@ ecoff_slurp_reloc_table (bfd *abfd,
       if (intern.r_extern)
 	{
 	  /* r_symndx is an index into the external symbols.  */
-	  if (intern.r_symndx >= 0
+	  if (symbols != NULL
+	      && intern.r_symndx >= 0
 	      && (intern.r_symndx
 		  < (ecoff_data (abfd)->debug_info.symbolic_header.iextMax)))
 	    rptr->sym_ptr_ptr = symbols + intern.r_symndx;

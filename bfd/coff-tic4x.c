@@ -219,7 +219,7 @@ tic4x_reloc_processing (arelent *relent,
 
   relent->address = reloc->r_vaddr;
 
-  if (reloc->r_symndx != -1)
+  if (reloc->r_symndx != -1 && symbols != NULL)
     {
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
 	{

@@ -283,8 +283,10 @@ NAME(lynx,swap_ext_reloc_out) (bfd *abfd,
   if (r_extern)								\
     {									\
       /* undefined symbol */						\
-      if (r_index < bfd_get_symcount (abfd))				\
+      if (symbols != NULL && r_index < bfd_get_symcount (abfd))		\
 	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      else								\
+	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
       cache_ptr->addend = ad;						\
     }									\
   else									\

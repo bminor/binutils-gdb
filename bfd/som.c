@@ -5099,7 +5099,7 @@ som_set_reloc_info (unsigned char *fixup,
 	    /* A symbol to use in the relocation.  Make a note
 	       of this if we are not just counting.  */
 	    case 'S':
-	      if (! just_count && (unsigned int) c < symcount)
+	      if (!just_count && symbols != NULL && (unsigned int) c < symcount)
 		rptr->sym_ptr_ptr = &symbols[c];
 	      break;
 	    /* Argument relocation bits for a function call.  */
