@@ -423,55 +423,45 @@ gdb_test "continue" \
     ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10a.*$bp_location10a\[\t \]+}.*breakpoint 10a here.*" \
     "continue to breakpoint at }"
 
-#
-# delete all breakpoints so we can start over, course this can be a test too
-#
-delete_breakpoints
-
-#
-# test temporary breakpoint at function
-#
-
-gdb_test "tbreak -q main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
-
-#
-# test break at function in file
-#
-
-gdb_test "tbreak $srcfile:factorial" "Temporary breakpoint.*at.* file .*$srcfile, line.*" \
-	"Temporary breakpoint function in file"
-
-#
-# test break at line number
-#
-gdb_test "tbreak $bp_location1" \
-    "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location1.*" \
-    "temporary breakpoint line number #1"
-
-gdb_test "tbreak $bp_location6" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "temporary breakpoint line number #2"
-
-#
-# test break at line number in file
-#
-gdb_test "tbreak $srcfile:$bp_location2" \
-    "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location2.*" \
-    "temporary breakpoint line number in file #1"
-
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
-gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"
 
-#
-# check to see what breakpoints are set (temporary this time)
-#
-gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$main_line.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func factorial] at .*$srcfile:$bp_location7.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location1.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location6.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location2.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in [func main] at .*$srcfile:$bp_location11.*" \
-    "Temporary breakpoint info"
+proc_with_prefix test_tbreak {} {
+    clean_restart break
 
+    # test temporary breakpoint at function
+    gdb_test "tbreak -q main" "Temporary breakpoint.*at.* file .*$::srcfile, line.*" "temporary breakpoint function"
+
+    # test break at function in file
+    gdb_test "tbreak $::srcfile:factorial" "Temporary breakpoint.*at.* file .*$::srcfile, line.*" \
+	    "Temporary breakpoint function in file"
+
+    # test break at line number
+    gdb_test "tbreak $::bp_location1" \
+	"Temporary breakpoint.*at.* file .*$::srcfile, line $::bp_location1.*" \
+	"temporary breakpoint line number #1"
+
+    gdb_test "tbreak $::bp_location6" "Temporary breakpoint.*at.* file .*$::srcfile, line $::bp_location6.*" "temporary breakpoint line number #2"
+
+    # test break at line number in file
+    gdb_test "tbreak $::srcfile:$::bp_location2" \
+	"Temporary breakpoint.*at.* file .*$::srcfile, line $::bp_location2.*" \
+	"temporary breakpoint line number in file #1"
+
+    gdb_test  "tbreak $::srcfile:$::bp_location11" "Temporary breakpoint.*at.* file .*$::srcfile, line $::bp_location11.*" "Temporary breakpoint line number in file #2"
+
+    # check to see what breakpoints are set (temporary this time)
+    gdb_test "info break" \
+	[multi_line "Num     Type.*Disp Enb Address.*What.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func main] at .*$::srcfile:$::main_line.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func factorial] at .*$::srcfile:$::bp_location7.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func main] at .*$::srcfile:$::bp_location1.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func main] at .*$::srcfile:$::bp_location6.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func main] at .*$::srcfile:$::bp_location2.*" \
+		    "$::decimal\[\t \]+breakpoint     del.*y.*in [func main] at .*$::srcfile:$::bp_location11.*"] \
+	"Temporary breakpoint info"
+}
+
+test_tbreak
 
 #***********
 
