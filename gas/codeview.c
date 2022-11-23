@@ -24,7 +24,7 @@
 #include "filenames.h"
 #include "md5.h"
 
-#ifdef TE_PE
+#if defined (TE_PE) && defined (O_secrel)
 
 #define NUM_MD5_BYTES       	16
 
@@ -538,4 +538,4 @@ codeview_generate_asm_lineno (void)
 {
 }
 
-#endif /* TE_PE */
+#endif /* TE_PE && O_secrel */

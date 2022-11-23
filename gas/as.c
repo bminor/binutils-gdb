@@ -334,7 +334,7 @@ Options:\n\
   --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"));
   fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
-#ifdef TE_PE
+#if defined (TE_PE) && defined (O_secrel)
   fprintf (stream, _("\
   --gcodeview             generate CodeView debugging information\n"));
 #endif
@@ -551,7 +551,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF_2}
     ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
     ,{"gdwarf-cie-version", required_argument, NULL, OPTION_GDWARF_CIE_VERSION}
-#ifdef TE_PE
+#if defined (TE_PE) && defined (O_secrel)
     ,{"gcodeview", no_argument, NULL, OPTION_GCODEVIEW}
 #endif
     ,{"gen-debug", no_argument, NULL, 'g'}
@@ -879,7 +879,7 @@ This program has absolutely no warranty.\n"));
 	  flag_dwarf_sections = true;
 	  break;
 
-#ifdef TE_PE
+#if defined (TE_PE) && defined (O_secrel)
 	case OPTION_GCODEVIEW:
 	  debug_type = DEBUG_CODEVIEW;
 	  break;
