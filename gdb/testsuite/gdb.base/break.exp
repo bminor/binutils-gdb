@@ -15,111 +15,22 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-if { [prepare_for_testing "failed to prepare" "break" {break.c break1.c} {debug nowarnings}] } {
+if { [build_executable "failed to prepare" "break" {break.c break1.c} {debug nowarnings}] } {
     return -1
 }
 set srcfile break.c
 set srcfile1 break1.c
-#
-# test simple breakpoint setting commands
-#
-
-# Test deleting all breakpoints when there are none installed,
-# GDB should not prompt for confirmation.
-# Note that lib/gdb.exp provides a "delete_breakpoints" proc
-# for general use elsewhere.
-
-send_gdb "delete breakpoints\n"
-gdb_expect {
-     -re "Delete all breakpoints.*$" {
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re "$gdb_prompt $" {
-		    fail "delete all breakpoints when none (unexpected prompt)"
-		}
-		timeout	{ fail "delete all breakpoints when none (timeout after unexpected prompt)" }
-	    }
-	}
-     -re ".*$gdb_prompt $"       { pass "delete all breakpoints when none" }
-    timeout	            { fail "delete all breakpoints when none (timeout)" }
-}
-
-#
-# test break at function
-#
-gdb_test "break -q main" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "breakpoint function"
-
-#
-# test break at quoted function
-#
-gdb_test "break \"marker2\"" \
-    "Breakpoint.*at.* file .*$srcfile1, line.*" \
-    "breakpoint quoted function"
-
-#
-# test break at function in file
-#
-gdb_test "break $srcfile:factorial" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "breakpoint function in file"
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
-
-#
-# test break at line number
-#
-# Note that the default source file is the last one whose source text
-# was printed.  For native debugging, before we've executed the
-# program, this is the file containing main, but for remote debugging,
-# it's wherever the processor was stopped when we connected to the
-# board.  So, to be sure, we do a list command.
-#
-gdb_test "list -q main" \
-    ".*main \\(int argc, char \\*\\*argv, char \\*\\*envp\\).*" \
-    "use `list' to establish default source file"
-gdb_test "break $bp_location1" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location1\\." \
-    "breakpoint line number"
-
-#
-# test duplicate breakpoint
-#
-gdb_test "break $bp_location1" \
-    "Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$srcfile, line $bp_location1\\." \
-    "breakpoint duplicate"
-
 set bp_location2 [gdb_get_line_number "set breakpoint 2 here"]
-
-#
-# test break at line number in file
-#
-gdb_test "break $srcfile:$bp_location2" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location2\\." \
-    "breakpoint line number in file"
-
 set bp_location3 [gdb_get_line_number "set breakpoint 3 here"]
 set bp_location4 [gdb_get_line_number "set breakpoint 4 here"]
-
-#
-# Test putting a break at the start of a multi-line if conditional.
-# Verify the breakpoint was put at the start of the conditional.
-#
-gdb_test "break multi_line_if_conditional" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location3\\." \
-    "breakpoint at start of multi line if conditional"
-
-gdb_test "break multi_line_while_conditional" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location4\\." \
-    "breakpoint at start of multi line while conditional"
-
 set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
-
-set main_line $bp_location6
-
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
+set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
+
+set main_line $bp_location6
 
 # In C++ mode, we see a full prototype; in C mode, we only see the
 # function name, with no parameter info.
@@ -127,168 +38,95 @@ proc func {name} {
     return "${name}(?:\(\[^\r\n\]*\))?"
 }
 
-gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$main_line.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func marker2] at .*$srcfile1:$bp_location8.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func factorial] at .*$srcfile:$bp_location7.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location1.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location1.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func main] at .*$srcfile:$bp_location2.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func multi_line_if_conditional] at .*$srcfile:$bp_location3.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in [func multi_line_while_conditional] at .*$srcfile:$bp_location4" \
-    "breakpoint info"
+# test simple breakpoint setting commands
 
-#
-# Test info breakpoint with arguments
-#
+proc_with_prefix test_break {} {
+    clean_restart break
 
-set see1 0
-set see2 0
-set see3 0
-set see4 0
-set see5 0
-set see6 0
-
-gdb_test_multiple "info break 2 4 6" "info break 2 4 6" {
-    -re "1\[\t \]+breakpoint *keep y\[^\r\n\]*:$main_line\[^\r\n\]*" {
-	set see1 1
-	exp_continue
-    }
-    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
-	set see2 1
-	exp_continue
-    }
-    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
-	set see3 1
-	exp_continue
-    }
-    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	set see4 1
-	exp_continue
-    }
-    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	set see5 1
-	exp_continue
-    }
-    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
-	set see6 1
-	exp_continue
-    }
-    -re ".*$gdb_prompt $" {
-	if { !$see1 && $see2 && !$see3 && $see4 && !$see5 && $see6 } then {
-	    pass "info break 2 4 6"
-	} else {
-	    fail "info break 2 4 6"
-	}
-    }
-}
-
-set see1 0
-set see2 0
-set see3 0
-set see4 0
-set see5 0
-set see6 0
-
-gdb_test_multiple "info break 3-5" "info break 3-5" {
-    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
-	set see1 1
-	exp_continue
-    }
-    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
-	set see2 1
-	exp_continue
-    }
-    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
-	set see3 1
-	exp_continue
-    }
-    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	set see4 1
-	exp_continue
-    }
-    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	set see5 1
-	exp_continue
-    }
-    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
-	set see6 1
-	exp_continue
-    }
-    -re ".*$gdb_prompt $" {
-	if { !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6 } then {
-	    pass "info break 3-5"
-	} else {
-	    fail "info break 3-5"
-	}
-    }
-}
-
-#
-# Test disable/enable with arguments
-#
-
-# Test with value history
-
-with_test_prefix "with value history" {
-    gdb_test "print 1"
-    gdb_test "print 2"
-    gdb_test "print 3"
-    gdb_test "print 4"
-    gdb_test "print 5"
-    gdb_test "print 6"
-
-    # $2 is 2 and $$ is 5
-    gdb_test_no_output "disable \$2 \$\$" "disable using history values"
-
-    set see1 0
-    set see2 0
-    set see3 0
-    set see4 0
-    set see5 0
-    set see6 0
-
-    gdb_test_multiple "info break" "check disable with history values" {
-	-re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
-	    set see1 1
-	    exp_continue
-	}
-	-re "2\[\t \]+breakpoint *keep n\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
-	    set see2 1
-	    exp_continue
-	}
-	-re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
-	    set see3 1
-	    exp_continue
-	}
-	-re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	    set see4 1
-	    exp_continue
-	}
-	-re "5\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location1\[^\r\n\]*" {
-	    set see5 1
-	    exp_continue
-	}
-	-re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
-	    set see6 1
-	    exp_continue
-	}
-	-re ".*$gdb_prompt $" {
-	    if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
-		pass "check disable with history values"
-	    } else {
-		fail "check disable with history values"
+    # Test deleting all breakpoints when there are none installed,
+    # GDB should not prompt for confirmation.
+    # Note that lib/gdb.exp provides a "delete_breakpoints" proc
+    # for general use elsewhere.
+    send_gdb "delete breakpoints\n"
+    gdb_expect {
+	 -re "Delete all breakpoints.*$" {
+		send_gdb "y\n"
+		gdb_expect {
+		    -re "$::gdb_prompt $" {
+			fail "delete all breakpoints when none (unexpected prompt)"
+		    }
+		    timeout	{ fail "delete all breakpoints when none (timeout after unexpected prompt)" }
+		}
 	    }
-	}
+	 -re ".*$::gdb_prompt $"       { pass "delete all breakpoints when none" }
+	timeout	            { fail "delete all breakpoints when none (timeout)" }
     }
-}
 
-with_test_prefix "with convenience vars" {
-    gdb_test "enable"
-    gdb_test "set \$foo = 3"
-    gdb_test "set \$bar = 6"
-    gdb_test_no_output "disable \$foo \$bar" "disable with convenience values"
+    # test break at function
+    gdb_test "break -q main" \
+	"Breakpoint.*at.* file .*$::srcfile, line.*" \
+	"breakpoint function"
+
+    # test break at quoted function
+    gdb_test "break \"marker2\"" \
+	"Breakpoint.*at.* file .*$::srcfile1, line.*" \
+	"breakpoint quoted function"
+
+    # test break at function in file
+    gdb_test "break $::srcfile:factorial" \
+	"Breakpoint.*at.* file .*$::srcfile, line.*" \
+	"breakpoint function in file"
+
+    # test break at line number
+    #
+    # Note that the default source file is the last one whose source text
+    # was printed.  For native debugging, before we've executed the
+    # program, this is the file containing main, but for remote debugging,
+    # it's wherever the processor was stopped when we connected to the
+    # board.  So, to be sure, we do a list command.
+    gdb_test "list -q main" \
+	".*main \\(int argc, char \\*\\*argv, char \\*\\*envp\\).*" \
+	"use `list' to establish default source file"
+
+    gdb_test "break $::bp_location1" \
+	"Breakpoint.*at.* file .*$::srcfile, line $::bp_location1\\." \
+	"breakpoint line number"
+
+    # test duplicate breakpoint
+    gdb_test "break $::bp_location1" \
+	"Note: breakpoint \[0-9\]+ also set at pc.*Breakpoint \[0-9\]+ at.* file .*$::srcfile, line $::bp_location1\\." \
+	"breakpoint duplicate"
+
+    # test break at line number in file
+    gdb_test "break $::srcfile:$::bp_location2" \
+	"Breakpoint.*at.* file .*$::srcfile, line $::bp_location2\\." \
+	"breakpoint line number in file"
+
+    # Test putting a break at the start of a multi-line if conditional.
+    # Verify the breakpoint was put at the start of the conditional.
+    gdb_test "break multi_line_if_conditional" \
+	"Breakpoint.*at.* file .*$::srcfile, line $::bp_location3\\." \
+	"breakpoint at start of multi line if conditional"
+
+    gdb_test "break multi_line_while_conditional" \
+	"Breakpoint.*at.* file .*$::srcfile, line $::bp_location4\\." \
+	"breakpoint at start of multi line while conditional"
+
+    gdb_test "info break" \
+	[multi_line "Num     Type\[ \]+Disp Enb Address\[ \]+What.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func main] at .*$::srcfile:$::main_line.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func marker2] at .*$::srcfile1:$::bp_location8.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func factorial] at .*$::srcfile:$::bp_location7.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func main] at .*$::srcfile:$::bp_location1.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func main] at .*$::srcfile:$::bp_location1.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func main] at .*$::srcfile:$::bp_location2.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func multi_line_if_conditional] at .*$::srcfile:$::bp_location3.*" \
+		    "$::decimal\[\t \]+breakpoint     keep y.* in [func multi_line_while_conditional] at .*$::srcfile:$::bp_location4"] \
+	"breakpoint info"
+
+    #
+    # Test info breakpoint with arguments
+    #
 
     set see1 0
     set see2 0
@@ -297,8 +135,8 @@ with_test_prefix "with convenience vars" {
     set see5 0
     set see6 0
 
-    gdb_test_multiple "info break" "check disable with convenience values" {
-	-re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$main_line\[^\r\n\]*" {
+    gdb_test_multiple "info break 2 4 6" "info break 2 4 6" {
+	-re "1\[\t \]+breakpoint *keep y\[^\r\n\]*:$::main_line\[^\r\n\]*" {
 	    set see1 1
 	    exp_continue
 	}
@@ -306,124 +144,272 @@ with_test_prefix "with convenience vars" {
 	    set see2 1
 	    exp_continue
 	}
-	-re "3\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location7\[^\r\n\]*" {
+	-re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location7\[^\r\n\]*" {
 	    set see3 1
 	    exp_continue
 	}
-	-re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	-re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
 	    set see4 1
 	    exp_continue
 	}
-	-re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	-re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
 	    set see5 1
 	    exp_continue
 	}
-	-re "6\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location2\[^\r\n\]*" {
+	-re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location2\[^\r\n\]*" {
 	    set see6 1
 	    exp_continue
 	}
-	-re ".*$gdb_prompt $" {
-	    if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
-		pass "check disable with convenience values"
+	-re ".*$::gdb_prompt $" {
+	    if { !$see1 && $see2 && !$see3 && $see4 && !$see5 && $see6 } then {
+		pass "info break 2 4 6"
 	    } else {
-		fail "check disable with convenience values"
+		fail "info break 2 4 6"
 	    }
 	}
     }
+
+    set see1 0
+    set see2 0
+    set see3 0
+    set see4 0
+    set see5 0
+    set see6 0
+
+    gdb_test_multiple "info break 3-5" "info break 3-5" {
+	-re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$::main_line\[^\r\n\]*" {
+	    set see1 1
+	    exp_continue
+	}
+	-re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
+	    set see2 1
+	    exp_continue
+	}
+	-re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location7\[^\r\n\]*" {
+	    set see3 1
+	    exp_continue
+	}
+	-re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+	    set see4 1
+	    exp_continue
+	}
+	-re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+	    set see5 1
+	    exp_continue
+	}
+	-re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location2\[^\r\n\]*" {
+	    set see6 1
+	    exp_continue
+	}
+	-re ".*$::gdb_prompt $" {
+	    if { !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6 } then {
+		pass "info break 3-5"
+	    } else {
+		fail "info break 3-5"
+	    }
+	}
+    }
+
+    #
+    # Test disable/enable with arguments
+    #
+
+    # Test with value history
+
+    with_test_prefix "with value history" {
+	gdb_test "print 1"
+	gdb_test "print 2"
+	gdb_test "print 3"
+	gdb_test "print 4"
+	gdb_test "print 5"
+	gdb_test "print 6"
+
+	# $2 is 2 and $$ is 5
+	gdb_test_no_output "disable \$2 \$\$" "disable using history values"
+
+	set see1 0
+	set see2 0
+	set see3 0
+	set see4 0
+	set see5 0
+	set see6 0
+
+	gdb_test_multiple "info break" "check disable with history values" {
+	    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$::main_line\[^\r\n\]*" {
+		set see1 1
+		exp_continue
+	    }
+	    -re "2\[\t \]+breakpoint *keep n\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
+		set see2 1
+		exp_continue
+	    }
+	    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location7\[^\r\n\]*" {
+		set see3 1
+		exp_continue
+	    }
+	    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+		set see4 1
+		exp_continue
+	    }
+	    -re "5\[\t \]+breakpoint *keep n\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+		set see5 1
+		exp_continue
+	    }
+	    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location2\[^\r\n\]*" {
+		set see6 1
+		exp_continue
+	    }
+	    -re ".*$::gdb_prompt $" {
+		if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+		    pass "check disable with history values"
+		} else {
+		    fail "check disable with history values"
+		}
+	    }
+	}
+    }
+
+    with_test_prefix "with convenience vars" {
+	gdb_test "enable"
+	gdb_test "set \$foo = 3"
+	gdb_test "set \$bar = 6"
+	gdb_test_no_output "disable \$foo \$bar" "disable with convenience values"
+
+	set see1 0
+	set see2 0
+	set see3 0
+	set see4 0
+	set see5 0
+	set see6 0
+
+	gdb_test_multiple "info break" "check disable with convenience values" {
+	    -re "1\[\t \]+breakpoint *keep y.* in [func main] at .*:$::main_line\[^\r\n\]*" {
+		set see1 1
+		exp_continue
+	    }
+	    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in [func marker2] at \[^\r\n\]*" {
+		set see2 1
+		exp_continue
+	    }
+	    -re "3\[\t \]+breakpoint *keep n\[^\r\n\]*$::bp_location7\[^\r\n\]*" {
+		set see3 1
+		exp_continue
+	    }
+	    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+		set see4 1
+		exp_continue
+	    }
+	    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$::bp_location1\[^\r\n\]*" {
+		set see5 1
+		exp_continue
+	    }
+	    -re "6\[\t \]+breakpoint *keep n\[^\r\n\]*$::bp_location2\[^\r\n\]*" {
+		set see6 1
+		exp_continue
+	    }
+	    -re ".*$::gdb_prompt $" {
+		if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+		    pass "check disable with convenience values"
+		} else {
+		    fail "check disable with convenience values"
+		}
+	    }
+	}
+    }
+
+    # test with bad values
+
+    with_test_prefix "bad values" {
+	gdb_test "enable"
+	gdb_test "disable 10" "No breakpoint number 10." \
+	    "disable non-existent breakpoint 10"
+
+	gdb_test_no_output "set \$baz = 1.234"
+	gdb_test "disable \$baz" \
+	    "Convenience variable must have integer value.*" \
+	    "disable with non-integer convenience var"
+	gdb_test "disable \$grbx" \
+	    "Convenience variable must have integer value.*" \
+	    "disable with non-existent convenience var"
+	gdb_test "disable \$10" \
+	    "History has not yet reached .10." \
+	    "disable with non-existent history value"
+	gdb_test "disable \$1foo" \
+	    "Convenience variable must have integer value.*" \
+	    "disable with badly formed history value"
+    }
+
+    # FIXME: The rest of this test doesn't work with anything that can't
+    # handle arguments.
+    # Huh? There doesn't *appear* to be anything that passes arguments
+    # below.
+
+    #
+    # run until the breakpoint at main is hit. For non-stubs-using targets.
+    #
+    gdb_run_cmd
+    gdb_test "" \
+	"Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$::srcfile:$::bp_location6.*$::bp_location6\[\t \]+if .argc.* \{.*" \
+	"run until function breakpoint"
+
+    # Test the 'list' commands sets current file for the 'break LINENO' command.
+    set bp_marker1 [gdb_get_line_number "set breakpoint 15 here" $::srcfile1]
+    gdb_test "list marker1" ".*"
+    gdb_test "break $bp_marker1" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*$::srcfile1, line ${bp_marker1}\\." \
+	     "break lineno"
+    gdb_test_no_output {delete $bpnum}
+
+    #
+    # run until the breakpoint at a line number
+    #
+    gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$::srcfile:$::bp_location1.*$::bp_location1\[\t \]+printf.*factorial.*" \
+			    "run until breakpoint set at a line number"
+
+    #
+    # Run until the breakpoint set in a function in a file
+    #
+    for {set i 6} {$i >= 1} {incr i -1} {
+	    gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$::srcfile:$::bp_location7.*$::bp_location7\[\t \]+.*if .value > 1. \{.*" \
+			    "run until file:function($i) breakpoint"
+    }
+
+    #
+    # Run until the breakpoint set at a quoted function
+    #
+    gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, (0x\[0-9a-f\]+ in )?marker2 \\(a=43\\) at .*$::srcfile1:$::bp_location8.*" \
+		    "run until quoted breakpoint"
+    #
+    # run until the file:function breakpoint at a line number in a file
+    #
+    gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$::srcfile:$::bp_location2.*$::bp_location2\[\t \]+argc = \\(argc == 12345\\);.*" \
+		    "run until file:linenum breakpoint"
+
+    # Test break at offset +1
+    set bp_location10 [gdb_get_line_number "set breakpoint 10 here"]
+
+    gdb_test "break +1" \
+	"Breakpoint.*at.* file .*$::srcfile, line $bp_location10\\." \
+	"breakpoint offset +1"
+
+    # Check to see if breakpoint is hit when stepped onto
+
+    gdb_test "step" \
+	".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$::srcfile:$bp_location10.*$bp_location10\[\t \]+return argc;.*breakpoint 10 here.*" \
+	"step onto breakpoint"
+
+    # Check to see if breakpoint can be set on ending brace of function
+    set bp_location10a [gdb_get_line_number "set breakpoint 10a here"]
+
+    gdb_test "break $bp_location10a" \
+	"Breakpoint.*at.* file .*$::srcfile, line $bp_location10a\\." \
+	"setting breakpoint at \}"
+
+    gdb_test "continue" \
+	".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$::srcfile:$bp_location10a.*$bp_location10a\[\t \]+\}.*breakpoint 10a here.*" \
+	"continue to breakpoint at \}"
 }
 
-# test with bad values
-
-with_test_prefix "bad values" {
-    gdb_test "enable"
-    gdb_test "disable 10" "No breakpoint number 10." \
-	"disable non-existent breakpoint 10"
-
-    gdb_test_no_output "set \$baz = 1.234"
-    gdb_test "disable \$baz" \
-	"Convenience variable must have integer value.*" \
-	"disable with non-integer convenience var"
-    gdb_test "disable \$grbx" \
-	"Convenience variable must have integer value.*" \
-	"disable with non-existent convenience var"
-    gdb_test "disable \$10" \
-	"History has not yet reached .10." \
-	"disable with non-existent history value"
-    gdb_test "disable \$1foo" \
-	"Convenience variable must have integer value.*" \
-	"disable with badly formed history value"
-}
-
-# FIXME: The rest of this test doesn't work with anything that can't
-# handle arguments.
-# Huh? There doesn't *appear* to be anything that passes arguments
-# below.
-
-#
-# run until the breakpoint at main is hit. For non-stubs-using targets.
-#
-gdb_run_cmd
-gdb_test "" \
-    "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*" \
-    "run until function breakpoint"
-
-# Test the 'list' commands sets current file for the 'break LINENO' command.
-set bp_marker1 [gdb_get_line_number "set breakpoint 15 here" ${srcfile1}]
-gdb_test "list marker1" ".*"
-gdb_test "break $bp_marker1" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*${srcfile1}, line ${bp_marker1}\\." \
-         "break lineno"
-gdb_test_no_output {delete $bpnum}
-
-#
-# run until the breakpoint at a line number
-#
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location1.*$bp_location1\[\t \]+printf.*factorial.*" \
-			"run until breakpoint set at a line number"
-
-#
-# Run until the breakpoint set in a function in a file
-#
-for {set i 6} {$i >= 1} {incr i -1} {
-	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:$bp_location7.*$bp_location7\[\t \]+.*if .value > 1. \{.*" \
-			"run until file:function($i) breakpoint"
-}
-
-#
-# Run until the breakpoint set at a quoted function
-#
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, (0x\[0-9a-f\]+ in )?marker2 \\(a=43\\) at .*$srcfile1:$bp_location8.*" \
-		"run until quoted breakpoint"
-#
-# run until the file:function breakpoint at a line number in a file
-#
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location2.*$bp_location2\[\t \]+argc = \\(argc == 12345\\);.*" \
-		"run until file:linenum breakpoint"
-
-# Test break at offset +1
-set bp_location10 [gdb_get_line_number "set breakpoint 10 here"]
-
-gdb_test "break +1" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location10\\." \
-    "breakpoint offset +1"
-
-# Check to see if breakpoint is hit when stepped onto
-
-gdb_test "step" \
-    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10.*$bp_location10\[\t \]+return argc;.*breakpoint 10 here.*" \
-    "step onto breakpoint"
-
-# Check to see if breakpoint can be set on ending brace of function
-set bp_location10a [gdb_get_line_number "set breakpoint 10a here"]
-
-gdb_test "break $bp_location10a" \
-    "Breakpoint.*at.* file .*$srcfile, line $bp_location10a\\." \
-    "setting breakpoint at }"
-
-gdb_test "continue" \
-    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10a.*$bp_location10a\[\t \]+}.*breakpoint 10a here.*" \
-    "continue to breakpoint at }"
-
-set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
+test_break
 
 proc_with_prefix test_tbreak {} {
     clean_restart break
