@@ -604,18 +604,22 @@ gdb_test "break marker3" "Breakpoint.*at.*" "break marker3 #2"
 gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
 
 # Verify that a breakpoint can be set via a convenience variable.
-#
 
-with_test_prefix "set line breakpoint via convenience variable" {
-    gdb_test_no_output "set \$foo=$bp_location11" \
+proc_with_prefix test_break_line_convenience_var {} {
+    clean_restart break
+
+    if { ![runto_main] } {
+	return
+    }
+
+    gdb_test_no_output "set \$foo=$::bp_location11" \
 	"set convenience variable \$foo to bp_location11"
 
     gdb_test "break \$foo" \
-	"Breakpoint (\[0-9\]*) at .*, line $bp_location11.*"
+	"Breakpoint (\[0-9\]*) at .*, line $::bp_location11.*"
 
     # Verify that GDB responds gracefully to an attempt to set a
     # breakpoint via a convenience variable whose type is not integer.
-    #
 
     gdb_test_no_output "set \$foo=81.5" \
 	"set convenience variable \$foo to 81.5"
@@ -624,6 +628,8 @@ with_test_prefix "set line breakpoint via convenience variable" {
 	"Convenience variables used in line specs must have integer values.*" \
 	"non-integer convenience variable disallowed"
 }
+
+test_break_line_convenience_var
 
 # Verify that we can set and trigger a breakpoint in a user-called function.
 
