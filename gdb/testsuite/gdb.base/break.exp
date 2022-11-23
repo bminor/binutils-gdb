@@ -492,6 +492,8 @@ gdb_test "catch vfork" "Catchpoint \[0-9\]+ \\(vfork\\)" \
 gdb_test "catch exec" "Catchpoint \[0-9\]+ \\(exec\\)" \
     "set catch exec, never expected to trigger"
 
+gdb_continue_to_end
+
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
 #
@@ -500,36 +502,46 @@ gdb_test "break 999" \
     "No line 999 in the current file." \
     "break on non-existent source line"
 
-# Run to the desired default location. If not positioned here, the
-# tests below don't work.
-#
-gdb_test "until $bp_location1" "main .* at .*:$bp_location1.*" \
-    "until bp_location1"
+proc_with_prefix test_break_default {} {
+    clean_restart break
 
-# Verify that GDB allows one to just say "break", which is treated
-# as the "default" breakpoint.  Note that GDB gets cute when printing
-# the informational message about other breakpoints at the same
-# location.  We'll hit that bird with this stone too.
-#
-gdb_test "break" "Breakpoint \[0-9\]*.*" \
-    "break on default location, 1st time"
+    if ![runto_main] then {
+	return
+    }
 
-gdb_test "break" \
-    "Note: breakpoint \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
-    "break on default location, 2nd time"
+    # Run to the desired default location. If not positioned here, the
+    # tests below don't work.
+    #
+    gdb_test "until $::bp_location1" "main .* at .*:$::bp_location1.*" \
+	"until bp_location1"
 
-gdb_test "break" \
-    "Note: breakpoints \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
-    "break on default location, 3rd time"
+    # Verify that GDB allows one to just say "break", which is treated
+    # as the "default" breakpoint.  Note that GDB gets cute when printing
+    # the informational message about other breakpoints at the same
+    # location.  We'll hit that bird with this stone too.
+    #
+    gdb_test "break" "Breakpoint \[0-9\]*.*" \
+	"break on default location, 1st time"
 
-gdb_test "break" \
-    "Note: breakpoints \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
-    "break on default location, 4th time"
+    gdb_test "break" \
+	"Note: breakpoint \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
+	"break on default location, 2nd time"
 
-# Check setting a breakpoint at the default location with a condition attached.
-gdb_test "break if (1)" \
-    "Note: breakpoints \[0-9\]*, \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
-    "break on the default location, 5th time, but with a condition"
+    gdb_test "break" \
+	"Note: breakpoints \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
+	"break on default location, 3rd time"
+
+    gdb_test "break" \
+	"Note: breakpoints \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
+	"break on default location, 4th time"
+
+    # Check setting a breakpoint at the default location with a condition attached.
+    gdb_test "break if (1)" \
+	"Note: breakpoints \[0-9\]*, \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
+	"break on the default location, 5th time, but with a condition"
+}
+
+test_break_default
 
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
