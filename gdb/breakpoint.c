@@ -3296,6 +3296,8 @@ set_breakpoint_number (int internal, struct breakpoint *b)
     }
 }
 
+/* Create a TYPE breakpoint on ADDRESS from an object file with GDBARCH.  */
+
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
 			    CORE_ADDR address, enum bptype type)
@@ -3306,6 +3308,33 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
   b->number = internal_breakpoint_number--;
 
   return add_to_breakpoint_chain (std::move (b));
+}
+
+/* Create a TYPE breakpoint on minimal symbol MSYM from an object file with
+   GDBARCH.  */
+
+static struct breakpoint *
+create_internal_breakpoint (struct gdbarch *gdbarch,
+			    struct bound_minimal_symbol &msym, enum bptype type)
+{
+  CORE_ADDR address;
+
+  address = msym.value_address ();
+
+  address = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, address, current_inferior ()->top_target ());
+
+  /* Note that we're not using gdbarch_addr_bits_remove here, because that's
+     related to addresses in $pc.  We're getting the address from the
+     minimal symbol table.  */
+
+  /* Is gdbarch_deprecated_function_start_offset needed here?  Or is that dealt
+     with elsewhere?  Needs testing on vax.  */
+
+  if (gdbarch_skip_entrypoint_p (gdbarch))
+    address = gdbarch_skip_entrypoint (gdbarch, address);
+
+  return create_internal_breakpoint (gdbarch, address, type);
 }
 
 static const char *const longjmp_names[] =
@@ -3557,8 +3586,6 @@ create_std_terminate_master_breakpoint (void)
 
   for (struct program_space *pspace : program_spaces)
     {
-      CORE_ADDR addr;
-
       set_current_program_space (pspace);
 
       for (objfile *objfile : current_program_space->objfiles ())
@@ -3586,8 +3613,8 @@ create_std_terminate_master_breakpoint (void)
 	      bp_objfile_data->terminate_msym = m;
 	    }
 
-	  addr = bp_objfile_data->terminate_msym.value_address ();
-	  b = create_internal_breakpoint (objfile->arch (), addr,
+	  b = create_internal_breakpoint (objfile->arch (),
+					  bp_objfile_data->terminate_msym,
 					  bp_std_terminate_master);
 	  b->locspec = new_explicit_location_spec_function (func_name);
 	  b->enable_state = bp_disabled;
@@ -3656,7 +3683,6 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   struct breakpoint *b;
   struct gdbarch *gdbarch;
   struct breakpoint_objfile_data *bp_objfile_data;
-  CORE_ADDR addr;
 
   bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3679,10 +3705,8 @@ create_exception_master_breakpoint_hook (objfile *objfile)
       bp_objfile_data->exception_msym = debug_hook;
     }
 
-  addr = bp_objfile_data->exception_msym.value_address ();
-  addr = gdbarch_convert_from_func_ptr_addr
-    (gdbarch, addr, current_inferior ()->top_target ());
-  b = create_internal_breakpoint (gdbarch, addr, bp_exception_master);
+  b = create_internal_breakpoint (gdbarch, bp_objfile_data->exception_msym,
+				  bp_exception_master);
   b->locspec = new_explicit_location_spec_function (func_name);
   b->enable_state = bp_disabled;
 
