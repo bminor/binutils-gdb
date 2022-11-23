@@ -38,6 +38,7 @@
 #include "obstack.h"
 #include "ecoff.h"
 #include "dw2gencfi.h"
+#include "codeview.h"
 #include "wchar.h"
 
 #include <limits.h>
@@ -5964,6 +5965,9 @@ generate_lineno_debug (void)
 	 has changed.  However, since there is additional backend
 	 support that is required (calling dwarf2_emit_insn), we
 	 let dwarf2dbg.c call as_where on its own.  */
+      break;
+    case DEBUG_CODEVIEW:
+      codeview_generate_asm_lineno ();
       break;
     }
 }

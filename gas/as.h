@@ -387,7 +387,8 @@ enum debug_info_type
   DEBUG_STABS,
   DEBUG_ECOFF,
   DEBUG_DWARF,
-  DEBUG_DWARF2
+  DEBUG_DWARF2,
+  DEBUG_CODEVIEW
 };
 
 extern enum debug_info_type debug_type;

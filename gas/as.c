@@ -42,6 +42,7 @@
 #include "macro.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "codeview.h"
 #include "bfdver.h"
 #include "write.h"
 
@@ -333,6 +334,10 @@ Options:\n\
   --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"));
   fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
+#ifdef TE_PE
+  fprintf (stream, _("\
+  --gcodeview             generate CodeView debugging information\n"));
+#endif
   fprintf (stream, _("\
   --hash-size=<N>         ignored\n"));
   fprintf (stream, _("\
@@ -483,6 +488,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GDWARF_5,
       OPTION_GDWARF_SECTIONS, /* = STD_BASE + 20 */
       OPTION_GDWARF_CIE_VERSION,
+      OPTION_GCODEVIEW,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_WARN,
@@ -545,6 +551,9 @@ parse_args (int * pargc, char *** pargv)
     ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF_2}
     ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
     ,{"gdwarf-cie-version", required_argument, NULL, OPTION_GDWARF_CIE_VERSION}
+#ifdef TE_PE
+    ,{"gcodeview", no_argument, NULL, OPTION_GCODEVIEW}
+#endif
     ,{"gen-debug", no_argument, NULL, 'g'}
     ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
@@ -869,6 +878,12 @@ This program has absolutely no warranty.\n"));
 	case OPTION_GDWARF_SECTIONS:
 	  flag_dwarf_sections = true;
 	  break;
+
+#ifdef TE_PE
+	case OPTION_GCODEVIEW:
+	  debug_type = DEBUG_CODEVIEW;
+	  break;
+#endif
 
         case OPTION_GDWARF_CIE_VERSION:
 	  flag_dwarf_cie_version = atoi (optarg);
@@ -1428,6 +1443,8 @@ main (int argc, char ** argv)
 
     }
 #endif
+
+  codeview_finish ();
 
   /* If we've been collecting dwarf2 .debug_line info, either for
      assembly debugging or on behalf of the compiler, emit it now.  */
