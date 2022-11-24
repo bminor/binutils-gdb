@@ -24,8 +24,6 @@ if {[gdb_compile_pthreads \
     return -1
 }
 
-clean_restart ${binfile}
-
 # Extract and return the thread ID of the thread stopped at function
 # FUNC.
 
@@ -45,86 +43,84 @@ proc get_thread_id {func} {
     return $thre
 }
 
-proc check_thread_specific_breakpoint {mode} {
-    with_test_prefix "$mode" {
-	global gdb_prompt
+proc check_thread_specific_breakpoint {non_stop} {
+    global gdb_prompt
 
-	if ![runto_main] {
-	    return -1
-	}
+    if { ![runto_main] } {
+	return -1
+    }
 
-	set main_thre [get_thread_id "main"]
-	if { $main_thre < 0 } {
-	    return -1
-	}
+    set main_thre [get_thread_id "main"]
+    if { $main_thre < 0 } {
+	return -1
+    }
 
-	gdb_breakpoint "start"
-	gdb_continue_to_breakpoint "start"
+    gdb_breakpoint "start"
+    gdb_continue_to_breakpoint "start"
 
-	set start_thre [get_thread_id "start"]
-	if { $start_thre < 0 } {
-	    return -1
-	}
+    set start_thre [get_thread_id "start"]
+    if { $start_thre < 0 } {
+	return -1
+    }
 
-	# Set a thread-specific breakpoint at "main".  This can't ever
-	# be hit, but that's OK.
-	gdb_breakpoint "main thread $start_thre"
-	gdb_test "info break" ".*breakpoint.*thread $start_thre" "breakpoint set"
+    # Set a thread-specific breakpoint at "main".  This can't ever
+    # be hit, but that's OK.
+    gdb_breakpoint "main thread $start_thre"
+    gdb_test "info break" ".*breakpoint.*thread $start_thre" "breakpoint set"
 
-	# Set breakpoint at a place only reacheable after the "start"
-	# thread exits.
-	gdb_breakpoint "end"
+    # Set breakpoint at a place only reacheable after the "start"
+    # thread exits.
+    gdb_breakpoint "end"
 
-	# Switch back to the main thread, and resume all threads.  The
-	# "start" thread exits, and the main thread reaches "end".
-	gdb_test "thread $main_thre" \
-	    "Switching to thread $main_thre.*" \
-	    "thread $main_thre selected"
+    # Switch back to the main thread, and resume all threads.  The
+    # "start" thread exits, and the main thread reaches "end".
+    gdb_test "thread $main_thre" \
+	"Switching to thread $main_thre.*" \
+	"thread $main_thre selected"
 
-	if { $mode == "non-stop" } {
-	    set cmd "continue -a"
-	} else {
-	    set cmd "continue"
-	}
-	set test "continue to end"
-	set thread_exited 0
-	set prompt 0
-	gdb_test_multiple "$cmd" $test -lbl {
-	    -re "(^|\r\n)\\\[Thread \[^\r\n\]* exited](?=\r\n)" {
-		if { $prompt } {
-		    pass $gdb_test_name
-		} else {
-		    set thread_exited 1
-		    exp_continue
-		}
-	    }
-	    -re "\r\n$gdb_prompt " {
-		if { $thread_exited } {
-		    pass $gdb_test_name
-		} else {
-		    set prompt 1
-		    exp_continue
-		}
+    if { $non_stop } {
+	set cmd "continue -a"
+    } else {
+	set cmd "continue"
+    }
+    set test "continue to end"
+    set thread_exited 0
+    set prompt 0
+    gdb_test_multiple "$cmd" $test -lbl {
+	-re "(^|\r\n)\\\[Thread \[^\r\n\]* exited](?=\r\n)" {
+	    if { $prompt } {
+		pass $gdb_test_name
+	    } else {
+		set thread_exited 1
+		exp_continue
 	    }
 	}
+	-re "\r\n$gdb_prompt " {
+	    if { $thread_exited } {
+		pass $gdb_test_name
+	    } else {
+		set prompt 1
+		exp_continue
+	    }
+	}
+    }
 
-	set test "thread-specific breakpoint was deleted"
-	gdb_test_multiple "info breakpoint" $test {
-	    -re "thread $start_thre\n$gdb_prompt $" {
-		fail $test
-	    }
-	    -re "$gdb_prompt $" {
-		pass $test
-	    }
+    set test "thread-specific breakpoint was deleted"
+    gdb_test_multiple "info breakpoint" $test {
+	-re "thread $start_thre\n$gdb_prompt $" {
+	    fail $test
+	}
+	-re "$gdb_prompt $" {
+	    pass $test
 	}
     }
 }
 
-# Test all-stop mode.
-check_thread_specific_breakpoint "all-stop"
+foreach_with_prefix non_stop {on off} {
+    save_vars { GDBFLAGS } {
+	append GDBFLAGS " -ex \"set non-stop $non_stop\""
+	clean_restart $binfile
+    }
 
-clean_restart ${binfile}
-
-# Test non-stop mode.
-gdb_test_no_output "set non-stop on" "set non-stop mode"
-check_thread_specific_breakpoint "non-stop"
+    check_thread_specific_breakpoint $non_stop
+}
