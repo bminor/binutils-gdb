@@ -142,9 +142,9 @@
 ### MARKER ###
 
 // Move instructions.
-mov, 0xa0, None, CpuNo64, D|W|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
-mov, 0xa0, None, Cpu64, D|W|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
-movabs, 0xa0, None, Cpu64, D|W|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
+mov, 0xa0, None, CpuNo64, D|W|CheckRegSize|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
+mov, 0xa0, None, Cpu64, D|W|CheckRegSize|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
+movabs, 0xa0, None, Cpu64, D|W|CheckRegSize|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 movq, 0xa1, None, Cpu64, D|Size64|NoSuf, { Disp64|Unspecified|Qword, Acc|Qword }
 mov, 0x88, None, 0, D|W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|HLEPrefixRelease, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 movq, 0x89, None, Cpu64, D|Modrm|Size64|NoSuf|HLEPrefixRelease, { Reg64, Reg64|Unspecified|Qword|BaseIndex }
@@ -176,7 +176,7 @@ movq, 0xf21, None, Cpu64, D|RegMem|Size64|NoSuf|NoRex64, { Debug, Reg64 }
 mov, 0xf24, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Test, Reg32 }
 
 // Move after swapping the bytes
-movbe, 0x0f38f0, None, CpuMovbe, D|Modrm|No_bSuf|No_sSuf|No_ldSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movbe, 0x0f38f0, None, CpuMovbe, D|Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Move with sign extend.
 // "movsbl" & "movsbw" must not be unified into "movsb" to avoid
@@ -302,7 +302,7 @@ cmp, 0x3c, None, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word
 cmp, 0x80, 7, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
 test, 0x84, None, 0, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|Byte|Word|Dword|Qword|BaseIndex }
-test, 0x84, None, 0, W|Modrm|No_sSuf|No_ldSuf, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+test, 0x84, None, 0, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 test, 0xa8, None, 0, W|No_sSuf|No_ldSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 test, 0xf6, 0, 0, W|Modrm|No_sSuf|No_ldSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
@@ -970,7 +970,7 @@ fucompi, 0xdfe8, None, Cpu687, NoSuf, { FloatReg }
 
 // Pentium4 extensions.
 
-movnti, 0xfc3, None, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+movnti, 0xfc3, None, CpuSSE2, Modrm|CheckRegSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 clflush, 0xfae, 7, CpuClflush, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 lfence, 0xfaee8, None, CpuSSE2, NoSuf, {}
 mfence, 0xfaef0, None, CpuSSE2, NoSuf, {}
@@ -3053,7 +3053,7 @@ cldemote, 0x0f1c, 0, CpuCLDEMOTE, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
 
 // MOVDIR[I,64B] instructions.
 
-movdiri, 0xf38f9, None, CpuMOVDIRI, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+movdiri, 0xf38f9, None, CpuMOVDIRI, Modrm|CheckRegSize|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
 movdir64b, 0x660f38f8, None, CpuMOVDIR64B, Modrm|AddrPrefixOpReg|NoSuf, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // MOVEDIR instructions end.

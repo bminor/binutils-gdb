@@ -2192,7 +2192,7 @@ operand_type_match (i386_operand_type overlap,
 
 /* If given types g0 and g1 are registers they must be of the same type
    unless the expected operand type register overlap is null.
-   Some Intel syntax memory operand size checking also happens here.  */
+   Intel syntax sized memory operands are also checked here.  */
 
 static INLINE int
 operand_type_register_match (i386_operand_type g0,
@@ -2202,18 +2202,14 @@ operand_type_register_match (i386_operand_type g0,
 {
   if (g0.bitfield.class != Reg
       && g0.bitfield.class != RegSIMD
-      && (!operand_type_check (g0, anymem)
-	  || g0.bitfield.unspecified
-	  || (t0.bitfield.class != Reg
-	      && t0.bitfield.class != RegSIMD)))
+      && (g0.bitfield.unspecified
+	  || !operand_type_check (g0, anymem)))
     return 1;
 
   if (g1.bitfield.class != Reg
       && g1.bitfield.class != RegSIMD
-      && (!operand_type_check (g1, anymem)
-	  || g1.bitfield.unspecified
-	  || (t1.bitfield.class != Reg
-	      && t1.bitfield.class != RegSIMD)))
+      && (g1.bitfield.unspecified
+	  || !operand_type_check (g1, anymem)))
     return 1;
 
   if (g0.bitfield.byte == g1.bitfield.byte
