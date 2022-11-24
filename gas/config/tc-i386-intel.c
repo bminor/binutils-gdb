@@ -697,7 +697,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  i.types[this_operand].bitfield.word = 1;
 	  if (got_a_float == 2)	/* "fi..." */
 	    suffix = SHORT_MNEM_SUFFIX;
-	  else
+	  else if ((current_templates->start->base_opcode | 1) != 0x03
+		   || (current_templates->start->opcode_modifier.opcodespace
+		       != SPACE_0F)) /* lar, lsl */
 	    suffix = WORD_MNEM_SUFFIX;
 	  break;
 

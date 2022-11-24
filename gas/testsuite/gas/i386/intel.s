@@ -699,6 +699,16 @@ fidivr  dword ptr [ebx]
  cmovpe  dx, 0x90909090[eax]
  cmovpo dx, 0x90909090[eax]
 
+	lar	eax, eax
+	lar	ax, ax
+	lar	eax, word ptr [eax]
+	lar	ax, word ptr [eax]
+
+	lsl	eax, eax
+	lsl	ax, ax
+	lsl	eax, word ptr [eax]
+	lsl	ax, word ptr [eax]
+
  # Check base/index swapping
 	.allow_index_reg
  mov    eax, [eax+esp]
