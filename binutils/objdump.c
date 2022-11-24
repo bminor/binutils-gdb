@@ -4210,9 +4210,9 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     {
       section->start = NULL;
       free_debug_section (debug);
-      printf (_("\nSection '%s' has an invalid size: %#llx.\n"),
+      printf (_("\nSection '%s' has an invalid size: %#" PRIx64 ".\n"),
 	      sanitize_string (section->name),
-	      (unsigned long long) section->size);
+	      section->size);
       return false;
     }
 
