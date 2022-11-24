@@ -1,9 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename sframe-spec.info
 @settitle The SFrame Format
-@ifnottex
-@xrefautomaticsectiontitle on
-@end ifnottex
 
 @copying
 Copyright @copyright{} 2021-2022 Free Software Foundation, Inc.
@@ -395,7 +392,7 @@ used for the function.
 
 @cindex The SFrame FDE info word
 @node The SFrame FDE info word
-@subsection The SFrame FDE info word, sfde_func_info
+@subsection The SFrame FDE info word
 
 The info word is a bitfield split into three parts.  From MSB to LSB:
 
@@ -562,7 +559,7 @@ Further FRE types may be added in future.
 
 @cindex The SFrame FRE info word
 @node The SFrame FRE info word
-@subsection The SFrame FRE info word, sfre_info
+@subsection The SFrame FRE info word
 
 The SFrame FRE info word is a bitfield split into four parts.  From MSB to LSB:
 
