@@ -836,7 +836,7 @@ set_running_thread (struct thread_info *tp, bool running)
 
   threads_debug_printf ("thread: %s, running? %d%s",
 			tp->ptid.to_string ().c_str (), running,
-			(started ? " (started" : ""));
+			(started ? " (started)" : ""));
 
   if (!running)
     {
