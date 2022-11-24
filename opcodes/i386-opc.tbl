@@ -928,11 +928,11 @@ ud2, 0xf0b, None, Cpu186, NoSuf, {}
 // alias for ud2
 ud2a, 0xf0b, None, Cpu186, NoSuf, {}
 // 2nd. official undefined instr.
-ud1, 0xfb9, None, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud1, 0xfb9, None, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // alias for ud1
-ud2b, 0xfb9, None, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud2b, 0xfb9, None, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // 3rd official undefined instr (older CPUs don't take a ModR/M byte)
-ud0, 0xfff, None, Cpu186, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud0, 0xfff, None, Cpu186, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 cmov<cc>, 0xf4<cc:opc>, None, CpuCMOV, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
