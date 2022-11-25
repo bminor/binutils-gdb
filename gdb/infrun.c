@@ -756,13 +756,56 @@ follow_fork ()
 	  if (tp == cur_thr)
 	    continue;
 
-	  if (tp->pending_follow.kind () != TARGET_WAITKIND_SPURIOUS)
+	  /* follow_fork_inferior clears tp->pending_follow, and below
+	     we'll need the value after the follow_fork_inferior
+	     call.  */
+	  target_waitkind kind = tp->pending_follow.kind ();
+
+	  if (kind != TARGET_WAITKIND_SPURIOUS)
 	    {
 	      infrun_debug_printf ("need to follow-fork [%s] first",
 				   tp->ptid.to_string ().c_str ());
 
 	      switch_to_thread (tp);
-	      should_resume = false;
+
+	      /* Set up inferior(s) as specified by the caller, and
+		 tell the target to do whatever is necessary to follow
+		 either parent or child.  */
+	      if (follow_child)
+		{
+		  /* The thread that started the execution command
+		     won't exist in the child.  Abort the command and
+		     immediately stop in this thread, in the child,
+		     inside fork.  */
+		  should_resume = false;
+		}
+	      else
+		{
+		  /* Following the parent, so let the thread fork its
+		     child freely, it won't influence the current
+		     execution command.  */
+		  if (follow_fork_inferior (follow_child, detach_fork))
+		    {
+		      /* Target refused to follow, or there's some
+			 other reason we shouldn't resume.  */
+		      switch_to_thread (cur_thr);
+		      set_last_target_status_stopped (cur_thr);
+		      return false;
+		    }
+
+		  /* If we're following a vfork, when we need to leave
+		     the just-forked thread as selected, as we need to
+		     solo-resume it to collect the VFORK_DONE event.
+		     If we're following a fork, however, switch back
+		     to the original thread that we continue stepping
+		     it, etc.  */
+		  if (kind != TARGET_WAITKIND_VFORKED)
+		    {
+		      gdb_assert (kind == TARGET_WAITKIND_FORKED);
+		      switch_to_thread (cur_thr);
+		    }
+		}
+
 	      break;
 	    }
 	}
@@ -2200,6 +2243,29 @@ user_visible_resume_target (ptid_t resume_ptid)
 	  : current_inferior ()->process_target ());
 }
 
+/* Find a thread from the inferiors that we'll resume that is waiting
+   for a vfork-done event.  */
+
+static thread_info *
+find_thread_waiting_for_vfork_done ()
+{
+  gdb_assert (!target_is_non_stop_p ());
+
+  if (sched_multi)
+    {
+      for (inferior *inf : all_non_exited_inferiors ())
+	if (inf->thread_waiting_for_vfork_done != nullptr)
+	  return inf->thread_waiting_for_vfork_done;
+    }
+  else
+    {
+      inferior *cur_inf = current_inferior ();
+      if (cur_inf->thread_waiting_for_vfork_done != nullptr)
+	return cur_inf->thread_waiting_for_vfork_done;
+    }
+  return nullptr;
+}
+
 /* Return a ptid representing the set of threads that we will resume,
    in the perspective of the target, assuming run control handling
    does not require leaving some threads stopped (e.g., stepping past
@@ -2240,14 +2306,18 @@ internal_resume_ptid (int user_step)
      Since we don't have that flexibility (we can only pass one ptid), just
      resume the first thread waiting for a vfork-done event we find (e.g. thread
      2.1).  */
-  if (sched_multi)
+  thread_info *thr = find_thread_waiting_for_vfork_done ();
+  if (thr != nullptr)
     {
-      for (inferior *inf : all_non_exited_inferiors ())
-	if (inf->thread_waiting_for_vfork_done != nullptr)
-	  return inf->thread_waiting_for_vfork_done->ptid;
+      /* If we have a thread that is waiting for a vfork-done event,
+	 then we should have switched to it earlier.  Calling
+	 target_resume with thread scope is only possible when the
+	 current thread matches the thread scope.  */
+      gdb_assert (thr->ptid == inferior_ptid);
+      gdb_assert (thr->inf->process_target ()
+		  == inferior_thread ()->inf->process_target ());
+      return thr->ptid;
     }
-  else if (current_inferior ()->thread_waiting_for_vfork_done != nullptr)
-    return current_inferior ()->thread_waiting_for_vfork_done->ptid;
 
   return user_visible_resume_ptid (user_step);
 }
