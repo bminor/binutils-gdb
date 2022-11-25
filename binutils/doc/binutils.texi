@@ -3381,7 +3381,7 @@ octal, @samp{x} for hexadecimal, or @samp{d} for decimal.
 @itemx --encoding=@var{encoding}
 Select the character encoding of the strings that are to be found.
 Possible values for @var{encoding} are: @samp{s} = single-7-bit-byte
-characters (ASCII, ISO 8859, etc., default), @samp{S} =
+characters (default), @samp{S} =
 single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
 littleendian.  Useful for finding wide character strings. (@samp{l}
