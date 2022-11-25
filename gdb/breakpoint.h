@@ -317,6 +317,7 @@ enum bp_loc_type
   bp_loc_hardware_breakpoint,
   bp_loc_software_watchpoint,
   bp_loc_hardware_watchpoint,
+  bp_loc_tracepoint,
   bp_loc_other			/* Miscellaneous...  */
 };
 

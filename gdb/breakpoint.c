@@ -7359,20 +7359,27 @@ bp_location_from_bp_type (bptype type)
     case bp_gnu_ifunc_resolver_return:
     case bp_dprintf:
       return bp_loc_software_breakpoint;
+
     case bp_hardware_breakpoint:
       return bp_loc_hardware_breakpoint;
+
     case bp_hardware_watchpoint:
     case bp_read_watchpoint:
     case bp_access_watchpoint:
       return bp_loc_hardware_watchpoint;
+
     case bp_watchpoint:
       return bp_loc_software_watchpoint;
-    case bp_catchpoint:
+
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
     case bp_static_marker_tracepoint:
+      return bp_loc_tracepoint;
+
+    case bp_catchpoint:
       return bp_loc_other;
+
     default:
       internal_error (_("unknown breakpoint type"));
     }
