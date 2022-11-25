@@ -164,14 +164,15 @@ PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 	codeview.$(OBJEXT) compress-debug.$(OBJEXT) cond.$(OBJEXT) \
 	depend.$(OBJEXT) dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) \
-	ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) flonum-copy.$(OBJEXT) \
-	flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) frags.$(OBJEXT) \
-	gen-sframe.$(OBJEXT) hash.$(OBJEXT) input-file.$(OBJEXT) \
-	input-scrub.$(OBJEXT) listing.$(OBJEXT) literal.$(OBJEXT) \
-	macro.$(OBJEXT) messages.$(OBJEXT) output-file.$(OBJEXT) \
-	read.$(OBJEXT) remap.$(OBJEXT) sb.$(OBJEXT) \
-	sframe-opt.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
-	symbols.$(OBJEXT) write.$(OBJEXT)
+	ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) \
+	flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) \
+	flonum-mult.$(OBJEXT) frags.$(OBJEXT) gen-sframe.$(OBJEXT) \
+	hash.$(OBJEXT) input-file.$(OBJEXT) input-scrub.$(OBJEXT) \
+	listing.$(OBJEXT) literal.$(OBJEXT) macro.$(OBJEXT) \
+	messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
+	remap.$(OBJEXT) sb.$(OBJEXT) sframe-opt.$(OBJEXT) \
+	stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
+	write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 as_new_OBJECTS = $(am_as_new_OBJECTS)
