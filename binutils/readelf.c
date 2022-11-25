@@ -12724,9 +12724,6 @@ get_symbol_type (Filedata * filedata, unsigned int type)
     case STT_TLS:	return "TLS";
     case STT_RELC:      return "RELC";
     case STT_SRELC:     return "SRELC";
-    case STT_GNU_IFUNC: return "IFUNC"; /* As mentioned in PR29718, do not
-					   require EI_OSABI as IFUNC is
-					   a reseved name.  */
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
@@ -12750,6 +12747,11 @@ get_symbol_type (Filedata * filedata, unsigned int type)
 	      if (type == STT_HP_STUB)
 		return "HP_STUB";
 	    }
+
+	  if (type == STT_GNU_IFUNC
+	      && (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_GNU
+		  || filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_FREEBSD))
+	    return "IFUNC";
 
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), type);
 	}
