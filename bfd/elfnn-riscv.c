@@ -3427,7 +3427,7 @@ riscv_merge_std_ext (bfd *ibfd,
 		     struct riscv_subset_t **pin,
 		     struct riscv_subset_t **pout)
 {
-  const char *standard_exts = "mafdqlcbjtpvn";
+  const char *standard_exts = "mafdqlcbjtpvnh";
   const char *p;
   struct riscv_subset_t *in = *pin;
   struct riscv_subset_t *out = *pout;
