@@ -7291,7 +7291,16 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 				  &per_objfile->per_bfd->abbrev, 0,
 				  types_htab, rcuh_kind::TYPE);
 
-  dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+  dwz_file *dwz;
+  try
+    {
+      dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+    }
+  catch (const gdb_exception_error &)
+    {
+      per_objfile->per_bfd->all_units.clear ();
+      throw;
+    }
   if (dwz != NULL)
     {
       /* Pre-read the sections we'll need to construct an index.  */
