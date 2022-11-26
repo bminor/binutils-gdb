@@ -6322,6 +6322,17 @@ proc cached_file { filename txt {executable 0}} {
     return $filename
 }
 
+# Return a wrapper around gdb that prevents generating a core file.
+
+proc gdb_no_core { } {
+    set script \
+	[list \
+	     "ulimit -c 0" \
+	     [join [list exec $::GDB {"$@"}]]]
+    set script [join $script "\n"]
+    return [cached_file gdb-no-core.sh $script 1]
+}
+
 # Set 'testfile', 'srcfile', and 'binfile'.
 #
 # ARGS is a list of source file specifications.

@@ -62,7 +62,10 @@ foreach test_data {{SEGV "Segmentation fault"} \
     with_test_prefix ${sig} {
 
 	# Restart GDB.
-	clean_restart $binfile
+	save_vars { GDB } {
+	    set GDB [gdb_no_core]
+	    clean_restart $binfile
+	}
 
 	# Capture the pid of GDB.
 	set testpid [spawn_id_get_pid $gdb_spawn_id]
