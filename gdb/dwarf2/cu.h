@@ -278,8 +278,6 @@ public:
      hash table and don't find it.  */
   bool load_all_dies : 1;
 
-  struct partial_die_info *find_partial_die (sect_offset sect_off);
-
   /* Get the buildsym_compunit for this CU.  */
   buildsym_compunit *get_builder ();
 };
