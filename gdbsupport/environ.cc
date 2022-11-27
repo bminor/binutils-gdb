@@ -29,6 +29,8 @@ gdb_environ::operator= (gdb_environ &&e)
   if (&e == this)
     return *this;
 
+  this->clear ();
+
   m_environ_vector = std::move (e.m_environ_vector);
   m_user_set_env = std::move (e.m_user_set_env);
   m_user_unset_env = std::move (e.m_user_unset_env);
