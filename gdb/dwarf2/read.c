@@ -2822,7 +2822,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
     XOBNEWVEC (&per_objfile->per_bfd->obstack, const char *,
 	       qfn->num_file_names);
   if (offset != 0)
-    qfn->file_names[0] = xstrdup (fnd.get_name ());
+    qfn->file_names[0] = per_objfile->objfile->intern (fnd.get_name ());
 
   if (!include_names.empty ())
     memcpy (&qfn->file_names[offset], include_names.data (),
