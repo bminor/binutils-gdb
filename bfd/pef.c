@@ -181,7 +181,7 @@ bfd_pef_parse_traceback_table (bfd *abfd,
 
       /* Strip leading period inserted by compiler.  */
       if (namebuf[0] == '.')
-	memmove (namebuf, namebuf + 1, name.name_len + 1);
+	memmove (namebuf, namebuf + 1, name.name_len);
 
       sym->name = namebuf;
 
