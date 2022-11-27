@@ -417,7 +417,7 @@ add_region_prefix (bfd *abfd ATTRIBUTE_UNUSED, asection *s,
       bfd_rename_section (s, concat (".lower", curr_name, NULL));
       break;
     case REGION_EITHER:
-      s->name = concat (".either", curr_name, NULL);
+      bfd_rename_section (s, concat (".either", curr_name, NULL));
       break;
     default:
       /* Unreachable.  */
