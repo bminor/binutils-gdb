@@ -706,7 +706,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
   ptid_t ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();
   inferior_appeared (inf, pid);
-  inf->attach_flag = 1;
+  inf->attach_flag = true;
 
   if (!inf->target_is_pushed (ops))
     inf->push_target (ops);
@@ -1286,7 +1286,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
 
   inf = current_inferior ();
   inferior_appeared (inf, pid);
-  inf->attach_flag = 0;
+  inf->attach_flag = false;
 
   flags = _DEBUG_FLAG_KLC;	/* Kill-on-Last-Close flag.  */
   errn = devctl (ctl_fd, DCMD_PROC_SET_FLAG, &flags, sizeof (flags), 0);

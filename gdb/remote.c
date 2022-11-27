@@ -4625,7 +4625,7 @@ remote_target::process_initial_stop_replies (int from_tty)
      registers/memory.  */
   for (inferior *inf : all_non_exited_inferiors (this))
     {
-      inf->needs_setup = 1;
+      inf->needs_setup = true;
 
       if (non_stop)
 	{

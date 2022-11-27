@@ -495,15 +495,15 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 		 with the shared region.  Keep track of the
 		 parent.  */
 	      child_inf->vfork_parent = parent_inf;
-	      child_inf->pending_detach = 0;
+	      child_inf->pending_detach = false;
 	      parent_inf->vfork_child = child_inf;
-	      parent_inf->pending_detach = 0;
+	      parent_inf->pending_detach = false;
 	    }
 	  else
 	    {
 	      child_inf->aspace = new address_space ();
 	      child_inf->pspace = new program_space (child_inf->aspace);
-	      child_inf->removable = 1;
+	      child_inf->removable = true;
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
 	    }
 	}
@@ -585,7 +585,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	{
 	  child_inf->aspace = new address_space ();
 	  child_inf->pspace = new program_space (child_inf->aspace);
-	  child_inf->removable = 1;
+	  child_inf->removable = true;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  clone_program_space (child_inf->pspace, parent_inf->pspace);
 	}
@@ -647,7 +647,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  gdb_assert (child_inf->vfork_parent == nullptr);
 	  gdb_assert (parent_inf->vfork_child == nullptr);
 	  child_inf->vfork_parent = parent_inf;
-	  child_inf->pending_detach = 0;
+	  child_inf->pending_detach = false;
 	  parent_inf->vfork_child = child_inf;
 	  parent_inf->pending_detach = detach_fork;
 	}
@@ -942,7 +942,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  /* follow-fork child, detach-on-fork on.  */
 
-	  vfork_parent->pending_detach = 0;
+	  vfork_parent->pending_detach = false;
 
 	  scoped_restore_current_pspace_and_thread restore_thread;
 
@@ -998,7 +998,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	     child a new address space.  */
 	  inf->pspace = new program_space (maybe_new_address_space ());
 	  inf->aspace = inf->pspace->aspace;
-	  inf->removable = 1;
+	  inf->removable = true;
 	  set_current_program_space (inf->pspace);
 
 	  resume_parent = vfork_parent;
@@ -1023,7 +1023,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->pspace = new program_space (maybe_new_address_space ());
 	  inf->aspace = inf->pspace->aspace;
 	  set_current_program_space (inf->pspace);
-	  inf->removable = 1;
+	  inf->removable = true;
 	  inf->symfile_flags = SYMFILE_NO_READ;
 	  clone_program_space (inf->pspace, vfork_parent->pspace);
 
@@ -5563,7 +5563,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 				   (LONGEST) ecs->ws.exit_status ());
 
 	  /* Also record this in the inferior itself.  */
-	  current_inferior ()->has_exit_code = 1;
+	  current_inferior ()->has_exit_code = true;
 	  current_inferior ()->exit_code = (LONGEST) ecs->ws.exit_status ();
 
 	  /* Support the --return-child-result option.  */

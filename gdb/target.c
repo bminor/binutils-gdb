@@ -2489,7 +2489,7 @@ target_pre_inferior (int from_tty)
 
   /* attach_flag may be set if the previous process associated with
      the inferior was attached to.  */
-  current_inferior ()->attach_flag = 0;
+  current_inferior ()->attach_flag = false;
 
   current_inferior ()->highest_thread_num = 0;
 

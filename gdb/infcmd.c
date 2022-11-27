@@ -2494,7 +2494,7 @@ setup_inferior (int from_tty)
   struct inferior *inferior;
 
   inferior = current_inferior ();
-  inferior->needs_setup = 0;
+  inferior->needs_setup = false;
 
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
@@ -2677,7 +2677,7 @@ attach_command (const char *args, int from_tty)
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
 
-  inferior->needs_setup = 1;
+  inferior->needs_setup = true;
 
   if (target_is_non_stop_p ())
     {

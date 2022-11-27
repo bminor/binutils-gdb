@@ -223,7 +223,7 @@ exit_inferior_1 (struct inferior *inf, int silent)
       inf->vfork_child = NULL;
     }
 
-  inf->pending_detach = 0;
+  inf->pending_detach = false;
   /* Reset it.  */
   inf->control = inferior_control_state (NO_STOP_QUIETLY);
 
@@ -270,7 +270,7 @@ inferior_appeared (struct inferior *inf, int pid)
     init_thread_list ();
 
   inf->pid = pid;
-  inf->has_exit_code = 0;
+  inf->has_exit_code = false;
   inf->exit_code = 0;
 
   gdb::observers::inferior_appeared.notify (inf);

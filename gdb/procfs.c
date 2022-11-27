@@ -1849,7 +1849,7 @@ do_attach (ptid_t ptid)
   inf = current_inferior ();
   inferior_appeared (inf, pi->pid);
   /* Let GDB know that the inferior was attached.  */
-  inf->attach_flag = 1;
+  inf->attach_flag = true;
 
   /* Create a procinfo for the current lwp.  */
   lwpid = proc_get_current_thread (pi);

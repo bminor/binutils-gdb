@@ -2183,7 +2183,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
   inferior->push_target (this);
 
   inferior_appeared (inferior, pid);
-  inferior->attach_flag = 1;
+  inferior->attach_flag = true;
 
   inf_update_procs (inf);
 
