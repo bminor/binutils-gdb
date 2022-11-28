@@ -387,7 +387,7 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       m_saved_output->targerr = gdb_stdtargerr;
 
       ui_file *logfile_p = logfile.get ();
-      m_saved_output->file_to_delete = std::move (logfile);
+      m_saved_output->logfile_holder = std::move (logfile);
 
       /* The new stdout and stderr only depend on whether logging
 	 redirection is being done.  */
@@ -395,19 +395,19 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       ui_file *new_stderr = logfile_p;
       if (!logging_redirect)
 	{
-	  m_saved_output->tee_to_delete.reset
+	  m_saved_output->stdout_holder.reset
 	    (new tee_file (gdb_stdout, logfile_p));
-	  new_stdout = m_saved_output->tee_to_delete.get ();
-	  m_saved_output->stderr_to_delete.reset
+	  new_stdout = m_saved_output->stdout_holder.get ();
+	  m_saved_output->stderr_holder.reset
 	    (new tee_file (gdb_stderr, logfile_p));
-	  new_stderr = m_saved_output->stderr_to_delete.get ();
+	  new_stderr = m_saved_output->stderr_holder.get ();
 	}
 
-      m_saved_output->log_to_delete.reset
+      m_saved_output->stdlog_holder.reset
 	(new timestamped_file (debug_redirect ? logfile_p : new_stderr));
 
       gdb_stdout = new_stdout;
-      gdb_stdlog = m_saved_output->log_to_delete.get ();
+      gdb_stdlog = m_saved_output->stdlog_holder.get ();
       gdb_stderr = new_stderr;
       gdb_stdtarg = new_stderr;
       gdb_stdtargerr = new_stderr;

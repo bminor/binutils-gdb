@@ -36,15 +36,18 @@ public:
 private:
   struct saved_output_files
   {
+    /* Saved gdb_stdout, gdb_stderr, etc.  */
     ui_file *out;
     ui_file *err;
     ui_file *log;
     ui_file *targ;
     ui_file *targerr;
-    ui_file_up tee_to_delete;
-    ui_file_up stderr_to_delete;
-    ui_file_up file_to_delete;
-    ui_file_up log_to_delete;
+    /* When redirecting, some or all of these may be non-null
+       depending on the logging mode.  */
+    ui_file_up stdout_holder;
+    ui_file_up stderr_holder;
+    ui_file_up stdlog_holder;
+    ui_file_up logfile_holder;
   };
 
   /* These hold the pushed copies of the gdb output files.  If NULL
