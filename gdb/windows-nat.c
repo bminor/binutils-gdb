@@ -631,7 +631,7 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
 
   auto iter = std::find_if (windows_process.thread_list.begin (),
 			    windows_process.thread_list.end (),
-			    [=] (auto &th)
+			    [=] (std::unique_ptr<windows_thread_info> &th)
 			    {
 			      return th->tid == id;
 			    });
