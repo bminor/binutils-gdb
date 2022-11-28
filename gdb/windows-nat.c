@@ -1824,7 +1824,6 @@ windows_nat_target::get_windows_debug_event
 			       windows_process.desired_stop_thread_id, 0));
     }
 
-out:
   if (thread_id == 0)
     return null_ptid;
   return ptid_t (windows_process.current_event.dwProcessId, thread_id, 0);
