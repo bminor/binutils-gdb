@@ -58,16 +58,35 @@ gdb_test_multiple "step" $test {
     }
 }
 
+set in_second 0
 set test "second-hit"
 gdb_test_multiple "step" $test {
+    -re -wrap " first-retry .*" {
+	if { $in_second } {
+	    fail $gdb_test_name
+	} else {
+	    send_gdb "step\n"
+	    exp_continue
+	}
+    }
+    -re -wrap " first-hit .*" {
+	if { $in_second } {
+	    fail $gdb_test_name
+	} else {
+	    send_gdb "step\n"
+	    exp_continue
+	}
+    }
     -re -wrap " second-hit .*" {
 	pass $gdb_test_name
     }
     -re -wrap " second-retry .*" {
+	set in_second 1
 	send_gdb "step\n"
 	exp_continue
     }
     -re -wrap "get_pc_thunk.*" {
+	set in_second 1
 	send_gdb "step\n"
 	exp_continue
     }
