@@ -427,6 +427,8 @@ windows_nat_target::async (bool enable)
 		      nullptr, "windows_nat_target");
   else
     delete_file_handler (async_wait_fd ());
+
+  m_is_async = enable;
 }
 
 /* A wrapper for WaitForSingleObject that issues a warning if
