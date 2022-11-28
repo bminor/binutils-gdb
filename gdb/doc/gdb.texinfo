@@ -27556,13 +27556,6 @@ Turns on or off display of gdbarch debugging info.  The default is off
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
 
-@item set debug aix-solib
-@cindex AIX shared library debugging
-Control display of debugging messages from the AIX shared library
-support module.  The default is off.
-@item show debug aix-solib
-Show the current state of displaying AIX shared library debugging messages.
-
 @item set debug aix-thread
 @cindex AIX threads
 Display debugging messages about inner workings of the AIX thread
@@ -27796,12 +27789,11 @@ default is off.
 Displays the current state of displaying @value{GDBN} serial debugging
 info.
 
-@item set debug solib-frv
-@cindex FR-V shared-library debugging
-Turn on or off debugging messages for FR-V shared-library code.
-@item show debug solib-frv
-Display the current state of FR-V shared-library code debugging
-messages.
+@item set debug solib
+Turns on or off display of debugging messages related to shared libraries.
+The default is off.
+@item show debug solib
+Show the current state of solib debugging messages.
 
 @item set debug symbol-lookup
 @cindex symbol lookup

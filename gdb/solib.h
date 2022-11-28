@@ -29,6 +29,18 @@ struct program_space;
 #include "gdb_bfd.h"
 #include "symfile-add-flags.h"
 
+/* Value of the 'set debug solib' configuration variable.  */
+
+extern bool debug_solib;
+
+/* Print an "solib" debug statement.  */
+
+#define solib_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_solib, "solib", fmt, ##__VA_ARGS__)
+
+#define SOLIB_SCOPED_DEBUG_START_END(fmt, ...) \
+  scoped_debug_start_end (debug_solib, "solib", fmt, ##__VA_ARGS__)
+
 /* Called when we free all symtabs, to free the shared library information
    as well.  */
 

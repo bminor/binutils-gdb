@@ -145,6 +145,10 @@ set debug infcall on|off
 show debug infcall
   Print additional debug messages about inferior function calls.
 
+set debug solib on|off
+show debug solib
+  Print additional debug messages about shared library handling.
+
 set style tui-current-position [on|off]
   Whether to style the source and assembly code highlighted by the
   TUI's current position indicator.  The default is off.
@@ -165,6 +169,14 @@ maintenance info line-table
   Add a PROLOGUE-END column to the output which indicates that an
   entry corresponds to an address where a breakpoint should be placed
   to be at the first instruction past a function's prologue.
+
+* Removed commands
+
+set debug aix-solib on|off
+show debug aix-solib
+set debug solib-frv on|off
+show debug solib-frv
+  Removed in favor of "set/show debug solib".
 
 * New targets
 
