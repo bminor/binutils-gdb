@@ -344,6 +344,9 @@ private:
   BOOL windows_continue (DWORD continue_status, int id, int killed,
 			 bool last_call = false);
 
+  /* Helper function to start process_thread.  */
+  static DWORD WINAPI process_thread_starter (LPVOID self);
+
   /* This function implements the background thread that starts
      inferiors and waits for events.  */
   void process_thread ();
@@ -404,13 +407,8 @@ windows_nat_target::windows_nat_target ()
     m_response_event (CreateEvent (nullptr, false, false, nullptr)),
     m_wait_event (make_serial_event ())
 {
-  auto fn = [] (LPVOID self) -> DWORD
-    {
-      ((windows_nat_target *) self)->process_thread ();
-      return 0;
-    };
-
-  HANDLE bg_thread = CreateThread (nullptr, 64 * 1024, fn, this, 0, nullptr);
+  HANDLE bg_thread = CreateThread (nullptr, 64 * 1024,
+				   process_thread_starter, this, 0, nullptr);
   CloseHandle (bg_thread);
 }
 
@@ -451,6 +449,13 @@ wait_for_single (HANDLE handle, DWORD howlong)
 	warning ("unexpected result from WaitForSingleObject: %u",
 		 (unsigned) r);
     }
+}
+
+DWORD WINAPI
+windows_nat_target::process_thread_starter (LPVOID self)
+{
+  ((windows_nat_target *) self)->process_thread ();
+  return 0;
 }
 
 void
