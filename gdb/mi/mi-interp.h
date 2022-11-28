@@ -56,8 +56,8 @@ public:
      file which we need to delete, so we can restore correctly when
      done.  */
   struct ui_file *saved_raw_stdout;
-  struct ui_file *saved_raw_file_to_delete;
-  struct ui_file *saved_tee_to_delete;
+  ui_file_up logfile_holder;
+  ui_file_up stdout_holder;
 
   /* MI's builder.  */
   struct ui_out *mi_uiout;
