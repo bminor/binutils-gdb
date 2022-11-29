@@ -367,5 +367,6 @@ xcofflink.c
 xcofflink.h
 xsym.c
 xsym.h
+xtensa-dynconfig.c
 xtensa-isa.c
 xtensa-modules.c
