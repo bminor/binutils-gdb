@@ -73,10 +73,8 @@ h8300-dis.c
 hppa-dis.c
 i386-dis.c
 i386-gen.c
-i386-init.h
 i386-opc.c
 i386-opc.h
-i386-tbl.h
 ia64-asmtab.c
 ia64-asmtab.h
 ia64-dis.c
