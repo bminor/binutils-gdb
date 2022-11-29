@@ -1618,8 +1618,6 @@ thread_db_target::update_thread_list ()
 {
   struct thread_db_info *info;
 
-  prune_threads ();
-
   for (inferior *inf : all_inferiors ())
     {
       if (inf->pid == 0)
