@@ -31,6 +31,7 @@
 #  - thread apply
 #  - taas
 
+load_lib compile-support.exp
 load_lib completion-support.exp
 
 standard_testfile .c

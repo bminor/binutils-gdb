@@ -4195,26 +4195,6 @@ proc skip_libstdcxx_probe_tests {} {
     return [skip_libstdcxx_probe_tests_prompt "$gdb_prompt $"]
 }
 
-# Return 1 if we should skip tests of the "compile" feature.
-# This must be invoked after the inferior has been started.
-
-proc skip_compile_feature_tests {} {
-    global gdb_prompt
-
-    set result 0
-    gdb_test_multiple "compile code -- ;" "check for working compile command" {
-	"Could not load libcc1.*\r\n$gdb_prompt $" {
-	    set result 1
-	}
-	-re "Command not supported on this host\\..*\r\n$gdb_prompt $" {
-	    set result 1
-	}
-	-re "\r\n$gdb_prompt $" {
-	}
-    }
-    return $result
-}
-
 # Helper for gdb_is_target_* procs.  TARGET_NAME is the name of the target
 # we're looking for (used to build the test name).  TARGET_STACK_REGEXP
 # is a regexp that will match the output of "maint print target-stack" if
