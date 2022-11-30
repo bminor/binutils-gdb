@@ -178,6 +178,7 @@ if [gas_32_check] then {
     run_dump_test "i386-intel"
     run_dump_test "compat"
     run_dump_test "compat-intel"
+    run_dump_test "compat-intel2"
     run_dump_test "arch-1"
     run_dump_test "arch-2"
     run_dump_test "arch-3"
