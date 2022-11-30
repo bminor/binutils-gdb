@@ -841,11 +841,16 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		  abort ();
 		}
 
+	      /* We can skip templates with swappable operands here, as one
+		 operand will be a register, which operand size can be
+		 determined from.  */
+	      if (t->opcode_modifier.d)
+		continue;
+
 	      /* In a few cases suffixes are permitted, but we can nevertheless
 		 derive that these aren't going to be needed.  This is only of
-		 interest for insns using ModR/M, plus we can skip templates with
-		 swappable operands here (simplifying subsequent logic).  */
-	      if (!t->opcode_modifier.modrm || t->opcode_modifier.d)
+		 interest for insns using ModR/M.  */
+	      if (!t->opcode_modifier.modrm)
 		break;
 
 	      if (!t->operand_types[op].bitfield.baseindex)
