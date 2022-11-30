@@ -511,17 +511,6 @@ extern ULONGEST get_frame_register_unsigned (frame_info_ptr frame,
 extern bool read_frame_register_unsigned (frame_info_ptr frame,
 					  int regnum, ULONGEST *val);
 
-/* Get the value of the register that belongs to this FRAME.  This
-   function is a wrapper to the call sequence ``frame_register_unwind
-   (get_next_frame (FRAME))''.  As per frame_register_unwind(), if
-   VALUEP is NULL, the registers value is not fetched/computed.  */
-
-extern void frame_register (frame_info_ptr frame, int regnum,
-			    int *optimizedp, int *unavailablep,
-			    enum lval_type *lvalp,
-			    CORE_ADDR *addrp, int *realnump,
-			    gdb_byte *valuep);
-
 /* The reverse.  Store a register value relative to the specified
    frame.  Note: this call makes the frame's state undefined.  The
    register and frame caches must be flushed.  */

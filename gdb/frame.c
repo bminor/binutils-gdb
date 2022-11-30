@@ -1166,7 +1166,12 @@ frame_register_unwind (frame_info_ptr next_frame, int regnum,
   release_value (value);
 }
 
-void
+/* Get the value of the register that belongs to this FRAME.  This
+   function is a wrapper to the call sequence ``frame_register_unwind
+   (get_next_frame (FRAME))''.  As per frame_register_unwind(), if
+   VALUEP is NULL, the registers value is not fetched/computed.  */
+
+static void
 frame_register (frame_info_ptr frame, int regnum,
 		int *optimizedp, int *unavailablep, enum lval_type *lvalp,
 		CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
