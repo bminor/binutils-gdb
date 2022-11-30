@@ -387,10 +387,6 @@ private:
   bool m_is_async = false;
 };
 
-/* This is a pointer and not a global specifically to avoid a C++
-   "static initializer fiasco" situation.  */
-static windows_nat_target *the_windows_nat_target;
-
 static void
 check (BOOL ok, const char *file, int line)
 {
@@ -629,7 +625,7 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
 		target_pid_to_str (ptid).c_str (),
 		(unsigned) exit_code);
 
-  ::delete_thread (find_thread_ptid (the_windows_nat_target, ptid));
+  ::delete_thread (find_thread_ptid (this, ptid));
 
   auto iter = std::find_if (windows_process.thread_list.begin (),
 			    windows_process.thread_list.end (),
@@ -3126,8 +3122,9 @@ _initialize_windows_nat ()
      calling x86_set_debug_register_length function
      in processor windows specific native file.  */
 
-  the_windows_nat_target = new windows_nat_target;
-  add_inf_child_target (the_windows_nat_target);
+  /* The target is not a global specifically to avoid a C++ "static
+     initializer fiasco" situation.  */
+  add_inf_child_target (new windows_nat_target);
 
 #ifdef __CYGWIN__
   cygwin_internal (CW_SET_DOS_FILE_WARNING, 0);
