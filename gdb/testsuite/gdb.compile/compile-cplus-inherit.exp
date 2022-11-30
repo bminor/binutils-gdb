@@ -33,14 +33,12 @@ if {![runto_main]} {
     return -1
 }
 
-if {[skip_compile_feature_tests]} {
-    untested \
-	"compile command not supported (could not find libcc1 shared library?)"
-    return -1
-}
-
 gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
+
+if {[skip_compile_feature_untested "var = 0"]} {
+    return -1
+}
 
 CompileExpression::new "var"
 CompileExpression::test "d.a_" 1

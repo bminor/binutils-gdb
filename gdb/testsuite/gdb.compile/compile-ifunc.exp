@@ -43,8 +43,7 @@ with_test_prefix "nodebug" {
     # feature check below will work.
     gdb_test_no_output "set language c" ""
 
-    if {[skip_compile_feature_tests]} {
-	untested "compile command not supported (could not find libcc1 shared library?)"
+    if {[skip_compile_feature_untested]} {
 	return -1
     }
 

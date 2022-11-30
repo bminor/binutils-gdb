@@ -52,8 +52,10 @@ if ![runto_main] {
     return -1
 }
 
-if {[skip_compile_feature_tests]} {
-    untested "compile command not supported (could not find libcc1 shared library?)"
+gdb_breakpoint [gdb_get_line_number "break-here"]
+gdb_continue_to_breakpoint "break-here" ".* break-here .*"
+
+if {[skip_compile_feature_untested "var = 0"]} {
     return -1
 }
 
@@ -131,9 +133,6 @@ gdb_test_no_output "set unwindonsignal on"
 gdb_test "compile code *(volatile int *) 0 = 0;" \
     "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB has restored the context to what it was before the call\\.\r\n.*" \
     "compile code segfault second"
-
-gdb_breakpoint [gdb_get_line_number "break-here"]
-gdb_continue_to_breakpoint "break-here" ".* break-here .*"
 
 # C++ Specific tests.
 ## Public methods and members
