@@ -686,11 +686,10 @@ fadd, 0xdec1, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
 fadd, 0xd8, 0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fiadd, 0xde, 0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
-faddp, 0xdec0, None, CpuFP, NoSuf, { FloatAcc, FloatReg }
+faddp, 0xdec0, None, CpuFP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
 faddp, 0xdec0, None, CpuFP, NoSuf, { FloatReg }
 // alias for faddp %st, %st(1)
 faddp, 0xdec1, None, CpuFP, NoSuf, {}
-faddp, 0xdec0, None, CpuFP, NoSuf|Ugh, { FloatReg, FloatAcc }
 
 // subtract
 fsub, 0xd8e0, None, CpuFP, NoSuf, { FloatReg }
@@ -732,10 +731,10 @@ fmul, 0xdec9, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
 fmul, 0xd8, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fimul, 0xde, 1, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
-fmulp, 0xdec8, None, CpuFP, NoSuf, { FloatAcc, FloatReg }
+fmulp, 0xdec8, None, CpuFP, D|NoSuf|Ugh, { FloatAcc, FloatReg }
 fmulp, 0xdec8, None, CpuFP, NoSuf, { FloatReg }
+// alias for fmulp %st, %st(1)
 fmulp, 0xdec9, None, CpuFP, NoSuf, {}
-fmulp, 0xdec8, None, CpuFP, NoSuf|Ugh, { FloatReg, FloatAcc }
 
 // divide
 fdiv, 0xd8f0, None, CpuFP, NoSuf, { FloatReg }
