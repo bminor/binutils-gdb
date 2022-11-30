@@ -565,31 +565,31 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       plongest (gdbarch->bfloat16_bit));
   gdb_printf (file,
                       "gdbarch_dump: bfloat16_format = %s\n",
-                      pformat (gdbarch->bfloat16_format));
+                      pformat (gdbarch, gdbarch->bfloat16_format));
   gdb_printf (file,
                       "gdbarch_dump: half_bit = %s\n",
                       plongest (gdbarch->half_bit));
   gdb_printf (file,
                       "gdbarch_dump: half_format = %s\n",
-                      pformat (gdbarch->half_format));
+                      pformat (gdbarch, gdbarch->half_format));
   gdb_printf (file,
                       "gdbarch_dump: float_bit = %s\n",
                       plongest (gdbarch->float_bit));
   gdb_printf (file,
                       "gdbarch_dump: float_format = %s\n",
-                      pformat (gdbarch->float_format));
+                      pformat (gdbarch, gdbarch->float_format));
   gdb_printf (file,
                       "gdbarch_dump: double_bit = %s\n",
                       plongest (gdbarch->double_bit));
   gdb_printf (file,
                       "gdbarch_dump: double_format = %s\n",
-                      pformat (gdbarch->double_format));
+                      pformat (gdbarch, gdbarch->double_format));
   gdb_printf (file,
                       "gdbarch_dump: long_double_bit = %s\n",
                       plongest (gdbarch->long_double_bit));
   gdb_printf (file,
                       "gdbarch_dump: long_double_format = %s\n",
-                      pformat (gdbarch->long_double_format));
+                      pformat (gdbarch, gdbarch->long_double_format));
   gdb_printf (file,
                       "gdbarch_dump: wchar_bit = %s\n",
                       plongest (gdbarch->wchar_bit));

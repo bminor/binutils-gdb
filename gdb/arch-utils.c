@@ -1104,13 +1104,13 @@ show_gdbarch_debug (struct ui_file *file, int from_tty,
 }
 
 static const char *
-pformat (const struct floatformat **format)
+pformat (struct gdbarch *gdbarch, const struct floatformat **format)
 {
   if (format == NULL)
     return "(null)";
-  else
-    /* Just print out one of them - this is only for diagnostics.  */
-    return format[0]->name;
+
+  int format_index = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE ? 1 : 0;
+  return format[format_index]->name;
 }
 
 static const char *
