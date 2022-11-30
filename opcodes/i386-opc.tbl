@@ -694,11 +694,10 @@ faddp, 0xdec0, None, CpuFP, NoSuf|Ugh, { FloatReg, FloatAcc }
 
 // subtract
 fsub, 0xd8e0, None, CpuFP, NoSuf, { FloatReg }
-fsub, 0xd8e0, None, CpuFP, D|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fsub, 0xd8e0, None, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubp
 fsub, 0xdee1, None, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fsub, 0xdee9, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fsub, 0xd8e0, None, CpuFP, NoSuf|D|FloatR, { FloatReg, FloatAcc }
 fsub, 0xd8, 4, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisub, 0xde, 4, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -711,11 +710,10 @@ fsubp, 0xdee9, None, CpuFP, NoSuf, {}
 
 // subtract reverse
 fsubr, 0xd8e8, None, CpuFP, NoSuf, { FloatReg }
-fsubr, 0xd8e8, None, CpuFP, D|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fsubr, 0xd8e8, None, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fsubrp
 fsubr, 0xdee9, None, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fsubr, 0xdee1, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fsubr, 0xd8e8, None, CpuFP, NoSuf|D|FloatR, { FloatReg, FloatAcc }
 fsubr, 0xd8, 5, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fisubr, 0xde, 5, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -741,11 +739,10 @@ fmulp, 0xdec8, None, CpuFP, NoSuf|Ugh, { FloatReg, FloatAcc }
 
 // divide
 fdiv, 0xd8f0, None, CpuFP, NoSuf, { FloatReg }
-fdiv, 0xd8f0, None, CpuFP, D|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fdiv, 0xd8f0, None, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivp
 fdiv, 0xdef1, None, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fdiv, 0xdef9, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fdiv, 0xd8f0, None, CpuFP, NoSuf|D|FloatR, { FloatReg, FloatAcc }
 fdiv, 0xd8, 6, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidiv, 0xde, 6, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 
@@ -758,11 +755,10 @@ fdivp, 0xdef9, None, CpuFP, NoSuf, {}
 
 // divide reverse
 fdivr, 0xd8f8, None, CpuFP, NoSuf, { FloatReg }
-fdivr, 0xd8f8, None, CpuFP, D|NoSuf|ATTMnemonic|ATTSyntax, { FloatReg, FloatAcc }
+fdivr, 0xd8f8, None, CpuFP, D|NoSuf, { FloatReg, FloatAcc }
 // alias for fdivrp
 fdivr, 0xdef9, None, CpuFP, NoSuf|Ugh|ATTMnemonic|ATTSyntax, {}
 fdivr, 0xdef1, None, CpuFP, NoSuf|Ugh|ATTMnemonic, {}
-fdivr, 0xd8f8, None, CpuFP, NoSuf|D|FloatR, { FloatReg, FloatAcc }
 fdivr, 0xd8, 7, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex }
 fidivr, 0xde, 7, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 

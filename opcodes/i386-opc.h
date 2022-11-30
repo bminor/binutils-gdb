@@ -487,8 +487,6 @@ enum
   Jump,
   /* FP insn memory format bit, sized by 0x4 */
   FloatMF,
-  /* src/dest swap for floats. */
-  FloatR,
   /* needs size prefix if in 32-bit mode */
 #define SIZE16 1
   /* needs size prefix if in 16-bit mode */
@@ -743,7 +741,6 @@ typedef struct i386_opcode_modifier
   unsigned int modrm:1;
   unsigned int jump:3;
   unsigned int floatmf:1;
-  unsigned int floatr:1;
   unsigned int size:2;
   unsigned int checkregsize:1;
   unsigned int operandconstraint:4;

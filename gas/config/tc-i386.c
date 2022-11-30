@@ -6800,12 +6800,18 @@ match_template (char mnem_suffix)
 		  specific_error = progress (i.error);
 		  continue;
 		}
-	      /* found_reverse_match holds which of D or FloatR
+	      /* found_reverse_match holds which variant of D
 		 we've found.  */
 	      if (!t->opcode_modifier.d)
 		found_reverse_match = 0;
 	      else if (operand_types[0].bitfield.tbyte)
-		found_reverse_match = Opcode_FloatD;
+		{
+		  found_reverse_match = Opcode_FloatD;
+		  /* FSUB{,R} and FDIV{,R} may need a 2nd bit flipped.  */
+		  if ((t->base_opcode & 0x20)
+		      && (intel_syntax || intel_mnemonic))
+		    found_reverse_match |= Opcode_FloatR;
+		}
 	      else if (t->opcode_modifier.vexsources)
 		{
 		  found_reverse_match = Opcode_VexW;
@@ -6820,8 +6826,6 @@ match_template (char mnem_suffix)
 				      ? Opcode_ExtD : Opcode_SIMD_IntD;
 	      else
 		found_reverse_match = Opcode_D;
-	      if (t->opcode_modifier.floatr)
-		found_reverse_match |= Opcode_FloatR;
 	    }
 	  else
 	    {
