@@ -123,11 +123,11 @@ struct gdb_printing_disassembler : public gdb_disassemble_info
 {
   DISABLE_COPY_AND_ASSIGN (gdb_printing_disassembler);
 
-protected:
-
   /* The stream that disassembler output is being written too.  */
   struct ui_file *stream ()
   { return m_stream; }
+
+protected:
 
   /* Constructor.  All the arguments are just passed to the parent class.
      We also add the two print functions to the arguments passed to the
