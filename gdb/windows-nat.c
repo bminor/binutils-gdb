@@ -2877,7 +2877,6 @@ windows_nat_target::interrupt ()
   DEBUG_EVENTS ("GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)");
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT,
 				   windows_process.current_event.dwProcessId));
-  registers_changed ();		/* refresh register state */
 }
 
 /* Helper for windows_xfer_partial that handles memory transfers.
