@@ -531,827 +531,827 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_nm_file = GDB_NM_FILE;
 #endif
   gdb_printf (file,
-		      "gdbarch_dump: GDB_NM_FILE = %s\n",
-		      gdb_nm_file);
+	      "gdbarch_dump: GDB_NM_FILE = %s\n",
+	      gdb_nm_file);
   gdb_printf (file,
-                      "gdbarch_dump: bfd_arch_info = %s\n",
-                      gdbarch_bfd_arch_info (gdbarch)->printable_name);
+	      "gdbarch_dump: bfd_arch_info = %s\n",
+	      gdbarch_bfd_arch_info (gdbarch)->printable_name);
   gdb_printf (file,
-                      "gdbarch_dump: byte_order = %s\n",
-                      plongest (gdbarch->byte_order));
+	      "gdbarch_dump: byte_order = %s\n",
+	      plongest (gdbarch->byte_order));
   gdb_printf (file,
-                      "gdbarch_dump: byte_order_for_code = %s\n",
-                      plongest (gdbarch->byte_order_for_code));
+	      "gdbarch_dump: byte_order_for_code = %s\n",
+	      plongest (gdbarch->byte_order_for_code));
   gdb_printf (file,
-                      "gdbarch_dump: osabi = %s\n",
-                      plongest (gdbarch->osabi));
+	      "gdbarch_dump: osabi = %s\n",
+	      plongest (gdbarch->osabi));
   gdb_printf (file,
-                      "gdbarch_dump: target_desc = %s\n",
-                      host_address_to_string (gdbarch->target_desc));
+	      "gdbarch_dump: target_desc = %s\n",
+	      host_address_to_string (gdbarch->target_desc));
   gdb_printf (file,
-                      "gdbarch_dump: short_bit = %s\n",
-                      plongest (gdbarch->short_bit));
+	      "gdbarch_dump: short_bit = %s\n",
+	      plongest (gdbarch->short_bit));
   gdb_printf (file,
-                      "gdbarch_dump: int_bit = %s\n",
-                      plongest (gdbarch->int_bit));
+	      "gdbarch_dump: int_bit = %s\n",
+	      plongest (gdbarch->int_bit));
   gdb_printf (file,
-                      "gdbarch_dump: long_bit = %s\n",
-                      plongest (gdbarch->long_bit));
+	      "gdbarch_dump: long_bit = %s\n",
+	      plongest (gdbarch->long_bit));
   gdb_printf (file,
-                      "gdbarch_dump: long_long_bit = %s\n",
-                      plongest (gdbarch->long_long_bit));
+	      "gdbarch_dump: long_long_bit = %s\n",
+	      plongest (gdbarch->long_long_bit));
   gdb_printf (file,
-                      "gdbarch_dump: bfloat16_bit = %s\n",
-                      plongest (gdbarch->bfloat16_bit));
+	      "gdbarch_dump: bfloat16_bit = %s\n",
+	      plongest (gdbarch->bfloat16_bit));
   gdb_printf (file,
-                      "gdbarch_dump: bfloat16_format = %s\n",
-                      pformat (gdbarch, gdbarch->bfloat16_format));
+	      "gdbarch_dump: bfloat16_format = %s\n",
+	      pformat (gdbarch, gdbarch->bfloat16_format));
   gdb_printf (file,
-                      "gdbarch_dump: half_bit = %s\n",
-                      plongest (gdbarch->half_bit));
+	      "gdbarch_dump: half_bit = %s\n",
+	      plongest (gdbarch->half_bit));
   gdb_printf (file,
-                      "gdbarch_dump: half_format = %s\n",
-                      pformat (gdbarch, gdbarch->half_format));
+	      "gdbarch_dump: half_format = %s\n",
+	      pformat (gdbarch, gdbarch->half_format));
   gdb_printf (file,
-                      "gdbarch_dump: float_bit = %s\n",
-                      plongest (gdbarch->float_bit));
+	      "gdbarch_dump: float_bit = %s\n",
+	      plongest (gdbarch->float_bit));
   gdb_printf (file,
-                      "gdbarch_dump: float_format = %s\n",
-                      pformat (gdbarch, gdbarch->float_format));
+	      "gdbarch_dump: float_format = %s\n",
+	      pformat (gdbarch, gdbarch->float_format));
   gdb_printf (file,
-                      "gdbarch_dump: double_bit = %s\n",
-                      plongest (gdbarch->double_bit));
+	      "gdbarch_dump: double_bit = %s\n",
+	      plongest (gdbarch->double_bit));
   gdb_printf (file,
-                      "gdbarch_dump: double_format = %s\n",
-                      pformat (gdbarch, gdbarch->double_format));
+	      "gdbarch_dump: double_format = %s\n",
+	      pformat (gdbarch, gdbarch->double_format));
   gdb_printf (file,
-                      "gdbarch_dump: long_double_bit = %s\n",
-                      plongest (gdbarch->long_double_bit));
+	      "gdbarch_dump: long_double_bit = %s\n",
+	      plongest (gdbarch->long_double_bit));
   gdb_printf (file,
-                      "gdbarch_dump: long_double_format = %s\n",
-                      pformat (gdbarch, gdbarch->long_double_format));
+	      "gdbarch_dump: long_double_format = %s\n",
+	      pformat (gdbarch, gdbarch->long_double_format));
   gdb_printf (file,
-                      "gdbarch_dump: wchar_bit = %s\n",
-                      plongest (gdbarch->wchar_bit));
+	      "gdbarch_dump: wchar_bit = %s\n",
+	      plongest (gdbarch->wchar_bit));
   gdb_printf (file,
-                      "gdbarch_dump: wchar_signed = %s\n",
-                      plongest (gdbarch->wchar_signed));
+	      "gdbarch_dump: wchar_signed = %s\n",
+	      plongest (gdbarch->wchar_signed));
   gdb_printf (file,
-                      "gdbarch_dump: floatformat_for_type = <%s>\n",
-                      host_address_to_string (gdbarch->floatformat_for_type));
+	      "gdbarch_dump: floatformat_for_type = <%s>\n",
+	      host_address_to_string (gdbarch->floatformat_for_type));
   gdb_printf (file,
-                      "gdbarch_dump: ptr_bit = %s\n",
-                      plongest (gdbarch->ptr_bit));
+	      "gdbarch_dump: ptr_bit = %s\n",
+	      plongest (gdbarch->ptr_bit));
   gdb_printf (file,
-                      "gdbarch_dump: addr_bit = %s\n",
-                      plongest (gdbarch->addr_bit));
+	      "gdbarch_dump: addr_bit = %s\n",
+	      plongest (gdbarch->addr_bit));
   gdb_printf (file,
-                      "gdbarch_dump: dwarf2_addr_size = %s\n",
-                      plongest (gdbarch->dwarf2_addr_size));
+	      "gdbarch_dump: dwarf2_addr_size = %s\n",
+	      plongest (gdbarch->dwarf2_addr_size));
   gdb_printf (file,
-                      "gdbarch_dump: char_signed = %s\n",
-                      plongest (gdbarch->char_signed));
+	      "gdbarch_dump: char_signed = %s\n",
+	      plongest (gdbarch->char_signed));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
-                      gdbarch_read_pc_p (gdbarch));
+	      "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
+	      gdbarch_read_pc_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: read_pc = <%s>\n",
-                      host_address_to_string (gdbarch->read_pc));
+	      "gdbarch_dump: read_pc = <%s>\n",
+	      host_address_to_string (gdbarch->read_pc));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
-                      gdbarch_write_pc_p (gdbarch));
+	      "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
+	      gdbarch_write_pc_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: write_pc = <%s>\n",
-                      host_address_to_string (gdbarch->write_pc));
+	      "gdbarch_dump: write_pc = <%s>\n",
+	      host_address_to_string (gdbarch->write_pc));
   gdb_printf (file,
-                      "gdbarch_dump: virtual_frame_pointer = <%s>\n",
-                      host_address_to_string (gdbarch->virtual_frame_pointer));
+	      "gdbarch_dump: virtual_frame_pointer = <%s>\n",
+	      host_address_to_string (gdbarch->virtual_frame_pointer));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
-                      gdbarch_pseudo_register_read_p (gdbarch));
+	      "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
+	      gdbarch_pseudo_register_read_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: pseudo_register_read = <%s>\n",
-                      host_address_to_string (gdbarch->pseudo_register_read));
+	      "gdbarch_dump: pseudo_register_read = <%s>\n",
+	      host_address_to_string (gdbarch->pseudo_register_read));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_pseudo_register_read_value_p() = %d\n",
-                      gdbarch_pseudo_register_read_value_p (gdbarch));
+	      "gdbarch_dump: gdbarch_pseudo_register_read_value_p() = %d\n",
+	      gdbarch_pseudo_register_read_value_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: pseudo_register_read_value = <%s>\n",
-                      host_address_to_string (gdbarch->pseudo_register_read_value));
+	      "gdbarch_dump: pseudo_register_read_value = <%s>\n",
+	      host_address_to_string (gdbarch->pseudo_register_read_value));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
-                      gdbarch_pseudo_register_write_p (gdbarch));
+	      "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
+	      gdbarch_pseudo_register_write_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: pseudo_register_write = <%s>\n",
-                      host_address_to_string (gdbarch->pseudo_register_write));
+	      "gdbarch_dump: pseudo_register_write = <%s>\n",
+	      host_address_to_string (gdbarch->pseudo_register_write));
   gdb_printf (file,
-                      "gdbarch_dump: num_regs = %s\n",
-                      plongest (gdbarch->num_regs));
+	      "gdbarch_dump: num_regs = %s\n",
+	      plongest (gdbarch->num_regs));
   gdb_printf (file,
-                      "gdbarch_dump: num_pseudo_regs = %s\n",
-                      plongest (gdbarch->num_pseudo_regs));
+	      "gdbarch_dump: num_pseudo_regs = %s\n",
+	      plongest (gdbarch->num_pseudo_regs));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
-                      gdbarch_ax_pseudo_register_collect_p (gdbarch));
+	      "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
+	      gdbarch_ax_pseudo_register_collect_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: ax_pseudo_register_collect = <%s>\n",
-                      host_address_to_string (gdbarch->ax_pseudo_register_collect));
+	      "gdbarch_dump: ax_pseudo_register_collect = <%s>\n",
+	      host_address_to_string (gdbarch->ax_pseudo_register_collect));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_ax_pseudo_register_push_stack_p() = %d\n",
-                      gdbarch_ax_pseudo_register_push_stack_p (gdbarch));
+	      "gdbarch_dump: gdbarch_ax_pseudo_register_push_stack_p() = %d\n",
+	      gdbarch_ax_pseudo_register_push_stack_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: ax_pseudo_register_push_stack = <%s>\n",
-                      host_address_to_string (gdbarch->ax_pseudo_register_push_stack));
+	      "gdbarch_dump: ax_pseudo_register_push_stack = <%s>\n",
+	      host_address_to_string (gdbarch->ax_pseudo_register_push_stack));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_report_signal_info_p() = %d\n",
-                      gdbarch_report_signal_info_p (gdbarch));
+	      "gdbarch_dump: gdbarch_report_signal_info_p() = %d\n",
+	      gdbarch_report_signal_info_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: report_signal_info = <%s>\n",
-                      host_address_to_string (gdbarch->report_signal_info));
+	      "gdbarch_dump: report_signal_info = <%s>\n",
+	      host_address_to_string (gdbarch->report_signal_info));
   gdb_printf (file,
-                      "gdbarch_dump: sp_regnum = %s\n",
-                      plongest (gdbarch->sp_regnum));
+	      "gdbarch_dump: sp_regnum = %s\n",
+	      plongest (gdbarch->sp_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: pc_regnum = %s\n",
-                      plongest (gdbarch->pc_regnum));
+	      "gdbarch_dump: pc_regnum = %s\n",
+	      plongest (gdbarch->pc_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: ps_regnum = %s\n",
-                      plongest (gdbarch->ps_regnum));
+	      "gdbarch_dump: ps_regnum = %s\n",
+	      plongest (gdbarch->ps_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: fp0_regnum = %s\n",
-                      plongest (gdbarch->fp0_regnum));
+	      "gdbarch_dump: fp0_regnum = %s\n",
+	      plongest (gdbarch->fp0_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: stab_reg_to_regnum = <%s>\n",
-                      host_address_to_string (gdbarch->stab_reg_to_regnum));
+	      "gdbarch_dump: stab_reg_to_regnum = <%s>\n",
+	      host_address_to_string (gdbarch->stab_reg_to_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: ecoff_reg_to_regnum = <%s>\n",
-                      host_address_to_string (gdbarch->ecoff_reg_to_regnum));
+	      "gdbarch_dump: ecoff_reg_to_regnum = <%s>\n",
+	      host_address_to_string (gdbarch->ecoff_reg_to_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: sdb_reg_to_regnum = <%s>\n",
-                      host_address_to_string (gdbarch->sdb_reg_to_regnum));
+	      "gdbarch_dump: sdb_reg_to_regnum = <%s>\n",
+	      host_address_to_string (gdbarch->sdb_reg_to_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: dwarf2_reg_to_regnum = <%s>\n",
-                      host_address_to_string (gdbarch->dwarf2_reg_to_regnum));
+	      "gdbarch_dump: dwarf2_reg_to_regnum = <%s>\n",
+	      host_address_to_string (gdbarch->dwarf2_reg_to_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: register_name = <%s>\n",
-                      host_address_to_string (gdbarch->register_name));
+	      "gdbarch_dump: register_name = <%s>\n",
+	      host_address_to_string (gdbarch->register_name));
   gdb_printf (file,
-                      "gdbarch_dump: register_type = <%s>\n",
-                      host_address_to_string (gdbarch->register_type));
+	      "gdbarch_dump: register_type = <%s>\n",
+	      host_address_to_string (gdbarch->register_type));
   gdb_printf (file,
-                      "gdbarch_dump: dummy_id = <%s>\n",
-                      host_address_to_string (gdbarch->dummy_id));
+	      "gdbarch_dump: dummy_id = <%s>\n",
+	      host_address_to_string (gdbarch->dummy_id));
   gdb_printf (file,
-                      "gdbarch_dump: deprecated_fp_regnum = %s\n",
-                      plongest (gdbarch->deprecated_fp_regnum));
+	      "gdbarch_dump: deprecated_fp_regnum = %s\n",
+	      plongest (gdbarch->deprecated_fp_regnum));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_push_dummy_call_p() = %d\n",
-                      gdbarch_push_dummy_call_p (gdbarch));
+	      "gdbarch_dump: gdbarch_push_dummy_call_p() = %d\n",
+	      gdbarch_push_dummy_call_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: push_dummy_call = <%s>\n",
-                      host_address_to_string (gdbarch->push_dummy_call));
+	      "gdbarch_dump: push_dummy_call = <%s>\n",
+	      host_address_to_string (gdbarch->push_dummy_call));
   gdb_printf (file,
-                      "gdbarch_dump: call_dummy_location = %s\n",
-                      plongest (gdbarch->call_dummy_location));
+	      "gdbarch_dump: call_dummy_location = %s\n",
+	      plongest (gdbarch->call_dummy_location));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_push_dummy_code_p() = %d\n",
-                      gdbarch_push_dummy_code_p (gdbarch));
+	      "gdbarch_dump: gdbarch_push_dummy_code_p() = %d\n",
+	      gdbarch_push_dummy_code_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: push_dummy_code = <%s>\n",
-                      host_address_to_string (gdbarch->push_dummy_code));
+	      "gdbarch_dump: push_dummy_code = <%s>\n",
+	      host_address_to_string (gdbarch->push_dummy_code));
   gdb_printf (file,
-                      "gdbarch_dump: code_of_frame_writable = <%s>\n",
-                      host_address_to_string (gdbarch->code_of_frame_writable));
+	      "gdbarch_dump: code_of_frame_writable = <%s>\n",
+	      host_address_to_string (gdbarch->code_of_frame_writable));
   gdb_printf (file,
-                      "gdbarch_dump: print_registers_info = <%s>\n",
-                      host_address_to_string (gdbarch->print_registers_info));
+	      "gdbarch_dump: print_registers_info = <%s>\n",
+	      host_address_to_string (gdbarch->print_registers_info));
   gdb_printf (file,
-                      "gdbarch_dump: print_float_info = <%s>\n",
-                      host_address_to_string (gdbarch->print_float_info));
+	      "gdbarch_dump: print_float_info = <%s>\n",
+	      host_address_to_string (gdbarch->print_float_info));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_print_vector_info_p() = %d\n",
-                      gdbarch_print_vector_info_p (gdbarch));
+	      "gdbarch_dump: gdbarch_print_vector_info_p() = %d\n",
+	      gdbarch_print_vector_info_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: print_vector_info = <%s>\n",
-                      host_address_to_string (gdbarch->print_vector_info));
+	      "gdbarch_dump: print_vector_info = <%s>\n",
+	      host_address_to_string (gdbarch->print_vector_info));
   gdb_printf (file,
-                      "gdbarch_dump: register_sim_regno = <%s>\n",
-                      host_address_to_string (gdbarch->register_sim_regno));
+	      "gdbarch_dump: register_sim_regno = <%s>\n",
+	      host_address_to_string (gdbarch->register_sim_regno));
   gdb_printf (file,
-                      "gdbarch_dump: cannot_fetch_register = <%s>\n",
-                      host_address_to_string (gdbarch->cannot_fetch_register));
+	      "gdbarch_dump: cannot_fetch_register = <%s>\n",
+	      host_address_to_string (gdbarch->cannot_fetch_register));
   gdb_printf (file,
-                      "gdbarch_dump: cannot_store_register = <%s>\n",
-                      host_address_to_string (gdbarch->cannot_store_register));
+	      "gdbarch_dump: cannot_store_register = <%s>\n",
+	      host_address_to_string (gdbarch->cannot_store_register));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
-                      gdbarch_get_longjmp_target_p (gdbarch));
+	      "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
+	      gdbarch_get_longjmp_target_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: get_longjmp_target = <%s>\n",
-                      host_address_to_string (gdbarch->get_longjmp_target));
+	      "gdbarch_dump: get_longjmp_target = <%s>\n",
+	      host_address_to_string (gdbarch->get_longjmp_target));
   gdb_printf (file,
-                      "gdbarch_dump: believe_pcc_promotion = %s\n",
-                      plongest (gdbarch->believe_pcc_promotion));
+	      "gdbarch_dump: believe_pcc_promotion = %s\n",
+	      plongest (gdbarch->believe_pcc_promotion));
   gdb_printf (file,
-                      "gdbarch_dump: convert_register_p = <%s>\n",
-                      host_address_to_string (gdbarch->convert_register_p));
+	      "gdbarch_dump: convert_register_p = <%s>\n",
+	      host_address_to_string (gdbarch->convert_register_p));
   gdb_printf (file,
-                      "gdbarch_dump: register_to_value = <%s>\n",
-                      host_address_to_string (gdbarch->register_to_value));
+	      "gdbarch_dump: register_to_value = <%s>\n",
+	      host_address_to_string (gdbarch->register_to_value));
   gdb_printf (file,
-                      "gdbarch_dump: value_to_register = <%s>\n",
-                      host_address_to_string (gdbarch->value_to_register));
+	      "gdbarch_dump: value_to_register = <%s>\n",
+	      host_address_to_string (gdbarch->value_to_register));
   gdb_printf (file,
-                      "gdbarch_dump: value_from_register = <%s>\n",
-                      host_address_to_string (gdbarch->value_from_register));
+	      "gdbarch_dump: value_from_register = <%s>\n",
+	      host_address_to_string (gdbarch->value_from_register));
   gdb_printf (file,
-                      "gdbarch_dump: pointer_to_address = <%s>\n",
-                      host_address_to_string (gdbarch->pointer_to_address));
+	      "gdbarch_dump: pointer_to_address = <%s>\n",
+	      host_address_to_string (gdbarch->pointer_to_address));
   gdb_printf (file,
-                      "gdbarch_dump: address_to_pointer = <%s>\n",
-                      host_address_to_string (gdbarch->address_to_pointer));
+	      "gdbarch_dump: address_to_pointer = <%s>\n",
+	      host_address_to_string (gdbarch->address_to_pointer));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_integer_to_address_p() = %d\n",
-                      gdbarch_integer_to_address_p (gdbarch));
+	      "gdbarch_dump: gdbarch_integer_to_address_p() = %d\n",
+	      gdbarch_integer_to_address_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: integer_to_address = <%s>\n",
-                      host_address_to_string (gdbarch->integer_to_address));
+	      "gdbarch_dump: integer_to_address = <%s>\n",
+	      host_address_to_string (gdbarch->integer_to_address));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_return_value_p() = %d\n",
-                      gdbarch_return_value_p (gdbarch));
+	      "gdbarch_dump: gdbarch_return_value_p() = %d\n",
+	      gdbarch_return_value_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: return_value = <%s>\n",
-                      host_address_to_string (gdbarch->return_value));
+	      "gdbarch_dump: return_value = <%s>\n",
+	      host_address_to_string (gdbarch->return_value));
   gdb_printf (file,
-                      "gdbarch_dump: get_return_buf_addr = <%s>\n",
-                      host_address_to_string (gdbarch->get_return_buf_addr));
+	      "gdbarch_dump: get_return_buf_addr = <%s>\n",
+	      host_address_to_string (gdbarch->get_return_buf_addr));
   gdb_printf (file,
-                      "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
-                      host_address_to_string (gdbarch->return_in_first_hidden_param_p));
+	      "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
+	      host_address_to_string (gdbarch->return_in_first_hidden_param_p));
   gdb_printf (file,
-                      "gdbarch_dump: skip_prologue = <%s>\n",
-                      host_address_to_string (gdbarch->skip_prologue));
+	      "gdbarch_dump: skip_prologue = <%s>\n",
+	      host_address_to_string (gdbarch->skip_prologue));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
-                      gdbarch_skip_main_prologue_p (gdbarch));
+	      "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
+	      gdbarch_skip_main_prologue_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: skip_main_prologue = <%s>\n",
-                      host_address_to_string (gdbarch->skip_main_prologue));
+	      "gdbarch_dump: skip_main_prologue = <%s>\n",
+	      host_address_to_string (gdbarch->skip_main_prologue));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_skip_entrypoint_p() = %d\n",
-                      gdbarch_skip_entrypoint_p (gdbarch));
+	      "gdbarch_dump: gdbarch_skip_entrypoint_p() = %d\n",
+	      gdbarch_skip_entrypoint_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: skip_entrypoint = <%s>\n",
-                      host_address_to_string (gdbarch->skip_entrypoint));
+	      "gdbarch_dump: skip_entrypoint = <%s>\n",
+	      host_address_to_string (gdbarch->skip_entrypoint));
   gdb_printf (file,
-                      "gdbarch_dump: inner_than = <%s>\n",
-                      host_address_to_string (gdbarch->inner_than));
+	      "gdbarch_dump: inner_than = <%s>\n",
+	      host_address_to_string (gdbarch->inner_than));
   gdb_printf (file,
-                      "gdbarch_dump: breakpoint_from_pc = <%s>\n",
-                      host_address_to_string (gdbarch->breakpoint_from_pc));
+	      "gdbarch_dump: breakpoint_from_pc = <%s>\n",
+	      host_address_to_string (gdbarch->breakpoint_from_pc));
   gdb_printf (file,
-                      "gdbarch_dump: breakpoint_kind_from_pc = <%s>\n",
-                      host_address_to_string (gdbarch->breakpoint_kind_from_pc));
+	      "gdbarch_dump: breakpoint_kind_from_pc = <%s>\n",
+	      host_address_to_string (gdbarch->breakpoint_kind_from_pc));
   gdb_printf (file,
-                      "gdbarch_dump: sw_breakpoint_from_kind = <%s>\n",
-                      host_address_to_string (gdbarch->sw_breakpoint_from_kind));
+	      "gdbarch_dump: sw_breakpoint_from_kind = <%s>\n",
+	      host_address_to_string (gdbarch->sw_breakpoint_from_kind));
   gdb_printf (file,
-                      "gdbarch_dump: breakpoint_kind_from_current_state = <%s>\n",
-                      host_address_to_string (gdbarch->breakpoint_kind_from_current_state));
+	      "gdbarch_dump: breakpoint_kind_from_current_state = <%s>\n",
+	      host_address_to_string (gdbarch->breakpoint_kind_from_current_state));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
-                      gdbarch_adjust_breakpoint_address_p (gdbarch));
+	      "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
+	      gdbarch_adjust_breakpoint_address_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: adjust_breakpoint_address = <%s>\n",
-                      host_address_to_string (gdbarch->adjust_breakpoint_address));
+	      "gdbarch_dump: adjust_breakpoint_address = <%s>\n",
+	      host_address_to_string (gdbarch->adjust_breakpoint_address));
   gdb_printf (file,
-                      "gdbarch_dump: memory_insert_breakpoint = <%s>\n",
-                      host_address_to_string (gdbarch->memory_insert_breakpoint));
+	      "gdbarch_dump: memory_insert_breakpoint = <%s>\n",
+	      host_address_to_string (gdbarch->memory_insert_breakpoint));
   gdb_printf (file,
-                      "gdbarch_dump: memory_remove_breakpoint = <%s>\n",
-                      host_address_to_string (gdbarch->memory_remove_breakpoint));
+	      "gdbarch_dump: memory_remove_breakpoint = <%s>\n",
+	      host_address_to_string (gdbarch->memory_remove_breakpoint));
   gdb_printf (file,
-                      "gdbarch_dump: decr_pc_after_break = %s\n",
-                      core_addr_to_string_nz (gdbarch->decr_pc_after_break));
+	      "gdbarch_dump: decr_pc_after_break = %s\n",
+	      core_addr_to_string_nz (gdbarch->decr_pc_after_break));
   gdb_printf (file,
-                      "gdbarch_dump: deprecated_function_start_offset = %s\n",
-                      core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
+	      "gdbarch_dump: deprecated_function_start_offset = %s\n",
+	      core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
   gdb_printf (file,
-                      "gdbarch_dump: remote_register_number = <%s>\n",
-                      host_address_to_string (gdbarch->remote_register_number));
+	      "gdbarch_dump: remote_register_number = <%s>\n",
+	      host_address_to_string (gdbarch->remote_register_number));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
-                      gdbarch_fetch_tls_load_module_address_p (gdbarch));
+	      "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
+	      gdbarch_fetch_tls_load_module_address_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: fetch_tls_load_module_address = <%s>\n",
-                      host_address_to_string (gdbarch->fetch_tls_load_module_address));
+	      "gdbarch_dump: fetch_tls_load_module_address = <%s>\n",
+	      host_address_to_string (gdbarch->fetch_tls_load_module_address));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_get_thread_local_address_p() = %d\n",
-                      gdbarch_get_thread_local_address_p (gdbarch));
+	      "gdbarch_dump: gdbarch_get_thread_local_address_p() = %d\n",
+	      gdbarch_get_thread_local_address_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: get_thread_local_address = <%s>\n",
-                      host_address_to_string (gdbarch->get_thread_local_address));
+	      "gdbarch_dump: get_thread_local_address = <%s>\n",
+	      host_address_to_string (gdbarch->get_thread_local_address));
   gdb_printf (file,
-                      "gdbarch_dump: frame_args_skip = %s\n",
-                      core_addr_to_string_nz (gdbarch->frame_args_skip));
+	      "gdbarch_dump: frame_args_skip = %s\n",
+	      core_addr_to_string_nz (gdbarch->frame_args_skip));
   gdb_printf (file,
-                      "gdbarch_dump: unwind_pc = <%s>\n",
-                      host_address_to_string (gdbarch->unwind_pc));
+	      "gdbarch_dump: unwind_pc = <%s>\n",
+	      host_address_to_string (gdbarch->unwind_pc));
   gdb_printf (file,
-                      "gdbarch_dump: unwind_sp = <%s>\n",
-                      host_address_to_string (gdbarch->unwind_sp));
+	      "gdbarch_dump: unwind_sp = <%s>\n",
+	      host_address_to_string (gdbarch->unwind_sp));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_frame_num_args_p() = %d\n",
-                      gdbarch_frame_num_args_p (gdbarch));
+	      "gdbarch_dump: gdbarch_frame_num_args_p() = %d\n",
+	      gdbarch_frame_num_args_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: frame_num_args = <%s>\n",
-                      host_address_to_string (gdbarch->frame_num_args));
+	      "gdbarch_dump: frame_num_args = <%s>\n",
+	      host_address_to_string (gdbarch->frame_num_args));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
-                      gdbarch_frame_align_p (gdbarch));
+	      "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
+	      gdbarch_frame_align_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: frame_align = <%s>\n",
-                      host_address_to_string (gdbarch->frame_align));
+	      "gdbarch_dump: frame_align = <%s>\n",
+	      host_address_to_string (gdbarch->frame_align));
   gdb_printf (file,
-                      "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
-                      host_address_to_string (gdbarch->stabs_argument_has_addr));
+	      "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
+	      host_address_to_string (gdbarch->stabs_argument_has_addr));
   gdb_printf (file,
-                      "gdbarch_dump: frame_red_zone_size = %s\n",
-                      plongest (gdbarch->frame_red_zone_size));
+	      "gdbarch_dump: frame_red_zone_size = %s\n",
+	      plongest (gdbarch->frame_red_zone_size));
   gdb_printf (file,
-                      "gdbarch_dump: convert_from_func_ptr_addr = <%s>\n",
-                      host_address_to_string (gdbarch->convert_from_func_ptr_addr));
+	      "gdbarch_dump: convert_from_func_ptr_addr = <%s>\n",
+	      host_address_to_string (gdbarch->convert_from_func_ptr_addr));
   gdb_printf (file,
-                      "gdbarch_dump: addr_bits_remove = <%s>\n",
-                      host_address_to_string (gdbarch->addr_bits_remove));
+	      "gdbarch_dump: addr_bits_remove = <%s>\n",
+	      host_address_to_string (gdbarch->addr_bits_remove));
   gdb_printf (file,
-                      "gdbarch_dump: significant_addr_bit = %s\n",
-                      plongest (gdbarch->significant_addr_bit));
+	      "gdbarch_dump: significant_addr_bit = %s\n",
+	      plongest (gdbarch->significant_addr_bit));
   gdb_printf (file,
-                      "gdbarch_dump: memtag_to_string = <%s>\n",
-                      host_address_to_string (gdbarch->memtag_to_string));
+	      "gdbarch_dump: memtag_to_string = <%s>\n",
+	      host_address_to_string (gdbarch->memtag_to_string));
   gdb_printf (file,
-                      "gdbarch_dump: tagged_address_p = <%s>\n",
-                      host_address_to_string (gdbarch->tagged_address_p));
+	      "gdbarch_dump: tagged_address_p = <%s>\n",
+	      host_address_to_string (gdbarch->tagged_address_p));
   gdb_printf (file,
-                      "gdbarch_dump: memtag_matches_p = <%s>\n",
-                      host_address_to_string (gdbarch->memtag_matches_p));
+	      "gdbarch_dump: memtag_matches_p = <%s>\n",
+	      host_address_to_string (gdbarch->memtag_matches_p));
   gdb_printf (file,
-                      "gdbarch_dump: set_memtags = <%s>\n",
-                      host_address_to_string (gdbarch->set_memtags));
+	      "gdbarch_dump: set_memtags = <%s>\n",
+	      host_address_to_string (gdbarch->set_memtags));
   gdb_printf (file,
-                      "gdbarch_dump: get_memtag = <%s>\n",
-                      host_address_to_string (gdbarch->get_memtag));
+	      "gdbarch_dump: get_memtag = <%s>\n",
+	      host_address_to_string (gdbarch->get_memtag));
   gdb_printf (file,
-                      "gdbarch_dump: memtag_granule_size = %s\n",
-                      core_addr_to_string_nz (gdbarch->memtag_granule_size));
+	      "gdbarch_dump: memtag_granule_size = %s\n",
+	      core_addr_to_string_nz (gdbarch->memtag_granule_size));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
-                      gdbarch_software_single_step_p (gdbarch));
+	      "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
+	      gdbarch_software_single_step_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: software_single_step = <%s>\n",
-                      host_address_to_string (gdbarch->software_single_step));
+	      "gdbarch_dump: software_single_step = <%s>\n",
+	      host_address_to_string (gdbarch->software_single_step));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
-                      gdbarch_single_step_through_delay_p (gdbarch));
+	      "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
+	      gdbarch_single_step_through_delay_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: single_step_through_delay = <%s>\n",
-                      host_address_to_string (gdbarch->single_step_through_delay));
+	      "gdbarch_dump: single_step_through_delay = <%s>\n",
+	      host_address_to_string (gdbarch->single_step_through_delay));
   gdb_printf (file,
-                      "gdbarch_dump: print_insn = <%s>\n",
-                      host_address_to_string (gdbarch->print_insn));
+	      "gdbarch_dump: print_insn = <%s>\n",
+	      host_address_to_string (gdbarch->print_insn));
   gdb_printf (file,
-                      "gdbarch_dump: skip_trampoline_code = <%s>\n",
-                      host_address_to_string (gdbarch->skip_trampoline_code));
+	      "gdbarch_dump: skip_trampoline_code = <%s>\n",
+	      host_address_to_string (gdbarch->skip_trampoline_code));
   gdb_printf (file,
-                      "gdbarch_dump: so_ops = %s\n",
-                      host_address_to_string (gdbarch->so_ops));
+	      "gdbarch_dump: so_ops = %s\n",
+	      host_address_to_string (gdbarch->so_ops));
   gdb_printf (file,
-                      "gdbarch_dump: skip_solib_resolver = <%s>\n",
-                      host_address_to_string (gdbarch->skip_solib_resolver));
+	      "gdbarch_dump: skip_solib_resolver = <%s>\n",
+	      host_address_to_string (gdbarch->skip_solib_resolver));
   gdb_printf (file,
-                      "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
-                      host_address_to_string (gdbarch->in_solib_return_trampoline));
+	      "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
+	      host_address_to_string (gdbarch->in_solib_return_trampoline));
   gdb_printf (file,
-                      "gdbarch_dump: in_indirect_branch_thunk = <%s>\n",
-                      host_address_to_string (gdbarch->in_indirect_branch_thunk));
+	      "gdbarch_dump: in_indirect_branch_thunk = <%s>\n",
+	      host_address_to_string (gdbarch->in_indirect_branch_thunk));
   gdb_printf (file,
-                      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
-                      host_address_to_string (gdbarch->stack_frame_destroyed_p));
+	      "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
+	      host_address_to_string (gdbarch->stack_frame_destroyed_p));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_elf_make_msymbol_special_p() = %d\n",
-                      gdbarch_elf_make_msymbol_special_p (gdbarch));
+	      "gdbarch_dump: gdbarch_elf_make_msymbol_special_p() = %d\n",
+	      gdbarch_elf_make_msymbol_special_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
-                      host_address_to_string (gdbarch->elf_make_msymbol_special));
+	      "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
+	      host_address_to_string (gdbarch->elf_make_msymbol_special));
   gdb_printf (file,
-                      "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
-                      host_address_to_string (gdbarch->coff_make_msymbol_special));
+	      "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
+	      host_address_to_string (gdbarch->coff_make_msymbol_special));
   gdb_printf (file,
-                      "gdbarch_dump: make_symbol_special = <%s>\n",
-                      host_address_to_string (gdbarch->make_symbol_special));
+	      "gdbarch_dump: make_symbol_special = <%s>\n",
+	      host_address_to_string (gdbarch->make_symbol_special));
   gdb_printf (file,
-                      "gdbarch_dump: adjust_dwarf2_addr = <%s>\n",
-                      host_address_to_string (gdbarch->adjust_dwarf2_addr));
+	      "gdbarch_dump: adjust_dwarf2_addr = <%s>\n",
+	      host_address_to_string (gdbarch->adjust_dwarf2_addr));
   gdb_printf (file,
-                      "gdbarch_dump: adjust_dwarf2_line = <%s>\n",
-                      host_address_to_string (gdbarch->adjust_dwarf2_line));
+	      "gdbarch_dump: adjust_dwarf2_line = <%s>\n",
+	      host_address_to_string (gdbarch->adjust_dwarf2_line));
   gdb_printf (file,
-                      "gdbarch_dump: cannot_step_breakpoint = %s\n",
-                      plongest (gdbarch->cannot_step_breakpoint));
+	      "gdbarch_dump: cannot_step_breakpoint = %s\n",
+	      plongest (gdbarch->cannot_step_breakpoint));
   gdb_printf (file,
-                      "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
-                      plongest (gdbarch->have_nonsteppable_watchpoint));
+	      "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
+	      plongest (gdbarch->have_nonsteppable_watchpoint));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_address_class_type_flags_p() = %d\n",
-                      gdbarch_address_class_type_flags_p (gdbarch));
+	      "gdbarch_dump: gdbarch_address_class_type_flags_p() = %d\n",
+	      gdbarch_address_class_type_flags_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: address_class_type_flags = <%s>\n",
-                      host_address_to_string (gdbarch->address_class_type_flags));
+	      "gdbarch_dump: address_class_type_flags = <%s>\n",
+	      host_address_to_string (gdbarch->address_class_type_flags));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_address_class_type_flags_to_name_p() = %d\n",
-                      gdbarch_address_class_type_flags_to_name_p (gdbarch));
+	      "gdbarch_dump: gdbarch_address_class_type_flags_to_name_p() = %d\n",
+	      gdbarch_address_class_type_flags_to_name_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: address_class_type_flags_to_name = <%s>\n",
-                      host_address_to_string (gdbarch->address_class_type_flags_to_name));
+	      "gdbarch_dump: address_class_type_flags_to_name = <%s>\n",
+	      host_address_to_string (gdbarch->address_class_type_flags_to_name));
   gdb_printf (file,
-                      "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
-                      host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
+	      "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
+	      host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_address_class_name_to_type_flags_p() = %d\n",
-                      gdbarch_address_class_name_to_type_flags_p (gdbarch));
+	      "gdbarch_dump: gdbarch_address_class_name_to_type_flags_p() = %d\n",
+	      gdbarch_address_class_name_to_type_flags_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: address_class_name_to_type_flags = <%s>\n",
-                      host_address_to_string (gdbarch->address_class_name_to_type_flags));
+	      "gdbarch_dump: address_class_name_to_type_flags = <%s>\n",
+	      host_address_to_string (gdbarch->address_class_name_to_type_flags));
   gdb_printf (file,
-                      "gdbarch_dump: register_reggroup_p = <%s>\n",
-                      host_address_to_string (gdbarch->register_reggroup_p));
+	      "gdbarch_dump: register_reggroup_p = <%s>\n",
+	      host_address_to_string (gdbarch->register_reggroup_p));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
-                      gdbarch_fetch_pointer_argument_p (gdbarch));
+	      "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
+	      gdbarch_fetch_pointer_argument_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: fetch_pointer_argument = <%s>\n",
-                      host_address_to_string (gdbarch->fetch_pointer_argument));
+	      "gdbarch_dump: fetch_pointer_argument = <%s>\n",
+	      host_address_to_string (gdbarch->fetch_pointer_argument));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_iterate_over_regset_sections_p() = %d\n",
-                      gdbarch_iterate_over_regset_sections_p (gdbarch));
+	      "gdbarch_dump: gdbarch_iterate_over_regset_sections_p() = %d\n",
+	      gdbarch_iterate_over_regset_sections_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: iterate_over_regset_sections = <%s>\n",
-                      host_address_to_string (gdbarch->iterate_over_regset_sections));
+	      "gdbarch_dump: iterate_over_regset_sections = <%s>\n",
+	      host_address_to_string (gdbarch->iterate_over_regset_sections));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_make_corefile_notes_p() = %d\n",
-                      gdbarch_make_corefile_notes_p (gdbarch));
+	      "gdbarch_dump: gdbarch_make_corefile_notes_p() = %d\n",
+	      gdbarch_make_corefile_notes_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: make_corefile_notes = <%s>\n",
-                      host_address_to_string (gdbarch->make_corefile_notes));
+	      "gdbarch_dump: make_corefile_notes = <%s>\n",
+	      host_address_to_string (gdbarch->make_corefile_notes));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_find_memory_regions_p() = %d\n",
-                      gdbarch_find_memory_regions_p (gdbarch));
+	      "gdbarch_dump: gdbarch_find_memory_regions_p() = %d\n",
+	      gdbarch_find_memory_regions_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: find_memory_regions = <%s>\n",
-                      host_address_to_string (gdbarch->find_memory_regions));
+	      "gdbarch_dump: find_memory_regions = <%s>\n",
+	      host_address_to_string (gdbarch->find_memory_regions));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_create_memtag_section_p() = %d\n",
-                      gdbarch_create_memtag_section_p (gdbarch));
+	      "gdbarch_dump: gdbarch_create_memtag_section_p() = %d\n",
+	      gdbarch_create_memtag_section_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: create_memtag_section = <%s>\n",
-                      host_address_to_string (gdbarch->create_memtag_section));
+	      "gdbarch_dump: create_memtag_section = <%s>\n",
+	      host_address_to_string (gdbarch->create_memtag_section));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_fill_memtag_section_p() = %d\n",
-                      gdbarch_fill_memtag_section_p (gdbarch));
+	      "gdbarch_dump: gdbarch_fill_memtag_section_p() = %d\n",
+	      gdbarch_fill_memtag_section_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: fill_memtag_section = <%s>\n",
-                      host_address_to_string (gdbarch->fill_memtag_section));
+	      "gdbarch_dump: fill_memtag_section = <%s>\n",
+	      host_address_to_string (gdbarch->fill_memtag_section));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_decode_memtag_section_p() = %d\n",
-                      gdbarch_decode_memtag_section_p (gdbarch));
+	      "gdbarch_dump: gdbarch_decode_memtag_section_p() = %d\n",
+	      gdbarch_decode_memtag_section_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: decode_memtag_section = <%s>\n",
-                      host_address_to_string (gdbarch->decode_memtag_section));
+	      "gdbarch_dump: decode_memtag_section = <%s>\n",
+	      host_address_to_string (gdbarch->decode_memtag_section));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
-                      gdbarch_core_xfer_shared_libraries_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
+	      gdbarch_core_xfer_shared_libraries_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_xfer_shared_libraries = <%s>\n",
-                      host_address_to_string (gdbarch->core_xfer_shared_libraries));
+	      "gdbarch_dump: core_xfer_shared_libraries = <%s>\n",
+	      host_address_to_string (gdbarch->core_xfer_shared_libraries));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_aix_p() = %d\n",
-                      gdbarch_core_xfer_shared_libraries_aix_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_aix_p() = %d\n",
+	      gdbarch_core_xfer_shared_libraries_aix_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_xfer_shared_libraries_aix = <%s>\n",
-                      host_address_to_string (gdbarch->core_xfer_shared_libraries_aix));
+	      "gdbarch_dump: core_xfer_shared_libraries_aix = <%s>\n",
+	      host_address_to_string (gdbarch->core_xfer_shared_libraries_aix));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_pid_to_str_p() = %d\n",
-                      gdbarch_core_pid_to_str_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_pid_to_str_p() = %d\n",
+	      gdbarch_core_pid_to_str_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_pid_to_str = <%s>\n",
-                      host_address_to_string (gdbarch->core_pid_to_str));
+	      "gdbarch_dump: core_pid_to_str = <%s>\n",
+	      host_address_to_string (gdbarch->core_pid_to_str));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_thread_name_p() = %d\n",
-                      gdbarch_core_thread_name_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_thread_name_p() = %d\n",
+	      gdbarch_core_thread_name_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_thread_name = <%s>\n",
-                      host_address_to_string (gdbarch->core_thread_name));
+	      "gdbarch_dump: core_thread_name = <%s>\n",
+	      host_address_to_string (gdbarch->core_thread_name));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_xfer_siginfo_p() = %d\n",
-                      gdbarch_core_xfer_siginfo_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_xfer_siginfo_p() = %d\n",
+	      gdbarch_core_xfer_siginfo_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_xfer_siginfo = <%s>\n",
-                      host_address_to_string (gdbarch->core_xfer_siginfo));
+	      "gdbarch_dump: core_xfer_siginfo = <%s>\n",
+	      host_address_to_string (gdbarch->core_xfer_siginfo));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_gcore_bfd_target_p() = %d\n",
-                      gdbarch_gcore_bfd_target_p (gdbarch));
+	      "gdbarch_dump: gdbarch_gcore_bfd_target_p() = %d\n",
+	      gdbarch_gcore_bfd_target_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: gcore_bfd_target = %s\n",
-                      pstring (gdbarch->gcore_bfd_target));
+	      "gdbarch_dump: gcore_bfd_target = %s\n",
+	      pstring (gdbarch->gcore_bfd_target));
   gdb_printf (file,
-                      "gdbarch_dump: vtable_function_descriptors = %s\n",
-                      plongest (gdbarch->vtable_function_descriptors));
+	      "gdbarch_dump: vtable_function_descriptors = %s\n",
+	      plongest (gdbarch->vtable_function_descriptors));
   gdb_printf (file,
-                      "gdbarch_dump: vbit_in_delta = %s\n",
-                      plongest (gdbarch->vbit_in_delta));
+	      "gdbarch_dump: vbit_in_delta = %s\n",
+	      plongest (gdbarch->vbit_in_delta));
   gdb_printf (file,
-                      "gdbarch_dump: skip_permanent_breakpoint = <%s>\n",
-                      host_address_to_string (gdbarch->skip_permanent_breakpoint));
+	      "gdbarch_dump: skip_permanent_breakpoint = <%s>\n",
+	      host_address_to_string (gdbarch->skip_permanent_breakpoint));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_max_insn_length_p() = %d\n",
-                      gdbarch_max_insn_length_p (gdbarch));
+	      "gdbarch_dump: gdbarch_max_insn_length_p() = %d\n",
+	      gdbarch_max_insn_length_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: max_insn_length = %s\n",
-                      plongest (gdbarch->max_insn_length));
+	      "gdbarch_dump: max_insn_length = %s\n",
+	      plongest (gdbarch->max_insn_length));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
-                      gdbarch_displaced_step_copy_insn_p (gdbarch));
+	      "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
+	      gdbarch_displaced_step_copy_insn_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_copy_insn = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_copy_insn));
+	      "gdbarch_dump: displaced_step_copy_insn = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_copy_insn));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_hw_singlestep));
+	      "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_hw_singlestep));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_displaced_step_fixup_p() = %d\n",
-                      gdbarch_displaced_step_fixup_p (gdbarch));
+	      "gdbarch_dump: gdbarch_displaced_step_fixup_p() = %d\n",
+	      gdbarch_displaced_step_fixup_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_fixup = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_fixup));
+	      "gdbarch_dump: displaced_step_fixup = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_fixup));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_displaced_step_prepare_p() = %d\n",
-                      gdbarch_displaced_step_prepare_p (gdbarch));
+	      "gdbarch_dump: gdbarch_displaced_step_prepare_p() = %d\n",
+	      gdbarch_displaced_step_prepare_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_prepare = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_prepare));
+	      "gdbarch_dump: displaced_step_prepare = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_prepare));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_finish = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_finish));
+	      "gdbarch_dump: displaced_step_finish = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_finish));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_displaced_step_copy_insn_closure_by_addr_p() = %d\n",
-                      gdbarch_displaced_step_copy_insn_closure_by_addr_p (gdbarch));
+	      "gdbarch_dump: gdbarch_displaced_step_copy_insn_closure_by_addr_p() = %d\n",
+	      gdbarch_displaced_step_copy_insn_closure_by_addr_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_copy_insn_closure_by_addr = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_copy_insn_closure_by_addr));
+	      "gdbarch_dump: displaced_step_copy_insn_closure_by_addr = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_copy_insn_closure_by_addr));
   gdb_printf (file,
-                      "gdbarch_dump: displaced_step_restore_all_in_ptid = <%s>\n",
-                      host_address_to_string (gdbarch->displaced_step_restore_all_in_ptid));
+	      "gdbarch_dump: displaced_step_restore_all_in_ptid = <%s>\n",
+	      host_address_to_string (gdbarch->displaced_step_restore_all_in_ptid));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_relocate_instruction_p() = %d\n",
-                      gdbarch_relocate_instruction_p (gdbarch));
+	      "gdbarch_dump: gdbarch_relocate_instruction_p() = %d\n",
+	      gdbarch_relocate_instruction_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: relocate_instruction = <%s>\n",
-                      host_address_to_string (gdbarch->relocate_instruction));
+	      "gdbarch_dump: relocate_instruction = <%s>\n",
+	      host_address_to_string (gdbarch->relocate_instruction));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_overlay_update_p() = %d\n",
-                      gdbarch_overlay_update_p (gdbarch));
+	      "gdbarch_dump: gdbarch_overlay_update_p() = %d\n",
+	      gdbarch_overlay_update_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: overlay_update = <%s>\n",
-                      host_address_to_string (gdbarch->overlay_update));
+	      "gdbarch_dump: overlay_update = <%s>\n",
+	      host_address_to_string (gdbarch->overlay_update));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_read_description_p() = %d\n",
-                      gdbarch_core_read_description_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_read_description_p() = %d\n",
+	      gdbarch_core_read_description_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_read_description = <%s>\n",
-                      host_address_to_string (gdbarch->core_read_description));
+	      "gdbarch_dump: core_read_description = <%s>\n",
+	      host_address_to_string (gdbarch->core_read_description));
   gdb_printf (file,
-                      "gdbarch_dump: sofun_address_maybe_missing = %s\n",
-                      plongest (gdbarch->sofun_address_maybe_missing));
+	      "gdbarch_dump: sofun_address_maybe_missing = %s\n",
+	      plongest (gdbarch->sofun_address_maybe_missing));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_process_record_p() = %d\n",
-                      gdbarch_process_record_p (gdbarch));
+	      "gdbarch_dump: gdbarch_process_record_p() = %d\n",
+	      gdbarch_process_record_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: process_record = <%s>\n",
-                      host_address_to_string (gdbarch->process_record));
+	      "gdbarch_dump: process_record = <%s>\n",
+	      host_address_to_string (gdbarch->process_record));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_process_record_signal_p() = %d\n",
-                      gdbarch_process_record_signal_p (gdbarch));
+	      "gdbarch_dump: gdbarch_process_record_signal_p() = %d\n",
+	      gdbarch_process_record_signal_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: process_record_signal = <%s>\n",
-                      host_address_to_string (gdbarch->process_record_signal));
+	      "gdbarch_dump: process_record_signal = <%s>\n",
+	      host_address_to_string (gdbarch->process_record_signal));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_gdb_signal_from_target_p() = %d\n",
-                      gdbarch_gdb_signal_from_target_p (gdbarch));
+	      "gdbarch_dump: gdbarch_gdb_signal_from_target_p() = %d\n",
+	      gdbarch_gdb_signal_from_target_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: gdb_signal_from_target = <%s>\n",
-                      host_address_to_string (gdbarch->gdb_signal_from_target));
+	      "gdbarch_dump: gdb_signal_from_target = <%s>\n",
+	      host_address_to_string (gdbarch->gdb_signal_from_target));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_gdb_signal_to_target_p() = %d\n",
-                      gdbarch_gdb_signal_to_target_p (gdbarch));
+	      "gdbarch_dump: gdbarch_gdb_signal_to_target_p() = %d\n",
+	      gdbarch_gdb_signal_to_target_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: gdb_signal_to_target = <%s>\n",
-                      host_address_to_string (gdbarch->gdb_signal_to_target));
+	      "gdbarch_dump: gdb_signal_to_target = <%s>\n",
+	      host_address_to_string (gdbarch->gdb_signal_to_target));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_get_siginfo_type_p() = %d\n",
-                      gdbarch_get_siginfo_type_p (gdbarch));
+	      "gdbarch_dump: gdbarch_get_siginfo_type_p() = %d\n",
+	      gdbarch_get_siginfo_type_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: get_siginfo_type = <%s>\n",
-                      host_address_to_string (gdbarch->get_siginfo_type));
+	      "gdbarch_dump: get_siginfo_type = <%s>\n",
+	      host_address_to_string (gdbarch->get_siginfo_type));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_record_special_symbol_p() = %d\n",
-                      gdbarch_record_special_symbol_p (gdbarch));
+	      "gdbarch_dump: gdbarch_record_special_symbol_p() = %d\n",
+	      gdbarch_record_special_symbol_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: record_special_symbol = <%s>\n",
-                      host_address_to_string (gdbarch->record_special_symbol));
+	      "gdbarch_dump: record_special_symbol = <%s>\n",
+	      host_address_to_string (gdbarch->record_special_symbol));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_get_syscall_number_p() = %d\n",
-                      gdbarch_get_syscall_number_p (gdbarch));
+	      "gdbarch_dump: gdbarch_get_syscall_number_p() = %d\n",
+	      gdbarch_get_syscall_number_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: get_syscall_number = <%s>\n",
-                      host_address_to_string (gdbarch->get_syscall_number));
+	      "gdbarch_dump: get_syscall_number = <%s>\n",
+	      host_address_to_string (gdbarch->get_syscall_number));
   gdb_printf (file,
-                      "gdbarch_dump: xml_syscall_file = %s\n",
-                      pstring (gdbarch->xml_syscall_file));
+	      "gdbarch_dump: xml_syscall_file = %s\n",
+	      pstring (gdbarch->xml_syscall_file));
   gdb_printf (file,
-                      "gdbarch_dump: syscalls_info = %s\n",
-                      host_address_to_string (gdbarch->syscalls_info));
+	      "gdbarch_dump: syscalls_info = %s\n",
+	      host_address_to_string (gdbarch->syscalls_info));
   gdb_printf (file,
-                      "gdbarch_dump: stap_integer_prefixes = %s\n",
-                      pstring_list (gdbarch->stap_integer_prefixes));
+	      "gdbarch_dump: stap_integer_prefixes = %s\n",
+	      pstring_list (gdbarch->stap_integer_prefixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_integer_suffixes = %s\n",
-                      pstring_list (gdbarch->stap_integer_suffixes));
+	      "gdbarch_dump: stap_integer_suffixes = %s\n",
+	      pstring_list (gdbarch->stap_integer_suffixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_register_prefixes = %s\n",
-                      pstring_list (gdbarch->stap_register_prefixes));
+	      "gdbarch_dump: stap_register_prefixes = %s\n",
+	      pstring_list (gdbarch->stap_register_prefixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_register_suffixes = %s\n",
-                      pstring_list (gdbarch->stap_register_suffixes));
+	      "gdbarch_dump: stap_register_suffixes = %s\n",
+	      pstring_list (gdbarch->stap_register_suffixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_register_indirection_prefixes = %s\n",
-                      pstring_list (gdbarch->stap_register_indirection_prefixes));
+	      "gdbarch_dump: stap_register_indirection_prefixes = %s\n",
+	      pstring_list (gdbarch->stap_register_indirection_prefixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_register_indirection_suffixes = %s\n",
-                      pstring_list (gdbarch->stap_register_indirection_suffixes));
+	      "gdbarch_dump: stap_register_indirection_suffixes = %s\n",
+	      pstring_list (gdbarch->stap_register_indirection_suffixes));
   gdb_printf (file,
-                      "gdbarch_dump: stap_gdb_register_prefix = %s\n",
-                      pstring (gdbarch->stap_gdb_register_prefix));
+	      "gdbarch_dump: stap_gdb_register_prefix = %s\n",
+	      pstring (gdbarch->stap_gdb_register_prefix));
   gdb_printf (file,
-                      "gdbarch_dump: stap_gdb_register_suffix = %s\n",
-                      pstring (gdbarch->stap_gdb_register_suffix));
+	      "gdbarch_dump: stap_gdb_register_suffix = %s\n",
+	      pstring (gdbarch->stap_gdb_register_suffix));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_stap_is_single_operand_p() = %d\n",
-                      gdbarch_stap_is_single_operand_p (gdbarch));
+	      "gdbarch_dump: gdbarch_stap_is_single_operand_p() = %d\n",
+	      gdbarch_stap_is_single_operand_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: stap_is_single_operand = <%s>\n",
-                      host_address_to_string (gdbarch->stap_is_single_operand));
+	      "gdbarch_dump: stap_is_single_operand = <%s>\n",
+	      host_address_to_string (gdbarch->stap_is_single_operand));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_stap_parse_special_token_p() = %d\n",
-                      gdbarch_stap_parse_special_token_p (gdbarch));
+	      "gdbarch_dump: gdbarch_stap_parse_special_token_p() = %d\n",
+	      gdbarch_stap_parse_special_token_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: stap_parse_special_token = <%s>\n",
-                      host_address_to_string (gdbarch->stap_parse_special_token));
+	      "gdbarch_dump: stap_parse_special_token = <%s>\n",
+	      host_address_to_string (gdbarch->stap_parse_special_token));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_stap_adjust_register_p() = %d\n",
-                      gdbarch_stap_adjust_register_p (gdbarch));
+	      "gdbarch_dump: gdbarch_stap_adjust_register_p() = %d\n",
+	      gdbarch_stap_adjust_register_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: stap_adjust_register = <%s>\n",
-                      host_address_to_string (gdbarch->stap_adjust_register));
+	      "gdbarch_dump: stap_adjust_register = <%s>\n",
+	      host_address_to_string (gdbarch->stap_adjust_register));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_dtrace_parse_probe_argument_p() = %d\n",
-                      gdbarch_dtrace_parse_probe_argument_p (gdbarch));
+	      "gdbarch_dump: gdbarch_dtrace_parse_probe_argument_p() = %d\n",
+	      gdbarch_dtrace_parse_probe_argument_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: dtrace_parse_probe_argument = <%s>\n",
-                      host_address_to_string (gdbarch->dtrace_parse_probe_argument));
+	      "gdbarch_dump: dtrace_parse_probe_argument = <%s>\n",
+	      host_address_to_string (gdbarch->dtrace_parse_probe_argument));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_dtrace_probe_is_enabled_p() = %d\n",
-                      gdbarch_dtrace_probe_is_enabled_p (gdbarch));
+	      "gdbarch_dump: gdbarch_dtrace_probe_is_enabled_p() = %d\n",
+	      gdbarch_dtrace_probe_is_enabled_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: dtrace_probe_is_enabled = <%s>\n",
-                      host_address_to_string (gdbarch->dtrace_probe_is_enabled));
+	      "gdbarch_dump: dtrace_probe_is_enabled = <%s>\n",
+	      host_address_to_string (gdbarch->dtrace_probe_is_enabled));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_dtrace_enable_probe_p() = %d\n",
-                      gdbarch_dtrace_enable_probe_p (gdbarch));
+	      "gdbarch_dump: gdbarch_dtrace_enable_probe_p() = %d\n",
+	      gdbarch_dtrace_enable_probe_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: dtrace_enable_probe = <%s>\n",
-                      host_address_to_string (gdbarch->dtrace_enable_probe));
+	      "gdbarch_dump: dtrace_enable_probe = <%s>\n",
+	      host_address_to_string (gdbarch->dtrace_enable_probe));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_dtrace_disable_probe_p() = %d\n",
-                      gdbarch_dtrace_disable_probe_p (gdbarch));
+	      "gdbarch_dump: gdbarch_dtrace_disable_probe_p() = %d\n",
+	      gdbarch_dtrace_disable_probe_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: dtrace_disable_probe = <%s>\n",
-                      host_address_to_string (gdbarch->dtrace_disable_probe));
+	      "gdbarch_dump: dtrace_disable_probe = <%s>\n",
+	      host_address_to_string (gdbarch->dtrace_disable_probe));
   gdb_printf (file,
-                      "gdbarch_dump: has_global_solist = %s\n",
-                      plongest (gdbarch->has_global_solist));
+	      "gdbarch_dump: has_global_solist = %s\n",
+	      plongest (gdbarch->has_global_solist));
   gdb_printf (file,
-                      "gdbarch_dump: has_global_breakpoints = %s\n",
-                      plongest (gdbarch->has_global_breakpoints));
+	      "gdbarch_dump: has_global_breakpoints = %s\n",
+	      plongest (gdbarch->has_global_breakpoints));
   gdb_printf (file,
-                      "gdbarch_dump: has_shared_address_space = <%s>\n",
-                      host_address_to_string (gdbarch->has_shared_address_space));
+	      "gdbarch_dump: has_shared_address_space = <%s>\n",
+	      host_address_to_string (gdbarch->has_shared_address_space));
   gdb_printf (file,
-                      "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
-                      host_address_to_string (gdbarch->fast_tracepoint_valid_at));
+	      "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
+	      host_address_to_string (gdbarch->fast_tracepoint_valid_at));
   gdb_printf (file,
-                      "gdbarch_dump: guess_tracepoint_registers = <%s>\n",
-                      host_address_to_string (gdbarch->guess_tracepoint_registers));
+	      "gdbarch_dump: guess_tracepoint_registers = <%s>\n",
+	      host_address_to_string (gdbarch->guess_tracepoint_registers));
   gdb_printf (file,
-                      "gdbarch_dump: auto_charset = <%s>\n",
-                      host_address_to_string (gdbarch->auto_charset));
+	      "gdbarch_dump: auto_charset = <%s>\n",
+	      host_address_to_string (gdbarch->auto_charset));
   gdb_printf (file,
-                      "gdbarch_dump: auto_wide_charset = <%s>\n",
-                      host_address_to_string (gdbarch->auto_wide_charset));
+	      "gdbarch_dump: auto_wide_charset = <%s>\n",
+	      host_address_to_string (gdbarch->auto_wide_charset));
   gdb_printf (file,
-                      "gdbarch_dump: solib_symbols_extension = %s\n",
-                      pstring (gdbarch->solib_symbols_extension));
+	      "gdbarch_dump: solib_symbols_extension = %s\n",
+	      pstring (gdbarch->solib_symbols_extension));
   gdb_printf (file,
-                      "gdbarch_dump: has_dos_based_file_system = %s\n",
-                      plongest (gdbarch->has_dos_based_file_system));
+	      "gdbarch_dump: has_dos_based_file_system = %s\n",
+	      plongest (gdbarch->has_dos_based_file_system));
   gdb_printf (file,
-                      "gdbarch_dump: gen_return_address = <%s>\n",
-                      host_address_to_string (gdbarch->gen_return_address));
+	      "gdbarch_dump: gen_return_address = <%s>\n",
+	      host_address_to_string (gdbarch->gen_return_address));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
-                      gdbarch_info_proc_p (gdbarch));
+	      "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
+	      gdbarch_info_proc_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: info_proc = <%s>\n",
-                      host_address_to_string (gdbarch->info_proc));
+	      "gdbarch_dump: info_proc = <%s>\n",
+	      host_address_to_string (gdbarch->info_proc));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_core_info_proc_p() = %d\n",
-                      gdbarch_core_info_proc_p (gdbarch));
+	      "gdbarch_dump: gdbarch_core_info_proc_p() = %d\n",
+	      gdbarch_core_info_proc_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: core_info_proc = <%s>\n",
-                      host_address_to_string (gdbarch->core_info_proc));
+	      "gdbarch_dump: core_info_proc = <%s>\n",
+	      host_address_to_string (gdbarch->core_info_proc));
   gdb_printf (file,
-                      "gdbarch_dump: iterate_over_objfiles_in_search_order = <%s>\n",
-                      host_address_to_string (gdbarch->iterate_over_objfiles_in_search_order));
+	      "gdbarch_dump: iterate_over_objfiles_in_search_order = <%s>\n",
+	      host_address_to_string (gdbarch->iterate_over_objfiles_in_search_order));
   gdb_printf (file,
-                      "gdbarch_dump: ravenscar_ops = %s\n",
-                      host_address_to_string (gdbarch->ravenscar_ops));
+	      "gdbarch_dump: ravenscar_ops = %s\n",
+	      host_address_to_string (gdbarch->ravenscar_ops));
   gdb_printf (file,
-                      "gdbarch_dump: insn_is_call = <%s>\n",
-                      host_address_to_string (gdbarch->insn_is_call));
+	      "gdbarch_dump: insn_is_call = <%s>\n",
+	      host_address_to_string (gdbarch->insn_is_call));
   gdb_printf (file,
-                      "gdbarch_dump: insn_is_ret = <%s>\n",
-                      host_address_to_string (gdbarch->insn_is_ret));
+	      "gdbarch_dump: insn_is_ret = <%s>\n",
+	      host_address_to_string (gdbarch->insn_is_ret));
   gdb_printf (file,
-                      "gdbarch_dump: insn_is_jump = <%s>\n",
-                      host_address_to_string (gdbarch->insn_is_jump));
+	      "gdbarch_dump: insn_is_jump = <%s>\n",
+	      host_address_to_string (gdbarch->insn_is_jump));
   gdb_printf (file,
-                      "gdbarch_dump: program_breakpoint_here_p = <%s>\n",
-                      host_address_to_string (gdbarch->program_breakpoint_here_p));
+	      "gdbarch_dump: program_breakpoint_here_p = <%s>\n",
+	      host_address_to_string (gdbarch->program_breakpoint_here_p));
   gdb_printf (file,
-                      "gdbarch_dump: gdbarch_auxv_parse_p() = %d\n",
-                      gdbarch_auxv_parse_p (gdbarch));
+	      "gdbarch_dump: gdbarch_auxv_parse_p() = %d\n",
+	      gdbarch_auxv_parse_p (gdbarch));
   gdb_printf (file,
-                      "gdbarch_dump: auxv_parse = <%s>\n",
-                      host_address_to_string (gdbarch->auxv_parse));
+	      "gdbarch_dump: auxv_parse = <%s>\n",
+	      host_address_to_string (gdbarch->auxv_parse));
   gdb_printf (file,
-                      "gdbarch_dump: print_auxv_entry = <%s>\n",
-                      host_address_to_string (gdbarch->print_auxv_entry));
+	      "gdbarch_dump: print_auxv_entry = <%s>\n",
+	      host_address_to_string (gdbarch->print_auxv_entry));
   gdb_printf (file,
-                      "gdbarch_dump: vsyscall_range = <%s>\n",
-                      host_address_to_string (gdbarch->vsyscall_range));
+	      "gdbarch_dump: vsyscall_range = <%s>\n",
+	      host_address_to_string (gdbarch->vsyscall_range));
   gdb_printf (file,
-                      "gdbarch_dump: infcall_mmap = <%s>\n",
-                      host_address_to_string (gdbarch->infcall_mmap));
+	      "gdbarch_dump: infcall_mmap = <%s>\n",
+	      host_address_to_string (gdbarch->infcall_mmap));
   gdb_printf (file,
-                      "gdbarch_dump: infcall_munmap = <%s>\n",
-                      host_address_to_string (gdbarch->infcall_munmap));
+	      "gdbarch_dump: infcall_munmap = <%s>\n",
+	      host_address_to_string (gdbarch->infcall_munmap));
   gdb_printf (file,
-                      "gdbarch_dump: gcc_target_options = <%s>\n",
-                      host_address_to_string (gdbarch->gcc_target_options));
+	      "gdbarch_dump: gcc_target_options = <%s>\n",
+	      host_address_to_string (gdbarch->gcc_target_options));
   gdb_printf (file,
-                      "gdbarch_dump: gnu_triplet_regexp = <%s>\n",
-                      host_address_to_string (gdbarch->gnu_triplet_regexp));
+	      "gdbarch_dump: gnu_triplet_regexp = <%s>\n",
+	      host_address_to_string (gdbarch->gnu_triplet_regexp));
   gdb_printf (file,
-                      "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
-                      host_address_to_string (gdbarch->addressable_memory_unit_size));
+	      "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
+	      host_address_to_string (gdbarch->addressable_memory_unit_size));
   gdb_printf (file,
-                      "gdbarch_dump: disassembler_options_implicit = %s\n",
-                      pstring (gdbarch->disassembler_options_implicit));
+	      "gdbarch_dump: disassembler_options_implicit = %s\n",
+	      pstring (gdbarch->disassembler_options_implicit));
   gdb_printf (file,
-                      "gdbarch_dump: disassembler_options = %s\n",
-                      pstring_ptr (gdbarch->disassembler_options));
+	      "gdbarch_dump: disassembler_options = %s\n",
+	      pstring_ptr (gdbarch->disassembler_options));
   gdb_printf (file,
-                      "gdbarch_dump: valid_disassembler_options = %s\n",
-                      host_address_to_string (gdbarch->valid_disassembler_options));
+	      "gdbarch_dump: valid_disassembler_options = %s\n",
+	      host_address_to_string (gdbarch->valid_disassembler_options));
   gdb_printf (file,
-                      "gdbarch_dump: type_align = <%s>\n",
-                      host_address_to_string (gdbarch->type_align));
+	      "gdbarch_dump: type_align = <%s>\n",
+	      host_address_to_string (gdbarch->type_align));
   gdb_printf (file,
-                      "gdbarch_dump: get_pc_address_flags = <%s>\n",
-                      host_address_to_string (gdbarch->get_pc_address_flags));
+	      "gdbarch_dump: get_pc_address_flags = <%s>\n",
+	      host_address_to_string (gdbarch->get_pc_address_flags));
   gdb_printf (file,
-                      "gdbarch_dump: read_core_file_mappings = <%s>\n",
-                      host_address_to_string (gdbarch->read_core_file_mappings));
+	      "gdbarch_dump: read_core_file_mappings = <%s>\n",
+	      host_address_to_string (gdbarch->read_core_file_mappings));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
