@@ -5730,13 +5730,19 @@ proc gdb_gcore_cmd {core test} {
     global gdb_prompt
 
     set result 0
-    gdb_test_multiple "gcore $core" $test {
-	-re "Saved corefile .*\[\r\n\]+$gdb_prompt $" {
-	    pass $test
-	    set result 1
-	}
-	-re "(?:Can't create a corefile|Target does not support core file generation\\.)\[\r\n\]+$gdb_prompt $" {
-	    unsupported $test
+
+    set re_unsupported \
+	"(?:Can't create a corefile|Target does not support core file generation\\.)"
+
+    with_timeout_factor 3 {
+	gdb_test_multiple "gcore $core" $test {
+	    -re -wrap "Saved corefile .*" {
+		pass $test
+		set result 1
+	    }
+	    -re -wrap $re_unsupported {
+		unsupported $test
+	    }
 	}
     }
 
