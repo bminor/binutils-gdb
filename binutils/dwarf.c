@@ -7158,7 +7158,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   const char *suffix = strrchr (section->name, '.');
   bool is_dwo = false;
   int is_loclists = strstr (section->name, "debug_loclists") != NULL;
-  uint64_t expected_start = 0;
+  uint64_t header_size = 0;
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
     is_dwo = true;
@@ -7209,7 +7209,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
       if (offset_entry_count != 0)
 	return display_offset_entry_loclists (section);
 
-      expected_start = hdrptr - section_begin;
+      header_size = hdrptr - section_begin;
     }
 
   if (load_debug_info (file) == 0)
@@ -7265,12 +7265,12 @@ display_debug_loc (struct dwarf_section *section, void *file)
     error (_("No location lists in .debug_info section!\n"));
 
   if (debug_information [first].num_loc_offsets > 0
-      && debug_information [first].loc_offsets [0] != expected_start
-      && debug_information [first].loc_views [0] != expected_start)
+      && debug_information [first].loc_offsets [0] != header_size
+      && debug_information [first].loc_views [0] != header_size)
     warn (_("Location lists in %s section start at %#" PRIx64
 	    " rather than %#" PRIx64 "\n"),
 	  section->name, debug_information [first].loc_offsets [0],
-	  expected_start);
+	  header_size);
 
   if (!locs_sorted)
     array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
@@ -7282,10 +7282,9 @@ display_debug_loc (struct dwarf_section *section, void *file)
 
   printf (_("    Offset   Begin            End              Expression\n"));
 
-  seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
     {
-      uint64_t offset, voffset;
+      uint64_t offset = 0, voffset = 0;
       uint64_t base_address;
       unsigned int k;
       int has_frame_base;
@@ -7298,6 +7297,24 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  loc_views = debug_information [i].loc_views;
 	  qsort (array, debug_information [i].num_loc_offsets,
 		 sizeof (*array), loc_offsets_compar);
+	}
+
+      /* .debug_loclists has a per-unit header.
+	 Update start if we are detecting it.  */
+      if (debug_information [i].dwarf_version == 5)
+	{
+	  j = locs_sorted ? 0 : array [0];
+
+	  if (debug_information [i].num_loc_offsets)
+	    offset = debug_information [i].loc_offsets [j];
+
+	  if (debug_information [i].num_loc_views)
+	    voffset = debug_information [i].loc_views [j];
+
+	  /* Assume that the size of the header is constant across CUs. */
+	  if (((start - section_begin) + header_size == offset)
+	      || ((start -section_begin) + header_size == voffset))
+	    start += header_size;
 	}
 
       int adjacent_view_loclists = 1;
@@ -7330,19 +7347,21 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		start = vstart;
 	    }
 
-	  if (!seen_first_offset || !adjacent_view_loclists)
-	    seen_first_offset = 1;
-	  else
+	  if (start < next)
 	    {
-	      if (start < next)
+	      if (vnext && vnext < next)
+		warn (_("There is a hole [%#tx - %#" PRIx64 "]"
+			" in %s section.\n"),
+		      start - section_begin, voffset, section->name);
+	      else
 		warn (_("There is a hole [%#tx - %#" PRIx64 "]"
 			" in %s section.\n"),
 		      start - section_begin, offset, section->name);
-	      else if (start > next)
-		warn (_("There is an overlap [%#tx - %#" PRIx64 "]"
-			" in %s section.\n"),
-		      start - section_begin, offset, section->name);
 	    }
+	  else if (start > next)
+	    warn (_("There is an overlap [%#tx - %#" PRIx64 "]"
+		    " in %s section.\n"),
+		  start - section_begin, offset, section->name);
 	  start = next;
 	  vstart = vnext;
 
