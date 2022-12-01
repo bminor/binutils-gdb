@@ -3698,7 +3698,7 @@ loongarch_relax_delete_bytes (bfd *abfd,
 
 /* Relax pcalau12i,addi.d => pcaddi.  */
 static bool
-loongarch_relax_pcala_addi(bfd *abfd, asection *sec,
+loongarch_relax_pcala_addi (bfd *abfd, asection *sec,
 		       Elf_Internal_Rela *rel_hi, bfd_vma symval)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -3967,7 +3967,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	    {
 	      if (i + 4 > sec->reloc_count)
 		break;
-	      loongarch_relax_pcala_addi(abfd, sec, rel, symval);
+	      loongarch_relax_pcala_addi (abfd, sec, rel, symval);
 	    }
 	  break;
 	case R_LARCH_GOT_PC_HI20:
@@ -3977,7 +3977,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 		break;
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
 		{
-		  loongarch_relax_pcala_addi(abfd, sec, rel, symval);
+		  loongarch_relax_pcala_addi (abfd, sec, rel, symval);
 		}
 	    }
 	  break;

@@ -22,7 +22,10 @@
 #include "opcode/loongarch.h"
 #include "libiberty.h"
 
-struct loongarch_ASEs_option LARCH_opts;
+struct loongarch_ASEs_option LARCH_opts =
+{
+  .relax = 1
+};
 
 size_t
 loongarch_insn_length (insn_t insn ATTRIBUTE_UNUSED)
