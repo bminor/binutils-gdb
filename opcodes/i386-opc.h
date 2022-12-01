@@ -535,8 +535,6 @@ enum
   No_sSuf,
   /* q suffix on instruction illegal */
   No_qSuf,
-  /* long double suffix on instruction illegal */
-  No_ldSuf,
   /* instruction needs FWAIT */
   FWait,
   /* IsString provides for a quick test for string instructions, and
@@ -750,7 +748,6 @@ typedef struct i386_opcode_modifier
   unsigned int no_lsuf:1;
   unsigned int no_ssuf:1;
   unsigned int no_qsuf:1;
-  unsigned int no_ldsuf:1;
   unsigned int fwait:1;
   unsigned int isstring:2;
   unsigned int regmem:1;

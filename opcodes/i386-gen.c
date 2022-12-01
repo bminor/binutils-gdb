@@ -740,7 +740,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (No_lSuf),
   BITFIELD (No_sSuf),
   BITFIELD (No_qSuf),
-  BITFIELD (No_ldSuf),
   BITFIELD (FWait),
   BITFIELD (IsString),
   BITFIELD (RegMem),

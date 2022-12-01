@@ -7249,8 +7249,6 @@ process_suffix (void)
 	suffixes |= 1 << 1;
       if (!i.tm.opcode_modifier.no_lsuf)
 	suffixes |= 1 << 2;
-      if (!i.tm.opcode_modifier.no_ldsuf)
-	suffixes |= 1 << 3;
       if (!i.tm.opcode_modifier.no_ssuf)
 	suffixes |= 1 << 4;
       if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
