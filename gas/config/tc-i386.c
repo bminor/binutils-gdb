@@ -80,9 +80,6 @@
 #define SHORT_MNEM_SUFFIX 's'
 #define LONG_MNEM_SUFFIX  'l'
 #define QWORD_MNEM_SUFFIX  'q'
-/* Intel Syntax.  Use a non-ascii letter since since it never appears
-   in instructions.  */
-#define LONG_DOUBLE_MNEM_SUFFIX '\1'
 
 #define END_OF_INSN '\0'
 
@@ -312,6 +309,9 @@ struct _i386_insn
 
     /* The operand to a branch insn indicates an absolute branch.  */
     bool jumpabsolute;
+
+    /* The operand to a branch insn indicates a far branch.  */
+    bool far_branch;
 
     /* There is a memory operand of (%dx) which should be only used
        with input/output instructions.  */
@@ -6494,14 +6494,6 @@ match_template (char mnem_suffix)
     case QWORD_MNEM_SUFFIX:
       suffix_check.no_qsuf = 1;
       break;
-    default:
-      /* NB: In Intel syntax, normally we can check for memory operand
-	 size when there is no mnemonic suffix.  But jmp and call have
-	 2 different encodings with Dword memory operand size, one with
-	 No_ldSuf and the other without.  i.suffix is set to
-	 LONG_DOUBLE_MNEM_SUFFIX to skip the one with No_ldSuf.  */
-      if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
-	suffix_check.no_ldsuf = 1;
     }
 
   for (t = current_templates->start; t < current_templates->end; t++)
@@ -6555,8 +6547,7 @@ match_template (char mnem_suffix)
 	  || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
 	  || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
 	  || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
-	  || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
-	  || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf))
+	  || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf))
 	continue;
 
       specific_error = progress (operand_size_mismatch);
@@ -6572,6 +6563,15 @@ match_template (char mnem_suffix)
 	 a warning, issued further down).  */
       specific_error = progress (operand_type_mismatch);
       if (i.jumpabsolute && t->opcode_modifier.jump != JUMP_ABSOLUTE)
+	continue;
+
+      /* In Intel syntax, normally we can check for memory operand size when
+	 there is no mnemonic suffix.  But jmp and call have 2 different
+	 encodings with Dword memory operand size.  Skip the "near" one
+	 (permitting a register operand) when "far" was requested.  */
+      if (i.far_branch
+	  && t->opcode_modifier.jump == JUMP_ABSOLUTE
+	  && t->operand_types[0].bitfield.class == Reg)
 	continue;
 
       for (j = 0; j < MAX_OPERANDS; j++)

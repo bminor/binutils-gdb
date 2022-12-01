@@ -715,8 +715,10 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		   && (current_templates->start->opcode_modifier.jump == JUMP
 		       || current_templates->start->opcode_modifier.jump
 			  == JUMP_DWORD))
-	    suffix = flag_code == CODE_16BIT ? LONG_DOUBLE_MNEM_SUFFIX
-					     : WORD_MNEM_SUFFIX;
+	    {
+	      i.far_branch = true;
+	      suffix = WORD_MNEM_SUFFIX;
+	    }
 	  else if (got_a_float == 1)	/* "f..." */
 	    suffix = SHORT_MNEM_SUFFIX;
 	  else
@@ -733,7 +735,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	    {
 	      if (flag_code == CODE_16BIT)
 		add_prefix (DATA_PREFIX_OPCODE);
-	      suffix = LONG_DOUBLE_MNEM_SUFFIX;
+	      i.far_branch = true;
 	    }
 	  break;
 
@@ -774,7 +776,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  break;
 
 	case O_far_ptr:
-	  suffix = LONG_DOUBLE_MNEM_SUFFIX;
+	  i.far_branch = true;
 	  /* FALLTHROUGH */
 	case O_near_ptr:
 	  if (current_templates->start->opcode_modifier.jump != JUMP
@@ -831,10 +833,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		  break;
 		case SHORT_MNEM_SUFFIX:
 		  if (t->opcode_modifier.no_ssuf)
-		    continue;
-		  break;
-		case LONG_DOUBLE_MNEM_SUFFIX:
-		  if (t->opcode_modifier.no_ldsuf)
 		    continue;
 		  break;
 		default:
@@ -916,7 +914,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		return 0;
 	      }
 	    else if (S_GET_SEGMENT (intel_state.seg) == reg_section)
-	      jumpabsolute = true;
+	      {
+		jumpabsolute = true;
+		if (intel_state.op_modifier == O_far_ptr)
+		  i.far_branch = true;
+	      }
 	    else
 	      {
 		i386_operand_type types;
@@ -943,8 +945,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		    this_operand = i.operands++;
 		    i.types[this_operand].bitfield.unspecified = 1;
 		  }
-		if (suffix == LONG_DOUBLE_MNEM_SUFFIX)
-		  i.suffix = 0;
 		intel_state.seg = NULL;
 		intel_state.is_mem = 0;
 	      }

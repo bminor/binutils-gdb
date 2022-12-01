@@ -434,7 +434,7 @@ call, 0xff, 2, Cpu64, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sS
 call, 0xff, 2, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining call instances.
 call, 0x9a, None, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
-call, 0xff, 3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Dword|Fword|BaseIndex }
+call, 0xff, 3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|NoSuf, { Dword|Fword|BaseIndex }
 call, 0xff, 3, Cpu64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
 lcall, 0x9a, None, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 lcall, 0xff, 3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
@@ -447,7 +447,7 @@ jmp, 0xff, 4, Cpu64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|N
 jmp, 0xff, 4, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining jmp instances.
 jmp, 0xea, None, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
-jmp, 0xff, 5, 0, Amd64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Dword|Fword|BaseIndex }
+jmp, 0xff, 5, 0, Amd64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|BaseIndex }
 jmp, 0xff, 5, Cpu64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
 ljmp, 0xea, None, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 ljmp, 0xff, 5, 0, Amd64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
