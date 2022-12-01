@@ -18653,6 +18653,8 @@ cooked_index_functions::expand_matching_symbols
        (per_objfile->per_bfd->index_table.get ()));
   for (const cooked_index_entry *entry : table->all_entries ())
     {
+      QUIT;
+
       if (entry->parent_entry != nullptr)
 	continue;
 
@@ -18728,6 +18730,8 @@ cooked_index_functions::expand_symtabs_matching
       for (const cooked_index_entry *entry : table->find (name_vec.back (),
 							  completing))
 	{
+	  QUIT;
+
 	  /* No need to consider symbols from expanded CUs.  */
 	  if (per_objfile->symtab_set_p (entry->per_cu))
 	    continue;
