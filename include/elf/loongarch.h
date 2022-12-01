@@ -229,6 +229,26 @@ RELOC_NUMBER (R_LARCH_32_PCREL, 99)
 /* RELAX.  */
 RELOC_NUMBER (R_LARCH_RELAX, 100)
 
+/* relax delete.  */
+RELOC_NUMBER (R_LARCH_DELETE, 101)
+
+/* relax align.  */
+RELOC_NUMBER (R_LARCH_ALIGN, 102)
+
+/* pcaddi.  */
+RELOC_NUMBER (R_LARCH_PCREL20_S2, 103)
+
+/* cfa.  */
+RELOC_NUMBER (R_LARCH_CFA, 104)
+
+/* DW_CFA_advance_loc.  */
+RELOC_NUMBER (R_LARCH_ADD6, 105)
+RELOC_NUMBER (R_LARCH_SUB6, 106)
+
+/* unsigned leb128.  */
+RELOC_NUMBER (R_LARCH_ADD_ULEB128, 107)
+RELOC_NUMBER (R_LARCH_SUB_ULEB128, 108)
+
 END_RELOC_NUMBERS (R_LARCH_count)
 
 /* Processor specific flags for the ELF header e_flags field.  */

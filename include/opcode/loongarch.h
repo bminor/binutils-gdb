@@ -28,6 +28,8 @@ extern "C"
 {
 #endif
 
+  #define LARCH_NOP 0x03400000
+
   typedef uint32_t insn_t;
 
   struct loongarch_opcode
@@ -228,6 +230,7 @@ dec2 : [1-9][0-9]?
 #define ase_gpcr	isa.use_la_global_with_pcrel
 #define ase_gabs	isa.use_la_global_with_abs
 
+    int relax;
   } LARCH_opts;
 
   extern size_t loongarch_insn_length (insn_t insn);
