@@ -2,8 +2,8 @@
 #readelf: -S --wide
 #name: Disabling section padding
 # The RX port uses non standard section names.
-#xfail: rx-*-*
-# RISC-V handles alignment via linker relaxation, so object files don't have
+#xfail: loongarch*-* rx-*-*
+# LoongArch and RISC-V handles alignment via linker relaxation, so object files don't have
 # the expected alignment.
 #xfail: riscv*-*-*
 

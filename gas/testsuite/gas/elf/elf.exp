@@ -72,6 +72,9 @@ if { [is_elf_format] } then {
     if {[istarget "csky*-*-*"]} {
 	set target_machine -csky
     }
+    if {[istarget "loongarch*-*-*"]} then {
+	set dump_opts {{as -mno-relax}}
+    }
     if {[istarget "m32r*-*-*"]} then {
 	set target_machine -m32r
     }

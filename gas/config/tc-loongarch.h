@@ -47,15 +47,44 @@ extern int loongarch_relax_frag (asection *, struct frag *, long);
 #define md_undefined_symbol(name) (0)
 #define md_operand(x)
 
-/* This is called to see whether a reloc against a defined symbol
+extern bool loongarch_frag_align_code (int);
+#define md_do_align(N, FILL, LEN, MAX, LABEL)				\
+  if ((N) != 0 && !(FILL) && !need_pass_2 && subseg_text_p (now_seg))	\
+    {									\
+      if (loongarch_frag_align_code (N))				\
+	goto LABEL;							\
+    }
+
+/* The following two macros let the linker resolve all the relocs
+   due to relaxation.
+   This is called to see whether a reloc against a defined symbol
    should be converted into a reloc against a section.  */
-extern int loongarch_fix_adjustable (struct fix *fix);
-#define tc_fix_adjustable(fixp) loongarch_fix_adjustable(fixp)
+#define tc_fix_adjustable(fixp) 0
+/* The difference between same-section symbols may be affected by linker
+   relaxation, so do not resolve such expressions in the assembler.  */
+#define md_allow_local_subtract(l,r,s) 0
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 #define DIFF_EXPR_OK 1
+
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
+   || ((SEC)->flags & SEC_CODE) != 0		\
+   || ((SEC)->flags & SEC_DEBUGGING) != 0	\
+   || TC_FORCE_RELOCATION (FIX))
+
+#define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE)  \
+				    || (seg->flags & SEC_DEBUGGING))
+
+#define TC_FORCE_RELOCATION_LOCAL(FIX) 1
+
+/* Adjust debug_line after relaxation.  */
+#define DWARF2_USE_FIXED_ADVANCE_PC 1
+
+/* Values passed to md_apply_fix don't include symbol values.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define TARGET_USE_CFIPOP 1
 #define DWARF2_DEFAULT_RETURN_COLUMN 1 /* $ra.  */
@@ -65,13 +94,15 @@ extern int loongarch_fix_adjustable (struct fix *fix);
   loongarch_cfi_frame_initial_instructions
 extern void loongarch_cfi_frame_initial_instructions (void);
 
+#define tc_symbol_new_hook(sym) \
+  if (0 == strcmp (sym->bsym->name, FAKE_LABEL_NAME)) \
+    S_SET_OTHER (sym, STV_HIDDEN);
+
 #define tc_parse_to_dw2regnum tc_loongarch_parse_to_dw2regnum
 extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
 
-/* A enumerated values to specific how to deal with align in '.text'.
-   Now we want to fill 'andi $r0,$r0,0x0'.
-   Here is the type 0, will fill andi insn later.  */
-#define NOP_OPCODE (0x00)
+extern void loongarch_pre_output_hook (void);
+#define md_pre_output_hook loongarch_pre_output_hook ()
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
@@ -89,5 +120,8 @@ struct reloc_info
   bfd_reloc_code_real_type type;
   expressionS value;
 };
+
+#define md_finish loongarch_md_finish
+extern void loongarch_md_finish (void);
 
 #endif

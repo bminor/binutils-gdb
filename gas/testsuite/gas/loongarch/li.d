@@ -10,9 +10,11 @@ Disassembly of section .text:
 00000000.* <_start>:
 [ 	]+0:[ 	]+03803c06[ 	]+ori[ 	]+\$a2,[ 	]+\$zero,[ 	]+0xf
 [ 	]+4:[ 	]+1a000005[ 	]+pcalau12i[ 	]+\$a1,[ 	]+0
-[ 	]+4:[ 	]+R_LARCH_PCALA_HI20[ 	]+.rodata
-[ 	]+8:[ 	]+02c000a5[ 	]+addi.d[ 	]+\$a1,[ 	]+\$a1,[ 	]+0
-[ 	]+8:[ 	]+R_LARCH_PCALA_LO12[ 	]+.rodata
+[ 	]+4:[ 	]+R_LARCH_PCALA_HI20[ 	]+msg
+[ 	]+4:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
+[ 	]+8:[ 	]+02c000a5[ 	]+addi\.d[ 	]+\$a1,[ 	]+\$a1,[ 	]+0
+[ 	]+8:[ 	]+R_LARCH_PCALA_LO12[ 	]+msg
+[ 	]+8:[ 	]+R_LARCH_RELAX[ 	]+\*ABS\*
 [ 	]+c:[ 	]+03800404[ 	]+ori[ 	]+\$a0,[ 	]+\$zero,[ 	]+0x1
 [ 	]+10:[ 	]+0381000b[ 	]+ori[ 	]+\$a7,[ 	]+\$zero,[ 	]+0x40
 [ 	]+14:[ 	]+002b0000[ 	]+syscall[ 	]+0x0

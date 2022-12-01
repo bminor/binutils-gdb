@@ -31,6 +31,7 @@ if { ![istarget s390*-*-*] } {
 	 || [istarget cr16-*-*]
 	 || [istarget crx-*-*]
 	 || [istarget ft32*-*]
+	 || [istarget loongarch*-*-*]
 	 || [istarget mn10*-*-*]
 	 || [istarget msp430-*-*]
 	 || [istarget nds32*-*-*]
