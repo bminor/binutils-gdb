@@ -59,6 +59,30 @@ if [istarget "loongarch64-*-*"] {
 	]
   }
 
+  # loongarch*-elf target do not support -shared option
+  if [check_shared_lib_support] {
+    run_ld_link_tests \
+	[list \
+	     [list \
+		  "data plt" \
+		  "-shared" "" \
+		  "" \
+		  {data-plt.s} \
+		  {} \
+		  "data-plt.so" \
+	     ] \
+	]
+
+    if [file exist "tmpdir/data-plt.so"] {
+      set objdump_output [run_host_cmd "objdump" "-d tmpdir/data-plt.so"]
+      if { [ regexp "<a@plt>" $objdump_output] } {
+	fail "data plt"
+      } {
+	pass "data plt"
+      }
+    }
+  }
+
   run_ld_link_tests \
       [list \
 	  [list \

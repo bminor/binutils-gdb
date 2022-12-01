@@ -891,8 +891,12 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h->non_got_ref = 1;
 	  break;
 
+	/* For normal cmodel, pcalau12i + addi.d/w used to data.
+	   For first version medium cmodel, pcalau12i + jirl are used to
+	   function call, it need to creat PLT entry for STT_FUNC and
+	   STT_GNU_IFUNC type symbol.  */
 	case R_LARCH_PCALA_HI20:
-	  if (h != NULL)
+	  if (h != NULL && (STT_FUNC == h->type || STT_GNU_IFUNC == h->type))
 	    {
 	      /* For pcalau12i + jirl.  */
 	      h->needs_plt = 1;
