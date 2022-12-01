@@ -6461,7 +6461,6 @@ match_template (char mnem_suffix)
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;
-  i386_opcode_modifier suffix_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j, size_match, check_register, errline = __LINE__;
@@ -6474,27 +6473,6 @@ match_template (char mnem_suffix)
 
   found_reverse_match = 0;
   addr_prefix_disp = -1;
-
-  /* Prepare for mnemonic suffix check.  */
-  memset (&suffix_check, 0, sizeof (suffix_check));
-  switch (mnem_suffix)
-    {
-    case BYTE_MNEM_SUFFIX:
-      suffix_check.no_bsuf = 1;
-      break;
-    case WORD_MNEM_SUFFIX:
-      suffix_check.no_wsuf = 1;
-      break;
-    case SHORT_MNEM_SUFFIX:
-      suffix_check.no_ssuf = 1;
-      break;
-    case LONG_MNEM_SUFFIX:
-      suffix_check.no_lsuf = 1;
-      break;
-    case QWORD_MNEM_SUFFIX:
-      suffix_check.no_qsuf = 1;
-      break;
-    }
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
@@ -6543,11 +6521,11 @@ match_template (char mnem_suffix)
 
       /* Check the suffix.  */
       specific_error = progress (invalid_instruction_suffix);
-      if ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
-	  || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
-	  || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
-	  || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
-	  || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf))
+      if ((t->opcode_modifier.no_bsuf && mnem_suffix == BYTE_MNEM_SUFFIX)
+	  || (t->opcode_modifier.no_wsuf && mnem_suffix == WORD_MNEM_SUFFIX)
+	  || (t->opcode_modifier.no_lsuf && mnem_suffix == LONG_MNEM_SUFFIX)
+	  || (t->opcode_modifier.no_ssuf && mnem_suffix == SHORT_MNEM_SUFFIX)
+	  || (t->opcode_modifier.no_qsuf && mnem_suffix == QWORD_MNEM_SUFFIX))
 	continue;
 
       specific_error = progress (operand_size_mismatch);
