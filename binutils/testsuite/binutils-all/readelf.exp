@@ -489,18 +489,23 @@ if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
     readelf_test {--decompress --hex-dump .debug_loc} $tempfile readelf.z
 }
 
-set hpux ""
+set flags ""
 
 # Skip the next test for the RISCV architectures because they
 # do not support .ULEB128 pseudo-ops with non-constant values.
 if ![istarget "riscv*-*-*"] then {
 
     if [istarget "hppa*64*-*-hpux*"] {
-	set hpux "--defsym HPUX=1"
+	set flags "--defsym HPUX=1"
     }
 
+    # LoongArch relax align add nops, so label subtractions will increase
+    if [istarget "loongarch*-*-*"] {
+	set flags "-mno-relax"
+     }
+
     # Assemble the DWARF-5 test file.
-    if {![binutils_assemble_flags $srcdir/$subdir/dw5.S tmpdir/dw5.o $hpux]} then {
+    if {![binutils_assemble_flags $srcdir/$subdir/dw5.S tmpdir/dw5.o $flags]} then {
 	unsupported "readelf -wiaoRlL dw5 (failed to assemble)"
     } else {
 
@@ -612,7 +617,7 @@ if ![is_remote host] {
 }
 
 # Check dwarf-5 support for DW_OP_addrx.
-if {![binutils_assemble_flags $srcdir/$subdir/dw5-op.S tmpdir/dw5-op.o $hpux]} then {
+if {![binutils_assemble_flags $srcdir/$subdir/dw5-op.S tmpdir/dw5-op.o $flags]} then {
     unsupported "readelf -wi dw5-op (failed to assemble)"
 } else {
 
