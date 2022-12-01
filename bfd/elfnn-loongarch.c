@@ -27,6 +27,7 @@
 #include "objalloc.h"
 #include "elf/loongarch.h"
 #include "elfxx-loongarch.h"
+#include "opcode/loongarch.h"
 
 static bool
 loongarch_info_to_howto_rela (bfd *abfd, arelent *cache_ptr,
@@ -93,6 +94,10 @@ struct loongarch_elf_link_hash_table
 
   /* The max alignment of output sections.  */
   bfd_vma max_alignment;
+
+  /* The data segment phase, don't relax the section
+     when it is exp_seg_relro_adjust.  */
+  int *data_segment_phase;
 };
 
 /* Get the LoongArch ELF linker hash table from a link_info structure.  */
@@ -772,8 +777,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  break;
 
-	case R_LARCH_B21:
 	case R_LARCH_B16:
+	case R_LARCH_B21:
 	case R_LARCH_B26:
 	  if (h != NULL)
 	    {
@@ -972,8 +977,12 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && (h->needs_plt || h->type == STT_GNU_IFUNC || h->is_weakalias
-		  || (h->def_dynamic && h->ref_regular && !h->def_regular)));
+	      && (h->needs_plt
+		  || h->type == STT_GNU_IFUNC
+		  || h->is_weakalias
+		  || (h->def_dynamic
+		      && h->ref_regular
+		      && !h->def_regular)));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
@@ -1884,7 +1893,7 @@ loongarch_reloc_rewrite_imm_insn (const Elf_Internal_Rela *rel,
   int bits = bfd_get_reloc_size (howto) * 8;
   uint32_t insn = bfd_get (bits, input_bfd, contents + rel->r_offset);
 
-  if (!loongarch_adjust_reloc_bitsfield(howto, &reloc_val))
+  if (!loongarch_adjust_reloc_bitsfield (input_bfd, howto, &reloc_val))
     return bfd_reloc_overflow;
 
   insn = (insn & (uint32_t)howto->src_mask)
@@ -2004,42 +2013,73 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
       bfd_put (bits, input_bfd, value, contents + rel->r_offset);
       break;
 
+    /* LoongArch only has add/sub reloc pair, not has set/sub reloc pair.
+       Because set/sub reloc pair not support multi-thread. While add/sub
+       reloc pair process order not affect the final result.
+
+       For add/sub reloc, the original value will be involved in the
+       calculation. In order not to add/sub extra value, we write 0 to symbol
+       address at assembly time.
+
+       add/sub reloc bits determined by the value after symbol subtraction,
+       not symbol value.
+
+       add/sub reloc save part of the symbol value, so we only need to
+       save howto->dst_mask bits.  */
+    case R_LARCH_ADD6:
+    case R_LARCH_SUB6:
+      {
+	bfd_vma word = bfd_get (howto->bitsize, input_bfd,
+				contents + rel->r_offset);
+	word = (word & ~howto->dst_mask) | (value & howto->dst_mask);
+	bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
+	r = bfd_reloc_ok;
+	break;
+      }
+
+    /* Not need to read the original value, just write the new value.  */
     case R_LARCH_ADD8:
     case R_LARCH_ADD16:
     case R_LARCH_ADD24:
     case R_LARCH_ADD32:
     case R_LARCH_ADD64:
-      r = loongarch_check_offset (rel, input_section);
-      if (r != bfd_reloc_ok)
-	break;
-
-      opr1 = bfd_get (bits, input_bfd, contents + rel->r_offset);
-      bfd_put (bits, input_bfd, opr1 + value, contents + rel->r_offset);
-      break;
-
     case R_LARCH_SUB8:
     case R_LARCH_SUB16:
     case R_LARCH_SUB24:
     case R_LARCH_SUB32:
     case R_LARCH_SUB64:
-      r = loongarch_check_offset (rel, input_section);
-      if (r != bfd_reloc_ok)
+      {
+	/* Because add/sub reloc is processed separately,
+	   so the high bits is invalid.  */
+	bfd_vma word = value & howto->dst_mask;
+	bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
+	r = bfd_reloc_ok;
 	break;
+      }
 
-      opr1 = bfd_get (bits, input_bfd, contents + rel->r_offset);
-      bfd_put (bits, input_bfd, opr1 - value, contents + rel->r_offset);
-      break;
+    case R_LARCH_ADD_ULEB128:
+    case R_LARCH_SUB_ULEB128:
+      {
+	unsigned int len = 0;
+	/* Before write uleb128, first read it to get it's length.  */
+	_bfd_read_unsigned_leb128 (input_bfd, contents + rel->r_offset, &len);
+	loongarch_write_unsigned_leb128 (contents + rel->r_offset, len, value);
+	r = bfd_reloc_ok;
+	break;
+      }
 
     /* For eh_frame and debug info.  */
     case R_LARCH_32_PCREL:
-      value -= sec_addr (input_section) + rel->r_offset;
-      value += rel->r_addend;
-      bfd_vma word = bfd_get (howto->bitsize, input_bfd,
-			      contents + rel->r_offset);
-      word = (word & ~howto->dst_mask) | (value & howto->dst_mask);
-      bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
-      r = bfd_reloc_ok;
-      break;
+      {
+	value -= sec_addr (input_section) + rel->r_offset;
+	value += rel->r_addend;
+	bfd_vma word = bfd_get (howto->bitsize, input_bfd,
+				contents + rel->r_offset);
+	word = (word & ~howto->dst_mask) | (value & howto->dst_mask);
+	bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
+	r = bfd_reloc_ok;
+	break;
+      }
 
     /* New reloc type.
        R_LARCH_B16 ~ R_LARCH_TLS_GD_HI20.  */
@@ -2078,6 +2118,7 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
     case R_LARCH_TLS_LD_HI20:
     case R_LARCH_TLS_GD_PC_HI20:
     case R_LARCH_TLS_GD_HI20:
+    case R_LARCH_PCREL20_S2:
       r = loongarch_check_offset (rel, input_section);
       if (r != bfd_reloc_ok)
 	break;
@@ -2244,9 +2285,9 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
 
 #define RELOCATE_CALC_PC32_HI20(relocation, pc) 	\
   ({							\
-    bfd_vma lo = (relocation) & ((bfd_vma)0xfff);	\
+    bfd_vma __lo = (relocation) & ((bfd_vma)0xfff);	\
     pc = pc & (~(bfd_vma)0xfff);			\
-    if (lo > 0x7ff)					\
+    if (__lo > 0x7ff)					\
       {							\
 	relocation += 0x1000;				\
       } 						\
@@ -2256,8 +2297,8 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
 
 #define RELOCATE_CALC_PC64_HI32(relocation, pc)  	\
   ({							\
-    bfd_vma lo = (relocation) & ((bfd_vma)0xfff);	\
-    if (lo > 0x7ff)					\
+    bfd_vma __lo = (relocation) & ((bfd_vma)0xfff);	\
+    if (__lo > 0x7ff)					\
       { 						\
 	relocation -= 0x100000000;      		\
       }  						\
@@ -2522,29 +2563,49 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  relocation += rel->r_addend;
 	  break;
 
+	case R_LARCH_ADD6:
 	case R_LARCH_ADD8:
 	case R_LARCH_ADD16:
 	case R_LARCH_ADD24:
 	case R_LARCH_ADD32:
 	case R_LARCH_ADD64:
+	  {
+	    bfd_vma old_value = bfd_get (howto->bitsize, input_bfd,
+					 contents + rel->r_offset);
+	    relocation = old_value + relocation + rel->r_addend;
+	    break;
+	  }
+
+	case R_LARCH_SUB6:
 	case R_LARCH_SUB8:
 	case R_LARCH_SUB16:
 	case R_LARCH_SUB24:
 	case R_LARCH_SUB32:
 	case R_LARCH_SUB64:
-	  if (resolved_dynly)
-	    fatal = (loongarch_reloc_is_fatal
-		     (info, input_bfd, input_section, rel, howto,
-		      bfd_reloc_undefined, is_undefweak, name,
-		      "Can't be resolved dynamically.  "
-		      "If this procedure is hand-written assembly,\n"
-		      "there must be something like '.dword sym1 - sym2' "
-		      "to generate these relocs\n"
-		      "and we can't get known link-time address of "
-		      "these symbols."));
-	  else
-	    relocation += rel->r_addend;
-	  break;
+	  {
+	    bfd_vma old_value = bfd_get (howto->bitsize, input_bfd,
+					  contents + rel->r_offset);
+	    relocation = old_value - relocation - rel->r_addend;
+	    break;
+	  }
+
+	case R_LARCH_ADD_ULEB128:
+	case R_LARCH_SUB_ULEB128:
+	  {
+	    /* Get the value and length of the uleb128 data.  */
+	    unsigned int len = 0;
+	    bfd_vma old_value = _bfd_read_unsigned_leb128 (input_bfd,
+				    contents + rel->r_offset, &len);
+
+	    if (R_LARCH_ADD_ULEB128 == ELFNN_R_TYPE (rel->r_info))
+	      relocation = old_value + relocation + rel->r_addend;
+	    else if (R_LARCH_SUB_ULEB128 == ELFNN_R_TYPE (rel->r_info))
+	      relocation = old_value - relocation - rel->r_addend;
+
+	    bfd_vma mask = (1 << (7 * len)) - 1;
+	    relocation &= mask;
+	    break;
+	  }
 
 	case R_LARCH_TLS_DTPREL32:
 	case R_LARCH_TLS_DTPREL64:
@@ -3084,6 +3145,15 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  break;
 
+	case R_LARCH_PCREL20_S2:
+	  unresolved_reloc = false;
+	  if (h && h->plt.offset != MINUS_ONE)
+	    relocation = sec_addr (plt) + h->plt.offset;
+	  else
+	    relocation += rel->r_addend;
+	  relocation -= pc;
+	  break;
+
 	case R_LARCH_PCALA_HI20:
 	  unresolved_reloc = false;
 	  if (h && h->plt.offset != MINUS_ONE)
@@ -3109,15 +3179,15 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    relocation += rel->r_addend;
 
-	  relocation &= 0xfff;
-	  /* Signed extend.  */
-	  relocation = (relocation ^ 0x800) - 0x800;
-
 	  /* For 2G jump, generate pcalau12i, jirl.  */
 	  /* If use jirl, turns to R_LARCH_B16.  */
 	  uint32_t insn = bfd_get (32, input_bfd, contents + rel->r_offset);
 	  if ((insn & 0x4c000000) == 0x4c000000)
 	    {
+	      relocation &= 0xfff;
+	      /* Signed extend.  */
+	      relocation = (relocation ^ 0x800) - 0x800;
+
 	      rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_B16);
 	      howto = loongarch_elf_rtype_to_howto (input_bfd, R_LARCH_B16);
 	    }
@@ -3253,13 +3323,12 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    + (idx * GOT_ENTRY_SIZE)
 		    - sec_addr (htab->elf.sgot);
 		}
+
 	      relocation = got_off + sec_addr (got);
 	    }
 
-	  if (r_type == R_LARCH_GOT_PC_LO12)
-	    relocation &= (bfd_vma)0xfff;
-	  else if (r_type == R_LARCH_GOT64_PC_LO20
-		   || r_type == R_LARCH_GOT64_PC_HI12)
+	  if (r_type == R_LARCH_GOT64_PC_HI12
+	      || r_type == R_LARCH_GOT64_PC_LO20)
 	    RELOCATE_CALC_PC64_HI32 (relocation, pc);
 
 	  break;
@@ -3417,15 +3486,16 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_IE))
 	    relocation += 2 * GOT_ENTRY_SIZE;
 
-	  if (r_type == R_LARCH_TLS_IE_PC_LO12)
-	    relocation &= (bfd_vma)0xfff;
-	  else if (r_type == R_LARCH_TLS_IE64_PC_LO20
-		   || r_type == R_LARCH_TLS_IE64_PC_HI12)
+	  if (r_type == R_LARCH_TLS_IE64_PC_LO20
+	      || r_type == R_LARCH_TLS_IE64_PC_HI12)
 	    RELOCATE_CALC_PC64_HI32 (relocation, pc);
 
 	  break;
 
 	case R_LARCH_RELAX:
+	case R_LARCH_ALIGN:
+	  r = bfd_reloc_continue;
+	  unresolved_reloc = false;
 	  break;
 
 	default:
@@ -3514,6 +3584,409 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
     }
 
   return !fatal;
+}
+
+static bool
+loongarch_relax_delete_bytes (bfd *abfd,
+			  asection *sec,
+			  bfd_vma addr,
+			  size_t count,
+			  struct bfd_link_info *link_info)
+{
+  unsigned int i, symcount;
+  bfd_vma toaddr = sec->size;
+  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
+  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  unsigned int sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+  struct bfd_elf_section_data *data = elf_section_data (sec);
+  bfd_byte *contents = data->this_hdr.contents;
+
+  /* Actually delete the bytes.  */
+  sec->size -= count;
+  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+
+  /* Adjust the location of all of the relocs.  Note that we need not
+     adjust the addends, since all PC-relative references must be against
+     symbols, which we will adjust below.  */
+  for (i = 0; i < sec->reloc_count; i++)
+    if (data->relocs[i].r_offset > addr && data->relocs[i].r_offset < toaddr)
+      data->relocs[i].r_offset -= count;
+
+  /* Adjust the local symbols defined in this section.  */
+  for (i = 0; i < symtab_hdr->sh_info; i++)
+    {
+      Elf_Internal_Sym *sym = (Elf_Internal_Sym *) symtab_hdr->contents + i;
+      if (sym->st_shndx == sec_shndx)
+	{
+	  /* If the symbol is in the range of memory we just moved, we
+	     have to adjust its value.  */
+	  if (sym->st_value > addr && sym->st_value <= toaddr)
+	    sym->st_value -= count;
+
+	  /* If the symbol *spans* the bytes we just deleted (i.e. its
+	     *end* is in the moved bytes but its *start* isn't), then we
+	     must adjust its size.
+
+	     This test needs to use the original value of st_value, otherwise
+	     we might accidentally decrease size when deleting bytes right
+	     before the symbol.  But since deleted relocs can't span across
+	     symbols, we can't have both a st_value and a st_size decrease,
+	     so it is simpler to just use an else.  */
+	  else if (sym->st_value <= addr
+		   && sym->st_value + sym->st_size > addr
+		   && sym->st_value + sym->st_size <= toaddr)
+	    sym->st_size -= count;
+	}
+    }
+
+  /* Now adjust the global symbols defined in this section.  */
+  symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
+	      - symtab_hdr->sh_info);
+
+  for (i = 0; i < symcount; i++)
+    {
+      struct elf_link_hash_entry *sym_hash = sym_hashes[i];
+
+      /* The '--wrap SYMBOL' option is causing a pain when the object file,
+	 containing the definition of __wrap_SYMBOL, includes a direct
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two
+	 different symbols in 'sym_hashes', we don't want to adjust
+	 the global symbol __wrap_SYMBOL twice.
+
+	 The same problem occurs with symbols that are versioned_hidden, as
+	 foo becomes an alias for foo@BAR, and hence they need the same
+	 treatment.  */
+      if (link_info->wrap_hash != NULL
+	  || sym_hash->versioned != unversioned)
+	{
+	  struct elf_link_hash_entry **cur_sym_hashes;
+
+	  /* Loop only over the symbols which have already been checked.  */
+	  for (cur_sym_hashes = sym_hashes; cur_sym_hashes < &sym_hashes[i];
+	       cur_sym_hashes++)
+	    {
+	      /* If the current symbol is identical to 'sym_hash', that means
+		 the symbol was already adjusted (or at least checked).  */
+	      if (*cur_sym_hashes == sym_hash)
+		break;
+	    }
+	  /* Don't adjust the symbol again.  */
+	  if (cur_sym_hashes < &sym_hashes[i])
+	    continue;
+	}
+
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec)
+	{
+	  /* As above, adjust the value if needed.  */
+	  if (sym_hash->root.u.def.value > addr
+	      && sym_hash->root.u.def.value <= toaddr)
+	    sym_hash->root.u.def.value -= count;
+
+	  /* As above, adjust the size if needed.  */
+	  else if (sym_hash->root.u.def.value <= addr
+		   && sym_hash->root.u.def.value + sym_hash->size > addr
+		   && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
+	    sym_hash->size -= count;
+	}
+    }
+
+  return true;
+}
+
+/* Relax pcalau12i,addi.d => pcaddi.  */
+static bool
+loongarch_relax_pcala_addi(bfd *abfd, asection *sec,
+		       Elf_Internal_Rela *rel_hi, bfd_vma symval)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  Elf_Internal_Rela *rel_lo = rel_hi + 2;
+  uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
+  uint32_t add = bfd_get (32, abfd, contents + rel_lo->r_offset);
+  uint32_t rd = pca & 0x1f;
+  bfd_vma pc = sec_addr (sec) + rel_hi->r_offset;
+  const uint32_t addi_d = 0x02c00000;
+  const uint32_t pcaddi = 0x18000000;
+
+  /* Is pcalau12i + addi.d insns?  */
+  if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_PCALA_LO12)
+      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
+      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
+      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
+      || ((add & addi_d) != addi_d)
+      /* Is pcalau12i $rd + addi.d $rd,$rd?  */
+      || ((add & 0x1f) != rd)
+      || (((add >> 5) & 0x1f) != rd)
+      /* Can be relaxed to pcaddi?  */
+      || (symval & 0x3) /* 4 bytes align.  */
+      || ((bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0xffe00000)
+      || ((bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x1ffffc))
+    return false;
+
+  pca = pcaddi | rd;
+  bfd_put (32, abfd, pca, contents + rel_hi->r_offset);
+
+  /* Adjust relocations.  */
+  rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				 R_LARCH_PCREL20_S2);
+  rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				 R_LARCH_DELETE);
+
+  return true;
+}
+
+/* Relax pcalau12i,ld.d => pcalau12i,addi.d.  */
+static bool
+loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
+		Elf_Internal_Rela *rel_hi)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  Elf_Internal_Rela *rel_lo = rel_hi + 2;
+  uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
+  uint32_t ld = bfd_get (32, abfd, contents + rel_lo->r_offset);
+  uint32_t rd = pca & 0x1f;
+  const uint32_t ld_d = 0x28c00000;
+  uint32_t addi_d = 0x02c00000;
+
+  if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12)
+      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
+      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
+      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
+      || ((ld & 0x1f) != rd)
+      || (((ld >> 5) & 0x1f) != rd)
+      || ((ld & ld_d) != ld_d))
+    return false;
+
+  addi_d = addi_d | (rd << 5) | rd;
+  bfd_put (32, abfd, addi_d, contents + rel_lo->r_offset);
+
+  rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				 R_LARCH_PCALA_HI20);
+  rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_lo->r_info),
+				 R_LARCH_PCALA_LO12);
+  return true;
+}
+
+/* Called by after_allocation to set the information of data segment
+   before relaxing.  */
+
+void
+bfd_elfNN_loongarch_set_data_segment_info (struct bfd_link_info *info,
+				     int *data_segment_phase)
+{
+  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
+  htab->data_segment_phase = data_segment_phase;
+}
+
+/* Implement R_LARCH_ALIGN by deleting excess alignment NOPs.
+   Once we've handled an R_LARCH_ALIGN, we can't relax anything else.  */
+static bool
+loongarch_relax_align (bfd *abfd, asection *sec,
+			asection *sym_sec,
+			struct bfd_link_info *link_info,
+			Elf_Internal_Rela *rel,
+			bfd_vma symval)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  bfd_vma alignment = 1, pos;
+  while (alignment <= rel->r_addend)
+    alignment *= 2;
+
+  symval -= rel->r_addend;
+  bfd_vma aligned_addr = ((symval - 1) & ~(alignment - 1)) + alignment;
+  bfd_vma nop_bytes = aligned_addr - symval;
+
+  /* Once we've handled an R_LARCH_ALIGN, we can't relax anything else.  */
+  sec->sec_flg0 = true;
+
+  /* Make sure there are enough NOPs to actually achieve the alignment.  */
+  if (rel->r_addend < nop_bytes)
+    {
+      _bfd_error_handler
+	(_("%pB(%pA+%#" PRIx64 "): %" PRId64 " bytes required for alignment "
+	   "to %" PRId64 "-byte boundary, but only %" PRId64 " present"),
+	 abfd, sym_sec, (uint64_t) rel->r_offset,
+	 (int64_t) nop_bytes, (int64_t) alignment, (int64_t) rel->r_addend);
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  /* Delete the reloc.  */
+  rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+
+  /* If the number of NOPs is already correct, there's nothing to do.  */
+  if (nop_bytes == rel->r_addend)
+    return true;
+
+  /* Write as many LOONGARCH NOPs as we need.  */
+  for (pos = 0; pos < (nop_bytes & -4); pos += 4)
+    bfd_putl32 (LARCH_NOP, contents + rel->r_offset + pos);
+
+  /* Delete the excess NOPs.  */
+  return loongarch_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
+				   rel->r_addend - nop_bytes, link_info);
+}
+
+static bool
+loongarch_elf_relax_section (bfd *abfd, asection *sec,
+			       struct bfd_link_info *info,
+			       bool *again)
+{
+  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
+  struct bfd_elf_section_data *data = elf_section_data (sec);
+  Elf_Internal_Rela *relocs;
+  *again = false;
+
+  if (bfd_link_relocatable (info)
+      || sec->sec_flg0
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || elf_seg_map (info->output_bfd) == NULL
+      || (info->disable_target_specific_optimizations
+	  && info->relax_pass == 0)
+      /* The exp_seg_relro_adjust is enum phase_enum (0x4),
+	 and defined in ld/ldexp.h.  */
+      || *(htab->data_segment_phase) == 4)
+    return true;
+
+  if (data->relocs)
+    relocs = data->relocs;
+  else if (!(relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
+						 info->keep_memory)))
+    return true;
+
+  if (!data->this_hdr.contents
+      && !bfd_malloc_and_get_section (abfd, sec, &data->this_hdr.contents))
+    return true;
+
+  if (symtab_hdr->sh_info != 0
+      && !symtab_hdr->contents
+      && !(symtab_hdr->contents =
+	   (unsigned char *) bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						   symtab_hdr->sh_info,
+						   0, NULL, NULL, NULL)))
+    return true;
+
+      data->relocs = relocs;
+
+  for (unsigned int i = 0; i < sec->reloc_count; i++)
+    {
+      Elf_Internal_Rela *rel = relocs + i;
+      asection *sym_sec;
+      bfd_vma symval;
+      unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+      bool local_got = false;
+      char symtype;
+      struct elf_link_hash_entry *h = NULL;
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
+				    + r_symndx;
+	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	    continue;
+
+	  if (sym->st_shndx == SHN_UNDEF)
+	    {
+	      sym_sec = sec;
+	      symval = rel->r_offset;
+	    }
+	  else
+	    {
+	      sym_sec = elf_elfsections (abfd)[sym->st_shndx]->bfd_section;
+	      symval = sym->st_value;
+	    }
+	  symtype = ELF_ST_TYPE (sym->st_info);
+	}
+      else
+	{
+	  r_symndx = ELFNN_R_SYM (rel->r_info) - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[r_symndx];
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Disable the relaxation for ifunc.  */
+	  if (h != NULL && h->type == STT_GNU_IFUNC)
+	    continue;
+
+	  if ((h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
+		   && h->root.u.def.section != NULL
+		   && h->root.u.def.section->output_section != NULL)
+	    {
+	      symval = h->root.u.def.value;
+	      sym_sec = h->root.u.def.section;
+	    }
+	  else
+	    continue;
+
+	  if (h && bfd_link_executable (info)
+	      && SYMBOL_REFERENCES_LOCAL (info, h))
+	    local_got = true;
+	  symtype = h->type;
+	}
+
+      if (sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE
+	   && (sym_sec->flags & SEC_MERGE))
+	{
+	   if (symtype == STT_SECTION)
+	     symval += rel->r_addend;
+
+	   symval = _bfd_merged_section_offset (abfd, &sym_sec,
+				elf_section_data (sym_sec)->sec_info,
+				symval);
+
+	   if (symtype != STT_SECTION)
+	     symval += rel->r_addend;
+	}
+      else
+	symval += rel->r_addend;
+
+      symval += sec_addr (sym_sec);
+
+      switch (ELFNN_R_TYPE (rel->r_info))
+	{
+	case R_LARCH_ALIGN:
+	  if (2 == info->relax_pass)
+	    loongarch_relax_align (abfd, sec, sym_sec, info, rel, symval);
+	  break;
+	case R_LARCH_DELETE:
+	  if (info->relax_pass == 1)
+	    {
+	      loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, info);
+	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
+	    }
+	  break;
+	case R_LARCH_PCALA_HI20:
+	  if (info->relax_pass == 0)
+	    {
+	      if (i + 4 > sec->reloc_count)
+		break;
+	      loongarch_relax_pcala_addi(abfd, sec, rel, symval);
+	    }
+	  break;
+	case R_LARCH_GOT_PC_HI20:
+	  if (local_got)
+	    {
+	      if (i + 4 > sec->reloc_count)
+		break;
+	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
+		{
+		  loongarch_relax_pcala_addi(abfd, sec, rel, symval);
+		}
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  return true;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
@@ -4149,5 +4622,6 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_grok_prstatus loongarch_elf_grok_prstatus
 #define elf_backend_grok_psinfo loongarch_elf_grok_psinfo
 #define elf_backend_hash_symbol elf_loongarch64_hash_symbol
+#define bfd_elfNN_bfd_relax_section loongarch_elf_relax_section
 
 #include "elfNN-target.h"
