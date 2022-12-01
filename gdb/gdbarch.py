@@ -26,6 +26,11 @@ import gdbcopyright
 components = []
 
 
+def indentation(n_columns):
+    """Return string with tabs and spaces to indent line to N_COLUMNS."""
+    return "\t" * (n_columns // 8) + " " * (n_columns % 8)
+
+
 def join_type_and_name(t, n):
     "Combine the type T and the name N into a C declaration."
     if t.endswith("*") or t.endswith("&"):
@@ -474,11 +479,11 @@ with open("gdbarch.c", "w") as f:
             print("}", file=f)
             print(file=f)
             print("void", file=f)
-            print(f"set_gdbarch_{c.name} (struct gdbarch *gdbarch,", file=f)
-            print(
-                f"            {' ' * len(c.name)}  gdbarch_{c.name}_ftype {c.name})",
-                file=f,
-            )
+            setter_name = f"set_gdbarch_{c.name}"
+            ftype_name = f"gdbarch_{c.name}_ftype"
+            print(f"{setter_name} (struct gdbarch *gdbarch,", file=f)
+            indent_columns = len(f"{setter_name} (")
+            print(f"{indentation(indent_columns)}{ftype_name} {c.name})", file=f)
             print("{", file=f)
             print(f"  gdbarch->{c.name} = {c.name};", file=f)
             print("}", file=f)
@@ -505,8 +510,10 @@ with open("gdbarch.c", "w") as f:
             print("}", file=f)
             print(file=f)
             print("void", file=f)
-            print(f"set_gdbarch_{c.name} (struct gdbarch *gdbarch,", file=f)
-            print(f"            {' ' * len(c.name)}  {c.type} {c.name})", file=f)
+            setter_name = f"set_gdbarch_{c.name}"
+            print(f"{setter_name} (struct gdbarch *gdbarch,", file=f)
+            indent_columns = len(f"{setter_name} (")
+            print(f"{indentation(indent_columns)}{c.type} {c.name})", file=f)
             print("{", file=f)
             print(f"  gdbarch->{c.name} = {c.name};", file=f)
             print("}", file=f)
