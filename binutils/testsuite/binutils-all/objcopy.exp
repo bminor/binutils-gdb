@@ -155,13 +155,13 @@ proc objcopy_test_verilog {testname} {
     }
 
     set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 0 $binfile $verilog-0.hex"]
-    if ![regexp "verilog data width must be at least 1 byte" $got] then {
+    if ![regexp "error: verilog data width must be 1, 2, 4, 8 or 16" $got] then {
 	fail "objcopy ($testname 0) {$got}"
     } else {
 	pass "objcopy ($testname 0)"
     }
 
-    foreach width {1 2 4 8} {
+    foreach width {1 2} {
 	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
 	if ![string equal "" $got] then {
 	    fail "objcopy ($testname $width)"
@@ -172,6 +172,40 @@ proc objcopy_test_verilog {testname} {
 	} else {
 	    fail "objcopy ($testname $width)"
 	}
+    }
+
+    # 16-bit little-endian targets fail the following tests because the
+    # verilog backend does not convert from 16-bits to 32-bits before it
+    # converts from internal format to little endian format.
+    if { [istarget tic54*-*-*] || [istarget pdp11-*-*] } {
+	untested "verilog width-4 and width-8 tests"
+	return
+    }
+    
+    foreach width {4 8} {
+	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
+	if ![string equal "" $got] then {
+	    fail "objcopy ($testname $width)"
+	}
+        send_log "regexp_diff $verilog-$width.hex $srcdir/$subdir/verilog-$width.hex\n"
+	if {! [regexp_diff "$verilog-$width.hex" "$srcdir/$subdir/verilog-$width.hex"]} {
+	    pass "objcopy ($testname $width)"
+	} else {
+	    fail "objcopy ($testname $width)"
+	}
+    }
+
+    # Test generating endian correct output.    
+    set testname "objcopy (verilog output endian-ness == input endian-ness)"
+    set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 4 $binfile $verilog-I4.hex"]
+    if ![string equal "" $got] then {
+	fail $testname
+    }
+    send_log "regexp_diff $verilog-I4.hex $srcdir/$subdir/verilog-I4.hex\n"
+    if {! [regexp_diff "$verilog-I4.hex" "$srcdir/$subdir/verilog-I4.hex"]} {
+	pass $testname 
+    } else {
+	fail $testname 
     }
 }
 

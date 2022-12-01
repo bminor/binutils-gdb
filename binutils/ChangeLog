@@ -1,3 +1,13 @@
+2022-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 25202
+	* objcopy.c (copy_object): Set VerilogDataEndianness to the
+	endianness of the input file.
+	(copy_main): Verifiy the value set by the --verilog-data-width
+	option.
+	* testsuite/binutils-all/objcopy.exp: Add tests of the new behaviour.
+	* testsuite/binutils-all/verilog-I4.hex: New file.
+
 2022-11-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 29764

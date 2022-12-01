@@ -1,3 +1,11 @@
+2022-12-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 25202
+	* bfd.c (VerilogDataEndianness): New variable.
+	(verilog_write_record): Use VerilogDataEndianness, if set, to
+	choose the endianness of the output.
+	(verilog_write_section): Adjust the address by the data width.
+
 2022-11-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 29764

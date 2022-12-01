@@ -546,6 +546,11 @@ extern bool _bfd_srec_forceS3;
    the --verilog-data-width parameter.  */
 extern unsigned int VerilogDataWidth;
 
+/* Endianness of data for verilog output.
+   This variable is declared in bfd/verilog.c and is set in the
+   copy_object() function.  */
+extern enum bfd_endian VerilogDataEndianness;
+
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
 static void setup_bfd_headers (bfd *, bfd *);
@@ -2654,6 +2659,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		 bfd_get_archive_filename (ibfd));
       return false;
     }
+
+  /* Set the Verilog output endianness based upon the input file's
+     endianness.  We may not be producing verilog format output,
+     but testing this just adds extra code this is not really
+     necessary.  */
+  VerilogDataEndianness = ibfd->xvec->byteorder;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     {
@@ -5847,8 +5858,18 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_VERILOG_DATA_WIDTH:
 	  VerilogDataWidth = parse_vma (optarg, "--verilog-data-width");
-	  if (VerilogDataWidth < 1)
-	    fatal (_("verilog data width must be at least 1 byte"));
+	  switch (VerilogDataWidth)
+	    {
+	    case 1:
+	    case 2:
+	    case 4:
+	    case 8:
+	    case 16: /* We do not support widths > 16 because the verilog
+			data is handled internally in 16 byte wide packets.  */
+	      break;
+	    default:
+	      fatal (_("error: verilog data width must be 1, 2, 4, 8 or 16"));
+	    }
 	  break;
 
 	case 0:
