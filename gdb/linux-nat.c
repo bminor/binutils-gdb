@@ -3611,20 +3611,16 @@ linux_xfer_siginfo (enum target_object object,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		    ULONGEST *xfered_len)
 {
-  int pid;
   siginfo_t siginfo;
   gdb_byte inf_siginfo[sizeof (siginfo_t)];
 
   gdb_assert (object == TARGET_OBJECT_SIGNAL_INFO);
   gdb_assert (readbuf || writebuf);
 
-  pid = inferior_ptid.lwp ();
-  if (pid == 0)
-    pid = inferior_ptid.pid ();
-
   if (offset > sizeof (siginfo))
     return TARGET_XFER_E_IO;
 
+  int pid = get_ptrace_pid (inferior_ptid);
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
   if (errno != 0)
@@ -4446,11 +4442,7 @@ linux_nat_target::linux_nat_target ()
 int
 linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
-  int pid;
-
-  pid = ptid.lwp ();
-  if (pid == 0)
-    pid = ptid.pid ();
+  int pid = get_ptrace_pid (ptid);
 
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);
