@@ -3620,10 +3620,7 @@ linux_xfer_siginfo (enum target_object object,
   if (offset > sizeof (siginfo))
     return TARGET_XFER_E_IO;
 
-  int pid = get_ptrace_pid (inferior_ptid);
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
-  if (errno != 0)
+  if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
     return TARGET_XFER_E_IO;
 
   /* When GDB is built as a 64-bit application, ptrace writes into
@@ -3646,6 +3643,7 @@ linux_xfer_siginfo (enum target_object object,
       /* Convert back to ptrace layout before flushing it out.  */
       siginfo_fixup (&siginfo, inf_siginfo, 1);
 
+      int pid = get_ptrace_pid (inferior_ptid);
       errno = 0;
       ptrace (PTRACE_SETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
       if (errno != 0)
