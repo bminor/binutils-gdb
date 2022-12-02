@@ -507,14 +507,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
   struct symbol *function = block->function ();
   struct block_symbol result;
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_imports_or_template"
-		  " (%s, %s, %s, %s)\n",
-		  scope, name, host_address_to_string (block),
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf
+    ("cp_lookup_symbol_imports_or_template (%s, %s, %s, %s)",
+     scope, name, host_address_to_string (block), domain_name (domain));
 
   if (function != NULL && function->language () == language_cplus)
     {
@@ -529,13 +524,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 
 	  if (sym != NULL)
 	    {
-	      if (symbol_lookup_debug)
-		{
-		  gdb_printf (gdb_stdlog,
-			      "cp_lookup_symbol_imports_or_template"
-			      " (...) = %s\n",
-			      host_address_to_string (sym));
-		}
+	      symbol_lookup_debug_printf
+		("cp_lookup_symbol_imports_or_template (...) = %s",
+		 host_address_to_string (sym));
 	      return (struct block_symbol) {sym, block};
 	    }
 	}
@@ -574,13 +565,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      TYPE_TEMPLATE_ARGUMENTS (context));
 	      if (sym != NULL)
 		{
-		  if (symbol_lookup_debug)
-		    {
-		      gdb_printf
-			(gdb_stdlog,
-			 "cp_lookup_symbol_imports_or_template (...) = %s\n",
-			 host_address_to_string (sym));
-		    }
+		  symbol_lookup_debug_printf
+		    ("cp_lookup_symbol_imports_or_template (...) = %s",
+		     host_address_to_string (sym));
 		  return (struct block_symbol) {sym, parent};
 		}
 	    }
@@ -588,13 +575,9 @@ cp_lookup_symbol_imports_or_template (const char *scope,
     }
 
   result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_imports_or_template (...) = %s\n",
-		  result.symbol != NULL
-		  ? host_address_to_string (result.symbol) : "NULL");
-    }
+  symbol_lookup_debug_printf
+    ("cp_lookup_symbol_imports_or_template (...) = %s",
+     result.symbol != NULL ? host_address_to_string (result.symbol) : "NULL");
   return result;
 }
 
@@ -634,13 +617,9 @@ cp_lookup_symbol_namespace (const char *scope,
 {
   struct block_symbol sym;
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_namespace (%s, %s, %s, %s)\n",
-		  scope, name, host_address_to_string (block),
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_namespace (%s, %s, %s, %s)",
+			      scope, name, host_address_to_string (block),
+			      domain_name (domain));
 
   /* First, try to find the symbol in the given namespace.  */
   sym = cp_lookup_symbol_in_namespace (scope, name, block, domain, 1);
@@ -649,13 +628,9 @@ cp_lookup_symbol_namespace (const char *scope,
   if (sym.symbol == NULL)
     sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_namespace (...) = %s\n",
-		  sym.symbol != NULL
-		  ? host_address_to_string (sym.symbol) : "NULL");
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_namespace (...) = %s",
+			      sym.symbol != NULL
+			      ? host_address_to_string (sym.symbol) : "NULL");
   return sym;
 }
 
@@ -740,14 +715,9 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
   struct block_symbol sym;
   const char *scope = block_scope (block);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_non_local"
-		  " (%s, %s (scope %s), %s)\n",
-		  name, host_address_to_string (block), scope,
-		  domain_name (domain));
-    }
+  symbol_lookup_debug_printf
+    ("cp_lookup_symbol_non_local (%s, %s (scope %s), %s)",
+     name, host_address_to_string (block), scope, domain_name (domain));
 
   /* First, try to find the symbol in the given namespace, and all
      containing namespaces.  */
@@ -757,14 +727,10 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
   if (sym.symbol == NULL)
     sym = cp_lookup_symbol_via_all_imports (scope, name, block, domain);
 
-  if (symbol_lookup_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_symbol_nonlocal (...) = %s\n",
-		  (sym.symbol != NULL
-		   ? host_address_to_string (sym.symbol)
-		   : "NULL"));
-    }
+  symbol_lookup_debug_printf ("cp_lookup_symbol_nonlocal (...) = %s",
+			      (sym.symbol != NULL
+			       ? host_address_to_string (sym.symbol)
+			       : "NULL"));
   return sym;
 }
 
@@ -921,11 +887,10 @@ cp_lookup_nested_symbol (struct type *parent_type,
     {
       const char *type_name = saved_parent_type->name ();
 
-      gdb_printf (gdb_stdlog,
-		  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
-		  type_name != NULL ? type_name : "unnamed",
-		  nested_name, host_address_to_string (block),
-		  domain_name (domain));
+      symbol_lookup_debug_printf ("cp_lookup_nested_symbol (%s, %s, %s, %s)",
+				  type_name != NULL ? type_name : "unnamed",
+				  nested_name, host_address_to_string (block),
+				  domain_name (domain));
     }
 
   switch (parent_type->code ())
@@ -955,25 +920,17 @@ cp_lookup_nested_symbol (struct type *parent_type,
 					 concatenated_name, block, domain,
 					 1, is_in_anonymous);
 
-	if (symbol_lookup_debug)
-	  {
-	    gdb_printf (gdb_stdlog,
-			"cp_lookup_nested_symbol (...) = %s\n",
-			(sym.symbol != NULL
-			 ? host_address_to_string (sym.symbol)
-			 : "NULL"));
-	  }
+	symbol_lookup_debug_printf ("cp_lookup_nested_symbol (...) = %s",
+				    (sym.symbol != NULL
+				     ? host_address_to_string (sym.symbol)
+				     : "NULL"));
 	return sym;
       }
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      if (symbol_lookup_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "cp_lookup_nested_symbol (...) = NULL"
-		      " (func/method)\n");
-	}
+      symbol_lookup_debug_printf
+	("cp_lookup_nested_symbol (...) = NULL (func/method)");
       return {};
 
     default:

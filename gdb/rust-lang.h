@@ -148,14 +148,10 @@ public:
   {
     struct block_symbol result = {};
 
-    if (symbol_lookup_debug)
-      {
-	gdb_printf (gdb_stdlog,
-		    "rust_lookup_symbol_non_local"
-		    " (%s, %s (scope %s), %s)\n",
-		    name, host_address_to_string (block),
-		    block_scope (block), domain_name (domain));
-      }
+    symbol_lookup_debug_printf
+      ("rust_lookup_symbol_non_local (%s, %s (scope %s), %s)",
+       name, host_address_to_string (block), block_scope (block),
+       domain_name (domain));
 
     /* Look up bare names in the block's scope.  */
     std::string scopedname;

@@ -2625,6 +2625,18 @@ extern unsigned int symtab_create_debug;
 
 extern unsigned int symbol_lookup_debug;
 
+/* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 1.  */
+
+#define symbol_lookup_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (symbol_lookup_debug >= 1, "symbol-lookup", fmt, \
+			      ##__VA_ARGS__)
+
+/* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 2.  */
+
+#define symbol_lookup_debug_printf_v(fmt, ...) \
+  debug_prefixed_printf_cond (symbol_lookup_debug >= 2, "symbol-lookup", fmt, \
+			      ##__VA_ARGS__)
+
 extern bool basenames_may_differ;
 
 bool compare_filenames_for_search (const char *filename,

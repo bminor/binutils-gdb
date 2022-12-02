@@ -1077,17 +1077,15 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
   struct language_gdbarch *ld = get_language_gdbarch (gdbarch);
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
 
-  if (symbol_lookup_debug)
-    gdb_printf (gdb_stdlog,
-		"language_lookup_primitive_type_as_symbol"
-		" (%s, %s, %s)",
-		la->name (), host_address_to_string (gdbarch), name);
+  symbol_lookup_debug_printf
+    ("language = \"%s\", gdbarch @ %s, type = \"%s\")",
+     la->name (), host_address_to_string (gdbarch), name);
 
   struct symbol *sym
     = lai->lookup_primitive_type_as_symbol (name, la->la_language);
 
-  if (symbol_lookup_debug)
-    gdb_printf (gdb_stdlog, " = %s\n", host_address_to_string (sym));
+  symbol_lookup_debug_printf ("found symbol @ %s",
+			      host_address_to_string (sym));
 
   /* Note: The result of symbol lookup is normally a symbol *and* the block
      it was found in.  Builtin types don't live in blocks.  We *could* give
