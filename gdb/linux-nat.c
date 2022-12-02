@@ -4439,7 +4439,7 @@ linux_nat_target::linux_nat_target ()
 
 /* See linux-nat.h.  */
 
-int
+bool
 linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
   int pid = get_ptrace_pid (ptid);
@@ -4449,9 +4449,9 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
   if (errno != 0)
     {
       memset (siginfo, 0, sizeof (*siginfo));
-      return 0;
+      return false;
     }
-  return 1;
+  return true;
 }
 
 /* See nat/linux-nat.h.  */

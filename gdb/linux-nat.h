@@ -330,8 +330,8 @@ extern void linux_unstop_all_lwps (void);
 void linux_nat_switch_fork (ptid_t new_ptid);
 
 /* Store the saved siginfo associated with PTID in *SIGINFO.
-   Return 1 if it was retrieved successfully, 0 otherwise (*SIGINFO is
+   Return true if it was retrieved successfully, false otherwise (*SIGINFO is
    uninitialized in such case).  */
-int linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
+bool linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
 
 #endif /* LINUX_NAT_H */
