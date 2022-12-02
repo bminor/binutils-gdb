@@ -4443,11 +4443,7 @@ bool
 linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
   int pid = get_ptrace_pid (ptid);
-
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);
-
-  return errno == 0;
+  return ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo) == 0;
 }
 
 /* See nat/linux-nat.h.  */
