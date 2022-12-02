@@ -4446,12 +4446,8 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);
-  if (errno != 0)
-    {
-      memset (siginfo, 0, sizeof (*siginfo));
-      return false;
-    }
-  return true;
+
+  return errno == 0;
 }
 
 /* See nat/linux-nat.h.  */
