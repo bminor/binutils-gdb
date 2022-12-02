@@ -230,10 +230,8 @@ popa, 0x61, None, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
 // xchg commutes:  we allow both operand orders.
 
 // In the 64bit code, xchg rax, rax is reused for new nop instruction.
-xchg, 0x90, None, 0, CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Acc|Word|Dword|Qword }
-xchg, 0x90, None, 0, CheckRegSize|No_bSuf|No_sSuf, { Acc|Word|Dword|Qword, Reg16|Reg32|Reg64 }
-xchg, 0x86, None, 0, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixAny, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-xchg, 0x86, None, 0, W|CheckRegSize|Modrm|No_sSuf|HLEPrefixAny, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+xchg, 0x90, None, 0, D|C|CheckRegSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64, Acc|Word|Dword|Qword }
+xchg, 0x86, None, 0, D|W|C|CheckRegSize|Modrm|No_sSuf|HLEPrefixAny, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 // In/out from ports.
 in, 0xe4, None, 0, W|No_sSuf|No_qSuf, { Imm8, Acc|Byte|Word|Dword }
@@ -301,8 +299,7 @@ cmp, 0x83, 7, 0, Modrm|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qw
 cmp, 0x3c, None, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 cmp, 0x80, 7, 0, W|Modrm|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 
-test, 0x84, None, 0, W|CheckRegSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|Byte|Word|Dword|Qword|BaseIndex }
-test, 0x84, None, 0, W|CheckRegSize|Modrm|No_sSuf, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+test, 0x84, None, 0, D|W|C|CheckRegSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 test, 0xa8, None, 0, W|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 test, 0xf6, 0, 0, W|Modrm|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 

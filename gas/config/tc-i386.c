@@ -6803,8 +6803,10 @@ match_template (char mnem_suffix)
 			   || (t->base_opcode | 7) != 0x27))
 		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
 				      ? Opcode_ExtD : Opcode_SIMD_IntD;
-	      else
+	      else if (!t->opcode_modifier.commutative)
 		found_reverse_match = Opcode_D;
+	      else
+		found_reverse_match = ~0;
 	    }
 	  else
 	    {
@@ -7001,9 +7003,6 @@ match_template (char mnem_suffix)
 
       i.tm.base_opcode ^= found_reverse_match;
 
-      i.tm.operand_types[0] = operand_types[i.operands - 1];
-      i.tm.operand_types[i.operands - 1] = operand_types[0];
-
       /* Certain SIMD insns have their load forms specified in the opcode
 	 table, and hence we need to _set_ RegMem instead of clearing it.
 	 We need to avoid setting the bit though on insns like KMOVW.  */
@@ -7011,6 +7010,11 @@ match_template (char mnem_suffix)
 	= i.tm.opcode_modifier.modrm && i.tm.opcode_modifier.d
 	  && i.tm.operands > 2U - i.tm.opcode_modifier.sse2avx
 	  && !i.tm.opcode_modifier.regmem;
+
+      /* Fall through.  */
+    case ~0:
+      i.tm.operand_types[0] = operand_types[i.operands - 1];
+      i.tm.operand_types[i.operands - 1] = operand_types[0];
       break;
 
     case Opcode_VexW:
