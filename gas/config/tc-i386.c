@@ -6686,8 +6686,7 @@ match_template (char mnem_suffix)
 	      && t->opcode_modifier.opcodespace == SPACE_BASE
 	      && i.types[0].bitfield.instance == Accum
 	      && i.types[0].bitfield.dword
-	      && i.types[1].bitfield.instance == Accum
-	      && i.types[1].bitfield.dword)
+	      && i.types[1].bitfield.instance == Accum)
 	    continue;
 	  /* xrelease mov %eax, <disp> is another special case. It must not
 	     match the accumulator-only encoding of mov.  */
@@ -7408,11 +7407,10 @@ process_suffix (void)
 	     need rex64. */
 	  && ! (i.operands == 2
 		&& i.tm.base_opcode == 0x90
-		&& i.tm.extension_opcode == None
+		&& i.tm.opcode_modifier.opcodespace == SPACE_BASE
 		&& i.types[0].bitfield.instance == Accum
 		&& i.types[0].bitfield.qword
-		&& i.types[1].bitfield.instance == Accum
-		&& i.types[1].bitfield.qword))
+		&& i.types[1].bitfield.instance == Accum))
 	i.rex |= REX_W;
 
       break;
