@@ -477,102 +477,6 @@ static initializer cpu_flag_init[] =
     "CpuRAO_INT"},
 };
 
-static initializer operand_type_init[] =
-{
-  { "OPERAND_TYPE_NONE",
-    "0" },
-  { "OPERAND_TYPE_REG8",
-    "Class=Reg|Byte" },
-  { "OPERAND_TYPE_REG16",
-    "Class=Reg|Word" },
-  { "OPERAND_TYPE_REG32",
-    "Class=Reg|Dword" },
-  { "OPERAND_TYPE_REG64",
-    "Class=Reg|Qword" },
-  { "OPERAND_TYPE_IMM1",
-    "Imm1" },
-  { "OPERAND_TYPE_IMM8",
-    "Imm8" },
-  { "OPERAND_TYPE_IMM8S",
-    "Imm8S" },
-  { "OPERAND_TYPE_IMM16",
-    "Imm16" },
-  { "OPERAND_TYPE_IMM32",
-    "Imm32" },
-  { "OPERAND_TYPE_IMM32S",
-    "Imm32S" },
-  { "OPERAND_TYPE_IMM64",
-    "Imm64" },
-  { "OPERAND_TYPE_BASEINDEX",
-    "BaseIndex" },
-  { "OPERAND_TYPE_DISP8",
-    "Disp8" },
-  { "OPERAND_TYPE_DISP16",
-    "Disp16" },
-  { "OPERAND_TYPE_DISP32",
-    "Disp32" },
-  { "OPERAND_TYPE_DISP64",
-    "Disp64" },
-  { "OPERAND_TYPE_INOUTPORTREG",
-    "Instance=RegD|Word" },
-  { "OPERAND_TYPE_SHIFTCOUNT",
-    "Instance=RegC|Byte" },
-  { "OPERAND_TYPE_CONTROL",
-    "Class=RegCR" },
-  { "OPERAND_TYPE_TEST",
-    "Class=RegTR" },
-  { "OPERAND_TYPE_DEBUG",
-    "Class=RegDR" },
-  { "OPERAND_TYPE_FLOATREG",
-    "Class=Reg|Tbyte" },
-  { "OPERAND_TYPE_FLOATACC",
-    "Instance=Accum|Tbyte" },
-  { "OPERAND_TYPE_SREG",
-    "Class=SReg" },
-  { "OPERAND_TYPE_REGMMX",
-    "Class=RegMMX" },
-  { "OPERAND_TYPE_REGXMM",
-    "Class=RegSIMD|Xmmword" },
-  { "OPERAND_TYPE_REGYMM",
-    "Class=RegSIMD|Ymmword" },
-  { "OPERAND_TYPE_REGZMM",
-    "Class=RegSIMD|Zmmword" },
-  { "OPERAND_TYPE_REGTMM",
-    "Class=RegSIMD|Tmmword" },
-  { "OPERAND_TYPE_REGMASK",
-    "Class=RegMask" },
-  { "OPERAND_TYPE_REGBND",
-    "Class=RegBND" },
-  { "OPERAND_TYPE_ACC8",
-    "Instance=Accum|Byte" },
-  { "OPERAND_TYPE_ACC16",
-    "Instance=Accum|Word" },
-  { "OPERAND_TYPE_ACC32",
-    "Instance=Accum|Dword" },
-  { "OPERAND_TYPE_ACC64",
-    "Instance=Accum|Qword" },
-  { "OPERAND_TYPE_DISP16_32",
-    "Disp16|Disp32" },
-  { "OPERAND_TYPE_ANYDISP",
-    "Disp8|Disp16|Disp32|Disp64" },
-  { "OPERAND_TYPE_IMM16_32",
-    "Imm16|Imm32" },
-  { "OPERAND_TYPE_IMM16_32S",
-    "Imm16|Imm32S" },
-  { "OPERAND_TYPE_IMM16_32_32S",
-    "Imm16|Imm32|Imm32S" },
-  { "OPERAND_TYPE_IMM32_64",
-    "Imm32|Imm64" },
-  { "OPERAND_TYPE_IMM32_32S_DISP32",
-    "Imm32|Imm32S|Disp32" },
-  { "OPERAND_TYPE_IMM64_DISP64",
-    "Imm64|Disp64" },
-  { "OPERAND_TYPE_IMM32_32S_64_DISP32",
-    "Imm32|Imm32S|Imm64|Disp32" },
-  { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
-    "Imm32|Imm32S|Imm64|Disp32|Disp64" },
-};
-
 typedef struct bitfield
 {
   int position;
@@ -2031,13 +1935,6 @@ process_i386_initializers (void)
       free (init);
     }
 
-  for (i = 0; i < ARRAY_SIZE (operand_type_init); i++)
-    {
-      fprintf (fp, "\n\n#define %s \\\n  ", operand_type_init[i].name);
-      init = xstrdup (operand_type_init[i].init);
-      process_i386_operand_type (fp, init, stage_macros, "      ", -1);
-      free (init);
-    }
   fprintf (fp, "\n");
 
   fclose (fp);

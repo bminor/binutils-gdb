@@ -83,6 +83,8 @@
 
 #define END_OF_INSN '\0'
 
+#define OPERAND_TYPE_NONE { .bitfield = { .class = ClassNone } }
+
 /* This matches the C -> StaticRounding alias in the opcode table.  */
 #define commutative staticrounding
 
@@ -1952,15 +1954,9 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
   return x;
 }
 
-static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
-static const i386_operand_type anydisp = OPERAND_TYPE_ANYDISP;
-static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
-static const i386_operand_type imm16 = OPERAND_TYPE_IMM16;
-static const i386_operand_type imm32 = OPERAND_TYPE_IMM32;
-static const i386_operand_type imm32s = OPERAND_TYPE_IMM32S;
-static const i386_operand_type imm16_32 = OPERAND_TYPE_IMM16_32;
-static const i386_operand_type imm16_32s = OPERAND_TYPE_IMM16_32S;
-static const i386_operand_type imm16_32_32s = OPERAND_TYPE_IMM16_32_32S;
+static const i386_operand_type anydisp = {
+  .bitfield = { .disp8 = 1, .disp16 = 1, .disp32 = 1, .disp64 = 1 }
+};
 
 enum operand_type
 {
@@ -3261,40 +3257,40 @@ static struct type_name
   }
 const type_names[] =
 {
-  { OPERAND_TYPE_REG8, "r8" },
-  { OPERAND_TYPE_REG16, "r16" },
-  { OPERAND_TYPE_REG32, "r32" },
-  { OPERAND_TYPE_REG64, "r64" },
-  { OPERAND_TYPE_ACC8, "acc8" },
-  { OPERAND_TYPE_ACC16, "acc16" },
-  { OPERAND_TYPE_ACC32, "acc32" },
-  { OPERAND_TYPE_ACC64, "acc64" },
-  { OPERAND_TYPE_IMM8, "i8" },
-  { OPERAND_TYPE_IMM8, "i8s" },
-  { OPERAND_TYPE_IMM16, "i16" },
-  { OPERAND_TYPE_IMM32, "i32" },
-  { OPERAND_TYPE_IMM32S, "i32s" },
-  { OPERAND_TYPE_IMM64, "i64" },
-  { OPERAND_TYPE_IMM1, "i1" },
-  { OPERAND_TYPE_BASEINDEX, "BaseIndex" },
-  { OPERAND_TYPE_DISP8, "d8" },
-  { OPERAND_TYPE_DISP16, "d16" },
-  { OPERAND_TYPE_DISP32, "d32" },
-  { OPERAND_TYPE_DISP64, "d64" },
-  { OPERAND_TYPE_INOUTPORTREG, "InOutPortReg" },
-  { OPERAND_TYPE_SHIFTCOUNT, "ShiftCount" },
-  { OPERAND_TYPE_CONTROL, "control reg" },
-  { OPERAND_TYPE_TEST, "test reg" },
-  { OPERAND_TYPE_DEBUG, "debug reg" },
-  { OPERAND_TYPE_FLOATREG, "FReg" },
-  { OPERAND_TYPE_FLOATACC, "FAcc" },
-  { OPERAND_TYPE_SREG, "SReg" },
-  { OPERAND_TYPE_REGMMX, "rMMX" },
-  { OPERAND_TYPE_REGXMM, "rXMM" },
-  { OPERAND_TYPE_REGYMM, "rYMM" },
-  { OPERAND_TYPE_REGZMM, "rZMM" },
-  { OPERAND_TYPE_REGTMM, "rTMM" },
-  { OPERAND_TYPE_REGMASK, "Mask reg" },
+  { { .bitfield = { .class = Reg, .byte = 1 } }, "r8" },
+  { { .bitfield = { .class = Reg, .word = 1 } }, "r16" },
+  { { .bitfield = { .class = Reg, .dword = 1 } }, "r32" },
+  { { .bitfield = { .class = Reg, .qword = 1 } }, "r64" },
+  { { .bitfield = { .instance = Accum, .byte = 1 } }, "acc8" },
+  { { .bitfield = { .instance = Accum, .word = 1 } }, "acc16" },
+  { { .bitfield = { .instance = Accum, .dword = 1 } }, "acc32" },
+  { { .bitfield = { .instance = Accum, .qword = 1 } }, "acc64" },
+  { { .bitfield = { .imm8 = 1 } }, "i8" },
+  { { .bitfield = { .imm8s = 1 } }, "i8s" },
+  { { .bitfield = { .imm16 = 1 } }, "i16" },
+  { { .bitfield = { .imm32 = 1 } }, "i32" },
+  { { .bitfield = { .imm32s = 1 } }, "i32s" },
+  { { .bitfield = { .imm64 = 1 } }, "i64" },
+  { { .bitfield = { .imm1 = 1 } }, "i1" },
+  { { .bitfield = { .baseindex = 1 } }, "BaseIndex" },
+  { { .bitfield = { .disp8 = 1 } }, "d8" },
+  { { .bitfield = { .disp16 = 1 } }, "d16" },
+  { { .bitfield = { .disp32 = 1 } }, "d32" },
+  { { .bitfield = { .disp64 = 1 } }, "d64" },
+  { { .bitfield = { .instance = RegD, .word = 1 } }, "InOutPortReg" },
+  { { .bitfield = { .instance = RegC, .byte = 1 } }, "ShiftCount" },
+  { { .bitfield = { .class = RegCR } }, "control reg" },
+  { { .bitfield = { .class = RegTR } }, "test reg" },
+  { { .bitfield = { .class = RegDR } }, "debug reg" },
+  { { .bitfield = { .class = Reg, .tbyte = 1 } }, "FReg" },
+  { { .bitfield = { .instance = Accum, .tbyte = 1 } }, "FAcc" },
+  { { .bitfield = { .class = SReg } }, "SReg" },
+  { { .bitfield = { .class = RegMMX } }, "rMMX" },
+  { { .bitfield = { .class = RegSIMD, .xmmword = 1 } }, "rXMM" },
+  { { .bitfield = { .class = RegSIMD, .ymmword = 1 } }, "rYMM" },
+  { { .bitfield = { .class = RegSIMD, .zmmword = 1 } }, "rZMM" },
+  { { .bitfield = { .class = RegSIMD, .tmmword = 1 } }, "rTMM" },
+  { { .bitfield = { .class = RegMask } }, "Mask reg" },
 };
 
 static void
@@ -7699,6 +7695,19 @@ update_imm (unsigned int j)
       + overlap.bitfield.imm32s
       + overlap.bitfield.imm64 > 1)
     {
+      static const i386_operand_type imm16 = { .bitfield = { .imm16 = 1 } };
+      static const i386_operand_type imm32 = { .bitfield = { .imm32 = 1 } };
+      static const i386_operand_type imm32s = { .bitfield = { .imm32s = 1 } };
+      static const i386_operand_type imm16_32 = { .bitfield =
+	{ .imm16 = 1, .imm32 = 1 }
+      };
+      static const i386_operand_type imm16_32s =  { .bitfield =
+	{ .imm16 = 1, .imm32s = 1 }
+      };
+      static const i386_operand_type imm16_32_32s = { .bitfield =
+	{ .imm16 = 1, .imm32 = 1, .imm32s = 1 }
+      };
+
       if (i.suffix)
 	{
 	  i386_operand_type temp;
@@ -7793,6 +7802,9 @@ process_operands (void)
 
   if (i.tm.opcode_modifier.sse2avx && i.tm.opcode_modifier.vexvvvv)
     {
+      static const i386_operand_type regxmm = {
+        .bitfield = { .class = RegSIMD, .xmmword = 1 }
+      };
       unsigned int dupl = i.operands;
       unsigned int dest = dupl - 1;
       unsigned int j;
@@ -10308,15 +10320,25 @@ lex_got (enum bfd_reloc_code_real *rel,
   }
     gotrel[] =
   {
+
+#define OPERAND_TYPE_IMM32_32S_DISP32 { .bitfield = \
+  { .imm32 = 1, .imm32s = 1, .disp32 = 1 } }
+#define OPERAND_TYPE_IMM32_32S_64_DISP32 { .bitfield = \
+  { .imm32 = 1, .imm32s = 1, .imm64 = 1, .disp32 = 1 } }
+#define OPERAND_TYPE_IMM32_32S_64_DISP32_64 { .bitfield = \
+  { .imm32 = 1, .imm32s = 1, .imm64 = 1, .disp32 = 1, .disp64 = 1 } }
+#define OPERAND_TYPE_IMM64_DISP64 { .bitfield = \
+  { .imm64 = 1, .disp64 = 1 } }
+
 #ifndef TE_PE
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
 					BFD_RELOC_SIZE32 },
-      OPERAND_TYPE_IMM32_64, false },
+      { .bitfield = { .imm32 = 1, .imm64 = 1 } }, false },
 #endif
     { STRING_COMMA_LEN ("PLTOFF"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_PLTOFF64 },
-      OPERAND_TYPE_IMM64, true },
+      { .bitfield = { .imm64 = 1 } }, true },
     { STRING_COMMA_LEN ("PLT"),      { BFD_RELOC_386_PLT32,
 				       BFD_RELOC_X86_64_PLT32    },
       OPERAND_TYPE_IMM32_32S_DISP32, false },
@@ -10370,6 +10392,12 @@ lex_got (enum bfd_reloc_code_real *rel,
 				       BFD_RELOC_32_SECREL },
       OPERAND_TYPE_IMM32_32S_64_DISP32_64, false },
 #endif
+
+#undef OPERAND_TYPE_IMM32_32S_DISP32
+#undef OPERAND_TYPE_IMM32_32S_64_DISP32
+#undef OPERAND_TYPE_IMM32_32S_64_DISP32_64
+#undef OPERAND_TYPE_IMM64_DISP64
+
   };
   char *cp;
   unsigned int j;
@@ -11210,8 +11238,14 @@ i386_addressing_mode (void)
 		  if (flag_code != CODE_64BIT
 		      && (i.types[this_operand].bitfield.disp16
 			  || i.types[this_operand].bitfield.disp32))
-		    i.types[this_operand]
-		      = operand_type_xor (i.types[this_operand], disp16_32);
+		    {
+		      static const i386_operand_type disp16_32 = {
+			.bitfield = { .disp16 = 1, .disp32 = 1 }
+		      };
+
+		      i.types[this_operand]
+			= operand_type_xor (i.types[this_operand], disp16_32);
+		    }
 		}
 	    }
 	}
