@@ -75,13 +75,20 @@ set gdb_long_double_size [float_size "16llf#0#" ]
 
 # Get the used long double format.
 set long_double_format ""
-gdb_test_multiple "maint print architecture" "" {
-    -re "\r\ngdbarch_dump: long_double_format = (\[^\r\n\]*)" {
+set cmd "maint print architecture"
+gdb_test_multiple $cmd  "" {
+    -re "^[string_to_regexp $cmd](?=\r\n)" {
+	exp_continue
+    }
+    -re "^\r\ngdbarch_dump: long_double_format = (\[^\r\n\]*)(?=\r\n)" {
 	set long_double_format $expect_out(1,string)
 	exp_continue
     }
-    -re -wrap "" {
+    -re "^\r\n$gdb_prompt $" {
 	pass $gdb_test_name
+    }
+    -re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
+	exp_continue
     }
 }
 
