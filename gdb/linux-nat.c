@@ -3606,7 +3606,7 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 }
 
 static enum target_xfer_status
-linux_xfer_siginfo (enum target_object object,
+linux_xfer_siginfo (ptid_t ptid, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		    ULONGEST *xfered_len)
@@ -3620,7 +3620,7 @@ linux_xfer_siginfo (enum target_object object,
   if (offset > sizeof (siginfo))
     return TARGET_XFER_E_IO;
 
-  if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
+  if (!linux_nat_get_siginfo (ptid, &siginfo))
     return TARGET_XFER_E_IO;
 
   /* When GDB is built as a 64-bit application, ptrace writes into
@@ -3643,7 +3643,7 @@ linux_xfer_siginfo (enum target_object object,
       /* Convert back to ptrace layout before flushing it out.  */
       siginfo_fixup (&siginfo, inf_siginfo, 1);
 
-      int pid = get_ptrace_pid (inferior_ptid);
+      int pid = get_ptrace_pid (ptid);
       errno = 0;
       ptrace (PTRACE_SETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
       if (errno != 0)
@@ -3672,7 +3672,7 @@ linux_nat_target::xfer_partial (enum target_object object,
 				ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
   if (object == TARGET_OBJECT_SIGNAL_INFO)
-    return linux_xfer_siginfo (object, annex, readbuf, writebuf,
+    return linux_xfer_siginfo (inferior_ptid, object, annex, readbuf, writebuf,
 			       offset, len, xfered_len);
 
   /* The target is connected but no live inferior is selected.  Pass
