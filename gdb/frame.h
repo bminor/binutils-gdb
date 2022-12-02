@@ -239,8 +239,7 @@ extern void reinit_frame_cache (void);
    and then return that thread's previously selected frame.  */
 extern frame_info_ptr get_selected_frame (const char *message = nullptr);
 
-/* Select a specific frame.  NULL implies re-select the inner most
-   frame.  */
+/* Select a specific frame.  */
 extern void select_frame (frame_info_ptr);
 
 /* Save the frame ID and frame level of the selected frame in FRAME_ID

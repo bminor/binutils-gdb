@@ -1836,11 +1836,23 @@ deprecated_safe_get_selected_frame (void)
   return get_selected_frame (NULL);
 }
 
-/* Select frame FI (or NULL - to invalidate the selected frame).  */
+/* Invalidate the selected frame.  */
+
+static void
+invalidate_selected_frame ()
+{
+  selected_frame = nullptr;
+  selected_frame_level = -1;
+  selected_frame_id = null_frame_id;
+}
+
+/* See frame.h.  */
 
 void
 select_frame (frame_info_ptr fi)
 {
+  gdb_assert (fi != nullptr);
+
   selected_frame = fi;
   selected_frame_level = frame_relative_level (fi);
   if (selected_frame_level == 0)
@@ -2012,7 +2024,7 @@ reinit_frame_cache (void)
     annotate_frames_invalid ();
 
   sentinel_frame = NULL;		/* Invalidate cache */
-  select_frame (NULL);
+  invalidate_selected_frame ();
   frame_stash_invalidate ();
 
   for (frame_info_ptr &iter : frame_info_ptr::frame_list)
