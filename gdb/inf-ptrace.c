@@ -522,7 +522,7 @@ inf_ptrace_target::files_info ()
 
   gdb_printf (_("\tUsing the running image of %s %s.\n"),
 	      inf->attach_flag ? "attached" : "child",
-	      target_pid_to_str (inferior_ptid).c_str ());
+	      target_pid_to_str (ptid_t (inf->pid)).c_str ());
 }
 
 std::string

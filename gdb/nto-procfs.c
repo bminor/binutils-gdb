@@ -658,7 +658,7 @@ nto_procfs_target::files_info ()
 
   gdb_printf ("\tUsing the running image of %s %s via %s.\n",
 	      inf->attach_flag ? "attached" : "child",
-	      target_pid_to_str (inferior_ptid).c_str (),
+	      target_pid_to_str (ptid_t (inf->pid)).c_str (),
 	      (nodestr != NULL) ? nodestr : "local node");
 }
 
