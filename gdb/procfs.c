@@ -2533,7 +2533,7 @@ procfs_target::files_info ()
 
   gdb_printf (_("\tUsing the running image of %s %s via /proc.\n"),
 	      inf->attach_flag? "attached": "child",
-	      target_pid_to_str (inferior_ptid).c_str ());
+	      target_pid_to_str (ptid_t (inf->pid)).c_str ());
 }
 
 /* Make it die.  Wait for it to die.  Clean up after it.  Note: this
