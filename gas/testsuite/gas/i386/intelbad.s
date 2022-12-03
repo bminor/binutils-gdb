@@ -183,12 +183,12 @@ start:
 	fild	far ptr [ebx]
 	fist	near ptr [ebx]
 
-	lar	eax, ax
+
 	lar	ax, eax
 	lar	eax, dword ptr [eax]
 	lar	ax, dword ptr [eax]
 
-	lsl	eax, ax
+
 	lsl	ax, eax
 	lsl	eax, dword ptr [eax]
 	lsl	ax, dword ptr [eax]

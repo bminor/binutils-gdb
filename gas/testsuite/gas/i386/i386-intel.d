@@ -62,4 +62,24 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f b6 00             	movzx  eax,BYTE PTR \[eax\]
 [ 	]*[a-f0-9]+:	0f b7 00             	movzx  eax,WORD PTR \[eax\]
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti DWORD PTR \[eax\],eax
+[ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    dx,dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,dx
+[ 	]*[a-f0-9]+:	66 0f 02 12          	lar    dx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    dx,dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,dx
+[ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    dx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    dx,dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    edx,dx
+[ 	]*[a-f0-9]+:	66 0f 02 12          	lar    dx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    edx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    dx,dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    edx,dx
+[ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    dx,WORD PTR \[edx\]
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    edx,WORD PTR \[edx\]
 #pass

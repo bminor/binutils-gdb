@@ -699,11 +699,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp edx,DWORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovp  dx,WORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnp dx,WORD PTR \[eax-0x6f6f6f70\]
-[ 	]*[a-f0-9]+:	0f 02 c0 +	lar    eax,eax
+[ 	]*[a-f0-9]+:	0f 02 c0 +	lar    eax,ax
 [ 	]*[a-f0-9]+:	66 0f 02 c0 +	lar    ax,ax
 [ 	]*[a-f0-9]+:	0f 02 00 +	lar    eax,WORD PTR \[eax\]
 [ 	]*[a-f0-9]+:	66 0f 02 00 +	lar    ax,WORD PTR \[eax\]
-[ 	]*[a-f0-9]+:	0f 03 c0 +	lsl    eax,eax
+[ 	]*[a-f0-9]+:	0f 03 c0 +	lsl    eax,ax
 [ 	]*[a-f0-9]+:	66 0f 03 c0 +	lsl    ax,ax
 [ 	]*[a-f0-9]+:	0f 03 00 +	lsl    eax,WORD PTR \[eax\]
 [ 	]*[a-f0-9]+:	66 0f 03 00 +	lsl    ax,WORD PTR \[eax\]

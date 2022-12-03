@@ -61,4 +61,24 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f b6 00             	movzbl \(%eax\),%eax
 [ 	]*[a-f0-9]+:	0f b7 00             	movzwl \(%eax\),%eax
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%eax\)
+[ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    %dx,%dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    %dx,%edx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    %dx,%edx
+[ 	]*[a-f0-9]+:	66 0f 02 12          	lar    \(%edx\),%dx
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    \(%edx\),%edx
+[ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    %dx,%dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    %dx,%edx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    %dx,%edx
+[ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    \(%edx\),%dx
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    \(%edx\),%edx
+[ 	]*[a-f0-9]+:	66 0f 02 d2          	lar    %dx,%dx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    %dx,%edx
+[ 	]*[a-f0-9]+:	0f 02 d2             	lar    %dx,%edx
+[ 	]*[a-f0-9]+:	66 0f 02 12          	lar    \(%edx\),%dx
+[ 	]*[a-f0-9]+:	0f 02 12             	lar    \(%edx\),%edx
+[ 	]*[a-f0-9]+:	66 0f 03 d2          	lsl    %dx,%dx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    %dx,%edx
+[ 	]*[a-f0-9]+:	0f 03 d2             	lsl    %dx,%edx
+[ 	]*[a-f0-9]+:	66 0f 03 12          	lsl    \(%edx\),%dx
+[ 	]*[a-f0-9]+:	0f 03 12             	lsl    \(%edx\),%edx
 #pass
