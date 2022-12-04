@@ -30,6 +30,35 @@
 
 #define MAX_COMPRESSION_HEADER_SIZE 24
 
+/*
+CODE_FRAGMENT
+.static inline char *
+.bfd_debug_name_to_zdebug (bfd *abfd, const char *name)
+.{
+.  size_t len = strlen (name);
+.  char *new_name = bfd_alloc (abfd, len + 2);
+.  if (new_name == NULL)
+.    return NULL;
+.  new_name[0] = '.';
+.  new_name[1] = 'z';
+.  memcpy (new_name + 2, name + 1, len);
+.  return new_name;
+.}
+.
+.static inline char *
+.bfd_zdebug_name_to_debug (bfd *abfd, const char *name)
+.{
+.  size_t len = strlen (name);
+.  char *new_name = bfd_alloc (abfd, len);
+.  if (new_name == NULL)
+.    return NULL;
+.  new_name[0] = '.';
+.  memcpy (new_name + 1, name + 2, len - 1);
+.  return new_name;
+.}
+.
+*/
+
 static bool
 decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
 		     bfd_size_type compressed_size,

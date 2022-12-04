@@ -7963,6 +7963,31 @@ bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 /* Extracted from compress.c.  */
+static inline char *
+bfd_debug_name_to_zdebug (bfd *abfd, const char *name)
+{
+  size_t len = strlen (name);
+  char *new_name = bfd_alloc (abfd, len + 2);
+  if (new_name == NULL)
+    return NULL;
+  new_name[0] = '.';
+  new_name[1] = 'z';
+  memcpy (new_name + 2, name + 1, len);
+  return new_name;
+}
+
+static inline char *
+bfd_zdebug_name_to_debug (bfd *abfd, const char *name)
+{
+  size_t len = strlen (name);
+  char *new_name = bfd_alloc (abfd, len);
+  if (new_name == NULL)
+    return NULL;
+  new_name[0] = '.';
+  memcpy (new_name + 1, name + 2, len - 1);
+  return new_name;
+}
+
 bool bfd_get_full_section_contents
    (bfd *abfd, asection *section, bfd_byte **ptr);
 

@@ -968,31 +968,6 @@ bfd_elf_group_name (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
   return NULL;
 }
 
-static char *
-convert_debug_to_zdebug (bfd *abfd, const char *name)
-{
-  unsigned int len = strlen (name);
-  char *new_name = bfd_alloc (abfd, len + 2);
-  if (new_name == NULL)
-    return NULL;
-  new_name[0] = '.';
-  new_name[1] = 'z';
-  memcpy (new_name + 2, name + 1, len);
-  return new_name;
-}
-
-static char *
-convert_zdebug_to_debug (bfd *abfd, const char *name)
-{
-  unsigned int len = strlen (name);
-  char *new_name = bfd_alloc (abfd, len);
-  if (new_name == NULL)
-    return NULL;
-  new_name[0] = '.';
-  memcpy (new_name + 1, name + 2, len - 1);
-  return new_name;
-}
-
 /* This a copy of lto_section defined in GCC (lto-streamer.h).  */
 
 struct lto_section
@@ -1285,7 +1260,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		  /* Convert section name from .zdebug_* to .debug_* so
 		     that linker will consider this section as a debug
 		     section.  */
-		  char *new_name = convert_zdebug_to_debug (abfd, name);
+		  char *new_name = bfd_zdebug_name_to_debug (abfd, name);
 		  if (new_name == NULL)
 		    return false;
 		  bfd_rename_section (newsect, new_name);
@@ -3233,7 +3208,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	     needed.  */
 	  if (name[1] == 'z')
 	    {
-	      char *new_name = convert_zdebug_to_debug (abfd, name);
+	      char *new_name = bfd_zdebug_name_to_debug (abfd, name);
 	      if (new_name == NULL)
 		{
 		  arg->failed = true;
@@ -3249,7 +3224,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	     section smaller.  So only rename the section when
 	     compression has actually taken place.  If input section
 	     name is .zdebug_*, we should never compress it again.  */
-	  char *new_name = convert_debug_to_zdebug (abfd, name);
+	  char *new_name = bfd_debug_name_to_zdebug (abfd, name);
 	  if (new_name == NULL)
 	    {
 	      arg->failed = true;
@@ -6729,8 +6704,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 		    {
 		      /* If section is compressed with zlib-gnu, convert
 			 section name from .debug_* to .zdebug_*.  */
-		      char *new_name
-			= convert_debug_to_zdebug (abfd, name);
+		      char *new_name = bfd_debug_name_to_zdebug (abfd, name);
 		      if (new_name == NULL)
 			return false;
 		      name = new_name;
