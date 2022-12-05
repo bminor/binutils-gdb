@@ -629,7 +629,6 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  if (print_thread_events)
 	    gdb_printf (_("[%s exited]\n"),
 			target_pid_to_str (wptid).c_str ());
-	  delete_thread (thr);
 	}
 
       /* The GDB core expects that the rest of the threads are running.  */
