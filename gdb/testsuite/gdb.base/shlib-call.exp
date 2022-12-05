@@ -62,7 +62,7 @@ gdb_load_shlib $lib2
 
 
 if {![runto_main]} {
-        perror "C function calling tests suppressed"
+    return
 }
 
 

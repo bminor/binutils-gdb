@@ -40,7 +40,6 @@ clean_restart $testfile
 gdb_load_shlib $libfile
 
 if {![fortran_runto_main]} {
-    perror "couldn't run to main"
     return
 }
 

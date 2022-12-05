@@ -26,7 +26,6 @@ if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug f90}]} {
 }
 
 if {![runto [gdb_get_line_number "post_truth_table_init"]]} {
-    perror "couldn't run to breakpoint post_truth_table_init"
     return
 }
 

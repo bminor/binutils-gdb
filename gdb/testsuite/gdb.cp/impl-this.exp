@@ -52,7 +52,6 @@ with_test_prefix "before run" {
 
 # Run to D::f.
 if {![runto_main]} {
-    perror "couldn't run to main"
     return
 }
 

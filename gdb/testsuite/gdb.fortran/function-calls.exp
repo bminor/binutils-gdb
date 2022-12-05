@@ -40,7 +40,6 @@ with_complaints 5 {
 }
 
 if {![runto [gdb_get_line_number "post_init"]]} {
-    perror "couldn't run to breakpoint post_init"
     return
 }
 

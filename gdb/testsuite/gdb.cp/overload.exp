@@ -35,7 +35,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 # Set it up at a breakpoint so we can play with the variable values.
 
 if {![runto 'marker1']} {
-    perror "couldn't run to marker1"
     continue
 }
 
@@ -360,7 +359,6 @@ with_test_prefix "list all overloads" {
 }
 
 if {![runto 'XXX::marker2']} {
-    perror "couldn't run to XXX::marker2"
     continue
 }
 

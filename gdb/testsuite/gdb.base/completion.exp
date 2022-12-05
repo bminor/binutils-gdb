@@ -58,7 +58,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 }
 
 if {![runto_main]} {
-        perror "tests suppressed"
+    return
 }
 
 set timeout 30

@@ -43,7 +43,6 @@ clean_restart ${binfile}
 
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

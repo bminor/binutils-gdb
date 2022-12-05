@@ -56,7 +56,6 @@ with_test_prefix "before run" {
 # Set it up at a breakpoint so we can play with the variable values.
 
 if {![runto 'marker1']} {
-    perror "couldn't run to marker1"
     return
 }
 
@@ -266,7 +265,6 @@ gdb_test "ptype N::Derived::value_type" "type = int"
 
 # Now run to N::Derived::doit and get the type of "value_type"
 if {![runto "N::Derived::doit"]} {
-    perror "couldn't run to N::Derived::doit"
     return
 }
 

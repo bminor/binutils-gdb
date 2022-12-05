@@ -26,7 +26,6 @@ if {[prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {c++
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

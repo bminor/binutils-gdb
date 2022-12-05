@@ -34,7 +34,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 
@@ -182,7 +181,6 @@ if {[prepare_for_testing "failed to prepare" ${testfile}03 $srcfile2 \
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
    return
 }
 

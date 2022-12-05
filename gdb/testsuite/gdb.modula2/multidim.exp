@@ -25,7 +25,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 }
 
 if {![runto here]} {
-    perror "couldn't run to breakpoint 'here'"
     return
 }
 

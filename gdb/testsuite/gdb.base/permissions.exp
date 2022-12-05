@@ -82,7 +82,6 @@ gdb_test_no_output "set non-stop off"
 gdb_load ${binfile}
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

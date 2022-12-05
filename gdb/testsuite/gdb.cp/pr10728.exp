@@ -43,7 +43,6 @@ if  { [gdb_compile "${tfx}.o ${tfy}.o" ${binfile} executable {debug c++}] != "" 
 clean_restart $binfile
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

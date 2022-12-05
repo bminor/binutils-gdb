@@ -39,7 +39,6 @@ gdb_start
 
 
 if {![file exists $binfile]} {
-    perror "$binfile does not exist."
     return 0
 } else {
     gdb_reinitialize_dir $srcdir/$subdir

@@ -34,7 +34,6 @@ if { [prepare_for_testing "failed to prepare" relational int-type.c {debug nowar
 #
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

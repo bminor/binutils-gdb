@@ -32,12 +32,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 # set it up at a breakpoint so we can play with the variable values
 #
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 
 if {![runto 'marker1']} {
-    perror "couldn't run to marker1"
     return
 }
 
@@ -58,12 +56,10 @@ proc gdb_start_again {} {
     # set it up at a breakpoint so we can play with the variable values
     #
     if {![runto_main]} {
-	perror "couldn't run to breakpoint"
 	return
     }
 
     if {![runto 'marker1']} {
-	perror "couldn't run to marker1"
 	return
     }
 
@@ -129,7 +125,6 @@ gdb_test "print ras\[3\]" ".\[0-9\]* = 3" "print value of ras\[3\]"
 
 
 if {![runto 'f']} {
-    perror "couldn't run to f"
     return
 }
 

@@ -22,7 +22,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
 clean_restart ${binfile}
 
 if {![runto break_me]} {
-  perror "Couldn't run ${testfile}"
   return
 }
 

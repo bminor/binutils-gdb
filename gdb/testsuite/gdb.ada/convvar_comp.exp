@@ -26,7 +26,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
 clean_restart ${testfile}
 
 if {![runto "break_me"]} {
-  perror "Couldn't run ${testfile}"
   return
 }
 

@@ -23,7 +23,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 # Test printing of namespace imported within the function.
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint main"
     continue
 }
 

@@ -27,7 +27,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarning
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

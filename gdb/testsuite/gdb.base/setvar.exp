@@ -36,7 +36,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 gdb_test_no_output "set print sevenbit-strings" 
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

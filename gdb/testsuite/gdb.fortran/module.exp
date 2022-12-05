@@ -35,7 +35,6 @@ gdb_test "print mod1::var_const" " = 20" "fully qualified name of DW_TAG_constan
 gdb_test_no_output "set auto-solib-add off"
 
 if {![fortran_runto_main]} {
-    perror "couldn't run to main"
     return
 }
 

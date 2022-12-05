@@ -42,7 +42,6 @@ proc restart_gdb {exefile} {
   gdb_load ${exefile}
 
   if {![runto_main]} {
-      perror "couldn't run to breakpoint"
       return
   }
 }

@@ -31,7 +31,6 @@ set eol "\[\r\n\]+"
 set sp "\[ \t\]*"
 
 if {![runto break_me]} {
-  perror "Couldn't run ${testfile}"
   return
 } 
 

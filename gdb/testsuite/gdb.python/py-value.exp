@@ -416,7 +416,6 @@ proc test_subscript_regression {exefile lang} {
  clean_restart ${exefile}
 
  if {![runto_main]} {
-     perror "couldn't run to breakpoint"
      return
  }
 

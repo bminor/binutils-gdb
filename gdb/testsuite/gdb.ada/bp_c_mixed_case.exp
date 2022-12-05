@@ -47,7 +47,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $options] != "" } {
 clean_restart ${testfile}
 
 if {![runto "foo_h731_021"]} {
-  perror "Couldn't run ${testfile}"
   return
 }
 

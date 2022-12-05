@@ -30,7 +30,6 @@ foreach_with_prefix scenario {all minimal} {
 
     set bp_location [gdb_get_line_number "BREAK" ${testdir}/foo_q418_043.adb]
     if {![runto "foo_q418_043.adb:$bp_location"]} {
-	perror "Couldn't run ${testfile}-${scenario}"
 	return
     }
 

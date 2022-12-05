@@ -26,7 +26,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable ""] != "" } {
 clean_restart ${testfile}
 
 if {![runto "_ada_foo_qb07_057"]} {
-  perror "Couldn't run ${testfile}"
   return
 }
 

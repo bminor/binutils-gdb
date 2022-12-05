@@ -38,7 +38,6 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" $srcfile \
 }
 
 if {![runto MAIN__]} {
-    perror "couldn't run to breakpoint MAIN__"
     return
 }
 

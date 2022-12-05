@@ -28,7 +28,6 @@ if { [prepare_for_testing "prepare for testing" ${testfile} ${srcfile} \
 }
 
 if {![runto f]} {
-    perror "couldn't run to f"
     return
 }
 

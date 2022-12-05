@@ -115,7 +115,6 @@ gdb_test "info auto-load python-scripts no-script-matches-this" \
   "No auto-load scripts matching no-script-matches-this."
 
 if ![runto_main] {
-    perror "couldn't run to main"
     return
 }
 

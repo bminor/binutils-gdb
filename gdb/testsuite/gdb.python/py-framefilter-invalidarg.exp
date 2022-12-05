@@ -52,7 +52,6 @@ gdb_test "info auto-load python-scripts" "Yes.*${testfile}-gdb.py.*" \
     "Test auto-load had loaded python scripts"
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 gdb_test_no_output "set python print-stack full" \

@@ -147,7 +147,6 @@ clean_restart ${testfile}
 set GDBFLAGS $saved_gdbflags
 
 if ![runto_main] {
-    perror "couldn't run to main"
     return -1
 }
 

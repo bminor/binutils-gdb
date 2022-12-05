@@ -50,7 +50,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
 
 clean_restart "${testcase}"
 if ![runto_main] {
-    perror "could not run to main"
     return
 }
 

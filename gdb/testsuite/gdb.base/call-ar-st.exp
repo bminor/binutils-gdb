@@ -45,7 +45,6 @@ gdb_test_no_output "set width 0"
 
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

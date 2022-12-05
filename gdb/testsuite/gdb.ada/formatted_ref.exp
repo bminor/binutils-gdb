@@ -44,7 +44,6 @@ proc get_address { var } {
             return $expect_out(1,string)
         }
     }
-    perror "couldn't find address of $var"
     return ""
 }
 

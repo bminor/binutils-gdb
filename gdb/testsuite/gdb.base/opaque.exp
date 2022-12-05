@@ -111,7 +111,7 @@ gdb_load ${binfile}
 
 # Run to main, where struct foo is incomplete.
 if ![runto_main] {
-    perror "cannot run to breakpoint at main"
+    return
 }
 
 

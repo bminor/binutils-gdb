@@ -52,7 +52,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 }
 
 if {![runto_main]} {
-    perror "couldn't run to main"
     return
 }
 
@@ -97,7 +96,6 @@ gdb_test "p exceptions.throw_function()" \
 
 # Restart the inferior back at main.
 if {![runto_main]} {
-    perror "couldn't run to main"
     return
 }
 

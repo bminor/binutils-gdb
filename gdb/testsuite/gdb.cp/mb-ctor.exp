@@ -32,7 +32,6 @@ if {[test_compiler_info {clang-*-*} c++]} {
 }
 
 if {![runto_main]} {
-    perror "couldn't run to breakpoint"
     return
 }
 

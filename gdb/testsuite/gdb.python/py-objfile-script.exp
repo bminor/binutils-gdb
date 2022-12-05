@@ -43,7 +43,6 @@ gdb_load ${binfile}
 gdb_test "info auto-load python-scripts" "Yes.*${testfile}-gdb.py.*"
 
 if ![runto_main] {
-    perror "couldn't run to main"
     return
 }
 

@@ -44,7 +44,6 @@ proc test_template_arg {exefile type} {
     }
     gdb_load ${exefile}
     if {![runto_main]} {
-	perror "couldn't run to breakpoint"
 	return
     }
     # There is no executable code in main(), so we are where we want to be
