@@ -1,3 +1,9 @@
+2022-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 29848
+	* vms-alpha.c (parse_module): Fix potential out of bounds memory
+	access.
+
 2022-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 25202

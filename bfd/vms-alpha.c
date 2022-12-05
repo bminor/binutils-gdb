@@ -4366,7 +4366,7 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
     return false;
   module->line_table = curr_line;
 
-  while (length == -1 || ptr < maxptr)
+  while (length == -1 || (ptr + 3) < maxptr)
     {
       /* The first byte is not counted in the recorded length.  */
       int rec_length = bfd_getl16 (ptr) + 1;
