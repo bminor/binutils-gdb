@@ -868,7 +868,10 @@ read_a_source_file (const char *name)
 		  /* Find the end of the current expanded macro line.  */
 		  s = find_end_of_line (input_line_pointer, flag_m68k_mri);
 
-		  if (s != last_eol)
+		  if (s != last_eol
+		      && !startswith (input_line_pointer,
+				      !flag_m68k_mri ? " .linefile "
+						     : " linefile "))
 		    {
 		      char *copy;
 		      size_t len;
