@@ -898,14 +898,15 @@ linux_nat_switch_fork (ptid_t new_ptid)
   registers_changed ();
 }
 
-/* Handle the exit of a single thread LP.  */
+/* Handle the exit of a single thread LP.  If DEL_THREAD is true,
+   delete the thread_info associated to LP, if it exists.  */
 
 static void
-exit_lwp (struct lwp_info *lp)
+exit_lwp (struct lwp_info *lp, bool del_thread = true)
 {
   struct thread_info *th = linux_target->find_thread (lp->ptid);
 
-  if (th)
+  if (th != nullptr && del_thread)
     delete_thread (th);
 
   delete_lwp (lp->ptid);
@@ -3155,11 +3156,17 @@ filter_exit_event (struct lwp_info *event_child,
   if (!is_leader (event_child))
     {
       if (report_thread_events)
-	ourstatus->set_thread_exited (0);
+	{
+	  ourstatus->set_thread_exited (0);
+	  /* Delete lwp, but not thread_info, infrun will need it to
+	     process the event.  */
+	  exit_lwp (event_child, false);
+	}
       else
-	ourstatus->set_ignore ();
-
-      exit_lwp (event_child);
+	{
+	  ourstatus->set_ignore ();
+	  exit_lwp (event_child);
+	}
     }
 
   return ptid;

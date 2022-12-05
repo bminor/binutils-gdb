@@ -4352,7 +4352,12 @@ reinstall_readline_callback_handler_cleanup ()
 }
 
 /* Clean up the FSMs of threads that are now stopped.  In non-stop,
-   that's just the event thread.  In all-stop, that's all threads.  */
+   that's just the event thread.  In all-stop, that's all threads.  In
+   all-stop, threads that had a pending exit no longer have a reason
+   to be around, as their FSMs/commands are canceled, so we delete
+   them.  This avoids "info threads" listing such threads as if they
+   were alive (and failing to read their registers), the user being
+   able to select and resume them (and that failing), etc.  */
 
 static void
 clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
@@ -4370,15 +4375,29 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
     {
       scoped_restore_current_thread restore_thread;
 
-      for (thread_info *thr : all_non_exited_threads ())
+      for (thread_info *thr : all_threads_safe ())
 	{
-	  if (thr->thread_fsm () == nullptr)
+	  if (thr->state == THREAD_EXITED)
 	    continue;
+
 	  if (thr == ecs->event_thread)
 	    continue;
 
-	  switch_to_thread (thr);
-	  thr->thread_fsm ()->clean_up (thr);
+	  if (thr->thread_fsm () != nullptr)
+	    {
+	      switch_to_thread (thr);
+	      thr->thread_fsm ()->clean_up (thr);
+	    }
+
+	  /* As we are cancelling the command/FSM of this thread,
+	     whatever was the reason we needed to report a thread
+	     exited event to the user, that reason is gone.  Delete
+	     the thread, so that the user doesn't see it in the thread
+	     list, the next proceed doesn't try to resume it, etc.  */
+	  if (thr->has_pending_waitstatus ()
+	      && (thr->pending_waitstatus ().kind ()
+		  == TARGET_WAITKIND_THREAD_EXITED))
+	    delete_thread (thr);
 	}
     }
 }
@@ -5728,6 +5747,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
     {
+      ecs->event_thread = ecs->target->find_thread (ecs->ptid);
+      gdb_assert (ecs->event_thread != nullptr);
+      delete_thread (ecs->event_thread);
       prepare_to_wait (ecs);
       return;
     }
