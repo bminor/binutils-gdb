@@ -12206,24 +12206,19 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	{
 	  if (bytemode == xh_mode)
 	    {
-	      if (ins->vex.w)
-		oappend (ins, "{bad}");
-	      else
+	      switch (ins->vex.length)
 		{
-		  switch (ins->vex.length)
-		    {
-		    case 128:
-		      oappend (ins, "{1to8}");
-		      break;
-		    case 256:
-		      oappend (ins, "{1to16}");
-		      break;
-		    case 512:
-		      oappend (ins, "{1to32}");
-		      break;
-		    default:
-		      abort ();
-		    }
+		case 128:
+		  oappend (ins, "{1to8}");
+		  break;
+		case 256:
+		  oappend (ins, "{1to16}");
+		  break;
+		case 512:
+		  oappend (ins, "{1to32}");
+		  break;
+		default:
+		  abort ();
 		}
 	    }
 	  else if (bytemode == q_mode
