@@ -1071,7 +1071,7 @@ gdb_init_signals (void)
 
   sigint_token =
     create_async_signal_handler (async_request_quit, NULL, "sigint");
-  signal (SIGINT, handle_sigint);
+  install_sigint_handler (handle_sigint);
 
   async_sigterm_token
     = create_async_signal_handler (async_sigterm_handler, NULL, "sigterm");

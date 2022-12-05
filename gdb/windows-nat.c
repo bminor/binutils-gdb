@@ -298,6 +298,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   std::string pid_to_str (ptid_t) override;
 
   void interrupt () override;
+  void pass_ctrlc () override;
 
   const char *pid_to_exec_file (int pid) override;
 
@@ -1509,24 +1510,12 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     windows_continue (continue_status, ptid.lwp (), 0);
 }
 
-/* Ctrl-C handler used when the inferior is not run in the same console.  The
-   handler is in charge of interrupting the inferior using DebugBreakProcess.
-   Note that this function is not available prior to Windows XP.  In this case
-   we emit a warning.  */
-static BOOL WINAPI
-ctrl_c_handler (DWORD event_type)
+/* Interrupt the inferior.  */
+
+void
+windows_nat_target::interrupt ()
 {
-  const int attach_flag = current_inferior ()->attach_flag;
-
-  /* Only handle Ctrl-C and Ctrl-Break events.  Ignore others.  */
-  if (event_type != CTRL_C_EVENT && event_type != CTRL_BREAK_EVENT)
-    return FALSE;
-
-  /* If the inferior and the debugger share the same console, do nothing as
-     the inferior has also received the Ctrl-C event.  */
-  if (!new_console && !attach_flag)
-    return TRUE;
-
+  DEBUG_EVENTS ("interrupt");
 #ifdef __x86_64__
   if (windows_process.wow64_process)
     {
@@ -1548,19 +1537,24 @@ ctrl_c_handler (DWORD event_type)
 					      windows_process.wow64_dbgbreak,
 					      NULL, 0, NULL);
 	  if (thread)
-	    CloseHandle (thread);
+	    {
+	      CloseHandle (thread);
+	      return;
+	    }
 	}
     }
   else
 #endif
-    {
-      if (!DebugBreakProcess (windows_process.handle))
-	warning (_("Could not interrupt program.  "
-		   "Press Ctrl-c in the program console."));
-    }
+    if (DebugBreakProcess (windows_process.handle))
+      return;
+  warning (_("Could not interrupt program.  "
+	     "Press Ctrl-c in the program console."));
+}
 
-  /* Return true to tell that Ctrl-C has been handled.  */
-  return TRUE;
+void
+windows_nat_target::pass_ctrlc ()
+{
+  interrupt ();
 }
 
 /* Get the next event from the child.  Returns the thread ptid.  */
@@ -1840,35 +1834,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   while (1)
     {
-      /* If the user presses Ctrl-c while the debugger is waiting
-	 for an event, he expects the debugger to interrupt his program
-	 and to get the prompt back.  There are two possible situations:
-
-	   - The debugger and the program do not share the console, in
-	     which case the Ctrl-c event only reached the debugger.
-	     In that case, the ctrl_c handler will take care of interrupting
-	     the inferior.  Note that this case is working starting with
-	     Windows XP.  For Windows 2000, Ctrl-C should be pressed in the
-	     inferior console.
-
-	   - The debugger and the program share the same console, in which
-	     case both debugger and inferior will receive the Ctrl-c event.
-	     In that case the ctrl_c handler will ignore the event, as the
-	     Ctrl-c event generated inside the inferior will trigger the
-	     expected debug event.
-
-	     FIXME: brobecker/2008-05-20: If the inferior receives the
-	     signal first and the delay until GDB receives that signal
-	     is sufficiently long, GDB can sometimes receive the SIGINT
-	     after we have unblocked the CTRL+C handler.  This would
-	     lead to the debugger stopping prematurely while handling
-	     the new-thread event that comes with the handling of the SIGINT
-	     inside the inferior, and then stop again immediately when
-	     the user tries to resume the execution in the inferior.
-	     This is a classic race that we should try to fix one day.  */
-      SetConsoleCtrlHandler (&ctrl_c_handler, TRUE);
       ptid_t result = get_windows_debug_event (pid, ourstatus, options);
-      SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (result != null_ptid)
 	{
@@ -2866,17 +2832,6 @@ windows_nat_target::mourn_inferior ()
     }
   windows_process.siginfo_er.ExceptionCode = 0;
   inf_child_target::mourn_inferior ();
-}
-
-/* Send a SIGINT to the process group.  This acts just like the user typed a
-   ^C on the controlling terminal.  */
-
-void
-windows_nat_target::interrupt ()
-{
-  DEBUG_EVENTS ("GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)");
-  CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT,
-				   windows_process.current_event.dwProcessId));
 }
 
 /* Helper for windows_xfer_partial that handles memory transfers.

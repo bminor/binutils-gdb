@@ -21,6 +21,7 @@
 #include "gdbsupport/event-loop.h"
 #include "gdbsupport/gdb_select.h"
 #include "inferior.h"
+#include <signal.h>
 
 /* Wrapper for select.  Nothing special needed on POSIX platforms.  */
 
@@ -55,4 +56,27 @@ sharing_input_terminal (int pid)
 #else
   return TRIBOOL_UNKNOWN;
 #endif
+}
+
+/* Current C-c handler.  */
+static c_c_handler_ftype *current_handler;
+
+/* A wrapper that reinstalls the current signal handler.  */
+static void
+handler_wrapper (int num)
+{
+  signal (num, handler_wrapper);
+  if (current_handler != SIG_IGN)
+    current_handler (num);
+}
+
+/* See inferior.h.  */
+
+c_c_handler_ftype *
+install_sigint_handler (c_c_handler_ftype *fn)
+{
+  signal (SIGINT, handler_wrapper);
+  c_c_handler_ftype *result = current_handler;
+  current_handler = fn;
+  return result;
 }

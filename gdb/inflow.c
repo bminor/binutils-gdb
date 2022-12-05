@@ -332,7 +332,7 @@ child_terminal_inferior (struct target_ops *self)
 
       if (!job_control)
 	{
-	  sigint_ours = signal (SIGINT, SIG_IGN);
+	  sigint_ours = install_sigint_handler (SIG_IGN);
 #ifdef SIGQUIT
 	  sigquit_ours = signal (SIGQUIT, SIG_IGN);
 #endif
@@ -481,7 +481,7 @@ child_terminal_ours_1 (target_terminal_state desired_state)
       if (!job_control && desired_state == target_terminal_state::is_ours)
 	{
 	  if (sigint_ours.has_value ())
-	    signal (SIGINT, *sigint_ours);
+	    install_sigint_handler (*sigint_ours);
 	  sigint_ours.reset ();
 #ifdef SIGQUIT
 	  if (sigquit_ours.has_value ())
@@ -869,7 +869,7 @@ set_sigint_trap (void)
 
   if (inf->attach_flag || !tinfo->run_terminal.empty ())
     {
-      osig = signal (SIGINT, pass_signal);
+      osig = install_sigint_handler (pass_signal);
       osig_set = 1;
     }
   else
@@ -881,7 +881,7 @@ clear_sigint_trap (void)
 {
   if (osig_set)
     {
-      signal (SIGINT, osig);
+      install_sigint_handler (osig);
       osig_set = 0;
     }
 }

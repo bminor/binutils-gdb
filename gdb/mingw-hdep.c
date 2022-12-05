@@ -25,6 +25,7 @@
 #include "inferior.h"
 
 #include <windows.h>
+#include <signal.h>
 
 /* Return an absolute file name of the running GDB, if possible, or
    ARGV0 if not.  The return value is in malloc'ed storage.  */
@@ -399,4 +400,41 @@ sharing_input_terminal (int pid)
     }
 
   return TRIBOOL_FALSE;
+}
+
+/* Current C-c handler.  */
+static c_c_handler_ftype *current_handler;
+
+/* The Windows callback that forwards requests to the C-c handler.  */
+static BOOL WINAPI
+ctrl_c_handler (DWORD event_type)
+{
+  if (event_type == CTRL_BREAK_EVENT || event_type == CTRL_C_EVENT)
+    {
+      if (current_handler != SIG_IGN)
+	current_handler (SIGINT);
+    }
+  else
+    return FALSE;
+  return TRUE;
+}
+
+/* See inferior.h.  */
+
+c_c_handler_ftype *
+install_sigint_handler (c_c_handler_ftype *fn)
+{
+  /* We want to make sure the gdb handler always comes first, so that
+     gdb gets to handle the C-c.  This is why the handler is always
+     removed and reinstalled here.  Note that trying to remove the
+     function without installing it first will cause a crash.  */
+  static bool installed = false;
+  if (installed)
+    SetConsoleCtrlHandler (ctrl_c_handler, FALSE);
+  SetConsoleCtrlHandler (ctrl_c_handler, TRUE);
+  installed = true;
+
+  c_c_handler_ftype *result = current_handler;
+  current_handler = fn;
+  return result;
 }
