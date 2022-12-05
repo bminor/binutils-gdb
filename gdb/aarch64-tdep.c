@@ -3807,7 +3807,7 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
+  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
 	      paddress (gdbarch, tdep->lowest_pc));
 }
 
