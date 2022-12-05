@@ -657,7 +657,7 @@ get_active_ext_lang (void)
 /* Install a SIGINT handler.  */
 
 static void
-install_sigint_handler (const struct signal_handler *handler_state)
+install_ext_sigint_handler (const struct signal_handler *handler_state)
 {
   gdb_assert (handler_state->handler_saved);
 
@@ -756,7 +756,7 @@ restore_active_ext_lang (struct active_ext_lang_state *previous)
     {
       /* Restore the previous SIGINT handler if one was saved.  */
       if (previous->sigint_handler.handler_saved)
-	install_sigint_handler (&previous->sigint_handler);
+	install_ext_sigint_handler (&previous->sigint_handler);
 
       /* If there's a SIGINT recorded in the cooperative extension languages,
 	 move it to the new language, or save it in GDB's global flag if the
