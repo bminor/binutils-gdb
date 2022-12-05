@@ -652,8 +652,7 @@ proc strip_test_with_saving_a_symbol { } {
 
     set exec_output [binutils_run $NM "$NMFLAGS $objfile"]
     set exec_output [prune_warnings $exec_output]
-    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
-         && ![regexp {^([0-9a-fA-F]+)?[ ]+T _main} $exec_output]} {
+    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TtDd] _?main} $exec_output]} {
 	fail $test
 	return
     }
@@ -902,8 +901,7 @@ proc strip_executable_with_saving_a_symbol { prog flags test1 test2 } {
 	regsub "^\[0-9a-fA-F\]+\[ \]+T Main\[\n\r\]+" $exec_output "" exec_output
     }
 
-    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
-         && ![regexp {^([0-9a-fA-F]+)?[ ]+[TD] _main} $exec_output]} {
+    if {![regexp {^([0-9a-fA-F]+)?[ ]+[TtDd] _?main} $exec_output]} {
 	fail $test1
 	return
     }

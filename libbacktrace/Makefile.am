@@ -498,7 +498,7 @@ TESTS += mtest_minidebug
 
 %_minidebug: %
 	$(NM) -D $< -P --defined-only | $(AWK) '{ print $$1 }' | sort > $<.dsyms
-	$(NM) $< -P --defined-only | $(AWK) '{ if ($$2 == "T" || $$2 == "t" || $$2 == "D") print $$1 }' | sort > $<.fsyms
+	$(NM) $< -P --defined-only | $(AWK) '{ if ($$2 == "T" || $$2 == "t" || $$2 == "D" || $$2 == "d") print $$1 }' | sort > $<.fsyms
 	$(COMM) -13 $<.dsyms $<.fsyms > $<.keepsyms
 	$(OBJCOPY) --only-keep-debug $< $<.dbg
 	$(OBJCOPY) -S --remove-section .gdb_index --remove-section .comment --keep-symbols=$<.keepsyms $<.dbg $<.mdbg

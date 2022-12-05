@@ -34,7 +34,7 @@ if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug
 #testcase for default option.
 #Run nm command and input the main symbol address to addr2line.
 set output [binutils_run $NM "$opts tmpdir/testprog$exe"]
-if ![regexp -line "^(\[0-9a-fA-F\]+)? +T ${dot}main" $output contents] then {
+if ![regexp -line "^(\[0-9a-fA-F\]+)? +\[Tt\] ${dot}main" $output contents] then {
     fail "$testname"
 } else {
     set list [regexp -inline -all -- {\S+} $contents]
@@ -49,7 +49,7 @@ if ![regexp -line "^(\[0-9a-fA-F\]+)? +T ${dot}main" $output contents] then {
 
 #testcase for -f option.
 #Run nm command and input the fn function symbol address to addr2line.
-if ![regexp -line "^(\[0-9a-fA-F\]+)? +T ${dot}fn" $output contents] then {
+if ![regexp -line "^(\[0-9a-fA-F\]+)? +\[Tt\] ${dot}fn" $output contents] then {
     fail "$testname -f option"
 } else {
     set list [regexp -inline -all -- {\S+} $contents]
