@@ -19,8 +19,8 @@
 
 #include "defs.h"
 #include "gdbsupport/event-loop.h"
-
 #include "gdbsupport/gdb_select.h"
+#include "inferior.h"
 
 /* Wrapper for select.  Nothing special needed on POSIX platforms.  */
 
@@ -37,4 +37,22 @@ int
 gdb_console_fputs (const char *buf, FILE *f)
 {
   return 0;
+}
+
+/* See inferior.h.  */
+
+tribool
+sharing_input_terminal (int pid)
+{
+  /* Using host-dependent code here is fine, because the
+     child_terminal_foo functions are meant to be used by child/native
+     targets.  */
+#if defined (__linux__) || defined (__sun__)
+  char buf[100];
+
+  xsnprintf (buf, sizeof (buf), "/proc/%d/fd/0", pid);
+  return is_gdb_terminal (buf);
+#else
+  return TRIBOOL_UNKNOWN;
+#endif
 }

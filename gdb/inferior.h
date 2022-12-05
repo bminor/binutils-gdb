@@ -167,6 +167,17 @@ extern void default_print_float_info (struct gdbarch *gdbarch,
 				      frame_info_ptr frame,
 				      const char *args);
 
+/* Try to determine whether TTY is GDB's input terminal.  Returns
+   TRIBOOL_UNKNOWN if we can't tell.  */
+
+extern tribool is_gdb_terminal (const char *tty);
+
+/* Helper for sharing_input_terminal.  Try to determine whether pid
+   PID is using the same TTY for input as GDB is.  Returns
+   TRIBOOL_UNKNOWN if we can't tell.  */
+
+extern tribool sharing_input_terminal (int pid);
+
 extern void child_terminal_info (struct target_ops *self, const char *, int);
 
 extern void child_terminal_ours (struct target_ops *self);

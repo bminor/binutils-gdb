@@ -21,8 +21,8 @@
 #include "main.h"
 #include "serial.h"
 #include "gdbsupport/event-loop.h"
-
 #include "gdbsupport/gdb_select.h"
+#include "inferior.h"
 
 #include <windows.h>
 
@@ -370,4 +370,33 @@ gdb_console_fputs (const char *linebuf, FILE *fstream)
 
   last_style = style;
   return 1;
+}
+
+/* See inferior.h.  */
+
+tribool
+sharing_input_terminal (int pid)
+{
+  std::vector<DWORD> results (10);
+  DWORD len = 0;
+  while (true)
+    {
+      len = GetConsoleProcessList (results.data (), results.size ());
+      /* Note that LEN == 0 is a failure, but we can treat it the same
+	 as a "no".  */
+      if (len < results.size ())
+	break;
+
+      results.resize (len);
+    }
+  /* In case the vector was too big.  */
+  results.resize (len);
+  if (std::find (results.begin (), results.end (), pid) != results.end ())
+    {
+      /* The pid is in the list sharing the console, so don't
+	 interrupt the inferior -- it will get the signal itself.  */
+      return TRIBOOL_TRUE;
+    }
+
+  return TRIBOOL_FALSE;
 }

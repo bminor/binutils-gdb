@@ -212,10 +212,9 @@ gdb_save_tty_state (void)
     }
 }
 
-/* Try to determine whether TTY is GDB's input terminal.  Returns
-   TRIBOOL_UNKNOWN if we can't tell.  */
+/* See inferior.h.  */
 
-static tribool
+tribool
 is_gdb_terminal (const char *tty)
 {
   struct stat gdb_tty;
@@ -234,26 +233,6 @@ is_gdb_terminal (const char *tty)
 	   && gdb_tty.st_ino == other_tty.st_ino)
 	  ? TRIBOOL_TRUE
 	  : TRIBOOL_FALSE);
-}
-
-/* Helper for sharing_input_terminal.  Try to determine whether
-   inferior INF is using the same TTY for input as GDB is.  Returns
-   TRIBOOL_UNKNOWN if we can't tell.  */
-
-static tribool
-sharing_input_terminal_1 (inferior *inf)
-{
-  /* Using host-dependent code here is fine, because the
-     child_terminal_foo functions are meant to be used by child/native
-     targets.  */
-#if defined (__linux__) || defined (__sun__)
-  char buf[100];
-
-  xsnprintf (buf, sizeof (buf), "/proc/%d/fd/0", inf->pid);
-  return is_gdb_terminal (buf);
-#else
-  return TRIBOOL_UNKNOWN;
-#endif
 }
 
 /* Return true if the inferior is using the same TTY for input as GDB
@@ -287,7 +266,7 @@ sharing_input_terminal (inferior *inf)
 {
   terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-  tribool res = sharing_input_terminal_1 (inf);
+  tribool res = sharing_input_terminal (inf->pid);
 
   if (res == TRIBOOL_UNKNOWN)
     {
