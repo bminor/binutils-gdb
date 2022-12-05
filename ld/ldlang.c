@@ -223,23 +223,39 @@ spec_match (const struct wildcard_spec *spec, const char *name)
   size_t nl = spec->namelen;
   size_t pl = spec->prefixlen;
   size_t sl = spec->suffixlen;
+  size_t inputlen = strlen (name);
   int r;
-  if (pl && (r = memcmp (spec->name, name, pl)))
-    return r;
+
+  if (pl)
+    {
+      if (inputlen < pl)
+	return 1;
+
+      r = memcmp (spec->name, name, pl);
+      if (r)
+	return r;
+    }
+
   if (sl)
     {
-      size_t inputlen = strlen (name);
       if (inputlen < sl)
 	return 1;
+
       r = memcmp (spec->name + nl - sl, name + inputlen - sl, sl);
       if (r)
 	return r;
     }
+
   if (nl == pl + sl + 1 && spec->name[pl] == '*')
     return 0;
-  else if (nl > pl)
+
+  if (nl > pl)
     return fnmatch (spec->name + pl, name + pl, 0);
-  return name[nl];
+
+  if (inputlen >= nl)
+    return name[nl];
+
+  return 0;
 }
 
 static char *

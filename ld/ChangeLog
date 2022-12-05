@@ -1,3 +1,9 @@
+2022-12-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 29849
+	* ldlang.c (spec_match): Check that there is sufficient length in
+	the target name to match the spec's prefix.
+
 2022-11-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 29748
