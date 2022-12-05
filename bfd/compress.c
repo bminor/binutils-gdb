@@ -564,6 +564,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
 	  return false;
 	}
       uncompressed_size = bfd_getb64 (header + 4);
+      ch_type = 0;
     }
   else if (!bfd_check_compression_header (abfd, header, sec,
 					  &ch_type,
