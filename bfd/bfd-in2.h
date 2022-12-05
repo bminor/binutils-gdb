@@ -7286,24 +7286,6 @@ bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 char *bfd_demangle (bfd *, const char *, int);
 
-void bfd_update_compression_header
-   (bfd *abfd, bfd_byte *contents, asection *sec);
-
-bool bfd_check_compression_header
-   (bfd *abfd, bfd_byte *contents, asection *sec,
-    unsigned int *ch_type,
-    bfd_size_type *uncompressed_size,
-    unsigned int *uncompressed_alignment_power);
-
-int bfd_get_compression_header_size (bfd *abfd, asection *sec);
-
-bfd_size_type bfd_convert_section_size
-   (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
-
-bool bfd_convert_section_contents
-   (bfd *ibfd, asection *isec, bfd *obfd,
-    bfd_byte **ptr, bfd_size_type *ptr_size);
-
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);
@@ -7963,6 +7945,13 @@ bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 /* Extracted from compress.c.  */
+enum compression_type
+{
+  ch_none = 0,
+  ch_compress_zlib = 1 ,       /* Compressed with zlib.  */
+  ch_compress_zstd = 2         /* Compressed with zstd (www.zstandard.org).  */
+};
+
 static inline char *
 bfd_debug_name_to_zdebug (bfd *abfd, const char *name)
 {
@@ -7988,6 +7977,18 @@ bfd_zdebug_name_to_debug (bfd *abfd, const char *name)
   return new_name;
 }
 
+void bfd_update_compression_header
+   (bfd *abfd, bfd_byte *contents, asection *sec);
+
+int bfd_get_compression_header_size (bfd *abfd, asection *sec);
+
+bfd_size_type bfd_convert_section_size
+   (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
+
+bool bfd_convert_section_contents
+   (bfd *ibfd, asection *isec, bfd *obfd,
+    bfd_byte **ptr, bfd_size_type *ptr_size);
+
 bool bfd_get_full_section_contents
    (bfd *abfd, asection *section, bfd_byte **ptr);
 
@@ -7996,7 +7997,7 @@ bool bfd_is_section_compressed_info
     int *compression_header_size_p,
     bfd_size_type *uncompressed_size_p,
     unsigned int *uncompressed_alignment_power_p,
-    unsigned int *ch_type);
+    enum compression_type *ch_type);
 
 bool bfd_is_section_compressed
    (bfd *abfd, asection *section);

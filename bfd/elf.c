@@ -1184,7 +1184,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       int compression_header_size;
       bfd_size_type uncompressed_size;
       unsigned int uncompressed_align_power;
-      unsigned int ch_type = 0;
+      enum compression_type ch_type = ch_none;
       bool compressed
 	= bfd_is_section_compressed_info (abfd, newsect,
 					  &compression_header_size,
@@ -1206,10 +1206,10 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    action = compress;
 	  else
 	    {
-	      unsigned int new_ch_type = 0;
+	      enum compression_type new_ch_type = ch_none;
 	      if ((abfd->flags & BFD_COMPRESS_GABI) != 0)
 		new_ch_type = ((abfd->flags & BFD_COMPRESS_ZSTD) != 0
-			       ? ELFCOMPRESS_ZSTD : ELFCOMPRESS_ZLIB);
+			       ? ch_compress_zstd : ch_compress_zlib);
 	      if (new_ch_type != ch_type)
 		action = compress;
 	    }

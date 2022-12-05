@@ -7803,9 +7803,9 @@ process_section_headers (Filedata * filedata)
 		    printf (_("       [<corrupt>]\n"));
 		  else
 		    {
-		      if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+		      if (chdr.ch_type == ch_compress_zlib)
 			printf ("       ZLIB, ");
-		      else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+		      else if (chdr.ch_type == ch_compress_zstd)
 			printf ("       ZSTD, ");
 		      else
 			printf (_("       [<unknown>: 0x%x], "),
@@ -15369,10 +15369,10 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
 	    ;
 #ifdef HAVE_ZSTD
-	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	  else if (chdr.ch_type == ch_compress_zstd)
 	    is_zstd = true;
 #endif
 	  else
@@ -15592,10 +15592,10 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
 	    ;
 #ifdef HAVE_ZSTD
-	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	  else if (chdr.ch_type == ch_compress_zstd)
 	    is_zstd = true;
 #endif
 	  else
@@ -16024,10 +16024,10 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 	       by get_compression_header.  */
 	    return false;
 
-	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ch_compress_zlib)
 	    ;
 #ifdef HAVE_ZSTD
-	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	  else if (chdr.ch_type == ch_compress_zstd)
 	    is_zstd = true;
 #endif
 	  else
