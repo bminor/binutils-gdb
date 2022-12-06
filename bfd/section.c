@@ -336,9 +336,8 @@ CODE_FRAGMENT
 .     executables or shared objects. This is for COFF only.  *}
 .#define SEC_COFF_SHARED             0x8000000
 .
-.  {* This section should be compressed.  This is for ELF linker
-.     internal use only.  *}
-.#define SEC_ELF_COMPRESS            0x8000000
+.  {* Indicate that section has the purecode flag set.  *}
+.#define SEC_ELF_PURECODE            0x8000000
 .
 .  {* When a section with this flag is being linked, then if the size of
 .     the input section is less than a page, it should not cross a page
@@ -363,9 +362,6 @@ CODE_FRAGMENT
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD            0x40000000
-.
-.  {* Indicate that section has the purecode flag set.  *}
-.#define SEC_ELF_PURECODE           0x80000000
 .
 .  {*  End of section flags.  *}
 .

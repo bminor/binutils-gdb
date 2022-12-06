@@ -12559,7 +12559,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	     later.  Use bfd_malloc since it will be freed by
 	     bfd_compress_section_contents.  */
 	  unsigned char *contents = esdo->this_hdr.contents;
-	  if ((o->flags & SEC_ELF_COMPRESS) == 0 || contents != NULL)
+	  if (contents != NULL)
 	    abort ();
 	  contents
 	    = (unsigned char *) bfd_malloc (esdo->this_hdr.sh_size);

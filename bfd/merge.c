@@ -850,8 +850,7 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec, void *psecinfo)
       /* We must compress this section.  Write output to the
 	 buffer.  */
       contents = hdr->contents;
-      if ((sec->output_section->flags & SEC_ELF_COMPRESS) == 0
-	  || contents == NULL)
+      if (contents == NULL)
 	abort ();
     }
   else
