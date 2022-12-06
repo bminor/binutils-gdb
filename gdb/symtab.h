@@ -2625,17 +2625,38 @@ extern unsigned int symtab_create_debug;
 
 extern unsigned int symbol_lookup_debug;
 
+/* Return true if symbol-lookup debug is turned on at all.  */
+
+static inline bool
+symbol_lookup_debug_enabled ()
+{
+  return symbol_lookup_debug > 0;
+}
+
+/* Return true if symbol-lookup debug is turned to verbose mode.  */
+
+static inline bool
+symbol_lookup_debug_enabled_v ()
+{
+  return symbol_lookup_debug > 1;
+}
+
 /* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 1.  */
 
 #define symbol_lookup_debug_printf(fmt, ...) \
-  debug_prefixed_printf_cond (symbol_lookup_debug >= 1, "symbol-lookup", fmt, \
-			      ##__VA_ARGS__)
+  debug_prefixed_printf_cond (symbol_lookup_debug_enabled (),	\
+			      "symbol-lookup", fmt, ##__VA_ARGS__)
 
 /* Print a "symbol-lookup" debug statement if symbol_lookup_debug is >= 2.  */
 
 #define symbol_lookup_debug_printf_v(fmt, ...) \
-  debug_prefixed_printf_cond (symbol_lookup_debug >= 2, "symbol-lookup", fmt, \
-			      ##__VA_ARGS__)
+  debug_prefixed_printf_cond (symbol_lookup_debug_enabled_v (), \
+			      "symbol-lookup", fmt, ##__VA_ARGS__)
+
+/* Print "symbol-lookup" enter/exit debug statements.  */
+
+#define SYMBOL_LOOKUP_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (symbol_lookup_debug_enabled, "symbol-lookup")
 
 extern bool basenames_may_differ;
 
