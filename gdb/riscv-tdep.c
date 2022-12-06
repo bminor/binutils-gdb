@@ -3623,10 +3623,10 @@ riscv_add_reggroups (struct gdbarch *gdbarch)
 static int
 riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  if (reg < RISCV_DWARF_REGNUM_X31)
+  if (reg <= RISCV_DWARF_REGNUM_X31)
     return RISCV_ZERO_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
 
-  else if (reg < RISCV_DWARF_REGNUM_F31)
+  else if (reg <= RISCV_DWARF_REGNUM_F31)
     return RISCV_FIRST_FP_REGNUM + (reg - RISCV_DWARF_REGNUM_F0);
 
   else if (reg >= RISCV_DWARF_FIRST_CSR && reg <= RISCV_DWARF_LAST_CSR)
