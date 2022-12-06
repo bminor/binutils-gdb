@@ -306,7 +306,7 @@ bfd_convert_section_setup (bfd *ibfd, asection *isec, bfd *obfd,
   if (hdr_size == sizeof (Elf32_External_Chdr))
     *new_size += sizeof (Elf64_External_Chdr) - sizeof (Elf32_External_Chdr);
   else
-    *new_size += sizeof (Elf32_External_Chdr) - sizeof (Elf64_External_Chdr);
+    *new_size -= sizeof (Elf64_External_Chdr) - sizeof (Elf32_External_Chdr);
   return true;
 }
 
