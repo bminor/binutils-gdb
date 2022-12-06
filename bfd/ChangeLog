@@ -1,3 +1,10 @@
+2022-12-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 29852
+	* elf32-arm.c (cmse_scan): Check for NULL entries in the
+	sym_hashes array.
+	(elf32_arm_gc_mark_extra_sections): Likewise.
+
 2022-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 29848

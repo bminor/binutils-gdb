@@ -6008,6 +6008,9 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
       else
 	{
 	  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
+	  if (cmse_hash == NULL)
+	    continue;
+
 	  sym_name = (char *) cmse_hash->root.root.root.string;
 	  if (!startswith (sym_name, CMSE_PREFIX))
 	    continue;
@@ -15987,6 +15990,8 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 	      for (i = ext_start; i < sym_count; i++)
 		{
 		  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
+		  if (cmse_hash == NULL)
+		    continue;
 
 		  /* Assume it is a special symbol.  If not, cmse_scan will
 		     warn about it and user can do something about it.  */
