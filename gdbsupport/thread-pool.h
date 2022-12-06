@@ -23,6 +23,7 @@
 #include <queue>
 #include <vector>
 #include <functional>
+#include <chrono>
 #if CXX_STD_THREAD
 #include <thread>
 #include <mutex>
@@ -40,7 +41,18 @@ namespace gdb
 template<typename T>
 using future = std::future<T>;
 
+/* ... and the standard future_status.  */
+using future_status = std::future_status;
+
 #else /* CXX_STD_THREAD */
+
+/* A compatibility enum for std::future_status.  This is just the
+   subset needed by gdb.  */
+enum class future_status
+{
+  ready,
+  timeout,
+};
 
 /* A compatibility wrapper for std::future.  Once <thread> and
    <future> are available in all GCC builds -- should that ever happen
@@ -71,6 +83,13 @@ public:
 
   void wait () const { }
 
+  template<class Rep, class Period>
+  future_status wait_for (const std::chrono::duration<Rep,Period> &duration)
+    const
+  {
+    return future_status::ready;
+  }
+
   T get () { return std::move (m_value); }
 
 private:
@@ -85,6 +104,14 @@ class future<void>
 {
 public:
   void wait () const { }
+
+  template<class Rep, class Period>
+  future_status wait_for (const std::chrono::duration<Rep,Period> &duration)
+    const
+  {
+    return future_status::ready;
+  }
+
   void get () { }
 };
 

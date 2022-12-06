@@ -28,6 +28,7 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/selftest.h"
+#include <chrono>
 
 /* See cooked-index.h.  */
 
@@ -402,6 +403,21 @@ cooked_index_shard::find (const std::string &name, bool completing) const
   });
 
   return range (lower, upper);
+}
+
+/* See cooked-index.h.  */
+
+void
+cooked_index_shard::wait (bool allow_quit) const
+{
+  if (allow_quit)
+    {
+      std::chrono::milliseconds duration { 15 };
+      while (m_future.wait_for (duration) == gdb::future_status::timeout)
+	QUIT;
+    }
+  else
+    m_future.wait ();
 }
 
 cooked_index::cooked_index (vec_type &&vec)
