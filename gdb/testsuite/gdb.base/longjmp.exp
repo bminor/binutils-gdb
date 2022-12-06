@@ -42,30 +42,35 @@ set bp_start_test_3 [gdb_get_line_number "patt3"]
 # Pattern 1 - simple longjmp.
 #
 
-delete_breakpoints
+with_test_prefix "pattern 1" {
 
-gdb_test "break $bp_start_test_1" \
-    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_1.*" \
-    "breakpoint at pattern 1 start"
-gdb_test "continue" "patt1.*" "continue to breakpoint at pattern 1 start"
+    with_test_prefix setup {
+	delete_breakpoints
 
-# set safe-net break
-gdb_test "break $bp_miss_step_1" \
-    "Breakpoint.*at.* file .*$srcfile, line.*$bp_miss_step_1.*" \
-    "breakpoint at miss_step_1"
+	gdb_test "break $bp_start_test_1" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_1.*" \
+	    "breakpoint at pattern start"
+	gdb_test "continue" "patt1.*" "continue to breakpoint at pattern start"
 
-gdb_test "next" "longjmps\\+\\+;.*" "next over setjmp (1)"
-gdb_test "next" "longjmp \\(env, 1\\);.*" "next to longjmp (1)"
-
-set msg "next over longjmp(1)"
-gdb_test_multiple "next" $msg {
-    -re ".*patt1.*$gdb_prompt $" {
-	pass $msg
-	gdb_test "next" "resumes\\+\\+.*" "next into else block (1)"
-	gdb_test "next" "miss_step_1.*" "next into safety net (1)"
+	# set safe-net break
+	gdb_test "break $bp_miss_step_1" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*$bp_miss_step_1.*" \
+	    "breakpoint at safety net"
     }
-    -re "miss_step_1.*$gdb_prompt $" {
-	fail $msg
+
+    gdb_test "next" "longjmps\\+\\+;.*" "next over setjmp"
+    gdb_test "next" "longjmp \\(env, 1\\);.*" "next to longjmp"
+
+    set msg "next over longjmp"
+    gdb_test_multiple "next" $msg {
+	-re ".*patt1.*$gdb_prompt $" {
+	    pass $msg
+	    gdb_test "next" "resumes\\+\\+.*" "next into else block"
+	    gdb_test "next" "miss_step_1.*" "next into safety net"
+	}
+	-re "miss_step_1.*$gdb_prompt $" {
+	    fail $msg
+	}
     }
 }
 
@@ -73,30 +78,35 @@ gdb_test_multiple "next" $msg {
 # Pattern 2 - longjmp from an inner function.
 #
 
-delete_breakpoints
+with_test_prefix "pattern 2" {
 
-gdb_test "break $bp_start_test_2" \
-    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_2.*" \
-    "breakpoint at pattern 2 start"
-gdb_test "continue" "patt2.*" "continue to breakpoint at pattern 2 start"
+    with_test_prefix setup {
+	delete_breakpoints
 
-# set safe-net break
-gdb_test "break $bp_miss_step_2" \
-    "Breakpoint.*at.* file .*$srcfile, line.*$bp_miss_step_2.*" \
-    "breakpoint at miss_step_2"
+	gdb_test "break $bp_start_test_2" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_2.*" \
+	    "breakpoint at pattern start"
+	gdb_test "continue" "patt2.*" "continue to breakpoint at pattern start"
 
-gdb_test "next" "call_longjmp.*" "next over setjmp (2)"
-
-set msg "next over call_longjmp (2)"
-gdb_test_multiple "next" $msg {
-    -re ".*patt2.*$gdb_prompt $" {
-	pass $msg
-
-	gdb_test "next" "resumes\\+\\+.*" "next into else block (2)"
-	gdb_test "next" "miss_step_2.*" "next into safety net (2)"
+	# set safe-net break
+	gdb_test "break $bp_miss_step_2" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*$bp_miss_step_2.*" \
+	    "breakpoint at safety net"
     }
-    -re "miss_step_2.*$gdb_prompt $" {
-	fail $msg
+
+    gdb_test "next" "call_longjmp.*" "next over setjmp"
+
+    set msg "next over call_longjmp"
+    gdb_test_multiple "next" $msg {
+	-re ".*patt2.*$gdb_prompt $" {
+	    pass $msg
+
+	    gdb_test "next" "resumes\\+\\+.*" "next into else block"
+	    gdb_test "next" "miss_step_2.*" "next into safety net"
+	}
+	-re "miss_step_2.*$gdb_prompt $" {
+	    fail $msg
+	}
     }
 }
 
@@ -104,11 +114,16 @@ gdb_test_multiple "next" $msg {
 # Pattern 3 - setjmp/longjmp inside stepped-over function.
 #
 
-delete_breakpoints
+with_test_prefix "pattern 3" {
 
-gdb_test "break $bp_start_test_3" \
-    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_3.*" \
-    "breakpoint at pattern 3 start"
-gdb_test "continue" "patt3.*" "continue to breakpoint at pattern 3 start"
+    with_test_prefix setup {
+	delete_breakpoints
 
-gdb_test "next" "longjmp caught.*" "next over patt3"
+	gdb_test "break $bp_start_test_3" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*$bp_start_test_3.*" \
+	    "breakpoint at pattern start"
+	gdb_test "continue" "patt3.*" "continue to breakpoint at pattern start"
+    }
+
+    gdb_test "next" "longjmp caught.*" "next over pattern"
+}
