@@ -2157,13 +2157,14 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
-CORE_ADDR ppc64_sysv_get_return_buf_addr (struct type *val_type,
-					  frame_info_ptr cur_frame)
+CORE_ADDR
+ppc64_sysv_get_return_buf_addr (struct type *val_type,
+				frame_info_ptr cur_frame)
 {
   /* The PowerPC ABI specifies aggregates that are not returned by value
      are returned in a storage buffer provided by the caller.  The
      address of the storage buffer is provided as a hidden first input
-     arguement in register r3.  The PowerPC ABI does not guarantee that
+     argument in register r3.  The PowerPC ABI does not guarantee that
      register r3 will not be changed while executing the function.  Hence, it
      cannot be assumed that r3 will still contain the address of the storage
      buffer when execution reaches the end of the function.
