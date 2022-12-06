@@ -932,10 +932,6 @@ typedef struct bfd_section
      TMS320C54X only.  */
 #define SEC_TIC54X_BLOCK           0x10000000
 
-  /* This section should be renamed.  This is for ELF linker
-     internal use only.  */
-#define SEC_ELF_RENAME             0x10000000
-
   /* Conditionally link this section; do not link if there are no
      references found to any symbol in the section.  This is for TI
      TMS320C54X only.  */
@@ -7982,8 +7978,9 @@ void bfd_update_compression_header
 
 int bfd_get_compression_header_size (bfd *abfd, asection *sec);
 
-bfd_size_type bfd_convert_section_size
-   (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
+bool bfd_convert_section_setup
+   (bfd *ibfd, asection *isec, bfd *obfd,
+    const char **new_name, bfd_size_type *new_size);
 
 bool bfd_convert_section_contents
    (bfd *ibfd, asection *isec, bfd *obfd,

@@ -1246,30 +1246,16 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	      return false;
 	    }
 #endif
-	}
-
-      if (action != nothing)
-	{
-	  if (abfd->is_linker_input)
+	  if (abfd->is_linker_input
+	      && name[1] == 'z')
 	    {
-	      if (name[1] == 'z'
-		  && (action == decompress
-		      || (action == compress
-			  && (abfd->flags & BFD_COMPRESS_GABI) != 0)))
-		{
-		  /* Convert section name from .zdebug_* to .debug_* so
-		     that linker will consider this section as a debug
-		     section.  */
-		  char *new_name = bfd_zdebug_name_to_debug (abfd, name);
-		  if (new_name == NULL)
-		    return false;
-		  bfd_rename_section (newsect, new_name);
-		}
+	      /* Rename section from .zdebug_* to .debug_* so that ld
+		 scripts will see this section as a debug section.  */
+	      char *new_name = bfd_zdebug_name_to_debug (abfd, name);
+	      if (new_name == NULL)
+		return false;
+	      bfd_rename_section (newsect, new_name);
 	    }
-	  else
-	    /* For objdump, don't rename the section.  For objcopy, delay
-	       section rename to elf_fake_sections.  */
-	    newsect->flags |= SEC_ELF_RENAME;
 	}
     }
 
@@ -3181,57 +3167,20 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 
   this_hdr = &esd->this_hdr;
 
-  if (arg->link_info)
+  /* ld: compress DWARF debug sections with names: .debug_*.  */
+  if (arg->link_info
+      && (arg->link_info->compress_debug & COMPRESS_DEBUG) != 0
+      && (asect->flags & SEC_DEBUGGING)
+      && name[1] == 'd'
+      && name[6] == '_')
     {
-      /* ld: compress DWARF debug sections with names: .debug_*.  */
-      if ((arg->link_info->compress_debug & COMPRESS_DEBUG)
-	  && (asect->flags & SEC_DEBUGGING)
-	  && name[1] == 'd'
-	  && name[6] == '_')
-	{
-	  /* Set SEC_ELF_COMPRESS to indicate this section should be
-	     compressed.  */
-	  asect->flags |= SEC_ELF_COMPRESS;
-	  /* If this section will be compressed, delay adding section
-	     name to section name section after it is compressed in
-	     _bfd_elf_assign_file_positions_for_non_load.  */
-	  delay_st_name_p = true;
-	}
-    }
-  else if ((asect->flags & SEC_ELF_RENAME))
-    {
-      /* objcopy: rename output DWARF debug section.  */
-      if ((abfd->flags & (BFD_DECOMPRESS | BFD_COMPRESS_GABI)))
-	{
-	  /* When we decompress or compress with SHF_COMPRESSED,
-	     convert section name from .zdebug_* to .debug_* if
-	     needed.  */
-	  if (name[1] == 'z')
-	    {
-	      char *new_name = bfd_zdebug_name_to_debug (abfd, name);
-	      if (new_name == NULL)
-		{
-		  arg->failed = true;
-		  return;
-		}
-	      name = new_name;
-	    }
-	}
-      else if (asect->compress_status == COMPRESS_SECTION_DONE
-	       && name[1] == 'd')
-	{
-	  /* PR binutils/18087: Compression does not always make a
-	     section smaller.  So only rename the section when
-	     compression has actually taken place.  If input section
-	     name is .zdebug_*, we should never compress it again.  */
-	  char *new_name = bfd_debug_name_to_zdebug (abfd, name);
-	  if (new_name == NULL)
-	    {
-	      arg->failed = true;
-	      return;
-	    }
-	  name = new_name;
-	}
+      /* Set SEC_ELF_COMPRESS to indicate this section should be
+	 compressed.  */
+      asect->flags |= SEC_ELF_COMPRESS;
+      /* If this section will be compressed, delay adding section
+	 name to section name section after it is compressed in
+	 _bfd_elf_assign_file_positions_for_non_load.  */
+      delay_st_name_p = true;
     }
 
   if (delay_st_name_p)

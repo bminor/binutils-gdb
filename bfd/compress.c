@@ -225,53 +225,89 @@ bfd_get_compression_header_size (bfd *abfd, asection *sec)
 
 /*
 FUNCTION
-	bfd_convert_section_size
+	bfd_convert_section_setup
 
 SYNOPSIS
-	bfd_size_type bfd_convert_section_size
-	  (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
+	bool bfd_convert_section_setup
+	  (bfd *ibfd, asection *isec, bfd *obfd,
+	   const char **new_name, bfd_size_type *new_size);
 
 DESCRIPTION
-	Convert the size @var{size} of the section @var{isec} in input
-	BFD @var{ibfd} to the section size in output BFD @var{obfd}.
+	Do early setup for objcopy, when copying @var{isec} in input
+	BFD @var{ibfd} to output BFD @var{obfd}.  Returns the name and
+	size of the output section.
 */
 
-bfd_size_type
-bfd_convert_section_size (bfd *ibfd, sec_ptr isec, bfd *obfd,
-			  bfd_size_type size)
+bool
+bfd_convert_section_setup (bfd *ibfd, asection *isec, bfd *obfd,
+			   const char **new_name, bfd_size_type *new_size)
 {
   bfd_size_type hdr_size;
+
+  if ((isec->flags & SEC_DEBUGGING) != 0
+      && (isec->flags & SEC_HAS_CONTENTS) != 0)
+    {
+      const char *name = *new_name;
+
+      if ((ibfd->flags & (BFD_DECOMPRESS | BFD_COMPRESS_GABI)) != 0)
+	{
+	  /* When we decompress or compress with SHF_COMPRESSED,
+	     convert section name from .zdebug_* to .debug_*.  */
+	  if (startswith (name, ".zdebug_"))
+	    {
+	      name = bfd_zdebug_name_to_debug (obfd, name);
+	      if (name == NULL)
+		return false;
+	    }
+	}
+
+      /* PR binutils/18087: Compression does not always make a
+	 section smaller.  So only rename the section when
+	 compression has actually taken place.  If input section
+	 name is .zdebug_*, we should never compress it again.  */
+      else if (isec->compress_status == COMPRESS_SECTION_DONE
+	       && startswith (name, ".debug_"))
+	{
+	  name = bfd_debug_name_to_zdebug (obfd, name);
+	  if (name == NULL)
+	    return false;
+	}
+      *new_name = name;
+    }
+  *new_size = bfd_section_size (isec);
 
   /* Do nothing if either input or output aren't ELF.  */
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return size;
+    return true;
 
   /* Do nothing if ELF classes of input and output are the same. */
   if (get_elf_backend_data (ibfd)->s->elfclass
       == get_elf_backend_data (obfd)->s->elfclass)
-    return size;
+    return true;
 
   /* Convert GNU property size.  */
   if (startswith (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
-    return _bfd_elf_convert_gnu_property_size (ibfd, obfd);
+    {
+      *new_size = _bfd_elf_convert_gnu_property_size (ibfd, obfd);
+      return true;
+    }
 
   /* Do nothing if input file will be decompressed.  */
   if ((ibfd->flags & BFD_DECOMPRESS))
-    return size;
+    return true;
 
   /* Do nothing if the input section isn't a SHF_COMPRESSED section. */
   hdr_size = bfd_get_compression_header_size (ibfd, isec);
   if (hdr_size == 0)
-    return size;
+    return true;
 
   /* Adjust the size of the output SHF_COMPRESSED section.  */
   if (hdr_size == sizeof (Elf32_External_Chdr))
-    return (size - sizeof (Elf32_External_Chdr)
-	    + sizeof (Elf64_External_Chdr));
+    *new_size += sizeof (Elf64_External_Chdr) - sizeof (Elf32_External_Chdr);
   else
-    return (size - sizeof (Elf64_External_Chdr)
-	    + sizeof (Elf32_External_Chdr));
+    *new_size += sizeof (Elf32_External_Chdr) - sizeof (Elf64_External_Chdr);
+  return true;
 }
 
 /*

@@ -4118,6 +4118,13 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       flags &= ~clr;
     }
 
+  if (!bfd_convert_section_setup (ibfd, isection, obfd, &name, &size))
+    {
+      osection = NULL;
+      err = _("failed to create output section");
+      goto loser;
+    }
+
   osection = bfd_make_section_anyway_with_flags (obfd, name, flags);
 
   if (osection == NULL)
@@ -4126,8 +4133,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  size = bfd_section_size (isection);
-  size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
     size = (size + interleave - 1) / interleave * copy_width;
   else if (extract_symbol)
