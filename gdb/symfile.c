@@ -1769,6 +1769,23 @@ symfile_bfd_open (const char *name)
   return sym_bfd;
 }
 
+/* See symfile.h.  */
+
+gdb_bfd_ref_ptr
+symfile_bfd_open_no_error (const char *name) noexcept
+{
+  try
+    {
+      return symfile_bfd_open (name);
+    }
+  catch (const gdb_exception_error &err)
+    {
+      warning ("%s", err.what ());
+    }
+
+  return nullptr;
+}
+
 /* Return the section index for SECTION_NAME on OBJFILE.  Return -1 if
    the section was not found.  */
 

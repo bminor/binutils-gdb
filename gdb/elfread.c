@@ -1232,10 +1232,12 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 
       if (!debugfile.empty ())
 	{
-	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
+	  gdb_bfd_ref_ptr debug_bfd
+	    (symfile_bfd_open_no_error (debugfile.c_str ()));
 
-	  symbol_file_add_separate (debug_bfd, debugfile.c_str (),
-				    symfile_flags, objfile);
+	  if (debug_bfd != nullptr)
+	    symbol_file_add_separate (debug_bfd, debugfile.c_str (),
+				      symfile_flags, objfile);
 	}
       else
 	{
@@ -1255,13 +1257,12 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 	      if (fd.get () >= 0)
 		{
 		  /* File successfully retrieved from server.  */
-		  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
+		  gdb_bfd_ref_ptr debug_bfd
+		    (symfile_bfd_open_no_error (symfile_path.get ()));
 
-		  if (debug_bfd == nullptr)
-		    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
-			     filename);
-		  else if (build_id_verify (debug_bfd.get (), build_id->size,
-					    build_id->data))
+		  if (debug_bfd != nullptr
+		      && build_id_verify (debug_bfd.get (), build_id->size,
+					  build_id->data))
 		    {
 		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
 						symfile_flags, objfile);

@@ -276,6 +276,11 @@ extern void set_initial_language (void);
 
 extern gdb_bfd_ref_ptr symfile_bfd_open (const char *);
 
+/* Like symfile_bfd_open, but will not throw an exception on error.
+   Instead, it issues a warning and returns nullptr.  */
+
+extern gdb_bfd_ref_ptr symfile_bfd_open_no_error (const char *) noexcept;
+
 extern int get_section_index (struct objfile *, const char *);
 
 extern int print_symbol_loading_p (int from_tty, int mainline, int full);
