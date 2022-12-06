@@ -2127,13 +2127,8 @@ if { [isnative] && [check_compiler_available] } {
     }
 
     if { [istarget "x86_64-*-linux*"] } {
-	if { [istarget "x86_64-*-linux*-gnux32"] } {
-	    set pltdump {{objdump {-drw} plt-main-ibt-x32.dd}}
-	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt-x32.dd}}
-	} else {
-	    set pltdump {{objdump {-drw} plt-main-ibt.dd}}
-	    set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
-	}
+	set pltdump {{objdump {-drw} plt-main-ibt.dd}}
+	set pltsecdump {{readelf {-SW} plt-main-ibt-now.rd} {objdump {-drw} plt-main-ibt.dd}}
 	run_cc_link_tests [list \
 	    [list \
 		"Build plt-main with -z ibtplt" \
