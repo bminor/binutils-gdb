@@ -3804,15 +3804,17 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
   switch (do_debug_sections)
     {
+    case compress_gnu_zlib:
+      ibfd->flags |= BFD_COMPRESS;
+      break;
     case compress:
     case compress_zlib:
-    case compress_gnu_zlib:
+      /* The above two cases ought to just set BFD_COMPRESS for non-ELF
+	 but we can't tell whether a file is ELF or not until after
+	 bfd_check_format_matches.  FIXME maybe: decide compression
+	 style in BFD after bfd_check_format_matches.  */
     case compress_gabi_zlib:
-      ibfd->flags |= BFD_COMPRESS;
-      /* Don't check if input is ELF here since this information is
-	 only available after bfd_check_format_matches is called.  */
-      if (do_debug_sections != compress_gnu_zlib)
-	ibfd->flags |= BFD_COMPRESS_GABI;
+      ibfd->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
       break;
     case compress_zstd:
       ibfd->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;

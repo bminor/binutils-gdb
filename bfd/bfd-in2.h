@@ -342,25 +342,6 @@ extern void bfd_hash_traverse
    this size.  */
 extern unsigned long bfd_hash_set_default_size (unsigned long);
 
-/* Types of compressed DWARF debug sections.  */
-enum compressed_debug_section_type
-{
-  COMPRESS_DEBUG_NONE = 0,
-  COMPRESS_DEBUG = 1 << 0,
-  COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 1,
-  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2,
-  COMPRESS_DEBUG_ZSTD = COMPRESS_DEBUG | 1 << 3,
-  COMPRESS_UNKNOWN = 1 << 4
-};
-
-/* Tuple for compressed_debug_section_type and their name.  */
-
-struct compressed_type_tuple
-{
-  enum compressed_debug_section_type type;
-  const char *name;
-};
-
 /* This structure is used to keep track of stabs in sections
    information while linking.  */
 
@@ -471,12 +452,6 @@ extern void bfd_free_window
   (bfd_window *);
 extern bool bfd_get_file_window
   (bfd *, file_ptr, bfd_size_type, bfd_window *, bool);
-
-
-extern enum compressed_debug_section_type bfd_get_compression_algorithm
-  (const char *);
-extern const char *bfd_get_compression_algorithm_name
-  (enum compressed_debug_section_type);
 
 /* Externally visible ELF routines.  */
 
@@ -7937,6 +7912,24 @@ bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
 
 /* Extracted from compress.c.  */
+/* Types of compressed DWARF debug sections.  */
+enum compressed_debug_section_type
+{
+  COMPRESS_DEBUG_NONE = 0,
+  COMPRESS_DEBUG_GNU_ZLIB = 1 << 1,
+  COMPRESS_DEBUG_GABI_ZLIB = 1 << 2,
+  COMPRESS_DEBUG_ZSTD = 1 << 3,
+  COMPRESS_UNKNOWN = 1 << 4
+};
+
+/* Tuple for compressed_debug_section_type and their name.  */
+struct compressed_type_tuple
+{
+  enum compressed_debug_section_type type;
+  const char *name;
+};
+
+/* Compression header ch_type values.  */
 enum compression_type
 {
   ch_none = 0,
@@ -7969,6 +7962,10 @@ bfd_zdebug_name_to_debug (bfd *abfd, const char *name)
   return new_name;
 }
 
+enum compressed_debug_section_type
+bfd_get_compression_algorithm (const char *name);
+const char *bfd_get_compression_algorithm_name
+   (enum compressed_debug_section_type type);
 void bfd_update_compression_header
    (bfd *abfd, bfd_byte *contents, asection *sec);
 

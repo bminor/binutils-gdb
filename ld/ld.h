@@ -304,6 +304,9 @@ typedef struct
   /* If set, share only duplicated types in CTF, rather than sharing
      all types that are not in conflict.  */
   bool ctf_share_duplicated;
+
+  /* Compress DWARF debug sections.  */
+  enum compressed_debug_section_type compress_debug;
 } ld_config_type;
 
 extern ld_config_type config;

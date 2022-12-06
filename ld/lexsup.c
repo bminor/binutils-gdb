@@ -2163,7 +2163,7 @@ elf_static_list_options (FILE *file)
 			      Compress DWARF debug sections\n"));
   fprintf (file, _("\
                                 Default: %s\n"),
-	   bfd_get_compression_algorithm_name (link_info.compress_debug));
+	   bfd_get_compression_algorithm_name (config.compress_debug));
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\

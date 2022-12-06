@@ -3169,8 +3169,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 
   /* ld: compress DWARF debug sections with names: .debug_*.  */
   if (arg->link_info
-      && (arg->link_info->compress_debug & COMPRESS_DEBUG) != 0
-      && (asect->flags & SEC_DEBUGGING)
+      && (abfd->flags & BFD_COMPRESS) != 0
+      && (asect->flags & SEC_DEBUGGING) != 0
       && name[1] == 'd'
       && name[6] == '_')
     {

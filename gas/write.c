@@ -1490,7 +1490,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (ctx == NULL)
     return;
 
-  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB)
+  if ((abfd->flags & BFD_COMPRESS_GABI) == 0)
     header_size = 12;
   else
     header_size = bfd_get_compression_header_size (stdoutput, NULL);
@@ -1601,7 +1601,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
   x = bfd_set_section_size (sec, compressed_size);
   gas_assert (x);
-  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB
+  if ((abfd->flags & BFD_COMPRESS_GABI) == 0
       && section_name[1] == 'd')
     {
       compressed_name = concat (".z", section_name + 1, (char *) NULL);
@@ -2531,15 +2531,16 @@ write_object_file (void)
      contents of the debug sections.  This needs to be done before
      we start writing any sections, because it will affect the file
      layout, which is fixed once we start writing contents.  */
-  if (flag_compress_debug)
+  if (flag_compress_debug != COMPRESS_DEBUG_NONE)
     {
+      flagword flags = BFD_COMPRESS;
       if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
-	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+	flags = BFD_COMPRESS | BFD_COMPRESS_GABI;
       else if (flag_compress_debug == COMPRESS_DEBUG_ZSTD)
-	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
-      else
-	stdoutput->flags |= BFD_COMPRESS;
-      bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
+	flags = BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
+      stdoutput->flags |= flags & bfd_applicable_file_flags (stdoutput);
+      if ((stdoutput->flags & BFD_COMPRESS) != 0)
+	bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
     }
 
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
