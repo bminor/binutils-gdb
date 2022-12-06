@@ -1398,7 +1398,7 @@ rust_parser::parse_binop (bool required)
 	  break;
         }
 
-      while (precedence < operator_stack.back ().precedence
+      while (precedence <= operator_stack.back ().precedence
 	     && operator_stack.size () > 1)
 	{
 	  rustop_item rhs = std::move (operator_stack.back ());

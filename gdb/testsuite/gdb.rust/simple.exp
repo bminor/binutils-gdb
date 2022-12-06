@@ -412,3 +412,7 @@ if {[lindex $v 0] >= 8} {
     gdb_test "python print(gdb.lookup_type('simple::MoreComplicated').dynamic)" \
 	"True"
 }
+
+# The new parser introduced an operator precedence bug.
+gdb_test "print 5 * 7 / 5" " = 7"
+gdb_test "print 4 - 3 - 1" " = 0"
