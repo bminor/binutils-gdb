@@ -2328,29 +2328,15 @@ Output_data_plt_x86_64_ibt<size>::set_final_data_size()
 
 // The first entry in the IBT PLT.
 
-template<>
+template<int size>
 const unsigned char
-Output_data_plt_x86_64_ibt<32>::first_plt_entry[plt_entry_size] =
+Output_data_plt_x86_64_ibt<size>::first_plt_entry[plt_entry_size] =
 {
-  // MPX isn't supported for x32, so we don't need the BND prefix.
-  // From AMD64 ABI Draft 0.98, page 76
   0xff, 0x35,		 // pushq contents of memory address
   0, 0, 0, 0,		 // replaced with address of .got + 8
   0xff, 0x25,		 // jmp indirect
   0, 0, 0, 0,		 // replaced with address of .got + 16
   0x90, 0x90, 0x90, 0x90 // noop (x4)
-};
-
-template<>
-const unsigned char
-Output_data_plt_x86_64_ibt<64>::first_plt_entry[plt_entry_size] =
-{
-  // Use the BND prefix so that IBT is compatible with MPX.
-  0xff, 0x35,		// pushq contents of memory address
-  0, 0, 0, 0,		// replaced with address of .got + 8
-  0xf2, 0xff, 0x25,	// bnd jmp indirect
-  0, 0, 0, 0,		// replaced with address of .got + 16
-  0x0f, 0x1f, 0x00   	// nop
 };
 
 template<int size>
@@ -2362,7 +2348,7 @@ Output_data_plt_x86_64_ibt<size>::do_fill_first_plt_entry(
 {
   // Offsets to the addresses needing relocation.
   const unsigned int roff1 = 2;
-  const unsigned int roff2 = (size == 32) ? 8 : 9;
+  const unsigned int roff2 = 8;
 
   memcpy(pov, first_plt_entry, plt_entry_size);
   // We do a jmp relative to the PC at the end of this instruction.
@@ -2376,9 +2362,9 @@ Output_data_plt_x86_64_ibt<size>::do_fill_first_plt_entry(
 
 // Subsequent entries in the IBT PLT.
 
-template<>
+template<int size>
 const unsigned char
-Output_data_plt_x86_64_ibt<32>::plt_entry[plt_entry_size] =
+Output_data_plt_x86_64_ibt<size>::plt_entry[plt_entry_size] =
 {
   // From AMD64 ABI Draft 1.0-rc1, Chapter 13.
   0xf3, 0x0f, 0x1e, 0xfa,	// endbr64
@@ -2389,24 +2375,11 @@ Output_data_plt_x86_64_ibt<32>::plt_entry[plt_entry_size] =
   0x90, 0x90			// nop
 };
 
-template<>
-const unsigned char
-Output_data_plt_x86_64_ibt<64>::plt_entry[plt_entry_size] =
-{
-  // From AMD64 ABI Draft 1.0-rc1, Chapter 13.
-  0xf3, 0x0f, 0x1e, 0xfa,	// endbr64
-  0x68,				// pushq immediate
-  0, 0, 0, 0,			// replaced with offset into relocation table
-  0xf2, 0xe9,			// bnd jmpq relative
-  0, 0, 0, 0,			// replaced with offset to start of .plt
-  0x90				// nop
-};
-
 // Entries in the IBT Additional PLT.
 
-template<>
+template<int size>
 const unsigned char
-Output_data_plt_x86_64_ibt<32>::aplt_entry[aplt_entry_size] =
+Output_data_plt_x86_64_ibt<size>::aplt_entry[aplt_entry_size] =
 {
   // From AMD64 ABI Draft 1.0-rc1, Chapter 13.
   0xf3, 0x0f, 0x1e, 0xfa,	// endbr64
@@ -2414,18 +2387,6 @@ Output_data_plt_x86_64_ibt<32>::aplt_entry[aplt_entry_size] =
   0, 0, 0, 0,			// replaced with address of symbol in .got
   0x0f, 0x1f, 0x04, 0x00,	// nop
   0x90, 0x90			// nop
-};
-
-template<>
-const unsigned char
-Output_data_plt_x86_64_ibt<64>::aplt_entry[aplt_entry_size] =
-{
-  // From AMD64 ABI Draft 1.0-rc1, Chapter 13.
-  0xf3, 0x0f, 0x1e, 0xfa,	// endbr64
-  0xf2, 0xff, 0x25,		// bnd jmpq indirect
-  0, 0, 0, 0,			// replaced with address of symbol in .got
-  0x0f, 0x1f, 0x04, 0x00,	// nop
-  0x90,				// nop
 };
 
 template<int size>
@@ -2440,7 +2401,7 @@ Output_data_plt_x86_64_ibt<size>::do_fill_plt_entry(
 {
   // Offsets to the addresses needing relocation.
   const unsigned int roff1 = 5;
-  const unsigned int roff2 = (size == 32) ? 10 : 11;
+  const unsigned int roff2 = 10;
 
   memcpy(pov, plt_entry, plt_entry_size);
   elfcpp::Swap_unaligned<32, false>::writeval(pov + roff1, plt_index);
@@ -2459,7 +2420,7 @@ Output_data_plt_x86_64_ibt<size>::fill_aplt_entry(
     unsigned int plt_index)
 {
   // Offset to the address needing relocation.
-  const unsigned int roff = (size == 32) ? 6 : 7;
+  const unsigned int roff = 6;
 
   // Check PC-relative offset overflow in PLT entry.
   uint64_t plt_got_pcrel_offset = (got_address + got_offset
