@@ -46,14 +46,14 @@ main ()
   volatile int i = 0;
 
   /* Pattern 1 - simple longjmp.  */
-  if (setjmp (env) == 0) /* patt1 */
+  if (setjmp (env) != 0) /* patt1 */
     {
-      longjmps++;
-      longjmp (env, 1);
+      resumes++;
     }
   else
     {
-      resumes++;
+      longjmps++;
+      longjmp (env, 1);
     }
 
   i = 1; /* miss_step_1 */
