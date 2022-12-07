@@ -1461,25 +1461,15 @@ static void
 compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
-  fragS *f;
-  fragS *first_newf;
-  fragS *last_newf;
-  struct obstack *ob = &seginfo->frchainP->frch_obstack;
-  bfd_size_type uncompressed_size = (bfd_size_type) sec->size;
-  bfd_size_type compressed_size;
-  const char *section_name;
-  char *compressed_name;
-  char *header;
-  int x;
+  bfd_size_type uncompressed_size = sec->size;
   flagword flags = bfd_section_flags (sec);
-  unsigned int header_size;
 
   if (seginfo == NULL
-      || sec->size < 32
-      || (flags & (SEC_ALLOC | SEC_HAS_CONTENTS)) == SEC_ALLOC)
+      || uncompressed_size < 32
+      || (flags & SEC_HAS_CONTENTS) == 0)
     return;
 
-  section_name = bfd_section_name (sec);
+  const char *section_name = bfd_section_name (sec);
   if (!startswith (section_name, ".debug_")
       && !startswith (section_name, ".gnu.debuglto_.debug_")
       && !startswith (section_name, ".gnu.linkonce.wi."))
@@ -1490,13 +1480,15 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (ctx == NULL)
     return;
 
+  unsigned int header_size;
   if ((abfd->flags & BFD_COMPRESS_GABI) == 0)
     header_size = 12;
   else
     header_size = bfd_get_compression_header_size (stdoutput, NULL);
 
   /* Create a new frag to contain the compression header.  */
-  first_newf = frag_alloc (ob);
+  struct obstack *ob = &seginfo->frchainP->frch_obstack;
+  fragS *first_newf = frag_alloc (ob);
   if (obstack_room (ob) < header_size)
     first_newf = frag_alloc (ob);
   if (obstack_room (ob) < header_size)
@@ -1504,16 +1496,16 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 			"can't extend frag %lu chars",
 			(unsigned long) header_size),
 	      (unsigned long) header_size);
-  last_newf = first_newf;
+  fragS *last_newf = first_newf;
   obstack_blank_fast (ob, header_size);
   last_newf->fr_type = rs_fill;
   last_newf->fr_fix = header_size;
-  header = last_newf->fr_literal;
-  compressed_size = header_size;
+  char *header = last_newf->fr_literal;
+  bfd_size_type compressed_size = header_size;
 
   /* Stream the frags through the compression engine, adding new frags
      as necessary to accommodate the compressed output.  */
-  for (f = seginfo->frchainP->frch_root;
+  for (fragS *f = seginfo->frchainP->frch_root;
        f;
        f = f->fr_next)
     {
@@ -1573,7 +1565,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
       obstack_blank_fast (ob, avail_out);
-      x = compress_finish (use_zstd, ctx, &next_out, &avail_out, &out_size);
+      int x = compress_finish (use_zstd, ctx, &next_out, &avail_out, &out_size);
       if (x < 0)
 	return;
 
@@ -1599,12 +1591,12 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* Update the section size and its name.  */
   bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
-  x = bfd_set_section_size (sec, compressed_size);
+  bool x = bfd_set_section_size (sec, compressed_size);
   gas_assert (x);
   if ((abfd->flags & BFD_COMPRESS_GABI) == 0
       && section_name[1] == 'd')
     {
-      compressed_name = concat (".z", section_name + 1, (char *) NULL);
+      char *compressed_name = bfd_debug_name_to_zdebug (abfd, section_name);
       bfd_rename_section (sec, compressed_name);
     }
 }
