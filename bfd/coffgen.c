@@ -51,7 +51,7 @@ make_a_section_from_file (bfd *abfd,
 			  struct internal_scnhdr *hdr,
 			  unsigned int target_index)
 {
-  asection *return_section;
+  asection *newsect;
   char *name;
   bool result = true;
   flagword flags;
@@ -107,34 +107,33 @@ make_a_section_from_file (bfd *abfd,
       name[sizeof (hdr->s_name)] = 0;
     }
 
-  return_section = bfd_make_section_anyway (abfd, name);
-  if (return_section == NULL)
+  newsect = bfd_make_section_anyway (abfd, name);
+  if (newsect == NULL)
     return false;
 
-  return_section->vma = hdr->s_vaddr;
-  return_section->lma = hdr->s_paddr;
-  return_section->size = hdr->s_size;
-  return_section->filepos = hdr->s_scnptr;
-  return_section->rel_filepos = hdr->s_relptr;
-  return_section->reloc_count = hdr->s_nreloc;
+  newsect->vma = hdr->s_vaddr;
+  newsect->lma = hdr->s_paddr;
+  newsect->size = hdr->s_size;
+  newsect->filepos = hdr->s_scnptr;
+  newsect->rel_filepos = hdr->s_relptr;
+  newsect->reloc_count = hdr->s_nreloc;
 
-  bfd_coff_set_alignment_hook (abfd, return_section, hdr);
+  bfd_coff_set_alignment_hook (abfd, newsect, hdr);
 
-  return_section->line_filepos = hdr->s_lnnoptr;
+  newsect->line_filepos = hdr->s_lnnoptr;
 
-  return_section->lineno_count = hdr->s_nlnno;
-  return_section->userdata = NULL;
-  return_section->next = NULL;
-  return_section->target_index = target_index;
+  newsect->lineno_count = hdr->s_nlnno;
+  newsect->userdata = NULL;
+  newsect->next = NULL;
+  newsect->target_index = target_index;
 
-  if (! bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name, return_section,
-					 & flags))
+  if (!bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name, newsect, &flags))
     result = false;
 
   /* At least on i386-coff, the line number count for a shared library
      section must be ignored.  */
   if ((flags & SEC_COFF_SHARED_LIBRARY) != 0)
-    return_section->lineno_count = 0;
+    newsect->lineno_count = 0;
 
   if (hdr->s_nreloc != 0)
     flags |= SEC_RELOC;
@@ -142,20 +141,19 @@ make_a_section_from_file (bfd *abfd,
   if (hdr->s_scnptr != 0)
     flags |= SEC_HAS_CONTENTS;
 
-  return_section->flags = flags;
+  newsect->flags = flags;
 
-  /* Compress/decompress DWARF debug sections with names: .debug_* and
-     .zdebug_*, after the section flags is set.  */
+  /* Compress/decompress DWARF debug sections.  */
   if ((flags & SEC_DEBUGGING) != 0
       && (flags & SEC_HAS_CONTENTS) != 0
-      && strlen (name) > 7
-      && ((name[1] == 'd' && name[6] == '_')
-	  || (strlen (name) > 8 && name[1] == 'z' && name[7] == '_')))
+      && (startswith (name, ".debug_")
+	  || startswith (name, ".zdebug_")
+	  || startswith (name, ".gnu.debuglto_.debug_")
+	  || startswith (name, ".gnu.linkonce.wi.")))
     {
       enum { nothing, compress, decompress } action = nothing;
-      char *new_name = NULL;
 
-      if (bfd_is_section_compressed (abfd, return_section))
+      if (bfd_is_section_compressed (abfd, newsect))
 	{
 	  /* Compressed section.  Check if we should decompress.  */
 	  if ((abfd->flags & BFD_DECOMPRESS))
@@ -164,50 +162,40 @@ make_a_section_from_file (bfd *abfd,
       else
 	{
 	  /* Normal section.  Check if we should compress.  */
-	  if ((abfd->flags & BFD_COMPRESS) && return_section->size != 0)
+	  if ((abfd->flags & BFD_COMPRESS) && newsect->size != 0)
 	    action = compress;
 	}
 
-      switch (action)
+      if (action == compress)
 	{
-	case nothing:
-	  break;
-	case compress:
-	  if (!bfd_init_section_compress_status (abfd, return_section))
+	  if (!bfd_init_section_compress_status (abfd, newsect))
 	    {
 	      _bfd_error_handler
-		/* xgettext: c-format */
-		(_("%pB: unable to compress section %s"),
-		 abfd, name);
+		/* xgettext:c-format */
+		(_("%pB: unable to compress section %s"), abfd, name);
 	      return false;
 	    }
-	  if (return_section->compress_status == COMPRESS_SECTION_DONE
-	      && name[1] != 'z')
-	    {
-	      new_name = bfd_debug_name_to_zdebug (abfd, name);
-	      if (new_name == NULL)
-		return false;
-	    }
-	 break;
-	case decompress:
-	  if (!bfd_init_section_decompress_status (abfd, return_section))
-	    {
-	      _bfd_error_handler
-		/* xgettext: c-format */
-		(_("%pB: unable to decompress section %s"),
-		 abfd, name);
-	      return false;
-	    }
-	  if (name[1] == 'z')
-	    {
-	      new_name = bfd_zdebug_name_to_debug (abfd, name);
-	      if (new_name == NULL)
-		return false;
-	    }
-	  break;
 	}
-      if (new_name != NULL)
-	bfd_rename_section (return_section, new_name);
+      else if (action == decompress)
+	{
+	  if (!bfd_init_section_decompress_status (abfd, newsect))
+	    {
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: unable to decompress section %s"), abfd, name);
+	      return false;
+	    }
+	  if (abfd->is_linker_input
+	      && name[1] == 'z')
+	    {
+	      /* Rename section from .zdebug_* to .debug_* so that ld
+		 scripts will see this section as a debug section.  */
+	      char *new_name = bfd_zdebug_name_to_debug (abfd, name);
+	      if (new_name == NULL)
+		return false;
+	      bfd_rename_section (newsect, new_name);
+	    }
+	}
     }
 
   return result;
