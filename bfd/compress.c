@@ -682,7 +682,8 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
   if (compressed_size >= uncompressed_size)
     {
       memcpy (buffer, input_buffer, uncompressed_size);
-      elf_section_flags (sec) &= ~SHF_COMPRESSED;
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	elf_section_flags (sec) &= ~SHF_COMPRESSED;
       sec->compress_status = COMPRESS_SECTION_NONE;
     }
   else
