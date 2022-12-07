@@ -13154,6 +13154,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
   asection * relsec;
   bool result = true;
   bfd_vma (*r_sym) (bfd_vma);
+  ufile_ptr filesize;
 
 #if BFD_DEFAULT_TARGET_SIZE > 32
   if (bfd_arch_bits_per_address (abfd) != 32)
@@ -13167,6 +13168,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 
   /* Discover if there are any secondary reloc sections
      associated with SEC.  */
+  filesize = bfd_get_file_size (abfd);
   for (relsec = abfd->sections; relsec != NULL; relsec = relsec->next)
     {
       Elf_Internal_Shdr * hdr = & elf_section_data (relsec)->this_hdr;
@@ -13180,10 +13182,10 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 	  bfd_byte * native_reloc;
 	  arelent * internal_relocs;
 	  arelent * internal_reloc;
-	  unsigned int i;
+	  size_t i;
 	  unsigned int entsize;
 	  unsigned int symcount;
-	  unsigned int reloc_count;
+	  bfd_size_type reloc_count;
 	  size_t amt;
 
 	  if (ebd->elf_info_to_howto == NULL)
@@ -13194,6 +13196,15 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 		   sec->name, relsec->name);
 #endif
 	  entsize = hdr->sh_entsize;
+
+	  if (filesize != 0
+	      && ((ufile_ptr) hdr->sh_offset > filesize
+		  || hdr->sh_size > filesize - hdr->sh_offset))
+	    {
+	      bfd_set_error (bfd_error_file_truncated);
+	      result = false;
+	      continue;
+	    }
 
 	  native_relocs = bfd_malloc (hdr->sh_size);
 	  if (native_relocs == NULL)
@@ -13268,7 +13279,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
+		    (_("%pB(%pA): relocation %zu has invalid symbol index %lu"),
 		     abfd, sec, i, (long) r_sym (rela.r_info));
 		  bfd_set_error (bfd_error_bad_value);
 		  internal_reloc->sym_ptr_ptr =
