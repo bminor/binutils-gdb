@@ -938,16 +938,14 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  }
 	case bp_watchpoint:
 	  {
-	    gdb::unique_xmalloc_ptr<char>
-	      copy_holder (xstrdup (skip_spaces (spec)));
-	    char *copy = copy_holder.get ();
+	    spec = skip_spaces (spec);
 
 	    if (access_type == hw_write)
-	      watch_command_wrapper (copy, 0, internal_bp);
+	      watch_command_wrapper (spec, 0, internal_bp);
 	    else if (access_type == hw_access)
-	      awatch_command_wrapper (copy, 0, internal_bp);
+	      awatch_command_wrapper (spec, 0, internal_bp);
 	    else if (access_type == hw_read)
-	      rwatch_command_wrapper (copy, 0, internal_bp);
+	      rwatch_command_wrapper (spec, 0, internal_bp);
 	    else
 	      error(_("Cannot understand watchpoint access type."));
 	    break;
