@@ -1,3 +1,9 @@
+2022-12-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29861
+	* ld.texi (Output Section Type): Note that setting the output
+	section type only works if the section contains untyped data.
+
 2022-12-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 29849
