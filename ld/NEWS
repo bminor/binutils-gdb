@@ -11,6 +11,8 @@
   that selects the default compression algorithm
   for --enable-compressed-debug-sections.
 
+* Remove support for -z bndplt (MPX prefix instructions).
+
 Changes in 2.39:
 
 * The ELF linker will now generate a warning message if the stack is made

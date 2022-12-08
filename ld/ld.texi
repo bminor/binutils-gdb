@@ -1208,9 +1208,6 @@ for Solaris compatibility.
 The recognized keywords are:
 @table @samp
 
-@item bndplt
-Always generate BND prefix in PLT entries. Supported for Linux/x86_64.
-
 @item call-nop=prefix-addr
 @itemx call-nop=suffix-nop
 @itemx call-nop=prefix-@var{byte}

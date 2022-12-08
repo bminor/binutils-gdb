@@ -1460,9 +1460,6 @@ class General_options
 
   // The -z options.
 
-  DEFINE_bool(bndplt, options::DASH_Z, '\0', false,
-	      N_("(x86-64 only) Generate a BND PLT for Intel MPX"),
-	      N_("Generate a regular PLT"));
   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
 	      N_("Sort dynamic relocs"),
 	      N_("Do not sort dynamic relocs"));

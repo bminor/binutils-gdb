@@ -1,6 +1,9 @@
 * gold and dwp now support zstd compressed debug sections.
+
 * The new option --compress-debug-sections=zstd compresses debug sections with
   zstd.
+
+* Remove support for -z bndplt (MPX prefix instructions).
 
 Changes in 1.16:
 

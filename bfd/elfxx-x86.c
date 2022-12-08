@@ -4415,20 +4415,6 @@ _bfd_x86_elf_link_setup_gnu_properties
 		  if (!bfd_set_section_alignment (sec, plt_alignment))
 		    goto error_alignment;
 		}
-	      else if (htab->params->bndplt && ABI_64_P (dynobj))
-		{
-		  /* Create the second PLT for Intel MPX support.  MPX
-		     PLT is supported only in 64-bit mode and is needed
-		     only for lazy binding.  */
-		  sec = bfd_make_section_anyway_with_flags (dynobj,
-							    ".plt.sec",
-							    pltflags);
-		  if (sec == NULL)
-		    info->callbacks->einfo (_("%F%P: failed to create BND PLT section\n"));
-
-		  if (!bfd_set_section_alignment (sec, non_lazy_plt_alignment))
-		    goto error_alignment;
-		}
 
 	      htab->plt_second = sec;
 	    }
@@ -4499,7 +4485,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 
 	  htab->plt_sframe = sec;
 
-	  /* Second PLT is generated for Intel IBT / MPX Support + lazy plt.  */
+	  /* Second PLT is generated for Intel IBT + lazy plt.  */
 	  if (htab->plt_second != NULL)
 	    {
 	      sec = bfd_make_section_anyway_with_flags (dynobj,

@@ -2197,7 +2197,6 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_PLT32:
-	case R_X86_64_PLT32_BND:
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
 	     because this might be a case of linking PIC code which is
@@ -2256,7 +2255,6 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
-	case R_X86_64_PC32_BND:
 	case R_X86_64_PC64:
 	case R_X86_64_64:
 	pointer:
@@ -2289,8 +2287,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 			}
 		    }
 		}
-	      else if (r_type != R_X86_64_PC32_BND
-		       && r_type != R_X86_64_PC64)
+	      else if (r_type != R_X86_64_PC64)
 		{
 		  /* At run-time, R_X86_64_64 can be resolved for both
 		     x86-64 and x32. But R_X86_64_32 and R_X86_64_32S
@@ -2905,10 +2902,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		}
 	      /* FALLTHROUGH */
 	    case R_X86_64_PC32:
-	    case R_X86_64_PC32_BND:
 	    case R_X86_64_PC64:
 	    case R_X86_64_PLT32:
-	    case R_X86_64_PLT32_BND:
 	      goto do_relocation;
 	    }
 	}
@@ -3172,7 +3167,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_X86_64_PLT32:
-	case R_X86_64_PLT32_BND:
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
 
@@ -3227,7 +3221,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
-	case R_X86_64_PC32_BND:
 	  /* Don't complain about -fPIC if the symbol is undefined when
 	     building executable unless it is unresolved weak symbol,
 	     references a dynamic definition in PIE or -z nocopyreloc
@@ -5317,16 +5310,9 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   htab = elf_x86_hash_table (info, bed->target_id);
   if (!htab)
     abort ();
-  if (htab->params->bndplt)
-    {
-      init_table.lazy_plt = &elf_x86_64_lazy_bnd_plt;
-      init_table.non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;
-    }
-  else
-    {
-      init_table.lazy_plt = &elf_x86_64_lazy_plt;
-      init_table.non_lazy_plt = &elf_x86_64_non_lazy_plt;
-    }
+
+  init_table.lazy_plt = &elf_x86_64_lazy_plt;
+  init_table.non_lazy_plt = &elf_x86_64_non_lazy_plt;
 
   init_table.lazy_ibt_plt = &elf_x32_lazy_ibt_plt;
   init_table.non_lazy_ibt_plt = &elf_x32_non_lazy_ibt_plt;

@@ -31,9 +31,6 @@ enum elf_x86_prop_report
 /* Used to pass x86-specific linker options from ld to bfd.  */
 struct elf_linker_x86_params
 {
-  /* TRUE if BND prefix in PLT entries is always generated.  */
-  unsigned int bndplt: 1;
-
   /* TRUE if IBT-enabled PLT entries should be generated.  */
   unsigned int ibtplt: 1;
 

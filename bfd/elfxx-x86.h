@@ -36,7 +36,6 @@
   ((TYPE) == R_X86_64_PC8 \
    || (TYPE) == R_X86_64_PC16 \
    || (TYPE) == R_X86_64_PC32 \
-   || (TYPE) == R_X86_64_PC32_BND \
    || (TYPE) == R_X86_64_PC64)
 #define I386_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
 #define X86_PCREL_TYPE_P(IS_X86_64, TYPE) \
@@ -103,7 +102,6 @@
   ((TYPE) == R_X86_64_PC8 \
    || (TYPE) == R_X86_64_PC16 \
    || (TYPE) == R_X86_64_PC32 \
-   || (TYPE) == R_X86_64_PC32_BND \
    || (TYPE) == R_X86_64_PC64)
 
 /* This must be the same as sframe_get_hdr_size (sfh).  For x86-64, this value
