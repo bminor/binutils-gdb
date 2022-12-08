@@ -32,6 +32,11 @@ if {![Term::prepare_for_tui]} {
     return
 }
 
+if { $gdb_file_cmd_debug_info == "nodebug" } {
+    unsupported "no debug info"
+    return
+}
+
 # This puts us into TUI mode, and should display the ASM window.
 Term::command_no_prompt_prefix "layout asm"
 Term::check_box_contents "check asm box contents" 0 0 80 15 "<_start>"
