@@ -1560,6 +1560,9 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
+      if (objfile->obfd == nullptr)
+	continue;
+
       comp_unit *unit = find_comp_unit (objfile);
       if (unit == NULL)
 	{

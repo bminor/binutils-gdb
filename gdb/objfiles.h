@@ -646,7 +646,9 @@ public:
   struct compunit_symtab *compunit_symtabs = nullptr;
 
   /* The object file's BFD.  Can be null if the objfile contains only
-     minimal symbols, e.g. the run time common symbols for SunOS4.  */
+     minimal symbols (e.g. the run time common symbols for SunOS4) or
+     if the objfile is a dynamic objfile (e.g. created by JIT reader
+     API).  */
 
   gdb_bfd_ref_ptr obfd;
 
