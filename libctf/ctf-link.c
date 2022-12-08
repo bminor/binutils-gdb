@@ -431,7 +431,10 @@ ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
 	}
     }
   else
-    free (t);
+    {
+      free (t);
+      t = NULL;
+    }
 
   if (ctf_dynhash_insert (one_out, f, NULL) < 0)
     {
