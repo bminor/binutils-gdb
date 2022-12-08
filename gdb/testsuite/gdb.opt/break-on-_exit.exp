@@ -36,8 +36,7 @@
 standard_testfile
 
 # See if we have target board readnow.exp or similar.
-if { [lsearch -exact $GDBFLAGS -readnow] != -1 \
-	 || [lsearch -exact $GDBFLAGS --readnow] != -1 } {
+if {[readnow]} {
     untested "--readnever not allowed in combination with --readnow"
     return -1
 }

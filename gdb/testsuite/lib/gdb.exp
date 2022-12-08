@@ -8553,32 +8553,12 @@ gdb_caching_proc supports_fcf_protection {
   } executable "additional_flags=-fcf-protection=full"]
 }
 
-# Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
+# Return true if symbols were read in using -readnow.  Otherwise,
+# return false.
 
-proc readnow { args } {
-    if { [llength $args] == 1 } {
-	set re [lindex $args 0]
-    } else {
-	set re ""
-    }
-
-    set readnow_p 0
-    # Given the listing from the following command can be very verbose, match
-    # the patterns line-by-line.  This prevents timeouts from waiting for
-    # too much data to come at once.
-    set cmd "maint print objfiles $re"
-    gdb_test_multiple $cmd "" -lbl {
-	-re "\r\n.gdb_index: faked for \"readnow\"" {
-	    # Record the we've seen the above pattern.
-	    set readnow_p 1
-	    exp_continue
-	}
-	-re -wrap "" {
-	    # We don't care about any other input.
-	}
-    }
-
-    return $readnow_p
+proc readnow { } {
+    return [expr {[lsearch -exact $::GDBFLAGS -readnow] != -1
+		  || [lsearch -exact $::GDBFLAGS --readnow] != -1}]
 }
 
 # Return index name if symbols were read in using an index.
