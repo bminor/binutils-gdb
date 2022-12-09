@@ -156,6 +156,7 @@ struct optional_dbg_header
 #define CV_SIGNATURE_C13		4
 
 #define DEBUG_S_STRINGTABLE		0xf3
+#define DEBUG_S_FILECHKSMS		0xf4
 
 #define STRING_TABLE_SIGNATURE		0xeffeeffe
 #define STRING_TABLE_VERSION		1
@@ -199,6 +200,14 @@ struct module_info
   uint32_t source_file_name_index;
   uint32_t pdb_file_path_name_index;
 };
+
+/* filedata in dumpsym7.cpp */
+struct file_checksum
+{
+  uint32_t file_id;
+  uint8_t checksum_length;
+  uint8_t checksum_type;
+} ATTRIBUTE_PACKED;
 
 extern bool create_pdb_file (bfd *, const char *, const unsigned char *);
 

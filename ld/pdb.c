@@ -46,6 +46,7 @@ struct string
   struct string *next;
   uint32_t hash;
   uint32_t offset;
+  uint32_t source_file_offset;
   size_t len;
   char s[];
 };
@@ -56,6 +57,18 @@ struct string_table
   struct string *strings_tail;
   uint32_t strings_len;
   htab_t hashmap;
+};
+
+struct mod_source_files
+{
+  uint16_t files_count;
+  struct string **files;
+};
+
+struct source_files_info
+{
+  uint16_t mod_count;
+  struct mod_source_files *mods;
 };
 
 /* Add a new stream to the PDB archive, and return its BFD.  */
@@ -400,6 +413,135 @@ get_arch_number (bfd *abfd)
   return IMAGE_FILE_MACHINE_I386;
 }
 
+/* Validate the DEBUG_S_FILECHKSMS entry within a module's .debug$S
+   section, and copy it to the module's symbol stream.  */
+static bool
+copy_filechksms (uint8_t *data, uint32_t size, char *string_table,
+		 struct string_table *strings, uint8_t *out,
+		 struct mod_source_files *mod_source)
+{
+  uint8_t *orig_data = data;
+  uint32_t orig_size = size;
+  uint16_t num_files = 0;
+  struct string **strptr;
+
+  bfd_putl32 (DEBUG_S_FILECHKSMS, out);
+  out += sizeof (uint32_t);
+
+  bfd_putl32 (size, out);
+  out += sizeof (uint32_t);
+
+  /* Calculate the number of files, and check for any overflows.  */
+
+  while (size > 0)
+    {
+      struct file_checksum *fc = (struct file_checksum *) data;
+      uint8_t padding;
+      size_t len;
+
+      if (size < sizeof (struct file_checksum))
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      len = sizeof (struct file_checksum) + fc->checksum_length;
+
+      if (size < len)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      data += len;
+      size -= len;
+
+      if (len % sizeof (uint32_t))
+	padding = sizeof (uint32_t) - (len % sizeof (uint32_t));
+      else
+	padding = 0;
+
+      if (size < padding)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      num_files++;
+
+      data += padding;
+      size -= padding;
+    }
+
+  /* Add the files to mod_source, so that they'll appear in the source
+     info substream.  */
+
+  strptr = NULL;
+  if (num_files > 0)
+    {
+      uint16_t new_count = num_files + mod_source->files_count;
+
+      mod_source->files = xrealloc (mod_source->files,
+				    sizeof (struct string *) * new_count);
+
+      strptr = mod_source->files + mod_source->files_count;
+
+      mod_source->files_count += num_files;
+    }
+
+  /* Actually copy the data.  */
+
+  data = orig_data;
+  size = orig_size;
+
+  while (size > 0)
+    {
+      struct file_checksum *fc = (struct file_checksum *) data;
+      uint32_t string_off;
+      uint8_t padding;
+      size_t len;
+      struct string *str = NULL;
+
+      string_off = bfd_getl32 (&fc->file_id);
+      len = sizeof (struct file_checksum) + fc->checksum_length;
+
+      if (len % sizeof (uint32_t))
+	padding = sizeof (uint32_t) - (len % sizeof (uint32_t));
+      else
+	padding = 0;
+
+      /* Remap the "file ID", i.e. the offset in the module's string table,
+	 so it points to the right place in the main string table.  */
+
+      if (string_table)
+	{
+	  char *fn = string_table + string_off;
+	  size_t fn_len = strlen (fn);
+	  uint32_t hash = calc_hash (fn, fn_len);
+	  void **slot;
+
+	  slot = htab_find_slot_with_hash (strings->hashmap, fn, hash,
+					   NO_INSERT);
+
+	  if (slot)
+	    str = (struct string *) *slot;
+	}
+
+      *strptr = str;
+      strptr++;
+
+      bfd_putl32 (str ? str->offset : 0, &fc->file_id);
+
+      memcpy (out, data, len + padding);
+
+      data += len + padding;
+      size -= len + padding;
+      out += len + padding;
+    }
+
+  return true;
+}
+
 /* Add a string to the strings table, if it's not already there.  */
 static void
 add_string (char *str, size_t len, struct string_table *strings)
@@ -420,6 +562,7 @@ add_string (char *str, size_t len, struct string_table *strings)
       s->next = NULL;
       s->hash = hash;
       s->offset = strings->strings_len;
+      s->source_file_offset = 0xffffffff;
       s->len = len;
       memcpy (s->s, str, len);
 
@@ -479,10 +622,15 @@ parse_string_table (bfd_byte *data, size_t size,
 
 /* Parse the .debug$S section within an object file.  */
 static bool
-handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
+handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
+		       uint8_t **dataptr, uint32_t *sizeptr,
+		       struct mod_source_files *mod_source)
 {
   bfd_byte *data = NULL;
   size_t off;
+  uint32_t c13_size = 0;
+  char *string_table = NULL;
+  uint8_t *buf, *bufptr;
 
   if (!bfd_get_full_section_contents (mod, s, &data))
     return false;
@@ -497,6 +645,8 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
     }
 
   off = sizeof (uint32_t);
+
+  /* calculate size */
 
   while (off + sizeof (uint32_t) <= s->size)
     {
@@ -526,8 +676,62 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
 
       switch (type)
 	{
+	case DEBUG_S_FILECHKSMS:
+	  c13_size += sizeof (uint32_t) + sizeof (uint32_t) + size;
+
+	  if (c13_size % sizeof (uint32_t))
+	    c13_size += sizeof (uint32_t) - (c13_size % sizeof (uint32_t));
+
+	  break;
+
 	case DEBUG_S_STRINGTABLE:
 	  parse_string_table (data + off, size, strings);
+
+	  string_table = (char *) data + off;
+
+	  break;
+	}
+
+      off += size;
+
+      if (off % sizeof (uint32_t))
+	off += sizeof (uint32_t) - (off % sizeof (uint32_t));
+    }
+
+  if (c13_size == 0)
+    {
+      free (data);
+      return true;
+    }
+
+  /* copy data */
+
+  buf = xmalloc (c13_size);
+  bufptr = buf;
+
+  off = sizeof (uint32_t);
+
+  while (off + sizeof (uint32_t) <= s->size)
+    {
+      uint32_t type, size;
+
+      type = bfd_getl32 (data + off);
+      off += sizeof (uint32_t);
+
+      size = bfd_getl32 (data + off);
+      off += sizeof (uint32_t);
+
+      switch (type)
+	{
+	case DEBUG_S_FILECHKSMS:
+	  if (!copy_filechksms (data + off, size, string_table,
+				strings, bufptr, mod_source))
+	    {
+	      free (data);
+	      return false;
+	    }
+
+	  bufptr += sizeof (uint32_t) + sizeof (uint32_t) + size;
 
 	  break;
 	}
@@ -540,6 +744,23 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
 
   free (data);
 
+  if (*dataptr)
+    {
+      /* Append the C13 info to what's already there, if the module has
+	 multiple .debug$S sections.  */
+
+      *dataptr = xrealloc (*dataptr, *sizeptr + c13_size);
+      memcpy (*dataptr + *sizeptr, buf, c13_size);
+
+      free (buf);
+    }
+  else
+    {
+      *dataptr = buf;
+    }
+
+  *sizeptr += c13_size;
+
   return true;
 }
 
@@ -547,11 +768,15 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
    data for each object file.  */
 static bool
 populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
-			struct string_table *strings)
+			struct string_table *strings,
+			uint32_t *c13_info_size,
+			struct mod_source_files *mod_source)
 {
   uint8_t int_buf[sizeof (uint32_t)];
+  uint8_t *c13_info = NULL;
 
   *sym_byte_size = sizeof (uint32_t);
+  *c13_info_size = 0;
 
   /* Process .debug$S section(s).  */
 
@@ -559,8 +784,13 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
     {
       if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
 	{
-	  if (!handle_debugs_section (s, mod, strings))
+	  if (!handle_debugs_section (s, mod, strings, &c13_info,
+				      c13_info_size, mod_source))
+	    {
+	      free (c13_info);
+	      free (mod_source->files);
 	      return false;
+	    }
 	}
     }
 
@@ -569,7 +799,21 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
   bfd_putl32 (CV_SIGNATURE_C13, int_buf);
 
   if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
-    return false;
+    {
+      free (c13_info);
+      return false;
+    }
+
+  if (c13_info)
+    {
+      if (bfd_bwrite (c13_info, *c13_info_size, stream) != *c13_info_size)
+	{
+	  free (c13_info);
+	  return false;
+	}
+
+      free (c13_info);
+    }
 
   /* Write the global refs size.  */
 
@@ -584,9 +828,11 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 /* Create the module info substream within the DBI.  */
 static bool
 create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
-			      uint32_t *size, struct string_table *strings)
+			      uint32_t *size, struct string_table *strings,
+			      struct source_files_info *source)
 {
   uint8_t *ptr;
+  unsigned int mod_num;
 
   static const char linker_fn[] = "* Linker *";
 
@@ -631,11 +877,20 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 	len += 4 - (len % 4);
 
       *size += len;
+
+      source->mod_count++;
     }
 
   *data = xmalloc (*size);
 
   ptr = *data;
+
+  source->mods = xmalloc (source->mod_count
+			  * sizeof (struct mod_source_files));
+  memset (source->mods, 0,
+	  source->mod_count * sizeof (struct mod_source_files));
+
+  mod_num = 0;
 
   for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
        in = in->link.next)
@@ -643,20 +898,33 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
       struct module_info *mod = (struct module_info *) ptr;
       uint16_t stream_num;
       bfd *stream;
-      uint32_t sym_byte_size;
+      uint32_t sym_byte_size, c13_info_size;
       uint8_t *start = ptr;
 
       stream = add_stream (pdb, NULL, &stream_num);
 
       if (!stream)
 	{
+	  for (unsigned int i = 0; i < source->mod_count; i++)
+	    {
+	      free (source->mods[i].files);
+	    }
+
+	  free (source->mods);
 	  free (*data);
 	  return false;
 	}
 
       if (!populate_module_stream (stream, in, &sym_byte_size,
-				   strings))
+				   strings, &c13_info_size,
+				   &source->mods[mod_num]))
 	{
+	  for (unsigned int i = 0; i < source->mod_count; i++)
+	    {
+	      free (source->mods[i].files);
+	    }
+
+	  free (source->mods);
 	  free (*data);
 	  return false;
 	}
@@ -679,7 +947,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
       bfd_putl16 (stream_num, &mod->module_sym_stream);
       bfd_putl32 (sym_byte_size, &mod->sym_byte_size);
       bfd_putl32 (0, &mod->c11_byte_size);
-      bfd_putl32 (0, &mod->c13_byte_size);
+      bfd_putl32 (c13_info_size, &mod->c13_byte_size);
       bfd_putl16 (0, &mod->source_file_count);
       bfd_putl16 (0, &mod->padding);
       bfd_putl32 (0, &mod->unused2);
@@ -741,6 +1009,8 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 	  memset (ptr, 0, 4 - ((ptr - start) % 4));
 	  ptr += 4 - ((ptr - start) % 4);
 	}
+
+      mod_num++;
     }
 
   return true;
@@ -855,6 +1125,114 @@ create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
   return true;
 }
 
+/* The source info substream lives within the DBI stream, and lists the
+   source files for each object file (i.e. it's derived from the
+   DEBUG_S_FILECHKSMS parts of the .debug$S sections).  This is a bit
+   superfluous, as the filenames are also available in the C13 parts of
+   the module streams, but MSVC relies on it to work properly.  */
+static void
+create_source_info_substream (void **data, uint32_t *size,
+			      struct source_files_info *source)
+{
+  uint16_t dedupe_source_files_count = 0;
+  uint16_t source_files_count = 0;
+  uint32_t strings_len = 0;
+  uint8_t *ptr;
+
+  /* Loop through the source files, marking unique filenames.  The pointers
+     here are for entries in the main string table, and so have already
+     been deduplicated.  */
+
+  for (uint16_t i = 0; i < source->mod_count; i++)
+    {
+      for (uint16_t j = 0; j < source->mods[i].files_count; j++)
+	{
+	  if (source->mods[i].files[j])
+	    {
+	      if (source->mods[i].files[j]->source_file_offset == 0xffffffff)
+		{
+		  source->mods[i].files[j]->source_file_offset = strings_len;
+		  strings_len += source->mods[i].files[j]->len + 1;
+		  dedupe_source_files_count++;
+		}
+
+	      source_files_count++;
+	    }
+	}
+    }
+
+  *size = sizeof (uint16_t) + sizeof (uint16_t);
+  *size += (sizeof (uint16_t) + sizeof (uint16_t)) * source->mod_count;
+  *size += sizeof (uint32_t) * source_files_count;
+  *size += strings_len;
+
+  *data = xmalloc (*size);
+
+  ptr = (uint8_t *) *data;
+
+  /* Write header (module count and source file count).  */
+
+  bfd_putl16 (source->mod_count, ptr);
+  ptr += sizeof (uint16_t);
+
+  bfd_putl16 (dedupe_source_files_count, ptr);
+  ptr += sizeof (uint16_t);
+
+  /* Write "ModIndices".  As the LLVM documentation puts it, "this array is
+     present, but does not appear to be useful".  */
+
+  for (uint16_t i = 0; i < source->mod_count; i++)
+    {
+      bfd_putl16 (i, ptr);
+      ptr += sizeof (uint16_t);
+    }
+
+  /* Write source file count for each module.  */
+
+  for (uint16_t i = 0; i < source->mod_count; i++)
+    {
+      bfd_putl16 (source->mods[i].files_count, ptr);
+      ptr += sizeof (uint16_t);
+    }
+
+  /* For each module, write the offsets within the string table
+     for each source file.  */
+
+  for (uint16_t i = 0; i < source->mod_count; i++)
+    {
+      for (uint16_t j = 0; j < source->mods[i].files_count; j++)
+	{
+	  if (source->mods[i].files[j])
+	    {
+	      bfd_putl32 (source->mods[i].files[j]->source_file_offset, ptr);
+	      ptr += sizeof (uint32_t);
+	    }
+	}
+    }
+
+  /* Write the string table.  We set source_file_offset to a dummy value for
+     each entry we write, so we don't write duplicate filenames.  */
+
+  for (uint16_t i = 0; i < source->mod_count; i++)
+    {
+      for (uint16_t j = 0; j < source->mods[i].files_count; j++)
+	{
+	  if (source->mods[i].files[j]
+	      && source->mods[i].files[j]->source_file_offset != 0xffffffff)
+	    {
+	      memcpy (ptr, source->mods[i].files[j]->s,
+		      source->mods[i].files[j]->len);
+	      ptr += source->mods[i].files[j]->len;
+
+	      *ptr = 0;
+	      ptr++;
+
+	      source->mods[i].files[j]->source_file_offset = 0xffffffff;
+	    }
+	}
+    }
+}
+
 /* Stream 4 is the debug information (DBI) stream.  */
 static bool
 populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
@@ -865,18 +1243,36 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
-  void *mod_info, *sc;
-  uint32_t mod_info_size, sc_size;
+  void *mod_info, *sc, *source_info;
+  uint32_t mod_info_size, sc_size, source_info_size;
+  struct source_files_info source;
+
+  source.mod_count = 0;
+  source.mods = NULL;
 
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
-				     strings))
+				     strings, &source))
     return false;
 
   if (!create_section_contrib_substream (abfd, &sc, &sc_size))
     {
+      for (unsigned int i = 0; i < source.mod_count; i++)
+	{
+	  free (source.mods[i].files);
+	}
+      free (source.mods);
+
       free (mod_info);
       return false;
     }
+
+  create_source_info_substream (&source_info, &source_info_size, &source);
+
+  for (unsigned int i = 0; i < source.mod_count; i++)
+    {
+      free (source.mods[i].files);
+    }
+  free (source.mods);
 
   bfd_putl32 (0xffffffff, &h.version_signature);
   bfd_putl32 (DBI_STREAM_VERSION_70, &h.version_header);
@@ -890,7 +1286,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
   bfd_putl32 (mod_info_size, &h.mod_info_size);
   bfd_putl32 (sc_size, &h.section_contribution_size);
   bfd_putl32 (0, &h.section_map_size);
-  bfd_putl32 (0, &h.source_info_size);
+  bfd_putl32 (source_info_size, &h.source_info_size);
   bfd_putl32 (0, &h.type_server_map_size);
   bfd_putl32 (0, &h.mfc_type_server_index);
   bfd_putl32 (sizeof (opt), &h.optional_dbg_header_size);
@@ -901,6 +1297,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 
   if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
     {
+      free (source_info);
       free (sc);
       free (mod_info);
       return false;
@@ -908,6 +1305,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 
   if (bfd_bwrite (mod_info, mod_info_size, stream) != mod_info_size)
     {
+      free (source_info);
       free (sc);
       free (mod_info);
       return false;
@@ -917,11 +1315,20 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 
   if (bfd_bwrite (sc, sc_size, stream) != sc_size)
     {
+      free (source_info);
       free (sc);
       return false;
     }
 
   free (sc);
+
+  if (bfd_bwrite (source_info, source_info_size, stream) != source_info_size)
+    {
+      free (source_info);
+      return false;
+    }
+
+  free (source_info);
 
   bfd_putl16 (0xffff, &opt.fpo_stream);
   bfd_putl16 (0xffff, &opt.exception_stream);
