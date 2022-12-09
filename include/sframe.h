@@ -192,10 +192,10 @@ typedef struct sframe_func_desc_entry
 /* Macros to compose and decompose function info in FDE.  */
 
 #define SFRAME_V1_FUNC_INFO(fde_type, fre_enc_type) \
-  (((fde_type) & 0x1) << 4 | (fre_enc_type))
+  ((((fde_type) & 0x1) << 4) | ((fre_enc_type) & 0xf))
 
 #define SFRAME_V1_FUNC_FRE_TYPE(data)	  ((data) & 0xf)
-#define SFRAME_V1_FUNC_FDE_TYPE(data)	  ((data >> 4) & 0x1)
+#define SFRAME_V1_FUNC_FDE_TYPE(data)	  (((data) >> 4) & 0x1)
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary
@@ -240,7 +240,8 @@ typedef struct sframe_fre_info
 /* Macros to compose and decompose FRE info.  */
 
 #define SFRAME_V1_FRE_INFO(base_reg_id, offset_num, offset_size) \
-  ((offset_size << 5) | (offset_num << 1) | (base_reg_id))
+  ((((offset_size) & 0x3) << 5) | (((offset_num) & 0xf) << 1) | \
+   ((base_reg_id) & 0x1))
 
 #define SFRAME_V1_FRE_CFA_BASE_REG_ID(data)	  ((data) & 0x1)
 #define SFRAME_V1_FRE_OFFSET_COUNT(data)	  (((data) >> 1) & 0xf)
