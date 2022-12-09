@@ -21,6 +21,7 @@
 #include "pdb.h"
 #include "bfdlink.h"
 #include "ld.h"
+#include "ldmain.h"
 #include "ldmisc.h"
 #include "libbfd.h"
 #include "libiberty.h"
@@ -3411,6 +3412,168 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
   return true;
 }
 
+/* Return the CodeView constant for the selected architecture.  */
+static uint16_t
+target_processor (bfd *abfd)
+{
+  if (abfd->arch_info->arch != bfd_arch_i386)
+    return 0;
+
+  if (abfd->arch_info->mach & bfd_mach_x86_64)
+    return CV_CFL_X64;
+  else
+    return CV_CFL_80386;
+}
+
+/* Create the symbols that go in "* Linker *", the dummy module created
+   for the linker itself.  */
+static bool
+create_linker_symbols (bfd *abfd, uint8_t **syms, uint32_t *sym_byte_size,
+		       const char *pdb_name)
+{
+  uint8_t *ptr;
+  struct objname *name;
+  struct compile3 *comp;
+  struct envblock *env;
+  size_t padding1, padding2, env_size;
+  char *cwdval, *exeval, *pdbval;
+
+  /* extra NUL for padding */
+  static const char linker_fn[] = "* Linker *\0";
+  static const char linker_name[] = "GNU LD " VERSION;
+
+  static const char cwd[] = "cwd";
+  static const char exe[] = "exe";
+  static const char pdb[] = "pdb";
+
+  cwdval = getcwd (NULL, 0);
+  if (!cwdval)
+    {
+      einfo (_("%P: warning: unable to get working directory\n"));
+      return false;
+    }
+
+  exeval = lrealpath (program_name);
+
+  if (!exeval)
+    {
+      einfo (_("%P: warning: unable to get program name\n"));
+      free (cwdval);
+      return false;
+    }
+
+  pdbval = lrealpath (pdb_name);
+
+  if (!pdbval)
+    {
+      einfo (_("%P: warning: unable to get full path to PDB\n"));
+      free (exeval);
+      free (cwdval);
+      return false;
+    }
+
+  *sym_byte_size += offsetof (struct objname, name) + sizeof (linker_fn);
+  *sym_byte_size += offsetof (struct compile3, compiler) + sizeof (linker_name);
+
+  if (*sym_byte_size % 4)
+    padding1 = 4 - (*sym_byte_size % 4);
+  else
+    padding1 = 0;
+
+  *sym_byte_size += padding1;
+
+  env_size = offsetof (struct envblock, strings);
+  env_size += sizeof (cwd);
+  env_size += strlen (cwdval) + 1;
+  env_size += sizeof (exe);
+  env_size += strlen (exeval) + 1;
+  env_size += sizeof (pdb);
+  env_size += strlen (pdbval) + 1;
+
+  if (env_size % 4)
+    padding2 = 4 - (env_size % 4);
+  else
+    padding2 = 0;
+
+  env_size += padding2;
+
+  *sym_byte_size += env_size;
+
+  *syms = xmalloc (*sym_byte_size);
+  ptr = *syms;
+
+  /* Write S_OBJNAME */
+
+  name = (struct objname *) ptr;
+  bfd_putl16 (offsetof (struct objname, name)
+	      + sizeof (linker_fn) - sizeof (uint16_t), &name->size);
+  bfd_putl16 (S_OBJNAME, &name->kind);
+  bfd_putl32 (0, &name->signature);
+  memcpy (name->name, linker_fn, sizeof (linker_fn));
+
+  ptr += offsetof (struct objname, name) + sizeof (linker_fn);
+
+  /* Write S_COMPILE3 */
+
+  comp = (struct compile3 *) ptr;
+
+  bfd_putl16 (offsetof (struct compile3, compiler) + sizeof (linker_name)
+	      + padding1 - sizeof (uint16_t), &comp->size);
+  bfd_putl16 (S_COMPILE3, &comp->kind);
+  bfd_putl32 (CV_CFL_LINK, &comp->flags);
+  bfd_putl16 (target_processor (abfd), &comp->machine);
+  bfd_putl16 (0, &comp->frontend_major);
+  bfd_putl16 (0, &comp->frontend_minor);
+  bfd_putl16 (0, &comp->frontend_build);
+  bfd_putl16 (0, &comp->frontend_qfe);
+  bfd_putl16 (0, &comp->backend_major);
+  bfd_putl16 (0, &comp->backend_minor);
+  bfd_putl16 (0, &comp->backend_build);
+  bfd_putl16 (0, &comp->backend_qfe);
+  memcpy (comp->compiler, linker_name, sizeof (linker_name));
+
+  memset (comp->compiler + sizeof (linker_name), 0, padding1);
+
+  ptr += offsetof (struct compile3, compiler) + sizeof (linker_name) + padding1;
+
+  /* Write S_ENVBLOCK */
+
+  env = (struct envblock *) ptr;
+
+  bfd_putl16 (env_size - sizeof (uint16_t), &env->size);
+  bfd_putl16 (S_ENVBLOCK, &env->kind);
+  env->flags = 0;
+
+  ptr += offsetof (struct envblock, strings);
+
+  memcpy (ptr, cwd, sizeof (cwd));
+  ptr += sizeof (cwd);
+  memcpy (ptr, cwdval, strlen (cwdval) + 1);
+  ptr += strlen (cwdval) + 1;
+
+  memcpy (ptr, exe, sizeof (exe));
+  ptr += sizeof (exe);
+  memcpy (ptr, exeval, strlen (exeval) + 1);
+  ptr += strlen (exeval) + 1;
+
+  memcpy (ptr, pdb, sizeof (pdb));
+  ptr += sizeof (pdb);
+  memcpy (ptr, pdbval, strlen (pdbval) + 1);
+  ptr += strlen (pdbval) + 1;
+
+  /* Microsoft's LINK also includes "cmd", the command-line options passed
+     to the linker, but unfortunately we don't have access to argc and argv
+     at this stage.  */
+
+  memset (ptr, 0, padding2);
+
+  free (pdbval);
+  free (exeval);
+  free (cwdval);
+
+  return true;
+}
+
 /* Populate the module stream, which consists of the transformed .debug$S
    data for each object file.  */
 static bool
@@ -3420,55 +3583,65 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			struct mod_source_files *mod_source,
 			bfd *abfd, struct types *types,
 			struct types *ids, uint16_t mod_num,
-			bfd *sym_rec_stream, struct globals *glob)
+			bfd *sym_rec_stream, struct globals *glob,
+			const char *pdb_name)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
   uint8_t *syms = NULL;
-  struct type_entry **map = NULL;
-  uint32_t num_types = 0;
 
   *sym_byte_size = 0;
   *c13_info_size = 0;
 
-  /* Process .debug$T section.  */
-
-  for (asection *s = mod->sections; s; s = s->next)
+  if (!strcmp (bfd_get_filename (mod), "dll stuff"))
     {
-      if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
-	{
-	  if (!handle_debugt_section (s, mod, types, ids, mod_num, strings,
-				      &map, &num_types))
-	    {
-	      free (mod_source->files);
-	      return false;
-	    }
-
-	  break;
-	}
+      if (!create_linker_symbols (mod, &syms, sym_byte_size, pdb_name))
+	return false;
     }
-
-  /* Process .debug$S section(s).  */
-
-  for (asection *s = mod->sections; s; s = s->next)
+  else
     {
-      if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
+      struct type_entry **map = NULL;
+      uint32_t num_types = 0;
+
+      /* Process .debug$T section.  */
+
+      for (asection *s = mod->sections; s; s = s->next)
 	{
-	  if (!handle_debugs_section (s, mod, strings, &c13_info,
-				      c13_info_size, mod_source, abfd,
-				      &syms, sym_byte_size, map, num_types,
-				      sym_rec_stream, glob, mod_num))
+	  if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
 	    {
-	      free (c13_info);
-	      free (syms);
-	      free (mod_source->files);
-	      free (map);
-	      return false;
+	      if (!handle_debugt_section (s, mod, types, ids, mod_num, strings,
+					  &map, &num_types))
+		{
+		  free (mod_source->files);
+		  return false;
+		}
+
+	      break;
 	    }
 	}
-    }
 
-  free (map);
+      /* Process .debug$S section(s).  */
+
+      for (asection *s = mod->sections; s; s = s->next)
+	{
+	  if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
+	    {
+	      if (!handle_debugs_section (s, mod, strings, &c13_info,
+					  c13_info_size, mod_source, abfd,
+					  &syms, sym_byte_size, map, num_types,
+					  sym_rec_stream, glob, mod_num))
+		{
+		  free (c13_info);
+		  free (syms);
+		  free (mod_source->files);
+		  free (map);
+		  return false;
+		}
+	    }
+	}
+
+      free (map);
+    }
 
   /* Write the signature.  */
 
@@ -3520,7 +3693,8 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 			      uint32_t *size, struct string_table *strings,
 			      struct source_files_info *source,
 			      struct types *types, struct types *ids,
-			      bfd *sym_rec_stream, struct globals *glob)
+			      bfd *sym_rec_stream, struct globals *glob,
+			      const char *pdb_name)
 {
   uint8_t *ptr;
   unsigned int mod_num;
@@ -3610,7 +3784,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 				   strings, &c13_info_size,
 				   &source->mods[mod_num], abfd,
 				   types, ids, mod_num,
-				   sym_rec_stream, glob))
+				   sym_rec_stream, glob, pdb_name))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {
@@ -4099,7 +4273,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     struct string_table *strings,
 		     struct types *types,
 		     struct types *ids,
-		     bfd *sym_rec_stream)
+		     bfd *sym_rec_stream, const char *pdb_name)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
@@ -4121,7 +4295,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
 				     strings, &source, types, ids,
-				     sym_rec_stream, &glob))
+				     sym_rec_stream, &glob, pdb_name))
     {
       htab_delete (glob.hashmap);
       return false;
@@ -4813,7 +4987,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
 
   if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
 			    sym_rec_stream_num, publics_stream_num,
-			    &strings, &types, &ids, sym_rec_stream))
+			    &strings, &types, &ids, sym_rec_stream, pdb_name))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
 	       "in PDB file: %E\n"));

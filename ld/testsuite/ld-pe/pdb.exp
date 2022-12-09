@@ -1678,6 +1678,83 @@ proc test9 { } {
     } else {
 	fail "Incorrect symbols in module stream"
     }
+
+    # check linker symbols
+
+    set off 64
+
+    set obj1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $obj1] + 1]
+
+    set ar1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $ar1] + 1]
+
+    if { [expr $off % 4] != 0 } {
+	set off [expr $off + 4 - ($off % 4)]
+    }
+
+    incr off 34
+
+    binary scan [string range $mod_info $off [expr $off + 1]] s linker_syms_index
+
+    set index_str [format "%04x" $linker_syms_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms2.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract linker symbols"
+	return
+    } else {
+	pass "Extracted linker symbols"
+    }
+
+    set syms [file_contents "tmpdir/$index_str"]
+
+    # check S_OBJNAME
+
+    set off 4
+    binary scan [string range $syms $off [expr $off + 1]] s sym_len
+    binary scan [string range $syms [expr $off + 2] [expr $off + 3]] s sym_type
+
+    if { $sym_type != 0x1101 } {
+	fail "First linker symbol was not S_OBJNAME"
+    } else {
+	pass "First linker symbol was S_OBJNAME"
+
+	set linker_fn [string range $syms [expr $off + 8] [expr [string first \000 $syms [expr $off + 8]] - 1]]
+
+	if ![string equal $linker_fn "* Linker *"] {
+	    fail "Incorrect linker object name"
+	} else {
+	    pass "Correct linker object name"
+	}
+    }
+
+    incr off [expr $sym_len + 2]
+
+    # check S_COMPILE3
+
+    binary scan [string range $syms $off [expr $off + 1]] s sym_len
+    binary scan [string range $syms [expr $off + 2] [expr $off + 3]] s sym_type
+
+    if { $sym_type != 0x113c } {
+	fail "Second linker symbol was not S_COMPILE3"
+    } else {
+	pass "Second linker symbol was S_COMPILE3"
+    }
+
+    incr off [expr $sym_len + 2]
+
+    # check S_ENVBLOCK
+
+    binary scan [string range $syms $off [expr $off + 1]] s sym_len
+    binary scan [string range $syms [expr $off + 2] [expr $off + 3]] s sym_type
+
+    if { $sym_type != 0x113d } {
+	fail "Third linker symbol was not S_ENVBLOCK"
+    } else {
+	pass "Third linker symbol was S_ENVBLOCK"
+    }
 }
 
 test1

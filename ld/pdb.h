@@ -93,6 +93,7 @@
 #define S_LPROCREF			0x1127
 #define S_FRAMECOOKIE			0x113a
 #define S_COMPILE3			0x113c
+#define S_ENVBLOCK			0x113d
 #define S_LOCAL				0x113e
 #define S_DEFRANGE_REGISTER		0x1141
 #define S_DEFRANGE_FRAMEPOINTER_REL	0x1142
@@ -794,6 +795,47 @@ struct heap_alloc_site
   uint16_t section;
   uint16_t length;
   uint32_t type;
+} ATTRIBUTE_PACKED;
+
+/* OBJNAMESYM in cvinfo.h */
+struct objname
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t signature;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+#define CV_CFL_80386			0x03
+#define CV_CFL_X64			0xD0
+
+#define CV_CFL_LINK			0x07
+
+/* COMPILESYM3 in cvinfo.h */
+struct compile3
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t flags;
+  uint16_t machine;
+  uint16_t frontend_major;
+  uint16_t frontend_minor;
+  uint16_t frontend_build;
+  uint16_t frontend_qfe;
+  uint16_t backend_major;
+  uint16_t backend_minor;
+  uint16_t backend_build;
+  uint16_t backend_qfe;
+  char compiler[];
+} ATTRIBUTE_PACKED;
+
+/* ENVBLOCKSYM in cvinfo.h */
+struct envblock
+{
+  uint16_t size;
+  uint16_t kind;
+  uint8_t flags;
+  char strings[];
 } ATTRIBUTE_PACKED;
 
 extern bool create_pdb_file (bfd *, const char *, const unsigned char *);
