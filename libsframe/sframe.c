@@ -548,12 +548,12 @@ sframe_decoder_free (sframe_decoder_ctx **decoder)
     }
 }
 
-/* Create a FDE function info byte given an FRE_TYPE and an FDE_TYPE.  */
+/* Create an FDE function info byte given an FRE_TYPE and an FDE_TYPE.  */
 /* FIXME API for linker.  Revisit if its better placed somewhere else?  */
 
 unsigned char
-sframe_fde_func_info (unsigned int fre_type,
-		      unsigned int fde_type)
+sframe_fde_create_func_info (unsigned int fre_type,
+			     unsigned int fde_type)
 {
   unsigned char func_info;
   sframe_assert (fre_type == SFRAME_FRE_TYPE_ADDR1

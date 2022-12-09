@@ -83,10 +83,10 @@ _SFRAME_ERRORS
 extern const char *
 sframe_errmsg (int error);
 
-/* Get FDE function info given a FRE_TYPE.  */
+/* Create an FDE function info bye given an FRE_TYPE and an FDE_TYPE.  */
 
 extern unsigned char
-sframe_fde_func_info (unsigned int fre_type, unsigned int fde_type);
+sframe_fde_create_func_info (unsigned int fre_type, unsigned int fde_type);
 
 /* Gather the FRE type given the function size.  */
 

@@ -1857,8 +1857,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 
   /* FRE type is dependent on the size of the function.  */
   fre_type = sframe_calc_fre_type (dpltsec->size);
-  func_info = sframe_fde_func_info (fre_type,
-				    SFRAME_FDE_TYPE_PCINC);
+  func_info = sframe_fde_create_func_info (fre_type, SFRAME_FDE_TYPE_PCINC);
 
   /* Add SFrame FDE and the associated FREs for plt0 if plt0 has been
      generated.  */
@@ -1888,7 +1887,8 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 	 pattern of the instructions in these entries.  Using this SFrame FDE
 	 type helps in keeping the unwind information for pltn entries
 	 compact.  */
-      func_info	= sframe_fde_func_info (fre_type, SFRAME_FDE_TYPE_PCMASK);
+      func_info	= sframe_fde_create_func_info (fre_type,
+					       SFRAME_FDE_TYPE_PCMASK);
       /* Add the SFrame FDE for all PCs starting at the first pltn entry (hence,
 	 function start address = plt0_entry_size.  As usual, this will be
 	 updated later at _bfd_elf_merge_section_sframe, by when the
