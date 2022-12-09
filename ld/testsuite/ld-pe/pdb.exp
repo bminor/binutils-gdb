@@ -1148,8 +1148,180 @@ proc test5 { } {
     }
 }
 
+proc test6 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-types2a.s tmpdir/pdb-types2a.o] {
+	unsupported "Build pdb-types2a.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-types2b.s tmpdir/pdb-types2b.o] {
+	unsupported "Build pdb-types2b.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-types2.exe" "--pdb=tmpdir/pdb-types2.pdb tmpdir/pdb-types2a.o tmpdir/pdb-types2b.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-types2.pdb 0004"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract IPI stream"
+	return
+    } else {
+	pass "Extracted IPI stream"
+    }
+
+    # check values in IPI header, and save anything interesting
+
+    set fi [open tmpdir/0004]
+    fconfigure $fi -translation binary
+
+    seek $fi 8 current
+
+    set data [read $fi 4]
+    binary scan $data i first_type
+
+    if { $first_type != 0x1000 } {
+	fail "Incorrect first type value in IPI stream."
+    } else {
+	pass "Correct first type value in IPI stream."
+    }
+
+    set data [read $fi 4]
+    binary scan $data i end_type
+
+    # end_type is one greater than the last type in the stream
+    if { $end_type != 0x100f } {
+	fail "Incorrect end type value in IPI stream."
+    } else {
+	pass "Correct end type value in IPI stream."
+    }
+
+    set data [read $fi 4]
+    binary scan $data i type_list_size
+
+    set data [read $fi 2]
+    binary scan $data s hash_stream_index
+
+    seek $fi 2 current
+
+    set data [read $fi 4]
+    binary scan $data i hash_size
+
+    if { $hash_size != 4 } {
+	fail "Incorrect hash size in IPI stream."
+    } else {
+	pass "Correct hash size in IPI stream."
+    }
+
+    set data [read $fi 4]
+    binary scan $data i num_buckets
+
+    if { $num_buckets != 0x3ffff } {
+	fail "Incorrect number of buckets in IPI stream."
+    } else {
+	pass "Correct number of buckets in IPI stream."
+    }
+
+    set data [read $fi 4]
+    binary scan $data i hash_list_offset
+
+    set data [read $fi 4]
+    binary scan $data i hash_list_size
+
+    set data [read $fi 4]
+    binary scan $data i skip_list_offset
+
+    set data [read $fi 4]
+    binary scan $data i skip_list_size
+
+    seek $fi 8 current
+
+    set type_list [read $fi $type_list_size]
+
+    close $fi
+
+    set fi [open tmpdir/pdb-types2-typelist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $type_list
+    close $fi
+
+    # check type list
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types2-typelist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types2-typelist"]
+    if ![string match $exp $got] {
+	fail "Incorrect type list in IPI stream."
+    } else {
+	pass "Correct type list in IPI stream."
+    }
+
+    # extract hash list and skip list
+
+    set index_str [format "%04x" $hash_stream_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-types2.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract IPI hash stream."
+    } else {
+	pass "Extracted IPI hash stream."
+    }
+
+    set fi [open tmpdir/$index_str]
+    fconfigure $fi -translation binary
+
+    seek $fi $hash_list_offset
+    set hash_list [read $fi $hash_list_size]
+
+    seek $fi $skip_list_offset
+    set skip_list [read $fi $skip_list_size]
+
+    close $fi
+
+    # check hash list
+
+    set fi [open tmpdir/pdb-types2-hashlist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $hash_list
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types2-hashlist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types2-hashlist"]
+    if ![string match $exp $got] {
+	fail "Incorrect hash list in IPI stream."
+    } else {
+	pass "Correct hash list in IPI stream."
+    }
+
+    # check skip list
+
+    set fi [open tmpdir/pdb-types2-skiplist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $skip_list
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types2-skiplist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types2-skiplist"]
+    if ![string match $exp $got] {
+	fail "Incorrect skip list in IPI stream."
+    } else {
+	pass "Correct skip list in IPI stream."
+    }
+}
+
 test1
 test2
 test3
 test4
 test5
+test6

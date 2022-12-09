@@ -54,6 +54,11 @@
 #define LF_METHOD			0x150f
 #define LF_NESTTYPE			0x1510
 #define LF_ONEMETHOD			0x1511
+#define LF_FUNC_ID			0x1601
+#define LF_MFUNC_ID			0x1602
+#define LF_BUILDINFO			0x1603
+#define LF_SUBSTR_LIST			0x1604
+#define LF_STRING_ID			0x1605
 
 #define LF_CHAR				0x8000
 #define LF_SHORT			0x8001
@@ -265,7 +270,7 @@ struct lf_pointer
   uint32_t attributes;
 } ATTRIBUTE_PACKED;
 
-/* lfArgList in cvinfo.h */
+/* lfArgList in cvinfo.h (used for both LF_ARGLIST and LF_SUBSTR_LIST) */
 struct lf_arglist
 {
   uint16_t size;
@@ -471,6 +476,44 @@ struct lf_nest_type
   uint16_t kind;
   uint16_t padding;
   uint32_t type;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* lfStringId in cvinfo.h */
+struct lf_string_id
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t substring;
+  char string[];
+} ATTRIBUTE_PACKED;
+
+/* lfBuildInfo in cvinfo.h */
+struct lf_build_info
+{
+  uint16_t size;
+  uint16_t kind;
+  uint16_t count;
+  uint32_t strings[];
+} ATTRIBUTE_PACKED;
+
+/* lfFuncId in cvinfo.h */
+struct lf_func_id
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent_scope;
+  uint32_t function_type;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* lfMFuncId in cvinfo.h */
+struct lf_mfunc_id
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent_type;
+  uint32_t function_type;
   char name[];
 } ATTRIBUTE_PACKED;
 
