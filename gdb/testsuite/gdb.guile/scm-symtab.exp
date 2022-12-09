@@ -153,5 +153,5 @@ gdb_test "guile (print (= (sal-line (find-pc-line (frame-pc (selected-frame)))) 
 gdb_scm_test_silent_cmd "step" "step into func2"
 gdb_scm_test_silent_cmd "up" "step out of func2"
 
-gdb_test "guile (print (> (sal-line (find-pc-line (frame-pc (selected-frame)))) line))" \
+gdb_test "guile (print (>= (sal-line (find-pc-line (frame-pc (selected-frame)))) line))" \
     "#t" "test find-pc-line with resume address"
