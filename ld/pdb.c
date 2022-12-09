@@ -1411,6 +1411,9 @@ populate_publics_stream (bfd *stream, bfd *abfd, bfd *sym_rec_stream)
   for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
        in = in->link.next)
     {
+      if (!in->outsymbols)
+	continue;
+
       for (unsigned int i = 0; i < in->symcount; i++)
 	{
 	  struct bfd_symbol *sym = in->outsymbols[i];
