@@ -396,8 +396,8 @@ sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
     - <val> and <width> are themselves expressionS.
     - <val> stores the expression which when evaluated gives the value of the
       start address offset of the FRE.
-    - <width> stores the expression when when evaluated gives the number of
-      bytes needed to encode the start address offset of the FRE.
+    - <width> stores the expression when evaluated gives the number of bytes
+      needed to encode the start address offset of the FRE.
 
    The use of OP_absent as the X_op_symbol helps identify this expression
    later when fragments are fixed up.  */
@@ -427,6 +427,41 @@ create_fre_start_addr_exp (expressionS *cexp, symbolS *fre_pc_begin,
 
   cexp->X_op = O_absent;
   cexp->X_add_symbol = make_expr_symbol (&val);
+  cexp->X_op_symbol = make_expr_symbol (&width);
+  cexp->X_add_number = 0;
+}
+
+/* Create a composite exression CEXP (for SFrame FDE function info) such that:
+
+      exp = <rest_of_func_info> OP_modulus <width>, where,
+
+    - <rest_of_func_info> and <width> are themselves expressionS.
+    - <rest_of_func_info> stores a constant expression where X_add_number is
+    used to stash away the func_info.  The upper 4-bits of the func_info are copied
+    back to the resulting byte by the fragment fixup logic.
+    - <width> stores the expression when evaluated gives the size of the
+    funtion in number of bytes.
+
+   The use of OP_modulus as the X_op_symbol helps identify this expression
+   later when fragments are fixed up.  */
+
+static void
+create_func_info_exp (expressionS *cexp, symbolS *dw_fde_end_addrS,
+		      symbolS *dw_fde_start_addrS, uint8_t func_info)
+{
+  expressionS width;
+  expressionS rest_of_func_info;
+
+  width.X_op = O_subtract;
+  width.X_add_symbol = dw_fde_end_addrS;
+  width.X_op_symbol = dw_fde_start_addrS;
+  width.X_add_number = 0;
+
+  rest_of_func_info.X_op = O_constant;
+  rest_of_func_info.X_add_number = func_info;
+
+  cexp->X_op = O_modulus;
+  cexp->X_add_symbol = make_expr_symbol (&rest_of_func_info);
   cexp->X_op_symbol = make_expr_symbol (&width);
   cexp->X_add_number = 0;
 }
@@ -538,19 +573,17 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   out_four (sframe_fde->num_fres);
 
   /* SFrame FDE function info.  */
-#if SFRAME_FRE_TYPE_SELECTION_OPT
-  expressionS width;
-  width.X_op = O_subtract;
-  width.X_add_symbol = dw_fde_end_addrS;
-  width.X_op_symbol = dw_fde_start_addrS;
-  width.X_add_number = 0;
-  frag_grow (1); /* Size of func info is unsigned char.  */
-  frag_var (rs_sframe, 1, 0, (relax_substateT) 0,
-	    make_expr_symbol (&width), 0, (char *) frag_now);
-#else
   unsigned char func_info;
   func_info = sframe_set_func_info (SFRAME_FDE_TYPE_PCINC,
 				    SFRAME_FRE_TYPE_ADDR4);
+#if SFRAME_FRE_TYPE_SELECTION_OPT
+  expressionS cexp;
+  create_func_info_exp (&cexp, dw_fde_end_addrS, dw_fde_start_addrS,
+			func_info);
+  frag_grow (1); /* Size of func info is unsigned char.  */
+  frag_var (rs_sframe, 1, 0, (relax_substateT) 0,
+	    make_expr_symbol (&cexp), 0, (char *) frag_now);
+#else
   out_one (func_info);
 #endif
 }

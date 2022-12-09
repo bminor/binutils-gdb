@@ -40,10 +40,10 @@ sframe_estimate_size_before_relax (fragS *frag)
      The two kind of fragments can be differentiated based on the opcode
      of the symbol.  */
   exp = symbol_get_value_expression (frag->fr_symbol);
-  gas_assert ((exp->X_op == O_subtract) || (exp->X_op == O_absent));
+  gas_assert ((exp->X_op == O_modulus) || (exp->X_op == O_absent));
   /* Fragment for function info in an SFrame FDE will always write
      only one byte.  */
-  if (exp->X_op == O_subtract)
+  if (exp->X_op == O_modulus)
     ret = 1;
   /* Fragment for the start address in an SFrame FRE may write out
      1/2/4 bytes depending on the value of the diff.  */
@@ -92,8 +92,12 @@ sframe_convert_frag (fragS *frag)
   offsetT fsize;
   offsetT diff;
   offsetT value;
-  unsigned char func_info = SFRAME_FRE_TYPE_ADDR4;
+
+  offsetT rest_of_data;
+  uint8_t fde_type, fre_type;
+
   expressionS *exp;
+  symbolS *dataS;
   symbolS *fsizeS, *diffS;
 
   /* We are dealing with two different kind of fragments here which need
@@ -103,19 +107,29 @@ sframe_convert_frag (fragS *frag)
      The two kind of fragments can be differentiated based on the opcode
      of the symbol.  */
   exp = symbol_get_value_expression (frag->fr_symbol);
-  gas_assert ((exp->X_op == O_subtract) || (exp->X_op == O_absent));
+  gas_assert ((exp->X_op == O_modulus) || (exp->X_op == O_absent));
   /* Fragment for function info in an SFrame FDE.  */
-  if (exp->X_op == O_subtract)
+  if (exp->X_op == O_modulus)
     {
-      fsizeS = frag->fr_symbol;
+      /* Gather the existing value of the rest of the data except
+	 the fre_type.  */
+      dataS = exp->X_add_symbol;
+      rest_of_data = (symbol_get_value_expression(dataS))->X_add_number;
+      fde_type = SFRAME_V1_FUNC_FDE_TYPE (rest_of_data);
+      gas_assert (fde_type == SFRAME_FDE_TYPE_PCINC);
+
+      /* Calculate the applicable fre_type.  */
+      fsizeS = exp->X_op_symbol;
       fsize = resolve_symbol_value (fsizeS);
       if (fsize < SFRAME_FRE_TYPE_ADDR1_LIMIT)
-	func_info = SFRAME_FRE_TYPE_ADDR1;
+	fre_type = SFRAME_FRE_TYPE_ADDR1;
       else if (fsize < SFRAME_FRE_TYPE_ADDR2_LIMIT)
-	func_info = SFRAME_FRE_TYPE_ADDR2;
+	fre_type = SFRAME_FRE_TYPE_ADDR2;
       else
-	func_info = SFRAME_FRE_TYPE_ADDR4;
-      value = func_info;
+	fre_type = SFRAME_FRE_TYPE_ADDR4;
+
+      /* Create the new function info.  */
+      value = SFRAME_V1_FUNC_INFO (fde_type, fre_type);
 
       frag->fr_literal[frag->fr_fix] = value;
     }
