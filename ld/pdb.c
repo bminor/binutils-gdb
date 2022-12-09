@@ -41,6 +41,23 @@ struct public
   uint32_t address;
 };
 
+struct string
+{
+  struct string *next;
+  uint32_t hash;
+  uint32_t offset;
+  size_t len;
+  char s[];
+};
+
+struct string_table
+{
+  struct string *strings_head;
+  struct string *strings_tail;
+  uint32_t strings_len;
+  htab_t hashmap;
+};
+
 /* Add a new stream to the PDB archive, and return its BFD.  */
 static bfd *
 add_stream (bfd *pdb, const char *name, uint16_t *stream_num)
@@ -383,14 +400,169 @@ get_arch_number (bfd *abfd)
   return IMAGE_FILE_MACHINE_I386;
 }
 
+/* Add a string to the strings table, if it's not already there.  */
+static void
+add_string (char *str, size_t len, struct string_table *strings)
+{
+  uint32_t hash = calc_hash (str, len);
+  void **slot;
+
+  slot = htab_find_slot_with_hash (strings->hashmap, str, hash, INSERT);
+
+  if (!*slot)
+    {
+      struct string *s;
+
+      *slot = xmalloc (offsetof (struct string, s) + len);
+
+      s = (struct string *) *slot;
+
+      s->next = NULL;
+      s->hash = hash;
+      s->offset = strings->strings_len;
+      s->len = len;
+      memcpy (s->s, str, len);
+
+      if (strings->strings_tail)
+	strings->strings_tail->next = s;
+      else
+	strings->strings_head = s;
+
+      strings->strings_tail = s;
+
+      strings->strings_len += len + 1;
+    }
+}
+
+/* Return the hash of an entry in the string table.  */
+static hashval_t
+hash_string_table_entry (const void *p)
+{
+  const struct string *s = (const struct string *) p;
+
+  return s->hash;
+}
+
+/* Compare an entry in the string table with a string.  */
+static int
+eq_string_table_entry (const void *a, const void *b)
+{
+  const struct string *s1 = (const struct string *) a;
+  const char *s2 = (const char *) b;
+  size_t s2_len = strlen (s2);
+
+  if (s2_len != s1->len)
+    return 0;
+
+  return memcmp (s1->s, s2, s2_len) == 0;
+}
+
+/* Parse the string table within the .debug$S section.  */
+static void
+parse_string_table (bfd_byte *data, size_t size,
+		    struct string_table *strings)
+{
+  while (true)
+    {
+      size_t len = strnlen ((char *) data, size);
+
+      add_string ((char *) data, len, strings);
+
+      data += len + 1;
+
+      if (size <= len + 1)
+	break;
+
+      size -= len + 1;
+    }
+}
+
+/* Parse the .debug$S section within an object file.  */
+static bool
+handle_debugs_section (asection *s, bfd *mod, struct string_table *strings)
+{
+  bfd_byte *data = NULL;
+  size_t off;
+
+  if (!bfd_get_full_section_contents (mod, s, &data))
+    return false;
+
+  if (!data)
+    return false;
+
+  if (bfd_getl32 (data) != CV_SIGNATURE_C13)
+    {
+      free (data);
+      return true;
+    }
+
+  off = sizeof (uint32_t);
+
+  while (off + sizeof (uint32_t) <= s->size)
+    {
+      uint32_t type, size;
+
+      type = bfd_getl32 (data + off);
+
+      off += sizeof (uint32_t);
+
+      if (off + sizeof (uint32_t) > s->size)
+	{
+	  free (data);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      size = bfd_getl32 (data + off);
+
+      off += sizeof (uint32_t);
+
+      if (off + size > s->size)
+	{
+	  free (data);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      switch (type)
+	{
+	case DEBUG_S_STRINGTABLE:
+	  parse_string_table (data + off, size, strings);
+
+	  break;
+	}
+
+      off += size;
+
+      if (off % sizeof (uint32_t))
+	off += sizeof (uint32_t) - (off % sizeof (uint32_t));
+    }
+
+  free (data);
+
+  return true;
+}
+
 /* Populate the module stream, which consists of the transformed .debug$S
    data for each object file.  */
 static bool
-populate_module_stream (bfd *stream, uint32_t *sym_byte_size)
+populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
+			struct string_table *strings)
 {
   uint8_t int_buf[sizeof (uint32_t)];
 
   *sym_byte_size = sizeof (uint32_t);
+
+  /* Process .debug$S section(s).  */
+
+  for (asection *s = mod->sections; s; s = s->next)
+    {
+      if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
+	{
+	  if (!handle_debugs_section (s, mod, strings))
+	      return false;
+	}
+    }
 
   /* Write the signature.  */
 
@@ -412,7 +584,7 @@ populate_module_stream (bfd *stream, uint32_t *sym_byte_size)
 /* Create the module info substream within the DBI.  */
 static bool
 create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
-			      uint32_t *size)
+			      uint32_t *size, struct string_table *strings)
 {
   uint8_t *ptr;
 
@@ -482,7 +654,8 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 	  return false;
 	}
 
-      if (!populate_module_stream (stream, &sym_byte_size))
+      if (!populate_module_stream (stream, in, &sym_byte_size,
+				   strings))
 	{
 	  free (*data);
 	  return false;
@@ -687,14 +860,16 @@ static bool
 populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     uint16_t section_header_stream_num,
 		     uint16_t sym_rec_stream_num,
-		     uint16_t publics_stream_num)
+		     uint16_t publics_stream_num,
+		     struct string_table *strings)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
   void *mod_info, *sc;
   uint32_t mod_info_size, sc_size;
 
-  if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size))
+  if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
+				     strings))
     return false;
 
   if (!create_section_contrib_substream (abfd, &sc, &sc_size))
@@ -1107,6 +1282,95 @@ create_section_header_stream (bfd *pdb, bfd *abfd, uint16_t *num)
   return true;
 }
 
+/* Populate the "/names" named stream, which contains the string table.  */
+static bool
+populate_names_stream (bfd *stream, struct string_table *strings)
+{
+  char int_buf[sizeof (uint32_t)];
+  struct string_table_header h;
+  uint32_t num_strings = 0, num_buckets;
+  struct string **buckets;
+
+  bfd_putl32 (STRING_TABLE_SIGNATURE, &h.signature);
+  bfd_putl32 (STRING_TABLE_VERSION, &h.version);
+
+  if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
+    return false;
+
+  bfd_putl32 (strings->strings_len, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    return false;
+
+  int_buf[0] = 0;
+
+  if (bfd_bwrite (int_buf, 1, stream) != 1)
+    return false;
+
+  for (struct string *s = strings->strings_head; s; s = s->next)
+    {
+      if (bfd_bwrite (s->s, s->len, stream) != s->len)
+	return false;
+
+      if (bfd_bwrite (int_buf, 1, stream) != 1)
+	return false;
+
+      num_strings++;
+    }
+
+  num_buckets = num_strings * 2;
+
+  buckets = xmalloc (sizeof (struct string *) * num_buckets);
+  memset (buckets, 0, sizeof (struct string *) * num_buckets);
+
+  for (struct string *s = strings->strings_head; s; s = s->next)
+    {
+      uint32_t bucket_num = s->hash % num_buckets;
+
+      while (buckets[bucket_num])
+	{
+	  bucket_num++;
+
+	  if (bucket_num == num_buckets)
+	    bucket_num = 0;
+	}
+
+      buckets[bucket_num] = s;
+    }
+
+  bfd_putl32 (num_buckets, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    {
+      free (buckets);
+      return false;
+    }
+
+  for (unsigned int i = 0; i < num_buckets; i++)
+    {
+      if (buckets[i])
+	bfd_putl32 (buckets[i]->offset, int_buf);
+      else
+	bfd_putl32 (0, int_buf);
+
+      if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) !=
+	  sizeof (uint32_t))
+	{
+	  free (buckets);
+	  return false;
+	}
+    }
+
+  free (buckets);
+
+  bfd_putl32 (num_strings, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    return false;
+
+  return true;
+}
+
 /* Create a PDB debugging file for the PE image file abfd with the build ID
    guid, stored at pdb_name.  */
 bool
@@ -1117,6 +1381,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   bfd *info_stream, *dbi_stream, *names_stream, *sym_rec_stream,
     *publics_stream;
   uint16_t section_header_stream_num, sym_rec_stream_num, publics_stream_num;
+  struct string_table strings;
 
   pdb = bfd_openw (pdb_name, "pdb");
   if (!pdb)
@@ -1124,6 +1389,13 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       einfo (_("%P: warning: cannot create PDB file: %E\n"));
       return false;
     }
+
+  strings.strings_head = NULL;
+  strings.strings_tail = NULL;
+  strings.strings_len = 1;
+  strings.hashmap = htab_create_alloc (0, hash_string_table_entry,
+				       eq_string_table_entry, free,
+				       xcalloc, free);
 
   bfd_set_format (pdb, bfd_archive);
 
@@ -1201,9 +1473,19 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
     }
 
   if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
-			    sym_rec_stream_num, publics_stream_num))
+			    sym_rec_stream_num, publics_stream_num,
+			    &strings))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
+	       "in PDB file: %E\n"));
+      goto end;
+    }
+
+  add_string ("", 0, &strings);
+
+  if (!populate_names_stream (names_stream, &strings))
+    {
+      einfo (_("%P: warning: cannot populate names stream "
 	       "in PDB file: %E\n"));
       goto end;
     }
@@ -1226,6 +1508,8 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
 
 end:
   bfd_close (pdb);
+
+  htab_delete (strings.hashmap);
 
   return ret;
 }

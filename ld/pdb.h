@@ -155,6 +155,18 @@ struct optional_dbg_header
 
 #define CV_SIGNATURE_C13		4
 
+#define DEBUG_S_STRINGTABLE		0xf3
+
+#define STRING_TABLE_SIGNATURE		0xeffeeffe
+#define STRING_TABLE_VERSION		1
+
+/* VHdr in nmt.h */
+struct string_table_header
+{
+  uint32_t signature;
+  uint32_t version;
+};
+
 #define SECTION_CONTRIB_VERSION_60	0xf12eba2d
 
 /* SC in dbicommon.h */

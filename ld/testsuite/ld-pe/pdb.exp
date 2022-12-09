@@ -703,5 +703,127 @@ proc test2 { } {
     test_section_contrib $section_contrib
 }
 
+proc find_named_stream { pdb name } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb 0001"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set fi [open tmpdir/0001]
+    fconfigure $fi -translation binary
+
+    seek $fi 0x1c
+
+    set data [read $fi 4]
+    binary scan $data i string_len
+
+    set strings [read $fi $string_len]
+
+    set string_off 0
+
+    while {[string first \000 $strings $string_off] != -1 } {
+	set str [string range $strings $string_off [expr [string first \000 $strings $string_off] - 1]]
+
+	if { $str eq $name } {
+	    break
+	}
+
+	incr string_off [expr [string length $str] + 1]
+    }
+
+    if { [string length $strings] == $string_off } { # string not found
+	close $fi
+	return 0
+    }
+
+    set data [read $fi 4]
+    binary scan $data i num_entries
+
+    seek $fi 4 current
+
+    set data [read $fi 4]
+    binary scan $data i present_bitmap_len
+
+    seek $fi [expr $present_bitmap_len * 4] current
+
+    set data [read $fi 4]
+    binary scan $data i deleted_bitmap_len
+
+    seek $fi [expr $deleted_bitmap_len * 4] current
+
+    for {set i 0} {$i < $num_entries} {incr i} {
+	set data [read $fi 4]
+	binary scan $data i offset
+
+	if { $offset == $string_off } {
+	    set data [read $fi 4]
+	    binary scan $data i value
+	    close $fi
+
+	    return $value
+	}
+
+	seek $fi 4 current
+    }
+
+    close $fi
+
+    return 0
+}
+
+proc test3 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-strings1.s tmpdir/pdb-strings1.o] {
+	unsupported "Build pdb-strings1.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-strings2.s tmpdir/pdb-strings2.o] {
+	unsupported "Build pdb-strings2.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-strings.exe" "--pdb=tmpdir/pdb-strings.pdb tmpdir/pdb-strings1.o tmpdir/pdb-strings2.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    set index [find_named_stream "tmpdir/pdb-strings.pdb" "/names"]
+
+    if { $index == 0 } {
+	fail "Could not find /names stream"
+	return
+    } else {
+	pass "Found /names stream"
+    }
+
+    set index_str [format "%04x" $index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-strings.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-strings.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if ![string match $exp $got] {
+	fail "Strings table was not as expected"
+    } else {
+	pass "Strings table was as expected"
+    }
+}
+
 test1
 test2
+test3
