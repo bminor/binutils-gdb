@@ -4871,12 +4871,18 @@ dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
   /* Decode the contents of the section.  */
   sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
   if (!sfd_ctx)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      free (sframe_data);
+      bfd_fatal (bfd_get_filename (abfd));
+    }
 
   printf (_("Contents of the SFrame section %s:"),
 	  sanitize_string (sect_name));
   /* Dump the contents as text.  */
   dump_sframe (sfd_ctx, sf_vma);
+
+  free (sframe_data);
+  sframe_decoder_free (&sfd_ctx);
 }
 
 
