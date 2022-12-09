@@ -88,6 +88,24 @@ struct types
   struct type_entry *last;
 };
 
+struct global
+{
+  struct global *next;
+  uint32_t offset;
+  uint32_t hash;
+  uint32_t refcount;
+  unsigned int index;
+  uint8_t data[];
+};
+
+struct globals
+{
+  uint32_t num_entries;
+  struct global *first;
+  struct global *last;
+  htab_t hashmap;
+};
+
 static const uint32_t crc_table[] =
 {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -794,6 +812,120 @@ parse_string_table (bfd_byte *data, size_t size,
     }
 }
 
+/* Remap a type reference within a CodeView symbol.  */
+static bool
+remap_symbol_type (void *data, struct type_entry **map, uint32_t num_types)
+{
+  uint32_t type = bfd_getl32 (data);
+
+  /* Ignore builtin types (those with IDs below 0x1000).  */
+  if (type < TPI_FIRST_INDEX)
+    return true;
+
+  if (type >= TPI_FIRST_INDEX + num_types)
+    {
+      einfo (_("%P: CodeView symbol references out of range type %v\n"),
+	       type);
+      return false;
+    }
+
+  type = TPI_FIRST_INDEX + map[type - TPI_FIRST_INDEX]->index;
+  bfd_putl32 (type, data);
+
+  return true;
+}
+
+/* Add an entry into the globals stream.  If it already exists, increase
+   the refcount.  */
+static bool
+add_globals_ref (struct globals *glob, bfd *sym_rec_stream, const char *name,
+		 size_t name_len, uint8_t *data, size_t len)
+{
+  void **slot;
+  uint32_t hash;
+  struct global *g;
+
+  slot = htab_find_slot_with_hash (glob->hashmap, data,
+				   iterative_hash (data, len, 0), INSERT);
+
+  if (*slot)
+    {
+      g = *slot;
+      g->refcount++;
+      return true;
+    }
+
+  *slot = xmalloc (offsetof (struct global, data) + len);
+
+  hash = crc32 ((const uint8_t *) name, name_len);
+  hash %= NUM_GLOBALS_HASH_BUCKETS;
+
+  g = *slot;
+  g->next = NULL;
+  g->offset = bfd_tell (sym_rec_stream);
+  g->hash = hash;
+  g->refcount = 1;
+  memcpy (g->data, data, len + 1);
+
+  glob->num_entries++;
+
+  if (glob->last)
+    glob->last->next = g;
+  else
+    glob->first = g;
+
+  glob->last = g;
+
+  return bfd_bwrite (data, len, sym_rec_stream) == len;
+}
+
+/* Find the end of the current scope within symbols data.  */
+static uint8_t *
+find_end_of_scope (uint8_t *data, uint32_t size)
+{
+  unsigned int scope_level = 1;
+  uint16_t len;
+
+  len = bfd_getl16 (data) + sizeof (uint16_t);
+
+  data += len;
+  size -= len;
+
+  while (true)
+    {
+      uint16_t type;
+
+      if (size < sizeof (uint32_t))
+	return NULL;
+
+      len = bfd_getl16 (data) + sizeof (uint16_t);
+      type = bfd_getl16 (data + sizeof (uint16_t));
+
+      if (size < len)
+	return NULL;
+
+      switch (type)
+	{
+	case S_GPROC32:
+	case S_LPROC32:
+	  scope_level++;
+	  break;
+
+	case S_END:
+	case S_PROC_ID_END:
+	  scope_level--;
+
+	  if (scope_level == 0)
+	    return data;
+
+	  break;
+	}
+
+      data += len;
+      size -= len;
+    }
+}
+
 /* Return the size of an extended value parameter, as used in
    LF_ENUMERATE etc.  */
 static unsigned int
@@ -820,18 +952,529 @@ extended_value_len (uint16_t type)
   return 0;
 }
 
+/* Parse the symbols in a .debug$S section, and copy them to the module's
+   symbol stream.  */
+static bool
+parse_symbols (uint8_t *data, uint32_t size, uint8_t **buf,
+	       struct type_entry **map, uint32_t num_types,
+	       bfd *sym_rec_stream, struct globals *glob, uint16_t mod_num)
+{
+  uint8_t *orig_buf = *buf;
+  unsigned int scope_level = 0;
+
+  while (size >= sizeof (uint16_t))
+    {
+      uint16_t len, type;
+
+      len = bfd_getl16 (data) + sizeof (uint16_t);
+
+      if (len > size)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      type = bfd_getl16 (data + sizeof (uint16_t));
+
+      switch (type)
+	{
+	case S_LDATA32:
+	case S_GDATA32:
+	case S_LTHREAD32:
+	case S_GTHREAD32:
+	  {
+	    struct datasym *d = (struct datasym *) data;
+	    size_t name_len;
+
+	    if (len < offsetof (struct datasym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_LDATA32/S_GDATA32/S_LTHREAD32/S_GTHREAD32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (scope_level == 0)
+	      {
+		uint16_t section = bfd_getl16 (&d->section);
+
+		if (section == 0) /* GC'd, ignore */
+		  break;
+	      }
+
+	    name_len =
+	      strnlen (d->name, len - offsetof (struct datasym, name));
+
+	    if (name_len == len - offsetof (struct datasym, name))
+	      {
+		einfo (_("%P: warning: name for S_LDATA32/S_GDATA32/"
+			 "S_LTHREAD32/S_GTHREAD32 has no terminating"
+			 " zero\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&d->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    /* If S_LDATA32 or S_LTHREAD32, copy into module symbols.  */
+
+	    if (type == S_LDATA32 || type == S_LTHREAD32)
+	      {
+		memcpy (*buf, d, len);
+		*buf += len;
+	      }
+
+	    /* S_LDATA32 and S_LTHREAD32 only go in globals if
+	       not in function scope.  */
+	    if (type == S_GDATA32 || type == S_GTHREAD32 || scope_level == 0)
+	      {
+		if (!add_globals_ref (glob, sym_rec_stream, d->name,
+				      name_len, data, len))
+		  return false;
+	      }
+
+	    break;
+	  }
+
+	case S_GPROC32:
+	case S_LPROC32:
+	case S_GPROC32_ID:
+	case S_LPROC32_ID:
+	  {
+	    struct procsym *proc = (struct procsym *) data;
+	    size_t name_len;
+	    uint16_t section;
+	    uint32_t end;
+	    uint8_t *endptr;
+	    size_t ref_size, padding;
+	    struct refsym *ref;
+
+	    if (len < offsetof (struct procsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_GPROC32/S_LPROC32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    section = bfd_getl16 (&proc->section);
+
+	    endptr = find_end_of_scope (data, size);
+
+	    if (!endptr)
+	      {
+		einfo (_("%P: warning: could not find end of"
+			 " S_GPROC32/S_LPROC32 record\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (section == 0) /* skip if GC'd */
+	      {
+		/* Skip to after S_END.  */
+
+		size -= endptr - data;
+		data = endptr;
+
+		len = bfd_getl16 (data) + sizeof (uint16_t);
+
+		data += len;
+		size -= len;
+
+		continue;
+	      }
+
+	    name_len =
+	      strnlen (proc->name, len - offsetof (struct procsym, name));
+
+	    if (name_len == len - offsetof (struct procsym, name))
+	      {
+		einfo (_("%P: warning: name for S_GPROC32/S_LPROC32 has no"
+			 " terminating zero\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (type == S_GPROC32_ID || type == S_LPROC32_ID)
+	      {
+		/* Transform into S_GPROC32 / S_LPROC32.  */
+
+		uint32_t t_idx = bfd_getl32 (&proc->type);
+		struct type_entry *t;
+		uint16_t t_type;
+
+		if (t_idx < TPI_FIRST_INDEX
+		    || t_idx >= TPI_FIRST_INDEX + num_types)
+		  {
+		    einfo (_("%P: CodeView symbol references out of range"
+			     " type %v\n"), type);
+		    bfd_set_error (bfd_error_bad_value);
+		    return false;
+		  }
+
+		t = map[t_idx - TPI_FIRST_INDEX];
+
+		t_type = bfd_getl16 (t->data + sizeof (uint16_t));
+
+		switch (t_type)
+		  {
+		  case LF_FUNC_ID:
+		    {
+		      struct lf_func_id *t_data =
+			(struct lf_func_id *) t->data;
+
+		      /* Replace proc->type with function type.  */
+
+		      memcpy (&proc->type, &t_data->function_type,
+			      sizeof (uint32_t));
+
+		      break;
+		    }
+
+		  case LF_MFUNC_ID:
+		    {
+		      struct lf_mfunc_id *t_data =
+			(struct lf_mfunc_id *) t->data;
+
+		      /* Replace proc->type with function type.  */
+
+		      memcpy (&proc->type, &t_data->function_type,
+			      sizeof (uint32_t));
+
+		      break;
+		    }
+
+		  default:
+		    einfo (_("%P: CodeView S_GPROC32_ID/S_LPROC32_ID symbol"
+			     " referenced unknown type as ID\n"));
+		    bfd_set_error (bfd_error_bad_value);
+		    return false;
+		  }
+
+		/* Change record type.  */
+
+		if (type == S_GPROC32_ID)
+		  bfd_putl32 (S_GPROC32, &proc->kind);
+		else
+		  bfd_putl32 (S_LPROC32, &proc->kind);
+	      }
+	    else
+	      {
+		if (!remap_symbol_type (&proc->type, map, num_types))
+		  {
+		    bfd_set_error (bfd_error_bad_value);
+		    return false;
+		  }
+	      }
+
+	    end = *buf - orig_buf + sizeof (uint32_t) + endptr - data;
+	    bfd_putl32 (end, &proc->end);
+
+	    /* Add S_PROCREF / S_LPROCREF to globals stream.  */
+
+	    ref_size = offsetof (struct refsym, name) + name_len + 1;
+
+	    if (ref_size % sizeof (uint32_t))
+	      padding = sizeof (uint32_t) - (ref_size % sizeof (uint32_t));
+	    else
+	      padding = 0;
+
+	    ref = xmalloc (ref_size + padding);
+
+	    bfd_putl16 (ref_size + padding - sizeof (uint16_t), &ref->size);
+	    bfd_putl16 (type == S_GPROC32 || type == S_GPROC32_ID ?
+			S_PROCREF : S_LPROCREF, &ref->kind);
+	    bfd_putl32 (0, &ref->sum_name);
+	    bfd_putl32 (*buf - orig_buf + sizeof (uint32_t),
+			&ref->symbol_offset);
+	    bfd_putl16 (mod_num + 1, &ref->mod);
+
+	    memcpy (ref->name, proc->name, name_len + 1);
+
+	    memset (ref->name + name_len + 1, 0, padding);
+
+	    if (!add_globals_ref (glob, sym_rec_stream, proc->name, name_len,
+				  (uint8_t *) ref, ref_size + padding))
+	      {
+		free (ref);
+		return false;
+	      }
+
+	    free (ref);
+
+	    memcpy (*buf, proc, len);
+	    *buf += len;
+
+	    scope_level++;
+
+	    break;
+	  }
+
+	case S_UDT:
+	  {
+	    struct udtsym *udt = (struct udtsym *) data;
+	    size_t name_len;
+
+	    if (len < offsetof (struct udtsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_UDT\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    name_len =
+	      strnlen (udt->name, len - offsetof (struct udtsym, name));
+
+	    if (name_len == len - offsetof (struct udtsym, name))
+	      {
+		einfo (_("%P: warning: name for S_UDT has no"
+			 " terminating zero\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&udt->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    /* S_UDT goes in the symbols stream if within a procedure,
+	       otherwise it goes in the globals stream.  */
+	    if (scope_level == 0)
+	      {
+		if (!add_globals_ref (glob, sym_rec_stream, udt->name,
+				      name_len, data, len))
+		  return false;
+	      }
+	    else
+	      {
+		memcpy (*buf, udt, len);
+		*buf += len;
+	      }
+
+	    break;
+	  }
+
+	case S_CONSTANT:
+	  {
+	    struct constsym *c = (struct constsym *) data;
+	    size_t name_len, rec_size;
+	    uint16_t val;
+
+	    if (len < offsetof (struct constsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_CONSTANT\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    rec_size = offsetof (struct constsym, name);
+
+	    val = bfd_getl16 (&c->value);
+
+	    /* If val >= 0x8000, actual value follows.  */
+	    if (val >= 0x8000)
+	      {
+		unsigned int param_len = extended_value_len (val);
+
+		if (param_len == 0)
+		  {
+		    einfo (_("%P: warning: unhandled type %v within"
+			     " S_CONSTANT\n"), val);
+		    bfd_set_error (bfd_error_bad_value);
+		    return false;
+		  }
+
+		rec_size += param_len;
+	      }
+
+	    name_len =
+	      strnlen ((const char *) data + rec_size, len - rec_size);
+
+	    if (name_len == len - rec_size)
+	      {
+		einfo (_("%P: warning: name for S_CONSTANT has no"
+			 " terminating zero\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&c->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!add_globals_ref (glob, sym_rec_stream,
+				  (const char *) data + rec_size, name_len,
+				  data, len))
+	      return false;
+
+	    break;
+	  }
+
+	case S_END:
+	case S_PROC_ID_END:
+	  memcpy (*buf, data, len);
+
+	  if (type == S_PROC_ID_END) /* transform to S_END */
+	    bfd_putl16 (S_END, *buf + sizeof (uint16_t));
+
+	  *buf += len;
+	  scope_level--;
+	  break;
+
+	default:
+	  einfo (_("%P: warning: unrecognized CodeView record %v\n"), type);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      data += len;
+      size -= len;
+    }
+
+  return true;
+}
+
+/* For a given symbol subsection, work out how much space to allocate in the
+   result module stream.  This is different because we don't copy certain
+   symbols, such as S_CONSTANT, and we skip over any procedures or data that
+   have been GC'd out.  */
+static bool
+calculate_symbols_size (uint8_t *data, uint32_t size, uint32_t *sym_size)
+{
+  unsigned int scope_level = 0;
+
+  while (size >= sizeof (uint32_t))
+    {
+      uint16_t len = bfd_getl16 (data) + sizeof (uint16_t);
+      uint16_t type = bfd_getl16 (data + sizeof (uint16_t));
+
+      switch (type)
+	{
+	case S_LDATA32:
+	case S_LTHREAD32:
+	  {
+	    struct datasym *d = (struct datasym *) data;
+	    uint16_t section;
+
+	    if (len < offsetof (struct datasym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_LDATA32/S_LTHREAD32\n"));
+		return false;
+	      }
+
+	    section = bfd_getl16 (&d->section);
+
+	    /* copy if not GC'd or within function */
+	    if (scope_level != 0 || section != 0)
+	      *sym_size += len;
+	  }
+
+	case S_GDATA32:
+	case S_GTHREAD32:
+	case S_CONSTANT:
+	  /* Not copied into symbols stream.  */
+	  break;
+
+	case S_GPROC32:
+	case S_LPROC32:
+	case S_GPROC32_ID:
+	case S_LPROC32_ID:
+	  {
+	    struct procsym *proc = (struct procsym *) data;
+	    uint16_t section;
+
+	    if (len < offsetof (struct procsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_GPROC32/S_LPROC32\n"));
+		return false;
+	      }
+
+	    section = bfd_getl16 (&proc->section);
+
+	    if (section != 0)
+	      {
+		*sym_size += len;
+	      }
+	    else
+	      {
+		uint8_t *endptr = find_end_of_scope (data, size);
+
+		if (!endptr)
+		  {
+		    einfo (_("%P: warning: could not find end of"
+			     " S_GPROC32/S_LPROC32 record\n"));
+		    return false;
+		  }
+
+		/* Skip to after S_END.  */
+
+		size -= endptr - data;
+		data = endptr;
+
+		len = bfd_getl16 (data) + sizeof (uint16_t);
+
+		data += len;
+		size -= len;
+
+		continue;
+	      }
+
+	    scope_level++;
+
+	    break;
+	  }
+
+	case S_UDT:
+	  if (scope_level != 0) /* only goes in symbols if local */
+	    *sym_size += len;
+	  break;
+
+	case S_END: /* always copied */
+	case S_PROC_ID_END:
+	  *sym_size += len;
+	  scope_level--;
+	  break;
+
+	default:
+	  einfo (_("%P: warning: unrecognized CodeView record %v\n"), type);
+	  return false;
+	}
+
+      data += len;
+      size -= len;
+    }
+
+  return true;
+}
+
 /* Parse the .debug$S section within an object file.  */
 static bool
 handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 		       uint8_t **dataptr, uint32_t *sizeptr,
 		       struct mod_source_files *mod_source,
-		       bfd *abfd)
+		       bfd *abfd, uint8_t **syms, uint32_t *sym_byte_size,
+		       struct type_entry **map, uint32_t num_types,
+		       bfd *sym_rec_stream, struct globals *glob,
+		       uint16_t mod_num)
 {
   bfd_byte *data = NULL;
   size_t off;
   uint32_t c13_size = 0;
   char *string_table = NULL;
-  uint8_t *buf, *bufptr;
+  uint8_t *buf, *bufptr, *symbuf, *symbufptr;
+  uint32_t sym_size = 0;
 
   if (!bfd_get_full_section_contents (mod, s, &data))
     return false;
@@ -970,6 +1613,16 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
 	    break;
 	  }
+
+	case DEBUG_S_SYMBOLS:
+	  if (!calculate_symbols_size (data + off, size, &sym_size))
+	    {
+	      free (data);
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+
+	  break;
 	}
 
       off += size;
@@ -978,7 +1631,10 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 	off += sizeof (uint32_t) - (off % sizeof (uint32_t));
     }
 
-  if (c13_size == 0)
+  if (sym_size % sizeof (uint32_t))
+    sym_size += sizeof (uint32_t) - (sym_size % sizeof (uint32_t));
+
+  if (c13_size == 0 && sym_size == 0)
     {
       free (data);
       return true;
@@ -986,8 +1642,15 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
   /* copy data */
 
-  buf = xmalloc (c13_size);
+  buf = NULL;
+  if (c13_size != 0)
+    buf = xmalloc (c13_size);
   bufptr = buf;
+
+  symbuf = NULL;
+  if (sym_size != 0)
+    symbuf = xmalloc (sym_size);
+  symbufptr = symbuf;
 
   off = sizeof (uint32_t);
 
@@ -1008,6 +1671,7 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 				strings, bufptr, mod_source))
 	    {
 	      free (data);
+	      free (symbuf);
 	      return false;
 	    }
 
@@ -1036,6 +1700,17 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
 	    break;
 	  }
+
+	case DEBUG_S_SYMBOLS:
+	  if (!parse_symbols (data + off, size, &symbufptr, map, num_types,
+			      sym_rec_stream, glob, mod_num))
+	    {
+	      free (data);
+	      free (symbuf);
+	      return false;
+	    }
+
+	  break;
 	}
 
       off += size;
@@ -1046,22 +1721,42 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
   free (data);
 
-  if (*dataptr)
+  if (buf)
     {
-      /* Append the C13 info to what's already there, if the module has
-	 multiple .debug$S sections.  */
+      if (*dataptr)
+	{
+	  /* Append the C13 info to what's already there, if the module has
+	     multiple .debug$S sections.  */
 
-      *dataptr = xrealloc (*dataptr, *sizeptr + c13_size);
-      memcpy (*dataptr + *sizeptr, buf, c13_size);
+	  *dataptr = xrealloc (*dataptr, *sizeptr + c13_size);
+	  memcpy (*dataptr + *sizeptr, buf, c13_size);
 
-      free (buf);
+	  free (buf);
+	}
+      else
+	{
+	  *dataptr = buf;
+	}
+
+      *sizeptr += c13_size;
     }
-  else
+
+  if (symbuf)
     {
-      *dataptr = buf;
-    }
+      if (*syms)
+	{
+	  *syms = xrealloc (*syms, *sym_byte_size + sym_size);
+	  memcpy (*syms + *sym_byte_size, symbuf, sym_size);
 
-  *sizeptr += c13_size;
+	  free (symbuf);
+	}
+      else
+	{
+	  *syms = symbuf;
+	}
+
+      *sym_byte_size += sym_size;
+    }
 
   return true;
 }
@@ -2280,12 +2975,11 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 static bool
 handle_debugt_section (asection *s, bfd *mod, struct types *types,
 		       struct types *ids, uint16_t mod_num,
-		       struct string_table *strings)
+		       struct string_table *strings,
+		       struct type_entry ***map, uint32_t *num_types)
 {
   bfd_byte *data = NULL;
   size_t off;
-  unsigned int num_types = 0;
-  struct type_entry **map;
   uint32_t type_num;
 
   if (!bfd_get_full_section_contents (mod, s, &data))
@@ -2316,17 +3010,17 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
 	  return false;
 	}
 
-      num_types++;
+      (*num_types)++;
       off += size;
     }
 
-  if (num_types == 0)
+  if (*num_types == 0)
     {
       free (data);
       return true;
     }
 
-  map = xcalloc (num_types, sizeof (struct type_entry *));
+  *map = xcalloc (*num_types, sizeof (struct type_entry *));
 
   off = sizeof (uint32_t);
   type_num = 0;
@@ -2337,11 +3031,11 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
 
       size = bfd_getl16 (data + off);
 
-      if (!handle_type (data + off, map, type_num, num_types, types, ids,
+      if (!handle_type (data + off, *map, type_num, *num_types, types, ids,
 			mod_num, strings))
 	{
 	  free (data);
-	  free (map);
+	  free (*map);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
@@ -2351,7 +3045,6 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
     }
 
   free (data);
-  free (map);
 
   return true;
 }
@@ -2364,13 +3057,34 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			uint32_t *c13_info_size,
 			struct mod_source_files *mod_source,
 			bfd *abfd, struct types *types,
-			struct types *ids, uint16_t mod_num)
+			struct types *ids, uint16_t mod_num,
+			bfd *sym_rec_stream, struct globals *glob)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
+  uint8_t *syms = NULL;
+  struct type_entry **map = NULL;
+  uint32_t num_types = 0;
 
-  *sym_byte_size = sizeof (uint32_t);
+  *sym_byte_size = 0;
   *c13_info_size = 0;
+
+  /* Process .debug$T section.  */
+
+  for (asection *s = mod->sections; s; s = s->next)
+    {
+      if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
+	{
+	  if (!handle_debugt_section (s, mod, types, ids, mod_num, strings,
+				      &map, &num_types))
+	    {
+	      free (mod_source->files);
+	      return false;
+	    }
+
+	  break;
+	}
+    }
 
   /* Process .debug$S section(s).  */
 
@@ -2379,23 +3093,20 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
       if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
 	{
 	  if (!handle_debugs_section (s, mod, strings, &c13_info,
-				      c13_info_size, mod_source, abfd))
+				      c13_info_size, mod_source, abfd,
+				      &syms, sym_byte_size, map, num_types,
+				      sym_rec_stream, glob, mod_num))
 	    {
 	      free (c13_info);
+	      free (syms);
 	      free (mod_source->files);
-	      return false;
-	    }
-	}
-      else if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
-	{
-	  if (!handle_debugt_section (s, mod, types, ids, mod_num, strings))
-	    {
-	      free (c13_info);
-	      free (mod_source->files);
+	      free (map);
 	      return false;
 	    }
 	}
     }
+
+  free (map);
 
   /* Write the signature.  */
 
@@ -2404,7 +3115,20 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
   if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
     {
       free (c13_info);
+      free (syms);
       return false;
+    }
+
+  if (syms)
+    {
+      if (bfd_bwrite (syms, *sym_byte_size, stream) != *sym_byte_size)
+	{
+	  free (c13_info);
+	  free (syms);
+	  return false;
+	}
+
+      free (syms);
     }
 
   if (c13_info)
@@ -2433,7 +3157,8 @@ static bool
 create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 			      uint32_t *size, struct string_table *strings,
 			      struct source_files_info *source,
-			      struct types *types, struct types *ids)
+			      struct types *types, struct types *ids,
+			      bfd *sym_rec_stream, struct globals *glob)
 {
   uint8_t *ptr;
   unsigned int mod_num;
@@ -2522,7 +3247,8 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
       if (!populate_module_stream (stream, in, &sym_byte_size,
 				   strings, &c13_info_size,
 				   &source->mods[mod_num], abfd,
-				   types, ids, mod_num))
+				   types, ids, mod_num,
+				   sym_rec_stream, glob))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {
@@ -2550,7 +3276,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 
       bfd_putl16 (0, &mod->flags);
       bfd_putl16 (stream_num, &mod->module_sym_stream);
-      bfd_putl32 (sym_byte_size, &mod->sym_byte_size);
+      bfd_putl32 (sizeof (uint32_t) + sym_byte_size, &mod->sym_byte_size);
       bfd_putl32 (0, &mod->c11_byte_size);
       bfd_putl32 (c13_info_size, &mod->c13_byte_size);
       bfd_putl16 (0, &mod->source_file_count);
@@ -2838,6 +3564,170 @@ create_source_info_substream (void **data, uint32_t *size,
     }
 }
 
+/* Used as parameter to qsort, to sort globals by hash.  */
+static int
+global_compare_hash (const void *s1, const void *s2)
+{
+  const struct global *g1 = *(const struct global **) s1;
+  const struct global *g2 = *(const struct global **) s2;
+
+  if (g1->hash < g2->hash)
+    return -1;
+  if (g1->hash > g2->hash)
+    return 1;
+
+  return 0;
+}
+
+/* Create the globals stream, which contains the unmangled symbol names.  */
+static bool
+create_globals_stream (bfd *pdb, struct globals *glob, uint16_t *stream_num)
+{
+  bfd *stream;
+  struct globals_hash_header h;
+  uint32_t buckets_size, filled_buckets = 0;
+  struct global **sorted = NULL;
+  bool ret = false;
+  struct global *buckets[NUM_GLOBALS_HASH_BUCKETS];
+  char int_buf[sizeof (uint32_t)];
+
+  stream = add_stream (pdb, NULL, stream_num);
+  if (!stream)
+    return false;
+
+  memset (buckets, 0, sizeof (buckets));
+
+  if (glob->num_entries > 0)
+    {
+      struct global *g;
+
+      /* Create an array of pointers, sorted by hash value.  */
+
+      sorted = xmalloc (sizeof (struct global *) * glob->num_entries);
+
+      g = glob->first;
+      for (unsigned int i = 0; i < glob->num_entries; i++)
+	{
+	  sorted[i] = g;
+	  g = g->next;
+	}
+
+      qsort (sorted, glob->num_entries, sizeof (struct global *),
+	     global_compare_hash);
+
+      /* Populate the buckets.  */
+
+      for (unsigned int i = 0; i < glob->num_entries; i++)
+	{
+	  if (!buckets[sorted[i]->hash])
+	    {
+	      buckets[sorted[i]->hash] = sorted[i];
+	      filled_buckets++;
+	    }
+
+	  sorted[i]->index = i;
+	}
+    }
+
+  buckets_size = NUM_GLOBALS_HASH_BUCKETS / 8;
+  buckets_size += sizeof (uint32_t);
+  buckets_size += filled_buckets * sizeof (uint32_t);
+
+  bfd_putl32 (GLOBALS_HASH_SIGNATURE, &h.signature);
+  bfd_putl32 (GLOBALS_HASH_VERSION_70, &h.version);
+  bfd_putl32 (glob->num_entries * sizeof (struct hash_record),
+	      &h.entries_size);
+  bfd_putl32 (buckets_size, &h.buckets_size);
+
+  if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
+    return false;
+
+  /* Write hash entries, sorted by hash.  */
+
+  for (unsigned int i = 0; i < glob->num_entries; i++)
+    {
+      struct hash_record hr;
+
+      bfd_putl32 (sorted[i]->offset + 1, &hr.offset);
+      bfd_putl32 (sorted[i]->refcount, &hr.reference);
+
+      if (bfd_bwrite (&hr, sizeof (hr), stream) != sizeof (hr))
+	goto end;
+    }
+
+  /* Write the bitmap for filled and unfilled buckets.  */
+
+  for (unsigned int i = 0; i < NUM_GLOBALS_HASH_BUCKETS; i += 8)
+    {
+      uint8_t v = 0;
+
+      for (unsigned int j = 0; j < 8; j++)
+	{
+	  if (buckets[i + j])
+	    v |= 1 << j;
+	}
+
+      if (bfd_bwrite (&v, sizeof (v), stream) != sizeof (v))
+	goto end;
+    }
+
+  /* Add a 4-byte gap.  */
+
+  bfd_putl32 (0, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    goto end;
+
+  /* Write the bucket offsets.  */
+
+  for (unsigned int i = 0; i < NUM_GLOBALS_HASH_BUCKETS; i++)
+    {
+      if (buckets[i])
+	{
+	  /* 0xc is size of internal hash_record structure in
+	     Microsoft's parser.  */
+	  bfd_putl32 (buckets[i]->index * 0xc, int_buf);
+
+	  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) !=
+	      sizeof (uint32_t))
+	    goto end;
+	}
+    }
+
+  ret = true;
+
+end:
+  free (sorted);
+
+  return ret;
+}
+
+/* Hash an entry in the globals list.  */
+static hashval_t
+hash_global_entry (const void *p)
+{
+  const struct global *g = (const struct global *) p;
+  uint16_t len = bfd_getl16 (g->data);
+
+  return iterative_hash (g->data, len, 0);
+}
+
+/* Compare an entry in the globals list with a symbol.  */
+static int
+eq_global_entry (const void *a, const void *b)
+{
+  const struct global *g = (const struct global *) a;
+  uint16_t len1, len2;
+
+  len1 = bfd_getl16 (g->data) + sizeof (uint16_t);
+  len2 = bfd_getl16 (b) + sizeof (uint16_t);
+
+  if (len1 != len2)
+    return 0;
+
+  return !memcmp (g->data, b, len1);
+}
+
 /* Stream 4 is the debug information (DBI) stream.  */
 static bool
 populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
@@ -2846,20 +3736,50 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     uint16_t publics_stream_num,
 		     struct string_table *strings,
 		     struct types *types,
-		     struct types *ids)
+		     struct types *ids,
+		     bfd *sym_rec_stream)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
   void *mod_info, *sc, *source_info;
   uint32_t mod_info_size, sc_size, source_info_size;
   struct source_files_info source;
+  struct globals glob;
+  uint16_t globals_stream_num;
 
   source.mod_count = 0;
   source.mods = NULL;
 
+  glob.num_entries = 0;
+  glob.first = NULL;
+  glob.last = NULL;
+
+  glob.hashmap = htab_create_alloc (0, hash_global_entry,
+				    eq_global_entry, free, xcalloc, free);
+
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
-				     strings, &source, types, ids))
-    return false;
+				     strings, &source, types, ids,
+				     sym_rec_stream, &glob))
+    {
+      htab_delete (glob.hashmap);
+      return false;
+    }
+
+  if (!create_globals_stream (pdb, &glob, &globals_stream_num))
+    {
+      htab_delete (glob.hashmap);
+
+      for (unsigned int i = 0; i < source.mod_count; i++)
+	{
+	  free (source.mods[i].files);
+	}
+      free (source.mods);
+
+      free (mod_info);
+      return false;
+    }
+
+  htab_delete (glob.hashmap);
 
   if (!create_section_contrib_substream (abfd, &sc, &sc_size))
     {
@@ -2884,7 +3804,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
   bfd_putl32 (0xffffffff, &h.version_signature);
   bfd_putl32 (DBI_STREAM_VERSION_70, &h.version_header);
   bfd_putl32 (1, &h.age);
-  bfd_putl16 (0xffff, &h.global_stream_index);
+  bfd_putl16 (globals_stream_num, &h.global_stream_index);
   bfd_putl16 (0x8e1d, &h.build_number); // MSVC 14.29
   bfd_putl16 (publics_stream_num, &h.public_stream_index);
   bfd_putl16 (0, &h.pdb_dll_version);
@@ -3531,7 +4451,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
 
   if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
 			    sym_rec_stream_num, publics_stream_num,
-			    &strings, &types, &ids))
+			    &strings, &types, &ids, sym_rec_stream))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
 	       "in PDB file: %E\n"));

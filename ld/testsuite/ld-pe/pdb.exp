@@ -1451,6 +1451,169 @@ proc test7 { } {
     }
 }
 
+proc test8 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-syms1a.s tmpdir/pdb-syms1a.o] {
+	unsupported "Build pdb-syms1a.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-syms1b.s tmpdir/pdb-syms1b.o] {
+	unsupported "Build pdb-syms1b.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-syms1.exe" "--pdb=tmpdir/pdb-syms1.pdb tmpdir/pdb-syms1a.o tmpdir/pdb-syms1b.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    # get index of globals stream and records stream
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms1.pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract DBI stream"
+	return
+    } else {
+	pass "Extracted DBI stream"
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    seek $fi 12
+    set data [read $fi 2]
+    binary scan $data s globals_index
+
+    seek $fi 6 current
+    set data [read $fi 2]
+    binary scan $data s records_index
+
+    seek $fi 2 current
+    set data [read $fi 4]
+    binary scan $data i mod_info_size
+
+    seek $fi 36 current
+    set mod_info [read $fi $mod_info_size]
+
+    close $fi
+
+    # get index of first and second module streams
+
+    binary scan [string range $mod_info 34 35] s mod1_index
+
+    set off 64
+
+    set obj1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $obj1] + 1]
+
+    set ar1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $ar1] + 1]
+
+    if { [expr $off % 4] != 0 } {
+	set off [expr $off + 4 - ($off % 4)]
+    }
+
+    incr off 34
+
+    binary scan [string range $mod_info $off [expr $off + 1]] s mod2_index
+
+    # check globals stream
+
+    set index_str [format "%04x" $globals_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms1.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract globals stream"
+	return
+    } else {
+	pass "Extracted globals stream"
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-syms1-globals.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if [string match $exp $got] {
+	pass "Correct globals stream"
+    } else {
+	fail "Incorrect globals stream"
+    }
+
+    # check records stream
+
+    set index_str [format "%04x" $records_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms1.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract records stream"
+	return
+    } else {
+	pass "Extracted records stream"
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-syms1-records.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if [string match $exp $got] {
+	pass "Correct records stream"
+    } else {
+	fail "Incorrect records stream"
+    }
+
+    # check symbols in first module
+
+    set index_str [format "%04x" $mod1_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms1.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract first module's symbols"
+	return
+    } else {
+	pass "Extracted first module's symbols"
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-syms1-symbols1.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if [string match $exp $got] {
+	pass "Correct symbols in first module's stream"
+    } else {
+	fail "Incorrect symbols in first module's stream"
+    }
+
+    # check symbols in second module
+
+    set index_str [format "%04x" $mod2_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms1.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract second module's symbols"
+	return
+    } else {
+	pass "Extracted second module's symbols"
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-syms1-symbols2.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if [string match $exp $got] {
+	pass "Correct symbols in second module's stream"
+    } else {
+	fail "Incorrect symbols in second module's stream"
+    }
+}
+
 test1
 test2
 test3
@@ -1458,3 +1621,4 @@ test4
 test5
 test6
 test7
+test8

@@ -70,7 +70,21 @@
 #define LF_QUADWORD			0x8009
 #define LF_UQUADWORD			0x800a
 
+#define S_END				0x0006
+#define S_CONSTANT			0x1107
+#define S_UDT				0x1108
+#define S_LDATA32			0x110c
+#define S_GDATA32 			0x110d
 #define S_PUB32				0x110e
+#define S_LPROC32			0x110f
+#define S_GPROC32			0x1110
+#define S_LTHREAD32			0x1112
+#define S_GTHREAD32			0x1113
+#define S_PROCREF			0x1125
+#define S_LPROCREF			0x1127
+#define S_LPROC32_ID			0x1146
+#define S_GPROC32_ID			0x1147
+#define S_PROC_ID_END			0x114f
 
 /* PDBStream70 in pdb1.h */
 struct pdb_stream_70
@@ -108,6 +122,8 @@ struct pdb_tpi_stream_header
 
 #define TPI_FIRST_INDEX			0x1000
 #define NUM_TPI_HASH_BUCKETS		0x3ffff
+
+#define NUM_GLOBALS_HASH_BUCKETS	4096
 
 /* NewDBIHdr in dbi.h */
 struct pdb_dbi_stream_header
@@ -198,6 +214,7 @@ struct optional_dbg_header
 
 #define CV_SIGNATURE_C13		4
 
+#define DEBUG_S_SYMBOLS			0xf1
 #define DEBUG_S_LINES			0xf2
 #define DEBUG_S_STRINGTABLE		0xf3
 #define DEBUG_S_FILECHKSMS		0xf4
@@ -538,6 +555,66 @@ struct lf_udt_mod_src_line
   uint32_t source_file_string;
   uint32_t line_no;
   uint16_t module_no;
+} ATTRIBUTE_PACKED;
+
+/* DATASYM32 in cvinfo.h */
+struct datasym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint32_t offset;
+  uint16_t section;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* PROCSYM32 in cvinfo.h */
+struct procsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent;
+  uint32_t end;
+  uint32_t next;
+  uint32_t proc_len;
+  uint32_t debug_start;
+  uint32_t debug_end;
+  uint32_t type;
+  uint32_t offset;
+  uint16_t section;
+  uint8_t flags;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* REFSYM2 in cvinfo.h */
+struct refsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t sum_name;
+  uint32_t symbol_offset;
+  uint16_t mod;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* UDTSYM in cvinfo.h */
+struct udtsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* CONSTSYM in cvinfo.h */
+struct constsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint16_t value;
+  /* then actual value if value >= 0x8000 */
+  char name[];
 } ATTRIBUTE_PACKED;
 
 extern bool create_pdb_file (bfd *, const char *, const unsigned char *);
