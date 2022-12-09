@@ -71,6 +71,69 @@ struct source_files_info
   struct mod_source_files *mods;
 };
 
+struct type_entry
+{
+  struct type_entry *next;
+  uint32_t index;
+  uint32_t cv_hash;
+  uint8_t data[];
+};
+
+struct types
+{
+  htab_t hashmap;
+  uint32_t num_types;
+  struct type_entry *first;
+  struct type_entry *last;
+};
+
+static const uint32_t crc_table[] =
+{
+  0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
+  0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
+  0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
+  0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
+  0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9,
+  0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172,
+  0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa, 0x42b2986c,
+  0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
+  0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423,
+  0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
+  0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190, 0x01db7106,
+  0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
+  0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x086d3d2d,
+  0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e,
+  0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950,
+  0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
+  0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7,
+  0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0,
+  0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa,
+  0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+  0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81,
+  0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a,
+  0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683, 0xe3630b12, 0x94643b84,
+  0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
+  0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb,
+  0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc,
+  0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8, 0xa1d1937e,
+  0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
+  0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55,
+  0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
+  0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe, 0xb2bd0b28,
+  0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
+  0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9, 0xeb0e363f,
+  0x72076785, 0x05005713, 0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38,
+  0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242,
+  0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
+  0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69,
+  0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2,
+  0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc,
+  0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+  0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
+  0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
+  0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
+};
+
 /* Add a new stream to the PDB archive, and return its BFD.  */
 static bfd *
 add_stream (bfd *pdb, const char *name, uint16_t *stream_num)
@@ -365,37 +428,141 @@ end:
   return ret;
 }
 
+/* Calculate the CRC32 used for type hashes.  */
+static uint32_t
+crc32 (const uint8_t *data, size_t len)
+{
+  uint32_t crc = 0;
+
+  while (len > 0)
+    {
+      crc = (crc >> 8) ^ crc_table[(crc & 0xff) ^ *data];
+
+      data++;
+      len--;
+    }
+
+  return crc;
+}
+
 /* Stream 2 is the type information (TPI) stream, and stream 4 is
    the ID information (IPI) stream.  They differ only in which records
    go in which stream. */
 static bool
-create_type_stream (bfd *pdb)
+populate_type_stream (bfd *pdb, bfd *stream, struct types *types)
 {
-  bfd *stream;
   struct pdb_tpi_stream_header h;
+  struct type_entry *e;
+  uint32_t len = 0, index_offset_len, off;
+  struct bfd *hash_stream = NULL;
+  uint16_t hash_stream_index;
 
-  stream = add_stream (pdb, NULL, NULL);
-  if (!stream)
+  static const uint32_t index_skip = 0x2000;
+
+  e = types->first;
+
+  index_offset_len = 0;
+
+  while (e)
+    {
+      uint32_t old_len = len;
+
+      len += sizeof (uint16_t) + bfd_getl16 (e->data);
+
+      if (old_len == 0 || old_len / index_skip != len / index_skip)
+	index_offset_len += sizeof (uint32_t) * 2;
+
+      e = e->next;
+    }
+
+  /* Each type stream also has a stream which holds the hash value for each
+     type, along with a skip list to speed up searching.  */
+
+  hash_stream = add_stream (pdb, "", &hash_stream_index);
+
+  if (!hash_stream)
     return false;
 
   bfd_putl32 (TPI_STREAM_VERSION_80, &h.version);
   bfd_putl32 (sizeof (h), &h.header_size);
   bfd_putl32 (TPI_FIRST_INDEX, &h.type_index_begin);
-  bfd_putl32 (TPI_FIRST_INDEX, &h.type_index_end);
-  bfd_putl32 (0, &h.type_record_bytes);
-  bfd_putl16 (0xffff, &h.hash_stream_index);
+  bfd_putl32 (TPI_FIRST_INDEX + types->num_types, &h.type_index_end);
+  bfd_putl32 (len, &h.type_record_bytes);
+  bfd_putl16 (hash_stream_index, &h.hash_stream_index);
   bfd_putl16 (0xffff, &h.hash_aux_stream_index);
-  bfd_putl32 (4, &h.hash_key_size);
-  bfd_putl32 (0x3ffff, &h.num_hash_buckets);
+  bfd_putl32 (sizeof (uint32_t), &h.hash_key_size);
+  bfd_putl32 (NUM_TPI_HASH_BUCKETS, &h.num_hash_buckets);
   bfd_putl32 (0, &h.hash_value_buffer_offset);
-  bfd_putl32 (0, &h.hash_value_buffer_length);
-  bfd_putl32 (0, &h.index_offset_buffer_offset);
-  bfd_putl32 (0, &h.index_offset_buffer_length);
-  bfd_putl32 (0, &h.hash_adj_buffer_offset);
+  bfd_putl32 (types->num_types * sizeof (uint32_t),
+	      &h.hash_value_buffer_length);
+  bfd_putl32 (types->num_types * sizeof (uint32_t),
+	      &h.index_offset_buffer_offset);
+  bfd_putl32 (index_offset_len, &h.index_offset_buffer_length);
+  bfd_putl32 ((types->num_types * sizeof (uint32_t)) + index_offset_len,
+	      &h.hash_adj_buffer_offset);
   bfd_putl32 (0, &h.hash_adj_buffer_length);
 
   if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
     return false;
+
+  /* Write the type definitions into the main stream, and the hashes
+     into the hash stream.  The hashes have already been calculated
+     in handle_type.  */
+
+  e = types->first;
+
+  while (e)
+    {
+      uint8_t buf[sizeof (uint32_t)];
+      uint16_t size;
+
+      size = bfd_getl16 (e->data);
+
+      if (bfd_bwrite (e->data, size + sizeof (uint16_t), stream)
+	  != size + sizeof (uint16_t))
+	return false;
+
+      bfd_putl32 (e->cv_hash % NUM_TPI_HASH_BUCKETS, buf);
+
+      if (bfd_bwrite (buf, sizeof (uint32_t), hash_stream)
+	  != sizeof (uint32_t))
+	return false;
+
+      e = e->next;
+    }
+
+  /* Write the index offsets, i.e. the skip list, into the hash stream.  We
+     copy MSVC here by writing a new entry for every 8192 bytes.  */
+
+  e = types->first;
+  off = 0;
+
+  while (e)
+    {
+      uint32_t old_off = off;
+      uint16_t size = bfd_getl16 (e->data);
+
+      off += size + sizeof (uint16_t);
+
+      if (old_off == 0 || old_off / index_skip != len / index_skip)
+	{
+	  uint8_t buf[sizeof (uint32_t)];
+
+	  bfd_putl32 (TPI_FIRST_INDEX + e->index, buf);
+
+	  if (bfd_bwrite (buf, sizeof (uint32_t), hash_stream)
+	      != sizeof (uint32_t))
+	    return false;
+
+	  bfd_putl32 (old_off, buf);
+
+	  if (bfd_bwrite (buf, sizeof (uint32_t), hash_stream)
+	      != sizeof (uint32_t))
+	    return false;
+	}
+
+      e = e->next;
+    }
 
   return true;
 }
@@ -618,6 +785,32 @@ parse_string_table (bfd_byte *data, size_t size,
 
       size -= len + 1;
     }
+}
+
+/* Return the size of an extended value parameter, as used in
+   LF_ENUMERATE etc.  */
+static unsigned int
+extended_value_len (uint16_t type)
+{
+  switch (type)
+    {
+    case LF_CHAR:
+      return 1;
+
+    case LF_SHORT:
+    case LF_USHORT:
+      return 2;
+
+    case LF_LONG:
+    case LF_ULONG:
+      return 4;
+
+    case LF_QUADWORD:
+    case LF_UQUADWORD:
+      return 8;
+    }
+
+  return 0;
 }
 
 /* Parse the .debug$S section within an object file.  */
@@ -866,6 +1059,984 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
   return true;
 }
 
+/* Remap the type number stored in data from the per-module numbering to
+   that of the deduplicated output list.  */
+static bool
+remap_type (void *data, struct type_entry **map,
+	    uint32_t type_num, uint32_t num_types)
+{
+  uint32_t type = bfd_getl32 (data);
+
+  /* Ignore builtin types (those with IDs below 0x1000).  */
+  if (type < TPI_FIRST_INDEX)
+    return true;
+
+  if (type >= TPI_FIRST_INDEX + type_num)
+    {
+      einfo (_("%P: CodeView type %v references other type %v not yet "
+	       "declared\n"), TPI_FIRST_INDEX + type_num, type);
+      return false;
+    }
+
+  if (type >= TPI_FIRST_INDEX + num_types)
+    {
+      einfo (_("%P: CodeView type %v references out of range type %v\n"),
+	     TPI_FIRST_INDEX + type_num, type);
+      return false;
+    }
+
+  type = TPI_FIRST_INDEX + map[type - TPI_FIRST_INDEX]->index;
+  bfd_putl32 (type, data);
+
+  return true;
+}
+
+/* Determines whether the name of a struct, class, or union counts as
+   "anonymous".  Non-anonymous types have a hash based on just the name,
+   rather than the whole structure.  */
+static bool
+is_name_anonymous (char *name, size_t len)
+{
+  static const char tag1[] = "<unnamed-tag>";
+  static const char tag2[] = "__unnamed";
+  static const char tag3[] = "::<unnamed-tag>";
+  static const char tag4[] = "::__unnamed";
+
+  if (len == sizeof (tag1) - 1 && !memcmp (name, tag1, sizeof (tag1) - 1))
+    return true;
+
+  if (len == sizeof (tag2) - 1 && !memcmp (name, tag2, sizeof (tag2) - 1))
+    return true;
+
+  if (len >= sizeof (tag3) - 1
+      && !memcmp (name + len - sizeof (tag3) + 1, tag3, sizeof (tag3) - 1))
+    return true;
+
+  if (len >= sizeof (tag4) - 1
+      && !memcmp (name + len - sizeof (tag4) + 1, tag4, sizeof (tag4) - 1))
+    return true;
+
+  return false;
+}
+
+/* Parse a type definition in the .debug$T section.  We remap the numbers
+   of any referenced types, and if the type is not a duplicate of one
+   already seen add it to types (for TPI types) or ids (for IPI types).  */
+static bool
+handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
+	     uint32_t num_types, struct types *types)
+{
+  uint16_t size, type;
+  void **slot;
+  hashval_t hash;
+  bool other_hash = false;
+  uint32_t cv_hash;
+
+  size = bfd_getl16 (data) + sizeof (uint16_t);
+  type = bfd_getl16 (data + sizeof (uint16_t));
+
+  switch (type)
+    {
+    case LF_MODIFIER:
+      {
+	struct lf_modifier *mod = (struct lf_modifier *) data;
+
+	if (size < offsetof (struct lf_modifier, modifier))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record "
+		     "LF_MODIFIER\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&mod->base_type, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_POINTER:
+      {
+	struct lf_pointer *ptr = (struct lf_pointer *) data;
+
+	if (size < offsetof (struct lf_pointer, attributes))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_POINTER\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&ptr->base_type, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_PROCEDURE:
+      {
+	struct lf_procedure *proc = (struct lf_procedure *) data;
+
+	if (size < sizeof (struct lf_procedure))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_PROCEDURE\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&proc->return_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&proc->arglist, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_MFUNCTION:
+      {
+	struct lf_mfunction *func = (struct lf_mfunction *) data;
+
+	if (size < sizeof (struct lf_procedure))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_MFUNCTION\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&func->return_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&func->containing_class_type, map, type_num,
+			 num_types))
+	  return false;
+
+	if (!remap_type (&func->this_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&func->arglist, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_ARGLIST:
+      {
+	uint32_t num_entries;
+	struct lf_arglist *al = (struct lf_arglist *) data;
+
+	if (size < offsetof (struct lf_arglist, args))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_ARGLIST\n"));
+	    return false;
+	  }
+
+	num_entries = bfd_getl32 (&al->num_entries);
+
+	if (size < offsetof (struct lf_arglist, args)
+		   + (num_entries * sizeof (uint32_t)))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_ARGLIST\n"));
+	    return false;
+	  }
+
+	for (uint32_t i = 0; i < num_entries; i++)
+	  {
+	    if (!remap_type (&al->args[i], map, type_num, num_types))
+	      return false;
+	  }
+
+	break;
+      }
+
+    case LF_FIELDLIST:
+      {
+	uint16_t left = size - sizeof (uint16_t) - sizeof (uint16_t);
+	uint8_t *ptr = data + sizeof (uint16_t) + sizeof (uint16_t);
+
+	while (left > 0)
+	  {
+	    uint16_t subtype;
+
+	    if (left < sizeof (uint16_t))
+	      {
+		einfo (_("%P: warning: truncated CodeView type record"
+			 " LF_FIELDLIST\n"));
+		return false;
+	      }
+
+	    subtype = bfd_getl16 (ptr);
+
+	    switch (subtype)
+	      {
+	      case LF_MEMBER:
+		{
+		  struct lf_member *mem = (struct lf_member *) ptr;
+		  size_t name_len, subtype_len;
+
+		  if (left < offsetof (struct lf_member, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_MEMBER\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&mem->type, map, type_num, num_types))
+		    return false;
+
+		  name_len =
+		    strnlen (mem->name,
+			     left - offsetof (struct lf_member, name));
+
+		  if (name_len == left - offsetof (struct lf_member, name))
+		    {
+		      einfo (_("%P: warning: name for LF_MEMBER has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len = offsetof (struct lf_member, name) + name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_FIELDLIST\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      case LF_ENUMERATE:
+		{
+		  struct lf_enumerate *en = (struct lf_enumerate *) ptr;
+		  size_t name_len, subtype_len;
+		  uint16_t val;
+
+		  if (left < offsetof (struct lf_enumerate, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_ENUMERATE\n"));
+		      return false;
+		    }
+
+		  subtype_len = offsetof (struct lf_enumerate, name);
+
+		  val = bfd_getl16 (&en->value);
+
+		  /* If val >= 0x8000, the actual value immediately follows.  */
+		  if (val >= 0x8000)
+		    {
+		      unsigned int param_len = extended_value_len (val);
+
+		      if (param_len == 0)
+			{
+			  einfo (_("%P: warning: unhandled type %v within"
+				   " LF_ENUMERATE\n"), val);
+			  return false;
+			}
+
+		      if (left < subtype_len + param_len)
+			{
+			  einfo (_("%P: warning: truncated CodeView type"
+				   " record LF_ENUMERATE\n"));
+			  return false;
+			}
+
+		      subtype_len += param_len;
+		    }
+
+		  name_len = strnlen ((char *) ptr + subtype_len,
+				      left - subtype_len);
+
+		  if (name_len == left - offsetof (struct lf_enumerate, name))
+		    {
+		      einfo (_("%P: warning: name for LF_ENUMERATE has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len += name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_ENUMERATE\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      case LF_INDEX:
+		{
+		  struct lf_index *ind = (struct lf_index *) ptr;
+
+		  if (left < sizeof (struct lf_index))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_INDEX\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&ind->index, map, type_num, num_types))
+		    return false;
+
+		  ptr += sizeof (struct lf_index);
+		  left -= sizeof (struct lf_index);
+
+		  break;
+		}
+
+	      case LF_ONEMETHOD:
+		{
+		  struct lf_onemethod *meth = (struct lf_onemethod *) ptr;
+		  size_t name_len, subtype_len;
+
+		  if (left < offsetof (struct lf_onemethod, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_ONEMETHOD\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&meth->method_type, map, type_num,
+				   num_types))
+		    return false;
+
+		  name_len =
+		    strnlen (meth->name,
+			     left - offsetof (struct lf_onemethod, name));
+
+		  if (name_len == left - offsetof (struct lf_onemethod, name))
+		    {
+		      einfo (_("%P: warning: name for LF_ONEMETHOD has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len = offsetof (struct lf_onemethod, name)
+				+ name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_FIELDLIST\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      case LF_METHOD:
+		{
+		  struct lf_method *meth = (struct lf_method *) ptr;
+		  size_t name_len, subtype_len;
+
+		  if (left < offsetof (struct lf_method, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_METHOD\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&meth->method_list, map, type_num,
+				   num_types))
+		    return false;
+
+		  name_len =
+		    strnlen (meth->name,
+			     left - offsetof (struct lf_method, name));
+
+		  if (name_len == left - offsetof (struct lf_method, name))
+		    {
+		      einfo (_("%P: warning: name for LF_METHOD has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len = offsetof (struct lf_method, name) + name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_FIELDLIST\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      case LF_BCLASS:
+		{
+		  struct lf_bclass *bc = (struct lf_bclass *) ptr;
+
+		  if (left < sizeof (struct lf_bclass))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_BCLASS\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&bc->base_class_type, map, type_num,
+				   num_types))
+		    return false;
+
+		  ptr += sizeof (struct lf_bclass);
+		  left -= sizeof (struct lf_bclass);
+
+		  break;
+		}
+
+	      case LF_VFUNCTAB:
+		{
+		  struct lf_vfunctab *vft = (struct lf_vfunctab *) ptr;
+
+		  if (left < sizeof (struct lf_vfunctab))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_VFUNCTAB\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&vft->type, map, type_num, num_types))
+		    return false;
+
+		  ptr += sizeof (struct lf_vfunctab);
+		  left -= sizeof (struct lf_vfunctab);
+
+		  break;
+		}
+
+	      case LF_VBCLASS:
+	      case LF_IVBCLASS:
+		{
+		  struct lf_vbclass *vbc = (struct lf_vbclass *) ptr;
+
+		  if (left < sizeof (struct lf_vbclass))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_VBCLASS/LF_IVBCLASS\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&vbc->base_class_type, map, type_num,
+				   num_types))
+		    return false;
+
+		  if (!remap_type (&vbc->virtual_base_pointer_type, map,
+				   type_num, num_types))
+		    return false;
+
+		  ptr += sizeof (struct lf_vbclass);
+		  left -= sizeof (struct lf_vbclass);
+
+		  break;
+		}
+
+	      case LF_STMEMBER:
+		{
+		  struct lf_static_member *st =
+		    (struct lf_static_member *) ptr;
+		  size_t name_len, subtype_len;
+
+		  if (left < offsetof (struct lf_static_member, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_STMEMBER\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&st->type, map, type_num, num_types))
+		    return false;
+
+		  name_len =
+		    strnlen (st->name,
+			     left - offsetof (struct lf_static_member, name));
+
+		  if (name_len == left
+				  - offsetof (struct lf_static_member, name))
+		    {
+		      einfo (_("%P: warning: name for LF_STMEMBER has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len = offsetof (struct lf_static_member, name)
+				+ name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_FIELDLIST\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      case LF_NESTTYPE:
+		{
+		  struct lf_nest_type *nest = (struct lf_nest_type *) ptr;
+		  size_t name_len, subtype_len;
+
+		  if (left < offsetof (struct lf_nest_type, name))
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_NESTTYPE\n"));
+		      return false;
+		    }
+
+		  if (!remap_type (&nest->type, map, type_num, num_types))
+		    return false;
+
+		  name_len =
+		    strnlen (nest->name,
+			     left - offsetof (struct lf_nest_type, name));
+
+		  if (name_len == left - offsetof (struct lf_nest_type, name))
+		    {
+		      einfo (_("%P: warning: name for LF_NESTTYPE has no"
+			       " terminating zero\n"));
+		      return false;
+		    }
+
+		  name_len++;
+
+		  subtype_len = offsetof (struct lf_nest_type, name)
+				+ name_len;
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_FIELDLIST\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
+
+		  break;
+		}
+
+	      default:
+		einfo (_("%P: warning: unrecognized CodeView subtype %v\n"),
+		       subtype);
+		return false;
+	      }
+	  }
+
+	break;
+      }
+
+    case LF_BITFIELD:
+      {
+	struct lf_bitfield *bf = (struct lf_bitfield *) data;
+
+	if (size < offsetof (struct lf_bitfield, length))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_BITFIELD\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&bf->base_type, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_METHODLIST:
+      {
+	struct lf_methodlist *ml = (struct lf_methodlist *) data;
+	unsigned int num_entries;
+
+	if (size < offsetof (struct lf_methodlist, entries))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_METHODLIST\n"));
+	    return false;
+	  }
+
+	if ((size - offsetof (struct lf_methodlist, entries))
+	    % sizeof (struct lf_methodlist_entry))
+	  {
+	    einfo (_("%P: warning: malformed CodeView type record"
+		     " LF_METHODLIST\n"));
+	    return false;
+	  }
+
+	num_entries = (size - offsetof (struct lf_methodlist, entries))
+		      / sizeof (struct lf_methodlist_entry);
+
+	for (unsigned int i = 0; i < num_entries; i++)
+	  {
+	    if (!remap_type (&ml->entries[i].method_type, map,
+			     type_num, num_types))
+	      return false;
+	  }
+
+	break;
+      }
+
+    case LF_ARRAY:
+      {
+	struct lf_array *arr = (struct lf_array *) data;
+
+	if (size < offsetof (struct lf_array, length_in_bytes))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_ARRAY\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&arr->element_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&arr->index_type, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
+    case LF_CLASS:
+    case LF_STRUCTURE:
+      {
+	struct lf_class *cl = (struct lf_class *) data;
+	uint16_t prop;
+	size_t name_len;
+
+	if (size < offsetof (struct lf_class, name))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_CLASS/LF_STRUCTURE\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&cl->field_list, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&cl->derived_from, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&cl->vshape, map, type_num, num_types))
+	  return false;
+
+	name_len = strnlen (cl->name, size - offsetof (struct lf_class, name));
+
+	if (name_len == size - offsetof (struct lf_class, name))
+	  {
+	    einfo (_("%P: warning: name for LF_CLASS/LF_STRUCTURE has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	prop = bfd_getl16 (&cl->properties);
+
+	if (prop & CV_PROP_HAS_UNIQUE_NAME)
+	  {
+	    /* Structure has another name following first one.  */
+
+	    size_t len = offsetof (struct lf_class, name) + name_len + 1;
+	    size_t unique_name_len;
+
+	    unique_name_len = strnlen (cl->name + name_len + 1, size - len);
+
+	    if (unique_name_len == size - len)
+	      {
+		einfo (_("%P: warning: unique name for LF_CLASS/LF_STRUCTURE"
+			 " has no terminating zero\n"));
+		return false;
+	      }
+	  }
+
+	if (!(prop & (CV_PROP_FORWARD_REF | CV_PROP_SCOPED))
+	    && !is_name_anonymous (cl->name, name_len))
+	  {
+	    other_hash = true;
+	    cv_hash = crc32 ((uint8_t *) cl->name, name_len);
+	  }
+
+	break;
+      }
+
+    case LF_UNION:
+      {
+	struct lf_union *un = (struct lf_union *) data;
+	uint16_t prop;
+	size_t name_len;
+
+	if (size < offsetof (struct lf_union, name))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_UNION\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&un->field_list, map, type_num, num_types))
+	  return false;
+
+	name_len = strnlen (un->name, size - offsetof (struct lf_union, name));
+
+	if (name_len == size - offsetof (struct lf_union, name))
+	  {
+	    einfo (_("%P: warning: name for LF_UNION has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	prop = bfd_getl16 (&un->properties);
+
+	if (prop & CV_PROP_HAS_UNIQUE_NAME)
+	  {
+	    /* Structure has another name following first one.  */
+
+	    size_t len = offsetof (struct lf_union, name) + name_len + 1;
+	    size_t unique_name_len;
+
+	    unique_name_len = strnlen (un->name + name_len + 1, size - len);
+
+	    if (unique_name_len == size - len)
+	      {
+		einfo (_("%P: warning: unique name for LF_UNION has"
+			 " no terminating zero\n"));
+		return false;
+	      }
+	  }
+
+	if (!(prop & (CV_PROP_FORWARD_REF | CV_PROP_SCOPED))
+	    && !is_name_anonymous (un->name, name_len))
+	  {
+	    other_hash = true;
+	    cv_hash = crc32 ((uint8_t *) un->name, name_len);
+	  }
+
+	break;
+      }
+
+    case LF_ENUM:
+      {
+	struct lf_enum *en = (struct lf_enum *) data;
+	uint16_t prop;
+	size_t name_len;
+
+	if (size < offsetof (struct lf_enum, name))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_ENUM\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&en->underlying_type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&en->field_list, map, type_num, num_types))
+	  return false;
+
+	name_len = strnlen (en->name, size - offsetof (struct lf_enum, name));
+
+	if (name_len == size - offsetof (struct lf_enum, name))
+	  {
+	    einfo (_("%P: warning: name for LF_ENUM has no"
+		     " terminating zero\n"));
+	    return false;
+	  }
+
+	prop = bfd_getl16 (&en->properties);
+
+	if (prop & CV_PROP_HAS_UNIQUE_NAME)
+	  {
+	    /* Structure has another name following first one.  */
+
+	    size_t len = offsetof (struct lf_enum, name) + name_len + 1;
+	    size_t unique_name_len;
+
+	    unique_name_len = strnlen (en->name + name_len + 1, size - len);
+
+	    if (unique_name_len == size - len)
+	      {
+		einfo (_("%P: warning: unique name for LF_ENUM has"
+			 " no terminating zero\n"));
+		return false;
+	      }
+	  }
+
+	break;
+      }
+
+    case LF_VTSHAPE:
+      /* Does not reference any types, nothing to be done.  */
+      break;
+
+    default:
+      einfo (_("%P: warning: unrecognized CodeView type %v\n"), type);
+      return false;
+    }
+
+  hash = iterative_hash (data, size, 0);
+
+  slot = htab_find_slot_with_hash (types->hashmap, data, hash, INSERT);
+  if (!slot)
+    return false;
+
+  if (!*slot) /* new entry */
+    {
+      struct type_entry *e;
+
+      *slot = xmalloc (offsetof (struct type_entry, data) + size);
+
+      e = (struct type_entry *) *slot;
+
+      e->next = NULL;
+      e->index = types->num_types;
+
+      if (other_hash)
+	e->cv_hash = cv_hash;
+      else
+	e->cv_hash = crc32 (data, size);
+
+      memcpy (e->data, data, size);
+
+      if (types->last)
+	types->last->next = e;
+      else
+	types->first = e;
+
+      types->last = e;
+
+      map[type_num] = e;
+
+      types->num_types++;
+    }
+  else /* duplicate */
+    {
+      map[type_num] = (struct type_entry *) *slot;
+    }
+
+  return true;
+}
+
+/* Parse the .debug$T section of a module, and pass any type definitions
+   found to handle_type.  */
+static bool
+handle_debugt_section (asection *s, bfd *mod, struct types *types)
+{
+  bfd_byte *data = NULL;
+  size_t off;
+  unsigned int num_types = 0;
+  struct type_entry **map;
+  uint32_t type_num;
+
+  if (!bfd_get_full_section_contents (mod, s, &data))
+    return false;
+
+  if (!data)
+    return false;
+
+  if (bfd_getl32 (data) != CV_SIGNATURE_C13)
+    {
+      free (data);
+      return true;
+    }
+
+  off = sizeof (uint32_t);
+
+  while (off + sizeof (uint16_t) <= s->size)
+    {
+      uint16_t size;
+
+      size = bfd_getl16 (data + off);
+      off += sizeof (uint16_t);
+
+      if (size + off > s->size || size <= sizeof (uint16_t))
+	{
+	  free (data);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      num_types++;
+      off += size;
+    }
+
+  if (num_types == 0)
+    {
+      free (data);
+      return true;
+    }
+
+  map = xcalloc (num_types, sizeof (struct type_entry *));
+
+  off = sizeof (uint32_t);
+  type_num = 0;
+
+  while (off + sizeof (uint16_t) <= s->size)
+    {
+      uint16_t size;
+
+      size = bfd_getl16 (data + off);
+
+      if (!handle_type (data + off, map, type_num, num_types, types))
+	{
+	  free (data);
+	  free (map);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      off += sizeof (uint16_t) + size;
+      type_num++;
+    }
+
+  free (data);
+  free (map);
+
+  return true;
+}
+
 /* Populate the module stream, which consists of the transformed .debug$S
    data for each object file.  */
 static bool
@@ -873,7 +2044,7 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			struct string_table *strings,
 			uint32_t *c13_info_size,
 			struct mod_source_files *mod_source,
-			bfd *abfd)
+			bfd *abfd, struct types *types)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
@@ -889,6 +2060,15 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 	{
 	  if (!handle_debugs_section (s, mod, strings, &c13_info,
 				      c13_info_size, mod_source, abfd))
+	    {
+	      free (c13_info);
+	      free (mod_source->files);
+	      return false;
+	    }
+	}
+      else if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
+	{
+	  if (!handle_debugt_section (s, mod, types))
 	    {
 	      free (c13_info);
 	      free (mod_source->files);
@@ -932,7 +2112,8 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 static bool
 create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 			      uint32_t *size, struct string_table *strings,
-			      struct source_files_info *source)
+			      struct source_files_info *source,
+			      struct types *types)
 {
   uint8_t *ptr;
   unsigned int mod_num;
@@ -1020,7 +2201,8 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 
       if (!populate_module_stream (stream, in, &sym_byte_size,
 				   strings, &c13_info_size,
-				   &source->mods[mod_num], abfd))
+				   &source->mods[mod_num], abfd,
+				   types))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {
@@ -1342,7 +2524,8 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     uint16_t section_header_stream_num,
 		     uint16_t sym_rec_stream_num,
 		     uint16_t publics_stream_num,
-		     struct string_table *strings)
+		     struct string_table *strings,
+		     struct types *types)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
@@ -1354,7 +2537,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
   source.mods = NULL;
 
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size,
-				     strings, &source))
+				     strings, &source, types))
     return false;
 
   if (!create_section_contrib_substream (abfd, &sc, &sc_size))
@@ -1884,6 +3067,31 @@ populate_names_stream (bfd *stream, struct string_table *strings)
   return true;
 }
 
+/* Calculate the hash of a type_entry.  */
+static hashval_t
+hash_type_entry (const void *p)
+{
+  const struct type_entry *e = (const struct type_entry *) p;
+  uint16_t size = bfd_getl16 (e->data) + sizeof (uint16_t);
+
+  return iterative_hash (e->data, size, 0);
+}
+
+/* Compare a type_entry with a type.  */
+static int
+eq_type_entry (const void *a, const void *b)
+{
+  const struct type_entry *e = (const struct type_entry *) a;
+  uint16_t size_a = bfd_getl16 (e->data);
+  uint16_t size_b = bfd_getl16 (b);
+
+  if (size_a != size_b)
+    return 0;
+
+  return memcmp (e->data + sizeof (uint16_t),
+		 (const uint8_t *) b + sizeof (uint16_t), size_a) == 0;
+}
+
 /* Create a PDB debugging file for the PE image file abfd with the build ID
    guid, stored at pdb_name.  */
 bool
@@ -1892,9 +3100,10 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   bfd *pdb;
   bool ret = false;
   bfd *info_stream, *dbi_stream, *names_stream, *sym_rec_stream,
-    *publics_stream;
+    *publics_stream, *tpi_stream, *ipi_stream;
   uint16_t section_header_stream_num, sym_rec_stream_num, publics_stream_num;
   struct string_table strings;
+  struct types types, ids;
 
   pdb = bfd_openw (pdb_name, "pdb");
   if (!pdb)
@@ -1928,7 +3137,9 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       goto end;
     }
 
-  if (!create_type_stream (pdb))
+  tpi_stream = add_stream (pdb, NULL, NULL);
+
+  if (!tpi_stream)
     {
       einfo (_("%P: warning: cannot create TPI stream "
 	       "in PDB file: %E\n"));
@@ -1944,7 +3155,9 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       goto end;
     }
 
-  if (!create_type_stream (pdb))
+  ipi_stream = add_stream (pdb, NULL, NULL);
+
+  if (!ipi_stream)
     {
       einfo (_("%P: warning: cannot create IPI stream "
 	       "in PDB file: %E\n"));
@@ -1985,14 +3198,47 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       goto end;
     }
 
+  types.num_types = 0;
+  types.hashmap = htab_create_alloc (0, hash_type_entry, eq_type_entry,
+				     free, xcalloc, free);
+  types.first = types.last = NULL;
+
+  ids.num_types = 0;
+  ids.hashmap = htab_create_alloc (0, hash_type_entry, eq_type_entry,
+				   free, xcalloc, free);
+  ids.first = ids.last = NULL;
+
   if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
 			    sym_rec_stream_num, publics_stream_num,
-			    &strings))
+			    &strings, &types))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
 	       "in PDB file: %E\n"));
+      htab_delete (types.hashmap);
+      htab_delete (ids.hashmap);
       goto end;
     }
+
+  if (!populate_type_stream (pdb, tpi_stream, &types))
+    {
+      einfo (_("%P: warning: cannot populate TPI stream "
+	       "in PDB file: %E\n"));
+      htab_delete (types.hashmap);
+      htab_delete (ids.hashmap);
+      goto end;
+    }
+
+  htab_delete (types.hashmap);
+
+  if (!populate_type_stream (pdb, ipi_stream, &ids))
+    {
+      einfo (_("%P: warning: cannot populate IPI stream "
+	       "in PDB file: %E\n"));
+      htab_delete (ids.hashmap);
+      goto end;
+    }
+
+  htab_delete (ids.hashmap);
 
   add_string ("", 0, &strings);
 
