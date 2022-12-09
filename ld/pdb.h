@@ -59,6 +59,8 @@
 #define LF_BUILDINFO			0x1603
 #define LF_SUBSTR_LIST			0x1604
 #define LF_STRING_ID			0x1605
+#define LF_UDT_SRC_LINE			0x1606
+#define LF_UDT_MOD_SRC_LINE		0x1607
 
 #define LF_CHAR				0x8000
 #define LF_SHORT			0x8001
@@ -515,6 +517,27 @@ struct lf_mfunc_id
   uint32_t parent_type;
   uint32_t function_type;
   char name[];
+} ATTRIBUTE_PACKED;
+
+/* lfUdtSrcLine in cvinfo.h */
+struct lf_udt_src_line
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint32_t source_file_type;
+  uint32_t line_no;
+} ATTRIBUTE_PACKED;
+
+/* lfUdtModSrcLine in cvinfo.h */
+struct lf_udt_mod_src_line
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint32_t source_file_string;
+  uint32_t line_no;
+  uint16_t module_no;
 } ATTRIBUTE_PACKED;
 
 extern bool create_pdb_file (bfd *, const char *, const unsigned char *);

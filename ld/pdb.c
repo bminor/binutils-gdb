@@ -76,6 +76,7 @@ struct type_entry
   struct type_entry *next;
   uint32_t index;
   uint32_t cv_hash;
+  bool has_udt_src_line;
   uint8_t data[];
 };
 
@@ -709,19 +710,19 @@ copy_filechksms (uint8_t *data, uint32_t size, char *string_table,
   return true;
 }
 
-/* Add a string to the strings table, if it's not already there.  */
-static void
+/* Add a string to the strings table, if it's not already there.  Returns its
+   offset within the string table.  */
+static uint32_t
 add_string (char *str, size_t len, struct string_table *strings)
 {
   uint32_t hash = calc_hash (str, len);
+  struct string *s;
   void **slot;
 
   slot = htab_find_slot_with_hash (strings->hashmap, str, hash, INSERT);
 
   if (!*slot)
     {
-      struct string *s;
-
       *slot = xmalloc (offsetof (struct string, s) + len);
 
       s = (struct string *) *slot;
@@ -742,6 +743,12 @@ add_string (char *str, size_t len, struct string_table *strings)
 
       strings->strings_len += len + 1;
     }
+  else
+    {
+      s = (struct string *) *slot;
+    }
+
+  return s->offset;
 }
 
 /* Return the hash of an entry in the string table.  */
@@ -1119,13 +1126,149 @@ is_name_anonymous (char *name, size_t len)
   return false;
 }
 
+/* Handle LF_UDT_SRC_LINE type entries, which are a special case.  These
+   give the source file and line number for each user-defined type that is
+   declared.  We parse these and emit instead an LF_UDT_MOD_SRC_LINE entry,
+   which also includes the module number.  */
+static bool
+handle_udt_src_line (uint8_t *data, uint16_t size, struct type_entry **map,
+		     uint32_t type_num, uint32_t num_types,
+		     struct types *ids, uint16_t mod_num,
+		     struct string_table *strings)
+{
+  struct lf_udt_src_line *usl = (struct lf_udt_src_line *) data;
+  uint32_t orig_type, source_file_type;
+  void **slot;
+  hashval_t hash;
+  struct type_entry *e, *type_e, *str_e;
+  struct lf_udt_mod_src_line *umsl;
+  struct lf_string_id *str;
+  uint32_t source_file_offset;
+
+  if (size < sizeof (struct lf_udt_src_line))
+    {
+      einfo (_("%P: warning: truncated CodeView type record"
+	       " LF_UDT_SRC_LINE\n"));
+      return false;
+    }
+
+  /* Check if LF_UDT_MOD_SRC_LINE already present for type, and return.  */
+
+  orig_type = bfd_getl32 (&usl->type);
+
+  if (orig_type < TPI_FIRST_INDEX ||
+      orig_type >= TPI_FIRST_INDEX + num_types ||
+      !map[orig_type - TPI_FIRST_INDEX])
+    {
+      einfo (_("%P: warning: CodeView type record LF_UDT_SRC_LINE"
+	       " referred to unknown type %v\n"), orig_type);
+      return false;
+    }
+
+  type_e = map[orig_type - TPI_FIRST_INDEX];
+
+  /* Skip if type already declared in other module.  */
+  if (type_e->has_udt_src_line)
+    return true;
+
+  if (!remap_type (&usl->type, map, type_num, num_types))
+    return false;
+
+  /* Extract string from source_file_type.  */
+
+  source_file_type = bfd_getl32 (&usl->source_file_type);
+
+  if (source_file_type < TPI_FIRST_INDEX ||
+      source_file_type >= TPI_FIRST_INDEX + num_types ||
+      !map[source_file_type - TPI_FIRST_INDEX])
+    {
+      einfo (_("%P: warning: CodeView type record LF_UDT_SRC_LINE"
+	       " referred to unknown string %v\n"), source_file_type);
+      return false;
+    }
+
+  str_e = map[source_file_type - TPI_FIRST_INDEX];
+
+  if (bfd_getl16 (str_e->data + sizeof (uint16_t)) != LF_STRING_ID)
+    {
+      einfo (_("%P: warning: CodeView type record LF_UDT_SRC_LINE"
+	       " pointed to unexpected record type\n"));
+      return false;
+    }
+
+  str = (struct lf_string_id *) str_e->data;
+
+  /* Add string to string table.  */
+
+  source_file_offset = add_string (str->string, strlen (str->string),
+				   strings);
+
+  /* Add LF_UDT_MOD_SRC_LINE entry.  */
+
+  size = sizeof (struct lf_udt_mod_src_line);
+
+  e = xmalloc (offsetof (struct type_entry, data) + size);
+
+  e->next = NULL;
+  e->index = ids->num_types;
+  e->has_udt_src_line = false;
+
+  /* LF_UDT_MOD_SRC_LINE use calc_hash on the type number, rather than
+     the crc32 used for type hashes elsewhere.  */
+  e->cv_hash = calc_hash ((char *) &usl->type, sizeof (uint32_t));
+
+  type_e->has_udt_src_line = true;
+
+  umsl = (struct lf_udt_mod_src_line *) e->data;
+
+  bfd_putl16 (size - sizeof (uint16_t), &umsl->size);
+  bfd_putl16 (LF_UDT_MOD_SRC_LINE, &umsl->kind);
+  memcpy (&umsl->type, &usl->type, sizeof (uint32_t));
+  bfd_putl32 (source_file_offset, &umsl->source_file_string);
+  memcpy (&umsl->line_no, &usl->line_no, sizeof (uint32_t));
+  bfd_putl16 (mod_num + 1, &umsl->module_no);
+
+  hash = iterative_hash (e->data, size, 0);
+
+  slot = htab_find_slot_with_hash (ids->hashmap, data, hash, INSERT);
+  if (!slot)
+    {
+      free (e);
+      return false;
+    }
+
+  if (*slot)
+    {
+      free (e);
+      einfo (_("%P: warning: duplicate CodeView type record "
+	       "LF_UDT_MOD_SRC_LINE\n"));
+      return false;
+    }
+
+  *slot = e;
+
+  if (ids->last)
+    ids->last->next = e;
+  else
+    ids->first = e;
+
+  ids->last = e;
+
+  map[type_num] = e;
+
+  ids->num_types++;
+
+  return true;
+}
+
 /* Parse a type definition in the .debug$T section.  We remap the numbers
    of any referenced types, and if the type is not a duplicate of one
    already seen add it to types (for TPI types) or ids (for IPI types).  */
 static bool
 handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	     uint32_t num_types, struct types *types,
-	     struct types *ids)
+	     struct types *ids, uint16_t mod_num,
+	     struct string_table *strings)
 {
   uint16_t size, type;
   void **slot;
@@ -2076,6 +2219,10 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	break;
       }
 
+    case LF_UDT_SRC_LINE:
+      return handle_udt_src_line (data, size, map, type_num, num_types,
+				  ids, mod_num, strings);
+
     default:
       einfo (_("%P: warning: unrecognized CodeView type %v\n"), type);
       return false;
@@ -2105,6 +2252,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
       else
 	e->cv_hash = crc32 (data, size);
 
+      e->has_udt_src_line = false;
+
       memcpy (e->data, data, size);
 
       if (t->last)
@@ -2130,7 +2279,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
    found to handle_type.  */
 static bool
 handle_debugt_section (asection *s, bfd *mod, struct types *types,
-		       struct types *ids)
+		       struct types *ids, uint16_t mod_num,
+		       struct string_table *strings)
 {
   bfd_byte *data = NULL;
   size_t off;
@@ -2187,7 +2337,8 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
 
       size = bfd_getl16 (data + off);
 
-      if (!handle_type (data + off, map, type_num, num_types, types, ids))
+      if (!handle_type (data + off, map, type_num, num_types, types, ids,
+			mod_num, strings))
 	{
 	  free (data);
 	  free (map);
@@ -2213,7 +2364,7 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			uint32_t *c13_info_size,
 			struct mod_source_files *mod_source,
 			bfd *abfd, struct types *types,
-			struct types *ids)
+			struct types *ids, uint16_t mod_num)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
@@ -2237,7 +2388,7 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 	}
       else if (!strcmp (s->name, ".debug$T") && s->size >= sizeof (uint32_t))
 	{
-	  if (!handle_debugt_section (s, mod, types, ids))
+	  if (!handle_debugt_section (s, mod, types, ids, mod_num, strings))
 	    {
 	      free (c13_info);
 	      free (mod_source->files);
@@ -2371,7 +2522,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
       if (!populate_module_stream (stream, in, &sym_byte_size,
 				   strings, &c13_info_size,
 				   &source->mods[mod_num], abfd,
-				   types, ids))
+				   types, ids, mod_num))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {

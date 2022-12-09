@@ -1319,9 +1319,142 @@ proc test6 { } {
     }
 }
 
+proc test7 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-types3a.s tmpdir/pdb-types3a.o] {
+	unsupported "Build pdb-types3a.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-types3b.s tmpdir/pdb-types3b.o] {
+	unsupported "Build pdb-types3b.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-types3.exe" "--pdb=tmpdir/pdb-types3.pdb tmpdir/pdb-types3a.o tmpdir/pdb-types3b.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-types3.pdb 0004"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract IPI stream"
+	return
+    } else {
+	pass "Extracted IPI stream"
+    }
+
+    set fi [open tmpdir/0004]
+    fconfigure $fi -translation binary
+
+    seek $fi 16 current
+
+    set data [read $fi 4]
+    binary scan $data i type_list_size
+
+    set data [read $fi 2]
+    binary scan $data s hash_stream_index
+
+    seek $fi 10 current
+
+    set data [read $fi 4]
+    binary scan $data i hash_list_offset
+
+    set data [read $fi 4]
+    binary scan $data i hash_list_size
+
+    set data [read $fi 4]
+    binary scan $data i skip_list_offset
+
+    set data [read $fi 4]
+    binary scan $data i skip_list_size
+
+    seek $fi 8 current
+
+    set type_list [read $fi $type_list_size]
+
+    close $fi
+
+    set fi [open tmpdir/pdb-types3-typelist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $type_list
+    close $fi
+
+    # check type list
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types3-typelist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types3-typelist"]
+    if ![string match $exp $got] {
+	fail "Incorrect type list in IPI stream."
+    } else {
+	pass "Correct type list in IPI stream."
+    }
+
+    # extract hash list and skip list
+
+    set index_str [format "%04x" $hash_stream_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-types3.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract IPI hash stream."
+    } else {
+	pass "Extracted IPI hash stream."
+    }
+
+    set fi [open tmpdir/$index_str]
+    fconfigure $fi -translation binary
+
+    seek $fi $hash_list_offset
+    set hash_list [read $fi $hash_list_size]
+
+    seek $fi $skip_list_offset
+    set skip_list [read $fi $skip_list_size]
+
+    close $fi
+
+    # check hash list
+
+    set fi [open tmpdir/pdb-types3-hashlist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $hash_list
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types3-hashlist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types3-hashlist"]
+    if ![string match $exp $got] {
+	fail "Incorrect hash list in IPI stream."
+    } else {
+	pass "Correct hash list in IPI stream."
+    }
+
+    # check skip list
+
+    set fi [open tmpdir/pdb-types3-skiplist w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $skip_list
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb-types3-skiplist.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-types3-skiplist"]
+    if ![string match $exp $got] {
+	fail "Incorrect skip list in IPI stream."
+    } else {
+	pass "Correct skip list in IPI stream."
+    }
+}
+
 test1
 test2
 test3
 test4
 test5
 test6
+test7
