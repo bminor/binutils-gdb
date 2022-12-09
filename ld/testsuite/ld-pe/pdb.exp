@@ -870,7 +870,7 @@ proc test4 { } {
 	return
     }
 
-    if ![ld_link $ld "tmpdir/pdb3.exe" "--pdb=tmpdir/pdb3.pdb tmpdir/pdb3a.o tmpdir/pdb3b.o"] {
+    if ![ld_link $ld "tmpdir/pdb3.exe" "--pdb=tmpdir/pdb3.pdb --gc-sections -e main tmpdir/pdb3a.o tmpdir/pdb3b.o"] {
 	unsupported "Create PE image with PDB file"
 	return
     }

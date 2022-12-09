@@ -624,7 +624,8 @@ parse_string_table (bfd_byte *data, size_t size,
 static bool
 handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 		       uint8_t **dataptr, uint32_t *sizeptr,
-		       struct mod_source_files *mod_source)
+		       struct mod_source_files *mod_source,
+		       bfd *abfd)
 {
   bfd_byte *data = NULL;
   size_t off;
@@ -637,6 +638,59 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
   if (!data)
     return false;
+
+  /* Resolve relocations.  Addresses are stored within the .debug$S section as
+     a .secidx, .secrel32 pair.  */
+
+  if (s->flags & SEC_RELOC)
+    {
+      struct internal_reloc *relocs;
+      struct internal_syment *symbols;
+      asection **sectlist;
+      unsigned int syment_count;
+      int sect_num;
+      struct external_syment *ext;
+
+      syment_count = obj_raw_syment_count (mod);
+
+      relocs =
+	_bfd_coff_read_internal_relocs (mod, s, false, NULL, true, NULL);
+
+      symbols = xmalloc (sizeof (struct internal_syment) * syment_count);
+      sectlist = xmalloc (sizeof (asection *) * syment_count);
+
+      ext = (struct external_syment *) (coff_data (mod)->external_syms);
+
+      for (unsigned int i = 0; i < syment_count; i++)
+	{
+	  bfd_coff_swap_sym_in (mod, &ext[i], &symbols[i]);
+	}
+
+      sect_num = 1;
+
+      for (asection *sect = mod->sections; sect; sect = sect->next)
+	{
+	  for (unsigned int i = 0; i < syment_count; i++)
+	    {
+	      if (symbols[i].n_scnum == sect_num)
+		sectlist[i] = sect;
+	    }
+
+	  sect_num++;
+	}
+
+      if (!bfd_coff_relocate_section (abfd, coff_data (abfd)->link_info, mod,
+				      s, data, relocs, symbols, sectlist))
+	{
+	  free (sectlist);
+	  free (symbols);
+	  free (data);
+	  return false;
+	}
+
+      free (sectlist);
+      free (symbols);
+    }
 
   if (bfd_getl32 (data) != CV_SIGNATURE_C13)
     {
@@ -690,6 +744,32 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 	  string_table = (char *) data + off;
 
 	  break;
+
+	case DEBUG_S_LINES:
+	  {
+	    uint16_t sect;
+
+	    if (size < sizeof (uint32_t) + sizeof (uint16_t))
+	      {
+		free (data);
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    sect = bfd_getl16 (data + off + sizeof (uint32_t));
+
+	    /* Skip GC'd symbols.  */
+	    if (sect != 0)
+	      {
+		c13_size += sizeof (uint32_t) + sizeof (uint32_t) + size;
+
+		if (c13_size % sizeof (uint32_t))
+		  c13_size +=
+		    sizeof (uint32_t) - (c13_size % sizeof (uint32_t));
+	      }
+
+	    break;
+	  }
 	}
 
       off += size;
@@ -734,6 +814,28 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 	  bufptr += sizeof (uint32_t) + sizeof (uint32_t) + size;
 
 	  break;
+
+	case DEBUG_S_LINES:
+	  {
+	    uint16_t sect;
+
+	    sect = bfd_getl16 (data + off + sizeof (uint32_t));
+
+	    /* Skip if GC'd.  */
+	    if (sect != 0)
+	      {
+		bfd_putl32 (type, bufptr);
+		bufptr += sizeof (uint32_t);
+
+		bfd_putl32 (size, bufptr);
+		bufptr += sizeof (uint32_t);
+
+		memcpy (bufptr, data + off, size);
+		bufptr += size;
+	      }
+
+	    break;
+	  }
 	}
 
       off += size;
@@ -770,7 +872,8 @@ static bool
 populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
 			struct string_table *strings,
 			uint32_t *c13_info_size,
-			struct mod_source_files *mod_source)
+			struct mod_source_files *mod_source,
+			bfd *abfd)
 {
   uint8_t int_buf[sizeof (uint32_t)];
   uint8_t *c13_info = NULL;
@@ -785,7 +888,7 @@ populate_module_stream (bfd *stream, bfd *mod, uint32_t *sym_byte_size,
       if (!strcmp (s->name, ".debug$S") && s->size >= sizeof (uint32_t))
 	{
 	  if (!handle_debugs_section (s, mod, strings, &c13_info,
-				      c13_info_size, mod_source))
+				      c13_info_size, mod_source, abfd))
 	    {
 	      free (c13_info);
 	      free (mod_source->files);
@@ -917,7 +1020,7 @@ create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
 
       if (!populate_module_stream (stream, in, &sym_byte_size,
 				   strings, &c13_info_size,
-				   &source->mods[mod_num]))
+				   &source->mods[mod_num], abfd))
 	{
 	  for (unsigned int i = 0; i < source->mod_count; i++)
 	    {

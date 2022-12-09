@@ -155,6 +155,7 @@ struct optional_dbg_header
 
 #define CV_SIGNATURE_C13		4
 
+#define DEBUG_S_LINES			0xf2
 #define DEBUG_S_STRINGTABLE		0xf3
 #define DEBUG_S_FILECHKSMS		0xf4
 
