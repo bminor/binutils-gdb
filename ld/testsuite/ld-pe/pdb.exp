@@ -1614,6 +1614,72 @@ proc test8 { } {
     }
 }
 
+proc test9 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-syms2.s tmpdir/pdb-syms2.o] {
+	unsupported "Build pdb-syms2.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-syms2.exe" "--pdb=tmpdir/pdb-syms2.pdb tmpdir/pdb-syms2.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    # get index of module stream
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms2.pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract DBI stream"
+	return
+    } else {
+	pass "Extracted DBI stream"
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    seek $fi 24
+    set data [read $fi 4]
+    binary scan $data i mod_info_size
+
+    seek $fi 36 current
+    set mod_info [read $fi $mod_info_size]
+
+    close $fi
+
+    binary scan [string range $mod_info 34 35] s module_index
+
+    # check module records
+
+    set index_str [format "%04x" $module_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-syms2.pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract module symbols"
+	return
+    } else {
+	pass "Extracted module symbols"
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb-syms2-symbols1.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+
+    if [string match $exp $got] {
+	pass "Correct symbols in module stream"
+    } else {
+	fail "Incorrect symbols in module stream"
+    }
+}
+
 test1
 test2
 test3
@@ -1622,3 +1688,4 @@ test5
 test6
 test7
 test8
+test9

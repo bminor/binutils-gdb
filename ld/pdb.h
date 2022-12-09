@@ -71,20 +71,41 @@
 #define LF_UQUADWORD			0x800a
 
 #define S_END				0x0006
+#define S_FRAMEPROC			0x1012
+#define S_OBJNAME			0x1101
+#define S_THUNK32			0x1102
+#define S_BLOCK32			0x1103
+#define S_LABEL32			0x1105
+#define S_REGISTER			0x1106
 #define S_CONSTANT			0x1107
 #define S_UDT				0x1108
+#define S_BPREL32			0x110b
 #define S_LDATA32			0x110c
 #define S_GDATA32 			0x110d
 #define S_PUB32				0x110e
 #define S_LPROC32			0x110f
 #define S_GPROC32			0x1110
+#define S_REGREL32			0x1111
 #define S_LTHREAD32			0x1112
 #define S_GTHREAD32			0x1113
+#define S_UNAMESPACE			0x1124
 #define S_PROCREF			0x1125
 #define S_LPROCREF			0x1127
+#define S_FRAMECOOKIE			0x113a
+#define S_COMPILE3			0x113c
+#define S_LOCAL				0x113e
+#define S_DEFRANGE_REGISTER		0x1141
+#define S_DEFRANGE_FRAMEPOINTER_REL	0x1142
+#define S_DEFRANGE_SUBFIELD_REGISTER	0x1143
+#define S_DEFRANGE_FRAMEPOINTER_REL_FULL_SCOPE	0x1144
+#define S_DEFRANGE_REGISTER_REL		0x1145
 #define S_LPROC32_ID			0x1146
 #define S_GPROC32_ID			0x1147
+#define S_BUILDINFO			0x114c
+#define S_INLINESITE			0x114d
+#define S_INLINESITE_END		0x114e
 #define S_PROC_ID_END			0x114f
+#define S_HEAPALLOCSITE			0x115e
 
 /* PDBStream70 in pdb1.h */
 struct pdb_stream_70
@@ -615,6 +636,164 @@ struct constsym
   uint16_t value;
   /* then actual value if value >= 0x8000 */
   char name[];
+} ATTRIBUTE_PACKED;
+
+/* BUILDINFOSYM in cvinfo.h */
+struct buildinfosym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+} ATTRIBUTE_PACKED;
+
+/* BLOCKSYM32 in cvinfo.h */
+struct blocksym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent;
+  uint32_t end;
+  uint32_t len;
+  uint32_t offset;
+  uint16_t section;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* BPRELSYM32 in cvinfo.h */
+struct bprelsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t bp_offset;
+  uint32_t type;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* REGSYM in cvinfo.h */
+struct regsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint16_t reg;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* REGREL32 in cvinfo.h */
+struct regrel
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t offset;
+  uint32_t type;
+  uint16_t reg;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* LOCALSYM in cvinfo.h */
+struct localsym
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint16_t flags;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* CV_LVAR_ADDR_RANGE in cvinfo.h */
+struct lvar_addr_range
+{
+  uint32_t offset;
+  uint16_t section;
+  uint16_t length;
+} ATTRIBUTE_PACKED;
+
+/* CV_LVAR_ADDR_GAP in cvinfo.h */
+struct lvar_addr_gap {
+  uint16_t offset;
+  uint16_t length;
+} ATTRIBUTE_PACKED;
+
+/* DEFRANGESYMREGISTERREL in cvinfo.h */
+struct defrange_register_rel
+{
+  uint16_t size;
+  uint16_t kind;
+  uint16_t reg;
+  uint16_t offset_parent;
+  uint32_t offset_register;
+  struct lvar_addr_range range;
+  struct lvar_addr_gap gaps[];
+} ATTRIBUTE_PACKED;
+
+/* DEFRANGESYMFRAMEPOINTERREL in cvinfo.h */
+struct defrange_framepointer_rel
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t offset;
+  struct lvar_addr_range range;
+  struct lvar_addr_gap gaps[];
+} ATTRIBUTE_PACKED;
+
+/* DEFRANGESYMSUBFIELDREGISTER in cvinfo.h */
+struct defrange_subfield_register
+{
+  uint16_t size;
+  uint16_t kind;
+  uint16_t reg;
+  uint16_t attributes;
+  uint32_t offset_parent;
+  struct lvar_addr_range range;
+  struct lvar_addr_gap gaps[];
+} ATTRIBUTE_PACKED;
+
+/* DEFRANGESYMREGISTER in cvinfo.h */
+struct defrange_register
+{
+  uint16_t size;
+  uint16_t kind;
+  uint16_t reg;
+  uint16_t attributes;
+  struct lvar_addr_range range;
+  struct lvar_addr_gap gaps[];
+} ATTRIBUTE_PACKED;
+
+/* INLINESITESYM in cvinfo.h */
+struct inline_site
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent;
+  uint32_t end;
+  uint32_t inlinee;
+  uint8_t binary_annotations[];
+} ATTRIBUTE_PACKED;
+
+/* THUNKSYM32 in cvinfo.h */
+struct thunk
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t parent;
+  uint32_t end;
+  uint32_t next;
+  uint32_t offset;
+  uint16_t section;
+  uint16_t length;
+  uint8_t thunk_type;
+  char name[];
+} ATTRIBUTE_PACKED;
+
+/* HEAPALLOCSITE in cvinfo.h */
+struct heap_alloc_site
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t offset;
+  uint16_t section;
+  uint16_t length;
+  uint32_t type;
 } ATTRIBUTE_PACKED;
 
 extern bool create_pdb_file (bfd *, const char *, const unsigned char *);

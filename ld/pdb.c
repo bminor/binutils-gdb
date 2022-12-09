@@ -908,11 +908,15 @@ find_end_of_scope (uint8_t *data, uint32_t size)
 	{
 	case S_GPROC32:
 	case S_LPROC32:
+	case S_BLOCK32:
+	case S_INLINESITE:
+	case S_THUNK32:
 	  scope_level++;
 	  break;
 
 	case S_END:
 	case S_PROC_ID_END:
+	case S_INLINESITE_END:
 	  scope_level--;
 
 	  if (scope_level == 0)
@@ -961,6 +965,7 @@ parse_symbols (uint8_t *data, uint32_t size, uint8_t **buf,
 {
   uint8_t *orig_buf = *buf;
   unsigned int scope_level = 0;
+  uint8_t *scope = NULL;
 
   while (size >= sizeof (uint16_t))
     {
@@ -1206,6 +1211,8 @@ parse_symbols (uint8_t *data, uint32_t size, uint8_t **buf,
 
 	    free (ref);
 
+	    scope = *buf;
+
 	    memcpy (*buf, proc, len);
 	    *buf += len;
 
@@ -1321,14 +1328,341 @@ parse_symbols (uint8_t *data, uint32_t size, uint8_t **buf,
 	  }
 
 	case S_END:
+	case S_INLINESITE_END:
 	case S_PROC_ID_END:
 	  memcpy (*buf, data, len);
 
 	  if (type == S_PROC_ID_END) /* transform to S_END */
 	    bfd_putl16 (S_END, *buf + sizeof (uint16_t));
 
+	  /* Reset scope variable back to the address of the previous
+	     scope start.  */
+	  if (scope)
+	    {
+	      uint32_t parent;
+	      uint16_t scope_start_type =
+		bfd_getl16 (scope + sizeof (uint16_t));
+
+	      switch (scope_start_type)
+		{
+		case S_GPROC32:
+		case S_LPROC32:
+		  parent = bfd_getl32 (scope + offsetof (struct procsym,
+							 parent));
+		  break;
+
+		case S_BLOCK32:
+		  parent = bfd_getl32 (scope + offsetof (struct blocksym,
+							 parent));
+		  break;
+
+		case S_INLINESITE:
+		  parent = bfd_getl32 (scope + offsetof (struct inline_site,
+							 parent));
+		  break;
+
+		case S_THUNK32:
+		  parent = bfd_getl32 (scope + offsetof (struct thunk,
+							 parent));
+		  break;
+
+		default:
+		  einfo (_("%P: warning: unexpected CodeView scope start"
+			   " record %v\n"), scope_start_type);
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+
+	      if (parent == 0)
+		scope = NULL;
+	      else
+		scope = orig_buf + parent - sizeof (uint32_t);
+	    }
+
 	  *buf += len;
 	  scope_level--;
+	  break;
+
+	case S_BUILDINFO:
+	  {
+	    struct buildinfosym *bi = (struct buildinfosym *) data;
+
+	    if (len < sizeof (struct buildinfosym))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_BUILDINFO\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&bi->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_BLOCK32:
+	  {
+	    struct blocksym *bl = (struct blocksym *) data;
+	    uint8_t *endptr;
+	    uint32_t end;
+
+	    if (len < offsetof (struct blocksym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_BLOCK32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    bfd_putl32 (scope - orig_buf + sizeof (uint32_t), &bl->parent);
+
+	    endptr = find_end_of_scope (data, size);
+
+	    if (!endptr)
+	      {
+		einfo (_("%P: warning: could not find end of"
+			 " S_BLOCK32 record\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    end = *buf - orig_buf + sizeof (uint32_t) + endptr - data;
+	    bfd_putl32 (end, &bl->end);
+
+	    scope = *buf;
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    scope_level++;
+
+	    break;
+	  }
+
+	case S_BPREL32:
+	  {
+	    struct bprelsym *bp = (struct bprelsym *) data;
+
+	    if (len < offsetof (struct bprelsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_BPREL32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&bp->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_REGISTER:
+	  {
+	    struct regsym *reg = (struct regsym *) data;
+
+	    if (len < offsetof (struct regsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_REGISTER\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&reg->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_REGREL32:
+	  {
+	    struct regrel *rr = (struct regrel *) data;
+
+	    if (len < offsetof (struct regrel, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_REGREL32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&rr->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_LOCAL:
+	  {
+	    struct localsym *l = (struct localsym *) data;
+
+	    if (len < offsetof (struct localsym, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_LOCAL\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&l->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_INLINESITE:
+	  {
+	    struct inline_site *is = (struct inline_site *) data;
+	    uint8_t *endptr;
+	    uint32_t end;
+
+	    if (len < offsetof (struct inline_site, binary_annotations))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_INLINESITE\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    bfd_putl32 (scope - orig_buf + sizeof (uint32_t), &is->parent);
+
+	    endptr = find_end_of_scope (data, size);
+
+	    if (!endptr)
+	      {
+		einfo (_("%P: warning: could not find end of"
+			 " S_INLINESITE record\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    end = *buf - orig_buf + sizeof (uint32_t) + endptr - data;
+	    bfd_putl32 (end, &is->end);
+
+	    if (!remap_symbol_type (&is->inlinee, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    scope = *buf;
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    scope_level++;
+
+	    break;
+	  }
+
+	case S_THUNK32:
+	  {
+	    struct thunk *th = (struct thunk *) data;
+	    uint8_t *endptr;
+	    uint32_t end;
+
+	    if (len < offsetof (struct thunk, name))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_THUNK32\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    bfd_putl32 (scope - orig_buf + sizeof (uint32_t), &th->parent);
+
+	    endptr = find_end_of_scope (data, size);
+
+	    if (!endptr)
+	      {
+		einfo (_("%P: warning: could not find end of"
+			 " S_THUNK32 record\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    end = *buf - orig_buf + sizeof (uint32_t) + endptr - data;
+	    bfd_putl32 (end, &th->end);
+
+	    scope = *buf;
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    scope_level++;
+
+	    break;
+	  }
+
+	case S_HEAPALLOCSITE:
+	  {
+	    struct heap_alloc_site *has = (struct heap_alloc_site *) data;
+
+	    if (len < sizeof (struct heap_alloc_site))
+	      {
+		einfo (_("%P: warning: truncated CodeView record"
+			 " S_HEAPALLOCSITE\n"));
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    if (!remap_symbol_type (&has->type, map, num_types))
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+
+	    memcpy (*buf, data, len);
+	    *buf += len;
+
+	    break;
+	  }
+
+	case S_OBJNAME: /* just copy */
+	case S_COMPILE3:
+	case S_UNAMESPACE:
+	case S_FRAMEPROC:
+	case S_FRAMECOOKIE:
+	case S_LABEL32:
+	case S_DEFRANGE_REGISTER_REL:
+	case S_DEFRANGE_FRAMEPOINTER_REL:
+	case S_DEFRANGE_SUBFIELD_REGISTER:
+	case S_DEFRANGE_FRAMEPOINTER_REL_FULL_SCOPE:
+	case S_DEFRANGE_REGISTER:
+	  memcpy (*buf, data, len);
+	  *buf += len;
 	  break;
 
 	default:
@@ -1441,10 +1775,38 @@ calculate_symbols_size (uint8_t *data, uint32_t size, uint32_t *sym_size)
 	    *sym_size += len;
 	  break;
 
+	case S_BLOCK32: /* always copied */
+	case S_INLINESITE:
+	case S_THUNK32:
+	  *sym_size += len;
+	  scope_level++;
+	  break;
+
 	case S_END: /* always copied */
 	case S_PROC_ID_END:
+	case S_INLINESITE_END:
 	  *sym_size += len;
 	  scope_level--;
+	  break;
+
+	case S_OBJNAME: /* always copied */
+	case S_COMPILE3:
+	case S_UNAMESPACE:
+	case S_FRAMEPROC:
+	case S_FRAMECOOKIE:
+	case S_LABEL32:
+	case S_BUILDINFO:
+	case S_BPREL32:
+	case S_REGISTER:
+	case S_REGREL32:
+	case S_LOCAL:
+	case S_DEFRANGE_REGISTER_REL:
+	case S_DEFRANGE_FRAMEPOINTER_REL:
+	case S_DEFRANGE_SUBFIELD_REGISTER:
+	case S_DEFRANGE_FRAMEPOINTER_REL_FULL_SCOPE:
+	case S_DEFRANGE_REGISTER:
+	case S_HEAPALLOCSITE:
+	  *sym_size += len;
 	  break;
 
 	default:
