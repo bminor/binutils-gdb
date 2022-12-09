@@ -572,11 +572,11 @@ unsigned int
 sframe_calc_fre_type (unsigned int func_size)
 {
   unsigned int fre_type = 0;
-  if (func_size <= 0xff)
+  if (func_size < SFRAME_FRE_TYPE_ADDR1_LIMIT)
     fre_type = SFRAME_FRE_TYPE_ADDR1;
-  else if (func_size <= 0xffff)
+  else if (func_size < SFRAME_FRE_TYPE_ADDR2_LIMIT)
     fre_type = SFRAME_FRE_TYPE_ADDR2;
-  else if (func_size <= 0xffffffff)
+  else if (func_size < SFRAME_FRE_TYPE_ADDR4_LIMIT)
     fre_type = SFRAME_FRE_TYPE_ADDR4;
   return fre_type;
 }
