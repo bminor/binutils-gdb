@@ -557,7 +557,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
       regcache_write_pc (regs, from + insnlen);
       /* Recompute output address in R1.  */
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
-				      amode | (from + i2 * 2));
+				      from + i2 * 2);
     }
 
   /* If we executed a breakpoint instruction, point PC right back at it.  */
