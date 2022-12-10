@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#include "gdb/sim-ft32.h"
+#include "sim/sim-ft32.h"
 
 #define FT32_HARD_FP 29
 #define FT32_HARD_CC 30

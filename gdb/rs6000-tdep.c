@@ -35,7 +35,7 @@
 #include "osabi.h"
 #include "infcall.h"
 #include "sim-regno.h"
-#include "gdb/sim-ppc.h"
+#include "sim/sim-ppc.h"
 #include "reggroups.h"
 #include "dwarf2/frame.h"
 #include "target-descriptions.h"

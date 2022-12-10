@@ -34,7 +34,7 @@
 #include "sim/callback.h"
 #include "sim/sim.h"
 #include "gdb/signals.h"
-#include "gdb/sim-aarch64.h"
+#include "sim/sim-aarch64.h"
 
 #include "sim-main.h"
 #include "sim-options.h"

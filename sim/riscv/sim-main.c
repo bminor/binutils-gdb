@@ -33,7 +33,7 @@
 
 #include "opcode/riscv.h"
 
-#include "gdb/sim-riscv.h"
+#include "sim/sim-riscv.h"
 
 #define TRACE_REG(cpu, reg) \
   TRACE_REGISTER (cpu, "wrote %s = %#" PRIxTW, riscv_gpr_names_abi[reg], \

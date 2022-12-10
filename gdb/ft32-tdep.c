@@ -40,7 +40,7 @@
 #include "opcode/ft32.h"
 
 #include "ft32-tdep.h"
-#include "gdb/sim-ft32.h"
+#include "sim/sim-ft32.h"
 #include <algorithm>
 
 #define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */

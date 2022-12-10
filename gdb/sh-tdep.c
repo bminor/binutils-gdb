@@ -49,7 +49,7 @@
 #include "elf/sh.h"
 #include "dwarf2.h"
 /* registers numbers shared with the simulator.  */
-#include "gdb/sim-sh.h"
+#include "sim/sim-sh.h"
 #include <algorithm>
 
 /* List of "set sh ..." and "show sh ..." commands.  */

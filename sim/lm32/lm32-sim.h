@@ -20,7 +20,7 @@
 #ifndef LM32_SIM_H
 #define LM32_SIM_H
 
-#include "gdb/sim-lm32.h"
+#include "sim/sim-lm32.h"
 
 /* CSRs.  */
 #define LM32_CSR_IE             0

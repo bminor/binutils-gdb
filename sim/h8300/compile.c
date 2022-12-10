@@ -29,7 +29,7 @@
 
 #include "bfd.h"
 #include "sim-main.h"
-#include "gdb/sim-h8300.h"
+#include "sim/sim-h8300.h"
 #include "sys/stat.h"
 #include "sys/types.h"
 #include "sim-options.h"

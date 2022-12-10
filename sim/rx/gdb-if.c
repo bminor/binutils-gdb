@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim/callback.h"
 #include "sim/sim.h"
 #include "gdb/signals.h"
-#include "gdb/sim-rx.h"
+#include "sim/sim-rx.h"
 
 #include "cpu.h"
 #include "mem.h"

@@ -11,7 +11,7 @@
 #include "sim-options.h"
 #include "sim-signal.h"
 
-#include "gdb/sim-d10v.h"
+#include "sim/sim-d10v.h"
 #include "gdb/signals.h"
 
 #include <string.h>

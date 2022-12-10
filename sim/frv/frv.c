@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "bfd.h"
-#include "gdb/sim-frv.h"
+#include "sim/sim-frv.h"
 #include <math.h>
 #include <stdlib.h>
 

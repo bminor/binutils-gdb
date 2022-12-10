@@ -51,7 +51,7 @@
 #include "arch/arm.h"
 #include "arch/arm-get-next-pcs.h"
 #include "arm-tdep.h"
-#include "gdb/sim-arm.h"
+#include "sim/sim-arm.h"
 
 #include "elf-bfd.h"
 #include "coff/internal.h"

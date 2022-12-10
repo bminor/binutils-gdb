@@ -55,7 +55,7 @@
 #include "bfd.h"
 #include "sim/callback.h"
 #include "sim/sim.h"
-#include "gdb/sim-sh.h"
+#include "sim/sim-sh.h"
 
 #include "sim-main.h"
 #include "sim-base.h"

@@ -36,7 +36,7 @@
 #include "armemu.h"
 #include "dbg_rdi.h"
 #include "ansidecl.h"
-#include "gdb/sim-arm.h"
+#include "sim/sim-arm.h"
 #include "gdb/signals.h"
 #include "libiberty.h"
 #include "iwmmxt.h"

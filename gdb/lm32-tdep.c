@@ -27,7 +27,7 @@
 #include "symfile.h"
 #include "remote.h"
 #include "gdbcore.h"
-#include "gdb/sim-lm32.h"
+#include "sim/sim-lm32.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "trad-frame.h"

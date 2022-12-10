@@ -26,7 +26,7 @@
 #include "sim_callbacks.h"
 #include "sim/callback.h"
 #include "sim/sim.h"
-#include "gdb/sim-ppc.h"
+#include "sim/sim-ppc.h"
 
 /* Return the register name for the supplied SPR if any, or NULL if
    none.  */

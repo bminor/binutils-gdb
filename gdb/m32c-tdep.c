@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb/sim-m32c.h"
+#include "sim/sim-m32c.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "arch-utils.h"
