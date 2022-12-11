@@ -271,3 +271,7 @@ gdb_test "print & (void) v_char" "value not located in memory."
 # Regression test for "&&".
 gdb_test "print null_t_struct && null_t_struct->v_int_member == 0" \
     " = 0"
+
+# Regression test for unusual function-call parse that caused a crash.
+gdb_test "print v_short++(97)" \
+    "cast the call to its declared return type"

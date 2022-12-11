@@ -4037,8 +4037,8 @@ type_byte_order (const struct type *type)
 bool
 is_nocall_function (const struct type *type)
 {
-  gdb_assert (type->code () == TYPE_CODE_FUNC
-	      || type->code () == TYPE_CODE_METHOD);
+  if (type->code () != TYPE_CODE_FUNC && type->code () != TYPE_CODE_METHOD)
+    return false;
 
   return TYPE_CALLING_CONVENTION (type) == DW_CC_nocall;
 }
