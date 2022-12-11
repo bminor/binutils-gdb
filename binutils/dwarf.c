@@ -5499,7 +5499,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      || (xop == DW_LNS_copy))
 	    {
 	      const unsigned int MAX_FILENAME_LENGTH = 35;
-	      char *fileName;
+	      char *fileName = NULL;
 	      char *newFileName = NULL;
 	      size_t fileNameLength;
 
@@ -5518,7 +5518,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  else
 		    fileName = (char *) file_table[indx].name;
 		}
-	      else
+	      if (!fileName)
 		fileName = _("<unknown>");
 
 	      fileNameLength = strlen (fileName);
