@@ -11381,11 +11381,9 @@ i386_index_check (const char *operand_string)
 {
   const char *kind = "base/index";
   enum flag_code addr_mode = i386_addressing_mode ();
-  const insn_template *t = current_templates->start;
+  const insn_template *t = current_templates->end - 1;
 
-  if (t->opcode_modifier.isstring
-      && (current_templates->end[-1].opcode_modifier.isstring
-	  || i.mem_operands))
+  if (t->opcode_modifier.isstring)
     {
       /* Memory operands of string insns are special in that they only allow
 	 a single register (rDI, rSI, or rBX) as their memory address.  */
@@ -11402,14 +11400,12 @@ i386_index_check (const char *operand_string)
 
       if (t->opcode_modifier.prefixok == PrefixRep)
 	{
-	  int es_op = current_templates->end[-1].opcode_modifier.isstring
-		      - IS_STRING_ES_OP0;
+	  int es_op = t->opcode_modifier.isstring - IS_STRING_ES_OP0;
 	  int op = 0;
 
-	  if (!current_templates->end[-1].operand_types[0].bitfield.baseindex
+	  if (!t->operand_types[0].bitfield.baseindex
 	      || ((!i.mem_operands != !intel_syntax)
-		  && current_templates->end[-1].operand_types[1]
-		     .bitfield.baseindex))
+		  && t->operand_types[1].bitfield.baseindex))
 	    op = 1;
 	  expected_reg
 	    = (const reg_entry *) str_hash_find (reg_hash,
@@ -11452,6 +11448,8 @@ i386_index_check (const char *operand_string)
     }
   else
     {
+      t = current_templates->start;
+
       if (addr_mode != CODE_16BIT)
 	{
 	  /* 32-bit/64-bit checks.  */
