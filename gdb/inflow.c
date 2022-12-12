@@ -113,9 +113,9 @@ static struct terminal_info *get_inflow_inferior_data (struct inferior *);
    we save our handlers in these two variables and set SIGINT and SIGQUIT
    to SIG_IGN.  */
 
-static sighandler_t sigint_ours;
+static gdb::optional<sighandler_t> sigint_ours;
 #ifdef SIGQUIT
-static sighandler_t sigquit_ours;
+static gdb::optional<sighandler_t> sigquit_ours;
 #endif
 
 /* The name of the tty (from the `tty' command) that we're giving to
@@ -501,9 +501,13 @@ child_terminal_ours_1 (target_terminal_state desired_state)
 
       if (!job_control && desired_state == target_terminal_state::is_ours)
 	{
-	  signal (SIGINT, sigint_ours);
+	  if (sigint_ours.has_value ())
+	    signal (SIGINT, *sigint_ours);
+	  sigint_ours.reset ();
 #ifdef SIGQUIT
-	  signal (SIGQUIT, sigquit_ours);
+	  if (sigquit_ours.has_value ())
+	    signal (SIGQUIT, *sigquit_ours);
+	  sigquit_ours.reset ();
 #endif
 	}
 
