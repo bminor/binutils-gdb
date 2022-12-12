@@ -172,14 +172,9 @@ mov, 0xf24, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No
 movbe, 0x0f38f0, None, CpuMovbe, D|Modrm|CheckRegSize|No_bSuf|No_sSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Move with sign extend.
-// "movsbl" & "movsbw" must not be unified into "movsb" to avoid
-// conflict with the "movs" string move instruction.
-movsbl, 0xfbe, None, Cpu386, Modrm|NoSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg32 }
-movsbw, 0xfbe, None, Cpu386, Modrm|NoSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16 }
-movswl, 0xfbf, None, Cpu386, Modrm|NoSuf, { Reg16|Word|Unspecified|BaseIndex, Reg32 }
-movsbq, 0xfbe, None, Cpu64, Modrm|NoSuf|Size64, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
-movswq, 0xfbf, None, Cpu64, Modrm|NoSuf|Size64, { Reg16|Word|Unspecified|BaseIndex, Reg64 }
-movslq, 0x63, None, Cpu64, Modrm|NoSuf|Size64, { Reg32|Dword|Unspecified|BaseIndex, Reg64 }
+movsb, 0xfbe, None, Cpu386, Modrm|No_bSuf|No_sSuf, { Reg8|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+movsw, 0xfbf, None, Cpu386, Modrm|No_bSuf|No_wSuf|No_sSuf, { Reg16|Unspecified|BaseIndex, Reg32|Reg64 }
+movsl, 0x63, None, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg32|Unspecified|BaseIndex, Reg64 }
 movsx, 0xfbe, None, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movsx, 0x63, None, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
 movsxd, 0x63, None, Cpu64, Modrm|NoSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }

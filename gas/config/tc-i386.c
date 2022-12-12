@@ -4860,7 +4860,11 @@ static INLINE bool may_need_pass2 (const insn_template *t)
 {
   return t->opcode_modifier.sse2avx
 	 /* Note that all SSE2AVX templates have at least one operand.  */
-	 && t->operand_types[t->operands - 1].bitfield.class == RegSIMD;
+	 ? t->operand_types[t->operands - 1].bitfield.class == RegSIMD
+	 : (t->opcode_modifier.opcodespace == SPACE_0F
+	    && (t->base_opcode | 1) == 0xbf)
+	   || (t->opcode_modifier.opcodespace == SPACE_BASE
+	       && t->base_opcode == 0x63);
 }
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
