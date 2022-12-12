@@ -158,7 +158,7 @@ static int i386_intel_operand (char *, int);
 static int i386_intel_simplify (expressionS *);
 static int i386_intel_parse_name (const char *, expressionS *);
 static const reg_entry *parse_register (char *, char **);
-static char *parse_insn (char *, char *);
+static const char *parse_insn (const char *, char *);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
@@ -4845,6 +4845,7 @@ md_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE], mnem_suffix;
+  const char *end;
   const insn_template *t;
 
   /* Initialize globals.  */
@@ -4860,9 +4861,10 @@ md_assemble (char *line)
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) mnemonic.  */
 
-  line = parse_insn (line, mnemonic);
-  if (line == NULL)
+  end = parse_insn (line, mnemonic);
+  if (end == NULL)
     return;
+  line += end - line;
   mnem_suffix = i.suffix;
 
   line = parse_operands (line, mnemonic);
@@ -5260,11 +5262,10 @@ md_assemble (char *line)
     last_insn.kind = last_insn_other;
 }
 
-static char *
-parse_insn (char *line, char *mnemonic)
+static const char *
+parse_insn (const char *line, char *mnemonic)
 {
-  char *l = line;
-  char *token_start = l;
+  const char *l = line, *token_start = l;
   char *mnem_p;
   int supported;
   const insn_template *t;
