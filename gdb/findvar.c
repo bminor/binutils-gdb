@@ -152,10 +152,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
-  if (!type->is_pointer_or_reference ())
-    internal_error (_("extract_typed_address: "
-		    "type is not a pointer or reference"));
-
+  gdb_assert (type->is_pointer_or_reference ());
   return gdbarch_pointer_to_address (type->arch (), type, buf);
 }
 
@@ -204,10 +201,7 @@ template void store_integer (gdb_byte *addr, int len,
 void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
-  if (!type->is_pointer_or_reference ())
-    internal_error (_("store_typed_address: "
-		    "type is not a pointer or reference"));
-
+  gdb_assert (type->is_pointer_or_reference ());
   gdbarch_address_to_pointer (type->arch (), type, buf, addr);
 }
 
