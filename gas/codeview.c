@@ -452,7 +452,7 @@ void
 codeview_generate_asm_lineno (void)
 {
   const char *file;
-  unsigned int fileno;
+  unsigned int filenr;
   unsigned int lineno;
   struct line *l;
   symbolS *sym = NULL;
@@ -461,7 +461,7 @@ codeview_generate_asm_lineno (void)
 
   file = as_where (&lineno);
 
-  fileno = get_fileno (file);
+  filenr = get_fileno (file);
 
   if (!blocks_tail || blocks_tail->frag != frag_now)
     {
@@ -492,11 +492,11 @@ codeview_generate_asm_lineno (void)
       lb = blocks_tail;
     }
 
-  if (!lb->files_tail || lb->files_tail->fileno != fileno)
+  if (!lb->files_tail || lb->files_tail->fileno != filenr)
     {
       lf = xmalloc (sizeof (struct line_file));
       lf->next = NULL;
-      lf->fileno = fileno;
+      lf->fileno = filenr;
       lf->lines_head = lf->lines_tail = NULL;
       lf->num_lines = 0;
 
