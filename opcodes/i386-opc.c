@@ -21,4 +21,3 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "i386-opc.h"
-#include "i386-tbl.h"

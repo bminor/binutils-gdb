@@ -20,7 +20,7 @@
 
 /* i386 opcode table.  */
 
-const insn_template i386_optab[] =
+static const insn_template i386_optab[] =
 {
   { "mov", 0xa0, 2, None,
     { 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
@@ -59853,7 +59853,7 @@ const insn_template i386_optab[] =
 
 /* i386 register table.  */
 
-const reg_entry i386_regtab[] =
+static const reg_entry i386_regtab[] =
 {
   { "al",
     { { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
@@ -61009,4 +61009,4 @@ const reg_entry i386_regtab[] =
     0, 0, { 39, 64 } },
 };
 
-const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);
+static const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);

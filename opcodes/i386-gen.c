@@ -1718,7 +1718,7 @@ process_i386_opcodes (FILE *table)
 					 xcalloc, free);
 
   fprintf (table, "\n/* i386 opcode table.  */\n\n");
-  fprintf (table, "const insn_template i386_optab[] =\n{\n");
+  fprintf (table, "static const insn_template i386_optab[] =\n{\n");
 
   /* Put everything on opcode array.  */
   while (!feof (fp))
@@ -1848,7 +1848,7 @@ process_i386_registers (FILE *table)
 	  xstrerror (errno));
 
   fprintf (table, "\n/* i386 register table.  */\n\n");
-  fprintf (table, "const reg_entry i386_regtab[] =\n{\n");
+  fprintf (table, "static const reg_entry i386_regtab[] =\n{\n");
 
   while (!feof (fp))
     {
@@ -1911,7 +1911,7 @@ process_i386_registers (FILE *table)
 
   fprintf (table, "};\n");
 
-  fprintf (table, "\nconst unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);\n");
+  fprintf (table, "\nstatic const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);\n");
 }
 
 static void
