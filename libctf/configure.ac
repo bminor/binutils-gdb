@@ -69,7 +69,6 @@ AC_FUNC_MMAP
 # Needed for BFD capability checks.
 AC_SEARCH_LIBS(dlsym, dl)
 AM_ZLIB
-AC_ZSTD
 
 GCC_ENABLE([libctf-hash-debugging], [no], [], [Enable expensive debugging of CTF deduplication type hashing])
 if test "${enable_libctf_hash_debugging}" = yes; then
@@ -89,7 +88,7 @@ CC="./libtool --quiet --mode=link $OLD_CC"
 CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
 LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-LIBS="-lbfd -liberty $ZSTD_LIBS $intl $LIBS"
+LIBS="-lbfd -liberty $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], ac_cv_libctf_bfd_elf,
 [AC_TRY_LINK([#include <stdlib.h>
 	     #include <string.h>
