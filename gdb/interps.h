@@ -122,7 +122,9 @@ public:
   virtual void on_new_thread (thread_info *t) {}
 
   /* Notify the interpreter that thread T has exited.  */
-  virtual void on_thread_exited (thread_info *, int silent) {}
+  virtual void on_thread_exited (thread_info *,
+				 gdb::optional<ULONGEST> exit_code,
+				 int silent) {}
 
   /* Notify the interpreter that inferior INF was added.  */
   virtual void on_inferior_added (inferior *inf) {}
@@ -297,7 +299,9 @@ extern void interps_notify_user_selected_context_changed
 extern void interps_notify_new_thread (thread_info *t);
 
 /* Notify all interpreters that thread T has exited.  */
-extern void interps_notify_thread_exited (thread_info *t, int silent);
+extern void interps_notify_thread_exited (thread_info *t,
+					  gdb::optional<ULONGEST> exit_code,
+					  int silent);
 
 /* Notify all interpreters that inferior INF was added.  */
 extern void interps_notify_inferior_added (inferior *inf);

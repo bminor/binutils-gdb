@@ -2117,9 +2117,6 @@ wait_again:
 	      case PR_SYSENTRY:
 		if (what == SYS_lwp_exit)
 		  {
-		    if (print_thread_events)
-		      gdb_printf (_("[%s exited]\n"),
-				  target_pid_to_str (retval).c_str ());
 		    delete_thread (this->find_thread (retval));
 		    proc_resume (pi, ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
@@ -2223,9 +2220,6 @@ wait_again:
 		  }
 		else if (what == SYS_lwp_exit)
 		  {
-		    if (print_thread_events)
-		      gdb_printf (_("[%s exited]\n"),
-				  target_pid_to_str (retval).c_str ());
 		    delete_thread (this->find_thread (retval));
 		    status->set_spurious ();
 		    return retval;

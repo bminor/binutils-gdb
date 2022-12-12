@@ -235,17 +235,9 @@ foreach_mi_ui_mode mode {
 
 	    # The output has arrived!  Check how we did.  There are other bugs
 	    # that come into play here which change what output we'll see.
-	    if { $saw_mi_thread_exited && $saw_mi_bp_deleted \
-		     && $saw_cli_thread_exited \
-		     && $saw_cli_bp_deleted } {
-		kpass "gdb/30129" $gdb_test_name
-	    } elseif { $saw_mi_thread_exited && $saw_mi_bp_deleted \
-			   && !$saw_cli_thread_exited \
-			   && $saw_cli_bp_deleted } {
-		kfail "gdb/30129" $gdb_test_name
-	    } else {
-		fail "$gdb_test_name"
-	    }
+	    gdb_assert { $saw_mi_thread_exited && $saw_mi_bp_deleted \
+			     && $saw_cli_thread_exited \
+			     && $saw_cli_bp_deleted } $gdb_test_name
 	}
     }
 

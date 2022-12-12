@@ -51,7 +51,8 @@ public:
   void on_command_error () override;
   void on_user_selected_context_changed (user_selected_what selection) override;
   void on_new_thread (thread_info *t) override;
-  void on_thread_exited (thread_info *t, int silent) override;
+  void on_thread_exited (thread_info *t, gdb::optional<ULONGEST> exit_code,
+			 int silent) override;
   void on_inferior_added (inferior *inf) override;
   void on_inferior_appeared (inferior *inf) override;
   void on_inferior_disappeared (inferior *inf) override;

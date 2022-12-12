@@ -626,9 +626,6 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  /* NetBSD does not store an LWP exit status.  */
 	  ourstatus->set_thread_exited (0);
 
-	  if (print_thread_events)
-	    gdb_printf (_("[%s exited]\n"),
-			target_pid_to_str (wptid).c_str ());
 	  delete_thread (thr);
 	}
 

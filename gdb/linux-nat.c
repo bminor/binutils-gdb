@@ -906,13 +906,7 @@ exit_lwp (struct lwp_info *lp)
   struct thread_info *th = linux_target->find_thread (lp->ptid);
 
   if (th)
-    {
-      if (print_thread_events)
-	gdb_printf (_("[%s exited]\n"),
-		    target_pid_to_str (lp->ptid).c_str ());
-
-      delete_thread (th);
-    }
+    delete_thread (th);
 
   delete_lwp (lp->ptid);
 }

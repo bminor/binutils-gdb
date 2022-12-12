@@ -457,9 +457,11 @@ interps_notify_new_thread (thread_info *t)
 /* See interps.h.  */
 
 void
-interps_notify_thread_exited (thread_info *t, int silent)
+interps_notify_thread_exited (thread_info *t,
+			      gdb::optional<ULONGEST> exit_code,
+			      int silent)
 {
-  interps_notify (&interp::on_thread_exited, t, silent);
+  interps_notify (&interp::on_thread_exited, t, exit_code, silent);
 }
 
 /* See interps.h.  */

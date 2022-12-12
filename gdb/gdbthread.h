@@ -623,16 +623,30 @@ extern struct thread_info *add_thread_with_info (process_stratum_target *targ,
 
 /* Delete thread THREAD and notify of thread exit.  If the thread is
    currently not deletable, don't actually delete it but still tag it
-   as exited and do the notification.  */
-extern void delete_thread (struct thread_info *thread);
+   as exited and do the notification.  EXIT_CODE is the thread's exit
+   code.  If SILENT, don't actually notify the CLI.  THREAD must not
+   be NULL or an assertion will fail.  */
+extern void delete_thread_with_exit_code (thread_info *thread,
+					  ULONGEST exit_code,
+					  bool silent = false);
+
+/* Delete thread THREAD and notify of thread exit.  If the thread is
+   currently not deletable, don't actually delete it but still tag it
+   as exited and do the notification.  THREAD must not be NULL or an
+   assertion will fail.  */
+extern void delete_thread (thread_info *thread);
 
 /* Like delete_thread, but be quiet about it.  Used when the process
    this thread belonged to has already exited, for example.  */
 extern void delete_thread_silent (struct thread_info *thread);
 
 /* Mark the thread exited, but don't delete it or remove it from the
-   inferior thread list.  */
-extern void set_thread_exited (thread_info *tp, bool silent);
+   inferior thread list.  EXIT_CODE is the thread's exit code, if
+   available.  If SILENT, then don't inform the CLI about the
+   exit.  */
+extern void set_thread_exited (thread_info *tp,
+			       gdb::optional<ULONGEST> exit_code = {},
+			       bool silent = false);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
 extern void delete_step_resume_breakpoint (struct thread_info *);

@@ -1394,9 +1394,6 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		{
 		  fbsd_lwp_debug_printf ("deleting thread for LWP %u",
 					 pl.pl_lwpid);
-		  if (print_thread_events)
-		    gdb_printf (_("[%s exited]\n"),
-				target_pid_to_str (wptid).c_str ());
 		  low_delete_thread (thr);
 		  delete_thread (thr);
 		  fbsd_inf->num_lwps--;

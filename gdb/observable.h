@@ -109,10 +109,13 @@ extern observable<struct objfile */* objfile */> free_objfile;
 /* The thread specified by T has been created.  */
 extern observable<struct thread_info */* t */> new_thread;
 
-/* The thread specified by T has exited.  The SILENT argument
-   indicates that gdb is removing the thread from its tables without
-   wanting to notify the user about it.  */
-extern observable<struct thread_info */* t */, int /* silent */> thread_exit;
+/* The thread specified by T has exited.  EXIT_CODE is the thread's
+   exit code, if available.  The SILENT argument indicates that GDB is
+   removing the thread from its tables without wanting to notify the
+   CLI about it.  */
+extern observable<thread_info */* t */,
+		  gdb::optional<ULONGEST> /* exit_code */,
+		  bool /* silent */> thread_exit;
 
 /* An explicit stop request was issued to PTID.  If PTID equals
    minus_one_ptid, the request applied to all threads.  If

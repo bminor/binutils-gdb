@@ -277,7 +277,9 @@ mi_interp::on_new_thread (thread_info *t)
 }
 
 void
-mi_interp::on_thread_exited (thread_info *t, int silent)
+mi_interp::on_thread_exited (thread_info *t,
+			     gdb::optional<ULONGEST> /* exit_code */,
+			     int /* silent */)
 {
   target_terminal::scoped_restore_terminal_state term_state;
   target_terminal::ours_for_output ();

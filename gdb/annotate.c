@@ -232,7 +232,9 @@ annotate_thread_changed (void)
 /* Emit notification on thread exit.  */
 
 static void
-annotate_thread_exited (struct thread_info *t, int silent)
+annotate_thread_exited (thread_info *t,
+			gdb::optional<ULONGEST> exit_code,
+			bool /* silent */)
 {
   if (annotation_level > 1)
     {

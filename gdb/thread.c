@@ -194,16 +194,29 @@ clear_thread_inferior_resources (struct thread_info *tp)
 /* Notify interpreters and observers that thread T has exited.  */
 
 static void
-notify_thread_exited (thread_info *t, int silent)
+notify_thread_exited (thread_info *t, gdb::optional<ULONGEST> exit_code,
+		      int silent)
 {
-  interps_notify_thread_exited (t, silent);
-  gdb::observers::thread_exit.notify (t, silent);
+  if (!silent && print_thread_events)
+    {
+      if (exit_code.has_value ())
+	gdb_printf (_("[%s exited with code %s]\n"),
+		    target_pid_to_str (t->ptid).c_str (),
+		    pulongest (*exit_code));
+      else
+	gdb_printf (_("[%s exited]\n"),
+		    target_pid_to_str (t->ptid).c_str ());
+    }
+
+  interps_notify_thread_exited (t, exit_code, silent);
+  gdb::observers::thread_exit.notify (t, exit_code, silent);
 }
 
 /* See gdbthread.h.  */
 
 void
-set_thread_exited (thread_info *tp, bool silent)
+set_thread_exited (thread_info *tp, gdb::optional<ULONGEST> exit_code,
+		   bool silent)
 {
   /* Dead threads don't need to step-over.  Remove from chain.  */
   if (thread_is_in_step_over_chain (tp))
@@ -222,7 +235,7 @@ set_thread_exited (thread_info *tp, bool silent)
       if (proc_target != nullptr)
 	proc_target->maybe_remove_resumed_with_pending_wait_status (tp);
 
-      notify_thread_exited (tp, silent);
+      notify_thread_exited (tp, exit_code, silent);
 
       /* Tag it as exited.  */
       tp->state = THREAD_EXITED;
@@ -470,20 +483,22 @@ global_thread_step_over_chain_remove (struct thread_info *tp)
   global_thread_step_over_list.erase (it);
 }
 
-/* Delete the thread referenced by THR.  If SILENT, don't notify
-   the observer of this exit.
-   
-   THR must not be NULL or a failed assertion will be raised.  */
+/* Helper for the different delete_thread variants.  */
 
 static void
-delete_thread_1 (thread_info *thr, bool silent)
+delete_thread_1 (thread_info *thr, gdb::optional<ULONGEST> exit_code,
+		 bool silent)
 {
   gdb_assert (thr != nullptr);
 
-  threads_debug_printf ("deleting thread %s, silent = %d",
-			thr->ptid.to_string ().c_str (), silent);
+  threads_debug_printf ("deleting thread %s, exit_code = %s, silent = %d",
+			thr->ptid.to_string ().c_str (),
+			(exit_code.has_value ()
+			 ? pulongest (*exit_code)
+			 : "<none>"),
+			silent);
 
-  set_thread_exited (thr, silent);
+  set_thread_exited (thr, exit_code, silent);
 
   if (!thr->deletable ())
     {
@@ -500,15 +515,24 @@ delete_thread_1 (thread_info *thr, bool silent)
 /* See gdbthread.h.  */
 
 void
+delete_thread_with_exit_code (thread_info *thread, ULONGEST exit_code,
+			      bool silent)
+{
+  delete_thread_1 (thread, exit_code, silent);
+}
+
+/* See gdbthread.h.  */
+
+void
 delete_thread (thread_info *thread)
 {
-  delete_thread_1 (thread, false /* not silent */);
+  delete_thread_1 (thread, {}, false /* not silent */);
 }
 
 void
 delete_thread_silent (thread_info *thread)
 {
-  delete_thread_1 (thread, true /* silent */);
+  delete_thread_1 (thread, {}, true /* not silent */);
 }
 
 struct thread_info *

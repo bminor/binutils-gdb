@@ -612,21 +612,13 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
 
   id = ptid.lwp ();
 
-  /* Emit a notification about the thread being deleted.
+  /* Note that no notification was printed when the main thread was
+     created, and thus, unless in verbose mode, we should be symmetrical,
+     and avoid an exit notification for the main thread here as well.  */
 
-     Note that no notification was printed when the main thread
-     was created, and thus, unless in verbose mode, we should be
-     symmetrical, and avoid that notification for the main thread
-     here as well.  */
-
-  if (info_verbose)
-    gdb_printf ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
-  else if (print_thread_events && !main_thread_p)
-    gdb_printf (_("[%s exited with code %u]\n"),
-		target_pid_to_str (ptid).c_str (),
-		(unsigned) exit_code);
-
-  ::delete_thread (this->find_thread (ptid));
+  bool silent = (main_thread_p && !info_verbose);
+  thread_info *to_del = this->find_thread (ptid);
+  delete_thread_with_exit_code (to_del, exit_code, silent);
 
   auto iter = std::find_if (windows_process.thread_list.begin (),
 			    windows_process.thread_list.end (),
