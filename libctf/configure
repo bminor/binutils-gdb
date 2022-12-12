@@ -14579,10 +14579,9 @@ OLD_CC=$CC
 # always want our bfd.
 CC="./libtool --quiet --mode=link $OLD_CC"
 CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-LIBS="-lbfd -liberty -lz $ZSTD_LIBS $intl $LIBS"
+LIBS="-lbfd -liberty $ZSTD_LIBS $intl $LIBS"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ELF support in BFD" >&5
 $as_echo_n "checking for ELF support in BFD... " >&6; }
 if ${ac_cv_libctf_bfd_elf+:} false; then :

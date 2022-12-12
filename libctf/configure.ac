@@ -90,10 +90,9 @@ OLD_CC=$CC
 # always want our bfd.
 CC="./libtool --quiet --mode=link $OLD_CC"
 CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-LIBS="-lbfd -liberty -lz $ZSTD_LIBS $intl $LIBS"
+LIBS="-lbfd -liberty $ZSTD_LIBS $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], ac_cv_libctf_bfd_elf,
 [AC_TRY_LINK([#include <stdlib.h>
 	     #include <string.h>
