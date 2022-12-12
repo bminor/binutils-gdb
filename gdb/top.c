@@ -655,6 +655,11 @@ execute_command (const char *p, int from_tty)
 	    }
 	}
 
+      /* Remember name of the command.  This is needed later when
+	 executing command post-hooks to handle the case when command
+	 is redefined or removed during it's execution.  See below.  */
+      std::string c_name (c->name);
+
       /* If this command has been pre-hooked, run the hook first.  */
       execute_cmd_pre_hook (c);
 
@@ -693,8 +698,13 @@ execute_command (const char *p, int from_tty)
 
       maybe_wait_sync_command_done (was_sync);
 
-      /* If this command has been post-hooked, run the hook last.  */
-      execute_cmd_post_hook (c);
+      /* If this command has been post-hooked, run the hook last.
+	 We need to lookup the command again since during its execution,
+	 a command may redefine itself.  In this case, C pointer
+	 becomes invalid so we need to look it up again.  */
+      c = lookup_cmd_exact (c_name.c_str (), cmdlist);
+      if (c != nullptr)
+	execute_cmd_post_hook (c);
 
       if (repeat_arguments != NULL && cmd_start == saved_command_line)
 	{
