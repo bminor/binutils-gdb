@@ -5166,14 +5166,30 @@ md_assemble (char *line)
       return;
     }
 
-  /* Check for data size prefix on VEX/XOP/EVEX encoded and SIMD insns.  */
-  if (i.prefix[DATA_PREFIX]
-      && (is_any_vex_encoding (&i.tm)
-	  || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
-	  || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX))
+  if (is_any_vex_encoding (&i.tm)
+      || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
+      || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX)
     {
-      as_bad (_("data size prefix invalid with `%s'"), i.tm.name);
-      return;
+      /* Check for data size prefix on VEX/XOP/EVEX encoded and SIMD insns.  */
+      if (i.prefix[DATA_PREFIX])
+	{
+	  as_bad (_("data size prefix invalid with `%s'"), i.tm.name);
+	  return;
+	}
+
+      /* Don't allow e.g. KMOV in TLS code sequences.  */
+      for (j = i.imm_operands; j < i.operands; ++j)
+	switch (i.reloc[j])
+	  {
+	  case BFD_RELOC_386_TLS_GOTIE:
+	  case BFD_RELOC_386_TLS_LE_32:
+	  case BFD_RELOC_X86_64_GOTTPOFF:
+	  case BFD_RELOC_X86_64_TLSLD:
+	    as_bad (_("TLS relocation cannot be used with `%s'"), i.tm.name);
+	    return;
+	  default:
+	    break;
+	  }
     }
 
   /* Check if HLE prefix is OK.  */
@@ -6827,26 +6843,6 @@ match_template (char mnem_suffix)
 	    }
 	}
 
-      switch (i.reloc[0])
-	{
-	case BFD_RELOC_386_GOT32:
-	  /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
-	  if (t->base_opcode == 0xa0
-	      && t->opcode_modifier.opcodespace == SPACE_BASE)
-	    continue;
-	  break;
-	case BFD_RELOC_386_TLS_GOTIE:
-	case BFD_RELOC_386_TLS_LE_32:
-	case BFD_RELOC_X86_64_GOTTPOFF:
-	case BFD_RELOC_X86_64_TLSLD:
-	  /* Don't allow KMOV in TLS code sequences.  */
-	  if (t->opcode_modifier.vex)
-	    continue;
-	  break;
-	default:
-	  break;
-	}
-
       /* We check register size if needed.  */
       if (t->opcode_modifier.checkregsize)
 	{
@@ -6876,12 +6872,19 @@ match_template (char mnem_suffix)
 	      && i.types[0].bitfield.dword
 	      && i.types[1].bitfield.instance == Accum)
 	    continue;
-	  /* xrelease mov %eax, <disp> is another special case. It must not
-	     match the accumulator-only encoding of mov.  */
-	  if (i.hle_prefix
-	      && t->base_opcode == 0xa0
+
+	  if (t->base_opcode == MOV_AX_DISP32
 	      && t->opcode_modifier.opcodespace == SPACE_BASE)
-	    continue;
+	    {
+	      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
+	      if (i.reloc[0] == BFD_RELOC_386_GOT32)
+		continue;
+
+	      /* xrelease mov %eax, <disp> is another special case. It must not
+		 match the accumulator-only encoding of mov.  */
+	      if (i.hle_prefix)
+		continue;
+	    }
 	  /* Fall through.  */
 
 	case 3:
