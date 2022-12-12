@@ -46,16 +46,21 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	db 55 00             	fistl  0x0\(%rbp\)
  +[a-f0-9]+:	df 55 00             	fists  0x0\(%rbp\)
+ +[a-f0-9]+:	db 5d 00             	fistpl 0x0\(%rbp\)
+ +[a-f0-9]+:	df 5d 00             	fistps 0x0\(%rbp\)
+ +[a-f0-9]+:	df 7d 00             	fistpll 0x0\(%rbp\)
  +[a-f0-9]+:	db 45 00             	fildl  0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	df 45 00             	filds  0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence
+ +[a-f0-9]+:	df 6d 00             	fildll 0x0\(%rbp\)
+ +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	9b dd 75 00          	fsave  0x0\(%rbp\)
  +[a-f0-9]+:	dd 65 00             	frstor 0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	df 45 00             	filds  0x0\(%rbp\)
- +[a-f0-9]+:	0f ae e8             	lfence
+ +[a-f0-9]+:	db 4d 00             	fisttpl 0x0\(%rbp\)
  +[a-f0-9]+:	df 4d 00             	fisttps 0x0\(%rbp\)
+ +[a-f0-9]+:	dd 4d 00             	fisttpll 0x0\(%rbp\)
  +[a-f0-9]+:	d9 65 00             	fldenv 0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	9b d9 75 00          	fstenv 0x0\(%rbp\)

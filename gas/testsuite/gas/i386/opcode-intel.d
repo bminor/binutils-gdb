@@ -593,6 +593,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp edx,DWORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovp  dx,WORD PTR \[eax-0x6f6f6f70\]
 [ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnp dx,WORD PTR \[eax-0x6f6f6f70\]
+[ 	]*[a-f0-9]+:	df 28                	fild   QWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	df 28                	fild   QWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	df 38                	fistp  QWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	df 38                	fistp  QWORD PTR \[eax\]
  +[a-f0-9]+:	82 c3 01             	add    bl,0x1
  +[a-f0-9]+:	82 f3 01             	xor    bl,0x1
  +[a-f0-9]+:	82 d3 01             	adc    bl,0x1

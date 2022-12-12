@@ -237,6 +237,8 @@ enum i386_error
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
     unsupported,
+    unsupported_on_arch,
+    unsupported_64bit,
     invalid_sib_address,
     invalid_vsib_address,
     invalid_vector_register_set,
@@ -2013,7 +2015,15 @@ match_operand_size (const insn_template *t, unsigned int wanted,
 	   || (i.types[given].bitfield.dword
 	       && !t->operand_types[wanted].bitfield.dword)
 	   || (i.types[given].bitfield.qword
-	       && !t->operand_types[wanted].bitfield.qword)
+	       && (!t->operand_types[wanted].bitfield.qword
+		   /* Don't allow 64-bit (memory) operands outside of 64-bit
+		      mode, when they're used where a 64-bit GPR could also
+		      be used.  Checking is needed for Intel Syntax only.  */
+		   || (intel_syntax
+		       && flag_code != CODE_64BIT
+		       && (t->operand_types[wanted].bitfield.class == Reg
+			   || t->operand_types[wanted].bitfield.class == Accum
+			   || t->opcode_modifier.isstring))))
 	   || (i.types[given].bitfield.tbyte
 	       && !t->operand_types[wanted].bitfield.tbyte));
 }
@@ -4861,7 +4871,7 @@ void
 md_assemble (char *line)
 {
   unsigned int j;
-  char mnemonic[MAX_MNEM_SIZE], mnem_suffix, *copy = NULL;
+  char mnemonic[MAX_MNEM_SIZE], mnem_suffix = 0, *copy = NULL;
   const char *end, *pass1_mnem = NULL;
   enum i386_error pass1_err = 0;
   const insn_template *t;
@@ -4886,6 +4896,16 @@ md_assemble (char *line)
     {
       if (pass1_mnem != NULL)
 	goto match_error;
+      if (i.error != no_error)
+	{
+	  gas_assert (current_templates != NULL);
+	  if (may_need_pass2 (current_templates->start) && !i.suffix)
+	    goto no_match;
+	  /* No point in trying a 2nd pass - it'll only find the same suffix
+	     again.  */
+	  mnem_suffix = i.suffix;
+	  goto match_error;
+	}
       return;
     }
   if (may_need_pass2 (current_templates->start))
@@ -4987,12 +5007,21 @@ md_assemble (char *line)
 	{
 	  line = copy;
 	  copy = NULL;
+  no_match:
 	  pass1_err = i.error;
 	  pass1_mnem = current_templates->start->name;
 	  goto retry;
 	}
-      free (copy);
+
+      /* If a non-/only-64bit template (group) was found in pass 1, and if
+	 _some_ template (group) was found in pass 2, squash pass 1's
+	 error.  */
+      if (pass1_err == unsupported_64bit)
+	pass1_mnem = NULL;
+
   match_error:
+      free (copy);
+
       switch (pass1_mnem ? pass1_err : i.error)
 	{
 	default:
@@ -5024,6 +5053,23 @@ md_assemble (char *line)
 	case unsupported:
 	  as_bad (_("unsupported instruction `%s'"),
 		  pass1_mnem ? pass1_mnem : current_templates->start->name);
+	  return;
+	case unsupported_on_arch:
+	  as_bad (_("`%s' is not supported on `%s%s'"),
+		  pass1_mnem ? pass1_mnem : current_templates->start->name,
+		  cpu_arch_name ? cpu_arch_name : default_arch,
+		  cpu_sub_arch_name ? cpu_sub_arch_name : "");
+	  return;
+	case unsupported_64bit:
+	  if (ISLOWER (mnem_suffix))
+	    as_bad (_("`%s%c' is %s supported in 64-bit mode"),
+		    pass1_mnem ? pass1_mnem : current_templates->start->name,
+		    mnem_suffix,
+		    flag_code == CODE_64BIT ? _("not") : _("only"));
+	  else
+	    as_bad (_("`%s' is %s supported in 64-bit mode"),
+		    pass1_mnem ? pass1_mnem : current_templates->start->name,
+		    flag_code == CODE_64BIT ? _("not") : _("only"));
 	  return;
 	case invalid_sib_address:
 	  err_msg = _("invalid SIB address");
@@ -5382,6 +5428,23 @@ md_assemble (char *line)
     last_insn.kind = last_insn_other;
 }
 
+/* The Q suffix is generally valid only in 64-bit mode, with very few
+   exceptions: fild, fistp, fisttp, and cmpxchg8b.  Note that for fild
+   and fisttp only one of their two templates is matched below: That's
+   sufficient since other relevant attributes are the same between both
+   respective templates.  */
+static INLINE bool q_suffix_allowed(const insn_template *t)
+{
+  return flag_code == CODE_64BIT
+	 || (t->opcode_modifier.opcodespace == SPACE_BASE
+	     && t->base_opcode == 0xdf
+	     && (t->extension_opcode & 1)) /* fild / fistp / fisttp */
+	 || (t->opcode_modifier.opcodespace == SPACE_0F
+	     && t->base_opcode == 0xc7
+	     && t->opcode_modifier.opcodeprefix == PREFIX_NONE
+	     && t->extension_opcode == 1) /* cmpxchg8b */;
+}
+
 static const char *
 parse_insn (const char *line, char *mnemonic)
 {
@@ -5677,20 +5740,21 @@ parse_insn (const char *line, char *mnemonic)
   for (t = current_templates->start; t < current_templates->end; ++t)
     {
       supported |= cpu_flags_match (t);
+
+      if (i.suffix == QWORD_MNEM_SUFFIX && !q_suffix_allowed (t))
+	supported &= ~CPU_FLAGS_64BIT_MATCH;
+
       if (supported == CPU_FLAGS_PERFECT_MATCH)
 	return l;
     }
 
-  if (!(supported & CPU_FLAGS_64BIT_MATCH))
-    as_bad (flag_code == CODE_64BIT
-	    ? _("`%s' is not supported in 64-bit mode")
-	    : _("`%s' is only supported in 64-bit mode"),
-	    current_templates->start->name);
-  else
-    as_bad (_("`%s' is not supported on `%s%s'"),
-	    current_templates->start->name,
-	    cpu_arch_name ? cpu_arch_name : default_arch,
-	    cpu_sub_arch_name ? cpu_sub_arch_name : "");
+  if (pass1)
+    {
+      if (supported & CPU_FLAGS_64BIT_MATCH)
+        i.error = unsupported_on_arch;
+      else
+        i.error = unsupported_64bit;
+    }
 
   return NULL;
 }
@@ -6687,20 +6751,12 @@ match_template (char mnem_suffix)
       for (j = 0; j < MAX_OPERANDS; j++)
 	operand_types[j] = t->operand_types[j];
 
-      /* In general, don't allow
-	 - 64-bit operands outside of 64-bit mode,
-	 - 32-bit operands on pre-386.  */
+      /* In general, don't allow 32-bit operands on pre-386.  */
       specific_error = progress (mnem_suffix ? invalid_instruction_suffix
 					     : operand_size_mismatch);
       j = i.imm_operands + (t->operands > i.imm_operands + 1);
-      if (((i.suffix == QWORD_MNEM_SUFFIX
-	    && flag_code != CODE_64BIT
-	    && !(t->opcode_modifier.opcodespace == SPACE_0F
-		 && t->base_opcode == 0xc7
-		 && t->opcode_modifier.opcodeprefix == PREFIX_NONE
-		 && t->extension_opcode == 1) /* cmpxchg8b */)
-	   || (i.suffix == LONG_MNEM_SUFFIX
-	       && !cpu_arch_flags.bitfield.cpui386))
+      if (i.suffix == LONG_MNEM_SUFFIX
+	  && !cpu_arch_flags.bitfield.cpui386
 	  && (intel_syntax
 	      ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
 		 && !intel_float_operand (t->name))

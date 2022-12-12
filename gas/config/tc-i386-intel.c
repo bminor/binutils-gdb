@@ -828,7 +828,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		    continue;
 		  break;
 		case QWORD_MNEM_SUFFIX:
-		  if (t->opcode_modifier.no_qsuf)
+		  if (t->opcode_modifier.no_qsuf || !q_suffix_allowed (t))
 		    continue;
 		  break;
 		case SHORT_MNEM_SUFFIX:
