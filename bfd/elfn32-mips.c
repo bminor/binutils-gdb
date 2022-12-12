@@ -4197,6 +4197,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_bfd_print_private_bfd_data \
 					_bfd_mips_elf_print_private_bfd_data
 #define bfd_elf32_mkobject		mips_elf_n32_mkobject
+#define bfd_elf32_close_and_cleanup	_bfd_mips_elf_close_and_cleanup
 
 /* Support for SGI-ish mips targets using n32 ABI.  */
 

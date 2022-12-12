@@ -31,6 +31,8 @@ enum reloc_check
 
 extern bool _bfd_mips_elf_mkobject
   (bfd *);
+extern bool _bfd_mips_elf_close_and_cleanup
+  (bfd *);
 extern bool _bfd_mips_elf_new_section_hook
   (bfd *, asection *);
 extern void _bfd_mips_elf_symbol_processing
