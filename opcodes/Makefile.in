@@ -552,7 +552,6 @@ TARGET32_LIBOPCODES_CFILES = \
 	h8300-dis.c \
 	hppa-dis.c \
 	i386-dis.c \
-	i386-opc.c \
 	ip2k-asm.c \
 	ip2k-desc.c \
 	ip2k-dis.c \
@@ -945,7 +944,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h8300-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hppa-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ia64-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ia64-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip2k-asm.Plo@am__quote@
@@ -1535,10 +1533,9 @@ $(srcdir)/i386%tbl.h $(srcdir)/i386%init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) 
 		< $(srcdir)/i386-opc.tbl \
 		| ./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
 
-i386-opc.lo: $(srcdir)/i386-tbl.h
-# While not really a dependency, specify i386-init.h here as well to make sure
-# it is generated even if i386-tbl.h is present and up-to-date.
-i386-opc.lo: $(srcdir)/i386-init.h
+# While not really dependencies, specify i386-{init,tbl}.h here as well to
+# make sure they are re-generated as necessary.
+i386-dis.lo: $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h
 
 ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIB_DEPS)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)
