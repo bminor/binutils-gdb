@@ -4337,7 +4337,7 @@ new_module (bfd *abfd)
     = (struct module *) bfd_zalloc (abfd, sizeof (struct module));
   module->file_table_count = 16; /* Arbitrary.  */
   module->file_table
-    = bfd_malloc (module->file_table_count * sizeof (struct fileinfo));
+    = bfd_zmalloc (module->file_table_count * sizeof (struct fileinfo));
   return module;
 }
 
@@ -4520,15 +4520,18 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		       src_ptr + DST_S_B_SRC_DF_FILENAME,
 		       ptr + rec_length - (src_ptr + DST_S_B_SRC_DF_FILENAME));
 
-		    while (fileid >= module->file_table_count)
+		    if (fileid >= module->file_table_count)
 		      {
-			module->file_table_count *= 2;
+			unsigned int old_count = module->file_table_count;
+			module->file_table_count += fileid;
 			module->file_table
 			  = bfd_realloc_or_free (module->file_table,
 						 module->file_table_count
 						 * sizeof (struct fileinfo));
 			if (module->file_table == NULL)
 			  return false;
+			memset (module->file_table + old_count, 0,
+				fileid * sizeof (struct fileinfo));
 		      }
 
 		    module->file_table [fileid].name = filename;
