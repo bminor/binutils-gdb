@@ -6878,12 +6878,9 @@ match_template (char mnem_suffix)
 	    continue;
 	  /* xrelease mov %eax, <disp> is another special case. It must not
 	     match the accumulator-only encoding of mov.  */
-	  if (flag_code != CODE_64BIT
-	      && i.hle_prefix
+	  if (i.hle_prefix
 	      && t->base_opcode == 0xa0
-	      && t->opcode_modifier.opcodespace == SPACE_BASE
-	      && i.types[0].bitfield.instance == Accum
-	      && (i.flags[1] & Operand_Mem))
+	      && t->opcode_modifier.opcodespace == SPACE_BASE)
 	    continue;
 	  /* Fall through.  */
 
