@@ -145,34 +145,27 @@
 mov, 0xa0, None, CpuNo64, D|W|CheckRegSize|No_sSuf|No_qSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
 mov, 0xa0, None, Cpu64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 movabs, 0xa0, None, Cpu64, D|W|CheckRegSize|No_sSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
-movq, 0xa1, None, Cpu64, D|Size64|NoSuf, { Disp64|Unspecified|Qword, Acc|Qword }
 mov, 0x88, None, 0, D|W|CheckRegSize|Modrm|No_sSuf|HLEPrefixRelease, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-movq, 0x89, None, Cpu64, D|Modrm|Size64|NoSuf|HLEPrefixRelease, { Reg64, Reg64|Unspecified|Qword|BaseIndex }
 // In the 64bit mode the short form mov immediate is redefined to have
 // 64bit value.
 mov, 0xb0, None, 0, W|No_sSuf|No_qSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32 }
 mov, 0xc6, 0, 0, W|Modrm|No_sSuf|HLEPrefixRelease|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-movq, 0xc7, 0, Cpu64, Modrm|Size64|NoSuf|HLEPrefixRelease|Optimize, { Imm32S, Reg64|Qword|Unspecified|BaseIndex }
 mov, 0xb8, None, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|Optimize, { Imm64, Reg64 }
 movabs, 0xb8, None, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Imm64, Reg64 }
-movq, 0xb8, None, Cpu64, Size64|NoSuf|Optimize, { Imm64, Reg64 }
 // The segment register moves accept WordReg so that a segment register
 // can be copied to a 32 bit register, and vice versa, without using a
 // size prefix.  When moving to a 32 bit register, the upper 16 bits
 // are set to an implementation defined value (on the Pentium Pro, the
 // implementation defined value is zero).
-mov, 0x8c, None, 0, RegMem|No_bSuf|No_sSuf|No_qSuf|NoRex64, { SReg, Reg16|Reg32|Reg64 }
+mov, 0x8c, None, 0, RegMem|No_bSuf|No_sSuf|NoRex64, { SReg, Reg16|Reg32|Reg64 }
 mov, 0x8c, None, 0, D|Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { SReg, Word|Unspecified|BaseIndex }
-movq, 0x8c, None, Cpu64, D|RegMem|NoSuf|NoRex64, { SReg, Reg64 }
-mov, 0x8e, None, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf|NoRex64, { Reg16|Reg32|Reg64, SReg }
+mov, 0x8e, None, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64, SReg }
 // Move to/from control debug registers.  In the 16 or 32bit modes
 // they are 32bit.  In the 64bit mode they are 64bit.
 mov, 0xf20, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Control, Reg32 }
 mov, 0xf20, None, Cpu64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Control, Reg64 }
-movq, 0xf20, None, Cpu64, D|RegMem|Size64|NoSuf|NoRex64, { Control, Reg64 }
 mov, 0xf21, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Debug, Reg32 }
 mov, 0xf21, None, Cpu64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Debug, Reg64 }
-movq, 0xf21, None, Cpu64, D|RegMem|Size64|NoSuf|NoRex64, { Debug, Reg64 }
 mov, 0xf24, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf, { Test, Reg32 }
 
 // Move after swapping the bytes
@@ -499,9 +492,6 @@ set<cc>, 0xf9<cc:opc>, 0, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|
 // String manipulation.
 cmps, 0xa6, None, 0, W|No_sSuf|IsString|RepPrefixOk, {}
 cmps, 0xa6, None, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-// Intel mode string compare.
-cmpsd, 0xa7, None, Cpu386, Size32|NoSuf|IsString|RepPrefixOk, {}
-cmpsd, 0xa7, None, Cpu386, Size32|NoSuf|IsStringEsOp0|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
 scmp, 0xa6, None, 0, W|No_sSuf|IsString|RepPrefixOk, {}
 scmp, 0xa6, None, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ins, 0x6c, None, Cpu186, W|No_sSuf|No_qSuf|IsString|RepPrefixOk, {}
@@ -516,9 +506,6 @@ slod, 0xac, None, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Uns
 slod, 0xac, None, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 movs, 0xa4, None, 0, W|No_sSuf|IsString|RepPrefixOk, {}
 movs, 0xa4, None, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-// Intel mode string move.
-movsd, 0xa5, None, Cpu386, Size32|NoSuf|IsString|RepPrefixOk, {}
-movsd, 0xa5, None, Cpu386, Size32|NoSuf|IsStringEsOp1|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
 smov, 0xa4, None, 0, W|No_sSuf|IsString|RepPrefixOk, {}
 smov, 0xa4, None, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scas, 0xae, None, 0, W|No_sSuf|IsString|RepPrefixOk, {}
@@ -997,6 +984,7 @@ movd, 0x666e, None, CpuAVX, D|Modrm|Vex128|Space0F|VexW0|NoSuf|SSE2AVX, { Reg32|
 movd, 0x666e, None, CpuAVX|Cpu64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
 movd, 0x660f6e, None, CpuSSE2, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
 movd, 0x660f6e, None, CpuSSE2|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegXMM }
+// The MMX templates have to remain after at least the SSE2AVX ones.
 movd, 0xf6e, None, CpuMMX, D|Modrm|IgnoreSize|NoSuf, { Reg32|Unspecified|BaseIndex, RegMMX }
 movd, 0xf6e, None, CpuMMX|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|BaseIndex, RegMMX }
 movq, 0xf37e, None, CpuAVX, Load|Modrm|Vex=1|Space0F|VexWIG|NoSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
@@ -1005,6 +993,7 @@ movq, 0x666e, None, CpuAVX|Cpu64, D|Modrm|Vex=1|Space0F|VexW1|NoSuf|Size64|SSE2A
 movq, 0xf30f7e, None, CpuSSE2, Load|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
 movq, 0x660fd6, None, CpuSSE2, Modrm|NoSuf, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
 movq, 0x660f6e, None, CpuSSE2|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
+// The MMX templates have to remain after at least the SSE2AVX ones.
 movq, 0xf6f, None, CpuMMX, D|Modrm|NoSuf, { Unspecified|Qword|BaseIndex|RegMMX, RegMMX }
 movq, 0xf6e, None, CpuMMX|Cpu64, D|Modrm|NoSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
 packssdw<mmx>, 0x<mmx:pfx>0f6b, None, <mmx:cpu>, Modrm|<mmx:attr>|NoSuf, { <mmx:reg>|<mmx:mem>|Unspecified|BaseIndex, <mmx:reg> }

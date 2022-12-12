@@ -298,9 +298,6 @@ struct _i386_insn
        explicit segment overrides are given.  */
     const reg_entry *seg[2];
 
-    /* Copied first memory operand string, for re-checking.  */
-    char *memop1_string;
-
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the number of prefix opcodes.  */
     unsigned int prefixes;
@@ -4299,7 +4296,20 @@ optimize_encoding (void)
 	   movq $imm31, %r64   -> movl $imm31, %r32
 	   movq $imm32, %r64   -> movl $imm32, %r32
         */
-      i.tm.opcode_modifier.norex64 = 1;
+      i.tm.opcode_modifier.size = SIZE32;
+      if (i.imm_operands)
+	{
+	  i.types[0].bitfield.imm32 = 1;
+	  i.types[0].bitfield.imm32s = 0;
+	  i.types[0].bitfield.imm64 = 0;
+	}
+      else
+	{
+	  i.types[0].bitfield.dword = 1;
+	  i.types[0].bitfield.qword = 0;
+	}
+      i.types[1].bitfield.dword = 1;
+      i.types[1].bitfield.qword = 0;
       if (i.tm.base_opcode == 0xb8 || (i.tm.base_opcode | 1) == 0xc7)
 	{
 	  /* Handle
@@ -4309,11 +4319,6 @@ optimize_encoding (void)
 	  i.tm.operand_types[0].bitfield.imm32 = 1;
 	  i.tm.operand_types[0].bitfield.imm32s = 0;
 	  i.tm.operand_types[0].bitfield.imm64 = 0;
-	  i.types[0].bitfield.imm32 = 1;
-	  i.types[0].bitfield.imm32s = 0;
-	  i.types[0].bitfield.imm64 = 0;
-	  i.types[1].bitfield.dword = 1;
-	  i.types[1].bitfield.qword = 0;
 	  if ((i.tm.base_opcode | 1) == 0xc7)
 	    {
 	      /* Handle
@@ -4836,6 +4841,18 @@ insert_lfence_before (void)
     }
 }
 
+/* Helper for md_assemble() to decide whether to prepare for a possible 2nd
+   parsing pass. Instead of introducing a rarely use new insn attribute this
+   utilizes a common pattern between affected templates. It is deemed
+   acceptable that this will lead to unnecessary pass 2 preparations in a
+   limited set of cases.  */
+static INLINE bool may_need_pass2 (const insn_template *t)
+{
+  return t->opcode_modifier.sse2avx
+	 /* Note that all SSE2AVX templates have at least one operand.  */
+	 && t->operand_types[t->operands - 1].bitfield.class == RegSIMD;
+}
+
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -4844,11 +4861,14 @@ void
 md_assemble (char *line)
 {
   unsigned int j;
-  char mnemonic[MAX_MNEM_SIZE], mnem_suffix;
-  const char *end;
+  char mnemonic[MAX_MNEM_SIZE], mnem_suffix, *copy = NULL;
+  const char *end, *pass1_mnem = NULL;
+  enum i386_error pass1_err = 0;
   const insn_template *t;
 
   /* Initialize globals.  */
+  current_templates = NULL;
+ retry:
   memset (&i, '\0', sizeof (i));
   i.rounding.type = rc_none;
   for (j = 0; j < MAX_OPERANDS; j++)
@@ -4863,16 +4883,26 @@ md_assemble (char *line)
 
   end = parse_insn (line, mnemonic);
   if (end == NULL)
-    return;
+    {
+      if (pass1_mnem != NULL)
+	goto match_error;
+      return;
+    }
+  if (may_need_pass2 (current_templates->start))
+    {
+      /* Make a copy of the full line in case we need to retry.  */
+      copy = xstrdup (line);
+    }
   line += end - line;
   mnem_suffix = i.suffix;
 
   line = parse_operands (line, mnemonic);
   this_operand = -1;
-  xfree (i.memop1_string);
-  i.memop1_string = NULL;
   if (line == NULL)
-    return;
+    {
+      free (copy);
+      return;
+    }
 
   /* Now we've parsed the mnemonic into a set of templates, and have the
      operands at hand.  */
@@ -4950,7 +4980,97 @@ md_assemble (char *line)
      with the template operand types.  */
 
   if (!(t = match_template (mnem_suffix)))
-    return;
+    {
+      const char *err_msg;
+
+      if (copy && !mnem_suffix)
+	{
+	  line = copy;
+	  copy = NULL;
+	  pass1_err = i.error;
+	  pass1_mnem = current_templates->start->name;
+	  goto retry;
+	}
+      free (copy);
+  match_error:
+      switch (pass1_mnem ? pass1_err : i.error)
+	{
+	default:
+	  abort ();
+	case operand_size_mismatch:
+	  err_msg = _("operand size mismatch");
+	  break;
+	case operand_type_mismatch:
+	  err_msg = _("operand type mismatch");
+	  break;
+	case register_type_mismatch:
+	  err_msg = _("register type mismatch");
+	  break;
+	case number_of_operands_mismatch:
+	  err_msg = _("number of operands mismatch");
+	  break;
+	case invalid_instruction_suffix:
+	  err_msg = _("invalid instruction suffix");
+	  break;
+	case bad_imm4:
+	  err_msg = _("constant doesn't fit in 4 bits");
+	  break;
+	case unsupported_with_intel_mnemonic:
+	  err_msg = _("unsupported with Intel mnemonic");
+	  break;
+	case unsupported_syntax:
+	  err_msg = _("unsupported syntax");
+	  break;
+	case unsupported:
+	  as_bad (_("unsupported instruction `%s'"),
+		  pass1_mnem ? pass1_mnem : current_templates->start->name);
+	  return;
+	case invalid_sib_address:
+	  err_msg = _("invalid SIB address");
+	  break;
+	case invalid_vsib_address:
+	  err_msg = _("invalid VSIB address");
+	  break;
+	case invalid_vector_register_set:
+	  err_msg = _("mask, index, and destination registers must be distinct");
+	  break;
+	case invalid_tmm_register_set:
+	  err_msg = _("all tmm registers must be distinct");
+	  break;
+	case invalid_dest_and_src_register_set:
+	  err_msg = _("destination and source registers must be distinct");
+	  break;
+	case unsupported_vector_index_register:
+	  err_msg = _("unsupported vector index register");
+	  break;
+	case unsupported_broadcast:
+	  err_msg = _("unsupported broadcast");
+	  break;
+	case broadcast_needed:
+	  err_msg = _("broadcast is needed for operand of such type");
+	  break;
+	case unsupported_masking:
+	  err_msg = _("unsupported masking");
+	  break;
+	case mask_not_on_destination:
+	  err_msg = _("mask not on destination operand");
+	  break;
+	case no_default_mask:
+	  err_msg = _("default mask isn't allowed");
+	  break;
+	case unsupported_rc_sae:
+	  err_msg = _("unsupported static rounding/sae");
+	  break;
+	case invalid_register_operand:
+	  err_msg = _("invalid register operand");
+	  break;
+	}
+      as_bad (_("%s for `%s'"), err_msg,
+	      pass1_mnem ? pass1_mnem : current_templates->start->name);
+      return;
+    }
+
+  free (copy);
 
   if (sse_check != check_none
       /* The opcode space check isn't strictly needed; it's there only to
@@ -5267,6 +5387,7 @@ parse_insn (const char *line, char *mnemonic)
 {
   const char *l = line, *token_start = l;
   char *mnem_p;
+  bool pass1 = !current_templates;
   int supported;
   const insn_template *t;
   char *dot_p = NULL;
@@ -5436,8 +5557,10 @@ parse_insn (const char *line, char *mnemonic)
       current_templates = (const templates *) str_hash_find (op_hash, mnemonic);
     }
 
-  if (!current_templates)
+  if (!current_templates || !pass1)
     {
+      current_templates = NULL;
+
     check_suffix:
       if (mnem_p > mnemonic)
 	{
@@ -5479,13 +5602,39 @@ parse_insn (const char *line, char *mnemonic)
 		  current_templates
 		    = (const templates *) str_hash_find (op_hash, mnemonic);
 		}
+	      /* For compatibility reasons accept MOVSD and CMPSD without
+	         operands even in AT&T mode.  */
+	      else if (*l == END_OF_INSN
+		       || (is_space_char (*l) && l[1] == END_OF_INSN))
+		{
+		  mnem_p[-1] = '\0';
+		  current_templates
+		    = (const templates *) str_hash_find (op_hash, mnemonic);
+		  if (current_templates != NULL
+		      /* MOVS or CMPS */
+		      && (current_templates->start->base_opcode | 2) == 0xa6
+		      && current_templates->start->opcode_modifier.opcodespace
+			 == SPACE_BASE
+		      && mnem_p[-2] == 's')
+		    {
+		      as_warn (_("found `%sd'; assuming `%sl' was meant"),
+			       mnemonic, mnemonic);
+		      i.suffix = LONG_MNEM_SUFFIX;
+		    }
+		  else
+		    {
+		      current_templates = NULL;
+		      mnem_p[-1] = 'd';
+		    }
+		}
 	      break;
 	    }
 	}
 
       if (!current_templates)
 	{
-	  as_bad (_("no such instruction: `%s'"), token_start);
+	  if (pass1)
+	    as_bad (_("no such instruction: `%s'"), token_start);
 	  return NULL;
 	}
     }
@@ -6873,81 +7022,7 @@ match_template (char mnem_suffix)
   if (t == current_templates->end)
     {
       /* We found no match.  */
-      const char *err_msg;
-      switch (specific_error)
-	{
-	default:
-	  abort ();
-	case operand_size_mismatch:
-	  err_msg = _("operand size mismatch");
-	  break;
-	case operand_type_mismatch:
-	  err_msg = _("operand type mismatch");
-	  break;
-	case register_type_mismatch:
-	  err_msg = _("register type mismatch");
-	  break;
-	case number_of_operands_mismatch:
-	  err_msg = _("number of operands mismatch");
-	  break;
-	case invalid_instruction_suffix:
-	  err_msg = _("invalid instruction suffix");
-	  break;
-	case bad_imm4:
-	  err_msg = _("constant doesn't fit in 4 bits");
-	  break;
-	case unsupported_with_intel_mnemonic:
-	  err_msg = _("unsupported with Intel mnemonic");
-	  break;
-	case unsupported_syntax:
-	  err_msg = _("unsupported syntax");
-	  break;
-	case unsupported:
-	  as_bad (_("unsupported instruction `%s'"),
-		  current_templates->start->name);
-	  return NULL;
-	case invalid_sib_address:
-	  err_msg = _("invalid SIB address");
-	  break;
-	case invalid_vsib_address:
-	  err_msg = _("invalid VSIB address");
-	  break;
-	case invalid_vector_register_set:
-	  err_msg = _("mask, index, and destination registers must be distinct");
-	  break;
-	case invalid_tmm_register_set:
-	  err_msg = _("all tmm registers must be distinct");
-	  break;
-	case invalid_dest_and_src_register_set:
-	  err_msg = _("destination and source registers must be distinct");
-	  break;
-	case unsupported_vector_index_register:
-	  err_msg = _("unsupported vector index register");
-	  break;
-	case unsupported_broadcast:
-	  err_msg = _("unsupported broadcast");
-	  break;
-	case broadcast_needed:
-	  err_msg = _("broadcast is needed for operand of such type");
-	  break;
-	case unsupported_masking:
-	  err_msg = _("unsupported masking");
-	  break;
-	case mask_not_on_destination:
-	  err_msg = _("mask not on destination operand");
-	  break;
-	case no_default_mask:
-	  err_msg = _("default mask isn't allowed");
-	  break;
-	case unsupported_rc_sae:
-	  err_msg = _("unsupported static rounding/sae");
-	  break;
-	case invalid_register_operand:
-	  err_msg = _("invalid register operand");
-	  break;
-	}
-      as_bad (_("%s for `%s'"), err_msg,
-	      current_templates->start->name);
+      i.error = specific_error;
       return NULL;
     }
 
@@ -11426,49 +11501,6 @@ RC_SAE_immediate (const char *imm_start)
   return 1;
 }
 
-/* Only string instructions can have a second memory operand, so
-   reduce current_templates to just those if it contains any.  */
-static int
-maybe_adjust_templates (void)
-{
-  const insn_template *t;
-
-  gas_assert (i.mem_operands == 1);
-
-  for (t = current_templates->start; t < current_templates->end; ++t)
-    if (t->opcode_modifier.isstring)
-      break;
-
-  if (t < current_templates->end)
-    {
-      static templates aux_templates;
-      bool recheck;
-
-      aux_templates.start = t;
-      for (; t < current_templates->end; ++t)
-	if (!t->opcode_modifier.isstring)
-	  break;
-      aux_templates.end = t;
-
-      /* Determine whether to re-check the first memory operand.  */
-      recheck = (aux_templates.start != current_templates->start
-		 || t != current_templates->end);
-
-      current_templates = &aux_templates;
-
-      if (recheck)
-	{
-	  i.mem_operands = 0;
-	  if (i.memop1_string != NULL
-	      && i386_index_check (i.memop1_string) == 0)
-	    return 0;
-	  i.mem_operands = 1;
-	}
-    }
-
-  return 1;
-}
-
 static INLINE bool starts_memory_operand (char c)
 {
   return ISDIGIT (c)
@@ -11619,17 +11651,6 @@ i386_att_operand (char *operand_string)
       char *displacement_string_end;
 
     do_memory_reference:
-      if (i.mem_operands == 1 && !maybe_adjust_templates ())
-	return 0;
-      if ((i.mem_operands == 1
-	   && !current_templates->start->opcode_modifier.isstring)
-	  || i.mem_operands == 2)
-	{
-	  as_bad (_("too many memory references for `%s'"),
-		  current_templates->start->name);
-	  return 0;
-	}
-
       /* Check for base index form.  We detect the base index form by
 	 looking for an ')' at the end of the operand, searching
 	 for the '(' matching it, and finding a REGISTER_PREFIX or ','
@@ -11837,8 +11858,6 @@ i386_att_operand (char *operand_string)
       if (i386_index_check (operand_string) == 0)
 	return 0;
       i.flags[this_operand] |= Operand_Mem;
-      if (i.mem_operands == 0)
-	i.memop1_string = xstrdup (operand_string);
       i.mem_operands++;
     }
   else
