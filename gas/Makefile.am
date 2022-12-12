@@ -448,6 +448,17 @@ development.exp: $(BFDDIR)/development.sh
 	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
+config/tc-i386.o: $(srcdir)/../opcodes/i386-init.h $(srcdir)/../opcodes/i386-tbl.h
+
+i386_tbl_deps = $(srcdir)/../opcodes/i386-opc.tbl \
+	$(srcdir)/../opcodes/i386-reg.tbl \
+	$(srcdir)/../opcodes/i386-gen.c $(srcdir)/../opcodes/i386-opc.h
+
+$(srcdir)/../opcodes/i386%init.h $(srcdir)/../opcodes/i386%tbl.h: @MAINT@ $(i386_tbl_deps)
+	@echo '"$@" is outdated wrt "$?"' >&2
+	@echo 'Please rebuild from the top level or in $(CURDIR)/../opcodes/' >&2
+	@false
+
 EXTRA_as_new_SOURCES += config/m68k-parse.y
 config/m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/m68k-parse.y y.tab.c $@ -- $(YACCCOMPILE)
