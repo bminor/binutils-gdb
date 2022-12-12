@@ -496,9 +496,8 @@ public:
   /* Find (non-exited) thread PTID of this inferior.  */
   thread_info *find_thread (ptid_t ptid);
 
-  /* Delete all threads in the thread list.  If SILENT, exit threads
-     silently.  */
-  void clear_thread_list (bool silent);
+  /* Delete all threads in the thread list, silently.  */
+  void clear_thread_list ();
 
   /* Continuations-related methods.  A continuation is an std::function
      to be called to finish the execution of a command when running

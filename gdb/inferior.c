@@ -247,13 +247,13 @@ inferior::find_thread (ptid_t ptid)
 /* See inferior.h.  */
 
 void
-inferior::clear_thread_list (bool silent)
+inferior::clear_thread_list ()
 {
   thread_list.clear_and_dispose ([=] (thread_info *thr)
     {
-      threads_debug_printf ("deleting thread %s, silent = %d",
-			    thr->ptid.to_string ().c_str (), silent);
-      set_thread_exited (thr, silent);
+      threads_debug_printf ("deleting thread %s",
+			    thr->ptid.to_string ().c_str ());
+      set_thread_exited (thr, true /* silent */);
       if (thr->deletable ())
 	delete thr;
     });
@@ -272,7 +272,7 @@ notify_inferior_removed (inferior *inf)
 void
 delete_inferior (struct inferior *inf)
 {
-  inf->clear_thread_list (true);
+  inf->clear_thread_list ();
 
   auto it = inferior_list.iterator_to (*inf);
   inferior_list.erase (it);
@@ -307,7 +307,7 @@ notify_inferior_disappeared (inferior *inf)
 static void
 exit_inferior_1 (struct inferior *inf, int silent)
 {
-  inf->clear_thread_list (silent);
+  inf->clear_thread_list ();
 
   notify_inferior_disappeared (inf);
 
