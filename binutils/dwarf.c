@@ -255,6 +255,14 @@ print_view (uint64_t value, unsigned num_bytes)
 	  value & ~(~(uint64_t) 0 << num_bytes * 4 << num_bytes * 4));
 }
 
+static const char *
+null_name (const char *p)
+{
+  if (p == NULL)
+    p = _("unknown");
+  return p;
+}
+
 /* Read in a LEB128 encoded value starting at address DATA.
    If SIGN is true, return a signed LEB128 value.
    If LENGTH_RETURN is not NULL, return in it the number of bytes read.
@@ -3843,7 +3851,7 @@ process_debug_info (struct dwarf_section * section,
 	      const char *name = get_DW_UT_name (compunit.cu_unit_type);
 
 	      printf (_("   Unit Type:     %s (%x)\n"),
-		      name ? name : "???",
+		      null_name (name),
 		      compunit.cu_unit_type);
 	    }
 	  printf (_("   Abbrev Offset: %#" PRIx64 "\n"),
@@ -4855,7 +4863,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 
 typedef struct
 {
-  unsigned char *name;
+  char *name;
   unsigned int directory_index;
   unsigned int modification_date;
   unsigned int length;
@@ -4883,7 +4891,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
       int i;
       File_Entry *file_table = NULL;
       unsigned int n_files = 0;
-      unsigned char **directory_table = NULL;
+      char **directory_table = NULL;
       uint64_t n_directories = 0;
 
       if (startswith (section->name, ".debug_line.")
@@ -4961,12 +4969,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      if (n_directories == 0)
 		directory_table = NULL;
 	      else
-		directory_table = (unsigned char **)
-		  xmalloc (n_directories * sizeof (unsigned char *));
+		directory_table = (char **)
+		  xcalloc (n_directories, sizeof (unsigned char *));
 
 	      for (entryi = 0; entryi < n_directories; entryi++)
 		{
-		  unsigned char **pathp = &directory_table[entryi];
+		  char **pathp = &directory_table[entryi];
 
 		  format = format_start;
 		  for (formati = 0; formati < format_count; formati++)
@@ -4987,13 +4995,13 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			  switch (form)
 			    {
 			    case DW_FORM_string:
-			      *pathp = data;
+			      *pathp = (char *) data;
 			      break;
 			    case DW_FORM_line_strp:
 			      SAFE_BYTE_GET (uvalue, data, linfo.li_offset_size,
 					     end);
 			      /* Remove const by the cast.  */
-			      *pathp = (unsigned char *)
+			      *pathp = (char *)
 				       fetch_indirect_line_string (uvalue);
 			      break;
 			    }
@@ -5035,8 +5043,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      if (n_files == 0)
 		file_table = NULL;
 	      else
-		file_table = (File_Entry *) xcalloc (1, n_files
-						     * sizeof (File_Entry));
+		file_table = (File_Entry *) xcalloc (n_files,
+						     sizeof (File_Entry));
 
 	      for (entryi = 0; entryi < n_files; entryi++)
 		{
@@ -5062,13 +5070,13 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			  switch (form)
 			    {
 			    case DW_FORM_string:
-			      file->name = data;
+			      file->name = (char *) data;
 			      break;
 			    case DW_FORM_line_strp:
 			      SAFE_BYTE_GET (uvalue, data, linfo.li_offset_size,
 					     end);
 			      /* Remove const by the cast.  */
-			      file->name = (unsigned char *)
+			      file->name = (char *)
 					   fetch_indirect_line_string (uvalue);
 			      break;
 			    }
@@ -5109,7 +5117,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	    {
 	      if (*data != 0)
 		{
-		  unsigned char *ptr_directory_table = data;
+		  char *ptr_directory_table = (char *) data;
 
 		  while (data < end && *data != 0)
 		    {
@@ -5128,15 +5136,14 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		    }
 
 		  /* Go through the directory table again to save the directories.  */
-		  directory_table = (unsigned char **)
+		  directory_table = (char **)
 		    xmalloc (n_directories * sizeof (unsigned char *));
 
 		  i = 0;
 		  while (*ptr_directory_table != 0)
 		    {
 		      directory_table[i] = ptr_directory_table;
-		      ptr_directory_table
-			+= strlen ((char *) ptr_directory_table) + 1;
+		      ptr_directory_table += strlen (ptr_directory_table) + 1;
 		      i++;
 		    }
 		}
@@ -5174,7 +5181,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  i = 0;
 		  while (*ptr_file_name_table != 0)
 		    {
-		      file_table[i].name = ptr_file_name_table;
+		      file_table[i].name = (char *) ptr_file_name_table;
 		      ptr_file_name_table
 			+= strlen ((char *) ptr_file_name_table) + 1;
 
@@ -5198,7 +5205,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	  if (file_table == NULL)
 	    printf (_("CU: No directory table\n"));
 	  else if (directory_table == NULL)
-	    printf (_("CU: %s:\n"), file_table[0].name);
+	    printf (_("CU: %s:\n"), null_name (file_table[0].name));
 	  else
 	    {
 	      unsigned int ix = file_table[0].directory_index;
@@ -5216,14 +5223,16 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  directory = _("<corrupt>");
 		}
 	      else if (linfo.li_version >= 5)
-		directory = (char *) directory_table[ix];
+		directory = directory_table[ix];
 	      else
-		directory = (char *) directory_table[ix - 1];
+		directory = directory_table[ix - 1];
 
 	      if (do_wide)
-		printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
+		printf (_("CU: %s/%s:\n"),
+			null_name (directory),
+			null_name (file_table[0].name));
 	      else
-		printf ("%s:\n", file_table[0].name);
+		printf ("%s:\n", null_name (file_table[0].name));
 	    }
 
 	  if (n_files > 0)
@@ -5316,7 +5325,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 		      ++state_machine_regs.last_file_entry;
 		      /* Source file name.  */
-		      file_table[n_files].name = op_code_data;
+		      file_table[n_files].name = (char *) op_code_data;
 		      op_code_data += strlen ((char *) op_code_data) + 1;
 		      /* Directory index.  */
 		      READ_ULEB (file_table[n_files].directory_index,
@@ -5398,10 +5407,10 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		    }
 		  else if ((dir = file_table[file].directory_index) == 0)
 		    /* If directory index is 0, that means current directory.  */
-		    printf ("\n./%s:[++]\n", file_table[file].name);
+		    printf ("\n./%s:[++]\n", null_name (file_table[file].name));
 		  else if (directory_table == NULL || n_directories == 0)
 		    printf (_("\n [Use file %s in directory table entry %d]\n"),
-			    file_table[file].name, dir);
+			    null_name (file_table[file].name), dir);
 		  /* PR 20439 */
 		  else if (dir > n_directories)
 		    {
@@ -5412,11 +5421,13 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  else if (linfo.li_version >= 5)
 		    printf ("\n%s/%s:\n",
 			    /* The directory index starts counting at 0.  */
-			    directory_table[dir], file_table[file].name);
+			    null_name (directory_table[dir]),
+			    null_name (file_table[file].name));
 		  else
 		    printf ("\n%s/%s:\n",
 			    /* The directory index starts counting at 1.  */
-			    directory_table[dir - 1], file_table[file].name);
+			    null_name (directory_table[dir - 1]),
+			    null_name (file_table[file].name));
 		}
 		break;
 
