@@ -2973,21 +2973,16 @@ md_begin (void)
   op_hash = str_htab_create ();
 
   {
-    const insn_template *optab = i386_optab;
-    const insn_template *end = optab + ARRAY_SIZE (i386_optab);
+    const insn_template *const *sets = i386_op_sets;
+    const insn_template *const *end = sets + ARRAY_SIZE (i386_op_sets) - 1;
 
-    while (optab < end)
-      {
-	templates *core_optab = notes_alloc (sizeof (*core_optab));
-
-	core_optab->start = optab;
-	while (++optab < end)
-	  if (strcmp (optab->name, optab[-1].name) != 0)
-	    break;
-	core_optab->end = optab;
-	if (str_hash_insert (op_hash, optab[-1].name, core_optab, 0))
-	  as_fatal (_("duplicate %s"), optab[-1].name);
-      }
+    /* Type checks to compensate for the conversion through void * which
+       occurs during hash table insertion / lookup.  */
+    (void)(sets == &current_templates->start);
+    (void)(end == &current_templates->end);
+    for (; sets < end; ++sets)
+      if (str_hash_insert (op_hash, (*sets)->name, sets, 0))
+	as_fatal (_("duplicate %s"), (*sets)->name);
   }
 
   /* Initialize reg_hash hash table.  */
