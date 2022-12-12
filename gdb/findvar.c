@@ -593,20 +593,32 @@ language_defn::read_var_value (struct symbol *var,
       return v;
 
     case LOC_LABEL:
-      /* Put the constant back in target format.  */
-      v = allocate_value (type);
-      if (overlay_debugging)
-	{
-	  struct objfile *var_objfile = var->objfile ();
-	  addr = symbol_overlayed_address (var->value_address (),
-					   var->obj_section (var_objfile));
-	  store_typed_address (value_contents_raw (v).data (), type, addr);
-	}
-      else
-	store_typed_address (value_contents_raw (v).data (), type,
-			      var->value_address ());
-      VALUE_LVAL (v) = not_lval;
-      return v;
+      {
+	/* Put the constant back in target format.  */
+	if (overlay_debugging)
+	  {
+	    struct objfile *var_objfile = var->objfile ();
+	    addr = symbol_overlayed_address (var->value_address (),
+					     var->obj_section (var_objfile));
+	  }
+	else
+	  addr = var->value_address ();
+
+	/* First convert the CORE_ADDR to a function pointer type, this
+	   ensures the gdbarch knows what type of pointer we are
+	   manipulating when value_from_pointer is called.  */
+	type = builtin_type (var->arch ())->builtin_func_ptr;
+	v = value_from_pointer (type, addr);
+
+	/* But we want to present the value as 'void *', so cast it to the
+	   required type now, this will not change the values bit
+	   representation.  */
+	struct type *void_ptr_type
+	  = builtin_type (var->arch ())->builtin_data_ptr;
+	v = value_cast_pointers (void_ptr_type, v, 0);
+	VALUE_LVAL (v) = not_lval;
+	return v;
+      }
 
     case LOC_CONST_BYTES:
       if (is_dynamic_type (type))
