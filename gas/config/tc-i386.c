@@ -2973,31 +2973,20 @@ md_begin (void)
   op_hash = str_htab_create ();
 
   {
-    const insn_template *optab;
-    templates *core_optab;
+    const insn_template *optab = i386_optab;
+    const insn_template *end = optab + ARRAY_SIZE (i386_optab);
 
-    /* Setup for loop.  */
-    optab = i386_optab;
-    core_optab = notes_alloc (sizeof (*core_optab));
-    core_optab->start = optab;
-
-    while (1)
+    while (optab < end)
       {
-	++optab;
-	if (optab->name == NULL
-	    || strcmp (optab->name, (optab - 1)->name) != 0)
-	  {
-	    /* different name --> ship out current template list;
-	       add to hash table; & begin anew.  */
-	    core_optab->end = optab;
-	    if (str_hash_insert (op_hash, (optab - 1)->name, core_optab, 0))
-	      as_fatal (_("duplicate %s"), (optab - 1)->name);
+	templates *core_optab = notes_alloc (sizeof (*core_optab));
 
-	    if (optab->name == NULL)
-	      break;
-	    core_optab = notes_alloc (sizeof (*core_optab));
-	    core_optab->start = optab;
-	  }
+	core_optab->start = optab;
+	while (++optab < end)
+	  if (strcmp (optab->name, optab[-1].name) != 0)
+	    break;
+	core_optab->end = optab;
+	if (str_hash_insert (op_hash, optab[-1].name, core_optab, 0))
+	  as_fatal (_("duplicate %s"), optab[-1].name);
       }
   }
 

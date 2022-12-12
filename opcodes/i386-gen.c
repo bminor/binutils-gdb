@@ -1818,16 +1818,6 @@ process_i386_opcodes (FILE *table)
 
   fclose (fp);
 
-  fprintf (table, "  { NULL, 0, 0, 0,\n");
-
-  process_i386_opcode_modifier (table, "0", 0, 0, NULL, -1);
-
-  process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
-
-  fprintf (table, "    { ");
-  process_i386_operand_type (table, "0", stage_opcodes, "\t  ", -1);
-  fprintf (table, " } }\n");
-
   fprintf (table, "};\n");
 }
 
