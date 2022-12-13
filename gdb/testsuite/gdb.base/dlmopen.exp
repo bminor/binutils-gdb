@@ -21,10 +21,7 @@
 # We test that GDB shows the correct number of instances of the libraries
 # the test loaded while unloading them one-by-one.
 
-if { [skip_dlmopen_tests] } {
-    unsupported "target does not support dlmopen debugging"
-    return -1
-}
+require !skip_dlmopen_tests
 
 standard_testfile
 
