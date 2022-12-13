@@ -16,7 +16,7 @@
 # Verify that, using the MI, we can evaluate a simple Fortran Variable
 # Length Array (VLA).
 
-if { [skip_fortran_tests] } { return -1 }
+require !skip_fortran_tests
 
 load_lib mi-support.exp
 load_lib fortran.exp

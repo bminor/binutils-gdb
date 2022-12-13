@@ -24,9 +24,7 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
 }
 
 # It requires fortran.
-if {[skip_fortran_tests]} {
-    return 0
-}
+require !skip_fortran_tests
 
 standard_testfile .S
 

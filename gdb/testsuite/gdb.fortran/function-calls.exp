@@ -16,7 +16,7 @@
 # Exercise passing and returning arguments in Fortran. This test case
 # is based on the GNU Fortran Argument passing conventions.
 
-if {[skip_fortran_tests]} { return -1 }
+require !skip_fortran_tests
 
 standard_testfile ".f90"
 

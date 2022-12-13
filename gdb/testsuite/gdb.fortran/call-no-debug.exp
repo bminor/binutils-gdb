@@ -16,7 +16,7 @@
 # Test calling Fortran functions that are compiled without debug
 # information.
 
-if {[skip_fortran_tests]} { return -1 }
+require !skip_fortran_tests
 
 standard_testfile call-no-debug-prog.f90 call-no-debug-func.f90
 load_lib fortran.exp

@@ -15,7 +15,7 @@
 
 # Test "set debug expr 1" on Fortran expressions.
 
-if { [skip_fortran_tests] } { return -1 }
+require !skip_fortran_tests
 
 # Test relies on checking gdb debug output. Do not run if gdb debug is
 # enabled as any debug will be redirected to the log.

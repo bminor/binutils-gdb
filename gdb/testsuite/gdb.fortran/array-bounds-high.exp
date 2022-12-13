@@ -16,7 +16,7 @@
 # This file is part of the gdb testsuite.  It contains test to ensure that
 # array bounds accept LONGEST.
 
-if { [skip_fortran_tests] } { return -1 }
+require !skip_fortran_tests
 
 set testfile "array-bounds-high"
 standard_testfile .f90

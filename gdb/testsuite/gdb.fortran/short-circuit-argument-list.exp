@@ -17,7 +17,7 @@
 # calls and substring operations that are to be skipped due to short
 # circuiting.
 
-if {[skip_fortran_tests]} { return -1 }
+require !skip_fortran_tests
 
 standard_testfile ".f90"
 

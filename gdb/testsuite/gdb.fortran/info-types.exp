@@ -18,7 +18,7 @@
 load_lib "fortran.exp"
 load_lib "sym-info-cmds.exp"
 
-if { [skip_fortran_tests] } { return }
+require !skip_fortran_tests
 
 standard_testfile info-types.f90 info-types-2.f90
 

@@ -33,7 +33,7 @@
 # debug information) matches the size of the slice manually extracted
 # by GDB.
 
-if {[skip_fortran_tests]} { return -1 }
+require !skip_fortran_tests
 
 # This test relies on output from the inferior.
 if [target_info exists gdb,noinferiorio] {

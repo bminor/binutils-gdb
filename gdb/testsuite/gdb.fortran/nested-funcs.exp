@@ -16,7 +16,7 @@
 # This testcase is supposed to test DWARF static link which is usually
 # used together with nested functions.  
 
-if { [skip_fortran_tests] } { return -1 }
+require !skip_fortran_tests
 
 standard_testfile .f90
 load_lib "fortran.exp"
