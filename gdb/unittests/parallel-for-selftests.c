@@ -149,6 +149,45 @@ TEST (int n_threads)
   SELF_CHECK (counter == NUMBER);
 
 #undef NUMBER
+
+  /* Check that if there are fewer tasks than threads, then we won't
+     end up with a null result.  */
+  std::vector<std::unique_ptr<int>> intresults;
+  std::atomic<bool> any_empty_tasks (false);
+
+  FOR_EACH (1, 0, 1,
+	    [&] (int start, int end)
+	      {
+		if (start == end)
+		  any_empty_tasks = true;
+		return std::unique_ptr<int> (new int (end - start));
+	      });
+  SELF_CHECK (!any_empty_tasks);
+  SELF_CHECK (std::all_of (intresults.begin (),
+			   intresults.end (),
+			   [] (const std::unique_ptr<int> &entry)
+			     {
+			       return entry != nullptr;
+			     }));
+
+  /* The same but using the task size parameter.  */
+  intresults.clear ();
+  any_empty_tasks = false;
+  FOR_EACH (1, 0, 1,
+	    [&] (int start, int end)
+	      {
+		if (start == end)
+		  any_empty_tasks = true;
+		return std::unique_ptr<int> (new int (end - start));
+	      },
+	    task_size_one);
+  SELF_CHECK (!any_empty_tasks);
+  SELF_CHECK (std::all_of (intresults.begin (),
+			   intresults.end (),
+			   [] (const std::unique_ptr<int> &entry)
+			     {
+			       return entry != nullptr;
+			     }));
 }
 
 #endif /* FOR_EACH */
