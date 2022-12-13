@@ -35,9 +35,7 @@
 #   Test forward replay
 #
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile .c ms1.c
 

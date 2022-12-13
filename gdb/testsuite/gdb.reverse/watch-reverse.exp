@@ -18,9 +18,7 @@
 # with watchpoints.
 
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile
 

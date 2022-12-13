@@ -27,9 +27,7 @@
 # but to verify the correct output response to MI operations.
 #
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

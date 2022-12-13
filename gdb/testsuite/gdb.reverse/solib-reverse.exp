@@ -16,12 +16,7 @@
 # This file is part of the GDB testsuite.  It tests reverse debugging
 # with shared libraries.
 
-if ![supports_reverse] {
-    return
-}
-if {[skip_shlib_tests]} {
-    return
-}
+require supports_reverse !skip_shlib_tests
 
 standard_testfile
 set lib1file "shr1"

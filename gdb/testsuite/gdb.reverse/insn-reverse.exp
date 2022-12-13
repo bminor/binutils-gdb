@@ -13,12 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ![supports_reverse] {
-    return
-}
-
-# Check if start command is supported.
-require !use_gdb_stub
+require supports_reverse !use_gdb_stub
 
 standard_testfile
 

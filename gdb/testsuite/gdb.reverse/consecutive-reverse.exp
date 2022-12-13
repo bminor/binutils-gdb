@@ -16,9 +16,7 @@
 # This file is part of the GDB testsuite.  It tests stepping over
 # consecutive instructions in reverse.
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile
 

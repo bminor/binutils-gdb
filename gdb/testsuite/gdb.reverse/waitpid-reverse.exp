@@ -21,9 +21,7 @@
 # Also serves as regression test for gdb/19187 (recording across a
 # fork).
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile
 

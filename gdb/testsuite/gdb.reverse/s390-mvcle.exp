@@ -17,9 +17,7 @@
 # This test tests s390 MVCLE opcode for reverse execution.
 #
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 if { ! [istarget "s390*-*-*"] } {
     verbose "Skipping s390 MVCLE instruction recording tests."

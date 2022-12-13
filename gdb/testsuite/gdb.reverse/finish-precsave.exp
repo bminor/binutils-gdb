@@ -16,9 +16,7 @@
 # This file is part of the GDB testsuite.  It tests 'finish' with
 # reverse debugging.
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile finish-reverse.c
 set precsave [standard_output_file finish.precsave]

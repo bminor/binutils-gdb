@@ -18,10 +18,7 @@ if [target_info exists gdb,nosignals] {
     return
 }
 
-if ![supports_reverse] {
-    return
-}
-
+require supports_reverse
 
 gdb_exit
 gdb_start

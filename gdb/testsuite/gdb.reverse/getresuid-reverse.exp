@@ -19,9 +19,7 @@
 # This test tests getresuid/getresgid syscalls for reverse execution.
 #
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile
 

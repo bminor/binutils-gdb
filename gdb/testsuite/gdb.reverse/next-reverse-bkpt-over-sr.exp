@@ -40,9 +40,7 @@
 # addition to non-PowerPC systems.  On non-PowerPC systems, the GEP and LEP
 # are the same.
 
-if ![supports_reverse] {
-    return
-}
+require supports_reverse
 
 standard_testfile
 

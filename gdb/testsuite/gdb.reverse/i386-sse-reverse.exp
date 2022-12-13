@@ -19,10 +19,7 @@
 # This test tests some i386 general instructions for reverse execution.
 #
 
-if ![supports_reverse] {
-    return
-}
-
+require supports_reverse
 
 if {![istarget "*86*-*linux*"]} {
     verbose "Skipping i386 reverse tests."
