@@ -70,6 +70,12 @@ public:
     return result;
   }
 
+  /* Resize the results to N.  */
+  void resize (size_t n)
+  {
+    m_futures.resize (n);
+  }
+
 private:
   
   /* A vector of futures coming from the tasks run in the
@@ -106,6 +112,12 @@ public:
 	/* Use 'get' and not 'wait', to propagate any exception.  */
 	future.get ();
       }
+  }
+
+  /* Resize the results to N.  */
+  void resize (size_t n)
+  {
+    m_futures.resize (n);
   }
 
 private:
@@ -232,6 +244,24 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 	  end = j;
 	  remaining_size -= chunk_size;
 	}
+
+      /* This case means we don't have enough elements to really
+	 distribute them.  Rather than ever submit a task that does
+	 nothing, we short-circuit here.  */
+      if (first == end)
+	end = last;
+
+      if (end == last)
+	{
+	  /* We're about to dispatch the last batch of elements, which
+	     we normally process in the main thread.  So just truncate
+	     the result list here.  This avoids submitting empty tasks
+	     to the thread pool.  */
+	  count = i;
+	  results.resize (count);
+	  break;
+	}
+
       if (parallel_for_each_debug)
 	{
 	  debug_printf (_("Parallel for: elements on worker thread %i\t: %zu"),
