@@ -16,9 +16,7 @@
 # Test raw identifiers.
 
 load_lib rust-support.exp
-if {[skip_rust_tests]} {
-    return
-}
+require !skip_rust_tests
 
 set v [split [rust_compiler_version] .]
 if {[lindex $v 0] == 1 && [lindex $v 1] < 30} {

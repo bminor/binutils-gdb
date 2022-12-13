@@ -16,9 +16,7 @@
 # Test method calls.
 
 load_lib rust-support.exp
-if {[skip_rust_tests]} {
-    return
-}
+require !skip_rust_tests
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
