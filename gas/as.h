@@ -437,12 +437,20 @@ typedef struct _pseudo_type pseudo_typeS;
 #define PRINTF_WHERE_LIKE(FCN) \
   void FCN (const char *file, unsigned int line, const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 3, 4)))
+#define PRINTF_INDENT_LIKE(FCN) \
+  void FCN (const char *file, unsigned int line, unsigned int indent, \
+	    const char *format, ...) \
+    __attribute__ ((__format__ (__printf__, 4, 5)))
 
 #else /* __GNUC__ < 2 || defined(VMS) */
 
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
 #define PRINTF_WHERE_LIKE(FCN)	void FCN (const char *file, \
 					  unsigned int line, \
+					  const char *format, ...)
+#define PRINTF_INDENT_LIKE(FCN)	void FCN (const char *file, \
+					  unsigned int line, \
+					  unsigned int indent, \
 					  const char *format, ...)
 
 #endif /* __GNUC__ < 2 || defined(VMS) */
@@ -453,6 +461,7 @@ PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
+PRINTF_INDENT_LIKE (as_info_where);
 
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   signal_init (void);
@@ -487,7 +496,9 @@ void   cond_finish_check (int);
 void   cond_exit_macro (int);
 int    seen_at_least_1_file (void);
 void   app_pop (char *);
+void   as_report_context (void);
 const char * as_where (unsigned int *);
+const char * as_where_top (unsigned int *);
 const char * as_where_physical (unsigned int *);
 void   bump_line_counters (void);
 void   do_scrub_begin (int);

@@ -1,19 +1,49 @@
 [^:]*: Assembler messages:
-[^:]*:27: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\]'
-[^:]*:28: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]'
-[^:]*:29: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp\]'
-[^:]*:30: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp,#0\]'
-[^:]*:31: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0\]'
-[^:]*:32: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,#0\]'
-[^:]*:33: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#-4\]'
-[^:]*:34: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\],#4'
-[^:]*:35: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]!'
-[^:]*:38: Error: branch must be last instruction in IT block -- `ldreq r15,label'
-[^:]*:39: Error: branch must be last instruction in IT block -- `ldreq.w r15,label'
-[^:]*:40: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[pc,#-0\]'
-[^:]*:43: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,r1\]'
-[^:]*:44: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1\]'
-[^:]*:45: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1,LSL#2\]'
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\]'
+[^:]*:17: *Info: macro .*
+[^:]*:27: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]'
+[^:]*:17: *Info: macro .*
+[^:]*:28: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp\]'
+[^:]*:17: *Info: macro .*
+[^:]*:29: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp,#0\]'
+[^:]*:17: *Info: macro .*
+[^:]*:30: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0\]'
+[^:]*:21: *Info: macro .*
+[^:]*:31: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,#0\]'
+[^:]*:21: *Info: macro .*
+[^:]*:32: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#-4\]'
+[^:]*:17: *Info: macro .*
+[^:]*:33: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\],#4'
+[^:]*:17: *Info: macro .*
+[^:]*:34: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]!'
+[^:]*:17: *Info: macro .*
+[^:]*:35: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,label'
+[^:]*:17: *Info: macro .*
+[^:]*:38: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,label'
+[^:]*:21: *Info: macro .*
+[^:]*:39: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[pc,#-0\]'
+[^:]*:21: *Info: macro .*
+[^:]*:40: *Info: macro .*
+[^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,r1\]'
+[^:]*:17: *Info: macro .*
+[^:]*:43: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1\]'
+[^:]*:21: *Info: macro .*
+[^:]*:44: *Info: macro .*
+[^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1,LSL#2\]'
+[^:]*:21: *Info: macro .*
+[^:]*:45: *Info: macro .*
 [^:]*:48: Error: r15 not allowed here -- `ldrb pc,\[r0,#4\]'
 [^:]*:50: Error: r13 not allowed here -- `ldrb.w sp,\[r0,#4\]'
 [^:]*:51: Error: r15 not allowed here -- `ldrb.w pc,\[r0,#4\]'
