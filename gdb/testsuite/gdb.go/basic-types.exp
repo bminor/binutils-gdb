@@ -20,7 +20,7 @@
 
 load_lib "go.exp"
 
-if { [skip_go_tests] } { continue }
+require !skip_go_tests
 
 proc test_integer_literal_types_accepted {} {
     # Test various decimal values.
