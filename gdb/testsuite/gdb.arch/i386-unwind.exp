@@ -21,10 +21,7 @@
 # Test i386 unwinder.
 
 
-if {![is_x86_like_target]} {
-    verbose "Skipping i386 unwinder tests."
-    return
-}
+require is_x86_like_target
 
 standard_testfile
 

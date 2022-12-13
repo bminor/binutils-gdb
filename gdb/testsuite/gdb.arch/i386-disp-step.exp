@@ -18,10 +18,7 @@
 # Test i386 displaced stepping.
 
 
-if {![is_x86_like_target]} {
-    verbose "Skipping x86 displaced stepping tests."
-    return
-}
+require is_x86_like_target
 
 standard_testfile .S
 

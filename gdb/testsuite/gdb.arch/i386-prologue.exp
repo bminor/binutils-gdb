@@ -21,10 +21,7 @@
 # Test i386 prologue analyzer.
 
 
-if {![is_x86_like_target]} {
-    verbose "Skipping i386 prologue tests."
-    return
-}
+require is_x86_like_target
 
 set testfile "i386-prologue"
 set srcfile ${testfile}.c

@@ -16,10 +16,7 @@
 standard_testfile ".S"
 
 # We can only test this if the target is i686 or x86_64 with -m32
-if { ![is_x86_like_target] } {
-    verbose "Skipping $testfile.exp"
-    return
-}
+require is_x86_like_target
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1

@@ -17,11 +17,8 @@ load_lib dwarf.exp
 # Test DW_OP_stack_value and DW_OP_implicit_value.
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-require dwarf2_support
 # This test can only be run on x86 targets.
-if {![is_x86_like_target]} {
-    return 0  
-}
+require dwarf2_support is_x86_like_target
 
 standard_testfile .S
 

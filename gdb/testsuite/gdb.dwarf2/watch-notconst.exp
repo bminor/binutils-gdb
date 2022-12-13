@@ -17,12 +17,8 @@ load_lib dwarf.exp
 set test "watch-notconst"
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-require dwarf2_support
-
 # This test can only be run on x86 targets.
-if { ![is_x86_like_target] } {
-    return 0
-}
+require dwarf2_support is_x86_like_target
 
 if { [prepare_for_testing "failed to prepare" "${test}" \
       {watch-notconst.c watch-notconst2.S} {nodebug}] } {

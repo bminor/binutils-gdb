@@ -20,13 +20,7 @@
 #
 
 # This test suitable only for process record-replay
-require supports_process_record
-
-
-if {![is_x86_like_target]} {
-    verbose "Skipping i386 reverse tests."
-    return
-}
+require supports_process_record is_x86_like_target
 
 standard_testfile i386-reverse.c
 set precsave [standard_output_file i386.precsave]

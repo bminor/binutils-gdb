@@ -16,9 +16,7 @@
 # [RFA] DWARF frame unwinder executes one too many rows
 # http://sourceware.org/ml/gdb-patches/2012-07/msg00650.html
 
-if { ![is_x86_like_target] } {
-    return 0
-}
+require is_x86_like_target
 
 set testfile "i386-cfi-notcurrent"
 set srcfile ${testfile}.S

@@ -23,10 +23,7 @@
 # Test i386 unwinder.
 
 
-if {![is_x86_like_target]} {
-    verbose "Skipping i386 unwinder tests."
-    return
-}
+require is_x86_like_target
 
 set testfile "i386-gnu-cfi"
 set srcfilec ${testfile}.c
