@@ -19,7 +19,7 @@
 # source file "userdef.cc"
 #
 
-if { [skip_stl_tests] } { return }
+require !skip_stl_tests
 
 standard_testfile .cc
 

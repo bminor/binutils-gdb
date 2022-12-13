@@ -17,7 +17,7 @@
 # This file was written by Sue Kimura (sue_kimura@hp.com)
 # Rewritten by Michael Chastain (mec.gnu@mindspring.com)
 
-if { [skip_stl_tests] } { return }
+require !skip_stl_tests
 
 standard_testfile .cc
 

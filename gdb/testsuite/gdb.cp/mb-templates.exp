@@ -16,7 +16,7 @@
 # This test verifies that setting breakpoint on line in template
 # function will fire in all instantiations of that template.
 
-if { [skip_stl_tests] } { continue }
+require !skip_stl_tests
 
 
 standard_testfile .cc
