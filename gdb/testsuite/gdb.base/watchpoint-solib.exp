@@ -26,9 +26,7 @@ set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
 #
 
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 set testfile "watchpoint-solib"
 set libfile "watchpoint-solib-shr"

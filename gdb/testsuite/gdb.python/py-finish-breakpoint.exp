@@ -16,10 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-if {[skip_shlib_tests]} {
-	untested "skipping shared library tests"
-    return 0
-}
+require !skip_shlib_tests
 
 load_lib gdb-python.exp
 

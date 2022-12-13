@@ -19,11 +19,7 @@
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-require dwarf2_support
-
-if {[skip_shlib_tests]} {
-    return 0
-}
+require dwarf2_support !skip_shlib_tests
 
 standard_testfile .c -shlib.c -dw.S
 

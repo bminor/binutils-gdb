@@ -19,9 +19,7 @@
 
 load_lib mi-support.exp
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 standard_testfile mi-dprintf-pending.c
 

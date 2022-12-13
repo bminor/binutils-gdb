@@ -24,10 +24,7 @@
 # For completeness, also test when the JIT descriptor does not change
 # address between runs.
 
-if {[skip_shlib_tests]} {
-    untested "skipping shared library tests"
-    return -1
-}
+require !skip_shlib_tests
 
 standard_testfile
 

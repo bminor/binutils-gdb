@@ -23,9 +23,7 @@
 # also happens to exercise an issue with displaced stepping on amd64
 # when libdso1 is mapped at an address greater than 0xffffffff.
 
-if { [skip_shlib_tests] } {
-    return 0
-}
+require !skip_shlib_tests
 
 standard_testfile
 

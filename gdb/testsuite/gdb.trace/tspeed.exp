@@ -15,9 +15,7 @@
 
 load_lib "trace-support.exp"
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 # Do not run if gdbsever debug is enabled - the output file is many Gb.
 if [gdbserver_debug_enabled] {

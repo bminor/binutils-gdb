@@ -17,9 +17,7 @@
 
 load_lib gdb-python.exp
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 standard_testfile
 

@@ -29,9 +29,7 @@
 #prop lib shr2.sl
 
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 if { [is_remote host] } {
     gdb_remote_download host $srcdir/$subdir/ss.h

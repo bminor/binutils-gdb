@@ -14,9 +14,7 @@
 
 load_lib "trace-support.exp"
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 standard_testfile
 set executable $testfile

@@ -15,9 +15,7 @@
 
 standard_testfile
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 # Library file.
 set libname "${testfile}-lib"

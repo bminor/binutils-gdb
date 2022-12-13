@@ -16,9 +16,7 @@
 # Test 'info sources' when the test file makes use of a shared
 # library.
 
-if { [skip_shlib_tests] } {
-    return 0
-}
+require !skip_shlib_tests
 
 set is_remote_target [is_remote target]
 

@@ -23,9 +23,7 @@
 # in the source of the shlib, and "list" should display the source where
 # the program stopped.
 
-if { [skip_shlib_tests] } {
-    return 0
-}
+require !skip_shlib_tests
 
 standard_testfile .c -shlib.c
 set shlib_path [standard_output_file ${testfile}-lib.so]

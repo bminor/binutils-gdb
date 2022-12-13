@@ -108,9 +108,7 @@ foreach break_always_inserted { "on" "off" } {
 
 step_over_tracepoint "trace"
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 set libipa [get_in_proc_agent]
 set remote_libipa [gdb_load_shlib $libipa]

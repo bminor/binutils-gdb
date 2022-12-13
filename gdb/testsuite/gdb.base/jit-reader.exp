@@ -22,9 +22,7 @@ if { (![istarget x86_64-*-*] && ![istarget i?86-*-*]) || ![is_lp64_target] } {
     return -1;
 }
 
-if {[skip_shlib_tests]} {
-    return -1
-}
+require !skip_shlib_tests
 
 if { ![isnative] } {
     return -1

@@ -33,9 +33,7 @@ if {![is_elf_target]} {
     return 0
 }
 
-if [skip_shlib_tests] {
-    return 0
-}
+require !skip_shlib_tests
 
 set target_size TARGET_UNKNOWN
 if {[is_lp64_target]} {

@@ -16,10 +16,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi2"
 
-if {[skip_shlib_tests]} {
-    untested "skipping shared library tests"
-    return -1
-}
+require !skip_shlib_tests
 
 gdb_exit
 if [mi_gdb_start] {

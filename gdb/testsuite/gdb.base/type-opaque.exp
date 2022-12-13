@@ -15,9 +15,7 @@
 
 # Test resolving of an opaque type from the loaded shared library.
 
-if {[skip_shlib_tests]} {
-    return -1
-}
+require !skip_shlib_tests
 
 standard_testfile type-opaque-main.c
 

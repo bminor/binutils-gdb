@@ -366,10 +366,7 @@ if { $srcfile3 != "" } {
 
 # Shared library tests.
 
-if {[skip_shlib_tests]} {
-    untested "skipping shlib tests"
-    return;
-}
+require !skip_shlib_tests
 
 set libbin [standard_output_file ${testfile}-shlib.so]
 set binfile [standard_output_file ${testfile}-shlib]

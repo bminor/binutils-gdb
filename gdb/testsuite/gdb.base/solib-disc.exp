@@ -15,9 +15,7 @@
 
 # Test connecting and disconnecting at shared library events.
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 set gdbserver_reconnect_p 1
 if { [info proc gdb_reconnect] == "" } {

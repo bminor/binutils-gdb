@@ -19,9 +19,7 @@
 # on the libstc++.so DSO (which is how GDB was built and revealed the
 # bug), and vice versa.
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 # STATIC_BIN indicates whether to build the main binary with
 # -static-libgcc/-static-libstdc++.  STATIC_LIB is the same, but for

@@ -19,9 +19,7 @@
 # test running programs
 #
 
-if {[skip_shlib_tests]} {
-    return 0
-}
+require !skip_shlib_tests
 
 set testfile "unload"
 set libfile "unloadshr"

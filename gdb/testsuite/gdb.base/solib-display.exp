@@ -28,9 +28,7 @@
 # (and thus aren't affected by shared library unloading) are not
 # disabled prematurely.
 
-if { [skip_shlib_tests] } {
-    return 0
-}
+require !skip_shlib_tests
 
 # This test is currently not supported for stub targets, because it uses the
 # start command (through gdb_start_cmd).  In theory, it could be changed to
