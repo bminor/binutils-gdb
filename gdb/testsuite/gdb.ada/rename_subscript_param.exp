@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-if { [skip_ada_tests] } { return -1 }
+require !skip_ada_tests
 
 if { ![gnatmake_version_at_least 8] } {
     return -1

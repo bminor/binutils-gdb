@@ -17,7 +17,7 @@ require !skip_shlib_tests
 
 load_lib "ada.exp"
 
-if { [skip_ada_tests] } { return -1 }
+require !skip_ada_tests
 
 standard_ada_testfile foo
 

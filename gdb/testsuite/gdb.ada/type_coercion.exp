@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-if { [skip_ada_tests] } { return -1 }
+require !skip_ada_tests
 
 standard_ada_testfile assign
 

@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-if { [skip_ada_tests] } { return -1 }
+require !skip_ada_tests
 
 if {![gnat_runtime_has_debug_info]} {
     untested "GNAT runtime debuginfo required for this test"
