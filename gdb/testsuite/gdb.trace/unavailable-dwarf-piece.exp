@@ -16,9 +16,7 @@
 load_lib "trace-support.exp"
 load_lib dwarf.exp
 
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 standard_testfile .c -dbg.S
 

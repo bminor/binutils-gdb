@@ -14,9 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 load_lib dwarf.exp
 
-if {![dwarf2_support]} {
-    return 0  
-}
+require dwarf2_support
 
 standard_testfile .S
 set executable ${testfile}

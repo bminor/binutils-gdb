@@ -17,9 +17,7 @@ load_lib dwarf.exp
 # Test G++ 4.1 producing DW_TAG_namespace with DW_AT_name "::".
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    return 0  
-}
+require dwarf2_support
 
 standard_testfile .S
 

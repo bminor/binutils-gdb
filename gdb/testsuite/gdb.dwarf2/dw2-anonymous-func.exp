@@ -17,9 +17,7 @@ load_lib dwarf.exp
 # Minimal DWARF-2 unit test
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 standard_testfile .S
 set dwarf_srcfile "file1.txt"

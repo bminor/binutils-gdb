@@ -15,9 +15,7 @@
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-4 and use gas.
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 if { [use_gdb_stub] } {
     unsupported "test requires running"

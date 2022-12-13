@@ -17,9 +17,7 @@
 
 load_lib dwarf.exp
 
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 # Test with 32-bit and 64-bit DWARF.
 foreach_with_prefix is_64 {false true} {

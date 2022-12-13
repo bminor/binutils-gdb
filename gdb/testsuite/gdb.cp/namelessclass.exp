@@ -24,9 +24,7 @@ if {[skip_cplus_tests]} {
 }
 
 # This test can only be run on x86-like targets which support DWARF.
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
     return 0

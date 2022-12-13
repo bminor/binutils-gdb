@@ -22,7 +22,7 @@ load_lib dwarf.exp
 
 if { [skip_cplus_tests] } { return }
 
-if { ![dwarf2_support] } { return }
+require dwarf2_support
 
 standard_testfile .cc .S
 set asm_file [standard_output_file ${srcfile2}]

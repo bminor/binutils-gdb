@@ -17,10 +17,7 @@ load_lib dwarf.exp
 # Test with two aranges entries referring to the same CU.
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    verbose "Skipping $gdb_test_file_name."
-    return 0
-}
+require dwarf2_support
 
 standard_testfile .c -dw.S
 

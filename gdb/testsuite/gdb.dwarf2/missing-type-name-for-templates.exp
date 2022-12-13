@@ -21,9 +21,7 @@
 
 load_lib dwarf.exp
 
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 standard_testfile .cc .S
 

@@ -56,9 +56,7 @@ if [skip_shlib_tests] {
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if ![dwarf2_support] {
-    return 0
-}
+require dwarf2_support
 
 # gdb_test_file_name is the name of this file without the .exp
 # extension.  Use it to form basenames for the main program

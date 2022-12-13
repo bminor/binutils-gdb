@@ -17,9 +17,7 @@ load_lib dwarf.exp
 load_lib gdb-python.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 # This test can also only be run when we have python support in gdb,
 # but that test can only be done after gdb has started, below.

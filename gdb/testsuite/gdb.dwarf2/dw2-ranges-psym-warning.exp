@@ -18,10 +18,7 @@ load_lib dwarf.exp
 # Check psymtabs addrmaps generated from DW_AT_ranges of functions.
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    unsupported "dwarf2 support required for this test"
-    return 0
-}
+require dwarf2_support
 
 standard_testfile -main.c .c -dw.S
 

@@ -15,9 +15,7 @@
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    return 0  
-}
+require dwarf2_support
 
 if { [prepare_for_testing "failed to prepare" "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} {nodebug}] } {
     return -1

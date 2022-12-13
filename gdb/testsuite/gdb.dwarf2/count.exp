@@ -18,9 +18,7 @@
 load_lib dwarf.exp
 
 # Only run on targets which support dwarf and gas.
-if { ![dwarf2_support] } {
-    return 0
-}
+require dwarf2_support
 
 standard_testfile main.c .S
 

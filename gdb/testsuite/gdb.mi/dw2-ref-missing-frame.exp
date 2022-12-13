@@ -18,9 +18,7 @@ load_lib dwarf.exp
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 standard_testfile .S dw2-ref-missing-frame-func.c dw2-ref-missing-frame-main.c
 set objsfile [standard_output_file ${testfile}.o]

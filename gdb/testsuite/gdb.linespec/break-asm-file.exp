@@ -24,9 +24,7 @@ set asm_file1 break-asm-file1.s
 set asm_file0 break-asm-file0.s
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-if {![dwarf2_support]} {
-    return 0
-}
+require dwarf2_support
 
 if  {[gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile}1.o \
 	  object {debug nowarnings optimize=-O0}] != ""} {
