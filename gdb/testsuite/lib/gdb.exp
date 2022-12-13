@@ -9081,7 +9081,7 @@ proc require { args } {
 	    set fn $arg
 	}
 	if {$ok != !![uplevel 1 $fn]} {
-	    untested "require failed: $arg"
+	    unsupported "require failed: $arg"
 	    return -code return 0
 	}
     }
