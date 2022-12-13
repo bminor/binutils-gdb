@@ -617,7 +617,7 @@ enable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
 
-  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  parse_probe_linespec (arg, &provider, &probe_name, &objname);
 
   std::vector<bound_probe> probes
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
@@ -652,7 +652,7 @@ disable_probes_command (const char *arg, int from_tty)
 {
   std::string provider, probe_name, objname;
 
-  parse_probe_linespec ((const char *) arg, &provider, &probe_name, &objname);
+  parse_probe_linespec (arg, &provider, &probe_name, &objname);
 
   std::vector<bound_probe> probes
     = collect_probes (objname, provider, probe_name, &any_static_probe_ops);
