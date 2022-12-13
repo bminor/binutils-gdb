@@ -26,7 +26,7 @@
 # directives.
 
 # Check if starti command is supported.
-require use_gdb_stub 0
+require !use_gdb_stub
 
 load_lib dwarf.exp
 

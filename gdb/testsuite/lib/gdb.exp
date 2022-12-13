@@ -9061,41 +9061,30 @@ gdb_caching_proc have_avx {
     return $status
 }
 
-# Called as either:
-# - require EXPR VAL
-# - require EXPR OP VAL
-# In the first case, OP is ==.
+# Called as
+# - require ARG...
 #
-# Require EXPR OP VAL, where EXPR is evaluated in caller context.  If not,
-# return in the caller's context.
+# ARG can either be a name, or of the form !NAME.
+#
+# Each name is a proc to evaluate in the caller's context.  It returns
+# a boolean, and a "!" means to invert the result.  If this is
+# nonzero, all is well.  If it is zero, an "untested" is emitted and
+# this proc causes the caller to return.
 
-proc require { fn arg1 {arg2 ""} } {
-    if { $arg2 == "" } {
-	set op ==
-	set val $arg1
-    } else {
-	set op $arg1
-	set val $arg2
-    }
-    set res [uplevel 1 $fn]
-    if { [expr $res $op $val] } {
-	return
-    }
-
-    switch "$fn $op $val" {
-	"gdb_skip_xml_test == 0" { set msg "missing xml support" }
-	"ensure_gdb_index $binfile != -1" -
-	"ensure_gdb_index $binfile -dwarf-5 != -1" {
-	    set msg "Couldn't ensure index in binfile"
+proc require { args } {
+    foreach arg $args {
+	if {[string index $arg 0] == "!"} {
+	    set ok 0
+	    set fn [string range $arg 1 end]
+	} else {
+	    set ok 1
+	    set fn $arg
 	}
-	"use_gdb_stub == 0" {
-	    set msg "Remote stub used"
+	if {$ok != !![uplevel 1 $fn]} {
+	    untested "require failed: $arg"
+	    return -code return 0
 	}
-	default { set msg "$fn != $val" }
     }
-
-    untested $msg
-    return -code return 0
 }
 
 # Wait up to ::TIMEOUT seconds for file PATH to exist on the target system.

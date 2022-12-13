@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Valgrind gdbserver requires gdb with xml support.
-require gdb_skip_xml_test 0
+require !gdb_skip_xml_test
 
 load_lib valgrind.exp
 

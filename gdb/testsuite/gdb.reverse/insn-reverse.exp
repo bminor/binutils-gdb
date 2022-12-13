@@ -18,7 +18,7 @@ if ![supports_reverse] {
 }
 
 # Check if start command is supported.
-require use_gdb_stub 0
+require !use_gdb_stub
 
 standard_testfile
 

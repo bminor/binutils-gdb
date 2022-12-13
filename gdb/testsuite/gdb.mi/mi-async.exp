@@ -26,7 +26,7 @@ if {!([isnative] && [istarget *-linux*])} {
 }
 
 # Check if start command is supported.
-require use_gdb_stub 0
+require !use_gdb_stub
 
 # The plan is for async mode to become the default but toggle for now.
 set saved_gdbflags $GDBFLAGS
