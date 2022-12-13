@@ -18,7 +18,7 @@
 
 load_lib "d-support.exp"
 
-if { [skip_d_tests] } { continue }
+require !skip_d_tests
 
 proc test_builtin_d_types_accepted {} {
     # Test types are recognised.
