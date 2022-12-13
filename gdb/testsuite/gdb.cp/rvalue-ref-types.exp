@@ -16,7 +16,7 @@
 # Tests for reference types with short type variables in GDB, based on
 # gdb.cp/ref-types.exp.
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

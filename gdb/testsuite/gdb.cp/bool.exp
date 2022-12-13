@@ -20,7 +20,7 @@
 
 # Test returning bool.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 
 standard_testfile .cc

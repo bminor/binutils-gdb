@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile hang1.cc hang2.cc hang3.cc
 

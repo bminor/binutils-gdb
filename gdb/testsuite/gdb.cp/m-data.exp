@@ -18,7 +18,7 @@
 
 # This file is part of the gdb testsuite
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 #
 # test running programs

@@ -176,7 +176,7 @@
 #
 
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile psmang1.cc psmang2.cc
 

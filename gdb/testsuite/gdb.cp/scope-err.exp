@@ -16,9 +16,7 @@
 # Tests for linespec errors with C++.
 # Derived from gdb.linespec/ls-errs.exp.
 
-if {[skip_cplus_tests]} {
-    return
-}
+require !skip_cplus_tests
 
 standard_testfile .cc
 set exefile $testfile

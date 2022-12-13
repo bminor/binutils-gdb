@@ -16,7 +16,7 @@
 # This file is part of the gdb testsuite.
 # It tests various aspects of iostream that have caused problems for gdb.
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

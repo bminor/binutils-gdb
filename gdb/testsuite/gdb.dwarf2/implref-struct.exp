@@ -16,9 +16,7 @@
 # Test a C++ reference marked with DW_OP_GNU_implicit_pointer.
 # The referenced value is a global struct whose location is a DW_OP_addr.
 
-if [skip_cplus_tests] {
-    return
-}
+require !skip_cplus_tests
 
 load_lib dwarf.exp
 

@@ -21,8 +21,7 @@
 #
 # PR c++/9489.
 
-if { [skip_cplus_tests] } { continue }
-if { [skip_shlib_tests] } { continue }
+require !skip_cplus_tests !skip_shlib_tests
 
 standard_testfile .cc gdb2384-base.cc
 

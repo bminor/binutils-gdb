@@ -16,7 +16,7 @@
 # Tests for rvalue reference parameters of types and their subtypes in GDB,
 # based on gdb.cp/ref-params.exp.
 
-if {[skip_cplus_tests]} { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

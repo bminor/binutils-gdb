@@ -15,7 +15,7 @@
 #
 # Check if unsigned typedef are handled correctly with typed enums.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

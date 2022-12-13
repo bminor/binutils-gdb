@@ -22,10 +22,7 @@ set exefile $testfile
 set baseone base/one/thefile.cc
 set basetwo base/two/thefile.cc
 
-if {[skip_cplus_tests]} {
-    unsupported "skipping c++ tests"
-    return
-}
+require !skip_cplus_tests
 
 if {[prepare_for_testing "failed to prepare" $exefile \
 	 [list $srcfile $baseone $basetwo] \

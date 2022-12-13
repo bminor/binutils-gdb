@@ -15,10 +15,7 @@
 
 # Tests for explicit linespecs
 
-if {[skip_cplus_tests]} {
-    unsupported "skipping C++ tests"
-    return
-}
+require !skip_cplus_tests
 
 standard_testfile .cc
 set exefile $testfile

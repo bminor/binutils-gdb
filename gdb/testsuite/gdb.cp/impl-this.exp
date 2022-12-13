@@ -18,7 +18,7 @@
 # Test expressions which assume an implicit "this" with a qualified
 # name.
 
-if {[skip_cplus_tests]} { return }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

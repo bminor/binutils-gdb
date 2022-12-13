@@ -17,7 +17,7 @@
 
 # This contains tests for breakpoints in C++.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 #
 # test running programs

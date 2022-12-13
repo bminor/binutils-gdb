@@ -15,7 +15,7 @@
 #
 # Make sure that inheritance through a typedef is well handled.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

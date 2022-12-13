@@ -21,7 +21,7 @@
 # multiple locations and breakpoints are found in
 # gdb.base/ena-dis-br.exp.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

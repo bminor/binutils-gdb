@@ -18,7 +18,7 @@
 # This tests that C++ alignof works in gdb, and that it agrees with
 # the compiler.
 
-if {[skip_cplus_tests]} { continue }
+require !skip_cplus_tests
 
 # The types we're going to test.
 

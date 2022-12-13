@@ -30,7 +30,7 @@ proc add {var name params expected {kind {func}}} {
     lappend result [list "${method_name}($params)" $expect]
 }
 
-if {[skip_cplus_tests]} { return }
+require !skip_cplus_tests
 
 # Tests for c++/12266 et al
 standard_testfile .cc

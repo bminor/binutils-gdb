@@ -15,10 +15,7 @@
 
 standard_testfile lspec.cc
 
-if {[skip_cplus_tests]} {
-    unsupported "skipping C++ tests"
-    return
-}
+require !skip_cplus_tests
 
 set opts {debug c++}
 set objfile1 [standard_output_file ${testfile}one.o]

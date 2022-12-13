@@ -15,7 +15,7 @@
 
 # Make sure printing virtual base class data member works correctly (PR16841)
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

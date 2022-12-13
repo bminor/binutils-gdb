@@ -15,7 +15,7 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

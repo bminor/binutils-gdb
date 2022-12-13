@@ -19,7 +19,7 @@
 # passed in registers.  This test passes so many structures it is
 # hoped that some will need to be placed onto the stack.
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

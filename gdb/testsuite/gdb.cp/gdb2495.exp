@@ -31,7 +31,7 @@
 
 # This test is largely based of gdb.base/callfuncs.exp.
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping gdb2495.exp because of nosignals."

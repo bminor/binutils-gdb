@@ -28,7 +28,7 @@ set nl "\[\r\n\]+"
 # Start program.
 
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 load_lib "cp-support.exp"
 

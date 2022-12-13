@@ -21,7 +21,7 @@
 
 set vhn "\\$\[0-9\]+"
 
-if { [skip_cplus_tests] } { return }
+require !skip_cplus_tests
 
 
 standard_testfile .cc

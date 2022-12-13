@@ -25,10 +25,7 @@
 # - have inlined copy ctor
 # - have deleted destructor
 
-if {[skip_cplus_tests]} {
-    untested "c++ test skipped"
-    return
-}
+require !skip_cplus_tests
 
 standard_testfile .cc
 

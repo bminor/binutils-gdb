@@ -17,7 +17,7 @@
 
 # Test printing c++ pointer-to-member.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

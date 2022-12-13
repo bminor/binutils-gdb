@@ -15,7 +15,7 @@
 
 # Regression test for type printing of private nested classes.
 
-if {[skip_cplus_tests]} { continue }
+require !skip_cplus_tests
 
 load_lib "cp-support.exp"
 

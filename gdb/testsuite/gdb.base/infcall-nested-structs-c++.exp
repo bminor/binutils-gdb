@@ -16,9 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Only test C++ if we are able.
-if { [skip_cplus_tests] } {
-    return -1
-}
+require !skip_cplus_tests
 set lang c++
 
 source $srcdir/$subdir/infcall-nested-structs.exp.tcl

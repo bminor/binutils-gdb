@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-if { [skip_cplus_tests] } { continue }
+require !skip_cplus_tests
 
 standard_testfile .cc
 

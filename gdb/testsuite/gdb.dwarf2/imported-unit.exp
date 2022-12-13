@@ -22,9 +22,7 @@
 # on specific compiler versions or use of optimization switches, in
 # this case -flto.
 
-if [skip_cplus_tests] {
-    return
-}
+require !skip_cplus_tests
 
 load_lib dwarf.exp
 

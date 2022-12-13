@@ -68,10 +68,7 @@
 # The companion test file pass-by-ref-2.exp also contains
 # manually-written cases.
 
-if {[skip_cplus_tests]} {
-    untested "c++ test skipped"
-    return
-}
+require !skip_cplus_tests
 
 # The program source is generated in the output directory.
 # We use standard_testfile here to set convenience variables.
