@@ -17,10 +17,7 @@
 
 # Skip this test if target does not support recording.
 
-if { ![supports_process_record] } {
-    untested "skipping recording tests"
-    return -1
-}
+require supports_process_record
 
 load_lib gdb-python.exp
 

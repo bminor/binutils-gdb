@@ -36,9 +36,7 @@
 #
 
 # This test suitable only for process record-replay
-if ![supports_process_record] {
-    return
-}
+require supports_process_record
 
 standard_testfile machinestate.c ms1.c
 set precsave [standard_output_file machinestate.precsave]
@@ -57,10 +55,8 @@ set endmain   [gdb_get_line_number " end main "   $srcfile]
 
 runto_main
 
-if [supports_process_record] {
-    # Activate process record/replay
-    gdb_test_no_output "record" "turn on process record"
-}
+# Activate process record/replay
+gdb_test_no_output "record" "turn on process record"
 
 gdb_test "break $endmain" \
     "Breakpoint $decimal at .*$srcfile, line $endmain\." \

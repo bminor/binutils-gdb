@@ -17,12 +17,7 @@
 # with shared libraries and a logfile.
 
 # This test suitable only for process record-replay
-if ![supports_process_record] {
-    return
-}
-if {[skip_shlib_tests]} {
-    return
-}
+require supports_process_record !skip_shlib_tests
 
 standard_testfile solib-reverse.c
 set precsave [standard_output_file solib.precsave]
@@ -77,10 +72,8 @@ gdb_load_shlib $library2
 
 runto_main
 
-if [supports_process_record] {
-    # Activate process record/replay
-    gdb_test_no_output "record" "turn on process record"
-}
+# Activate process record/replay
+gdb_test_no_output "record" "turn on process record"
 
 set end_of_main [gdb_get_line_number "end of main" ]
 gdb_test "break $end_of_main" \
