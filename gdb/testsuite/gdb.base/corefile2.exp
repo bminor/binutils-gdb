@@ -18,9 +18,7 @@
 # coremaker2.c for details.
 
 # are we on a target board
-if {![isnative]} {
-    return
-}
+require isnative
 
 # Some of these tests will only work on GNU/Linux due to the
 # fact that Linux core files includes a section describing

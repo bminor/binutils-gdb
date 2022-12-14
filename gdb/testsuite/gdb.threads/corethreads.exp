@@ -15,7 +15,8 @@
 
 # Are we on a target board?  And non-Linux targets seem to identify the thread
 # differently.
-if {![isnative] || ![istarget "*-*-linux*"]} {
+require isnative
+if {![istarget "*-*-linux*"]} {
     return
 }
 

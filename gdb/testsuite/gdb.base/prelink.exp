@@ -19,7 +19,8 @@
 # This file was written by Alexandre Oliva <aoliva@redhat.com>
 
 
-if { ![isnative] || [is_remote host] || [skip_shlib_tests]} {
+require isnative
+if { [is_remote host] || [skip_shlib_tests]} {
     return
 }
 

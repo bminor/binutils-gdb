@@ -20,10 +20,7 @@
 # Are we on a target board?  As of 2004-02-12, GDB didn't have a
 # mechanism that would let it efficiently access a remote corefile.
 
-if {![isnative]} {
-    untested "remote system"
-    return
-}
+require isnative
 
 # Can the system run this test (in particular support sparse
 # corefiles)?  On systems that lack sparse corefile support this test

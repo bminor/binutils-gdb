@@ -21,7 +21,8 @@
 # mi_run_cmd, it ignores whatever target the rest of GDB testsuite is
 # using, and always tries to run natively.  So, don't do anything unless
 # we're actually testing native.
-if {!([isnative] && [istarget *-linux*])} {
+require isnative
+if {![istarget *-linux*]} {
   return
 }
 

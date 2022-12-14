@@ -18,9 +18,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if {![isnative]} {
-    return
-}
+require isnative
 
 standard_testfile
 

@@ -17,9 +17,7 @@
 
 
 # are we on a target board
-if {![isnative]} {
-    return
-}
+require isnative
 
 standard_testfile coremaker.c
 

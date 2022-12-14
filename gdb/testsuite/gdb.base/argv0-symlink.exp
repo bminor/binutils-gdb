@@ -20,10 +20,7 @@
 # Therefore, it can't work reliably on anything other than configurations 
 # where build/host/target are all the same.
 
-if { ![isnative] } {
-    unsupported "argv0-symlink.exp not supported on non-native target"
-    return -1
-}
+require isnative
 
 if { [is_remote host] } {
     unsupported "argv0-symlink.exp not supported on remote host"
