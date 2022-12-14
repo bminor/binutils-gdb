@@ -15,10 +15,7 @@
 
 standard_testfile .c
 
-if { ![can_single_step_to_signal_handler] } {
-    untested "cannot single-step to signal handler"
-    return
-}
+require can_single_step_to_signal_handler
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping kill-after-signal.exp because of nosignals."
