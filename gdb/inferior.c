@@ -33,6 +33,7 @@
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
 #include "target-descriptions.h"
+#include "target-connection.h"
 #include "readline/tilde.h"
 #include "progspace-and-thread.h"
 #include "gdbsupport/buildargv.h"
@@ -482,21 +483,13 @@ static std::string
 uiout_field_connection (process_stratum_target *proc_target)
 {
   if (proc_target == NULL)
-    {
-      return {};
-    }
-  else if (proc_target->connection_string () != NULL)
-    {
-      return string_printf ("%d (%s %s)",
-			    proc_target->connection_number,
-			    proc_target->shortname (),
-			    proc_target->connection_string ());
-    }
+    return {};
   else
     {
-      return string_printf ("%d (%s)",
-			    proc_target->connection_number,
-			    proc_target->shortname ());
+      std::string conn_str
+	= make_target_connection_string (proc_target).c_str ();
+      return string_printf ("%d (%s)", proc_target->connection_number,
+			    conn_str.c_str ());
     }
 }
 
@@ -823,17 +816,10 @@ switch_to_inferior_and_push_target (inferior *new_inf,
   if (!no_connection && proc_target != NULL)
     {
       new_inf->push_target (proc_target);
-      if (proc_target->connection_string () != NULL)
-	gdb_printf (_("Added inferior %d on connection %d (%s %s)\n"),
-		    new_inf->num,
-		    proc_target->connection_number,
-		    proc_target->shortname (),
-		    proc_target->connection_string ());
-      else
-	gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
-		    new_inf->num,
-		    proc_target->connection_number,
-		    proc_target->shortname ());
+      gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
+		  new_inf->num,
+		  proc_target->connection_number,
+		  make_target_connection_string (proc_target).c_str ());
     }
   else
     gdb_printf (_("Added inferior %d\n"), new_inf->num);
