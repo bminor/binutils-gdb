@@ -18741,8 +18741,9 @@ cooked_index_functions::expand_symtabs_matching
     {
       std::vector<gdb::string_view> name_vec
 	= lookup_name_without_params.split_name (lang);
+      std::string last_name = gdb::to_string (name_vec.back ());
 
-      for (const cooked_index_entry *entry : table->find (name_vec.back (),
+      for (const cooked_index_entry *entry : table->find (last_name,
 							  completing))
 	{
 	  QUIT;
