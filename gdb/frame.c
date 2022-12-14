@@ -1929,22 +1929,23 @@ select_frame (frame_info_ptr fi)
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
-frame_info_ptr
-create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
+static frame_info_ptr
+create_new_frame (frame_id id)
 {
-  frame_info *fi;
+  gdb_assert (id.user_created_p);
+  gdb_assert (id.stack_status == frame_id_stack_status::FID_STACK_VALID);
+  gdb_assert (id.code_addr_p);
 
-  frame_debug_printf ("addr=%s, pc=%s", hex_string (addr), hex_string (pc));
+  frame_debug_printf ("stack_addr=%s, core_addr=%s",
+		      hex_string (id.stack_addr), hex_string (id.code_addr));
 
   /* Avoid creating duplicate frames, search for an existing frame with that id
      in the stash.  */
-  frame_id id = frame_id_build (addr, pc);
-  id.user_created_p = 1;
   frame_info_ptr frame = frame_stash_find (id);
   if (frame != nullptr)
     return frame;
 
-  fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame_info *fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_program_space,
 				    get_current_regcache ());
@@ -1953,7 +1954,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      Do this before looking for this frame's unwinder.  A sniffer is
      very likely to read this, and the corresponding unwinder is
      entitled to rely that the PC doesn't magically change.  */
-  fi->next->prev_pc.value = pc;
+  fi->next->prev_pc.value = id.code_addr;
   fi->next->prev_pc.status = CC_VALUE;
 
   /* We currently assume that frame chain's can't cross spaces.  */
@@ -1973,6 +1974,15 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   frame_debug_printf ("  -> %s", fi->to_string ().c_str ());
 
   return frame_info_ptr (fi);
+}
+
+frame_info_ptr
+create_new_frame (CORE_ADDR stack, CORE_ADDR pc)
+{
+  frame_id id = frame_id_build (stack, pc);
+  id.user_created_p = 1;
+
+  return create_new_frame (id);
 }
 
 /* Return the frame that THIS_FRAME calls (NULL if THIS_FRAME is the
