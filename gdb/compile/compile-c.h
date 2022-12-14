@@ -17,6 +17,7 @@
 #ifndef COMPILE_COMPILE_C_H
 #define COMPILE_COMPILE_C_H
 
+#include "compile/compile.h"
 #include "gdbsupport/enum-flags.h"
 #include "gcc-c-plugin.h"
 

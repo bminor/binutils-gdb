@@ -17,6 +17,7 @@
 #ifndef COMPILE_COMPILE_CPLUS_H
 #define COMPILE_COMPILE_CPLUS_H
 
+#include "compile/compile.h"
 #include "gdbsupport/enum-flags.h"
 #include "gcc-cp-plugin.h"
 #include "symtab.h"

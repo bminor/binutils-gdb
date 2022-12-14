@@ -26,6 +26,7 @@ struct language_arch_info;
 struct type_print_options;
 struct parser_state;
 
+#include "compile/compile.h"
 #include "value.h"
 #include "macroexp.h"
 #include "gdbsupport/enum-flags.h"

@@ -46,7 +46,6 @@
 #include "c-lang.h"
 #include <algorithm>
 #include "gdbarch.h"
-#include "compile/compile-internal.h"
 
 static void set_range_case (void);
 

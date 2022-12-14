@@ -36,7 +36,6 @@
 #include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"
-#include "compile/compile-internal.h"
 #include "c-exp.h"
 
 /* Given a C string type, STR_TYPE, return the corresponding target
