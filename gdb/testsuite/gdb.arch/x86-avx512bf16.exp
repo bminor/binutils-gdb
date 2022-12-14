@@ -18,10 +18,7 @@
 
 # Test bfloat16 support in AVX512 registers
 
-if { [skip_avx512bf16_tests] } {
-    unsupported "target does not support AVX512BF16"
-    return -1
-}
+require !skip_avx512bf16_tests
 
 standard_testfile
 

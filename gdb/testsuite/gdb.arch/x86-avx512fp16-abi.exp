@@ -15,10 +15,7 @@
 
 # Test support for _Float16 parameters and return values.
 
-if { [skip_avx512fp16_tests] } {
-    unsupported "target does not support AVX512fp16"
-    return -1
-}
+require !skip_avx512fp16_tests
 
 standard_testfile
 
