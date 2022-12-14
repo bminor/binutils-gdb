@@ -1206,7 +1206,8 @@ arg_lookup (char **s, const char *const *array, size_t size, unsigned *regnop)
     return false;
 
   for (i = 0; i < size; i++)
-    if (array[i] != NULL && strncmp (array[i], *s, len) == 0)
+    if (array[i] != NULL && strncmp (array[i], *s, len) == 0
+	&& array[i][len] == '\0')
       {
 	*regnop = i;
 	*s += len;
