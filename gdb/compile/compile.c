@@ -74,6 +74,19 @@ struct symbol_error
   char *message;
 };
 
+/* An object that maps a gdb type to a gcc type.  */
+
+struct type_map_instance
+{
+  /* The gdb type.  */
+
+  struct type *type;
+
+  /* The corresponding gcc type handle.  */
+
+  gcc_type gcc_type_handle;
+};
+
 /* Hash a type_map_instance.  */
 
 static hashval_t
