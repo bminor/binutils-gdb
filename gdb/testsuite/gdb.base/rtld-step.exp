@@ -35,9 +35,7 @@
 # or for non-ELF targets.  (We're not really testing or building
 # shared libraries here, but having a RTLD implies having shared
 # libraries on the target.)
-if { [skip_shlib_tests] || ![is_elf_target] } {
-    return 0
-}
+require !skip_shlib_tests is_elf_target
 
 # (Pretend) RTLD file names and flags:
 set rtld_basename ${::gdb_test_file_name}-rtld

@@ -29,9 +29,7 @@
 # 13) Check that the execution can continue without error.
 # 14) Regression test for a stale breakpoints bug.
 
-if {![is_elf_target]} {
-    return 0
-}
+require is_elf_target
 
 require !skip_shlib_tests
 
