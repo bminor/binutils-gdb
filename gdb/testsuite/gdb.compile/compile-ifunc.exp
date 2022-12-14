@@ -15,9 +15,7 @@
 
 load_lib compile-support.exp
 
-if {[skip_ifunc_tests]} {
-    return 0
-}
+require !skip_ifunc_tests
 
 standard_testfile
 

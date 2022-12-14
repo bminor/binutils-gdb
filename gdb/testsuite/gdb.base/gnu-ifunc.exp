@@ -13,11 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require !skip_shlib_tests
-
-if {[skip_ifunc_tests]} {
-    return 0
-}
+require !skip_shlib_tests !skip_ifunc_tests
 
 standard_testfile .c
 set staticexecutable ${testfile}-static
