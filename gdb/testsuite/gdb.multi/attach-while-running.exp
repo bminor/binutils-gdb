@@ -36,10 +36,7 @@
 
 standard_testfile
 
-if [use_gdb_stub] {
-    unsupported "test requires running"
-    return
-}
+require !use_gdb_stub
 
 if { [build_executable "failed to prepare" ${testfile} ${srcfile}] } {
     return

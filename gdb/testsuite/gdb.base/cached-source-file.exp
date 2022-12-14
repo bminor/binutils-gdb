@@ -24,7 +24,8 @@
 standard_testfile
 
 # Only run on native boards.
-if { [use_gdb_stub] || [target_info gdb_protocol] == "extended-remote" } {
+require !use_gdb_stub
+if { [target_info gdb_protocol] == "extended-remote" } {
     return -1
 }
 

@@ -43,9 +43,7 @@ require !skip_shlib_tests
 # This is because the initial stop is done before the shared libraries are
 # loaded.
 
-if { [use_gdb_stub] } {
-    return 0
-}
+require !use_gdb_stub
 
 # Library file.
 set libname "solib-display-lib"

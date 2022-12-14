@@ -20,10 +20,7 @@
 # 'set detach-on-fork [on,off]' are the correct ones.
 
 # This test relies on "run", so it cannot run on target remote stubs.
-if { [use_gdb_stub] } {
-    untested "not supported on target remote stubs"
-    return
-}
+require !use_gdb_stub
 
 # Test relies on checking follow-fork output. Do not run if gdb debug is
 # enabled as it will be redirected to the log.

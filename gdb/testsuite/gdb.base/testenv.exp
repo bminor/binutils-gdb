@@ -20,9 +20,7 @@
 
 # Can't pass environment variables to the inferior if when we connect,
 # the inferior is already running.
-if [use_gdb_stub] {
-    return
-}
+require !use_gdb_stub
 
 standard_testfile .c
 

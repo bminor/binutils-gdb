@@ -29,9 +29,7 @@
 # simpler to do, so we test with both editing on and off.
 
 # The test uses the "attach" command.
-if [use_gdb_stub] {
-    return
-}
+require !use_gdb_stub
 
 standard_testfile
 

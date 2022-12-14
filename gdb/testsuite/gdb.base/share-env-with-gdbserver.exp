@@ -16,10 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This test doesn't make sense on native-gdbserver.
-if { [use_gdb_stub] } {
-    untested "not supported"
-    return
-}
+require !use_gdb_stub
 
 standard_testfile
 

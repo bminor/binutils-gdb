@@ -52,10 +52,7 @@ with_test_prefix "single-inferior" {
 
 # For the following tests, multiple inferiors are needed, therefore
 # non-extended gdbserver is not supported.
-if [use_gdb_stub] {
-    untested "using gdb stub"
-    return
-}
+require !use_gdb_stub
 
 # Test with multiple inferiors.  This time, since we restart inferior
 # 1 while inferior 2 still has threads, then the new thread 1.1 should

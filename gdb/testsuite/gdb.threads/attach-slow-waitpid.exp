@@ -37,8 +37,8 @@
 # during the attach phase.
 
 # This test only works on Linux
-if { ![isnative] || [is_remote host] || [use_gdb_stub]
-     || ![istarget *-linux*] } {
+require !use_gdb_stub
+if { ![isnative] || [is_remote host] || ![istarget *-linux*] } {
     return
 }
 

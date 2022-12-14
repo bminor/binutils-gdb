@@ -22,10 +22,7 @@ standard_testfile
 # Multiple inferiors are needed, therefore both native and extended
 # gdbserver modes are supported.  Only non-extended gdbserver is not
 # supported.
-if [use_gdb_stub] {
-    untested "using gdb stub"
-    return
-}
+require !use_gdb_stub
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {pthreads debug}] } {
     return -1

@@ -18,9 +18,7 @@ standard_testfile
 require support_displaced_stepping
 
 # The testfile uses "run".  The real bug happened only for ![is_remote target].
-if [use_gdb_stub] {
-    return 0
-}
+require !use_gdb_stub
 
 save_vars { GDBFLAGS } {
     set GDBFLAGS "$GDBFLAGS -ex \"set non-stop on\""

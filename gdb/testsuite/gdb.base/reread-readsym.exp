@@ -38,9 +38,7 @@ proc generate_cmd_file {gdbfile binfile} {
     close $ofd
 }
 
-if [use_gdb_stub] {
-    return 0
-}
+require !use_gdb_stub
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1

@@ -23,9 +23,7 @@ if [is_remote target] {
 # We need to be able to influence the target's environment and working
 # directory.  Can't do that if when we connect the inferior is already
 # running.
-if [use_gdb_stub] {
-    return
-}
+require !use_gdb_stub
 
 set testfile "solib-nodir"
 # Arbitrary file, possibly not containing main, even an empty one.

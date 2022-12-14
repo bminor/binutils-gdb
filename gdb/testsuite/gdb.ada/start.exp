@@ -19,10 +19,7 @@ require !skip_ada_tests
 
 # This testcase verifies the behavior of the `start' command, which
 # does not work when we use the gdb stub...
-if [use_gdb_stub] {
-    untested "skipping test due to gdb stub"
-    return
-}
+require !use_gdb_stub
 
 standard_ada_testfile dummy
 

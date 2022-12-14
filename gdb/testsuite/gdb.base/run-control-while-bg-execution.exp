@@ -21,10 +21,7 @@
 # again.  The test was expanded to test various combinations of
 # run-control-related actions done with an inferior running in background.
 
-if {[use_gdb_stub]} {
-    unsupported "test requires running"
-    return
-}
+require !use_gdb_stub
 
 standard_testfile
 

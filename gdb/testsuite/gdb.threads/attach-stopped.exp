@@ -18,8 +18,8 @@
 # This file was updated by Jan Kratochvil <jan.kratochvil@redhat.com>.
 
 # This test only works on Linux
-if { ![isnative] || [is_remote host] || [use_gdb_stub]
-     || ![istarget *-linux*] } {
+require !use_gdb_stub
+if { ![isnative] || [is_remote host] || ![istarget *-linux*] } {
     return
 }
 

@@ -17,9 +17,7 @@ standard_testfile .c
 set executable ${testfile}
 
 # The plain remote target can't do multiple inferiors.
-if [use_gdb_stub] {
-    return
-}
+require !use_gdb_stub
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
