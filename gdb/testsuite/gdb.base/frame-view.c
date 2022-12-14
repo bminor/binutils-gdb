@@ -28,6 +28,12 @@ struct type_2
   int n;
 };
 
+__attribute__((used)) static int
+called_from_pretty_printer (void)
+{
+  return 23;
+}
+
 static int
 baz (struct type_1 z1, struct type_2 z2)
 {

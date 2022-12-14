@@ -22,11 +22,26 @@ if { [build_executable "failed to prepare" \
     return
 }
 
-proc test_select_frame_view {} {
+# If WITH_PRETTY_PRINTER is true, load pretty printers for the function
+# parameter types, in which we do an inferior call.  This is meant to test
+# that the frame_info_ptr correctly reinflates frames created using
+# "select-frame view".
+
+proc test_select_frame_view { with_pretty_printer } {
     clean_restart $::binfile
+
+    if { $with_pretty_printer } {
+	require allow_python_tests
+    }
 
     if { ![runto_main] } {
 	return
+    }
+
+    if { $with_pretty_printer } {
+	set remote_python_file \
+	    [gdb_remote_download host "${::srcdir}/${::subdir}/${::testfile}.py"]
+	gdb_test_no_output "source ${remote_python_file}" "load python file"
     }
 
     # Stop thread 2 at a baz.
@@ -60,11 +75,34 @@ proc test_select_frame_view {} {
     gdb_test "thread 1" "Switching to thread 1 .*"
     gdb_test_no_output "select-frame view $frame_sp $frame_pc"
 
+    if { $with_pretty_printer } {
+	# When the pretty printer does its infcall, it is done on the currently
+	# selected thread, thread 1 here.  However, other threads are resumed
+	# at the same time.  This causes thread 2 to exit during that infcall,
+	# leading to this weirdness:
+	#
+	#     frame^M
+	#     #0  baz (z=[Thread 0x7ffff7cc26c0 (LWP 417519) exited]^M
+	#     hohoho) at /home/simark/src/binutils-gdb/gdb/testsuite/gdb.base/frame-view.c:35^M
+	#     35        return z.n + 2;^M
+	#
+	# Avoid that by setting scheduler-locking on.
+	gdb_test_no_output "set scheduler-locking on"
+
+	set z1_pattern "hahaha"
+	set z2_pattern "hohoho"
+    } else {
+	set z1_pattern "\\.\\.\\."
+	set z2_pattern "\\.\\.\\."
+    }
+
     # Verify that the "frame" command does not change the selected frame.
     # There used to be a bug where the "frame" command would lose the
     # selection of user-created frames.
-    gdb_test "frame" "#0  baz \\(z1=.*, z2=.*\\).*" "frame"
-    gdb_test "frame" "#0  baz \\(z1=.*, z2=.*\\).*" "frame again"
+    gdb_test "frame" "#0  baz \\(z1=$z1_pattern, z2=$z2_pattern\\).*" "frame"
+    gdb_test "frame" "#0  baz \\(z1=$z1_pattern, z2=$z2_pattern\\).*" "frame again"
 }
 
-test_select_frame_view
+foreach_with_prefix with_pretty_printer {false true} {
+    test_select_frame_view $with_pretty_printer
+}

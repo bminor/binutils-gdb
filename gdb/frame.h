@@ -325,7 +325,12 @@ private:
   /* The underlying pointer.  */
   frame_info *m_ptr = nullptr;
 
-  /* The frame_id of the underlying pointer.  */
+  /* The frame_id of the underlying pointer.
+
+     For the current target frames (frames with level 0, obtained through
+     get_current_frame), we don't save the frame id, we leave it at
+     null_frame_id.  For user-created frames (also with level 0, but created
+     with create_new_frame), we do save the id.  */
   frame_id m_cached_id = null_frame_id;
 
   /* The frame level of the underlying pointer.  */

@@ -3213,7 +3213,8 @@ frame_info_ptr::prepare_reinflate ()
 {
   m_cached_level = frame_relative_level (*this);
 
-  if (m_cached_level != 0)
+  if (m_cached_level != 0
+      || (m_ptr != nullptr && m_ptr->this_id.value.user_created_p))
     m_cached_id = get_frame_id (*this);
 }
 
@@ -3232,13 +3233,22 @@ frame_info_ptr::reinflate ()
       return;
     }
 
-  /* Frame #0 needs special handling, see comment in select_frame.  */
-  if (m_cached_level == 0)
-    m_ptr = get_current_frame ().get ();
+  if (m_cached_id.user_created_p)
+    m_ptr = create_new_frame (m_cached_id).get ();
   else
     {
-      gdb_assert (frame_id_p (m_cached_id));
-      m_ptr = frame_find_by_id (m_cached_id).get ();
+      /* Frame #0 needs special handling, see comment in select_frame.  */
+      if (m_cached_level == 0)
+	m_ptr = get_current_frame ().get ();
+      else
+	{
+	  /* If we reach here without a valid frame id, it means we are trying
+	     to reinflate a frame whose id was not know at construction time.
+	     We're probably trying to reinflate a frame while computing its id
+	     which is not possible, and would indicate a problem with GDB.  */
+	  gdb_assert (frame_id_p (m_cached_id));
+	  m_ptr = frame_find_by_id (m_cached_id).get ();
+	}
     }
 
   gdb_assert (m_ptr != nullptr);
