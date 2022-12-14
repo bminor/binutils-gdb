@@ -20,8 +20,7 @@
 
 load_lib "go.exp"
 
-require !skip_go_tests
-if { [support_go_compile] == 0 } { continue }
+require !skip_go_tests support_go_compile
 
 standard_testfile .go
 
