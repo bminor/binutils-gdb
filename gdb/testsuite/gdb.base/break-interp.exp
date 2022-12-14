@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This test only works on GNU/Linux.
-require !use_gdb_stub isnative
-if { [is_remote host] || ![istarget *-linux*] || [skip_shlib_tests]} {
+require !use_gdb_stub isnative !skip_shlib_tests
+if { [is_remote host] || ![istarget *-linux*] } {
     return
 }
 
