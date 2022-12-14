@@ -17,10 +17,7 @@
 
 # Test explicitly unwinding the PC DWARF register on aarch64
 
-if {![is_aarch64_target]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require is_aarch64_target
 
 standard_testfile .S
 

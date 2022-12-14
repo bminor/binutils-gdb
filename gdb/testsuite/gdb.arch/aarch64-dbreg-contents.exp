@@ -21,10 +21,7 @@
 #
 # See PR breakpoints/21870.
 
-if {![is_aarch64_target]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require is_aarch64_target
 
 standard_testfile .c
 

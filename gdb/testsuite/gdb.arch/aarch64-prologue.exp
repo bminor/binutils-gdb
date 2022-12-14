@@ -15,10 +15,7 @@
 
 # This file is part of the gdb testsuite.
 
-if {![is_aarch64_target]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return 1
-}
+require is_aarch64_target
 
 standard_testfile
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile {nodebug}]} {

@@ -164,10 +164,7 @@ proc test_mode { mode } {
 
 }
 
-if {![is_aarch64_target]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require is_aarch64_target
 
 # Run tests
 foreach_with_prefix mode {"sync" "async"} {

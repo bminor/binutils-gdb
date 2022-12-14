@@ -18,10 +18,7 @@
 # Test if GDB stops at various BRK instruction patterns inserted into
 # the code.
 
-if {![is_aarch64_target]} {
-    verbose "Skipping ${gdb_test_file_name}."
-    return
-}
+require is_aarch64_target
 
 standard_testfile
 if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
