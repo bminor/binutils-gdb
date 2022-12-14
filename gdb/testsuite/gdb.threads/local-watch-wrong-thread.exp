@@ -19,9 +19,7 @@
 # thread other than the thread the local watchpoint was set in stops
 # for a breakpoint.
 
-if {[skip_hw_watchpoint_multi_tests]} {
-    return 0
-}
+require !skip_hw_watchpoint_multi_tests
 
 standard_testfile
 if {[gdb_compile_pthreads \

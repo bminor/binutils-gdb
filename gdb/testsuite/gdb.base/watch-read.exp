@@ -24,9 +24,7 @@
 
 standard_testfile .c
 
-if {[skip_hw_watchpoint_access_tests]} {
-    return 0
-}
+require !skip_hw_watchpoint_access_tests
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1

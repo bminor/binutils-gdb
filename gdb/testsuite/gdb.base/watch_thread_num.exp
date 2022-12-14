@@ -23,9 +23,7 @@
 # so the test is only meaningful on a system with hardware watchpoints.
 # More specifically, the implementation of this test uses access
 # watchpoints, so skip it when those are not available.
-if {[skip_hw_watchpoint_access_tests]} {
-    return 0
-}
+require !skip_hw_watchpoint_access_tests
 
 standard_testfile .c
 

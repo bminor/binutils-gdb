@@ -18,9 +18,7 @@ if { [use_gdb_stub] } {
     return
 }
 
-if {[skip_hw_watchpoint_tests]} {
-    return 0
-}
+require !skip_hw_watchpoint_tests
 
 standard_testfile
 
