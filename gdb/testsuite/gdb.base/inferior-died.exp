@@ -21,10 +21,7 @@ if {![istarget "*-*-linux*"]} {
     return
 }
 
-if { ![support_displaced_stepping] } {
-    unsupported "inferior-died.exp"
-    return -1
-}
+require support_displaced_stepping
 
 standard_testfile .c
 

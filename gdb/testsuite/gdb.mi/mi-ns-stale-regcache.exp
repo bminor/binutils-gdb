@@ -16,10 +16,7 @@
 # Regression test for PR11557.  Make sure we don't end up with a stale
 # register cache just after resuming a thread.
 
-if { ![support_displaced_stepping] } { 
-    unsupported "displaced stepping"
-    return -1
-}
+require support_displaced_stepping
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

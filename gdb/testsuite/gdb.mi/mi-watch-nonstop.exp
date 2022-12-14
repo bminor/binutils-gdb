@@ -13,12 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require !skip_hw_watchpoint_tests
-
-if { ![support_displaced_stepping] } { 
-    unsupported "displaced stepping"
-    return -1
-}
+require !skip_hw_watchpoint_tests support_displaced_stepping
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

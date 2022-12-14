@@ -15,10 +15,7 @@
 
 standard_testfile start.c
 
-if { ![support_displaced_stepping] } {
-    unsupported "displaced stepping"
-    return -1
-}
+require support_displaced_stepping
 
 save_vars { GDBFLAGS } {
     set GDBFLAGS "$GDBFLAGS -ex \"set non-stop on\""

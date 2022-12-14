@@ -16,10 +16,7 @@ standard_testfile insn-reloc.c
 set executable $testfile
 set expfile $testfile.exp
 
-if { ![support_displaced_stepping] } {
-    unsupported "displaced stepping"
-    return -1
-}
+require support_displaced_stepping
 
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]

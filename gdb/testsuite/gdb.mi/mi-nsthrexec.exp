@@ -18,10 +18,7 @@
 # the main thread doesn't just silently stop at the first internal
 # breakpoint (usually the _dl_debug_state breakpoint).
 
-if { ![support_displaced_stepping] } { 
-    unsupported "displaced stepping"
-    return -1
-}
+require support_displaced_stepping
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

@@ -15,10 +15,7 @@
 
 standard_testfile
 
-if { ![support_displaced_stepping] } { 
-    unsupported "displaced stepping"
-    return -1
-}
+require support_displaced_stepping
 
 # The testfile uses "run".  The real bug happened only for ![is_remote target].
 if [use_gdb_stub] {
