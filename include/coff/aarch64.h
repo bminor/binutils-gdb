@@ -54,11 +54,10 @@ struct external_reloc
   char r_vaddr[4];
   char r_symndx[4];
   char r_type[2];
-  char r_offset[4];
 };
 
 #define RELOC struct external_reloc
-#define RELSZ 14
+#define RELSZ 10
 
 /* ARM64 relocations types. */
 
