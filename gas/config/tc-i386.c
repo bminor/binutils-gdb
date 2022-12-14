@@ -2985,8 +2985,8 @@ md_begin (void)
 
     /* Type checks to compensate for the conversion through void * which
        occurs during hash table insertion / lookup.  */
-    (void)(sets == &current_templates->start);
-    (void)(end == &current_templates->end);
+    (void) sizeof (sets == &current_templates->start);
+    (void) sizeof (end == &current_templates->end);
     for (; sets < end; ++sets)
       if (str_hash_insert (op_hash, (*sets)->name, sets, 0))
 	as_fatal (_("duplicate %s"), (*sets)->name);
