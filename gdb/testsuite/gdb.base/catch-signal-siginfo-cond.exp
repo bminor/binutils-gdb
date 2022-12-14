@@ -30,10 +30,7 @@ if [target_info exists gdb,nosignals] {
     return -1
 }
 
-if { ![supports_get_siginfo_type] } {
-    verbose "Skipping catch-signal-siginfo-cond.exp because of lack of support."
-    return -1
-}
+require supports_get_siginfo_type
 
 standard_testfile
 
