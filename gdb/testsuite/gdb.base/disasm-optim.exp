@@ -15,9 +15,7 @@
 
 # This test exercises disassemble /s with optimized and inlined code.
 
-if { ![is_amd64_regs_target] } {
-    return
-}
+require is_amd64_regs_target
 
 standard_testfile .S
 
