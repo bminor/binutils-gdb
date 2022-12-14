@@ -22,6 +22,7 @@
 #include <ctype.h>		/* XXX for isupper ().  */
 
 #include "frame.h"
+#include "language.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbcmd.h"

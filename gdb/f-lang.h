@@ -23,6 +23,7 @@
 #ifndef F_LANG_H
 #define F_LANG_H
 
+#include "language.h"
 #include "valprint.h"
 
 struct type_print_options;

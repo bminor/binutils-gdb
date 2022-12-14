@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "frame.h"
+#include "language.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "dis-asm.h"

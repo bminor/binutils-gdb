@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "python-internal.h"
+#include "language.h"
 #include "dis-asm.h"
 #include "arch-utils.h"
 #include "charset.h"

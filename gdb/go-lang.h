@@ -22,6 +22,7 @@
 
 struct type_print_options;
 
+#include "language.h"
 #include "gdbtypes.h"
 #include "symtab.h"
 #include "value.h"

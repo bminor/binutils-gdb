@@ -71,7 +71,6 @@
 
    */
 
-#include "language.h"
 #include "cli/cli-option.h"
 #include "gdbsupport/common-debug.h"
 

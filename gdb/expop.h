@@ -24,6 +24,7 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "expression.h"
+#include "language.h"
 #include "objfiles.h"
 #include "gdbsupport/traits.h"
 #include "gdbsupport/enum-flags.h"

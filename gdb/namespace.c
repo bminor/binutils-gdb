@@ -19,6 +19,7 @@
 #include "defs.h"
 #include "namespace.h"
 #include "frame.h"
+#include "symtab.h"
 
 /* Add a using directive to USING_DIRECTIVES.  If the using directive
    in question has already been added, don't add it twice.
