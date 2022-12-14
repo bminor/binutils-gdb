@@ -711,9 +711,9 @@ tui_set_focus_command (const char *arg, int from_tty)
 
   struct tui_win_info *win_info = NULL;
 
-  if (subset_compare (arg, "next"))
+  if (startswith ("next", arg))
     win_info = tui_next_win (tui_win_with_focus ());
-  else if (subset_compare (arg, "prev"))
+  else if (startswith ("prev", arg))
     win_info = tui_prev_win (tui_win_with_focus ());
   else
     win_info = tui_partial_win_by_name (arg);

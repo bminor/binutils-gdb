@@ -102,8 +102,6 @@ extern int strcmp_iw_ordered (const char *, const char *);
 
 extern bool streq (const char *, const char *);
 
-extern int subset_compare (const char *, const char *);
-
 /* Compare C strings for std::sort.  */
 
 static inline bool

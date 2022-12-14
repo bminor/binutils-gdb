@@ -2140,17 +2140,17 @@ parse_backtrace_qualifiers (const char *arg,
       if (this_arg.empty ())
 	return arg;
 
-      if (subset_compare (this_arg.c_str (), "no-filters"))
+      if (startswith ("no-filters", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->no_filters = true;
 	}
-      else if (subset_compare (this_arg.c_str (), "full"))
+      else if (startswith ("full", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->full = true;
 	}
-      else if (subset_compare (this_arg.c_str (), "hide"))
+      else if (startswith ("hide", this_arg))
 	{
 	  if (bt_cmd_opts != nullptr)
 	    bt_cmd_opts->hide = true;
