@@ -240,6 +240,9 @@ frame_addr_hash (const void *ap)
     hash = iterative_hash (&f_id.special_addr,
 			   sizeof (f_id.special_addr), hash);
 
+  char user_created_p = f_id.user_created_p;
+  hash = iterative_hash (&user_created_p, sizeof (user_created_p), hash);
+
   return hash;
 }
 
@@ -774,6 +777,8 @@ frame_id::operator== (const frame_id &r) const
     eq = false;
   else if (artificial_depth != r.artificial_depth)
     /* If artificial depths are different, the frames must be different.  */
+    eq = false;
+  else if (user_created_p != r.user_created_p)
     eq = false;
   else
     /* Frames are equal.  */
@@ -1931,6 +1936,14 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   frame_debug_printf ("addr=%s, pc=%s", hex_string (addr), hex_string (pc));
 
+  /* Avoid creating duplicate frames, search for an existing frame with that id
+     in the stash.  */
+  frame_id id = frame_id_build (addr, pc);
+  id.user_created_p = 1;
+  frame_info_ptr frame = frame_stash_find (id);
+  if (frame != nullptr)
+    return frame;
+
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_program_space,
@@ -1952,8 +1965,10 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   frame_unwind_find_by_frame (frame_info_ptr (fi), &fi->prologue_cache);
 
   fi->this_id.p = frame_id_status::COMPUTED;
-  fi->this_id.value = frame_id_build (addr, pc);
-  fi->this_id.value.user_created_p = 1;
+  fi->this_id.value = id;
+
+  bool added = frame_stash_add (fi);
+  gdb_assert (added);
 
   frame_debug_printf ("  -> %s", fi->to_string ().c_str ());
 
