@@ -1,0 +1,70 @@
+# Copyright 2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the "frame view" family of commands.
+
+standard_testfile
+
+if { [build_executable "failed to prepare" \
+	${testfile} ${srcfile}] } {
+    return
+}
+
+proc test_select_frame_view {} {
+    clean_restart $::binfile
+
+    if { ![runto_main] } {
+	return
+    }
+
+    # Stop thread 2 at a baz.
+    gdb_test "break baz"
+    gdb_test "continue" "Thread 2.*hit Breakpoint $::decimal, baz .*"
+
+    # Grab the stack pointer and pc of thread 2's frame.
+    set frame_sp ""
+    set frame_pc ""
+
+    gdb_test_multiple "info frame" "" {
+	-re -wrap ".*frame at ($::hex):.*" {
+	    set frame_sp $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple "print/x \$pc" "" {
+	-re -wrap " = ($::hex)" {
+	    set frame_pc $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    if { $frame_sp == "" || $frame_pc == "" } {
+	# Something must have failed and logged a failure above.
+	return
+    }
+
+    # Select thread 2's frame in thread 1.
+    gdb_test "thread 1" "Switching to thread 1 .*"
+    gdb_test_no_output "select-frame view $frame_sp $frame_pc"
+
+    # Verify that the "frame" command does not change the selected frame.
+    # There used to be a bug where the "frame" command would lose the
+    # selection of user-created frames.
+    gdb_test "frame" "#0  baz \\(z1=.*, z2=.*\\).*" "frame"
+    gdb_test "frame" "#0  baz \\(z1=.*, z2=.*\\).*" "frame again"
+}
+
+test_select_frame_view

@@ -69,6 +69,7 @@ set_backtrace_options user_set_backtrace_options;
 
 static frame_info_ptr get_prev_frame_raw (frame_info_ptr this_frame);
 static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
+static frame_info_ptr create_new_frame (frame_id id);
 
 /* Status of some values cached in the frame_info object.  */
 
@@ -1669,9 +1670,12 @@ get_current_frame (void)
 
    If SELECTED_FRAME_ID / SELECTED_FRAME_LEVEL are null_frame_id / -1,
    and the target has stack and is stopped, the selected frame is the
-   current (innermost) frame.  This means that SELECTED_FRAME_LEVEL is
-   never 0 and SELECTED_FRAME_ID is never the ID of the innermost
-   frame.
+   current (innermost) target frame.  SELECTED_FRAME_ID is never the ID
+   of the current (innermost) target frame.  SELECTED_FRAME_LEVEL may
+   only be 0 if the selected frame is a user-created one (created and
+   selected through the "select-frame view" command), in which case
+   SELECTED_FRAME_ID is the frame id derived from the user-provided
+   addresses.
 
    If SELECTED_FRAME_ID / SELECTED_FRAME_LEVEL are null_frame_id / -1,
    and the target has no stack or is executing, then there's no
@@ -1699,9 +1703,9 @@ void
 restore_selected_frame (frame_id frame_id, int frame_level)
   noexcept
 {
-  /* save_selected_frame never returns level == 0, so we shouldn't see
-     it here either.  */
-  gdb_assert (frame_level != 0);
+  /* Unless it is a user-created frame, save_selected_frame never returns
+     level == 0, so we shouldn't see it here either.  */
+  gdb_assert (frame_level != 0 || frame_id.user_created_p);
 
   /* FRAME_ID can be null_frame_id only IFF frame_level is -1.  */
   gdb_assert ((frame_level == -1 && !frame_id_p (frame_id))
@@ -1732,6 +1736,15 @@ lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
   if (frame_level == -1)
     {
       select_frame (get_current_frame ());
+      return;
+    }
+
+  /* This means the selected frame was a user-created one.  Create a new one
+     using the user-provided addresses, which happen to be in the frame id.  */
+  if (frame_level == 0)
+    {
+      gdb_assert (a_frame_id.user_created_p);
+      select_frame (create_new_frame (a_frame_id));
       return;
     }
 
@@ -1859,7 +1872,10 @@ select_frame (frame_info_ptr fi)
 
   selected_frame = fi;
   selected_frame_level = frame_relative_level (fi);
-  if (selected_frame_level == 0)
+
+  /* If the frame is a user-created one, save its level and frame id just like
+     any other non-level-0 frame.  */
+  if (selected_frame_level == 0 && !fi->this_id.value.user_created_p)
     {
       /* Treat the current frame especially -- we want to always
 	 save/restore it without warning, even if the frame ID changes
