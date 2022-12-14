@@ -24,10 +24,7 @@
 #            const pointers to const vars
 # with mixed types.
 
-if [skip_ctf_tests] {
-    unsupported "no CTF debug format support, or CTF disabled in GDB"
-    return 0
-}
+require !skip_ctf_tests
 
 standard_testfile .c
 
