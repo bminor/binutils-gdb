@@ -23,7 +23,7 @@
 #define DWARF2EXPR_H
 
 #include "leb128.h"
-#include "gdbtypes.h"
+#include "dwarf2/call-site.h"
 
 struct dwarf2_per_objfile;
 

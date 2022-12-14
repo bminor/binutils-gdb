@@ -20,8 +20,6 @@
 #ifndef DWARF2_LINE_HEADER_H
 #define DWARF2_LINE_HEADER_H
 
-#include "gdbtypes.h"
-
 /* dir_index is 1-based in DWARF 4 and before, and is 0-based in DWARF 5 and
    later.  */
 typedef int dir_index;

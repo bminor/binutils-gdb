@@ -28,7 +28,7 @@
 #define GDB_DWARF2_ATTRIBUTE_H
 
 #include "dwarf2.h"
-#include "gdbtypes.h"
+#include "dwarf2/types.h"
 #include "gdbsupport/gdb_optional.h"
 
 /* Blocks are a bunch of untyped bytes.  */

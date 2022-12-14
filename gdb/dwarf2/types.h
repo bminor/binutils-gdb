@@ -21,6 +21,7 @@
 #define DWARF2_TYPES_H
 
 #include "gdbsupport/offset-type.h"
+#include "gdbsupport/underlying.h"
 
 /* Offset relative to the start of its containing CU (compilation
    unit).  */

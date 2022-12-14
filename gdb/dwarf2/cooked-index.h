@@ -21,7 +21,7 @@
 #define GDB_DWARF2_COOKED_INDEX_H
 
 #include "dwarf2.h"
-#include "gdbtypes.h"
+#include "dwarf2/types.h"
 #include "symtab.h"
 #include "hashtab.h"
 #include "dwarf2/index-common.h"
