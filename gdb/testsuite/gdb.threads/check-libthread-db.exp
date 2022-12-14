@@ -20,10 +20,7 @@ if {[target_info gdb_protocol] != "" || ![istarget *-linux*]} {
 
 # Test relies on checking gdb debug output. Do not run if gdb debug is
 # enabled as any debug will be redirected to the log.
-if [gdb_debug_enabled] {
-    untested "debug is enabled"
-    return 0
-}
+require !gdb_debug_enabled
 
 standard_testfile
 

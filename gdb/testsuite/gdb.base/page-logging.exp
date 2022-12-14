@@ -14,10 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Do not run if gdb debug is enabled as it will interfere with log redirect.
-if [gdb_debug_enabled] {
-    untested "debug is enabled"
-    return 0
-}
+require !gdb_debug_enabled
 
 gdb_start
 
