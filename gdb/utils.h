@@ -98,18 +98,6 @@ extern int strcmp_iw (const char *string1, const char *string2);
 
 extern int strcmp_iw_ordered (const char *, const char *);
 
-/* Return true if the strings are equal.  */
-
-extern bool streq (const char *, const char *);
-
-/* Compare C strings for std::sort.  */
-
-static inline bool
-compare_cstrings (const char *str1, const char *str2)
-{
-  return strcmp (str1, str2) < 0;
-}
-
 /* Reset the prompt_for_continue clock.  */
 void reset_prompt_for_continue_wait_time (void);
 /* Return the time spent in prompt_for_continue.  */

@@ -3099,14 +3099,6 @@ strcmp_iw_ordered (const char *string1, const char *string2)
     }
 }
 
-/* See utils.h.  */
-
-bool
-streq (const char *lhs, const char *rhs)
-{
-  return !strcmp (lhs, rhs);
-}
-
 
 
 static void

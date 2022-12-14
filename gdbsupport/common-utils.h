@@ -93,6 +93,22 @@ startswith (gdb::string_view string, gdb::string_view pattern)
 	  && strncmp (string.data (), pattern.data (), pattern.length ()) == 0);
 }
 
+/* Return true if the strings are equal.  */
+
+static inline bool
+streq (const char *lhs, const char *rhs)
+{
+  return strcmp (lhs, rhs) == 0;
+}
+
+/* Compare C strings for std::sort.  */
+
+static inline bool
+compare_cstrings (const char *str1, const char *str2)
+{
+  return strcmp (str1, str2) < 0;
+}
+
 ULONGEST strtoulst (const char *num, const char **trailer, int base);
 
 /* Skip leading whitespace characters in INP, returning an updated
