@@ -597,7 +597,8 @@ sh_reloc (bfd *      abfd,
       && bfd_is_und_section (symbol_in->section))
     return bfd_reloc_undefined;
 
-  if (addr > input_section->size)
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd, input_section,
+				  addr))
     return bfd_reloc_outofrange;
 
   sym_value = get_symbol_value (symbol_in);
