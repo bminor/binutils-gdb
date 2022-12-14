@@ -57,6 +57,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
 #include "frame-info.h"
+#include "dwarf2/types.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -65,23 +66,6 @@ struct value_print_options;
 struct language_defn;
 struct dwarf2_per_cu_data;
 struct dwarf2_per_objfile;
-
-/* These declarations are DWARF-specific as some of the gdbtypes.h data types
-   are already DWARF-specific.  */
-
-/* * Offset relative to the start of its containing CU (compilation
-   unit).  */
-DEFINE_OFFSET_TYPE (cu_offset, unsigned int);
-
-/* * Offset relative to the start of its .debug_info or .debug_types
-   section.  */
-DEFINE_OFFSET_TYPE (sect_offset, uint64_t);
-
-static inline char *
-sect_offset_str (sect_offset offset)
-{
-  return hex_string (to_underlying (offset));
-}
 
 /* Some macros for char-based bitfields.  */
 
