@@ -143,11 +143,16 @@ struct cooked_index_entry : public allocate_on_obstack
      STORAGE.  */
   const char *full_name (struct obstack *storage) const;
 
-  /* Entries must be sorted case-insensitively; this compares two
-     entries.  */
+  /* Compare two strings, case-insensitively.  Return true if STRA is
+     less than STRB.  If one string has template parameters, but the
+     other does not, then they are considered to be equal; so for
+     example "t<x>" == "t<x>", "t<x>" < "t<y>", but "t" == "t<x>".  */
+  static bool compare (const char *stra, const char *strb, bool completing);
+
+  /* Compare two entries by canonical name.  */
   bool operator< (const cooked_index_entry &other) const
   {
-    return strcasecmp (canonical, other.canonical) < 0;
+    return compare (canonical, other.canonical, false);
   }
 
   /* The name as it appears in DWARF.  This always points into one of
@@ -232,7 +237,7 @@ public:
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
      for completion, will be returned.  */
-  range find (gdb::string_view name, bool completing);
+  range find (const std::string &name, bool completing);
 
 private:
 
@@ -335,7 +340,7 @@ public:
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
      for completion, will be returned.  */
-  range find (gdb::string_view name, bool completing);
+  range find (const std::string &name, bool completing);
 
   /* Return a range of all the entries.  */
   range all_entries ()

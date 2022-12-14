@@ -25,6 +25,114 @@
 #include "ada-lang.h"
 #include "split-name.h"
 #include <algorithm>
+#include "safe-ctype.h"
+#include "gdbsupport/selftest.h"
+
+/* See cooked-index.h.  */
+
+bool
+cooked_index_entry::compare (const char *stra, const char *strb,
+			     bool completing)
+{
+  /* If we've ever matched "<" in both strings, then we disable the
+     special template parameter handling.  */
+  bool seen_lt = false;
+
+  while (*stra != '\0'
+	 && *strb != '\0'
+	 && (TOLOWER ((unsigned char) *stra)
+	     == TOLOWER ((unsigned char ) *strb)))
+    {
+      if (*stra == '<')
+	seen_lt = true;
+      ++stra;
+      ++strb;
+    }
+
+  unsigned c1 = TOLOWER ((unsigned char) *stra);
+  unsigned c2 = TOLOWER ((unsigned char) *strb);
+
+  if (completing)
+    {
+      /* When completing, if one string ends earlier than the other,
+	 consider them as equal.  Also, completion mode ignores the
+	 special '<' handling.  */
+      if (c1 == '\0' || c2 == '\0')
+	return false;
+      /* Fall through to the generic case.  */
+    }
+  else if (seen_lt)
+    {
+      /* Fall through to the generic case.  */
+    }
+  else if (c1 == '\0' || c1 == '<')
+    {
+      /* Maybe they both end at the same spot.  */
+      if (c2 == '\0' || c2 == '<')
+	return false;
+      /* First string ended earlier.  */
+      return true;
+    }
+  else if (c2 == '\0' || c2 == '<')
+    {
+      /* Second string ended earlier.  */
+      return false;
+    }
+
+  return c1 < c2;
+}
+
+#if GDB_SELF_TEST
+
+namespace {
+
+void
+test_compare ()
+{
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", false));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", false));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", true));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "abcd", true));
+
+  SELF_CHECK (cooked_index_entry::compare ("abcd", "ABCDE", false));
+  SELF_CHECK (!cooked_index_entry::compare ("ABCDE", "abcd", false));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "ABCDE", true));
+  SELF_CHECK (!cooked_index_entry::compare ("ABCDE", "abcd", true));
+
+  SELF_CHECK (!cooked_index_entry::compare ("name", "name<>", false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<>", "name", false));
+  SELF_CHECK (!cooked_index_entry::compare ("name", "name<>", true));
+  SELF_CHECK (!cooked_index_entry::compare ("name<>", "name", true));
+
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<arg>", true));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg>", "name<ag>", true));
+
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>",
+					    "name<arg<more>>", false));
+
+  SELF_CHECK (!cooked_index_entry::compare ("name", "name<arg<more>>", false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name", false));
+  SELF_CHECK (cooked_index_entry::compare ("name<arg<", "name<arg<more>>",
+					   false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg<",
+					    "name<arg<more>>",
+					    true));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
+					    false));
+  SELF_CHECK (!cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
+					    true));
+
+  SELF_CHECK (cooked_index_entry::compare ("", "abcd", false));
+  SELF_CHECK (!cooked_index_entry::compare ("", "abcd", true));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "", false));
+  SELF_CHECK (!cooked_index_entry::compare ("abcd", "", true));
+}
+
+} /* anonymous namespace */
+
+#endif /* GDB_SELF_TEST */
 
 /* See cooked-index.h.  */
 
@@ -247,30 +355,24 @@ cooked_index::do_finalize ()
 /* See cooked-index.h.  */
 
 cooked_index::range
-cooked_index::find (gdb::string_view name, bool completing)
+cooked_index::find (const std::string &name, bool completing)
 {
   wait ();
 
-  auto lower = std::lower_bound (m_entries.begin (), m_entries.end (),
-				 name,
+  auto lower = std::lower_bound (m_entries.begin (), m_entries.end (), name,
 				 [=] (const cooked_index_entry *entry,
-				      const gdb::string_view &n)
+				      const std::string &n)
   {
-    int cmp = strncasecmp (entry->canonical, n.data (), n.length ());
-    if (cmp != 0 || completing)
-      return cmp < 0;
-    return strlen (entry->canonical) < n.length ();
+    return cooked_index_entry::compare (entry->canonical, n.c_str (),
+					completing);
   });
 
-  auto upper = std::upper_bound (m_entries.begin (), m_entries.end (),
-				 name,
-				 [=] (const gdb::string_view &n,
+  auto upper = std::upper_bound (m_entries.begin (), m_entries.end (), name,
+				 [=] (const std::string &n,
 				      const cooked_index_entry *entry)
   {
-    int cmp = strncasecmp (n.data (), entry->canonical, n.length ());
-    if (cmp != 0 || completing)
-      return cmp < 0;
-    return n.length () < strlen (entry->canonical);
+    return cooked_index_entry::compare (n.c_str (), entry->canonical,
+					completing);
   });
 
   return range (lower, upper);
@@ -311,7 +413,7 @@ cooked_index_vector::get_addrmaps ()
 /* See cooked-index.h.  */
 
 cooked_index_vector::range
-cooked_index_vector::find (gdb::string_view name, bool completing)
+cooked_index_vector::find (const std::string &name, bool completing)
 {
   std::vector<cooked_index::range> result_range;
   result_range.reserve (m_vector.size ());
@@ -338,4 +440,13 @@ cooked_index_vector::get_main () const
     }
 
   return result;
+}
+
+void _initialize_cooked_index ();
+void
+_initialize_cooked_index ()
+{
+#if GDB_SELF_TEST
+  selftests::register_test ("cooked_index_entry::compare", test_compare);
+#endif
 }
