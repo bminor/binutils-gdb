@@ -1953,6 +1953,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi->this_id.p = frame_id_status::COMPUTED;
   fi->this_id.value = frame_id_build (addr, pc);
+  fi->this_id.value.user_created_p = 1;
 
   frame_debug_printf ("  -> %s", fi->to_string ().c_str ());
 

@@ -99,6 +99,10 @@ struct frame_id
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
 
+  /* True if this frame was created from addresses given by the user (see
+     create_new_frame) rather than through unwinding.  */
+  unsigned int user_created_p : 1;
+
   /* It is non-zero for a frame made up by GDB without stack data
      representation in inferior, such as INLINE_FRAME or TAILCALL_FRAME.
      Caller of inlined function will have it zero, each more inner called frame
