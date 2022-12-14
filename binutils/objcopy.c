@@ -3543,7 +3543,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
   char *dir;
-  const char *filename;
+  char *filename;
 
   /* PR 24281: It is not clear what should happen when copying a thin archive.
      One part is straight forward - if the output archive is in a different
@@ -3720,19 +3720,21 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     }
   *ptr = NULL;
 
-  filename = bfd_get_filename (obfd);
+  filename = xstrdup (bfd_get_filename (obfd));
   if (!(status == 0 ? bfd_close : bfd_close_all_done) (obfd))
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
+  free (filename);
 
-  filename = bfd_get_filename (ibfd);
+  filename = xstrdup (bfd_get_filename (ibfd));
   if (!bfd_close (ibfd))
     {
       status = 1;
       bfd_nonfatal_message (filename, NULL, NULL, NULL);
     }
+  free (filename);
 
  cleanup_and_exit:
   /* Delete all the files that we opened.  */
