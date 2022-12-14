@@ -21,10 +21,7 @@ load_lib dwarf.exp
 require dwarf2_support
 
 # The .c files use __attribute__.
-if ![is_c_compiler_gcc] {
-    verbose "Skipping $gdb_test_file_name."
-    return 0  
-}
+require is_c_compiler_gcc
 
 standard_testfile .c -2.c -3.c
 set asmfile [standard_output_file ${testfile}.s]

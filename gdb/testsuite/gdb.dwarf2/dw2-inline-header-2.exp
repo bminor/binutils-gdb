@@ -51,9 +51,7 @@ load_lib dwarf.exp
 require dwarf2_support
 
 # The .c files use __attribute__.
-if ![is_c_compiler_gcc] {
-    return 0
-}
+require is_c_compiler_gcc
 
 standard_testfile dw2-inline-header-lbls.c dw2-inline-header.S \
     dw2-inline-header.c dw2-inline-header.h

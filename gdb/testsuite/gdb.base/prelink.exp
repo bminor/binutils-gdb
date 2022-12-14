@@ -19,14 +19,9 @@
 # This file was written by Alexandre Oliva <aoliva@redhat.com>
 
 
-require isnative !skip_shlib_tests
+require isnative !skip_shlib_tests is_c_compiler_gcc
 if { [is_remote host] } {
     return
-}
-
-if {![is_c_compiler_gcc]} {
-    unsupported "gcc compiler is required"
-    return -1
 }
 
 load_lib prelink-support.exp

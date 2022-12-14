@@ -20,10 +20,7 @@ load_lib dwarf.exp
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
 
-if ![is_c_compiler_gcc] {
-    unsupported "gcc required for this test"
-    return 0
-}
+require is_c_compiler_gcc
 
 standard_testfile main.c .c -dw.S
 
