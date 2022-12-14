@@ -362,7 +362,6 @@ print_stack_frame (frame_info_ptr frame, int print_level,
   if (current_uiout->is_mi_like_p ())
     print_what = LOC_AND_ADDRESS;
 
-  frame.prepare_reinflate ();
   try
     {
       print_frame_info (user_frame_print_options,
@@ -744,11 +743,6 @@ print_frame_args (const frame_print_options &fp_opts,
     = (print_names
        && fp_opts.print_frame_arguments != print_frame_arguments_none);
 
-  /* If one of the arguments has a pretty printer that calls a
-     function of the inferior to print it, the pointer must be
-     reinflatable.  */
-  frame.prepare_reinflate ();
-
   /* Temporarily change the selected frame to the given FRAME.
      This allows routines that rely on the selected frame instead
      of being given a frame as parameter to use the correct frame.  */
@@ -1046,8 +1040,6 @@ print_frame_info (const frame_print_options &fp_opts,
   int source_print;
   int location_print;
   struct ui_out *uiout = current_uiout;
-
-  frame.prepare_reinflate ();
 
   if (!current_uiout->is_mi_like_p ()
       && fp_opts.print_frame_info != print_frame_info_auto)
@@ -1682,7 +1674,6 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 	      gdb_printf (" %d args: ", numargs);
 	  }
 
-	fi.prepare_reinflate ();
 	print_frame_args (user_frame_print_options,
 			  func, fi, numargs, gdb_stdout);
 	fi.reinflate ();
@@ -2075,7 +2066,6 @@ backtrace_command_1 (const frame_print_options &fp_opts,
       for (fi = trailing; fi && count--; fi = get_prev_frame (fi))
 	{
 	  QUIT;
-	  fi.prepare_reinflate ();
 
 	  /* Don't use print_stack_frame; if an error() occurs it probably
 	     means further attempts to backtrace would fail (on the other

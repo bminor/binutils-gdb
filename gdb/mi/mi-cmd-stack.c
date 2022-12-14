@@ -176,7 +176,6 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 	   i++, fi = get_prev_frame (fi))
 	{
 	  QUIT;
-	  fi.prepare_reinflate ();
 	  /* Print the location and the address always, even for level 0.
 	     If args is 0, don't print the arguments.  */
 	  print_frame_info (user_frame_print_options,

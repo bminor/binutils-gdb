@@ -3208,14 +3208,18 @@ intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
 
 /* See frame-info-ptr.h.  */
 
-void
-frame_info_ptr::prepare_reinflate ()
+frame_info_ptr::frame_info_ptr (struct frame_info *ptr)
+  : m_ptr (ptr)
 {
-  m_cached_level = frame_relative_level (*this);
+  frame_list.push_back (*this);
 
-  if (m_cached_level != 0
-      || (m_ptr != nullptr && m_ptr->this_id.value.user_created_p))
-    m_cached_id = get_frame_id (*this);
+  if (m_ptr == nullptr)
+    return;
+
+  m_cached_level = ptr->level;
+
+  if (m_cached_level != 0 || m_ptr->this_id.value.user_created_p)
+    m_cached_id = m_ptr->this_id.value;
 }
 
 /* See frame-info-ptr.h.  */
@@ -3223,8 +3227,7 @@ frame_info_ptr::prepare_reinflate ()
 void
 frame_info_ptr::reinflate ()
 {
-  /* Ensure we have a valid frame level (sentinel frame or above), indicating
-     prepare_reinflate was called.  */
+  /* Ensure we have a valid frame level (sentinel frame or above).  */
   gdb_assert (m_cached_level >= -1);
 
   if (m_ptr != nullptr)

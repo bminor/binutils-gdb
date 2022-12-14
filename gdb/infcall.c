@@ -842,7 +842,6 @@ call_function_by_hand_dummy (struct value *function,
   bool stack_temporaries = thread_stack_temporaries_enabled_p (call_thread.get ());
 
   frame = get_current_frame ();
-  frame.prepare_reinflate ();
   gdbarch = get_frame_arch (frame);
 
   if (!gdbarch_push_dummy_call_p (gdbarch))

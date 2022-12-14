@@ -206,11 +206,7 @@ class frame_info_ptr : public intrusive_list_node<frame_info_ptr>
 {
 public:
   /* Create a frame_info_ptr from a raw pointer.  */
-  explicit frame_info_ptr (struct frame_info *ptr)
-    : m_ptr (ptr)
-  {
-    frame_list.push_back (*this);
-  }
+  explicit frame_info_ptr (struct frame_info *ptr);
 
   /* Create a null frame_info_ptr.  */
   frame_info_ptr ()
@@ -309,9 +305,6 @@ public:
   {
     m_ptr = nullptr;
   }
-
-  /* Cache the frame_id that the pointer will use to reinflate.  */
-  void prepare_reinflate ();
 
   /* Use the cached frame_id to reinflate the pointer.  */
   void reinflate ();

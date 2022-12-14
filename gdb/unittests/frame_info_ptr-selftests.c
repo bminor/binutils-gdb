@@ -40,7 +40,6 @@ user_created_frame_callee (frame_info_ptr frame)
 {
   validate_user_created_frame (get_frame_id (frame));
 
-  frame.prepare_reinflate ();
   reinit_frame_cache ();
   frame.reinflate ();
 
@@ -61,7 +60,6 @@ test_user_created_frame ()
   /* Pass the frame to a callee, which calls reinit_frame_cache.  This lets us
      validate that the reinflation in both the callee and caller restore the
      same frame_info object.  */
-  frame.prepare_reinflate ();
   frame_info_ptr callees_frame_info = user_created_frame_callee (frame);
   frame.reinflate ();
 
