@@ -22,9 +22,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile normal.c
 
-if {[skip_gdbserver_tests]} {
-    return 0
-}
+require !skip_gdbserver_tests
 
 # We want to have control over where we start gdbserver.
 if { [is_remote target] } {

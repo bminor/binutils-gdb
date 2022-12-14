@@ -25,10 +25,7 @@
 
 load_lib gdbserver-support.exp
 
-if { [skip_gdbserver_tests] } {
-    verbose "skipping gdbserver tests"
-    return -1
-}
+require !skip_gdbserver_tests
 
 standard_testfile
 

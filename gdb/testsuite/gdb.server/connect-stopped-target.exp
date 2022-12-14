@@ -20,9 +20,7 @@
 load_lib gdbserver-support.exp
 load_lib prelink-support.exp
 
-if {[skip_gdbserver_tests]} {
-    return
-}
+require !skip_gdbserver_tests
 
 standard_testfile
 set executable ${testfile}

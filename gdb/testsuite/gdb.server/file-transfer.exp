@@ -20,9 +20,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile server.c
 
-if { [skip_gdbserver_tests] } {
-    return 0
-}
+require !skip_gdbserver_tests
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1

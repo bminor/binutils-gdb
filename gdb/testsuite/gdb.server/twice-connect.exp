@@ -19,9 +19,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile
 
-if { [skip_gdbserver_tests] } {
-    return 0
-}
+require !skip_gdbserver_tests
 
 if { [build_executable "failed to prepare" $::testfile $::srcfile \
 	  {debug}] } {
