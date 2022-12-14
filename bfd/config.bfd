@@ -1493,12 +1493,6 @@ case "${targ}" in
     ;;
 esac
 
-if test x"$targ_defvec" = x"aarch64-pe"; then
-  # Not currently complete (and probably not stable), warn user
-  echo "*** WARNING BFD aarch64-pe support not complete nor stable"
-  echo "*** Do not rely on this for production purposes"
-fi
-
 # All MIPS ELF targets need a 64-bit bfd_vma.
 case "${targ_defvec} ${targ_selvecs}" in
   *mips_elf*)

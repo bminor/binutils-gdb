@@ -1889,10 +1889,9 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
     }
 }
 
-#ifdef OBJ_ELF
+#if defined(OBJ_ELF) || defined(OBJ_COFF)
 /* Forward declarations for functions below, in the MD interface
    section.  */
-static fixS *fix_new_aarch64 (fragS *, int, short, expressionS *, int, int);
 static struct reloc_table_entry * find_reloc_table_entry (char **);
 
 /* Directives: Data.  */
@@ -1900,7 +1899,7 @@ static struct reloc_table_entry * find_reloc_table_entry (char **);
    implemented properly.  */
 
 static void
-s_aarch64_elf_cons (int nbytes)
+s_aarch64_cons (int nbytes)
 {
   expressionS exp;
 
@@ -1950,6 +1949,12 @@ s_aarch64_elf_cons (int nbytes)
   input_line_pointer--;
   demand_empty_rest_of_line ();
 }
+#endif
+
+#ifdef OBJ_ELF
+/* Forward declarations for functions below, in the MD interface
+   section.  */
+ static fixS *fix_new_aarch64 (fragS *, int, short, expressionS *, int, int);
 
 /* Mark symbol that it follows a variant PCS convention.  */
 
@@ -2119,11 +2124,13 @@ const pseudo_typeS md_pseudo_table[] = {
   {"tlsdescadd", s_tlsdescadd, 0},
   {"tlsdesccall", s_tlsdesccall, 0},
   {"tlsdescldr", s_tlsdescldr, 0},
-  {"word", s_aarch64_elf_cons, 4},
-  {"long", s_aarch64_elf_cons, 4},
-  {"xword", s_aarch64_elf_cons, 8},
-  {"dword", s_aarch64_elf_cons, 8},
   {"variant_pcs", s_variant_pcs, 0},
+#endif
+#if defined(OBJ_ELF) || defined(OBJ_COFF)
+  {"word", s_aarch64_cons, 4},
+  {"long", s_aarch64_cons, 4},
+  {"xword", s_aarch64_cons, 8},
+  {"dword", s_aarch64_cons, 8},
 #endif
   {"float16", float_cons, 'h'},
   {"bfloat16", float_cons, 'b'},
@@ -9258,6 +9265,9 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
     case BFD_RELOC_UNUSED:
       /* An error will already have been reported.  */
+      break;
+
+    case BFD_RELOC_RVA:
       break;
 
     default:
