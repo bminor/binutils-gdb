@@ -3343,18 +3343,6 @@ incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_com
 endif DEFAULT_TARGET_X86_64
 
 if DEFAULT_TARGET_X86_64
-check_PROGRAMS += exception_x86_64_bnd_test
-exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
-exception_x86_64_bnd_test_DEPENDENCIES = gcctestdir/ld exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
-exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS) -Wl,-z,bndplt
-exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
-exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
-	$(CXXCOMPILE) -c -fpic -Wa,-madd-bnd-prefix -o $@ $<
-exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
-	$(CXXCOMPILE) -c -Wa,-madd-bnd-prefix -o $@ $<
-endif DEFAULT_TARGET_X86_64
-
-if DEFAULT_TARGET_X86_64
 check_SCRIPTS += gnu_property_test.sh
 check_DATA += gnu_property_test.stdout
 MOSTLYCLEANFILES += gnu_property_test
@@ -3489,33 +3477,6 @@ split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
 	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
 MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 	split_x86_64_4 split_x86_64_r
-
-check_SCRIPTS += bnd_plt_1.sh
-check_DATA += bnd_plt_1.stdout
-bnd_plt_1.o: bnd_plt_1.s
-	$(TEST_AS) --64 -o $@ $<
-bnd_plt_1.so: bnd_plt_1.o ../ld-new
-	../ld-new -shared -z bndplt bnd_plt_1.o -o $@
-bnd_plt_1.stdout: bnd_plt_1.so
-	$(TEST_OBJDUMP) -dw $< > $@
-
-check_SCRIPTS += bnd_ifunc_1.sh
-check_DATA += bnd_ifunc_1.stdout
-bnd_ifunc_1.o: bnd_ifunc_1.s
-	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
-bnd_ifunc_1.so: bnd_ifunc_1.o ../ld-new
-	../ld-new -shared -z bndplt bnd_ifunc_1.o -o $@
-bnd_ifunc_1.stdout: bnd_ifunc_1.so
-	$(TEST_OBJDUMP) -dw $< > $@
-
-check_SCRIPTS += bnd_ifunc_2.sh
-check_DATA += bnd_ifunc_2.stdout
-bnd_ifunc_2.o: bnd_ifunc_2.s
-	$(TEST_AS) --64 -madd-bnd-prefix -o $@ $<
-bnd_ifunc_2.so: bnd_ifunc_2.o ../ld-new
-	../ld-new -shared -z bndplt bnd_ifunc_2.o -o $@
-bnd_ifunc_2.stdout: bnd_ifunc_2.so
-	$(TEST_OBJDUMP) -dw $< > $@
 
 endif DEFAULT_TARGET_X86_64
 
