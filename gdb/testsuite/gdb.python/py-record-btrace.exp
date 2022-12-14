@@ -17,10 +17,7 @@
 
 # Skip this test if btrace is disabled.
 
-if { [skip_btrace_tests] } {
-    untested "skipping btrace tests"
-    return -1
-}
+require !skip_btrace_tests
 
 load_lib gdb-python.exp
 

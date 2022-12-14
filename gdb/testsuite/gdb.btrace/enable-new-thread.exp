@@ -17,10 +17,7 @@
 
 # Test that new threads of recorded inferiors also get recorded.
 
-if { [skip_btrace_tests] } {
-    unsupported "target does not support record-btrace"
-    return -1
-}
+require !skip_btrace_tests
 
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] {

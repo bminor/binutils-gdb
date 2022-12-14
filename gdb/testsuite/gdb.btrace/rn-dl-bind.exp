@@ -21,10 +21,7 @@
 # Test that we can reverse-next over the dynamic linker's symbol
 # lookup code.
 
-if { [skip_btrace_tests] } {
-    unsupported "target does not support record-btrace"
-    return -1
-}
+require !skip_btrace_tests
 
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile $srcfile \

@@ -20,10 +20,7 @@
 # calls.  This used to cause a crash in get_frame_type.
 #
 
-if { [skip_btrace_tests] } {
-    unsupported "target does not support record-btrace"
-    return -1
-}
+require !skip_btrace_tests
 
 # This test requires the compiler to generate a tail call.  To guarantee that
 # we always get one, we use an assembly source file.

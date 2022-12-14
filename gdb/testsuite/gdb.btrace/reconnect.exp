@@ -19,10 +19,7 @@
 
 load_lib gdbserver-support.exp
 
-if { [skip_btrace_tests] } {
-    unsupported "target does not support record-btrace"
-    return -1
-}
+require !skip_btrace_tests
 if { [skip_gdbserver_tests] } {
     unsupported "target does not support gdbserver"
     return -1
