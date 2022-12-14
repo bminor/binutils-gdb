@@ -18,9 +18,7 @@
 # Test the basic operation of the "kill inferiors" and "detach inferiors"
 # commands.
 
-if ![can_spawn_for_attach] {
-    return 0
-}
+require can_spawn_for_attach
 
 standard_testfile
 set executable $testfile

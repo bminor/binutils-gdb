@@ -144,10 +144,7 @@ gdb_breakpoint $srcfile:$bp_main
 test_dlmopen
 
 # Try the same again when attaching after dlmopen().
-if { ![can_spawn_for_attach] } {
-    unsupported "target does not support attach"
-    return -1
-}
+require can_spawn_for_attach
 
 clean_restart $binfile
 

@@ -35,9 +35,7 @@ if [mi_gdb_start] {
     return
 }
 
-if ![can_spawn_for_attach] {
-    return
-}
+require can_spawn_for_attach
 
 set string_re {(?:[^\\"]|\\.)*}
 

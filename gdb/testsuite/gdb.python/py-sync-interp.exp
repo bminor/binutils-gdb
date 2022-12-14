@@ -20,9 +20,7 @@
 
 standard_testfile
 
-if {![can_spawn_for_attach]} {
-    return 0
-}
+require can_spawn_for_attach
 
 load_lib gdb-python.exp
 

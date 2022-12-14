@@ -48,9 +48,7 @@
 # a breakpoint, which has helped with exposing further corner case
 # bugs.
 
-if {![can_spawn_for_attach]} {
-    return 0
-}
+require can_spawn_for_attach
 
 standard_testfile
 
