@@ -275,29 +275,38 @@ public:
   }
 
   frame_info *operator-> () const
-  {
-    return m_ptr;
-  }
+  { return this->reinflate (); }
 
   /* Fetch the underlying pointer.  Note that new code should
      generally not use this -- avoid it if at all possible.  */
   frame_info *get () const
   {
-    return m_ptr;
+    if (this->is_null ())
+      return nullptr;
+
+    return this->reinflate ();
   }
+
+  /* Return true if this object is empty (does not wrap a frame_info
+     object).  */
+
+  bool is_null () const
+  {
+    return m_cached_level == this->invalid_level;
+  };
 
   /* This exists for compatibility with pre-existing code that checked
      a "frame_info *" using "!".  */
   bool operator! () const
   {
-    return m_ptr == nullptr;
+    return this->is_null ();
   }
 
   /* This exists for compatibility with pre-existing code that checked
      a "frame_info *" like "if (ptr)".  */
   explicit operator bool () const
   {
-    return m_ptr != nullptr;
+    return !this->is_null ();
   }
 
   /* Invalidate this pointer.  */
@@ -306,17 +315,18 @@ public:
     m_ptr = nullptr;
   }
 
-  /* Use the cached frame_id to reinflate the pointer.  */
-  void reinflate ();
-
 private:
   /* We sometimes need to construct frame_info_ptr objects around the
      sentinel_frame, which has level -1.  Therefore, make the invalid frame
      level value -2.  */
   static constexpr int invalid_level = -2;
 
+  /* Use the cached frame level and id to reinflate the pointer, and return
+     it.  */
+  frame_info *reinflate () const;
+
   /* The underlying pointer.  */
-  frame_info *m_ptr = nullptr;
+  mutable frame_info *m_ptr = nullptr;
 
   /* The frame_id of the underlying pointer.
 
@@ -341,37 +351,46 @@ private:
 static inline bool
 operator== (const frame_info *self, const frame_info_ptr &other)
 {
+  if (self == nullptr || other.is_null ())
+    return self == nullptr && other.is_null ();
+
   return self == other.get ();
 }
 
 static inline bool
 operator== (const frame_info_ptr &self, const frame_info_ptr &other)
 {
+  if (self.is_null () || other.is_null ())
+    return self.is_null () && other.is_null ();
+
   return self.get () == other.get ();
 }
 
 static inline bool
 operator== (const frame_info_ptr &self, const frame_info *other)
 {
+  if (self.is_null () || other == nullptr)
+    return self.is_null () && other == nullptr;
+
   return self.get () == other;
 }
 
 static inline bool
 operator!= (const frame_info *self, const frame_info_ptr &other)
 {
-  return self != other.get ();
+  return !(self == other);
 }
 
 static inline bool
 operator!= (const frame_info_ptr &self, const frame_info_ptr &other)
 {
-  return self.get () != other.get ();
+  return !(self == other);
 }
 
 static inline bool
 operator!= (const frame_info_ptr &self, const frame_info *other)
 {
-  return self.get () != other;
+  return !(self == other);
 }
 
 /* For every stopped thread, GDB tracks two frames: current and

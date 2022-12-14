@@ -1915,7 +1915,6 @@ finish_command (const char *arg, int from_tty)
 
       print_stack_frame (callee_frame, 1, LOCATION, 0);
     }
-  frame.reinflate ();
 
   if (execution_direction == EXEC_REVERSE)
     finish_backward (sm);

@@ -367,7 +367,6 @@ print_stack_frame (frame_info_ptr frame, int print_level,
       print_frame_info (user_frame_print_options,
 			frame, print_level, print_what, 1 /* print_args */,
 			set_current_sal);
-      frame.reinflate ();
       if (set_current_sal)
 	set_current_sal_from_frame (frame);
     }
@@ -903,7 +902,6 @@ print_frame_args (const frame_print_options &fp_opts,
 	    }
 
 	  first = 0;
-	  frame.reinflate ();
 	}
     }
 
@@ -1173,7 +1171,6 @@ print_frame_info (const frame_print_options &fp_opts,
 
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
-      frame.reinflate ();
 
       /* If disassemble-next-line is set to on and there is line debug
 	 messages, output assembly codes for next line.  */
@@ -1676,8 +1673,6 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 
 	print_frame_args (user_frame_print_options,
 			  func, fi, numargs, gdb_stdout);
-	fi.reinflate ();
-
 	gdb_puts ("\n");
       }
   }
@@ -2077,7 +2072,6 @@ backtrace_command_1 (const frame_print_options &fp_opts,
 	    print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
 
 	  /* Save the last frame to check for error conditions.  */
-	  fi.reinflate ();
 	  trailing = fi;
 	}
 

@@ -180,7 +180,6 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
 	     If args is 0, don't print the arguments.  */
 	  print_frame_info (user_frame_print_options,
 			    fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
-	  fi.reinflate ();
 	}
     }
 }

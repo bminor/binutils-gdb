@@ -3224,8 +3224,8 @@ frame_info_ptr::frame_info_ptr (struct frame_info *ptr)
 
 /* See frame-info-ptr.h.  */
 
-void
-frame_info_ptr::reinflate ()
+frame_info *
+frame_info_ptr::reinflate () const
 {
   /* Ensure we have a valid frame level (sentinel frame or above).  */
   gdb_assert (m_cached_level >= -1);
@@ -3233,7 +3233,7 @@ frame_info_ptr::reinflate ()
   if (m_ptr != nullptr)
     {
       /* The frame_info wasn't invalidated, no need to reinflate.  */
-      return;
+      return m_ptr;
     }
 
   if (m_cached_id.user_created_p)
@@ -3255,6 +3255,7 @@ frame_info_ptr::reinflate ()
     }
 
   gdb_assert (m_ptr != nullptr);
+  return m_ptr;
 }
 
 void _initialize_frame ();
