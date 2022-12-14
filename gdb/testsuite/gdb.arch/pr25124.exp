@@ -16,10 +16,7 @@
 # Test proper disassembling of ARM thumb instructions when reloading a symbol
 # file.
 
-if {![is_aarch32_target]} {
-    verbose "Skipping ARM tests."
-    return
-}
+require is_aarch32_target
 
 standard_testfile .S
 

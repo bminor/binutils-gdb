@@ -15,10 +15,7 @@
 
 # Test single-stepping into incorrectly marked Thumb routine
 
-if {![is_aarch32_target]} {
-    verbose "Skipping ARM tests."
-    return
-}
+require is_aarch32_target
 
 set testfile "thumb-singlestep"
 set srcfile ${testfile}.S

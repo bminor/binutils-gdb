@@ -15,10 +15,7 @@
 
 # Test ARM/Thumb prologue analyzer.
 
-if {![is_aarch32_target]} {
-    verbose "Skipping ARM prologue tests."
-    return
-}
+require is_aarch32_target
 
 standard_testfile
 
