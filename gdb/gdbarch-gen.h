@@ -684,19 +684,46 @@ extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR ad
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
 /* On some architectures, not all bits of a pointer are significant.
-   On AArch64, for example, the top bits of a pointer may carry a "tag", which
-   can be ignored by the kernel and the hardware.  The "tag" can be regarded as
-   additional data associated with the pointer, but it is not part of the address.
+   On AArch64 and amd64, for example, the top bits of a pointer may carry a
+   "tag", which can be ignored by the kernel and the hardware.  The "tag" can be
+   regarded as additional data associated with the pointer, but it is not part
+   of the address.
 
    Given a pointer for the architecture, this hook removes all the
-   non-significant bits and sign-extends things as needed.  It gets used to remove
-   non-address bits from data pointers (for example, removing the AArch64 MTE tag
-   bits from a pointer) and from code pointers (removing the AArch64 PAC signature
-   from a pointer containing the return address). */
+   non-significant bits and sign-extends things as needed.  It gets used to
+   remove non-address bits from pointers used for watchpoints. */
 
-typedef CORE_ADDR (gdbarch_remove_non_address_bits_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
-extern CORE_ADDR gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer);
-extern void set_gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_ftype *remove_non_address_bits);
+typedef CORE_ADDR (gdbarch_remove_non_address_bits_watchpoint_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern CORE_ADDR gdbarch_remove_non_address_bits_watchpoint (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern void set_gdbarch_remove_non_address_bits_watchpoint (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_watchpoint_ftype *remove_non_address_bits_watchpoint);
+
+/* On some architectures, not all bits of a pointer are significant.
+   On AArch64 and amd64, for example, the top bits of a pointer may carry a
+   "tag", which can be ignored by the kernel and the hardware.  The "tag" can be
+   regarded as additional data associated with the pointer, but it is not part
+   of the address.
+
+   Given a pointer for the architecture, this hook removes all the
+   non-significant bits and sign-extends things as needed.  It gets used to
+   remove non-address bits from pointers used for breakpoints. */
+
+typedef CORE_ADDR (gdbarch_remove_non_address_bits_breakpoint_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern CORE_ADDR gdbarch_remove_non_address_bits_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern void set_gdbarch_remove_non_address_bits_breakpoint (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_breakpoint_ftype *remove_non_address_bits_breakpoint);
+
+/* On some architectures, not all bits of a pointer are significant.
+   On AArch64 and amd64, for example, the top bits of a pointer may carry a
+   "tag", which can be ignored by the kernel and the hardware.  The "tag" can be
+   regarded as additional data associated with the pointer, but it is not part
+   of the address.
+
+   Given a pointer for the architecture, this hook removes all the
+   non-significant bits and sign-extends things as needed.  It gets used to
+   remove non-address bits from any pointer used to access memory. */
+
+typedef CORE_ADDR (gdbarch_remove_non_address_bits_memory_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern CORE_ADDR gdbarch_remove_non_address_bits_memory (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern void set_gdbarch_remove_non_address_bits_memory (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_memory_ftype *remove_non_address_bits_memory);
 
 /* Return a string representation of the memory tag TAG. */
 

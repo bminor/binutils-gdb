@@ -4121,7 +4121,7 @@ aarch64_memtag_matches_p (struct gdbarch *gdbarch,
 
   /* Fetch the allocation tag for ADDRESS.  */
   std::optional<CORE_ADDR> atag
-    = aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch, addr));
+    = aarch64_mte_get_atag (aarch64_remove_non_address_bits (gdbarch, addr));
 
   if (!atag.has_value ())
     return true;
@@ -4160,7 +4160,7 @@ aarch64_set_memtags (struct gdbarch *gdbarch, struct value *address,
   else
     {
       /* Remove the top byte.  */
-      addr = gdbarch_remove_non_address_bits (gdbarch, addr);
+      addr = aarch64_remove_non_address_bits (gdbarch, addr);
 
       /* With G being the number of tag granules and N the number of tags
 	 passed in, we can have the following cases:
@@ -4209,7 +4209,7 @@ aarch64_get_memtag (struct gdbarch *gdbarch, struct value *address,
   else
     {
       /* Remove the top byte.  */
-      addr = gdbarch_remove_non_address_bits (gdbarch, addr);
+      addr = aarch64_remove_non_address_bits (gdbarch, addr);
       std::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
 
       if (!atag.has_value ())
@@ -4236,10 +4236,9 @@ aarch64_memtag_to_string (struct gdbarch *gdbarch, struct value *tag_value)
   return string_printf ("0x%s", phex_nz (tag, sizeof (tag)));
 }
 
-/* AArch64 implementation of the remove_non_address_bits gdbarch hook.  Remove
-   non address bits from a pointer value.  */
+/* See aarch64-tdep.h.  */
 
-static CORE_ADDR
+CORE_ADDR
 aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
 {
   /* By default, we assume TBI and discard the top 8 bits plus the VA range
@@ -4750,9 +4749,15 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->ra_sign_state_regnum = ra_sign_state_offset + num_regs;
 
   /* Architecture hook to remove bits of a pointer that are not part of the
-     address, like memory tags (MTE) and pointer authentication signatures.  */
-  set_gdbarch_remove_non_address_bits (gdbarch,
-				       aarch64_remove_non_address_bits);
+     address, like memory tags (MTE) and pointer authentication signatures.
+     Configure address adjustment for watchpoints, breakpoints and memory
+     transfer.  */
+  set_gdbarch_remove_non_address_bits_watchpoint
+    (gdbarch, aarch64_remove_non_address_bits);
+  set_gdbarch_remove_non_address_bits_breakpoint
+    (gdbarch, aarch64_remove_non_address_bits);
+  set_gdbarch_remove_non_address_bits_memory
+    (gdbarch, aarch64_remove_non_address_bits);
 
   /* SME pseudo-registers.  */
   if (tdep->has_sme ())

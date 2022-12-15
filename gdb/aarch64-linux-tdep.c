@@ -2430,7 +2430,7 @@ static bool
 aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   /* Remove the top byte for the memory range check.  */
-  address = gdbarch_remove_non_address_bits (gdbarch, address);
+  address = aarch64_remove_non_address_bits (gdbarch, address);
 
   /* Check if the page that contains ADDRESS is mapped with PROT_MTE.  */
   if (!linux_address_in_memtag_page (address))
@@ -2488,8 +2488,9 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       uiout->text ("\n");
 
       std::optional<CORE_ADDR> atag
-	= aarch64_mte_get_atag (gdbarch_remove_non_address_bits (gdbarch,
-								 fault_addr));
+	= aarch64_mte_get_atag (
+	    aarch64_remove_non_address_bits (gdbarch, fault_addr));
+
       gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
 
       if (!atag.has_value ())

@@ -943,7 +943,7 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
      kernel can potentially be tagged addresses.  */
   struct gdbarch *gdbarch = thread_architecture (inferior_ptid);
   const CORE_ADDR addr_trap
-    = gdbarch_remove_non_address_bits (gdbarch, (CORE_ADDR) siginfo.si_addr);
+    = aarch64_remove_non_address_bits (gdbarch, (CORE_ADDR) siginfo.si_addr);
 
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (inferior_ptid.pid ());

@@ -1608,7 +1608,8 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   if (len == 0)
     return TARGET_XFER_EOF;
 
-  memaddr = gdbarch_remove_non_address_bits (current_inferior ()->arch (),
+  memaddr
+   = gdbarch_remove_non_address_bits_memory (current_inferior ()->arch (),
 					     memaddr);
 
   /* Fill in READBUF with breakpoint shadows, or WRITEBUF with

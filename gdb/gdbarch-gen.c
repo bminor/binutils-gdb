@@ -143,7 +143,9 @@ struct gdbarch
   int frame_red_zone_size = 0;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove = core_addr_identity;
-  gdbarch_remove_non_address_bits_ftype *remove_non_address_bits = default_remove_non_address_bits;
+  gdbarch_remove_non_address_bits_watchpoint_ftype *remove_non_address_bits_watchpoint = default_remove_non_address_bits;
+  gdbarch_remove_non_address_bits_breakpoint_ftype *remove_non_address_bits_breakpoint = default_remove_non_address_bits;
+  gdbarch_remove_non_address_bits_memory_ftype *remove_non_address_bits_memory = default_remove_non_address_bits;
   gdbarch_memtag_to_string_ftype *memtag_to_string = default_memtag_to_string;
   gdbarch_tagged_address_p_ftype *tagged_address_p = default_tagged_address_p;
   gdbarch_memtag_matches_p_ftype *memtag_matches_p = default_memtag_matches_p;
@@ -407,7 +409,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_red_zone_size, invalid_p == 0.  */
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0.  */
   /* Skip verify of addr_bits_remove, invalid_p == 0.  */
-  /* Skip verify of remove_non_address_bits, invalid_p == 0.  */
+  /* Skip verify of remove_non_address_bits_watchpoint, invalid_p == 0.  */
+  /* Skip verify of remove_non_address_bits_breakpoint, invalid_p == 0.  */
+  /* Skip verify of remove_non_address_bits_memory, invalid_p == 0.  */
   /* Skip verify of memtag_to_string, invalid_p == 0.  */
   /* Skip verify of tagged_address_p, invalid_p == 0.  */
   /* Skip verify of memtag_matches_p, invalid_p == 0.  */
@@ -910,8 +914,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	      "gdbarch_dump: addr_bits_remove = <%s>\n",
 	      host_address_to_string (gdbarch->addr_bits_remove));
   gdb_printf (file,
-	      "gdbarch_dump: remove_non_address_bits = <%s>\n",
-	      host_address_to_string (gdbarch->remove_non_address_bits));
+	      "gdbarch_dump: remove_non_address_bits_watchpoint = <%s>\n",
+	      host_address_to_string (gdbarch->remove_non_address_bits_watchpoint));
+  gdb_printf (file,
+	      "gdbarch_dump: remove_non_address_bits_breakpoint = <%s>\n",
+	      host_address_to_string (gdbarch->remove_non_address_bits_breakpoint));
+  gdb_printf (file,
+	      "gdbarch_dump: remove_non_address_bits_memory = <%s>\n",
+	      host_address_to_string (gdbarch->remove_non_address_bits_memory));
   gdb_printf (file,
 	      "gdbarch_dump: memtag_to_string = <%s>\n",
 	      host_address_to_string (gdbarch->memtag_to_string));
@@ -3198,20 +3208,54 @@ set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
+gdbarch_remove_non_address_bits_watchpoint (struct gdbarch *gdbarch, CORE_ADDR pointer)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->remove_non_address_bits != NULL);
+  gdb_assert (gdbarch->remove_non_address_bits_watchpoint != NULL);
   if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_remove_non_address_bits called\n");
-  return gdbarch->remove_non_address_bits (gdbarch, pointer);
+    gdb_printf (gdb_stdlog, "gdbarch_remove_non_address_bits_watchpoint called\n");
+  return gdbarch->remove_non_address_bits_watchpoint (gdbarch, pointer);
 }
 
 void
-set_gdbarch_remove_non_address_bits (struct gdbarch *gdbarch,
-				     gdbarch_remove_non_address_bits_ftype remove_non_address_bits)
+set_gdbarch_remove_non_address_bits_watchpoint (struct gdbarch *gdbarch,
+						gdbarch_remove_non_address_bits_watchpoint_ftype remove_non_address_bits_watchpoint)
 {
-  gdbarch->remove_non_address_bits = remove_non_address_bits;
+  gdbarch->remove_non_address_bits_watchpoint = remove_non_address_bits_watchpoint;
+}
+
+CORE_ADDR
+gdbarch_remove_non_address_bits_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pointer)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->remove_non_address_bits_breakpoint != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_remove_non_address_bits_breakpoint called\n");
+  return gdbarch->remove_non_address_bits_breakpoint (gdbarch, pointer);
+}
+
+void
+set_gdbarch_remove_non_address_bits_breakpoint (struct gdbarch *gdbarch,
+						gdbarch_remove_non_address_bits_breakpoint_ftype remove_non_address_bits_breakpoint)
+{
+  gdbarch->remove_non_address_bits_breakpoint = remove_non_address_bits_breakpoint;
+}
+
+CORE_ADDR
+gdbarch_remove_non_address_bits_memory (struct gdbarch *gdbarch, CORE_ADDR pointer)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->remove_non_address_bits_memory != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_remove_non_address_bits_memory called\n");
+  return gdbarch->remove_non_address_bits_memory (gdbarch, pointer);
+}
+
+void
+set_gdbarch_remove_non_address_bits_memory (struct gdbarch *gdbarch,
+					    gdbarch_remove_non_address_bits_memory_ftype remove_non_address_bits_memory)
+{
+  gdbarch->remove_non_address_bits_memory = remove_non_address_bits_memory;
 }
 
 std::string

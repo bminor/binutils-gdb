@@ -205,4 +205,10 @@ bool aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch);
 
 std::optional<CORE_ADDR> aarch64_mte_get_atag (CORE_ADDR address);
 
+/* AArch64 implementation of the remove_non_address_bits gdbarch hooks.
+   Remove non address bits from a pointer value.  */
+
+CORE_ADDR aarch64_remove_non_address_bits (struct gdbarch *gdbarch,
+					   CORE_ADDR pointer);
+
 #endif /* aarch64-tdep.h */
