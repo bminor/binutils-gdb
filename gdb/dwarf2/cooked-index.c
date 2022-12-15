@@ -26,26 +26,6 @@
 #include "split-name.h"
 #include <algorithm>
 
-/* Hash function for cooked_index_entry.  */
-
-static hashval_t
-hash_entry (const void *e)
-{
-  const cooked_index_entry *entry = (const cooked_index_entry *) e;
-  return dwarf5_djb_hash (entry->canonical);
-}
-
-/* Equality function for cooked_index_entry.  */
-
-static int
-eq_entry (const void *a, const void *b)
-{
-  const cooked_index_entry *ae = (const cooked_index_entry *) a;
-  const gdb::string_view *sv = (const gdb::string_view *) b;
-  return (strlen (ae->canonical) == sv->length ()
-	  && strncasecmp (ae->canonical, sv->data (), sv->length ()) == 0);
-}
-
 /* See cooked-index.h.  */
 
 const char *
@@ -190,6 +170,20 @@ cooked_index::do_finalize ()
      of extra memory is used.  */
   htab_up seen_names (htab_create_alloc (10, hash_name_ptr, eq_name_ptr,
 					 nullptr, xcalloc, xfree));
+
+  auto hash_entry = [] (const void *e)
+    {
+      const cooked_index_entry *entry = (const cooked_index_entry *) e;
+      return dwarf5_djb_hash (entry->canonical);
+    };
+
+  auto eq_entry = [] (const void *a, const void *b) -> int
+    {
+      const cooked_index_entry *ae = (const cooked_index_entry *) a;
+      const gdb::string_view *sv = (const gdb::string_view *) b;
+      return (strlen (ae->canonical) == sv->length ()
+	      && strncasecmp (ae->canonical, sv->data (), sv->length ()) == 0);
+    };
 
   htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry,
 					   nullptr, xcalloc, xfree));
