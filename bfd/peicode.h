@@ -1527,8 +1527,8 @@ pe_bfd_object_p (bfd * abfd)
       if ((a->SectionAlignment & -a->SectionAlignment) != a->SectionAlignment
 	  || a->SectionAlignment >= 0x80000000)
 	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: adjusting invalid SectionAlignment");
+	  _bfd_error_handler (_("%pB: adjusting invalid SectionAlignment"),
+				abfd);
 	  a->SectionAlignment &= -a->SectionAlignment;
 	  if (a->SectionAlignment >= 0x80000000)
 	    a->SectionAlignment = 0x40000000;
@@ -1537,18 +1537,15 @@ pe_bfd_object_p (bfd * abfd)
       if ((a->FileAlignment & -a->FileAlignment) != a->FileAlignment
 	  || a->FileAlignment > a->SectionAlignment)
 	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: adjusting invalid FileAlignment");
+	  _bfd_error_handler (_("%pB: adjusting invalid FileAlignment"),
+			      abfd);
 	  a->FileAlignment &= -a->FileAlignment;
 	  if (a->FileAlignment > a->SectionAlignment)
 	    a->FileAlignment = a->SectionAlignment;
 	}
 
       if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-	{
-	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
-	  *warn = _("%pB: invalid NumberOfRvaAndSizes");
-	}
+	_bfd_error_handler (_("%pB: invalid NumberOfRvaAndSizes"), abfd);
     }
 
   result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,

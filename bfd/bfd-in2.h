@@ -7816,6 +7816,13 @@ bfd_keep_unused_section_symbols (const bfd *abfd)
   return abfd->xvec->keep_unused_section_symbols;
 }
 
+/* Cached _bfd_check_format messages are put in this.  */
+struct per_xvec_message
+{
+  struct per_xvec_message *next;
+  char message[];
+};
+
 bool bfd_set_default_target (const char *name);
 
 const bfd_target *bfd_find_target (const char *target_name, bfd *abfd);

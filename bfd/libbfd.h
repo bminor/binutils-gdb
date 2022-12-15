@@ -1,6 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
-   generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c",
-   "cache.c", "reloc.c", "section.c", "targets.c", "archures.c"
+   generated from "libbfd-in.h", "libbfd.c", "bfd.c", "bfdio.c",
+   "bfdwin.c", "cache.c", "reloc.c", "section.c", "targets.c", "archures.c"
    and "linker.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
@@ -988,6 +988,11 @@ extern void * bfd_zmalloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
 bool bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 
 unsigned int bfd_log2 (bfd_vma x);
+
+/* Extracted from bfd.c.  */
+bfd_error_handler_type _bfd_set_error_handler_caching (bfd *);
+
+const char *_bfd_get_error_program_name (void);
 
 /* Extracted from bfdio.c.  */
 struct bfd_iovec
@@ -3554,7 +3559,7 @@ bool _bfd_unrecognized_reloc
 bool _bfd_section_size_insane (bfd *abfd, asection *sec);
 
 /* Extracted from targets.c.  */
-const char **_bfd_per_xvec_warn (const bfd_target *);
+struct per_xvec_message **_bfd_per_xvec_warn (const bfd_target *, size_t);
 
 /* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;

@@ -890,6 +890,10 @@ union _bfd_doprnt_args
   } type;
 };
 
+/* Maximum number of _bfd_error_handler args.  Don't increase this
+   without changing the code handling positional parameters.  */
+#define MAX_ARGS 9
+
 /* This macro and _bfd_doprnt taken from libiberty _doprnt.c, tidied a
    little and extended to handle '%pA', '%pB' and positional parameters.  */
 
@@ -897,11 +901,14 @@ union _bfd_doprnt_args
   do								\
     {								\
       TYPE value = (TYPE) args[arg_no].FIELD;			\
-      result = fprintf (stream, specifier, value);		\
+      result = print (stream, specifier, value);		\
     } while (0)
 
+typedef int (*print_func) (void *, const char *, ...);
+
 static int
-_bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
+_bfd_doprnt (print_func print, void *stream, const char *format,
+	     union _bfd_doprnt_args *args)
 {
   const char *ptr = format;
   char specifier[128];
@@ -917,9 +924,9 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 	  /* While we have regular characters, print them.  */
 	  char *end = strchr (ptr, '%');
 	  if (end != NULL)
-	    result = fprintf (stream, "%.*s", (int) (end - ptr), ptr);
+	    result = print (stream, "%.*s", (int) (end - ptr), ptr);
 	  else
-	    result = fprintf (stream, "%s", ptr);
+	    result = print (stream, "%s", ptr);
 	  ptr += result;
 	}
       else if (ptr[1] == '%')
@@ -1103,9 +1110,9 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 								 sec)) != NULL)
 		    group = ci->name;
 		  if (group != NULL)
-		    result = fprintf (stream, "%s[%s]", sec->name, group);
+		    result = print (stream, "%s[%s]", sec->name, group);
 		  else
-		    result = fprintf (stream, "%s", sec->name);
+		    result = print (stream, "%s", sec->name);
 		}
 	      else if (*ptr == 'B')
 		{
@@ -1119,11 +1126,11 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 		    abort ();
 		  else if (abfd->my_archive
 			   && !bfd_is_thin_archive (abfd->my_archive))
-		    result = fprintf (stream, "%s(%s)",
-				      bfd_get_filename (abfd->my_archive),
-				      bfd_get_filename (abfd));
+		    result = print (stream, "%s(%s)",
+				    bfd_get_filename (abfd->my_archive),
+				    bfd_get_filename (abfd));
 		  else
-		    result = fprintf (stream, "%s", bfd_get_filename (abfd));
+		    result = print (stream, "%s", bfd_get_filename (abfd));
 		}
 	      else
 		PRINT_TYPE (void *, p);
@@ -1144,10 +1151,13 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 /* First pass over FORMAT to gather ARGS.  Returns number of args.  */
 
 static unsigned int
-_bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
+_bfd_doprnt_scan (const char *format, va_list ap, union _bfd_doprnt_args *args)
 {
   const char *ptr = format;
   unsigned int arg_count = 0;
+
+  for (unsigned int i = 0; i < MAX_ARGS; i++)
+    args[i].type = Bad;
 
   while (*ptr != '\0')
     {
@@ -1190,7 +1200,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		  arg_index = *ptr - '1';
 		  ptr += 2;
 		}
-	      if (arg_index >= 9)
+	      if (arg_index >= MAX_ARGS)
 		abort ();
 	      args[arg_index].type = Int;
 	      arg_count++;
@@ -1215,7 +1225,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		      arg_index = *ptr - '1';
 		      ptr += 2;
 		    }
-		  if (arg_index >= 9)
+		  if (arg_index >= MAX_ARGS)
 		    abort ();
 		  args[arg_index].type = Int;
 		  arg_count++;
@@ -1303,27 +1313,14 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 	      abort();
 	    }
 
-	  if (arg_no >= 9)
+	  if (arg_no >= MAX_ARGS)
 	    abort ();
 	  args[arg_no].type = arg_type;
 	  arg_count++;
 	}
     }
 
-  return arg_count;
-}
-
-static void
-error_handler_internal (const char *fmt, va_list ap)
-{
-  unsigned int i, arg_count;
-  union _bfd_doprnt_args args[9];
-
-  for (i = 0; i < sizeof (args) / sizeof (args[0]); i++)
-    args[i].type = Bad;
-
-  arg_count = _bfd_doprnt_scan (fmt, args);
-  for (i = 0; i < arg_count; i++)
+  for (unsigned int i = 0; i < arg_count; i++)
     {
       switch (args[i].type)
 	{
@@ -1350,20 +1347,93 @@ error_handler_internal (const char *fmt, va_list ap)
 	}
     }
 
+  return arg_count;
+}
+
+/* The standard error handler that prints to stderr.  */
+
+static void
+error_handler_fprintf (const char *fmt, va_list ap)
+{
+  union _bfd_doprnt_args args[MAX_ARGS];
+
+  _bfd_doprnt_scan (fmt, ap, args);
+
   /* PR 4992: Don't interrupt output being sent to stdout.  */
   fflush (stdout);
 
-  if (_bfd_error_program_name != NULL)
-    fprintf (stderr, "%s: ", _bfd_error_program_name);
-  else
-    fprintf (stderr, "BFD: ");
+  fprintf (stderr, "%s: ", _bfd_get_error_program_name ());
 
-  _bfd_doprnt (stderr, fmt, args);
+  _bfd_doprnt ((print_func) fprintf, stderr, fmt, args);
 
   /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
      warning, so use the fputc function to avoid it.  */
   fputc ('\n', stderr);
   fflush (stderr);
+}
+
+/* Control printing to a string buffer.  */
+struct buf_stream
+{
+  char *ptr;
+  int left;
+};
+
+/* An fprintf like function that instead prints to a string buffer.  */
+
+static int
+err_sprintf (void *stream, const char *fmt, ...)
+{
+  struct buf_stream *s = stream;
+  va_list ap;
+
+  va_start (ap, fmt);
+  int total = vsnprintf (s->ptr, s->left, fmt, ap);
+  va_end (ap);
+  if (total < 0)
+    ;
+  else if (total > s->left)
+    {
+      s->ptr += s->left;
+      s->left = 0;
+    }
+  else
+    {
+      s->ptr += total;
+      s->left -= total;
+    }
+  return total;
+}
+
+/* Communicate the bfd processed by bfd_check_format_matches to the
+   error handling function error_handler_sprintf.  */
+
+static bfd *error_handler_bfd;
+
+/* An error handler that prints to a string, then dups that string to
+   a per-xvec cache.  */
+
+static void
+error_handler_sprintf (const char *fmt, va_list ap)
+{
+  union _bfd_doprnt_args args[MAX_ARGS];
+  char error_buf[1024];
+  struct buf_stream error_stream;
+
+  _bfd_doprnt_scan (fmt, ap, args);
+
+  error_stream.ptr = error_buf;
+  error_stream.left = sizeof (error_buf);
+  _bfd_doprnt (err_sprintf, &error_stream, fmt, args);
+
+  size_t len = error_stream.ptr - error_buf;
+  struct per_xvec_message **warn
+    = _bfd_per_xvec_warn (error_handler_bfd->xvec, len + 1);
+  if (*warn)
+    {
+      memcpy ((*warn)->message, error_buf, len);
+      (*warn)->message[len] = 0;
+    }
 }
 
 /* This is a function pointer to the routine which should handle BFD
@@ -1372,7 +1442,7 @@ error_handler_internal (const char *fmt, va_list ap)
    function pointer permits a program linked against BFD to intercept
    the messages and deal with them itself.  */
 
-static bfd_error_handler_type _bfd_error_internal = error_handler_internal;
+static bfd_error_handler_type _bfd_error_internal = error_handler_fprintf;
 
 /*
 FUNCTION
@@ -1427,6 +1497,25 @@ bfd_set_error_handler (bfd_error_handler_type pnew)
 }
 
 /*
+INTERNAL_FUNCTION
+	_bfd_set_error_handler_caching
+
+SYNOPSIS
+	bfd_error_handler_type _bfd_set_error_handler_caching (bfd *);
+
+DESCRIPTION
+	Set the BFD error handler function to one that stores messages
+	to the per_xvec_warn array.  Returns the previous function.
+*/
+
+bfd_error_handler_type
+_bfd_set_error_handler_caching (bfd *abfd)
+{
+  error_handler_bfd = abfd;
+  return bfd_set_error_handler (error_handler_sprintf);
+}
+
+/*
 FUNCTION
 	bfd_set_error_program_name
 
@@ -1444,6 +1533,25 @@ void
 bfd_set_error_program_name (const char *name)
 {
   _bfd_error_program_name = name;
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_get_error_program_name
+
+SYNOPSIS
+	const char *_bfd_get_error_program_name (void);
+
+DESCRIPTION
+	Get the program name used when printing a BFD error.
+*/
+
+const char *
+_bfd_get_error_program_name (void)
+{
+  if (_bfd_error_program_name != NULL)
+    return _bfd_error_program_name;
+  return "BFD";
 }
 
 /*

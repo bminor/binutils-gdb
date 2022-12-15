@@ -932,7 +932,7 @@ BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \
 	linker.c simple.c compress.c
 BFD64_H_FILES = archive64.c
-LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
+LIBBFD_H_FILES = libbfd-in.h libbfd.c bfd.c bfdio.c bfdwin.c \
 	cache.c reloc.c section.c targets.c archures.c linker.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
