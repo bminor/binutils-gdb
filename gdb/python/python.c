@@ -644,7 +644,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       bool first = true;
       char *save_ptr = nullptr;
       auto reader
-	= [&] ()
+	= [&] (std::string &buffer)
 	  {
 	    const char *result = strtok_r (first ? &arg_copy[0] : nullptr,
 					   "\n", &save_ptr);

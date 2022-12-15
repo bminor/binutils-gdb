@@ -38,11 +38,12 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 {
   int n;
   const char *p = NULL;
+  std::string buffer;
   char *q;
 
   try
     {
-      p = command_line_input (prompt, "python");
+      p = command_line_input (buffer, prompt, "python");
     }
   /* Handle errors by raising Python exceptions.  */
   catch (const gdb_exception &except)

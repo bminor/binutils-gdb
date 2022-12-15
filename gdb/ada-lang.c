@@ -3561,7 +3561,8 @@ get_selections (int *choices, int n_choices, int max_results,
   if (prompt == NULL)
     prompt = "> ";
 
-  args = command_line_input (prompt, annotation_suffix);
+  std::string buffer;
+  args = command_line_input (buffer, prompt, annotation_suffix);
 
   if (args == NULL)
     error_no_arg (_("one or more choice numbers"));

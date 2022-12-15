@@ -1501,7 +1501,9 @@ decode_line_2 (struct linespec_state *self,
     {
       prompt = "> ";
     }
-  args = command_line_input (prompt, "overload-choice");
+
+  std::string buffer;
+  args = command_line_input (buffer, prompt, "overload-choice");
 
   if (args == 0 || *args == 0)
     error_no_arg (_("one or more choice numbers"));

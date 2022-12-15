@@ -316,7 +316,8 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern const char *command_line_input (const char *, const char *);
+extern const char *command_line_input (std::string &cmd_line_buffer,
+				       const char *, const char *);
 
 extern void print_prompt (void);
 

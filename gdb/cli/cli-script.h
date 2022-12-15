@@ -112,11 +112,18 @@ private:
   }
 };
 
+/* Prototype for a function to call to get one more input line.
+
+   If the function needs to return a dynamically allocated string, it can place
+   in the passed-in buffer, and return a pointer to it.  Otherwise, it can
+   simply ignore it.  */
+
+using read_next_line_ftype = gdb::function_view<const char * (std::string &)>;
+
 extern counted_command_line read_command_lines
     (const char *, int, int, gdb::function_view<void (const char *)>);
 extern counted_command_line read_command_lines_1
-    (gdb::function_view<const char * ()>, int,
-     gdb::function_view<void (const char *)>);
+    (read_next_line_ftype, int, gdb::function_view<void (const char *)>);
 
 
 /* Exported to cli/cli-cmds.c */

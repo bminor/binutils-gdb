@@ -307,8 +307,6 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     m_gdb_stderr (new stderr_file (errstream)),
     m_gdb_stdlog (m_gdb_stderr)
 {
-  buffer_init (&line_buffer);
-
   unbuffer_stream (instream_);
 
   if (ui_list == NULL)
@@ -343,8 +341,6 @@ ui::~ui ()
   delete m_gdb_stdin;
   delete m_gdb_stdout;
   delete m_gdb_stderr;
-
-  buffer_free (&line_buffer);
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
@@ -452,11 +448,11 @@ read_command_file (FILE *stream)
 
   while (ui->instream != NULL && !feof (ui->instream))
     {
-      const char *command;
-
       /* Get a command-line.  This calls the readline package.  */
-      command = command_line_input (NULL, NULL);
-      if (command == NULL)
+      std::string command_buffer;
+      const char *command
+	= command_line_input (command_buffer, nullptr, nullptr);
+      if (command == nullptr)
 	break;
       command_handler (command);
     }
@@ -1333,23 +1329,23 @@ gdb_safe_append_history (void)
     }
 }
 
-/* Read one line from the command input stream `instream' into a local
-   static buffer.  The buffer is made bigger as necessary.  Returns
-   the address of the start of the line.
+/* Read one line from the command input stream `instream'.
 
-   NULL is returned for end of file.
+   CMD_LINE_BUFFER is a buffer that the function may use to store the result, if
+   it needs to be dynamically-allocated.  Otherwise, it is unused.string
+
+   Return nullptr for end of file.
 
    This routine either uses fancy command line editing or simple input
    as the user has requested.  */
 
 const char *
-command_line_input (const char *prompt_arg, const char *annotation_suffix)
+command_line_input (std::string &cmd_line_buffer, const char *prompt_arg,
+		    const char *annotation_suffix)
 {
-  static struct buffer cmd_line_buffer;
-  static int cmd_line_buffer_initialized;
   struct ui *ui = current_ui;
   const char *prompt = prompt_arg;
-  char *cmd;
+  const char *cmd;
   int from_tty = ui->instream == ui->stdin_stream;
 
   /* The annotation suffix must be non-NULL.  */
@@ -1373,15 +1369,6 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 
       prompt = local_prompt;
     }
-
-  if (!cmd_line_buffer_initialized)
-    {
-      buffer_init (&cmd_line_buffer);
-      cmd_line_buffer_initialized = 1;
-    }
-
-  /* Starting a new command line.  */
-  cmd_line_buffer.used_size = 0;
 
 #ifdef SIGTSTP
   if (job_control)
@@ -1422,7 +1409,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 	  rl.reset (gdb_readline_no_editing (prompt));
 	}
 
-      cmd = handle_line_of_input (&cmd_line_buffer, rl.get (),
+      cmd = handle_line_of_input (cmd_line_buffer, rl.get (),
 				  0, annotation_suffix);
       if (cmd == (char *) EOF)
 	{

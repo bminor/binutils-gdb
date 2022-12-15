@@ -582,7 +582,7 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
       bool first = true;
       char *save_ptr = nullptr;
       auto reader
-	= [&] ()
+	= [&] (std::string &buffer)
 	  {
 	    const char *result = strtok_r (first ? commands.get () : nullptr,
 					   "\n", &save_ptr);

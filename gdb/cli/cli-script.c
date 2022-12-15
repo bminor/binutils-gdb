@@ -44,7 +44,7 @@
 
 static enum command_control_type
 recurse_read_control_structure
-    (gdb::function_view<const char * ()> read_next_line_func,
+    (read_next_line_ftype read_next_line_func,
      struct command_line *current_cmd,
      gdb::function_view<void (const char *)> validator);
 
@@ -54,7 +54,7 @@ static void do_define_command (const char *comname, int from_tty,
 static void do_document_command (const char *comname, int from_tty,
                                  const counted_command_line *commands);
 
-static const char *read_next_line ();
+static const char *read_next_line (std::string &buffer);
 
 /* Level of control structure when reading.  */
 static int control_level;
@@ -894,7 +894,7 @@ user_args::insert_args (const char *line) const
    from stdin.  */
 
 static const char *
-read_next_line ()
+read_next_line (std::string &buffer)
 {
   struct ui *ui = current_ui;
   char *prompt_ptr, control_prompt[256];
@@ -917,7 +917,7 @@ read_next_line ()
   else
     prompt_ptr = NULL;
 
-  return command_line_input (prompt_ptr, "commands");
+  return command_line_input (buffer, prompt_ptr, "commands");
 }
 
 /* Given an input line P, skip the command and return a pointer to the
@@ -1064,7 +1064,7 @@ process_next_line (const char *p, command_line_up *command,
    obtain lines of the command.  */
 
 static enum command_control_type
-recurse_read_control_structure (gdb::function_view<const char * ()> read_next_line_func,
+recurse_read_control_structure (read_next_line_ftype read_next_line_func,
 				struct command_line *current_cmd,
 				gdb::function_view<void (const char *)> validator)
 {
@@ -1085,8 +1085,9 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
     {
       dont_repeat ();
 
+      std::string buffer;
       next = nullptr;
-      val = process_next_line (read_next_line_func (), &next,
+      val = process_next_line (read_next_line_func (buffer), &next,
 			       current_cmd->control_type != python_control
 			       && current_cmd->control_type != guile_control
 			       && current_cmd->control_type != compile_control,
@@ -1215,7 +1216,7 @@ read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
    obtained using READ_NEXT_LINE_FUNC.  */
 
 counted_command_line
-read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
+read_command_lines_1 (read_next_line_ftype read_next_line_func,
 		      int parse_commands,
 		      gdb::function_view<void (const char *)> validator)
 {
@@ -1231,7 +1232,9 @@ read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
   while (1)
     {
       dont_repeat ();
-      val = process_next_line (read_next_line_func (), &next, parse_commands,
+
+      std::string buffer;
+      val = process_next_line (read_next_line_func (buffer), &next, parse_commands,
 			       validator);
 
       /* Ignore blank lines or comments.  */

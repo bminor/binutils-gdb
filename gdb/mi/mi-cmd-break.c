@@ -564,7 +564,7 @@ mi_cmd_break_commands (const char *command, char **argv, int argc)
 
   int count = 1;
   auto reader
-    = [&] ()
+    = [&] (std::string &buffer)
       {
 	const char *result = nullptr;
 	if (count < argc)

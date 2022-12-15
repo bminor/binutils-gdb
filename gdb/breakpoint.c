@@ -13782,8 +13782,8 @@ strace_command (const char *arg, int from_tty)
 static struct uploaded_tp *this_utp;
 static int next_cmd;
 
-static char *
-read_uploaded_action (void)
+static const char *
+read_uploaded_action (std::string &buffer)
 {
   char *rslt = nullptr;
 

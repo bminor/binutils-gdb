@@ -483,13 +483,13 @@ struct ui *main_ui;
 struct ui *current_ui;
 struct ui *ui_list;
 
-/* Get a pointer to the current UI's line buffer.  This is used to
+/* Get a reference to the current UI's line buffer.  This is used to
    construct a whole line of input from partial input.  */
 
-static struct buffer *
+static std::string &
 get_command_line_buffer (void)
 {
-  return &current_ui->line_buffer;
+  return current_ui->line_buffer;
 }
 
 /* When there is an event ready on the stdin file descriptor, instead
@@ -620,46 +620,41 @@ command_handler (const char *command)
     }
 }
 
-/* Append RL, an input line returned by readline or one of its
-   emulations, to CMD_LINE_BUFFER.  Returns the command line if we
-   have a whole command line ready to be processed by the command
-   interpreter or NULL if the command line isn't complete yet (input
-   line ends in a backslash).  */
+/* Append RL, an input line returned by readline or one of its emulations, to
+   CMD_LINE_BUFFER.  Return true if we have a whole command line ready to be
+   processed by the command interpreter or false if the command line isn't
+   complete yet (input line ends in a backslash).  */
 
-static char *
-command_line_append_input_line (struct buffer *cmd_line_buffer, const char *rl)
+static bool
+command_line_append_input_line (std::string &cmd_line_buffer, const char *rl)
 {
-  char *cmd;
-  size_t len;
-
-  len = strlen (rl);
+  size_t len = strlen (rl);
 
   if (len > 0 && rl[len - 1] == '\\')
     {
       /* Don't copy the backslash and wait for more.  */
-      buffer_grow (cmd_line_buffer, rl, len - 1);
-      cmd = NULL;
+      cmd_line_buffer.append (rl, len - 1);
+      return false;
     }
   else
     {
       /* Copy whole line including terminating null, and we're
 	 done.  */
-      buffer_grow (cmd_line_buffer, rl, len + 1);
-      cmd = cmd_line_buffer->buffer;
+      cmd_line_buffer.append (rl, len + 1);
+      return true;
     }
-
-  return cmd;
 }
 
 /* Handle a line of input coming from readline.
 
-   If the read line ends with a continuation character (backslash),
-   save the partial input in CMD_LINE_BUFFER (except the backslash),
-   and return NULL.  Otherwise, save the partial input and return a
-   pointer to CMD_LINE_BUFFER's buffer (null terminated), indicating a
-   whole command line is ready to be executed.
+   If the read line ends with a continuation character (backslash), return
+   nullptr.  Otherwise, return a pointer to the command line, indicating a whole
+   command line is ready to be executed.
 
-   Returns EOF on end of file.
+   The returned pointer may or may not point to CMD_LINE_BUFFER's internal
+   buffer.
+
+   Return EOF on end of file.
 
    If REPEAT, handle command repetitions:
 
@@ -670,38 +665,32 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, const char *rl)
        command instead of the empty input line.
 */
 
-char *
-handle_line_of_input (struct buffer *cmd_line_buffer,
+const char *
+handle_line_of_input (std::string &cmd_line_buffer,
 		      const char *rl, int repeat,
 		      const char *annotation_suffix)
 {
   struct ui *ui = current_ui;
   int from_tty = ui->instream == ui->stdin_stream;
-  char *p1;
-  char *cmd;
 
   if (rl == NULL)
     return (char *) EOF;
 
-  cmd = command_line_append_input_line (cmd_line_buffer, rl);
-  if (cmd == NULL)
+  bool complete = command_line_append_input_line (cmd_line_buffer, rl);
+  if (!complete)
     return NULL;
-
-  /* We have a complete command line now.  Prepare for the next
-     command, but leave ownership of memory to the buffer .  */
-  cmd_line_buffer->used_size = 0;
 
   if (from_tty && annotation_level > 1)
     printf_unfiltered (("\n\032\032post-%s\n"), annotation_suffix);
 
 #define SERVER_COMMAND_PREFIX "server "
-  server_command = startswith (cmd, SERVER_COMMAND_PREFIX);
+  server_command = startswith (cmd_line_buffer.c_str (), SERVER_COMMAND_PREFIX);
   if (server_command)
     {
       /* Note that we don't call `save_command_line'.  Between this
 	 and the check in dont_repeat, this insures that repeating
 	 will still do the right thing.  */
-      return cmd + strlen (SERVER_COMMAND_PREFIX);
+      return cmd_line_buffer.c_str () + strlen (SERVER_COMMAND_PREFIX);
     }
 
   /* Do history expansion if that is wished.  */
@@ -710,32 +699,29 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
       char *cmd_expansion;
       int expanded;
 
-      expanded = history_expand (cmd, &cmd_expansion);
+      /* Note: here, we pass a pointer to the std::string's internal buffer as
+	 a `char *`.  At the time of writing, readline's history_expand does
+	 not modify the passed-in string.  Ideally, readline should be modified
+	 to make that parameter `const char *`.  */
+      expanded = history_expand (&cmd_line_buffer[0], &cmd_expansion);
       gdb::unique_xmalloc_ptr<char> history_value (cmd_expansion);
       if (expanded)
 	{
-	  size_t len;
-
 	  /* Print the changes.  */
 	  printf_unfiltered ("%s\n", history_value.get ());
 
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
-	    return cmd;
+	    return cmd_line_buffer.c_str ();
 
-	  /* history_expand returns an allocated string.  Just replace
-	     our buffer with it.  */
-	  len = strlen (history_value.get ());
-	  xfree (buffer_finish (cmd_line_buffer));
-	  cmd_line_buffer->buffer = history_value.get ();
-	  cmd_line_buffer->buffer_size = len + 1;
-	  cmd = history_value.release ();
+	  cmd_line_buffer = history_value.get ();
 	}
     }
 
   /* If we just got an empty line, and that is supposed to repeat the
      previous command, return the previously saved command.  */
-  for (p1 = cmd; *p1 == ' ' || *p1 == '\t'; p1++)
+  const char *p1;
+  for (p1 = cmd_line_buffer.c_str (); *p1 == ' ' || *p1 == '\t'; p1++)
     ;
   if (repeat && *p1 == '\0')
     return get_saved_command_line ();
@@ -747,17 +733,21 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
      and then later fetch it from the value history and remove the
      '#'.  The kill ring is probably better, but some people are in
      the habit of commenting things out.  */
-  if (*cmd != '\0' && from_tty && current_ui->input_interactive_p ())
-    gdb_add_history (cmd);
+  if (cmd_line_buffer[0] != '\0' && from_tty && current_ui->input_interactive_p ())
+    gdb_add_history (cmd_line_buffer.c_str ());
 
   /* Save into global buffer if appropriate.  */
   if (repeat)
     {
-      save_command_line (cmd);
+      save_command_line (cmd_line_buffer.c_str ());
+
+      /* It is important that we return a pointer to the saved command line
+	 here, for the `cmd_start == saved_command_line` check in
+	 execute_command to work.  */
       return get_saved_command_line ();
     }
-  else
-    return cmd;
+
+  return cmd_line_buffer.c_str ();
 }
 
 /* See event-top.h.  */
@@ -790,11 +780,10 @@ gdb_rl_deprep_term_function (void)
 void
 command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
 {
-  struct buffer *line_buffer = get_command_line_buffer ();
+  std::string &line_buffer = get_command_line_buffer ();
   struct ui *ui = current_ui;
-  char *cmd;
 
-  cmd = handle_line_of_input (line_buffer, rl.get (), 1, "prompt");
+  const char *cmd = handle_line_of_input (line_buffer, rl.get (), 1, "prompt");
   if (cmd == (char *) EOF)
     {
       /* stdin closed.  The connection with the terminal is gone.
@@ -856,6 +845,9 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
   else
     {
       ui->prompt_state = PROMPT_NEEDED;
+
+      /* Ensure the UI's line buffer is empty for the next command.  */
+      SCOPE_EXIT { line_buffer.clear (); };
 
       command_handler (cmd);
 
