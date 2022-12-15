@@ -19,10 +19,7 @@
 
 load_lib opencl.exp
 
-if { [skip_opencl_tests] } {
-    unsupported "OpenCL support not detected"
-    return 0
-}
+require !skip_opencl_tests
 
 set testfile "callfuncs"
 set clprogram [remote_download target ${srcdir}/${subdir}/${testfile}.cl]
