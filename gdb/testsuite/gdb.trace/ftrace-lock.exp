@@ -31,10 +31,7 @@ set options [list debug [gdb_target_symbol_prefix_flags] \
 	     additional_flags=-DNUM_THREADS=$NUM_THREADS]
 
 # Check that the target supports trace.
-if ![gdb_trace_common_supports_arch] {
-    unsupported "no trace-common.h support for arch"
-    return -1
-}
+require gdb_trace_common_supports_arch
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
     untested "failed to compile"
     return -1

@@ -21,10 +21,7 @@ standard_testfile actions.c
 set executable $testfile
 set expfile $testfile.exp
 
-if ![gdb_trace_common_supports_arch] {
-    unsupported "no trace-common.h support for arch"
-    return -1
-}
+require gdb_trace_common_supports_arch
 
 if [prepare_for_testing "failed to prepare" $executable $srcfile \
 	[list debug nowarnings nopie]] {

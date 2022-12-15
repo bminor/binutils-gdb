@@ -16,10 +16,7 @@ load_lib "trace-support.exp"
 
 require !skip_shlib_tests
 
-if ![gdb_trace_common_supports_arch] {
-    unsupported "no trace-common.h support for arch"
-    return -1
-}
+require gdb_trace_common_supports_arch
 
 standard_testfile
 set libfile1 "change-loc-1"

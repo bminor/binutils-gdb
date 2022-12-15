@@ -17,10 +17,7 @@ load_lib trace-support.exp
 
 standard_testfile actions.c
 
-if ![gdb_trace_common_supports_arch] {
-    unsupported "no trace-common.h support for arch"
-    return -1
-}
+require gdb_trace_common_supports_arch
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] } {
     return -1

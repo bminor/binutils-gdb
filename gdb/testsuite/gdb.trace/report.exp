@@ -22,10 +22,7 @@ gdb_exit
 gdb_start
 
 standard_testfile actions.c
-if ![gdb_trace_common_supports_arch] {
-    unsupported "no trace-common.h support for arch"
-    return -1
-}
+require gdb_trace_common_supports_arch
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings nopie}] != "" } {
     untested "failed to compile"
