@@ -22,10 +22,7 @@ if {![istarget *-*-linux*]} {
 }
 
 # Support for XML-output is needed to run this test.
-if {[gdb_skip_xml_test]} {
-    unsupported "info-os.exp"
-    return -1
-}
+require !gdb_skip_xml_test
 
 # Compile test program.
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] } {

@@ -16,10 +16,7 @@
 # Testing for 'maint print xml-tdesc'.  Check we can print out the
 # current target description and load it back in again.
 
-if {[gdb_skip_xml_test]} {
-    unsupported "xml tests not being run"
-    return -1
-}
+require !gdb_skip_xml_test
 
 standard_testfile
 

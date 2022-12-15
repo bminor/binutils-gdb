@@ -37,10 +37,7 @@
 #
 # 4. Indentation of lines will be preserved so your input file needs
 #    to follow the expected indentation.
-if {[gdb_skip_xml_test]} {
-    unsupported "xml tests not being run"
-    return -1
-}
+require !gdb_skip_xml_test
 
 gdb_start
 
