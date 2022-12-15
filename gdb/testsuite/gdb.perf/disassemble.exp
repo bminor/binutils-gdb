@@ -17,9 +17,7 @@
 # some large functions in GDB.
 load_lib perftest.exp
 
-if [skip_perf_tests] {
-    return 0
-}
+require !skip_perf_tests
 
 global GDB
 

@@ -19,8 +19,6 @@
 load_lib perftest.exp
 load_lib gen-perf-test.exp
 
-if [skip_perf_tests] {
-    return 0
-}
+require !skip_perf_tests
 
 GenPerfTest::standard_run_driver gmonster1.exp make_testcase_config gmonster-null-lookup.py NullLookup
