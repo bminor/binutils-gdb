@@ -96,7 +96,7 @@ struct sim_inferior_data {
   ~sim_inferior_data ();
 
   /* Flag which indicates whether or not the program has been loaded.  */
-  int program_loaded = 0;
+  bool program_loaded = false;
 
   /* Simulator descriptor for this inferior.  */
   SIM_DESC gdbsim_desc;
@@ -112,7 +112,7 @@ struct sim_inferior_data {
   enum gdb_signal resume_siggnal = GDB_SIGNAL_0;
 
   /* Flag which indicates whether resume should step or not.  */
-  int resume_step = 0;
+  bool resume_step = false;
 };
 
 static const target_info gdbsim_target_info = {
@@ -180,9 +180,9 @@ static struct gdbsim_target gdbsim_ops;
 
 static const registry<inferior>::key<sim_inferior_data> sim_inferior_data_key;
 
-/* Flag indicating the "open" status of this module.  It's set to 1
-   in gdbsim_open() and 0 in gdbsim_close().  */
-static int gdbsim_is_open = 0;
+/* Flag indicating the "open" status of this module.  It's set true
+   in gdbsim_open() and false in gdbsim_close().  */
+static bool gdbsim_is_open = false;
 
 /* Argument list to pass to sim_open().  It is allocated in gdbsim_open()
    and deallocated in gdbsim_close().  The lifetime needs to extend beyond
@@ -600,7 +600,7 @@ gdbsim_target::load (const char *args, int fromtty)
   /* FIXME: If a load command should reset the targets registers then
      a call to sim_create_inferior() should go here.  */
 
-  sim_data->program_loaded = 1;
+  sim_data->program_loaded = true;
 }
 
 
@@ -768,7 +768,7 @@ gdbsim_target_open (const char *args, int from_tty)
      "run".  */
   switch_to_no_thread ();
 
-  gdbsim_is_open = 1;
+  gdbsim_is_open = true;
 }
 
 /* Helper for gdbsim_target::close.  */
@@ -815,7 +815,7 @@ gdbsim_target::close ()
 
   end_callbacks ();
 
-  gdbsim_is_open = 0;
+  gdbsim_is_open = false;
 }
 
 /* Takes a program previously attached to and detaches it.
@@ -968,11 +968,11 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status,
 #else
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
 #endif
-  sim_resume (sim_data->gdbsim_desc, sim_data->resume_step,
+  sim_resume (sim_data->gdbsim_desc, sim_data->resume_step ? 1 : 0,
 	      sim_data->resume_siggnal);
 
   signal (SIGINT, prev_sigint);
-  sim_data->resume_step = 0;
+  sim_data->resume_step = false;
 
   sim_stop_reason (sim_data->gdbsim_desc, &reason, &sigrc);
 
