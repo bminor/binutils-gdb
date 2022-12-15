@@ -420,7 +420,7 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 bool
 tracefile_target::has_all_memory ()
 {
-  return 1;
+  return true;
 }
 
 /* This is the implementation of target_ops method to_has_memory.  */
@@ -428,7 +428,7 @@ tracefile_target::has_all_memory ()
 bool
 tracefile_target::has_memory ()
 {
-  return 1;
+  return true;
 }
 
 /* This is the implementation of target_ops method to_has_stack.
@@ -457,7 +457,7 @@ tracefile_target::has_registers ()
 bool
 tracefile_target::thread_alive (ptid_t ptid)
 {
-  return 1;
+  return true;
 }
 
 /* This is the implementation of target_ops method to_get_trace_status.
