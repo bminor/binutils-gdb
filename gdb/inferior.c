@@ -486,8 +486,7 @@ uiout_field_connection (process_stratum_target *proc_target)
     return {};
   else
     {
-      std::string conn_str
-	= make_target_connection_string (proc_target).c_str ();
+      std::string conn_str = make_target_connection_string (proc_target);
       return string_printf ("%d (%s)", proc_target->connection_number,
 			    conn_str.c_str ());
     }

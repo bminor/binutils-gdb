@@ -91,7 +91,7 @@ print_connection (struct ui_out *uiout, const char *requested_connections)
 
       process_stratum_target *t = it.second;
 
-      size_t l = strlen (make_target_connection_string (t).c_str ());
+      size_t l = make_target_connection_string (t).length ();
       if (l > what_len)
 	what_len = l;
     }
