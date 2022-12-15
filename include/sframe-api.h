@@ -34,13 +34,17 @@ typedef struct sframe_encoder_ctx sframe_encoder_ctx;
 
 /* User interfacing SFrame Row Entry.
    An abstraction provided by libsframe so the consumer is decoupled from
-   the binary format representation of the same.  */
+   the binary format representation of the same.
+
+   The members are best ordered such that they are aligned at their natural
+   boundaries.  This helps avoid usage of undesirable misaligned memory
+   accesses.  See PR libsframe/29856.  */
 
 typedef struct sframe_frame_row_entry
 {
   uint32_t fre_start_addr;
-  unsigned char fre_info;
   unsigned char fre_offsets[MAX_OFFSET_BYTES];
+  unsigned char fre_info;
 } sframe_frame_row_entry;
 
 #define SFRAME_ERR ((int) -1)

@@ -822,48 +822,48 @@ static const bfd_byte elf_x86_64_eh_frame_non_lazy_plt[] =
 static const sframe_frame_row_entry elf_x86_64_sframe_null_fre =
 {
   0,
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* .sframe FRE covering the .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_plt0_fre1 =
 {
   0, /* SFrame FRE start address.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* .sframe FRE covering the .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_plt0_fre2 =
 {
   6, /* SFrame FRE start address.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* .sframe FRE covering the .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_pltn_fre1 =
 {
   0, /* SFrame FRE start address.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* .sframe FRE covering the .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_pltn_fre2 =
 {
   11, /* SFrame FRE start address.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* .sframe FRE covering the second .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_sec_pltn_fre1 =
 {
   0, /* SFrame FRE start address.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B), /* FRE info.  */
-  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* 12 bytes.  */
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* SFrame helper object for non-lazy PLT.  Also used for IBT enabled PLT.  */

@@ -652,6 +652,11 @@ sframe_frame_row_entry_copy (sframe_frame_row_entry *dst, sframe_frame_row_entry
   return 0;
 }
 
+/* Decode the SFrame FRE start address offset value from FRE_BUF in on-disk
+   binary format, given the FRE_TYPE.  Updates the FRE_START_ADDR.
+
+   Returns 0 on success, SFRAME_ERR otherwise.  */
+
 static int
 sframe_decode_fre_start_address (const char *fre_buf,
 				 uint32_t *fre_start_addr,
@@ -659,6 +664,9 @@ sframe_decode_fre_start_address (const char *fre_buf,
 {
   uint32_t saddr = 0;
   int err = 0;
+  size_t addr_size = 0;
+
+  addr_size = sframe_fre_start_addr_size (fre_type);
 
   if (fre_type == SFRAME_FRE_TYPE_ADDR1)
     {
@@ -668,12 +676,18 @@ sframe_decode_fre_start_address (const char *fre_buf,
   else if (fre_type == SFRAME_FRE_TYPE_ADDR2)
     {
       uint16_t *ust = (uint16_t *)fre_buf;
-      saddr = (uint32_t)*ust;
+      /* SFrame is an unaligned on-disk format.  Using memcpy helps avoid the
+	 use of undesirable unaligned loads.  See PR libsframe/29856.  */
+      uint16_t tmp = 0;
+      memcpy (&tmp, ust, addr_size);
+      saddr = (uint32_t)tmp;
     }
   else if (fre_type == SFRAME_FRE_TYPE_ADDR4)
     {
       uint32_t *uit = (uint32_t *)fre_buf;
-      saddr = (uint32_t)*uit;
+      int32_t tmp = 0;
+      memcpy (&tmp, uit, addr_size);
+      saddr = (uint32_t)tmp;
     }
   else
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
