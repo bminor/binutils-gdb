@@ -84,6 +84,8 @@ if {[istarget "aarch64-*-pe*"]} {
     set pe_tests {
       {"aarch64" "--image-base 0x1000" "" "" {aarch64a.s aarch64b.s}
 	{{objdump -dr aarch64.d}} "aarch64.x"}
+      {".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
+	{{objdump -s secrel_64.d}} "secrel.x"}
     }
 
     run_ld_link_tests $pe_tests

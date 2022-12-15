@@ -314,4 +314,8 @@ extern void aarch64_handle_align (struct frag *);
 extern int tc_aarch64_regname_to_dw2regnum (char *regname);
 extern void tc_aarch64_frame_initial_instructions (void);
 
+#ifdef TE_PE
+#define O_secrel O_md1
+#endif /* TE_PE */
+
 #endif /* TC_AARCH64 */

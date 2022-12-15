@@ -267,6 +267,20 @@ coff_aarch64_addr32nb_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   return bfd_reloc_ok;
 }
 
+static bfd_reloc_status_type
+coff_aarch64_secrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+			   arelent *reloc_entry,
+			   asymbol *symbol ATTRIBUTE_UNUSED,
+			   void *data,
+			   asection *input_section ATTRIBUTE_UNUSED,
+			   bfd *output_bfd ATTRIBUTE_UNUSED,
+			   char **error_message ATTRIBUTE_UNUSED)
+{
+  bfd_putl32 (reloc_entry->addend, data + reloc_entry->address);
+
+  return bfd_reloc_ok;
+}
+
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
@@ -330,6 +344,11 @@ static const reloc_howto_type arm64_reloc_howto_32nb = HOWTO (IMAGE_REL_ARM64_AD
 	 coff_aarch64_addr32nb_reloc, "IMAGE_REL_ARM64_ADDR32NB",
 	 false, 0xffffffff, 0xffffffff, false);
 
+static const reloc_howto_type arm64_reloc_howto_secrel = HOWTO (IMAGE_REL_ARM64_SECREL, 0, 4, 32, false, 0,
+	 complain_overflow_bitfield,
+	 coff_aarch64_secrel_reloc, "IMAGE_REL_ARM64_SECREL",
+	 false, 0xffffffff, 0xffffffff, false);
+
 static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_abs,
      &arm64_reloc_howto_64,
@@ -342,7 +361,8 @@ static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_branch19,
      &arm64_reloc_howto_branch14,
      &arm64_reloc_howto_pgoff12a,
-     &arm64_reloc_howto_32nb
+     &arm64_reloc_howto_32nb,
+     &arm64_reloc_howto_secrel
 };
 
 #ifndef NUM_ELEM
@@ -387,6 +407,8 @@ coff_aarch64_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real
     return &arm64_reloc_howto_branch19;
   case BFD_RELOC_RVA:
     return &arm64_reloc_howto_32nb;
+  case BFD_RELOC_32_SECREL:
+    return &arm64_reloc_howto_secrel;
   default:
     BFD_FAIL ();
     return NULL;
@@ -441,6 +463,8 @@ coff_aarch64_rtype_lookup (unsigned int code)
       return &arm64_reloc_howto_pgoff12a;
     case IMAGE_REL_ARM64_ADDR32NB:
       return &arm64_reloc_howto_32nb;
+    case IMAGE_REL_ARM64_SECREL:
+      return &arm64_reloc_howto_secrel;
     default:
       BFD_FAIL ();
       return NULL;
@@ -806,6 +830,27 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= val << 10;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
+	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+
+	    break;
+	  }
+
+	case IMAGE_REL_ARM64_SECREL:
+	  {
+	    uint64_t val;
+	    int32_t addend;
+
+	    addend = bfd_getl32 (contents + rel->r_vaddr);
+
+	    val = sec->output_offset + sym_value + addend;
+
+	    if (val > 0xffffffff)
+	      (*info->callbacks->reloc_overflow)
+		(info, h ? &h->root : NULL, syms[symndx]._n._n_name,
+		"IMAGE_REL_ARM64_SECREL", addend, input_bfd,
+		input_section, rel->r_vaddr - input_section->vma);
+
+	    bfd_putl32 (val, contents + rel->r_vaddr);
 	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
 
 	    break;
