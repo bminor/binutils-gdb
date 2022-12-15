@@ -16,10 +16,7 @@
 standard_testfile .c
 
 # Fission doesn't support macros yet.  Bug 15954.
-if [using_fission] {
-    untested "fission does not support macros yet"
-    return -1
-}
+require !using_fission
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug macros}] } {
     return -1

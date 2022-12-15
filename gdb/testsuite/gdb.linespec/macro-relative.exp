@@ -16,10 +16,7 @@
 standard_testfile
 
 # Fission doesn't support macros yet.  Bug 15954.
-if [using_fission] {
-    unsupported "fission"
-    return -1
-}
+require !using_fission
 
 if [is_remote host] {
     unsupported "compiling on a remote host does not support a filename with directory."
