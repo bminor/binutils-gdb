@@ -20,9 +20,7 @@
 # part of this test.
 
 # Bail out if the target can't use the 'run' command.
-if ![target_can_use_run_cmd] {
-    return 0
-}
+require target_can_use_run_cmd
 
 standard_testfile
 

@@ -19,9 +19,7 @@
 # This testcase cannot use runto_main because of the different prompt
 # we get when using annotation level 2.
 #
-if ![target_can_use_run_cmd] {
-    return 0
-}
+require target_can_use_run_cmd
 
 
 #
