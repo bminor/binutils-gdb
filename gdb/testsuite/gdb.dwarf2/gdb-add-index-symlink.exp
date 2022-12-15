@@ -29,7 +29,10 @@ with_test_prefix non-symlink {
 	return -1
     }
 
-    require {ensure_gdb_index $binfile} != -1
+    if { [ensure_gdb_index $binfile] == -1 } {
+	untested "error adding gdb index"
+	return -1
+    }
 }
 
 # Regenerate exec without index.

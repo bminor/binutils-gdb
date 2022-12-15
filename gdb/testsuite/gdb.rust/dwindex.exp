@@ -26,7 +26,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
     return -1
 }
 
-require {ensure_gdb_index $binfile -dwarf-5} != -1
+if {[ensure_gdb_index $binfile -dwarf-5] == -1} {
+    untested "error adding gdb index"
+    return -1
+}
 
 gdb_exit
 gdb_start
