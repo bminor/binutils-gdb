@@ -50,7 +50,6 @@
 #include "maint.h"
 #include "filenames.h"
 #include "frame.h"
-#include "gdbsupport/buffer.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
@@ -879,17 +878,15 @@ save_command_line (const char *cmd)
 
    A NULL return means end of file.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 gdb_readline_no_editing (const char *prompt)
 {
-  struct buffer line_buffer;
+  std::string line_buffer;
   struct ui *ui = current_ui;
   /* Read from stdin if we are executing a user defined command.  This
      is the right thing for prompt_for_continue, at least.  */
   FILE *stream = ui->instream != NULL ? ui->instream : stdin;
   int fd = fileno (stream);
-
-  buffer_init (&line_buffer);
 
   if (prompt != NULL)
     {
@@ -925,28 +922,25 @@ gdb_readline_no_editing (const char *prompt)
 
       if (c == EOF)
 	{
-	  if (line_buffer.used_size > 0)
+	  if (!line_buffer.empty ())
 	    /* The last line does not end with a newline.  Return it, and
 	       if we are called again fgetc will still return EOF and
 	       we'll return NULL then.  */
 	    break;
-	  xfree (buffer_finish (&line_buffer));
 	  return NULL;
 	}
 
       if (c == '\n')
 	{
-	  if (line_buffer.used_size > 0
-	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
-	    line_buffer.used_size--;
+	  if (!line_buffer.empty () && line_buffer.back () == '\r')
+	    line_buffer.pop_back ();
 	  break;
 	}
 
-      buffer_grow_char (&line_buffer, c);
+      line_buffer += c;
     }
 
-  buffer_grow_char (&line_buffer, '\0');
-  return buffer_finish (&line_buffer);
+  return make_unique_xstrdup (line_buffer.c_str ());
 }
 
 /* Variables which control command line editing and history
@@ -1402,7 +1396,7 @@ command_line_input (std::string &cmd_line_buffer, const char *prompt_arg,
 	}
       else
 	{
-	  rl.reset (gdb_readline_no_editing (prompt));
+	  rl = gdb_readline_no_editing (prompt);
 	}
 
       cmd = handle_line_of_input (cmd_line_buffer, rl.get (),
