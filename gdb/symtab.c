@@ -6496,17 +6496,10 @@ get_symbol_address (const struct symbol *sym)
   gdb_assert (sym->aclass () == LOC_STATIC);
 
   const char *linkage_name = sym->linkage_name ();
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->separate_debug_objfile_backlink != nullptr)
-	continue;
-
-      bound_minimal_symbol minsym
-	= lookup_minimal_symbol_linkage (linkage_name, objfile);
-      if (minsym.minsym != nullptr)
-	return minsym.value_address ();
-    }
+  bound_minimal_symbol minsym = lookup_minimal_symbol_linkage (linkage_name,
+							       false);
+  if (minsym.minsym != nullptr)
+    return minsym.value_address ();
   return sym->m_value.address;
 }
 
@@ -6519,18 +6512,10 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
   gdb_assert ((objf->flags & OBJF_MAINLINE) == 0);
 
   const char *linkage_name = minsym->linkage_name ();
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->separate_debug_objfile_backlink == nullptr
-	  && (objfile->flags & OBJF_MAINLINE) != 0)
-	{
-	  bound_minimal_symbol found
-	    = lookup_minimal_symbol_linkage (linkage_name, objfile);
-	  if (found.minsym != nullptr)
-	    return found.value_address ();
-	}
-    }
+  bound_minimal_symbol found = lookup_minimal_symbol_linkage (linkage_name,
+							      true);
+  if (found.minsym != nullptr)
+    return found.value_address ();
   return (minsym->m_value.address
 	  + objf->section_offsets[minsym->section_index ()]);
 }
