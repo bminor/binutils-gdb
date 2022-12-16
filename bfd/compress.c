@@ -720,7 +720,8 @@ DESCRIPTION
 bool
 bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 {
-  bfd_size_type sz = bfd_get_section_limit_octets (abfd, sec);
+  bfd_size_type readsz = bfd_get_section_limit_octets (abfd, sec);
+  bfd_size_type allocsz = bfd_get_section_alloc_size (abfd, sec);
   bfd_byte *p = *ptr;
   bool ret;
   bfd_size_type save_size;
@@ -729,7 +730,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
   unsigned int compression_header_size;
   const unsigned int compress_status = sec->compress_status;
 
-  if (sz == 0)
+  if (allocsz == 0)
     {
       *ptr = NULL;
       return true;
@@ -744,7 +745,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("error: %pB(%pA) is too large (%#" PRIx64 " bytes)"),
-	 abfd, sec, (uint64_t) sz);
+	 abfd, sec, (uint64_t) readsz);
       return false;
     }
 
@@ -753,7 +754,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     case COMPRESS_SECTION_NONE:
       if (p == NULL)
 	{
-	  p = (bfd_byte *) bfd_malloc (sz);
+	  p = (bfd_byte *) bfd_malloc (allocsz);
 	  if (p == NULL)
 	    {
 	      /* PR 20801: Provide a more helpful error message.  */
@@ -761,12 +762,12 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 		_bfd_error_handler
 		  /* xgettext:c-format */
 		  (_("error: %pB(%pA) is too large (%#" PRIx64 " bytes)"),
-		  abfd, sec, (uint64_t) sz);
+		  abfd, sec, (uint64_t) allocsz);
 	      return false;
 	    }
 	}
 
-      if (!bfd_get_section_contents (abfd, sec, p, 0, sz))
+      if (!bfd_get_section_contents (abfd, sec, p, 0, readsz))
 	{
 	  if (*ptr != p)
 	    free (p);
@@ -799,7 +800,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	goto fail_compressed;
 
       if (p == NULL)
-	p = (bfd_byte *) bfd_malloc (sz);
+	p = (bfd_byte *) bfd_malloc (allocsz);
       if (p == NULL)
 	goto fail_compressed;
 
@@ -811,7 +812,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
       bool is_zstd = compress_status == DECOMPRESS_SECTION_ZSTD;
       if (!decompress_contents (
 	      is_zstd, compressed_buffer + compression_header_size,
-	      sec->compressed_size - compression_header_size, p, sz))
+	      sec->compressed_size - compression_header_size, p, readsz))
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  if (p != *ptr)
@@ -830,14 +831,14 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	return false;
       if (p == NULL)
 	{
-	  p = (bfd_byte *) bfd_malloc (sz);
+	  p = (bfd_byte *) bfd_malloc (allocsz);
 	  if (p == NULL)
 	    return false;
 	  *ptr = p;
 	}
       /* PR 17512; file: 5bc29788.  */
       if (p != sec->contents)
-	memcpy (p, sec->contents, sz);
+	memcpy (p, sec->contents, readsz);
       return true;
 
     default:

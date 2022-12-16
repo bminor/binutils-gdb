@@ -2922,6 +2922,13 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
 						       relocatable,
 						       symbols);
 
+  bfd_byte *orig_data = data;
+  if (data == NULL)
+    {
+      data = bfd_malloc (input_section->size);
+      if (data == NULL)
+	return NULL;
+    }
   memcpy (data, coff_section_data (input_bfd, input_section)->contents,
 	  (size_t) input_section->size);
 
@@ -2997,6 +3004,8 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
   free (internal_relocs);
   free (internal_syms);
   free (sections);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

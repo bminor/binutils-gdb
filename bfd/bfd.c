@@ -518,6 +518,14 @@ CODE_FRAGMENT
 .	   / bfd_octets_per_byte (abfd, sec));
 .}
 .
+.static inline bfd_size_type
+.bfd_get_section_alloc_size (const bfd *abfd, const asection *sec)
+.{
+.  if (abfd->direction != write_direction && sec->rawsize > sec->size)
+.    return sec->rawsize;
+.  return sec->size;
+.}
+.
 .{* Functions to handle insertion and deletion of a bfd's sections.  These
 .   only handle the list pointers, ie. do not adjust section_count,
 .   target_index etc.  *}

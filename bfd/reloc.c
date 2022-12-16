@@ -8532,6 +8532,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
     return NULL;
 
   /* Read in the section.  */
+  bfd_byte *orig_data = data;
   if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
@@ -8543,7 +8544,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 
   reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
-    return NULL;
+    goto error_return;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -8680,6 +8681,8 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 
  error_return:
   free (reloc_vector);
+  if (orig_data == NULL)
+    free (data);
   return NULL;
 }
 

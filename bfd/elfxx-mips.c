@@ -13301,6 +13301,7 @@ _bfd_elf_mips_get_relocated_section_contents
     return NULL;
 
   /* Read in the section.  */
+  bfd_byte *orig_data = data;
   if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
@@ -13331,6 +13332,8 @@ _bfd_elf_mips_get_relocated_section_contents
 	  else
 	    hip = &hi->next;
 	}
+      if (orig_data == NULL)
+	free (data);
       data = NULL;
       goto out;
     }
