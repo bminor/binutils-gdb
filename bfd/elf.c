@@ -1110,7 +1110,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   /* We do not parse the PT_NOTE segments as we are interested even in the
      separate debug info files which may have the segments offsets corrupted.
      PT_NOTEs from the core files are currently not parsed using BFD.  */
-  if (hdr->sh_type == SHT_NOTE)
+  if (hdr->sh_type == SHT_NOTE && hdr->sh_size != 0)
     {
       bfd_byte *contents;
 
