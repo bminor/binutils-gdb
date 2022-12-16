@@ -137,6 +137,7 @@ static bool visualize_jumps = false;	/* --visualize-jumps.  */
 static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
+static int show_all_symbols;            /* --show-all-symbols.  */
 
 static enum color_selection
   {
@@ -399,6 +400,8 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"));
       fprintf (stream, _("\
+      --show-all-symbols         When disassembling, display all symbols at a given address\n"));
+      fprintf (stream, _("\
       --special-syms             Include special symbols in symbol dumps\n"));
       fprintf (stream, _("\
       --inlines                  Print all inlines for source line (with -l)\n"));
@@ -537,6 +540,7 @@ static struct option long_options[]=
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
   {"sframe", optional_argument, NULL, OPTION_SFRAME},
+  {"show-all-symbols", no_argument, &show_all_symbols, 1},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
   {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
@@ -3942,6 +3946,24 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  objdump_print_addr_with_sym (abfd, section, sym, addr,
 				       pinfo, false);
 	  pinfo->fprintf_func (pinfo->stream, ":\n");
+
+	  if (sym != NULL && show_all_symbols)
+	    {
+	      for (++place; place < sorted_symcount; place++)
+		{
+		  sym = sorted_syms[place];
+		  
+		  if (bfd_asymbol_value (sym) != addr)
+		    break;
+		  if (! pinfo->symbol_is_valid (sym, pinfo))
+		    continue;
+		  if (strcmp (bfd_section_name (sym->section), bfd_section_name (section)) != 0)
+		    break;
+
+		  objdump_print_addr_with_sym (abfd, section, sym, addr, pinfo, false);
+		  pinfo->fprintf_func (pinfo->stream, ":\n");
+		}
+	    }	   
 	}
 
       if (sym != NULL && bfd_asymbol_value (sym) > addr)

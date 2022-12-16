@@ -7741,7 +7741,7 @@ display_debug_addr (struct dwarf_section *section,
 	  if (end < entry)
 	    {
 	      warn (_("Corrupt %s section header: length field (%lx) is too small\n"),
-		    section->name, length);
+		    section->name, (long) length);
 	      return 0;
 	    }
 	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
@@ -7761,8 +7761,8 @@ display_debug_addr (struct dwarf_section *section,
 	    {
 	      warn (_("Corrupt %s section: address base of entry %u (%lx) is less than entry %u (%lx)\n"),
 		    section->name,
-		    i, debug_addr_info [i]->addr_base,
-		    i + 1, debug_addr_info [i + 1]->addr_base);
+		    i, (long) debug_addr_info [i]->addr_base,
+		    i + 1, (long) debug_addr_info [i + 1]->addr_base);
 	      return 0;
 	    }
 	}

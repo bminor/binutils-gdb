@@ -2274,6 +2274,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-addresses}]
         [@option{--[no-]show-raw-insn}]
         [@option{--adjust-vma=}@var{offset}]
+        [@option{--show-all-symbols}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{--ctf-parent=}@var{section}]
@@ -2783,6 +2784,10 @@ non-empty sections are displayed.
 @cindex disassembly, with source
 Display source code intermixed with disassembly, if possible.  Implies
 @option{-d}.
+
+@item --show-all-symbols
+When disassembling, show all the symbols that match a given address,
+not just the first one.
 
 @item --source-comment[=@var{txt}]
 @cindex source disassembly

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Objdump has a new command line option --show-all-symbols which will make it
+  display all symbols that match a given address when disassembling.  (Normally
+  only the first symbol that matches an address is shown).
+
 * Add --enable-colored-disassembly configure time option to enable colored
   disassembly output by default, if the output device is a terminal.  Note,
   this configure option is disabled by default.
