@@ -282,11 +282,11 @@ public:
 
   int disable_btrace (btrace_target_info *tinfo) override;
 
-  int read_btrace (btrace_target_info *tinfo, buffer *buf,
+  int read_btrace (btrace_target_info *tinfo, std::string *buf,
 		   enum btrace_read_type type) override;
 
   int read_btrace_conf (const btrace_target_info *tinfo,
-			buffer *buf) override;
+			std::string *buf) override;
 #endif
 
   bool supports_range_stepping () override;

@@ -6741,38 +6741,38 @@ linux_process_target::disable_btrace (btrace_target_info *tinfo)
 /* Encode an Intel Processor Trace configuration.  */
 
 static void
-linux_low_encode_pt_config (struct buffer *buffer,
+linux_low_encode_pt_config (std::string *buffer,
 			    const struct btrace_data_pt_config *config)
 {
-  buffer_grow_str (buffer, "<pt-config>\n");
+  *buffer += "<pt-config>\n";
 
   switch (config->cpu.vendor)
     {
     case CV_INTEL:
-      buffer_xml_printf (buffer, "<cpu vendor=\"GenuineIntel\" family=\"%u\" "
-			 "model=\"%u\" stepping=\"%u\"/>\n",
-			 config->cpu.family, config->cpu.model,
-			 config->cpu.stepping);
+      string_xml_appendf (*buffer, "<cpu vendor=\"GenuineIntel\" family=\"%u\" "
+			  "model=\"%u\" stepping=\"%u\"/>\n",
+			  config->cpu.family, config->cpu.model,
+			  config->cpu.stepping);
       break;
 
     default:
       break;
     }
 
-  buffer_grow_str (buffer, "</pt-config>\n");
+  *buffer += "</pt-config>\n";
 }
 
 /* Encode a raw buffer.  */
 
 static void
-linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
+linux_low_encode_raw (std::string *buffer, const gdb_byte *data,
 		      unsigned int size)
 {
   if (size == 0)
     return;
 
   /* We use hex encoding - see gdbsupport/rsp-low.h.  */
-  buffer_grow_str (buffer, "<raw>\n");
+  *buffer += "<raw>\n";
 
   while (size-- > 0)
     {
@@ -6781,17 +6781,17 @@ linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
       elem[0] = tohex ((*data >> 4) & 0xf);
       elem[1] = tohex (*data++ & 0xf);
 
-      buffer_grow (buffer, elem, 2);
+      buffer->append (elem);
     }
 
-  buffer_grow_str (buffer, "</raw>\n");
+  *buffer += "</raw>\n";
 }
 
 /* See to_read_btrace target method.  */
 
 int
 linux_process_target::read_btrace (btrace_target_info *tinfo,
-				   buffer *buffer,
+				   std::string *buffer,
 				   enum btrace_read_type type)
 {
   struct btrace_data btrace;
@@ -6801,9 +6801,9 @@ linux_process_target::read_btrace (btrace_target_info *tinfo,
   if (err != BTRACE_ERR_NONE)
     {
       if (err == BTRACE_ERR_OVERFLOW)
-	buffer_grow_str0 (buffer, "E.Overflow.");
+	*buffer += "E.Overflow.";
       else
-	buffer_grow_str0 (buffer, "E.Generic Error.");
+	*buffer += "E.Generic Error.";
 
       return -1;
     }
@@ -6811,36 +6811,36 @@ linux_process_target::read_btrace (btrace_target_info *tinfo,
   switch (btrace.format)
     {
     case BTRACE_FORMAT_NONE:
-      buffer_grow_str0 (buffer, "E.No Trace.");
+      *buffer += "E.No Trace.";
       return -1;
 
     case BTRACE_FORMAT_BTS:
-      buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
-      buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
+      *buffer += "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n";
+      *buffer += "<btrace version=\"1.0\">\n";
 
       for (const btrace_block &block : *btrace.variant.bts.blocks)
-	buffer_xml_printf (buffer, "<block begin=\"0x%s\" end=\"0x%s\"/>\n",
-			   paddress (block.begin), paddress (block.end));
+	string_xml_appendf (*buffer, "<block begin=\"0x%s\" end=\"0x%s\"/>\n",
+			    paddress (block.begin), paddress (block.end));
 
-      buffer_grow_str0 (buffer, "</btrace>\n");
+      *buffer += "</btrace>\n";
       break;
 
     case BTRACE_FORMAT_PT:
-      buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
-      buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
-      buffer_grow_str (buffer, "<pt>\n");
+      *buffer += "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n";
+      *buffer += "<btrace version=\"1.0\">\n";
+      *buffer += "<pt>\n";
 
       linux_low_encode_pt_config (buffer, &btrace.variant.pt.config);
 
       linux_low_encode_raw (buffer, btrace.variant.pt.data,
 			    btrace.variant.pt.size);
 
-      buffer_grow_str (buffer, "</pt>\n");
-      buffer_grow_str0 (buffer, "</btrace>\n");
+      *buffer += "</pt>\n";
+      *buffer += "</btrace>\n";
       break;
 
     default:
-      buffer_grow_str0 (buffer, "E.Unsupported Trace Format.");
+      *buffer += "E.Unsupported Trace Format.";
       return -1;
     }
 
@@ -6851,12 +6851,12 @@ linux_process_target::read_btrace (btrace_target_info *tinfo,
 
 int
 linux_process_target::read_btrace_conf (const btrace_target_info *tinfo,
-					buffer *buffer)
+					std::string *buffer)
 {
   const struct btrace_config *conf;
 
-  buffer_grow_str (buffer, "<!DOCTYPE btrace-conf SYSTEM \"btrace-conf.dtd\">\n");
-  buffer_grow_str (buffer, "<btrace-conf version=\"1.0\">\n");
+  *buffer += "<!DOCTYPE btrace-conf SYSTEM \"btrace-conf.dtd\">\n";
+  *buffer += "<btrace-conf version=\"1.0\">\n";
 
   conf = linux_btrace_conf (tinfo);
   if (conf != NULL)
@@ -6867,20 +6867,20 @@ linux_process_target::read_btrace_conf (const btrace_target_info *tinfo,
 	  break;
 
 	case BTRACE_FORMAT_BTS:
-	  buffer_xml_printf (buffer, "<bts");
-	  buffer_xml_printf (buffer, " size=\"0x%x\"", conf->bts.size);
-	  buffer_xml_printf (buffer, " />\n");
+	  string_xml_appendf (*buffer, "<bts");
+	  string_xml_appendf (*buffer, " size=\"0x%x\"", conf->bts.size);
+	  string_xml_appendf (*buffer, " />\n");
 	  break;
 
 	case BTRACE_FORMAT_PT:
-	  buffer_xml_printf (buffer, "<pt");
-	  buffer_xml_printf (buffer, " size=\"0x%x\"", conf->pt.size);
-	  buffer_xml_printf (buffer, "/>\n");
+	  string_xml_appendf (*buffer, "<pt");
+	  string_xml_appendf (*buffer, " size=\"0x%x\"", conf->pt.size);
+	  string_xml_appendf (*buffer, "/>\n");
 	  break;
 	}
     }
 
-  buffer_grow_str0 (buffer, "</btrace-conf>\n");
+  *buffer += "</btrace-conf>\n";
   return 0;
 }
 #endif /* HAVE_LINUX_BTRACE */

@@ -1825,7 +1825,7 @@ handle_qxfer_btrace (const char *annex,
 		     ULONGEST offset, LONGEST len)
 {
   client_state &cs = get_client_state ();
-  static struct buffer cache;
+  static std::string cache;
   struct thread_info *thread;
   enum btrace_read_type type;
   int result;
@@ -1867,13 +1867,13 @@ handle_qxfer_btrace (const char *annex,
 
   if (offset == 0)
     {
-      buffer_free (&cache);
+      cache.clear ();
 
       try
 	{
 	  result = target_read_btrace (thread->btrace, &cache, type);
 	  if (result != 0)
-	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
+	    memcpy (cs.own_buf, cache.c_str (), cache.length ());
 	}
       catch (const gdb_exception_error &exception)
 	{
@@ -1884,16 +1884,16 @@ handle_qxfer_btrace (const char *annex,
       if (result != 0)
 	return -3;
     }
-  else if (offset > cache.used_size)
+  else if (offset > cache.length ())
     {
-      buffer_free (&cache);
+      cache.clear ();
       return -3;
     }
 
-  if (len > cache.used_size - offset)
-    len = cache.used_size - offset;
+  if (len > cache.length () - offset)
+    len = cache.length () - offset;
 
-  memcpy (readbuf, cache.buffer + offset, len);
+  memcpy (readbuf, cache.c_str () + offset, len);
 
   return len;
 }
@@ -1906,7 +1906,7 @@ handle_qxfer_btrace_conf (const char *annex,
 			  ULONGEST offset, LONGEST len)
 {
   client_state &cs = get_client_state ();
-  static struct buffer cache;
+  static std::string cache;
   struct thread_info *thread;
   int result;
 
@@ -1938,13 +1938,13 @@ handle_qxfer_btrace_conf (const char *annex,
 
   if (offset == 0)
     {
-      buffer_free (&cache);
+      cache.clear ();
 
       try
 	{
 	  result = target_read_btrace_conf (thread->btrace, &cache);
 	  if (result != 0)
-	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
+	    memcpy (cs.own_buf, cache.c_str (), cache.length ());
 	}
       catch (const gdb_exception_error &exception)
 	{
@@ -1955,16 +1955,16 @@ handle_qxfer_btrace_conf (const char *annex,
       if (result != 0)
 	return -3;
     }
-  else if (offset > cache.used_size)
+  else if (offset > cache.length ())
     {
-      buffer_free (&cache);
+      cache.clear ();
       return -3;
     }
 
-  if (len > cache.used_size - offset)
-    len = cache.used_size - offset;
+  if (len > cache.length () - offset)
+    len = cache.length () - offset;
 
-  memcpy (readbuf, cache.buffer + offset, len);
+  memcpy (readbuf, cache.c_str () + offset, len);
 
   return len;
 }

@@ -33,7 +33,6 @@
 #include "gdbsupport/byte-vector.h"
 
 struct emit_ops;
-struct buffer;
 struct process_info;
 
 /* This structure describes how to resume a particular thread (or all
@@ -403,14 +402,14 @@ public:
   /* Read branch trace data into buffer.
      Return 0 on success; print an error message into BUFFER and return -1,
      otherwise.  */
-  virtual int read_btrace (btrace_target_info *tinfo, buffer *buf,
+  virtual int read_btrace (btrace_target_info *tinfo, std::string *buf,
 			   enum btrace_read_type type);
 
   /* Read the branch trace configuration into BUFFER.
      Return 0 on success; print an error message into BUFFER and return -1
      otherwise.  */
   virtual int read_btrace_conf (const btrace_target_info *tinfo,
-				buffer *buf);
+				std::string *buf);
 
   /* Return true if target supports range stepping.  */
   virtual bool supports_range_stepping ();
@@ -636,7 +635,7 @@ target_disable_btrace (struct btrace_target_info *tinfo)
 
 static inline int
 target_read_btrace (struct btrace_target_info *tinfo,
-		    struct buffer *buffer,
+		    std::string *buffer,
 		    enum btrace_read_type type)
 {
   return the_target->read_btrace (tinfo, buffer, type);
@@ -644,7 +643,7 @@ target_read_btrace (struct btrace_target_info *tinfo,
 
 static inline int
 target_read_btrace_conf (struct btrace_target_info *tinfo,
-			 struct buffer *buffer)
+			 std::string *buffer)
 {
   return the_target->read_btrace_conf (tinfo, buffer);
 }
