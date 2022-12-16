@@ -5390,13 +5390,13 @@ traceframe_read_sdata (int tfnum, ULONGEST offset,
 }
 
 /* Callback for traceframe_walk_blocks.  Builds a traceframe-info
-   object.  DATA is pointer to a struct buffer holding the
-   traceframe-info object being built.  */
+   object.  DATA is pointer to a string holding the traceframe-info
+   object being built.  */
 
 static int
 build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 {
-  struct buffer *buffer = (struct buffer *) data;
+  std::string *buffer = (std::string *) data;
 
   switch (blocktype)
     {
@@ -5409,9 +5409,9 @@ build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 	dataptr += sizeof (maddr);
 	memcpy (&mlen, dataptr, sizeof (mlen));
 	dataptr += sizeof (mlen);
-	buffer_xml_printf (buffer,
-			   "<memory start=\"0x%s\" length=\"0x%s\"/>\n",
-			   paddress (maddr), phex_nz (mlen, sizeof (mlen)));
+	string_xml_appendf (*buffer,
+			    "<memory start=\"0x%s\" length=\"0x%s\"/>\n",
+			    paddress (maddr), phex_nz (mlen, sizeof (mlen)));
 	break;
       }
     case 'V':
@@ -5419,7 +5419,7 @@ build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 	int vnum;
 
 	memcpy (&vnum, dataptr, sizeof (vnum));
-	buffer_xml_printf (buffer, "<tvar id=\"%d\"/>\n", vnum);
+	string_xml_appendf (*buffer, "<tvar id=\"%d\"/>\n", vnum);
 	break;
       }
     case 'R':
@@ -5441,7 +5441,7 @@ build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
    BUFFER.  */
 
 int
-traceframe_read_info (int tfnum, struct buffer *buffer)
+traceframe_read_info (int tfnum, std::string *buffer)
 {
   struct traceframe *tframe;
 
@@ -5455,10 +5455,10 @@ traceframe_read_info (int tfnum, struct buffer *buffer)
       return 1;
     }
 
-  buffer_grow_str (buffer, "<traceframe-info>\n");
+  *buffer += "<traceframe-info>\n";
   traceframe_walk_blocks (tframe->data, tframe->data_size,
 			  tfnum, build_traceframe_info_xml, buffer);
-  buffer_grow_str0 (buffer, "</traceframe-info>\n");
+  *buffer += "</traceframe-info>\n";
   return 0;
 }
 

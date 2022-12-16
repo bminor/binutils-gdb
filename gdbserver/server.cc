@@ -1770,8 +1770,7 @@ handle_qxfer_traceframe_info (const char *annex,
 			      ULONGEST offset, LONGEST len)
 {
   client_state &cs = get_client_state ();
-  static char *result = 0;
-  static unsigned int result_length = 0;
+  static std::string result;
 
   if (writebuf != NULL)
     return -2;
@@ -1781,35 +1780,25 @@ handle_qxfer_traceframe_info (const char *annex,
 
   if (offset == 0)
     {
-      struct buffer buffer;
-
       /* When asked for data at offset 0, generate everything and
 	 store into 'result'.  Successive reads will be served off
 	 'result'.  */
-      free (result);
+      result.clear ();
 
-      buffer_init (&buffer);
-
-      traceframe_read_info (cs.current_traceframe, &buffer);
-
-      result = buffer_finish (&buffer);
-      result_length = strlen (result);
-      buffer_free (&buffer);
+      traceframe_read_info (cs.current_traceframe, &result);
     }
 
-  if (offset >= result_length)
+  if (offset >= result.length ())
     {
       /* We're out of data.  */
-      free (result);
-      result = NULL;
-      result_length = 0;
+      result.clear ();
       return 0;
     }
 
-  if (len > result_length - offset)
-    len = result_length - offset;
+  if (len > result.length () - offset)
+    len = result.length () - offset;
 
-  memcpy (readbuf, result + offset, len);
+  memcpy (readbuf, result.c_str () + offset, len);
   return len;
 }
 
