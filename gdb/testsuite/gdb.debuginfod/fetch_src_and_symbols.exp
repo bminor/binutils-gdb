@@ -20,7 +20,7 @@ standard_testfile
 load_lib dwarf.exp
 load_lib debuginfod-support.exp
 
-if { [skip_debuginfod_tests] } { return -1 }
+require !skip_debuginfod_tests
 
 set sourcetmp [standard_output_file tmp-${srcfile}]
 set outputdir [standard_output_file {}]
