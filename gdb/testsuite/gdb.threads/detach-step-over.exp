@@ -187,10 +187,6 @@ proc prepare_test_iter {testpid non_stop attempt attempts tid_re} {
 	}
     }
 
-    # Wait a bit, to give time for the threads to hit the
-    # breakpoint.
-    sleep 1
-
     return true
 }
 
@@ -233,7 +229,8 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
 
 	    set running_count 0
 	    set interrupted 0
-	    gdb_test_multiple "info threads" "all threads running" {
+	    set running_expected [expr ($::n_threads + 1) * 2]
+	    gdb_test_multiple "info threads" "threads running" {
 		-re "\\(running\\)" {
 		    incr running_count
 		    exp_continue
@@ -254,10 +251,31 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
 			}
 		    }
 		}
-		-re "$::gdb_prompt $" {
-		    gdb_assert {$running_count == ($::n_threads + 1) * 2} \
-			$gdb_test_name
+		-re "$::gdb_prompt " {
 		}
+	    }
+
+	    if { !$interrupted } {
+		set iterations 0
+		set max_iterations 10
+		while { $running_count < $running_expected } {
+		    sleep 1
+		    set running_count 0
+		    gdb_test_multiple "info threads" "threads running" {
+			-re "\\(running\\)" {
+			    incr running_count
+			    exp_continue
+			}
+			-re "$::gdb_prompt " {
+			}
+		    }
+		    incr iterations
+		    if { $iterations == $max_iterations } {
+			break
+		    }
+		}
+		gdb_assert {$running_count == $running_expected} \
+		    "all threads running"
 	    }
 
 	    gdb_test "detach" "Detaching from.*"
