@@ -31,7 +31,6 @@
 #include "remote.h"
 #include "xml-tdesc.h"
 #include "target-descriptions.h"
-#include "gdbsupport/buffer.h"
 #include "gdbsupport/pathstuff.h"
 #include <algorithm>
 
@@ -425,7 +424,7 @@ static off_t trace_frames_offset;
 static off_t cur_offset;
 static int cur_data_size;
 int trace_regblock_size;
-static struct buffer trace_tdesc;
+static std::string trace_tdesc;
 
 static void tfile_append_tdesc_line (const char *line);
 static void tfile_interp_line (char *line,
@@ -487,7 +486,7 @@ tfile_target_open (const char *arg, int from_tty)
   trace_fd = scratch_chan;
 
   /* Make sure this is clear.  */
-  buffer_free (&trace_tdesc);
+  trace_tdesc.clear ();
 
   bytes = 0;
   /* Read the file header and test for validity.  */
@@ -626,7 +625,7 @@ tfile_target::close ()
   trace_fd = -1;
   xfree (trace_filename);
   trace_filename = NULL;
-  buffer_free (&trace_tdesc);
+  trace_tdesc.clear ();
 
   trace_reset_local_state ();
 }
@@ -922,16 +921,16 @@ tfile_xfer_partial_features (const char *annex,
   if (readbuf == NULL)
     error (_("tfile_xfer_partial: tdesc is read-only"));
 
-  if (trace_tdesc.used_size == 0)
+  if (trace_tdesc.empty ())
     return TARGET_XFER_E_IO;
 
-  if (offset >= trace_tdesc.used_size)
+  if (offset >= trace_tdesc.length ())
     return TARGET_XFER_EOF;
 
-  if (len > trace_tdesc.used_size - offset)
-    len = trace_tdesc.used_size - offset;
+  if (len > trace_tdesc.length () - offset)
+    len = trace_tdesc.length () - offset;
 
-  memcpy (readbuf, trace_tdesc.buffer + offset, len);
+  memcpy (readbuf, trace_tdesc.c_str () + offset, len);
   *xfered_len = len;
 
   return TARGET_XFER_OK;
@@ -1128,8 +1127,8 @@ tfile_target::traceframe_info ()
 static void
 tfile_append_tdesc_line (const char *line)
 {
-  buffer_grow_str (&trace_tdesc, line);
-  buffer_grow_str (&trace_tdesc, "\n");
+  trace_tdesc += line;
+  trace_tdesc += "\n";
 }
 
 void _initialize_tracefile_tfile ();
