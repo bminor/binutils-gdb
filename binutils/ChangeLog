@@ -1,3 +1,8 @@
+2022-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 29908
+	* dwarf.c (display_debug_addr): Check for corrupt header lengths.
+
 2022-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 25202

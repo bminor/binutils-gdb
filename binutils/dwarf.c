@@ -7738,6 +7738,12 @@ display_debug_addr (struct dwarf_section *section,
 	      return 0;
 	    }
 	  end = curr_header + length;
+	  if (end < entry)
+	    {
+	      warn (_("Corrupt %s section header: length field (%lx) is too small\n"),
+		    section->name, length);
+	      return 0;
+	    }
 	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
 	  if (version != 5)
 	    warn (_("Corrupt %s section: expecting version number 5 in header but found %d instead\n"),
@@ -7748,9 +7754,22 @@ display_debug_addr (struct dwarf_section *section,
 	  address_size += segment_selector_size;
 	}
       else
-	end = section->start + debug_addr_info [i + 1]->addr_base;
+	{
+	  end = section->start + debug_addr_info [i + 1]->addr_base;
+
+	  if (end < entry)
+	    {
+	      warn (_("Corrupt %s section: address base of entry %u (%lx) is less than entry %u (%lx)\n"),
+		    section->name,
+		    i, debug_addr_info [i]->addr_base,
+		    i + 1, debug_addr_info [i + 1]->addr_base);
+	      return 0;
+	    }
+	}
+
       header = end;
       idx = 0;
+
       while ((size_t) (end - entry) >= address_size)
 	{
 	  uint64_t base = byte_get (entry, address_size);
