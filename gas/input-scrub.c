@@ -564,9 +564,6 @@ as_where (unsigned int *linep)
 
       do
 	{
-	  if (!saved->is_linefile)
-	    break;
-
 	  if (expansion != expanding_macro)
 	    /* Nothing.  */;
 	  else if (saved->logical_input_file != NULL

@@ -120,8 +120,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
   size_t from_len;
   size_t to_len = strlen (to);
   int depth = 1;
-  size_t line_start = ptr->len;
-  size_t more = get_line (ptr);
+  size_t line_start, more;
 
   if (to_len == 4 && strcasecmp (to, "ENDR") == 0)
     {
@@ -147,6 +146,8 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
     xfree (linefile);
   }
 
+  line_start = ptr->len;
+  more = get_line (ptr);
   while (more)
     {
       /* Try to find the first pseudo op on the line.  */
