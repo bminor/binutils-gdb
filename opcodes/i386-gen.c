@@ -1299,8 +1299,10 @@ output_i386_opcode (FILE *table, const char *name, char *str,
   /* Find base_opcode.  */
   base_opcode = next_field (str, ',', &str, last);
 
-  /* Find extension_opcode.  */
-  extension_opcode = next_field (str, ',', &str, last);
+  /* Find extension_opcode, if any.  */
+  extension_opcode = strchr (base_opcode, '/');
+  if (extension_opcode)
+    *extension_opcode++ = '\0';
 
   /* Find cpu_flags.  */
   cpu_flags = next_field (str, ',', &str, last);
@@ -1385,7 +1387,8 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	  filename, lineno, name, 2 * length, opcode);
 
   fprintf (table, "  { \"%s\", 0x%0*llx%s, %lu, %s,\n",
-	   name, 2 * (int)length, opcode, end, i, extension_opcode);
+	   name, 2 * (int)length, opcode, end, i,
+	   extension_opcode ? extension_opcode : "None");
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
 				operand_types, lineno);
