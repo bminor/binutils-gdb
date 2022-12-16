@@ -1,4 +1,4 @@
---  Copyright 2008-2023 Free Software Foundation, Inc.
+--  Copyright 2023 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,24 +13,19 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Pck is
+with Pkg;
 
-   My_Global_Variable : Integer := 1;
+procedure Prog is
+   Ordinary_Var : Integer := 78;
 
-   Internal_Capitalized : Integer := 2;
-   pragma Export (C, Internal_Capitalized, "Exported_Capitalized");
+   Local_Imported_Var : Integer;
+   pragma Import (C, Local_Imported_Var, "imported_var");
 
-   Local_Identical_One : Integer := 4;
-   Local_Identical_Two : Integer := 8;
-
-   External_Identical_One : Integer := 19;
-
-   package Inner is
-      Inside_Variable : Integer := 3;
-   end Inner;
-
-   procedure Proc (I : Integer);
-
-   procedure Ambiguous_Func;
-
-end Pck;
+   function Local_Imported_Func return Integer;
+   pragma Import (C, Local_Imported_Func, "imported_func");
+begin
+   Local_Imported_Var := Local_Imported_Func;  --  BREAK
+   Pkg.Imported_Var_Ada := Pkg.Imported_Func_Ada;
+   Pkg.Do_Nothing (Pkg.Imported_Func_Ada'Address);
+   Pkg.Do_Nothing (Pkg.Exported_Func_Ada'Address);
+end Prog;

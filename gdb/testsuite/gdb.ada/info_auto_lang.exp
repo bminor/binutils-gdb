@@ -51,8 +51,14 @@ if {![runto "some_c.c:$bp_location"]} {
 
 set func_in_c(c_syntax)      "${decimal}:	void proc_in_c\\\(void\\\);"
 set func_in_c(ada_syntax)    "${decimal}:	procedure proc_in_c;"
-set func_in_ada(c_syntax)    "${decimal}:	void proc_in_ada\\\(void\\\);"
-set func_in_ada(ada_syntax)  "${decimal}:	procedure proc_in_ada;"
+set func_in_ada(c_syntax) \
+    [string cat \
+	 "${decimal}:	void proc_in_ada\\\(void\\\);\r\n" \
+	 "${decimal}:	void proc_in_ada.something_in_c\\\(void\\\);"]
+set func_in_ada(ada_syntax) \
+    [string cat \
+	 "${decimal}:	procedure proc_in_ada;\r\n" \
+	 "${decimal}:	procedure proc_in_ada.something_in_c;"]
 
 set type_in_c(c_syntax) "${decimal}:	typedef struct {\\.\\.\\.} some_type_in_c;"
 set type_in_c(ada_syntax) [multi_line \

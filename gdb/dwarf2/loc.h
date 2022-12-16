@@ -246,9 +246,11 @@ struct dwarf2_property_baton
 
 extern const struct symbol_computed_ops dwarf2_locexpr_funcs;
 extern const struct symbol_computed_ops dwarf2_loclist_funcs;
+extern const struct symbol_computed_ops ada_imported_funcs;
 
 extern const struct symbol_block_ops dwarf2_block_frame_base_locexpr_funcs;
 extern const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs;
+extern const struct symbol_block_ops ada_function_alias_funcs;
 
 /* Determined tail calls for constructing virtual tail call frames.  */
 

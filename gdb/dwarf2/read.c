@@ -142,8 +142,10 @@ static const registry<objfile>::key<dwarf2_per_bfd>
 
 static int dwarf2_locexpr_index;
 static int dwarf2_loclist_index;
+static int ada_imported_index;
 static int dwarf2_locexpr_block_index;
 static int dwarf2_loclist_block_index;
+static int ada_block_index;
 
 /* Size of .debug_loclists section header for 32-bit DWARF format.  */
 #define LOCLIST_HEADER_SIZE32 12
@@ -1071,6 +1073,9 @@ static void queue_comp_unit (dwarf2_per_cu_data *per_cu,
 			     enum language pretend_language);
 
 static void process_queue (dwarf2_per_objfile *per_objfile);
+
+static bool is_ada_import_or_export (dwarf2_cu *cu, const char *name,
+				     const char *linkagename);
 
 /* Class, the destructor of which frees all allocated queue entries.  This
    will only have work to do if an error was thrown while processing the
@@ -10014,6 +10019,31 @@ dwarf2_func_is_main_p (struct die_info *die, struct dwarf2_cu *cu)
 	  && attr->constant_value (DW_CC_normal) == DW_CC_program);
 }
 
+/* A helper to handle Ada's "Pragma Import" feature when it is applied
+   to a function.  */
+
+static bool
+check_ada_pragma_import (struct die_info *die, struct dwarf2_cu *cu)
+{
+  /* A Pragma Import will have both a name and a linkage name.  */
+  const char *name = dwarf2_name (die, cu);
+  if (name == nullptr)
+    return false;
+
+  const char *linkage_name = dw2_linkage_name (die, cu);
+  /* Disallow the special Ada symbols.  */
+  if (!is_ada_import_or_export (cu, name, linkage_name))
+    return false;
+
+  /* A Pragma Import will be a declaration, while a Pragma Export will
+     not be.  */
+  if (!die_is_declaration (die, cu))
+    return false;
+
+  new_symbol (die, read_type_die (die, cu), cu);
+  return true;
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -10057,6 +10087,14 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       complaint (_("missing name for subprogram DIE at %s"),
 		 sect_offset_str (die->sect_off));
+      return;
+    }
+
+  if (check_ada_pragma_import (die, cu))
+    {
+      /* We already made the symbol for the Pragma Import, and because
+	 it is a declaration, we know it won't have any other
+	 important information, so we can simply return.  */
       return;
     }
 
@@ -18821,6 +18859,51 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
     cu->has_loclist = true;
 }
 
+/* A helper function to add an "export" symbol.  The new symbol starts
+   as a clone of ORIG, but is modified to defer to the symbol named
+   ORIG_NAME.  The original symbol uses the name given in the source
+   code, and the symbol that is created here uses the linkage name as
+   its name.  See ada-imported.c.  */
+
+static void
+add_ada_export_symbol (struct symbol *orig, const char *new_name,
+		       const char *orig_name, struct dwarf2_cu *cu,
+		       struct pending **list_to_add)
+{
+  struct symbol *copy
+    = new (&cu->per_objfile->objfile->objfile_obstack) symbol (*orig);
+  copy->set_linkage_name (new_name);
+  SYMBOL_LOCATION_BATON (copy) = (void *) orig_name;
+  copy->set_aclass_index (copy->aclass () == LOC_BLOCK
+			  ? ada_block_index
+			  : ada_imported_index);
+  add_symbol_to_list (copy, list_to_add);
+}
+
+/* A helper function that decides if a given symbol is an Ada Pragma
+   Import or Pragma Export.  */
+
+static bool
+is_ada_import_or_export (dwarf2_cu *cu, const char *name,
+			 const char *linkagename)
+{
+  return (cu->lang () == language_ada
+	  && linkagename != nullptr
+	  && !streq (name, linkagename)
+	  /* The following exclusions are necessary because symbols
+	     with names or linkage names that match here will meet the
+	     other criteria but are not in fact caused by Pragma
+	     Import or Pragma Export, and applying the import/export
+	     treatment to them will introduce problems.  Some of these
+	     checks only apply to functions, but it is simpler and
+	     harmless to always do them all.  */
+	  && !startswith (name, "__builtin")
+	  && !startswith (linkagename, "___ghost_")
+	  && !startswith (linkagename, "__gnat")
+	  && !startswith (linkagename, "_ada_")
+	  && !streq (linkagename, "adainit"));
+}
+
 /* Given a pointer to a DWARF information entry, figure out if we need
    to make a symbol table entry for it, and if so, create a new entry
    and return a pointer to it.
@@ -18961,6 +19044,28 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      list_to_add = cu->list_in_scope;
 	    }
+
+	  if (is_ada_import_or_export (cu, name, linkagename))
+	    {
+	      /* This is either a Pragma Import or Export.  They can
+		 be distinguished by the declaration flag.  */
+	      sym->set_linkage_name (name);
+	      if (die_is_declaration (die, cu))
+		{
+		  /* For Import, create a symbol using the source
+		     name, and have it refer to the linkage name.  */
+		  SYMBOL_LOCATION_BATON (sym) = (void *) linkagename;
+		  sym->set_aclass_index (ada_block_index);
+		}
+	      else
+		{
+		  /* For Export, create a symbol using the source
+		     name, then create a second symbol that refers
+		     back to it.  */
+		  add_ada_export_symbol (sym, linkagename, name, cu,
+					 list_to_add);
+		}
+	    }
 	  break;
 	case DW_TAG_inlined_subroutine:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
@@ -19053,6 +19158,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		}
 	      else
 		list_to_add = cu->list_in_scope;
+
+	      if (is_ada_import_or_export (cu, name, linkagename))
+		{
+		  /* This is a Pragma Export.  A Pragma Import won't
+		     be seen here, because it will not have a location
+		     and so will be handled below.  */
+		  add_ada_export_symbol (sym, name, linkagename, cu,
+					 list_to_add);
+		}
 	    }
 	  else
 	    {
@@ -19073,6 +19187,16 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		     read_common_block is going to reset it.  */
 		  if (!suppress_add)
 		    list_to_add = cu->list_in_scope;
+		}
+	      else if (is_ada_import_or_export (cu, name, linkagename))
+		{
+		  /* This is a Pragma Import.  A Pragma Export won't
+		     be seen here, because it will have a location and
+		     so will be handled above.  */
+		  sym->set_linkage_name (name);
+		  list_to_add = cu->list_in_scope;
+		  SYMBOL_LOCATION_BATON (sym) = (void *) linkagename;
+		  sym->set_aclass_index (ada_imported_index);
 		}
 	      else if (attr2 != nullptr && attr2->as_boolean ()
 		       && dwarf2_attr (die, DW_AT_type, cu) != NULL)
@@ -21923,11 +22047,15 @@ the demangler."),
 							&dwarf2_locexpr_funcs);
   dwarf2_loclist_index = register_symbol_computed_impl (LOC_COMPUTED,
 							&dwarf2_loclist_funcs);
+  ada_imported_index = register_symbol_computed_impl (LOC_COMPUTED,
+						      &ada_imported_funcs);
 
   dwarf2_locexpr_block_index = register_symbol_block_impl (LOC_BLOCK,
 					&dwarf2_block_frame_base_locexpr_funcs);
   dwarf2_loclist_block_index = register_symbol_block_impl (LOC_BLOCK,
 					&dwarf2_block_frame_base_loclist_funcs);
+  ada_block_index = register_symbol_block_impl (LOC_BLOCK,
+						&ada_function_alias_funcs);
 
 #if GDB_SELF_TEST
   selftests::register_test ("dw2_expand_symtabs_matching",
