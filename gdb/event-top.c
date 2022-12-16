@@ -36,7 +36,6 @@
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
-#include "gdbsupport/buffer.h"
 #include "ser-event.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb-sigmask.h"
@@ -868,11 +867,8 @@ void
 gdb_readline_no_editing_callback (gdb_client_data client_data)
 {
   int c;
-  char *result;
-  struct buffer line_buffer;
+  std::string line_buffer;
   struct ui *ui = current_ui;
-
-  buffer_init (&line_buffer);
 
   FILE *stream = ui->instream != nullptr ? ui->instream : ui->stdin_stream;
   gdb_assert (stream != nullptr);
@@ -893,32 +889,28 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 
       if (c == EOF)
 	{
-	  if (line_buffer.used_size > 0)
+	  if (!line_buffer.empty ())
 	    {
 	      /* The last line does not end with a newline.  Return it, and
 		 if we are called again fgetc will still return EOF and
 		 we'll return NULL then.  */
 	      break;
 	    }
-	  xfree (buffer_finish (&line_buffer));
 	  ui->input_handler (NULL);
 	  return;
 	}
 
       if (c == '\n')
 	{
-	  if (line_buffer.used_size > 0
-	      && line_buffer.buffer[line_buffer.used_size - 1] == '\r')
-	    line_buffer.used_size--;
+	  if (!line_buffer.empty () && line_buffer.back () == '\r')
+	    line_buffer.pop_back ();
 	  break;
 	}
 
-      buffer_grow_char (&line_buffer, c);
+      line_buffer += c;
     }
 
-  buffer_grow_char (&line_buffer, '\0');
-  result = buffer_finish (&line_buffer);
-  ui->input_handler (gdb::unique_xmalloc_ptr<char> (result));
+  ui->input_handler (make_unique_xstrdup (line_buffer.c_str ()));
 }
 
 
