@@ -17,10 +17,7 @@ load_lib "ada.exp"
 
 require !skip_ada_tests
 
-if {![gnat_runtime_has_debug_info]} {
-    untested "GNAT runtime debuginfo required for this test"
-    return -1
-}
+require gnat_runtime_has_debug_info
 
 standard_ada_testfile main
 
