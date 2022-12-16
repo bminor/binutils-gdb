@@ -372,6 +372,7 @@ linux_init_ptrace_procfs (pid_t pid, int attached)
   linux_enable_event_reporting (pid, options);
   linux_ptrace_init_warnings ();
   linux_proc_init_warnings ();
+  proc_mem_file_is_writable ();
 }
 
 linux_nat_target::~linux_nat_target ()
@@ -3955,7 +3956,11 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
    return true if so.  It wasn't writable before Linux 2.6.39, but
    there's no way to know whether the feature was backported to older
    kernels.  So we check to see if it works.  The result is cached,
-   and this is garanteed to be called once early at startup.  */
+   and this is garanteed to be called once early during inferior
+   startup, so that any warning is printed out consistently between
+   GDB invocations.  Note we don't call it during GDB startup instead
+   though, because then we might warn with e.g. just "gdb --version"
+   on sandboxed systems.  See PR gdb/29907.  */
 
 static bool
 proc_mem_file_is_writable ()
@@ -4490,8 +4495,6 @@ Enables printf debugging output."),
   sigemptyset (&blocked_mask);
 
   lwp_lwpid_htab_create ();
-
-  proc_mem_file_is_writable ();
 }
 
 
