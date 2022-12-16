@@ -2366,7 +2366,31 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	  return 0;
 	}
       else
-	return (*string1 != '\0' && *string1 != '(');
+	{
+	  if (*string1 == '(')
+	    {
+	      int p_count = 0;
+
+	      do
+		{
+		  if (*string1 == '(')
+		    ++p_count;
+		  else if (*string1 == ')')
+		    --p_count;
+		  ++string1;
+		}
+	      while (*string1 != '\0' && p_count > 0);
+
+	      /* There maybe things like 'const' after the parameters,
+		 which we do want to ignore.  However, if there's an '@'
+		 then this likely indicates something like '@plt' which we
+		 should not ignore.  */
+	      return *string1 == '@';
+	    }
+
+	  return *string1 == '\0' ? 0 : 1;
+	}
+
     }
   else
     return 1;
@@ -2898,6 +2922,11 @@ strncmp_iw_with_mode_tests ()
   CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a][abi:b](bar[abi:c][abi:d])",
 	       MATCH_PARAMS);
   CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo(args)@plt", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo((())args(()))@plt", "foo", MATCH_PARAMS);
+  CHECK_MATCH ("foo((())args(()))", "foo", MATCH_PARAMS);
+  CHECK_MATCH ("foo(args) const", "foo", MATCH_PARAMS);
+  CHECK_MATCH ("foo(args)const", "foo", MATCH_PARAMS);
 
   /* strncmp_iw_with_mode also supports case insensitivity.  */
   {
