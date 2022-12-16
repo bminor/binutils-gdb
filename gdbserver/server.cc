@@ -1639,7 +1639,7 @@ handle_qxfer_statictrace (const char *annex,
    Emit the XML to describe the thread of INF.  */
 
 static void
-handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
+handle_qxfer_threads_worker (thread_info *thread, std::string *buffer)
 {
   ptid_t ptid = ptid_of (thread);
   char ptid_s[100];
@@ -1658,34 +1658,34 @@ handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
 
   write_ptid (ptid_s, ptid);
 
-  buffer_xml_printf (buffer, "<thread id=\"%s\"", ptid_s);
+  string_xml_appendf (*buffer, "<thread id=\"%s\"", ptid_s);
 
   if (core != -1)
     {
       sprintf (core_s, "%d", core);
-      buffer_xml_printf (buffer, " core=\"%s\"", core_s);
+      string_xml_appendf (*buffer, " core=\"%s\"", core_s);
     }
 
   if (name != NULL)
-    buffer_xml_printf (buffer, " name=\"%s\"", name);
+    string_xml_appendf (*buffer, " name=\"%s\"", name);
 
   if (handle_status)
     {
       char *handle_s = (char *) alloca (handle_len * 2 + 1);
       bin2hex (handle, handle_s, handle_len);
-      buffer_xml_printf (buffer, " handle=\"%s\"", handle_s);
+      string_xml_appendf (*buffer, " handle=\"%s\"", handle_s);
     }
 
-  buffer_xml_printf (buffer, "/>\n");
+  string_xml_appendf (*buffer, "/>\n");
 }
 
 /* Helper for handle_qxfer_threads.  Return true on success, false
    otherwise.  */
 
 static bool
-handle_qxfer_threads_proper (struct buffer *buffer)
+handle_qxfer_threads_proper (std::string *buffer)
 {
-  buffer_grow_str (buffer, "<threads>\n");
+  *buffer += "<threads>\n";
 
   /* The target may need to access memory and registers (e.g. via
      libthread_db) to fetch thread properties.  Even if don't need to
@@ -1705,7 +1705,7 @@ handle_qxfer_threads_proper (struct buffer *buffer)
   if (non_stop)
     target_unpause_all (true);
 
-  buffer_grow_str0 (buffer, "</threads>\n");
+  *buffer += "</threads>\n";
   return true;
 }
 
@@ -1716,8 +1716,7 @@ handle_qxfer_threads (const char *annex,
 		      gdb_byte *readbuf, const gdb_byte *writebuf,
 		      ULONGEST offset, LONGEST len)
 {
-  static char *result = 0;
-  static unsigned int result_length = 0;
+  static std::string result;
 
   if (writebuf != NULL)
     return -2;
@@ -1727,37 +1726,27 @@ handle_qxfer_threads (const char *annex,
 
   if (offset == 0)
     {
-      struct buffer buffer;
       /* When asked for data at offset 0, generate everything and store into
 	 'result'.  Successive reads will be served off 'result'.  */
-      if (result)
-	free (result);
+      result.clear ();
 
-      buffer_init (&buffer);
-
-      bool res = handle_qxfer_threads_proper (&buffer);
-
-      result = buffer_finish (&buffer);
-      result_length = strlen (result);
-      buffer_free (&buffer);
+      bool res = handle_qxfer_threads_proper (&result);
 
       if (!res)
 	return -1;
     }
 
-  if (offset >= result_length)
+  if (offset >= result.length ())
     {
       /* We're out of data.  */
-      free (result);
-      result = NULL;
-      result_length = 0;
+      result.clear ();
       return 0;
     }
 
-  if (len > result_length - offset)
-    len = result_length - offset;
+  if (len > result.length () - offset)
+    len = result.length () - offset;
 
-  memcpy (readbuf, result + offset, len);
+  memcpy (readbuf, result.c_str () + offset, len);
 
   return len;
 }
