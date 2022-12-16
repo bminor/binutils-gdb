@@ -33,7 +33,6 @@
 #include <arpa/inet.h>
 
 #include "gdbsupport/xml-utils.h"
-#include "gdbsupport/buffer.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include "gdbsupport/filestuff.h"

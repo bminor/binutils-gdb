@@ -18,8 +18,6 @@
 #ifndef NAT_LINUX_PTRACE_H
 #define NAT_LINUX_PTRACE_H
 
-struct buffer;
-
 #include "nat/gdb_ptrace.h"
 #include "gdbsupport/gdb_wait.h"
 

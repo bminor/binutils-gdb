@@ -60,7 +60,6 @@
 #include "symfile.h"
 #include "gdbsupport/agent.h"
 #include "tracepoint.h"
-#include "gdbsupport/buffer.h"
 #include "target-descriptions.h"
 #include "gdbsupport/filestuff.h"
 #include "objfiles.h"

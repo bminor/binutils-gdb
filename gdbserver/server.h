@@ -52,7 +52,6 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #  define PROG "gdbserver"
 #endif
 
-#include "gdbsupport/buffer.h"
 #include "gdbsupport/xml-utils.h"
 #include "regcache.h"
 #include "gdbsupport/gdb_signals.h"
