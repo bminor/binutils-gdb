@@ -1271,6 +1271,7 @@ run_dump_test "non-contiguous-arm3"
 run_dump_test "non-contiguous-arm4"
 run_dump_test "non-contiguous-arm5"
 run_dump_test "non-contiguous-arm6"
+run_dump_test "non-contiguous-arm7"
 
 if { !$is_nacl && [check_shared_lib_support] } {
     run_dump_test "thumb-plt"

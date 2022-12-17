@@ -11154,12 +11154,12 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
       if (isym->st_shndx != SHN_UNDEF
 	  && isym->st_shndx < SHN_LORESERVE
 	  && isec->output_section == NULL
-	  && flinfo->info->non_contiguous_regions
-	  && flinfo->info->non_contiguous_regions_warnings)
+	  && flinfo->info->non_contiguous_regions)
 	{
-	  _bfd_error_handler (_("warning: --enable-non-contiguous-regions "
-				"discards section `%s' from '%s'\n"),
-			      isec->name, bfd_get_filename (isec->owner));
+	  if (flinfo->info->non_contiguous_regions_warnings)
+	    _bfd_error_handler (_("warning: --enable-non-contiguous-regions "
+				  "discards section `%s' from '%s'\n"),
+				isec->name, bfd_get_filename (isec->owner));
 	  continue;
 	}
 
