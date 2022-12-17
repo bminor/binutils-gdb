@@ -21,6 +21,7 @@
 #define	_SFRAME_API_H
 
 #include <sframe.h>
+#include <stdbool.h>
 
 #ifdef	__cplusplus
 extern "C"
@@ -183,6 +184,12 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
 extern int32_t
 sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
 			  sframe_frame_row_entry *fre, int *errp);
+
+/* Get whether the RA is mangled.  */
+
+extern bool
+sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx,
+			     sframe_frame_row_entry *fre, int *errp);
 
 /* The SFrame Encoder.  */
 

@@ -124,6 +124,12 @@ sframe_fre_get_offset_size (unsigned char fre_info)
   return SFRAME_V1_FRE_OFFSET_SIZE (fre_info);
 }
 
+static bool
+sframe_get_fre_ra_mangled_p (unsigned char fre_info)
+{
+  return SFRAME_V1_FRE_MANGLED_RA_P (fre_info);
+}
+
 /* Access functions for info from function descriptor entry.  */
 
 static unsigned int
@@ -638,6 +644,18 @@ sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
 
   /* Otherwise, get the RA offset from the FRE.  */
   return sframe_get_fre_offset (fre, SFRAME_FRE_RA_OFFSET_IDX, errp);
+}
+
+/* Get whether the RA is mangled.  */
+
+bool
+sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
+			     sframe_frame_row_entry *fre, int *errp)
+{
+  if (fre == NULL || !sframe_fre_sanity_check_p (fre))
+    return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
+
+  return sframe_get_fre_ra_mangled_p (fre->fre_info);
 }
 
 static int
