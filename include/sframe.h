@@ -227,11 +227,12 @@ typedef struct sframe_fre_info
      - 2 bits: information about size of the offsets (S) in bytes.
      Valid values are SFRAME_FRE_OFFSET_1B, SFRAME_FRE_OFFSET_2B,
      SFRAME_FRE_OFFSET_4B
-     - 1 bit: Unused.
-     -----------------------------------------------------------------------
-     |  Unused  |  Size of offsets   |   Number of offsets    |   base_reg |
-     -----------------------------------------------------------------------
-     8          7                    5                        1            0
+     - 1 bit: Mangled RA state bit (aarch64 only).
+     ----------------------------------------------------------------------------------
+     | Mangled-RA (aarch64) |  Size of offsets   |   Number of offsets    |   base_reg |
+     |  Unused (amd64)      |                    |                        |            |
+     ----------------------------------------------------------------------------------
+     8                     7                    5                        1            0
 
      */
   uint8_t fre_info;
@@ -239,13 +240,19 @@ typedef struct sframe_fre_info
 
 /* Macros to compose and decompose FRE info.  */
 
+/* Note: Set mangled_ra_p to zero by default.  */
 #define SFRAME_V1_FRE_INFO(base_reg_id, offset_num, offset_size) \
-  ((((offset_size) & 0x3) << 5) | (((offset_num) & 0xf) << 1) | \
-   ((base_reg_id) & 0x1))
+  (((0 & 0x1) << 7) | (((offset_size) & 0x3) << 5) | \
+   (((offset_num) & 0xf) << 1) | ((base_reg_id) & 0x1))
+
+/* Set the mangled_ra_p bit as indicated.  */
+#define SFRAME_V1_FRE_INFO_UPDATE_MANGLED_RA_P(mangled_ra_p, fre_info) \
+  ((((mangled_ra_p) & 0x1) << 7) | ((fre_info) & 0x7f))
 
 #define SFRAME_V1_FRE_CFA_BASE_REG_ID(data)	  ((data) & 0x1)
 #define SFRAME_V1_FRE_OFFSET_COUNT(data)	  (((data) >> 1) & 0xf)
-#define SFRAME_V1_FRE_OFFSET_SIZE(data)	  (((data) >> 5) & 0x3)
+#define SFRAME_V1_FRE_OFFSET_SIZE(data)		  (((data) >> 5) & 0x3)
+#define SFRAME_V1_FRE_MANGLED_RA_P(data)	  (((data) >> 7) & 0x1)
 
 /* SFrame Frame Row Entry definitions.
 
