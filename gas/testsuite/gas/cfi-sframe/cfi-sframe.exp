@@ -82,7 +82,6 @@ if  { ([istarget "x86_64-*-*"] || [istarget "aarch64*-*-*"]) \
     run_dump_test "common-empty-1"
     run_dump_test "common-empty-2"
     run_dump_test "common-empty-3"
-    run_dump_test "common-empty-4"
 }
 
 # x86-64 specific tests

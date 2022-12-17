@@ -243,10 +243,11 @@ static struct sframe_version_ops sframe_ver_ops;
 
 static unsigned char
 sframe_v1_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
-			unsigned int offset_size)
+			unsigned int offset_size, bool mangled_ra_p)
 {
   unsigned char fre_info;
   fre_info = SFRAME_V1_FRE_INFO (base_reg, num_offsets, offset_size);
+  fre_info = SFRAME_V1_FRE_INFO_UPDATE_MANGLED_RA_P (mangled_ra_p, fre_info);
   return fre_info;
 }
 
@@ -275,10 +276,10 @@ sframe_set_version (uint32_t sframe_version __attribute__((unused)))
 
 static unsigned char
 sframe_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
-		     unsigned int offset_size)
+		     unsigned int offset_size, bool mangled_ra_p)
 {
   return sframe_ver_ops.set_fre_info (base_reg, num_offsets,
-					 offset_size);
+				      offset_size, mangled_ra_p);
 }
 
 /* SFrame set func info. */
@@ -507,7 +508,7 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_num_offsets = get_fre_num_offsets (sframe_fre);
   fre_offset_size = sframe_get_fre_offset_size (sframe_fre);
   fre_info = sframe_set_fre_info (fre_base_reg, fre_num_offsets,
-				     fre_offset_size);
+				  fre_offset_size, sframe_fre->mangled_ra_p);
   out_one (fre_info);
 
   idx = sframe_fre_offset_func_map_index (fre_offset_size);
@@ -845,6 +846,9 @@ sframe_row_entry_new (void)
      for the supported arches.  */
   fre->cfa_base_reg = -1;
   fre->merge_candidate = true;
+  /* Reset the mangled RA status bit to zero by default.  We will initialize it in
+     sframe_row_entry_initialize () with the sticky bit if set.  */
+  fre->mangled_ra_p = false;
 
   return fre;
 }
@@ -890,6 +894,9 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   cur_fre->bp_offset = prev_fre->bp_offset;
   cur_fre->ra_loc = prev_fre->ra_loc;
   cur_fre->ra_offset = prev_fre->ra_offset;
+  /* Treat RA mangling as a sticky bit.  It retains its value until another
+     .cfi_negate_ra_state is seen.  */
+  cur_fre->mangled_ra_p = prev_fre->mangled_ra_p;
 }
 
 /* Translate DW_CFA_advance_loc into SFrame context.
@@ -1150,6 +1157,23 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_OK;
 }
 
+/* Translate DW_CFA_GNU_window_save into SFrame context.
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
+				 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
+{
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+
+  gas_assert (cur_fre);
+  /* Toggle the mangled RA status bit.  */
+  cur_fre->mangled_ra_p = !cur_fre->mangled_ra_p;
+  cur_fre->merge_candidate = false;
+
+  return SFRAME_XLATE_OK;
+}
+
 /* Process CFI_INSN and update the translation context with the FRE
    information.
 
@@ -1195,6 +1219,11 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case DW_CFA_restore:
       err = sframe_xlate_do_restore (xlate_ctx, cfi_insn);
       break;
+    /* DW_CFA_AARCH64_negate_ra_state is multiplexed with
+       DW_CFA_GNU_window_save.  */
+    case DW_CFA_GNU_window_save:
+      err = sframe_xlate_do_gnu_window_save (xlate_ctx, cfi_insn);
+      break;
     case DW_CFA_undefined:
     case DW_CFA_same_value:
       break;
@@ -1207,10 +1236,7 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
 	    - ...
 
 	   Following skipped operations do, however, impact the asynchronicity:
-	     - CFI_escape,
-	     - DW_CFA_GNU_window_save,
-	     - DW_CFA_AARCH64_negate_ra_state (multiplexed with
-	       DW_CFA_GNU_window_save)  */
+	     - CFI_escape  */
 
 	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
 	// printf (_("SFrame Unsupported or unknown Dwarf CFI number: %#x\n"), op);

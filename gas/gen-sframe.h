@@ -50,6 +50,9 @@ struct sframe_row_entry
      on it.  */
   bool merge_candidate;
 
+  /* Whether the return address is mangled with pauth code.  */
+  bool mangled_ra_p;
+
   /* Track CFA base (architectural) register ID.  */
   unsigned int cfa_base_reg;
   /* Offset from the CFA base register for recovering CFA.  */
@@ -140,7 +143,8 @@ struct sframe_version_ops
 {
   unsigned char format_version;    /* SFrame format version.  */
   /* set SFrame FRE info.  */
-  unsigned char (*set_fre_info) (unsigned int, unsigned int, unsigned int);
+  unsigned char (*set_fre_info) (unsigned int, unsigned int, unsigned int,
+				 bool);
   /* set SFrame Func info.  */
   unsigned char (*set_func_info) (unsigned int, unsigned int);
 };
