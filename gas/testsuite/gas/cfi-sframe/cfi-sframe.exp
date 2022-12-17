@@ -96,4 +96,5 @@ if { [istarget "x86_64-*-*"] && [gas_sframe_check] } then {
 # aarch64 specific tests
 if { [istarget "aarch64*-*-*"] && [gas_sframe_check] } then {
     run_dump_test "cfi-sframe-aarch64-1"
+    run_dump_test "cfi-sframe-aarch64-2"
 }
