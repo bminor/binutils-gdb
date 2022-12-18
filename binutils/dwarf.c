@@ -7738,19 +7738,14 @@ display_debug_addr (struct dwarf_section *section,
 	  SAFE_BYTE_GET_AND_INC (length, curr_header, 4, entry);
 	  if (length == 0xffffffff)
 	    SAFE_BYTE_GET_AND_INC (length, curr_header, 8, entry);
-	  if (length > (size_t) (section->start + section->size - curr_header))
+	  if (length > (size_t) (section->start + section->size - curr_header)
+	      || length < (size_t) (entry - curr_header))
 	    {
 	      warn (_("Corrupt %s section: unit_length field of %#" PRIx64
-		      " too large\n"), section->name, length);
+		      " is invalid\n"), section->name, length);
 	      return 0;
 	    }
 	  end = curr_header + length;
-	  if (end < entry)
-	    {
-	      warn (_("Corrupt %s section header: length field (%lx) is too small\n"),
-		    section->name, (long) length);
-	      return 0;
-	    }
 	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
 	  if (version != 5)
 	    warn (_("Corrupt %s section: expecting version number 5 in header but found %d instead\n"),
@@ -7761,18 +7756,7 @@ display_debug_addr (struct dwarf_section *section,
 	  address_size += segment_selector_size;
 	}
       else
-	{
-	  end = section->start + debug_addr_info [i + 1]->addr_base;
-
-	  if (end < entry)
-	    {
-	      warn (_("Corrupt %s section: address base of entry %u (%lx) is less than entry %u (%lx)\n"),
-		    section->name,
-		    i, (long) debug_addr_info [i]->addr_base,
-		    i + 1, (long) debug_addr_info [i + 1]->addr_base);
-	      return 0;
-	    }
-	}
+	end = section->start + debug_addr_info [i + 1]->addr_base;
 
       header = end;
       idx = 0;
