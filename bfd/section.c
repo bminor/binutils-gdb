@@ -1550,10 +1550,7 @@ bfd_get_section_contents (bfd *abfd,
       return true;
     }
 
-  if (abfd->direction != write_direction && section->rawsize != 0)
-    sz = section->rawsize;
-  else
-    sz = section->size;
+  sz = bfd_get_section_limit_octets (abfd, section);
   if ((bfd_size_type) offset > sz
       || count > sz - offset
       || count != (size_t) count)

@@ -502,6 +502,8 @@ CODE_FRAGMENT
 .  sy->name = name;
 .}
 .
+.{* For input sections return the original size on disk of the
+.   section.  For output sections return the current size.  *}
 .static inline bfd_size_type
 .bfd_get_section_limit_octets (const bfd *abfd, const asection *sec)
 .{
@@ -518,6 +520,9 @@ CODE_FRAGMENT
 .	   / bfd_octets_per_byte (abfd, sec));
 .}
 .
+.{* For input sections return the larger of the current size and the
+.   original size on disk of the section.  For output sections return
+.   the current size.  *}
 .static inline bfd_size_type
 .bfd_get_section_alloc_size (const bfd *abfd, const asection *sec)
 .{

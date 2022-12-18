@@ -943,15 +943,7 @@ _bfd_generic_get_section_contents (bfd *abfd,
       return false;
     }
 
-  /* We do allow reading of a section after bfd_final_link has
-     written the contents out to disk.  In that situation, rawsize is
-     just a stale version of size, so ignore it.  Otherwise we must be
-     reading an input section, where rawsize, if different to size,
-     is the on-disk size.  */
-  if (abfd->direction != write_direction && section->rawsize != 0)
-    sz = section->rawsize;
-  else
-    sz = section->size;
+  sz = bfd_get_section_limit_octets (abfd, section);
   if (offset + count < count
       || offset + count > sz
       || (abfd->my_archive != NULL
