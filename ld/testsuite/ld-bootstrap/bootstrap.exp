@@ -106,7 +106,7 @@ foreach flags $test_flags {
 
     # This test can only be run if we have the ld build directory,
     # since we need the object files.
-    if {$ld != "$objdir/ld-new"} {
+    if {[file normalize $ld] != [file normalize $objdir/ld-new]} {
 	untested $testname
 	continue
     }
