@@ -32,7 +32,7 @@ so_cputime ()
   /* put a memory leak in here */
   (void) malloc (13);
 
-  fprintf (stderr, "so_burncpu @ 0x%08x\n", (unsigned int) so_burncpu);
+  fprintf (stderr, "so_burncpu @ %p\n", so_burncpu);
   so_burncpu ();
 
   wlog ("end of so_cputime", NULL);
