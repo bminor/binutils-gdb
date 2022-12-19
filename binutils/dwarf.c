@@ -739,6 +739,13 @@ fetch_indexed_value (uint64_t idx,
       return -1;
     }
 
+  if (section->size < 4)
+    {
+      warn (_("Section %s is too small to contain an value indexed from another section!\n"),
+	    section->name);
+      return -1;
+    }
+
   uint32_t pointer_size, bias;
 
   if (byte_get (section->start, 4) == 0xffffffff)
@@ -7769,6 +7776,13 @@ display_debug_addr (struct dwarf_section *section,
 
       header = end;
       idx = 0;
+
+      if (address_size < 1 || address_size > sizeof (uint64_t))
+	{
+	  warn (_("Corrupt %s section: address size (%x) is wrong"),
+		section->name, address_size);
+	  return 0;
+	}
 
       while ((size_t) (end - entry) >= address_size)
 	{
