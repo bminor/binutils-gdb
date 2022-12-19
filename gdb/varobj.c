@@ -2412,8 +2412,7 @@ varobj_invalidate_if_uses_objfile (struct objfile *objfile)
 	    }
 	}
 
-      if (var->root->exp != nullptr
-	  && exp_uses_objfile (var->root->exp.get (), objfile))
+      if (var->root->exp != nullptr && var->root->exp->uses_objfile (objfile))
 	{
 	  /* The varobj's current expression references the objfile.  For
 	     globals and floating, it is possible that when we try to

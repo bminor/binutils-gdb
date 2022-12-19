@@ -89,6 +89,15 @@ parse_to_comma_and_eval (const char **expp)
 
 /* See expression.h.  */
 
+bool
+expression::uses_objfile (struct objfile *objfile) const
+{
+  gdb_assert (objfile->separate_debug_objfile_backlink == nullptr);
+  return op->uses_objfile (objfile);
+}
+
+/* See expression.h.  */
+
 struct value *
 expression::evaluate (struct type *expect_type, enum noside noside)
 {

@@ -2360,7 +2360,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
 	}
 
       if (bl_objf == objfile
-	  || (d->exp != NULL && exp_uses_objfile (d->exp.get (), objfile)))
+	  || (d->exp != nullptr && d->exp->uses_objfile (objfile)))
 	{
 	  d->exp.reset ();
 	  d->block = NULL;

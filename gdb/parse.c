@@ -667,18 +667,6 @@ parser_fprintf (FILE *x, const char *y, ...)
   va_end (args);
 }
 
-/* Return rue if EXP uses OBJFILE (and will become dangling when
-   OBJFILE is unloaded), otherwise return false.  OBJFILE must not be
-   a separate debug info file.  */
-
-bool
-exp_uses_objfile (struct expression *exp, struct objfile *objfile)
-{
-  gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
-
-  return exp->op->uses_objfile (objfile);
-}
-
 void _initialize_parse ();
 void
 _initialize_parse ()
