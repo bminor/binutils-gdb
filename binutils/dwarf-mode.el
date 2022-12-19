@@ -177,7 +177,7 @@ A prefix argument means expand all children."
 ;; Run objdump and insert the contents into the buffer.  The arguments
 ;; are the way they are because this is also called as a
 ;; revert-buffer-function.
-(defun dwarf-do-refresh (&rest ignore)
+(defun dwarf-do-refresh (&rest _ignore)
   (dwarf--check-running)
   (let ((inhibit-read-only t))
     (dwarf--invoke (point-min) (point-max)
