@@ -651,11 +651,6 @@ execute_command (const char *p, int from_tty)
 	    }
 	}
 
-      /* Remember name of the command.  This is needed later when
-	 executing command post-hooks to handle the case when command
-	 is redefined or removed during it's execution.  See below.  */
-      std::string c_name (c->name);
-
       /* If this command has been pre-hooked, run the hook first.  */
       execute_cmd_pre_hook (c);
 
@@ -698,7 +693,8 @@ execute_command (const char *p, int from_tty)
 	 We need to lookup the command again since during its execution,
 	 a command may redefine itself.  In this case, C pointer
 	 becomes invalid so we need to look it up again.  */
-      c = lookup_cmd_exact (c_name.c_str (), cmdlist);
+      const char *cmd2 = cmd_start;
+      c = lookup_cmd (&cmd2, cmdlist, "", nullptr, 1, 1);
       if (c != nullptr)
 	execute_cmd_post_hook (c);
 
