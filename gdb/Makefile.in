@@ -2020,7 +2020,7 @@ install-only: $(CONFIG_INSTALL)
 		  true ; \
 		fi ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
-		$(LIBTOOL) --mode=install $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) \
+		$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) \
 			gdb$(EXEEXT) \
 			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(includedir)/gdb ; \
@@ -2533,7 +2533,7 @@ install-gdbtk:
 	  true ; \
 	fi ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir); \
-	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) \
+	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) \
 		insight$(EXEEXT) \
 		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
