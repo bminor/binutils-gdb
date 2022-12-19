@@ -1500,7 +1500,7 @@ set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
-  switch (expr->op->opcode ())
+  switch (expr->first_opcode ())
     {
     case UNOP_PREINCREMENT:
     case UNOP_POSTINCREMENT:
