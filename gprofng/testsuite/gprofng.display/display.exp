@@ -54,6 +54,7 @@ switch $pltf {
   }
 }
 
+global JDK_INC
 global GPROFNG_BROKEN_JAVAC
 
 foreach line $table {
@@ -63,7 +64,8 @@ foreach line $table {
 
   verbose [file rootname $line]
   verbose running display test $line
-  if { $GPROFNG_BROKEN_JAVAC == "yes" && $dir == "jsynprog" } {
+  if { $dir == "jsynprog"
+       && ($JDK_INC == "" || $GPROFNG_BROKEN_JAVAC == "yes") } {
     unsupported $dir
   } else {
     run_display_test $dir $cflags $gprofflags
