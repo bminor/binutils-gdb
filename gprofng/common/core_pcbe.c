@@ -2937,6 +2937,8 @@ core_pcbe_cpuref (void)
       return
       GTXT ("See Chapter 19 of the \"Intel 64 and IA-32 Architectures Software Developer's Manual Volume 3B: System Programming Guide, Part 2\"\nOrder Number: 253669-045US, January 2013");
     }
+#else
+  return GTXT ("Unknown cpu model");
 #endif
 }
 

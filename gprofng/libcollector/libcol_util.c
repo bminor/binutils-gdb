@@ -137,7 +137,7 @@ atomic_swap (volatile int * p, int v)
 int
 __collector_mutex_lock (collector_mutex_t *lock_var)
 {
-  volatile unsigned int i; /* xxxx volatile may not be honored on amd64 -x04 */
+  volatile unsigned int i = 0; /* xxxx volatile may not be honored on amd64 -x04 */
 
   if (!(*lock_var) && !atomic_swap (lock_var, 1))
     return 0;

@@ -326,7 +326,7 @@ collect::check_executable_arch (Elf *elf)
 	// now figure out if the platform can run it
 	struct utsname unbuf;
 	int r = uname (&unbuf);
-	if (r == 0 && unbuf.machine && strstr (unbuf.machine, "_64") == NULL)
+	if (r == 0 && strstr (unbuf.machine, "_64") == NULL)
 	  // machine can not run 64 bits, but this code is 64-bit
 	  return EXEC_ELF_ARCH;
       }

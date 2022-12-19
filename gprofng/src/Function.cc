@@ -416,6 +416,8 @@ SrcInfo *
 Function::new_srcInfo ()
 {
   SrcInfo *t = new SrcInfo ();
+  t->src_line = NULL;
+  t->included_from = NULL;
   t->next = srcinfo_list;
   srcinfo_list = t;
   return t;

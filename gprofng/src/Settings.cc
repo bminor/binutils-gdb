@@ -1257,7 +1257,7 @@ Settings::set_name_format (char *arg)
     return CMD_BAD_ARG;
 
   bool soname_fmt = false;
-  if (colon && (colon + 1))
+  if (colon)
     {
       colon++;
       if (!strcasecmp (colon, NTXT ("soname")))
