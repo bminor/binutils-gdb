@@ -54,7 +54,4 @@ gdb_test "next" {v = 3;} "next to v = 3"
 # {
 gdb_test "reverse-step" {nodebug \(\);}
 
-# FAIL was:
-# No more reverse-execution history.
-# {
-gdb_test "reverse-next" {f \(\);}
+gdb_test "reverse-next" {g \(\);}

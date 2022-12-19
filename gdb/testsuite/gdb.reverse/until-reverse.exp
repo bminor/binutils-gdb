@@ -111,7 +111,7 @@ gdb_test "advance marker2" \
 # Finish out to main scope (backward)
 
 gdb_test "finish" \
-    " in main .*$srcfile:$bp_location20.*" \
+    "main .*$srcfile:$bp_location20.*" \
     "reverse-finish from marker2"
 
 # Advance backward to last line of factorial (outer invocation)

@@ -2748,8 +2748,6 @@ clear_proceed_status_thread (struct thread_info *tp)
 
   tp->control.stop_step = 0;
 
-  tp->control.proceed_to_finish = 0;
-
   tp->control.stepping_command = 0;
 
   /* Discard any remaining commands or status from previous stop.  */
@@ -6737,31 +6735,27 @@ process_event_stop_test (struct execution_control_state *ecs)
 
     case BPSTAT_WHAT_STEP_RESUME:
       infrun_debug_printf ("BPSTAT_WHAT_STEP_RESUME");
-
       delete_step_resume_breakpoint (ecs->event_thread);
-      if (ecs->event_thread->control.proceed_to_finish
-	  && execution_direction == EXEC_REVERSE)
+      fill_in_stop_func (gdbarch, ecs);
+
+      if (execution_direction == EXEC_REVERSE)
 	{
 	  struct thread_info *tp = ecs->event_thread;
+	  /* We are finishing a function in reverse or stepping over a function
+	     call in reverse, and just hit the step-resume breakpoint at the
+	     start address of the function, and we're almost there -- just need
+	     to back up to the function call.  */
 
-	  /* We are finishing a function in reverse, and just hit the
-	     step-resume breakpoint at the start address of the
-	     function, and we're almost there -- just need to back up
-	     by one more single-step, which should take us back to the
-	     function call.  */
-	  tp->control.step_range_start = tp->control.step_range_end = 1;
-	  keep_going (ecs);
-	  return;
-	}
-      fill_in_stop_func (gdbarch, ecs);
-      if (ecs->event_thread->stop_pc () == ecs->stop_func_start
-	  && execution_direction == EXEC_REVERSE)
-	{
-	  /* We are stepping over a function call in reverse, and just
-	     hit the step-resume breakpoint at the start address of
-	     the function.  Go back to single-stepping, which should
-	     take us back to the function call.  */
-	  ecs->event_thread->stepping_over_breakpoint = 1;
+	  stop_pc_sal = find_pc_line (ecs->event_thread->stop_pc (), 0);
+
+	  /* When setting a step range, need to call set_step_info
+	     to setup the current_line/symtab fields as well.  */
+	  set_step_info (tp, frame, stop_pc_sal);
+
+	  /* Return using a step range so we will keep stepping back to the
+	     first instruction in the source code line.  */
+	  tp->control.step_range_start = ecs->stop_func_start;
+	  tp->control.step_range_end = ecs->stop_func_start;
 	  keep_going (ecs);
 	  return;
 	}

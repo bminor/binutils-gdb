@@ -42,6 +42,5 @@ if [supports_process_record] {
 gdb_test "next" {f \(\);} "next to f"
 gdb_test "next" {v = 3;} "next to v = 3"
 
-# FAIL was:
-# 29        g ();
-gdb_test "reverse-next" {f \(\);}
+# Reverse step back into f ().  Puts us at call to g () in function f ().
+gdb_test "reverse-next" {g \(\);}

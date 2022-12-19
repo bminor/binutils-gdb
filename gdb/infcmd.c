@@ -1719,19 +1719,10 @@ finish_backward (struct finish_command_fsm *sm)
 
   sal = find_pc_line (func_addr, 0);
 
-  tp->control.proceed_to_finish = 1;
-  /* Special case: if we're sitting at the function entry point,
-     then all we need to do is take a reverse singlestep.  We
-     don't need to set a breakpoint, and indeed it would do us
-     no good to do so.
-
-     Note that this can only happen at frame #0, since there's
-     no way that a function up the stack can have a return address
-     that's equal to its entry point.  */
+  frame_info_ptr frame = get_selected_frame (nullptr);
 
   if (sal.pc != pc)
     {
-      frame_info_ptr frame = get_selected_frame (nullptr);
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       /* Set a step-resume at the function's entry point.  Once that's
@@ -1741,16 +1732,22 @@ finish_backward (struct finish_command_fsm *sm)
       sr_sal.pspace = get_frame_program_space (frame);
       insert_step_resume_breakpoint_at_sal (gdbarch,
 					    sr_sal, null_frame_id);
-
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
   else
     {
-      /* We're almost there -- we just need to back up by one more
-	 single-step.  */
-      tp->control.step_range_start = tp->control.step_range_end = 1;
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
+      /* We are exactly at the function entry point.  Note that this
+	 can only happen at frame #0.
+
+	 When setting a step range, need to call set_step_info
+	 to setup the current_line/symtab fields as well.  */
+      set_step_info (tp, frame, find_pc_line (pc, 0));
+
+      /* Return using a step range so we will keep stepping back
+	 to the first instruction in the source code line.  */
+      tp->control.step_range_start = sal.pc;
+      tp->control.step_range_end = sal.pc;
     }
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }
 
 /* finish_forward -- helper function for finish_command.  FRAME is the
@@ -1775,9 +1772,6 @@ finish_forward (struct finish_command_fsm *sm, frame_info_ptr frame)
   frame = nullptr;
 
   set_longjmp_breakpoint (tp, frame_id);
-
-  /* We want to print return value, please...  */
-  tp->control.proceed_to_finish = 1;
 
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }
