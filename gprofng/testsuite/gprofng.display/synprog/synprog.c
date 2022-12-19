@@ -184,7 +184,7 @@ struct scripttab scripttab[] = {
   {"sched",     sched,          "sched",        0,  1},
   {"so",        callso,         "callso",       0,  0},
   {"sx",        callsx,         "callsx",       0,  0},
-  {"sig",       sigtime,        "sigtime",      0,  1},
+  {"sig",       sigtime,        "sigtime_handler", 0,  1},
   {"sigprof",   sigprof,        "sigprof",      1,  0},
   {"sigprof0",  sigprof,        "sigprof",      0,  0},
   {"sigprofh",  sigprofh,       "sigprofh",     1,  0},
@@ -197,7 +197,7 @@ struct scripttab scripttab[] = {
   {"uf",        underflow,      "underflow",    0,  1},
   {"forkexec",  do_forkexec,    "forkexec",     0,  0},
   {"vforkexec", do_vforkexec,   "vforkexec",    0,  0},
-  {"uwdc",      unwindcases,    "unwindcases",  0,  0},
+  {"uwdc",      unwindcases,    "unwindcases_handler", 0,  0},
   {NULL, NULL, NULL, 0, 0}
 };
 
