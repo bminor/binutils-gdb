@@ -420,7 +420,7 @@ changequote([,])dnl
 
     # Do we need the opcodes library?
     case ${cpu_type} in
-      vax | tic30 | i386)
+      vax | tic30 | i386 | arm)
 	;;
 
       *)
