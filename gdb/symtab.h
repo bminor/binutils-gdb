@@ -1182,6 +1182,12 @@ struct symbol_block_ops
      the corresponding DW_AT_frame_base attribute.  */
   CORE_ADDR (*get_frame_base) (struct symbol *framefunc,
 			       frame_info_ptr frame);
+
+  /* Return the block for this function.  So far, this is used to
+     implement function aliases.  So, if this is set, then it's not
+     necessary to set the other functions in this structure; and vice
+     versa.  */
+  const block *(*get_block_value) (const struct symbol *sym);
 };
 
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
@@ -1536,6 +1542,9 @@ struct block_symbol
 inline const block *
 symbol::value_block () const
 {
+  if (SYMBOL_BLOCK_OPS (this) != nullptr
+      && SYMBOL_BLOCK_OPS (this)->get_block_value != nullptr)
+    return SYMBOL_BLOCK_OPS (this)->get_block_value (this);
   return m_value.block;
 }
 
