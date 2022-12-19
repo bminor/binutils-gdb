@@ -52,7 +52,7 @@ int x2M = 2000000;
 int x8M = 8000000;
 
 /* define a macro that burns CPU time */
-#define burncpu(nn) \ 
+#define burncpu(nn) \
         x = 0; \
         for (j = 0; j < (nn * x8M); j++) { \
                  x = x + 1; \
