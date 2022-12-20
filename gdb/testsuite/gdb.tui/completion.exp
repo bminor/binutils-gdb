@@ -15,8 +15,9 @@
 
 require allow_tui_tests
 
-gdb_exit
-gdb_start
+tuiterm_env
+
+clean_restart
 
 if {[target_info exists gdb,nointerrupts]} {
     return
@@ -56,3 +57,16 @@ with_test_prefix "completion of layout names" {
 with_test_prefix "completion of focus command" {
     test_tab_completion "focus" "cmd *next *prev *src *"
 }
+
+# Now run some completion tests when TUI mode is enabled.
+Term::clean_restart 24 80
+if {![Term::prepare_for_tui]} {
+    unsupported "TUI not supported"
+    return
+}
+
+Term::command "layout src"
+Term::command "complete focus "
+Term::dump_screen
+Term::check_region_contents "check focus completions" 0 17 80 5 \
+    "focus cmd\\s*focus next\\s*focus prev\\s*focus src\\s*$gdb_prompt"
