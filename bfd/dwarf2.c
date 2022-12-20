@@ -4831,16 +4831,19 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
     {
       look = debug_sections[debug_info].uncompressed_name;
       msec = bfd_get_section_by_name (abfd, look);
-      if (msec != NULL)
+      /* Testing SEC_HAS_CONTENTS is an anti-fuzzer measure.  Of
+	 course debug sections always have contents.  */
+      if (msec != NULL && (msec->flags & SEC_HAS_CONTENTS) != 0)
 	return msec;
 
       look = debug_sections[debug_info].compressed_name;
       msec = bfd_get_section_by_name (abfd, look);
-      if (msec != NULL)
+      if (msec != NULL && (msec->flags & SEC_HAS_CONTENTS) != 0)
         return msec;
 
       for (msec = abfd->sections; msec != NULL; msec = msec->next)
-	if (startswith (msec->name, GNU_LINKONCE_INFO))
+	if ((msec->flags & SEC_HAS_CONTENTS) != 0
+	    && startswith (msec->name, GNU_LINKONCE_INFO))
 	  return msec;
 
       return NULL;
@@ -4848,6 +4851,9 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
 
   for (msec = after_sec->next; msec != NULL; msec = msec->next)
     {
+      if ((msec->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
+
       look = debug_sections[debug_info].uncompressed_name;
       if (strcmp (msec->name, look) == 0)
 	return msec;
