@@ -16,6 +16,10 @@
 # Test that the logic for displaying the TUI disassembly window
 # handles very long lines.
 
+require allow_tui_tests
+
+tuiterm_env
+
 standard_testfile
 
 set ccopts {debug quiet}
@@ -31,13 +35,16 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
     }
 }
 
-clean_restart "$binfile"
-
-if {![allow_tui_tests]} {
-    # TUI support is disabled.  Check for error message.
-    gdb_test "layout asm" "Undefined command: \"layout\".  Try \"help\"."
+Term::clean_restart 24 80 $binfile
+if {![Term::prepare_for_tui]} {
+    unsupported "TUI not supported"
     return
 }
 
-# Just check the command does not cause gdb to crash.
-gdb_test "layout asm"
+# Just check the command does not cause gdb to crash.  It is worth
+# noting that the asm window does infact fail to correctly display the
+# disassembler output at this point, but initially we are just
+# checking that GDB doesn't crash, fixing the asm display will come
+# later.
+Term::command_no_prompt_prefix "layout asm"
+Term::check_box "asm box" 0 0 80 15
