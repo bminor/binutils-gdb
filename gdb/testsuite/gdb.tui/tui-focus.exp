@@ -1,0 +1,68 @@
+# Copyright 2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Minimal testcase that just checks that the various "layout $foo"
+# commands do not cause gdb to crash.
+
+require allow_tui_tests
+
+tuiterm_env
+
+standard_testfile
+
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
+    return -1
+}
+
+# Run a series of tests based on various test specifications.
+#
+# Each test specification is a tuple where the first item is the name of a
+# window, and the second item is a boolean indicating if we expect that
+# window to be present in the default (src) layout.
+foreach spec {{src true} {cmd true} {status true} {regs false} {asm false}} {
+    lassign $spec window valid_p
+    with_test_prefix "window=$window" {
+
+	Term::clean_restart 24 80 $binfile
+	if {![Term::prepare_for_tui]} {
+	    unsupported "TUI not supported"
+	    return
+	}
+
+	Term::command_no_prompt_prefix "focus $window"
+
+	if {$valid_p} {
+	    # The 'status' window is special, it's present in the
+	    # default (src) layout, but is not focusable.
+	    if {$window == "status"} {
+		Term::check_region_contents "check focus error" 0 16 80 1 \
+		    "^Window \"$window\" cannot be focused\\s*"
+	    } else {
+		Term::check_region_contents "check focus message" 0 16 80 1 \
+		    "^Focus set to $window window\\.\\s*"
+	    }
+	} else {
+	    Term::check_region_contents "check focus error" 0 16 80 1 \
+		"^Unrecognized window name \"$window\"\\s*"
+	}
+
+	Term::check_box "check src box" 0 0 80 15
+
+	# At one point the following 'focus prev' command would trigger a
+	# crash in GDB, GDB was allowing users to set focus to the 'status'
+	# window, and 'focus prev' would then trigger an assert.
+	Term::command "focus prev"
+    }
+}

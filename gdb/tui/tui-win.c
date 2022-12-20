@@ -723,6 +723,9 @@ tui_set_focus_command (const char *arg, int from_tty)
   if (!win_info->is_visible ())
     error (_("Window \"%s\" is not visible"), arg);
 
+  if (!win_info->can_focus ())
+    error (_("Window \"%s\" cannot be focused"), arg);
+
   tui_set_win_focus_to (win_info);
   gdb_printf (_("Focus set to %s window.\n"),
 	      tui_win_with_focus ()->name ());
