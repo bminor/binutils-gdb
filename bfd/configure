@@ -13006,6 +13006,18 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRNLEN $ac_have_decl
 _ACEOF
 
+ac_fn_c_check_decl "$LINENO" "___lc_codepage_func" "ac_cv_have_decl____lc_codepage_func" "#include <locale.h>
+"
+if test "x$ac_cv_have_decl____lc_codepage_func" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL____LC_CODEPAGE_FUNC $ac_have_decl
+_ACEOF
+
 
 
 case "${host}" in
