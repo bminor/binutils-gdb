@@ -64,6 +64,10 @@
    don't. */
 #undef HAVE_DECL_VASPRINTF
 
+/* Define to 1 if you have the declaration of `___lc_codepage_func', and to 0
+   if you don't. */
+#undef HAVE_DECL____LC_CODEPAGE_FUNC
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
