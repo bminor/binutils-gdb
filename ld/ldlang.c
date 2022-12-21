@@ -2539,7 +2539,7 @@ lang_add_section (lang_statement_list_type *ptr,
 	}
       else if (link_info.non_contiguous_regions_warnings)
 	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions makes "
-		 "section `%pA' from '%pB' match /DISCARD/ clause.\n"),
+		 "section `%pA' from `%pB' match /DISCARD/ clause.\n"),
 	       NULL, section, section->owner);
 
       return;
@@ -2572,7 +2572,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
       if (link_info.non_contiguous_regions_warnings && output->bfd_section)
 	einfo (_("%P:%pS: warning: --enable-non-contiguous-regions may "
-		 "change behaviour for section `%pA' from '%pB' (assigned to "
+		 "change behaviour for section `%pA' from `%pB' (assigned to "
 		 "%pA, but additional match: %pA)\n"),
 	       NULL, section, section->owner, section->output_section,
 	       output->bfd_section);
@@ -5252,15 +5252,15 @@ size_input_section
 	      if (dot + TO_ADDR (i->size) > end)
 		{
 		  if (i->flags & SEC_LINKER_CREATED)
-		    einfo (_("%F%P: Output section '%s' not large enough for the "
-			     "linker-created stubs section '%s'.\n"),
-			   i->output_section->name, i->name);
+		    einfo (_("%F%P: Output section `%pA' not large enough for "
+			     "the linker-created stubs section `%pA'.\n"),
+			   i->output_section, i);
 
 		  if (i->rawsize && i->rawsize != i->size)
 		    einfo (_("%F%P: Relaxation not supported with "
-			     "--enable-non-contiguous-regions (section '%s' "
-			     "would overflow '%s' after it changed size).\n"),
-			   i->name, i->output_section->name);
+			     "--enable-non-contiguous-regions (section `%pA' "
+			     "would overflow `%pA' after it changed size).\n"),
+			   i, i->output_section);
 
 		  *removed = 1;
 		  dot = end;
@@ -7851,6 +7851,24 @@ lang_propagate_lma_regions (void)
 }
 
 static void
+warn_non_contiguous_discards (void)
+{
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
+    {
+      if ((file->the_bfd->flags & (BFD_LINKER_CREATED | DYNAMIC)) != 0
+	  || file->flags.just_syms)
+	continue;
+
+      for (asection *s = file->the_bfd->sections; s != NULL; s = s->next)
+	if (s->output_section == NULL
+	    && (s->flags & SEC_LINKER_CREATED) == 0)
+	  einfo (_("%P: warning: --enable-non-contiguous-regions "
+		   "discards section `%pA' from `%pB'\n"),
+		 s, file->the_bfd);
+    }
+}
+
+static void
 reset_one_wild (lang_statement_union_type *statement)
 {
   if (statement->header.type == lang_wild_statement_enum)
@@ -8190,6 +8208,10 @@ lang_process (void)
   /* Make sure that the section addresses make sense.  */
   if (command_line.check_section_addresses)
     lang_check_section_addresses ();
+
+  if (link_info.non_contiguous_regions
+      && link_info.non_contiguous_regions_warnings)
+    warn_non_contiguous_discards ();
 
   /* Check any required symbols are known.  */
   ldlang_check_require_defined_symbols ();

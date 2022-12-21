@@ -11701,25 +11701,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   stub_entry = (struct ppc_stub_hash_entry *) gen_entry;
   info = in_arg;
 
-  /* Fail if the target section could not be assigned to an output
-     section.  The user should fix his linker script.  */
-  if (stub_entry->target_section != NULL
-      && stub_entry->target_section->output_section == NULL
-      && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
-			      "Retry without --enable-non-contiguous-regions.\n"),
-			    stub_entry->target_section);
-
-  /* Same for the group.  */
-  if (stub_entry->group->stub_sec != NULL
-      && stub_entry->group->stub_sec->output_section == NULL
-      && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
-			      "output section. Retry without "
-			      "--enable-non-contiguous-regions.\n"),
-			    stub_entry->group->stub_sec,
-			    stub_entry->target_section);
-
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return false;
@@ -12254,7 +12235,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->target_section != NULL
       && stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign %pA to an output section. "
+    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
 			      "Retry without --enable-non-contiguous-regions.\n"),
 			    stub_entry->target_section);
 
@@ -12262,11 +12243,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->group->stub_sec != NULL
       && stub_entry->group->stub_sec->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
-			      "output section. Retry without "
-			      "--enable-non-contiguous-regions.\n"),
-			    stub_entry->group->stub_sec,
-			    stub_entry->target_section);
+    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->group->stub_sec);
 
   /* Make a note of the offset within the stubs for this entry.  */
   stub_offset = stub_entry->group->stub_sec->size;
