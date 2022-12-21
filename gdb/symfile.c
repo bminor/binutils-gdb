@@ -1470,19 +1470,32 @@ find_separate_debug_file (const char *dir,
 	    return debugfile;
 
 	  /* If the file is in the sysroot, try using its base path in
-	     the sysroot's global debugfile directory.  */
-	  debugfile = target_prefix ? "target:" : "";
-	  debugfile += gdb_sysroot;
-	  debugfile += debugdir;
-	  debugfile += "/";
-	  debugfile += base_path;
-	  debugfile += "/";
-	  debugfile += debuglink;
+	     the sysroot's global debugfile directory.  GDB_SYSROOT
+	     might refer to a target: path; we strip the "target:"
+	     prefix -- but if that would yield the empty string, we
+	     don't bother at all, because that would just give the
+	     same result as above.  */
+	  if (gdb_sysroot != "target:")
+	    {
+	      debugfile = target_prefix ? "target:" : "";
+	      if (startswith (gdb_sysroot, "target:"))
+		{
+		  std::string root = gdb_sysroot.substr (strlen ("target:"));
+		  gdb_assert (!root.empty ());
+		  debugfile += root;
+		}
+	      else
+		debugfile += gdb_sysroot;
+	      debugfile += debugdir;
+	      debugfile += "/";
+	      debugfile += base_path;
+	      debugfile += "/";
+	      debugfile += debuglink;
 
-	  if (separate_debug_file_exists (debugfile, crc32, objfile))
-	    return debugfile;
+	      if (separate_debug_file_exists (debugfile, crc32, objfile))
+		return debugfile;
+	    }
 	}
-
     }
 
   return std::string ();
