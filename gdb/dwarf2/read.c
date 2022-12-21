@@ -1549,13 +1549,13 @@ dwarf2_per_objfile::set_symtab (const dwarf2_per_cu_data *per_cu,
    interposition is possible and so symbol values must follow copy
    relocation rules.  */
 
-int
+bool
 dwarf2_has_info (struct objfile *objfile,
 		 const struct dwarf2_debug_sections *names,
 		 bool can_copy)
 {
   if (objfile->flags & OBJF_READNEVER)
-    return 0;
+    return false;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
