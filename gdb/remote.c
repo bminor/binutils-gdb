@@ -844,7 +844,7 @@ public: /* Remote specific methods.  */
   void send_interrupt_sequence ();
   void interrupt_query ();
 
-  void remote_notif_get_pending_events (notif_client *nc);
+  void remote_notif_get_pending_events (const notif_client *nc);
 
   int fetch_register_using_p (struct regcache *regcache,
 			      packet_reg *reg);
@@ -4995,7 +4995,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	 mechanism.  */
       if (strcmp (rs->buf.data (), "OK") != 0)
 	{
-	  struct notif_client *notif = &notif_client_stop;
+	  const notif_client *notif = &notif_client_stop;
 
 	  /* remote_notif_get_pending_replies acks this one, and gets
 	     the rest out.  */
@@ -7219,7 +7219,7 @@ remote_target::stop_reply_queue_length ()
 
 static void
 remote_notif_stop_parse (remote_target *remote,
-			 struct notif_client *self, const char *buf,
+			 const notif_client *self, const char *buf,
 			 struct notif_event *event)
 {
   remote->remote_parse_stop_reply (buf, (struct stop_reply *) event);
@@ -7227,7 +7227,7 @@ remote_notif_stop_parse (remote_target *remote,
 
 static void
 remote_notif_stop_ack (remote_target *remote,
-		       struct notif_client *self, const char *buf,
+		       const notif_client *self, const char *buf,
 		       struct notif_event *event)
 {
   struct stop_reply *stop_reply = (struct stop_reply *) event;
@@ -7244,7 +7244,7 @@ remote_notif_stop_ack (remote_target *remote,
 
 static int
 remote_notif_stop_can_get_pending_events (remote_target *remote,
-					  struct notif_client *self)
+					  const notif_client *self)
 {
   /* We can't get pending events in remote_notif_process for
      notification stop, and we have to do this in remote_wait_ns
@@ -7270,7 +7270,7 @@ remote_notif_stop_alloc_reply ()
 
 /* A client of notification Stop.  */
 
-struct notif_client notif_client_stop =
+const notif_client notif_client_stop =
 {
   "Stop",
   "vStopped",
@@ -7290,7 +7290,7 @@ struct notif_client notif_client_stop =
 void
 remote_target::remove_new_fork_children (threads_listing_context *context)
 {
-  struct notif_client *notif = &notif_client_stop;
+  const notif_client *notif = &notif_client_stop;
 
   /* For any threads stopped at a fork event, remove the corresponding
      fork child threads from the CONTEXT list.  */
@@ -7326,7 +7326,7 @@ void
 remote_target::check_pending_events_prevent_wildcard_vcont
   (bool *may_global_wildcard)
 {
-  struct notif_client *notif = &notif_client_stop;
+  const notif_client *notif = &notif_client_stop;
 
   remote_notif_get_pending_events (notif);
   for (auto &event : get_remote_state ()->stop_reply_queue)
@@ -7896,7 +7896,7 @@ Packet: '%s'\n"),
 */
 
 void
-remote_target::remote_notif_get_pending_events (notif_client *nc)
+remote_target::remote_notif_get_pending_events (const notif_client *nc)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -7934,7 +7934,7 @@ remote_target::remote_notif_get_pending_events (notif_client *nc)
    avoid having to export the whole remote_target class.  */
 
 void
-remote_notif_get_pending_events (remote_target *remote, notif_client *nc)
+remote_notif_get_pending_events (remote_target *remote, const notif_client *nc)
 {
   remote->remote_notif_get_pending_events (nc);
 }
@@ -10058,7 +10058,7 @@ void
 remote_target::kill_new_fork_children (inferior *inf)
 {
   remote_state *rs = get_remote_state ();
-  struct notif_client *notif = &notif_client_stop;
+  const notif_client *notif = &notif_client_stop;
 
   /* Kill the fork child threads of any threads in inferior INF that are stopped
      at a fork event.  */

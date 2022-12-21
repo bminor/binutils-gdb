@@ -46,7 +46,7 @@ bool notif_debug = false;
 
 /* Supported clients of notifications.  */
 
-static struct notif_client *notifs[] =
+static const notif_client *const notifs[] =
 {
   &notif_client_stop,
 };
@@ -58,7 +58,7 @@ gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
 
 void
 remote_notif_ack (remote_target *remote,
-		  struct notif_client *nc, const char *buf)
+		  const notif_client *nc, const char *buf)
 {
   notif_event_up event = nc->alloc_event ();
 
@@ -74,7 +74,7 @@ remote_notif_ack (remote_target *remote,
 
 struct notif_event *
 remote_notif_parse (remote_target *remote,
-		    struct notif_client *nc, const char *buf)
+		    const notif_client *nc, const char *buf)
 {
   notif_event_up event = nc->alloc_event ();
 
@@ -91,11 +91,11 @@ remote_notif_parse (remote_target *remote,
 
 void
 remote_notif_process (struct remote_notif_state *state,
-		      struct notif_client *except)
+		      const notif_client *except)
 {
   while (!state->notif_queue.empty ())
     {
-      struct notif_client *nc = state->notif_queue.front ();
+      const notif_client *nc = state->notif_queue.front ();
       state->notif_queue.pop_front ();
 
       gdb_assert (nc != except);
@@ -120,7 +120,7 @@ remote_async_get_pending_events_handler (gdb_client_data data)
 void
 handle_notification (struct remote_notif_state *state, const char *buf)
 {
-  struct notif_client *nc;
+  const notif_client *nc;
   size_t i;
 
   for (i = 0; i < ARRAY_SIZE (notifs); i++)
