@@ -1581,7 +1581,6 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
-#endif
 #if HAVE_LIBXXHASH
   gdb_printf (stream, _("\
 	     --with-xxhash\n\
