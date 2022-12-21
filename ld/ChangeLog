@@ -1,3 +1,10 @@
+2022-12-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29900
+	* scripttempl/pe.sc: Keep the .drectve section when performing a
+	relocateable link.
+	* scripttempl/pep.sc: Likewise.
+
 2022-12-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 29861

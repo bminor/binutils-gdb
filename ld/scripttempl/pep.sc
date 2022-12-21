@@ -208,7 +208,7 @@ SECTIONS
     *(.debug\$S)
     *(.debug\$T)
     *(.debug\$F)
-    *(.drectve)
+    ${RELOCATING+ *(.drectve)}
     ${RELOCATING+ *(.note.GNU-stack)}
     ${RELOCATING+ *(.gnu.lto_*)}
   }
