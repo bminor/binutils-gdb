@@ -4225,7 +4225,9 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->size = bfd_section_size (sec);
   /* PR 24360: On 32-bit hosts sizeof (size_t) < sizeof (bfd_size_type). */
   alloced = amt = section->size + 1;
-  if (alloced != amt || alloced == 0)
+  if (alloced != amt
+      || alloced == 0
+      || (bfd_get_size (abfd) != 0 && alloced >= bfd_get_size (abfd)))
     {
       section->start = NULL;
       free_debug_section (debug);
