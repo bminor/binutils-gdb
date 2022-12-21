@@ -161,9 +161,6 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
     }
   else
     {
-      if (value_type (v) != value_enclosing_type (v))
-	internal_error (_("Should not be able to create a lazy value with "
-			  "an enclosing type"));
       if (check_optimized)
 	v_contents = nullptr;
       else
