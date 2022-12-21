@@ -639,7 +639,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Jump),
   BITFIELD (FloatMF),
   BITFIELD (Size),
-  BITFIELD (CheckRegSize),
+  BITFIELD (CheckOperandSize),
   BITFIELD (OperandConstraint),
   BITFIELD (MnemonicSize),
   BITFIELD (No_bSuf),

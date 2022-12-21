@@ -6431,7 +6431,7 @@ check_VecOperands (const insn_template *t)
       if (operand_type_all_zero (&overlap))
 	  goto bad_broadcast;
 
-      if (t->opcode_modifier.checkregsize)
+      if (t->opcode_modifier.checkoperandsize)
 	{
 	  unsigned int j;
 
@@ -6848,7 +6848,7 @@ match_template (char mnem_suffix)
 	}
 
       /* We check register size if needed.  */
-      if (t->opcode_modifier.checkregsize)
+      if (t->opcode_modifier.checkoperandsize)
 	{
 	  check_register = (1 << t->operands) - 1;
 	  if (i.broadcast.type || i.broadcast.bytes)

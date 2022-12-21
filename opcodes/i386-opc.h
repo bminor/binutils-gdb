@@ -494,8 +494,8 @@ enum
   /* needs size prefix if in 64-bit mode */
 #define SIZE64 3
   Size,
-  /* check register size.  */
-  CheckRegSize,
+  /* Check that operand sizes match.  */
+  CheckOperandSize,
   /* any memory size */
 #define ANY_SIZE 1
   /* fake an extra reg operand for clr, imul and special register
@@ -740,7 +740,7 @@ typedef struct i386_opcode_modifier
   unsigned int jump:3;
   unsigned int floatmf:1;
   unsigned int size:2;
-  unsigned int checkregsize:1;
+  unsigned int checkoperandsize:1;
   unsigned int operandconstraint:4;
   unsigned int mnemonicsize:2;
   unsigned int no_bsuf:1;
