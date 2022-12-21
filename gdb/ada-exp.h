@@ -130,6 +130,14 @@ public:
 
   enum exp_opcode opcode () const override
   { return std::get<0> (m_storage)->opcode (); }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
 };
 
 /* An Ada string constant.  */
@@ -253,6 +261,18 @@ public:
 						     exp, noside);
     return ada_equal_binop (expect_type, exp, noside, std::get<0> (m_storage),
 			    arg1, arg2);
+  }
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_binop (exp, opcode (),
+		    std::get<1> (this->m_storage).get (),
+		    std::get<2> (this->m_storage).get (),
+		    ax, value);
   }
 
   enum exp_opcode opcode () const override
@@ -380,7 +400,11 @@ public:
 
 protected:
 
-  using operation::do_generate_ax;
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
 };
 
 /* Variant of var_msym_value_operation for Ada.  */

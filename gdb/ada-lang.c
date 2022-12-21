@@ -60,6 +60,7 @@
 #include <algorithm>
 #include "ada-exp.h"
 #include "charset.h"
+#include "ax-gdb.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -9189,6 +9190,23 @@ ada_enum_name (const char *name)
     }
 }
 
+/* If TYPE is a dynamic type, return the base type.  Otherwise, if
+   there is no parallel type, return nullptr.  */
+
+static struct type *
+find_base_type (struct type *type)
+{
+  struct type *raw_real_type
+    = ada_check_typedef (ada_get_base_type (type));
+
+  /* No parallel XVS or XVE type.  */
+  if (type == raw_real_type
+      && ada_find_parallel_type (type, "___XVE") == nullptr)
+    return nullptr;
+
+  return raw_real_type;
+}
+
 /* If VAL is wrapped in an aligner or subtype wrapper, return the
    value it wraps.  */
 
@@ -9209,13 +9227,8 @@ unwrap_value (struct value *val)
     }
   else
     {
-      struct type *raw_real_type =
-	ada_check_typedef (ada_get_base_type (type));
-
-      /* If there is no parallel XVS or XVE type, then the value is
-	 already unwrapped.  Return it without further modification.  */
-      if ((type == raw_real_type)
-	  && ada_find_parallel_type (type, "___XVE") == NULL)
+      struct type *raw_real_type = find_base_type (type);
+      if (raw_real_type == nullptr)
 	return val;
 
       return
@@ -10641,6 +10654,21 @@ ada_wrapped_operation::evaluate (struct type *expect_type,
   return result;
 }
 
+void
+ada_wrapped_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  std::get<0> (m_storage)->generate_ax (exp, ax, value, cast_type);
+
+  struct type *type = value->type;
+  if (ada_is_aligner_type (type))
+    error (_("Aligner types cannot be handled in agent expressions"));
+  else if (find_base_type (type) != nullptr)
+    error (_("Dynamic types cannot be handled in agent expressions"));
+}
+
 value *
 ada_string_operation::evaluate (struct type *expect_type,
 				struct expression *exp,
@@ -10989,6 +11017,33 @@ ada_var_value_operation::resolve (struct expression *exp,
     return true;
 
   return false;
+}
+
+void
+ada_var_value_operation::do_generate_ax (struct expression *exp,
+					 struct agent_expr *ax,
+					 struct axs_value *value,
+					 struct type *cast_type)
+{
+  symbol *sym = std::get<0> (m_storage).symbol;
+
+  if (sym->domain () == UNDEF_DOMAIN)
+    error (_("Unexpected unresolved symbol, %s, during evaluation"),
+	   sym->print_name ());
+
+  struct type *type = static_unwrap_type (sym->type ());
+  if (ada_is_tagged_type (type, 0)
+      || (type->code () == TYPE_CODE_REF
+	  && ada_is_tagged_type (type->target_type (), 0)))
+    error (_("Tagged types cannot be handled in agent expressions"));
+
+  if ((type->code () == TYPE_CODE_STRUCT
+       && dynamic_template_type (type) != NULL)
+      || (type->code () == TYPE_CODE_UNION
+	  && ada_find_parallel_type (type, "___XVU") != NULL))
+    error (_("Dynamic types cannot be handled in agent expressions"));
+
+  var_value_operation::do_generate_ax (exp, ax, value, cast_type);
 }
 
 value *
