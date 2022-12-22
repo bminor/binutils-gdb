@@ -25,6 +25,21 @@
 
 #define SFRAME_HEADER_FLAGS_STR_MAX_LEN 50
 
+/* Return TRUE if the SFrame section is associated with the aarch64 ABIs.  */
+
+static bool
+is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
+{
+  bool aarch64_p = false;
+
+  unsigned char abi_arch = sframe_decoder_get_abi_arch (sfd_ctx);
+  if ((abi_arch == SFRAME_ABI_AARCH64_ENDIAN_BIG)
+      || (abi_arch == SFRAME_ABI_AARCH64_ENDIAN_LITTLE))
+    aarch64_p = true;
+
+  return aarch64_p;
+}
+
 static void
 dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 {
@@ -112,6 +127,10 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 	  funcidx,
 	  func_start_pc_vma,
 	  func_size);
+
+  if (is_sframe_abi_arch_aarch64 (sfd_ctx)
+      && (SFRAME_V1_FUNC_PAUTH_KEY (func_info) == SFRAME_AARCH64_PAUTH_KEY_B))
+    printf (", pauth = B key");
 
   char temp[100];
   memset (temp, 0, 100);
