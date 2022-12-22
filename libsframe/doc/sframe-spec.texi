@@ -398,9 +398,15 @@ The info word is a bitfield split into three parts.  From MSB to LSB:
 
 @multitable {Bit offset} {@code{isroot}} {Length of variable-length data for this type (some kinds only).}
 @headitem Bit offset @tab Name @tab Description
-@item 7--5
+@item 7--6
 @tab @code{unused}
 @tab Unused bits.
+
+@item 5
+@tab @code{pauth_key}
+@tab Specify which key is used for signing the return addresses in the SFrame
+FDE.  Two possible values: SFRAME_AARCH64_PAUTH_KEY_A (0) or
+SFRAME_AARCH64_PAUTH_KEY_B (1).
 
 @item 4
 @tab @code{fdetype}
