@@ -720,8 +720,11 @@ tui_set_focus_command (const char *arg, int from_tty)
 
   if (win_info == NULL)
     error (_("Unrecognized window name \"%s\""), arg);
-  if (!win_info->is_visible ())
-    error (_("Window \"%s\" is not visible"), arg);
+
+  /* If a window is part of the current layout then it will have a
+     tui_win_info associated with it and be visible, otherwise, there will
+     be no tui_win_info and the above error will have been raised.  */
+  gdb_assert (win_info->is_visible ());
 
   if (!win_info->can_focus ())
     error (_("Window \"%s\" cannot be focused"), arg);
