@@ -800,6 +800,10 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	    gdb_lpproc_thread_attribute_list lpAttributeList;
 	  };
 
+#	  ifndef EXTENDED_STARTUPINFO_PRESENT
+#	   define EXTENDED_STARTUPINFO_PRESENT 0x00080000
+#	  endif
+
 	  gdb_extended_info info_ex {};
 
 	  if (startup_info != nullptr)
@@ -810,7 +814,7 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 	     call always fails, by design.  */
 	  InitializeProcThreadAttributeList (nullptr, 1, 0, &size);
 	  info_ex.lpAttributeList
-	    = (PPROC_THREAD_ATTRIBUTE_LIST) alloca (size);
+	    = (gdb_lpproc_thread_attribute_list) alloca (size);
 	  InitializeProcThreadAttributeList (info_ex.lpAttributeList,
 					     1, 0, &size);
 
