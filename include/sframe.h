@@ -165,6 +165,10 @@ typedef struct sframe_header
 #define SFRAME_V1_HDR_SIZE(sframe_hdr)	\
   ((sizeof (sframe_header) + (sframe_hdr).sfh_auxhdr_len))
 
+/* Two possible keys for executable (instruction) pointers signing.  */
+#define SFRAME_AARCH64_PAUTH_KEY_A    0 /* Key A.  */
+#define SFRAME_AARCH64_PAUTH_KEY_B    1 /* Key B.  */
+
 typedef struct sframe_func_desc_entry
 {
   /* Function start address.  Encoded as a signed offset, relative to the
@@ -181,21 +185,30 @@ typedef struct sframe_func_desc_entry
      function.
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the FDE type of the function - mask or inc.
-     - 3-bits: Unused.
-     --------------------------------------------
-     |     Unused    |  FDE type |   FRE type   |
-     --------------------------------------------
-     8               5           4              0     */
+     - 1-bit: PAC authorization A/B key (aarch64).
+     - 2-bits: Unused.
+     ------------------------------------------------------------------------
+     |     Unused    |  PAC auth A/B key (aarch64) |  FDE type |   FRE type   |
+     |               |        Unused (amd64)       |           |              |
+     ------------------------------------------------------------------------
+     8               6                             5           4              0     */
   uint8_t sfde_func_info;
 } ATTRIBUTE_PACKED sframe_func_desc_entry;
 
 /* Macros to compose and decompose function info in FDE.  */
 
+/* Note: Set PAC auth key to SFRAME_AARCH64_PAUTH_KEY_A by default.  */
 #define SFRAME_V1_FUNC_INFO(fde_type, fre_enc_type) \
-  ((((fde_type) & 0x1) << 4) | ((fre_enc_type) & 0xf))
+  (((SFRAME_AARCH64_PAUTH_KEY_A & 0x1) << 5) | \
+   (((fde_type) & 0x1) << 4) | ((fre_enc_type) & 0xf))
 
 #define SFRAME_V1_FUNC_FRE_TYPE(data)	  ((data) & 0xf)
 #define SFRAME_V1_FUNC_FDE_TYPE(data)	  (((data) >> 4) & 0x1)
+#define SFRAME_V1_FUNC_PAUTH_KEY(data)	  (((data) >> 5) & 0x1)
+
+/* Set the pauth key as indicated.  */
+#define SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
+  ((((pauth_key) & 0x1) << 5) | ((fde_info) & 0xdf))
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary
