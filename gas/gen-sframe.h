@@ -146,7 +146,7 @@ struct sframe_version_ops
   unsigned char (*set_fre_info) (unsigned int, unsigned int, unsigned int,
 				 bool);
   /* set SFrame Func info.  */
-  unsigned char (*set_func_info) (unsigned int, unsigned int);
+  unsigned char (*set_func_info) (unsigned int, unsigned int, unsigned int);
 };
 
 /* Generate SFrame unwind info and prepare contents for the output.

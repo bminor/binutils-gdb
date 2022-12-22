@@ -106,6 +106,17 @@ get_dw_fde_end_addrS (const struct fde_entry *dw_fde)
   return dw_fde->end_address;
 }
 
+/* Get whether PAUTH B key is used.  */
+static bool
+get_dw_fde_pauth_b_key_p (const struct fde_entry *dw_fde ATTRIBUTE_UNUSED)
+{
+#ifdef tc_fde_entry_extras
+  return (dw_fde->pauth_key == AARCH64_PAUTH_KEY_B);
+#else
+  return false;
+#endif
+}
+
 /* SFrame Frame Row Entry (FRE) related functions.  */
 
 static void
@@ -253,10 +264,12 @@ sframe_v1_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
 
 /* SFrame (SFRAME_VERSION_1) set function info.  */
 static unsigned char
-sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type)
+sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type,
+			 unsigned int pauth_key)
 {
   unsigned char func_info;
   func_info = SFRAME_V1_FUNC_INFO (fde_type, fre_type);
+  func_info = SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, func_info);
   return func_info;
 }
 
@@ -285,9 +298,10 @@ sframe_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
 /* SFrame set func info. */
 
 ATTRIBUTE_UNUSED static unsigned char
-sframe_set_func_info (unsigned int fde_type, unsigned int fre_type)
+sframe_set_func_info (unsigned int fde_type, unsigned int fre_type,
+		      unsigned int pauth_key)
 {
-  return sframe_ver_ops.set_func_info (fde_type, fre_type);
+  return sframe_ver_ops.set_func_info (fde_type, fre_type, pauth_key);
 }
 
 /* Get the number of SFrame FDEs for the current file.  */
@@ -544,6 +558,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   expressionS exp;
   unsigned int addr_size;
   symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
+  unsigned int pauth_key;
 
   addr_size = SFRAME_RELOC_SIZE;
   dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
@@ -575,8 +590,11 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 
   /* SFrame FDE function info.  */
   unsigned char func_info;
+  pauth_key = (get_dw_fde_pauth_b_key_p (sframe_fde->dw_fde)
+	       ? SFRAME_AARCH64_PAUTH_KEY_B : SFRAME_AARCH64_PAUTH_KEY_A);
   func_info = sframe_set_func_info (SFRAME_FDE_TYPE_PCINC,
-				    SFRAME_FRE_TYPE_ADDR4);
+				    SFRAME_FRE_TYPE_ADDR4,
+				    pauth_key);
 #if SFRAME_FRE_TYPE_SELECTION_OPT
   expressionS cexp;
   create_func_info_exp (&cexp, dw_fde_end_addrS, dw_fde_start_addrS,
