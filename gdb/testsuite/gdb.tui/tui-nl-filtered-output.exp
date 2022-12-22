@@ -32,24 +32,19 @@
 
 require allow_tui_tests
 
-gdb_exit
-gdb_start
+tuiterm_env
 
-# Enable the TUI.
+# Setup and enter TUI mode.
+Term::clean_restart 24 80
+Term::enter_tui
 
-set test "tui enable"
-gdb_test_multiple "tui enable" $test {
-    -re "$gdb_prompt $" {
-	pass $test
-    }
-}
-
-# Make sure filtering/pagination is enabled, but make the window high
-# enough that we don't paginate in practice.
-gdb_test_no_output "set pagination on"
-gdb_test_no_output "set height 2000"
-
-gdb_test \
-    {printf "hello\nworld\n"} \
-    "hello\r\nworld" \
-    "correct line breaks"
+# Send the command, and check the output is correctly split over
+# multiple lines.
+Term::command \
+    {printf "hello\nworld\n"}
+Term::check_region_contents "check printf output" \
+    0 16 80 4 [multi_line \
+		   "$gdb_prompt printf \"hello\\\\nworld\\\\n\"\\s+" \
+		   "hello\\s+" \
+		   "world\\s+" \
+		   "$gdb_prompt\\s+"]
