@@ -119,6 +119,8 @@ static const dependency isa_dependencies[] =
     "387" },
   { "FISTTP",
     "687" },
+  { "SSE",
+    "FXSR" },
   { "SSE2",
     "SSE" },
   { "SSE3",
@@ -213,12 +215,18 @@ static const dependency isa_dependencies[] =
     "XSAVE" },
   { "OSPKE",
     "XSAVE" },
+  { "GFNI",
+    "SSE2" },
   { "AMX_INT8",
     "AMX_TILE" },
   { "AMX_BF16",
     "AMX_TILE" },
   { "AMX_FP16",
     "AMX_TILE" },
+  { "KL",
+    "SSE2" },
+  { "WIDEKL",
+    "KL" },
 };
 
 /* This array is populated as process_i386_initializers() walks cpu_flags[].  */
