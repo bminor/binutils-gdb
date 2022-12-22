@@ -2,6 +2,9 @@
 .*:8: Error: .*operand size mismatch.*
 .*:9: Error: .*unsupported masking.*
 .*:10: Error: .*unsupported masking.*
+.*:25: Error: .*not supported.*
+.*:26: Error: .*not supported.*
+.*:27: Error: .*not supported.*
 .*:11: Error: .*not supported.*
 .*:12: Error: .*not supported.*
 .*:13: Error: .*not supported.*
@@ -120,12 +123,9 @@
 [ 	]*[0-9]+[ 	]+\?\?\?\? 62F2FD49 	>  vgatherpf0dpd 23\(%ebp,%ymm7,8\)\{%k1\}
 [ 	]*[0-9]+[ 	]+C68CFD17 *
 [ 	]*[0-9]+[ 	]+000000
-[ 	]*[0-9]+[ 	]+\?\?\?\? 62F2554F 	>  vpermb %zmm4,%zmm5,%zmm6\{%k7\}
-[ 	]*[0-9]+[ 	]+8DF4
-[ 	]*[0-9]+[ 	]+\?\?\?\? 62F2550F 	>  vpermb %xmm4,%xmm5,%xmm6\{%k7\}
-[ 	]*[0-9]+[ 	]+8DF4
-[ 	]*[0-9]+[ 	]+\?\?\?\? 62F2552F 	>  vpermb %ymm4,%ymm5,%ymm6\{%k7\}
-[ 	]*[0-9]+[ 	]+8DF4
+[ 	]*[0-9]+[ 	]+>  vpermb %zmm4,%zmm5,%zmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpermb %xmm4,%xmm5,%xmm6\{%k7\}
+[ 	]*[0-9]+[ 	]+>  vpermb %ymm4,%ymm5,%ymm6\{%k7\}
 #...
 [ 	]*[0-9]+[ 	]+>  \.arch default
 [ 	]*[0-9]+[ 	]+>  \.arch \.noavx512cd
