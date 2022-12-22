@@ -99,10 +99,24 @@ namespace eval Term {
 	_log_cur "Line feed" {
 	    variable _cur_row
 	    variable _rows
+	    variable _cols
+	    variable _chars
 
 	    incr _cur_row 1
-	    if {$_cur_row >= $_rows} {
-		error "FIXME scroll"
+	    while {$_cur_row >= $_rows} {
+		# Scroll the display contents.  We scroll one line at
+		# a time here; as _cur_row was only increased by one,
+		# a single line scroll should be enough to put the
+		# cursor back on the screen.  But we wrap the
+		# scrolling inside a while loop just to be on the safe
+		# side.
+		for {set y 0} {$y < [expr $_rows - 1]} {incr y} {
+		    set next_y [expr $y + 1]
+		    for {set x 0} {$x < $_cols} {incr x} {
+			set _chars($x,$y) $_chars($x,$next_y)
+		    }
+		    incr _cur_row -1
+		}
 	    }
 	}
     }
