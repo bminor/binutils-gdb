@@ -1059,8 +1059,8 @@ static const arch_entry cpu_arch[] =
   SUBARCH (3dnow, 3DNOW, ANY_3DNOW, false),
   SUBARCH (3dnowa, 3DNOWA, ANY_3DNOWA, false),
   SUBARCH (padlock, PADLOCK, PADLOCK, false),
-  SUBARCH (pacifica, SVME, SVME, true),
-  SUBARCH (svme, SVME, SVME, false),
+  SUBARCH (pacifica, SVME, ANY_SVME, true),
+  SUBARCH (svme, SVME, ANY_SVME, false),
   SUBARCH (abm, ABM, ABM, false),
   SUBARCH (bmi, BMI, BMI, false),
   SUBARCH (tbm, TBM, TBM, false),
@@ -1111,7 +1111,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (serialize, SERIALIZE, SERIALIZE, false),
   SUBARCH (rdpru, RDPRU, RDPRU, false),
   SUBARCH (mcommit, MCOMMIT, MCOMMIT, false),
-  SUBARCH (sev_es, SEV_ES, SEV_ES, false),
+  SUBARCH (sev_es, SEV_ES, ANY_SEV_ES, false),
   SUBARCH (tsxldtrk, TSXLDTRK, TSXLDTRK, false),
   SUBARCH (kl, KL, ANY_KL, false),
   SUBARCH (widekl, WIDEKL, ANY_WIDEKL, false),
@@ -1126,7 +1126,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (msrlist, MSRLIST, MSRLIST, false),
   SUBARCH (avx_ne_convert, AVX_NE_CONVERT, ANY_AVX_NE_CONVERT, false),
   SUBARCH (rao_int, RAO_INT, RAO_INT, false),
-  SUBARCH (rmpquery, RMPQUERY, RMPQUERY, false),
+  SUBARCH (rmpquery, RMPQUERY, ANY_RMPQUERY, false),
 };
 
 #undef SUBARCH
