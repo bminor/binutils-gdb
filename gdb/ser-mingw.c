@@ -867,6 +867,12 @@ pipe_windows_open (struct serial *scb, const char *name)
   if (name == NULL)
     error_no_arg (_("child command"));
 
+  if (*name == '|')
+    {
+      name++;
+      name = skip_spaces (name);
+    }
+
   gdb_argv argv (name);
 
   if (! argv[0] || argv[0][0] == '\0')
