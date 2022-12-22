@@ -233,7 +233,7 @@ if [gas_32_check] then {
     run_list_test "noavx-2" "-march=+noavx -al"
     run_list_test "noavx-3" "-al"
     run_dump_test "noavx-4"
-    run_list_test "noavx512-1" "-al"
+    run_list_test "noavx512-1" "-almn"
     run_list_test "noavx512-2" "-al"
     run_dump_test "noextreg"
     run_dump_test "xmmhi32"
