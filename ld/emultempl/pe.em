@@ -1285,7 +1285,6 @@ write_build_id (bfd *abfd)
   asection *asec;
   struct bfd_link_order *link_order = NULL;
   unsigned char *contents;
-  bfd_size_type size;
   bfd_size_type build_id_size;
   unsigned char *build_id;
   const char *pdb_base_name = NULL;
@@ -1320,7 +1319,6 @@ write_build_id (bfd *abfd)
   if (t->build_id.sec->contents == NULL)
     t->build_id.sec->contents = (unsigned char *) xmalloc (t->build_id.sec->size);
   contents = t->build_id.sec->contents;
-  size = t->build_id.sec->size;
 
   build_id_size = compute_build_id_size (t->build_id.style);
   build_id = xmalloc (build_id_size);
@@ -1351,7 +1349,7 @@ write_build_id (bfd *abfd)
   if (bfd_seek (abfd, asec->filepos + link_order->offset, SEEK_SET) != 0)
     return 0;
 
-  if (bfd_bwrite (contents, size, abfd) != size)
+  if (bfd_bwrite (contents, sizeof (*ext), abfd) != sizeof (*ext))
     return 0;
 
   if (pdb)
@@ -1417,7 +1415,7 @@ setup_build_id (bfd *ibfd)
 	+ sizeof (CV_INFO_PDB70) + 1;
 
       if (pdb_name)
-	s->size += strlen (pdb_name);
+	s->size += strlen (lbasename (pdb_name));
 
       return true;
     }
