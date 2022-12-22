@@ -26,6 +26,9 @@
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "gdbsupport/iterator-range.h"
+
+#include <unordered_map>
 
 /* Values that can be returned when handling a request to adjust a
    window's size.  */
@@ -358,10 +361,56 @@ extern void tui_adjust_window_width (struct tui_win_info *win,
 
 typedef std::function<tui_win_info * (const char *name)> window_factory;
 
+/* The type for a data structure that maps a window name to that window's
+   factory function.  */
+typedef std::unordered_map<std::string, window_factory> window_types_map;
+
 /* Register a new TUI window type.  NAME is the name of the window
    type.  FACTORY is a function that can be called to instantiate the
    window.  */
 
 extern void tui_register_window (const char *name, window_factory &&factory);
+
+/* An iterator class that exposes just the window names from the
+   known_window_types map in tui-layout.c.  This is just a wrapper around
+   an iterator of the underlying known_window_types map, but this just
+   exposes the window names.  */
+
+struct known_window_names_iterator
+{
+  using known_window_types_iterator = window_types_map::iterator;
+
+  known_window_names_iterator (known_window_types_iterator &&iter)
+    : m_iter (std::move (iter))
+  { /* Nothing.  */ }
+
+  known_window_names_iterator &operator++ ()
+  {
+    ++m_iter;
+    return *this;
+  }
+
+  const std::string &operator* () const
+  { return (*m_iter).first; }
+
+  bool operator!= (const known_window_names_iterator &other) const
+  { return m_iter != other.m_iter; }
+
+private:
+
+  /* The underlying iterator.  */
+  known_window_types_iterator m_iter;
+};
+
+/* A range adapter that makes it possible to iterate over the names of all
+   known tui windows.  */
+
+using known_window_names_range
+  = iterator_range<known_window_names_iterator>;
+
+/* Return a range that can be used to walk over the name of all known tui
+   windows in a range-for loop.  */
+
+extern known_window_names_range all_known_window_names ();
 
 #endif /* TUI_TUI_LAYOUT_H */

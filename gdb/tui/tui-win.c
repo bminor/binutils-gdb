@@ -728,8 +728,44 @@ tui_set_focus_command (const char *arg, int from_tty)
   else
     win_info = tui_partial_win_by_name (arg);
 
-  if (win_info == NULL)
-    error (_("Unrecognized window name \"%s\""), arg);
+  if (win_info == nullptr)
+    {
+      /* When WIN_INFO is nullptr this can either mean that the window name
+	 is unknown to GDB, or that the window is not in the current
+	 layout.  To try and help the user, give a different error
+	 depending on which of these is the case.  */
+      std::string matching_window_name;
+      bool is_ambiguous = false;
+
+      for (const std::string &name : all_known_window_names ())
+	{
+	  /* Look through all windows in the current layout, if the window
+	     is in the current layout then we're not interested is it.  */
+	  for (tui_win_info *item : all_tui_windows ())
+	    if (item->name () == name)
+	      continue;
+
+	  if (startswith (name, arg))
+	    {
+	      if (matching_window_name.empty ())
+		matching_window_name = name;
+	      else
+		is_ambiguous = true;
+	    }
+	};
+
+      if (!matching_window_name.empty ())
+	{
+	  if (is_ambiguous)
+	    error (_("No windows matching \"%s\" in the current layout"),
+		   arg);
+	  else
+	    error (_("Window \"%s\" is not in the current layout"),
+		   matching_window_name.c_str ());
+	}
+      else
+	error (_("Unrecognized window name \"%s\""), arg);
+    }
 
   /* If a window is part of the current layout then it will have a
      tui_win_info associated with it and be visible, otherwise, there will

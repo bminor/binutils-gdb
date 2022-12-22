@@ -29,7 +29,6 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
-#include <unordered_map>
 #include <unordered_set>
 
 #include "tui/tui.h"
@@ -351,7 +350,17 @@ make_standard_window (const char *)
    shut down, causing crashes if any window destruction requires
    running Python code.  */
 
-static std::unordered_map<std::string, window_factory> *known_window_types;
+static window_types_map *known_window_types;
+
+/* See tui-layout.h.  */
+
+known_window_names_range
+all_known_window_names ()
+{
+  auto begin = known_window_names_iterator (known_window_types->begin ());
+  auto end = known_window_names_iterator (known_window_types->end ());
+  return known_window_names_range (begin, end);
+}
 
 /* Helper function that returns a TUI window, given its name.  */
 
@@ -377,7 +386,7 @@ tui_get_window_by_name (const std::string &name)
 static void
 initialize_known_windows ()
 {
-  known_window_types = new std::unordered_map<std::string, window_factory>;
+  known_window_types = new window_types_map;
 
   known_window_types->emplace (SRC_NAME,
 			       make_standard_window<SRC_WIN,
