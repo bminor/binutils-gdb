@@ -15,6 +15,13 @@ case ${target} in
     ;;
 esac
 
+case ${target} in
+  x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep | x86_64-*-cygwin | \
+  i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe)
+    pdb_support=" ";;
+  *)
+esac
+
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
@@ -66,7 +73,7 @@ fragment <<EOF
 #include "ldctor.h"
 #include "ldbuildid.h"
 #include "coff/internal.h"
-#include "pdb.h"
+${pdb_support+#include \"pdb.h\"}
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -147,8 +154,10 @@ static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = DEFAULT_DLL_CHARACTERISTICS;
 static bool insert_timestamp = true;
 static const char *emit_build_id;
+#ifdef PDB_H
 static int pdb;
 static char *pdb_name;
+#endif
 
 #ifdef DLL_SUPPORT
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
@@ -220,87 +229,82 @@ fragment <<EOF
 /* PE format extra command line options.  */
 
 /* Used for setting flags in the PE header.  */
-#define OPTION_BASE_FILE		(300  + 1)
-#define OPTION_DLL			(OPTION_BASE_FILE + 1)
-#define OPTION_FILE_ALIGNMENT		(OPTION_DLL + 1)
-#define OPTION_IMAGE_BASE		(OPTION_FILE_ALIGNMENT + 1)
-#define OPTION_MAJOR_IMAGE_VERSION	(OPTION_IMAGE_BASE + 1)
-#define OPTION_MAJOR_OS_VERSION		(OPTION_MAJOR_IMAGE_VERSION + 1)
-#define OPTION_MAJOR_SUBSYSTEM_VERSION	(OPTION_MAJOR_OS_VERSION + 1)
-#define OPTION_MINOR_IMAGE_VERSION	(OPTION_MAJOR_SUBSYSTEM_VERSION + 1)
-#define OPTION_MINOR_OS_VERSION		(OPTION_MINOR_IMAGE_VERSION + 1)
-#define OPTION_MINOR_SUBSYSTEM_VERSION	(OPTION_MINOR_OS_VERSION + 1)
-#define OPTION_SECTION_ALIGNMENT	(OPTION_MINOR_SUBSYSTEM_VERSION + 1)
-#define OPTION_STACK			(OPTION_SECTION_ALIGNMENT + 1)
-#define OPTION_SUBSYSTEM		(OPTION_STACK + 1)
-#define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
-#define OPTION_SUPPORT_OLD_CODE		(OPTION_HEAP + 1)
-#define OPTION_OUT_DEF			(OPTION_SUPPORT_OLD_CODE + 1)
-#define OPTION_EXPORT_ALL		(OPTION_OUT_DEF + 1)
-#define OPTION_EXCLUDE_SYMBOLS		(OPTION_EXPORT_ALL + 1)
-#define OPTION_EXCLUDE_ALL_SYMBOLS	(OPTION_EXCLUDE_SYMBOLS + 1)
-#define OPTION_KILL_ATS			(OPTION_EXCLUDE_ALL_SYMBOLS + 1)
-#define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
-#define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
-#define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
-#define OPTION_THUMB_ENTRY		(OPTION_DISABLE_STDCALL_FIXUP + 1)
-#define OPTION_WARN_DUPLICATE_EXPORTS	(OPTION_THUMB_ENTRY + 1)
-#define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
-#define OPTION_ENABLE_AUTO_IMAGE_BASE	(OPTION_IMP_COMPAT + 1)
-#define OPTION_DISABLE_AUTO_IMAGE_BASE	(OPTION_ENABLE_AUTO_IMAGE_BASE + 1)
-#define OPTION_DLL_SEARCH_PREFIX	(OPTION_DISABLE_AUTO_IMAGE_BASE + 1)
-#define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_DLL_SEARCH_PREFIX + 1)
-#define OPTION_DLL_ENABLE_AUTO_IMPORT	(OPTION_NO_DEFAULT_EXCLUDES + 1)
-#define OPTION_DLL_DISABLE_AUTO_IMPORT	(OPTION_DLL_ENABLE_AUTO_IMPORT + 1)
-#define OPTION_ENABLE_EXTRA_PE_DEBUG	(OPTION_DLL_DISABLE_AUTO_IMPORT + 1)
-#define OPTION_EXCLUDE_LIBS		(OPTION_ENABLE_EXTRA_PE_DEBUG + 1)
-#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC	\
-					(OPTION_EXCLUDE_LIBS + 1)
-#define OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC	\
-					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
-#define OPTION_LARGE_ADDRESS_AWARE	(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
-#define OPTION_DISABLE_LARGE_ADDRESS_AWARE \
-					(OPTION_LARGE_ADDRESS_AWARE + 1)
-#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1	\
-					(OPTION_DISABLE_LARGE_ADDRESS_AWARE + 1)
-#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2	\
-					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1 + 1)
-#define OPTION_EXCLUDE_MODULES_FOR_IMPLIB \
-					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2 + 1)
-#define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
-					(OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
-#define OPTION_NO_LEADING_UNDERSCORE	(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
-#define OPTION_LEADING_UNDERSCORE	(OPTION_NO_LEADING_UNDERSCORE + 1)
-#define OPTION_ENABLE_LONG_SECTION_NAMES \
-					(OPTION_LEADING_UNDERSCORE + 1)
-#define OPTION_DISABLE_LONG_SECTION_NAMES \
-					(OPTION_ENABLE_LONG_SECTION_NAMES + 1)
+enum options
+{
+  OPTION_BASE_FILE = 300 + 1,
+  OPTION_DLL,
+  OPTION_FILE_ALIGNMENT,
+  OPTION_IMAGE_BASE,
+  OPTION_MAJOR_IMAGE_VERSION,
+  OPTION_MAJOR_OS_VERSION,
+  OPTION_MAJOR_SUBSYSTEM_VERSION,
+  OPTION_MINOR_IMAGE_VERSION,
+  OPTION_MINOR_OS_VERSION,
+  OPTION_MINOR_SUBSYSTEM_VERSION,
+  OPTION_SECTION_ALIGNMENT,
+  OPTION_STACK,
+  OPTION_SUBSYSTEM,
+  OPTION_HEAP,
+  OPTION_SUPPORT_OLD_CODE,
+  OPTION_OUT_DEF,
+  OPTION_EXPORT_ALL,
+  OPTION_EXCLUDE_SYMBOLS,
+  OPTION_EXCLUDE_ALL_SYMBOLS,
+  OPTION_KILL_ATS,
+  OPTION_STDCALL_ALIASES,
+  OPTION_ENABLE_STDCALL_FIXUP,
+  OPTION_DISABLE_STDCALL_FIXUP,
+  OPTION_THUMB_ENTRY,
+  OPTION_WARN_DUPLICATE_EXPORTS,
+  OPTION_IMP_COMPAT,
+  OPTION_ENABLE_AUTO_IMAGE_BASE,
+  OPTION_DISABLE_AUTO_IMAGE_BASE,
+  OPTION_DLL_SEARCH_PREFIX,
+  OPTION_NO_DEFAULT_EXCLUDES,
+  OPTION_DLL_ENABLE_AUTO_IMPORT,
+  OPTION_DLL_DISABLE_AUTO_IMPORT,
+  OPTION_ENABLE_EXTRA_PE_DEBUG,
+  OPTION_EXCLUDE_LIBS,
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC,
+  OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC,
+  OPTION_LARGE_ADDRESS_AWARE,
+  OPTION_DISABLE_LARGE_ADDRESS_AWARE,
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2,
+  OPTION_EXCLUDE_MODULES_FOR_IMPLIB,
+  OPTION_USE_NUL_PREFIXED_IMPORT_TABLES,
+  OPTION_NO_LEADING_UNDERSCORE,
+  OPTION_LEADING_UNDERSCORE,
+  OPTION_ENABLE_LONG_SECTION_NAMES,
+  OPTION_DISABLE_LONG_SECTION_NAMES,
 /* DLLCharacteristics flags.  */
-#define OPTION_DYNAMIC_BASE		(OPTION_DISABLE_LONG_SECTION_NAMES + 1)
-#define OPTION_FORCE_INTEGRITY		(OPTION_DYNAMIC_BASE + 1)
-#define OPTION_NX_COMPAT		(OPTION_FORCE_INTEGRITY + 1)
-#define OPTION_NO_ISOLATION		(OPTION_NX_COMPAT + 1)
-#define OPTION_NO_SEH			(OPTION_NO_ISOLATION + 1)
-#define OPTION_NO_BIND			(OPTION_NO_SEH + 1)
-#define OPTION_WDM_DRIVER		(OPTION_NO_BIND + 1)
-#define OPTION_TERMINAL_SERVER_AWARE	(OPTION_WDM_DRIVER + 1)
+  OPTION_DYNAMIC_BASE,
+  OPTION_FORCE_INTEGRITY,
+  OPTION_NX_COMPAT,
+  OPTION_NO_ISOLATION,
+  OPTION_NO_SEH,
+  OPTION_NO_BIND,
+  OPTION_WDM_DRIVER,
+  OPTION_TERMINAL_SERVER_AWARE,
 /* Determinism.  */
-#define OPTION_INSERT_TIMESTAMP		(OPTION_TERMINAL_SERVER_AWARE + 1)
-#define OPTION_NO_INSERT_TIMESTAMP	(OPTION_INSERT_TIMESTAMP + 1)
-#define OPTION_BUILD_ID			(OPTION_NO_INSERT_TIMESTAMP + 1)
-#define OPTION_PDB			(OPTION_BUILD_ID + 1)
-#define OPTION_ENABLE_RELOC_SECTION	(OPTION_PDB + 1)
-#define OPTION_DISABLE_RELOC_SECTION	(OPTION_ENABLE_RELOC_SECTION + 1)
+  OPTION_INSERT_TIMESTAMP,
+  OPTION_NO_INSERT_TIMESTAMP,
+  OPTION_BUILD_ID,
+#ifdef PDB_H
+  OPTION_PDB,
+#endif
+  OPTION_ENABLE_RELOC_SECTION,
+  OPTION_DISABLE_RELOC_SECTION,
 /* DLL Characteristics flags.  */
-#define OPTION_DISABLE_DYNAMIC_BASE	(OPTION_DISABLE_RELOC_SECTION + 1)
-#define OPTION_DISABLE_FORCE_INTEGRITY	(OPTION_DISABLE_DYNAMIC_BASE + 1)
-#define OPTION_DISABLE_NX_COMPAT	(OPTION_DISABLE_FORCE_INTEGRITY + 1)
-#define OPTION_DISABLE_NO_ISOLATION	(OPTION_DISABLE_NX_COMPAT + 1)
-#define OPTION_DISABLE_NO_SEH		(OPTION_DISABLE_NO_ISOLATION + 1)
-#define OPTION_DISABLE_NO_BIND		(OPTION_DISABLE_NO_SEH + 1)
-#define OPTION_DISABLE_WDM_DRIVER	(OPTION_DISABLE_NO_BIND + 1)
-#define OPTION_DISABLE_TERMINAL_SERVER_AWARE \
-					(OPTION_DISABLE_WDM_DRIVER + 1)
+  OPTION_DISABLE_DYNAMIC_BASE,
+  OPTION_DISABLE_FORCE_INTEGRITY,
+  OPTION_DISABLE_NX_COMPAT,
+  OPTION_DISABLE_NO_ISOLATION,
+  OPTION_DISABLE_NO_SEH,
+  OPTION_DISABLE_NO_BIND,
+  OPTION_DISABLE_WDM_DRIVER,
+  OPTION_DISABLE_TERMINAL_SERVER_AWARE
+};
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -388,7 +392,9 @@ gld${EMULATION_NAME}_add_options
     {"tsaware", no_argument, NULL, OPTION_TERMINAL_SERVER_AWARE},
     {"disable-tsaware", no_argument, NULL, OPTION_DISABLE_TERMINAL_SERVER_AWARE},
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+#ifdef PDB_H
     {"pdb", required_argument, NULL, OPTION_PDB},
+#endif
     {"enable-reloc-section", no_argument, NULL, OPTION_ENABLE_RELOC_SECTION},
     {"disable-reloc-section", no_argument, NULL, OPTION_DISABLE_RELOC_SECTION},
     {NULL, no_argument, NULL, 0}
@@ -538,7 +544,9 @@ gld${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --[disable-]wdmdriver              Driver uses the WDM model\n"));
   fprintf (file, _("  --[disable-]tsaware                Image is Terminal Server aware\n"));
   fprintf (file, _("  --build-id[=STYLE]                 Generate build ID\n"));
+#ifdef PDB_H
   fprintf (file, _("  --pdb=[FILENAME]                   Generate PDB file\n"));
+#endif
 }
 
 /* A case insensitive comparison, regardless of the host platform, used for
@@ -979,11 +987,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (strcmp (optarg, "none"))
 	emit_build_id = xstrdup (optarg);
       break;
+#ifdef PDB_H
     case OPTION_PDB:
       pdb = 1;
       if (optarg && optarg[0])
 	pdb_name = xstrdup (optarg);
       break;
+#endif
     }
 
   /*  Set DLLCharacteristics bits  */
@@ -1106,8 +1116,10 @@ gld${EMULATION_NAME}_after_parse (void)
     einfo (_("%P: warning: --export-dynamic is not supported for PE "
       "targets, did you mean --export-all-symbols?\n"));
 
+#ifdef PDB_H
   if (pdb && emit_build_id == NULL)
     emit_build_id = xstrdup (DEFAULT_BUILD_ID_STYLE);
+#endif
 
   set_entry_point ();
 
@@ -1326,8 +1338,10 @@ write_build_id (bfd *abfd)
 
   bfd_vma ib = pe_data (link_info.output_bfd)->pe_opthdr.ImageBase;
 
+#ifdef PDB_H
   if (pdb_name)
     pdb_base_name = lbasename (pdb_name);
+#endif
 
   /* Construct a debug directory entry which points to an immediately following CodeView record.  */
   struct internal_IMAGE_DEBUG_DIRECTORY idd;
@@ -1336,7 +1350,11 @@ write_build_id (bfd *abfd)
   idd.MajorVersion = 0;
   idd.MinorVersion = 0;
   idd.Type = PE_IMAGE_DEBUG_TYPE_CODEVIEW;
-  idd.SizeOfData = sizeof (CV_INFO_PDB70) + (pdb_base_name ? strlen (pdb_base_name) : 0) + 1;
+  idd.SizeOfData = (sizeof (CV_INFO_PDB70)
+#ifdef PDB_H
+		    + (pdb_base_name ? strlen (pdb_base_name) : 0)
+#endif
+		    + 1);
   idd.AddressOfRawData = asec->vma - ib + link_order->offset
     + sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
   idd.PointerToRawData = asec->filepos + link_order->offset
@@ -1352,11 +1370,13 @@ write_build_id (bfd *abfd)
   if (bfd_bwrite (contents, sizeof (*ext), abfd) != sizeof (*ext))
     return 0;
 
+#ifdef PDB_H
   if (pdb)
     {
       if (!create_pdb_file (abfd, pdb_name, build_id))
 	return 0;
     }
+#endif
 
   /* Construct the CodeView record.  */
   CODEVIEW_INFO cvinfo;
@@ -1414,9 +1434,10 @@ setup_build_id (bfd *ibfd)
       s->size = sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
 	+ sizeof (CV_INFO_PDB70) + 1;
 
+#ifdef PDB_H
       if (pdb_name)
 	s->size += strlen (lbasename (pdb_name));
-
+#endif
       return true;
     }
 
@@ -1447,6 +1468,7 @@ gld${EMULATION_NAME}_after_open (void)
     }
 #endif
 
+#ifdef PDB_H
   if (pdb && !pdb_name)
     {
       const char *base = lbasename (bfd_get_filename (link_info.output_bfd));
@@ -1465,6 +1487,7 @@ gld${EMULATION_NAME}_after_open (void)
       memcpy (pdb_name, base, len);
       memcpy (pdb_name + len, suffix, sizeof (suffix));
     }
+#endif
 
   if (emit_build_id != NULL)
     {

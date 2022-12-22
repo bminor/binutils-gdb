@@ -17,6 +17,13 @@ case ${target} in
     ;;
 esac
 
+case ${target} in
+  x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep | x86_64-*-cygwin | \
+  i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe)
+    pdb_support=" ";;
+  *)
+esac
+
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
@@ -73,7 +80,7 @@ fragment <<EOF
 #include "ldctor.h"
 #include "ldbuildid.h"
 #include "coff/internal.h"
-#include "pdb.h"
+${pdb_support+#include \"pdb.h\"}
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -166,8 +173,10 @@ static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = DEFAULT_DLL_CHARACTERISTICS;
 static bool insert_timestamp = true;
 static const char *emit_build_id;
+#ifdef PDB_H
 static int pdb;
 static char *pdb_name;
+#endif
 
 #ifdef DLL_SUPPORT
 static int    pep_enable_stdcall_fixup = 1; /* 0=disable 1=enable (default).  */
@@ -284,7 +293,9 @@ enum options
   OPTION_NO_INSERT_TIMESTAMP,
   OPTION_TERMINAL_SERVER_AWARE,
   OPTION_BUILD_ID,
+#ifdef PDB_H
   OPTION_PDB,
+#endif
   OPTION_ENABLE_RELOC_SECTION,
   OPTION_DISABLE_RELOC_SECTION,
   OPTION_DISABLE_HIGH_ENTROPY_VA,
@@ -373,7 +384,9 @@ gld${EMULATION_NAME}_add_options
     {"insert-timestamp", no_argument, NULL, OPTION_INSERT_TIMESTAMP},
     {"no-insert-timestamp", no_argument, NULL, OPTION_NO_INSERT_TIMESTAMP},
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+#ifdef PDB_H
     {"pdb", required_argument, NULL, OPTION_PDB},
+#endif
     {"enable-reloc-section", no_argument, NULL, OPTION_ENABLE_RELOC_SECTION},
     {"disable-reloc-section", no_argument, NULL, OPTION_DISABLE_RELOC_SECTION},
     {"disable-high-entropy-va", no_argument, NULL, OPTION_DISABLE_HIGH_ENTROPY_VA},
@@ -521,7 +534,9 @@ gld${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --[disable-]wdmdriver              Driver uses the WDM model\n"));
   fprintf (file, _("  --[disable-]tsaware                Image is Terminal Server aware\n"));
   fprintf (file, _("  --build-id[=STYLE]                 Generate build ID\n"));
+#ifdef PDB_H
   fprintf (file, _("  --pdb=[FILENAME]                   Generate PDB file\n"));
+#endif
 #endif
 }
 
@@ -930,11 +945,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (strcmp (optarg, "none"))
 	emit_build_id = xstrdup (optarg);
       break;
+#ifdef PDB_H
     case OPTION_PDB:
       pdb = 1;
       if (optarg && optarg[0])
 	pdb_name = xstrdup (optarg);
       break;
+#endif
     }
 
   /*  Set DLLCharacteristics bits  */
@@ -1057,8 +1074,10 @@ gld${EMULATION_NAME}_after_parse (void)
     einfo (_("%P: warning: --export-dynamic is not supported for PE+ "
       "targets, did you mean --export-all-symbols?\n"));
 
+#ifdef PDB_H
   if (pdb && emit_build_id == NULL)
     emit_build_id = xstrdup (DEFAULT_BUILD_ID_STYLE);
+#endif
 
   set_entry_point ();
 
@@ -1318,8 +1337,10 @@ write_build_id (bfd *abfd)
 
   bfd_vma ib = pe_data (link_info.output_bfd)->pe_opthdr.ImageBase;
 
+#ifdef PDB_H
   if (pdb_name)
     pdb_base_name = lbasename (pdb_name);
+#endif
 
   /* Construct a debug directory entry which points to an immediately following CodeView record.  */
   struct internal_IMAGE_DEBUG_DIRECTORY idd;
@@ -1328,7 +1349,11 @@ write_build_id (bfd *abfd)
   idd.MajorVersion = 0;
   idd.MinorVersion = 0;
   idd.Type = PE_IMAGE_DEBUG_TYPE_CODEVIEW;
-  idd.SizeOfData = sizeof (CV_INFO_PDB70) + (pdb_base_name ? strlen (pdb_base_name) : 0) + 1;
+  idd.SizeOfData = (sizeof (CV_INFO_PDB70)
+#ifdef PDB_H
+		    + (pdb_base_name ? strlen (pdb_base_name) : 0)
+#endif
+		    + 1);
   idd.AddressOfRawData = asec->vma - ib + link_order->offset
     + sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
   idd.PointerToRawData = asec->filepos + link_order->offset
@@ -1344,11 +1369,13 @@ write_build_id (bfd *abfd)
   if (bfd_bwrite (contents, sizeof (*ext), abfd) != sizeof (*ext))
     return 0;
 
+#ifdef PDB_H
   if (pdb)
     {
       if (!create_pdb_file (abfd, pdb_name, build_id))
 	return 0;
     }
+#endif
 
   /* Construct the CodeView record.  */
   CODEVIEW_INFO cvinfo;
@@ -1403,12 +1430,13 @@ setup_build_id (bfd *ibfd)
 	 One IMAGE_DEBUG_DIRECTORY entry, of type IMAGE_DEBUG_TYPE_CODEVIEW,
 	 pointing at a CV_INFO_PDB70 record containing the build-id, followed by
 	 PdbFileName if relevant.  */
-      s->size = sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
-	+ sizeof (CV_INFO_PDB70) + 1;
+      s->size = (sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
+		 + sizeof (CV_INFO_PDB70) + 1);
 
+#ifdef PDB_H
       if (pdb_name)
 	s->size += strlen (lbasename (pdb_name));
-
+#endif
       return true;
     }
 
@@ -1440,6 +1468,7 @@ gld${EMULATION_NAME}_after_open (void)
     }
 #endif
 
+#ifdef PDB_H
   if (pdb && !pdb_name)
     {
       const char *base = lbasename (bfd_get_filename (link_info.output_bfd));
@@ -1458,6 +1487,7 @@ gld${EMULATION_NAME}_after_open (void)
       memcpy (pdb_name, base, len);
       memcpy (pdb_name + len, suffix, sizeof (suffix));
     }
+#endif
 
   if (emit_build_id != NULL)
     {

@@ -212,7 +212,7 @@ am_ld_new_OBJECTS = ldgram.$(OBJEXT) ldlex-wrapper.$(OBJEXT) \
 	ldctor.$(OBJEXT) ldmain.$(OBJEXT) ldwrite.$(OBJEXT) \
 	ldexp.$(OBJEXT) ldemul.$(OBJEXT) ldver.$(OBJEXT) \
 	ldmisc.$(OBJEXT) ldfile.$(OBJEXT) ldcref.$(OBJEXT) \
-	plugin.$(OBJEXT) ldbuildid.$(OBJEXT) pdb.$(OBJEXT)
+	plugin.$(OBJEXT) ldbuildid.$(OBJEXT)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 @ENABLE_LIBCTF_TRUE@am__DEPENDENCIES_2 = ../libctf/libctf.la
@@ -965,6 +965,7 @@ ALL_64_EMULATION_SOURCES = \
 ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.@OBJEXT@ \
+	pdb.@OBJEXT@ \
 	pe-dll.@OBJEXT@ \
 	ldelf.@OBJEXT@ \
 	ldelfgen.@OBJEXT@
@@ -994,7 +995,7 @@ OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ 
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
 	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES} \
-	ldbuildid.@OBJEXT@ pdb.@OBJEXT@
+	ldbuildid.@OBJEXT@
 
 STAGESTUFF = *.@OBJEXT@ ldscripts/* e*.c
 SRC_POTFILES = $(CFILES) $(HFILES)
@@ -1008,12 +1009,12 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 # Allow dependency tracking to work for these files, too.
 
 # Dependency tracking for the generated emulation files.
-EXTRA_ld_new_SOURCES = deffilep.y ldlex.l pep-dll.c pe-dll.c ldelf.c \
-	ldelfgen.c $(ALL_EMULATION_SOURCES) \
+EXTRA_ld_new_SOURCES = deffilep.y ldlex.l ldelf.c ldelfgen.c pdb.c \
+	pep-dll.c pe-dll.c $(ALL_EMULATION_SOURCES) \
 	$(ALL_64_EMULATION_SOURCES)
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
-	ldbuildid.c pdb.c
+	ldbuildid.c
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
 		      $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL_DEP) $(JANSSON_LIBS)

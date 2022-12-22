@@ -466,6 +466,7 @@ ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
 
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.@OBJEXT@ \
+	pdb.@OBJEXT@ \
 	pe-dll.@OBJEXT@ \
 	ldelf.@OBJEXT@ \
 	ldelfgen.@OBJEXT@
@@ -496,7 +497,7 @@ OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ 
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
 	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES} \
-	ldbuildid.@OBJEXT@ pdb.@OBJEXT@
+	ldbuildid.@OBJEXT@
 
 STAGESTUFF = *.@OBJEXT@ ldscripts/* e*.c
 
@@ -956,11 +957,11 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l
 # Allow dependency tracking to work for these files, too.
-EXTRA_ld_new_SOURCES += pep-dll.c pe-dll.c ldelf.c ldelfgen.c
+EXTRA_ld_new_SOURCES += ldelf.c ldelfgen.c pdb.c pep-dll.c pe-dll.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
-	ldbuildid.c pdb.c
+	ldbuildid.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
 		      $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL_DEP) $(JANSSON_LIBS)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) \

@@ -423,17 +423,17 @@ i[3-7]86-*-moss*)	targ_emul=i386moss
 			targ_extra_emuls=i386msdos
 			;;
 i[3-7]86-*-winnt*)	targ_emul=i386pe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pe-dll.o"
 			;;
 i[3-7]86-*-pe)		targ_emul=i386pe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pe-dll.o"
 			;;
 i[3-7]86-*-cygwin*)	targ_emul=i386pe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o" ;
+			targ_extra_ofiles="deffilep.o pdb.o pe-dll.o" ;
 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api'
 			;;
 i[3-7]86-*-mingw32*)	targ_emul=i386pe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pe-dll.o"
 			;;
 i[3-7]86-*-interix*)	targ_emul=i386pe_posix;
 			targ_extra_ofiles="deffilep.o pe-dll.o"
@@ -1047,16 +1047,16 @@ x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 			;;
 x86_64-*-pe | x86_64-*-pep) targ_emul=i386pep ;
 			targ_extra_emuls=i386pe ;
-			targ_extra_ofiles="deffilep.o pep-dll-x86_64.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pep-dll-x86_64.o pe-dll.o"
 			;;
 x86_64-*-cygwin)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
-			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pep-dll.o pe-dll.o"
 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api'
 			;;
 x86_64-*-mingw*)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
-			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pdb.o pep-dll.o pe-dll.o"
 			;;
 xgate-*-*)		targ_emul=xgateelf
 			targ_extra_ofiles=ldelfgen.o
