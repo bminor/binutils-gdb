@@ -38,6 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "target-newlib-syscall.h"
 
+#include "mcore-sim.h"
+
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 
 
