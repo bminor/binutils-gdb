@@ -29,6 +29,8 @@
 #include "ansidecl.h"
 #include "opcode/bfin.h"
 #include "sim-main.h"
+#include "arch.h"
+#include "bfin-sim.h"
 #include "dv-bfin_cec.h"
 #include "dv-bfin_mmu.h"
 

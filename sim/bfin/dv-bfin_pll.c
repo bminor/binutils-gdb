@@ -22,7 +22,6 @@
 #include "defs.h"
 
 #include "sim-main.h"
-#include "machs.h"
 #include "devices.h"
 #include "dv-bfin_pll.h"
 

@@ -34,8 +34,11 @@
 #include "sim/callback.h"
 #include "gdb/signals.h"
 #include "sim-main.h"
+#include "sim-options.h"
 #include "sim-syscall.h"
 #include "sim-hw.h"
+
+#include "bfin-sim.h"
 
 /* The numbers here do not matter.  They just need to be unique.  They also
    need not be static across releases -- they're used internally only.  The
