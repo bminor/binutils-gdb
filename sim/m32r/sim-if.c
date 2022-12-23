@@ -25,6 +25,7 @@
 
 #include "sim/callback.h"
 #include "sim-main.h"
+#include "sim-hw.h"
 #include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"
