@@ -1029,7 +1029,7 @@ address_word micromips_instruction_decode (SIM_DESC sd, sim_cpu * cpu,
 					   int instruction_size);
 
 #if WITH_TRACE_ANY_P
-void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, const char *comment, ...) ATTRIBUTE_PRINTF (7, 8);
+void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, address_word address, int width, const char *comment, ...) ATTRIBUTE_PRINTF (7, 8);
 extern FILE *tracefh;
 #else
 #define dotrace(sd, cpu, tracefh, type, address, width, comment, ...)
@@ -1041,7 +1041,7 @@ extern int DSPHI_REGNUM[4];
 INLINE_SIM_MAIN (void) pending_tick (SIM_DESC sd, sim_cpu *cpu, address_word cia);
 extern SIM_CORE_SIGNAL_FN mips_core_signal;
 
-char* pr_addr (SIM_ADDR addr);
+char* pr_addr (address_word addr);
 char* pr_uword64 (uword64 addr);
 
 

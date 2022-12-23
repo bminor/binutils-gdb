@@ -52,7 +52,7 @@ code on the hardware.
 #include "sim/sim.h" /* GDB simulator interface */
 #include "sim-syscall.h"   /* Simulator system call support */
 
-char* pr_addr (SIM_ADDR addr);
+char* pr_addr (address_word addr);
 char* pr_uword64 (uword64 addr);
 
 
@@ -134,9 +134,9 @@ static void ColdReset (SIM_DESC sd);
     The RSVD_INSTRUCTION... macros specify the magic instructions we
     use at the monitor entry points.  */
 static int firmware_option_p = 0;
-static SIM_ADDR idt_monitor_base =     0xBFC00000;
-static SIM_ADDR pmon_monitor_base =    0xBFC00500;
-static SIM_ADDR lsipmon_monitor_base = 0xBFC00200;
+static address_word idt_monitor_base =     0xBFC00000;
+static address_word pmon_monitor_base =    0xBFC00500;
+static address_word lsipmon_monitor_base = 0xBFC00200;
 
 static SIM_RC sim_firmware_command (SIM_DESC sd, char* arg);
 
@@ -707,11 +707,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
       /* the default monitor region */
       if (WITH_TARGET_WORD_BITSIZE == 64)
-	sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
+	sim_do_commandf (sd, "memory alias %#" PRIxTA ",%#" PRIxTA ",%#" PRIxTA,
 			 idt_monitor_base, idt_monitor_size,
 			 EXTENDED (idt_monitor_base));
       else
-	sim_do_commandf (sd, "memory region 0x%x,0x%" PRIxTA,
+	sim_do_commandf (sd, "memory region %#" PRIxTA ",%#" PRIxTA,
 			 idt_monitor_base, idt_monitor_size);
 
       /* Entry into the IDT monitor is via fixed address vectors, and
@@ -1088,7 +1088,7 @@ static SIM_RC
 sim_firmware_command (SIM_DESC sd, char *arg)
 {
   int address_present = 0;
-  SIM_ADDR address;
+  address_word address;
 
   /* Signal occurrence of this option. */
   firmware_option_p = 1;
@@ -1728,7 +1728,7 @@ dotrace (SIM_DESC sd,
 	 sim_cpu *cpu,
 	 FILE *tracefh,
 	 int type,
-	 SIM_ADDR address,
+	 address_word address,
 	 int width,
 	 const char *comment, ...)
 {
@@ -2460,28 +2460,11 @@ get_cell (void)
 
 /* Print routines to handle variable size regs, etc */
 
-/* Eliminate warning from compiler on 32-bit systems */
-static int thirty_two = 32;
-
 char*
-pr_addr (SIM_ADDR addr)
+pr_addr (address_word addr)
 {
   char *paddr_str=get_cell();
-  switch (sizeof(addr))
-    {
-      case 8:
-        sprintf(paddr_str,"%08lx%08lx",
-		(unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
-	break;
-      case 4:
-        sprintf(paddr_str,"%08lx",(unsigned long)addr);
-	break;
-      case 2:
-        sprintf(paddr_str,"%04x",(unsigned short)(addr&0xffff));
-	break;
-      default:
-        sprintf(paddr_str,"%x",addr);
-    }
+  sprintf (paddr_str, "%0*" PRIxTA, (int) (sizeof (addr) * 2), addr);
   return paddr_str;
 }
 
@@ -2489,8 +2472,7 @@ char*
 pr_uword64 (uword64 addr)
 {
   char *paddr_str=get_cell();
-  sprintf(paddr_str,"%08lx%08lx",
-          (unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
+  sprintf (paddr_str, "%016" PRIx64, addr);
   return paddr_str;
 }
 
