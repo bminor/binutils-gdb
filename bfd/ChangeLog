@@ -1,3 +1,9 @@
+2022-12-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 29936
+	* dwarf2.c (concat_filename): Fix check for a directory index off
+	the end of the directory table.
+
 2022-12-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated Romanian translation.

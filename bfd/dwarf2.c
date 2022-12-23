@@ -2047,7 +2047,8 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
       if (table->files[file].dir
 	  /* PR 17512: file: 0317e960.  */
-	  && table->files[file].dir <= table->num_dirs
+	  && table->files[file].dir
+	  <= (table->use_dir_and_file_0 ? table->num_dirs - 1 : table->num_dirs)
 	  /* PR 17512: file: 7f3d2e4b.  */
 	  && table->dirs != NULL)
 	{
