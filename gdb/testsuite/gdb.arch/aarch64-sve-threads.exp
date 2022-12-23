@@ -1,0 +1,81 @@
+# Copyright 2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test a multi-threaded binary that uses SVE and changes the SVE vector
+# length in the additional thread.
+
+require allow_aarch64_sve_tests
+
+standard_testfile
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
+	 {debug pthreads}] == -1} {
+    return
+}
+
+if {![runto_main]} {
+    return
+}
+
+# Get the original VG value.
+set orig_vg [get_valueof "" {$vg} "0" "get value of VG register"]
+set expected_vg [expr {$orig_vg - 2}]
+
+# Stop after the additional thread has changed its vector length.
+gdb_breakpoint [gdb_get_line_number "break here 1"]
+gdb_continue_to_breakpoint "break here 1"
+
+# If GDB and gdbserver don't agree on the thread's vector length, this
+# command will fail.
+gdb_test "print \$z0" " = {q = {u = {.*}}}" "print z0 register"
+
+gdb_test "print \$vg" ". = ${expected_vg}" "vg was changed to ${expected_vg}"
+
+# Stop after the additional thread has restored its original vector length.
+gdb_breakpoint [gdb_get_line_number "break here 2"]
+gdb_continue_to_breakpoint "break here 2"
+
+# Test that going back to the original vector length doesn't confuse GDB or
+# gdbserver.
+gdb_test "print \$z0" " = {q = {u = {.*}}}" "print z0 register again"
+
+gdb_test "print \$vg" ". = ${orig_vg}" "vg was changed back to ${orig_vg}"
+
+# Restart GDB to test a scenario where GDB switches to a thread that
+# changed its vector length but hasn't hit any breakpoints yet.
+clean_restart
+gdb_load $binfile
+
+if {![runto_main]} {
+    return
+}
+
+# Make the thread sleep after changing its vector length.
+gdb_test_no_output -nopass "set var should_sleep = 1" "make thread sleep"
+
+# Stop in the main thread after the additional thread has changed its
+# vector length.
+gdb_breakpoint [gdb_get_line_number "break here 3"]
+gdb_continue_to_breakpoint "break here 3"
+
+# The regexp accounts for two lines of output after the "Switching to thread"
+# message.
+gdb_test_lines "thread 2" "switch to another thread" \
+    {\[Switching to thread 2 \(.*\)\]\r\n#0  [[:print:]]+}
+
+# Make sure everything is still fine.
+gdb_test "print \$z0" " = {q = {u = {.*}}}" "print z0 register in thread 2"
+
+gdb_test "print \$vg" ". = ${expected_vg}" \
+    "vg was changed to ${expected_vg} in thread 2"
