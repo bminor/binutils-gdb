@@ -63,6 +63,8 @@
 
 #include "target-newlib-syscall.h"
 
+#include "sh-sim.h"
+
 #include <math.h>
 
 #ifdef _WIN32
