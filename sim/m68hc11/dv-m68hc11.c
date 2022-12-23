@@ -29,6 +29,8 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include "m68hc11-sim.h"
+
 /* DEVICE
 
         m68hc11cpu - m68hc11 cpu virtual device

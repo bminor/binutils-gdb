@@ -2048,7 +2048,7 @@ gen_interpreter (FILE *fp)
 
   /* Generate header of interpretor.  */
   print (fp, col, "/* File generated automatically by gencode. */\n");
-  print (fp, col, "#include \"sim-main.h\"\n\n");
+  print (fp, col, "#include \"m68hc11-sim.h\"\n\n");
 
   if (cpu_type & cpu6811)
     {

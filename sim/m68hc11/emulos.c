@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <unistd.h>
 #endif
 
+#include "m68hc11-sim.h"
+
 #ifndef WIN32
 #include <errno.h>
 #include <stdio.h>

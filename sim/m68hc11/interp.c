@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hw-ports.h"
 #include "elf32-m68hc1x.h"
 
+#include "m68hc11-sim.h"
+
 #ifndef MONITOR_BASE
 # define MONITOR_BASE (0x0C000)
 # define MONITOR_SIZE (0x04000)

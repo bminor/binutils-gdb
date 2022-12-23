@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-
+#include "m68hc11-sim.h"
 
 /* DEVICE
 

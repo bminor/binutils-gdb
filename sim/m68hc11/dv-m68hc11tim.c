@@ -28,6 +28,8 @@
 #include "sim-assert.h"
 #include <limits.h>
 
+#include "m68hc11-sim.h"
+
 /* DEVICE
 
         m68hc11tim - m68hc11 timer devices

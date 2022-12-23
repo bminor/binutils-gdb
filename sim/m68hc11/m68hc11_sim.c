@@ -20,13 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-module.h"
 #include "sim-options.h"
 #include "sim-signal.h"
 
-#include <stdlib.h>
+#include "m68hc11-sim.h"
 
 enum {
   OPTION_CPU_RESET = OPTION_START,

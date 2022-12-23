@@ -28,6 +28,7 @@
 #include "dv-sockser.h"
 #include "sim-assert.h"
 
+#include "m68hc11-sim.h"
 
 /* DEVICE
 

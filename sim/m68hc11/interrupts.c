@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-options.h"
 #include "sim-signal.h"
 
+#include "m68hc11-sim.h"
+
 static const char *interrupt_names[] = {
   "R1",
   "R2",
