@@ -3,7 +3,7 @@
 
 #include "sim-main.h"
 #include "sim-options.h"
-#include "v850_sim.h"
+#include "v850-sim.h"
 #include "sim-assert.h"
 #include "itable.h"
 

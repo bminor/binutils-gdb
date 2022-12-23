@@ -3,7 +3,7 @@
 
 #include "sim-main.h"
 #include "sim-signal.h"
-#include "v850_sim.h"
+#include "v850-sim.h"
 #include "simops.h"
 
 #include <sys/types.h>

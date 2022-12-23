@@ -1,5 +1,8 @@
 #ifndef SIMOPS_H
 #define SIMOPS_H
+
+#include "sim-fpu.h"
+
 int OP_380 (void);
 int OP_480 (void);
 int OP_501 (void);
