@@ -25,7 +25,6 @@ mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ER
 
 #include "sim-basics.h"
 #include "sim-base.h"
-#include "bfd.h"
 #include "elf-bfd.h"
 #include "elf/mips.h"
 

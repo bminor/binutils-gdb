@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 
 #include "ansidecl.h"
+#include "bfd.h"
 #include "libiberty.h"
 #include "sim/callback.h"
 #include "sim/sim.h"

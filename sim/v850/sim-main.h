@@ -11,8 +11,6 @@
 #include "sim-base.h"
 
 #include "simops.h"
-#include "bfd.h"
-
 
 typedef uint32_t reg_t;
 typedef uint64_t reg64_t;

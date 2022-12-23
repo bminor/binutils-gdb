@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-basics.h"
 #include "sim-base.h"
 
-#include "bfd.h"
-
 #include "opcode/m68hc11.h"
 
 #include "sim/sim.h"

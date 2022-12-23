@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "bfd.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "sim-signal.h"

@@ -10,6 +10,8 @@
 #endif
 #include <string.h>
 
+#include "bfd.h"
+
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "simops.h"

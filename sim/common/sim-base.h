@@ -73,6 +73,8 @@ typedef address_word sim_cia;
 typedef struct _sim_cpu SIM_CPU;
 typedef struct _sim_cpu sim_cpu;
 
+#include "bfd.h"
+
 #include "sim-module.h"
 
 #include "sim-arange.h"

@@ -21,6 +21,8 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "bfd.h"
+
 #include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"

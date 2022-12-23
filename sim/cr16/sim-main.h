@@ -21,7 +21,6 @@
 
 #include "sim-basics.h"
 #include "sim-base.h"
-#include "bfd.h"
 
 #include "cr16_sim.h"
 

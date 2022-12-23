@@ -21,7 +21,6 @@
 
 #include "sim-basics.h"
 #include "sim-base.h"
-#include "bfd.h"
 
 #undef BIT
 #include "armdefs.h"

@@ -1,7 +1,5 @@
 /* Main header for the Hitachi h8/300 architecture.  */
 
-#include "bfd.h"
-
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
