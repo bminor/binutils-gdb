@@ -548,6 +548,11 @@ sframe_decoder_free (sframe_decoder_ctx **decoder)
 	  free (dctx->sfd_fres);
 	  dctx->sfd_fres = NULL;
 	}
+      if (dctx->sfd_buf != NULL)
+	{
+	  free (dctx->sfd_buf);
+	  dctx->sfd_buf = NULL;
+	}
 
       free (*decoder);
       *decoder = NULL;
@@ -824,6 +829,10 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
 	  return sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
 	}
       frame_buf = tempbuf;
+      /* This buffer is malloc'd when endian flipping the contents of the input
+	 buffer are needed.  Keep a reference to it so it can be free'd up
+	 later in sframe_decoder_free ().  */
+      dctx->sfd_buf = tempbuf;
     }
   else
     frame_buf = (char *)sf_buf;
