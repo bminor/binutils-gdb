@@ -20,10 +20,6 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef long int           word;
-typedef unsigned long int  uword;
-
 #include "sim-base.h"
 #include "bfd.h"
 

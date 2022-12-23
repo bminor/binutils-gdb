@@ -38,7 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "target-newlib-syscall.h"
 
 typedef int word;
-typedef unsigned int uword;
 
 /* Extract the signed 10-bit offset from a 16-bit branch
    instruction.  */

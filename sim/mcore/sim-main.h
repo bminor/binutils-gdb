@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-basics.h"
 
 typedef long int           word;
-typedef unsigned long int  uword;
 
 #include "sim-base.h"
 #include "bfd.h"
