@@ -258,7 +258,7 @@ iu_carry (unsigned long a, unsigned long b, int cin)
 #ifdef WATCHFUNCTIONS
 
 #define MAXWL 80
-word WL[MAXWL];
+int32_t WL[MAXWL];
 char * WLstr[MAXWL];
 
 int ENDWL=0;
@@ -267,7 +267,7 @@ int WLcyc[MAXWL];
 int WLcnts[MAXWL];
 int WLmax[MAXWL];
 int WLmin[MAXWL];
-word WLendpc;
+int32_t WLendpc;
 int WLbcyc;
 int WLW;
 #endif
@@ -295,8 +295,8 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
   struct mcore_sim_cpu *mcore_cpu = MCORE_SIM_CPU (cpu);
   int needfetch;
-  word ibuf;
-  word pc;
+  int32_t ibuf;
+  int32_t pc;
   unsigned short inst;
   int memops;
   int bonus_cycles;
@@ -304,7 +304,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
   int w;
   int cycs;
 #ifdef WATCHFUNCTIONS
-  word WLhash;
+  int32_t WLhash;
 #endif
 
   pc = CPU_PC_GET (cpu);
@@ -330,7 +330,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
   /* TODO: Unindent this block.  */
     {
-      word oldpc;
+      int32_t oldpc;
 
       insts ++;
 
@@ -404,7 +404,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 #endif
 
       if (tracing)
-	fprintf (stderr, "%.4lx: inst = %.4x ", pc, inst);
+	fprintf (stderr, "%.4x: inst = %.4x ", pc, inst);
 
       oldpc = pc;
 
@@ -498,7 +498,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0x4:					/* ldq */
 	      {
-		word addr = gr[RD];
+		int32_t addr = gr[RD];
 		int regno = 4;			/* always r4-r7 */
 
 		bonus_cycles++;
@@ -514,7 +514,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0x5:					/* stq */
 	      {
-		word addr = gr[RD];
+		int32_t addr = gr[RD];
 		int regno = 4;			/* always r4-r7 */
 
 		memops += 4;
@@ -530,7 +530,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0x6:					/* ldm */
 	      {
-		word addr = gr[0];
+		int32_t addr = gr[0];
 		int regno = RD;
 
 		/* bonus cycle is really only needed if
@@ -549,7 +549,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0x7:					/* stm */
 	      {
-		word addr = gr[0];
+		int32_t addr = gr[0];
 		int regno = RD;
 
 		/* this should be removed! */
@@ -580,7 +580,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    case 0xC:					/* jmp */
 	      pc = gr[RD];
 	      if (tracing && RD == 15)
-		fprintf (stderr, "Func return, r2 = %lxx, r3 = %lx\n",
+		fprintf (stderr, "Func return, r2 = %xx, r3 = %x\n",
 			 gr[2], gr[3]);
 	      bonus_cycles++;
 	      needfetch = 1;
@@ -593,7 +593,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0xE:					/* ff1 */
 	      {
-		word tmp, i;
+		int32_t tmp, i;
 		tmp = gr[RD];
 		for (i = 0; !(tmp & 0x80000000) && i < 32; i++)
 		  tmp <<= 1;
@@ -602,7 +602,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0xF:					/* brev */
 	      {
-		word tmp;
+		int32_t tmp;
 		tmp = gr[RD];
 		tmp = ((tmp & 0xaaaaaaaa) >>  1) | ((tmp & 0x55555555) <<  1);
 		tmp = ((tmp & 0xcccccccc) >>  2) | ((tmp & 0x33333333) <<  2);
@@ -662,7 +662,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	      break;
 	    case 0x9:					/* tstnbz */
 	      {
-		word tmp = gr[RD];
+		int32_t tmp = gr[RD];
 		NEW_C ((tmp & 0xFF000000) != 0 &&
 		       (tmp & 0x00FF0000) != 0 && (tmp & 0x0000FF00) != 0 &&
 		       (tmp & 0x000000FF) != 0);
@@ -708,7 +708,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	  }
 	  bonus_cycles += 2;  /* min. is 3, so add 2, plus ticks above */
 	  if (tracing)
-	    fprintf (stderr, "  mult %lx by %lx to give %lx",
+	    fprintf (stderr, "  mult %x by %x to give %x",
 		     gr[RD], gr[RS], gr[RD] * gr[RS]);
 	  gr[RD] = gr[RD] * gr[RS];
 	  break;
@@ -791,7 +791,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	case 0x12:					/* mov */
 	  gr[RD] = gr[RS];
 	  if (tracing)
-	    fprintf (stderr, "MOV %lx into reg %d", gr[RD], RD);
+	    fprintf (stderr, "MOV %x into reg %d", gr[RD], RD);
 	  break;
 
 	case 0x13:					/* bgenr */
@@ -915,7 +915,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 		exe = 0;
 
 		/* unsigned divide */
-		gr[RD] = (word) ((unsigned int) gr[RD] / (unsigned int)gr[1] );
+		gr[RD] = (int32_t) ((unsigned int) gr[RD] / (unsigned int)gr[1] );
 
 		/* compute bonus_cycles for divu */
 		for (r1nlz = 0; ((r1 & 0x80000000) == 0) && (r1nlz < 32); r1nlz ++)
@@ -1020,7 +1020,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	    unsigned long tmp = gr[RD];
 	    if (imm == 0)
 	      {
-		word cbit;
+		int32_t cbit;
 		cbit = C_VALUE();
 		NEW_C (tmp);
 		gr[RD] = (cbit << 31) | (tmp >> 1);
@@ -1097,7 +1097,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	case 0x7C: case 0x7D: case 0x7E:		/* lrw */
 	  gr[RX] =  rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	  if (tracing)
-	    fprintf (stderr, "LRW of 0x%x from 0x%lx to reg %d",
+	    fprintf (stderr, "LRW of 0x%x from 0x%x to reg %d",
 		     rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC),
 		     (pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC, RX);
 	  memops++;
@@ -1106,7 +1106,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	  gr[15] = pc;
 	  if (tracing)
 	    fprintf (stderr,
-		     "func call: r2 = %lx r3 = %lx r4 = %lx r5 = %lx r6 = %lx r7 = %lx\n",
+		     "func call: r2 = %x r3 = %x r4 = %x r5 = %x r6 = %x r7 = %x\n",
 		     gr[2], gr[3], gr[4], gr[5], gr[6], gr[7]);
 	case 0x70:					/* jmpi */
 	  pc = rlat ((pc + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
@@ -1121,7 +1121,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	case 0x8C: case 0x8D: case 0x8E: case 0x8F:	/* ld */
 	  gr[RX] = rlat (gr[RD] + ((inst >> 2) & 0x003C));
 	  if (tracing)
-	    fprintf (stderr, "load reg %d from 0x%lx with 0x%lx",
+	    fprintf (stderr, "load reg %d from 0x%x with 0x%x",
 		     RX,
 		     gr[RD] + ((inst >> 2) & 0x003C), gr[RX]);
 	  memops++;
@@ -1132,7 +1132,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	case 0x9C: case 0x9D: case 0x9E: case 0x9F:	/* st */
 	  wlat (gr[RD] + ((inst >> 2) & 0x003C), gr[RX]);
 	  if (tracing)
-	    fprintf (stderr, "store reg %d (containing 0x%lx) to 0x%lx",
+	    fprintf (stderr, "store reg %d (containing 0x%x) to 0x%x",
 		     RX, gr[RX],
 		     gr[RD] + ((inst >> 2) & 0x003C));
 	  memops++;
@@ -1472,7 +1472,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
     }
 
   /* Claim some memory for the pointers and strings. */
-  pointers = hi_stack - sizeof(word) * (nenv+1+nargs+1);
+  pointers = hi_stack - sizeof(int32_t) * (nenv+1+nargs+1);
   pointers &= ~3;		/* must be 4-byte aligned */
   gr[0] = pointers;
 

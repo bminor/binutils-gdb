@@ -20,9 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-
-typedef long int           word;
-
 #include "sim-base.h"
 #include "bfd.h"
 
@@ -39,10 +36,10 @@ typedef long int           word;
    gdb/config/mcore/tm-mcore.h file in the REGISTER_NAMES macro.  */
 struct mcore_regset
 {
-  word gregs[16];	/* primary registers */
-  word alt_gregs[16];	/* alt register file */
-  word cregs[32];	/* control registers */
-  word pc;
+  int32_t gregs[16];		/* primary registers */
+  int32_t alt_gregs[16];	/* alt register file */
+  int32_t cregs[32];		/* control registers */
+  int32_t pc;
 };
 #define LAST_VALID_CREG	32		/* only 0..12 implemented */
 #define NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG + 1)
@@ -52,11 +49,11 @@ struct mcore_sim_cpu {
   {
     struct mcore_regset regs;
     /* Used by the fetch/store reg helpers to access registers linearly.  */
-    word asints[NUM_MCORE_REGS];
+    int32_t asints[NUM_MCORE_REGS];
   };
 
   /* Used to switch between gregs/alt_gregs based on the control state.  */
-  word *active_gregs;
+  int32_t *active_gregs;
 
   int ticks;
   int stalls;
