@@ -26,6 +26,8 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "bfd.h"
+
 #include "sim-basics.h"
 #include "sim-assert.h"
 

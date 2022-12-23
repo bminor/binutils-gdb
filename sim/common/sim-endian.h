@@ -23,8 +23,6 @@
 #ifndef SIM_ENDIAN_H
 #define SIM_ENDIAN_H
 
-#include "bfd.h"
-
 /* C byte conversion functions */
 
 INLINE_SIM_ENDIAN(unsigned_1) endian_h2t_1(unsigned_1 x);
