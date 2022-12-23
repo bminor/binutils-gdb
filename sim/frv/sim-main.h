@@ -29,7 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "symcat.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "frv-desc.h"
 #include <stdbool.h>
 #include "frv-opc.h"

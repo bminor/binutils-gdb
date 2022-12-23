@@ -10,7 +10,6 @@
 
 #include "symcat.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "m32r-desc.h"
 #include "m32r-opc.h"
 #include "arch.h"

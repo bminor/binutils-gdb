@@ -25,7 +25,6 @@
 #include "or1k-desc.h"
 #include "or1k-opc.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "arch.h"
 #include "sim-base.h"
 #include "sim-fpu.h"

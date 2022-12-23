@@ -11,7 +11,6 @@
 
 #include "symcat.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "iq2000-desc.h"
 #include "iq2000-opc.h"
 #include "arch.h"

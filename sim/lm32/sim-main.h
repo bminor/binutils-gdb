@@ -27,7 +27,6 @@
 
 #include "symcat.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "lm32-desc.h"
 #include "lm32-opc.h"
 #include "arch.h"

@@ -31,7 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "symcat.h"
 #include "sim-basics.h"
-#include "cgen-types.h"
 #include "cris-desc.h"
 #include "cris-opc.h"
 #include "arch.h"
