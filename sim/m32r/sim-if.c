@@ -30,6 +30,7 @@
 #include "libiberty.h"
 #include "bfd.h"
 
+#include "m32r-sim.h"
 #include "dv-m32r_uart.h"
 
 #define M32R_DEFAULT_MEM_SIZE 0x2000000 /* 32M */

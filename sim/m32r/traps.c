@@ -55,6 +55,8 @@
 #include <linux/unistd.h>
 #endif
 
+#include "m32r-sim.h"
+
 #define TRAP_LINUX_SYSCALL 2
 #define TRAP_FLUSH_CACHE 12
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */

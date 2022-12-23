@@ -14,29 +14,9 @@
 #include "arch.h"
 #include "sim-base.h"
 #include "cgen-sim.h"
-#include "m32r-sim.h"
-
-struct m32r_sim_cpu {
-  M32R_MISC_PROFILE m32r_misc_profile;
-#define CPU_M32R_MISC_PROFILE(cpu) (& M32R_SIM_CPU (cpu)->m32r_misc_profile)
 
-  /* CPU specific parts go here.
-     Note that in files that don't need to access these pieces WANT_CPU_FOO
-     won't be defined and thus these parts won't appear.  This is ok in the
-     sense that things work.  It is a source of bugs though.
-     One has to of course be careful to not take the size of this
-     struct and no structure members accessed in non-cpu specific files can
-     go after here.  Oh for a better language.  */
-#if defined (WANT_CPU_M32RBF)
-  M32RBF_CPU_DATA cpu_data;
-#endif
-#if defined (WANT_CPU_M32RXF)
-  M32RXF_CPU_DATA cpu_data;
-#elif defined (WANT_CPU_M32R2F)
-  M32R2F_CPU_DATA cpu_data;
-#endif
-};
-#define M32R_SIM_CPU(cpu) ((struct m32r_sim_cpu *) CPU_ARCH_DATA (cpu))
+/* TODO: Move this to the CGEN generated files instead.  */
+#include "m32r-sim.h"
 
 /* Misc.  */
 

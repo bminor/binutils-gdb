@@ -27,6 +27,8 @@
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 
+#include "m32r-sim.h"
+
 /* The contents of BUF are in target byte order.  */
 
 int

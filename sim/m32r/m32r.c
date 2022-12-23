@@ -28,6 +28,8 @@
 #include "cgen-ops.h"
 #include <stdlib.h>
 
+#include "m32r-sim.h"
+
 /* Return the size of REGNO in bytes.  */
 
 static int
