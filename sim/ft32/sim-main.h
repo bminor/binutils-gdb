@@ -24,6 +24,4 @@
 #include "sim-basics.h"
 #include "sim-base.h"
 
-#include "ft32-sim.h"
-
 #endif

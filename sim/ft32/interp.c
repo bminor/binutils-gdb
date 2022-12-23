@@ -37,6 +37,8 @@
 
 #include "opcode/ft32.h"
 
+#include "ft32-sim.h"
+
 /*
  * FT32 is a Harvard architecture: RAM and code occupy
  * different address spaces.
