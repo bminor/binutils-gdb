@@ -32,7 +32,6 @@
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "lm32-sim.h"
-#include "opcode/cgen.h"
 
 struct lm32_sim_cpu
 {

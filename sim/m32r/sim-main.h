@@ -15,7 +15,6 @@
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "m32r-sim.h"
-#include "opcode/cgen.h"
 
 struct m32r_sim_cpu {
   M32R_MISC_PROFILE m32r_misc_profile;
