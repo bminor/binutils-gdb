@@ -36,6 +36,8 @@
 #include "sim-signal.h"
 #include "sim/callback.h"
 
+#include "h8300-sim.h"
+
 #ifndef SIGTRAP
 # define SIGTRAP 5
 #endif
