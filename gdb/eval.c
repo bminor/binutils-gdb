@@ -1309,6 +1309,8 @@ eval_op_member (struct type *expect_type, struct expression *exp,
 
     case TYPE_CODE_MEMBERPTR:
       /* Now, convert these values to an address.  */
+      if (check_typedef (value_type (arg1))->code () != TYPE_CODE_PTR)
+	arg1 = value_addr (arg1);
       arg1 = value_cast_pointers (lookup_pointer_type (TYPE_SELF_TYPE (type)),
 				  arg1, 1);
 

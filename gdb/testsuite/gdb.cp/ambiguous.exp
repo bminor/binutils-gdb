@@ -123,6 +123,7 @@ with_test_prefix "all fields" {
     gdb_test "print n.A1::y" " = 2"
     gdb_test "print n.A2::x" " = 3"
     gdb_test "print n.A2::y" " = 4"
+    gdb_test "print n->A2::y" " = 4"
     gdb_test "print n.w" " = 5"
     gdb_test "print n.r" " = 6"
     gdb_test "print n.z" " = 7"
