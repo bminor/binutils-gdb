@@ -41,6 +41,7 @@
 #include "libiberty.h"
 #include "iwmmxt.h"
 #include "maverick.h"
+#include "arm-sim.h"
 
 /* TODO: This should get pulled from the SIM_DESC.  */
 host_callback *sim_callback;
