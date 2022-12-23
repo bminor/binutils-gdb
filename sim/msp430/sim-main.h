@@ -22,14 +22,6 @@
 #define _MSP430_MAIN_SIM_H_
 
 #include "sim-basics.h"
-#include "msp430-sim.h"
 #include "sim-base.h"
-
-#define MSP430_SIM_CPU(cpu) ((struct msp430_cpu_state *) CPU_ARCH_DATA (cpu))
-
-#include "sim-config.h"
-#include "sim-types.h"
-#include "sim-engine.h"
-#include "sim-options.h"
 
 #endif /* _MSP430_MAIN_SIM_H_ */

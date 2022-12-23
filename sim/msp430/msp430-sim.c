@@ -30,8 +30,10 @@
 #include <assert.h>
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
+#include "sim-options.h"
 #include "sim-signal.h"
 #include "sim-syscall.h"
+#include "msp430-sim.h"
 
 static sim_cia
 msp430_pc_fetch (SIM_CPU *cpu)

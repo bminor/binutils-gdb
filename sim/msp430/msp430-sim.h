@@ -46,4 +46,6 @@ struct msp430_cpu_state
 
 #define HWMULT(sd, field) MSP430_SIM_CPU (STATE_CPU (sd, 0))->field
 
+#define MSP430_SIM_CPU(cpu) ((struct msp430_cpu_state *) CPU_ARCH_DATA (cpu))
+
 #endif
