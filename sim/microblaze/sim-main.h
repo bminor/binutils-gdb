@@ -18,31 +18,7 @@
 #ifndef MICROBLAZE_SIM_MAIN
 #define MICROBLAZE_SIM_MAIN
 
-#include "microblaze.h"
 #include "sim-basics.h"
 #include "sim-base.h"
-
-/* The machine state.
-   This state is maintained in host byte order.  The
-   fetch/store register functions must translate between host
-   byte order and the target processor byte order.
-   Keeping this data in target byte order simplifies the register
-   read/write functions.  Keeping this data in native order improves
-   the performance of the simulator.  Simulation speed is deemed more
-   important.  */
-
-/* The ordering of the microblaze_regset structure is matched in the
-   gdb/config/microblaze/tm-microblaze.h file in the REGISTER_NAMES macro.  */
- struct microblaze_regset
-{
-  signed_4	regs[32];		/* primary registers */
-  signed_4	spregs[2];		/* pc + msr */
-  int		cycles;
-  int		insts;
-  unsigned_1	imm_enable;
-  signed_2	imm_high;
-};
-
-#define MICROBLAZE_SIM_CPU(cpu) ((struct microblaze_regset *) CPU_ARCH_DATA (cpu))
 
 #endif /* MICROBLAZE_SIM_MAIN */
