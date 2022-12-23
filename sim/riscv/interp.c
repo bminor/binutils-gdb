@@ -27,6 +27,8 @@
 #include "sim-main.h"
 #include "sim-options.h"
 #include "target-newlib-syscall.h"
+
+#include "riscv-sim.h"
 
 void
 sim_engine_run (SIM_DESC sd,

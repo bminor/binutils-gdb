@@ -22,6 +22,7 @@
 #include "defs.h"
 
 #include "sim-main.h"
+#include "machs.h"
 
 static void
 riscv_model_init (SIM_CPU *cpu)
