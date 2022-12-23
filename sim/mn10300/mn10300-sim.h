@@ -1,14 +1,8 @@
-#include <stdio.h>
-#include <ctype.h>
-#include "ansidecl.h"
-#include "sim/callback.h"
-#include "opcode/mn10300.h"
-#include <limits.h>
-#include "sim/sim.h"
-#include "bfd.h"
-#include "sim-fpu.h"
-#include "sim-signal.h"
+#ifndef MN10300_SIM_H
+#define MN10300_SIM_H
 
+/* For compatibility, until all functions converted to passing
+   SIM_DESC as an argument */
 extern SIM_DESC simulator;
 
 typedef struct
@@ -185,6 +179,14 @@ dw2u64 (dword data)
   return data.low | (((uint64_t)data.high) << 32);
 }
 
+/* Bring data in from the cold */
+
+#define IMEM8(EA) \
+(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA)))
+
+#define IMEM8_IMMED(EA, N) \
+(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA) + (N)))
+
 /* Function declarations.  */
 
 INLINE_SIM_MAIN (void) genericAdd (uint32_t source, uint32_t destReg);
@@ -225,3 +227,5 @@ void fpu_fmadd  (SIM_DESC, sim_cpu *, address_word, const void *, const void *, 
 void fpu_fmsub  (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
 void fpu_fnmadd (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
 void fpu_fnmsub (SIM_DESC, sim_cpu *, address_word, const void *, const void *, const void *, void *, const struct fp_prec_t *);
+
+#endif

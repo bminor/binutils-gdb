@@ -14,8 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bfd.h"
-
 
 struct _state State;
 

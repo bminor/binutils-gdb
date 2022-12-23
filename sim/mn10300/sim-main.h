@@ -26,40 +26,20 @@
 
 #include "sim-basics.h"
 
-#include <signal.h> /* For kill() in insns:do_trap */
-
-#include <errno.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-/* These are generated files.  */
-#include "itable.h"
-#include "idecode.h"
-
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR)  \
 mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
 
-
 #include "sim-base.h"
 
-#include "mn10300_sim.h"
+/**
+ * TODO: Move these includes to the igen files that need them.
+ * This requires extending the igen syntax to support header includes.
+ */
+#include "sim-fpu.h"
+#include "sim-signal.h"
 
-/* Bring data in from the cold */
+#include "mn10300-sim.h"
 
-#define IMEM8(EA) \
-(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA)))
-
-#define IMEM8_IMMED(EA, N) \
-(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA) + (N)))
-
-/* For compatibility, until all functions converted to passing
-   SIM_DESC as an argument */
-extern SIM_DESC simulator;
-
-/* (re) initialize the simulator */
-
-extern void engine_init(SIM_DESC sd);
 extern SIM_CORE_SIGNAL_FN mn10300_core_signal;
 
 #endif
