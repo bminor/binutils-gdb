@@ -37,6 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-signal.h"
 #include "target-newlib-syscall.h"
 
+#include "moxie-sim.h"
+
 /* Extract the signed 10-bit offset from a 16-bit branch
    instruction.  */
 #define INST2OFFSET(o) ((((signed short)((o & ((1<<10)-1))<<6))>>6)<<1)
