@@ -235,7 +235,7 @@ DEPFILES = @GDBSERVER_DEPFILES@
 LIBOBJS = @LIBOBJS@
 
 SOURCES = $(SFILES)
-TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
+TAGFILES = $(SOURCES)
 
 OBS = \
 	alloc.o \
@@ -398,8 +398,9 @@ TAGS:	${TAGFILES}
 	etags \
 	  `for i in yzzy ${DEPFILES}; do \
 	     if [ x$$i != xyzzy ]; then \
-	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.cc/' \
-		 -e 's,/\(arch\|nat\|target\)/,/../\1/,' \
+	       echo ${srcdir}/$$i | \
+		 sed -e 's,/\(\(arch\|nat\|target\)/.*\)\.o$$,/../gdb/\1.c,' \
+		     -e 's/\.o$$/\.cc/'; \
 	     fi; \
 	   done` \
 	  ${TAGFILES}
