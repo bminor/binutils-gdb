@@ -70,6 +70,7 @@ write_template (void)
 
   printf ("#include \"defs.h\"\n");
   printf ("#include \"sim-main.h\"\n");
+  printf ("#include \"cr16-sim.h\"\n");
   printf ("#include \"simops.h\"\n\n");
 
   for ( ; i < NUMOPCODES; i++)
@@ -134,7 +135,7 @@ write_opcodes (void)
   
   /* write out opcode table.  */
   printf ("#include \"defs.h\"\n");
-  printf ("#include \"sim-main.h\"\n");
+  printf ("#include \"cr16-sim.h\"\n");
   printf ("#include \"simops.h\"\n\n");
   printf ("struct simops Simops[] = {\n");
   

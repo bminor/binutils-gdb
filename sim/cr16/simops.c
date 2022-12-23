@@ -38,6 +38,8 @@
 #include "simops.h"
 #include "target-newlib-syscall.h"
 
+#include "cr16-sim.h"
+
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif

@@ -25,6 +25,7 @@
 #include "sim/callback.h"
 #include "opcode/cr16.h"
 #include "bfd.h"
+#include "sim-main.h"
 
 #define DEBUG_TRACE		0x00000001
 #define DEBUG_VALUES		0x00000002

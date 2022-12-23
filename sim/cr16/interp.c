@@ -38,6 +38,8 @@
 
 #include "target-newlib-syscall.h"
 
+#include "cr16-sim.h"
+
 struct _state State;
 
 int cr16_debug;
