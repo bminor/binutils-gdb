@@ -37,8 +37,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-signal.h"
 #include "target-newlib-syscall.h"
 
-typedef int word;
-
 /* Extract the signed 10-bit offset from a 16-bit branch
    instruction.  */
 #define INST2OFFSET(o) ((((signed short)((o & ((1<<10)-1))<<6))>>6)<<1)
@@ -114,9 +112,9 @@ static const char *reg_names[16] =
 /* TODO: This should be moved to sim-main.h:_sim_cpu.  */
 struct moxie_regset
 {
-  word		  regs[NUM_MOXIE_REGS + 1]; /* primary registers */
-  word		  sregs[256];             /* special registers */
-  word            cc;                   /* the condition code reg */
+  int32_t	     regs[NUM_MOXIE_REGS + 1]; /* primary registers */
+  int32_t	     sregs[256];           /* special registers */
+  int32_t	     cc;                   /* the condition code reg */
   unsigned long long insts;                /* instruction counter */
 };
 
@@ -130,7 +128,7 @@ struct moxie_regset
 union
 {
   struct moxie_regset asregs;
-  word asints [1];		/* but accessed larger... */
+  int32_t asints [1];		/* but accessed larger... */
 } cpu;
 
 static void
@@ -152,7 +150,7 @@ set_initial_gprs (void)
 /* Write a 1 byte value to memory.  */
 
 static INLINE void
-wbat (sim_cpu *scpu, word pc, word x, word v)
+wbat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -162,7 +160,7 @@ wbat (sim_cpu *scpu, word pc, word x, word v)
 /* Write a 2 byte value to memory.  */
 
 static INLINE void
-wsat (sim_cpu *scpu, word pc, word x, word v)
+wsat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -172,7 +170,7 @@ wsat (sim_cpu *scpu, word pc, word x, word v)
 /* Write a 4 byte value to memory.  */
 
 static INLINE void
-wlat (sim_cpu *scpu, word pc, word x, word v)
+wlat (sim_cpu *scpu, int32_t pc, int32_t x, int32_t v)
 {
   address_word cia = CPU_PC_GET (scpu);
 	
@@ -182,7 +180,7 @@ wlat (sim_cpu *scpu, word pc, word x, word v)
 /* Read 2 bytes from memory.  */
 
 static INLINE int
-rsat (sim_cpu *scpu, word pc, word x)
+rsat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -192,7 +190,7 @@ rsat (sim_cpu *scpu, word pc, word x)
 /* Read 1 byte from memory.  */
 
 static INLINE int
-rbat (sim_cpu *scpu, word pc, word x)
+rbat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -202,7 +200,7 @@ rbat (sim_cpu *scpu, word pc, word x)
 /* Read 4 bytes from memory.  */
 
 static INLINE int
-rlat (sim_cpu *scpu, word pc, word x)
+rlat (sim_cpu *scpu, int32_t pc, int32_t x)
 {
   address_word cia = CPU_PC_GET (scpu);
   
@@ -248,7 +246,7 @@ sim_engine_run (SIM_DESC sd,
 		int nr_cpus, /* ignore  */
 		int siggnal) /* ignore  */
 {
-  word pc, opc;
+  int32_t pc, opc;
   unsigned short inst;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
   address_word cia = CPU_PC_GET (scpu);
