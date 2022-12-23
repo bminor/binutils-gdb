@@ -42,6 +42,8 @@
 #include "simulator.h"
 #include "sim-assert.h"
 
+#include "aarch64-sim.h"
+
 /* Filter out (in place) symbols that are useless for disassembly.
    COUNT is the number of elements in SYMBOLS.
    Return the number of useful symbols. */

@@ -27,6 +27,7 @@
 #include <inttypes.h>
 
 #include "sim/sim.h"
+#include "sim-main.h"
 
 /* Symbolic names used to identify general registers which also match
    the registers indices in machine code.

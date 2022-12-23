@@ -30,6 +30,7 @@
 #include <time.h>
 #include <limits.h>
 
+#include "aarch64-sim.h"
 #include "simulator.h"
 #include "cpustate.h"
 #include "memory.h"

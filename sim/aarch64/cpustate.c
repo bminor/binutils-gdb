@@ -31,6 +31,8 @@
 #include "simulator.h"
 #include "libiberty.h"
 
+#include "aarch64-sim.h"
+
 /* Some operands are allowed to access the stack pointer (reg 31).
    For others a read from r31 always returns 0, and a write to r31 is ignored.  */
 #define reg_num(reg) (((reg) == R31 && !r31_is_sp) ? 32 : (reg))
