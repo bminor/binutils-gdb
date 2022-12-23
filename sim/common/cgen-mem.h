@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CGEN_MEM_H
 #define CGEN_MEM_H
 
+#include "symcat.h"
+
 /* TODO: This should get moved into sim-inline.h.  */
 #ifdef MEMOPS_DEFINE_INLINE
 #define MEMOPS_INLINE

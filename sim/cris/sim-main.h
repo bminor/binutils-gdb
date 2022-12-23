@@ -29,7 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    one of -scache/-pbb.  */
 #define WITH_SCACHE_PBB 1
 
-#include "symcat.h"
 #include "sim-basics.h"
 #include "cris-desc.h"
 #include "cris-opc.h"

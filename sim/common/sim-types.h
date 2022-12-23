@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 
+#include "symcat.h"
+
 /* INTEGER QUANTITIES:
 
    TYPES:

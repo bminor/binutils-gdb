@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    one of -scache/-pbb. ???? */
 #define WITH_SCACHE_PBB 0
 
-#include "symcat.h"
 #include "sim-basics.h"
 #include "frv-desc.h"
 #include <stdbool.h>

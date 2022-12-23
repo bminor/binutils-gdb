@@ -9,7 +9,6 @@
    one of -scache/-pbb. ???? */
 #define WITH_SCACHE_PBB 1
 
-#include "symcat.h"
 #include "sim-basics.h"
 #include "iq2000-desc.h"
 #include "iq2000-opc.h"

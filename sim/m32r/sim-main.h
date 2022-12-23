@@ -8,7 +8,6 @@
    one of -scache/-pbb.  */
 #define WITH_SCACHE_PBB 1
 
-#include "symcat.h"
 #include "sim-basics.h"
 #include "m32r-desc.h"
 #include "m32r-opc.h"

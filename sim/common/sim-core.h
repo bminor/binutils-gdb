@@ -23,6 +23,7 @@
 #ifndef SIM_CORE_H
 #define SIM_CORE_H
 
+#include "symcat.h"
 
 /* core signals (error conditions)
    Define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for

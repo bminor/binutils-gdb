@@ -20,6 +20,8 @@
 #ifndef M32R_SIM_H
 #define M32R_SIM_H
 
+#include "symcat.h"
+
 /* GDB register numbers.  */
 #define PSW_REGNUM	16
 #define CBR_REGNUM	17

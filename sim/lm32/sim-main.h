@@ -25,7 +25,6 @@
 
 #define WITH_SCACHE_PBB 1
 
-#include "symcat.h"
 #include "sim-basics.h"
 #include "lm32-desc.h"
 #include "lm32-opc.h"
