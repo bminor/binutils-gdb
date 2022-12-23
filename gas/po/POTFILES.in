@@ -209,7 +209,6 @@ config/te-nbsd532.h
 config/te-pc532mach.h
 config/te-pe.h
 config/te-solaris.h
-config/te-svr4.h
 config/te-tmips.h
 config/te-vms.c
 config/te-vxworks.h

@@ -374,22 +374,13 @@ i[3-7]86-*-linux-*)	targ_emul=elf_i386
 i[3-7]86-*-redox*)	targ_emul=elf_i386
 			targ_extra_emuls=elf_x86_64
 			;;
-i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386
-			targ_extra_emuls=elf_iamcu
-			;;
 i[3-7]86-*-solaris2*)	targ_emul=elf_i386_sol2
 			targ_extra_emuls="elf_i386_ldso elf_i386 elf_iamcu elf_x86_64_sol2 elf_x86_64"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-i[3-7]86-*-unixware)	targ_emul=elf_i386
-			targ_extra_emuls=elf_iamcu
-			;;
 i[3-7]86-*-solaris*)	targ_emul=elf_i386_ldso
 			targ_extra_emuls="elf_i386"
 			targ_extra_libpath=$targ_extra_emuls
-			;;
-i[3-7]86-*-netbsdpe*)	targ_emul=i386pe
-			targ_extra_ofiles="deffilep.o pe-dll.o"
 			;;
 i[3-7]86-*-netbsd* | \
 i[3-7]86-*-netbsd*-gnu* | \
@@ -868,12 +859,6 @@ sh*eb-*-linux*)		targ_emul=shelf_linux
 			;;
 sh*-*-linux*)		targ_emul=shlelf_linux
 			targ_extra_emuls="shlelf_fd"
-			;;
-sh*l*-*-netbsdaout*)	targ_emul=shl
-			targ_extra_emuls=sh
-			;;
-sh*-*-netbsdaout*)	targ_emul=sh
-			targ_extra_emuls=shl
 			;;
 sh*l*-*-netbsd*)	targ_emul=shlelf_nbsd
 			targ_extra_emuls=shelf_nbsd

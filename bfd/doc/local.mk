@@ -69,7 +69,7 @@ SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
-	$(srcdir)/cpu-i960.c $(srcdir)/archures.c \
+	$(srcdir)/archures.c \
 	$(srcdir)/init.c
 
 TEXIDIR = $(srcdir)/../texinfo/fsf

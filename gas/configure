@@ -12080,8 +12080,7 @@ _ACEOF
     generic_target=${cpu_type}-${target_vendor}-${target_os}
     case ${generic_target} in
       i386-*-msdosdjgpp* \
-      | i386-*-go32* \
-      | i386-go32-rtems*)
+      | i386-*-go32*)
 
 $as_echo "#define STRICTCOFF 1" >>confdefs.h
 

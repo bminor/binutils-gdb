@@ -246,8 +246,7 @@ for this_target in $target $canon_targets ; do
     generic_target=${cpu_type}-${target_vendor}-${target_os}
     case ${generic_target} in
       i386-*-msdosdjgpp* \
-      | i386-*-go32* \
-      | i386-go32-rtems*)
+      | i386-*-go32*)
 	AC_DEFINE(STRICTCOFF, 1, [Using strict COFF?])
 	;;
 

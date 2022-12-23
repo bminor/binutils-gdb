@@ -94,7 +94,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
     }
 
 } elseif [istarget "sh*-*"] then {
-    if { [istarget "*-pe" ] || [istarget "*-rtemscoff*"] } then {
+    if { [istarget "*-pe" ] } then {
 	return
     }
     run_dump_test "cfi-sh-1"

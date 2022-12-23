@@ -135,9 +135,7 @@ case $targ in
  m68*-*-vxworks* | \
  m68*-apollo-* | \
  m68*-apple-aux* | \
- m68*-bull-sysv* | \
  m68*-ericsson-* | \
- m68*-motorola-sysv* | \
  m68*-netx-* | \
  m88*-*-* | \
  maxq-*-coff | \
@@ -1181,16 +1179,11 @@ case "${targ}" in
   powerpc-*-macos*)
     targ_defvec=powerpc_xcoff_vec
     ;;
-  powerpc-*-lynxos*)
-    targ_defvec=powerpc_elf32_vec
-    targ_selvecs="rs6000_xcoff_vec"
-    targ_cflags=-DSMALL_ARCHIVE
-    ;;
   powerpc-*-nto*)
     targ_defvec=powerpc_elf32_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec powerpc_boot_vec"
     ;;
-  powerpc-*-vxworks* | powerpc-*-windiss*)
+  powerpc-*-vxworks*)
     targ_defvec=powerpc_elf32_vxworks_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_vec powerpc_elf32_le_vec powerpc_boot_vec"
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec"

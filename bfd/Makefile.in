@@ -1103,7 +1103,6 @@ BFD64_BACKENDS_CFILES = \
 	vms-alpha.c
 
 OPTIONAL_BACKENDS = \
-	aix386-core.lo \
 	cisco-core.lo \
 	hpux-core.lo \
 	irix-core.lo \
@@ -1111,11 +1110,9 @@ OPTIONAL_BACKENDS = \
 	netbsd-core.lo \
 	osf-core.lo \
 	rs6000-core.lo \
-	sco5-core.lo \
 	trad-core.lo
 
 OPTIONAL_BACKENDS_CFILES = \
-	aix386-core.c \
 	cisco-core.c \
 	hpux-core.c \
 	irix-core.c \
@@ -1123,7 +1120,6 @@ OPTIONAL_BACKENDS_CFILES = \
 	netbsd-core.c \
 	osf-core.c \
 	rs6000-core.c \
-	sco5-core.c \
 	trad-core.c
 
 
@@ -1305,7 +1301,7 @@ SRCPROT = $(srcdir)/archive.c $(srcdir)/archures.c \
 SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 	$(srcdir)/bfdio.c $(srcdir)/bfdwin.c \
 	$(srcdir)/reloc.c $(srcdir)/cpu-h8300.c \
-	$(srcdir)/cpu-i960.c $(srcdir)/archures.c \
+	$(srcdir)/archures.c \
 	$(srcdir)/init.c
 
 TEXIDIR = $(srcdir)/../texinfo/fsf
@@ -1451,7 +1447,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aix386-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aix5ppc-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-cris.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-ns32k.Plo@am__quote@
@@ -1733,7 +1728,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc16.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rs6000-core.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sco5-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/section.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/som.Plo@am__quote@

@@ -162,10 +162,7 @@ DESCRIPTION
 .  bfd_target_verilog_flavour,
 .  bfd_target_ihex_flavour,
 .  bfd_target_som_flavour,
-.  bfd_target_os9k_flavour,
-.  bfd_target_versados_flavour,
 .  bfd_target_msdos_flavour,
-.  bfd_target_ovax_flavour,
 .  bfd_target_evax_flavour,
 .  bfd_target_mmo_flavour,
 .  bfd_target_mach_o_flavour,
@@ -960,7 +957,6 @@ extern const bfd_target binary_vec;
 extern const bfd_target ihex_vec;
 
 /* All of the xvecs for core files.  */
-extern const bfd_target core_aix386_vec;
 extern const bfd_target core_cisco_be_vec;
 extern const bfd_target core_cisco_le_vec;
 extern const bfd_target core_hppabsd_vec;
@@ -969,7 +965,6 @@ extern const bfd_target core_irix_vec;
 extern const bfd_target core_netbsd_vec;
 extern const bfd_target core_osf_vec;
 extern const bfd_target core_ptrace_vec;
-extern const bfd_target core_sco5_vec;
 extern const bfd_target core_trad_vec;
 
 static const bfd_target * const _bfd_target_vector[] =
@@ -1394,9 +1389,6 @@ static const bfd_target * const _bfd_target_vector[] =
 
 /* Add any required traditional-core-file-handler.  */
 
-#ifdef AIX386_CORE
-	&core_aix386_vec,
-#endif
 #if 0
 	/* We don't include cisco_core_*_vec.  Although it has a magic number,
 	   the magic number isn't at the beginning of the file, and thus
@@ -1421,9 +1413,6 @@ static const bfd_target * const _bfd_target_vector[] =
 #endif
 #ifdef PTRACE_CORE
 	&core_ptrace_vec,
-#endif
-#ifdef SCO5_CORE
-	&core_sco5_vec,
 #endif
 #ifdef TRAD_CORE
 	&core_trad_vec,
@@ -1863,10 +1852,7 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_verilog_flavour: return "Verilog";
     case bfd_target_ihex_flavour: return "Ihex";
     case bfd_target_som_flavour: return "SOM";
-    case bfd_target_os9k_flavour: return "OS9K";
-    case bfd_target_versados_flavour: return "Versados";
     case bfd_target_msdos_flavour: return "MSDOS";
-    case bfd_target_ovax_flavour: return "Ovax";
     case bfd_target_evax_flavour: return "Evax";
     case bfd_target_mmo_flavour: return "mmo";
     case bfd_target_mach_o_flavour: return "MACH_O";

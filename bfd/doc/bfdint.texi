@@ -346,10 +346,6 @@ Intel hex format.
 SOM (used on HP/UX).
 @item bfd_target_verilog_flavour
 Verilog memory hex dump format.
-@item bfd_target_os9k_flavour
-os9000.
-@item bfd_target_versados_flavour
-VERSAdos.
 @item bfd_target_msdos_flavour
 MS-DOS.
 @item bfd_target_evax_flavour

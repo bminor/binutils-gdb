@@ -812,7 +812,6 @@ if test "${target}" = "${host}"; then
   arm*-*-netbsd* | arm-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
   hppa*-*-hiux*)	COREFILE=hpux-core.lo ;;
   hppa*-*-mpeix*)	COREFILE=hpux-core.lo ;;
@@ -823,25 +822,12 @@ if test "${target}" = "${host}"; then
 	;;
 
 changequote(,)dnl
-  i[3-7]86-sequent-bsd*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/symmetry.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-sequent-sysv4*) ;;
-  i[3-7]86-sequent-sysv*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/symmetry.h"'
-	;;
-changequote(,)dnl
   i[3-7]86-*-bsdi)
 changequote([,])dnl
 	COREFILE=
 	;;
 changequote(,)dnl
-  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234] | i[3-7]86-*-freebsd4\.[01234]\.* | i[3-7]86-*-freebsd*aout*)
+  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234] | i[3-7]86-*-freebsd4\.[01234]\.*)
 changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386bsd.h"'
@@ -864,17 +850,6 @@ changequote([,])dnl
 	TRAD_HEADER='"hosts/esix.h"'
 	;;
 changequote(,)dnl
-  i[3-7]86-*-sco3.2v5*)
-changequote([,])dnl
-	COREFILE=sco5-core.lo
-	;;
-changequote(,)dnl
-  i[3-7]86-*-sco* | i[3-7]86-*-isc*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i386sco.h"'
-	;;
-changequote(,)dnl
   i[3-7]86-*-mach3*)
 changequote([,])dnl
 	COREFILE=trad-core.lo
@@ -890,16 +865,12 @@ changequote([,])dnl
 	  CORE_HEADER='"hosts/x86-64linux.h"'
 	esac
 	;;
-changequote(,)dnl
-  i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
-  i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
-changequote([,])dnl
   mips*-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
-  mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
-  mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
+  mips-*-irix*)
+	COREFILE=irix-core.lo
+	;;
   m68*-*-linux-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/m68klinux.h"'
@@ -955,14 +926,6 @@ changequote([,])dnl
   vax-*-netbsd* | vax-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  vax-*-ultrix2*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxult2.h"'
-	;;
-  vax-*-ultrix*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxult2.h"'
-	;;
   vax-*-linux-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxlinux.h"'
@@ -980,7 +943,6 @@ changequote([,])dnl
   esac
 
   case "$COREFILE" in
-  aix386-core.lo)	COREFLAG=-DAIX386_CORE ;;
   hppabsd-core.lo)	COREFLAG=-DHPPABSD_CORE ;;
   hpux-core.lo)		COREFLAG=-DHPUX_CORE ;;
   irix-core.lo)		COREFLAG=-DIRIX_CORE ;;
@@ -989,7 +951,6 @@ changequote([,])dnl
   osf-core.lo)		COREFLAG=-DOSF_CORE ;;
   ptrace-core.lo)	COREFLAG=-DPTRACE_CORE ;;
   rs6000-core.lo)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
-  sco5-core.lo)		COREFLAG="$COREFLAG -DSCO5_CORE" ;;
   trad-core.lo)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
   esac
 

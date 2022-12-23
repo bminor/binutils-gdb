@@ -346,8 +346,6 @@ CODE_FRAGMENT
 .      struct tekhex_data_struct *tekhex_data;
 .      struct elf_obj_tdata *elf_obj_data;
 .      struct mmo_data_struct *mmo_data;
-.      struct sun_core_struct *sun_core_data;
-.      struct sco5_core_struct *sco5_core_data;
 .      struct trad_core_struct *trad_core_data;
 .      struct som_data_struct *som_data;
 .      struct hpux_core_struct *hpux_core_data;
@@ -356,7 +354,6 @@ CODE_FRAGMENT
 .      struct lynx_core_struct *lynx_core_data;
 .      struct osf_core_struct *osf_core_data;
 .      struct cisco_core_struct *cisco_core_data;
-.      struct versados_data_struct *versados_data;
 .      struct netbsd_core_struct *netbsd_core_data;
 .      struct mach_o_data_struct *mach_o_data;
 .      struct mach_o_fat_data_struct *mach_o_fat_data;

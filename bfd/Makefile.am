@@ -633,7 +633,6 @@ BFD64_BACKENDS_CFILES = \
 	vms-alpha.c
 
 OPTIONAL_BACKENDS = \
-	aix386-core.lo \
 	cisco-core.lo \
 	hpux-core.lo \
 	irix-core.lo \
@@ -641,11 +640,9 @@ OPTIONAL_BACKENDS = \
 	netbsd-core.lo \
 	osf-core.lo \
 	rs6000-core.lo \
-	sco5-core.lo \
 	trad-core.lo
 
 OPTIONAL_BACKENDS_CFILES = \
-	aix386-core.c \
 	cisco-core.c \
 	hpux-core.c \
 	irix-core.c \
@@ -653,7 +650,6 @@ OPTIONAL_BACKENDS_CFILES = \
 	netbsd-core.c \
 	osf-core.c \
 	rs6000-core.c \
-	sco5-core.c \
 	trad-core.c
 
 # Reconfigure if config.bfd or configure.host changes.
