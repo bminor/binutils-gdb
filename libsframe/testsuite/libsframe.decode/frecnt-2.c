@@ -94,6 +94,9 @@ main (void)
       TEST ("frecnt-2: Decode get FRE", nfres == 4);
     }
 
+  free (sf_buf);
+  sf_buf = NULL;
+
   sframe_decoder_free (&dctx);
   return 0;
 

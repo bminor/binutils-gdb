@@ -104,6 +104,9 @@ main (void)
   err = sframe_decoder_get_funcdesc (dctx, 0, &nfres, &fsize, &fstart, &finfo);
   TEST ("be-flipping: Decoder get FDE", err == 0);
   TEST ("be-flipping: Decoder FRE count", nfres == 5);
+
+  free (sf_buf);
+  sf_buf = NULL;
       
   sframe_decoder_free (&dctx);
   return 0;

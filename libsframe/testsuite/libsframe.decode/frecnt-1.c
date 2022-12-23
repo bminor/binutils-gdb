@@ -89,6 +89,9 @@ main (void)
   TEST ("frecnt-1: Decoder get FDE", err == 0);
   TEST ("frecnt-1: Decoder FRE count", nfres == 4);
 
+  free (sf_buf);
+  sf_buf = NULL;
+
   sframe_decoder_free (&dctx);
   return 0;
 
