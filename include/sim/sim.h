@@ -26,12 +26,6 @@
 extern "C" {
 #endif
 
-/* This file is used when building stand-alone simulators, so isolate this
-   file from gdb.  */
-
-typedef unsigned int SIM_ADDR;
-
-
 /* Semi-opaque type used as result of sim_open and passed back to all
    other routines.  "desc" is short for "descriptor".
    It is up to each simulator to define `sim_state'.  */
