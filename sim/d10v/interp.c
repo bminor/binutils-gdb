@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "d10v-sim.h"
+
 #include "target-newlib-syscall.h"
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };

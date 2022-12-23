@@ -1,3 +1,6 @@
+#ifndef D10V_SIM_H
+#define D10V_SIM_H
+
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>
@@ -476,3 +479,5 @@ extern void write_longlong (uint8_t *addr, int64_t data);
    PSW is masked for zero bits. */
 
 extern reg_t move_to_cr (SIM_DESC, SIM_CPU *, int cr, reg_t mask, reg_t val, int psw_hw_p);
+
+#endif
