@@ -31,6 +31,8 @@
 #include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"
+
+#include "example-synacor-sim.h"
 
 /* This function is the main loop.  It should process ticks and decode+execute
    a single instruction.

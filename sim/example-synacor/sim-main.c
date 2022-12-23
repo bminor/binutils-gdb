@@ -26,6 +26,8 @@
 
 #include "sim-main.h"
 #include "sim-signal.h"
+
+#include "example-synacor-sim.h"
 
 /* Get the register number from the number.  */
 static uint16_t
