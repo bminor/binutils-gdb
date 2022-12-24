@@ -21,6 +21,7 @@
 #include "complaints.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "run-on-main-thread.h"
 #include "gdbsupport/selftest.h"
 #include <unordered_map>
 #include <mutex>
@@ -78,17 +79,14 @@ clear_complaints ()
 
 /* See complaints.h.  */
 
-complaint_interceptor *complaint_interceptor::g_complaint_interceptor;
+thread_local complaint_interceptor *complaint_interceptor::g_complaint_interceptor;
 
 /* See complaints.h.  */
 
 complaint_interceptor::complaint_interceptor ()
-  : m_saved_warning_hook (deprecated_warning_hook)
+  : m_saved_warning_hook (&deprecated_warning_hook, issue_complaint),
+    m_saved_complaint_interceptor (&g_complaint_interceptor, this)
 {
-  /* These cannot be stacked.  */
-  gdb_assert (g_complaint_interceptor == nullptr);
-  g_complaint_interceptor = this;
-  deprecated_warning_hook = issue_complaint;
 }
 
 /* A helper that wraps a warning hook.  */
@@ -104,19 +102,19 @@ wrap_warning_hook (void (*hook) (const char *, va_list), ...)
 
 /* See complaints.h.  */
 
-complaint_interceptor::~complaint_interceptor ()
+void
+re_emit_complaints (const complaint_collection &complaints)
 {
-  for (const std::string &str : m_complaints)
+  gdb_assert (is_main_thread ());
+
+  for (const std::string &str : complaints)
     {
-      if (m_saved_warning_hook)
-	wrap_warning_hook (m_saved_warning_hook, str.c_str ());
+      if (deprecated_warning_hook)
+	wrap_warning_hook (deprecated_warning_hook, str.c_str ());
       else
 	gdb_printf (gdb_stderr, _("During symbol reading: %s\n"),
 		    str.c_str ());
     }
-
-  g_complaint_interceptor = nullptr;
-  deprecated_warning_hook = m_saved_warning_hook;
 }
 
 /* See complaints.h.  */

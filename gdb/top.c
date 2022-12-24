@@ -221,7 +221,7 @@ int (*deprecated_query_hook) (const char *, va_list);
 
 /* Replaces most of warning.  */
 
-void (*deprecated_warning_hook) (const char *, va_list);
+thread_local void (*deprecated_warning_hook) (const char *, va_list);
 
 /* These three functions support getting lines of text from the user.
    They are used in sequence.  First deprecated_readline_begin_hook is

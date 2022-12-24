@@ -4930,9 +4930,6 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 			       index_storage.get_addrmap ());
 
   {
-    /* Ensure that complaints are handled correctly.  */
-    complaint_interceptor complaint_handler;
-
     using iter_type = decltype (per_bfd->all_units.begin ());
 
     auto task_size_ = [] (iter_type iter)
@@ -4942,18 +4939,23 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
       };
     auto task_size = gdb::make_function_view (task_size_);
 
-    /* Each thread returns a pair holding a cooked index, and a vector
-       of errors that should be printed.  The latter is done because
-       GDB's I/O system is not thread-safe.  run_on_main_thread could be
-       used, but that would mean the messages are printed after the
-       prompt, which looks weird.  */
-    using result_type = std::pair<std::unique_ptr<cooked_index_shard>,
-				  std::vector<gdb_exception>>;
+    /* Each thread returns a tuple holding a cooked index, any
+       collected complaints, and a vector of errors that should be
+       printed.  The latter is done because GDB's I/O system is not
+       thread-safe.  run_on_main_thread could be used, but that would
+       mean the messages are printed after the prompt, which looks
+       weird.  */
+    using result_type = std::tuple<std::unique_ptr<cooked_index_shard>,
+				   complaint_collection,
+				   std::vector<gdb_exception>>;
     std::vector<result_type> results
       = gdb::parallel_for_each (1, per_bfd->all_units.begin (),
 				per_bfd->all_units.end (),
 				[=] (iter_type iter, iter_type end)
       {
+	/* Ensure that complaints are handled correctly.  */
+	complaint_interceptor complaint_handler;
+
 	std::vector<gdb_exception> errors;
 	cooked_index_storage thread_storage;
 	for (; iter != end; ++iter)
@@ -4969,15 +4971,18 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 		errors.push_back (std::move (except));
 	      }
 	  }
-	return result_type (thread_storage.release (), std::move (errors));
+	return result_type (thread_storage.release (),
+			    complaint_handler.release (),
+			    std::move (errors));
       }, task_size);
 
     /* Only show a given exception a single time.  */
     std::unordered_set<gdb_exception> seen_exceptions;
     for (auto &one_result : results)
       {
-	indexes.push_back (std::move (one_result.first));
-	for (auto &one_exc : one_result.second)
+	indexes.push_back (std::move (std::get<0> (one_result)));
+	re_emit_complaints (std::get<1> (one_result));
+	for (auto &one_exc : std::get<2> (one_result))
 	  if (seen_exceptions.insert (one_exc).second)
 	    exception_print (gdb_stderr, one_exc);
       }
