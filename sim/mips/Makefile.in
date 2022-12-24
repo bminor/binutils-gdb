@@ -149,36 +149,21 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \
 		-x \
-		-n icache.h    -hc tmp-icache.h \
-		-n icache.c    -c  tmp-icache.c \
-		-n semantics.h -hs tmp-semantics.h \
-		-n semantics.c -s  tmp-semantics.c \
-		-n idecode.h   -hd tmp-idecode.h \
-		-n idecode.c   -d  tmp-idecode.c \
-		-n model.h     -hm tmp-model.h \
-		-n model.c     -m  tmp-model.c \
-		-n support.h   -hf tmp-support.h \
-		-n support.c   -f  tmp-support.c \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
-		-n engine.h    -he tmp-engine.h \
-		-n engine.c    -e  tmp-engine.c \
-		-n irun.c      -r  tmp-irun.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c support.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.h engine.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.c engine.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-irun.c irun.c
+		-n icache.h    -hc icache.h \
+		-n icache.c    -c  icache.c \
+		-n semantics.h -hs semantics.h \
+		-n semantics.c -s  semantics.c \
+		-n idecode.h   -hd idecode.h \
+		-n idecode.c   -d  idecode.c \
+		-n model.h     -hm model.h \
+		-n model.c     -m  model.c \
+		-n support.h   -hf support.h \
+		-n support.c   -f  support.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
+		-n engine.h    -he engine.h \
+		-n engine.c    -e  engine.c \
+		-n irun.c      -r  irun.c
 	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_M16 = \
@@ -221,27 +206,17 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-o $(M16_DC) \
 		-P m16_ \
 		-x \
-		-n m16_icache.h    -hc tmp-icache.h \
-		-n m16_icache.c    -c  tmp-icache.c \
-		-n m16_semantics.h -hs tmp-semantics.h \
-		-n m16_semantics.c -s  tmp-semantics.c \
-		-n m16_idecode.h   -hd tmp-idecode.h \
-		-n m16_idecode.c   -d  tmp-idecode.c \
-		-n m16_model.h     -hm tmp-model.h \
-		-n m16_model.c     -m  tmp-model.c \
-		-n m16_support.h   -hf tmp-support.h \
-		-n m16_support.c   -f  tmp-support.c \
+		-n m16_icache.h    -hc m16_icache.h \
+		-n m16_icache.c    -c  m16_icache.c \
+		-n m16_semantics.h -hs m16_semantics.h \
+		-n m16_semantics.c -s  m16_semantics.c \
+		-n m16_idecode.h   -hd m16_idecode.h \
+		-n m16_idecode.c   -d  m16_idecode.c \
+		-n m16_model.h     -hm m16_model.h \
+		-n m16_model.c     -m  m16_model.c \
+		-n m16_support.h   -hf m16_support.h \
+		-n m16_support.c   -f  m16_support.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h m16_icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c m16_icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h m16_idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c m16_idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h m16_semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c m16_semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h m16_model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c m16_model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h m16_support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c m16_support.c
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -256,27 +231,17 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-o $(IGEN_DC) \
 		-P m32_ \
 		-x \
-		-n m32_icache.h    -hc tmp-icache.h \
-		-n m32_icache.c    -c  tmp-icache.c \
-		-n m32_semantics.h -hs tmp-semantics.h \
-		-n m32_semantics.c -s  tmp-semantics.c \
-		-n m32_idecode.h   -hd tmp-idecode.h \
-		-n m32_idecode.c   -d  tmp-idecode.c \
-		-n m32_model.h     -hm tmp-model.h \
-		-n m32_model.c     -m  tmp-model.c \
-		-n m32_support.h   -hf tmp-support.h \
-		-n m32_support.c   -f  tmp-support.c \
+		-n m32_icache.h    -hc m32_icache.h \
+		-n m32_icache.c    -c  m32_icache.c \
+		-n m32_semantics.h -hs m32_semantics.h \
+		-n m32_semantics.c -s  m32_semantics.c \
+		-n m32_idecode.h   -hd m32_idecode.h \
+		-n m32_idecode.c   -d  m32_idecode.c \
+		-n m32_model.h     -hm m32_model.h \
+		-n m32_model.c     -m  m32_model.c \
+		-n m32_support.h   -hf m32_support.h \
+		-n m32_support.c   -f  m32_support.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h m32_icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c m32_icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h m32_idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c m32_idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h m32_semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c m32_semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h m32_model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c m32_model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h m32_support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c m32_support.c
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -287,11 +252,9 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
 	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MICROMIPS = \
@@ -345,27 +308,17 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-o $(MICROMIPS16_DC) \
 		-P micromips16_ \
 		-x \
-		-n micromips16_icache.h    -hc tmp-icache.h \
-		-n micromips16_icache.c    -c  tmp-icache.c \
-		-n micromips16_semantics.h -hs tmp-semantics.h \
-		-n micromips16_semantics.c -s  tmp-semantics.c \
-		-n micromips16_idecode.h   -hd tmp-idecode.h \
-		-n micromips16_idecode.c   -d  tmp-idecode.c \
-		-n micromips16_model.h     -hm tmp-model.h \
-		-n micromips16_model.c     -m  tmp-model.c \
-		-n micromips16_support.h   -hf tmp-support.h \
-		-n micromips16_support.c   -f  tmp-support.c \
+		-n micromips16_icache.h    -hc micromips16_icache.h \
+		-n micromips16_icache.c    -c  micromips16_icache.c \
+		-n micromips16_semantics.h -hs micromips16_semantics.h \
+		-n micromips16_semantics.c -s  micromips16_semantics.c \
+		-n micromips16_idecode.h   -hd micromips16_idecode.h \
+		-n micromips16_idecode.c   -d  micromips16_idecode.c \
+		-n micromips16_model.h     -hm micromips16_model.h \
+		-n micromips16_model.c     -m  micromips16_model.c \
+		-n micromips16_support.h   -hf micromips16_support.h \
+		-n micromips16_support.c   -f  micromips16_support.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h micromips16_icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c micromips16_icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h micromips16_idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c micromips16_idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h micromips16_semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c micromips16_semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h micromips16_model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c micromips16_model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h micromips16_support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c micromips16_support.c
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -380,27 +333,17 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-o $(MICROMIPS32_DC) \
 		-P micromips32_ \
 		-x \
-		-n micromips32_icache.h    -hc tmp-icache.h \
-		-n micromips32_icache.c    -c  tmp-icache.c \
-		-n micromips32_semantics.h -hs tmp-semantics.h \
-		-n micromips32_semantics.c -s  tmp-semantics.c \
-		-n micromips32_idecode.h   -hd tmp-idecode.h \
-		-n micromips32_idecode.c   -d  tmp-idecode.c \
-		-n micromips32_model.h     -hm tmp-model.h \
-		-n micromips32_model.c     -m  tmp-model.c \
-		-n micromips32_support.h   -hf tmp-support.h \
-		-n micromips32_support.c   -f  tmp-support.c \
+		-n micromips32_icache.h    -hc micromips32_icache.h \
+		-n micromips32_icache.c    -c  micromips32_icache.c \
+		-n micromips32_semantics.h -hs micromips32_semantics.h \
+		-n micromips32_semantics.c -s  micromips32_semantics.c \
+		-n micromips32_idecode.h   -hd micromips32_idecode.h \
+		-n micromips32_idecode.c   -d  micromips32_idecode.c \
+		-n micromips32_model.h     -hm micromips32_model.h \
+		-n micromips32_model.c     -m  micromips32_model.c \
+		-n micromips32_support.h   -hf micromips32_support.h \
+		-n micromips32_support.c   -f  micromips32_support.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h micromips32_icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c micromips32_icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h micromips32_idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c micromips32_idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h micromips32_semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c micromips32_semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h micromips32_model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c micromips32_model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h micromips32_support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c micromips32_support.c
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -415,27 +358,17 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-o $(IGEN_DC) \
 		-P micromips_m32_ \
 		-x \
-		-n micromips_m32_icache.h    -hc tmp-icache.h \
-		-n micromips_m32_icache.c    -c  tmp-icache.c \
-		-n micromips_m32_semantics.h -hs tmp-semantics.h \
-		-n micromips_m32_semantics.c -s  tmp-semantics.c \
-		-n micromips_m32_idecode.h   -hd tmp-idecode.h \
-		-n micromips_m32_idecode.c   -d  tmp-idecode.c \
-		-n micromips_m32_model.h     -hm tmp-model.h \
-		-n micromips_m32_model.c     -m  tmp-model.c \
-		-n micromips_m32_support.h   -hf tmp-support.h \
-		-n micromips_m32_support.c   -f  tmp-support.c \
+		-n micromips_m32_icache.h    -hc micromips_m32_icache.h \
+		-n micromips_m32_icache.c    -c  micromips_m32_icache.c \
+		-n micromips_m32_semantics.h -hs micromips_m32_semantics.h \
+		-n micromips_m32_semantics.c -s  micromips_m32_semantics.c \
+		-n micromips_m32_idecode.h   -hd micromips_m32_idecode.h \
+		-n micromips_m32_idecode.c   -d  micromips_m32_idecode.c \
+		-n micromips_m32_model.h     -hm micromips_m32_model.h \
+		-n micromips_m32_model.c     -m  micromips_m32_model.c \
+		-n micromips_m32_support.h   -hf micromips_m32_support.h \
+		-n micromips_m32_support.c   -f  micromips_m32_support.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h micromips_m32_icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c micromips_m32_icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h micromips_m32_idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c micromips_m32_idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h micromips_m32_semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c micromips_m32_semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h micromips_m32_model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c micromips_m32_model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h micromips_m32_support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c micromips_m32_support.c
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
@@ -446,11 +379,9 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
 	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MULTI = @sim_multi_src@
@@ -489,43 +420,19 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-i $(IGEN_INSN) \
 		-P $${p}_ \
 		-x \
-		-n $${p}_icache.h    -hc tmp-icache.h \
-		-n $${p}_icache.c    -c  tmp-icache.c \
-		-n $${p}_semantics.h -hs tmp-semantics.h \
-		-n $${p}_semantics.c -s  tmp-semantics.c \
-		-n $${p}_idecode.h   -hd tmp-idecode.h \
-		-n $${p}_idecode.c   -d  tmp-idecode.c \
-		-n $${p}_model.h     -hm tmp-model.h \
-		-n $${p}_model.c     -m  tmp-model.c \
-		-n $${p}_support.h   -hf tmp-support.h \
-		-n $${p}_support.c   -f  tmp-support.c \
-		-n $${p}_engine.h    -he tmp-engine.h \
-		-n $${p}_engine.c    -e  tmp-engine.c \
+		-n $${p}_icache.h    -hc $${p}_icache.h \
+		-n $${p}_icache.c    -c  $${p}_icache.c \
+		-n $${p}_semantics.h -hs $${p}_semantics.h \
+		-n $${p}_semantics.c -s  $${p}_semantics.c \
+		-n $${p}_idecode.h   -hd $${p}_idecode.h \
+		-n $${p}_idecode.c   -d  $${p}_idecode.c \
+		-n $${p}_model.h     -hm $${p}_model.h \
+		-n $${p}_model.c     -m  $${p}_model.c \
+		-n $${p}_support.h   -hf $${p}_support.h \
+		-n $${p}_support.c   -f  $${p}_support.c \
+		-n $${p}_engine.h    -he $${p}_engine.h \
+		-n $${p}_engine.c    -e  $${p}_engine.c \
 	  || exit; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-icache.h \
-						  $${p}_icache.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-icache.c \
-						  $${p}_icache.c ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h \
-						  $${p}_idecode.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c \
-						  $${p}_idecode.c ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h \
-						  $${p}_semantics.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c \
-						  $${p}_semantics.c ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-model.h \
-						  $${p}_model.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-model.c \
-						  $${p}_model.c ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-support.h \
-						  $${p}_support.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
-						  $${p}_support.c ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-engine.h \
-						  $${p}_engine.h ; \
-	  $(SHELL) $(srcdir)/../../move-if-change tmp-engine.c \
-						  $${p}_engine.c ; \
 	done
 	$(SILENCE) touch $@
 tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
@@ -540,11 +447,9 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
 		#
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
 	$(SILENCE) touch $@
 tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \

@@ -3508,36 +3508,21 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mn10300_TRUE@		-i $(mn10300_IGEN_INSN) \
 @SIM_ENABLE_ARCH_mn10300_TRUE@		-o $(mn10300_IGEN_DC) \
 @SIM_ENABLE_ARCH_mn10300_TRUE@		-x \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.h    -hc mn10300/tmp-icache.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.c    -c  mn10300/tmp-icache.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.h -hs mn10300/tmp-semantics.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.c -s  mn10300/tmp-semantics.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.h   -hd mn10300/tmp-idecode.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.c   -d  mn10300/tmp-idecode.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.h     -hm mn10300/tmp-model.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.c     -m  mn10300/tmp-model.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.h   -hf mn10300/tmp-support.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.c   -f  mn10300/tmp-support.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.h    -ht mn10300/tmp-itable.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.c    -t  mn10300/tmp-itable.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.h    -he mn10300/tmp-engine.h \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.c    -e  mn10300/tmp-engine.c \
-@SIM_ENABLE_ARCH_mn10300_TRUE@		-n irun.c      -r  mn10300/tmp-irun.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-icache.h mn10300/icache.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-icache.c mn10300/icache.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-idecode.h mn10300/idecode.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-idecode.c mn10300/idecode.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-semantics.h mn10300/semantics.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-semantics.c mn10300/semantics.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-model.h mn10300/model.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-model.c mn10300/model.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-support.h mn10300/support.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-support.c mn10300/support.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-itable.h mn10300/itable.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-itable.c mn10300/itable.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-engine.h mn10300/engine.h
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-engine.c mn10300/engine.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-irun.c mn10300/irun.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.h    -hc mn10300/icache.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.c    -c  mn10300/icache.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.h -hs mn10300/semantics.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.c -s  mn10300/semantics.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.h   -hd mn10300/idecode.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.c   -d  mn10300/idecode.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.h     -hm mn10300/model.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.c     -m  mn10300/model.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.h   -hf mn10300/support.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.c   -f  mn10300/support.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.h    -ht mn10300/itable.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.c    -t  mn10300/itable.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.h    -he mn10300/engine.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.c    -e  mn10300/engine.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n irun.c      -r  mn10300/irun.c
 @SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie/moxie-gdb.dtb: @MAINT@ moxie/moxie-gdb.dts moxie/$(am__dirstamp)
@@ -3610,36 +3595,21 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_v850_TRUE@		-i $(v850_IGEN_INSN) \
 @SIM_ENABLE_ARCH_v850_TRUE@		-o $(v850_IGEN_DC) \
 @SIM_ENABLE_ARCH_v850_TRUE@		-x \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.h    -hc v850/tmp-icache.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.c    -c  v850/tmp-icache.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.h -hs v850/tmp-semantics.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.c -s  v850/tmp-semantics.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.h   -hd v850/tmp-idecode.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.c   -d  v850/tmp-idecode.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n model.h     -hm v850/tmp-model.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n model.c     -m  v850/tmp-model.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n support.h   -hf v850/tmp-support.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n support.c   -f  v850/tmp-support.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.h    -ht v850/tmp-itable.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.c    -t  v850/tmp-itable.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.h    -he v850/tmp-engine.h \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.c    -e  v850/tmp-engine.c \
-@SIM_ENABLE_ARCH_v850_TRUE@		-n irun.c      -r  v850/tmp-irun.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-icache.h v850/icache.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-icache.c v850/icache.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-idecode.h v850/idecode.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-idecode.c v850/idecode.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-semantics.h v850/semantics.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-semantics.c v850/semantics.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-model.h v850/model.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-model.c v850/model.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-support.h v850/support.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-support.c v850/support.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-itable.h v850/itable.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-itable.c v850/itable.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-engine.h v850/engine.h
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-engine.c v850/engine.c
-@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-irun.c v850/irun.c
+@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.h    -hc v850/icache.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.c    -c  v850/icache.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.h -hs v850/semantics.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.c -s  v850/semantics.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.h   -hd v850/idecode.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.c   -d  v850/idecode.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n model.h     -hm v850/model.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n model.c     -m  v850/model.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n support.h   -hf v850/support.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n support.c   -f  v850/support.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.h    -ht v850/itable.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.c    -t  v850/itable.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.h    -he v850/engine.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.c    -e  v850/engine.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n irun.c      -r  v850/irun.c
 @SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)touch $@
 
 %/libsim.a: | $(SIM_ALL_RECURSIVE_DEPS)

@@ -601,30 +601,18 @@ tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen
 	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
 		-I $(srcdir) -i $(srcdir)/powerpc.igen \
-		-n icache.h    -hc tmp-icache.h \
-		-n icache.c    -c  tmp-icache.c \
-		-n semantics.h -hs tmp-semantics.h \
-		-n semantics.c -s  tmp-semantics.c \
-		-n idecode.h   -hd tmp-idecode.h \
-		-n idecode.c   -d  tmp-idecode.c \
-		-n itable.h    -ht tmp-itable.h \
-		-n itable.c    -t  tmp-itable.c \
-		-n model.h     -hm tmp-model.h \
-		-n model.c     -m  tmp-model.c \
-		-n support.h   -hf tmp-support.h \
-		-n support.c   -f  tmp-support.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h icache.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c icache.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h idecode.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c idecode.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h semantics.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c semantics.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h model.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c model.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h support.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c support.c
+		-n icache.h    -hc icache.h \
+		-n icache.c    -c  icache.c \
+		-n semantics.h -hs semantics.h \
+		-n semantics.c -s  semantics.c \
+		-n idecode.h   -hd idecode.h \
+		-n idecode.c   -d  idecode.c \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
+		-n model.h     -hm model.h \
+		-n model.c     -m  model.c \
+		-n support.h   -hf support.h \
+		-n support.c   -f  support.c
 	$(SILENCE) touch $@
 
 # NOTE: Some versions of make don't handle files created as side-effects
