@@ -170,6 +170,7 @@ tui_source_window_base::update_source_window_as_is
     erase_source_content ();
   else
     {
+      validate_scroll_offsets ();
       update_breakpoint_info (nullptr, false);
       show_source_content ();
       update_exec_info ();
@@ -231,6 +232,67 @@ tui_source_window_base::do_erase_source_content (const char *str)
     }
 }
 
+/* See tui-winsource.h.  */
+
+void
+tui_source_window_base::puts_to_pad_with_skip (const char *string, int skip)
+{
+  gdb_assert (m_pad.get () != nullptr);
+  WINDOW *w = m_pad.get ();
+
+  while (skip > 0)
+    {
+      const char *next = strpbrk (string, "\033");
+
+      /* Print the plain text prefix.  */
+      size_t n_chars = next == nullptr ? strlen (string) : next - string;
+      if (n_chars > 0)
+	{
+	  if (skip > 0)
+	    {
+	      if (skip < n_chars)
+		{
+		  string += skip;
+		  n_chars -= skip;
+		  skip = 0;
+		}
+	      else
+		{
+		  skip -= n_chars;
+		  string += n_chars;
+		  n_chars = 0;
+		}
+	    }
+
+	  if (n_chars > 0)
+	    {
+	      std::string copy (string, n_chars);
+	      tui_puts (copy.c_str (), w);
+	    }
+	}
+
+      /* We finished.  */
+      if (next == nullptr)
+	break;
+
+      gdb_assert (*next == '\033');
+
+      int n_read;
+      if (skip_ansi_escape (next, &n_read))
+	{
+	  std::string copy (next, n_read);
+	  tui_puts (copy.c_str (), w);
+	  next += n_read;
+	}
+      else
+	gdb_assert_not_reached ("unhandled escape");
+
+      string = next;
+    }
+
+  if (*string != '\0')
+    tui_puts (string, w);
+}
 
 /* Redraw the complete line of a source or disassembly window.  */
 void
@@ -243,7 +305,8 @@ tui_source_window_base::show_source_line (int lineno)
     tui_set_reverse_mode (m_pad.get (), true);
 
   wmove (m_pad.get (), lineno, 0);
-  tui_puts (line->line.c_str (), m_pad.get ());
+  puts_to_pad_with_skip (line->line.c_str (), m_pad_offset);
+
   if (line->is_exec_point)
     tui_set_reverse_mode (m_pad.get (), false);
 }
@@ -257,13 +320,25 @@ tui_source_window_base::refresh_window ()
      the screen, potentially creating a flicker.  */
   wnoutrefresh (handle.get ());
 
-  int pad_width = std::max (m_max_length, width);
-  int left_margin = 1 + TUI_EXECINFO_SIZE + extra_margin ();
-  int view_width = width - left_margin - 1;
-  int pad_x = std::min (pad_width - view_width, m_horizontal_offset);
-  /* Ensure that an equal number of scrolls will work if the user
-     scrolled beyond where we clip.  */
-  m_horizontal_offset = pad_x;
+  int pad_width = getmaxx (m_pad.get ());
+  int left_margin = this->left_margin ();
+  int view_width = this->view_width ();
+  int content_width = m_max_length;
+  int pad_x = m_horizontal_offset - m_pad_offset;
+
+  gdb_assert (m_pad_offset >= 0);
+  gdb_assert (m_horizontal_offset + view_width
+	      <= std::max (content_width, view_width));
+  gdb_assert (pad_x >= 0);
+  gdb_assert (m_horizontal_offset >= 0);
+
+  /* This function can be called before the pad has been allocated, this
+     should only occur during the initial startup.  In this case the first
+     condition in the following asserts will not be true, but the nullptr
+     check will.  */
+  gdb_assert (pad_width > 0 || m_pad.get () == nullptr);
+  gdb_assert (pad_x + view_width <= pad_width || m_pad.get () == nullptr);
+
   prefresh (m_pad.get (), 0, pad_x, y + 1, x + left_margin,
 	    y + m_content.size (), x + left_margin + view_width - 1);
 }
@@ -275,11 +350,51 @@ tui_source_window_base::show_source_content ()
 
   check_and_display_highlight_if_needed ();
 
-  int pad_width = std::max (m_max_length, width);
-  if (m_pad == nullptr || pad_width > getmaxx (m_pad.get ())
-      || m_content.size () > getmaxy (m_pad.get ()))
-    m_pad.reset (newpad (m_content.size (), pad_width));
+  /* The pad should be at least as wide as the window, but ideally, as wide
+     as the content, however, for some very wide content this might not be
+     possible.  */
+  int required_pad_width = std::max (m_max_length, width);
+  int required_pad_height = m_content.size ();
 
+  /* If the required pad width is wider than the previously requested pad
+     width, then we might want to grow the pad.  */
+  if (required_pad_width > m_pad_requested_width
+      || required_pad_height > getmaxy (m_pad.get ()))
+    {
+      /* The current pad width.  */
+      int pad_width = m_pad == nullptr ? 0 : getmaxx (m_pad.get ());
+
+      gdb_assert (pad_width <= m_pad_requested_width);
+
+      /* If the current pad width is smaller than the previously requested
+	 pad width, then this means we previously failed to allocate a
+	 bigger pad.  There's no point asking again, so we'll just make so
+	 with the pad we currently have.  */
+      if (pad_width == m_pad_requested_width
+	  || required_pad_height > getmaxy (m_pad.get ()))
+	{
+	  pad_width = required_pad_width;
+
+	  do
+	    {
+	      /* Try to allocate a new pad.  */
+	      m_pad.reset (newpad (required_pad_height, pad_width));
+
+	      if (m_pad == nullptr)
+		{
+		  int reduced_width = std::max (pad_width / 2, width);
+		  if (reduced_width == pad_width)
+		    error (_("failed to setup source window"));
+		  pad_width = reduced_width;
+		}
+	    }
+	  while (m_pad == nullptr);
+	}
+
+      m_pad_requested_width = required_pad_width;
+    }
+
+  gdb_assert (m_pad != nullptr);
   werase (m_pad.get ());
   for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
@@ -370,6 +485,35 @@ tui_source_window_base::refill ()
   update_source_window_as_is (m_gdbarch, sal);
 }
 
+/* See tui-winsource.h.  */
+
+bool
+tui_source_window_base::validate_scroll_offsets ()
+{
+  int original_pad_offset = m_pad_offset;
+
+  if (m_horizontal_offset < 0)
+    m_horizontal_offset = 0;
+
+  int content_width = m_max_length;
+  int pad_width = getmaxx (m_pad.get ());
+  int view_width = this->view_width ();
+
+  if (m_horizontal_offset + view_width > content_width)
+    m_horizontal_offset = std::max (content_width - view_width, 0);
+
+  if ((m_horizontal_offset + view_width) > (m_pad_offset + pad_width))
+    {
+      m_pad_offset = std::min (m_horizontal_offset, content_width - pad_width);
+      m_pad_offset = std::max (m_pad_offset, 0);
+    }
+  else if (m_horizontal_offset < m_pad_offset)
+    m_pad_offset = std::max (m_horizontal_offset + view_width - pad_width, 0);
+
+  gdb_assert (m_pad_offset >= 0);
+  return (original_pad_offset != m_pad_offset);
+}
+
 /* Scroll the source forward or backward horizontally.  */
 
 void
@@ -377,10 +521,11 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
 {
   if (!m_content.empty ())
     {
-      int offset = m_horizontal_offset + num_to_scroll;
-      if (offset < 0)
-	offset = 0;
-      m_horizontal_offset = offset;
+      m_horizontal_offset += num_to_scroll;
+
+      if (validate_scroll_offsets ())
+	show_source_content ();
+
       refresh_window ();
     }
 }

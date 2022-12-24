@@ -41,10 +41,6 @@ if {![Term::prepare_for_tui]} {
     return
 }
 
-# Just check the command does not cause gdb to crash.  It is worth
-# noting that the asm window does infact fail to correctly display the
-# disassembler output at this point, but initially we are just
-# checking that GDB doesn't crash, fixing the asm display will come
-# later.
 Term::command_no_prompt_prefix "layout asm"
 Term::check_box "asm box" 0 0 80 15
+Term::check_box_contents "check asm box contents" 0 0 80 15 "<main>"

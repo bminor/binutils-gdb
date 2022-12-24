@@ -181,7 +181,47 @@ private:
   /* Used for horizontal scroll.  */
   int m_horizontal_offset = 0;
 
+  /* Check that the current values of M_HORIZONTAL_OFFSET and M_PAD_OFFSET
+     make sense given the current M_MAX_LENGTH (content width), WIDTH
+     (window size), and window margins.  After calling this function
+     M_HORIZONTAL_OFFSET and M_PAD_OFFSET might have been adjusted to
+     reduce unnecessary whitespace on the right side of the window.
+
+     If M_PAD_OFFSET is adjusted then this function returns true
+     indicating that the pad contents need to be reloaded by calling
+     show_source_content.  If M_PAD_OFFSET is not adjusted then this
+     function returns false, the window contents might still need
+     redrawing if M_HORIZONTAL_OFFSET was adjusted, but right now, this
+     function is only called in contexts where the window is going to be
+     redrawn anyway.  */
+  bool validate_scroll_offsets ();
+
+  /* Return the size of the left margin space, this is the space used to
+     display things like breakpoint markers.  */
+  int left_margin () const
+  { return 1 + TUI_EXECINFO_SIZE + extra_margin (); }
+
+  /* Return the width of the area that is available for window content.
+     This is the window width minus the borders and the left margin, which
+     is used for displaying things like breakpoint markers.  */
+  int view_width () const
+  { return width - left_margin () - 1; }
+
   void show_source_content ();
+
+  /* Write STRING to the window M_PAD, but skip the first SKIP printable
+     characters.  Any escape sequences within the first SKIP characters are
+     still processed though.  This means if we have this string:
+
+     "\033[31mABCDEFGHIJKLM\033[0m"
+
+     and call this function with a skip value of 3, then we effectively
+     write this string to M_PAD:
+
+     "\033[31mDEFGHIJKLM\033[0m"
+
+     the initial escape that sets the color will still be applied.  */
+  void puts_to_pad_with_skip (const char *string, int skip);
 
   /* Called when the user "set style enabled" setting is changed.  */
   void style_changed ();
@@ -189,8 +229,20 @@ private:
   /* A token used to register and unregister an observer.  */
   gdb::observers::token m_observable;
 
-  /* Pad used to display fixme mumble  */
+  /* Pad to hold some, or all, of the window contents.  Content is then
+     copied from this pad to the screen as the user scrolls horizontally,
+     this avoids the need to recalculate the screen contents each time the
+     user does a horizontal scroll.  */
   std::unique_ptr<WINDOW, curses_deleter> m_pad;
+
+  /* When M_PAD was allocated, this holds the width that was initially
+     asked for.  If we ask for a very large pad then the allocation may
+     fail, and we might instead allocate a narrower pad.  */
+  int m_pad_requested_width = 0;
+
+  /* If M_PAD is not as wide as the content (so less than M_MAX_LENGTH)
+     then this value indicates the offset at which the pad contents begin.  */
+  int m_pad_offset = 0;
 };
 
 
