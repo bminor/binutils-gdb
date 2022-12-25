@@ -3,6 +3,16 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+SIM_MIPS_IGEN_FLAGS = @SIM_MIPS_IGEN_FLAGS@
+SIM_MIPS_M16_FLAGS = @SIM_MIPS_M16_FLAGS@
+SIM_MIPS_MICROMIPS_FLAGS = @SIM_MIPS_MICROMIPS_FLAGS@
+SIM_MIPS_MICROMIPS16_FLAGS = @SIM_MIPS_MICROMIPS16_FLAGS@
+SIM_MIPS_GEN = @SIM_MIPS_GEN@
+SIM_MIPS_MULTI_FLAGS = @SIM_MIPS_MULTI_FLAGS@
+SIM_MIPS_MULTI_IGEN_CONFIGS = @SIM_MIPS_MULTI_IGEN_CONFIGS@
+SIM_MIPS_MULTI_SRC = @SIM_MIPS_MULTI_SRC@
+SIM_MIPS_MULTI_OBJ = @SIM_MIPS_MULTI_OBJ@
+
 arch = mips
 
 # Object files created by various simulator generators.
@@ -52,13 +62,13 @@ SIM_MICROMIPS_OBJ = \
 	micromipsrun.o \
 
 
-SIM_MULTI_OBJ = @sim_multi_obj@ \
+SIM_MULTI_OBJ = $(SIM_MIPS_MULTI_OBJ) \
 		itable.o \
 		multi-run.o \
 
 SIM_OBJS = \
 	interp.o \
-	$(SIM_@sim_gen@_OBJ) \
+	$(SIM_$(SIM_MIPS_GEN)_OBJ) \
 	$(SIM_NEW_COMMON_OBJS) \
 	cp1.o \
 	mdmx.o \
@@ -75,7 +85,7 @@ SIM_FLOAT = -DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POI
 SIM_EXTRA_CLEAN = clean-extra
 SIM_EXTRA_DISTCLEAN = distclean-extra
 
-all: $(SIM_@sim_gen@_ALL)
+all: $(SIM_$(SIM_MIPS_GEN)_ALL)
 
 SIM_EXTRA_DEPS = itable.h
 
@@ -114,7 +124,7 @@ SIM_M16_ALL = tmp-m16
 SIM_MICROMIPS_ALL = tmp-micromips
 SIM_MULTI_ALL = tmp-multi
 
-$(BUILT_SRC_FROM_GEN): $(SIM_@sim_gen@_ALL)
+$(BUILT_SRC_FROM_GEN): $(SIM_$(SIM_MIPS_GEN)_ALL)
 
 
 
@@ -141,7 +151,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_igen_flags@ \
+		$(SIM_MIPS_IGEN_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -197,7 +207,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_m16_flags@ \
+		$(SIM_MIPS_M16_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 16 \
@@ -222,7 +232,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_igen_flags@ \
+		$(SIM_MIPS_IGEN_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -248,7 +258,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-Werror \
 		-Wnodiscard \
 		-Wnowidth \
-		@sim_igen_flags@ @sim_m16_flags@ \
+		$(SIM_MIPS_IGEN_FLAGS) $(SIM_MIPS_M16_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
@@ -299,7 +309,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_micromips16_flags@ \
+		$(SIM_MIPS_MICROMIPS16_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 16 \
@@ -324,7 +334,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_micromips_flags@ \
+		$(SIM_MIPS_MICROMIPS_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -349,7 +359,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		@sim_igen_flags@ \
+		$(SIM_MIPS_IGEN_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -375,7 +385,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-Werror \
 		-Wnodiscard \
 		-Wnowidth \
-		@sim_igen_flags@ @sim_micromips_flags@ @sim_micromips16_flags@\
+		$(SIM_MIPS_IGEN_FLAGS) $(SIM_MIPS_MICROMIPS_FLAGS) $(SIM_MIPS_MICROMIPS16_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
@@ -384,13 +394,12 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		#
 	$(SILENCE) touch $@
 
-BUILT_SRC_FROM_MULTI = @sim_multi_src@
-SIM_MULTI_IGEN_CONFIGS = @sim_multi_igen_configs@
+BUILT_SRC_FROM_MULTI = $(SIM_MIPS_MULTI_SRC)
 
 $(BUILT_SRC_FROM_MULTI): tmp-multi
 tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi
 tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
-	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
+	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
 	  p=`echo $${t} | sed -e 's/:.*//'` ; \
 	  m=`echo $${t} | sed -e 's/.*:\(.*\):.*/\1/'` ; \
 	  f=`echo $${t} | sed -e 's/.*://'` ; \
@@ -443,7 +452,7 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-Wnodiscard \
 		-Wnowidth \
 		-N 0 \
-		@sim_multi_flags@ \
+		$(SIM_MIPS_MULTI_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-i $(IGEN_INSN) \
@@ -452,7 +461,7 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		#
 	$(SILENCE) touch $@
 tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
-	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
+	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
 	  case $${t} in \
 	    m16*) \
 	      m=`echo $${t} | sed -e 's/^m16//' -e 's/:.*//'`; \

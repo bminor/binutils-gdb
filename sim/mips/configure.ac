@@ -9,85 +9,85 @@ AC_CANONICAL_SYSTEM
 #
 # Select the IGEN architecture
 #
-sim_gen=IGEN
-sim_igen_machine="-M mipsIV"
-sim_m16_machine="-M mips16,mipsIII"
-sim_igen_filter="32,64,f"
-sim_m16_filter="16"
+SIM_MIPS_GEN=IGEN
+sim_mips_igen_machine="-M mipsIV"
+sim_mips_m16_machine="-M mips16,mipsIII"
+sim_mips_igen_filter="32,64,f"
+sim_mips_m16_filter="16"
 
 case "${target}" in
-  mips*tx39*)		sim_gen=IGEN
-			sim_igen_filter="32,f"
-			sim_igen_machine="-M r3900"
+  mips*tx39*)		SIM_MIPS_GEN=IGEN
+			sim_mips_igen_filter="32,f"
+			sim_mips_igen_machine="-M r3900"
 			;;
-  mips64vr41*)		sim_gen=M16
-			sim_igen_machine="-M vr4100"
-			sim_m16_machine="-M vr4100"
+  mips64vr41*)		SIM_MIPS_GEN=M16
+			sim_mips_igen_machine="-M vr4100"
+			sim_mips_m16_machine="-M vr4100"
                         ;;
   mips64*)
-			sim_gen=MULTI
-			sim_multi_configs="\
+			SIM_MIPS_GEN=MULTI
+			sim_mips_multi_configs="\
 			  vr4100:mipsIII,mips16,vr4100:32,64:mips4100,mips4111\
 			  vr4120:mipsIII,mips16,vr4120:32,64:mips4120\
 			  vr5000:mipsIV:32,64,f:mips4300,mips5000,mips8000\
 			  vr5400:mipsIV,vr5400:32,64,f:mips5400\
 			  vr5500:mipsIV,vr5500:32,64,f:mips5500"
-			sim_multi_default=mips5000
+			sim_mips_multi_default=mips5000
 			;;
   mips*-sde-elf* | mips*-mti-elf*)
-			sim_gen=MULTI
-			sim_multi_configs="\
+			SIM_MIPS_GEN=MULTI
+			sim_mips_multi_configs="\
 			  micromips:micromips64,micromipsdsp:32,64,f:mips_micromips\
 			  mipsisa64r2:mips64r2,mips16,mips16e,mdmx,dsp,dsp2,mips3d,smartmips:32,64,f:mipsisa32r2,mipsisa64r2,mipsisa32r5,mipsisa64r5\
 			  mipsisa64r6:mips64r6:32,64,f:mipsisa32r6,mipsisa64r6"
-			sim_multi_default=mipsisa64r2
+			sim_mips_multi_default=mipsisa64r2
 			;;
-  mips16*)		sim_gen=M16
+  mips16*)		SIM_MIPS_GEN=M16
 			;;
-  mipsisa32r2*)		sim_gen=MULTI
-			sim_multi_configs="\
+  mipsisa32r2*)		SIM_MIPS_GEN=MULTI
+			sim_mips_multi_configs="\
 			  micromips:micromips32,micromipsdsp:32,f:mips_micromips\
 			  mips32r2:mips32r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2,smartmips:32,f:mipsisa32r2"
-			sim_multi_default=mipsisa32r2
+			sim_mips_multi_default=mipsisa32r2
 			;;
-  mipsisa32r6*)		sim_gen=IGEN
-			sim_igen_machine="-M mips32r6"
-			sim_igen_filter="32,f"
+  mipsisa32r6*)		SIM_MIPS_GEN=IGEN
+			sim_mips_igen_machine="-M mips32r6"
+			sim_mips_igen_filter="32,f"
 			;;
-  mipsisa32*)		sim_gen=M16
-			sim_igen_machine="-M mips32,mips16,mips16e,smartmips"
-			sim_m16_machine="-M mips16,mips16e,mips32"
-			sim_igen_filter="32,f"
+  mipsisa32*)		SIM_MIPS_GEN=M16
+			sim_mips_igen_machine="-M mips32,mips16,mips16e,smartmips"
+			sim_mips_m16_machine="-M mips16,mips16e,mips32"
+			sim_mips_igen_filter="32,f"
 			;;
-  mipsisa64r2*)		sim_gen=M16
-			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
-			sim_m16_machine="-M mips16,mips16e,mips64r2"
+  mipsisa64r2*)		SIM_MIPS_GEN=M16
+			sim_mips_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
+			sim_mips_m16_machine="-M mips16,mips16e,mips64r2"
 			;;
-  mipsisa64r6*)		sim_gen=IGEN
-			sim_igen_machine="-M mips64r6"
+  mipsisa64r6*)		SIM_MIPS_GEN=IGEN
+			sim_mips_igen_machine="-M mips64r6"
 			;;
-  mipsisa64sb1*)	sim_gen=IGEN
-			sim_igen_machine="-M mips64,mips3d,sb1"
+  mipsisa64sb1*)	SIM_MIPS_GEN=IGEN
+			sim_mips_igen_machine="-M mips64,mips3d,sb1"
 			;;
-  mipsisa64*)		sim_gen=M16
-			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
-			sim_m16_machine="-M mips16,mips16e,mips64"
+  mipsisa64*)		SIM_MIPS_GEN=M16
+			sim_mips_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
+			sim_mips_m16_machine="-M mips16,mips16e,mips64"
 			;;
-  mips*lsi*)		sim_gen=M16
-			sim_igen_machine="-M mipsIII,mips16"
-			sim_m16_machine="-M mips16,mipsIII"
-			sim_igen_filter="32,f"
+  mips*lsi*)		SIM_MIPS_GEN=M16
+			sim_mips_igen_machine="-M mipsIII,mips16"
+			sim_mips_m16_machine="-M mips16,mipsIII"
+			sim_mips_igen_filter="32,f"
 			;;
-  mips*)		sim_gen=IGEN
-			sim_igen_filter="32,f"
+  mips*)		SIM_MIPS_GEN=IGEN
+			sim_mips_igen_filter="32,f"
 			;;
 esac
 
 # The MULTI generator can combine several simulation engines into one.
 # executable.  A configuration which uses the MULTI should set two
-# variables: ${sim_multi_configs} and ${sim_multi_default}.
+# variables: ${sim_mips_multi_configs} and ${sim_mips_multi_default}.
 #
-# ${sim_multi_configs} is the list of engines to build.  Each
+# ${sim_mips_multi_configs} is the list of engines to build.  Each
 # space-separated entry has the form NAME:MACHINE:FILTER:BFDMACHS,
 # where:
 #
@@ -105,22 +105,22 @@ esac
 #
 # The simulator compares the bfd mach against BFDMACHS to decide
 # which engine to use.  Entries in BFDMACHS should be bfd_mach
-# values with "bfd_mach_" removed.  ${sim_multi_default} says
+# values with "bfd_mach_" removed.  ${sim_mips_multi_default} says
 # which entry should be the default.
-if test ${sim_gen} = MULTI; then
+SIM_MIPS_MULTI_FLAGS=
+SIM_MIPS_MULTI_SRC=
+SIM_MIPS_MULTI_OBJ=
+SIM_MIPS_MULTI_IGEN_CONFIGS=
+if test ${SIM_MIPS_GEN} = MULTI; then
 
   # Simple sanity check.
-  if test -z "${sim_multi_configs}" || test -z "${sim_multi_default}"; then
+  if test -z "${sim_mips_multi_configs}" || test -z "${sim_mips_multi_default}"; then
     AC_MSG_ERROR(Error in configure.ac: MULTI simulator not set up correctly)
   fi
 
   # Start in a known state.
   rm -f multi-include.h multi-run.c
-  sim_multi_flags=
-  sim_multi_src=
-  sim_multi_obj=
-  sim_multi_igen_configs=
-  sim_seen_default=no
+  sim_mips_seen_default=no
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
@@ -161,7 +161,7 @@ sim_engine_run (SIM_DESC sd,
   int mach;
 
   if (STATE_ARCHITECTURE (sd) == NULL)
-    mach = bfd_mach_${sim_multi_default};
+    mach = bfd_mach_${sim_mips_multi_default};
   else if (elf_elfheader (STATE_PROG_BFD (sd))->e_flags
 	   & EF_MIPS_ARCH_ASE_MICROMIPS)
     mach = bfd_mach_mips_micromips;
@@ -176,7 +176,7 @@ sim_engine_run (SIM_DESC sd,
     {
 __EOF__
 
-  for fc in ${sim_multi_configs}; do
+  for fc in ${sim_mips_multi_configs}; do
 
     # Split up the entry.  ${c} contains the first three elements.
     # Note: outer sqaure brackets are m4 quotes.
@@ -188,15 +188,15 @@ __EOF__
 
     # Build the following lists:
     #
-    #   sim_multi_flags: all -M and -F flags used by the simulator
-    #   sim_multi_src: all makefile-generated source files
-    #   sim_multi_obj: the objects for ${sim_multi_src}
-    #   sim_multi_igen_configs: igen configuration strings.
+    #   SIM_MIPS_MULTI_FLAGS: all -M and -F flags used by the simulator
+    #   SIM_MIPS_MULTI_SRC: all makefile-generated source files
+    #   SIM_MIPS_MULTI_OBJ: the objects for ${SIM_MIPS_MULTI_SRC}
+    #   SIM_MIPS_MULTI_IGEN_CONFIGS: igen configuration strings.
     #
-    # Each entry in ${sim_multi_igen_configs} is a prefix (m32
+    # Each entry in ${SIM_MIPS_MULTI_IGEN_CONFIGS} is a prefix (m32
     # or m16) followed by the NAME, MACHINE and FILTER part of
-    # the ${sim_multi_configs} entry.
-    sim_multi_flags="${sim_multi_flags} -F ${filter} -M ${machine}"
+    # the ${sim_mips_multi_configs} entry.
+    SIM_MIPS_MULTI_FLAGS="${SIM_MIPS_MULTI_FLAGS} -F ${filter} -M ${machine}"
 
     # Check whether special handling is needed.
     case ${c} in
@@ -207,9 +207,9 @@ __EOF__
 	# The top-level function for the mips16 simulator is
 	# in a file m16${name}_run.c, generated by the
 	# tmp-run-multi Makefile rule.
-	sim_multi_src="${sim_multi_src} m16${name}_run.c"
-	sim_multi_obj="${sim_multi_obj} m16${name}_run.o"
-	sim_multi_flags="${sim_multi_flags} -F 16"
+	SIM_MIPS_MULTI_SRC="${SIM_MIPS_MULTI_SRC} m16${name}_run.c"
+	SIM_MIPS_MULTI_OBJ="${SIM_MIPS_MULTI_OBJ} m16${name}_run.o"
+	SIM_MIPS_MULTI_FLAGS="${SIM_MIPS_MULTI_FLAGS} -F 16"
 	;;
       *:*micromips32*:*)
 	# Run igen thrice, once for micromips32, once for micromips16,
@@ -219,9 +219,9 @@ __EOF__
 	# The top-level function for the micromips simulator is
 	# in a file micromips${name}_run.c, generated by the
 	# tmp-run-multi Makefile rule.
-	sim_multi_src="${sim_multi_src} micromips${name}_run.c"
-	sim_multi_obj="${sim_multi_obj} micromips${name}_run.o"
-	sim_multi_flags="${sim_multi_flags} -F 16,32"
+	SIM_MIPS_MULTI_SRC="${SIM_MIPS_MULTI_SRC} micromips${name}_run.c"
+	SIM_MIPS_MULTI_OBJ="${SIM_MIPS_MULTI_OBJ} micromips${name}_run.o"
+	SIM_MIPS_MULTI_FLAGS="${SIM_MIPS_MULTI_FLAGS} -F 16,32"
 	;;
       *:*micromips64*:*)
 	# Run igen thrice, once for micromips64, once for micromips16,
@@ -231,24 +231,24 @@ __EOF__
 	# The top-level function for the micromips simulator is
 	# in a file micromips${name}_run.c, generated by the
 	# tmp-run-multi Makefile rule.
-	sim_multi_src="${sim_multi_src} micromips${name}_run.c"
-	sim_multi_obj="${sim_multi_obj} micromips${name}_run.o"
-	sim_multi_flags="${sim_multi_flags} -F 16,32,64"
+	SIM_MIPS_MULTI_SRC="${SIM_MIPS_MULTI_SRC} micromips${name}_run.c"
+	SIM_MIPS_MULTI_OBJ="${SIM_MIPS_MULTI_OBJ} micromips${name}_run.o"
+	SIM_MIPS_MULTI_FLAGS="${SIM_MIPS_MULTI_FLAGS} -F 16,32,64"
 	;;
       *)
 	ws=m32
 	;;
     esac
 
-    # Now add the list of igen-generated files to ${sim_multi_src}
-    # and ${sim_multi_obj}.
+    # Now add the list of igen-generated files to ${SIM_MIPS_MULTI_SRC}
+    # and ${SIM_MIPS_MULTI_OBJ}.
     for w in ${ws}; do
       for base in engine icache idecode model semantics support; do
-	sim_multi_src="${sim_multi_src} ${w}${name}_${base}.c"
-	sim_multi_src="${sim_multi_src} ${w}${name}_${base}.h"
-	sim_multi_obj="${sim_multi_obj} ${w}${name}_${base}.o"
+	SIM_MIPS_MULTI_SRC="${SIM_MIPS_MULTI_SRC} ${w}${name}_${base}.c"
+	SIM_MIPS_MULTI_SRC="${SIM_MIPS_MULTI_SRC} ${w}${name}_${base}.h"
+	SIM_MIPS_MULTI_OBJ="${SIM_MIPS_MULTI_OBJ} ${w}${name}_${base}.o"
       done
-      sim_multi_igen_configs="${sim_multi_igen_configs} ${w}${c}"
+      SIM_MIPS_MULTI_IGEN_CONFIGS="${SIM_MIPS_MULTI_IGEN_CONFIGS} ${w}${c}"
     done
 
     # Add an include for the engine.h file.  This file declares the
@@ -258,9 +258,9 @@ __EOF__
     # Add case statements for this engine to sim_engine_run().
     for mach in `echo ${bfdmachs} | sed 's/,/ /g'`; do
       echo "    case bfd_mach_${mach}:" >> multi-run.c
-      if test ${mach} = ${sim_multi_default}; then
+      if test ${mach} = ${sim_mips_multi_default}; then
 	echo "    default:" >> multi-run.c
-	sim_seen_default=yes
+	sim_mips_seen_default=yes
       fi
     done
     echo "      ${w}${name}_engine_run (sd, next_cpu_nr, nr_cpus, signal);" \
@@ -269,8 +269,8 @@ __EOF__
   done
 
   # Check whether we added a 'default:' label.
-  if test ${sim_seen_default} = no; then
-    AC_MSG_ERROR(Error in configure.ac: \${sim_multi_configs} doesn't have an entry for \${sim_multi_default})
+  if test ${sim_mips_seen_default} = no; then
+    AC_MSG_ERROR(Error in configure.ac: \${sim_mips_multi_configs} doesn't have an entry for \${sim_mips_multi_default})
   fi
 
   cat << __EOF__ >> multi-run.c
@@ -279,20 +279,20 @@ __EOF__
 __EOF__
 else
   # For clean-extra
-  sim_multi_src=doesnt-exist.c
+  SIM_MIPS_MULTI_SRC=doesnt-exist.c
 fi
-sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine} ${sim_igen_smp}"
-sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}  ${sim_igen_smp}"
-sim_micromips16_flags=" -F ${sim_micromips16_filter}  ${sim_micromips16_machine}  ${sim_igen_smp}"
-sim_micromips_flags=" -F ${sim_micromips_filter}  ${sim_micromips_machine}  ${sim_igen_smp}"
-AC_SUBST(sim_igen_flags)
-AC_SUBST(sim_m16_flags)
-AC_SUBST(sim_micromips_flags)
-AC_SUBST(sim_micromips16_flags)
-AC_SUBST(sim_gen)
-AC_SUBST(sim_multi_flags)
-AC_SUBST(sim_multi_igen_configs)
-AC_SUBST(sim_multi_src)
-AC_SUBST(sim_multi_obj)
+SIM_MIPS_IGEN_FLAGS="-F ${sim_mips_igen_filter} ${sim_mips_igen_machine} ${sim_igen_smp}"
+SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine} ${sim_igen_smp}"
+SIM_MIPS_MICROMIPS16_FLAGS="-F ${sim_mips_micromips16_filter} ${sim_mips_micromips16_machine} ${sim_igen_smp}"
+SIM_MIPS_MICROMIPS_FLAGS="-F ${sim_mips_micromips_filter} ${sim_mips_micromips_machine} ${sim_igen_smp}"
+AC_SUBST(SIM_MIPS_IGEN_FLAGS)
+AC_SUBST(SIM_MIPS_M16_FLAGS)
+AC_SUBST(SIM_MIPS_MICROMIPS_FLAGS)
+AC_SUBST(SIM_MIPS_MICROMIPS16_FLAGS)
+AC_SUBST(SIM_MIPS_GEN)
+AC_SUBST(SIM_MIPS_MULTI_FLAGS)
+AC_SUBST(SIM_MIPS_MULTI_IGEN_CONFIGS)
+AC_SUBST(SIM_MIPS_MULTI_SRC)
+AC_SUBST(SIM_MIPS_MULTI_OBJ)
 
 SIM_AC_OUTPUT
