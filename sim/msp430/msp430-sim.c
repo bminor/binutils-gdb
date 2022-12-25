@@ -116,6 +116,7 @@ sim_open (SIM_OPEN_KIND kind,
   SIM_DESC sd = sim_state_alloc (kind, callback);
   struct msp430_cpu_state *msp430_cpu;
   char c;
+  int i;
 
   /* Initialise the simulator.  */
 
@@ -140,11 +141,6 @@ sim_open (SIM_OPEN_KIND kind,
       sim_state_free (sd);
       return 0;
     }
-
-  CPU_PC_FETCH (STATE_CPU (sd, 0)) = msp430_pc_fetch;
-  CPU_PC_STORE (STATE_CPU (sd, 0)) = msp430_pc_store;
-  CPU_REG_FETCH (STATE_CPU (sd, 0)) = msp430_reg_fetch;
-  CPU_REG_STORE (STATE_CPU (sd, 0)) = msp430_reg_store;
 
   /* Allocate memory if none specified by user.
      Note - these values match the memory regions in the libgloss/msp430/msp430[xl]-sim.ld scripts.  */
@@ -180,13 +176,21 @@ sim_open (SIM_OPEN_KIND kind,
     }
 
   /* CPU specific initialization.  */
-  assert (MAX_NR_PROCESSORS == 1);
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, i);
 
-  msp430_cpu = MSP430_SIM_CPU (STATE_CPU (sd, 0));
-  msp430_cpu->cio_breakpoint = trace_sym_value (sd, "C$$IO$$");
-  msp430_cpu->cio_buffer = trace_sym_value (sd, "__CIOBUF__");
-  if (msp430_cpu->cio_buffer == -1)
-    msp430_cpu->cio_buffer = trace_sym_value (sd, "_CIOBUF_");
+      CPU_PC_FETCH (cpu) = msp430_pc_fetch;
+      CPU_PC_STORE (cpu) = msp430_pc_store;
+      CPU_REG_FETCH (cpu) = msp430_reg_fetch;
+      CPU_REG_STORE (cpu) = msp430_reg_store;
+
+      msp430_cpu = MSP430_SIM_CPU (cpu);
+      msp430_cpu->cio_breakpoint = trace_sym_value (sd, "C$$IO$$");
+      msp430_cpu->cio_buffer = trace_sym_value (sd, "__CIOBUF__");
+      if (msp430_cpu->cio_buffer == -1)
+	msp430_cpu->cio_buffer = trace_sym_value (sd, "_CIOBUF_");
+    }
 
   return sd;
 }
