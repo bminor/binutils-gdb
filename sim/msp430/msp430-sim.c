@@ -123,7 +123,7 @@ sim_open (SIM_OPEN_KIND kind,
   /* Set default options before parsing user options.  */
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
-  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct msp430_cpu_state))
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct msp430_cpu_state))
       != SIM_RC_OK)
     {
       sim_state_free (sd);

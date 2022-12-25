@@ -132,7 +132,7 @@ sim_open (SIM_OPEN_KIND kind,
   STATE_MACHS (sd) = bpf_sim_machs;
   STATE_MODEL_NAME (sd) = "bpf-def";
 
-  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct bpf_sim_cpu)) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct bpf_sim_cpu)) != SIM_RC_OK)
     goto error;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)

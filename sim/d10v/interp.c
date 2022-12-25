@@ -765,7 +765,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   cb->syscall_map = cb_d10v_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 0) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

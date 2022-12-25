@@ -351,7 +351,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct mips_sim_cpu))
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct mips_sim_cpu))
       != SIM_RC_OK)
     return 0;
 

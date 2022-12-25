@@ -35,8 +35,13 @@ sim_cpu_alloc_all_extra (SIM_DESC sd, int ncpus, size_t extra_bytes)
 {
   int c;
 
+  /* TODO: This should be a command line option for users to control.  */
+  if (ncpus == 0)
+    ncpus = MAX_NR_PROCESSORS;
+
   for (c = 0; c < ncpus; ++c)
     STATE_CPU (sd, c) = sim_cpu_alloc_extra (sd, extra_bytes);
+
   return SIM_RC_OK;
 }
 

@@ -348,7 +348,7 @@ sim_open (SIM_OPEN_KIND                  kind,
   current_alignment = NONSTRICT_ALIGNMENT;
 
   /* Perform the initialization steps one by one.  */
-  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct aarch64_sim_cpu))
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct aarch64_sim_cpu))
       != SIM_RC_OK
       || sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK
       || sim_parse_args (sd, argv) != SIM_RC_OK

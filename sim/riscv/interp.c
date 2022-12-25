@@ -77,7 +77,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   callback->syscall_map = cb_riscv_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct riscv_sim_cpu))
+  if (sim_cpu_alloc_all_extra (sd, 0, sizeof (struct riscv_sim_cpu))
       != SIM_RC_OK)
     {
       free_state (sd);
