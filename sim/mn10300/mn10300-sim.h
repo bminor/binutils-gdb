@@ -182,10 +182,10 @@ dw2u64 (dword data)
 /* Bring data in from the cold */
 
 #define IMEM8(EA) \
-(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA)))
+(sim_core_read_aligned_1(STATE_CPU (SD, 0), EA, exec_map, (EA)))
 
 #define IMEM8_IMMED(EA, N) \
-(sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA) + (N)))
+(sim_core_read_aligned_1(STATE_CPU (SD, 0), EA, exec_map, (EA) + (N)))
 
 /* Function declarations.  */
 
