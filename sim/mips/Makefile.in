@@ -422,7 +422,6 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		-N 0 \
 		-M $${m} \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
@@ -451,7 +450,6 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-Werror \
 		-Wnodiscard \
 		-Wnowidth \
-		-N 0 \
 		$(SIM_MIPS_MULTI_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \

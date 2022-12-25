@@ -22,7 +22,7 @@
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
 IGEN = %D%/igen$(EXEEXT)
-IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
+IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN) $(IGEN_FLAGS_SMP)
 
 ## This makes sure igen is available before building the arch-subdirs which
 ## need to run the igen tool.

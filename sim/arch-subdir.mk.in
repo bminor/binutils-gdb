@@ -73,3 +73,6 @@ SIM_INLINE = @SIM_INLINE@
 SIM_HW_CFLAGS = @SIM_HW_CFLAGS@
 SIM_HW_OBJS = $(SIM_HW_DEVICES:%=dv-%.o)
 @SIM_ENABLE_HW_FALSE@SIM_HW_OBJS =
+
+# TODO: Delete this once mips/Makefile.in igen moves to mips/local.mk.
+IGEN_FLAGS_SMP = @IGEN_FLAGS_SMP@

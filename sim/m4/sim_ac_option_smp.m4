@@ -27,7 +27,8 @@ AC_ARG_ENABLE(sim-smp,
   no)	sim_smp="0";;
   *)	sim_smp="$enableval";;
 esac])dnl
-sim_igen_smp="-N ${sim_smp}"
+IGEN_FLAGS_SMP="-N ${sim_smp}"
+AC_SUBST(IGEN_FLAGS_SMP)
 dnl NB: The ppc code uses a diff default because its smp works.  That is why
 dnl we don't unconditionally enable WITH_SMP here.  Once we unify ppc, we can
 dnl make this unconditional.
