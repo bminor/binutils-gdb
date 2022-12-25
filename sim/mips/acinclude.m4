@@ -59,19 +59,19 @@ AC_MSG_RESULT([$SIM_MIPS_FPU_BITSIZE])
 AC_SUBST(SIM_MIPS_FPU_BITSIZE)
 
 dnl Select the IGEN architecture.
-SIM_MIPS_GEN=IGEN
-sim_mips_igen_machine="-M mipsIV"
+SIM_MIPS_GEN=SINGLE
+sim_mips_single_machine="-M mipsIV"
 sim_mips_m16_machine="-M mips16,mipsIII"
-sim_mips_igen_filter="32,64,f"
+sim_mips_single_filter="32,64,f"
 sim_mips_m16_filter="16"
 AS_CASE([${target}],
   [mips*tx39*], [dnl
-    SIM_MIPS_GEN=IGEN
-    sim_mips_igen_filter="32,f"
-    sim_mips_igen_machine="-M r3900"],
+    SIM_MIPS_GEN=SINGLE
+    sim_mips_single_filter="32,f"
+    sim_mips_single_machine="-M r3900"],
   [mips64vr41*], [dnl
     SIM_MIPS_GEN=M16
-    sim_mips_igen_machine="-M vr4100"
+    sim_mips_single_machine="-M vr4100"
     sim_mips_m16_machine="-M vr4100"],
   [mips64*], [dnl
     SIM_MIPS_GEN=MULTI
@@ -98,36 +98,36 @@ AS_CASE([${target}],
       mips32r2:mips32r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2,smartmips:32,f:mipsisa32r2"
     sim_mips_multi_default=mipsisa32r2],
   [mipsisa32r6*], [dnl
-    SIM_MIPS_GEN=IGEN
-    sim_mips_igen_machine="-M mips32r6"
-    sim_mips_igen_filter="32,f"],
+    SIM_MIPS_GEN=SINGLE
+    sim_mips_single_machine="-M mips32r6"
+    sim_mips_single_filter="32,f"],
   [mipsisa32*], [dnl
     SIM_MIPS_GEN=M16
-    sim_mips_igen_machine="-M mips32,mips16,mips16e,smartmips"
+    sim_mips_single_machine="-M mips32,mips16,mips16e,smartmips"
     sim_mips_m16_machine="-M mips16,mips16e,mips32"
-    sim_mips_igen_filter="32,f"],
+    sim_mips_single_filter="32,f"],
   [mipsisa64r2*], [dnl
     SIM_MIPS_GEN=M16
-    sim_mips_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
+    sim_mips_single_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
     sim_mips_m16_machine="-M mips16,mips16e,mips64r2"],
   [mipsisa64r6*], [dnl
-    SIM_MIPS_GEN=IGEN
-    sim_mips_igen_machine="-M mips64r6"],
+    SIM_MIPS_GEN=SINGLE
+    sim_mips_single_machine="-M mips64r6"],
   [mipsisa64sb1*], [dnl
-    SIM_MIPS_GEN=IGEN
-    sim_mips_igen_machine="-M mips64,mips3d,sb1"],
+    SIM_MIPS_GEN=SINGLE
+    sim_mips_single_machine="-M mips64,mips3d,sb1"],
   [mipsisa64*], [dnl
     SIM_MIPS_GEN=M16
-    sim_mips_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
+    sim_mips_single_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
     sim_mips_m16_machine="-M mips16,mips16e,mips64"],
   [mips*lsi*], [dnl
     SIM_MIPS_GEN=M16
-    sim_mips_igen_machine="-M mipsIII,mips16"
+    sim_mips_single_machine="-M mipsIII,mips16"
     sim_mips_m16_machine="-M mips16,mipsIII"
-    sim_mips_igen_filter="32,f"],
+    sim_mips_single_filter="32,f"],
   [mips*], [dnl
-    SIM_MIPS_GEN=IGEN
-    sim_mips_igen_filter="32,f"])
+    SIM_MIPS_GEN=SINGLE
+    sim_mips_single_filter="32,f"])
 
 dnl The MULTI generator can combine several simulation engines into one.
 dnl executable.  A configuration which uses the MULTI should set two
@@ -321,12 +321,12 @@ __EOF__
 ], [dnl
   dnl For clean-extra target.
   SIM_MIPS_MULTI_SRC=doesnt-exist.c
-  SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_IGEN_FLAGS)'
+  SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_SINGLE_FLAGS)'
   AS_VAR_IF([SIM_MIPS_GEN], ["M16"], [AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [' $(SIM_MIPS_M16_FLAGS)'])])
 ])
-SIM_MIPS_IGEN_FLAGS="-F ${sim_mips_igen_filter} ${sim_mips_igen_machine}"
+SIM_MIPS_SINGLE_FLAGS="-F ${sim_mips_single_filter} ${sim_mips_single_machine}"
 SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine}"
-AC_SUBST(SIM_MIPS_IGEN_FLAGS)
+AC_SUBST(SIM_MIPS_SINGLE_FLAGS)
 AC_SUBST(SIM_MIPS_M16_FLAGS)
 AC_SUBST(SIM_MIPS_GEN)
 AC_SUBST(SIM_MIPS_IGEN_ITABLE_FLAGS)

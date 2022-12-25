@@ -3,7 +3,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_MIPS_IGEN_FLAGS = @SIM_MIPS_IGEN_FLAGS@
+SIM_MIPS_SINGLE_FLAGS = @SIM_MIPS_SINGLE_FLAGS@
 SIM_MIPS_M16_FLAGS = @SIM_MIPS_M16_FLAGS@
 SIM_MIPS_GEN = @SIM_MIPS_GEN@
 SIM_MIPS_MULTI_IGEN_CONFIGS = @SIM_MIPS_MULTI_IGEN_CONFIGS@
@@ -15,7 +15,7 @@ arch = mips
 # Object files created by various simulator generators.
 
 
-SIM_IGEN_OBJ = \
+SIM_SINGLE_OBJ = \
 	support.o \
 	itable.o \
 	semantics.o \
@@ -86,11 +86,11 @@ IGEN_INCLUDE=\
 	$(srcdir)/mips3264r2.igen \
 	$(srcdir)/mips3264r6.igen \
 
-SIM_IGEN_ALL = tmp-igen
+SIM_SINGLE_ALL = tmp-single
 SIM_M16_ALL = tmp-m16
 SIM_MULTI_ALL = tmp-multi
 
-BUILT_SRC_FROM_IGEN = \
+BUILT_SRC_FROM_SINGLE = \
 	icache.h \
 	icache.c \
 	idecode.h \
@@ -105,15 +105,15 @@ BUILT_SRC_FROM_IGEN = \
 	engine.c \
 	irun.c \
 
-$(BUILT_SRC_FROM_IGEN): tmp-igen
+$(BUILT_SRC_FROM_SINGLE): tmp-single
 
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+tmp-single: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		$(SIM_MIPS_IGEN_FLAGS) \
+		$(SIM_MIPS_SINGLE_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -192,7 +192,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
-		$(SIM_MIPS_IGEN_FLAGS) \
+		$(SIM_MIPS_SINGLE_FLAGS) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
 		-B 32 \
@@ -303,7 +303,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	$(SILENCE) touch $@
 
 clean-extra:
-	rm -f $(BUILT_SRC_FROM_IGEN)
+	rm -f $(BUILT_SRC_FROM_SINGLE)
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f $(BUILT_SRC_FROM_MULTI)
 	rm -f tmp-*
