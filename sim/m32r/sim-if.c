@@ -134,7 +134,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     m32r_cgen_init_dis (cd);
   }
 
-  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       /* Only needed for profiling, but the structure member is small.  */
       memset (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i)), 0,
