@@ -29,3 +29,6 @@ SIM_ALL_RECURSIVE_DEPS += $(IGEN)
 
 %C%_SIM_EXTRA_HW_DEVICES = tx3904cpu tx3904irc tx3904tmr tx3904sio
 AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
+
+## These are created by mips/acinclude.m4 during configure time.
+DISTCLEANFILES += %D%/multi-include.h %D%/multi-run.c

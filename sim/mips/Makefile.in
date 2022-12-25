@@ -83,7 +83,6 @@ SIM_BITSIZE = -DWITH_TARGET_WORD_BITSIZE=@SIM_MIPS_BITSIZE@ -DWITH_TARGET_WORD_M
 SIM_FLOAT = -DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=@SIM_MIPS_FPU_BITSIZE@
 
 SIM_EXTRA_CLEAN = clean-extra
-SIM_EXTRA_DISTCLEAN = distclean-extra
 
 all: $(SIM_$(SIM_MIPS_GEN)_ALL)
 
@@ -505,6 +504,3 @@ clean-extra:
 	rm -f $(BUILT_SRC_FROM_MULTI)
 	rm -f tmp-*
 	rm -f micromips16*.o micromips32*.o m16*.o m32*.o itable*.o
-
-distclean-extra:
-	rm -f multi-include.h multi-run.c
