@@ -153,7 +153,7 @@ dnl The simulator compares the bfd mach against BFDMACHS to decide
 dnl which engine to use.  Entries in BFDMACHS should be bfd_mach
 dnl values with "bfd_mach_" removed.  ${sim_mips_multi_default} says
 dnl which entry should be the default.
-SIM_MIPS_MULTI_FLAGS=
+SIM_MIPS_IGEN_ITABLE_FLAGS=
 SIM_MIPS_MULTI_SRC=
 SIM_MIPS_MULTI_OBJ=
 SIM_MIPS_MULTI_IGEN_CONFIGS=
@@ -233,7 +233,7 @@ __EOF__
 
     dnl Build the following lists:
     dnl
-    dnl   SIM_MIPS_MULTI_FLAGS: all -M and -F flags used by the simulator
+    dnl   SIM_MIPS_IGEN_ITABLE_FLAGS: all -M and -F flags used by the simulator
     dnl   SIM_MIPS_MULTI_SRC: all makefile-generated source files
     dnl   SIM_MIPS_MULTI_OBJ: the objects for ${SIM_MIPS_MULTI_SRC}
     dnl   SIM_MIPS_MULTI_IGEN_CONFIGS: igen configuration strings.
@@ -241,7 +241,7 @@ __EOF__
     dnl Each entry in ${SIM_MIPS_MULTI_IGEN_CONFIGS} is a prefix (m32
     dnl or m16) followed by the NAME, MACHINE and FILTER part of
     dnl the ${sim_mips_multi_configs} entry.
-    AS_VAR_APPEND([SIM_MIPS_MULTI_FLAGS], [" -F ${filter} -M ${machine}"])
+    AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [" -F ${filter} -M ${machine}"])
 
     dnl Check whether special handling is needed.
     AS_CASE([${c}],
@@ -254,7 +254,7 @@ __EOF__
 	dnl tmp-run-multi Makefile rule.
 	AS_VAR_APPEND([SIM_MIPS_MULTI_SRC], [" m16${name}_run.c"])
 	AS_VAR_APPEND([SIM_MIPS_MULTI_OBJ], [" m16${name}_run.o"])
-	AS_VAR_APPEND([SIM_MIPS_MULTI_FLAGS], [" -F 16"])
+	AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [" -F 16"])
 	],
       [*:*micromips32*:*], [dnl
 	dnl Run igen thrice, once for micromips32, once for micromips16,
@@ -266,7 +266,7 @@ __EOF__
 	dnl tmp-run-multi Makefile rule.
 	AS_VAR_APPEND([SIM_MIPS_MULTI_SRC], [" micromips${name}_run.c"])
 	AS_VAR_APPEND([SIM_MIPS_MULTI_OBJ], [" micromips${name}_run.o"])
-	AS_VAR_APPEND([SIM_MIPS_MULTI_FLAGS], [" -F 16,32"])
+	AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [" -F 16,32"])
 	],
       [*:*micromips64*:*], [dnl
 	dnl Run igen thrice, once for micromips64, once for micromips16,
@@ -278,7 +278,7 @@ __EOF__
 	dnl tmp-run-multi Makefile rule.
 	AS_VAR_APPEND([SIM_MIPS_MULTI_SRC], [" micromips${name}_run.c"])
 	AS_VAR_APPEND([SIM_MIPS_MULTI_OBJ], [" micromips${name}_run.o"])
-	AS_VAR_APPEND([SIM_MIPS_MULTI_FLAGS], [" -F 16,32,64"])
+	AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [" -F 16,32,64"])
 	],
       [ws=m32])
 
@@ -327,7 +327,7 @@ SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine}"
 AC_SUBST(SIM_MIPS_IGEN_FLAGS)
 AC_SUBST(SIM_MIPS_M16_FLAGS)
 AC_SUBST(SIM_MIPS_GEN)
-AC_SUBST(SIM_MIPS_MULTI_FLAGS)
+AC_SUBST(SIM_MIPS_IGEN_ITABLE_FLAGS)
 AC_SUBST(SIM_MIPS_MULTI_IGEN_CONFIGS)
 AC_SUBST(SIM_MIPS_MULTI_SRC)
 AC_SUBST(SIM_MIPS_MULTI_OBJ)

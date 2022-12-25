@@ -644,7 +644,7 @@ SIM_RISCV_BITSIZE
 SIM_MIPS_MULTI_OBJ
 SIM_MIPS_MULTI_SRC
 SIM_MIPS_MULTI_IGEN_CONFIGS
-SIM_MIPS_MULTI_FLAGS
+SIM_MIPS_IGEN_ITABLE_FLAGS
 SIM_MIPS_GEN
 SIM_MIPS_M16_FLAGS
 SIM_MIPS_IGEN_FLAGS
@@ -16463,7 +16463,7 @@ case ${target} in #(
      ;;
 esac
 
-SIM_MIPS_MULTI_FLAGS=
+SIM_MIPS_IGEN_ITABLE_FLAGS=
 SIM_MIPS_MULTI_SRC=
 SIM_MIPS_MULTI_OBJ=
 SIM_MIPS_MULTI_IGEN_CONFIGS=
@@ -16538,7 +16538,7 @@ __EOF__
     machine=`echo ${c} | sed 's/.*:\(.*\):.*/\1/'`
     filter=`echo ${c} | sed 's/.*://'`
 
-                                            as_fn_append SIM_MIPS_MULTI_FLAGS " -F ${filter} -M ${machine}"
+                                            as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F ${filter} -M ${machine}"
 
         case ${c} in #(
   *:*mips16*:*) :
@@ -16546,21 +16546,21 @@ __EOF__
 
 				as_fn_append SIM_MIPS_MULTI_SRC " m16${name}_run.c"
 	as_fn_append SIM_MIPS_MULTI_OBJ " m16${name}_run.o"
-	as_fn_append SIM_MIPS_MULTI_FLAGS " -F 16"
+	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16"
 	 ;; #(
   *:*micromips32*:*) :
     			ws="micromips_m32 micromips16 micromips32"
 
 				as_fn_append SIM_MIPS_MULTI_SRC " micromips${name}_run.c"
 	as_fn_append SIM_MIPS_MULTI_OBJ " micromips${name}_run.o"
-	as_fn_append SIM_MIPS_MULTI_FLAGS " -F 16,32"
+	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16,32"
 	 ;; #(
   *:*micromips64*:*) :
     			ws="micromips_m64 micromips16 micromips64"
 
 				as_fn_append SIM_MIPS_MULTI_SRC " micromips${name}_run.c"
 	as_fn_append SIM_MIPS_MULTI_OBJ " micromips${name}_run.o"
-	as_fn_append SIM_MIPS_MULTI_FLAGS " -F 16,32,64"
+	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16,32,64"
 	 ;; #(
   *) :
     ws=m32 ;;
