@@ -92,7 +92,7 @@ IGEN_INCLUDE=\
 # NB:	Since these can be built by a number of generators, care
 #	must be taken to ensure that they are only dependant on
 #	one of those generators.
-BUILT_SRC_FROM_GEN = \
+BUILT_SRC_FROM_IGEN_ITABLE = \
 	itable.h \
 	itable.c \
 
@@ -100,8 +100,24 @@ SIM_IGEN_ALL = tmp-igen
 SIM_M16_ALL = tmp-m16
 SIM_MULTI_ALL = tmp-multi
 
-$(BUILT_SRC_FROM_GEN): $(SIM_$(SIM_MIPS_GEN)_ALL)
+$(BUILT_SRC_FROM_IGEN_ITABLE): tmp-itable
 
+tmp-itable: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(ECHO_IGEN) $(IGEN_RUN) \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-Wnowidth \
+		-Wnounimplemented \
+		$(SIM_MIPS_IGEN_ITABLE_FLAGS) \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-i $(IGEN_INSN) \
+		-n itable.h    -ht itable.h \
+		-n itable.c    -t  itable.c \
+		#
+	$(SILENCE) touch $@
 
 
 BUILT_SRC_FROM_IGEN = \
@@ -145,8 +161,6 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-n model.c     -m  model.c \
 		-n support.h   -hf support.h \
 		-n support.c   -f  support.c \
-		-n itable.h    -ht itable.h \
-		-n itable.c    -t  itable.c \
 		-n engine.h    -he engine.h \
 		-n engine.c    -e  engine.c \
 		-n irun.c      -r  irun.c
@@ -228,25 +242,12 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		-n m32_support.h   -hf m32_support.h \
 		-n m32_support.c   -f  m32_support.c \
 		#
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		-Wnowidth \
-		$(SIM_MIPS_IGEN_FLAGS) $(SIM_MIPS_M16_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-i $(IGEN_INSN) \
-		-n itable.h    -ht itable.h \
-		-n itable.c    -t  itable.c \
-		#
 	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MULTI = $(SIM_MIPS_MULTI_SRC)
 
 $(BUILT_SRC_FROM_MULTI): tmp-multi
-tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi
+tmp-multi: tmp-mach-multi tmp-run-multi
 tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
 	  p=`echo $${t} | sed -e 's/:.*//'` ; \
@@ -292,21 +293,6 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	  || exit; \
 	done
 	$(SILENCE) touch $@
-tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		-Wnowidth \
-		$(SIM_MIPS_IGEN_ITABLE_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-i $(IGEN_INSN) \
-		-n itable.h    -ht itable.h \
-		-n itable.c    -t  itable.c \
-		#
-	$(SILENCE) touch $@
 tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
 	  case $${t} in \
@@ -347,7 +333,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	$(SILENCE) touch $@
 
 clean-extra:
-	rm -f $(BUILT_SRC_FROM_GEN)
+	rm -f $(BUILT_SRC_FROM_IGEN_ITABLE)
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f $(BUILT_SRC_FROM_MULTI)

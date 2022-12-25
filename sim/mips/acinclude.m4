@@ -321,6 +321,8 @@ __EOF__
 ], [dnl
   dnl For clean-extra target.
   SIM_MIPS_MULTI_SRC=doesnt-exist.c
+  SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_IGEN_FLAGS)'
+  AS_VAR_IF([SIM_MIPS_GEN], ["M16"], [AS_VAR_APPEND([SIM_MIPS_IGEN_ITABLE_FLAGS], [' $(SIM_MIPS_M16_FLAGS)'])])
 ])
 SIM_MIPS_IGEN_FLAGS="-F ${sim_mips_igen_filter} ${sim_mips_igen_machine}"
 SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine}"
