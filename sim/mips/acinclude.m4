@@ -1,5 +1,3 @@
-dnl TODO: Rename this to acinclude.m4 once mips/configure is removed.
-dnl
 dnl Copyright (C) 2005-2022 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify

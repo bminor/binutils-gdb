@@ -203,7 +203,7 @@ AC_SUBST(sim_float)
 
 dnl Some arches have unique configure flags.
 m4_include([frv/acinclude.m4])
-m4_include([mips/acinclude-top.m4])
+m4_include([mips/acinclude.m4])
 m4_include([riscv/acinclude.m4])
 m4_include([rx/acinclude.m4])
 
