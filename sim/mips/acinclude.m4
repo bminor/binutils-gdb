@@ -324,12 +324,8 @@ __EOF__
 ])
 SIM_MIPS_IGEN_FLAGS="-F ${sim_mips_igen_filter} ${sim_mips_igen_machine}"
 SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine}"
-SIM_MIPS_MICROMIPS16_FLAGS="-F ${sim_mips_micromips16_filter} ${sim_mips_micromips16_machine}"
-SIM_MIPS_MICROMIPS_FLAGS="-F ${sim_mips_micromips_filter} ${sim_mips_micromips_machine}"
 AC_SUBST(SIM_MIPS_IGEN_FLAGS)
 AC_SUBST(SIM_MIPS_M16_FLAGS)
-AC_SUBST(SIM_MIPS_MICROMIPS_FLAGS)
-AC_SUBST(SIM_MIPS_MICROMIPS16_FLAGS)
 AC_SUBST(SIM_MIPS_GEN)
 AC_SUBST(SIM_MIPS_MULTI_FLAGS)
 AC_SUBST(SIM_MIPS_MULTI_IGEN_CONFIGS)

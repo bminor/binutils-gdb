@@ -646,8 +646,6 @@ SIM_MIPS_MULTI_SRC
 SIM_MIPS_MULTI_IGEN_CONFIGS
 SIM_MIPS_MULTI_FLAGS
 SIM_MIPS_GEN
-SIM_MIPS_MICROMIPS16_FLAGS
-SIM_MIPS_MICROMIPS_FLAGS
 SIM_MIPS_M16_FLAGS
 SIM_MIPS_IGEN_FLAGS
 SIM_MIPS_FPU_BITSIZE
@@ -12446,7 +12444,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12449 "configure"
+#line 12447 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12552,7 +12550,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12555 "configure"
+#line 12553 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16607,10 +16605,6 @@ else
 fi
 SIM_MIPS_IGEN_FLAGS="-F ${sim_mips_igen_filter} ${sim_mips_igen_machine}"
 SIM_MIPS_M16_FLAGS="-F ${sim_mips_m16_filter} ${sim_mips_m16_machine}"
-SIM_MIPS_MICROMIPS16_FLAGS="-F ${sim_mips_micromips16_filter} ${sim_mips_micromips16_machine}"
-SIM_MIPS_MICROMIPS_FLAGS="-F ${sim_mips_micromips_filter} ${sim_mips_micromips_machine}"
-
-
 
 
 
