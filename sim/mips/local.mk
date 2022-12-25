@@ -81,6 +81,12 @@ if SIM_MIPS_GEN_MODE_M16
 	%D%/stamp-gen-mode-m16-m16 \
 	%D%/stamp-gen-mode-m16-m32
 endif
+if SIM_MIPS_GEN_MODE_MULTI
+%C%_BUILD_OUTPUTS += \
+	$(SIM_MIPS_MULTI_SRC) \
+	%D%/stamp-gen-mode-multi-igen \
+	%D%/stamp-gen-mode-multi-run
+endif
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
@@ -89,6 +95,7 @@ $(%C%_BUILT_SRC_FROM_IGEN_ITABLE): %D%/stamp-igen-itable
 $(%C%_BUILT_SRC_FROM_GEN_MODE_SINGLE): %D%/stamp-gen-mode-single
 $(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M16): %D%/stamp-gen-mode-m16-m16
 $(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32): %D%/stamp-gen-mode-m16-m32
+$(SIM_MIPS_MULTI_SRC): %D%/stamp-gen-mode-multi-igen %D%/stamp-gen-mode-multi-run
 
 %C%_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
 %C%_IGEN_INSN = $(srcdir)/%D%/mips.igen
@@ -108,6 +115,8 @@ $(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32): %D%/stamp-gen-mode-m16-m32
 	%D%/vr.igen
 %C%_IGEN_DC = $(srcdir)/%D%/mips.dc
 %C%_M16_DC = $(srcdir)/%D%/m16.dc
+%C%_MICROMIPS32_DC = $(srcdir)/%D%/micromips.dc
+%C%_MICROMIPS16_DC = $(srcdir)/%D%/micromips16.dc
 
 ## NB:	Since these can be built by a number of generators, care
 ##	must be taken to ensure that they are only dependant on
@@ -209,6 +218,99 @@ $(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32): %D%/stamp-gen-mode-m16-m32
 		-n m32_model.c     -m  %D%/m32_model.c \
 		-n m32_support.h   -hf %D%/m32_support.h \
 		-n m32_support.c   -f  %D%/m32_support.c
+	$(AM_V_at)touch $@
+
+%D%/stamp-gen-mode-multi-igen: $(%C%_IGEN_INSN) $(%C%_IGEN_INSN_INC) $(%C%_IGEN_DC) $(%C%_M16_DC) $(%C%_MICROMIPS32_DC) $(%C%_MICROMIPS16_DC) $(IGEN)
+	$(AM_V_GEN)\
+	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
+	  p=`echo $${t} | sed -e 's/:.*//'` ; \
+	  m=`echo $${t} | sed -e 's/.*:\(.*\):.*/\1/'` ; \
+	  f=`echo $${t} | sed -e 's/.*://'` ; \
+	  case $${p} in \
+	    micromips16*) \
+	      e="-B 16 -H 15 -o $(%C%_MICROMIPS16_DC) -F 16" ;; \
+	    micromips32* | micromips64*) \
+	      e="-B 32 -H 31 -o $(%C%_MICROMIPS32_DC) -F $${f}" ;; \
+	    micromips_m32*) \
+	      e="-B 32 -H 31 -o $(%C%_IGEN_DC) -F $${f}"; \
+	      m="mips32r2,mips3d,mdmx,dsp,dsp2,smartmips" ;; \
+	    micromips_m64*) \
+	      e="-B 32 -H 31 -o $(%C%_IGEN_DC) -F $${f}"; \
+	      m="mips64r2,mips3d,mdmx,dsp,dsp2,smartmips" ;; \
+	    m16*) \
+	      e="-B 16 -H 15 -o $(%C%_M16_DC) -F 16" ;; \
+	    *) \
+	      e="-B 32 -H 31 -o $(%C%_IGEN_DC) -F $${f}" ;; \
+	  esac; \
+	  $(IGEN_RUN) \
+		$(%C%_IGEN_TRACE) \
+		$${e} \
+		-I $(srcdir)/%D% \
+		-Werror \
+		-Wnodiscard \
+		-M $${m} \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-i $(%C%_IGEN_INSN) \
+		-P $${p}_ \
+		-x \
+		-n $${p}_icache.h    -hc %D%/$${p}_icache.h \
+		-n $${p}_icache.c    -c  %D%/$${p}_icache.c \
+		-n $${p}_semantics.h -hs %D%/$${p}_semantics.h \
+		-n $${p}_semantics.c -s  %D%/$${p}_semantics.c \
+		-n $${p}_idecode.h   -hd %D%/$${p}_idecode.h \
+		-n $${p}_idecode.c   -d  %D%/$${p}_idecode.c \
+		-n $${p}_model.h     -hm %D%/$${p}_model.h \
+		-n $${p}_model.c     -m  %D%/$${p}_model.c \
+		-n $${p}_support.h   -hf %D%/$${p}_support.h \
+		-n $${p}_support.c   -f  %D%/$${p}_support.c \
+		-n $${p}_engine.h    -he %D%/$${p}_engine.h \
+		-n $${p}_engine.c    -e  %D%/$${p}_engine.c \
+	    || exit; \
+	done
+	$(AM_V_at)touch $@
+
+%D%/stamp-gen-mode-multi-run: %D%/m16run.c %D%/micromipsrun.c
+	$(AM_V_GEN)\
+	for t in $(SIM_MIPS_MULTI_IGEN_CONFIGS); do \
+	  case $${t} in \
+	    m16*) \
+	      m=`echo $${t} | sed -e 's/^m16//' -e 's/:.*//'`; \
+	      o=%D%/m16$${m}_run.c; \
+	      sed < $(srcdir)/%D%/m16run.c > $$o.tmp \
+		    -e "s/^sim_/m16$${m}_/" \
+		    -e "/include/s/sim-engine/m16$${m}_engine/" \
+		    -e "s/m16_/m16$${m}_/" \
+		    -e "s/m32_/m32$${m}_/" \
+		    || exit 1; \
+	      $(SHELL) $(srcroot)/move-if-change $$o.tmp $$o; \
+	      ;;\
+	    micromips32*) \
+	      m=`echo $${t} | sed -e 's/^micromips32//' -e 's/:.*//'`; \
+	      o=%D%/micromips$${m}_run.c; \
+	      sed < $(srcdir)/%D%/micromipsrun.c > $$o.tmp \
+		    -e "s/^sim_/micromips32$${m}_/" \
+		    -e "/include/s/sim-engine/micromips32$${m}_engine/" \
+		    -e "s/micromips16_/micromips16$${m}_/" \
+		    -e "s/micromips32_/micromips32$${m}_/" \
+		    -e "s/m32_/m32$${m}_/" \
+		    || exit 1; \
+	      $(SHELL) $(srcroot)/move-if-change $$o.tmp $$o; \
+	      ;;\
+	    micromips64*) \
+	      m=`echo $${t} | sed -e 's/^micromips64//' -e 's/:.*//'`; \
+	      o=%D%/micromips$${m}_run.c; \
+	      sed < $(srcdir)/%D%/micromipsrun.c > $$o.tmp \
+		    -e "s/^sim_/micromips64$${m}_/" \
+		    -e "/include/s/sim-engine/micromips64$${m}_engine/" \
+		    -e "s/micromips16_/micromips16$${m}_/" \
+		    -e "s/micromips32_/micromips64$${m}_/" \
+		    -e "s/m32_/m64$${m}_/" \
+		    || exit 1; \
+	      $(SHELL) $(srcroot)/move-if-change $$o.tmp $$o; \
+	      ;;\
+	  esac \
+	done
 	$(AM_V_at)touch $@
 
 MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)

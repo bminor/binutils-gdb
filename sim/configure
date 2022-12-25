@@ -641,6 +641,8 @@ LTLIBOBJS
 include_makefile
 SIM_RX_CYCLE_ACCURATE_FLAGS
 SIM_RISCV_BITSIZE
+SIM_MIPS_GEN_MODE_MULTI_FALSE
+SIM_MIPS_GEN_MODE_MULTI_TRUE
 SIM_MIPS_GEN_MODE_M16_FALSE
 SIM_MIPS_GEN_MODE_M16_TRUE
 SIM_MIPS_GEN_MODE_SINGLE_FALSE
@@ -12448,7 +12450,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12451 "configure"
+#line 12453 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12554,7 +12556,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12557 "configure"
+#line 12559 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16636,6 +16638,14 @@ else
   SIM_MIPS_GEN_MODE_M16_FALSE=
 fi
 
+ if test "$SIM_MIPS_GEN" = "MULTI"; then
+  SIM_MIPS_GEN_MODE_MULTI_TRUE=
+  SIM_MIPS_GEN_MODE_MULTI_FALSE='#'
+else
+  SIM_MIPS_GEN_MODE_MULTI_TRUE='#'
+  SIM_MIPS_GEN_MODE_MULTI_FALSE=
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking riscv bitsize" >&5
 $as_echo_n "checking riscv bitsize... " >&6; }
@@ -16960,6 +16970,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_MIPS_GEN_MODE_M16_TRUE}" && test -z "${SIM_MIPS_GEN_MODE_M16_FALSE}"; then
   as_fn_error $? "conditional \"SIM_MIPS_GEN_MODE_M16\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_MIPS_GEN_MODE_MULTI_TRUE}" && test -z "${SIM_MIPS_GEN_MODE_MULTI_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_MIPS_GEN_MODE_MULTI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
