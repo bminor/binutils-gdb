@@ -1271,7 +1271,9 @@ CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = $(am__append_76)
 MOSTLYCLEANFILES = core $(common_HW_CONFIG_H_TARGETS) $(patsubst \
-	%,%/stamp-hw,$(SIM_ENABLED_ARCHES)) $(am__append_7) \
+	%,%/stamp-hw,$(SIM_ENABLED_ARCHES)) \
+	$(common_GEN_MODULES_C_TARGETS) $(patsubst \
+	%,%/stamp-modules,$(SIM_ENABLED_ARCHES)) $(am__append_7) \
 	site-sim-config.exp testrun.log testrun.sum $(am__append_16) \
 	$(am__append_21) $(am__append_27) $(am__append_32) \
 	$(am__append_40) $(am__append_46) $(am__append_51) \
@@ -1287,12 +1289,13 @@ AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_HW_CFLAGS) \
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
-	$(common_HW_CONFIG_H_TARGETS) $(am__append_4) $(am__append_15) \
-	$(am__append_19) $(am__append_26) $(am__append_30) \
-	$(am__append_39) $(am__append_45) $(am__append_50) \
-	$(am__append_53) $(am__append_59) $(am__append_63) \
-	$(am__append_74) $(am__append_80) $(am__append_86) \
-	$(am__append_95) $(am__append_100)
+	$(common_HW_CONFIG_H_TARGETS) $(common_GEN_MODULES_C_TARGETS) \
+	$(am__append_4) $(am__append_15) $(am__append_19) \
+	$(am__append_26) $(am__append_30) $(am__append_39) \
+	$(am__append_45) $(am__append_50) $(am__append_53) \
+	$(am__append_59) $(am__append_63) $(am__append_74) \
+	$(am__append_80) $(am__append_86) $(am__append_95) \
+	$(am__append_100)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_34)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_35)
@@ -1328,6 +1331,13 @@ SIM_NEW_COMMON_OBJS = sim-arange.o sim-bits.o sim-close.o \
 	sim-watch.o $(am__append_2)
 SIM_HW_DEVICES = cfi core pal glue
 common_HW_CONFIG_H_TARGETS = $(patsubst %,%/hw-config.h,$(SIM_ENABLED_ARCHES))
+am_arch_d = $(subst -,_,$(@D))
+GEN_MODULES_C_SRCS = \
+	$(wildcard \
+		$(patsubst %.o,$(abs_srcdir)/%.c,$($(am_arch_d)_libsim_a_OBJECTS) $($(am_arch_d)_libsim_a_LIBADD)) \
+		$(filter-out %.o,$(patsubst $(@D)/%.o,$(abs_srcdir)/common/%.c,$($(am_arch_d)_libsim_a_LIBADD))))
+
+common_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(filter-out ppc,$(SIM_ENABLED_ARCHES)))
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
@@ -3370,6 +3380,8 @@ common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(src
 	$(SHELL) $(srcroot)/move-if-change $@.tmp $(@D)/hw-config.h; \
 	touch $@
 .PRECIOUS: %/stamp-hw
+%/modules.c:
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) GEN_MODULES_C_SRCS="$(GEN_MODULES_C_SRCS)" -C $(@D) $(@F)
 
 # Alias for developers.
 @SIM_ENABLE_IGEN_TRUE@igen: $(IGEN)
@@ -3502,6 +3514,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bfin_TRUE@	) > $@.tmp
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/bfin/linux-fixed-code.h
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)touch $(srcdir)/bfin/linux-fixed-code.h
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/modules.c: | $(bpf_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/mloop-le.c bpf/eng-le.h: bpf/stamp-mloop-le ; @true
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/stamp-mloop-le: $(srccom)/genmloop.sh bpf/mloop.in
@@ -3549,6 +3562,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-decode-be:
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfbe cpu=bpfbf mach=bpf FLAGS="with-scache" SUFFIX="-be" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_DECODE)
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/sem-be.c bpf/decode-be.c bpf/decode-be.h: @CGEN_MAINT@ bpf/cgen-decode-be
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/modules.c: | $(cr16_BUILD_OUTPUTS)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/gencode$(EXEEXT): $(cr16_gencode_OBJECTS) $(cr16_gencode_DEPENDENCIES) cr16/$(am__dirstamp)
@@ -3565,6 +3579,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/table.c: cr16/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< >$@
+@SIM_ENABLE_ARCH_cris_TRUE@cris/modules.c: | $(cris_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_cris_TRUE@cris/mloopv10f.c cris/engv10.h: cris/stamp-mloop-v10f ; @true
 @SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v10f: $(srccom)/genmloop.sh cris/mloop.in
@@ -3601,6 +3616,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv32-switch.c $(srcdir)/cris/semcrisv32f-switch.c
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv32.h cris/cpuv32.c cris/semcrisv32f-switch.c cris/modelv32.c cris/decodev32.c cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/modules.c: | $(d10v_BUILD_OUTPUTS)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/gencode$(EXEEXT): $(d10v_gencode_OBJECTS) $(d10v_gencode_DEPENDENCIES) d10v/$(am__dirstamp)
@@ -3629,6 +3645,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) erc32/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 @SIM_ENABLE_ARCH_erc32_TRUE@sim-erc32-uninstall-local:
 @SIM_ENABLE_ARCH_erc32_TRUE@	rm -f $(DESTDIR)$(bindir)/sis
+@SIM_ENABLE_ARCH_frv_TRUE@frv/modules.c: | $(frv_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/mloop.c frv/eng.h: frv/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_frv_TRUE@frv/stamp-mloop: $(srccom)/genmloop.sh frv/mloop.in
@@ -3649,6 +3666,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)cpu=frvbf mach=frv,fr550,fr500,fr450,fr400,tomcat,simple FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cpu.h frv/sem.c frv/model.c frv/decode.c frv/decode.h: @CGEN_MAINT@ frv/cgen-cpu-decode
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/modules.c: | $(iq2000_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/mloop.c iq2000/eng.h: iq2000/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/stamp-mloop: $(srccom)/genmloop.sh iq2000/mloop.in
@@ -3669,6 +3687,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen-cpu-decode:
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)cpu=iq2000bf mach=iq2000 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cpu.h iq2000/sem.c iq2000/sem-switch.c iq2000/model.c iq2000/decode.c iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/modules.c: | $(lm32_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/mloop.c lm32/eng.h: lm32/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/stamp-mloop: $(srccom)/genmloop.sh lm32/mloop.in
@@ -3692,6 +3711,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: m32c/%.c | m32c/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/modules.c: | $(m32c_BUILD_OUTPUTS)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/opc2c$(EXEEXT): $(m32c_opc2c_OBJECTS) $(m32c_opc2c_DEPENDENCIES) m32c/$(am__dirstamp)
@@ -3708,6 +3728,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/r8c.c: m32c/r8c.opc m32c/opc2c$(EXEEXT)
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/modules.c: | $(m32r_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop.c m32r/eng.h: m32r/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop: $(srccom)/genmloop.sh m32r/mloop.in
@@ -3756,6 +3777,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode-2:
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32r2f mach=m32r2 SUFFIX=2 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu2.h m32r/sem2-switch.c m32r/model2.c m32r/decode2.c m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/modules.c: | $(m68hc11_BUILD_OUTPUTS)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/gencode$(EXEEXT): $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_DEPENDENCIES) m68hc11/$(am__dirstamp)
@@ -3770,6 +3792,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/m68hc12int.c: m68hc11/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_GEN)$< -m6812 >$@
+@SIM_ENABLE_ARCH_mips_TRUE@mips/modules.c: | $(mips_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_IGEN_ITABLE): mips/stamp-igen-itable
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_GEN_MODE_SINGLE): mips/stamp-gen-mode-single
@@ -3968,6 +3991,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mips_TRUE@	  esac \
 @SIM_ENABLE_ARCH_mips_TRUE@	done
 @SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)touch $@
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300/modules.c: | $(mn10300_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_mn10300_TRUE@$(mn10300_BUILT_SRC_FROM_IGEN): mn10300/stamp-igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300/stamp-igen: $(mn10300_IGEN_INSN) $(mn10300_IGEN_INSN_INC) $(mn10300_IGEN_DC) $(IGEN)
@@ -4008,6 +4032,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_moxie_TRUE@	  echo "tree compiler tool (dtc) is missing.  Install the tool to "; \
 @SIM_ENABLE_ARCH_moxie_TRUE@	  echo "update the device tree blob."; \
 @SIM_ENABLE_ARCH_moxie_TRUE@	fi
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/modules.c: | $(or1k_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/mloop.c or1k/eng.h: or1k/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/stamp-mloop: $(srccom)/genmloop.sh or1k/mloop.in
@@ -4050,6 +4075,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_rx_TRUE@rx/%.o: rx/%.c | rx/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_rx_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_sh_TRUE@sh/modules.c: | $(sh_BUILD_OUTPUTS)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_sh_TRUE@sh/gencode$(EXEEXT): $(sh_gencode_OBJECTS) $(sh_gencode_DEPENDENCIES) sh/$(am__dirstamp)
@@ -4067,6 +4093,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh/table.c: sh/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -s >$@
+@SIM_ENABLE_ARCH_v850_TRUE@v850/modules.c: | $(v850_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_v850_TRUE@$(v850_BUILT_SRC_FROM_IGEN): v850/stamp-igen
 @SIM_ENABLE_ARCH_v850_TRUE@v850/stamp-igen: $(v850_IGEN_INSN) $(v850_IGEN_DC) $(IGEN)

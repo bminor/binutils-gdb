@@ -35,6 +35,7 @@ BUILT_SOURCES += \
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+%D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %D%/mloop-le.c %D%/eng-le.h: %D%/stamp-mloop-le ; @true
 %D%/stamp-mloop-le: $(srccom)/genmloop.sh %D%/mloop.in

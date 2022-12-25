@@ -34,6 +34,7 @@ AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+%D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c
 

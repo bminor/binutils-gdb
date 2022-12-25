@@ -46,6 +46,7 @@ BUILT_SOURCES += \
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+%D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 ## FIXME: What is mono and what does "Use of `mono' is wip" mean (other
 ## than the apparent; some "mono" feature is work in progress)?

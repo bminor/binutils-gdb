@@ -186,8 +186,7 @@ endif
 
 all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
 generated_files = \
-	$(SIM_EXTRA_DEPS) \
-	modules.c
+	$(SIM_EXTRA_DEPS)
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,
@@ -212,7 +211,7 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	$(ECHO_STAMP) modules.c
 	$(SILENCE) LANG=C ; export LANG ; \
 	LC_ALL=C ; export LC_ALL ; \
-	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ | sort >$@.l-tmp
+	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp
 	@set -e; (\
 	echo '/* Do not modify this file.  */'; \
 	echo '/* It is created automatically by the Makefile.  */'; \

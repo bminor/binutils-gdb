@@ -130,6 +130,22 @@ endif
 MOSTLYCLEANFILES += $(%C%_HW_CONFIG_H_TARGETS) $(patsubst %,%/stamp-hw,$(SIM_ENABLED_ARCHES))
 SIM_ALL_RECURSIVE_DEPS += $(%C%_HW_CONFIG_H_TARGETS)
 
+## See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
+## TODO: Switch this to xxx_SOURCES once projects build objects in local.mk.
+am_arch_d = $(subst -,_,$(@D))
+GEN_MODULES_C_SRCS = \
+	$(wildcard \
+		$(patsubst %.o,$(abs_srcdir)/%.c,$($(am_arch_d)_libsim_a_OBJECTS) $($(am_arch_d)_libsim_a_LIBADD)) \
+		$(filter-out %.o,$(patsubst $(@D)/%.o,$(abs_srcdir)/common/%.c,$($(am_arch_d)_libsim_a_LIBADD))))
+%/modules.c:
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) GEN_MODULES_C_SRCS="$(GEN_MODULES_C_SRCS)" -C $(@D) $(@F)
+
+## NB: The ppc port doesn't currently utilize the modules API, so skip it.
+%C%_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(filter-out ppc,$(SIM_ENABLED_ARCHES)))
+MOSTLYCLEANFILES += $(%C%_GEN_MODULES_C_TARGETS) $(patsubst %,%/stamp-modules,$(SIM_ENABLED_ARCHES))
+## TODO: Drop this once each port's local.mk:libsim.a depends on it themself.
+SIM_ALL_RECURSIVE_DEPS += $(%C%_GEN_MODULES_C_TARGETS)
+
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
