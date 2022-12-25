@@ -44,6 +44,28 @@ AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 	%D%/engine.h \
 	%D%/engine.c \
 	%D%/irun.c
+%C%_BUILT_SRC_FROM_GEN_MODE_M16_M16 = \
+	%D%/m16_icache.h \
+	%D%/m16_icache.c \
+	%D%/m16_idecode.h \
+	%D%/m16_idecode.c \
+	%D%/m16_semantics.h \
+	%D%/m16_semantics.c \
+	%D%/m16_model.h \
+	%D%/m16_model.c \
+	%D%/m16_support.h \
+	%D%/m16_support.c \
+%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32 = \
+	%D%/m32_icache.h \
+	%D%/m32_icache.c \
+	%D%/m32_idecode.h \
+	%D%/m32_idecode.c \
+	%D%/m32_semantics.h \
+	%D%/m32_semantics.c \
+	%D%/m32_model.h \
+	%D%/m32_model.c \
+	%D%/m32_support.h \
+	%D%/m32_support.c
 %C%_BUILD_OUTPUTS = \
 	$(%C%_BUILT_SRC_FROM_IGEN_ITABLE) \
 	%D%/stamp-igen-itable
@@ -52,12 +74,21 @@ if SIM_MIPS_GEN_MODE_SINGLE
 	$(%C%_BUILT_SRC_FROM_GEN_MODE_SINGLE) \
 	%D%/stamp-gen-mode-single
 endif
+if SIM_MIPS_GEN_MODE_M16
+%C%_BUILD_OUTPUTS += \
+	$(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M16) \
+	$(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32) \
+	%D%/stamp-gen-mode-m16-m16 \
+	%D%/stamp-gen-mode-m16-m32
+endif
 
 ## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
 
 $(%C%_BUILT_SRC_FROM_IGEN_ITABLE): %D%/stamp-igen-itable
 $(%C%_BUILT_SRC_FROM_GEN_MODE_SINGLE): %D%/stamp-gen-mode-single
+$(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M16): %D%/stamp-gen-mode-m16-m16
+$(%C%_BUILT_SRC_FROM_GEN_MODE_M16_M32): %D%/stamp-gen-mode-m16-m32
 
 %C%_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
 %C%_IGEN_INSN = $(srcdir)/%D%/mips.igen
@@ -76,6 +107,7 @@ $(%C%_BUILT_SRC_FROM_GEN_MODE_SINGLE): %D%/stamp-gen-mode-single
 	%D%/tx.igen \
 	%D%/vr.igen
 %C%_IGEN_DC = $(srcdir)/%D%/mips.dc
+%C%_M16_DC = $(srcdir)/%D%/m16.dc
 
 ## NB:	Since these can be built by a number of generators, care
 ##	must be taken to ensure that they are only dependant on
@@ -123,6 +155,60 @@ $(%C%_BUILT_SRC_FROM_GEN_MODE_SINGLE): %D%/stamp-gen-mode-single
 		-n engine.h    -he %D%/engine.h \
 		-n engine.c    -e  %D%/engine.c \
 		-n irun.c      -r  %D%/irun.c
+	$(AM_V_at)touch $@
+
+%D%/stamp-gen-mode-m16-m16: $(%C%_IGEN_INSN) $(%C%_IGEN_INSN_INC) $(%C%_M16_DC) $(IGEN)
+	$(AM_V_GEN)$(IGEN_RUN) \
+		$(%C%_IGEN_TRACE) \
+		-I $(srcdir)/%D% \
+		-Werror \
+		-Wnodiscard \
+		$(SIM_MIPS_M16_FLAGS) \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 16 \
+		-H 15 \
+		-i $(%C%_IGEN_INSN) \
+		-o $(%C%_M16_DC) \
+		-P m16_ \
+		-x \
+		-n m16_icache.h    -hc %D%/m16_icache.h \
+		-n m16_icache.c    -c  %D%/m16_icache.c \
+		-n m16_semantics.h -hs %D%/m16_semantics.h \
+		-n m16_semantics.c -s  %D%/m16_semantics.c \
+		-n m16_idecode.h   -hd %D%/m16_idecode.h \
+		-n m16_idecode.c   -d  %D%/m16_idecode.c \
+		-n m16_model.h     -hm %D%/m16_model.h \
+		-n m16_model.c     -m  %D%/m16_model.c \
+		-n m16_support.h   -hf %D%/m16_support.h \
+		-n m16_support.c   -f  %D%/m16_support.c
+	$(AM_V_at)touch $@
+
+%D%/stamp-gen-mode-m16-m32: $(%C%_IGEN_INSN) $(%C%_IGEN_INSN_INC) $(%C%_IGEN_DC) $(IGEN)
+	$(AM_V_GEN)$(IGEN_RUN) \
+		$(%C%_IGEN_TRACE) \
+		-I $(srcdir)/%D% \
+		-Werror \
+		-Wnodiscard \
+		$(SIM_MIPS_SINGLE_FLAGS) \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-B 32 \
+		-H 31 \
+		-i $(%C%_IGEN_INSN) \
+		-o $(%C%_IGEN_DC) \
+		-P m32_ \
+		-x \
+		-n m32_icache.h    -hc %D%/m32_icache.h \
+		-n m32_icache.c    -c  %D%/m32_icache.c \
+		-n m32_semantics.h -hs %D%/m32_semantics.h \
+		-n m32_semantics.c -s  %D%/m32_semantics.c \
+		-n m32_idecode.h   -hd %D%/m32_idecode.h \
+		-n m32_idecode.c   -d  %D%/m32_idecode.c \
+		-n m32_model.h     -hm %D%/m32_model.h \
+		-n m32_model.c     -m  %D%/m32_model.c \
+		-n m32_support.h   -hf %D%/m32_support.h \
+		-n m32_support.c   -f  %D%/m32_support.c
 	$(AM_V_at)touch $@
 
 MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)

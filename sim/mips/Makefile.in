@@ -3,8 +3,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_MIPS_SINGLE_FLAGS = @SIM_MIPS_SINGLE_FLAGS@
-SIM_MIPS_M16_FLAGS = @SIM_MIPS_M16_FLAGS@
 SIM_MIPS_GEN = @SIM_MIPS_GEN@
 SIM_MIPS_MULTI_IGEN_CONFIGS = @SIM_MIPS_MULTI_IGEN_CONFIGS@
 SIM_MIPS_MULTI_SRC = @SIM_MIPS_MULTI_SRC@
@@ -87,86 +85,8 @@ IGEN_INCLUDE=\
 	$(srcdir)/mips3264r6.igen \
 
 SIM_SINGLE_ALL =
-SIM_M16_ALL = tmp-m16
+SIM_M16_ALL =
 SIM_MULTI_ALL = tmp-multi
-
-BUILT_SRC_FROM_M16 = \
-	m16_icache.h \
-	m16_icache.c \
-	m16_idecode.h \
-	m16_idecode.c \
-	m16_semantics.h \
-	m16_semantics.c \
-	m16_model.h \
-	m16_model.c \
-	m16_support.h \
-	m16_support.c \
-	\
-	m32_icache.h \
-	m32_icache.c \
-	m32_idecode.h \
-	m32_idecode.c \
-	m32_semantics.h \
-	m32_semantics.c \
-	m32_model.h \
-	m32_model.c \
-	m32_support.h \
-	m32_support.c \
-
-$(BUILT_SRC_FROM_M16): tmp-m16
-
-tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		$(SIM_MIPS_M16_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-B 16 \
-		-H 15 \
-		-i $(IGEN_INSN) \
-		-o $(M16_DC) \
-		-P m16_ \
-		-x \
-		-n m16_icache.h    -hc m16_icache.h \
-		-n m16_icache.c    -c  m16_icache.c \
-		-n m16_semantics.h -hs m16_semantics.h \
-		-n m16_semantics.c -s  m16_semantics.c \
-		-n m16_idecode.h   -hd m16_idecode.h \
-		-n m16_idecode.c   -d  m16_idecode.c \
-		-n m16_model.h     -hm m16_model.h \
-		-n m16_model.c     -m  m16_model.c \
-		-n m16_support.h   -hf m16_support.h \
-		-n m16_support.c   -f  m16_support.c \
-		#
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		$(SIM_MIPS_SINGLE_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-B 32 \
-		-H 31 \
-		-i $(IGEN_INSN) \
-		-o $(IGEN_DC) \
-		-P m32_ \
-		-x \
-		-n m32_icache.h    -hc m32_icache.h \
-		-n m32_icache.c    -c  m32_icache.c \
-		-n m32_semantics.h -hs m32_semantics.h \
-		-n m32_semantics.c -s  m32_semantics.c \
-		-n m32_idecode.h   -hd m32_idecode.h \
-		-n m32_idecode.c   -d  m32_idecode.c \
-		-n m32_model.h     -hm m32_model.h \
-		-n m32_model.c     -m  m32_model.c \
-		-n m32_support.h   -hf m32_support.h \
-		-n m32_support.c   -f  m32_support.c \
-		#
-	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MULTI = $(SIM_MIPS_MULTI_SRC)
 
@@ -257,7 +177,6 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	$(SILENCE) touch $@
 
 clean-extra:
-	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f $(BUILT_SRC_FROM_MULTI)
 	rm -f tmp-*
 	rm -f micromips16*.o micromips32*.o m16*.o m32*.o

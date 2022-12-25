@@ -203,30 +203,36 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_SINGLE_TRUE@	$(mips_BUILT_SRC_FROM_GEN_MODE_SINGLE) \
 @SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_SINGLE_TRUE@	mips/stamp-gen-mode-single
 
-@SIM_ENABLE_ARCH_mips_TRUE@am__append_63 = $(mips_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_M16_TRUE@am__append_63 = \
+@SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_M16_TRUE@	$(mips_BUILT_SRC_FROM_GEN_MODE_M16_M16) \
+@SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_M16_TRUE@	$(mips_BUILT_SRC_FROM_GEN_MODE_M16_M32) \
+@SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_M16_TRUE@	mips/stamp-gen-mode-m16-m16 \
+@SIM_ENABLE_ARCH_mips_TRUE@@SIM_MIPS_GEN_MODE_M16_TRUE@	mips/stamp-gen-mode-m16-m32
+
 @SIM_ENABLE_ARCH_mips_TRUE@am__append_64 = $(mips_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_mips_TRUE@am__append_65 = mips/multi-include.h mips/multi-run.c
-@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_66 = mn10300/run
-@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_67 = mn10300_SIM_EXTRA_HW_DEVICES="$(mn10300_SIM_EXTRA_HW_DEVICES)"
-@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_68 = $(mn10300_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_mips_TRUE@am__append_65 = $(mips_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_mips_TRUE@am__append_66 = mips/multi-include.h mips/multi-run.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_67 = mn10300/run
+@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_68 = mn10300_SIM_EXTRA_HW_DEVICES="$(mn10300_SIM_EXTRA_HW_DEVICES)"
 @SIM_ENABLE_ARCH_mn10300_TRUE@am__append_69 = $(mn10300_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_moxie_TRUE@am__append_70 = moxie/run
-@SIM_ENABLE_ARCH_msp430_TRUE@am__append_71 = msp430/run
-@SIM_ENABLE_ARCH_or1k_TRUE@am__append_72 = or1k/run
-@SIM_ENABLE_ARCH_or1k_TRUE@am__append_73 = $(or1k_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_70 = $(mn10300_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_moxie_TRUE@am__append_71 = moxie/run
+@SIM_ENABLE_ARCH_msp430_TRUE@am__append_72 = msp430/run
+@SIM_ENABLE_ARCH_or1k_TRUE@am__append_73 = or1k/run
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_74 = $(or1k_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_75 = ppc/run ppc/psim
-@SIM_ENABLE_ARCH_pru_TRUE@am__append_76 = pru/run
-@SIM_ENABLE_ARCH_riscv_TRUE@am__append_77 = riscv/run
-@SIM_ENABLE_ARCH_rl78_TRUE@am__append_78 = rl78/run
-@SIM_ENABLE_ARCH_rx_TRUE@am__append_79 = rx/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_80 = sh/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_81 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_82 = sh/gencode
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_83 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_84 = v850/run
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_85 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_or1k_TRUE@am__append_75 = $(or1k_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_76 = ppc/run ppc/psim
+@SIM_ENABLE_ARCH_pru_TRUE@am__append_77 = pru/run
+@SIM_ENABLE_ARCH_riscv_TRUE@am__append_78 = riscv/run
+@SIM_ENABLE_ARCH_rl78_TRUE@am__append_79 = rl78/run
+@SIM_ENABLE_ARCH_rx_TRUE@am__append_80 = rx/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_81 = sh/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_82 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_83 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_84 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_85 = v850/run
 @SIM_ENABLE_ARCH_v850_TRUE@am__append_86 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_87 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -1205,22 +1211,22 @@ SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 AM_MAKEFLAGS = SIM_NEW_COMMON_OBJS_="$(SIM_NEW_COMMON_OBJS)" \
 	$(am__append_3) $(am__append_12) $(am__append_21) \
 	$(am__append_42) $(am__append_50) $(am__append_54) \
-	$(am__append_61) $(am__append_67)
+	$(am__append_61) $(am__append_68)
 pkginclude_HEADERS = $(am__append_1)
 noinst_LIBRARIES = $(SIM_COMMON_LIB) $(am__append_5)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
-DISTCLEANFILES = $(am__append_65)
+DISTCLEANFILES = $(am__append_66)
 MOSTLYCLEANFILES = core $(common_HW_CONFIG_H_TARGETS) $(patsubst \
 	%,%/stamp-hw,$(SIM_ENABLED_ARCHES)) $(am__append_7) \
 	site-sim-config.exp testrun.log testrun.sum $(am__append_15) \
 	$(am__append_19) $(am__append_24) $(am__append_28) \
 	$(am__append_35) $(am__append_40) $(am__append_44) \
 	$(am__append_48) $(am__append_52) $(am__append_57) \
-	$(am__append_64) $(am__append_69) $(am__append_74) \
-	$(am__append_83) $(am__append_86)
+	$(am__append_65) $(am__append_70) $(am__append_75) \
+	$(am__append_84) $(am__append_87)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include -I../bfd -I.. \
 	$(SIM_HW_CFLAGS) $(SIM_INLINE) -I$(srcdir)/common \
@@ -1234,8 +1240,8 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
 	$(am__append_17) $(am__append_23) $(am__append_26) \
 	$(am__append_34) $(am__append_39) $(am__append_43) \
 	$(am__append_46) $(am__append_51) $(am__append_55) \
-	$(am__append_63) $(am__append_68) $(am__append_73) \
-	$(am__append_81) $(am__append_85)
+	$(am__append_64) $(am__append_69) $(am__append_74) \
+	$(am__append_82) $(am__append_86)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_30)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_31)
@@ -1610,10 +1616,33 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/engine.c \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/irun.c
 
+@SIM_ENABLE_ARCH_mips_TRUE@mips_BUILT_SRC_FROM_GEN_MODE_M16_M16 = \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_icache.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_icache.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_idecode.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_idecode.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_semantics.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_semantics.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_model.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_model.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_support.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m16_support.c \
+@SIM_ENABLE_ARCH_mips_TRUE@mips_BUILT_SRC_FROM_GEN_MODE_M16_M32 = \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_icache.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_icache.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_idecode.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_idecode.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_semantics.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_semantics.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_model.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_model.c \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_support.h \
+@SIM_ENABLE_ARCH_mips_TRUE@	mips/m32_support.c
+
 @SIM_ENABLE_ARCH_mips_TRUE@mips_BUILD_OUTPUTS =  \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(mips_BUILT_SRC_FROM_IGEN_ITABLE) \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/stamp-igen-itable \
-@SIM_ENABLE_ARCH_mips_TRUE@	$(am__append_62)
+@SIM_ENABLE_ARCH_mips_TRUE@	$(am__append_62) $(am__append_63)
 @SIM_ENABLE_ARCH_mips_TRUE@mips_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
 @SIM_ENABLE_ARCH_mips_TRUE@mips_IGEN_INSN = $(srcdir)/mips/mips.igen
 @SIM_ENABLE_ARCH_mips_TRUE@mips_IGEN_INSN_INC = \
@@ -1632,6 +1661,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/vr.igen
 
 @SIM_ENABLE_ARCH_mips_TRUE@mips_IGEN_DC = $(srcdir)/mips/mips.dc
+@SIM_ENABLE_ARCH_mips_TRUE@mips_M16_DC = $(srcdir)/mips/m16.dc
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_run_SOURCES = 
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_run_LDADD = \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/nrun.o \
@@ -3558,6 +3588,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_IGEN_ITABLE): mips/stamp-igen-itable
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_GEN_MODE_SINGLE): mips/stamp-gen-mode-single
+@SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_GEN_MODE_M16_M16): mips/stamp-gen-mode-m16-m16
+@SIM_ENABLE_ARCH_mips_TRUE@$(mips_BUILT_SRC_FROM_GEN_MODE_M16_M32): mips/stamp-gen-mode-m16-m32
 
 @SIM_ENABLE_ARCH_mips_TRUE@mips/stamp-igen-itable: $(mips_IGEN_INSN) $(mips_IGEN_INSN_INC) $(IGEN)
 @SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_GEN)$(IGEN_RUN) \
@@ -3602,6 +3634,60 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mips_TRUE@		-n engine.h    -he mips/engine.h \
 @SIM_ENABLE_ARCH_mips_TRUE@		-n engine.c    -e  mips/engine.c \
 @SIM_ENABLE_ARCH_mips_TRUE@		-n irun.c      -r  mips/irun.c
+@SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)touch $@
+
+@SIM_ENABLE_ARCH_mips_TRUE@mips/stamp-gen-mode-m16-m16: $(mips_IGEN_INSN) $(mips_IGEN_INSN_INC) $(mips_M16_DC) $(IGEN)
+@SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_GEN)$(IGEN_RUN) \
+@SIM_ENABLE_ARCH_mips_TRUE@		$(mips_IGEN_TRACE) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-I $(srcdir)/mips \
+@SIM_ENABLE_ARCH_mips_TRUE@		-Werror \
+@SIM_ENABLE_ARCH_mips_TRUE@		-Wnodiscard \
+@SIM_ENABLE_ARCH_mips_TRUE@		$(SIM_MIPS_M16_FLAGS) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-G gen-direct-access \
+@SIM_ENABLE_ARCH_mips_TRUE@		-G gen-zero-r0 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-B 16 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-H 15 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-i $(mips_IGEN_INSN) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-o $(mips_M16_DC) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-P m16_ \
+@SIM_ENABLE_ARCH_mips_TRUE@		-x \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_icache.h    -hc mips/m16_icache.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_icache.c    -c  mips/m16_icache.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_semantics.h -hs mips/m16_semantics.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_semantics.c -s  mips/m16_semantics.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_idecode.h   -hd mips/m16_idecode.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_idecode.c   -d  mips/m16_idecode.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_model.h     -hm mips/m16_model.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_model.c     -m  mips/m16_model.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_support.h   -hf mips/m16_support.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m16_support.c   -f  mips/m16_support.c
+@SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)touch $@
+
+@SIM_ENABLE_ARCH_mips_TRUE@mips/stamp-gen-mode-m16-m32: $(mips_IGEN_INSN) $(mips_IGEN_INSN_INC) $(mips_IGEN_DC) $(IGEN)
+@SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_GEN)$(IGEN_RUN) \
+@SIM_ENABLE_ARCH_mips_TRUE@		$(mips_IGEN_TRACE) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-I $(srcdir)/mips \
+@SIM_ENABLE_ARCH_mips_TRUE@		-Werror \
+@SIM_ENABLE_ARCH_mips_TRUE@		-Wnodiscard \
+@SIM_ENABLE_ARCH_mips_TRUE@		$(SIM_MIPS_SINGLE_FLAGS) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-G gen-direct-access \
+@SIM_ENABLE_ARCH_mips_TRUE@		-G gen-zero-r0 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-B 32 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-H 31 \
+@SIM_ENABLE_ARCH_mips_TRUE@		-i $(mips_IGEN_INSN) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-o $(mips_IGEN_DC) \
+@SIM_ENABLE_ARCH_mips_TRUE@		-P m32_ \
+@SIM_ENABLE_ARCH_mips_TRUE@		-x \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_icache.h    -hc mips/m32_icache.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_icache.c    -c  mips/m32_icache.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_semantics.h -hs mips/m32_semantics.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_semantics.c -s  mips/m32_semantics.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_idecode.h   -hd mips/m32_idecode.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_idecode.c   -d  mips/m32_idecode.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_model.h     -hm mips/m32_model.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_model.c     -m  mips/m32_model.c \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_support.h   -hf mips/m32_support.h \
+@SIM_ENABLE_ARCH_mips_TRUE@		-n m32_support.c   -f  mips/m32_support.c
 @SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_mn10300_TRUE@$(mn10300_BUILT_SRC_FROM_IGEN): mn10300/stamp-igen
