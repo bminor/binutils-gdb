@@ -244,7 +244,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   }
 
   /* Do some final OpenRISC sim specific initializations.  */
-  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+  for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
       /* Only needed for profiling, but the structure member is small.  */
