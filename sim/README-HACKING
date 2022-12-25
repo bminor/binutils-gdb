@@ -46,9 +46,6 @@ The Makefile.in of a simulator using the common framework should look like:
 
 # List of object files, less common parts.
 SIM_OBJS =
-# List of extra dependencies.
-# Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
 # Dependency of `clean' to clean any extra files.

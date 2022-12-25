@@ -85,9 +85,6 @@ POSTCOMPILE = @true
 
 # List of object files, less common parts.
 SIM_OBJS =
-# List of extra dependencies.
-# Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
 # List of main object files for `run'.
@@ -185,17 +182,6 @@ override POSTCOMPILE =
 endif
 
 all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
-generated_files = \
-	$(SIM_EXTRA_DEPS)
-
-# Ensure that generated files are created early.  Use order-only
-# dependencies if available.  They require GNU make 3.80 or newer,
-# and the .VARIABLES variable was introduced at the same time.
-ifdef .VARIABLES
-$(all_object_files): | $(generated_files)
-else
-$(all_object_files) : $(generated_files)
-endif
 
 # Dependencies.
 -include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
