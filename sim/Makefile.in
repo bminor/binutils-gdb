@@ -269,15 +269,16 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	lm32/.gdbinit m32c/Makefile.sim m32c/.gdbinit \
 	m32r/Makefile.sim m32r/.gdbinit m68hc11/Makefile.sim \
 	m68hc11/.gdbinit mcore/Makefile.sim mcore/.gdbinit \
-	microblaze/Makefile.sim microblaze/.gdbinit mips/.gdbinit \
-	mn10300/Makefile.sim mn10300/.gdbinit moxie/Makefile.sim \
-	moxie/.gdbinit msp430/Makefile.sim msp430/.gdbinit \
-	or1k/Makefile.sim or1k/.gdbinit ppc/.gdbinit pru/Makefile.sim \
-	pru/.gdbinit riscv/Makefile.sim riscv/.gdbinit \
-	rl78/Makefile.sim rl78/.gdbinit rx/Makefile.sim rx/.gdbinit \
-	sh/Makefile.sim sh/.gdbinit erc32/Makefile.sim erc32/.gdbinit \
-	v850/Makefile.sim v850/.gdbinit example-synacor/Makefile.sim \
-	example-synacor/.gdbinit arch-subdir.mk .gdbinit
+	microblaze/Makefile.sim microblaze/.gdbinit mips/Makefile.sim \
+	mips/.gdbinit mn10300/Makefile.sim mn10300/.gdbinit \
+	moxie/Makefile.sim moxie/.gdbinit msp430/Makefile.sim \
+	msp430/.gdbinit or1k/Makefile.sim or1k/.gdbinit ppc/.gdbinit \
+	pru/Makefile.sim pru/.gdbinit riscv/Makefile.sim \
+	riscv/.gdbinit rl78/Makefile.sim rl78/.gdbinit rx/Makefile.sim \
+	rx/.gdbinit sh/Makefile.sim sh/.gdbinit erc32/Makefile.sim \
+	erc32/.gdbinit v850/Makefile.sim v850/.gdbinit \
+	example-synacor/Makefile.sim example-synacor/.gdbinit \
+	arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1109,6 +1110,15 @@ SIM_HW_SOCKSER = @SIM_HW_SOCKSER@
 SIM_INLINE = @SIM_INLINE@
 SIM_MIPS_BITSIZE = @SIM_MIPS_BITSIZE@
 SIM_MIPS_FPU_BITSIZE = @SIM_MIPS_FPU_BITSIZE@
+SIM_MIPS_GEN = @SIM_MIPS_GEN@
+SIM_MIPS_IGEN_FLAGS = @SIM_MIPS_IGEN_FLAGS@
+SIM_MIPS_M16_FLAGS = @SIM_MIPS_M16_FLAGS@
+SIM_MIPS_MICROMIPS16_FLAGS = @SIM_MIPS_MICROMIPS16_FLAGS@
+SIM_MIPS_MICROMIPS_FLAGS = @SIM_MIPS_MICROMIPS_FLAGS@
+SIM_MIPS_MULTI_FLAGS = @SIM_MIPS_MULTI_FLAGS@
+SIM_MIPS_MULTI_IGEN_CONFIGS = @SIM_MIPS_MULTI_IGEN_CONFIGS@
+SIM_MIPS_MULTI_OBJ = @SIM_MIPS_MULTI_OBJ@
+SIM_MIPS_MULTI_SRC = @SIM_MIPS_MULTI_SRC@
 SIM_MIPS_SUBTARGET = @SIM_MIPS_SUBTARGET@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 SIM_RISCV_BITSIZE = @SIM_RISCV_BITSIZE@
@@ -1839,6 +1849,8 @@ mcore/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 microblaze/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/microblaze/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 microblaze/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mips/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/mips/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 mips/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
