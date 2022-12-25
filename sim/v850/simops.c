@@ -48,6 +48,9 @@ int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 #define SIZE_VALUES 11
 #endif
 
+/* TODO: This file largely assumes a single CPU.  */
+#define CPU STATE_CPU (sd, 0)
+
 
 uint32_t   trace_values[3];
 int          trace_num_values;

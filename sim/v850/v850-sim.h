@@ -91,9 +91,9 @@ nia = PC
 #define GR  (V850_SIM_CPU (CPU)->reg.regs)
 #define SR  (V850_SIM_CPU (CPU)->reg.sregs)
 #define VR  (V850_SIM_CPU (CPU)->reg.vregs)
-#define MPU0_SR  (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.mpu0_sregs)
-#define MPU1_SR  (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.mpu1_sregs)
-#define FPU_SR   (V850_SIM_CPU (STATE_CPU (sd, 0))->reg.fpu_sregs)
+#define MPU0_SR  (V850_SIM_CPU (CPU)->reg.mpu0_sregs)
+#define MPU1_SR  (V850_SIM_CPU (CPU)->reg.mpu1_sregs)
+#define FPU_SR   (V850_SIM_CPU (CPU)->reg.fpu_sregs)
 
 /* old */
 #define State    (V850_SIM_CPU (STATE_CPU (simulator, 0))->reg)
@@ -379,7 +379,7 @@ enum FPU_COMPARE {
 sim_core_read_aligned_2 (CPU, PC, exec_map, (EA))
 
 #define IMEM16_IMMED(EA,N) \
-sim_core_read_aligned_2 (STATE_CPU (sd, 0), \
+sim_core_read_aligned_2 (STATE_CPU (SD, 0), \
 			 PC, exec_map, (EA) + (N) * 2)
 
 #define load_mem(ADDR,LEN) \
