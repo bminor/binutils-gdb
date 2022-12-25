@@ -12,20 +12,26 @@ dnl GNU General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_DEFUN([SIM_AC_OPTION_SMP],
-[
+AC_DEFUN([SIM_AC_OPTION_SMP], [dnl
 AC_MSG_CHECKING([number of sim cpus to support])
-default_sim_smp="ifelse([$1],,5,[$1])"
-sim_smp="$default_sim_smp""
+dnl TODO: We should increase the default to use smp at some point.  When we do,
+dnl the ppc/configure sim-smp option should be merged.  See the WITH_SMP check
+dnl below for more cleanups too.
+default_sim_smp="0"
+sim_smp="$default_sim_smp"
 AC_ARG_ENABLE(sim-smp,
 [AS_HELP_STRING([--enable-sim-smp=n],
-		[Specify number of processors to configure for (default ${default_sim_smp})])],
+		[Specify number of processors to configure for (default 1)])],
 [case "${enableval}" in
   yes)	sim_smp="5";;
   no)	sim_smp="0";;
   *)	sim_smp="$enableval";;
 esac])dnl
 sim_igen_smp="-N ${sim_smp}"
-AC_DEFINE_UNQUOTED([WITH_SMP], [$sim_smp], [Sim SMP settings])
+dnl NB: The ppc code uses a diff default because its smp works.  That is why
+dnl we don't unconditionally enable WITH_SMP here.  Once we unify ppc, we can
+dnl make this unconditional.
+AS_VAR_IF([sim_smp], [0], [], [dnl
+  AC_DEFINE_UNQUOTED([WITH_SMP], [$sim_smp], [Sim SMP settings])])
 AC_MSG_RESULT($sim_smp)
 ])

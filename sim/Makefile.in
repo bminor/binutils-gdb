@@ -241,6 +241,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
 	$(top_srcdir)/m4/sim_ac_option_reserved_bits.m4 \
 	$(top_srcdir)/m4/sim_ac_option_scache.m4 \
+	$(top_srcdir)/m4/sim_ac_option_smp.m4 \
 	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
 	$(top_srcdir)/m4/sim_ac_option_trace.m4 \
 	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \

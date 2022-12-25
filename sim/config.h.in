@@ -468,6 +468,9 @@
 /* Sim cache szie */
 #undef WITH_SCACHE
 
+/* Sim SMP settings */
+#undef WITH_SMP
+
 /* How to route I/O */
 #undef WITH_STDIO
 
