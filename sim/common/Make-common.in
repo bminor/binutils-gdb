@@ -50,7 +50,6 @@ include $(srcroot)/gdb/silent-rules.mk
 
 ifeq ($(V),0)
 ECHO_STAMP = @echo "  GEN   "
-ECHO_IGEN  = @echo "  IGEN   $(<F)";
 else
 ECHO_STAMP = @:
 endif
@@ -78,11 +77,6 @@ COMPILE.pre = $(CC) $(C_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(ECHO_CC) $(COMPILE.pre) $(ALL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
-
-# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running it.
-IGEN = ../igen/igen$(EXEEXT)
-IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN) $(IGEN_FLAGS_SMP)
 
 # Each simulator's Makefile.in defines one or more of these variables
 # to override our settings as necessary.  There is no need to define these
@@ -271,8 +265,7 @@ TAGS: force
 mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core \
 		run$(EXEEXT) libsim.a \
-		modules.c stamp-modules \
-		tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
+		modules.c stamp-modules
 
 distclean maintainer-clean realclean: clean
 	rm -f TAGS Makefile
