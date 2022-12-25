@@ -86,55 +86,9 @@ IGEN_INCLUDE=\
 	$(srcdir)/mips3264r2.igen \
 	$(srcdir)/mips3264r6.igen \
 
-SIM_SINGLE_ALL = tmp-single
+SIM_SINGLE_ALL =
 SIM_M16_ALL = tmp-m16
 SIM_MULTI_ALL = tmp-multi
-
-BUILT_SRC_FROM_SINGLE = \
-	icache.h \
-	icache.c \
-	idecode.h \
-	idecode.c \
-	semantics.h \
-	semantics.c \
-	model.h \
-	model.c \
-	support.h \
-	support.c \
-	engine.h \
-	engine.c \
-	irun.c \
-
-$(BUILT_SRC_FROM_SINGLE): tmp-single
-
-tmp-single: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		$(SIM_MIPS_SINGLE_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-B 32 \
-		-H 31 \
-		-i $(IGEN_INSN) \
-		-o $(IGEN_DC) \
-		-x \
-		-n icache.h    -hc icache.h \
-		-n icache.c    -c  icache.c \
-		-n semantics.h -hs semantics.h \
-		-n semantics.c -s  semantics.c \
-		-n idecode.h   -hd idecode.h \
-		-n idecode.c   -d  idecode.c \
-		-n model.h     -hm model.h \
-		-n model.c     -m  model.c \
-		-n support.h   -hf support.h \
-		-n support.c   -f  support.c \
-		-n engine.h    -he engine.h \
-		-n engine.c    -e  engine.c \
-		-n irun.c      -r  irun.c
-	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
@@ -303,7 +257,6 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	$(SILENCE) touch $@
 
 clean-extra:
-	rm -f $(BUILT_SRC_FROM_SINGLE)
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f $(BUILT_SRC_FROM_MULTI)
 	rm -f tmp-*
