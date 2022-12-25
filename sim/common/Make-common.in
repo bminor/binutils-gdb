@@ -102,8 +102,6 @@ SIM_EXTRA_LIBS =
 SIM_RUN_OBJS = nrun.o
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
-# Likewise `distclean'
-SIM_EXTRA_DISTCLEAN =
 
 # Every time a new general purpose source file was added every target's
 # Makefile.in needed to be updated to include the file in SIM_OBJS.
@@ -276,9 +274,8 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 		modules.c stamp-modules \
 		tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
-distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
-	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
+distclean maintainer-clean realclean: clean
+	rm -f TAGS Makefile
 
 .c.o:
 	$(COMPILE) $<
