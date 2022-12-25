@@ -6,7 +6,6 @@
 SIM_MIPS_IGEN_FLAGS = @SIM_MIPS_IGEN_FLAGS@
 SIM_MIPS_M16_FLAGS = @SIM_MIPS_M16_FLAGS@
 SIM_MIPS_GEN = @SIM_MIPS_GEN@
-SIM_MIPS_IGEN_ITABLE_FLAGS = @SIM_MIPS_IGEN_ITABLE_FLAGS@
 SIM_MIPS_MULTI_IGEN_CONFIGS = @SIM_MIPS_MULTI_IGEN_CONFIGS@
 SIM_MIPS_MULTI_SRC = @SIM_MIPS_MULTI_SRC@
 SIM_MIPS_MULTI_OBJ = @SIM_MIPS_MULTI_OBJ@
@@ -64,8 +63,6 @@ SIM_EXTRA_CLEAN = clean-extra
 
 all: $(SIM_$(SIM_MIPS_GEN)_ALL)
 
-SIM_EXTRA_DEPS = itable.h
-
 ## COMMON_POST_CONFIG_FRAG
 
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
@@ -89,36 +86,9 @@ IGEN_INCLUDE=\
 	$(srcdir)/mips3264r2.igen \
 	$(srcdir)/mips3264r6.igen \
 
-# NB:	Since these can be built by a number of generators, care
-#	must be taken to ensure that they are only dependant on
-#	one of those generators.
-BUILT_SRC_FROM_IGEN_ITABLE = \
-	itable.h \
-	itable.c \
-
 SIM_IGEN_ALL = tmp-igen
 SIM_M16_ALL = tmp-m16
 SIM_MULTI_ALL = tmp-multi
-
-$(BUILT_SRC_FROM_IGEN_ITABLE): tmp-itable
-
-tmp-itable: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
-	$(ECHO_IGEN) $(IGEN_RUN) \
-		$(IGEN_TRACE) \
-		-I $(srcdir) \
-		-Werror \
-		-Wnodiscard \
-		-Wnowidth \
-		-Wnounimplemented \
-		$(SIM_MIPS_IGEN_ITABLE_FLAGS) \
-		-G gen-direct-access \
-		-G gen-zero-r0 \
-		-i $(IGEN_INSN) \
-		-n itable.h    -ht itable.h \
-		-n itable.c    -t  itable.c \
-		#
-	$(SILENCE) touch $@
-
 
 BUILT_SRC_FROM_IGEN = \
 	icache.h \
@@ -333,9 +303,8 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	$(SILENCE) touch $@
 
 clean-extra:
-	rm -f $(BUILT_SRC_FROM_IGEN_ITABLE)
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f $(BUILT_SRC_FROM_MULTI)
 	rm -f tmp-*
-	rm -f micromips16*.o micromips32*.o m16*.o m32*.o itable*.o
+	rm -f micromips16*.o micromips32*.o m16*.o m32*.o
