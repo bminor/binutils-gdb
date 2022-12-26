@@ -33,6 +33,7 @@
 #include "gdbsupport/thread-pool.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/tag.h"
+#include "dwarf2/abbrev-cache.h"
 #include "gdbsupport/range-chain.h"
 
 struct dwarf2_per_cu_data;
@@ -353,6 +354,75 @@ private:
      that the 'get' method is never called on this future, only
      'wait'.  */
   gdb::future<void> m_future;
+};
+
+class cutu_reader;
+
+/* An instance of this is created when scanning DWARF to create a
+   cooked index.  */
+
+class cooked_index_storage
+{
+public:
+
+  cooked_index_storage ();
+  DISABLE_COPY_AND_ASSIGN (cooked_index_storage);
+
+  /* Return the current abbrev cache.  */
+  abbrev_cache *get_abbrev_cache ()
+  {
+    return &m_abbrev_cache;
+  }
+
+  /* Return the DIE reader corresponding to PER_CU.  If no such reader
+     has been registered, return NULL.  */
+  cutu_reader *get_reader (dwarf2_per_cu_data *per_cu);
+
+  /* Preserve READER by storing it in the local hash table.  */
+  cutu_reader *preserve (std::unique_ptr<cutu_reader> reader);
+
+  /* Add an entry to the index.  The arguments describe the entry; see
+     cooked-index.h.  The new entry is returned.  */
+  const cooked_index_entry *add (sect_offset die_offset, enum dwarf_tag tag,
+				 cooked_index_flag flags,
+				 const char *name,
+				 const cooked_index_entry *parent_entry,
+				 dwarf2_per_cu_data *per_cu)
+  {
+    return m_index->add (die_offset, tag, flags, name, parent_entry, per_cu);
+  }
+
+  /* Install the current addrmap into the shard being constructed,
+     then transfer ownership of the index to the caller.  */
+  std::unique_ptr<cooked_index_shard> release ()
+  {
+    m_index->install_addrmap (&m_addrmap);
+    return std::move (m_index);
+  }
+
+  /* Return the mutable addrmap that is currently being created.  */
+  addrmap_mutable *get_addrmap ()
+  {
+    return &m_addrmap;
+  }
+
+private:
+
+  /* Hash function for a cutu_reader.  */
+  static hashval_t hash_cutu_reader (const void *a);
+
+  /* Equality function for cutu_reader.  */
+  static int eq_cutu_reader (const void *a, const void *b);
+
+  /* The abbrev cache used by this indexer.  */
+  abbrev_cache m_abbrev_cache;
+  /* A hash table of cutu_reader objects.  */
+  htab_up m_reader_hash;
+  /* The index shard that is being constructed.  */
+  std::unique_ptr<cooked_index_shard> m_index;
+
+  /* A writeable addrmap being constructed by this scanner.  */
+  addrmap_mutable m_addrmap;
 };
 
 /* The main index of DIEs.  The parallel DIE indexers create

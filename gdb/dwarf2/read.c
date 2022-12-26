@@ -742,7 +742,6 @@ show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
 static void dwarf2_find_base_address (struct die_info *die,
 				      struct dwarf2_cu *cu);
 
-class cooked_index_storage;
 static void build_type_psymtabs_reader (cutu_reader *reader,
 					cooked_index_storage *storage);
 
@@ -4418,105 +4417,53 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 }
 
 
-/* An instance of this is created when scanning DWARF to create a
-   cooked index.  */
-
-class cooked_index_storage
+cooked_index_storage::cooked_index_storage ()
+  : m_reader_hash (htab_create_alloc (10, hash_cutu_reader,
+				      eq_cutu_reader,
+				      htab_delete_entry<cutu_reader>,
+				      xcalloc, xfree)),
+    m_index (new cooked_index_shard)
 {
-public:
+}
 
-  cooked_index_storage ()
-    : m_reader_hash (htab_create_alloc (10, hash_cutu_reader,
-					eq_cutu_reader,
-					htab_delete_entry<cutu_reader>,
-					xcalloc, xfree)),
-      m_index (new cooked_index_shard)
-  {
-  }
+cutu_reader *
+cooked_index_storage::get_reader (dwarf2_per_cu_data *per_cu)
+{
+  int index = per_cu->index;
+  return (cutu_reader *) htab_find_with_hash (m_reader_hash.get (),
+					      &index, index);
+}
 
-  DISABLE_COPY_AND_ASSIGN (cooked_index_storage);
+cutu_reader *
+cooked_index_storage::preserve (std::unique_ptr<cutu_reader> reader)
+{
+  m_abbrev_cache.add (reader->release_abbrev_table ());
 
-  /* Return the current abbrev cache.  */
-  abbrev_cache *get_abbrev_cache ()
-  {
-    return &m_abbrev_cache;
-  }
+  int index = reader->cu->per_cu->index;
+  void **slot = htab_find_slot_with_hash (m_reader_hash.get (), &index,
+					  index, INSERT);
+  gdb_assert (*slot == nullptr);
+  cutu_reader *result = reader.get ();
+  *slot = reader.release ();
+  return result;
+}
 
-  /* Return the DIE reader corresponding to PER_CU.  If no such reader
-     has been registered, return NULL.  */
-  cutu_reader *get_reader (dwarf2_per_cu_data *per_cu)
-  {
-    int index = per_cu->index;
-    return (cutu_reader *) htab_find_with_hash (m_reader_hash.get (),
-						&index, index);
-  }
+/* Hash function for a cutu_reader.  */
+hashval_t
+cooked_index_storage::hash_cutu_reader (const void *a)
+{
+  const cutu_reader *reader = (const cutu_reader *) a;
+  return reader->cu->per_cu->index;
+}
 
-  /* Preserve READER by storing it in the local hash table.  */
-  cutu_reader *preserve (std::unique_ptr<cutu_reader> reader)
-  {
-    m_abbrev_cache.add (reader->release_abbrev_table ());
-
-    int index = reader->cu->per_cu->index;
-    void **slot = htab_find_slot_with_hash (m_reader_hash.get (), &index,
-					    index, INSERT);
-    gdb_assert (*slot == nullptr);
-    cutu_reader *result = reader.get ();
-    *slot = reader.release ();
-    return result;
-  }
-
-  /* Add an entry to the index.  The arguments describe the entry; see
-     cooked-index.h.  The new entry is returned.  */
-  const cooked_index_entry *add (sect_offset die_offset, enum dwarf_tag tag,
-				 cooked_index_flag flags,
-				 const char *name,
-				 const cooked_index_entry *parent_entry,
-				 dwarf2_per_cu_data *per_cu)
-  {
-    return m_index->add (die_offset, tag, flags, name, parent_entry, per_cu);
-  }
-
-  /* Install the current addrmap into the index shard being constructed,
-     then transfer ownership of the index to the caller.  */
-  std::unique_ptr<cooked_index_shard> release ()
-  {
-    m_index->install_addrmap (&m_addrmap);
-    return std::move (m_index);
-  }
-
-  /* Return the mutable addrmap that is currently being created.  */
-  addrmap_mutable *get_addrmap ()
-  {
-    return &m_addrmap;
-  }
-
-private:
-
-  /* Hash function for a cutu_reader.  */
-  static hashval_t hash_cutu_reader (const void *a)
-  {
-    const cutu_reader *reader = (const cutu_reader *) a;
-    return reader->cu->per_cu->index;
-  }
-
-  /* Equality function for cutu_reader.  */
-  static int eq_cutu_reader (const void *a, const void *b)
-  {
-    const cutu_reader *ra = (const cutu_reader *) a;
-    const int *rb = (const int *) b;
-    return ra->cu->per_cu->index == *rb;
-  }
-
-  /* The abbrev cache used by this indexer.  */
-  abbrev_cache m_abbrev_cache;
-  /* A hash table of cutu_reader objects.  */
-  htab_up m_reader_hash;
-  /* The index shard that is being constructed.  */
-  std::unique_ptr<cooked_index_shard> m_index;
-
-  /* A writeable addrmap being constructed by this scanner.  */
-  addrmap_mutable m_addrmap;
-};
+/* Equality function for cutu_reader.  */
+int
+cooked_index_storage::eq_cutu_reader (const void *a, const void *b)
+{
+  const cutu_reader *ra = (const cutu_reader *) a;
+  const int *rb = (const int *) b;
+  return ra->cu->per_cu->index == *rb;
+}
 
 /* An instance of this is created to index a CU.  */
 
