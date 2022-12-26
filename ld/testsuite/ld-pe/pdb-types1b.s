@@ -33,6 +33,7 @@
 
 .equ LF_USHORT, 0x8002
 .equ LF_LONG, 0x8003
+.equ LF_ULONG, 0x8004
 .equ LF_UQUADWORD, 0x800a
 
 .equ CV_PTR_NEAR32, 0xa
@@ -447,7 +448,7 @@
 
 # Type 1021, struct quux, field list 1020
 .struct4:
-.short .types_end - .struct4 - 2
+.short .arr2 - .struct4 - 2
 .short LF_STRUCTURE
 .short 1 # no. members
 .short 0 # property
@@ -457,5 +458,123 @@
 .short 4 # size
 .asciz "quux" # name
 .byte 0xf1 # padding
+
+# Type 1022, array[60000] of char
+.arr2:
+.short .fieldlist8 - .arr2 - 2
+.short LF_ARRAY
+.long T_CHAR # element type
+.long T_INT4 # index type
+.short LF_USHORT
+.short 60000 # size in bytes
+.byte 0 # name
+.byte 0xf3 # padding
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+
+# Type 1023, field list for struct longstruct
+.fieldlist8:
+.short .struct5 - .fieldlist8 - 2
+.short LF_FIELDLIST
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short 0 # offset
+.asciz "a"
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short LF_USHORT
+.short 60000 # offset
+.asciz "b"
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short LF_ULONG
+.long 120000 # offset
+.asciz "c"
+
+# Type 1024, struct longstruct
+.struct5:
+.short .fieldlist9 - .struct5 - 2
+.short LF_STRUCTURE
+.short 3 # no. members
+.short 0 # property
+.long 0x1023 # field list
+.long 0 # type derived from
+.long 0 # type of vshape table
+.short LF_ULONG
+.long 180000 # size
+.asciz "longstruct" # name
+.byte 0xf3 # padding
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+
+# Type 1025, field list for union longunion
+.fieldlist9:
+.short .union4 - .fieldlist9 - 2
+.short LF_FIELDLIST
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short 0 # offset
+.asciz "a"
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short 0 # offset
+.asciz "b"
+
+# Type 1026, union longunion (field list 1025)
+.union4:
+.short .fieldlist10 - .union4 - 2
+.short LF_UNION
+.short 2 # no. members
+.short 0 # property
+.long 0x1025 # field list
+.short LF_USHORT
+.short 60000 # size
+.asciz "longunion"
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+
+# Type 1027, field list with base class longstruct
+.fieldlist10:
+.short .fieldlist11 - .fieldlist10 - 2
+.short LF_FIELDLIST
+.short LF_BCLASS
+.short 0 # attributes
+.long 0x1024 # base class
+.short LF_ULONG
+.long 120000 # offset within class
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short 0 # offset
+.asciz "d"
+
+# Type 1028, field list with virtual base class longstruct
+.fieldlist11:
+.short .types_end - .fieldlist11 - 2
+.short LF_FIELDLIST
+.short LF_VBCLASS
+.short 0 # attributes
+.long 0x1024 # type index of direct virtual base class
+.long 0 # type index of virtual base pointer
+.short LF_USHORT
+.short 60000 # virtual base pointer offset
+.short LF_ULONG
+.long 120000 # virtual base offset from vbtable
+.byte 0xf2 # padding
+.byte 0xf1 # padding
+.short LF_MEMBER
+.short 3 # public
+.long 0x1022
+.short 0 # offset
+.asciz "d"
 
 .types_end:

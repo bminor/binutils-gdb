@@ -2476,6 +2476,7 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	      case LF_MEMBER:
 		{
 		  struct lf_member *mem = (struct lf_member *) ptr;
+		  uint16_t offset;
 		  size_t name_len, subtype_len;
 
 		  if (left < offsetof (struct lf_member, name))
@@ -2488,9 +2489,34 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 		  if (!remap_type (&mem->type, map, type_num, num_types))
 		    return false;
 
+		  subtype_len = offsetof (struct lf_member, name);
+
+		  offset = bfd_getl16 (&mem->offset);
+
+		  /* If offset >= 0x8000, actual value follows.  */
+		  if (offset >= 0x8000)
+		    {
+		      unsigned int param_len = extended_value_len (offset);
+
+		      if (param_len == 0)
+			{
+			  einfo (_("%P: warning: unhandled type %v within"
+				   " LF_MEMBER\n"), offset);
+			  return false;
+			}
+
+		      subtype_len += param_len;
+
+		      if (left < subtype_len)
+			{
+			  einfo (_("%P: warning: truncated CodeView type record"
+				  " LF_MEMBER\n"));
+			  return false;
+			}
+		    }
+
 		  name_len =
-		    strnlen (mem->name,
-			     left - offsetof (struct lf_member, name));
+		    strnlen ((char *) mem + subtype_len, left - subtype_len);
 
 		  if (name_len == left - offsetof (struct lf_member, name))
 		    {
@@ -2501,7 +2527,7 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 
 		  name_len++;
 
-		  subtype_len = offsetof (struct lf_member, name) + name_len;
+		  subtype_len += name_len;
 
 		  if (subtype_len % 4 != 0)
 		    subtype_len += 4 - (subtype_len % 4);
@@ -2706,6 +2732,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	      case LF_BCLASS:
 		{
 		  struct lf_bclass *bc = (struct lf_bclass *) ptr;
+		  size_t subtype_len;
+		  uint16_t offset;
 
 		  if (left < sizeof (struct lf_bclass))
 		    {
@@ -2718,8 +2746,44 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 				   num_types))
 		    return false;
 
-		  ptr += sizeof (struct lf_bclass);
-		  left -= sizeof (struct lf_bclass);
+		  subtype_len = sizeof (struct lf_bclass);
+
+		  offset = bfd_getl16 (&bc->offset);
+
+		  /* If offset >= 0x8000, actual value follows.  */
+		  if (offset >= 0x8000)
+		    {
+		      unsigned int param_len = extended_value_len (offset);
+
+		      if (param_len == 0)
+			{
+			  einfo (_("%P: warning: unhandled type %v within"
+				   " LF_BCLASS\n"), offset);
+			  return false;
+			}
+
+		      subtype_len += param_len;
+
+		      if (left < subtype_len)
+			{
+			  einfo (_("%P: warning: truncated CodeView type record"
+				   " LF_BCLASS\n"));
+			  return false;
+			}
+		    }
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_BCLASS\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
 
 		  break;
 		}
@@ -2748,6 +2812,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	      case LF_IVBCLASS:
 		{
 		  struct lf_vbclass *vbc = (struct lf_vbclass *) ptr;
+		  size_t subtype_len;
+		  uint16_t offset;
 
 		  if (left < sizeof (struct lf_vbclass))
 		    {
@@ -2764,8 +2830,70 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 				   type_num, num_types))
 		    return false;
 
-		  ptr += sizeof (struct lf_vbclass);
-		  left -= sizeof (struct lf_vbclass);
+		  subtype_len = offsetof (struct lf_vbclass,
+					  virtual_base_vbtable_offset);
+
+		  offset = bfd_getl16 (&vbc->virtual_base_pointer_offset);
+
+		  /* If offset >= 0x8000, actual value follows.  */
+		  if (offset >= 0x8000)
+		    {
+		      unsigned int param_len = extended_value_len (offset);
+
+		      if (param_len == 0)
+			{
+			  einfo (_("%P: warning: unhandled type %v within"
+				   " LF_VBCLASS/LF_IVBCLASS\n"), offset);
+			  return false;
+			}
+
+		      subtype_len += param_len;
+
+		      if (left < subtype_len)
+			{
+			  einfo (_("%P: warning: truncated CodeView type record"
+				   " LF_VBCLASS/LF_IVBCLASS\n"));
+			  return false;
+			}
+		    }
+
+		  offset = bfd_getl16 ((char *)vbc + subtype_len);
+		  subtype_len += sizeof (uint16_t);
+
+		  /* If offset >= 0x8000, actual value follows.  */
+		  if (offset >= 0x8000)
+		    {
+		      unsigned int param_len = extended_value_len (offset);
+
+		      if (param_len == 0)
+			{
+			  einfo (_("%P: warning: unhandled type %v within"
+				   " LF_VBCLASS/LF_IVBCLASS\n"), offset);
+			  return false;
+			}
+
+		      subtype_len += param_len;
+
+		      if (left < subtype_len)
+			{
+			  einfo (_("%P: warning: truncated CodeView type record"
+				   " LF_VBCLASS/LF_IVBCLASS\n"));
+			  return false;
+			}
+		    }
+
+		  if (subtype_len % 4 != 0)
+		    subtype_len += 4 - (subtype_len % 4);
+
+		  if (left < subtype_len)
+		    {
+		      einfo (_("%P: warning: truncated CodeView type record"
+			       " LF_VBCLASS/LF_IVBCLASS\n"));
+		      return false;
+		    }
+
+		  ptr += subtype_len;
+		  left -= subtype_len;
 
 		  break;
 		}
@@ -2950,8 +3078,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
     case LF_STRUCTURE:
       {
 	struct lf_class *cl = (struct lf_class *) data;
-	uint16_t prop;
-	size_t name_len;
+	uint16_t prop, num_bytes;
+	size_t name_len, name_off;
 
 	if (size < offsetof (struct lf_class, name))
 	  {
@@ -2969,9 +3097,35 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	if (!remap_type (&cl->vshape, map, type_num, num_types))
 	  return false;
 
-	name_len = strnlen (cl->name, size - offsetof (struct lf_class, name));
+	name_off = offsetof (struct lf_class, name);
 
-	if (name_len == size - offsetof (struct lf_class, name))
+	num_bytes = bfd_getl16 (&cl->length);
+
+	/* If num_bytes >= 0x8000, actual value follows.  */
+	if (num_bytes >= 0x8000)
+	  {
+	    unsigned int param_len = extended_value_len (num_bytes);
+
+	    if (param_len == 0)
+	      {
+		einfo (_("%P: warning: unhandled type %v within"
+			 " LF_CLASS/LF_STRUCTURE\n"), num_bytes);
+		return false;
+	      }
+
+	    name_off += param_len;
+
+	    if (size < name_off)
+	      {
+		einfo (_("%P: warning: truncated CodeView type record"
+			 " LF_CLASS/LF_STRUCTURE\n"));
+		return false;
+	      }
+	  }
+
+	name_len = strnlen ((char *) cl + name_off, size - name_off);
+
+	if (name_len == size - name_off)
 	  {
 	    einfo (_("%P: warning: name for LF_CLASS/LF_STRUCTURE has no"
 		     " terminating zero\n"));
@@ -2984,10 +3138,11 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	  {
 	    /* Structure has another name following first one.  */
 
-	    size_t len = offsetof (struct lf_class, name) + name_len + 1;
+	    size_t len = name_off + name_len + 1;
 	    size_t unique_name_len;
 
-	    unique_name_len = strnlen (cl->name + name_len + 1, size - len);
+	    unique_name_len = strnlen ((char *) cl + name_off + name_len + 1,
+				       size - len);
 
 	    if (unique_name_len == size - len)
 	      {
@@ -2998,10 +3153,10 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	  }
 
 	if (!(prop & (CV_PROP_FORWARD_REF | CV_PROP_SCOPED))
-	    && !is_name_anonymous (cl->name, name_len))
+	    && !is_name_anonymous ((char *) cl + name_off, name_len))
 	  {
 	    other_hash = true;
-	    cv_hash = crc32 ((uint8_t *) cl->name, name_len);
+	    cv_hash = crc32 ((uint8_t *) cl + name_off, name_len);
 	  }
 
 	break;
@@ -3010,8 +3165,8 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
     case LF_UNION:
       {
 	struct lf_union *un = (struct lf_union *) data;
-	uint16_t prop;
-	size_t name_len;
+	uint16_t prop, num_bytes;
+	size_t name_len, name_off;
 
 	if (size < offsetof (struct lf_union, name))
 	  {
@@ -3023,9 +3178,35 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	if (!remap_type (&un->field_list, map, type_num, num_types))
 	  return false;
 
-	name_len = strnlen (un->name, size - offsetof (struct lf_union, name));
+	name_off = offsetof (struct lf_union, name);
 
-	if (name_len == size - offsetof (struct lf_union, name))
+	num_bytes = bfd_getl16 (&un->length);
+
+	/* If num_bytes >= 0x8000, actual value follows.  */
+	if (num_bytes >= 0x8000)
+	  {
+	    unsigned int param_len = extended_value_len (num_bytes);
+
+	    if (param_len == 0)
+	      {
+		einfo (_("%P: warning: unhandled type %v within"
+			 " LF_UNION\n"), num_bytes);
+		return false;
+	      }
+
+	    name_off += param_len;
+
+	    if (size < name_off)
+	      {
+		einfo (_("%P: warning: truncated CodeView type record"
+			 " LF_UNION\n"));
+		return false;
+	      }
+	  }
+
+	name_len = strnlen ((char *) un + name_off, size - name_off);
+
+	if (name_len == size - name_off)
 	  {
 	    einfo (_("%P: warning: name for LF_UNION has no"
 		     " terminating zero\n"));
@@ -3038,10 +3219,11 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	  {
 	    /* Structure has another name following first one.  */
 
-	    size_t len = offsetof (struct lf_union, name) + name_len + 1;
+	    size_t len = name_off + name_len + 1;
 	    size_t unique_name_len;
 
-	    unique_name_len = strnlen (un->name + name_len + 1, size - len);
+	    unique_name_len = strnlen ((char *) un + name_off + name_len + 1,
+				       size - len);
 
 	    if (unique_name_len == size - len)
 	      {
@@ -3052,10 +3234,10 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 	  }
 
 	if (!(prop & (CV_PROP_FORWARD_REF | CV_PROP_SCOPED))
-	    && !is_name_anonymous (un->name, name_len))
+	    && !is_name_anonymous ((char *) un + name_off, name_len))
 	  {
 	    other_hash = true;
-	    cv_hash = crc32 ((uint8_t *) un->name, name_len);
+	    cv_hash = crc32 ((uint8_t *) un + name_off, name_len);
 	  }
 
 	break;

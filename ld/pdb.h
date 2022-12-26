@@ -480,7 +480,6 @@ struct lf_bclass
   uint16_t attributes;
   uint32_t base_class_type;
   uint16_t offset;
-  uint16_t padding;
 } ATTRIBUTE_PACKED;
 
 /* lfVFuncTab in cvinfo.h */
