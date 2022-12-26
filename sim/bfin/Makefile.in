@@ -19,14 +19,7 @@
 
 arch = bfin
 
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	bfin-sim.o \
-	devices.o \
-	gui.o \
-	interp.o \
-	machs.o \
-	sim-resume.o
+SIM_LIBSIM =
 
 SIM_EXTRA_CFLAGS = $(SDL_CFLAGS)
 
