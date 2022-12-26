@@ -256,8 +256,8 @@ proc check_dbi_stream { pdb } {
     set data [read $fi 4]
     binary scan $data i type_server_map_size
 
-    set data [read $fi 4]
-    binary scan $data i mfc_type_server_index
+    # skip MFC type server index
+    seek $fi 4 current
 
     set data [read $fi 4]
     binary scan $data i optional_dbg_header_size
@@ -271,7 +271,7 @@ proc check_dbi_stream { pdb } {
 
     set stream_length [file size tmpdir/0003]
 
-    if { $stream_length != [expr 0x40 + $mod_info_size + $section_contribution_size + $section_map_size + $source_info_size + $type_server_map_size + $mfc_type_server_index + $optional_dbg_header_size + $ec_substream_size] } {
+    if { $stream_length != [expr 0x40 + $mod_info_size + $section_contribution_size + $section_map_size + $source_info_size + $type_server_map_size + $optional_dbg_header_size + $ec_substream_size] } {
 	return 0
     }
 
