@@ -3297,6 +3297,26 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
       /* Does not reference any types, nothing to be done.  */
       break;
 
+    case LF_VFTABLE:
+      {
+	struct lf_vftable *vft = (struct lf_vftable *) data;
+
+	if (size < offsetof (struct lf_vftable, names))
+	  {
+	    einfo (_("%P: warning: truncated CodeView type record"
+		     " LF_VFTABLE\n"));
+	    return false;
+	  }
+
+	if (!remap_type (&vft->type, map, type_num, num_types))
+	  return false;
+
+	if (!remap_type (&vft->base_vftable, map, type_num, num_types))
+	  return false;
+
+	break;
+      }
+
     case LF_STRING_ID:
       {
 	struct lf_string_id *str = (struct lf_string_id *) data;

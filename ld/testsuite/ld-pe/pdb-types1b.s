@@ -30,6 +30,7 @@
 .equ LF_METHOD, 0x150f
 .equ LF_NESTTYPE, 0x1510
 .equ LF_ONEMETHOD, 0x1511
+.equ LF_VFTABLE, 0x151d
 
 .equ LF_USHORT, 0x8002
 .equ LF_LONG, 0x8003
@@ -559,7 +560,7 @@
 
 # Type 1028, field list with virtual base class longstruct
 .fieldlist11:
-.short .types_end - .fieldlist11 - 2
+.short .struct6 - .fieldlist11 - 2
 .short LF_FIELDLIST
 .short LF_VBCLASS
 .short 0 # attributes
@@ -576,5 +577,34 @@
 .long 0x1022
 .short 0 # offset
 .asciz "d"
+
+# Type 1029, forward declaration of struct IUnknown
+.struct6:
+.short .vftable1 - .struct6 - 2
+.short LF_STRUCTURE
+.short 0 # no. members
+.short 0x80 # property (forward declaration)
+.long 0 # field list
+.long 0 # type derived from
+.long 0 # type of vshape table
+.short 0 # size
+.asciz "IUnknown" # name
+.byte 0xf1 # padding
+
+# Type 102a, virtual function table
+.vftable1:
+.short .types_end - .vftable1 - 2
+.short LF_VFTABLE
+.long 0x1029 # type
+.long 0 # base vftable
+.long 0 # offset
+.long .vftable1_names_end - .vftable1_names # length of names array
+.vftable1_names:
+.asciz "IUnknown"
+.asciz "QueryInterface"
+.asciz "AddRef"
+.asciz "Release"
+.vftable1_names_end:
+.byte 0xf1 # padding
 
 .types_end:

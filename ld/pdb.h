@@ -54,6 +54,7 @@
 #define LF_METHOD			0x150f
 #define LF_NESTTYPE			0x1510
 #define LF_ONEMETHOD			0x1511
+#define LF_VFTABLE			0x151d
 #define LF_FUNC_ID			0x1601
 #define LF_MFUNC_ID			0x1602
 #define LF_BUILDINFO			0x1603
@@ -576,6 +577,18 @@ struct lf_udt_mod_src_line
   uint32_t source_file_string;
   uint32_t line_no;
   uint16_t module_no;
+} ATTRIBUTE_PACKED;
+
+/* lfVftable in cvinfo.h */
+struct lf_vftable
+{
+  uint16_t size;
+  uint16_t kind;
+  uint32_t type;
+  uint32_t base_vftable;
+  uint32_t offset;
+  uint32_t names_len;
+  char names[];
 } ATTRIBUTE_PACKED;
 
 /* DATASYM32 in cvinfo.h */
