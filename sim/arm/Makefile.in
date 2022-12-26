@@ -19,11 +19,6 @@
 
 SIM_EXTRA_CFLAGS = -DMODET
 
-SIM_OBJS = \
-	wrapper.o \
-	$(SIM_NEW_COMMON_OBJS) \
-	armemu.o armemu32.o arminit.o armos.o armsupp.o \
-	armvirt.o thumbemu.o \
-	armcopro.o maverick.o iwmmxt.o
+SIM_LIBSIM =
 
 ## COMMON_POST_CONFIG_FRAG
