@@ -16,6 +16,53 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
+	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
+	%D%/modules.o \
+	\
+	%D%/cgen-accfp.o \
+	%D%/cgen-fpu.o \
+	%D%/cgen-run.o \
+	%D%/cgen-scache.o \
+	%D%/cgen-trace.o \
+	%D%/cgen-utils.o \
+	\
+	%D%/arch.o \
+	%D%/cgen-par.o \
+	%D%/cpu.o \
+	%D%/decode.o \
+	%D%/frv.o \
+	%D%/mloop.o \
+	%D%/model.o \
+	%D%/sem.o \
+	\
+	%D%/cache.o \
+	%D%/interrupts.o \
+	%D%/memory.o \
+	%D%/options.o \
+	%D%/pipeline.o \
+	%D%/profile.o \
+	%D%/profile-fr400.o \
+	%D%/profile-fr450.o \
+	%D%/profile-fr500.o \
+	%D%/profile-fr550.o \
+	%D%/registers.o \
+	%D%/reset.o \
+	%D%/sim-if.o \
+	%D%/traps.o
+$(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
+
+noinst_LIBRARIES += %D%/libsim.a
+
+%D%/%.o: %D%/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+%D%/%.o: common/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 %C%_run_SOURCES =
 %C%_run_LDADD = \
 	%D%/nrun.o \

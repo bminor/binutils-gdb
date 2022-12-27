@@ -17,17 +17,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-FRV_OBJS = frv.o cpu.o decode.o sem.o model.o mloop.o cgen-par.o
-
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	cgen-utils.o cgen-trace.o cgen-scache.o cgen-fpu.o cgen-accfp.o \
-	cgen-run.o \
-	sim-if.o arch.o \
-	$(FRV_OBJS) \
-	traps.o interrupts.o memory.o cache.o pipeline.o \
-	profile.o profile-fr400.o profile-fr450.o profile-fr500.o profile-fr550.o options.o \
-	reset.o registers.o
+SIM_LIBSIM =
 
 SIM_EXTRA_CFLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 
