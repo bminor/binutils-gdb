@@ -2116,6 +2116,17 @@ s_secrel (int dummy ATTRIBUTE_UNUSED)
   input_line_pointer--;
   demand_empty_rest_of_line ();
 }
+
+void
+tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
+{
+  expressionS exp;
+
+  exp.X_op = O_secrel;
+  exp.X_add_symbol = symbol;
+  exp.X_add_number = 0;
+  emit_expr (&exp, size);
+}
 #endif	/* TE_PE */
 
 static void s_aarch64_arch (int);
