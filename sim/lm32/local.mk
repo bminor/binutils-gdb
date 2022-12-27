@@ -16,6 +16,40 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
+	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
+	$(patsubst %,%D%/dv-%.o,$(%C%_SIM_EXTRA_HW_DEVICES)) \
+	%D%/modules.o \
+	\
+	%D%/cgen-run.o \
+	%D%/cgen-scache.o \
+	%D%/cgen-trace.o \
+	%D%/cgen-utils.o \
+	\
+	%D%/arch.o \
+	%D%/cpu.o \
+	%D%/decode.o \
+	%D%/sem.o \
+	%D%/mloop.o \
+	%D%/model.o \
+	\
+	%D%/lm32.o \
+	%D%/sim-if.o \
+	%D%/traps.o \
+	%D%/user.o
+$(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
+
+noinst_LIBRARIES += %D%/libsim.a
+
+%D%/%.o: %D%/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+%D%/%.o: common/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 %C%_run_SOURCES =
 %C%_run_LDADD = \
 	%D%/nrun.o \

@@ -5,13 +5,6 @@
 
 arch = lm32
 
-# List of object files, less common parts.
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-        cgen-utils.o cgen-trace.o cgen-scache.o \
-        cgen-run.o \
-        sim-if.o arch.o \
-        cpu.o decode.o sem.o model.o mloop.o \
-        lm32.o traps.o user.o 
+SIM_LIBSIM =
 
 ## COMMON_POST_CONFIG_FRAG
