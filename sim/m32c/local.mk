@@ -16,6 +16,31 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	%D%/gdb-if.o \
+	%D%/int.o \
+	%D%/load.o \
+	%D%/m32c.o \
+	%D%/mem.o \
+	%D%/misc.o \
+	%D%/modules.o \
+	%D%/r8c.o \
+	%D%/reg.o \
+	%D%/srcdest.o \
+	%D%/syscalls.o \
+	%D%/trace.o
+$(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
+
+noinst_LIBRARIES += %D%/libsim.a
+
+%D%/%.o: %D%/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+%D%/%.o: common/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 %C%_run_SOURCES =
 %C%_run_LDADD = \
 	%D%/main.o \
@@ -23,10 +48,6 @@
 	$(SIM_COMMON_LIBS)
 
 noinst_PROGRAMS += %D%/run
-
-## Helper targets for running make from the top-level due to run's main.o.
-%D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %C%_BUILD_OUTPUTS = \
 	%D%/opc2c$(EXEEXT) \

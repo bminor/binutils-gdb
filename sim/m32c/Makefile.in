@@ -22,19 +22,7 @@
 
 SIM_EXTRA_CFLAGS = -DTIMER_A
 
-SIM_RUN_OBJS = main.o
-
-SIM_OBJS = \
-	gdb-if.o \
-	int.o \
-	load.o \
-	mem.o \
-	misc.o \
-	reg.o \
-	r8c.o \
-	m32c.o \
-	srcdest.o \
-	syscalls.o \
-	trace.o
+SIM_LIBSIM =
+SIM_RUN_OBJS =
 
 ## COMMON_POST_CONFIG_FRAG
