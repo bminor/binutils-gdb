@@ -21,16 +21,6 @@
 
 arch = cris
 
-CRISV10F_OBJS = crisv10f.o cpuv10.o decodev10.o modelv10.o mloopv10f.o
-CRISV32F_OBJS = crisv32f.o cpuv32.o decodev32.o modelv32.o mloopv32f.o
-
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	cgen-utils.o cgen-trace.o cgen-scache.o \
-	cgen-run.o \
-	sim-if.o arch.o \
-	$(CRISV10F_OBJS) \
-	$(CRISV32F_OBJS) \
-	traps.o
+SIM_LIBSIM =
 
 ## COMMON_POST_CONFIG_FRAG
