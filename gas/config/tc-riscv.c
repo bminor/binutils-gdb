@@ -1049,9 +1049,10 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SMAIA:
       extension = "smaia";
       break;
-    case CSR_CLASS_SMSTATEEN:
     case CSR_CLASS_SMSTATEEN_32:
-      is_rv32_only = (csr_class == CSR_CLASS_SMSTATEEN_32);
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SMSTATEEN:
       extension = "smstateen";
       break;
     case CSR_CLASS_SSAIA:
@@ -1064,12 +1065,13 @@ riscv_csr_address (const char *csr_name,
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
       break;
-    case CSR_CLASS_SSSTATEEN:
-    case CSR_CLASS_SSSTATEEN_AND_H:
     case CSR_CLASS_SSSTATEEN_AND_H_32:
-      is_rv32_only = (csr_class == CSR_CLASS_SSSTATEEN_AND_H_32);
-      is_h_required = (csr_class == CSR_CLASS_SSSTATEEN_AND_H
-		      || csr_class == CSR_CLASS_SSSTATEEN_AND_H_32);
+      is_rv32_only = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSSTATEEN_AND_H:
+      is_h_required = true;
+      /* Fall through.  */
+    case CSR_CLASS_SSSTATEEN:
       extension = "ssstateen";
       break;
     case CSR_CLASS_SSCOFPMF_32:
