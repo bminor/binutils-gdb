@@ -327,8 +327,9 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_128 = $(sh_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_129 = sh/gencode
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_130 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_131 = v850/run
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_132 = \
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_131 = v850/libsim.a
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_132 = v850/run
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_133 = \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.h \
@@ -337,8 +338,8 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.h
 
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_133 = $(v850_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_v850_TRUE@am__append_134 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_135 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -854,6 +855,21 @@ sh_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/modules.o sh/table.o
 am_sh_libsim_a_OBJECTS =
 sh_libsim_a_OBJECTS = $(am_sh_libsim_a_OBJECTS)
+v850_libsim_a_AR = $(AR) $(ARFLAGS)
+@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(common_libcommon_a_OBJECTS) \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_v850_TRUE@	%,v850/%,$(SIM_NEW_COMMON_OBJS)) \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_v850_TRUE@	%,v850/dv-%.o,$(SIM_HW_DEVICES)) \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/simops.o v850/interp.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.o v850/semantics.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.o v850/icache.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.o v850/irun.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/support.o v850/modules.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/sim-resume.o
+am_v850_libsim_a_OBJECTS =
+v850_libsim_a_OBJECTS = $(am_v850_libsim_a_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@am__EXEEXT_1 = $(IGEN) igen/filter$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/gen$(EXEEXT) igen/ld-cache$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-decode$(EXEEXT) \
@@ -1192,11 +1208,12 @@ SOURCES = $(aarch64_libsim_a_SOURCES) $(arm_libsim_a_SOURCES) \
 	$(or1k_libsim_a_SOURCES) $(pru_libsim_a_SOURCES) \
 	$(riscv_libsim_a_SOURCES) $(rl78_libsim_a_SOURCES) \
 	$(rx_libsim_a_SOURCES) $(sh_libsim_a_SOURCES) \
-	$(aarch64_run_SOURCES) $(arm_run_SOURCES) $(avr_run_SOURCES) \
-	$(bfin_run_SOURCES) $(bpf_run_SOURCES) $(cr16_gencode_SOURCES) \
-	$(cr16_run_SOURCES) $(cris_run_SOURCES) \
-	$(cris_rvdummy_SOURCES) $(d10v_gencode_SOURCES) \
-	$(d10v_run_SOURCES) $(erc32_run_SOURCES) erc32/sis.c \
+	$(v850_libsim_a_SOURCES) $(aarch64_run_SOURCES) \
+	$(arm_run_SOURCES) $(avr_run_SOURCES) $(bfin_run_SOURCES) \
+	$(bpf_run_SOURCES) $(cr16_gencode_SOURCES) $(cr16_run_SOURCES) \
+	$(cris_run_SOURCES) $(cris_rvdummy_SOURCES) \
+	$(d10v_gencode_SOURCES) $(d10v_run_SOURCES) \
+	$(erc32_run_SOURCES) erc32/sis.c \
 	$(example_synacor_run_SOURCES) $(frv_run_SOURCES) \
 	$(ft32_run_SOURCES) $(h8300_run_SOURCES) \
 	$(igen_filter_SOURCES) $(igen_gen_SOURCES) \
@@ -1761,12 +1778,12 @@ noinst_LIBRARIES = common/libcommon.a $(am__append_5) $(am__append_8) \
 	$(am__append_86) $(am__append_91) $(am__append_101) \
 	$(am__append_107) $(am__append_109) $(am__append_111) \
 	$(am__append_117) $(am__append_119) $(am__append_121) \
-	$(am__append_123) $(am__append_125)
+	$(am__append_123) $(am__append_125) $(am__append_131)
 BUILT_SOURCES = $(am__append_19) $(am__append_24) $(am__append_32) \
 	$(am__append_37) $(am__append_49) $(am__append_58) \
 	$(am__append_64) $(am__append_75) $(am__append_94) \
 	$(am__append_104) $(am__append_113) $(am__append_127) \
-	$(am__append_132)
+	$(am__append_133)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
@@ -1781,7 +1798,7 @@ MOSTLYCLEANFILES = core $(common_HW_CONFIG_H_TARGETS) $(patsubst \
 	$(am__append_51) $(am__append_60) $(am__append_66) \
 	$(am__append_71) $(am__append_77) $(am__append_83) \
 	$(am__append_99) $(am__append_106) $(am__append_115) \
-	$(am__append_130) $(am__append_134)
+	$(am__append_130) $(am__append_135)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include -I../bfd -I.. \
 	$(SIM_HW_CFLAGS) $(SIM_INLINE) -I$(srcdir)/common \
@@ -1797,7 +1814,7 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
 	$(am__append_59) $(am__append_65) $(am__append_69) \
 	$(am__append_76) $(am__append_81) $(am__append_98) \
 	$(am__append_105) $(am__append_114) $(am__append_128) \
-	$(am__append_133)
+	$(am__append_134)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_43)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_44)
@@ -2838,6 +2855,23 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/table.c
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_SOURCES = sh/gencode.c
+@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_LIBADD = \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(common_libcommon_a_OBJECTS) \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst %,v850/%,$(SIM_NEW_COMMON_OBJS)) \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst %,v850/dv-%.o,$(SIM_HW_DEVICES)) \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/simops.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/interp.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/irun.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/support.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/modules.o \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/sim-resume.o
+
 @SIM_ENABLE_ARCH_v850_TRUE@v850_run_SOURCES = 
 @SIM_ENABLE_ARCH_v850_TRUE@v850_run_LDADD = \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/nrun.o \
@@ -3368,6 +3402,14 @@ sh/libsim.a: $(sh_libsim_a_OBJECTS) $(sh_libsim_a_DEPENDENCIES) $(EXTRA_sh_libsi
 	$(AM_V_at)-rm -f sh/libsim.a
 	$(AM_V_AR)$(sh_libsim_a_AR) sh/libsim.a $(sh_libsim_a_OBJECTS) $(sh_libsim_a_LIBADD)
 	$(AM_V_at)$(RANLIB) sh/libsim.a
+v850/$(am__dirstamp):
+	@$(MKDIR_P) v850
+	@: > v850/$(am__dirstamp)
+
+v850/libsim.a: $(v850_libsim_a_OBJECTS) $(v850_libsim_a_DEPENDENCIES) $(EXTRA_v850_libsim_a_DEPENDENCIES) v850/$(am__dirstamp)
+	$(AM_V_at)-rm -f v850/libsim.a
+	$(AM_V_AR)$(v850_libsim_a_AR) v850/libsim.a $(v850_libsim_a_OBJECTS) $(v850_libsim_a_LIBADD)
+	$(AM_V_at)$(RANLIB) v850/libsim.a
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -3635,9 +3677,6 @@ testsuite/common/bits64m63.$(OBJEXT):  \
 	testsuite/common/$(DEPDIR)/$(am__dirstamp)
 testsuite/common/fpu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
 	testsuite/common/$(DEPDIR)/$(am__dirstamp)
-v850/$(am__dirstamp):
-	@$(MKDIR_P) v850
-	@: > v850/$(am__dirstamp)
 
 v850/run$(EXEEXT): $(v850_run_OBJECTS) $(v850_run_DEPENDENCIES) $(EXTRA_v850_run_DEPENDENCIES) v850/$(am__dirstamp)
 	@rm -f v850/run$(EXEEXT)
@@ -5411,6 +5450,13 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh/table.c: sh/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -s >$@
+@SIM_ENABLE_ARCH_v850_TRUE@$(v850_libsim_a_OBJECTS) $(v850_libsim_a_LIBADD): v850/hw-config.h
+
+@SIM_ENABLE_ARCH_v850_TRUE@v850/%.o: v850/%.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+@SIM_ENABLE_ARCH_v850_TRUE@v850/%.o: common/%.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_v850_TRUE@v850/modules.c: | $(v850_BUILD_OUTPUTS)
 
 @SIM_ENABLE_ARCH_v850_TRUE@$(v850_BUILT_SRC_FROM_IGEN): v850/stamp-igen
