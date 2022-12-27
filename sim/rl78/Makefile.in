@@ -20,15 +20,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_RUN_OBJS = \
-	main.o
-
-SIM_OBJS = \
-	load.o \
-	mem.o \
-	cpu.o \
-	rl78.o \
-	gdb-if.o \
-	trace.o
+SIM_LIBSIM =
+SIM_RUN_OBJS =
 
 ## COMMON_POST_CONFIG_FRAG
