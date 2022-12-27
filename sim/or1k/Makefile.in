@@ -18,27 +18,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-OR1K_OBJS = \
-	or1k.o \
-	arch.o \
-	cpu.o \
-	decode.o \
-	model.o \
-	sem.o \
-	mloop.o \
-	sim-if.o \
-	traps.o
-
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	cgen-utils.o \
-	cgen-trace.o \
-	cgen-scache.o \
-	cgen-run.o \
-	cgen-fpu.o \
-	cgen-accfp.o
-
-SIM_OBJS += $(OR1K_OBJS)
+SIM_LIBSIM =
 
 SIM_EXTRA_CFLAGS = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 
