@@ -22,18 +22,7 @@
 
 SIM_EXTRA_CFLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
 
-SIM_RUN_OBJS = main.o
-
-SIM_OBJS = \
-	fpu.o \
-	load.o \
-	mem.o \
-	misc.o \
-	reg.o \
-	rx.o \
-	syscalls.o \
-	trace.o \
-	gdb-if.o \
-	err.o
+SIM_LIBSIM =
+SIM_RUN_OBJS =
 
 ## COMMON_POST_CONFIG_FRAG
