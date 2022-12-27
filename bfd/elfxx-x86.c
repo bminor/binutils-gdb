@@ -1541,12 +1541,33 @@ elf_x86_size_or_finish_relative_reloc
 		    }
 		  else
 		    {
+		      bfd_byte *contents;
+
 		      if (rel.r_offset >= sec->size)
 			abort ();
+
+		      if (elf_section_data (sec)->this_hdr.contents
+			  != NULL)
+			contents
+			  = elf_section_data (sec)->this_hdr.contents;
+		      else
+			{
+			  if (!bfd_malloc_and_get_section (sec->owner,
+							   sec,
+							   &contents))
+			    info->callbacks->einfo
+			      /* xgettext:c-format */
+			      (_("%F%P: %pB: failed to allocate memory for section `%pA'\n"),
+			       info->output_bfd, sec);
+
+			  /* Cache the section contents for
+			     elf_link_input_bfd.  */
+			  elf_section_data (sec)->this_hdr.contents
+			    = contents;
+			}
 		      htab->elf_write_addend
 			(info->output_bfd, outrel->r_addend,
-			 (elf_section_data (sec)->this_hdr.contents
-			  + rel.r_offset));
+			 contents + rel.r_offset);
 		    }
 		}
 	    }
