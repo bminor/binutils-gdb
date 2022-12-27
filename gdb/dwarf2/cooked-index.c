@@ -409,8 +409,6 @@ cooked_index_shard::do_finalize ()
 cooked_index_shard::range
 cooked_index_shard::find (const std::string &name, bool completing) const
 {
-  wait ();
-
   cooked_index_entry::comparison_mode mode = (completing
 					      ? cooked_index_entry::COMPLETE
 					      : cooked_index_entry::MATCH);
@@ -528,6 +526,7 @@ cooked_index::get_addrmaps () const
 cooked_index::range
 cooked_index::find (const std::string &name, bool completing) const
 {
+  wait ();
   std::vector<cooked_index_shard::range> result_range;
   result_range.reserve (m_vector.size ());
   for (auto &entry : m_vector)

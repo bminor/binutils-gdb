@@ -288,7 +288,6 @@ public:
   /* Return a range of all the entries.  */
   range all_entries () const
   {
-    wait ();
     return { m_entries.cbegin (), m_entries.cend () };
   }
 
@@ -461,6 +460,7 @@ public:
   /* Return a range of all the entries.  */
   range all_entries () const
   {
+    wait ();
     std::vector<cooked_index_shard::range> result_range;
     result_range.reserve (m_vector.size ());
     for (auto &entry : m_vector)
