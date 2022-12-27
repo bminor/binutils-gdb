@@ -17,10 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	sim-resume.o \
-	interp.o \
-	sim-main.o
+SIM_LIBSIM =
 
 ## COMMON_POST_CONFIG_FRAG
