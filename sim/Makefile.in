@@ -5485,9 +5485,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_v850_TRUE@		-n irun.c      -r  v850/irun.c
 @SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)touch $@
 
-%/libsim.a: | $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 %/nrun.o: common/nrun.c | %/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 

@@ -19,8 +19,4 @@
 ### along with the GNU simulators; if not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
-
-SIM_LIBSIM =
-SIM_RUN_OBJS =
-
 ## COMMON_POST_CONFIG_FRAG

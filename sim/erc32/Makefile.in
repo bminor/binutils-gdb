@@ -18,9 +18,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_LIBSIM =
-SIM_RUN_OBJS =
-
 READLINE_SRC = $(srcroot)/readline/readline
 
 SIM_EXTRA_CFLAGS = $(READLINE_CFLAGS)

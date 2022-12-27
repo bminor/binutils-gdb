@@ -5,8 +5,6 @@
 
 arch = mips
 
-SIM_LIBSIM =
-
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = @SIM_MIPS_SUBTARGET@
 

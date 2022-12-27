@@ -17,8 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_LIBSIM =
-
 SIM_EXTRA_CFLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 
 # Some modules don't build cleanly yet.

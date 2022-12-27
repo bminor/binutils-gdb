@@ -19,8 +19,6 @@
 
 arch = m68hc11
 
-SIM_LIBSIM =
-
 # We must use 32-bit addresses to support memory bank switching.
 # The WORD_BITSIZE is normally 16 but must be switched (temporarily)
 # to 32 to avoid a bug in the sim-common which uses 'unsigned_word'

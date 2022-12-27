@@ -17,8 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_LIBSIM =
-
 SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
 ## COMMON_POST_CONFIG_FRAG

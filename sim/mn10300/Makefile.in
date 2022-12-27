@@ -19,8 +19,6 @@
 
 arch = mn10300
 
-SIM_LIBSIM =
-
 # List of extra flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = \
 	-DPOLL_QUIT_INTERVAL=0x20 \

@@ -16,9 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
-
-SIM_LIBSIM =
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = iq2000

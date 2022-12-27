@@ -5,6 +5,4 @@
 
 arch = lm32
 
-SIM_LIBSIM =
-
 ## COMMON_POST_CONFIG_FRAG

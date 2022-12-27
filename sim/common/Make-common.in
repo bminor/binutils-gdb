@@ -83,24 +83,18 @@ POSTCOMPILE = @true
 # in the simulator's Makefile.in if one is using the default value.  In fact
 # it's preferable not to.
 
-# List of object files, less common parts.
-SIM_OBJS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
-# List of main object files for `run'.
-SIM_RUN_OBJS = nrun.o
-SIM_LIBSIM = libsim.a
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
 
 # Every time a new general purpose source file was added every target's
-# Makefile.in needed to be updated to include the file in SIM_OBJS.
+# Makefile.in needed to be updated to include the file.
 # This doesn't scale.
 # This variable specifies all the generic stuff common to the newer simulators.
 # Things like sim-reason.o can't go here as the cpu may provide its own
 # (though hopefully in time that won't be so).  Things like sim-bits.o can go
 # here.  Some files are used by all simulators (e.g. callback.o).
-# Those files are specified in LIB_OBJS below.
 
 ## End COMMON_PRE_CONFIG_FRAG
 
@@ -124,9 +118,6 @@ BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
-SIM_HW_DEVICES = $(SIM_HW_DEVICES_) $($(arch)_SIM_EXTRA_HW_DEVICES)
-SIM_NEW_COMMON_OBJS = $(SIM_NEW_COMMON_OBJS_) $(SIM_HW_OBJS)
-
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
 BFD_LIB = ../../bfd/libbfd.la
 OPCODES_LIB = ../../opcodes/libopcodes.la
@@ -134,31 +125,12 @@ LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
 	$(COMMON_LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-COMMON_OBJS_NAMES = \
-	callback.o \
-	portability.o \
-	sim-load.o \
-	syscall.o \
-	target-newlib-errno.o \
-	target-newlib-open.o \
-	target-newlib-signal.o \
-	target-newlib-syscall.o \
-	version.o
-COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/%)
-
-LIB_OBJS = modules.o $(COMMON_OBJS) $(SIM_OBJS)
-
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-all: $(SIM_LIBSIM) $(LIB_OBJS) $(SIM_RUN_OBJS)
-
-libsim.a: $(LIB_OBJS)
-	$(SILENCE) rm -f libsim.a
-	$(ECHO_AR) $(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
-	$(ECHO_RANLIB) $(RANLIB) libsim.a
+all:
 
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being
@@ -182,11 +154,6 @@ override COMPILE.pre = source='$<' object='$@' libtool=no \
 override POSTCOMPILE =
 endif
 
-all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
-
-# Dependencies.
--include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
-
 test-hw-events: $(srccom)/hw-events.c libsim.a
 	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
 		$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
@@ -194,7 +161,7 @@ test-hw-events: $(srccom)/hw-events.c libsim.a
 
 # See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
 modules.c: stamp-modules ; @true
-stamp-modules: Makefile $(SIM_OBJS:.o=.c)
+stamp-modules: Makefile
 	$(ECHO_STAMP) modules.c
 	$(SILENCE) LANG=C ; export LANG ; \
 	LC_ALL=C ; export LC_ALL ; \
@@ -248,7 +215,6 @@ TAGS: force
 
 mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core \
-		run$(EXEEXT) libsim.a \
 		modules.c stamp-modules
 
 distclean maintainer-clean realclean: clean
