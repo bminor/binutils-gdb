@@ -1789,7 +1789,8 @@ CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = $(am__append_100)
-MOSTLYCLEANFILES = core $(common_HW_CONFIG_H_TARGETS) $(patsubst \
+MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
+	$(common_HW_CONFIG_H_TARGETS) $(patsubst \
 	%,%/stamp-hw,$(SIM_ENABLED_ARCHES)) \
 	$(common_GEN_MODULES_C_TARGETS) $(patsubst \
 	%,%/stamp-modules,$(SIM_ENABLED_ARCHES)) $(am__append_7) \
@@ -1799,10 +1800,16 @@ MOSTLYCLEANFILES = core $(common_HW_CONFIG_H_TARGETS) $(patsubst \
 	$(am__append_71) $(am__append_77) $(am__append_83) \
 	$(am__append_99) $(am__append_106) $(am__append_115) \
 	$(am__append_130) $(am__append_135)
-AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
-AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include -I../bfd -I.. \
-	$(SIM_HW_CFLAGS) $(SIM_INLINE) -I$(srcdir)/common \
-	-DSIM_COMMON_BUILD
+AM_CFLAGS = \
+	$(WERROR_CFLAGS) \
+	$(WARN_CFLAGS) \
+	$(AM_CFLAGS_$(subst -,_,$(@D))) \
+	$(AM_CFLAGS_$(subst -,_,$(@D)_$(@F)))
+
+AM_CPPFLAGS = $(INCGNU) -I$(srcroot) -I$(srcroot)/include -I../bfd \
+	-I.. -I$(@D) -I$(srcdir)/$(@D) $(SIM_HW_CFLAGS) $(SIM_INLINE) \
+	$(AM_CPPFLAGS_$(subst -,_,$(@D))) $(AM_CPPFLAGS_$(subst \
+	-,_,$(@D)_$(@F))) -I$(srcdir)/common -DSIM_TOPDIR_BUILD
 AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -1818,6 +1825,7 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_43)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_44)
+AM_CPPFLAGS_common = -DSIM_COMMON_BUILD
 common_libcommon_a_SOURCES = \
 	common/callback.c \
 	common/portability.c \

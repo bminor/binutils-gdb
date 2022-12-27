@@ -41,15 +41,27 @@ BUILT_SOURCES =
 CLEANFILES =
 DISTCLEANFILES =
 MOSTLYCLEANFILES = core
+## We build some objects ourselves directly that Automake doesn't track, so
+## make sure all objects in subdirs get cleaned up.
+MOSTLYCLEANFILES += $(SIM_ENABLED_ARCHES:%=%/*.o)
 
-AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
+AM_CFLAGS = \
+	$(WERROR_CFLAGS) \
+	$(WARN_CFLAGS) \
+	$(AM_CFLAGS_$(subst -,_,$(@D))) \
+	$(AM_CFLAGS_$(subst -,_,$(@D)_$(@F)))
 AM_CPPFLAGS = \
 	$(INCGNU) \
+	-I$(srcroot) \
 	-I$(srcroot)/include \
 	-I../bfd \
 	-I.. \
+	-I$(@D) \
+	-I$(srcdir)/$(@D) \
 	$(SIM_HW_CFLAGS) \
-	$(SIM_INLINE)
+	$(SIM_INLINE) \
+	$(AM_CPPFLAGS_$(subst -,_,$(@D))) \
+	$(AM_CPPFLAGS_$(subst -,_,$(@D)_$(@F)))
 
 AM_CPPFLAGS_FOR_BUILD = \
 	-I$(srcroot)/include \

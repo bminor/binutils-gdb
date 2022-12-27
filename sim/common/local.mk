@@ -20,7 +20,8 @@
 
 AM_CPPFLAGS += \
 	-I$(srcdir)/%D% \
-	-DSIM_COMMON_BUILD
+	-DSIM_TOPDIR_BUILD
+AM_CPPFLAGS_%C% = -DSIM_COMMON_BUILD
 AM_CPPFLAGS_FOR_BUILD += -I$(srcdir)/%D%
 
 ## This makes sure common parts are available before building the arch-subdirs

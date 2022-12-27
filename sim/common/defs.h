@@ -35,7 +35,7 @@
 #undef PACKAGE_VERSION
 
 /* Include common sim's various configure tests.  */
-#ifndef SIM_COMMON_BUILD
+#ifndef SIM_TOPDIR_BUILD
 #include "../config.h"
 #else
 #include "config.h"
