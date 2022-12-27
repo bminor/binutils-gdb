@@ -18,10 +18,11 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+SIM_LIBSIM =
+SIM_RUN_OBJS =
+
 READLINE_SRC = $(srcroot)/readline/readline
 
-SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
-SIM_RUN_OBJS = sis.o
 SIM_EXTRA_CFLAGS = $(READLINE_CFLAGS)
 
 # UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
