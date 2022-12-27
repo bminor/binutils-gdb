@@ -21,19 +21,7 @@
 
 arch = m32r
 
-M32R_OBJS = m32r.o cpu.o decode.o sem.o model.o mloop.o
-M32RX_OBJS = m32rx.o cpux.o decodex.o modelx.o mloopx.o
-M32R2_OBJS = m32r2.o cpu2.o decode2.o model2.o mloop2.o
-
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	cgen-utils.o cgen-trace.o cgen-scache.o \
-	cgen-run.o \
-	sim-if.o arch.o \
-	$(M32R_OBJS) \
-	$(M32RX_OBJS) \
-	$(M32R2_OBJS) \
-	traps.o
+SIM_LIBSIM =
 
 # Some modules don't build cleanly yet.
 cpu.o cpu2.o cpux.o m32r.o m32r2.o m32rx.o mloop.o mloop2.o mloopx.o sem.o sim-if.o traps.o: SIM_WERROR_CFLAGS =
