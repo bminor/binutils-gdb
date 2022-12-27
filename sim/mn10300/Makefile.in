@@ -19,13 +19,7 @@
 
 arch = mn10300
 
-MN10300_OBJS = \
-	itable.o semantics.o idecode.o icache.o engine.o irun.o support.o \
-	$(SIM_NEW_COMMON_OBJS) \
-	op_utils.o \
-	sim-resume.o
-
-SIM_OBJS = $(MN10300_OBJS) interp.o
+SIM_LIBSIM =
 
 # List of extra flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = \
