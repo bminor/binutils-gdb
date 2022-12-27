@@ -18,18 +18,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-CGEN_STD_OBJS = cgen-run.o cgen-scache.o cgen-trace.o cgen-utils.o
-BPF_GEN_OBJS = arch.o cpu.o \
-               decode-le.o decode-be.o \
-               sem-le.o sem-be.o \
-               mloop-le.o mloop-be.o
-BPF_HAND_OBJS = bpf.o sim-if.o traps.o bpf-helpers.o
-
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	$(CGEN_STD_OBJS) \
-	$(BPF_GEN_OBJS) \
-	$(BPF_HAND_OBJS)
+SIM_LIBSIM =
 
 SIM_EXTRA_CFLAGS = -DWITH_TARGET_WORD_BITSIZE=64
 
