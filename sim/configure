@@ -16582,22 +16582,22 @@ __EOF__
   *:*mips16*:*) :
     		ws="m32 m16"
 
-				as_fn_append SIM_MIPS_MULTI_SRC " m16${name}_run.c"
-	as_fn_append SIM_MIPS_MULTI_OBJ " m16${name}_run.o"
+				as_fn_append SIM_MIPS_MULTI_SRC " mips/m16${name}_run.c"
+	as_fn_append SIM_MIPS_MULTI_OBJ " mips/m16${name}_run.o"
 	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16"
 	 ;; #(
   *:*micromips32*:*) :
     			ws="micromips_m32 micromips16 micromips32"
 
-				as_fn_append SIM_MIPS_MULTI_SRC " micromips${name}_run.c"
-	as_fn_append SIM_MIPS_MULTI_OBJ " micromips${name}_run.o"
+				as_fn_append SIM_MIPS_MULTI_SRC " mips/micromips${name}_run.c"
+	as_fn_append SIM_MIPS_MULTI_OBJ " mips/micromips${name}_run.o"
 	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16,32"
 	 ;; #(
   *:*micromips64*:*) :
     			ws="micromips_m64 micromips16 micromips64"
 
-				as_fn_append SIM_MIPS_MULTI_SRC " micromips${name}_run.c"
-	as_fn_append SIM_MIPS_MULTI_OBJ " micromips${name}_run.o"
+				as_fn_append SIM_MIPS_MULTI_SRC " mips/micromips${name}_run.c"
+	as_fn_append SIM_MIPS_MULTI_OBJ " mips/micromips${name}_run.o"
 	as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS " -F 16,32,64"
 	 ;; #(
   *) :
@@ -16606,9 +16606,9 @@ esac
 
             for w in ${ws}; do
       for base in engine icache idecode model semantics support; do
-	as_fn_append SIM_MIPS_MULTI_SRC " ${w}${name}_${base}.c"
-	as_fn_append SIM_MIPS_MULTI_SRC " ${w}${name}_${base}.h"
-	as_fn_append SIM_MIPS_MULTI_OBJ " ${w}${name}_${base}.o"
+	as_fn_append SIM_MIPS_MULTI_SRC " mips/${w}${name}_${base}.c"
+	as_fn_append SIM_MIPS_MULTI_SRC " mips/${w}${name}_${base}.h"
+	as_fn_append SIM_MIPS_MULTI_OBJ " mips/${w}${name}_${base}.o"
       done
       as_fn_append SIM_MIPS_MULTI_IGEN_CONFIGS " ${w}${c}"
     done
@@ -16638,7 +16638,7 @@ fi
 __EOF__
 
 else
-      SIM_MIPS_MULTI_SRC=doesnt-exist.c
+      SIM_MIPS_MULTI_SRC=mips/doesnt-exist.c
   SIM_MIPS_IGEN_ITABLE_FLAGS='$(SIM_MIPS_SINGLE_FLAGS)'
   if test "x$SIM_MIPS_GEN" = x"M16"; then :
   as_fn_append SIM_MIPS_IGEN_ITABLE_FLAGS ' $(SIM_MIPS_M16_FLAGS)'

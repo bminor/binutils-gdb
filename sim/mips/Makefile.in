@@ -3,51 +3,9 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_MIPS_GEN = @SIM_MIPS_GEN@
-SIM_MIPS_MULTI_OBJ = @SIM_MIPS_MULTI_OBJ@
-
 arch = mips
 
-# Object files created by various simulator generators.
-
-
-SIM_SINGLE_OBJ = \
-	support.o \
-	itable.o \
-	semantics.o \
-	idecode.o \
-	icache.o \
-	engine.o \
-	irun.o \
-
-
-SIM_M16_OBJ = \
-	m16_support.o \
-	m16_semantics.o \
-	m16_idecode.o \
-	m16_icache.o \
-	\
-	m32_support.o \
-	m32_semantics.o \
-	m32_idecode.o \
-	m32_icache.o \
-	\
-	itable.o \
-	m16run.o \
-
-SIM_MULTI_OBJ = $(SIM_MIPS_MULTI_OBJ) \
-		itable.o \
-		multi-run.o \
-
-SIM_OBJS = \
-	interp.o \
-	$(SIM_$(SIM_MIPS_GEN)_OBJ) \
-	$(SIM_NEW_COMMON_OBJS) \
-	cp1.o \
-	mdmx.o \
-	dsp.o \
-	sim-main.o \
-	sim-resume.o \
+SIM_LIBSIM =
 
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = @SIM_MIPS_SUBTARGET@

@@ -16,6 +16,65 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_GEN_OBJ =
+if SIM_MIPS_GEN_MODE_SINGLE
+%C%_GEN_OBJ += \
+	%D%/support.o \
+	%D%/itable.o \
+	%D%/semantics.o \
+	%D%/idecode.o \
+	%D%/icache.o \
+	%D%/engine.o \
+	%D%/irun.o
+endif
+if SIM_MIPS_GEN_MODE_M16
+%C%_GEN_OBJ += \
+	%D%/m16_support.o \
+	%D%/m16_semantics.o \
+	%D%/m16_idecode.o \
+	%D%/m16_icache.o \
+	\
+	%D%/m32_support.o \
+	%D%/m32_semantics.o \
+	%D%/m32_idecode.o \
+	%D%/m32_icache.o \
+	\
+	%D%/itable.o \
+	%D%/m16run.o
+endif
+if SIM_MIPS_GEN_MODE_MULTI
+%C%_GEN_OBJ += \
+	$(SIM_MIPS_MULTI_OBJ) \
+	%D%/itable.o \
+	%D%/multi-run.o
+endif
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	%D%/interp.o \
+	$(%C%_GEN_OBJ) \
+	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
+	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
+	$(patsubst %,%D%/dv-%.o,$(%C%_SIM_EXTRA_HW_DEVICES)) \
+	%D%/cp1.o \
+	%D%/dsp.o \
+	%D%/mdmx.o \
+	%D%/modules.o \
+	%D%/sim-main.o \
+	%D%/sim-resume.o
+## Workaround Automake bug where $(SIM_MIPS_MULTI_OBJ) isn't copied from LIBADD
+## to DEPENDENCIES automatically.
+EXTRA_mips_libsim_a_DEPENDENCIES = $(SIM_MIPS_MULTI_OBJ)
+$(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
+
+noinst_LIBRARIES += %D%/libsim.a
+
+%D%/%.o: %D%/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+%D%/%.o: common/%.c
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 %C%_run_SOURCES =
 %C%_run_LDADD = \
 	%D%/nrun.o \
