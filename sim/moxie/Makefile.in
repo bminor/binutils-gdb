@@ -17,10 +17,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	interp.o \
-	sim-resume.o
+SIM_LIBSIM =
 
 SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
