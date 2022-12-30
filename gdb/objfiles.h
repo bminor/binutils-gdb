@@ -606,6 +606,9 @@ public:
 			     bool need_fullname);
 
   /* See quick_symbol_functions.  */
+  void compute_main_name ();
+
+  /* See quick_symbol_functions.  */
   struct compunit_symtab *find_compunit_symtab_by_address (CORE_ADDR address);
 
   /* See quick_symbol_functions.  */

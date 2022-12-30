@@ -467,6 +467,18 @@ objfile::map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
     iter->map_symbol_filenames (this, fun, need_fullname);
 }
 
+void
+objfile::compute_main_name ()
+{
+  if (debug_symfile)
+    gdb_printf (gdb_stdlog,
+		"qf->compute_main_name (%s)\n",
+		objfile_debug_name (this));
+
+  for (const auto &iter : qf_require_partial_symbols ())
+    iter->compute_main_name (this);
+}
+
 struct compunit_symtab *
 objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 {

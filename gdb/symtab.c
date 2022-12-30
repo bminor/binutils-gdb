@@ -6334,6 +6334,8 @@ find_main_name (void)
      accurate.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      objfile->compute_main_name ();
+
       if (objfile->per_bfd->name_of_main != NULL)
 	{
 	  set_main_name (pspace,
