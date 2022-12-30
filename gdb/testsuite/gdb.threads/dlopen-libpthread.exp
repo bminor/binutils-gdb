@@ -40,22 +40,37 @@ if { ![runto_main] } {
     return -1
 }
 
-set test "info probes all rtld rtld_map_complete"
-gdb_test_multiple $test $test {
-    -re "\[ \t\]rtld_map_complete\[ \t\]+0x\[0-9a-f\]+.*\r\n$gdb_prompt $" {
-	pass $test
+set probe_names {}
+# Fedora 17 name.  There's specific code in
+# svr4_find_and_create_probe_breakpoints to deal with this.
+lappend probe_names rtld_map_complete
+# Upstream name.
+lappend probe_names map_complete
+
+set have_probe 0
+foreach probe_name $probe_names {
+    set cmd "info probes all rtld ^$probe_name$"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "\[ \t\]$probe_name\[ \t\]+0x\[0-9a-f\]+.*" {
+	    set have_probe 1
+	}
+	-re -wrap "No probes matched\\." {
+	}
     }
-    -re "No probes matched\\.\r\n$gdb_prompt $" {
-	xfail $test
-	untested "no matching probes"
-	return
-    }
+}
+
+if { !$have_probe } {
+    untested "no matching probes"
 }
 
 set test "libpthread.so not found"
 gdb_test_multiple "info sharedlibrary" $test {
     -re "/libpthread\\.so.*\r\n$gdb_prompt $" {
-	fail $test
+	# With newer glibc, libpthread has been integrated into glibc so we
+	# can expect it to be already loaded at main.  This means we no longer
+	# excercise the scenario we're trying to trigger, but continue
+	# nevertheless.
+	unsupported $test
     }
     -re "/libc\\.so.*\r\n$gdb_prompt $" {
 	pass $test
