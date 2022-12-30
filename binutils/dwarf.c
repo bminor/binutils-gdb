@@ -4899,7 +4899,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
       File_Entry *file_table = NULL;
       unsigned int n_files = 0;
       char **directory_table = NULL;
-      uint64_t n_directories = 0;
+      unsigned int n_directories = 0;
 
       if (startswith (section->name, ".debug_line.")
 	  /* Note: the following does not apply to .debug_line.dwo sections.
@@ -4949,8 +4949,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	  if (linfo.li_version >= 5)
 	    {
-	      unsigned char *format_start, format_count, *format;
-	      uint64_t formati, entryi;
+	      unsigned char *format_start, *format;
+	      unsigned int format_count, formati, entryi;
 
 	      load_debug_section_with_follow (line_str, fileptr);
 
@@ -5218,22 +5218,25 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      unsigned int ix = file_table[0].directory_index;
 	      const char *directory;
 
-	      if (ix == 0)
+	      if (ix == 0 && linfo.li_version < 5)
 		directory = ".";
 	      /* PR 20439 */
 	      else if (n_directories == 0)
 		directory = _("<unknown>");
-	      else if (ix > n_directories)
-		{
-		  warn (_("directory index %u > number of directories %" PRIu64 "\n"),
-			ix, n_directories);
-		  directory = _("<corrupt>");
-		}
-	      else if (linfo.li_version >= 5)
-		directory = directory_table[ix];
 	      else
-		directory = directory_table[ix - 1];
-
+		{
+		  if (linfo.li_version < 5)
+		    --ix;
+		  if (ix >= n_directories)
+		    {
+		      warn (_("directory index %u "
+			      ">= number of directories %u\n"),
+			    ix, n_directories);
+		      directory = _("<corrupt>");
+		    }
+		  else
+		    directory = directory_table[ix];
+		}
 	      if (do_wide)
 		printf (_("CU: %s/%s:\n"),
 			null_name (directory),
@@ -5397,45 +5400,53 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		READ_ULEB (uladv, data, end);
 		state_machine_regs.file = uladv;
 
-		{
-		  unsigned file = state_machine_regs.file;
-		  unsigned dir;
+		unsigned file = state_machine_regs.file;
+		if (linfo.li_version < 5)
+		  --file;
 
-		  if (linfo.li_version < 5)
-		    --file;
-
-		  if (file_table == NULL || n_files == 0)
-		    printf (_("\n [Use file table entry %d]\n"), file);
-		  /* PR 20439 */
-		  else if (file >= n_files)
-		    {
-		      warn (_("file index %u > number of files %u\n"), file, n_files);
-		      printf (_("\n <over large file table index %u>"), file);
-		    }
-		  else if ((dir = file_table[file].directory_index) == 0)
-		    /* If directory index is 0, that means current directory.  */
-		    printf ("\n./%s:[++]\n", null_name (file_table[file].name));
-		  else if (directory_table == NULL || n_directories == 0)
-		    printf (_("\n [Use file %s in directory table entry %d]\n"),
-			    null_name (file_table[file].name), dir);
-		  /* PR 20439 */
-		  else if (dir > n_directories)
-		    {
-		      warn (_("directory index %u > number of directories %" PRIu64 "\n"),
-			    dir, n_directories);
-		      printf (_("\n <over large directory table entry %u>\n"), dir);
-		    }
-		  else if (linfo.li_version >= 5)
-		    printf ("\n%s/%s:\n",
-			    /* The directory index starts counting at 0.  */
-			    null_name (directory_table[dir]),
-			    null_name (file_table[file].name));
-		  else
-		    printf ("\n%s/%s:\n",
-			    /* The directory index starts counting at 1.  */
-			    null_name (directory_table[dir - 1]),
-			    null_name (file_table[file].name));
-		}
+		if (file_table == NULL || n_files == 0)
+		  printf (_("\n [Use file table entry %d]\n"), file);
+		/* PR 20439 */
+		else if (file >= n_files)
+		  {
+		    warn (_("file index %u >= number of files %u\n"),
+			  file, n_files);
+		    printf (_("\n <over large file table index %u>"), file);
+		  }
+		else
+		  {
+		    unsigned dir = file_table[file].directory_index;
+		    if (dir == 0 && linfo.li_version < 5)
+		      /* If directory index is 0, that means compilation
+			 current directory.  bfd/dwarf2.c shows
+			 DW_AT_comp_dir here but in keeping with the
+			 readelf practice of minimal interpretation of
+			 file data, we show "./".  */
+		      printf ("\n./%s:[++]\n",
+			      null_name (file_table[file].name));
+		    else if (directory_table == NULL || n_directories == 0)
+		      printf (_("\n [Use file %s "
+				"in directory table entry %d]\n"),
+			      null_name (file_table[file].name), dir);
+		    else
+		      {
+			if (linfo.li_version < 5)
+			  --dir;
+			/* PR 20439 */
+			if (dir >= n_directories)
+			  {
+			    warn (_("directory index %u "
+				    ">= number of directories %u\n"),
+				  dir, n_directories);
+			    printf (_("\n <over large directory table entry "
+				      "%u>\n"), dir);
+			  }
+			else
+			  printf ("\n%s/%s:\n",
+				  null_name (directory_table[dir]),
+				  null_name (file_table[file].name));
+		      }
+		  }
 		break;
 
 	      case DW_LNS_set_column:
@@ -5530,7 +5541,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  /* PR 20439  */
 		  if (indx >= n_files)
 		    {
-		      warn (_("corrupt file index %u encountered\n"), indx);
+		      warn (_("file index %u >= number of files %u\n"),
+			    indx, n_files);
 		      fileName = _("<corrupt>");
 		    }
 		  else
