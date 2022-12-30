@@ -34,7 +34,9 @@
    translation, looks like this.  */
 struct comp_unit_head
 {
-  unsigned int length = 0;
+private:
+  unsigned int m_length = 0;
+public:
   unsigned char version = 0;
   unsigned char addr_size = 0;
   unsigned char signed_addr_p = 0;
@@ -65,17 +67,30 @@ struct comp_unit_head
      DW_UT_skeleton or DW_UT_split_compile.  */
   ULONGEST signature = 0;
 
-  /* Return the total length of the CU described by this header.  */
-  unsigned int get_length () const
+  void set_length (unsigned int length)
   {
-    return initial_length_size + length;
+    m_length = length;
+  }
+
+  /* Return the total length of the CU described by this header, including the
+     initial length field.  */
+  unsigned int get_length_with_initial () const
+  {
+    return m_length + initial_length_size;
+  }
+
+  /* Return the total length of the CU described by this header, excluding the
+     initial length field.  */
+  unsigned int get_length_without_initial () const
+  {
+    return m_length;
   }
 
   /* Return TRUE if OFF is within this CU.  */
   bool offset_in_cu_p (sect_offset off) const
   {
     sect_offset bottom = sect_off;
-    sect_offset top = sect_off + get_length ();
+    sect_offset top = sect_off + get_length_with_initial ();
     return off >= bottom && off < top;
   }
 

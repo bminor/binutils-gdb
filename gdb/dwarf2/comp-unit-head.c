@@ -44,7 +44,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   const char *filename = section->get_file_name ();
   bfd *abfd = section->get_bfd_owner ();
 
-  cu_header->length = read_initial_length (abfd, info_ptr, &bytes_read);
+  cu_header->set_length (read_initial_length (abfd, info_ptr, &bytes_read));
   cu_header->initial_length_size = bytes_read;
   cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
   info_ptr += bytes_read;
@@ -162,11 +162,11 @@ error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 
   /* Cast to ULONGEST to use 64-bit arithmetic when possible to
      avoid potential 32-bit overflow.  */
-  if (((ULONGEST) header->sect_off + header->get_length ())
+  if (((ULONGEST) header->sect_off + header->get_length_with_initial ())
       > section->size)
     error (_("Dwarf Error: bad length (0x%x) in compilation unit header "
 	   "(offset %s + 0) [in module %s]"),
-	   header->length, sect_offset_str (header->sect_off),
+	   header->get_length_without_initial (), sect_offset_str (header->sect_off),
 	   filename);
 }
 

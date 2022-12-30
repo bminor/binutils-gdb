@@ -5598,7 +5598,7 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
       ptr = read_and_check_comp_unit_head (per_objfile, &header, section,
 					   abbrev_section, ptr, section_kind);
 
-      length = header.get_length ();
+      length = header.get_length_with_initial ();
 
       /* Skip dummy type units.  */
       if (ptr >= info_ptr + length
@@ -6005,7 +6005,7 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 nor the type's offset in the TU until now.  */
-      dwo_unit->length = cu->header.get_length ();
+      dwo_unit->length = cu->header.get_length_with_initial ();
       dwo_unit->type_offset_in_tu = cu->header.type_cu_offset_in_tu;
 
       /* Establish the type offset that can be used to lookup the type.
@@ -6021,7 +6021,7 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 until now.  */
-      dwo_unit->length = cu->header.get_length ();
+      dwo_unit->length = cu->header.get_length_with_initial ();
     }
 
   dwo_abbrev_section->read (objfile);
@@ -6289,7 +6289,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
 	  /* LENGTH has not been set yet for type units if we're
 	     using .gdb_index.  */
-	  this_cu->set_length (cu->header.get_length ());
+	  this_cu->set_length (cu->header.get_length_with_initial ());
 
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section =
@@ -6305,7 +6305,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 						    rcuh_kind::COMPILE);
 
 	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
-	  this_cu->set_length (cu->header.get_length ());
+	  this_cu->set_length (cu->header.get_length_with_initial ());
 	  this_cu->set_version (cu->header.version);
 	}
     }
@@ -6465,7 +6465,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
       m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
       m_new_cu->addr_base = parent_cu->addr_base;
     }
-  this_cu->set_length (m_new_cu->header.get_length ());
+  this_cu->set_length (m_new_cu->header.get_length_with_initial ());
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + this_cu->length ()
@@ -7249,7 +7249,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	  *slot = sig_ptr;
 	}
       this_cu->sect_off = sect_off;
-      this_cu->set_length (cu_header.get_length ());
+      this_cu->set_length (cu_header.get_length_with_initial ());
       this_cu->is_dwz = is_dwz;
       this_cu->section = section;
       /* Init this asap, to avoid a data race in the set_version in
@@ -7744,7 +7744,7 @@ load_full_comp_unit (dwarf2_per_cu_data *this_cu,
 
   gdb_assert (cu->die_hash == NULL);
   cu->die_hash =
-    htab_create_alloc_ex (cu->header.length / 12,
+    htab_create_alloc_ex (cu->header.get_length_without_initial () / 12,
 			  die_hash,
 			  die_eq,
 			  NULL,
@@ -18409,7 +18409,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 {
   const gdb_byte *end_ptr = (reader->buffer
 			     + to_underlying (reader->cu->header.sect_off)
-			     + reader->cu->header.get_length ());
+			     + reader->cu->header.get_length_with_initial ());
 
   while (info_ptr < end_ptr)
     {
@@ -23026,7 +23026,7 @@ read_signatured_type (signatured_type *sig_type,
 
       gdb_assert (cu->die_hash == NULL);
       cu->die_hash =
-	htab_create_alloc_ex (cu->header.length / 12,
+	htab_create_alloc_ex (cu->header.get_length_without_initial () / 12,
 			      die_hash,
 			      die_eq,
 			      NULL,
