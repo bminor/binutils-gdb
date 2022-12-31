@@ -14,16 +14,17 @@
 # Actualizare a algoritmului formelor de plural (de la „două” la „trei”).
 # NU și a mesajelor traduse (acestea au rămas neschimbate).
 # Eliminare a mesajelor ce-au dispărut în ultima versiune.
-# Actualizări realizate de Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 15.01.2022.
 # Actualizare a algoritmului formelor de plural (de la „trei” la „patru” experimental).
-# Actualizare a traducerii pentru versiunea 2.38.90, făcută de R-GC (33% - tradus), oct-2022.
+# Actualizări realizate de Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 15.01.2022.
+# Actualizare a traducerii pentru versiunea 2.38.90, făcută de R-GC (33% - tradus), oct-2022."
+# Actualizare a traducerii pentru versiunea 2.38.90, făcută de R-GC (66% - tradus), dec-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.38.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2022-07-08 11:02+0100\n"
-"PO-Revision-Date: 2022-10-31 03:12+0100\n"
+"PO-Revision-Date: 2022-12-29 16:25+0100\n"
 "Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
 "Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -32,7 +33,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=((n==1) ? 0 : (n==2) ? 1 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 2 : 3);\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Lokalize 22.12.0\n"
 
 #: addr2line.c:89
 #, c-format
@@ -220,42 +221,42 @@ msgstr "  [b]          - pune fișierul(e) înainte de [nume-membru] (la fel ca 
 #: ar.c:318
 #, c-format
 msgid "  [D]          - use zero for timestamps and uids/gids (default)\n"
-msgstr ""
+msgstr "  [D]          - utilizează zero pentru marcajele de timp și uid-uri/gid-uri (implicit)\n"
 
 #: ar.c:320
 #, c-format
 msgid "  [U]          - use actual timestamps and uids/gids\n"
-msgstr ""
+msgstr "  [U]          - utilizează marcajele de timp și uid-urile/gid-urile actuale\n"
 
 #: ar.c:325
 #, c-format
 msgid "  [D]          - use zero for timestamps and uids/gids\n"
-msgstr ""
+msgstr "  [D]          - utilizează zero pentru marcajele de timp și uid-uri/gid-uri\n"
 
 #: ar.c:327
 #, c-format
 msgid "  [U]          - use actual timestamps and uids/gids (default)\n"
-msgstr ""
+msgstr "  [U]          - utilizează marcajele de timp și uid-urile/gid-urile actuale (implicit)\n"
 
 #: ar.c:330
 #, c-format
 msgid "  [N]          - use instance [count] of name\n"
-msgstr ""
+msgstr "  [N]          - utilizează instanța [număr] de nume\n"
 
 #: ar.c:331
 #, c-format
 msgid "  [f]          - truncate inserted file names\n"
-msgstr ""
+msgstr "  [f]          - trunchiază numele fișierelor inserate\n"
 
 #: ar.c:332
 #, c-format
 msgid "  [P]          - use full path names when matching\n"
-msgstr ""
+msgstr "  [P]          - utilizează nume de căi complete atunci când se potrivesc\n"
 
 #: ar.c:333
 #, c-format
 msgid "  [o]          - preserve original dates\n"
-msgstr ""
+msgstr "  [o]          - păstrează datele originale\n"
 
 #: ar.c:334
 #, c-format
@@ -265,7 +266,7 @@ msgstr "  [O]          - afișează pozițiile fișierelor din arhivă\n"
 #: ar.c:335
 #, c-format
 msgid "  [u]          - only replace files that are newer than current archive contents\n"
-msgstr ""
+msgstr "  [u]          - înlocuiește numai fișierele care sunt mai noi decât conținutul actual al arhivei\n"
 
 #: ar.c:336
 #, c-format
@@ -275,22 +276,22 @@ msgstr " modificatori generici:\n"
 #: ar.c:337
 #, c-format
 msgid "  [c]          - do not warn if the library had to be created\n"
-msgstr ""
+msgstr "  [c]          - nu avertizează dacă biblioteca a trebuit să fie creată\n"
 
 #: ar.c:338
 #, c-format
 msgid "  [s]          - create an archive index (cf. ranlib)\n"
-msgstr ""
+msgstr "  [s]          - creează un index de arhivă (a se vedea ranlib)\n"
 
 #: ar.c:339
 #, c-format
 msgid "  [l <text> ]  - specify the dependencies of this library\n"
-msgstr ""
+msgstr "  [l <text> ]  - specifică dependențele acestei biblioteci\n"
 
 #: ar.c:340
 #, c-format
 msgid "  [S]          - do not build a symbol table\n"
-msgstr ""
+msgstr "  [S]          - nu construiește un tabel de simboluri\n"
 
 #: ar.c:341
 #, c-format
@@ -315,17 +316,17 @@ msgstr "  @<fișier>    - citește opțiunile din <fișier>\n"
 #: ar.c:345
 #, c-format
 msgid "  --target=BFDNAME - specify the target object format as BFDNAME\n"
-msgstr ""
+msgstr "  --target=NUMEBFD - specifică formatul obiectului țintă ca NUMEBFD\n"
 
 #: ar.c:346
 #, c-format
 msgid "  --output=DIRNAME - specify the output directory for extraction operations\n"
-msgstr ""
+msgstr "  --output=NUMEDIR - specifică directorul de ieșire pentru operațiunile de extragere\n"
 
 #: ar.c:347
 #, c-format
 msgid "  --record-libdeps=<text> - specify the dependencies of this library\n"
-msgstr ""
+msgstr "  --record-libdeps=<text> - specifică dependențele acestei biblioteci\n"
 
 #: ar.c:348
 #, c-format
@@ -340,7 +341,7 @@ msgstr " opțional:\n"
 #: ar.c:351
 #, c-format
 msgid "  --plugin <p> - load the specified plugin\n"
-msgstr ""
+msgstr "  --plugin <p> - încarcă modulul specificat\n"
 
 #: ar.c:372
 #, c-format
@@ -372,6 +373,8 @@ msgid ""
 "  -D                           Use zero for symbol map timestamp (default)\n"
 "  -U                           Use an actual symbol map timestamp\n"
 msgstr ""
+"  -D                           utilizează zero ca marcaj temporal pentru tabelul de simboluri (implicit)\n"
+"  -U                           utilizează un marcaj temporal cu ora/data actuale pentru tabelul de simboluri\n"
 
 #: ar.c:385
 #, c-format
@@ -379,6 +382,8 @@ msgid ""
 "  -D                           Use zero for symbol map timestamp\n"
 "  -U                           Use actual symbol map timestamp (default)\n"
 msgstr ""
+"  -D                           utilizează zero ca marcaj temporal pentru tabelul de simboluri\n"
+"  -U                           utilizează un marcaj temporal cu ora/data actuale pentru tabelul de simboluri (implicit)\n"
 
 #: ar.c:388
 #, c-format
@@ -387,6 +392,9 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -v --version                 Print version information\n"
 msgstr ""
+"  -t                           actualizează marcajul de timp al tabelului simbolurilor arhivei\n"
+"  -h --help                    afișează acest mesaj de ajutor\n"
+"  -v --version                 afișează informații despre versiune\n"
 
 #: ar.c:513
 msgid "two different operation options specified"
@@ -407,35 +415,35 @@ msgstr "nici o operațiune specificată"
 
 #: ar.c:817
 msgid "`u' is only meaningful with the `r' option."
-msgstr ""
+msgstr "„u” are sens doar cu opțiunea „r”."
 
 #: ar.c:820
 msgid "`u' is not meaningful with the `D' option."
-msgstr ""
+msgstr "„u” nu are sens cu opțiunea „D”."
 
 #: ar.c:823
 msgid "`u' modifier ignored since `D' is the default (see `U')"
-msgstr ""
+msgstr "modificatorul „u” a fost ignorat, deoarece modificatorul „D” este implicit (a se vedea „U”)"
 
 #: ar.c:832
 msgid "missing position arg."
-msgstr ""
+msgstr "argumentul de poziție lipsește"
 
 #: ar.c:838
 msgid "`N' is only meaningful with the `x' and `d' options."
-msgstr ""
+msgstr "„N” are sens doar cu opțiunile „x” și „d”."
 
 #: ar.c:840
 msgid "`N' missing value."
-msgstr ""
+msgstr "lipsește valoarea lui „N”."
 
 #: ar.c:843
 msgid "Value for `N' must be positive."
-msgstr ""
+msgstr "Valoarea pentru „N” trebuie să fie pozitivă."
 
 #: ar.c:859
 msgid "`x' cannot be used on thin archives."
-msgstr ""
+msgstr "„x” nu poate fi utilizat cu arhivele subțiri."
 
 #: ar.c:873
 msgid "Cannot create libdeps record."
@@ -703,7 +711,7 @@ msgstr "definirea secțiunii la %x dimensiunea %x\n"
 #: coffdump.c:140
 #, c-format
 msgid "pointer to"
-msgstr ""
+msgstr "arată spre"
 
 #: coffdump.c:145
 #, c-format
@@ -713,7 +721,7 @@ msgstr "matrice [%d] de"
 #: coffdump.c:150
 #, c-format
 msgid "function returning"
-msgstr ""
+msgstr "returnarea funcției"
 
 #: coffdump.c:154
 #, c-format
@@ -733,27 +741,27 @@ msgstr "definirea structurii"
 #: coffdump.c:170
 #, c-format
 msgid "structure ref to UNKNOWN struct"
-msgstr ""
+msgstr "referință de structură la struct NECUNOSCUTĂ"
 
 #: coffdump.c:172
 #, c-format
 msgid "structure ref to %s"
-msgstr ""
+msgstr "referință de structură a %s"
 
 #: coffdump.c:175
 #, c-format
 msgid "enum ref to %s"
-msgstr ""
+msgstr "referință enumerare a %s"
 
 #: coffdump.c:178
 #, c-format
 msgid "enum definition"
-msgstr ""
+msgstr "definiție enumerare"
 
 #: coffdump.c:251
 #, c-format
 msgid "Stack offset %x"
-msgstr ""
+msgstr "Decalaj de stivă %x"
 
 #: coffdump.c:254
 #, c-format
@@ -763,17 +771,17 @@ msgstr "Secțiunea de memorie %s+%x"
 #: coffdump.c:257
 #, c-format
 msgid "Register %d"
-msgstr ""
+msgstr "Registru %d"
 
 #: coffdump.c:260
 #, c-format
 msgid "Struct Member offset %x"
-msgstr ""
+msgstr "Decalaj membru structură %x"
 
 #: coffdump.c:263
 #, c-format
 msgid "Enum Member offset %x"
-msgstr ""
+msgstr "Decalaj membru enumerare %x"
 
 #: coffdump.c:266
 #, c-format
@@ -863,6 +871,11 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
+" Opțiunile sunt:\n"
+"  @<fișier>              citește opțiunile din <fișier>\n"
+"  -h --help              afișează aceste informații\n"
+"  -v --version           afișează versiunea programului\n"
+"\n"
 
 #: coffdump.c:532 srconv.c:1794 sysdump.c:711
 msgid "no input file specified"
@@ -884,17 +897,17 @@ msgstr "Index țintă de secțiune nevalid: %d"
 
 #: coffgrok.c:190
 msgid "Target section has insufficient relocs"
-msgstr ""
+msgstr "Secțiunea țintă are realocări insuficiente"
 
 #: coffgrok.c:198 coffgrok.c:445
 #, c-format
 msgid "Symbol index %u encountered when there are no symbols"
-msgstr ""
+msgstr "Index de simbol %u întâlnit când nu există simboluri"
 
 #: coffgrok.c:199 coffgrok.c:446
 #, c-format
 msgid "Invalid symbol index %u encountered"
-msgstr ""
+msgstr "Index de simbol nevalid %u întâlnit"
 
 #: coffgrok.c:251
 #, c-format
@@ -909,43 +922,43 @@ msgstr "Clasă de simbol nerecunoscută: %d"
 #: coffgrok.c:351
 #, c-format
 msgid "Type entry %u does not have enough symbolic information"
-msgstr ""
+msgstr "Intrarea de tipul %u nu are suficiente informații simbolice"
 
 #: coffgrok.c:354
 #, c-format
 msgid "Type entry %u does not refer to a symbol"
-msgstr ""
+msgstr "Intrarea de tipul %u nu se referă la un simbol"
 
 #: coffgrok.c:376
 msgid "Section definition needs a section length"
-msgstr ""
+msgstr "Definirea secțiunii necesită o lungime a secțiunii"
 
 #: coffgrok.c:427
 msgid "Aggregate definition needs auxiliary information"
-msgstr ""
+msgstr "Definiția agregată necesită informații auxiliare"
 
 #: coffgrok.c:436
 #, c-format
 msgid "Invalid tag index %#lx encountered"
-msgstr ""
+msgstr "Index de etichetă nevalid %#lx întâlnit"
 
 #: coffgrok.c:477
 msgid "Enum definition needs auxiliary information"
-msgstr ""
+msgstr "Definiția enumerației necesită informații auxiliare"
 
 #: coffgrok.c:484
 #, c-format
 msgid "Invalid enum symbol index %u encountered"
-msgstr ""
+msgstr "S-a întâlnit un index de simbol de enumerare nevalid %u"
 
 #: coffgrok.c:520
 msgid "Array definition needs auxiliary information"
-msgstr ""
+msgstr "Definirea matricei necesită informații auxiliare"
 
 #: coffgrok.c:536
 #, c-format
 msgid "Out of range sum for els (%#x) * size (%#x)"
-msgstr ""
+msgstr "Suma în afara intervalului pentru elemente (%#x) * dimensiune (%#x)"
 
 #: coffgrok.c:627 coffgrok.c:870
 #, c-format
@@ -954,58 +967,58 @@ msgstr "Clasă de simbol nerecunoscută: %d"
 
 #: coffgrok.c:644
 msgid "ICE: do_define called without a block"
-msgstr ""
+msgstr "ICE: do_define apelat fără un bloc"
 
 #: coffgrok.c:646
 #, c-format
 msgid "Out of range symbol index: %u"
-msgstr ""
+msgstr "Indexul simbolului în afara intervalului: %u"
 
 #: coffgrok.c:683
 msgid "Section referenced before any file is defined"
-msgstr ""
+msgstr "Secțiune la care se face referire înainte ca orice fișier să fie definit"
 
 #: coffgrok.c:701
 #, c-format
 msgid "Out of range sum for offset (%#x) + size (%#x)"
-msgstr ""
+msgstr "Suma pentru poziție (%#x) + dimensiune (%#x), în afara intervalului"
 
 #: coffgrok.c:706
 #, c-format
 msgid "Out of range type size: %u"
-msgstr ""
+msgstr "Dimensiunea tipului în afara intervalului: %u"
 
 #: coffgrok.c:792
 msgid "Function start encountered without a top level scope."
-msgstr ""
+msgstr "Începutul funcției întâlnit fără un domeniu de aplicare la cel mai înalt nivel."
 
 #: coffgrok.c:818
 msgid "Block start encountered without a scope for it."
-msgstr ""
+msgstr "Început de bloc întâlnit fără un domeniu de aplicare pentru acesta."
 
 #: coffgrok.c:828
 msgid "Function arguments encountered without a function definition"
-msgstr ""
+msgstr "Argumente ale funcției întâlnite fără o definiție a funcției"
 
 #: coffgrok.c:836
 msgid "Structure element encountered without a structure definition"
-msgstr ""
+msgstr "Element de structură întâlnit fără o definiție de structură"
 
 #: coffgrok.c:841
 msgid "Enum element encountered without an enum definition"
-msgstr ""
+msgstr "Element de enumerare întâlnit fără o definiție de enumerare"
 
 #: coffgrok.c:849
 msgid "Aggregate definition encountered without a scope"
-msgstr ""
+msgstr "Definiție agregată întâlnită fără un domeniu de aplicare"
 
 #: coffgrok.c:855
 msgid "Label definition encountered without a file scope"
-msgstr ""
+msgstr "Definiția etichetei a fost întâlnită fără un domeniu de aplicare al fișierului"
 
 #: coffgrok.c:863
 msgid "Variable definition encountered without a scope"
-msgstr ""
+msgstr "Definiție variabilă întâlnită fără un domeniu de aplicare"
 
 #: coffgrok.c:886
 #, c-format
@@ -1019,101 +1032,101 @@ msgstr "Raportați erorile la %s.\n"
 
 #: debug.c:647
 msgid "debug_add_to_current_namespace: no current file"
-msgstr ""
+msgstr "debug_add_to_current_namespace: niciun fișier curent"
 
 #: debug.c:726
 msgid "debug_start_source: no debug_set_filename call"
-msgstr ""
+msgstr "debug_start_source: niciun apel debug_set_filename"
 
 #: debug.c:780
 msgid "debug_record_function: no debug_set_filename call"
-msgstr ""
+msgstr "debug_record_function: niciun apel debug_set_filename"
 
 #: debug.c:832
 msgid "debug_record_parameter: no current function"
-msgstr ""
+msgstr "debug_record_parameter: nicio funcție curentă"
 
 #: debug.c:864
 msgid "debug_end_function: no current function"
-msgstr ""
+msgstr "debug_end_function: nicio funcție curentă"
 
 #: debug.c:870
 msgid "debug_end_function: some blocks were not closed"
-msgstr ""
+msgstr "debug_end_function: unele blocuri nu au fost închise"
 
 #: debug.c:898
 msgid "debug_start_block: no current block"
-msgstr ""
+msgstr "debug_start_block: niciun bloc curent"
 
 #: debug.c:934
 msgid "debug_end_block: no current block"
-msgstr ""
+msgstr "debug_end_block: niciun bloc curent"
 
 #: debug.c:941
 msgid "debug_end_block: attempt to close top level block"
-msgstr ""
+msgstr "debug_end_block: încercare de a închide blocul de nivel superior"
 
 #: debug.c:964
 msgid "debug_record_line: no current unit"
-msgstr ""
+msgstr "debug_record_line: nicio unitate curentă"
 
 #. FIXME
 #: debug.c:1017
 msgid "debug_start_common_block: not implemented"
-msgstr ""
+msgstr "debug_start_common_block: nu este implementat"
 
 #. FIXME
 #: debug.c:1028
 msgid "debug_end_common_block: not implemented"
-msgstr ""
+msgstr "debug_end_common_block: nu este implementat"
 
 #. FIXME.
 #: debug.c:1112
 msgid "debug_record_label: not implemented"
-msgstr ""
+msgstr "debug_record_label: nu este implementat"
 
 #: debug.c:1134
 msgid "debug_record_variable: no current file"
-msgstr ""
+msgstr "debug_record_variable: niciun fișier curent"
 
 #: debug.c:1662
 msgid "debug_make_undefined_type: unsupported kind"
-msgstr ""
+msgstr "debug_make_undefined_type: tip neacceptat"
 
 #: debug.c:1839
 msgid "debug_name_type: no current file"
-msgstr ""
+msgstr "debug_name_type: niciun fișier curent"
 
 #: debug.c:1884
 msgid "debug_tag_type: no current file"
-msgstr ""
+msgstr "debug_tag_type: niciun fișier curent"
 
 #: debug.c:1892
 msgid "debug_tag_type: extra tag attempted"
-msgstr ""
+msgstr "debug_tag_type: s-a încercat o etichetă suplimentară"
 
 #: debug.c:1929
 #, c-format
 msgid "Warning: changing type size from %d to %d\n"
-msgstr ""
+msgstr "Avertisment: se modifică dimensiunea tipului de la %d la %d\n"
 
 #: debug.c:1951
 msgid "debug_find_named_type: no current compilation unit"
-msgstr ""
+msgstr "debug_find_named_type: nicio unitate de compilare curentă"
 
 #: debug.c:2054
 #, c-format
 msgid "debug_get_real_type: circular debug information for %s\n"
-msgstr ""
+msgstr "debug_get_real_type: informație de depanare circulară pentru %s\n"
 
 #: debug.c:2490
 msgid "debug_write_type: illegal type encountered"
-msgstr ""
+msgstr "debug_write_type: tip ilegal întâlnit"
 
 #: dlltool.c:869 dlltool.c:893 dlltool.c:922
 #, c-format
 msgid "Internal error: Unknown machine type: %d"
-msgstr ""
+msgstr "Eroare internă: tip necunoscut de mașină: %d"
 
 #: dlltool.c:964
 #, c-format
@@ -1132,31 +1145,31 @@ msgstr "S-a procesat fișierul de definiție"
 #: dlltool.c:997
 #, c-format
 msgid "Syntax error in def file %s:%d"
-msgstr ""
+msgstr "Eroare de sintaxă în fișierul de definiție %s:%d"
 
 #: dlltool.c:1032
 #, c-format
 msgid "%s: Path components stripped from image name, '%s'."
-msgstr ""
+msgstr "%s: Componentele căii au fost eliminate din numele imaginii, „%s”."
 
 #: dlltool.c:1050
 #, c-format
 msgid "NAME: %s base: %x"
-msgstr ""
+msgstr "NUME: %s bază: %x"
 
 #: dlltool.c:1053 dlltool.c:1074
 msgid "Can't have LIBRARY and NAME"
-msgstr ""
+msgstr "Nu se pot avea BIBLIOTECĂ și NUME"
 
 #: dlltool.c:1071
 #, c-format
 msgid "LIBRARY: %s base: %x"
-msgstr ""
+msgstr "BIBLIOTECĂ: %s bază: %x"
 
 #: dlltool.c:1226
 #, c-format
 msgid "VERSION %d.%d\n"
-msgstr ""
+msgstr "VERSIUNEA %d.%d\n"
 
 #: dlltool.c:1274
 #, c-format
@@ -1186,12 +1199,12 @@ msgstr "Se absorb informații din secțiunea %s în %s"
 #: dlltool.c:1497
 #, c-format
 msgid "Excluding symbol: %s"
-msgstr ""
+msgstr "Excluzând simbolul: %s"
 
 #: dlltool.c:1586 dlltool.c:1597 nm.c:1423 nm.c:1434 nm.c:1444
 #, c-format
 msgid "%s: no symbols"
-msgstr ""
+msgstr "%s: nici un simbol"
 
 #. FIXME: we ought to read in and block out the base relocations.
 #: dlltool.c:1623
@@ -1216,11 +1229,11 @@ msgstr "Nu se poate produce dll mcore-elf din fișierul arhivă: %s"
 
 #: dlltool.c:1758
 msgid "Adding exports to output file"
-msgstr ""
+msgstr "Se adăugă exporturile în fișierul de ieșire"
 
 #: dlltool.c:1810
 msgid "Added exports to output file"
-msgstr ""
+msgstr "S-au adăugat exporturile în fișierul de ieșire"
 
 #: dlltool.c:1978
 #, c-format
@@ -1230,16 +1243,16 @@ msgstr "Se generează fișierul de export: %s"
 #: dlltool.c:1983
 #, c-format
 msgid "Unable to open temporary assembler file: %s"
-msgstr ""
+msgstr "Nu se poate deschide fișierul de asamblare temporar: %s"
 
 #: dlltool.c:1988
 #, c-format
 msgid "Opened temporary file: %s"
-msgstr ""
+msgstr "S-a deschis fișierul temporar: %s"
 
 #: dlltool.c:2164
 msgid "failed to read the number of entries from base file"
-msgstr ""
+msgstr "nu s-a putut citi numărul de intrări din fișierul de bază"
 
 #: dlltool.c:2215
 msgid "Generated exports file"
@@ -1263,7 +1276,7 @@ msgstr "bfd_open a eșuat la redeschiderea fișierului stub: %s: %s"
 #: dlltool.c:2705 dlltool.c:2784
 #, c-format
 msgid "failed to open temporary head file: %s"
-msgstr ""
+msgstr "nu s-a putut deschide fișierul temporar din frunte(primul): %s"
 
 #: dlltool.c:2769 dlltool.c:2859
 #, c-format
@@ -1273,7 +1286,7 @@ msgstr "nu s-a putut deschide fișierul temporar din frunte(primul): %s: %s"
 #: dlltool.c:2874
 #, c-format
 msgid "failed to open temporary tail file: %s"
-msgstr ""
+msgstr "nu s-a putut deschide fișierul temporar din coadă(ultimul): %s"
 
 #: dlltool.c:2910
 #, c-format
@@ -1312,12 +1325,12 @@ msgstr "%s nu este o bibliotecă"
 #: dlltool.c:3290
 #, c-format
 msgid "Import library `%s' specifies two or more dlls"
-msgstr ""
+msgstr "Biblioteca de import „%s” specifică două sau mai multe dll-uri"
 
 #: dlltool.c:3301
 #, c-format
 msgid "Unable to determine dll name for `%s' (not an import library?)"
-msgstr ""
+msgstr "Nu se poate determina numele dll pentru „%s” (nu este o bibliotecă de import?)"
 
 #: dlltool.c:3527
 #, c-format
@@ -1327,192 +1340,192 @@ msgstr "Avertisment, se ignoră EXPORTul duplicat %s %d,%d"
 #: dlltool.c:3533
 #, c-format
 msgid "Error, duplicate EXPORT with ordinals: %s"
-msgstr ""
+msgstr "Eroare, EXPORT duplicat cu ordinale: %s"
 
 #: dlltool.c:3636
 msgid "Processing definitions"
-msgstr ""
+msgstr "Se procesează definițiile"
 
 #: dlltool.c:3663
 msgid "Processed definitions"
-msgstr ""
+msgstr "Definitii procesate"
 
 #. xgetext:c-format
 #: dlltool.c:3670 dllwrap.c:477
 #, c-format
 msgid "Usage %s <option(s)> <object-file(s)>\n"
-msgstr ""
+msgstr "Utilizare %s <opțiune(i)> <fișier(e)-obiect>\n"
 
 #. xgetext:c-format
 #: dlltool.c:3672
 #, c-format
 msgid "   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
-msgstr ""
+msgstr "   -m --machine <mașina>    Creează ca DLL pentru <mașina>.  [implicit: %s]\n"
 
 #: dlltool.c:3673
 #, c-format
 msgid "        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, thumb\n"
-msgstr ""
+msgstr "        <mașina> posibilă: arm[_interwork], i386, mcore[-elf]{-le|-be}, thumb\n"
 
 #: dlltool.c:3674
 #, c-format
 msgid "   -e --output-exp <outname> Generate an export file.\n"
-msgstr ""
+msgstr "   -e --output-exp <nume_exp> Generează un fișier de export.\n"
 
 #: dlltool.c:3675
 #, c-format
 msgid "   -l --output-lib <outname> Generate an interface library.\n"
-msgstr ""
+msgstr "   -l --output-lib <nume_bibl> Generează o bibliotecă de interfață.\n"
 
 #: dlltool.c:3676
 #, c-format
 msgid "   -y --output-delaylib <outname> Create a delay-import library.\n"
-msgstr ""
+msgstr "   -y --output-delaylib <nume_bibl> Creează o bibliotecă de import întârziat.\n"
 
 #: dlltool.c:3677
 #, c-format
 msgid "   -a --add-indirect         Add dll indirects to export file.\n"
-msgstr ""
+msgstr "   -a --add-indirect         Adaugă dll indirecte la fișierul de export.\n"
 
 #: dlltool.c:3678
 #, c-format
 msgid "   -D --dllname <name>       Name of input dll to put into interface lib.\n"
-msgstr ""
+msgstr "   -D --dllname <nume>       Numele dll-ului de intrare de pus în biblioteca de interfață.\n"
 
 #: dlltool.c:3679
 #, c-format
 msgid "   -d --input-def <deffile>  Name of .def file to be read in.\n"
-msgstr ""
+msgstr "   -d --input-def <fișier_def>  Numele fișierului .def care trebuie citit.\n"
 
 #: dlltool.c:3680
 #, c-format
 msgid "   -z --output-def <deffile> Name of .def file to be created.\n"
-msgstr ""
+msgstr "   -z --output-def <fișier_def> Numele fișierului .def ce urmează să fie creat.\n"
 
 #: dlltool.c:3681
 #, c-format
 msgid "      --export-all-symbols   Export all symbols to .def\n"
-msgstr ""
+msgstr "      --export-all-symbols   Exportă toate simbolurile în .def\n"
 
 #: dlltool.c:3682
 #, c-format
 msgid "      --no-export-all-symbols  Only export listed symbols\n"
-msgstr ""
+msgstr "      --no-export-all-symbols  Exportă numai simbolurile listate\n"
 
 #: dlltool.c:3683
 #, c-format
 msgid "      --exclude-symbols <list> Don't export <list>\n"
-msgstr ""
+msgstr "      --exclude-symbols <lista> Nu exportă <lista>\n"
 
 #: dlltool.c:3684
 #, c-format
 msgid "      --no-default-excludes  Clear default exclude symbols\n"
-msgstr ""
+msgstr "      --no-default-excludes  Șterge simbolurile de excludere implicite\n"
 
 #: dlltool.c:3685
 #, c-format
 msgid "   -b --base-file <basefile> Read linker generated base file.\n"
-msgstr ""
+msgstr "   -b --base-file <fișier_bază> Citește fișierul de bază generat de editorul de legături.\n"
 
 #: dlltool.c:3686
 #, c-format
 msgid "   -x --no-idata4            Don't generate idata$4 section.\n"
-msgstr ""
+msgstr "   -x --no-idata4            Nu generează secțiunea idata$4.\n"
 
 #: dlltool.c:3687
 #, c-format
 msgid "   -c --no-idata5            Don't generate idata$5 section.\n"
-msgstr ""
+msgstr "   -c --no-idata5            Nu generează secțiunea idata$5.\n"
 
 #: dlltool.c:3688
 #, c-format
 msgid "      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata$5.\n"
-msgstr ""
+msgstr "      --use-nul-prefixed-import-tables Utilizează idata$4 și idata$5 cu prefixul zero.\n"
 
 #: dlltool.c:3689
 #, c-format
 msgid "   -U --add-underscore       Add underscores to all symbols in interface library.\n"
-msgstr ""
+msgstr "   -U --add-underscore       Adaugă liniuțe de subliniere la toate simbolurile din biblioteca de interfață.\n"
 
 #: dlltool.c:3690
 #, c-format
 msgid "      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"
-msgstr ""
+msgstr "      --add-stdcall-underscore Adaugă liniuțe de subliniere la simbolurile stdcall din biblioteca de interfață.\n"
 
 #: dlltool.c:3691
 #, c-format
 msgid "      --no-leading-underscore All symbols shouldn't be prefixed by an underscore.\n"
-msgstr ""
+msgstr "      --no-leading-underscore Nu toate simbolurile trebuie să fie prefixate de o liniuță de subliniere.\n"
 
 #: dlltool.c:3692
 #, c-format
 msgid "      --leading-underscore   All symbols should be prefixed by an underscore.\n"
-msgstr ""
+msgstr "      --leading-underscore   Toate simbolurile trebuie să fie prefixate de o liniuță de subliniere.\n"
 
 #: dlltool.c:3693
 #, c-format
 msgid "   -k --kill-at              Kill @<n> from exported names.\n"
-msgstr ""
+msgstr "   -k --kill-at             Elimină @<n> din numele exportate.\n"
 
 #: dlltool.c:3694
 #, c-format
 msgid "   -A --add-stdcall-alias    Add aliases without @<n>.\n"
-msgstr ""
+msgstr "   -A --add-stdcall-alias    Adaugă alias fără @<n>.\n"
 
 #: dlltool.c:3695
 #, c-format
 msgid "   -p --ext-prefix-alias <prefix> Add aliases with <prefix>.\n"
-msgstr ""
+msgstr "   -p --ext-prefix-alias <prefix> Adaugă alias cu <prefix>.\n"
 
 #: dlltool.c:3696
 #, c-format
 msgid "   -S --as <name>            Use <name> for assembler.\n"
-msgstr ""
+msgstr "   -S --as <nume>            Utilizează <nume> pentru asamblator.\n"
 
 #: dlltool.c:3697
 #, c-format
 msgid "   -f --as-flags <flags>     Pass <flags> to the assembler.\n"
-msgstr ""
+msgstr "   -f --as-flags <fanioane>  Pasează <fanioane> la asamblator.\n"
 
 #: dlltool.c:3698
 #, c-format
 msgid "   -C --compat-implib        Create backward compatible import library.\n"
-msgstr ""
+msgstr "   -C --compat-implib        Creează o bibliotecă de import compatibilă cu versiunea precedentă.\n"
 
 #: dlltool.c:3699
 #, c-format
 msgid "   -n --no-delete            Keep temp files (repeat for extra preservation).\n"
-msgstr ""
+msgstr "   -n --no-delete            Păstrează fișierele temporare (repetați pentru păstrare suplimentară).\n"
 
 #: dlltool.c:3700
 #, c-format
 msgid "   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"
-msgstr ""
+msgstr "   -t --temp-prefix <prefix> Utilizează <prefix> pentru a construi nume de fișiere temporare.\n"
 
 #: dlltool.c:3701
 #, c-format
 msgid "   -I --identify <implib>    Report the name of the DLL associated with <implib>.\n"
-msgstr ""
+msgstr "   -I --identify <bibl_imp>    Raportează numele DLL-ului asociat cu <bibl_imp>.\n"
 
 #: dlltool.c:3702
 #, c-format
 msgid "      --identify-strict      Causes --identify to report error when multiple DLLs.\n"
-msgstr ""
+msgstr "      --identify-strict      Face ca --identify să raporteze o eroare atunci când sunt mai multe DLL-uri.\n"
 
 #: dlltool.c:3703
 #, c-format
 msgid "   -v --verbose              Be verbose.\n"
-msgstr ""
+msgstr "   -v --verbose              Oferă informații detaliate.\n"
 
 #: dlltool.c:3704
 #, c-format
 msgid "   -V --version              Display the program version.\n"
-msgstr ""
+msgstr "   -V --version              Afișează versiunea programului\n"
 
 #: dlltool.c:3705
 #, c-format
 msgid "   -h --help                 Display this information.\n"
-msgstr ""
+msgstr "   -h --help                 Afișează aceste informații.\n"
 
 #: dlltool.c:3706
 #, c-format
@@ -1522,17 +1535,17 @@ msgstr "   @<fișier>                   Citește opțiunile din <fișier>.\n"
 #: dlltool.c:3708
 #, c-format
 msgid "   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
-msgstr ""
+msgstr "   -M --mcore-elf <nume_fișier>  Procesează fișierele obiect mcore-elf în <nume_fișier>.\n"
 
 #: dlltool.c:3709
 #, c-format
 msgid "   -L --linker <name>        Use <name> as the linker.\n"
-msgstr ""
+msgstr "   -L --linker <nume>        Utilizează <nume> ca editor de legături.\n"
 
 #: dlltool.c:3710
 #, c-format
 msgid "   -F --linker-flags <flags> Pass <flags> to the linker.\n"
-msgstr ""
+msgstr "   -F --linker-flags <fanioane> Pasează <fanioane> la editorul de legături.\n"
 
 #: dlltool.c:3854
 #, c-format
@@ -1542,7 +1555,7 @@ msgstr "Nu se poate deschide fișierul de definiție: %s"
 #: dlltool.c:3859
 #, c-format
 msgid "Path components stripped from dllname, '%s'."
-msgstr ""
+msgstr "Componentele căii eliminate din numele-dll, „%s”."
 
 #: dlltool.c:3907
 #, c-format
@@ -1557,7 +1570,7 @@ msgstr "Mașina „%s” nu este acceptată"
 #: dlltool.c:4037
 #, c-format
 msgid "Warning, machine type (%d) not supported for delayimport."
-msgstr ""
+msgstr "Avertisment, tipul de mașină (%d) nu este acceptat pentru import întârziat."
 
 #: dlltool.c:4105 dllwrap.c:206
 #, c-format
@@ -1572,7 +1585,7 @@ msgstr "Se utilizează fișierul: %s"
 #: dllwrap.c:296
 #, c-format
 msgid "Keeping temporary base file %s"
-msgstr ""
+msgstr "Se păstrează fișierul de bază temporar %s"
 
 #: dllwrap.c:298
 #, c-format
@@ -1612,235 +1625,237 @@ msgstr "  Opțiuni generice:\n"
 #: dllwrap.c:479
 #, c-format
 msgid "   @<file>                Read options from <file>\n"
-msgstr ""
+msgstr "   @<fișier>              Citește opțiunile din <fișier>\n"
 
 #: dllwrap.c:480
 #, c-format
 msgid "   --quiet, -q            Work quietly\n"
-msgstr ""
+msgstr "   --quiet, -q            Lucrează silențios\n"
 
 #: dllwrap.c:481
 #, c-format
 msgid "   --verbose, -v          Verbose\n"
-msgstr ""
+msgstr "   --verbose, -v          Oferă informații detaliate\n"
 
 #: dllwrap.c:482
 #, c-format
 msgid "   --version              Print dllwrap version\n"
-msgstr ""
+msgstr "   --version              Afișează versiunea dllwrap\n"
 
 #: dllwrap.c:483
 #, c-format
 msgid "   --implib <outname>     Synonym for --output-lib\n"
-msgstr ""
+msgstr "   --implib <bibl_imp>     Sinonim cu --output-lib\n"
 
 #: dllwrap.c:484
 #, c-format
 msgid "  Options for %s:\n"
-msgstr ""
+msgstr "  Opțiuni pentru %s:\n"
 
 #: dllwrap.c:485
 #, c-format
 msgid "   --driver-name <driver> Defaults to \"gcc\"\n"
-msgstr ""
+msgstr "   --driver-name <driver> Implicit este „gcc”\n"
 
 #: dllwrap.c:486
 #, c-format
 msgid "   --driver-flags <flags> Override default ld flags\n"
-msgstr ""
+msgstr "   --driver-flags <fanioane> Suprascrie fanioanele ld implicite\n"
 
 #: dllwrap.c:487
 #, c-format
 msgid "   --dlltool-name <dlltool> Defaults to \"dlltool\"\n"
-msgstr ""
+msgstr "   --dlltool-name <dlltool> Implicit este „dlltool”\n"
 
 #: dllwrap.c:488
 #, c-format
 msgid "   --entry <entry>        Specify alternate DLL entry point\n"
-msgstr ""
+msgstr "   --entry <intrare>      Specifică un punct de intrare DLL alternativ\n"
 
 #: dllwrap.c:489
 #, c-format
 msgid "   --image-base <base>    Specify image base address\n"
-msgstr ""
+msgstr "   --image-base <bază>    Specifică adresa de bază a imaginii\n"
 
 #: dllwrap.c:490
 #, c-format
 msgid "   --target <machine>     i386-cygwin32 or i386-mingw32\n"
-msgstr ""
+msgstr "   --target <mașina>     i386-cygwin32 sau i386-mingw32\n"
 
 #: dllwrap.c:491
 #, c-format
 msgid "   --dry-run              Show what needs to be run\n"
-msgstr ""
+msgstr "   --dry-run              Afișează ce este necesar să se execute\n"
 
 #: dllwrap.c:492
 #, c-format
 msgid "   --mno-cygwin           Create Mingw DLL\n"
-msgstr ""
+msgstr "   --mno-cygwin           Creează DLL Mingw\n"
 
 #: dllwrap.c:493
 #, c-format
 msgid "  Options passed to DLLTOOL:\n"
-msgstr ""
+msgstr "  Opțiunile pasate către DLLTOOL:\n"
 
 #: dllwrap.c:494
 #, c-format
 msgid "   --machine <machine>\n"
-msgstr ""
+msgstr "   --machine <mașina>\n"
 
 #: dllwrap.c:495
 #, c-format
 msgid "   --output-exp <outname> Generate export file.\n"
-msgstr ""
+msgstr "   --output-exp <nume_fișier> Generează fișierul de export.\n"
 
 #: dllwrap.c:496
 #, c-format
 msgid "   --output-lib <outname> Generate input library.\n"
-msgstr ""
+msgstr "   --output-lib <nume_bibl> Generează biblioteca de intrare.\n"
 
 #: dllwrap.c:497
 #, c-format
 msgid "   --add-indirect         Add dll indirects to export file.\n"
-msgstr ""
+msgstr "   --add-indirect         Adaugă dll indirecte la fișierul de export.\n"
 
 #: dllwrap.c:498
 #, c-format
 msgid "   --dllname <name>       Name of input dll to put into output lib.\n"
-msgstr ""
+msgstr "   --dllname <nume>       Numele dll-ului de intrare de pus în biblioteca de ieșire.\n"
 
 #: dllwrap.c:499
 #, c-format
 msgid "   --def <deffile>        Name input .def file\n"
-msgstr ""
+msgstr "   --def <fișier_def>        Numele fișierului .def de intrare\n"
 
 #: dllwrap.c:500
 #, c-format
 msgid "   --output-def <deffile> Name output .def file\n"
-msgstr ""
+msgstr "   --output-def <fișier_def> Numele fișierului .def de ieșire\n"
 
 #: dllwrap.c:501
 #, c-format
 msgid "   --export-all-symbols     Export all symbols to .def\n"
-msgstr ""
+msgstr "   --export-all-symbols     Exportă toate simbolurile în .def\n"
 
 #: dllwrap.c:502
 #, c-format
 msgid "   --no-export-all-symbols  Only export .drectve symbols\n"
-msgstr ""
+msgstr "   --no-export-all-symbols  Exportă numai simbolurile .drectve\n"
 
 #: dllwrap.c:503
 #, c-format
 msgid "   --exclude-symbols <list> Exclude <list> from .def\n"
-msgstr ""
+msgstr "   --exclude-symbols <lista> Exclude <lista> din .def\n"
 
 #: dllwrap.c:504
 #, c-format
 msgid "   --no-default-excludes    Zap default exclude symbols\n"
-msgstr ""
+msgstr "   --no-default-excludes    Ignoră lista simbolurilor excluse implicit\n"
 
 #: dllwrap.c:505
 #, c-format
 msgid "   --base-file <basefile> Read linker generated base file\n"
-msgstr ""
+msgstr "   --base-file <fișier_bază> Citește fișierul de bază generat de editorul de legături\n"
 
 #: dllwrap.c:506
 #, c-format
 msgid "   --no-idata4           Don't generate idata$4 section\n"
-msgstr ""
+msgstr "   --no-idata4           Nu generează secțiunea idata$4\n"
 
 #: dllwrap.c:507
 #, c-format
 msgid "   --no-idata5           Don't generate idata$5 section\n"
-msgstr ""
+msgstr "   --no-idata5           Nu generează secțiunea idata$5\n"
 
 #: dllwrap.c:508
 #, c-format
 msgid "   -U                     Add underscores to .lib\n"
-msgstr ""
+msgstr "   -U                     Adaugă liniuțe de subliniere la .lib\n"
 
 #: dllwrap.c:509
 #, c-format
 msgid "   -k                     Kill @<n> from exported names\n"
-msgstr ""
+msgstr "   -k                     Elimină @<n> din numele exportate\n"
 
 #: dllwrap.c:510
 #, c-format
 msgid "   --add-stdcall-alias    Add aliases without @<n>\n"
-msgstr ""
+msgstr "   --add-stdcall-alias    Adaugă alias fără @<n>\n"
 
 #: dllwrap.c:511
 #, c-format
 msgid "   --as <name>            Use <name> for assembler\n"
-msgstr ""
+msgstr "   --as <nume>            Utilizează <nume> pentru asamblator\n"
 
 #: dllwrap.c:512
 #, c-format
 msgid "   --nodelete             Keep temp files.\n"
-msgstr ""
+msgstr "   --nodelete             Păstrează fișierele temporare.\n"
 
 #: dllwrap.c:513
 #, c-format
 msgid "   --no-leading-underscore  Entrypoint without underscore\n"
-msgstr ""
+msgstr "   --no-leading-underscore  Punct de intrare fără liniuță de subliniere\n"
 
 #: dllwrap.c:514
 #, c-format
 msgid "   --leading-underscore     Entrypoint with underscore.\n"
-msgstr ""
+msgstr "   --leading-underscore     Punct de intrare cu liniuță de subliniere\n"
 
 #: dllwrap.c:515
 #, c-format
 msgid "  Rest are passed unmodified to the language driver\n"
-msgstr ""
+msgstr "  Restul sunt pasate nemodificate driverului de limbă\n"
 
 #: dllwrap.c:640
 #, c-format
 msgid "WARNING: %s is deprecated, use gcc -shared or ld -shared instead\n"
-msgstr ""
+msgstr "AVERTISMENT: %s este învechit, folosiți „gcc -shared” sau „ld -shared”\n"
 
 #: dllwrap.c:800
 msgid "Must provide at least one of -o or --dllname options"
-msgstr ""
+msgstr "Trebuie să furnizați cel puțin una dintre opțiunile „-o” sau „--dllname”"
 
 #: dllwrap.c:829
 msgid ""
 "no export definition file provided.\n"
 "Creating one, but that may not be what you want"
 msgstr ""
+"nu este furnizat un fișier de definire a exportului.\n"
+"Se creează unul, dar s-ar putea să nu fie ceea ce doriți"
 
 #: dllwrap.c:1018
 #, c-format
 msgid "DLLTOOL name    : %s\n"
-msgstr ""
+msgstr "Nume DLLTOOL    : %s\n"
 
 #: dllwrap.c:1019
 #, c-format
 msgid "DLLTOOL options : %s\n"
-msgstr ""
+msgstr "opțiuni DLLTOOL : %s\n"
 
 #: dllwrap.c:1020
 #, c-format
 msgid "DRIVER name     : %s\n"
-msgstr ""
+msgstr "nume DRIVER     : %s\n"
 
 #: dllwrap.c:1021
 #, c-format
 msgid "DRIVER options  : %s\n"
-msgstr ""
+msgstr "opțiuni DRIVER  : %s\n"
 
 #: dwarf.c:190
 msgid "Encoded value extends past end of section\n"
-msgstr ""
+msgstr "Valoarea codificată se extinde dincolo de sfârșitul secțiunii\n"
 
 #: dwarf.c:198
 #, c-format
 msgid "Encoded size of %d is too large to read\n"
-msgstr ""
+msgstr "Dimensiunea codificată a lui %d este prea mare pentru a fi citită\n"
 
 #: dwarf.c:206
 msgid "Encoded size of 0 is too small to read\n"
-msgstr ""
+msgstr "Dimensiunea codificată de 0 este prea mică pentru a fi citită\n"
 
 #. Read AMOUNT bytes from PTR and store them in VAL.
 #. Checks to make sure that the read will not reach or pass END.
@@ -1854,19 +1869,19 @@ msgstr ""
 #, c-format
 msgid "internal error: attempt to read %d byte of data in to %d sized variable"
 msgid_plural "internal error: attempt to read %d bytes of data in to %d sized variable"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "eroare internă: încercare de-a se citi un octet de date într-o variabilă de dimensiunea %d"
+msgstr[1] "eroare internă: încercare de-a se citi doi octeți de date într-o variabilă de dimensiunea %d"
+msgstr[2] "eroare internă: încercare de-a se citi %d octeți de date într-o variabilă de dimensiunea %d"
+msgstr[3] "eroare internă: încercare de-a se citi %d de octeți de date într-o variabilă de dimensiunea %d"
 
 #: dwarf.c:480 dwarf.c:5340
 msgid "Badly formed extended line op encountered!\n"
-msgstr ""
+msgstr "S-a întâlnit un operator de linie extinsă prost format!\n"
 
 #: dwarf.c:486
 #, c-format
 msgid "  Extended opcode %d: "
-msgstr ""
+msgstr "  Cod operațional extins %d: "
 
 #: dwarf.c:491
 #, c-format
@@ -1874,40 +1889,42 @@ msgid ""
 "End of Sequence\n"
 "\n"
 msgstr ""
+"Sfârșit de secvență\n"
+"\n"
 
 #: dwarf.c:499
 #, c-format
 msgid "Length (%lu) of DW_LNE_set_address op is too long\n"
-msgstr ""
+msgstr "Lungimea (%lu) a operațiunii DW_LNE_set_address este prea mare\n"
 
 #: dwarf.c:505
 #, c-format
 msgid "set Address to 0x%s\n"
-msgstr ""
+msgstr "stabilește adresa la 0x%s\n"
 
 #: dwarf.c:512
 #, c-format
 msgid "define new File Table entry\n"
-msgstr ""
+msgstr "definește o nouă intrare în tabelul de fișiere\n"
 
 #: dwarf.c:513 dwarf.c:4634
 #, c-format
 msgid "  Entry\tDir\tTime\tSize\tName\n"
-msgstr ""
+msgstr "  Intrare\tDir\tOră\tDimensiune\tNume\n"
 
 #: dwarf.c:534
 msgid "DW_LNE_define_file: Bad opcode length\n"
-msgstr ""
+msgstr "DW_LNE_define_file: lungime greșită a codului operațional\n"
 
 #: dwarf.c:539
 #, c-format
 msgid "set Discriminator to %s\n"
-msgstr ""
+msgstr "stabilește Discriminator la %s\n"
 
 #: dwarf.c:605
 #, c-format
 msgid "    UNKNOWN DW_LNE_HP_SFC opcode (%u)\n"
-msgstr ""
+msgstr "    Cod operațional DW_LNE_HP_SFC NECUNOSCUT (%u)\n"
 
 #. The test against DW_LNW_hi_user is redundant due to
 #. the limited range of the unsigned char data type used
@@ -1916,34 +1933,34 @@ msgstr ""
 #: dwarf.c:622
 #, c-format
 msgid "user defined: "
-msgstr ""
+msgstr "definit de utilizator: "
 
 #: dwarf.c:624
 #, c-format
 msgid "UNKNOWN: "
-msgstr ""
+msgstr "NECUNOSCUT: "
 
 #: dwarf.c:625
 #, c-format
 msgid "length %d ["
-msgstr ""
+msgstr "lungime %d ["
 
 #: dwarf.c:643 dwarf.c:713
 msgid "<no .debug_str section>"
-msgstr ""
+msgstr "<nu există secțiunea .debug_str>"
 
 #: dwarf.c:647
 #, c-format
 msgid "DW_FORM_strp offset too big: 0x%s\n"
-msgstr ""
+msgstr "decalajul DW_FORM_strp prea mare: 0x%s\n"
 
 #: dwarf.c:649 dwarf.c:677 dwarf.c:1843
 msgid "<offset is too big>"
-msgstr ""
+msgstr "<decalajul este prea mare>"
 
 #: dwarf.c:659
 msgid "<no NUL byte at end of .debug_str section>"
-msgstr ""
+msgstr "<fără octet NUL la sfârșitul secțiunii .debug_str>"
 
 #: dwarf.c:671
 msgid "<no .debug_line_str section>"
@@ -1952,54 +1969,54 @@ msgstr "<nu există secțiunea .debug_line_str>"
 #: dwarf.c:675
 #, c-format
 msgid "DW_FORM_line_strp offset too big: 0x%s\n"
-msgstr ""
+msgstr "decalajul DW_FORM_line_strp prea mare: 0x%s\n"
 
 #: dwarf.c:687
 msgid "<no NUL byte at end of .debug_line_str section>"
-msgstr ""
+msgstr "<fără octet NUL la sfârșitul secțiunii .debug_line_str>"
 
 #: dwarf.c:708
 msgid "<no .debug_str_offsets.dwo section>"
-msgstr ""
+msgstr "<fără secțiune .debug_str_offsets.dwo>"
 
 #: dwarf.c:709
 msgid "<no .debug_str_offsets section>"
-msgstr ""
+msgstr "<fără secțiune .debug_str_offsets>"
 
 #: dwarf.c:712
 msgid "<no .debug_str.dwo section>"
-msgstr ""
+msgstr "<fără secțiune .debug_str.dwo>"
 
 #: dwarf.c:724
 #, c-format
 msgid "string index of %s converts to an offset of 0x%s which is too big for section %s"
-msgstr ""
+msgstr "indexul șirului %s se convertește într-un decalaj de 0x%s, care este prea mare pentru secțiunea %s"
 
 #: dwarf.c:729
 msgid "<string index too big>"
-msgstr ""
+msgstr "<index de șir prea mare>"
 
 #: dwarf.c:742
 #, c-format
 msgid "indirect offset too big: 0x%s\n"
-msgstr ""
+msgstr "decalaj indirect prea mare: 0x%s\n"
 
 #: dwarf.c:744
 msgid "<indirect index offset is too big>"
-msgstr ""
+msgstr "<decalajul indirect al indexului este prea mare>"
 
 #: dwarf.c:754
 msgid "<no NUL byte at end of section>"
-msgstr ""
+msgstr "<fără octet NUL la sfârșitul secțiunii>"
 
 #: dwarf.c:766
 msgid "Cannot fetch indexed address: the .debug_addr section is missing\n"
-msgstr ""
+msgstr "Nu se poate prelua adresa indexată: secțiunea .debug_addr lipsește\n"
 
 #: dwarf.c:772 dwarf.c:821
 #, c-format
 msgid "Offset into section %s too big: 0x%s\n"
-msgstr ""
+msgstr "Decalaj în secțiunea %s prea mare: 0x%s\n"
 
 #: dwarf.c:793
 #, c-format
@@ -2010,32 +2027,32 @@ msgstr "Nu se poate localiza secțiunea %s\n"
 #: dwarf.c:1052
 #, c-format
 msgid "Debug info is corrupted, abbrev size (%lx) is larger than abbrev section size (%lx)\n"
-msgstr ""
+msgstr "Informațiile de depanare sunt corupte, dimensiunea abbrev (%lx) este mai mare decât dimensiunea secțiunii abbrev (%lx)\n"
 
 #: dwarf.c:1060
 #, c-format
 msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
-msgstr ""
+msgstr "Informațiile de depanare sunt corupte, decalajul abbrev (%lx) este mai mare decât dimensiunea secțiunii abbrev (%lx)\n"
 
 #. Report the missing single zero which ends the section.
 #: dwarf.c:1122
 msgid ".debug_abbrev section not zero terminated\n"
-msgstr ""
+msgstr "secțiunea .debug_abbrev nu este terminată cu zero\n"
 
 #: dwarf.c:1137
 #, c-format
 msgid "User TAG value: %#lx"
-msgstr ""
+msgstr "Valoarea TAG de utilizator: %#lx"
 
 #: dwarf.c:1139
 #, c-format
 msgid "Unknown TAG value: %#lx"
-msgstr ""
+msgstr "Valoare TAG necunoscută: %#lx"
 
 #: dwarf.c:1159
 #, c-format
 msgid "Unknown FORM value: %lx"
-msgstr ""
+msgstr "Valoare FORM necunoscută: %lx"
 
 #: dwarf.c:1175
 #, c-format
@@ -2045,12 +2062,12 @@ msgstr "Valoare IDX necunoscută: %lx"
 #: dwarf.c:1189
 #, c-format
 msgid "%c%s byte block: "
-msgstr ""
+msgstr "bloc de octeți %c%s: "
 
 #: dwarf.c:1533
 #, c-format
 msgid "(DW_OP_call_ref in frame info)"
-msgstr ""
+msgstr "(DW_OP_call_ref în informațiile cadru)"
 
 #: dwarf.c:1556
 #, c-format
@@ -2060,110 +2077,110 @@ msgstr "dimensiune: %s "
 #: dwarf.c:1558
 #, c-format
 msgid "offset: %s "
-msgstr ""
+msgstr "decalaj: %s "
 
 #: dwarf.c:1574
 #, c-format
 msgid "DW_OP_GNU_push_tls_address or DW_OP_HP_unknown"
-msgstr ""
+msgstr "DW_OP_GNU_push_tls_address sau DW_OP_HP_unknown"
 
 #: dwarf.c:1599
 #, c-format
 msgid "(%s in frame info)"
-msgstr ""
+msgstr "(%s în informațiile cadru)"
 
 #: dwarf.c:1703
 #, c-format
 msgid "(DW_OP_GNU_variable_value in frame info)"
-msgstr ""
+msgstr "(DW_OP_GNU_variable_value în informațiile cadru)"
 
 #: dwarf.c:1756
 #, c-format
 msgid "(User defined location op 0x%x)"
-msgstr ""
+msgstr "(Operatorul de locație definit de utilizator 0x%x)"
 
 #: dwarf.c:1758
 #, c-format
 msgid "(Unknown location op 0x%x)"
-msgstr ""
+msgstr "(Operator de locație necunoscut 0x%x)"
 
 #: dwarf.c:1812
 msgid "<no links available>"
-msgstr ""
+msgstr "<nu există legături disponibile>"
 
 #: dwarf.c:1836
 msgid "<no NUL byte at end of alt .debug_str section>"
-msgstr ""
+msgstr "<fără octet NUL la sfârșitul secțiunii alt .debug_str>"
 
 #: dwarf.c:1841
 #, c-format
 msgid "DW_FORM_GNU_strp_alt offset (%s) too big or no string sections available\n"
-msgstr ""
+msgstr "DW_FORM_GNU_strp_alt decalaj (%s) prea mare sau nu există secțiuni de șir disponibile\n"
 
 #: dwarf.c:1864
 #, c-format
 msgid "Unknown AT value: %lx"
-msgstr ""
+msgstr "Valoare AT necunoscută: %lx"
 
 #: dwarf.c:1930
 #, c-format
 msgid "Corrupt attribute block length: %lx\n"
-msgstr ""
+msgstr "Lungimea blocului de atribut coruptă: %lx\n"
 
 #: dwarf.c:2112
 #, c-format
 msgid "Unable to resolve ref_addr form: uvalue %lx > section size %lx (%s)\n"
-msgstr ""
+msgstr "Nu se poate rezolva forma ref_addr: uvalue %lx > dimensiunea secțiunii %lx (%s)\n"
 
 #: dwarf.c:2129
 #, c-format
 msgid "Unable to resolve ref form: uvalue %lx + cu_offset %lx > CU size %lx\n"
-msgstr ""
+msgstr "Nu se poate rezolva forma de referință: uvalue %lx + cu_offset %lx > dimensiunea CU %lx\n"
 
 #: dwarf.c:2139
 #, c-format
 msgid "Unexpected form %lx encountered whilst finding abbreviation for type\n"
-msgstr ""
+msgstr "Formă neașteptată %lx întâlnită în timpul căutării abrevierii pentru tip\n"
 
 #: dwarf.c:2148
 #, c-format
 msgid "Unable to find abbreviations for CU offset %#lx\n"
-msgstr ""
+msgstr "Nu se pot găsi abrevieri pentru decalajul CU %#lx\n"
 
 #: dwarf.c:2153
 #, c-format
 msgid "Empty abbreviation list encountered for CU offset %lx\n"
-msgstr ""
+msgstr "S-a întâlnit o listă de abrevieri goală pentru decalajul CU %lx\n"
 
 #: dwarf.c:2178
 #, c-format
 msgid "Unable to find entry for abbreviation %lu\n"
-msgstr ""
+msgstr "Nu se poate găsi intrarea pentru abrevierea %lu\n"
 
 #: dwarf.c:2330
 msgid "corrupt discr_list - not using a block form\n"
-msgstr ""
+msgstr "discr_list corupt - nu se utilizează o formă de bloc\n"
 
 #: dwarf.c:2337
 msgid "corrupt discr_list - block not long enough\n"
-msgstr ""
+msgstr "discr_list corupt - blocul nu este suficient de lung\n"
 
 #: dwarf.c:2372
 #, c-format
 msgid "corrupt discr_list - unrecognized discriminant byte %#x\n"
-msgstr ""
+msgstr "discr_list corupt - octet discriminant nerecunoscut %#x\n"
 
 #: dwarf.c:2413
 msgid "Corrupt attribute\n"
-msgstr ""
+msgstr "Atribut corupt\n"
 
 #: dwarf.c:2436
 msgid "Internal error: DW_FORM_ref_addr is not supported in DWARF version 1.\n"
-msgstr ""
+msgstr "Eroare internă: DW_FORM_ref_addr nu este acceptat în versiunea 1 a DWARF.\n"
 
 #: dwarf.c:2627
 msgid "Block ends prematurely\n"
-msgstr ""
+msgstr "Blocul se termină prematur\n"
 
 #. We have already displayed the form name.
 #: dwarf.c:2662 dwarf.c:2677 dwarf.c:2703
@@ -2174,34 +2191,34 @@ msgstr "%c(poziția: 0x%s): %s"
 #: dwarf.c:2666
 #, c-format
 msgid "%c(indirect string, offset: 0x%s): %s"
-msgstr ""
+msgstr "%c(șir indirect, decalaj: 0x%s): %s"
 
 #: dwarf.c:2681
 #, c-format
 msgid "%c(indirect line string, offset: 0x%s): %s"
-msgstr ""
+msgstr "%c(șir de linie indirectă, decalaj: 0x%s): %s"
 
 #: dwarf.c:2706
 #, c-format
 msgid "%c(indexed string: 0x%s): %s"
-msgstr ""
+msgstr "%c(șir indexat: 0x%s): %s"
 
 #. We have already displayed the form name.
 #: dwarf.c:2716
 #, c-format
 msgid "%c(offset: 0x%s) %s"
-msgstr ""
+msgstr "%c(poziția: 0x%s) %s"
 
 #: dwarf.c:2720
 #, c-format
 msgid "%c(alt indirect string, offset: 0x%s) %s"
-msgstr ""
+msgstr "%c(șir indirect alternativ, decalaj: 0x%s) %s"
 
 #. We have already displayed the form name.
 #: dwarf.c:2804
 #, c-format
 msgid "%c(index: 0x%s): %s"
-msgstr ""
+msgstr "%c(index: 0x%s): %s"
 
 #: dwarf.c:2816
 #, c-format
@@ -2211,60 +2228,60 @@ msgstr "Formă nerecunoscută: 0x%lx\n"
 #: dwarf.c:2830
 #, c-format
 msgid "CU @ 0x%s has multiple loclists_base values (0x%s and 0x%s)"
-msgstr ""
+msgstr "CU @ 0x%s are mai multe valori loclists_base (0x%s și 0x%s)"
 
 #: dwarf.c:2838
 #, c-format
 msgid "CU @ 0x%s has multiple rnglists_base values (0x%s and 0x%s)"
-msgstr ""
+msgstr "CU @ 0x%s are mai multe valori rnglists_base (0x%s și 0x%s)"
 
 #: dwarf.c:2846
 #, c-format
 msgid "CU @ 0x%s has multiple str_offsets_base values (0x%s and 0x%s)"
-msgstr ""
+msgstr "CU @ 0x%s are mai multe valori str_offsets_base (0x%s și 0x%s)"
 
 #: dwarf.c:2910
 msgid "More location offset attributes than DW_AT_GNU_locview attributes\n"
-msgstr ""
+msgstr "Mai multe atribute de decalaj de locație decât atributele DW_AT_GNU_locview\n"
 
 #: dwarf.c:2922
 msgid "More DW_AT_GNU_locview attributes than location offset attributes\n"
-msgstr ""
+msgstr "Mai multe atribute DW_AT_GNU_locview decât atributele de decalaj de locație\n"
 
 #: dwarf.c:2998 dwarf.c:3032 dwarf.c:3047
 #, c-format
 msgid "Unsupported form (%s) for attribute %s\n"
-msgstr ""
+msgstr "Formă neacceptată (%s) pentru atributul %s\n"
 
 #: dwarf.c:3094
 #, c-format
 msgid "(not inlined)"
-msgstr ""
+msgstr "(nu este „inlined”)"
 
 #: dwarf.c:3097
 #, c-format
 msgid "(inlined)"
-msgstr ""
+msgstr "(„inlined”)"
 
 #: dwarf.c:3100
 #, c-format
 msgid "(declared as inline but ignored)"
-msgstr ""
+msgstr "(declarat ca „inline”, dar ignorat)"
 
 #: dwarf.c:3103
 #, c-format
 msgid "(declared as inline and inlined)"
-msgstr ""
+msgstr "(declarat ca „inline” și „inlined”)"
 
 #: dwarf.c:3106
 #, c-format
 msgid "  (Unknown inline attribute value: %s)"
-msgstr ""
+msgstr "  (Valoare necunoscută a atributului „inline”: %s)"
 
 #: dwarf.c:3163
 #, c-format
 msgid "(implementation defined: %s)"
-msgstr ""
+msgstr "(implementare definită: %s)"
 
 #: dwarf.c:3166
 #, c-format
@@ -2274,7 +2291,7 @@ msgstr "(Necunoscut: %s)"
 #: dwarf.c:3211
 #, c-format
 msgid "(user defined type)"
-msgstr ""
+msgstr "(tip definit de utilizator)"
 
 #: dwarf.c:3213
 #, c-format
@@ -2334,22 +2351,22 @@ msgstr "(fără semn)"
 #: dwarf.c:3317
 #, c-format
 msgid "(leading overpunch)"
-msgstr ""
+msgstr "(„overpunch” inițial)"
 
 #: dwarf.c:3318
 #, c-format
 msgid "(trailing overpunch)"
-msgstr ""
+msgstr "(„overpunch” final)"
 
 #: dwarf.c:3319
 #, c-format
 msgid "(leading separate)"
-msgstr ""
+msgstr "(„separate” inițial)"
 
 #: dwarf.c:3320
 #, c-format
 msgid "(trailing separate)"
-msgstr ""
+msgstr "(„separate” final)"
 
 #: dwarf.c:3321 dwarf.c:3332
 #, c-format
@@ -2359,37 +2376,37 @@ msgstr "(nerecunoscut)"
 #: dwarf.c:3329
 #, c-format
 msgid "(no)"
-msgstr ""
+msgstr "(nu)"
 
 #: dwarf.c:3330
 #, c-format
 msgid "(in class)"
-msgstr ""
+msgstr "(în clasă)"
 
 #: dwarf.c:3331
 #, c-format
 msgid "(out of class)"
-msgstr ""
+msgstr "(în afara clasei)"
 
 #: dwarf.c:3370
 #, c-format
 msgid " (location list)"
-msgstr ""
+msgstr " (lista de locații)"
 
 #: dwarf.c:3393 dwarf.c:6580 dwarf.c:6786 dwarf.c:6962
 #, c-format
 msgid " [without DW_AT_frame_base]"
-msgstr ""
+msgstr " [fără DW_AT_frame_base]"
 
 #: dwarf.c:3423
 #, c-format
 msgid "Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"
-msgstr ""
+msgstr "Decalajul %s folosit ca valoare pentru atributul DW_AT_import al DIE la decalajul 0x%lx este prea mare.\n"
 
 #: dwarf.c:3429
 #, c-format
 msgid "\t[Abbrev Number: %ld"
-msgstr ""
+msgstr "\t[Număr abreviere: %ld"
 
 #: dwarf.c:3524
 #, c-format
@@ -2397,6 +2414,8 @@ msgid ""
 "Raw dump of debug contents of section %s (loaded from %s):\n"
 "\n"
 msgstr ""
+"Descărcare brută a conținutului de depanare al secțiunii %s (încărcat de la %s):\n"
+"\n"
 
 #: dwarf.c:3527
 #, c-format
@@ -2404,6 +2423,8 @@ msgid ""
 "Raw dump of debug contents of section %s:\n"
 "\n"
 msgstr ""
+"Descărcare brută a conținutului de depanare al secțiunii %s:\n"
+"\n"
 
 #: dwarf.c:3532
 #, c-format
@@ -2411,6 +2432,8 @@ msgid ""
 "Contents of the %s section (loaded from %s):\n"
 "\n"
 msgstr ""
+"Conținutul secțiunii %s (încărcat din %s):\n"
+"\n"
 
 #: dwarf.c:3535
 #, c-format
@@ -2418,167 +2441,171 @@ msgid ""
 "Contents of the %s section:\n"
 "\n"
 msgstr ""
+"Conținutul secțiunii %s:\n"
+"\n"
 
 #: dwarf.c:3578
 #, c-format
 msgid "Reserved length value (0x%s) found in section %s\n"
-msgstr ""
+msgstr "Valoarea rezervată a lungimii (0x%s) găsită în secțiunea %s\n"
 
 #: dwarf.c:3588
 #, c-format
 msgid "Corrupt unit length (got 0x%s expected at most 0x%s) in section %s\n"
-msgstr ""
+msgstr "Lungimea unității corupte (s-a obținut 0x%s, când  se aștepta cel mult 0x%s) în secțiunea %s\n"
 
+# De întrebat, dezvoltatorii; comp= compilation, computation sau comparation?
 #: dwarf.c:3599
-#, c-format
+#, fuzzy, c-format
 msgid "No comp units in %s section ?\n"
-msgstr ""
+msgstr "Fără unități de comparație în secțiunea %s?\n"
 
 #: dwarf.c:3613
 #, c-format
 msgid "Not enough memory for a debug info array of %u entries\n"
-msgstr ""
+msgstr "Nu este suficientă memorie pentru o matrice de informații de depanare de %u intrări\n"
 
 #: dwarf.c:3647
 #, c-format
 msgid "Unable to locate %s section!\n"
-msgstr ""
+msgstr "Nu se poate localiza secțiunea %s!\n"
 
+# La fel ca mai sus, de întrbat dezvoltatorii; compunit = ? -> unitate de ?, sau cuvînt magic (nume de clasă, funcție, procedeu, etc)
 #: dwarf.c:3823
 #, c-format
 msgid "Invalid pointer size (%d) in compunit header, using %d instead\n"
-msgstr ""
+msgstr "Dimensiunea indicatorului nevalidă (%d) în antetul compunit, folosind în schimb %d\n"
 
 #: dwarf.c:3868
 #, c-format
 msgid "  Compilation Unit @ offset 0x%s:\n"
-msgstr ""
+msgstr "  Unitate de compilare @ decalaj 0x%s:\n"
 
 #: dwarf.c:3870
 #, c-format
 msgid "   Length:        0x%s (%s)\n"
-msgstr "   Lungime:        0x%s (%s)\n"
+msgstr "   Lungime:            0x%s (%s)\n"
 
 #: dwarf.c:3873
 #, c-format
 msgid "   Version:       %d\n"
-msgstr "   Versiune:       %d\n"
+msgstr "   Versiune:           %d\n"
 
 #: dwarf.c:3878
 #, c-format
 msgid "   Unit Type:     %s (%x)\n"
-msgstr ""
+msgstr "   Unit Type           %s (%x)\n"
 
 #: dwarf.c:3882
-#, c-format
+#, fuzzy, c-format
 msgid "   Abbrev Offset: 0x%s\n"
-msgstr ""
+msgstr "   Decalaj abreviere:  0x%s\n"
 
 #: dwarf.c:3884
 #, c-format
 msgid "   Pointer Size:  %d\n"
-msgstr ""
+msgstr "   Dim. indicatorului: %d\n"
 
 #: dwarf.c:3887
 #, c-format
 msgid "   Signature:     0x%s\n"
-msgstr ""
+msgstr "   Semnătură:          0x%s\n"
 
 #: dwarf.c:3889
 #, c-format
 msgid "   Type Offset:   0x%s\n"
-msgstr ""
+msgstr "   Tip de  decalaj:    0x%s\n"
 
 #: dwarf.c:3893
 #, c-format
 msgid "   DWO ID:        0x%s\n"
-msgstr ""
+msgstr "   DWO ID:             0x%s\n"
 
 #: dwarf.c:3899
 #, c-format
 msgid "   Section contributions:\n"
-msgstr ""
+msgstr "   Contribuții secțiune:\n"
 
 #: dwarf.c:3900
 #, c-format
 msgid "    .debug_abbrev.dwo:       0x%s  0x%s\n"
-msgstr ""
+msgstr "    .debug_abbrev.dwo:       0x%s  0x%s\n"
 
 #: dwarf.c:3903
 #, c-format
 msgid "    .debug_line.dwo:         0x%s  0x%s\n"
-msgstr ""
+msgstr "    .debug_line.dwo:         0x%s  0x%s\n"
 
 #: dwarf.c:3906
 #, c-format
 msgid "    .debug_loc.dwo:          0x%s  0x%s\n"
-msgstr ""
+msgstr "    .debug_loc.dwo:          0x%s  0x%s\n"
 
 #: dwarf.c:3909
 #, c-format
 msgid "    .debug_str_offsets.dwo:  0x%s  0x%s\n"
-msgstr ""
+msgstr "    .debug_str_offsets.dwo:  0x%s  0x%s\n"
 
 #: dwarf.c:3920
 #, c-format
 msgid "CU at offset %s contains corrupt or unsupported version number: %d.\n"
-msgstr ""
+msgstr "CU de la poziția %s conține un număr de versiune corupt sau neacceptat: %d.\n"
 
 #: dwarf.c:3932
 #, c-format
 msgid "CU at offset %s contains corrupt or unsupported unit type: %d.\n"
-msgstr ""
+msgstr "CU de la poziția %s conține tipul de unitate corupt sau neacceptat: %d.\n"
 
 #: dwarf.c:3987
 #, c-format
 msgid " <%d><%lx>: Abbrev Number: 0\n"
-msgstr ""
+msgstr " <%d><%lx>: numărul abrevierilor: 0\n"
 
 #: dwarf.c:3997
 #, c-format
 msgid "Bogus end-of-siblings marker detected at offset %lx in %s section\n"
-msgstr ""
+msgstr "S-a detectat un marcator „end-of-siblings” fals la poziția %lx în secțiunea %s\n"
 
 #: dwarf.c:4001
 msgid "Further warnings about bogus end-of-sibling markers suppressed\n"
-msgstr ""
+msgstr "Alte avertismente despre marcatorii falși „end-of-siblings” au fost suprimate\n"
 
 #: dwarf.c:4020
 #, c-format
 msgid " <%d><%lx>: Abbrev Number: %lu"
-msgstr ""
+msgstr " <%d><%lx>: numărul abrevierilor: %lu"
 
 #: dwarf.c:4024
 #, c-format
 msgid " <%d><%lx>: ...\n"
-msgstr ""
+msgstr " <%d><%lx>: ...\n"
 
 #: dwarf.c:4045
 #, c-format
 msgid "DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"
-msgstr ""
+msgstr "DIE la poziția 0x%lx se referă la numărul de abreviere %lu care nu există\n"
 
 #: dwarf.c:4120
 msgid "DIE has locviews without loclist\n"
-msgstr ""
+msgstr "DIE are locviews fără loclist\n"
 
 #: dwarf.c:4229
 #, c-format
 msgid "The length field (0x%lx) in the debug_line header is wrong - the section is too small\n"
-msgstr ""
+msgstr "Câmpul de lungime (0x%lx) din antetul debug_line este greșit - secțiunea este prea mică\n"
 
 #: dwarf.c:4244
 msgid "Only DWARF version 2, 3, 4 and 5 line info is currently supported.\n"
-msgstr ""
+msgstr "Numai informațiile de linie de la DWARF versiunile 2, 3, 4 și 5 sunt acceptate în prezent.\n"
 
 #: dwarf.c:4256 dwarf.c:7267 dwarf.c:8167
 #, c-format
 msgid "The %s section contains unsupported segment selector size: %d.\n"
-msgstr ""
+msgstr "Secțiunea %s conține dimensiunea selectorului de segment neacceptată: %d.\n"
 
 #: dwarf.c:4273
 msgid "Invalid maximum operations per insn.\n"
-msgstr ""
+msgstr "Operații maxime nevalide pe insn.\n"
 
 #: dwarf.c:4300
 msgid "Directory Table"
@@ -2586,17 +2613,17 @@ msgstr "Tabelul de directoare"
 
 #: dwarf.c:4300
 msgid "File Name Table"
-msgstr ""
+msgstr "Tabelul cu nume de fișiere"
 
 #: dwarf.c:4304
 #, c-format
 msgid "Unexpectedly large number of columns in the %s (%u)\n"
-msgstr ""
+msgstr "Număr neașteptat de mare de coloane în %s (%u)\n"
 
 #: dwarf.c:4314
 #, c-format
 msgid "%s: Corrupt format description entry\n"
-msgstr ""
+msgstr "%s: Intrare coruptă de descriere a formatului\n"
 
 #: dwarf.c:4322
 #, c-format
@@ -2604,16 +2631,18 @@ msgid ""
 "\n"
 " The %s is empty.\n"
 msgstr ""
+"\n"
+" %s este gol.\n"
 
 #: dwarf.c:4327
 #, c-format
 msgid "%s: Corrupt entry count - expected %s but none found\n"
-msgstr ""
+msgstr "%s: Număr de intrări corupt - se așteptau %s, dar nu a fost găsită niciuna\n"
 
 #: dwarf.c:4334
 #, c-format
 msgid "%s: format count is zero, but the table is not empty\n"
-msgstr ""
+msgstr "%s: numărul formatelor este zero, dar tabelul nu este gol\n"
 
 #: dwarf.c:4339
 #, c-format
@@ -2621,36 +2650,38 @@ msgid ""
 "\n"
 " The %s (offset 0x%lx, lines %s, columns %u):\n"
 msgstr ""
+"\n"
+" %s (poziția 0x%lx, linii %s, coloane %u):\n"
 
 #: dwarf.c:4343
 #, c-format
 msgid "  Entry"
-msgstr ""
+msgstr "  Intrare"
 
 #: dwarf.c:4357
 #, c-format
 msgid "\tName"
-msgstr ""
+msgstr "\tNume"
 
 #: dwarf.c:4360
 #, c-format
 msgid "\tDir"
-msgstr ""
+msgstr "\tDir"
 
 #: dwarf.c:4363
 #, c-format
 msgid "\tTime"
-msgstr ""
+msgstr "\tOra"
 
 #: dwarf.c:4366
 #, c-format
 msgid "\tSize"
-msgstr ""
+msgstr "\tDim."
 
 #: dwarf.c:4369
 #, c-format
 msgid "\tMD5\t\t\t"
-msgstr ""
+msgstr "\tMD5\t\t\t"
 
 #: dwarf.c:4372
 #, c-format
@@ -2663,136 +2694,138 @@ msgid ""
 "\n"
 "%s: Corrupt entries list\n"
 msgstr ""
+"\n"
+"%s: Lista de intrări corupte\n"
 
 #: dwarf.c:4432
 msgid "corrupt .debug_sup section: size is too small\n"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: dimensiunea este prea mică\n"
 
 #: dwarf.c:4439
 msgid "corrupt .debug_sup section: version < 5"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: versiunea < 5"
 
 #: dwarf.c:4443
 msgid "corrupt .debug_sup section: is_supplementary not 0 or 1\n"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: is_supplementary nu este 0 sau 1\n"
 
 #: dwarf.c:4447
 msgid "corrupt .debug_sup section: filename not empty in supplementary section\n"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: numele fișierului nu este gol în secțiunea suplimentară\n"
 
 #: dwarf.c:4452
 msgid "corrupt .debug_sup section: filename is not NUL terminated\n"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: numele fișierului nu este terminat cu NULL\n"
 
 #: dwarf.c:4460
 msgid "corrupt .debug_sup section: bad LEB128 field for checksum length\n"
-msgstr ""
+msgstr "secțiune .debug_sup coruptă: câmp LEB128 greșit pentru lungimea sumei de control\n"
 
 #: dwarf.c:4466
 msgid "corrupt .debug_sup section: checksum length is longer than the remaining section length\n"
-msgstr ""
+msgstr "secțiune .debug_sup coruptă: lungimea sumei de control este mai mare decât lungimea secțiunii rămase\n"
 
 #: dwarf.c:4471
 #, c-format
 msgid "corrupt .debug_sup section: there are 0x%lx extra, unused bytes at the end of the section\n"
-msgstr ""
+msgstr "secțiunea .debug_sup coruptă: există 0x%lx octeți suplimentari, neutilizați la sfârșitul secțiunii\n"
 
 #: dwarf.c:4475
 #, c-format
 msgid "  Version:      %u\n"
-msgstr "  Versiune:      %u\n"
+msgstr "  Versiune:          %u\n"
 
 #: dwarf.c:4476
 #, c-format
 msgid "  Is Supp:      %u\n"
-msgstr ""
+msgstr "  Este suplim.:      %u\n"
 
 #: dwarf.c:4477
 #, c-format
 msgid "  Filename:     %s\n"
-msgstr "  Nume fișier:     %s\n"
+msgstr "  Nume fișier:       %s\n"
 
 #: dwarf.c:4478
 #, c-format
 msgid "  Checksum Len: %lu\n"
-msgstr ""
+msgstr "  Lung. sumă ctrl.:  %lu\n"
 
 #: dwarf.c:4481
 #, c-format
 msgid "  Checksum:     "
-msgstr ""
+msgstr "  Sumă ctrl.:        "
 
 #: dwarf.c:4529 dwarf.c:4950
 msgid "Partial .debug_line. section encountered without a prior full .debug_line section\n"
-msgstr ""
+msgstr "Secțiune .debug_line parțială întâlnită fără o secțiune .debug_line completă anterioară\n"
 
 #: dwarf.c:4542 dwarf.c:6097
 #, c-format
 msgid "  Offset:                      0x%lx\n"
-msgstr "  Poziție:                      0x%lx\n"
+msgstr "  Poziție:                           0x%lx\n"
 
 #: dwarf.c:4543
 #, c-format
 msgid "  Length:                      %ld\n"
-msgstr "  Lungime:                     %ld\n"
+msgstr "  Lungime:                           %ld\n"
 
 #: dwarf.c:4544
 #, c-format
 msgid "  DWARF Version:               %d\n"
-msgstr "  Versiune DWARF:              %d\n"
+msgstr "  Versiune DWARF:                    %d\n"
 
 #: dwarf.c:4547
 #, c-format
 msgid "  Address size (bytes):        %d\n"
-msgstr ""
+msgstr "  Dimensiune Adresă (octeți):        %d\n"
 
 #: dwarf.c:4548
 #, c-format
 msgid "  Segment selector (bytes):    %d\n"
-msgstr ""
+msgstr "  Selector de segmente (octeți):     %d\n"
 
 #: dwarf.c:4550
 #, c-format
 msgid "  Prologue Length:             %d\n"
-msgstr ""
+msgstr "  Lungime prolog:                    %d\n"
 
 #: dwarf.c:4551
 #, c-format
 msgid "  Minimum Instruction Length:  %d\n"
-msgstr ""
+msgstr "  Lungime minimă instrucțiune:       %d\n"
 
 #: dwarf.c:4553
 #, c-format
 msgid "  Maximum Ops per Instruction: %d\n"
-msgstr ""
+msgstr "  Operațiuni maxime pe instrucțiune: %d\n"
 
 #: dwarf.c:4554
 #, c-format
 msgid "  Initial value of 'is_stmt':  %d\n"
-msgstr ""
+msgstr "  Valoarea inițială a lui „is_stmt”: %d\n"
 
 #: dwarf.c:4555
 #, c-format
 msgid "  Line Base:                   %d\n"
-msgstr "  Bază Linie:                    %d\n"
+msgstr "  Bază Linie:                        %d\n"
 
 #: dwarf.c:4556
 #, c-format
 msgid "  Line Range:                  %d\n"
-msgstr "  Interval Linie:              %d\n"
+msgstr "  Interval Linie:                    %d\n"
 
 #: dwarf.c:4557
 #, c-format
 msgid "  Opcode Base:                 %d\n"
-msgstr "  Baza codului operațional::                 %d\n"
+msgstr "  Baza codului operațional:          %d\n"
 
 #: dwarf.c:4562 dwarf.c:4966
 msgid "Line range of 0 is invalid, using 1 instead\n"
-msgstr ""
+msgstr "Intervalul de linii de 0 este nevalid, utilizând în schimb 1\n"
 
 #: dwarf.c:4574
 msgid "Line Base extends beyond end of section\n"
-msgstr ""
+msgstr "Baza liniei se extinde dincolo de capătul secțiunii\n"
 
 #: dwarf.c:4578
 #, c-format
@@ -2836,6 +2869,8 @@ msgid ""
 "\n"
 " The File Name Table is empty.\n"
 msgstr ""
+"\n"
+" Tabelul cu nume de fișiere este gol.\n"
 
 #: dwarf.c:4632
 #, c-format
@@ -2843,45 +2878,47 @@ msgid ""
 "\n"
 " The File Name Table (offset 0x%lx):\n"
 msgstr ""
+"\n"
+" Tabelul cu nume de fișiere (poziția 0x%lx):\n"
 
 #: dwarf.c:4657
 msgid "Corrupt file name table entry\n"
-msgstr ""
+msgstr "Intrare coruptă în tabelul cu nume de fișiere\n"
 
 #: dwarf.c:4674
 #, c-format
 msgid " No Line Number Statements.\n"
-msgstr ""
+msgstr " Declarații fără număr de linie.\n"
 
 #: dwarf.c:4677
 #, c-format
 msgid " Line Number Statements:\n"
-msgstr ""
+msgstr " Declarații cu numărul de linie:\n"
 
 #: dwarf.c:4699
 #, c-format
 msgid "  Special opcode %d: advance Address by %s to 0x%s%s"
-msgstr ""
+msgstr "  Cod operațional special %d: avansează adresa cu %s la 0x%s%s"
 
 #: dwarf.c:4704 dwarf.c:4725 dwarf.c:4767 dwarf.c:4787 dwarf.c:4837
 #: dwarf.c:4857
 msgid " (reset view)"
-msgstr ""
+msgstr " (reinițializează vizualizarea)"
 
 #: dwarf.c:4719
 #, c-format
 msgid "  Special opcode %d: advance Address by %s to 0x%s[%d]%s"
-msgstr ""
+msgstr "  Cod operațional special %d: avansează adresa cu %s la 0x%s[%d]%s"
 
 #: dwarf.c:4729
 #, c-format
 msgid " and Line by %s to %d"
-msgstr ""
+msgstr " și Linia de la %s la %d"
 
 #: dwarf.c:4732 dwarf.c:4749
 #, c-format
 msgid " (view %u)\n"
-msgstr ""
+msgstr " (vizualizarea %u)\n"
 
 #: dwarf.c:4747
 #, c-format
@@ -2891,103 +2928,103 @@ msgstr "  Copiază"
 #: dwarf.c:4763
 #, c-format
 msgid "  Advance PC by %s to 0x%s%s\n"
-msgstr ""
+msgstr "  Crește contorul programului cu %s la 0x%s%s\n"
 
 #: dwarf.c:4782
 #, c-format
 msgid "  Advance PC by %s to 0x%s[%d]%s\n"
-msgstr ""
+msgstr "  Crește contorul programului cu %s la 0x%s[%d]%s\n"
 
 #: dwarf.c:4794
 #, c-format
 msgid "  Advance Line by %s to %d\n"
-msgstr ""
+msgstr "  Avansează linia cu %s la %d\n"
 
 #: dwarf.c:4801
 #, c-format
 msgid "  Set File Name to entry %s in the File Name Table\n"
-msgstr ""
+msgstr "  Stabilește numele fișierului la intrarea %s din tabelul cu nume de fișiere\n"
 
 #: dwarf.c:4808
 #, c-format
 msgid "  Set column to %s\n"
-msgstr ""
+msgstr "  Stabilește coloana la %s\n"
 
 #: dwarf.c:4816
 #, c-format
 msgid "  Set is_stmt to %s\n"
-msgstr ""
+msgstr "  Stabilește is_stmt la %s\n"
 
 #: dwarf.c:4821
 #, c-format
 msgid "  Set basic block\n"
-msgstr ""
+msgstr "  Stabilește blocul de bază\n"
 
 #: dwarf.c:4833
 #, c-format
 msgid "  Advance PC by constant %s to 0x%s%s\n"
-msgstr ""
+msgstr "  Crește contorul programului cu constanta %s la 0x%s%s\n"
 
 #: dwarf.c:4852
 #, c-format
 msgid "  Advance PC by constant %s to 0x%s[%d]%s\n"
-msgstr ""
+msgstr "  Crește contorul programului cu constanta %s la 0x%s[%d]%s\n"
 
 #: dwarf.c:4865
 #, c-format
 msgid "  Advance PC by fixed size amount %s to 0x%s\n"
-msgstr ""
+msgstr "  Crește contorul programului cu cantitatea de dimensiune fixă %s la 0x%s\n"
 
 #: dwarf.c:4872
 #, c-format
 msgid "  Set prologue_end to true\n"
-msgstr ""
+msgstr "  Stabilește prologue_end la „true” (adevărat)\n"
 
 #: dwarf.c:4876
 #, c-format
 msgid "  Set epilogue_begin to true\n"
-msgstr ""
+msgstr "  Stabilește epilogue_begin la „true” (adevărat)\n"
 
 #: dwarf.c:4881
 #, c-format
 msgid "  Set ISA to %s\n"
-msgstr ""
+msgstr "  Stabilește ISA la %s\n"
 
 #: dwarf.c:4885 dwarf.c:5524
 #, c-format
 msgid "  Unknown opcode %d with operands: "
-msgstr ""
+msgstr "  Cod operațional %d necunoscut cu operanzi: "
 
 #: dwarf.c:4979
 #, c-format
 msgid "opcode base of %d extends beyond end of section\n"
-msgstr ""
+msgstr "baza codului operațional de %d se extinde dincolo de sfârșitul secțiunii\n"
 
 #: dwarf.c:4994
 #, c-format
 msgid "Unexpectedly large number of columns in the directory name table (%u)\n"
-msgstr ""
+msgstr "Număr neașteptat de mare de coloane în tabelul de nume de directoare (%u)\n"
 
 #: dwarf.c:5006 dwarf.c:5030 dwarf.c:5060
 msgid "Corrupt directories list\n"
-msgstr ""
+msgstr "Lista de directoare coruptă\n"
 
 #: dwarf.c:5068
 #, c-format
 msgid "Unexpectedly large number of columns in the file name table (%u)\n"
-msgstr ""
+msgstr "Număr neașteptat de mare de coloane în tabelul cu nume de fișiere (%u)\n"
 
 #: dwarf.c:5080 dwarf.c:5105 dwarf.c:5152
 msgid "Corrupt file name list\n"
-msgstr ""
+msgstr "Lista de nume de fișiere coruptă\n"
 
 #: dwarf.c:5174
 msgid "directory table ends unexpectedly\n"
-msgstr ""
+msgstr "tabelul de director se termină în mod neașteptat\n"
 
 #: dwarf.c:5215
 msgid "file table ends unexpectedly\n"
-msgstr ""
+msgstr "tabelul de fișiere se termină în mod neașteptat\n"
 
 #: dwarf.c:5248
 #, c-format
@@ -2997,7 +3034,7 @@ msgstr "CU: Fără tabel de directoare\n"
 #: dwarf.c:5250
 #, c-format
 msgid "CU: %s:\n"
-msgstr ""
+msgstr "CU: %s:\n"
 
 #: dwarf.c:5260 dwarf.c:5565 readelf.c:6901 readelf.c:6998 readelf.c:7016
 #: readelf.c:7034 readelf.c:7838 readelf.c:12040 readelf.c:12705
@@ -3008,7 +3045,7 @@ msgstr "<necunoscut>"
 #: dwarf.c:5263 dwarf.c:5454
 #, c-format
 msgid "directory index %u > number of directories %s\n"
-msgstr ""
+msgstr "index de directoare %u > numărul de directoare %s\n"
 
 #: dwarf.c:5265 dwarf.c:5559 elfcomm.c:777 readelf.c:394 readelf.c:928
 #: readelf.c:8016 readelf.c:8579 readelf.c:10615 readelf.c:13057
@@ -3027,17 +3064,17 @@ msgstr "CU: %s/%s:\n"
 #: dwarf.c:5277
 #, c-format
 msgid "File name                            Line number    Starting address    View    Stmt\n"
-msgstr ""
+msgstr "Nume fișier                            Număr linie    Adresa de pornire    Vedere    Declarație\n"
 
 #: dwarf.c:5279
 #, c-format
 msgid "CU: Empty file name table\n"
-msgstr ""
+msgstr "CU: Tabelul de nume de fișiere este gol\n"
 
 #: dwarf.c:5386
 #, c-format
 msgid "UNKNOWN (%u): length %ld\n"
-msgstr ""
+msgstr "NECUNOSCUT (%u): lungime %ld\n"
 
 #: dwarf.c:5438
 #, c-format
@@ -3045,11 +3082,13 @@ msgid ""
 "\n"
 " [Use file table entry %d]\n"
 msgstr ""
+"\n"
+" [Utilizează intrarea din tabelul de fișiere %d]\n"
 
 #: dwarf.c:5442
 #, c-format
 msgid "file index %u > number of files %u\n"
-msgstr ""
+msgstr "indexul fișierelor %u > numărul de fișiere %u\n"
 
 #: dwarf.c:5443
 #, c-format
@@ -3057,6 +3096,8 @@ msgid ""
 "\n"
 " <over large file table index %u>"
 msgstr ""
+"\n"
+" <indexul tabelului de fișiere peste măsură de mare %u>"
 
 #: dwarf.c:5449
 #, c-format
@@ -3064,6 +3105,8 @@ msgid ""
 "\n"
 " [Use file %s in directory table entry %d]\n"
 msgstr ""
+"\n"
+" [Se utilizează fișierul %s în intrarea din tabelul de directoare %d]\n"
 
 #: dwarf.c:5456
 #, c-format
@@ -3071,16 +3114,18 @@ msgid ""
 "\n"
 " <over large directory table entry %u>\n"
 msgstr ""
+"\n"
+" <intrarea din tabelul de directoare peste măsură de mare %u>\n"
 
 #: dwarf.c:5520
 #, c-format
 msgid "  Set ISA to %lu\n"
-msgstr ""
+msgstr "  Stabilește ISA la %lu\n"
 
 #: dwarf.c:5558
 #, c-format
 msgid "corrupt file index %u encountered\n"
-msgstr ""
+msgstr "index de fișier corupt %u întâlnit\n"
 
 #: dwarf.c:5727
 msgid "no info"
@@ -3100,53 +3145,53 @@ msgstr "funcție"
 
 #: dwarf.c:5731
 msgid "other"
-msgstr ""
+msgstr "altele"
 
 #: dwarf.c:5732
 msgid "unused5"
-msgstr ""
+msgstr "neutilizat5"
 
 #: dwarf.c:5733
 msgid "unused6"
-msgstr ""
+msgstr "neutilizat6"
 
 #: dwarf.c:5734
 msgid "unused7"
-msgstr ""
+msgstr "neutilizat7"
 
 #: dwarf.c:5772 dwarf.c:7595 dwarf.c:10087
 #, c-format
 msgid "Debug info is corrupted, %s header at %#lx has length %s\n"
-msgstr ""
+msgstr "Informațiile de depanare sunt corupte, antetul %s la %#lx are lungimea %s\n"
 
 #: dwarf.c:5788 dwarf.c:7610
 #, c-format
 msgid ".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
-msgstr ""
+msgstr "Decalajul .debug_info de 0x%lx în secțiunea %s nu indică un antet CU.\n"
 
 #: dwarf.c:5793
 #, c-format
 msgid "  Length:                              %ld\n"
-msgstr ""
+msgstr "  Lungimea:                                    %ld\n"
 
 #: dwarf.c:5795
 #, c-format
 msgid "  Version:                             %d\n"
-msgstr ""
+msgstr "  Versiunea:                                   %d\n"
 
 #: dwarf.c:5797
 #, c-format
 msgid "  Offset into .debug_info section:     0x%lx\n"
-msgstr ""
+msgstr "  Decalajul în secțiunea .debug_info:          0x%lx\n"
 
 #: dwarf.c:5799
 #, c-format
 msgid "  Size of area in .debug_info section: %ld\n"
-msgstr ""
+msgstr "  Dimensiunea zonei din secțiunea .debug_info: %ld\n"
 
 #: dwarf.c:5808
 msgid "Only DWARF 2 and 3 pubnames are currently supported\n"
-msgstr ""
+msgstr "Numai numele publice „pubnames” DWARF 2 și 3 sunt acceptate în prezent\n"
 
 #: dwarf.c:5816
 #, c-format
@@ -3154,6 +3199,8 @@ msgid ""
 "\n"
 "    Offset  Kind          Name\n"
 msgstr ""
+"\n"
+"    Decalaj  Tip          Nume\n"
 
 #: dwarf.c:5818
 #, c-format
@@ -3161,218 +3208,220 @@ msgid ""
 "\n"
 "    Offset\tName\n"
 msgstr ""
+"\n"
+"    Decalaj\tNume\n"
 
 #: dwarf.c:5852
 msgid "s"
-msgstr ""
+msgstr "s"
 
 #: dwarf.c:5852
 msgid "g"
-msgstr ""
+msgstr "g"
 
 #: dwarf.c:5910
 #, c-format
 msgid " DW_MACINFO_start_file - lineno: %d filenum: %d\n"
-msgstr ""
+msgstr " DW_MACINFO_start_file - nr.linie: %d nr.fișier: %d\n"
 
 #: dwarf.c:5916
 #, c-format
 msgid " DW_MACINFO_end_file\n"
-msgstr ""
+msgstr " DW_MACINFO_end_file\n"
 
 #: dwarf.c:5923
 #, c-format
 msgid " DW_MACINFO_define - lineno : %d macro : %*s\n"
-msgstr ""
+msgstr " DW_MACINFO_define - nr.linie : %d macro : %*s\n"
 
 #: dwarf.c:5933
 #, c-format
 msgid " DW_MACINFO_undef - lineno : %d macro : %*s\n"
-msgstr ""
+msgstr " DW_MACINFO_undef - nr.linie : %d macro : %*s\n"
 
 #: dwarf.c:5946
 #, c-format
 msgid " DW_MACINFO_vendor_ext - constant : %d string : %*s\n"
-msgstr ""
+msgstr " DW_MACINFO_vendor_ext - constanta : %d șir : %*s\n"
 
 #: dwarf.c:6090
 #, c-format
 msgid "Expected to find a version number of 4 or 5 in section %s but found %d instead\n"
-msgstr ""
+msgstr "Se aștepta să se găsească un număr de versiune de 4 sau 5 în secțiunea %s, dar în schimb s-a găsit %d\n"
 
 #: dwarf.c:6099
 #, c-format
 msgid "  Version:                     %d\n"
-msgstr "  Versiune:                     %d\n"
+msgstr "  Versiunea:                   %d\n"
 
 #: dwarf.c:6100
 #, c-format
 msgid "  Offset size:                 %d\n"
-msgstr "  Dimensiunea decalajului:                 %d\n"
+msgstr "  Dimensiunea decalajului:     %d\n"
 
 #: dwarf.c:6104
 #, c-format
 msgid "  Offset into .debug_line:     0x%lx\n"
-msgstr ""
+msgstr "  Decalajul în .debug_line:    0x%lx\n"
 
 #: dwarf.c:6118
 #, c-format
 msgid "  Extension opcode arguments:\n"
-msgstr ""
+msgstr "  Argumente pentru codul operațional al extensiei:\n"
 
 #: dwarf.c:6125
 #, c-format
 msgid "    DW_MACRO_%02x has no arguments\n"
-msgstr ""
+msgstr "    DW_MACRO_%02x nu are argumente\n"
 
 #: dwarf.c:6128
 #, c-format
 msgid "    DW_MACRO_%02x arguments: "
-msgstr ""
+msgstr "    DW_MACRO_%02x argumente: "
 
 #: dwarf.c:6154
 #, c-format
 msgid "Invalid extension opcode form %s\n"
-msgstr ""
+msgstr "Formă de cod operațional de extensie nevalidă %s\n"
 
 #: dwarf.c:6171
 msgid ".debug_macro section not zero terminated\n"
-msgstr ""
+msgstr "secțiunea .debug_macro nu se termină cu zero\n"
 
 #: dwarf.c:6185
 #, c-format
 msgid " DW_MACRO_define - lineno : %d macro : %*s\n"
-msgstr ""
+msgstr " DW_MACRO_define - nr.linie : %d macro : %*s\n"
 
 #: dwarf.c:6195
 #, c-format
 msgid " DW_MACRO_undef - lineno : %d macro : %*s\n"
-msgstr ""
+msgstr " DW_MACRO_undef - nr.linie : %d macro : %*s\n"
 
 #: dwarf.c:6210
 msgid "DW_MACRO_start_file used, but no .debug_line offset provided.\n"
-msgstr ""
+msgstr "DW_MACRO_start_file a fost folosit, dar nu a fost furnizat niciun decalaj .debug_line.\n"
 
 #: dwarf.c:6216
 #, c-format
 msgid " DW_MACRO_start_file - lineno: %d filenum: %d\n"
-msgstr ""
+msgstr " DW_MACRO_start_file - nr.linie: %d nr.fișier: %d\n"
 
 #: dwarf.c:6219
 #, c-format
 msgid " DW_MACRO_start_file - lineno: %d filenum: %d filename: %s%s%s\n"
-msgstr ""
+msgstr " DW_MACRO_start_file - nr.linie: %d nr.linie: %d nume_fișier: %s%s%s\n"
 
 #: dwarf.c:6227
 #, c-format
 msgid " DW_MACRO_end_file\n"
-msgstr ""
+msgstr " DW_MACRO_end_file\n"
 
 #: dwarf.c:6237
 #, c-format
 msgid " DW_MACRO_define_strp - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACRO_define_strp - nr.linie : %d macro : %s\n"
 
 #: dwarf.c:6248
 #, c-format
 msgid " DW_MACRO_undef_strp - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACRO_undef_strp - nr.linie : %d macro : %s\n"
 
 #: dwarf.c:6254
 #, c-format
 msgid " DW_MACRO_import - offset : 0x%lx\n"
-msgstr ""
+msgstr " DW_MACRO_import - decalaj : 0x%lx\n"
 
 #: dwarf.c:6261
 #, c-format
 msgid " DW_MACRO_define_sup - lineno : %d macro offset : 0x%lx\n"
-msgstr ""
+msgstr " DW_MACRO_define_sup - nr.linie : %d decalaj macro : 0x%lx\n"
 
 #: dwarf.c:6268
 #, c-format
 msgid " DW_MACRO_undef_sup - lineno : %d macro offset : 0x%lx\n"
-msgstr ""
+msgstr " DW_MACRO_undef_sup - nr.linie : %d decalaj macro : 0x%lx\n"
 
 #: dwarf.c:6274
 #, c-format
 msgid " DW_MACRO_import_sup - offset : 0x%lx\n"
-msgstr ""
+msgstr " DW_MACRO_import_sup - decalaj : 0x%lx\n"
 
 #: dwarf.c:6289
 #, c-format
 msgid "(with offset %s) "
-msgstr ""
+msgstr "(cu decalaj %s) "
 
 #: dwarf.c:6290
 #, c-format
 msgid "lineno : %d macro : %s\n"
-msgstr ""
+msgstr "nr.linie : %d macro : %s\n"
 
 #: dwarf.c:6297
 #, c-format
 msgid " <Target Specific macro op: %#x - UNHANDLED"
-msgstr ""
+msgstr " <Operator macro specific țintei: %#x - NEGESTIONAT"
 
 #: dwarf.c:6303
 #, c-format
 msgid " Unknown macro opcode %02x seen\n"
-msgstr ""
+msgstr " Cod operațional macro necunoscut %02x detectat\n"
 
 #: dwarf.c:6314
 #, c-format
 msgid " DW_MACRO_%02x\n"
-msgstr ""
+msgstr " DW_MACRO_%02x\n"
 
 #: dwarf.c:6317
 #, c-format
 msgid " DW_MACRO_%02x -"
-msgstr ""
+msgstr " DW_MACRO_%02x -"
 
 #: dwarf.c:6373
 #, c-format
 msgid "  Number TAG (0x%lx)\n"
-msgstr ""
+msgstr "  Număr TAG (0x%lx)\n"
 
 #: dwarf.c:6382
 msgid "has children"
-msgstr ""
+msgstr "are descendenți"
 
 #: dwarf.c:6382
 msgid "no children"
-msgstr ""
+msgstr "nu are descendenți"
 
 #: dwarf.c:6444
 #, c-format
 msgid "location view pair\n"
-msgstr ""
+msgstr "pereche de vizualizare a locației\n"
 
 #: dwarf.c:6475
 #, c-format
 msgid "No debug information available for loc lists of entry: %u\n"
-msgstr ""
+msgstr "Nu există informații de depanare disponibile pentru listele de locații de intrare: %u\n"
 
 #: dwarf.c:6487 dwarf.c:6636 dwarf.c:6854
 #, c-format
 msgid "Invalid pointer size (%d) in debug info for entry %d\n"
-msgstr ""
+msgstr "Dimensiunea indicatorului nevalidă (%d) în informațiile de depanare pentru intrarea %d\n"
 
 #: dwarf.c:6499 dwarf.c:6553 dwarf.c:6562 dwarf.c:6648 dwarf.c:6760
 #: dwarf.c:6768 dwarf.c:6866 dwarf.c:6939 dwarf.c:6947 dwarf.c:7171
 #: dwarf.c:7189
 #, c-format
 msgid "Location list starting at offset 0x%lx is not terminated.\n"
-msgstr ""
+msgstr "Lista de locații care începe cu poziția 0x%lx nu este încheiată.\n"
 
 #: dwarf.c:6521 dwarf.c:6677 dwarf.c:6904 dwarf.c:7962 dwarf.c:8027
 #, c-format
 msgid "<End of list>\n"
-msgstr ""
+msgstr "<Sfârșitul listei>\n"
 
 #: dwarf.c:6533 dwarf.c:6686 dwarf.c:6718 dwarf.c:7119 dwarf.c:7150
 #: dwarf.c:8036 dwarf.c:8060
 #, c-format
 msgid "(base address)\n"
-msgstr ""
+msgstr "(adresa de bază)\n"
 
 #: dwarf.c:6547 dwarf.c:6670 dwarf.c:6892
 #, c-format
@@ -3380,19 +3429,21 @@ msgid ""
 "views at %8.8lx for:\n"
 "    %*s "
 msgstr ""
+"vizualizări la %8.8lx pentru:\n"
+"    %*s "
 
 #: dwarf.c:6583 dwarf.c:6789 dwarf.c:7180
 msgid " (start == end)"
-msgstr ""
+msgstr " (început == sfârșit)"
 
 #: dwarf.c:6585 dwarf.c:6791 dwarf.c:7182
 msgid " (start > end)"
-msgstr ""
+msgstr " (început > sfârșit)"
 
 #: dwarf.c:6623
 #, c-format
 msgid "No debug information available for loclists lists of entry: %u\n"
-msgstr ""
+msgstr "Nu există informații de depanare disponibile pentru listele loclists de intrare: %u\n"
 
 #: dwarf.c:6683 dwarf.c:7116
 #, c-format
@@ -3400,39 +3451,39 @@ msgid "(index into .debug_addr) "
 msgstr "(index în .debug_addr) "
 
 #: dwarf.c:6735
-#, c-format
+#, fuzzy, c-format
 msgid "View pair entry in loclist with locviews attribute\n"
-msgstr ""
+msgstr "Vizualizare intrarea perechii în loclist cu atributul locviews"
 
 #: dwarf.c:6742
 #, c-format
 msgid "views for:\n"
-msgstr ""
+msgstr "vizualizări pentru:\n"
 
 #: dwarf.c:6747 dwarf.c:7165
 #, c-format
 msgid "Invalid location list entry type %d\n"
-msgstr ""
+msgstr "Tip de intrare nevalid în lista de locații %d\n"
 
 #: dwarf.c:6800
 #, c-format
 msgid "Trailing view pair not used in a range"
-msgstr ""
+msgstr "Perechea de vizualizare finală nu este utilizată într-un interval"
 
 #: dwarf.c:6842
 #, c-format
 msgid "No debug information for loc lists of entry: %u\n"
-msgstr ""
+msgstr "Fără informații de depanare pentru listele de locații de intrare: %u\n"
 
 #: dwarf.c:6910
 #, c-format
 msgid "(base address selection entry)\n"
-msgstr ""
+msgstr "(intrare de selecție a adresei de bază)\n"
 
 #: dwarf.c:6931
 #, c-format
 msgid "Unknown location list entry type 0x%x.\n"
-msgstr ""
+msgstr "Tip de intrare necunoscut în lista de locații 0x%x.\n"
 
 #: dwarf.c:7014
 #, c-format
@@ -3442,42 +3493,42 @@ msgstr "Tabel la poziția 0x%lx\n"
 #: dwarf.c:7030 dwarf.c:8158
 #, c-format
 msgid "  Length:          0x%s\n"
-msgstr "  Lungime:          0x%s\n"
+msgstr "  Lungime:                 0x%s\n"
 
 #: dwarf.c:7031 dwarf.c:8159
 #, c-format
 msgid "  DWARF version:   %u\n"
-msgstr "  Versiunea DWARF:   %u\n"
+msgstr "  Versiunea DWARF:         %u\n"
 
 #: dwarf.c:7032 dwarf.c:8160
 #, c-format
 msgid "  Address size:    %u\n"
-msgstr "  Dimensiunea adresei:    %u\n"
+msgstr "  Dimensiunea adresei:     %u\n"
 
 #: dwarf.c:7033 dwarf.c:8161
 #, c-format
 msgid "  Segment size:    %u\n"
-msgstr "  Dimensiunea segmentului:    %u\n"
+msgstr "  Dimensiunea segmentului: %u\n"
 
 #: dwarf.c:7034 dwarf.c:8162
 #, c-format
 msgid "  Offset entries:  %u\n"
-msgstr ""
+msgstr "  Intrări decalaj:         %u\n"
 
 #: dwarf.c:7038
 #, c-format
 msgid "The %s section contains a corrupt or unsupported version number: %d.\n"
-msgstr ""
+msgstr "Secțiunea %s conține un număr de versiune corupt sau neacceptat: %d.\n"
 
 #: dwarf.c:7046
 #, c-format
 msgid "The %s section contains an unsupported segment selector size: %d.\n"
-msgstr ""
+msgstr "Secțiunea %s conține o dimensiune neacceptată a selectorului de segment: %d.\n"
 
 #: dwarf.c:7054
 #, c-format
 msgid "The %s section contains a table without offset\n"
-msgstr ""
+msgstr "Secțiunea %s conține un tabel fără decalaj\n"
 
 #: dwarf.c:7059
 #, c-format
@@ -3485,21 +3536,23 @@ msgid ""
 "\n"
 "   Offset Entries starting at 0x%lx:\n"
 msgstr ""
+"\n"
+"   Intrările de decalaj încep de la 0x%lx:\n"
 
 #: dwarf.c:7069 dwarf.c:8192
 #, c-format
 msgid "    [%6u] 0x%s\n"
-msgstr ""
+msgstr "    [%6u] 0x%s\n"
 
 #: dwarf.c:7079 dwarf.c:8202
 #, c-format
 msgid "    [%6u] 0x%x\n"
-msgstr ""
+msgstr "    [%6u] 0x%x\n"
 
 #: dwarf.c:7097
 #, c-format
 msgid "   Offset Entry %u\n"
-msgstr ""
+msgstr "   Intrare decalaj %u\n"
 
 #: dwarf.c:7109
 #, c-format
@@ -3507,6 +3560,8 @@ msgid ""
 "<End of list>\n"
 "\n"
 msgstr ""
+"<Sfârșitul listei>\n"
+"\n"
 
 #: dwarf.c:7236 dwarf.c:7490 dwarf.c:7708 dwarf.c:7815 dwarf.c:8252
 #, c-format
@@ -3520,21 +3575,21 @@ msgstr ""
 #: dwarf.c:7256
 #, c-format
 msgid "The %s section contains corrupt or unsupported version number: %d.\n"
-msgstr ""
+msgstr "Secțiunea %s conține un număr de versiune corupt sau neacceptat: %d.\n"
 
 #: dwarf.c:7283 dwarf.c:7714 dwarf.c:8263
 #, c-format
 msgid "Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"
-msgstr ""
+msgstr "Nu se poate încărca/analiza secțiunea .debug_info, deci nu se poate interpreta secțiunea %s.\n"
 
 #: dwarf.c:7331
 msgid "No location lists in .debug_info section!\n"
-msgstr ""
+msgstr "Nu există liste de locații în secțiunea .debug_info!\n"
 
 #: dwarf.c:7336
 #, c-format
 msgid "Location lists in %s section start at 0x%s rather than 0x%s\n"
-msgstr ""
+msgstr "Listele de locații din secțiunea %s încep la 0x%s și nu la 0x%s\n"
 
 #: dwarf.c:7347
 #, c-format
@@ -3542,6 +3597,8 @@ msgid ""
 " Warning: This section has relocations - addresses seen here may not be accurate.\n"
 "\n"
 msgstr ""
+" Avertisment: această secțiune are realocări - adresele văzute aici pot să nu fie corecte.\n"
+"\n"
 
 #: dwarf.c:7349
 #, c-format
@@ -3551,22 +3608,22 @@ msgstr "    Decalaj   Începe            Termină              Expresie\n"
 #: dwarf.c:7404 dwarf.c:8349
 #, c-format
 msgid "There is a hole [0x%lx - 0x%lx] in %s section.\n"
-msgstr ""
+msgstr "Există o gaură [0x%lx - 0x%lx] în secțiunea %s.\n"
 
 #: dwarf.c:7409 dwarf.c:8356
 #, c-format
 msgid "There is an overlap [0x%lx - 0x%lx] in %s section.\n"
-msgstr ""
+msgstr "Există o suprapunere [0x%lx - 0x%lx] în secțiunea %s.\n"
 
 #: dwarf.c:7419
 #, c-format
 msgid "Offset 0x%lx is bigger than %s section size.\n"
-msgstr ""
+msgstr "Decalajul 0x%lx este mai mare decât dimensiunea secțiunii %s.\n"
 
 #: dwarf.c:7427
 #, c-format
 msgid "View Offset 0x%lx is bigger than %s section size.\n"
-msgstr ""
+msgstr "Decalajul vizualizării 0x%lx este mai mare de dimensiunea secțiunii %s\n"
 
 #: dwarf.c:7445
 msgid "DWO is not yet supported.\n"
@@ -3574,54 +3631,54 @@ msgstr "DWO nu este încă acceptat.\n"
 
 #: dwarf.c:7462
 msgid "Hole and overlap detection requires adjacent view lists and loclists.\n"
-msgstr ""
+msgstr "Detectarea găurilor și a suprapunerilor necesită liste de vizualizare adiacente și loclists.\n"
 
 #: dwarf.c:7471
 #, c-format
 msgid "There is %ld unused byte at the end of section %s\n"
 msgid_plural "There are %ld unused bytes at the end of section %s\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "Există %ld octet neutilizat la sfârșitul secțiunii %s\n"
+msgstr[1] "Există %ld octeți neutilizați la sfârșitul secțiunii %s\n"
+msgstr[2] "Există %ld octeți neutilizați la sfârșitul secțiunii %s\n"
+msgstr[3] "Există %ld de octeți neutilizați la sfârșitul secțiunii %s\n"
 
 #: dwarf.c:7623
 msgid "Only DWARF 2 and 3 aranges are currently supported.\n"
-msgstr ""
+msgstr "Numai intervalele DWARF 2 și 3 a sunt acceptate în prezent.\n"
 
 #: dwarf.c:7627
 #, c-format
 msgid "  Length:                   %ld\n"
-msgstr "  Lungime:                  %ld\n"
+msgstr "  Lungime:                   %ld\n"
 
 #: dwarf.c:7629
 #, c-format
 msgid "  Version:                  %d\n"
-msgstr "  Versiune:                 %d\n"
+msgstr "  Versiune:                  %d\n"
 
 #: dwarf.c:7630
 #, c-format
 msgid "  Offset into .debug_info:  0x%lx\n"
-msgstr ""
+msgstr "  Decalaj în .debug_info:    0x%lx\n"
 
 #: dwarf.c:7632
 #, c-format
 msgid "  Pointer Size:             %d\n"
-msgstr ""
+msgstr "  Dimensiunea indicatorului: %d\n"
 
 #: dwarf.c:7633
 #, c-format
 msgid "  Segment Size:             %d\n"
-msgstr ""
+msgstr "  Dimensiunea segmentului:   %d\n"
 
 #: dwarf.c:7640
 #, c-format
 msgid "Invalid address size in %s section!\n"
-msgstr ""
+msgstr "Dimensiune nevalidă a adresei în secțiunea %s!\n"
 
 #: dwarf.c:7650
 msgid "Pointer size + Segment size is not a power of two.\n"
-msgstr ""
+msgstr "Dimensiunea indicatorului + dimensiunea segmentului nu este o putere de doi.\n"
 
 #: dwarf.c:7655
 #, c-format
@@ -3638,61 +3695,63 @@ msgid ""
 "\n"
 "    Address    Length\n"
 msgstr ""
+"\n"
+"    Adresă    Lungime\n"
 
 #: dwarf.c:7734
 #, c-format
 msgid "Corrupt address base (%lx) found in debug section %u\n"
-msgstr ""
+msgstr "Bază de adrese coruptă (%lx) găsită în secțiunea de depanare %u\n"
 
 #: dwarf.c:7751
 #, c-format
 msgid "  For compilation unit at offset 0x%s:\n"
-msgstr ""
+msgstr "  Pentru unitatea de compilare la decalajul 0x%s:\n"
 
 #: dwarf.c:7754
 #, c-format
 msgid "\tIndex\tAddress\n"
-msgstr ""
+msgstr "\tIndex\tAdresa\n"
 
 #: dwarf.c:7766
 #, c-format
 msgid "Corrupt %s section: expecting header size of 8 or 16, but found %ld instead\n"
-msgstr ""
+msgstr "Secțiunea %s coruptă: se aștepta o dimensiune a antetului de 8 sau 16, dar a fost găsită în schimb dimensiunea %ld\n"
 
 #: dwarf.c:7778
 #, c-format
 msgid "Corrupt %s section: expecting version number 5 in header but found %d instead\n"
-msgstr ""
+msgstr "Secțiunea %s coruptă: se aștepta versiunea cu numărul 5 în antet, dar a fost găsită în schimb versiunea %d\n"
 
 #: dwarf.c:7792
 #, c-format
 msgid "\t%d:\t"
-msgstr ""
+msgstr "\t%d:\t"
 
 #: dwarf.c:7862 dwarf.c:7886
 #, c-format
 msgid "    Length: %#lx\n"
-msgstr ""
+msgstr "    Lungime: %#lx\n"
 
 #: dwarf.c:7863 dwarf.c:7888
 #, c-format
 msgid "       Index   Offset [String]\n"
-msgstr ""
+msgstr "       Index   Decalaj [Șir]\n"
 
 #: dwarf.c:7871
 #, c-format
 msgid "Section %s is too small %#lx\n"
-msgstr ""
+msgstr "Secțiunea %s este prea mică %#lx\n"
 
 #: dwarf.c:7879
 #, c-format
 msgid "Unexpected version number in str_offset header: %#x\n"
-msgstr ""
+msgstr "Număr de versiune neașteptat în antetul str_offset: %#x\n"
 
 #: dwarf.c:7884
 #, c-format
 msgid "Unexpected value in str_offset header's padding field: %#x\n"
-msgstr ""
+msgstr "Valoare neașteptată în câmpul de completare al antetului str_offset: %#x\n"
 
 #: dwarf.c:7887
 #, c-format
@@ -3701,31 +3760,31 @@ msgstr "    Versiune: %#lx\n"
 
 #: dwarf.c:7981 dwarf.c:8093
 msgid "(start == end)"
-msgstr ""
+msgstr "(început == sfârșit)"
 
 #: dwarf.c:7983 dwarf.c:8095
 msgid "(start > end)"
-msgstr ""
+msgstr "(început > sfârșit)"
 
 #: dwarf.c:8014
 #, c-format
 msgid "Range list starting at offset 0x%s is not terminated.\n"
-msgstr ""
+msgstr "Lista de intervale care începe la poziția 0x%s nu este încheiată.\n"
 
 #: dwarf.c:8032
 #, c-format
 msgid "(base address index) "
-msgstr ""
+msgstr "(indexul adresei de bază) "
 
 #: dwarf.c:8072
 #, c-format
 msgid "Invalid range list entry type %d\n"
-msgstr ""
+msgstr "Tip de intrare nevalid în lista de intervale %d\n"
 
 #: dwarf.c:8143
 #, c-format
 msgid "The length field (0x%lx) in the debug_rnglists header is wrong - the section is too small\n"
-msgstr ""
+msgstr "Câmpul de lungime (0x%lx) din antetul debug_rnglists este greșit - secțiunea este prea mică\n"
 
 #: dwarf.c:8157
 #, c-format
@@ -3734,7 +3793,7 @@ msgstr " Tabel la poziția: 0x%s:\n"
 
 #: dwarf.c:8175
 msgid "Only DWARF version 5+ debug_rnglists info is currently supported.\n"
-msgstr ""
+msgstr "Numai informațiile DWARF versiunea 5+ debug_rnglists sunt acceptate în prezent.\n"
 
 #: dwarf.c:8184
 #, c-format
@@ -3742,6 +3801,8 @@ msgid ""
 "\n"
 "   Offsets starting at 0x%lx:\n"
 msgstr ""
+"\n"
+"   Decalaje care încep de la 0x%lx:\n"
 
 #: dwarf.c:8214
 #, c-format
@@ -3749,75 +3810,77 @@ msgid ""
 "\n"
 "  Offset: %lx, Index: 0x%s\n"
 msgstr ""
+"\n"
+"  Decalaj: %lx, Index: 0x%s\n"
 
 #: dwarf.c:8216 dwarf.c:8305
 #, c-format
 msgid "    Offset   Begin    End\n"
-msgstr ""
+msgstr "    Decalaj   Începe    Termină\n"
 
 #. This can happen when the file was compiled with -gsplit-debug
 #. which removes references to range lists from the primary .o file.
 #: dwarf.c:8276
 #, c-format
 msgid "No range lists in .debug_info section.\n"
-msgstr ""
+msgstr "Nu există liste de intervale în secțiunea .debug_info.\n"
 
 #: dwarf.c:8301
 #, c-format
 msgid "Range lists in %s section start at 0x%lx\n"
-msgstr ""
+msgstr "Listele de intervale din secțiunea %s încep de la 0x%lx\n"
 
 #: dwarf.c:8323
 #, c-format
 msgid "Corrupt pointer size (%d) in debug entry at offset %8.8lx\n"
-msgstr ""
+msgstr "Dimensiune a indicatorului coruptă (%d) în intrarea de depanare de la poziția %8.8lx\n"
 
 #: dwarf.c:8330
 #, c-format
 msgid "Corrupt offset (%#8.8lx) in range entry %u\n"
-msgstr ""
+msgstr "Decalaj corupt (%#8.8lx) în intrarea intervalului %u\n"
 
 #: dwarf.c:8432
 #, c-format
 msgid "Unfeasibly large register number: %u\n"
-msgstr ""
+msgstr "Număr de registru infezabil (imposibil de atins): %u\n"
 
 #: dwarf.c:8445
 #, c-format
 msgid "Out of memory allocating %u columns in dwarf frame arrays\n"
-msgstr ""
+msgstr "Memorie epuizată la alocarea a %u coloane în matrice de cadre dwarf\n"
 
 #: dwarf.c:8894
 msgid "No terminator for augmentation name\n"
-msgstr ""
+msgstr "Fără terminator pentru numele de augmentare\n"
 
 #: dwarf.c:8912
 #, c-format
 msgid "Invalid pointer size (%d) in CIE data\n"
-msgstr ""
+msgstr "Dimensiunea indicatorului nevalidă (%d) în datele CIE\n"
 
 #: dwarf.c:8920
 #, c-format
 msgid "Invalid segment size (%d) in CIE data\n"
-msgstr ""
+msgstr "Dimensiunea segmentului nevalidă (%d) în datele CIE\n"
 
 #: dwarf.c:8956 dwarf.c:9329
 #, c-format
 msgid "Augmentation data too long: 0x%s, expected at most %#lx\n"
-msgstr ""
+msgstr "Datele de augmentare sunt prea lungi: 0x%s, se aștepta cel mult %#lx\n"
 
 #: dwarf.c:9043
 #, c-format
 msgid "  Augmentation data:    "
-msgstr ""
+msgstr "  Datele augmentării:    "
 
 #: dwarf.c:9059
 msgid "bad register: "
-msgstr ""
+msgstr "registru defectuos: "
 
 #: dwarf.c:9231
 msgid "Failed to read CIE information\n"
-msgstr ""
+msgstr "Nu s-au putut citi informațiile CIE.\n"
 
 #: dwarf.c:9242 dwarf.c:9263 dwarf.c:9290
 msgid "Invalid max register\n"
@@ -3827,7 +3890,7 @@ msgstr "Registru maxim nevalid\n"
 #: dwarf.c:9305
 #, c-format
 msgid "Probably corrupt segment size: %d - using 4 instead\n"
-msgstr ""
+msgstr "Dimensiunea segmentului probabil coruptă: %d - folosind 4 în schimb\n"
 
 #. Ideally translate "invalid " to 8 chars, trailing space
 #. is optional.
@@ -3838,109 +3901,111 @@ msgstr "cie=nevalid "
 
 #: dwarf.c:9778
 msgid "Invalid column number in saved frame state\n"
-msgstr ""
+msgstr "Număr de coloană nevalid în starea cadru salvat\n"
 
 #: dwarf.c:9825
 #, c-format
 msgid "  DW_CFA_def_cfa_expression: <corrupt len %lu>\n"
-msgstr ""
+msgstr "  DW_CFA_def_cfa_expression: <lungime coruptă %lu>\n"
 
 #: dwarf.c:9848
 #, c-format
 msgid "  DW_CFA_expression: <corrupt len %lu>\n"
-msgstr ""
+msgstr "  DW_CFA_expression: <lungime coruptă %lu>\n"
 
 #: dwarf.c:9981
 #, c-format
 msgid "  DW_CFA_??? (User defined call frame op: %#x)\n"
 msgstr ""
+"  DW_CFA_??? (Operator cadru de apel definit de utilizator: %#x)\n"
+"\n"
 
 #: dwarf.c:9983
 #, c-format
 msgid "Unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
-msgstr ""
+msgstr "Număr de instrucțiune a cadrului de apelare Dwarf neacceptat sau necunoscut: %#x\n"
 
 #: dwarf.c:10097 dwarf.c:10522
 #, c-format
 msgid "Version %ld\n"
-msgstr ""
+msgstr "Versiunea %ld\n"
 
 #: dwarf.c:10103
 msgid "Only DWARF version 5 .debug_names is currently supported.\n"
-msgstr ""
+msgstr "Numai DWARF versiunea 5 .debug_names este acceptată în prezent.\n"
 
 #: dwarf.c:10110
 #, c-format
 msgid "Padding field of .debug_names must be 0 (found 0x%x)\n"
-msgstr ""
+msgstr "Câmpul de completare al .debug_names trebuie să fie 0 (s-a găsit 0x%x)\n"
 
 #: dwarf.c:10115
 msgid "Compilation unit count must be >= 1 in .debug_names\n"
-msgstr ""
+msgstr "Numărul de unități de compilare trebuie să fie >= 1 în .debug_names\n"
 
 #: dwarf.c:10126
 #, c-format
 msgid "Augmentation string length %u must be rounded up to a multiple of 4 in .debug_names.\n"
-msgstr ""
+msgstr "Lungimea șirului de augmentare %u trebuie să fie rotunjită la un multiplu de 4 în .debug_names.\n"
 
 #: dwarf.c:10134
 #, c-format
 msgid "Augmentation string:"
-msgstr ""
+msgstr "Șir de augmentare:"
 
 #: dwarf.c:10161
 #, c-format
 msgid "CU table:\n"
-msgstr ""
+msgstr "Tabel CU:\n"
 
 #: dwarf.c:10170 dwarf.c:10183
 #, c-format
 msgid "[%3u] 0x%lx\n"
-msgstr ""
+msgstr "[%3u] 0x%lx\n"
 
 #: dwarf.c:10174
 #, c-format
 msgid "TU table:\n"
-msgstr ""
+msgstr "Tabel TU:\n"
 
 #: dwarf.c:10187
 #, c-format
 msgid "Foreign TU table:\n"
-msgstr ""
+msgstr "Tabel TU extern:\n"
 
 #: dwarf.c:10196
 #, c-format
 msgid "[%3u] "
-msgstr ""
+msgstr "[%3u] "
 
 #: dwarf.c:10207
 #, c-format
 msgid "Entry pool offset (0x%lx) exceeds unit size 0x%lx for unit 0x%lx in the debug_names\n"
-msgstr ""
+msgstr "Decalajul fondului comun(pool) de intrare (0%lx) depășește dimensiunea unității 0%lx pentru unitatea 0%lx în debug_names\n"
 
 #: dwarf.c:10236
 #, c-format
 msgid "Used %zu of %lu bucket.\n"
 msgid_plural "Used %zu of %lu buckets.\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "S-a utilizat %zu dintr-o găleată(bucket).\n"
+msgstr[1] "S-a utilizat %zu din două găleți(buckets).\n"
+msgstr[2] "S-a utilizat %zu din %lu găleți(buckets).\n"
+msgstr[3] "S-a utilizat %zu din %lu de găleți(buckets).\n"
 
 #: dwarf.c:10265
 #, c-format
 msgid "Out of %lu items there are %zu bucket clashes (longest of %zu entries).\n"
-msgstr ""
+msgstr "Din %lu elemente există %zu conflicte de găleți(buckets) (cea mai lungă dintre %zu intrări).\n"
 
 #: dwarf.c:10270
 #, c-format
 msgid "The name_count (%lu) is not the same as the used bucket_count (%lu) + the hash clash count (%lu)"
-msgstr ""
+msgstr "Valoarea Name_count (%lu) nu este aceeași cu cea utilizată de bucket_count (%lu) + numărul de conflicte de sume de control(hash) (%lu)"
 
 #: dwarf.c:10308
 #, c-format
 msgid "Duplicate abbreviation tag %lu in unit 0x%lx in the debug_names\n"
-msgstr ""
+msgstr "Eticheta de abreviere duplicată %lu în unitatea 0x%lx în debug_names\n"
 
 #: dwarf.c:10330 dwarf.c:10612
 #, c-format
@@ -3948,80 +4013,82 @@ msgid ""
 "\n"
 "Symbol table:\n"
 msgstr ""
+"\n"
+"Tabel de simboluri:\n"
 
 #: dwarf.c:10382
 #, c-format
 msgid "Undefined abbreviation tag %lu in unit 0x%lx in the debug_names\n"
-msgstr ""
+msgstr "Etichetă de abreviere nedefinită %lu în unitatea 0x%lx în debug_names\n"
 
 #: dwarf.c:10413
 #, c-format
 msgid " <no entries>"
-msgstr ""
+msgstr " <fără intrări>"
 
 #: dwarf.c:10445
 msgid "The debuglink filename is corrupt/missing\n"
-msgstr ""
+msgstr "Numele fișierului de depanare este corupt/lipsește\n"
 
 #: dwarf.c:10449
 #, c-format
 msgid "  Separate debug info file: %s\n"
-msgstr ""
+msgstr "  Fișier separat cu informații de depanare: %s\n"
 
 #: dwarf.c:10460
 msgid "CRC offset missing/truncated\n"
-msgstr ""
+msgstr "Decalaj CRC lipsă/trunchiat\n"
 
 #: dwarf.c:10466
 #, c-format
 msgid "  CRC value: %#x\n"
-msgstr ""
+msgstr "  Valoarea CRC: %#x\n"
 
 #: dwarf.c:10470
 #, c-format
 msgid "There are %#lx extraneous bytes at the end of the section\n"
-msgstr ""
+msgstr "Există %#lx octeți stranii la sfârșitul secțiunii\n"
 
 #: dwarf.c:10484
 #, c-format
 msgid "Build-ID is too short (%#lx bytes)\n"
-msgstr ""
+msgstr "ID-ul de compilare este prea scurt (%#lx octeți)\n"
 
 #: dwarf.c:10488
 #, c-format
 msgid "  Build-ID (%#lx bytes):"
-msgstr ""
+msgstr "  ID-ul de compilare (%#lx octeți):"
 
 #: dwarf.c:10517
 #, c-format
 msgid "Truncated header in the %s section.\n"
-msgstr ""
+msgstr "Antet trunchiat în secțiunea %s.\n"
 
 #: dwarf.c:10528
 #, c-format
 msgid "Unsupported version %lu.\n"
-msgstr ""
+msgstr "Versiune neacceptată %lu.\n"
 
 #: dwarf.c:10532
 msgid "The address table data in version 3 may be wrong.\n"
-msgstr ""
+msgstr "Datele din tabelul de adrese din versiunea 3 pot fi greșite.\n"
 
 #: dwarf.c:10534
 msgid "Version 4 does not support case insensitive lookups.\n"
-msgstr ""
+msgstr "Versiunea 4 nu acceptă căutări fără distincție între majuscule și minuscule.\n"
 
 #: dwarf.c:10536
 msgid "Version 5 does not include inlined functions.\n"
-msgstr ""
+msgstr "Versiunea 5 nu include funcții inlined.\n"
 
 #: dwarf.c:10538
 msgid "Version 6 does not include symbol attributes.\n"
-msgstr ""
+msgstr "Versiunea 6 nu include atribute de simbol.\n"
 
 #: dwarf.c:10560
 #, c-format
 msgid "Corrupt header in the %s section.\n"
-msgstr ""
+msgstr "Antet corupt în secțiunea %s.\n"
 
 #: dwarf.c:10575
 #, c-format
@@ -4029,11 +4096,13 @@ msgid ""
 "\n"
 "CU table:\n"
 msgstr ""
+"\n"
+"Tabel CU:\n"
 
 #: dwarf.c:10581
 #, c-format
 msgid "[%3u] 0x%lx - 0x%lx\n"
-msgstr ""
+msgstr "[%3u] 0x%lx - 0x%lx\n"
 
 #: dwarf.c:10586
 #, c-format
@@ -4041,11 +4110,13 @@ msgid ""
 "\n"
 "TU table:\n"
 msgstr ""
+"\n"
+"Tabel TU:\n"
 
 #: dwarf.c:10593
 #, c-format
 msgid "[%3u] 0x%lx 0x%lx "
-msgstr ""
+msgstr "[%3u] 0x%lx 0x%lx "
 
 #: dwarf.c:10600
 #, c-format
@@ -4053,36 +4124,38 @@ msgid ""
 "\n"
 "Address table:\n"
 msgstr ""
+"\n"
+"Tabel de adrese:\n"
 
 #: dwarf.c:10609
 #, c-format
 msgid "%lu\n"
-msgstr ""
+msgstr "%lu\n"
 
 #: dwarf.c:10627
 #, c-format
 msgid "[%3u] <corrupt offset: %x>"
-msgstr ""
+msgstr "[%3u] <decalaj corupt: %x>"
 
 #: dwarf.c:10628
 #, c-format
 msgid "Corrupt name offset of 0x%x found for symbol table slot %d\n"
-msgstr ""
+msgstr "S-a găsit decalaj de nume corupt de 0x%x pentru slotul tabelului de simboluri %d\n"
 
 #: dwarf.c:10639
 #, c-format
 msgid "<invalid CU vector offset: %x>\n"
-msgstr ""
+msgstr "<decalaj vector CU nevalid: %x>\n"
 
 #: dwarf.c:10640
 #, c-format
 msgid "Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"
-msgstr ""
+msgstr "S-a găsit decalajul vectorului CU corupt de 0x%x pentru slotul tabelului de simboluri %d\n"
 
 #: dwarf.c:10651
 #, c-format
 msgid "Invalid number of CUs (0x%x) for symbol table slot %d\n"
-msgstr ""
+msgstr "Număr nevalid de CU (0x%x) pentru slotul tabelului de simboluri %d\n"
 
 #: dwarf.c:10676
 msgid "static"
@@ -4094,7 +4167,7 @@ msgstr "global"
 
 #: dwarf.c:10714 dwarf.c:10725
 msgid "Internal error: out of space in the shndx pool.\n"
-msgstr ""
+msgstr "Eroare internă: nu mai există spațiu în fondul comun(pool) shndx.\n"
 
 #: dwarf.c:10788
 #, c-format
@@ -4104,22 +4177,22 @@ msgstr "Secțiunea %s este goală\n"
 #: dwarf.c:10794
 #, c-format
 msgid "Section %s is too small to contain a CU/TU header\n"
-msgstr ""
+msgstr "Secțiunea %s este prea mică pentru a conține un antet CU/TU\n"
 
 #: dwarf.c:10813
 #, c-format
 msgid "  Version:                 %u\n"
-msgstr "  Versiune:                 %u\n"
+msgstr "  Versiunea:                    %u\n"
 
 #: dwarf.c:10815
 #, c-format
 msgid "  Number of columns:       %u\n"
-msgstr "  Numărul de coloane:       %u\n"
+msgstr "  Numărul de coloane:           %u\n"
 
 #: dwarf.c:10816
 #, c-format
 msgid "  Number of used entries:  %u\n"
-msgstr ""
+msgstr "  Numărul de intrări utilizate: %u\n"
 
 #: dwarf.c:10817
 #, c-format
@@ -4127,43 +4200,45 @@ msgid ""
 "  Number of slots:         %u\n"
 "\n"
 msgstr ""
+"  Numărul de sloturi:                  %u\n"
+"\n"
 
 #: dwarf.c:10824
 #, c-format
 msgid "Section %s is too small for %u slot\n"
 msgid_plural "Section %s is too small for %u slots\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "Secțiunea %s este prea mică pentru un slot\n"
+msgstr[1] "Secțiunea %s este prea mică pentru două sloturi\n"
+msgstr[2] "Secțiunea %s este prea mică pentru %u sloturi\n"
+msgstr[3] "Secțiunea %s este prea mică pentru %u de sloturi\n"
 
 #: dwarf.c:10848
 msgid "Section index pool located before start of section\n"
-msgstr ""
+msgstr "Fondul comun de index al secțiunii situat înainte de începerea secțiunii\n"
 
 #: dwarf.c:10853
 #, c-format
 msgid "  [%3d] Signature:  0x%s  Sections: "
-msgstr ""
+msgstr "  [%3d] Semnătura:  0x%s  Secțiuni: "
 
 #: dwarf.c:10859
 #, c-format
 msgid "Section %s too small for shndx pool\n"
-msgstr ""
+msgstr "Secțiunea %s prea mică pentru fondul comun(pool) shndx\n"
 
 #: dwarf.c:10905
 #, c-format
 msgid "Section %s too small for offset and size tables\n"
-msgstr ""
+msgstr "Secțiunea %s este prea mică pentru tabelele de decalaj și dimensiuni\n"
 
 #: dwarf.c:10912
 #, c-format
 msgid "  Offset table\n"
-msgstr ""
+msgstr "  Tabel de decalaj\n"
 
 #: dwarf.c:10914 dwarf.c:11002
 msgid "signature"
-msgstr ""
+msgstr "semnătură"
 
 #: dwarf.c:10914 dwarf.c:11002
 msgid "dwo_id"
@@ -4172,52 +4247,52 @@ msgstr "dwo_id"
 #: dwarf.c:10953
 #, c-format
 msgid "Row index (%u) is larger than number of used entries (%u)\n"
-msgstr ""
+msgstr "Indexul rândurilor (%u) este mai mare decât numărul de intrări utilizate (%u)\n"
 
 #: dwarf.c:10967 dwarf.c:11026
 #, c-format
 msgid "  [%3d] 0x%s"
-msgstr ""
+msgstr "  [%3d] 0x%s"
 
 #: dwarf.c:10982 dwarf.c:11054
 #, c-format
 msgid "Overlarge Dwarf section index detected: %u\n"
-msgstr ""
+msgstr "S-a detectat un index de secțiune Dwarf exagerat de mare: %u\n"
 
 #: dwarf.c:11000
 #, c-format
 msgid "  Size table\n"
-msgstr ""
+msgstr "  Tabel de dimensiuni\n"
 
 #: dwarf.c:11040
 #, c-format
 msgid "Too many rows/columns in DWARF index section %s\n"
-msgstr ""
+msgstr "Prea multe rânduri/coloane în secțiunea de index DWARF %s\n"
 
 #: dwarf.c:11069
 #, c-format
 msgid "  Unsupported version (%d)\n"
-msgstr ""
+msgstr "  Versiune neacceptată (%d)\n"
 
 #: dwarf.c:11141
 #, c-format
 msgid "Displaying the debug contents of section %s is not yet supported.\n"
-msgstr ""
+msgstr "Afișarea conținutului de depanare din secțiunea %s nu este încă acceptată.\n"
 
 #: dwarf.c:11172
 #, c-format
 msgid "Attempt to allocate an array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Se încearcă alocarea unei matrice cu un număr excesiv de elemente: 0x%lx\n"
 
 #: dwarf.c:11190
 #, c-format
 msgid "Attempt to re-allocate an array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Se încearcă realocarea unei matrice cu un număr excesiv de elemente: 0x%lx\n"
 
 #: dwarf.c:11206
 #, c-format
 msgid "Attempt to allocate a zero'ed array with an excessive number of elements: 0x%lx\n"
-msgstr ""
+msgstr "Se încearcă alocarea unei matrice puse la zero cu un număr excesiv de elemente: 0x%lx\n"
 
 #: dwarf.c:11304
 #, c-format
@@ -4227,7 +4302,7 @@ msgstr "Nu s-a putut redeschide fișierul separat ce conține informațiile de d
 #: dwarf.c:11316
 #, c-format
 msgid "Separate debug info file %s found, but CRC does not match - ignoring\n"
-msgstr ""
+msgstr "S-a găsit fișierul separat cu informații de depanare %s, dar CRC nu se potrivește - se ignoră\n"
 
 #: dwarf.c:11495
 #, c-format
@@ -4236,13 +4311,13 @@ msgstr "Secțiune de legătură de depanare (debuglink) coruptă: %s\n"
 
 #: dwarf.c:11534
 msgid "Out of memory"
-msgstr ""
+msgstr "Memorie insuficientă"
 
 #. Failed to find the file.
 #: dwarf.c:11610
 #, c-format
 msgid "could not find separate debug file '%s'\n"
-msgstr ""
+msgstr "nu s-a putut găsi fișierul de depanare separat „%s”\n"
 
 #: dwarf.c:11612 dwarf.c:11617 dwarf.c:11623 dwarf.c:11627 dwarf.c:11632
 #: dwarf.c:11635 dwarf.c:11638 dwarf.c:11641
@@ -4271,7 +4346,7 @@ msgstr ""
 
 #: dwarf.c:11711
 msgid "Out of memory allocating dwo filename\n"
-msgstr ""
+msgstr "Memorie epuizată la alocarea numele fișierului dwo\n"
 
 #: dwarf.c:11717
 #, c-format
@@ -4280,50 +4355,50 @@ msgstr "Nu se poate încărca fișierul dwo: %s\n"
 
 #. FIXME: We should check the dwo_id.
 #: dwarf.c:11724
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s: Found separate debug object file: %s\n"
 "\n"
 msgstr ""
-"%s: S-a găsit fișierul separat al obiectului de depanare: %s\n"
+"%s: S-a găsit fișierul obiect de depanare separat: %s\n"
 "\n"
 
 #: dwarf.c:11756
 msgid "Unable to load the .note.gnu.build-id section\n"
-msgstr ""
+msgstr "Nu se poate încărca secțiunea .note.gnu.build-id\n"
 
 #: dwarf.c:11762
 msgid ".note.gnu.build-id section is corrupt/empty\n"
-msgstr ""
+msgstr "secțiunea .note.gnu.build-id este coruptă/goală\n"
 
 #: dwarf.c:11783
 msgid ".note.gnu.build-id data size is too small\n"
-msgstr ""
+msgstr "dimensiunea datelor .note.gnu.build-id este prea mică\n"
 
 #: dwarf.c:11789
 msgid ".note.gnu.build-id data size is too bug\n"
-msgstr ""
+msgstr "dimensiunea datelor .note.gnu.build-id este prea mare\n"
 
 #: dwarf.c:11850
 msgid ".debug_sup section is corrupt/empty\n"
-msgstr ""
+msgstr "secțiunea .debug_sup este coruptă/goală\n"
 
 #: dwarf.c:11860
 msgid "filename in .debug_sup section is corrupt\n"
-msgstr ""
+msgstr "numele fișierului din secțiunea .debug_sup este corupt\n"
 
 #: dwarf.c:11875
 msgid "unable to construct path for supplementary debug file"
-msgstr ""
+msgstr "nu se poate construi calea pentru fișierul de depanare suplimentar"
 
 #: dwarf.c:11889
 msgid "out of memory constructing filename for .debug_sup link\n"
-msgstr ""
+msgstr "memorie insuficientă la construirea numelui fișierului pentru legătura .debug_sup\n"
 
 #: dwarf.c:11897
 #, c-format
 msgid "unable to open file '%s' referenced from .debug_sup section\n"
-msgstr ""
+msgstr "nu se poate deschide fișierul „%s” la care se face referire din secțiunea .debug_sup\n"
 
 #: dwarf.c:11902
 #, c-format
@@ -4331,14 +4406,16 @@ msgid ""
 "%s: Found supplementary debug file: %s\n"
 "\n"
 msgstr ""
+"%s: S-a găsit fișierul suplimentar de depanare: %s\n"
+"\n"
 
 #: dwarf.c:12003
 msgid "Multiple DWO_NAMEs encountered for the same CU\n"
-msgstr ""
+msgstr "Mai multe DWO_NAME întâlnite pentru același CU\n"
 
 #: dwarf.c:12015
 msgid "multiple DWO_IDs encountered for the same CU\n"
-msgstr ""
+msgstr "mai multe DWO_ID întâlnite pentru același CU\n"
 
 #: dwarf.c:12020
 msgid "Unexpected DWO INFO type"
@@ -4350,6 +4427,8 @@ msgid ""
 "The %s section contains link(s) to dwo file(s):\n"
 "\n"
 msgstr ""
+"Secțiunea %s conține legătură(i) către fișier(e) dwo:\n"
+"\n"
 
 #: dwarf.c:12040
 #, c-format
@@ -4383,20 +4462,20 @@ msgstr "Opțiune de depanare nerecunoscută „%s”\n"
 #: dwarf.c:12258
 #, c-format
 msgid "Unrecognized debug letter option '%c'\n"
-msgstr "Opțiune nerecunoscută pentru litera de depanare „%c”\n"
+msgstr "Literă de opțiune de depanare nerecunoscută „%c”\n"
 
 #: dwarf.h:284
 msgid "end of data encountered whilst reading LEB\n"
-msgstr ""
+msgstr "sfârșitul datelor întâlnite în timpul citirii LEB\n"
 
 #: dwarf.h:286
 msgid "read LEB value is too large to store in destination variable\n"
-msgstr ""
+msgstr "valoarea LEB citită este prea mare pentru a fi stocată în variabila destinație\n"
 
 #: elfcomm.c:47
 #, c-format
 msgid "%s: Error: "
-msgstr ""
+msgstr "%s: Eroare: "
 
 #: elfcomm.c:61
 #, c-format
@@ -4406,7 +4485,7 @@ msgstr "%s: Avertisment: "
 #: elfcomm.c:73 elfcomm.c:88 elfcomm.c:166 elfcomm.c:236
 #, c-format
 msgid "Unhandled data length: %d\n"
-msgstr ""
+msgstr "Lungimea datelor negestionate: %d\n"
 
 #: elfcomm.c:296 elfcomm.c:321 elfcomm.c:795
 msgid "Out of memory\n"
@@ -4415,22 +4494,22 @@ msgstr "Memorie insuficientă\n"
 #: elfcomm.c:313
 #, c-format
 msgid "Abnormal length of thin archive member name: %lx\n"
-msgstr ""
+msgstr "Lungimea anormală a numelui membrului de arhivă subțire: %lx\n"
 
 #: elfcomm.c:357
 #, c-format
 msgid "%s: invalid archive header size: %ld\n"
-msgstr ""
+msgstr "%s: dimensiunea antetului arhivei nevalidă: %ld\n"
 
 #: elfcomm.c:370
 #, c-format
 msgid "%s: failed to skip archive symbol table\n"
-msgstr ""
+msgstr "%s: nu s-a putut omite tabelul cu simboluri de arhivă\n"
 
 #: elfcomm.c:389
 #, c-format
 msgid "%s: the archive index is empty\n"
-msgstr ""
+msgstr "%s: indexul arhivei este gol\n"
 
 #: elfcomm.c:397 elfcomm.c:426
 #, c-format
@@ -4440,46 +4519,46 @@ msgstr "%s: nu s-a putut citi indexul arhivei\n"
 #: elfcomm.c:408
 #, c-format
 msgid "%s: the archive index is supposed to have 0x%lx entries of %d bytes, but the size is only 0x%lx\n"
-msgstr ""
+msgstr "%s: indexul arhivei se presupune că are 0x%lx intrări de %d octeți, dar dimensiunea este de doar 0x%lx\n"
 
 #: elfcomm.c:418
 msgid "Out of memory whilst trying to read archive symbol index\n"
-msgstr ""
+msgstr "Memorie epuizată în timp ce se încerca să se citească indexul simbolului arhivei\n"
 
 #: elfcomm.c:438
 msgid "Out of memory whilst trying to convert the archive symbol index\n"
-msgstr ""
+msgstr "Memoria epuizată în timp ce se încerca convertirea indexului simbolului arhivei\n"
 
 #: elfcomm.c:451
 #, c-format
 msgid "%s: the archive has an index but no symbols\n"
-msgstr ""
+msgstr "%s: arhiva are un index, dar nu are simboluri\n"
 
 #: elfcomm.c:459
 msgid "Out of memory whilst trying to read archive index symbol table\n"
-msgstr ""
+msgstr "Memorie epuizată în timp ce se încerca să se citească tabelul cu simboluri index de arhivă\n"
 
 #: elfcomm.c:467
 #, c-format
 msgid "%s: failed to read archive index symbol table\n"
-msgstr ""
+msgstr "%s: nu s-a putut citi tabelul de simboluri al indexului arhivei\n"
 
 #: elfcomm.c:477
 #, c-format
 msgid "%s: failed to read archive header following archive index\n"
-msgstr ""
+msgstr "%s: nu s-a putut citi antetul arhivei după indexul arhivei\n"
 
 #: elfcomm.c:510
 #, c-format
 msgid "%s: failed to seek to first archive header\n"
-msgstr ""
+msgstr "%s: nu s-a putut căuta primul antet arhivat\n"
 
 #. PR 24049 - we cannot use filedata->file_name as this will
 #. have already been freed.
 #: elfcomm.c:519 elfcomm.c:753 elfedit.c:613 readelf.c:22570
 #, c-format
 msgid "%s: failed to read archive header\n"
-msgstr ""
+msgstr "%s: nu s-a putut citi antetul arhivei\n"
 
 #: elfcomm.c:536
 #, c-format
@@ -4489,39 +4568,39 @@ msgstr "%s: nu are index de arhivă\n"
 #: elfcomm.c:548
 #, c-format
 msgid "%s: long name table is too small, (size = %ld)\n"
-msgstr ""
+msgstr "%s: tabelul cu nume lungi este prea mic, (dimensiune = %ld)\n"
 
 #: elfcomm.c:556
 #, c-format
 msgid "%s: long name table is too big, (size = 0x%lx)\n"
-msgstr ""
+msgstr "%s: tabelul cu nume lungi este prea mare (dimensiune = 0x%lx)\n"
 
 #: elfcomm.c:567
 msgid "Out of memory reading long symbol names in archive\n"
-msgstr ""
+msgstr "Memoria epuizată la citirea numelor lungi de simboluri din arhivă\n"
 
 #: elfcomm.c:575
 #, c-format
 msgid "%s: failed to read long symbol name string table\n"
-msgstr ""
+msgstr "%s: nu s-a putut citi tabelul de șiruri de nume lungi de simbol\n"
 
 #: elfcomm.c:658
 msgid "Archive member uses long names, but no longname table found\n"
-msgstr ""
+msgstr "Membrul arhivei folosește nume lungi, dar nu a fost găsit niciun tabel cu nume lungi\n"
 
 #: elfcomm.c:672
 #, c-format
 msgid "Found long name index (%ld) beyond end of long name table\n"
-msgstr ""
+msgstr "S-a găsit indexul numelor lungi (%ld) dincolo de sfârșitul tabelului de nume lungi\n"
 
 #: elfcomm.c:691
 msgid "Invalid Thin archive member name\n"
-msgstr ""
+msgstr "Nume de membru al arhivei Thin nevalid\n"
 
 #: elfcomm.c:747
 #, c-format
 msgid "%s: failed to seek to next file name\n"
-msgstr ""
+msgstr "%s: nu s-a putut căuta următorul nume de fișier\n"
 
 #: elfcomm.c:758 elfedit.c:620 readelf.c:22577
 #, c-format
@@ -4531,7 +4610,7 @@ msgstr "%s: nu s-a găsit un antet de arhivă valid\n"
 #: elfedit.c:93
 #, c-format
 msgid "%s: Not an i386 nor x86-64 ELF file\n"
-msgstr ""
+msgstr "%s: Nu este un fișier ELF i386 sau x86-64\n"
 
 #: elfedit.c:99
 #, c-format
@@ -4546,98 +4625,100 @@ msgstr "%s: mmap() a eșuat\n"
 #: elfedit.c:246
 #, c-format
 msgid "%s: Invalid PT_NOTE segment\n"
-msgstr ""
+msgstr "%s: Segment PT_NOTE nevalid\n"
 
 #: elfedit.c:271
 #, c-format
 msgid "Unknown x86 feature: %s\n"
-msgstr ""
+msgstr "Caracteristică x86 necunoscută: %s\n"
 
 #: elfedit.c:319
 #, c-format
 msgid "%s: Unsupported EI_VERSION: %d is not %d\n"
-msgstr ""
+msgstr "%s: EI_VERSION neacceptată: %d nu este %d\n"
 
 #: elfedit.c:340
 #, c-format
 msgid "%s: Unmatched input EI_CLASS: %d is not %d\n"
-msgstr ""
+msgstr "%s: Intrare EI_CLASS fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:349
 #, c-format
 msgid "%s: Unmatched output EI_CLASS: %d is not %d\n"
-msgstr ""
+msgstr "%s: Ieșire EI_CLASS fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:358
 #, c-format
 msgid "%s: Unmatched e_machine: %d is not %d\n"
-msgstr ""
+msgstr "%s: e_machine fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:369
 #, c-format
 msgid "%s: Unmatched e_type: %d is not %d\n"
-msgstr ""
+msgstr "%s: e_type fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:380
 #, c-format
 msgid "%s: Unmatched EI_OSABI: %d is not %d\n"
-msgstr ""
+msgstr "%s: EI_OSABI fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:392
 #, c-format
 msgid "%s: Unmatched EI_ABIVERSION: %d is not %d\n"
-msgstr ""
+msgstr "%s: EI_ABIVERSION fără potrivire: %d nu este %d\n"
 
 #: elfedit.c:429
 #, c-format
 msgid "%s: Failed to update ELF header: %s\n"
-msgstr ""
+msgstr "%s: Nu s-a putut actualiza antetul ELF: %s\n"
 
 #: elfedit.c:499
 msgid ""
 "This executable has been built without support for a\n"
 "64 bit data type and so it cannot process 64 bit ELF files.\n"
 msgstr ""
+"Acest executabil a fost construit fără suport pentru a\n"
+"tip de date pe 64 de biți și, prin urmare, nu poate procesa fișiere ELF pe 64 de biți.\n"
 
 #: elfedit.c:540
 #, c-format
 msgid "%s: Failed to read ELF header\n"
-msgstr ""
+msgstr "%s: Nu s-a putut citi antetul ELF\n"
 
 #: elfedit.c:547
 #, c-format
 msgid "%s: Failed to seek to ELF header\n"
-msgstr ""
+msgstr "%s: Nu s-a putut căuta antetul ELF\n"
 
 #: elfedit.c:604 readelf.c:22558
 #, c-format
 msgid "%s: failed to seek to next archive header\n"
-msgstr ""
+msgstr "%s: nu s-a putut căuta următorul antet de arhivă\n"
 
 #: elfedit.c:635 elfedit.c:644 readelf.c:22590 readelf.c:22599
 #, c-format
 msgid "%s: bad archive file name\n"
-msgstr ""
+msgstr "%s: nume greșit al fișierului de arhivă\n"
 
 #: elfedit.c:667 elfedit.c:778
 #, c-format
 msgid "Input file '%s' is not readable\n"
-msgstr ""
+msgstr "Fișierul de intrare „%s” nu poate fi citit\n"
 
 #: elfedit.c:694
 #, c-format
 msgid "%s: failed to seek to archive member\n"
-msgstr ""
+msgstr "%s: nu s-a putut găsi membrul arhivei.\n"
 
 #: elfedit.c:735 readelf.c:22718
 #, c-format
 msgid "'%s': No such file\n"
-msgstr ""
+msgstr "„%s”: Nu există un astfel de fișier\n"
 
 #: elfedit.c:737 readelf.c:22720
 #, c-format
 msgid "Could not locate '%s'.  System error message: %s\n"
-msgstr ""
+msgstr "Nu s-a putut localiza „%s”. Mesaj de eroare de sistem: %s\n"
 
 #: elfedit.c:758 readelf.c:22727
 #, c-format
@@ -4647,12 +4728,12 @@ msgstr "„%s” nu este un fișier obișnuit\n"
 #: elfedit.c:784 readelf.c:22749
 #, c-format
 msgid "%s: Failed to read file's magic number\n"
-msgstr ""
+msgstr "%s: Nu s-a putut citi numărul magic al fișierului\n"
 
 #: elfedit.c:848
 #, c-format
 msgid "Unknown OSABI: %s\n"
-msgstr ""
+msgstr "OSABI necunoscut: %s\n"
 
 #: elfedit.c:873
 #, c-format
@@ -4701,6 +4782,20 @@ msgid ""
 "  --input-abiversion [0-255]  Set input ABIVERSION\n"
 "  --output-abiversion [0-255] Set output ABIVERSION\n"
 msgstr ""
+"  --input-mach [none|i386|iamcu|l1om|k1om|x86_64]\n"
+"                              Stabilește tipul de mașină de intrare\n"
+"  --output-mach [none|i386|iamcu|l1om|k1om|x86_64]\n"
+"                              Stabilește tipul de mașină de ieșire\n"
+"  --input-type [none|rel|exec|dyn]\n"
+"                              Stabilește tipul fișierului de intrare\n"
+"  --output-type [none|rel|exec|dyn]\n"
+"                              Stabilește tipul fișierului de ieșire\n"
+"  --input-osabi [%s]\n"
+"                              Stabilește OSABI de intrare\n"
+"  --output-osabi [%s]\n"
+"                              Stabilește OSABI de ieșire\n"
+"  --input-abiversion [0-255]  Stabilește ABIVERSION de intrare\n"
+"  --output-abiversion [0-255] Stabilește ABIVERSION de ieșire\n"
 
 #: elfedit.c:964
 #, c-format
@@ -4710,6 +4805,10 @@ msgid ""
 "  --disable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n"
 "                              Disable x86 feature\n"
 msgstr ""
+"  --enable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n"
+"                              Activează caracteristica x86\n"
+"  --disable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n"
+"                              Dezactivează caracteristica x86\n"
 
 #: elfedit.c:970
 #, c-format
@@ -4717,6 +4816,8 @@ msgid ""
 "  -h --help                   Display this information\n"
 "  -v --version                Display the version number of %s\n"
 msgstr ""
+"  -h --help                   Afișează acest mesaj de ajutor\n"
+"  -v --version                Afișează numărul de versiune al %s\n"
 
 #: elfedit.c:1049 elfedit.c:1060
 #, c-format
@@ -4726,26 +4827,26 @@ msgstr "ABIVERSION nevalidă: %s\n"
 #: emul_aix.c:44
 #, c-format
 msgid "  [-g]         - 32 bit small archive\n"
-msgstr ""
+msgstr "  [-g]         - arhivă mică de 32 de biți\n"
 
 #: emul_aix.c:45
 #, c-format
 msgid "  [-X32]       - ignores 64 bit objects\n"
-msgstr ""
+msgstr "  [-X32]       - ignoră obiectele pe 64 de biți\n"
 
 #: emul_aix.c:46
 #, c-format
 msgid "  [-X64]       - ignores 32 bit objects\n"
-msgstr ""
+msgstr "  [-X64]       - ignoră obiectele pe 32 de biți\n"
 
 #: emul_aix.c:47
 #, c-format
 msgid "  [-X32_64]    - accepts 32 and 64 bit objects\n"
-msgstr ""
+msgstr "  [-X32_64]    - acceptă obiecte pe 32 și 64 de biți\n"
 
 #: mclex.c:245
 msgid "Duplicate symbol entered into keyword list."
-msgstr ""
+msgstr "Simbol duplicat introdus în lista de cuvinte cheie."
 
 # R-GC, scrie:
 # acest mesaj, și următoarele, se pot vizualiza,
@@ -4761,7 +4862,7 @@ msgstr "Utilizare: %s [opțiune(i)] [fișier(e)]\n"
 #: nm.c:297
 #, c-format
 msgid " List symbols in [file(s)] (a.out by default).\n"
-msgstr ""
+msgstr " Listează simbolurile în [fișier(e)] (a.out în mod implicit).\n"
 
 #: nm.c:299
 #, c-format
@@ -4771,17 +4872,21 @@ msgstr "  -a, --debug-syms       Afișează simboluri numai pentru depanare\n"
 #: nm.c:301
 #, c-format
 msgid "  -A, --print-file-name  Print name of the input file before every symbol\n"
-msgstr ""
+msgstr "  -A, --print-file-name  Imprimă numele fișierului de intrare înaintea fiecărui simbol\n"
 
 #: nm.c:303
 #, c-format
 msgid "  -B                     Same as --format=bsd\n"
 msgstr "  -B                     La fel ca „--format=bsd”\n"
 
+# R-GC scrie:
+#  conform paginii web:
+# «https://en.wikipedia.org/wiki/Name_mangling»,
+# „In compiler construction, name mangling (also called name decoration) ...”
 #: nm.c:305
 #, c-format
 msgid "  -C, --demangle[=STYLE] Decode mangled/processed symbol names\n"
-msgstr ""
+msgstr "  -C, --demangle[=STIL] Decodifică numele simbolurilor decorate/procesate\n"
 
 #: nm.c:307 readelf.c:5221
 msgid "                           STYLE can be "
@@ -4790,17 +4895,17 @@ msgstr "                           STILul poate fi "
 #: nm.c:309
 #, c-format
 msgid "      --no-demangle      Do not demangle low-level symbol names\n"
-msgstr ""
+msgstr "      --no-demangle      Nu elimină decorațiunile din numele simbolurilor de nivel scăzut\n"
 
 #: nm.c:311
 #, c-format
 msgid "      --recurse-limit    Enable a demangling recursion limit.  (default)\n"
-msgstr ""
+msgstr "      --recurse-limit    Activează o limită de recursivitate de eliminare a decorațiunilor.  (implicit)\n"
 
 #: nm.c:313
 #, c-format
 msgid "      --no-recurse-limit Disable a demangling recursion limit.\n"
-msgstr ""
+msgstr "      --no-recurse-limit Dezactivează limita de recursivitate de eliminare a decorațiunilor.\n"
 
 #: nm.c:315
 #, c-format
@@ -4819,6 +4924,9 @@ msgid ""
 "                           `sysv', `posix' or 'just-symbols'.\n"
 "                           The default is `bsd'\n"
 msgstr ""
+"  -f, --format=FORMAT    Utilizează formatul de ieșire FORMAT.  FORMAT poate fi:\n"
+"                         „bsd”, „sysv”, „posix” sau „just-symbols”.\n"
+"                         Implicit este „bsd”.\n"
 
 #: nm.c:323
 #, c-format
@@ -4828,12 +4936,12 @@ msgstr "  -g, --extern-only      Afișează numai simboluri externe\n"
 #: nm.c:325
 #, c-format
 msgid "    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n"
-msgstr ""
+msgstr "    --ifunc-chars=CARAC  Caractere de utilizat la afișarea simbolurilor ifunc\n"
 
 #: nm.c:327
 #, c-format
 msgid "  -j, --just-symbols     Same as --format=just-symbols\n"
-msgstr ""
+msgstr "  -j, --just-symbols     La fel ca „--format=just-symbols”\n"
 
 #: nm.c:329
 #, c-format
@@ -4841,11 +4949,13 @@ msgid ""
 "  -l, --line-numbers     Use debugging information to find a filename and\n"
 "                           line number for each symbol\n"
 msgstr ""
+"  -l, --line-numbers     Utilizează informațiile de depanare pentru a găsi un\n"
+"                         nume de fișier și un număr de linie pentru fiecare simbol\n"
 
 #: nm.c:332
 #, c-format
 msgid "  -n, --numeric-sort     Sort symbols numerically by address\n"
-msgstr ""
+msgstr "  -n, --numeric-sort     Sortează simbolurile numeric după adresă\n"
 
 #: nm.c:334
 #, c-format
@@ -4860,67 +4970,67 @@ msgstr "  -p, --no-sort          Nu sortează simbolurile\n"
 #: nm.c:338
 #, c-format
 msgid "  -P, --portability      Same as --format=posix\n"
-msgstr ""
+msgstr "  -P, --portability      La fel ca „--format=posix”\n"
 
 #: nm.c:340
 #, c-format
 msgid "  -r, --reverse-sort     Reverse the sense of the sort\n"
-msgstr ""
+msgstr "  -r, --reverse-sort     Inversează ordinea de sortare\n"
 
 #: nm.c:343
 #, c-format
 msgid "      --plugin NAME      Load the specified plugin\n"
-msgstr ""
+msgstr "      --plugin NUME      Încarcă modulul specificat\n"
 
 #: nm.c:346
 #, c-format
 msgid "  -S, --print-size       Print size of defined symbols\n"
-msgstr ""
+msgstr "  -S, --print-size       Afișează dimensiunea simbolurilor definite\n"
 
 #: nm.c:348
 #, c-format
 msgid "  -s, --print-armap      Include index for symbols from archive members\n"
-msgstr ""
+msgstr "  -s, --print-armap      Include indexul pentru simbolurile de la membrii arhivei\n"
 
 #: nm.c:350
 #, c-format
 msgid "      --quiet            Suppress \"no symbols\" diagnostic\n"
-msgstr ""
+msgstr "      --quiet            Suprimă diagnosticarea „fără simboluri”.\n"
 
 #: nm.c:352
 #, c-format
 msgid "      --size-sort        Sort symbols by size\n"
-msgstr ""
+msgstr "      --size-sort        Sortează simbolurile după dimensiune\n"
 
 #: nm.c:354
 #, c-format
 msgid "      --special-syms     Include special symbols in the output\n"
-msgstr ""
+msgstr "      --special-syms     Include simbolurile speciale în rezultat\n"
 
 #: nm.c:356
 #, c-format
 msgid "      --synthetic        Display synthetic symbols as well\n"
-msgstr "      --synthetic        Afișează, de asemenea, simboluri sintetice\n"
+msgstr "      --synthetic        Afișează, de asemenea, simbolurile sintetice\n"
 
 #: nm.c:358
 #, c-format
 msgid "  -t, --radix=RADIX      Use RADIX for printing symbol values\n"
-msgstr ""
+msgstr "  -t, --radix=RADIX      Utilizează RADIX pentru a afișa valorile simbolurilor\n"
 
 #: nm.c:360
 #, c-format
 msgid "      --target=BFDNAME   Specify the target object format as BFDNAME\n"
-msgstr ""
+msgstr "      --target=NUME_BFD  Specifică formatul obiectului țintă ca NUME_BFD\n"
 
 #: nm.c:362
 #, c-format
 msgid "  -u, --undefined-only   Display only undefined symbols\n"
-msgstr ""
+msgstr "  -u, --undefined-only   Afișează numai simbolurile nedefinite\n"
 
 #: nm.c:364
 #, c-format
 msgid "  -U, --defined-only     Display only defined symbols\n"
-msgstr "  -U, --defined-only     Afișează numai simboluri definite\n"
+msgstr "  -U, --defined-only     Afișează numai simbolurile definite\n"
 
 #: nm.c:366
 #, c-format
@@ -4928,6 +5038,9 @@ msgid ""
 "      --unicode={default|show|invalid|hex|escape|highlight}\n"
 "                         Specify how to treat UTF-8 encoded unicode characters\n"
 msgstr ""
+"      --unicode={default|show|invalid|hex|escape|highlight}\n"
+"                         Specifică modul de tratare al caracterelor unicode\n"
+"                         codificate UTF-8\n"
 
 #: nm.c:369
 #, c-format
@@ -4937,7 +5050,7 @@ msgstr "  -W, --no-weak          Ignoră simbolurile slabe\n"
 #: nm.c:371
 #, c-format
 msgid "      --with-symbol-versions  Display version strings after symbol names\n"
-msgstr ""
+msgstr "      --with-symbol-versions  Afișează șirurile de versiuni după numele simbolurilor\n"
 
 #: nm.c:373
 #, c-format
@@ -4972,12 +5085,12 @@ msgstr "%s: format de ieșire invalid"
 #: nm.c:455 readelf.c:12626 readelf.c:12669
 #, c-format
 msgid "<processor specific>: %d"
-msgstr ""
+msgstr "<specific procesorului>: %d"
 
 #: nm.c:457 readelf.c:12633 readelf.c:12686
 #, c-format
 msgid "<OS specific>: %d"
-msgstr ""
+msgstr "<specific SO>: %d"
 
 #: nm.c:459 readelf.c:12636 readelf.c:12689
 #, c-format
@@ -4995,11 +5108,13 @@ msgid ""
 "\n"
 "Archive index:\n"
 msgstr ""
+"\n"
+"Indexul arhivei:\n"
 
 #: nm.c:802 nm.c:1501
 #, c-format
 msgid "%s: plugin needed to handle lto object"
-msgstr ""
+msgstr "%s: modulul necesar pentru a gestiona obiectul lto"
 
 #: nm.c:1718
 #, c-format
@@ -5009,6 +5124,10 @@ msgid ""
 "Undefined symbols from %s:\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"Simboluri nedefinite din %s:\n"
+"\n"
 
 #: nm.c:1720
 #, c-format
@@ -5018,6 +5137,10 @@ msgid ""
 "Symbols from %s:\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"Simboluri din %s:\n"
+"\n"
 
 #: nm.c:1722 nm.c:1783
 #, c-format
@@ -5025,6 +5148,8 @@ msgid ""
 "Name                  Value   Class        Type         Size     Line  Section\n"
 "\n"
 msgstr ""
+"Nume                  Valoare  Clasa        Tip          Dim.     Linie  Secțiune\n"
+"\n"
 
 #: nm.c:1725 nm.c:1786
 #, c-format
@@ -5032,6 +5157,8 @@ msgid ""
 "Name                  Value           Class        Type         Size             Line  Section\n"
 "\n"
 msgstr ""
+"Nume                  Valoare         Clasa        Tip          Dim.             Linie  Secțiune\n"
+"\n"
 
 #: nm.c:1779
 #, c-format
@@ -5041,6 +5168,10 @@ msgid ""
 "Undefined symbols from %s[%s]:\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"Simboluri nedefinite din %s[%s]:\n"
+"\n"
 
 #: nm.c:1781
 #, c-format
@@ -5050,11 +5181,15 @@ msgid ""
 "Symbols from %s[%s]:\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"Simboluri din %s[%s]:\n"
+"\n"
 
 #: nm.c:1862
 #, c-format
 msgid "Print width has not been initialized (%d)"
-msgstr ""
+msgstr "Lățimea de imprimare nu a fost inițializată (%d)"
 
 #: nm.c:2129 objdump.c:5890 readelf.c:5656 strings.c:292
 #, c-format
@@ -5063,15 +5198,15 @@ msgstr "argument nevalid pentru opțiunea „-U/--unicode”: %s"
 
 #: nm.c:2147
 msgid "Only -X 32_64 is supported"
-msgstr ""
+msgstr "Numai „-X 32_64” este acceptat"
 
 #: nm.c:2179
 msgid "Using the --size-sort and --undefined-only options together"
-msgstr ""
+msgstr "Utilizarea împreună a opțiunilor „--size-sort” și „--undefined-only”"
 
 #: nm.c:2180
 msgid "will produce no output, since undefined symbols have no size."
-msgstr ""
+msgstr "nu va produce nicio ieșire, deoarece simbolurile nedefinite nu au dimensiune."
 
 #: objcopy.c:563 srconv.c:1694
 #, c-format
@@ -5081,7 +5216,7 @@ msgstr "Utilizare: %s [opțiune(i)] fișier-intrare [fișier-ieșire]\n"
 #: objcopy.c:564
 #, c-format
 msgid " Copies a binary file, possibly transforming it in the process\n"
-msgstr ""
+msgstr " Copiază un fișier binar, posibil transformându-l în acest proces\n"
 
 #: objcopy.c:566
 #, c-format
@@ -5093,6 +5228,12 @@ msgid ""
 "     --debugging                   Convert debugging information, if possible\n"
 "  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 msgstr ""
+"  -I --input-target <nume_bfd>     presupune că fișierul de intrare este în formatul <nume_bfd>\n"
+"  -O --output-target <nume_bfd>    creează un fișier de ieșire în format <nume_bfd>\n"
+"  -B --binary-architecture <arch>  stabilește  arhitectura de ieșire, când intrarea este fără arhitectură\n"
+"  -F --target <nume_bfd>           stabilește atât formatul de intrare, cât și formatul de ieșire la <nume_bfd>\n"
+"     --debugging                   convertește informațiile de depanare, dacă este posibil\n"
+"  -p --preserve-dates              copiază marcajele de timp modificate/accesate laieșire\n"
 
 #: objcopy.c:574 objcopy.c:714
 #, c-format
@@ -5102,6 +5243,10 @@ msgid ""
 "  -U --disable-deterministic-archives\n"
 "                                   Disable -D behavior\n"
 msgstr ""
+"  -D --enable-deterministic-archives\n"
+"                                   Produce ieșire deterministă la despuierea arhivelor (implicit)\n"
+"  -U --disable-deterministic-archives\n"
+"                                   Dezactivează comportamentul opțiunii „-D”\n"
 
 #: objcopy.c:580 objcopy.c:720
 #, c-format
@@ -5111,6 +5256,10 @@ msgid ""
 "  -U --disable-deterministic-archives\n"
 "                                   Disable -D behavior (default)\n"
 msgstr ""
+"  -D --enable-deterministic-archives\n"
+"                                   Produce ieșire deterministă la despuierea arhivelor\n"
+"  -U --disable-deterministic-archives\n"
+"                                   Dezactivează comportamentul opțiunii „-D” (implicit)\n"
 
 #: objcopy.c:585
 #, c-format
@@ -5233,7 +5382,7 @@ msgstr "Utilizare: %s <opțiune(e)>fișier(e)-intrare\n"
 #: objcopy.c:705
 #, c-format
 msgid " Removes symbols and sections from files\n"
-msgstr ""
+msgstr " Elimină simbolurile și secțiunile din fișiere\n"
 
 #: objcopy.c:707
 #, c-format
@@ -5243,6 +5392,10 @@ msgid ""
 "  -F --target=<bfdname>            Set both input and output format to <bfdname>\n"
 "  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 msgstr ""
+"  -I --input-target=<nume_bfd>     Presupune că fișierul de intrare este în formatul <nume_bfd>\n"
+"  -O --output-target=<nume_bfd>    Creează un fișier de ieșire în formatul <nume_bfd>\n"
+"  -F --target=<nume_bfd>           Stabilește atât formatul de intrare, cât și formatul de ieșire la <nume_bfd>\n"
+"  -p --preserve-dates              Copiază marcajele de timp modificate/accesate la ieșire\n"
 
 #: objcopy.c:725
 #, c-format
@@ -5270,6 +5423,28 @@ msgid ""
 "     --info                        List object formats & architectures supported\n"
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
+"  -R --remove-section=<nume>       de asemenea, elimină secțiunea <nume> de la ieșire\n"
+"     --remove-relocations <nume>   elimină realocările din secțiunea <nume>\n"
+"  -s --strip-all                   elimină toate simbolurile și informațiile despre realocare\n"
+"  -g -S -d --strip-debug           elimină toate simbolurile și secțiunile de depanare\n"
+"     --strip-dwo                   elimină toate secțiunile DWO\n"
+"     --strip-unneeded              elimină toate simbolurile care nu sunt necesare pentru realocări\n"
+"     --only-keep-debug             elimină absolut tot, cu excepția informațiilor de depanare\n"
+"  -M  --merge-notes                elimină intrările redundante din secțiunile de note (implicit)\n"
+"      --no-merge-notes             nu încearcă să elimine notele redundante\n"
+"  -N --strip-symbol=<nume>         nu copiază simbolul <nume>\n"
+"     --keep-section=<nume>         nu elimină secțiunea <nume>\n"
+"  -K --keep-symbol=<nume>          nu elimină simbolul <nume>\n"
+"     --keep-section-symbols        nu elimină simbolurile secțiunilor\n"
+"     --keep-file-symbols           nu elimină simbolurile fișierului\n"
+"  -w --wildcard                    permite metacaractere în compararea simbolurilor\n"
+"  -x --discard-all                 elimină toate simbolurile non-globale\n"
+"  -X --discard-locals              elimină orice simboluri generate de compilator\n"
+"  -v --verbose                     listează toate fișierele obiect modificate\n"
+"  -V --version                     afișează numărul versiunii acestui program\n"
+"  -h --help                        afișează acest mesaj de ajutor\n"
+"     --info                        listează formatele și arhitecturile obiectelor acceptate\n"
+"  -o <fișier>                      plasează ieșirea despuiată/curată în <fișier>\n"
 
 #: objcopy.c:803
 #, c-format
@@ -5289,17 +5464,17 @@ msgstr "opțiune pentru simboluri nerecunoscută „%s”"
 #: objcopy.c:934
 #, c-format
 msgid "error: %s both copied and removed"
-msgstr ""
+msgstr "eroare: %s atât copiat, cât și eliminat"
 
 #: objcopy.c:940
 #, c-format
 msgid "error: %s both sets and alters VMA"
-msgstr ""
+msgstr "eroare: %s atât stabilește, cât și modifică VMA"
 
 #: objcopy.c:946
 #, c-format
 msgid "error: %s both sets and alters LMA"
-msgstr ""
+msgstr "eroare: %s atât stabilește, cât și modifică LMA"
 
 #: objcopy.c:1091
 #, c-format
@@ -5314,31 +5489,31 @@ msgstr "%s: fread a eșuat"
 #: objcopy.c:1167
 #, c-format
 msgid "%s:%d: Ignoring rubbish found on this line"
-msgstr ""
+msgstr "%s:%d: Se ignoră gunoiul găsit pe această linie"
 
 #: objcopy.c:1339
 #, c-format
 msgid "error: section %s matches both remove and copy options"
-msgstr ""
+msgstr "eroare: secțiunea %s se potrivește atât cu opțiunea „eliminare” cât și cu opțiunea „copiere”"
 
 #: objcopy.c:1342
 #, c-format
 msgid "error: section %s matches both update and remove options"
-msgstr ""
+msgstr "eroare: secțiunea %s se potrivește atât cu opțiunea „actualizare” cât și cu opțiunea „eliminare”"
 
 #: objcopy.c:1512
 #, c-format
 msgid "Section %s not found"
-msgstr ""
+msgstr "Secțiunea %s nu a fost găsită"
 
 #: objcopy.c:1562
 msgid "redefining symbols does not work on LTO-compiled object files"
-msgstr ""
+msgstr "redefinirea simbolurilor nu funcționează pe fișierele obiect compilate LTO"
 
 #: objcopy.c:1674
 #, c-format
 msgid "not stripping symbol `%s' because it is named in a relocation"
-msgstr ""
+msgstr "nu se elimină simbolul „%s” deoarece este numit într-o realocare"
 
 #: objcopy.c:1735
 #, c-format
@@ -5348,7 +5523,7 @@ msgstr "„before=%s” nu a fost găsit"
 #: objcopy.c:1774
 #, c-format
 msgid "%s: Multiple redefinition of symbol \"%s\""
-msgstr ""
+msgstr "%s: Redefinire multiplă a simbolului „%s”"
 
 #: objcopy.c:1778
 #, c-format
@@ -5358,22 +5533,22 @@ msgstr "%s: Simbolul „%s” este țintă pentru mai mult de o redefinire"
 #: objcopy.c:1805
 #, c-format
 msgid "couldn't open symbol redefinition file %s (error: %s)"
-msgstr ""
+msgstr "nu s-a putut deschide fișierul de redefinire a simbolurilor %s (eroare: %s)"
 
 #: objcopy.c:1883
 #, c-format
 msgid "%s:%d: garbage found at end of line"
-msgstr ""
+msgstr "%s:%d: gunoi găsit la sfârșitul liniei"
 
 #: objcopy.c:1886
 #, c-format
 msgid "%s:%d: missing new symbol name"
-msgstr ""
+msgstr "%s:%d: lipsește numele simbolului nou"
 
 #: objcopy.c:1896
 #, c-format
 msgid "%s:%d: premature end of file"
-msgstr ""
+msgstr "%s:%d: sfârșit prematur al fișierului"
 
 #: objcopy.c:1922
 #, c-format
@@ -5383,63 +5558,63 @@ msgstr "stat() a returnat o dimensiune negativă pentru „%s”"
 #: objcopy.c:1934
 #, c-format
 msgid "copy from `%s' [unknown] to `%s' [unknown]\n"
-msgstr ""
+msgstr "se copiază din „%s” [necunoscut] în „%s” [necunoscut]\n"
 
 #: objcopy.c:2179
 #, c-format
 msgid "%s[%s]: Cannot merge - there are relocations against this section"
-msgstr ""
+msgstr "%s[%s]: Nu se poate fuziona - există realocări în această secțiune"
 
 #: objcopy.c:2201
 msgid "corrupt GNU build attribute note: description size not a factor of 4"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: dimensiunea descrierii nu este un factor de 4"
 
 #: objcopy.c:2208
 msgid "corrupt GNU build attribute note: wrong note type"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: tip de notă greșit"
 
 #: objcopy.c:2214
 msgid "corrupt GNU build attribute note: note too big"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: nota este prea mare"
 
 #: objcopy.c:2220
 msgid "corrupt GNU build attribute note: name too small"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: nota este prea mică"
 
 #: objcopy.c:2243
 msgid "corrupt GNU build attribute note: unsupported version"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: versiune neacceptată"
 
 #: objcopy.c:2277
 msgid "corrupt GNU build attribute note: bad description size"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: dimensiunea descrierii greșită"
 
 #: objcopy.c:2313
 msgid "corrupt GNU build attribute note: name not NUL terminated"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: numele nu este terminat cu NULL"
 
 #: objcopy.c:2325
 msgid "corrupt GNU build attribute notes: excess data at end"
-msgstr ""
+msgstr "notă de atribut de compilare GNU coruptă: note de atribut GNU build corupte: exces de date la sfârșit"
 
 #: objcopy.c:2332
 msgid "bad GNU build attribute notes: no known versions detected"
-msgstr ""
+msgstr "note de atribut de compilare GNU incorecte: nu au fost detectate versiuni cunoscute"
 
 #. This happens with glibc.  No idea why.
 #: objcopy.c:2336
 #, c-format
 msgid "%s[%s]: Warning: version note missing - assuming version 3"
-msgstr ""
+msgstr "%s[%s]: Avertisment: lipsește nota de versiune - presupunând versiunea 3"
 
 #: objcopy.c:2346
 msgid "bad GNU build attribute notes: multiple different versions"
-msgstr ""
+msgstr "note de atribut de compilare GNU incorecte: versiuni multiple diferite"
 
 #: objcopy.c:2586
 #, c-format
 msgid "%s[%s]: Note - dropping 'share' flag as output format is not COFF"
-msgstr ""
+msgstr "%s[%s]: Notă - eliminarea fanionului „share” (partajare) ca format de ieșire nu este COFF"
 
 #. PR 17636: Call non-fatal so that we return to our parent who
 #. may need to tidy temporary files.
@@ -5456,27 +5631,27 @@ msgstr "nu se poate modifica „%s” din cauza erorilor"
 #: objcopy.c:2638
 #, c-format
 msgid "error: the input file '%s' has no sections"
-msgstr ""
+msgstr "eroare: fișierul de intrare „%s” nu are secțiuni"
 
 #: objcopy.c:2648
 #, c-format
 msgid "--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"
-msgstr ""
+msgstr "--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] nu este acceptată pe „%s”"
 
 #: objcopy.c:2655
 #, c-format
 msgid "--elf-stt-common=[yes|no] is unsupported on `%s'"
-msgstr ""
+msgstr "--elf-stt-common=[yes|no] nu este acceptată pe „%s”"
 
 #: objcopy.c:2662
 #, c-format
 msgid "copy from `%s' [%s] to `%s' [%s]\n"
-msgstr ""
+msgstr "se copiază din „%s” [%s] în „%s” [%s]\n"
 
 #: objcopy.c:2710
 #, c-format
 msgid "Input file `%s' ignores binary architecture parameter."
-msgstr ""
+msgstr "Fișierul de intrare „%s” ignoră parametrul de arhitectură binar."
 
 #: objcopy.c:2726
 #, c-format
@@ -5486,12 +5661,12 @@ msgstr "Nu se poate recunoaște formatul fișierului de intrare „%s”"
 #: objcopy.c:2729
 #, c-format
 msgid "Output file cannot represent architecture `%s'"
-msgstr ""
+msgstr "Fișierul de ieșire nu poate reprezenta arhitectura „%s”"
 
 #: objcopy.c:2799
 #, c-format
 msgid "warning: file alignment (0x%s) > section alignment (0x%s)"
-msgstr ""
+msgstr "avertisment: alinierea fișierului (0x%s) > alinierea secțiunii (0x%s)"
 
 #: objcopy.c:2867
 #, c-format
@@ -5506,28 +5681,28 @@ msgstr "nu se poate crea secțiunea „%s”"
 #: objcopy.c:2929
 #, c-format
 msgid "error: %s not found, can't be updated"
-msgstr ""
+msgstr "eroare: %s nu a fost găsit, nu poate fi actualizat"
 
 #: objcopy.c:2962
 msgid "warning: note section is empty"
-msgstr ""
+msgstr "avertisment: secțiunea de note este goală"
 
 #: objcopy.c:2971
 msgid "warning: could not load note section"
-msgstr ""
+msgstr "avertisment: nu s-a putut încărca secțiunea de note"
 
 #: objcopy.c:2987
 msgid "warning: failed to set merged notes size"
-msgstr ""
+msgstr "avertisment: nu s-a putut definii dimensiunea notelor fuzionate"
 
 #: objcopy.c:3013
 #, c-format
 msgid "can't dump section '%s' - it does not exist"
-msgstr ""
+msgstr "nu se poate descărca secțiunea „%s” - nu există"
 
 #: objcopy.c:3021
 msgid "can't dump section - it has no contents"
-msgstr ""
+msgstr "nu se poate descărca secțiunea - nu are conținut"
 
 #: objcopy.c:3033
 msgid "could not open section dump file"
@@ -5536,16 +5711,16 @@ msgstr "nu s-a putut deschide fișierul de descărcare(dump) a secțiunii"
 #: objcopy.c:3041
 #, c-format
 msgid "error writing section contents to %s (error: %s)"
-msgstr ""
+msgstr "eroare la scrierea conținutului secțiunii în %s (eroare: %s)"
 
 #: objcopy.c:3051
 msgid "could not retrieve section contents"
-msgstr ""
+msgstr "nu s-a putut recupera conținutul secțiunii"
 
 #: objcopy.c:3065
 #, c-format
 msgid "%s: debuglink section already exists"
-msgstr ""
+msgstr "%s: secțiunea debuglink există deja"
 
 #: objcopy.c:3077
 #, c-format
@@ -5554,28 +5729,28 @@ msgstr "nu se poate crea secțiunea de legătură de depanare „%s”"
 
 #: objcopy.c:3171
 msgid "Can't fill gap after section"
-msgstr ""
+msgstr "Nu se poate umple golul după secțiune"
 
 #: objcopy.c:3196
 msgid "can't add padding"
-msgstr ""
+msgstr "nu se poate adăuga umplutură"
 
 #: objcopy.c:3373
 msgid "error: failed to locate merged notes"
-msgstr ""
+msgstr "eroare: notele fuzionate nu au putut fi localizate"
 
 #: objcopy.c:3382
 msgid "error: failed to merge notes"
-msgstr ""
+msgstr "eroare: notele nu au putut fi fuzionate"
 
 #: objcopy.c:3391
 msgid "error: failed to copy merged notes into output"
-msgstr ""
+msgstr "eroare: nu s-au putut copia notele fuzionate la ieșire"
 
 #: objcopy.c:3408
 #, c-format
 msgid "%s: Could not find any mergeable note sections"
-msgstr ""
+msgstr "%s: Nu s-a putut găsi nicio secțiune de note care poate fi fuzionată"
 
 #: objcopy.c:3417
 #, c-format
@@ -5584,34 +5759,34 @@ msgstr "nu se poate completa secțiunea de legătură de depanare „%s”"
 
 #: objcopy.c:3478
 msgid "error copying private BFD data"
-msgstr ""
+msgstr "eroare la copierea datelor BFD private"
 
 #: objcopy.c:3489
 #, c-format
 msgid "this target does not support %lu alternative machine codes"
-msgstr ""
+msgstr "această țintă nu acceptă %lu coduri de mașină alternative"
 
 #: objcopy.c:3493
 msgid "treating that number as an absolute e_machine value instead"
-msgstr ""
+msgstr "se tratează în schimb acest număr ca o valoare e_machine absolută"
 
 #: objcopy.c:3497
 msgid "ignoring the alternative value"
-msgstr ""
+msgstr "se ignoră valoarea alternativă"
 
 #: objcopy.c:3543
 msgid "sorry: copying thin archives is not currently supported"
-msgstr ""
+msgstr "scuze: copierea arhivelor subțiri nu este acceptată în prezent"
 
 #: objcopy.c:3550 objcopy.c:3605
 #, c-format
 msgid "cannot create tempdir for archive copying (error: %s)"
-msgstr ""
+msgstr "nu se poate crea directorul temporar pentru copierea arhivei (eroare: %s)"
 
 #: objcopy.c:3587
 #, c-format
 msgid "illegal pathname found in archive member: %s"
-msgstr ""
+msgstr "nume de cale nelegală găsit în membrul arhivei: %s"
 
 #: objcopy.c:3639
 msgid "Unable to recognise the format of file"
@@ -5620,12 +5795,12 @@ msgstr "Nu se poate recunoaște formatul fișierului"
 #: objcopy.c:3772
 #, c-format
 msgid "error: the input file '%s' is empty"
-msgstr ""
+msgstr "eroare: fișierul de intrare „%s” este gol"
 
 #: objcopy.c:3850
 #, c-format
 msgid "--add-gnu-debuglink ignored for archive %s"
-msgstr ""
+msgstr "--add-gnu-debuglink ignorată pentru arhiva %s"
 
 #: objcopy.c:3953
 #, c-format
@@ -5646,7 +5821,7 @@ msgstr "nu s-a putut definii dimensiunea"
 
 #: objcopy.c:4123
 msgid "failed to set vma"
-msgstr ""
+msgstr "nu s-a putut definii vma"
 
 #: objcopy.c:4153
 msgid "failed to set alignment"
@@ -5658,13 +5833,13 @@ msgstr "nu s-au putut copia datele private"
 
 #: objcopy.c:4345
 msgid "relocation count is negative"
-msgstr ""
+msgstr "numărul de realocări este negativ"
 
 #. User must pad the section up in order to do this.
 #: objcopy.c:4433
 #, c-format
 msgid "cannot reverse bytes: length of section %s must be evenly divisible by %d"
-msgstr ""
+msgstr "nu se pot inversa octeții: lungimea secțiunii %s trebuie să fie divizibilă în părți egale cu %d"
 
 #: objcopy.c:4641
 msgid "can't create debugging section"
@@ -5681,17 +5856,17 @@ msgstr "nu se știe cum să se scrie informațiile de depanare pentru %s"
 
 #: objcopy.c:4853
 msgid "could not create temporary file to hold stripped copy"
-msgstr ""
+msgstr "nu s-a putut crea un fișier temporar pentru a reține o copie eliminată"
 
 #: objcopy.c:4927
 #, c-format
 msgid "%s: bad version in PE subsystem"
-msgstr ""
+msgstr "%s: versiune greșită în subsistemul PE"
 
 #: objcopy.c:4957
 #, c-format
 msgid "unknown PE subsystem: %s"
-msgstr ""
+msgstr "subsistem PE necunoscut: %s"
 
 #: objcopy.c:5041 objcopy.c:5313 objcopy.c:5393 objcopy.c:5534 objcopy.c:5566
 #: objcopy.c:5629 objcopy.c:5633 objcopy.c:5653
@@ -5706,20 +5881,20 @@ msgstr "nu se poate deschide : %s: %s"
 
 #: objcopy.c:5125
 msgid "byte number must be non-negative"
-msgstr ""
+msgstr "numărul de octeți trebuie să fie nenegativ"
 
 #: objcopy.c:5131
 #, c-format
 msgid "architecture %s unknown"
-msgstr ""
+msgstr "arhitectură %s necunoscută"
 
 #: objcopy.c:5139
 msgid "interleave must be positive"
-msgstr ""
+msgstr "intercalarea trebuie să fie pozitivă"
 
 #: objcopy.c:5148
 msgid "interleave width must be positive"
-msgstr ""
+msgstr "lățimea intercalării trebuie să fie pozitivă"
 
 #: objcopy.c:5466
 #, c-format
@@ -5738,34 +5913,34 @@ msgstr "Avertisment: se trunchiază umplerea-spațiului_gol de la 0x%s la 0x%x"
 
 #: objcopy.c:5589
 msgid "bad format for --set-section-alignment: argument needed"
-msgstr ""
+msgstr "format greșit pentru „--set-section-alignment”: este necesar un argument"
 
 #: objcopy.c:5593
 msgid "bad format for --set-section-alignment: numeric argument needed"
-msgstr ""
+msgstr "format greșit pentru „--set-section-alignment”: este necesar un argument numeric"
 
 #. Number has more than on 1, i.e. wasn't a power of 2.
 #: objcopy.c:5605
 msgid "bad format for --set-section-alignment: alignment is not a power of two"
-msgstr ""
+msgstr "format greșit pentru „--set-section-alignment”: alinierea nu este o putere de doi"
 
 #: objcopy.c:5712
 #, c-format
 msgid "unknown long section names option '%s'"
-msgstr ""
+msgstr "opțiune de nume a secțiunilor lungi „%s” necunoscută"
 
 #: objcopy.c:5735
 msgid "unable to parse alternative machine code"
-msgstr ""
+msgstr "nu se poate analiza codul mașină alternativ"
 
 #: objcopy.c:5784
 msgid "number of bytes to reverse must be positive and even"
-msgstr ""
+msgstr "numărul de octeți de inversat trebuie să fie pozitiv și par"
 
 #: objcopy.c:5787
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
-msgstr ""
+msgstr "Avertisment: se ignoră valoarea anterioară a „--reverse-bytes” %d"
 
 #: objcopy.c:5802
 #, c-format
@@ -5789,23 +5964,23 @@ msgstr "%s: valoarea introdusă nu este validă pentru „--stack”"
 
 #: objcopy.c:5848
 msgid "verilog data width must be at least 1 byte"
-msgstr ""
+msgstr "lățimea datelor verilog trebuie să fie de cel puțin 1 octet"
 
 #: objcopy.c:5865
 msgid "--globalize-symbol(s) is incompatible with -G/--keep-global-symbol(s)"
-msgstr ""
+msgstr "„--globalize-symbol(s)” este incompatibilă cu „-G/--keep-global-symbol(s)”"
 
 #: objcopy.c:5877
 msgid "interleave start byte must be set with --byte"
-msgstr ""
+msgstr "intercalarea octetului de început trebuie activată cu „--byte”"
 
 #: objcopy.c:5880
 msgid "byte number must be less than interleave"
-msgstr ""
+msgstr "numărul de octeți trebuie să fie mai mic decât intercalarea"
 
 #: objcopy.c:5883
 msgid "interleave width must be less than or equal to interleave - byte`"
-msgstr ""
+msgstr "lățimea intercalării trebuie să fie mai mică sau egală cu intercalarea - octet`"
 
 #: objcopy.c:5906
 #, c-format
@@ -5820,12 +5995,12 @@ msgstr "țintă EFI de ieșire necunoscută: %s"
 #: objcopy.c:5940
 #, c-format
 msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
-msgstr ""
+msgstr "avertisment: nu s-a putut crea fișierul temporar în timp ce se copia „%s”, (eroare: %s)"
 
 #: objcopy.c:5977 objcopy.c:5991
 #, c-format
 msgid "%s %s%c0x%s never used"
-msgstr ""
+msgstr "%s %s%c0x%s nu a fost folosit niciodată"
 
 #: objdump.c:235
 #, c-format
@@ -5835,37 +6010,37 @@ msgstr "Utilizare: %s <opțiune(i)> <fișier(e)>\n"
 #: objdump.c:236
 #, c-format
 msgid " Display information from object <file(s)>.\n"
-msgstr ""
+msgstr "Afișează informații din obiectul <fișier(e)>.\n"
 
 #: objdump.c:237
 #, c-format
 msgid " At least one of the following switches must be given:\n"
-msgstr ""
+msgstr "Trebuie să fie furnizată cel puțin una dintre următoarele opțiuni:\n"
 
 #: objdump.c:238
 #, c-format
 msgid "  -a, --archive-headers    Display archive header information\n"
-msgstr ""
+msgstr "  -a, --archive-headers    afișează informații despre antetul arhivei\n"
 
 #: objdump.c:240
 #, c-format
 msgid "  -f, --file-headers       Display the contents of the overall file header\n"
-msgstr ""
+msgstr "  -f, --file-headers       afișează conținutul antetului general al fișierului\n"
 
 #: objdump.c:242
 #, c-format
 msgid "  -p, --private-headers    Display object format specific file header contents\n"
-msgstr ""
+msgstr "  -p, --private-headers    afișează conținutul antetului fișierului specific formatului obiectului\n"
 
 #: objdump.c:244
 #, c-format
 msgid "  -P, --private=OPT,OPT... Display object format specific contents\n"
-msgstr ""
+msgstr "  -P, --private=OPT,OPT... afișează conținutul specific formatului obiectului\n"
 
 #: objdump.c:246
 #, c-format
 msgid "  -h, --[section-]headers  Display the contents of the section headers\n"
-msgstr ""
+msgstr "  -h, --[section-]headers  afișează conținutul antetelor secțiunilor\n"
 
 #: objdump.c:248
 #, c-format
@@ -5875,47 +6050,47 @@ msgstr "  -x, --all-headers        afișează conținutul tuturor antetelor\n"
 #: objdump.c:250
 #, c-format
 msgid "  -d, --disassemble        Display assembler contents of executable sections\n"
-msgstr ""
+msgstr "  -d, --disassemble        afișează conținutul de asamblare al secțiunilor executabile\n"
 
 #: objdump.c:252
 #, c-format
 msgid "  -D, --disassemble-all    Display assembler contents of all sections\n"
-msgstr ""
+msgstr "  -D, --disassemble-all    afișează conținutul de asamblare al tuturor secțiunilor\n"
 
 #: objdump.c:254
 #, c-format
 msgid "      --disassemble=<sym>  Display assembler contents from <sym>\n"
-msgstr ""
+msgstr "      --disassemble=<sym>  afișează conținutul asamblatorului din <sym>\n"
 
 #: objdump.c:256
 #, c-format
 msgid "  -S, --source             Intermix source code with disassembly\n"
-msgstr ""
+msgstr "  -S, --source             amestecă codul sursă cu dezasamblarea\n"
 
 #: objdump.c:258
 #, c-format
 msgid "      --source-comment[=<txt>] Prefix lines of source code with <txt>\n"
-msgstr ""
+msgstr "      --source-comment[=<txt>] prefixează liniile de cod sursă cu <txt>\n"
 
 #: objdump.c:260
 #, c-format
 msgid "  -s, --full-contents      Display the full contents of all sections requested\n"
-msgstr ""
+msgstr "  -s, --full-contents      afișează conținutul complet al tuturor secțiunilor solicitate\n"
 
 #: objdump.c:262
 #, c-format
 msgid "  -g, --debugging          Display debug information in object file\n"
-msgstr ""
+msgstr "  -g, --debugging          afișează informațiile de depanare în fișierul obiect\n"
 
 #: objdump.c:264
 #, c-format
 msgid "  -e, --debugging-tags     Display debug information using ctags style\n"
-msgstr ""
+msgstr "  -e, --debugging-tags     afișează informațiile de depanare folosind stilul ctags\n"
 
 #: objdump.c:266
 #, c-format
 msgid "  -G, --stabs              Display (in raw form) any STABS info in the file\n"
-msgstr ""
+msgstr "  -G, --stabs              afișează (în formă brută) orice informații STABS din fișier\n"
 
 #: objdump.c:268
 #, c-format
@@ -5927,6 +6102,12 @@ msgid ""
 "              U/=trace_info]\n"
 "                           Display the contents of DWARF debug sections\n"
 msgstr ""
+"  -W, --dwarf[a/=abbrev, A/=addr, r/=aranges, c/=cu_index, L/=decodedline,\n"
+"              f/=frames, F/=frames-interp, g/=gdb_index, i/=info, o/=loc,\n"
+"              m/=macro, p/=pubnames, t/=pubtypes, R/=Ranges, l/=rawline,\n"
+"              s/=str, O/=str-offsets, u/=trace_abbrev, T/=trace_aranges,\n"
+"              U/=trace_info]\n"
+"                           afișează conținutul secțiunilor de depanare DWARF\n"
 
 #: objdump.c:275
 #, c-format
@@ -5984,11 +6165,13 @@ msgid ""
 "  -L, --process-links      Display the contents of non-debug sections in\n"
 "                            separate debuginfo files.  (Implies -WK)\n"
 msgstr ""
+"  -L, --process-links      afișează conținutul secțiunilor non-depanare în\n"
+"                            fișiere separate debuginfo. (implică „-WK”)\n"
 
 #: objdump.c:306
 #, c-format
 msgid "      --ctf[=SECTION]      Display CTF info from SECTION, (default `.ctf')\n"
-msgstr ""
+msgstr "      --ctf[=SECȚIUNE]     afișează informațiile CTF din SECȚIUNE (implicit „.ctf”)\n"
 
 #: objdump.c:309
 #, c-format
@@ -5998,7 +6181,7 @@ msgstr "  -t, --syms               afișează conținutul tabelului/tabelelor cu
 #: objdump.c:311
 #, c-format
 msgid "  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"
-msgstr ""
+msgstr "  -T, --dynamic-syms       afișează conținutul tabelului cu simboluri dinamice\n"
 
 #: objdump.c:313
 #, c-format
@@ -6008,27 +6191,27 @@ msgstr "  -r, --reloc              afișează intrările de readresare din fiși
 #: objdump.c:315
 #, c-format
 msgid "  -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n"
-msgstr ""
+msgstr "  -R, --dynamic-reloc      afișează intrările de realocare dinamică din fișier\n"
 
 #: objdump.c:317
 #, c-format
 msgid "  @<file>                  Read options from <file>\n"
-msgstr ""
+msgstr "  @<fișier>                citește opțiunile din <fișier>\n"
 
 #: objdump.c:319
 #, c-format
 msgid "  -v, --version            Display this program's version number\n"
-msgstr ""
+msgstr "  -v, --version            afișează numărul versiunii acestui program\n"
 
 #: objdump.c:321
 #, c-format
 msgid "  -i, --info               List object formats and architectures supported\n"
-msgstr ""
+msgstr "  -i, --info               listează formatele de obiecte și arhitecturile acceptate\n"
 
 #: objdump.c:323
 #, c-format
 msgid "  -H, --help               Display this information\n"
-msgstr ""
+msgstr "  -H, --help               afișează aceste informații\n"
 
 #: objdump.c:330
 #, c-format
@@ -6036,6 +6219,8 @@ msgid ""
 "\n"
 " The following switches are optional:\n"
 msgstr ""
+"\n"
+" Următoarele opțiuni prezentate, sunt opționale:\n"
 
 #: objdump.c:331
 #, c-format
@@ -6268,11 +6453,11 @@ msgstr "  Opțiuni"
 #: objdump.c:972
 #, c-format
 msgid "failed to read symbol table from: %s"
-msgstr ""
+msgstr "nu s-a putut citi tabelul de simboluri din: %s"
 
 #: objdump.c:973 objdump.c:5095
 msgid "error message was"
-msgstr ""
+msgstr "mesajul de eroare a fost"
 
 #: objdump.c:988
 #, c-format
@@ -7078,7 +7263,7 @@ msgstr ""
 #: od-xcoff.c:1089
 #, c-format
 msgid "Dynamic symbols:\n"
-msgstr ""
+msgstr "Simboluri dinamice:\n"
 
 #: od-xcoff.c:1096
 #, c-format
@@ -7098,12 +7283,12 @@ msgstr ""
 #: od-xcoff.c:1125
 #, c-format
 msgid "Dynamic relocs:\n"
-msgstr ""
+msgstr "Realocări dinamice:\n"
 
 #: od-xcoff.c:1165
 #, c-format
 msgid "Import files:\n"
-msgstr ""
+msgstr "Importare fișiere:\n"
 
 #: od-xcoff.c:1197
 #, c-format
@@ -7138,12 +7323,12 @@ msgstr " etichete la %08x\n"
 #: od-xcoff.c:1382
 #, c-format
 msgid " number of CTL anchors: %u\n"
-msgstr ""
+msgstr "numărul de ancore CTL: %u\n"
 
 #: od-xcoff.c:1401
 #, c-format
 msgid " Name (len: %u): "
-msgstr ""
+msgstr " Nume (lung.: %u): "
 
 #: od-xcoff.c:1404
 #, c-format
@@ -7163,12 +7348,12 @@ msgstr ""
 #: od-xcoff.c:1430
 #, c-format
 msgid " Truncated .text section\n"
-msgstr ""
+msgstr " Secțiune .text trunchiată\n"
 
 #: od-xcoff.c:1515
 #, c-format
 msgid "TOC:\n"
-msgstr ""
+msgstr "TOC:\n"
 
 #: od-xcoff.c:1558
 #, c-format
@@ -7216,7 +7401,7 @@ msgstr "  Magic negestionat\n"
 
 #: od-xcoff.c:1738
 msgid "cannot read loader info table"
-msgstr ""
+msgstr "nu se poate citi tabelul cu informații despre încărcător"
 
 #: od-xcoff.c:1770
 #, c-format
@@ -7242,12 +7427,12 @@ msgstr "  versiune:    0x%08x  "
 #: od-xcoff.c:1800
 #, c-format
 msgid "(dumpx format - aix4.3 / 32 bits)"
-msgstr ""
+msgstr "(format dumpx - aix4.3 / 32 biți)"
 
 #: od-xcoff.c:1803
 #, c-format
 msgid "(dumpxx format - aix5.0 / 64 bits)"
-msgstr ""
+msgstr "(format dumpxx - aix5.0 / 64 biți)"
 
 #: od-xcoff.c:1806
 #, c-format
@@ -7356,7 +7541,7 @@ msgstr "date de realocare pe 32 de biți"
 
 #: readelf.c:1195 readelf.c:1225 readelf.c:1299 readelf.c:1328 readelf.c:1407
 msgid "out of memory parsing relocs\n"
-msgstr "memorie insuficientă la analizarea realocărilort\n"
+msgstr "memorie insuficientă la analizarea realocărilor\n"
 
 #: readelf.c:1213 readelf.c:1317
 msgid "64-bit relocation data"
@@ -7948,7 +8133,7 @@ msgstr ""
 
 #: readelf.c:5642
 msgid "Missing arg to -U/--unicode"
-msgstr ""
+msgstr "Lipsește argumentul pentru „-U/--unicode”"
 
 #: readelf.c:5681
 #, c-format
@@ -7974,12 +8159,12 @@ msgstr ""
 #: readelf.c:5765
 #, c-format
 msgid "ELF Header in linked file '%s':\n"
-msgstr ""
+msgstr "Antet ELF în fișierul vinculat „%s”:\n"
 
 #: readelf.c:5767
 #, c-format
 msgid "ELF Header:\n"
-msgstr ""
+msgstr "Antetul ELF:\n"
 
 #: readelf.c:5768
 #, c-format
@@ -8012,7 +8197,7 @@ msgstr " <necunoscut>"
 #: readelf.c:5783
 #, c-format
 msgid "  OS/ABI:                            %s\n"
-msgstr "  OS/ABI:                            %s\n"
+msgstr "  SO/ABI:                            %s\n"
 
 #: readelf.c:5785
 #, c-format
@@ -12927,12 +13112,19 @@ msgid ""
 "the GNU General Public License version 3 or (at your option) any later version.\n"
 "This program has absolutely no warranty.\n"
 msgstr ""
+"Acest program este software liber; îl puteți redistribui în conformitate cu termenii\n"
+"Licenței Publice Generale GNU versiunea 3 sau (la alegerea dvs.) o versiune ulterioară.\n"
+"Acest program nu are absolut nicio garanție.\n"
 
 #: windmc.c:189
 #, c-format
 msgid "can't create %s file `%s' for output.\n"
 msgstr "nu se poate crea fișierul %s „%s” pentru ieșire.\n"
 
+# R-GC, scrie:
+# acest mesaj, și următoarele, se pot vizualiza,
+# rulînd comanda:
+# «windmc --help»
 #: windmc.c:197
 #, c-format
 msgid "Usage: %s [option(s)] [input-file]\n"
@@ -12969,6 +13161,9 @@ msgid ""
 "  -v --verbose                 Verbose - tells you what it's doing\n"
 "  -V --version                 Print version information\n"
 msgstr ""
+"  -H --help                    Afișează acest mesaj de ajutor\n"
+"  -v --verbose                 Oferă informații detaliate despre acțiunile efectuate\n"
+"  -V --version                 Afișează informațiile despre versiune\n"
 
 #: windmc.c:260 windres.c:404
 #, c-format
@@ -12987,7 +13182,7 @@ msgstr "\tconfigurările paginii de cod sunt ignorate.\n"
 
 #: windmc.c:306
 msgid "try to add a ill language."
-msgstr ""
+msgstr "încercare de-a adăuga un limbaj eronat."
 
 #: windmc.c:1115
 #, c-format
@@ -13069,7 +13264,7 @@ msgstr ""
 #: windres.c:674
 #, c-format
 msgid "     --yydebug                 Turn on parser debugging\n"
-msgstr ""
+msgstr "     --yydebug                 Turn on parser debugging\n"
 
 #: windres.c:677
 #, c-format
@@ -13079,6 +13274,10 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -V --version                 Print version information\n"
 msgstr ""
+"  -r                           Ignorată pentru compatibilitate cu rc\n"
+"  @<fișier>                    Citește opțiunile din <fișier>\n"
+"  -h --help                    Afișează acest mesaj de ajutor\n"
+"  -V --version                 Afișează informațiile despre versiune\n"
 
 #: windres.c:682
 #, c-format
