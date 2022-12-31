@@ -1,4 +1,4 @@
-@set EDITION 1.0
-@set VERSION 1.0
-@set UPDATED 22 February 2022
-@set UPDATED-MONTH February 2022
+@set UPDATED 31 December 2022
+@set UPDATED-MONTH December 2022
+@set EDITION 2.39.90
+@set VERSION 2.39.90
