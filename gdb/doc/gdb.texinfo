@@ -6114,6 +6114,7 @@ disabled, but @code{SystemTap} probes cannot be disabled.
 You can enable (or disable) one or more probes using the following
 commands, with optional arguments:
 
+@anchor{enable probes}
 @table @code
 @kindex enable probes
 @item enable probes @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
@@ -40897,6 +40898,27 @@ Like the @code{with} command, but works with @code{maintenance set}
 variables.  This is used by the testsuite to exercise the @code{with}
 command's infrastructure.
 
+@kindex maint ignore-probes
+@item maint ignore-probes [@var{-v}|@var{-verbose}] [@var{provider} [@var{name} [@var{objfile}]]]
+@itemx maint ignore-probes @var{-reset}
+Set or reset the ignore-probes filter.  The @var{provider}, @var{name}
+and @var{objfile} arguments are as in @code{enable probes} and
+@code{disable probes} (@pxref{enable probes}).  Only supported for
+SystemTap probes.
+
+Here's an example of using @code{maint ignore-probes}:
+@smallexample
+(gdb) maint ignore-probes -verbose libc ^longjmp$
+ignore-probes filter has been set to:
+PROVIDER: 'libc'
+PROBE_NAME: '^longjmp$'
+OBJNAME: ''
+(gdb) start
+<... more output ...>
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+Ignoring SystemTap probe libc longjmp in /lib64/libc.so.6.^M
+@end smallexample
 @end table
 
 The following command is useful for non-interactive invocations of
