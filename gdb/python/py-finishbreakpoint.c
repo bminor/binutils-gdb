@@ -55,6 +55,10 @@ struct finish_breakpoint_object
      the function; Py_None if the value is not computable; NULL if GDB is
      not stopped at a FinishBreakpoint.  */
   PyObject *return_value;
+
+  /* The initiating frame for this operation, used to decide when we have
+     left this frame.  */
+  struct frame_id initiating_frame;
 };
 
 extern PyTypeObject finish_breakpoint_object_type
@@ -310,6 +314,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   self_bpfinish->py_bp.bp->frame_id = frame_id;
   self_bpfinish->py_bp.is_finish_bp = 1;
+  self_bpfinish->initiating_frame = get_frame_id (frame);
 
   /* Bind the breakpoint with the current program space.  */
   self_bpfinish->py_bp.bp->pspace = current_program_space;
@@ -360,9 +365,11 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
 	{
 	  try
 	    {
+	      struct frame_id initiating_frame = finish_bp->initiating_frame;
+
 	      if (b->pspace == current_inferior ()->pspace
 		  && (!target_has_registers ()
-		      || frame_find_by_id (b->frame_id) == NULL))
+		      || frame_find_by_id (initiating_frame) == NULL))
 		bpfinishpy_out_of_scope (finish_bp);
 	    }
 	  catch (const gdb_exception &except)

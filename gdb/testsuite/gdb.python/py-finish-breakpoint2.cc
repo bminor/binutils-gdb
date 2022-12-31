@@ -17,9 +17,13 @@
 
 #include <iostream>
 
+int i;
+
 void
 throw_exception_1 (int e)
 {
+  i += 1; /* Finish breakpoint is set here.  */
+  i += 1; /* Break before exception.  */
   throw new int (e);
 }
 
@@ -32,7 +36,6 @@ throw_exception (int e)
 int
 main (void)
 {
-  int i;
   try
     {
       throw_exception_1 (10);
