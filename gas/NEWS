@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.40:
+
 * Add support for Intel RAO-INT instructions.
 
 * Add support for Intel AVX-NE-CONVERT instructions.

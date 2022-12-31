@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.40:
+
 * The linker has a new command line option to suppress the generation of any
   warning or error messages.  This can be useful when there is a need to create
   a known non-working binary.  The option is -w or --no-warnings.

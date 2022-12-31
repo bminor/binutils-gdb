@@ -1,3 +1,7 @@
+2022-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* 2.40 branch created.
+
 2022-11-22  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-regs.h: Change isa_config address to 0xc1.

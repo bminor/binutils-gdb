@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.40:
+
 * Objdump has a new command line option --show-all-symbols which will make it
   display all symbols that match a given address when disassembling.  (Normally
   only the first symbol that matches an address is shown).

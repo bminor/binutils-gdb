@@ -32,14 +32,13 @@ Approx time to complete from here: 2 hours ....
 
   2.5 If you have not built from the sources recently then now is the
       time to check that they still work...
-      
+
   3. When branch day arrives add markers for the upcoming release to
      the NEWS files in gas, ld, and binutils.  No need to update NEWS
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
-     and toplevel.
+     elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
 
