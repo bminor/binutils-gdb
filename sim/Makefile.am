@@ -188,9 +188,6 @@ endif
 ## Helper targets for running make from the top-level when some subdirs still
 ## have Makefiles in subdirs.
 
-%/nrun.o: common/nrun.c | %/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 
 install-data-local: installdirs $(SIM_INSTALL_DATA_LOCAL_DEPS)
