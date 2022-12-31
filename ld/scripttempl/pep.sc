@@ -34,6 +34,7 @@ if test "${RELOCATING}"; then
     KEEP (SORT(*)(.idata$3))
     /* These zeroes mark the end of the import list.  */
     LONG (0); LONG (0); LONG (0); LONG (0); LONG (0);
+    . = ALIGN(8);
     KEEP (SORT(*)(.idata$4))'
   R_IDATA5='SORT(*)(.idata$5)'
   R_IDATA67='
