@@ -4801,9 +4801,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< >$@
 @SIM_ENABLE_ARCH_cris_TRUE@$(cris_libsim_a_OBJECTS) $(cris_libsim_a_LIBADD): cris/hw-config.h
 
-@SIM_ENABLE_ARCH_cris_TRUE@cris/%.o: cris/%.c
-@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_cris_TRUE@cris/%.o: common/%.c
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_cris_TRUE@cris/modules.c: | $(cris_BUILD_OUTPUTS)
