@@ -587,6 +587,7 @@ class BinutilsCopyright (Copyright):
 
         self.add_external_author ('Carnegie Mellon University')
         self.add_external_author ('John D. Polstra.')
+        self.add_external_author ('Innovative Computing Labs')
         self.add_external_author ('Linaro Ltd.')
         self.add_external_author ('MIPS Computer Systems, Inc.')
         self.add_external_author ('Red Hat Inc.')
