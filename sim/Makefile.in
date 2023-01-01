@@ -2867,6 +2867,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_rl78_TRUE@	rl78/libsim.a \
 @SIM_ENABLE_ARCH_rl78_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_rx_TRUE@AM_CPPFLAGS_rx = $(SIM_RX_CYCLE_ACCURATE_FLAGS)
 @SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_rx_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -5409,9 +5410,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: common/%.c
 @SIM_ENABLE_ARCH_rl78_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_rx_TRUE@$(rx_libsim_a_OBJECTS) $(rx_libsim_a_LIBADD): rx/hw-config.h
-
-@SIM_ENABLE_ARCH_rx_TRUE@rx/%.o: rx/%.c
-@SIM_ENABLE_ARCH_rx_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_rx_TRUE@rx/%.o: common/%.c
 @SIM_ENABLE_ARCH_rx_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

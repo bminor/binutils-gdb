@@ -19,7 +19,4 @@
 ### along with the GNU simulators; if not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
-
-SIM_EXTRA_CFLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
-
 ## COMMON_POST_CONFIG_FRAG
