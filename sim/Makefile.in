@@ -2771,6 +2771,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_msp430_TRUE@	msp430/libsim.a \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_or1k_TRUE@AM_CPPFLAGS_or1k = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -5354,9 +5355,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_msp430_TRUE@msp430/%.o: common/%.c
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_or1k_TRUE@$(or1k_libsim_a_OBJECTS) $(or1k_libsim_a_LIBADD): or1k/hw-config.h
-
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k/%.o: or1k/%.c
-@SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/%.o: common/%.c
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
