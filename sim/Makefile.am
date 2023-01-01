@@ -24,7 +24,7 @@ GNULIB_PARENT_DIR = ..
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 
-SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
+SUBDIRS = @subdirs@
 
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 AM_MAKEFLAGS =

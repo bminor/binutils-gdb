@@ -48,10 +48,6 @@ dnl used when installing files to see if they need to be suffixed.
 SIM_PRIMARY_TARGET=
 AC_SUBST(SIM_PRIMARY_TARGET)
 
-dnl Directories that we need to recurse into (i.e. add to $SUBDIRS).
-SIM_SUBDIRS=
-AC_SUBST(SIM_SUBDIRS)
-
 dnl List of enabled arch backends.
 SIM_ENABLED_ARCHES=
 AC_SUBST(SIM_ENABLED_ARCHES)
@@ -62,7 +58,6 @@ SIM_COMMON_BUILD_FALSE='#'
 AC_SUBST(SIM_COMMON_BUILD_TRUE)
 AC_SUBST(SIM_COMMON_BUILD_FALSE)
 
-AC_CONFIG_FILES(Make-common.sim:common/Make-common.in)
 ENABLE_SIM=no
 dnl Build a particular arch subdir.
 dnl arg[1] is the arch subdir name.
@@ -72,22 +67,6 @@ m4_define([SIM_BUILD_TARGET], [dnl
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
     AC_CONFIG_SUBDIRS($1)
-  ], [dnl
-    AC_CONFIG_FILES($1/Makefile.sim:$1/Makefile.in)
-    AC_CONFIG_COMMANDS([$1/Makefile],
-[sed -n \
-	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir = / s:$:/$1:
-		p
-	}' \
-	<Make-common.sim >$1/Makesim1.tmp
- sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >$1/Makesim2.tmp
- sed -e '/^## COMMON_PRE_/ r $1/Makesim1.tmp' \
-	-e '/^## COMMON_POST_/ r $1/Makesim2.tmp' \
-	<$1/Makefile.sim >$1/Makefile
- rm -f $1/Makesim1.tmp $1/Makesim2.tmp
-])
-    AS_VAR_APPEND([SIM_SUBDIRS], [" $1"])
   ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
   dnl Create the depdirs for ports until we can convert them to automake.
