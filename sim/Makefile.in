@@ -4780,9 +4780,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/sem-be.c bpf/decode-be.c bpf/decode-be.h: @CGEN_MAINT@ bpf/cgen-decode-be
 @SIM_ENABLE_ARCH_cr16_TRUE@$(cr16_libsim_a_OBJECTS) $(cr16_libsim_a_LIBADD): cr16/hw-config.h
 
-@SIM_ENABLE_ARCH_cr16_TRUE@cr16/%.o: cr16/%.c
-@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/%.o: common/%.c
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/modules.c: | $(cr16_BUILD_OUTPUTS)
