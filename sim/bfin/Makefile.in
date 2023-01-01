@@ -19,6 +19,4 @@
 
 arch = bfin
 
-SIM_EXTRA_CFLAGS = $(SDL_CFLAGS)
-
 ## COMMON_POST_CONFIG_FRAG

@@ -2047,6 +2047,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_avr_TRUE@	avr/libsim.a \
 @SIM_ENABLE_ARCH_avr_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_bfin_TRUE@AM_CPPFLAGS_bfin = $(SDL_CFLAGS)
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4704,9 +4705,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_avr_TRUE@avr/%.o: common/%.c
 @SIM_ENABLE_ARCH_avr_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_bfin_TRUE@$(bfin_libsim_a_OBJECTS) $(bfin_libsim_a_LIBADD): bfin/hw-config.h
-
-@SIM_ENABLE_ARCH_bfin_TRUE@bfin/%.o: bfin/%.c
-@SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin/%.o: common/%.c
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
