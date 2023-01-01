@@ -2832,6 +2832,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_pru_TRUE@	pru/libsim.a \
 @SIM_ENABLE_ARCH_pru_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_riscv_TRUE@AM_CPPFLAGS_riscv = -DWITH_TARGET_WORD_BITSIZE=$(SIM_RISCV_BITSIZE)
 @SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -5400,9 +5401,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_pru_TRUE@pru/%.o: common/%.c
 @SIM_ENABLE_ARCH_pru_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_riscv_TRUE@$(riscv_libsim_a_OBJECTS) $(riscv_libsim_a_LIBADD): riscv/hw-config.h
-
-@SIM_ENABLE_ARCH_riscv_TRUE@riscv/%.o: riscv/%.c
-@SIM_ENABLE_ARCH_riscv_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_riscv_TRUE@riscv/%.o: common/%.c
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
