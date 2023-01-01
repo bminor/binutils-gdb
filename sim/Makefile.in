@@ -2425,6 +2425,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/mloop.c \
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/stamp-mloop
 
+@SIM_ENABLE_ARCH_m32c_TRUE@AM_CPPFLAGS_m32c = -DTIMER_A
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4968,9 +4969,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)cpu=lm32bf mach=lm32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/cpu.h lm32/sem.c lm32/sem-switch.c lm32/model.c lm32/decode.c lm32/decode.h: @CGEN_MAINT@ lm32/cgen-cpu-decode
 @SIM_ENABLE_ARCH_m32c_TRUE@$(m32c_libsim_a_OBJECTS) $(m32c_libsim_a_LIBADD): m32c/hw-config.h
-
-@SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: m32c/%.c
-@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: common/%.c
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
