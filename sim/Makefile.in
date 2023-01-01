@@ -2522,6 +2522,12 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/mloop2.c \
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/stamp-mloop-2
 
+@SIM_ENABLE_ARCH_m68hc11_TRUE@AM_CPPFLAGS_m68hc11 = \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_WORD_BITSIZE=32 \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_CELL_BITSIZE=32 \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_ADDRESS_BITSIZE=32 \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_WORD_MSB=31
+
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -5055,9 +5061,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32r2f mach=m32r2 SUFFIX=2 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu2.h m32r/sem2-switch.c m32r/model2.c m32r/decode2.c m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
 @SIM_ENABLE_ARCH_m68hc11_TRUE@$(m68hc11_libsim_a_OBJECTS) $(m68hc11_libsim_a_LIBADD): m68hc11/hw-config.h
-
-@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/%.o: m68hc11/%.c
-@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/%.o: common/%.c
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
