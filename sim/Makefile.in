@@ -2738,6 +2738,7 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN = $(srcdir)/mn10300/mn10300.igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN_INC = mn10300/am33.igen mn10300/am33-2.igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_DC = $(srcdir)/mn10300/mn10300.dc
+@SIM_ENABLE_ARCH_moxie_TRUE@AM_CPPFLAGS_moxie = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_moxie_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -5333,9 +5334,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mn10300_TRUE@		-n irun.c      -r  mn10300/irun.c
 @SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)touch $@
 @SIM_ENABLE_ARCH_moxie_TRUE@$(moxie_libsim_a_OBJECTS) $(moxie_libsim_a_LIBADD): moxie/hw-config.h
-
-@SIM_ENABLE_ARCH_moxie_TRUE@moxie/%.o: moxie/%.c
-@SIM_ENABLE_ARCH_moxie_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie/%.o: common/%.c
 @SIM_ENABLE_ARCH_moxie_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
