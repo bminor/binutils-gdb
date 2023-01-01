@@ -93,6 +93,14 @@ pkginclude_HEADERS += \
 	$(srcroot)/include/sim/sim.h
 endif
 
+## Used for our custom rules to calculate the dependency output base name.
+## This form aligns with Automake's default rules.
+SIM_DEPBASE = $(@D)/$(DEPDIR)/$(@F:.o=)
+## Actual full compile command like Automake's default rules.
+SIM_COMPILE = \
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(SIM_DEPBASE).Tpo -c -o $@ $< && \
+	$(am__mv) $(SIM_DEPBASE).Tpo $(SIM_DEPBASE).Po
+
 include common/local.mk
 if SIM_ENABLE_IGEN
 include igen/local.mk
