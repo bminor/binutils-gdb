@@ -13,12 +13,6 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl Additional SIM options that can (optionally) be configured
-dnl For optional simulator options, a macro SIM_AC_OPTION_* is defined.
-dnl Simulators that wish to use the relevant option specify the macro
-dnl in the simulator specific configure.ac file between the SIM_AC_COMMON
-dnl and SIM_AC_OUTPUT lines.
-dnl
 dnl Specify the running environment.
 dnl If the simulator invokes this in its configure.ac then without this option
 dnl the default is the user environment and all are runtime selectable.
