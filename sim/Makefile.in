@@ -5085,9 +5085,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_mcore_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_microblaze_TRUE@$(microblaze_libsim_a_OBJECTS) $(microblaze_libsim_a_LIBADD): microblaze/hw-config.h
 
-@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze/%.o: microblaze/%.c
-@SIM_ENABLE_ARCH_microblaze_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_microblaze_TRUE@microblaze/%.o: common/%.c
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_libsim_a_OBJECTS) $(mips_libsim_a_LIBADD): mips/hw-config.h
