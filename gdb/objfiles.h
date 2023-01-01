@@ -616,9 +616,6 @@ public:
 					       domain_enum domain,
 					       bool *symbol_found_p);
 
-  /* See quick_symbol_functions.  */
-  void require_partial_symbols (bool verbose);
-
   /* Return the relocation offset applied to SECTION.  */
   CORE_ADDR section_offset (bfd_section *section) const
   {
@@ -701,17 +698,6 @@ public:
     return (iterator_range<section_iterator>
 	    (section_iterator (sections_start, sections_end),
 	     section_iterator (sections_end, sections_end)));
-  }
-
-private:
-
-  /* Ensure that partial symbols have been read and return the "quick" (aka
-     partial) symbol functions for this symbol reader.  */
-  const std::forward_list<quick_symbol_functions_up> &
-  qf_require_partial_symbols ()
-  {
-    this->require_partial_symbols (true);
-    return qf;
   }
 
 public:

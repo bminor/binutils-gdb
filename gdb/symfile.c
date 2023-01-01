@@ -790,8 +790,6 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 				    add_flags | SYMFILE_NOT_FILENAME, objfile);
 	}
     }
-  if ((add_flags & SYMFILE_NO_READ) == 0)
-    objfile->require_partial_symbols (false);
 }
 
 /* Initialize entry point information for this objfile.  */
@@ -2621,8 +2619,6 @@ reread_symbols (int from_tty)
 
 	  (*objfile->sf->sym_init) (objfile);
 	  clear_complaints ();
-
-	  objfile->flags &= ~OBJF_PSYMTABS_READ;
 
 	  /* We are about to read new symbols and potentially also
 	     DWARF information.  Some targets may want to pass addresses

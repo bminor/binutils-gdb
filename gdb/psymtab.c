@@ -81,7 +81,6 @@ psymtab_storage::install_psymtab (partial_symtab *pst)
 psymtab_storage::partial_symtab_range
 psymbol_functions::partial_symbols (struct objfile *objfile)
 {
-  gdb_assert ((objfile->flags & OBJF_PSYMTABS_READ) != 0);
   return m_partial_symtabs->range ();
 }
 

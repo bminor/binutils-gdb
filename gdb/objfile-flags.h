@@ -44,10 +44,6 @@ enum objfile_flag : unsigned
        add-symbol-file command.  */
     OBJF_USERLOADED = 1 << 2,	/* User loaded */
 
-    /* Set if we have tried to read partial symtabs for this objfile.
-       This is used to allow lazy reading of partial symtabs.  */
-    OBJF_PSYMTABS_READ = 1 << 3,
-
     /* Set if this is the main symbol file (as opposed to symbol file
        for dynamically loaded code).  */
     OBJF_MAINLINE = 1 << 4,
