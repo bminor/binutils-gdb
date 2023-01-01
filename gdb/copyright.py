@@ -365,7 +365,7 @@ NOT_FSF_LIST = (
     "sim/ppc/hw_trace.c",
     "sim/ppc/emul_netbsd.h",
     "sim/ppc/psim.c",
-    "sim/ppc/ppc-instructions",
+    "sim/ppc/powerpc.igen",
     "sim/ppc/tree.h",
     "sim/ppc/README",
     "sim/ppc/gen-icache.h",
