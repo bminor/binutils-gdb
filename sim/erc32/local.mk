@@ -17,6 +17,14 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+READLINE_SRC = $(srcroot)/readline/readline
+AM_CPPFLAGS_%C% = $(READLINE_CFLAGS)
+
+## UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
+## CFLAGS if faster (infinite) UART speed is desired. Might affect the
+## behaviour of UART interrupt routines ...
+AM_CPPFLAGS_%C% += -DFAST_UART
+
 %C%_libsim_a_SOURCES =
 %C%_libsim_a_LIBADD = \
 	$(common_libcommon_a_OBJECTS) \
@@ -30,9 +38,6 @@
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a
-
-%D%/%.o: %D%/%.c
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %D%/%.o: common/%.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

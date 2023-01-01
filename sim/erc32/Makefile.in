@@ -17,14 +17,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
-
-READLINE_SRC = $(srcroot)/readline/readline
-
-SIM_EXTRA_CFLAGS = $(READLINE_CFLAGS)
-
-# UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
-# CFLAGS if faster (infinite) UART speed is desired. Might affect the
-# behaviour of UART interrupt routines ...
-SIM_EXTRA_CFLAGS += -DFAST_UART
-
 ## COMMON_POST_CONFIG_FRAG

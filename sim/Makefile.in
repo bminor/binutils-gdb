@@ -2236,6 +2236,9 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_SOURCES = d10v/gencode.c
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_LDADD = d10v/d10v-opc.o
+@SIM_ENABLE_ARCH_erc32_TRUE@READLINE_SRC = $(srcroot)/readline/readline
+@SIM_ENABLE_ARCH_erc32_TRUE@AM_CPPFLAGS_erc32 = $(READLINE_CFLAGS) \
+@SIM_ENABLE_ARCH_erc32_TRUE@	-DFAST_UART
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4862,9 +4865,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/table.c: d10v/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_GEN)$< >$@
 @SIM_ENABLE_ARCH_erc32_TRUE@$(erc32_libsim_a_OBJECTS) $(erc32_libsim_a_LIBADD): erc32/hw-config.h
-
-@SIM_ENABLE_ARCH_erc32_TRUE@erc32/%.o: erc32/%.c
-@SIM_ENABLE_ARCH_erc32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32/%.o: common/%.c
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
