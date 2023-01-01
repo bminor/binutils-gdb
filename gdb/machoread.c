@@ -785,6 +785,8 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      macho_symfile_read_all_oso at the end of this function.  */
   gdb::def_vector<asymbol *> symbol_table;
 
+  dwarf2_initialize_objfile (objfile);
+
   /* Get symbols from the symbol table only if the file is an executable.
      The symbol table of object files is not relocated and is expected to
      be in the executable.  */
@@ -822,9 +824,6 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	}
 
       /* Try to read .eh_frame / .debug_frame.  */
-      /* First, locate these sections.  We ignore the result status
-	 as it only checks for debug info.  */
-      dwarf2_has_info (objfile, NULL);
       dwarf2_build_frame_info (objfile);
 
       /* Check for DSYM file.  */
@@ -852,12 +851,6 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
 	  return;
 	}
-    }
-
-  if (dwarf2_has_info (objfile, NULL))
-    {
-      /* DWARF 2 sections */
-      dwarf2_initialize_objfile (objfile);
     }
 
   /* Then the oso.  */

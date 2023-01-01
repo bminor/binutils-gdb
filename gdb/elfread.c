@@ -1198,8 +1198,10 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 {
   bool has_dwarf2 = true;
 
-  if (dwarf2_has_info (objfile, NULL, true))
-    dwarf2_initialize_objfile (objfile);
+  if (dwarf2_initialize_objfile (objfile, nullptr, true))
+    {
+      /* Nothing.  */
+    }
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
      SYMTABS/PSYMTABS.	`.gnu_debuglink' may no longer be present with

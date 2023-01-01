@@ -2871,8 +2871,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   /* DWARF2 sections.  */
 
-  if (dwarf2_has_info (objfile, &dwarf2_xcoff_names))
-    dwarf2_initialize_objfile (objfile);
+  dwarf2_initialize_objfile (objfile, &dwarf2_xcoff_names);
 }
 
 static void

@@ -1354,14 +1354,10 @@ dwarf2_per_objfile::set_symtab (const dwarf2_per_cu_data *per_cu,
   this->m_symtabs[per_cu->index] = symtab;
 }
 
-/* Try to locate the sections we need for DWARF 2 debugging
-   information and return true if we have enough to do something.
-   NAMES points to the dwarf2 section names, or is NULL if the standard
-   ELF names are used.  CAN_COPY is true for formats where symbol
-   interposition is possible and so symbol values must follow copy
-   relocation rules.  */
+/* Helper function for dwarf2_initialize_objfile that creates the
+   per-BFD object.  */
 
-bool
+static bool
 dwarf2_has_info (struct objfile *objfile,
 		 const struct dwarf2_debug_sections *names,
 		 bool can_copy)
@@ -3199,9 +3195,14 @@ static quick_symbol_functions_up make_cooked_index_funcs
 
 /* See dwarf2/public.h.  */
 
-void
-dwarf2_initialize_objfile (struct objfile *objfile)
+bool
+dwarf2_initialize_objfile (struct objfile *objfile,
+			   const struct dwarf2_debug_sections *names,
+			   bool can_copy)
 {
+  if (!dwarf2_has_info (objfile, names, can_copy))
+    return false;
+
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
@@ -3231,48 +3232,42 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 	= create_quick_file_names_table (per_bfd->all_units.size ());
 
       objfile->qf.emplace_front (new readnow_functions);
-      return;
     }
-
   /* Was a GDB index already read when we processed an objfile sharing
      PER_BFD?  */
-  if (per_bfd->index_table != nullptr)
+  else if (per_bfd->index_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using symbols");
       objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-      return;
     }
-
-  if (dwarf2_read_debug_names (per_objfile))
+  else if (dwarf2_read_debug_names (per_objfile))
     {
       dwarf_read_debug_printf ("found debug names");
       objfile->qf.push_front
 	(per_bfd->index_table->make_quick_functions ());
-      return;
     }
-
-  if (dwarf2_read_gdb_index (per_objfile,
-			     get_gdb_index_contents_from_section<struct dwarf2_per_bfd>,
-			     get_gdb_index_contents_from_section<dwz_file>))
+  else if (dwarf2_read_gdb_index (per_objfile,
+				  get_gdb_index_contents_from_section<struct dwarf2_per_bfd>,
+				  get_gdb_index_contents_from_section<dwz_file>))
     {
       dwarf_read_debug_printf ("found gdb index from file");
       objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-      return;
     }
-
   /* ... otherwise, try to find the index in the index cache.  */
-  if (dwarf2_read_gdb_index (per_objfile,
+  else if (dwarf2_read_gdb_index (per_objfile,
 			     get_gdb_index_contents_from_cache,
 			     get_gdb_index_contents_from_cache_dwz))
     {
       dwarf_read_debug_printf ("found gdb index from cache");
       global_index_cache.hit ();
       objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-      return;
     }
-
-  global_index_cache.miss ();
-  objfile->qf.push_front (make_cooked_index_funcs (per_objfile));
+  else
+    {
+      global_index_cache.miss ();
+      objfile->qf.push_front (make_cooked_index_funcs (per_objfile));
+    }
+  return true;
 }
 
 
