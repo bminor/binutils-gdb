@@ -4915,9 +4915,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_h8300_TRUE@$(h8300_libsim_a_OBJECTS) $(h8300_libsim_a_LIBADD): h8300/hw-config.h
 
-@SIM_ENABLE_ARCH_h8300_TRUE@h8300/%.o: h8300/%.c
-@SIM_ENABLE_ARCH_h8300_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_h8300_TRUE@h8300/%.o: common/%.c
 @SIM_ENABLE_ARCH_h8300_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_iq2000_TRUE@$(iq2000_libsim_a_OBJECTS) $(iq2000_libsim_a_LIBADD): iq2000/hw-config.h
