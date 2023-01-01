@@ -2586,6 +2586,11 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	microblaze/libsim.a \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_mips_TRUE@AM_CPPFLAGS_mips = \
+@SIM_ENABLE_ARCH_mips_TRUE@	@SIM_MIPS_SUBTARGET@ \
+@SIM_ENABLE_ARCH_mips_TRUE@	-DWITH_TARGET_WORD_BITSIZE=@SIM_MIPS_BITSIZE@ -DWITH_TARGET_WORD_MSB=WITH_TARGET_WORD_BITSIZE-1 \
+@SIM_ENABLE_ARCH_mips_TRUE@	-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=@SIM_MIPS_FPU_BITSIZE@
+
 @SIM_ENABLE_ARCH_mips_TRUE@mips_GEN_OBJ = $(am__append_88) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(am__append_89) $(am__append_90)
 @SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_SOURCES = 
@@ -5088,9 +5093,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_microblaze_TRUE@microblaze/%.o: common/%.c
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_mips_TRUE@$(mips_libsim_a_OBJECTS) $(mips_libsim_a_LIBADD): mips/hw-config.h
-
-@SIM_ENABLE_ARCH_mips_TRUE@mips/%.o: mips/%.c
-@SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_mips_TRUE@mips/%.o: common/%.c
 @SIM_ENABLE_ARCH_mips_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

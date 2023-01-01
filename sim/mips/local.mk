@@ -16,6 +16,11 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+AM_CPPFLAGS_%C% = \
+	@SIM_MIPS_SUBTARGET@ \
+	-DWITH_TARGET_WORD_BITSIZE=@SIM_MIPS_BITSIZE@ -DWITH_TARGET_WORD_MSB=WITH_TARGET_WORD_BITSIZE-1 \
+	-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=@SIM_MIPS_FPU_BITSIZE@
+
 %C%_GEN_OBJ =
 if SIM_MIPS_GEN_MODE_SINGLE
 %C%_GEN_OBJ += \
@@ -68,9 +73,6 @@ EXTRA_mips_libsim_a_DEPENDENCIES = $(SIM_MIPS_MULTI_OBJ)
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a
-
-%D%/%.o: %D%/%.c
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %D%/%.o: common/%.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
