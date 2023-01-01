@@ -5406,9 +5406,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_rl78_TRUE@$(rl78_libsim_a_OBJECTS) $(rl78_libsim_a_LIBADD): rl78/hw-config.h
 
-@SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: rl78/%.c
-@SIM_ENABLE_ARCH_rl78_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: common/%.c
 @SIM_ENABLE_ARCH_rl78_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_rx_TRUE@$(rx_libsim_a_OBJECTS) $(rx_libsim_a_LIBADD): rx/hw-config.h
