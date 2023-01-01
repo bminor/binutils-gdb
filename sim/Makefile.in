@@ -2100,6 +2100,13 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_bfin_TRUE@	bfin_wp \
 @SIM_ENABLE_ARCH_bfin_TRUE@	eth_phy
 
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf = -DWITH_TARGET_WORD_BITSIZE=64
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_mloop_le.o = -DWANT_ISA_EBPFLE
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_mloop_be.o = -DWANT_ISA_EBPFBE
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_decode_le.o = -DWANT_ISA_EBPFLE
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_decode_be.o = -DWANT_ISA_EBPFBE
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_sem_le.o = -DWANT_ISA_EBPFLE
+@SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_sem_be.o = -DWANT_ISA_EBPFBE
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4722,9 +4729,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/bfin/linux-fixed-code.h
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(AM_V_at)touch $(srcdir)/bfin/linux-fixed-code.h
 @SIM_ENABLE_ARCH_bpf_TRUE@$(bpf_libsim_a_OBJECTS) $(bpf_libsim_a_LIBADD): bpf/hw-config.h
-
-@SIM_ENABLE_ARCH_bpf_TRUE@bpf/%.o: bpf/%.c
-@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf/%.o: common/%.c
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

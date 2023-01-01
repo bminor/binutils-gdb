@@ -15,6 +15,14 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+AM_CPPFLAGS_%C% = -DWITH_TARGET_WORD_BITSIZE=64
+AM_CPPFLAGS_%C%_mloop_le.o = -DWANT_ISA_EBPFLE
+AM_CPPFLAGS_%C%_mloop_be.o = -DWANT_ISA_EBPFBE
+AM_CPPFLAGS_%C%_decode_le.o = -DWANT_ISA_EBPFLE
+AM_CPPFLAGS_%C%_decode_be.o = -DWANT_ISA_EBPFBE
+AM_CPPFLAGS_%C%_sem_le.o = -DWANT_ISA_EBPFLE
+AM_CPPFLAGS_%C%_sem_be.o = -DWANT_ISA_EBPFBE
+
 %C%_libsim_a_SOURCES =
 %C%_libsim_a_LIBADD = \
 	$(common_libcommon_a_OBJECTS) \
@@ -43,9 +51,6 @@
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a
-
-%D%/%.o: %D%/%.c
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %D%/%.o: common/%.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
