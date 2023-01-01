@@ -4944,9 +4944,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cpu.h iq2000/sem.c iq2000/sem-switch.c iq2000/model.c iq2000/decode.c iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
 @SIM_ENABLE_ARCH_lm32_TRUE@$(lm32_libsim_a_OBJECTS) $(lm32_libsim_a_LIBADD): lm32/hw-config.h
 
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32/%.o: lm32/%.c
-@SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/%.o: common/%.c
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/modules.c: | $(lm32_BUILD_OUTPUTS)
