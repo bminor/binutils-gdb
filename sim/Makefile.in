@@ -4842,9 +4842,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv32.h cris/cpuv32.c cris/semcrisv32f-switch.c cris/modelv32.c cris/decodev32.c cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
 @SIM_ENABLE_ARCH_d10v_TRUE@$(d10v_libsim_a_OBJECTS) $(d10v_libsim_a_LIBADD): d10v/hw-config.h
 
-@SIM_ENABLE_ARCH_d10v_TRUE@d10v/%.o: d10v/%.c
-@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/%.o: common/%.c
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/modules.c: | $(d10v_BUILD_OUTPUTS)
