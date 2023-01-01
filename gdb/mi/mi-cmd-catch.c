@@ -1,5 +1,5 @@
 /* MI Command Set - catch commands.
-   Copyright (C) 2012-2022 Free Software Foundation, Inc.
+   Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    Contributed by Intel Corporation.
 
