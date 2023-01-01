@@ -4911,9 +4911,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_frv_TRUE@frv/cpu.h frv/sem.c frv/model.c frv/decode.c frv/decode.h: @CGEN_MAINT@ frv/cgen-cpu-decode
 @SIM_ENABLE_ARCH_ft32_TRUE@$(ft32_libsim_a_OBJECTS) $(ft32_libsim_a_LIBADD): ft32/hw-config.h
 
-@SIM_ENABLE_ARCH_ft32_TRUE@ft32/%.o: ft32/%.c
-@SIM_ENABLE_ARCH_ft32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_ft32_TRUE@ft32/%.o: common/%.c
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_h8300_TRUE@$(h8300_libsim_a_OBJECTS) $(h8300_libsim_a_LIBADD): h8300/hw-config.h
