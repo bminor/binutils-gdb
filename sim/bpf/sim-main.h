@@ -20,8 +20,8 @@
 #define SIM_MAIN_H
 
 #include "sim-basics.h"
-#include "bpf-desc.h"
-#include "bpf-opc.h"
+#include "opcodes/bpf-desc.h"
+#include "opcodes/bpf-opc.h"
 #include "arch.h"
 #include "sim-base.h"
 #include "cgen-sim.h"

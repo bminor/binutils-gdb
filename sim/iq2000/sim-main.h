@@ -10,8 +10,8 @@
 #define WITH_SCACHE_PBB 1
 
 #include "sim-basics.h"
-#include "iq2000-desc.h"
-#include "iq2000-opc.h"
+#include "opcodes/iq2000-desc.h"
+#include "opcodes/iq2000-opc.h"
 #include "arch.h"
 
 /* Pull in IQ2000_{DATA,INSN}_{MASK,VALUE}.  */

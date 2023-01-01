@@ -119,7 +119,7 @@ CONFIG_CFLAGS = \
 CSEARCH = -I. -I$(srcdir) -I$(srccom) \
   -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
-  -I$(srcroot)/opcodes \
+  -I$(srcroot) \
   -I../..
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(INCGNU) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
 BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)

@@ -28,9 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define WITH_SCACHE_PBB 0
 
 #include "sim-basics.h"
-#include "frv-desc.h"
+#include "opcodes/frv-desc.h"
 #include <stdbool.h>
-#include "frv-opc.h"
+#include "opcodes/frv-opc.h"
 #include "arch.h"
 
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) \

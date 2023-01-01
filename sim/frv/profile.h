@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef PROFILE_H
 #define PROFILE_H
 
-#include "frv-desc.h"
+#include "opcodes/frv-desc.h"
 
 /* This struct defines the state of profiling.  All fields are of general
    use to all machines.  */

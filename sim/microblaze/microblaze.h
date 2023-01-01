@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
-#include "../../opcodes/microblaze-opcm.h"
+#include "opcodes/microblaze-opcm.h"
 
 #define GET_RD	((inst & RD_MASK) >> RD_LOW)
 #define GET_RA	((inst & RA_MASK) >> RA_LOW)

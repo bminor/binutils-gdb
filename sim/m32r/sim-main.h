@@ -9,8 +9,8 @@
 #define WITH_SCACHE_PBB 1
 
 #include "sim-basics.h"
-#include "m32r-desc.h"
-#include "m32r-opc.h"
+#include "opcodes/m32r-desc.h"
+#include "opcodes/m32r-opc.h"
 #include "arch.h"
 #include "sim-base.h"
 #include "cgen-sim.h"

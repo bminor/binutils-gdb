@@ -34,7 +34,7 @@
 #include "sim-syscall.h"
 
 #include "microblaze-sim.h"
-#include "microblaze-dis.h"
+#include "opcodes/microblaze-dis.h"
 
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 

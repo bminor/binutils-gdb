@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
 #include "dis-asm.h"
-#include "m32c-desc.h"
+#include "opcodes/m32c-desc.h"
 
 #include "cpu.h"
 #include "mem.h"

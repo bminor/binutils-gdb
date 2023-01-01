@@ -26,8 +26,8 @@
 #define WITH_SCACHE_PBB 1
 
 #include "sim-basics.h"
-#include "lm32-desc.h"
-#include "lm32-opc.h"
+#include "opcodes/lm32-desc.h"
+#include "opcodes/lm32-opc.h"
 #include "arch.h"
 #include "sim-base.h"
 #include "cgen-sim.h"

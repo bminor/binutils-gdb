@@ -21,8 +21,8 @@
 
 #define WITH_SCACHE_PBB 1
 
-#include "or1k-desc.h"
-#include "or1k-opc.h"
+#include "opcodes/or1k-desc.h"
+#include "opcodes/or1k-opc.h"
 #include "sim-basics.h"
 #include "arch.h"
 #include "sim-base.h"

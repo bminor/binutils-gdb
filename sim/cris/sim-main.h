@@ -30,8 +30,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define WITH_SCACHE_PBB 1
 
 #include "sim-basics.h"
-#include "cris-desc.h"
-#include "cris-opc.h"
+#include "opcodes/cris-desc.h"
+#include "opcodes/cris-opc.h"
 #include "arch.h"
 #include "sim-base.h"
 #include "cgen-sim.h"
