@@ -4879,9 +4879,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_erc32_TRUE@	rm -f $(DESTDIR)$(bindir)/sis
 @SIM_ENABLE_ARCH_examples_TRUE@$(example_synacor_libsim_a_OBJECTS) $(example_synacor_libsim_a_LIBADD): example-synacor/hw-config.h
 
-@SIM_ENABLE_ARCH_examples_TRUE@example-synacor/%.o: example-synacor/%.c
-@SIM_ENABLE_ARCH_examples_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_examples_TRUE@example-synacor/%.o: common/%.c
 @SIM_ENABLE_ARCH_examples_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_frv_TRUE@$(frv_libsim_a_OBJECTS) $(frv_libsim_a_LIBADD): frv/hw-config.h
