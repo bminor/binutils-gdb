@@ -90,8 +90,6 @@ SIM_OBJS =
 SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
-# List of extra libraries to link with.
-SIM_EXTRA_LIBS =
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
 # Dependency of `clean' to clean any extra files.
@@ -136,7 +134,7 @@ BFD_LIB = ../../bfd/libbfd.la
 OPCODES_LIB = ../../opcodes/libopcodes.la
 LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
-	$(COMMON_LIBS) $(SIM_EXTRA_LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
+	$(COMMON_LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
 COMMON_OBJS_NAMES = \
 	callback.o \
