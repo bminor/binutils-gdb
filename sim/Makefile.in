@@ -5397,9 +5397,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $(srcdir)/ppc/spreg.h
 @SIM_ENABLE_ARCH_pru_TRUE@$(pru_libsim_a_OBJECTS) $(pru_libsim_a_LIBADD): pru/hw-config.h
 
-@SIM_ENABLE_ARCH_pru_TRUE@pru/%.o: pru/%.c
-@SIM_ENABLE_ARCH_pru_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_pru_TRUE@pru/%.o: common/%.c
 @SIM_ENABLE_ARCH_pru_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_riscv_TRUE@$(riscv_libsim_a_OBJECTS) $(riscv_libsim_a_LIBADD): riscv/hw-config.h
