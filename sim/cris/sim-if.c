@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libiberty.h"
 #include "bfd.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 
 #include "sim/callback.h"
 #include "sim-main.h"

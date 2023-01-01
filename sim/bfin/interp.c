@@ -71,7 +71,7 @@
 #include "elf/external.h"
 #include "elf/internal.h"
 #include "elf/bfin.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 
 #include "dv-bfin_cec.h"
 #include "dv-bfin_mmu.h"

@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hw-tree.h"
 #include "hw-device.h"
 #include "hw-ports.h"
-#include "elf32-m68hc1x.h"
+#include "bfd/elf32-m68hc1x.h"
 
 #include "m68hc11-sim.h"
 

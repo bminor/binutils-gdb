@@ -28,7 +28,7 @@
 
 #include "libiberty.h"
 #include "bfd.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 #include "elf/rl78.h"
 #include "cpu.h"
 #include "mem.h"

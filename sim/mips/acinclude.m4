@@ -190,8 +190,8 @@ AS_VAR_IF([SIM_MIPS_GEN], ["MULTI"], [dnl
 
 #include "sim-main.h"
 #include "multi-include.h"
-#include "elf-bfd.h"
-#include "elfxx-mips.h"
+#include "bfd/elf-bfd.h"
+#include "bfd/elfxx-mips.h"
 #include "elf/mips.h"
 
 #define SD sd

@@ -47,7 +47,7 @@ code on the hardware.
 #include "getopt.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 #include "sim/callback.h"   /* GDB simulator callback interface */
 #include "sim/sim.h" /* GDB simulator interface */
 #include "sim-syscall.h"   /* Simulator system call support */

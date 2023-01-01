@@ -25,7 +25,7 @@ mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ER
 
 #include "sim-basics.h"
 #include "sim-base.h"
-#include "elf-bfd.h"
+#include "bfd/elf-bfd.h"
 #include "elf/mips.h"
 
 /* Deprecated macros and types for manipulating 64bit values.  Use
