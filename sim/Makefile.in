@@ -2458,6 +2458,18 @@ testsuite_common_CPPFLAGS = \
 # opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_OPC2C_RUN = ASAN_OPTIONS=detect_leaks=0 m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_cpu.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_cpu2.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_cpux.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_m32r.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_m32r2.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_m32rx.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_mloop.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_mloop2.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_mloopx.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_sem.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_sim_if.o = -Wno-error
+@SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_traps.o = -Wno-error
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4990,9 +5002,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
 @SIM_ENABLE_ARCH_m32r_TRUE@$(m32r_libsim_a_OBJECTS) $(m32r_libsim_a_LIBADD): m32r/hw-config.h
-
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r/%.o: m32r/%.c
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/%.o: common/%.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

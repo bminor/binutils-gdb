@@ -16,6 +16,20 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Some modules don't build cleanly yet.
+AM_CFLAGS_%C%_cpu.o = -Wno-error
+AM_CFLAGS_%C%_cpu2.o = -Wno-error
+AM_CFLAGS_%C%_cpux.o = -Wno-error
+AM_CFLAGS_%C%_m32r.o = -Wno-error
+AM_CFLAGS_%C%_m32r2.o = -Wno-error
+AM_CFLAGS_%C%_m32rx.o = -Wno-error
+AM_CFLAGS_%C%_mloop.o = -Wno-error
+AM_CFLAGS_%C%_mloop2.o = -Wno-error
+AM_CFLAGS_%C%_mloopx.o = -Wno-error
+AM_CFLAGS_%C%_sem.o = -Wno-error
+AM_CFLAGS_%C%_sim_if.o = -Wno-error
+AM_CFLAGS_%C%_traps.o = -Wno-error
+
 %C%_libsim_a_SOURCES =
 %C%_libsim_a_LIBADD = \
 	$(common_libcommon_a_OBJECTS) \
@@ -55,9 +69,6 @@
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a
-
-%D%/%.o: %D%/%.c
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %D%/%.o: common/%.c
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
