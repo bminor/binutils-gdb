@@ -1,8 +1,0 @@
-# Makefile for Lattice Mico32 simulator.
-# Contributed by Jon Beniston <jon@beniston.com>
-
-## COMMON_PRE_CONFIG_FRAG
-
-arch = lm32
-
-## COMMON_POST_CONFIG_FRAG
