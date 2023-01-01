@@ -2274,6 +2274,9 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_examples_TRUE@	example-synacor/libsim.a \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(SIM_COMMON_LIBS)
 
+@SIM_ENABLE_ARCH_frv_TRUE@AM_CPPFLAGS_frv = $(SIM_FRV_TRAPDUMP_FLAGS)
+@SIM_ENABLE_ARCH_frv_TRUE@AM_CFLAGS_frv_memory.o = -Wno-error
+@SIM_ENABLE_ARCH_frv_TRUE@AM_CFLAGS_frv_sem.o = -Wno-error
 @SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_SOURCES = 
 @SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_LIBADD = \
 @SIM_ENABLE_ARCH_frv_TRUE@	$(common_libcommon_a_OBJECTS) \
@@ -4882,9 +4885,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_examples_TRUE@example-synacor/%.o: common/%.c
 @SIM_ENABLE_ARCH_examples_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_frv_TRUE@$(frv_libsim_a_OBJECTS) $(frv_libsim_a_LIBADD): frv/hw-config.h
-
-@SIM_ENABLE_ARCH_frv_TRUE@frv/%.o: frv/%.c
-@SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_frv_TRUE@frv/%.o: common/%.c
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
