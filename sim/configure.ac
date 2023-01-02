@@ -52,12 +52,6 @@ dnl List of enabled arch backends.
 SIM_ENABLED_ARCHES=
 AC_SUBST(SIM_ENABLED_ARCHES)
 
-dnl Used by common/Make-common.in to see which configure script created it.
-SIM_COMMON_BUILD_TRUE=
-SIM_COMMON_BUILD_FALSE='#'
-AC_SUBST(SIM_COMMON_BUILD_TRUE)
-AC_SUBST(SIM_COMMON_BUILD_FALSE)
-
 ENABLE_SIM=no
 dnl Build a particular arch subdir.
 dnl arg[1] is the arch subdir name.
@@ -165,13 +159,6 @@ SIM_AC_OPTION_SMP
 SIM_AC_OPTION_STDIO
 SIM_AC_OPTION_TRACE
 SIM_AC_OPTION_WARNINGS
-
-dnl These are unfortunate.  They are conditionally called by other sim macros
-dnl but always used by common/Make-common.in.  So we have to subst here even
-dnl when the rest of the code is in the respective macros.  Once we merge the
-dnl respective SIM_AC_OPTION_xxx call above, we can drop these.
-AC_SUBST(sim_bitsize)
-AC_SUBST(sim_float)
 
 dnl Some arches have unique configure flags.
 m4_include([frv/acinclude.m4])

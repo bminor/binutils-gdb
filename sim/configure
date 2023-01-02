@@ -657,8 +657,6 @@ SIM_MIPS_FPU_BITSIZE
 SIM_MIPS_BITSIZE
 SIM_MIPS_SUBTARGET
 SIM_FRV_TRAPDUMP_FLAGS
-sim_float
-sim_bitsize
 IGEN_FLAGS_SMP
 SIM_INLINE
 SIM_HW_SOCKSER
@@ -836,8 +834,6 @@ AS_FOR_TARGET_AARCH64
 LD_FOR_TARGET
 AS_FOR_TARGET
 CC_FOR_TARGET
-SIM_COMMON_BUILD_FALSE
-SIM_COMMON_BUILD_TRUE
 SIM_ENABLED_ARCHES
 SIM_PRIMARY_TARGET
 AM_BACKSLASH
@@ -12448,7 +12444,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12451 "configure"
+#line 12447 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12554,7 +12550,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12557 "configure"
+#line 12553 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14266,11 +14262,6 @@ SIM_PRIMARY_TARGET=
 
 
 SIM_ENABLED_ARCHES=
-
-
-SIM_COMMON_BUILD_TRUE=
-SIM_COMMON_BUILD_FALSE='#'
-
 
 
 ENABLE_SIM=no
@@ -16169,9 +16160,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
-
-
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim frv should dump cpu state on unknown traps" >&5

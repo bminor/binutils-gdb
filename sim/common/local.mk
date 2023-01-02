@@ -16,7 +16,6 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Parts of the common/ sim code that have been unified.
-## Most still lives in common/Make-common.in.
 
 AM_CPPFLAGS += \
 	-I$(srcdir)/%D% \

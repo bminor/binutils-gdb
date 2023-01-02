@@ -17,53 +17,10 @@ The common directory contains:
 
 - common documentation files (e.g. run.1, and maybe in time .texi files)
 - common source files (e.g. run.c)
-- common Makefile fragment and configury (e.g. Make-common.in, aclocal.m4).
+- common Makefile fragment and configury (e.g. common/local.mk)
 
 In addition "common" contains portions of the system call support
 (e.g. callback.c, target-newlib-*.c).
-
-Common Makefile Support
-=======================
-
-A common configuration framework is available for simulators that want
-to use it.  The common framework exists to remove a lot of duplication
-in configure.ac and Makefile.in, and it also provides a foundation for
-enhancing the simulators uniformly (e.g. the more they share in common
-the easier a feature added to one is added to all).
-
-The Makefile.in of a simulator using the common framework should look like:
-
---- snip ---
-# Makefile for blah ...
-# Copyright blah ...
-
-## COMMON_PRE_CONFIG_FRAG
-
-# These variables are given default values in COMMON_PRE_CONFIG_FRAG.
-# We override the ones we need to here.
-# Not all of these need to be mentioned, only the necessary ones.
-# In fact it is better to *not* mention ones if the value is the default.
-
-# List of flags to always pass to $(CC).
-SIM_EXTRA_CFLAGS =
-# Dependency of `clean' to clean any extra files.
-SIM_EXTRA_CLEAN =
-
-## COMMON_POST_CONFIG_FRAG
-
-... target specific rules ...
---- snip ---
-
-COMMON_{PRE,POST}_CONFIG_FRAG are markers for configure to tell it
-where to insert the two pieces of common/Make-common.in.
-The resulting Makefile is created by doing autoconf substitions on
-both the target's Makefile.in and Make-common.in, and inserting
-the two pieces of Make-common.in into the target's Makefile.in at
-COMMON_{PRE,POST}_CONFIG_FRAG.
-
-Note that SIM_EXTRA_{INSTALL,CLEAN} could be removed and "::" targets
-could be used instead.  However, it's not clear yet whether "::" targets
-are portable enough.
 
 TAGS support
 ============
