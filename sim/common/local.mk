@@ -131,9 +131,7 @@ endif
 	touch $@
 .PRECIOUS: %/stamp-hw
 
-%C%_HW_CONFIG_H_TARGETS = $(patsubst %,%/hw-config.h,$(SIM_ENABLED_ARCHES))
-MOSTLYCLEANFILES += $(%C%_HW_CONFIG_H_TARGETS) $(patsubst %,%/stamp-hw,$(SIM_ENABLED_ARCHES))
-SIM_ALL_RECURSIVE_DEPS += $(%C%_HW_CONFIG_H_TARGETS)
+MOSTLYCLEANFILES += $(SIM_ENABLED_ARCHES:%=%/hw-config.h) $(SIM_ENABLED_ARCHES:%=%/stamp-hw)
 
 ## See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
 ## TODO: Switch this to xxx_SOURCES once projects build objects in local.mk.
