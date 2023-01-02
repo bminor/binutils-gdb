@@ -3626,6 +3626,16 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change iq2000/mloop.cin iq2000/mloop.c
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen: iq2000/cgen-arch iq2000/cgen-cpu-decode
+
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen-arch:
+@SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)mach=iq2000 FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/arch.h iq2000/arch.c iq2000/cpuall.h: @CGEN_MAINT@ iq2000/cgen-arch
+
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cgen-cpu-decode:
+@SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)cpu=iq2000bf mach=iq2000 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/cpu.h iq2000/sem.c iq2000/sem-switch.c iq2000/model.c iq2000/decode.c iq2000/decode.h: @CGEN_MAINT@ iq2000/cgen-cpu-decode
+
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/mloop.c lm32/eng.h: lm32/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/stamp-mloop: $(srccom)/genmloop.sh lm32/mloop.in
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \

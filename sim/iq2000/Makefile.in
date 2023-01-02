@@ -26,32 +26,6 @@ SIM_OBJS = \
 	sim-if.o arch.o \
 	$(IQ2000_OBJS)
 
-SIM_EXTRA_CLEAN = iq2000-clean
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = iq2000
-
-# IQ2000 objs
-
-iq2000-clean:
-	rm -f tmp-*
-	rm -f stamp-arch stamp-cpu
-
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/iq2000.cpu Makefile
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=iq2000 \
-	  archfile=$(CPU_DIR)/iq2000.cpu \
-	  FLAGS="with-scache with-profile=fn"
-	$(SILENCE) touch $@
-arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
-	@true
-
-stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/iq2000.cpu Makefile
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=iq2000bf mach=iq2000 \
-	  archfile=$(CPU_DIR)/iq2000.cpu \
-	  FLAGS="with-scache with-profile=fn" \
-	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	$(SILENCE) touch $@
-cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
-	@true
