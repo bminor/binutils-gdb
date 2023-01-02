@@ -271,7 +271,8 @@ proc_with_prefix test_hardware_breakpoints { } {
 
     delete_breakpoints
 
-    gdb_test "python hbp1 = gdb.Breakpoint(\"add\", type=gdb.BP_HARDWARE_BREAKPOINT)" \
+    set bp_args {"add", type=gdb.BP_HARDWARE_BREAKPOINT, qualified=True}
+    gdb_test "python hbp1 = gdb.Breakpoint($bp_args)" \
 	".*Hardware assisted breakpoint ($decimal)+ at .*$srcfile, line ($decimal)+\." \
 	"Set hardware breakpoint"
     gdb_test "python print (gdb.breakpoints()\[0\].type == gdb.BP_HARDWARE_BREAKPOINT)" \
