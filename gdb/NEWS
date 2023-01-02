@@ -17,6 +17,11 @@ maintenance print record-instruction [ N ]
   prints how GDB would undo the N-th previous instruction, and if N is
   positive, it prints how GDB will redo the N-th following instruction.
 
+* MI changes
+
+** mi now reports 'no-history' as a stop reason when hitting the end of the
+   reverse execution history.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.

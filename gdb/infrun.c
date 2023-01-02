@@ -8406,7 +8406,10 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 void
 print_no_history_reason (struct ui_out *uiout)
 {
-  uiout->text ("\nNo more reverse-execution history.\n");
+  if (uiout->is_mi_like_p ())
+    uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_NO_HISTORY));
+  else
+    uiout->text ("\nNo more reverse-execution history.\n");
 }
 
 /* Print current location without a level number, if we have changed
