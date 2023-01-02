@@ -30,8 +30,7 @@ SIM_ALL_RECURSIVE_DEPS += \
 
 ## NB: libcommon.a isn't used directly by ports.  We need a target for common
 ## objects to be a part of, and ports use the individual objects directly.
-SIM_COMMON_LIB = %D%/libcommon.a
-noinst_LIBRARIES += $(SIM_COMMON_LIB)
+noinst_LIBRARIES += %D%/libcommon.a
 %C%_libcommon_a_SOURCES = \
 	%D%/callback.c \
 	%D%/portability.c \
@@ -136,7 +135,6 @@ BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
 
 SIM_COMMON_LIBS = \
-	$(SIM_COMMON_LIB) \
 	$(BFD_LIB) \
 	$(OPCODES_LIB) \
 	$(LIBIBERTY_LIB) \

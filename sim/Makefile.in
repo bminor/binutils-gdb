@@ -427,8 +427,7 @@ am__EXEEXT_8 = testsuite/common/bits32m0$(EXEEXT) \
 PROGRAMS = $(noinst_PROGRAMS)
 am_aarch64_run_OBJECTS =
 aarch64_run_OBJECTS = $(am_aarch64_run_OBJECTS)
-am__DEPENDENCIES_1 = $(SIM_COMMON_LIB) $(BFD_LIB) $(OPCODES_LIB) \
-	$(LIBIBERTY_LIB)
+am__DEPENDENCIES_1 = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB)
 @SIM_ENABLE_ARCH_aarch64_TRUE@aarch64_run_DEPENDENCIES =  \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/nrun.o aarch64/libsim.a \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	$(am__DEPENDENCIES_1)
@@ -1255,7 +1254,7 @@ AM_MAKEFLAGS = SIM_NEW_COMMON_OBJS_="$(SIM_NEW_COMMON_OBJS)" \
 	$(am__append_48) $(am__append_57) $(am__append_62) \
 	$(am__append_69) $(am__append_78)
 pkginclude_HEADERS = $(am__append_1)
-noinst_LIBRARIES = $(SIM_COMMON_LIB) $(am__append_5)
+noinst_LIBRARIES = common/libcommon.a $(am__append_5)
 BUILT_SOURCES = $(am__append_14) $(am__append_18) $(am__append_25) \
 	$(am__append_29) $(am__append_38) $(am__append_44) \
 	$(am__append_49) $(am__append_58) $(am__append_70) \
@@ -1291,7 +1290,6 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_34)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_35)
-SIM_COMMON_LIB = common/libcommon.a
 common_libcommon_a_SOURCES = \
 	common/callback.c \
 	common/portability.c \
@@ -1328,7 +1326,6 @@ LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
 SIM_COMMON_LIBS = \
-	$(SIM_COMMON_LIB) \
 	$(BFD_LIB) \
 	$(OPCODES_LIB) \
 	$(LIBIBERTY_LIB) \
