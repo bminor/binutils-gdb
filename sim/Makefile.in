@@ -3705,6 +3705,24 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloop2.cin m32r/mloop2.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen: m32r/cgen-arch m32r/cgen-cpu-decode m32r/cgen-cpu-decode-x m32r/cgen-cpu-decode-2
+
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-arch:
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)mach=all FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/arch.h m32r/arch.c m32r/cpuall.h: @CGEN_MAINT@ m32r/cgen-arch
+
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode:
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32rbf mach=m32r FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu.h m32r/sem.c m32r/sem-switch.c m32r/model.c m32r/decode.c m32r/decode.h: @CGEN_MAINT@ m32r/cgen-cpu-decode
+
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode-x:
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32rxf mach=m32rx SUFFIX=x FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpux.h m32r/semx-switch.c m32r/modelx.c m32r/decodex.c m32r/decodex.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-x
+
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cgen-cpu-decode-2:
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)cpu=m32r2f mach=m32r2 SUFFIX=2 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r/cpu2.h m32r/sem2-switch.c m32r/model2.c m32r/decode2.c m32r/decode2.h: @CGEN_MAINT@ m32r/cgen-cpu-decode-2
+
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/gencode$(EXEEXT): $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_DEPENDENCIES) m68hc11/$(am__dirstamp)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_LDADD)
