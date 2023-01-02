@@ -31,33 +31,9 @@ SIM_OBJS = \
 
 SIM_EXTRA_CFLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 
-SIM_EXTRA_CLEAN = frv-clean
-
 # Some modules don't build cleanly yet.
 memory.o sem.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
 arch = frv
-
-frv-clean:
-	rm -f tmp-*
-	rm -f stamp-arch stamp-cpu
-
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srcdir)/../../cpu/frv.cpu
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
-	  archfile=$(srcdir)/../../cpu/frv.cpu \
-	  FLAGS="with-scache"
-	$(SILENCE) touch $@
-arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
-#	@true
-
-stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srcdir)/../../cpu/frv.cpu
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=frvbf mach=frv,fr550,fr500,fr450,fr400,tomcat,simple SUFFIX= \
-	  archfile=$(srcdir)/../../cpu/frv.cpu \
-	  FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" \
-	  EXTRAFILES="$(CGEN_CPU_SEM)"
-	$(SILENCE) touch $@
-cpu.h sem.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
-#	@true

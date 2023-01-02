@@ -47,3 +47,14 @@ SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
 	$(AM_V_at)touch $@
 
 MOSTLYCLEANFILES += $(%C%_BUILD_OUTPUTS)
+
+## Target that triggers all cgen targets that works when --disable-cgen-maint.
+%D%/cgen: %D%/cgen-arch %D%/cgen-cpu-decode
+
+%D%/cgen-arch:
+	$(AM_V_GEN)mach=all FLAGS="with-scache"; $(CGEN_GEN_ARCH)
+%D%/arch.h %D%/arch.c %D%/cpuall.h: @CGEN_MAINT@ %D%/cgen-arch
+
+%D%/cgen-cpu-decode:
+	$(AM_V_GEN)cpu=frvbf mach=frv,fr550,fr500,fr450,fr400,tomcat,simple FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_CPU_DECODE)
+%D%/cpu.h %D%/sem.c %D%/model.c %D%/decode.c %D%/decode.h: @CGEN_MAINT@ %D%/cgen-cpu-decode
