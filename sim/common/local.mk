@@ -160,10 +160,7 @@ GEN_MODULES_C_SRCS = \
 .PRECIOUS: %/stamp-modules
 
 ## NB: The ppc port doesn't currently utilize the modules API, so skip it.
-%C%_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(filter-out ppc,$(SIM_ENABLED_ARCHES)))
-MOSTLYCLEANFILES += $(%C%_GEN_MODULES_C_TARGETS) $(patsubst %,%/stamp-modules,$(SIM_ENABLED_ARCHES))
-## TODO: Drop this once each port's local.mk:libsim.a depends on it themself.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_GEN_MODULES_C_TARGETS)
+MOSTLYCLEANFILES += $(SIM_ENABLED_ARCHES:%=%/modules.c) $(SIM_ENABLED_ARCHES:%=%/stamp-modules)
 
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la

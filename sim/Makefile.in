@@ -1825,8 +1825,8 @@ DISTCLEANFILES = $(am__append_81)
 MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(SIM_ENABLED_ARCHES:%=%/hw-config.h) \
 	$(SIM_ENABLED_ARCHES:%=%/stamp-hw) \
-	$(common_GEN_MODULES_C_TARGETS) $(patsubst \
-	%,%/stamp-modules,$(SIM_ENABLED_ARCHES)) $(am__append_5) \
+	$(SIM_ENABLED_ARCHES:%=%/modules.c) \
+	$(SIM_ENABLED_ARCHES:%=%/stamp-modules) $(am__append_5) \
 	site-sim-config.exp testrun.log testrun.sum $(am__append_17) \
 	$(am__append_22) $(am__append_27) $(am__append_32) \
 	$(am__append_42) $(am__append_50) $(am__append_54) \
@@ -1847,8 +1847,7 @@ AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
-SIM_ALL_RECURSIVE_DEPS = $(common_GEN_MODULES_C_TARGETS) \
-	$(am__append_94)
+SIM_ALL_RECURSIVE_DEPS = $(am__append_94)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_35)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_36)
@@ -1896,7 +1895,6 @@ GEN_MODULES_C_SRCS = \
 		$(patsubst %.o,$(srcdir)/%.c,$($(am_arch_d)_libsim_a_OBJECTS) $($(am_arch_d)_libsim_a_LIBADD)) \
 		$(filter-out %.o,$(patsubst $(@D)/%.o,$(srcdir)/common/%.c,$($(am_arch_d)_libsim_a_LIBADD))))
 
-common_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(filter-out ppc,$(SIM_ENABLED_ARCHES)))
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
