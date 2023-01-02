@@ -52,6 +52,15 @@ noinst_LIBRARIES += %D%/libcommon.a
 CLEANFILES += \
 	%D%/version.c %D%/version.c-stamp
 
+## NB: This is a bit of a hack.  If we can generalize the common/ files, we can
+## turn this from an arch-specific %/test-hw-events into a common/test-hw-events
+## program.
+.PRECIOUS: %/test-hw-events.o
+%/test-hw-events.o: common/hw-events.c
+	$(AM_V_CC)$(COMPILE) -DMAIN -c -o $@ $<
+%/test-hw-events: %/test-hw-events.o %/libsim.a
+	$(AM_V_CCLD)$(LINK) -o $@ $^ $(SIM_COMMON_LIBS) $(LIBS)
+
 ##
 ## For subdirs.
 ##

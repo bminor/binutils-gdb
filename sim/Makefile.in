@@ -4585,6 +4585,12 @@ common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(src
 	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(@:-stamp=)
 	$(AM_V_at)touch $@
 
+.PRECIOUS: %/test-hw-events.o
+%/test-hw-events.o: common/hw-events.c
+	$(AM_V_CC)$(COMPILE) -DMAIN -c -o $@ $<
+%/test-hw-events: %/test-hw-events.o %/libsim.a
+	$(AM_V_CCLD)$(LINK) -o $@ $^ $(SIM_COMMON_LIBS) $(LIBS)
+
 # FIXME This is one very simple-minded way of generating the file hw-config.h.
 %/hw-config.h: %/stamp-hw ; @true
 %/stamp-hw: Makefile

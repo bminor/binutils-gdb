@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdarg.h>
 #include <string.h>
 
+#include "sim/callback.h"
+
 #include "hw-main.h"
 #include "hw-base.h"
 

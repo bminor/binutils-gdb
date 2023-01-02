@@ -154,11 +154,6 @@ override COMPILE.pre = source='$<' object='$@' libtool=no \
 override POSTCOMPILE =
 endif
 
-test-hw-events: $(srccom)/hw-events.c libsim.a
-	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
-		$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
-		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
-
 # Support targets.
 
 install:
