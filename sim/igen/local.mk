@@ -24,10 +24,6 @@
 IGEN = %D%/igen$(EXEEXT)
 IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN) $(IGEN_FLAGS_SMP)
 
-## This makes sure igen is available before building the arch-subdirs which
-## need to run the igen tool.
-SIM_ALL_RECURSIVE_DEPS += $(IGEN)
-
 # Alias for developers.
 igen: $(IGEN)
 
