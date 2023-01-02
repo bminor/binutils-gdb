@@ -3489,6 +3489,33 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change bpf/mloop-be.cin bpf/mloop-be.c
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen: bpf/cgen-arch bpf/cgen-cpu bpf/cgen-defs-le bpf/cgen-defs-be bpf/cgen-decode-le bpf/cgen-decode-be
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-arch:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)mach=bpf cpu=bpfbf FLAGS="with-scache"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/arch.h bpf/arch.c bpf/cpuall.h: @CGEN_MAINT@ bpf/cgen-arch
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-cpu:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfle,ebpfbe cpu=bpfbf mach=bpf FLAGS="with-multiple-isa with-scache"; $(CGEN_GEN_CPU)
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_at)rm -f $(srcdir)/bpf/model.c
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cpu.h bpf/cpu.c bpf/model.c: @CGEN_MAINT@ bpf/cgen-cpu
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-defs-le:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfle cpu=bpfbf mach=bpf FLAGS="with-scache" SUFFIX="-le"; $(CGEN_GEN_DEFS)
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/defs-le.h: @CGEN_MAINT@ bpf/cgen-defs-le
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-defs-be:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfbe cpu=bpfbf mach=bpf FLAGS="with-scache" SUFFIX="-be"; $(CGEN_GEN_DEFS)
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/defs-be.h: @CGEN_MAINT@ bpf/cgen-defs-be
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-decode-le:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfle cpu=bpfbf mach=bpf FLAGS="with-scache" SUFFIX="-le" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_DECODE)
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/sem-le.c bpf/decode-le.c bpf/decode-le.h: @CGEN_MAINT@ bpf/cgen-decode-vle
+
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/cgen-decode-be:
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(AM_V_GEN)isa=ebpfbe cpu=bpfbf mach=bpf FLAGS="with-scache" SUFFIX="-be" EXTRAFILES="$(CGEN_CPU_SEM)"; $(CGEN_GEN_DECODE)
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf/sem-be.c bpf/decode-be.c bpf/decode-be.h: @CGEN_MAINT@ bpf/cgen-decode-be
+
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/gencode$(EXEEXT): $(cr16_gencode_OBJECTS) $(cr16_gencode_DEPENDENCIES) cr16/$(am__dirstamp)
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(cr16_gencode_OBJECTS) $(cr16_gencode_LDADD)

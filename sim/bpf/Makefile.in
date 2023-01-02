@@ -33,8 +33,6 @@ SIM_OBJS = \
 
 SIM_EXTRA_CFLAGS = -DWITH_TARGET_WORD_BITSIZE=64
 
-SIM_EXTRA_CLEAN = bpf-clean
-
 ## COMMON_POST_CONFIG_FRAG
 
 # Dependencies for binaries from CGEN generated source
@@ -61,91 +59,3 @@ sem-be.o: sem-be.c
 	$(POSTCOMPILE)
 
 arch = bpf
-
-CGEN_COMMON_DEPS = \
-	$(CGEN_READ_SCM) \
-	$(srcdir)/../../cpu/bpf.cpu \
-	$(srcdir)/../../cpu/bpf.opc \
-	Makefile
-
-stamp-arch: $(CGEN_COMMON_DEPS) $(CGEN_ARCH_SCM)
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) \
-		mach=bpf cpu=bpfbf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-scache"
-	$(SILENCE) touch $@
-$(srcdir)/arch.h $(srcdir)/arch.c $(srcdir)/cpuall.h: $(CGEN_MAINT) stamp-arch
-	@true
-
-stamp-cpu: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
-	$(MAKE) cgen-cpu  $(CGEN_FLAGS_TO_PASS) \
-		isa=ebpfle,ebpfbe cpu=bpfbf mach=bpf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-multiple-isa with-scache"
-	rm -f $(srcdir)/model.c
-	$(SILENCE) touch $@
-$(srcdir)/cpu.h $(srcdir)/cpu.c $(srcdir)/model.c: $(CGEN_MAINT) stamp-cpu
-	@true
-
-# We need to generate a group of files per ISA.
-# For eBPF little-endian:
-#    defs-le.h
-#    sem-le.c, decode-le.c, decode-le.h
-#    $(objdir)/mloop-le.c $(objdir)/eng-le.h
-# For eBPF big-endian:
-#    defs-be.h
-#    sem-be.c, decode-be.c, decode-be.h
-#    $(objdir)/mloop-be.c $(objdir)/eng-le.h
-#
-# The rules below take care of that.
-
-stamp-defs-le: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
-	$(MAKE) cgen-defs $(CGEN_FLAGS_TO_PASS) \
-		isa=ebpfle cpu=bpfbf mach=bpf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-scache" \
-                SUFFIX="-le"
-	$(SILENCE) touch $@
-$(srcdir)/defs-le.h: $(CGEN_MAINT) stamp-defs-le
-	@true
-
-
-stamp-defs-be: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM)
-	$(MAKE) cgen-defs $(CGEN_FLAGS_TO_PASS) \
-		isa=ebpfbe cpu=bpfbf mach=bpf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-scache" \
-                SUFFIX="-be"
-	$(SILENCE) touch $@
-$(srcdir)/defs-be.h: $(CGEN_MAINT) stamp-defs-be
-	@true
-
-stamp-decode-le: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM) $(GEN_DECODE_SCM)
-	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
-		isa=ebpfle cpu=bpfbf mach=bpf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-scache" \
-                SUFFIX="-le" \
-		EXTRAFILES="$(CGEN_CPU_SEM)"
-	$(SILENCE) touch $@
-$(srcdir)/sem-le.c $(srcdir)/decode-le.c $(srcdir)/decode-le.h: \
-              $(CGEN_MAINT) stamp-decode-le
-	@true
-
-
-stamp-decode-be: $(CGEN_COMMON_DEPS) $(CGEN_CPU_SCM) $(GEN_DECODE_SCM)
-	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
-		isa=ebpfbe cpu=bpfbf mach=bpf \
-		archfile=$(srcdir)/../../cpu/bpf.cpu \
-		FLAGS="with-scache" \
-                SUFFIX="-be" \
-		EXTRAFILES="$(CGEN_CPU_SEM)"
-	$(SILENCE) touch $@
-$(srcdir)/sem-be.c $(srcdir)/decode-be.c $(srcdir)/decode-be.h: \
-              $(CGEN_MAINT) stamp-decode-be
-	@true
-
-.PHONY = bpf-clean
-
-bpf-clean:
-	rm -f stamp-arch stamp-cpu stamp-decode stamp-defs
