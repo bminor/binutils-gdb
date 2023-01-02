@@ -114,6 +114,7 @@ dump_for_expression (struct ui_file *stream, int depth, symbol *sym)
 {
   gdb_printf (stream, _("%*sSymbol: %s\n"), depth, "",
 	      sym->print_name ());
+  dump_for_expression (stream, depth + 1, sym->type ());
 }
 
 void
