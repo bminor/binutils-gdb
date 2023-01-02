@@ -18,6 +18,8 @@
 
 AM_CPPFLAGS_%C% = $(SIM_RX_CYCLE_ACCURATE_FLAGS)
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -30,8 +32,7 @@ AM_CPPFLAGS_%C% = $(SIM_RX_CYCLE_ACCURATE_FLAGS)
 	%D%/syscalls.o \
 	%D%/trace.o \
 	%D%/gdb-if.o \
-	%D%/err.o \
-	%D%/modules.o
+	%D%/err.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a

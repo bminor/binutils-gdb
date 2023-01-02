@@ -30,13 +30,14 @@ AM_CFLAGS_%C%_sem.o = -Wno-error
 AM_CFLAGS_%C%_sim_if.o = -Wno-error
 AM_CFLAGS_%C%_traps.o = -Wno-error
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	$(patsubst %,%D%/dv-%.o,$(%C%_SIM_EXTRA_HW_DEVICES)) \
-	%D%/modules.o \
 	\
 	%D%/cgen-run.o \
 	%D%/cgen-scache.o \

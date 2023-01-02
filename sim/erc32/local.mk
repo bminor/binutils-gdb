@@ -25,6 +25,8 @@ AM_CPPFLAGS_%C% = $(READLINE_CFLAGS)
 ## behaviour of UART interrupt routines ...
 AM_CPPFLAGS_%C% += -DFAST_UART
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -33,8 +35,7 @@ AM_CPPFLAGS_%C% += -DFAST_UART
 	%D%/float.o \
 	%D%/func.o \
 	%D%/help.o \
-	%D%/interf.o \
-	%D%/modules.o
+	%D%/interf.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 
 noinst_LIBRARIES += %D%/libsim.a

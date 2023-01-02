@@ -18,13 +18,14 @@
 
 AM_CPPFLAGS_%C% = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	%D%/interp.o \
-	%D%/modules.o \
 	%D%/sim-resume.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 

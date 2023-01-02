@@ -23,12 +23,13 @@ AM_CPPFLAGS_%C%_decode_be.o = -DWANT_ISA_EBPFBE
 AM_CPPFLAGS_%C%_sem_le.o = -DWANT_ISA_EBPFLE
 AM_CPPFLAGS_%C%_sem_be.o = -DWANT_ISA_EBPFBE
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
-	%D%/modules.o \
 	\
 	%D%/cgen-run.o \
 	%D%/cgen-scache.o \

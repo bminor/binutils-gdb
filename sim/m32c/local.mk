@@ -18,6 +18,8 @@
 
 AM_CPPFLAGS_%C% = -DTIMER_A
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -27,7 +29,6 @@ AM_CPPFLAGS_%C% = -DTIMER_A
 	%D%/m32c.o \
 	%D%/mem.o \
 	%D%/misc.o \
-	%D%/modules.o \
 	%D%/r8c.o \
 	%D%/reg.o \
 	%D%/srcdest.o \

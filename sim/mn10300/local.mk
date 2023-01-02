@@ -20,6 +20,8 @@ AM_CPPFLAGS_%C% = \
 	-DPOLL_QUIT_INTERVAL=0x20 \
 	-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -34,7 +36,6 @@ AM_CPPFLAGS_%C% = \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	$(patsubst %,%D%/dv-%.o,$(%C%_SIM_EXTRA_HW_DEVICES)) \
 	%D%/interp.o \
-	%D%/modules.o \
 	%D%/op_utils.o \
 	%D%/sim-resume.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h

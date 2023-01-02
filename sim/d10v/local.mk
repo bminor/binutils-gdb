@@ -16,6 +16,8 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -23,7 +25,6 @@
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	%D%/endian.o \
-	%D%/modules.o \
 	%D%/sim-resume.o \
 	%D%/simops.o \
 	%D%/table.o

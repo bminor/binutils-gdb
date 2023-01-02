@@ -18,6 +18,8 @@
 
 AM_CPPFLAGS_%C% = -DWITH_TARGET_WORD_BITSIZE=$(SIM_RISCV_BITSIZE)
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -25,7 +27,6 @@ AM_CPPFLAGS_%C% = -DWITH_TARGET_WORD_BITSIZE=$(SIM_RISCV_BITSIZE)
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	%D%/interp.o \
 	%D%/machs.o \
-	%D%/modules.o \
 	%D%/sim-main.o \
 	%D%/sim-resume.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h

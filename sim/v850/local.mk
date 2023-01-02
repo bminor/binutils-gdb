@@ -18,6 +18,8 @@
 
 AM_CPPFLAGS_%C% = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -32,7 +34,6 @@ AM_CPPFLAGS_%C% = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 	%D%/engine.o \
 	%D%/irun.o \
 	%D%/support.o \
-	%D%/modules.o \
 	%D%/sim-resume.o
 $(%C%_libsim_a_OBJECTS) $(%C%_libsim_a_LIBADD): %D%/hw-config.h
 

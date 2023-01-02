@@ -53,6 +53,8 @@ if SIM_MIPS_GEN_MODE_MULTI
 	%D%/itable.o \
 	%D%/multi-run.o
 endif
+nodist_%C%_libsim_a_SOURCES = \
+	%D%/modules.c
 %C%_libsim_a_SOURCES = \
 	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
@@ -64,7 +66,6 @@ endif
 	%D%/cp1.o \
 	%D%/dsp.o \
 	%D%/mdmx.o \
-	%D%/modules.o \
 	%D%/sim-main.o \
 	%D%/sim-resume.o
 ## Workaround Automake bug where $(SIM_MIPS_MULTI_OBJ) isn't copied from LIBADD
