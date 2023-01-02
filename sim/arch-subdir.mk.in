@@ -62,12 +62,6 @@ MAINT = ; @true
 # The following line is commented depending upon --enable-maintainer-mode.
 @MAINTAINER_MODE_TRUE@MAINT =
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-CGENDIR = @cgendir@
-
 SIM_INLINE = @SIM_INLINE@
 
 SIM_HW_CFLAGS = @SIM_HW_CFLAGS@
