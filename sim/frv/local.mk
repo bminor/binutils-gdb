@@ -22,9 +22,9 @@ AM_CPPFLAGS_%C% = $(SIM_FRV_TRAPDUMP_FLAGS)
 AM_CFLAGS_%C%_memory.o = -Wno-error
 AM_CFLAGS_%C%_sem.o = -Wno-error
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	%D%/modules.o \

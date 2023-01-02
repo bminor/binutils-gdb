@@ -16,9 +16,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	%D%/msp430-sim.o \

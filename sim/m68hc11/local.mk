@@ -27,9 +27,9 @@ AM_CPPFLAGS_%C% = \
 	-DWITH_TARGET_ADDRESS_BITSIZE=32 \
 	-DWITH_TARGET_WORD_MSB=31
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/interp.o \
 	%D%/m68hc11int.o \
 	%D%/m68hc12int.o \

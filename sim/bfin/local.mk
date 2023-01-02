@@ -18,9 +18,9 @@
 
 AM_CPPFLAGS_%C% = $(SDL_CFLAGS)
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
 	$(patsubst %,%D%/dv-%.o,$(%C%_SIM_EXTRA_HW_DEVICES)) \

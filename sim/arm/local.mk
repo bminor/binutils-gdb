@@ -18,9 +18,9 @@
 
 AM_CPPFLAGS_%C% = -DMODET
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/wrapper.o \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \

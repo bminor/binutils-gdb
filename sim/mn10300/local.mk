@@ -20,9 +20,9 @@ AM_CPPFLAGS_%C% = \
 	-DPOLL_QUIT_INTERVAL=0x20 \
 	-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/itable.o \
 	%D%/semantics.o \
 	%D%/idecode.o \

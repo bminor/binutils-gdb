@@ -25,9 +25,9 @@ AM_CPPFLAGS_%C% = $(READLINE_CFLAGS)
 ## behaviour of UART interrupt routines ...
 AM_CPPFLAGS_%C% += -DFAST_UART
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/erc32.o \
 	%D%/exec.o \
 	%D%/float.o \

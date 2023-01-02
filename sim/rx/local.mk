@@ -18,9 +18,9 @@
 
 AM_CPPFLAGS_%C% = $(SIM_RX_CYCLE_ACCURATE_FLAGS)
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/fpu.o \
 	%D%/load.o \
 	%D%/mem.o \

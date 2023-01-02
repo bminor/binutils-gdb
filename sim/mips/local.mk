@@ -53,9 +53,9 @@ if SIM_MIPS_GEN_MODE_MULTI
 	%D%/itable.o \
 	%D%/multi-run.o
 endif
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/interp.o \
 	$(%C%_GEN_OBJ) \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \

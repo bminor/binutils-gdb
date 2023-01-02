@@ -30,6 +30,7 @@ SIM_ALL_RECURSIVE_DEPS += \
 
 ## NB: libcommon.a isn't used directly by ports.  We need a target for common
 ## objects to be a part of, and ports use the individual objects directly.
+## We can delete this once ppc/Makefile.in is merged into ppc/local.mk.
 noinst_LIBRARIES += %D%/libcommon.a
 %C%_libcommon_a_SOURCES = \
 	%D%/callback.c \

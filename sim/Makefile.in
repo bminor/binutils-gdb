@@ -396,9 +396,17 @@ aarch64_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/modules.o \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/sim-resume.o \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/simulator.o
-am_aarch64_libsim_a_OBJECTS =
-aarch64_libsim_a_OBJECTS = $(am_aarch64_libsim_a_OBJECTS)
 am__dirstamp = $(am__leading_dot)dirstamp
+am__objects_1 = common/callback.$(OBJEXT) common/portability.$(OBJEXT) \
+	common/sim-load.$(OBJEXT) common/syscall.$(OBJEXT) \
+	common/target-newlib-errno.$(OBJEXT) \
+	common/target-newlib-open.$(OBJEXT) \
+	common/target-newlib-signal.$(OBJEXT) \
+	common/target-newlib-syscall.$(OBJEXT) \
+	common/version.$(OBJEXT)
+@SIM_ENABLE_ARCH_aarch64_TRUE@am_aarch64_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_aarch64_TRUE@	$(am__objects_1)
+aarch64_libsim_a_OBJECTS = $(am_aarch64_libsim_a_OBJECTS)
 arm_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_arm_TRUE@arm_libsim_a_DEPENDENCIES = arm/wrapper.o \
 @SIM_ENABLE_ARCH_arm_TRUE@	$(patsubst \
@@ -411,7 +419,7 @@ arm_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_arm_TRUE@	arm/thumbemu.o arm/armcopro.o \
 @SIM_ENABLE_ARCH_arm_TRUE@	arm/maverick.o arm/iwmmxt.o \
 @SIM_ENABLE_ARCH_arm_TRUE@	arm/modules.o
-am_arm_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_arm_TRUE@am_arm_libsim_a_OBJECTS = $(am__objects_1)
 arm_libsim_a_OBJECTS = $(am_arm_libsim_a_OBJECTS)
 avr_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_avr_TRUE@avr_libsim_a_DEPENDENCIES = avr/interp.o \
@@ -420,7 +428,7 @@ avr_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_avr_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_avr_TRUE@	%,avr/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_avr_TRUE@	avr/modules.o avr/sim-resume.o
-am_avr_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_avr_TRUE@am_avr_libsim_a_OBJECTS = $(am__objects_1)
 avr_libsim_a_OBJECTS = $(am_avr_libsim_a_OBJECTS)
 bfin_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_DEPENDENCIES = $(patsubst \
@@ -433,7 +441,8 @@ bfin_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_bfin_TRUE@	bfin/gui.o bfin/interp.o \
 @SIM_ENABLE_ARCH_bfin_TRUE@	bfin/machs.o bfin/modules.o \
 @SIM_ENABLE_ARCH_bfin_TRUE@	bfin/sim-resume.o
-am_bfin_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_bfin_TRUE@am_bfin_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_bfin_TRUE@	$(am__objects_1)
 bfin_libsim_a_OBJECTS = $(am_bfin_libsim_a_OBJECTS)
 bpf_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_DEPENDENCIES = $(patsubst \
@@ -449,7 +458,7 @@ bpf_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/mloop-be.o bpf/bpf.o \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/bpf-helpers.o bpf/sim-if.o \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/traps.o
-am_bpf_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_bpf_TRUE@am_bpf_libsim_a_OBJECTS = $(am__objects_1)
 bpf_libsim_a_OBJECTS = $(am_bpf_libsim_a_OBJECTS)
 common_libcommon_a_AR = $(AR) $(ARFLAGS)
 common_libcommon_a_LIBADD =
@@ -462,21 +471,18 @@ am_common_libcommon_a_OBJECTS = common/callback.$(OBJEXT) \
 	common/version.$(OBJEXT)
 common_libcommon_a_OBJECTS = $(am_common_libcommon_a_OBJECTS)
 cr16_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_cr16_TRUE@cr16_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_cr16_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_cr16_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_cr16_TRUE@	%,cr16/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_cr16_TRUE@	%,cr16/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/interp.o cr16/modules.o \
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/sim-resume.o cr16/simops.o \
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/table.o
-am_cr16_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_cr16_TRUE@am_cr16_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(am__objects_1)
 cr16_libsim_a_OBJECTS = $(am_cr16_libsim_a_OBJECTS)
 cris_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_cris_TRUE@cris_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_cris_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_cris_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_cris_TRUE@cris_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_cris_TRUE@	%,cris/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_cris_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_cris_TRUE@	%,cris/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -492,32 +498,32 @@ cris_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_cris_TRUE@	cris/decodev32.o cris/modelv32.o \
 @SIM_ENABLE_ARCH_cris_TRUE@	cris/mloopv32f.o cris/sim-if.o \
 @SIM_ENABLE_ARCH_cris_TRUE@	cris/traps.o
-am_cris_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_cris_TRUE@am_cris_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_cris_TRUE@	$(am__objects_1)
 cris_libsim_a_OBJECTS = $(am_cris_libsim_a_OBJECTS)
 d10v_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_d10v_TRUE@d10v_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_d10v_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/interp.o $(patsubst \
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_libsim_a_DEPENDENCIES = d10v/interp.o \
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_d10v_TRUE@	%,d10v/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_d10v_TRUE@	%,d10v/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/endian.o d10v/modules.o \
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/sim-resume.o d10v/simops.o \
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/table.o
-am_d10v_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_d10v_TRUE@am_d10v_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(am__objects_1)
 d10v_libsim_a_OBJECTS = $(am_d10v_libsim_a_OBJECTS)
 erc32_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_erc32_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/erc32.o erc32/exec.o \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/float.o erc32/func.o \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/help.o erc32/interf.o \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/modules.o
-am_erc32_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_erc32_TRUE@am_erc32_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_erc32_TRUE@	$(am__objects_1)
 erc32_libsim_a_OBJECTS = $(am_erc32_libsim_a_OBJECTS)
 example_synacor_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_examples_TRUE@example_synacor_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_examples_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_examples_TRUE@	%,example-synacor/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(patsubst \
@@ -526,13 +532,12 @@ example_synacor_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_examples_TRUE@	example-synacor/modules.o \
 @SIM_ENABLE_ARCH_examples_TRUE@	example-synacor/sim-main.o \
 @SIM_ENABLE_ARCH_examples_TRUE@	example-synacor/sim-resume.o
-am_example_synacor_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_examples_TRUE@am_example_synacor_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_examples_TRUE@	$(am__objects_1)
 example_synacor_libsim_a_OBJECTS =  \
 	$(am_example_synacor_libsim_a_OBJECTS)
 frv_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_frv_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_frv_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_frv_TRUE@	%,frv/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_frv_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_frv_TRUE@	%,frv/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -550,28 +555,27 @@ frv_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/profile-fr500.o \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/profile-fr550.o frv/registers.o \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/reset.o frv/sim-if.o frv/traps.o
-am_frv_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_frv_TRUE@am_frv_libsim_a_OBJECTS = $(am__objects_1)
 frv_libsim_a_OBJECTS = $(am_frv_libsim_a_OBJECTS)
 ft32_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_ft32_TRUE@ft32_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_ft32_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_ft32_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_ft32_TRUE@ft32_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_ft32_TRUE@	%,ft32/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_ft32_TRUE@	%,ft32/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_ft32_TRUE@	ft32/interp.o ft32/modules.o \
 @SIM_ENABLE_ARCH_ft32_TRUE@	ft32/sim-resume.o
-am_ft32_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_ft32_TRUE@am_ft32_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_ft32_TRUE@	$(am__objects_1)
 ft32_libsim_a_OBJECTS = $(am_ft32_libsim_a_OBJECTS)
 h8300_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_h8300_TRUE@h8300_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_h8300_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_h8300_TRUE@	h8300/compile.o $(patsubst \
 @SIM_ENABLE_ARCH_h8300_TRUE@	%,h8300/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_h8300_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_h8300_TRUE@	%,h8300/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_h8300_TRUE@	h8300/modules.o h8300/sim-resume.o
-am_h8300_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_h8300_TRUE@am_h8300_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_h8300_TRUE@	$(am__objects_1)
 h8300_libsim_a_OBJECTS = $(am_h8300_libsim_a_OBJECTS)
 igen_libigen_a_AR = $(AR) $(ARFLAGS)
 igen_libigen_a_LIBADD =
@@ -594,7 +598,6 @@ igen_libigen_a_LIBADD =
 igen_libigen_a_OBJECTS = $(am_igen_libigen_a_OBJECTS)
 iq2000_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_iq2000_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	%,iq2000/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(patsubst \
@@ -608,12 +611,11 @@ iq2000_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/iq2000.o iq2000/sem.o \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/mloop.o iq2000/model.o \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/sim-if.o
-am_iq2000_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_iq2000_TRUE@am_iq2000_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_iq2000_TRUE@	$(am__objects_1)
 iq2000_libsim_a_OBJECTS = $(am_iq2000_libsim_a_OBJECTS)
 lm32_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_lm32_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_lm32_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_lm32_TRUE@	%,lm32/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_lm32_TRUE@	%,lm32/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -627,23 +629,21 @@ lm32_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/mloop.o lm32/model.o \
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/lm32.o lm32/sim-if.o \
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/traps.o lm32/user.o
-am_lm32_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_lm32_TRUE@am_lm32_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_lm32_TRUE@	$(am__objects_1)
 lm32_libsim_a_OBJECTS = $(am_lm32_libsim_a_OBJECTS)
 m32c_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_m32c_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/gdb-if.o m32c/int.o \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/load.o m32c/m32c.o m32c/mem.o \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/misc.o m32c/modules.o \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/r8c.o m32c/reg.o \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/srcdest.o m32c/syscalls.o \
-@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/trace.o
-am_m32c_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_DEPENDENCIES = m32c/gdb-if.o \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/int.o m32c/load.o m32c/m32c.o \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/mem.o m32c/misc.o \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/modules.o m32c/r8c.o \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/reg.o m32c/srcdest.o \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/syscalls.o m32c/trace.o
+@SIM_ENABLE_ARCH_m32c_TRUE@am_m32c_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(am__objects_1)
 m32c_libsim_a_OBJECTS = $(am_m32c_libsim_a_OBJECTS)
 m32r_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_m32r_TRUE@	%,m32r/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_m32r_TRUE@	%,m32r/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -661,11 +661,11 @@ m32r_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/cpu2.o m32r/decode2.o \
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/model2.o m32r/mloop2.o \
 @SIM_ENABLE_ARCH_m32r_TRUE@	m32r/sim-if.o m32r/traps.o
-am_m32r_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_m32r_TRUE@am_m32r_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(am__objects_1)
 m32r_libsim_a_OBJECTS = $(am_m32r_libsim_a_OBJECTS)
 m68hc11_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/interp.o \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc11int.o \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.o \
@@ -679,20 +679,21 @@ m68hc11_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	%,m68hc11/dv-%.o,$(m68hc11_SIM_EXTRA_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/modules.o \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/sim-resume.o
-am_m68hc11_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am_m68hc11_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(am__objects_1)
 m68hc11_libsim_a_OBJECTS = $(am_m68hc11_libsim_a_OBJECTS)
 mcore_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_mcore_TRUE@mcore_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_mcore_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_mcore_TRUE@	mcore/interp.o $(patsubst \
 @SIM_ENABLE_ARCH_mcore_TRUE@	%,mcore/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_mcore_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_mcore_TRUE@	%,mcore/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_mcore_TRUE@	mcore/modules.o mcore/sim-resume.o
-am_mcore_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_mcore_TRUE@am_mcore_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_mcore_TRUE@	$(am__objects_1)
 mcore_libsim_a_OBJECTS = $(am_mcore_libsim_a_OBJECTS)
 microblaze_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze_libsim_a_DEPENDENCIES = $(common_libcommon_a_OBJECTS) \
+@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze_libsim_a_DEPENDENCIES =  \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	microblaze/interp.o \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	%,microblaze/%,$(SIM_NEW_COMMON_OBJS)) \
@@ -700,7 +701,8 @@ microblaze_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_microblaze_TRUE@	%,microblaze/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	microblaze/modules.o \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	microblaze/sim-resume.o
-am_microblaze_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_microblaze_TRUE@am_microblaze_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_microblaze_TRUE@	$(am__objects_1)
 microblaze_libsim_a_OBJECTS = $(am_microblaze_libsim_a_OBJECTS)
 mips_libsim_a_AR = $(AR) $(ARFLAGS)
 am__DEPENDENCIES_1 =
@@ -710,10 +712,8 @@ am__DEPENDENCIES_1 =
 @SIM_ENABLE_ARCH_mips_TRUE@am__DEPENDENCIES_3 = $(am__append_81) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(am__append_82) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(am__DEPENDENCIES_2)
-@SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_mips_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_mips_TRUE@	mips/interp.o $(am__DEPENDENCIES_3) \
-@SIM_ENABLE_ARCH_mips_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_DEPENDENCIES = mips/interp.o \
+@SIM_ENABLE_ARCH_mips_TRUE@	$(am__DEPENDENCIES_3) $(patsubst \
 @SIM_ENABLE_ARCH_mips_TRUE@	%,mips/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_mips_TRUE@	%,mips/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -722,11 +722,11 @@ am__DEPENDENCIES_1 =
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/cp1.o mips/dsp.o mips/mdmx.o \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/modules.o mips/sim-main.o \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/sim-resume.o
-am_mips_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_mips_TRUE@am_mips_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_mips_TRUE@	$(am__objects_1)
 mips_libsim_a_OBJECTS = $(am_mips_libsim_a_OBJECTS)
 mn10300_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/itable.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/semantics.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/idecode.o \
@@ -742,22 +742,21 @@ mn10300_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/modules.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/op_utils.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/sim-resume.o
-am_mn10300_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_mn10300_TRUE@am_mn10300_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(am__objects_1)
 mn10300_libsim_a_OBJECTS = $(am_mn10300_libsim_a_OBJECTS)
 moxie_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_moxie_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_moxie_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_moxie_TRUE@	%,moxie/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_moxie_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_moxie_TRUE@	%,moxie/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_moxie_TRUE@	moxie/interp.o moxie/modules.o \
 @SIM_ENABLE_ARCH_moxie_TRUE@	moxie/sim-resume.o
-am_moxie_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_moxie_TRUE@am_moxie_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_moxie_TRUE@	$(am__objects_1)
 moxie_libsim_a_OBJECTS = $(am_moxie_libsim_a_OBJECTS)
 msp430_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_msp430_TRUE@msp430_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_msp430_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_msp430_TRUE@	%,msp430/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(patsubst \
@@ -765,12 +764,11 @@ msp430_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_msp430_TRUE@	msp430/msp430-sim.o \
 @SIM_ENABLE_ARCH_msp430_TRUE@	msp430/modules.o \
 @SIM_ENABLE_ARCH_msp430_TRUE@	msp430/sim-resume.o
-am_msp430_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_msp430_TRUE@am_msp430_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_msp430_TRUE@	$(am__objects_1)
 msp430_libsim_a_OBJECTS = $(am_msp430_libsim_a_OBJECTS)
 or1k_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_or1k_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_or1k_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_or1k_TRUE@	%,or1k/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_or1k_TRUE@	%,or1k/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -782,62 +780,55 @@ or1k_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/decode.o or1k/mloop.o \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/model.o or1k/sem.o or1k/or1k.o \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/sim-if.o or1k/traps.o
-am_or1k_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_or1k_TRUE@am_or1k_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_or1k_TRUE@	$(am__objects_1)
 or1k_libsim_a_OBJECTS = $(am_or1k_libsim_a_OBJECTS)
 pru_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_pru_TRUE@pru_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_pru_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_pru_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_pru_TRUE@pru_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_pru_TRUE@	%,pru/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_pru_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_pru_TRUE@	%,pru/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_pru_TRUE@	pru/interp.o pru/modules.o \
 @SIM_ENABLE_ARCH_pru_TRUE@	pru/sim-resume.o
-am_pru_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_pru_TRUE@am_pru_libsim_a_OBJECTS = $(am__objects_1)
 pru_libsim_a_OBJECTS = $(am_pru_libsim_a_OBJECTS)
 riscv_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_riscv_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_riscv_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_riscv_TRUE@	%,riscv/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_riscv_TRUE@	%,riscv/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_riscv_TRUE@	riscv/interp.o riscv/machs.o \
 @SIM_ENABLE_ARCH_riscv_TRUE@	riscv/modules.o riscv/sim-main.o \
 @SIM_ENABLE_ARCH_riscv_TRUE@	riscv/sim-resume.o
-am_riscv_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_riscv_TRUE@am_riscv_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_riscv_TRUE@	$(am__objects_1)
 riscv_libsim_a_OBJECTS = $(am_riscv_libsim_a_OBJECTS)
 rl78_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_rl78_TRUE@rl78_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_rl78_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/load.o rl78/mem.o rl78/cpu.o \
-@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/rl78.o rl78/gdb-if.o \
-@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/modules.o rl78/trace.o
-am_rl78_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_rl78_TRUE@rl78_libsim_a_DEPENDENCIES = rl78/load.o \
+@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/mem.o rl78/cpu.o rl78/rl78.o \
+@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/gdb-if.o rl78/modules.o \
+@SIM_ENABLE_ARCH_rl78_TRUE@	rl78/trace.o
+@SIM_ENABLE_ARCH_rl78_TRUE@am_rl78_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_rl78_TRUE@	$(am__objects_1)
 rl78_libsim_a_OBJECTS = $(am_rl78_libsim_a_OBJECTS)
 rx_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_rx_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_rx_TRUE@	rx/fpu.o rx/load.o rx/mem.o rx/misc.o \
-@SIM_ENABLE_ARCH_rx_TRUE@	rx/reg.o rx/rx.o rx/syscalls.o \
-@SIM_ENABLE_ARCH_rx_TRUE@	rx/trace.o rx/gdb-if.o rx/err.o \
-@SIM_ENABLE_ARCH_rx_TRUE@	rx/modules.o
-am_rx_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_DEPENDENCIES = rx/fpu.o rx/load.o \
+@SIM_ENABLE_ARCH_rx_TRUE@	rx/mem.o rx/misc.o rx/reg.o rx/rx.o \
+@SIM_ENABLE_ARCH_rx_TRUE@	rx/syscalls.o rx/trace.o rx/gdb-if.o \
+@SIM_ENABLE_ARCH_rx_TRUE@	rx/err.o rx/modules.o
+@SIM_ENABLE_ARCH_rx_TRUE@am_rx_libsim_a_OBJECTS = $(am__objects_1)
 rx_libsim_a_OBJECTS = $(am_rx_libsim_a_OBJECTS)
 sh_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_sh_TRUE@sh_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_sh_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_sh_TRUE@	sh/interp.o $(patsubst \
+@SIM_ENABLE_ARCH_sh_TRUE@sh_libsim_a_DEPENDENCIES = sh/interp.o \
+@SIM_ENABLE_ARCH_sh_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_sh_TRUE@	%,sh/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_sh_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_sh_TRUE@	%,sh/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/modules.o sh/table.o
-am_sh_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_sh_TRUE@am_sh_libsim_a_OBJECTS = $(am__objects_1)
 sh_libsim_a_OBJECTS = $(am_sh_libsim_a_OBJECTS)
 v850_libsim_a_AR = $(AR) $(ARFLAGS)
-@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_DEPENDENCIES =  \
-@SIM_ENABLE_ARCH_v850_TRUE@	$(common_libcommon_a_OBJECTS) \
-@SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst \
+@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_DEPENDENCIES = $(patsubst \
 @SIM_ENABLE_ARCH_v850_TRUE@	%,v850/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst \
 @SIM_ENABLE_ARCH_v850_TRUE@	%,v850/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -847,7 +838,8 @@ v850_libsim_a_AR = $(AR) $(ARFLAGS)
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.o v850/irun.o \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/support.o v850/modules.o \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/sim-resume.o
-am_v850_libsim_a_OBJECTS =
+@SIM_ENABLE_ARCH_v850_TRUE@am_v850_libsim_a_OBJECTS =  \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(am__objects_1)
 v850_libsim_a_OBJECTS = $(am_v850_libsim_a_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@am__EXEEXT_1 = $(IGEN) igen/filter$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/gen$(EXEEXT) igen/ld-cache$(EXEEXT) \
@@ -1966,9 +1958,10 @@ testsuite_common_CPPFLAGS = \
 	-I$(srcroot)/include \
 	-I../bfd
 
-@SIM_ENABLE_ARCH_aarch64_TRUE@aarch64_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_aarch64_TRUE@aarch64_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_aarch64_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_aarch64_TRUE@aarch64_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_aarch64_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	$(patsubst %,aarch64/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	$(patsubst %,aarch64/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	aarch64/cpustate.o \
@@ -1985,9 +1978,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_aarch64_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_arm_TRUE@AM_CPPFLAGS_arm = -DMODET
-@SIM_ENABLE_ARCH_arm_TRUE@arm_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_arm_TRUE@arm_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_arm_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_arm_TRUE@arm_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_arm_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_arm_TRUE@	arm/wrapper.o \
 @SIM_ENABLE_ARCH_arm_TRUE@	$(patsubst %,arm/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_arm_TRUE@	$(patsubst %,arm/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2005,9 +1999,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_arm_TRUE@armdocdir = $(docdir)/arm
 @SIM_ENABLE_ARCH_arm_TRUE@armdoc_DATA = arm/README
-@SIM_ENABLE_ARCH_avr_TRUE@avr_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_avr_TRUE@avr_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_avr_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_avr_TRUE@avr_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_avr_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_avr_TRUE@	avr/interp.o \
 @SIM_ENABLE_ARCH_avr_TRUE@	$(patsubst %,avr/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_avr_TRUE@	$(patsubst %,avr/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2021,9 +2016,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_avr_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_bfin_TRUE@AM_CPPFLAGS_bfin = $(SDL_CFLAGS)
-@SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_bfin_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_bfin_TRUE@bfin_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_bfin_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(patsubst %,bfin/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(patsubst %,bfin/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_bfin_TRUE@	$(patsubst %,bfin/dv-%.o,$(bfin_SIM_EXTRA_HW_DEVICES)) \
@@ -2081,9 +2077,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_decode_be.o = -DWANT_ISA_EBPFBE
 @SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_sem_le.o = -DWANT_ISA_EBPFLE
 @SIM_ENABLE_ARCH_bpf_TRUE@AM_CPPFLAGS_bpf_sem_be.o = -DWANT_ISA_EBPFBE
-@SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_bpf_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_bpf_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(patsubst %,bpf/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_bpf_TRUE@	$(patsubst %,bpf/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/modules.o \
@@ -2119,9 +2116,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/mloop-be.c \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/stamp-mloop-be
 
-@SIM_ENABLE_ARCH_cr16_TRUE@cr16_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_cr16_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(patsubst %,cr16/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(patsubst %,cr16/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_cr16_TRUE@	cr16/interp.o \
@@ -2142,9 +2140,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_SOURCES = cr16/gencode.c
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_LDADD = cr16/cr16-opc.o
-@SIM_ENABLE_ARCH_cris_TRUE@cris_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_cris_TRUE@cris_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_cris_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_cris_TRUE@cris_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_cris_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_cris_TRUE@	$(patsubst %,cris/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_cris_TRUE@	$(patsubst %,cris/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_cris_TRUE@	$(patsubst %,cris/dv-%.o,$(cris_SIM_EXTRA_HW_DEVICES)) \
@@ -2185,9 +2184,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_cris_TRUE@	cris/mloopv32f.c \
 @SIM_ENABLE_ARCH_cris_TRUE@	cris/stamp-mloop-v32f
 
-@SIM_ENABLE_ARCH_d10v_TRUE@d10v_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_d10v_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_d10v_TRUE@	d10v/interp.o \
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(patsubst %,d10v/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(patsubst %,d10v/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2212,9 +2212,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_erc32_TRUE@READLINE_SRC = $(srcroot)/readline/readline
 @SIM_ENABLE_ARCH_erc32_TRUE@AM_CPPFLAGS_erc32 = $(READLINE_CFLAGS) \
 @SIM_ENABLE_ARCH_erc32_TRUE@	-DFAST_UART
-@SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_erc32_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_erc32_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/erc32.o \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/exec.o \
 @SIM_ENABLE_ARCH_erc32_TRUE@	erc32/float.o \
@@ -2231,9 +2232,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32docdir = $(docdir)/erc32
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32doc_DATA = erc32/README.erc32 erc32/README.gdb erc32/README.sis
-@SIM_ENABLE_ARCH_examples_TRUE@example_synacor_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_examples_TRUE@example_synacor_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_examples_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_examples_TRUE@example_synacor_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_examples_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(patsubst %,example-synacor/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_examples_TRUE@	$(patsubst %,example-synacor/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_examples_TRUE@	example-synacor/interp.o \
@@ -2250,9 +2252,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_frv_TRUE@AM_CPPFLAGS_frv = $(SIM_FRV_TRAPDUMP_FLAGS)
 @SIM_ENABLE_ARCH_frv_TRUE@AM_CFLAGS_frv_memory.o = -Wno-error
 @SIM_ENABLE_ARCH_frv_TRUE@AM_CFLAGS_frv_sem.o = -Wno-error
-@SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_frv_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_frv_TRUE@frv_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_frv_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_frv_TRUE@	$(patsubst %,frv/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_frv_TRUE@	$(patsubst %,frv/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/modules.o \
@@ -2300,9 +2303,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/mloop.c \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/stamp-mloop
 
-@SIM_ENABLE_ARCH_ft32_TRUE@ft32_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_ft32_TRUE@ft32_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_ft32_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_ft32_TRUE@ft32_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_ft32_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(patsubst %,ft32/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(patsubst %,ft32/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_ft32_TRUE@	ft32/interp.o \
@@ -2315,9 +2319,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_ft32_TRUE@	ft32/libsim.a \
 @SIM_ENABLE_ARCH_ft32_TRUE@	$(SIM_COMMON_LIBS)
 
-@SIM_ENABLE_ARCH_h8300_TRUE@h8300_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_h8300_TRUE@h8300_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_h8300_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_h8300_TRUE@h8300_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_h8300_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_h8300_TRUE@	h8300/compile.o \
 @SIM_ENABLE_ARCH_h8300_TRUE@	$(patsubst %,h8300/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_h8300_TRUE@	$(patsubst %,h8300/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2330,9 +2335,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_h8300_TRUE@	h8300/libsim.a \
 @SIM_ENABLE_ARCH_h8300_TRUE@	$(SIM_COMMON_LIBS)
 
-@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_iq2000_TRUE@iq2000_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_iq2000_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_iq2000_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(patsubst %,iq2000/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(patsubst %,iq2000/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/modules.o \
@@ -2362,9 +2368,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/mloop.c \
 @SIM_ENABLE_ARCH_iq2000_TRUE@	iq2000/stamp-mloop
 
-@SIM_ENABLE_ARCH_lm32_TRUE@lm32_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_lm32_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_lm32_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(patsubst %,lm32/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(patsubst %,lm32/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(patsubst %,lm32/dv-%.o,$(lm32_SIM_EXTRA_HW_DEVICES)) \
@@ -2399,9 +2406,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_lm32_TRUE@	lm32/stamp-mloop
 
 @SIM_ENABLE_ARCH_m32c_TRUE@AM_CPPFLAGS_m32c = -DTIMER_A
-@SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_m32c_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/gdb-if.o \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/int.o \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/load.o \
@@ -2443,9 +2451,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_sem.o = -Wno-error
 @SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_sim_if.o = -Wno-error
 @SIM_ENABLE_ARCH_m32r_TRUE@AM_CFLAGS_m32r_traps.o = -Wno-error
-@SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_m32r_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_m32r_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(patsubst %,m32r/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(patsubst %,m32r/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(patsubst %,m32r/dv-%.o,$(m32r_SIM_EXTRA_HW_DEVICES)) \
@@ -2501,9 +2510,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_ADDRESS_BITSIZE=32 \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	-DWITH_TARGET_WORD_MSB=31
 
-@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/interp.o \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc11int.o \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.o \
@@ -2529,9 +2539,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.c
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_SOURCES = m68hc11/gencode.c
-@SIM_ENABLE_ARCH_mcore_TRUE@mcore_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_mcore_TRUE@mcore_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_mcore_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_mcore_TRUE@mcore_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_mcore_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_mcore_TRUE@	mcore/interp.o \
 @SIM_ENABLE_ARCH_mcore_TRUE@	$(patsubst %,mcore/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_mcore_TRUE@	$(patsubst %,mcore/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2544,9 +2555,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mcore_TRUE@	mcore/libsim.a \
 @SIM_ENABLE_ARCH_mcore_TRUE@	$(SIM_COMMON_LIBS)
 
-@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_microblaze_TRUE@microblaze_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_microblaze_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_microblaze_TRUE@microblaze_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_microblaze_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	microblaze/interp.o \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(patsubst %,microblaze/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_microblaze_TRUE@	$(patsubst %,microblaze/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2566,9 +2578,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_mips_TRUE@mips_GEN_OBJ = $(am__append_81) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(am__append_82) $(am__append_83)
-@SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_mips_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_mips_TRUE@mips_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_mips_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_mips_TRUE@	mips/interp.o \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(mips_GEN_OBJ) \
 @SIM_ENABLE_ARCH_mips_TRUE@	$(patsubst %,mips/%,$(SIM_NEW_COMMON_OBJS)) \
@@ -2661,9 +2674,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	-DPOLL_QUIT_INTERVAL=0x20 \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
 
-@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_mn10300_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/itable.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/semantics.o \
 @SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/idecode.o \
@@ -2712,9 +2726,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN_INC = mn10300/am33.igen mn10300/am33-2.igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_DC = $(srcdir)/mn10300/mn10300.dc
 @SIM_ENABLE_ARCH_moxie_TRUE@AM_CPPFLAGS_moxie = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
-@SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_moxie_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_moxie_TRUE@moxie_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_moxie_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_moxie_TRUE@	$(patsubst %,moxie/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_moxie_TRUE@	$(patsubst %,moxie/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_moxie_TRUE@	moxie/interp.o \
@@ -2729,9 +2744,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_moxie_TRUE@dtbdir = $(datadir)/gdb/dtb
 @SIM_ENABLE_ARCH_moxie_TRUE@dtb_DATA = moxie/moxie-gdb.dtb
-@SIM_ENABLE_ARCH_msp430_TRUE@msp430_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_msp430_TRUE@msp430_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_msp430_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_msp430_TRUE@msp430_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_msp430_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(patsubst %,msp430/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(patsubst %,msp430/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_msp430_TRUE@	msp430/msp430-sim.o \
@@ -2745,9 +2761,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_msp430_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_or1k_TRUE@AM_CPPFLAGS_or1k = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
-@SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_or1k_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_or1k_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(patsubst %,or1k/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(patsubst %,or1k/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/modules.o \
@@ -2790,9 +2807,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdocdir = $(docdir)/ppc
 @SIM_ENABLE_ARCH_ppc_TRUE@ppcdoc_DATA = ppc/BUGS ppc/INSTALL ppc/README ppc/RUN
-@SIM_ENABLE_ARCH_pru_TRUE@pru_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_pru_TRUE@pru_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_pru_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_pru_TRUE@pru_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_pru_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_pru_TRUE@	$(patsubst %,pru/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_pru_TRUE@	$(patsubst %,pru/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_pru_TRUE@	pru/interp.o \
@@ -2806,9 +2824,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_pru_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_riscv_TRUE@AM_CPPFLAGS_riscv = -DWITH_TARGET_WORD_BITSIZE=$(SIM_RISCV_BITSIZE)
-@SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_riscv_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_riscv_TRUE@riscv_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_riscv_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(patsubst %,riscv/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(patsubst %,riscv/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_riscv_TRUE@	riscv/interp.o \
@@ -2823,9 +2842,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_riscv_TRUE@	riscv/libsim.a \
 @SIM_ENABLE_ARCH_riscv_TRUE@	$(SIM_COMMON_LIBS)
 
-@SIM_ENABLE_ARCH_rl78_TRUE@rl78_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_rl78_TRUE@rl78_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_rl78_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_rl78_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_rl78_TRUE@	rl78/load.o \
 @SIM_ENABLE_ARCH_rl78_TRUE@	rl78/mem.o \
 @SIM_ENABLE_ARCH_rl78_TRUE@	rl78/cpu.o \
@@ -2841,9 +2861,10 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_rl78_TRUE@	$(SIM_COMMON_LIBS)
 
 @SIM_ENABLE_ARCH_rx_TRUE@AM_CPPFLAGS_rx = $(SIM_RX_CYCLE_ACCURATE_FLAGS)
-@SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_rx_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_rx_TRUE@rx_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_rx_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_rx_TRUE@	rx/fpu.o \
 @SIM_ENABLE_ARCH_rx_TRUE@	rx/load.o \
 @SIM_ENABLE_ARCH_rx_TRUE@	rx/mem.o \
@@ -2864,9 +2885,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_rx_TRUE@rxdocdir = $(docdir)/rx
 @SIM_ENABLE_ARCH_rx_TRUE@rxdoc_DATA = rx/README.txt
-@SIM_ENABLE_ARCH_sh_TRUE@sh_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_sh_TRUE@sh_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_sh_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_sh_TRUE@sh_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_sh_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/interp.o \
 @SIM_ENABLE_ARCH_sh_TRUE@	$(patsubst %,sh/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_sh_TRUE@	$(patsubst %,sh/dv-%.o,$(SIM_HW_DEVICES)) \
@@ -2885,9 +2907,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_SOURCES = sh/gencode.c
 @SIM_ENABLE_ARCH_v850_TRUE@AM_CPPFLAGS_v850 = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
-@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_SOURCES = 
+@SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_SOURCES = \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(common_libcommon_a_SOURCES)
+
 @SIM_ENABLE_ARCH_v850_TRUE@v850_libsim_a_LIBADD = \
-@SIM_ENABLE_ARCH_v850_TRUE@	$(common_libcommon_a_OBJECTS) \
 @SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst %,v850/%,$(SIM_NEW_COMMON_OBJS)) \
 @SIM_ENABLE_ARCH_v850_TRUE@	$(patsubst %,v850/dv-%.o,$(SIM_HW_DEVICES)) \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/simops.o \
@@ -3057,6 +3080,30 @@ arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+common/$(am__dirstamp):
+	@$(MKDIR_P) common
+	@: > common/$(am__dirstamp)
+common/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) common/$(DEPDIR)
+	@: > common/$(DEPDIR)/$(am__dirstamp)
+common/callback.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/portability.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/sim-load.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/syscall.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-errno.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-open.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-signal.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-syscall.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/version.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
 aarch64/$(am__dirstamp):
 	@$(MKDIR_P) aarch64
 	@: > aarch64/$(am__dirstamp)
@@ -3097,30 +3144,6 @@ bpf/libsim.a: $(bpf_libsim_a_OBJECTS) $(bpf_libsim_a_DEPENDENCIES) $(EXTRA_bpf_l
 	$(AM_V_at)-rm -f bpf/libsim.a
 	$(AM_V_AR)$(bpf_libsim_a_AR) bpf/libsim.a $(bpf_libsim_a_OBJECTS) $(bpf_libsim_a_LIBADD)
 	$(AM_V_at)$(RANLIB) bpf/libsim.a
-common/$(am__dirstamp):
-	@$(MKDIR_P) common
-	@: > common/$(am__dirstamp)
-common/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) common/$(DEPDIR)
-	@: > common/$(DEPDIR)/$(am__dirstamp)
-common/callback.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/portability.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/sim-load.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/syscall.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/target-newlib-errno.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/target-newlib-open.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/target-newlib-signal.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/target-newlib-syscall.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
-common/version.$(OBJEXT): common/$(am__dirstamp) \
-	common/$(DEPDIR)/$(am__dirstamp)
 
 common/libcommon.a: $(common_libcommon_a_OBJECTS) $(common_libcommon_a_DEPENDENCIES) $(EXTRA_common_libcommon_a_DEPENDENCIES) common/$(am__dirstamp)
 	$(AM_V_at)-rm -f common/libcommon.a

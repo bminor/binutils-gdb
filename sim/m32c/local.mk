@@ -18,9 +18,9 @@
 
 AM_CPPFLAGS_%C% = -DTIMER_A
 
-%C%_libsim_a_SOURCES =
+%C%_libsim_a_SOURCES = \
+	$(common_libcommon_a_SOURCES)
 %C%_libsim_a_LIBADD = \
-	$(common_libcommon_a_OBJECTS) \
 	%D%/gdb-if.o \
 	%D%/int.o \
 	%D%/load.o \
