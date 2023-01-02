@@ -3552,6 +3552,22 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/mloop-v32f.cin cris/mloopv32f.c
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cgen: cris/cgen-arch cris/cgen-cpu-decode-v10f cris/cgen-cpu-decode-v32f
+
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-arch:
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)mach=crisv10,crisv32 FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_cris_TRUE@cris/arch.h cris/arch.c cris/cpuall.h: @CGEN_MAINT@ cris/cgen-arch
+
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-cpu-decode-v10f:
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv10-switch.c $(srcdir)/cris/semcrisv10f-switch.c
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv10.h cris/cpuv10.c cris/semcrisv10f-switch.c cris/modelv10.c cris/decodev10.c cris/decodev10.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v10f
+
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cgen-cpu-decode-v32f:
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $(srcdir)/cris/semv32-switch.c $(srcdir)/cris/semcrisv32f-switch.c
+@SIM_ENABLE_ARCH_cris_TRUE@cris/cpuv32.h cris/cpuv32.c cris/semcrisv32f-switch.c cris/modelv32.c cris/decodev32.c cris/decodev32.h: @CGEN_MAINT@ cris/cgen-cpu-decode-v32f
+
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/gencode$(EXEEXT): $(d10v_gencode_OBJECTS) $(d10v_gencode_DEPENDENCIES) d10v/$(am__dirstamp)
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(d10v_gencode_OBJECTS) $(d10v_gencode_LDADD)

@@ -33,37 +33,4 @@ SIM_OBJS = \
 	$(CRISV32F_OBJS) \
 	traps.o
 
-SIM_EXTRA_CLEAN = cris-clean
-
 ## COMMON_POST_CONFIG_FRAG
-
-cris-clean:
-	-rm -f stamp-arch
-	-rm -f tmp-*
-
-# Useful when making CGEN-generated files manually, without --enable-cgen-maint.
-stamps: stamp-arch stamp-v10fcpu stamp-v32fcpu
-
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/cris.cpu Makefile
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=crisv10,crisv32 \
-	  archfile=$(CPU_DIR)/cris.cpu \
-	  FLAGS="with-scache with-profile=fn"
-	$(SILENCE) touch $@
-arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
-
-# The sed-hack is supposed to be temporary, until we get CGEN to emit it.
-stamp-v10fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cris.cpu Makefile
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  archfile=$(CPU_DIR)/cris.cpu \
-	  cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv10-switch.c $(srcdir)/semcrisv10f-switch.c
-	$(SILENCE) touch $@
-cpuv10.h cpuv10.c semcrisv10f-switch.c modelv10.c decodev10.c decodev10.h: $(CGEN_MAINT) stamp-v10fcpu
-
-stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cris.cpu Makefile
-	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  archfile=$(CPU_DIR)/cris.cpu \
-	  cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv32-switch.c $(srcdir)/semcrisv32f-switch.c
-	$(SILENCE) touch $@
-cpuv32.h cpuv32.c semcrisv32f-switch.c modelv32.c decodev32.c decodev32.h: $(CGEN_MAINT) stamp-v32fcpu
