@@ -3646,6 +3646,16 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change lm32/mloop.cin lm32/mloop.c
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/cgen: lm32/cgen-arch lm32/cgen-cpu-decode
+
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/cgen-arch:
+@SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)mach=all FLAGS="with-scache with-profile=fn"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/arch.h lm32/arch.c lm32/cpuall.h: @CGEN_MAINT@ lm32/cgen-arch
+
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/cgen-cpu-decode:
+@SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)cpu=lm32bf mach=lm32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_lm32_TRUE@lm32/cpu.h lm32/sem.c lm32/sem-switch.c lm32/model.c lm32/decode.c lm32/decode.h: @CGEN_MAINT@ lm32/cgen-cpu-decode
+
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: m32c/%.c | m32c/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
