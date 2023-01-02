@@ -83,8 +83,7 @@ BUILT_SOURCES += \
 	$(%C%_BUILT_SRC_FROM_IGEN) \
 	%D%/stamp-igen
 
-## This makes sure build tools are available before building the arch-subdirs.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+## Generating modules.c requires all sources to scan.
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 $(%C%_BUILT_SRC_FROM_IGEN): %D%/stamp-igen

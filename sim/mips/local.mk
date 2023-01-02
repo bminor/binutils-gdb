@@ -154,8 +154,7 @@ if SIM_MIPS_GEN_MODE_MULTI
 	%D%/stamp-gen-mode-multi-run
 endif
 
-## This makes sure build tools are available before building the arch-subdirs.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+## Generating modules.c requires all sources to scan.
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 $(%C%_BUILT_SRC_FROM_IGEN_ITABLE): %D%/stamp-igen-itable

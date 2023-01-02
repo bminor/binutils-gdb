@@ -63,8 +63,7 @@ noinst_PROGRAMS += %D%/run
 	%D%/m68hc11int.c \
 	%D%/m68hc12int.c
 
-## This makes sure build tools are available before building the arch-subdirs.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+## Generating modules.c requires all sources to scan.
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c

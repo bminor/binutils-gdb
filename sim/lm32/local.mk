@@ -63,8 +63,7 @@ BUILT_SOURCES += %D%/eng.h
 	%D%/mloop.c \
 	%D%/stamp-mloop
 
-## This makes sure build tools are available before building the arch-subdirs.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+## Generating modules.c requires all sources to scan.
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 ## FIXME: Use of `mono' is wip.

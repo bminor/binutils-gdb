@@ -48,8 +48,7 @@ BUILT_SOURCES += %D%/simops.h
 	%D%/gencode$(EXEEXT) \
 	%D%/table.c
 
-## This makes sure build tools are available before building the arch-subdirs.
-SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
+## Generating modules.c requires all sources to scan.
 %D%/modules.c: | $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c
