@@ -142,3 +142,63 @@ SIM_COMMON_LIBS = \
 	$(LIBIBERTY_LIB) \
 	$(LIBGNU) \
 	$(LIBGNU_EXTRA_LIBS)
+
+##
+## CGEN support.
+##
+
+## If the local tree has a bundled copy of guile, use that.
+GUILE = $(or $(wildcard ../guile/libguile/guile),guile)
+CGEN = "$(GUILE) -l $(cgendir)/guile.scm -s"
+CGENFLAGS = -v
+CGEN_CPU_DIR = $(cgendir)/cpu
+## Most ports use the files here instead of cgen/cpu.
+CPU_DIR = $(srcroot)/cpu
+CGEN_ARCHFILE = $(CPU_DIR)/$(@D).cpu
+
+CGEN_READ_SCM = $(cgendir)/sim.scm
+CGEN_ARCH_SCM = $(cgendir)/sim-arch.scm
+CGEN_CPU_SCM = $(cgendir)/sim-cpu.scm $(cgendir)/sim-model.scm
+CGEN_DECODE_SCM = $(cgendir)/sim-decode.scm
+CGEN_DESC_SCM = $(cgendir)/desc.scm $(cgendir)/desc-cpu.scm
+
+## Various choices for which cpu specific files to generate.
+## These are passed to cgen.sh in the "extrafiles" argument.
+CGEN_CPU_EXTR = /extr/
+CGEN_CPU_READ = /read/
+CGEN_CPU_WRITE = /write/
+CGEN_CPU_SEM = /sem/
+CGEN_CPU_SEMSW = /semsw/
+
+CGEN_WRAPPER = $(srccom)/cgen.sh
+
+CGEN_GEN_ARCH = \
+	$(SHELL) $(CGEN_WRAPPER) arch $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" ignored "$$isa" $$mach ignored \
+		$(CGEN_ARCHFILE) ignored
+CGEN_GEN_CPU = \
+	$(SHELL) $(CGEN_WRAPPER) cpu $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
+		$(CGEN_ARCHFILE) "$$EXTRAFILES"
+CGEN_GEN_DEFS = \
+	$(SHELL) $(CGEN_WRAPPER) defs $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
+		$(CGEN_ARCHFILE) ignored
+CGEN_GEN_DECODE = \
+	$(SHELL) $(CGEN_WRAPPER) decode $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
+		$(CGEN_ARCHFILE) "$$EXTRAFILES"
+CGEN_GEN_CPU_DECODE = \
+	$(SHELL) $(CGEN_WRAPPER) cpu-decode $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
+		$(CGEN_ARCHFILE) "$$EXTRAFILES"
+CGEN_GEN_CPU_DESC = \
+	$(SHELL) $(CGEN_WRAPPER) desc $(srcdir)/$(@D) \
+		$(CGEN) $(cgendir) "$(CGENFLAGS)" \
+		$(@D) "$$FLAGS" $$cpu "$$isa" $$mach "$$SUFFIX" \
+		$(CGEN_ARCHFILE) ignored $$opcfile
