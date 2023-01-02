@@ -3985,6 +3985,16 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change or1k/mloop.cin or1k/mloop.c
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_at)touch $@
 
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen: or1k/cgen-arch or1k/cgen-cpu-decode
+
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen-arch:
+@SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)mach=or32,or32nd FLAGS="with-scache"; $(CGEN_GEN_ARCH)
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/arch.h or1k/arch.c or1k/cpuall.h: @CGEN_MAINT@ or1k/cgen-arch
+
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/cgen-cpu-decode:
+@SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)cpu=or1k32bf mach=or32,or32nd FLAGS="with-scache" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"; $(CGEN_GEN_CPU_DECODE)
+@SIM_ENABLE_ARCH_or1k_TRUE@or1k/cpu.h or1k/cpu.c or1k/model.c or1k/sem.c or1k/sem-switch.c or1k/decode.c or1k/decode.h: @CGEN_MAINT@ or1k/cgen-cpu-decode
+
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/psim$(EXEEXT): ppc/run$(EXEEXT)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
