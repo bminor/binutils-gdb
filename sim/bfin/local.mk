@@ -78,7 +78,6 @@ noinst_PROGRAMS += %D%/run
 	bfin_wdog \
 	bfin_wp \
 	eth_phy
-AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
 %D%/linux-fixed-code.h: @MAINT@ $(srcdir)/%D%/linux-fixed-code.s %D%/local.mk %D%/$(am__dirstamp)
 	$(AM_V_GEN)$(AS_FOR_TARGET_BFIN) $(srcdir)/%D%/linux-fixed-code.s -o %D%/linux-fixed-code.o

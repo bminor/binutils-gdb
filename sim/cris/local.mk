@@ -59,7 +59,6 @@ noinst_LIBRARIES += %D%/libsim.a
 noinst_PROGRAMS += %D%/run
 
 %C%_SIM_EXTRA_HW_DEVICES = rv cris cris_900000xx
-AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
 ## rvdummy is just used for testing -- it runs on the same host as `run`.
 ## It does nothing if --enable-sim-hardware isn't active.

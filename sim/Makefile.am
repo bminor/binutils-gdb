@@ -27,7 +27,6 @@ srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
 
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
-AM_MAKEFLAGS =
 
 ## We don't set some of these vars here, but we need to define them so they may
 ## be used consistently in local.mk files we include below.

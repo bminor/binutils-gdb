@@ -106,16 +106,12 @@ SIM_NEW_COMMON_OBJS = \
 	sim-utils.o \
 	sim-watch.o
 
-AM_MAKEFLAGS += SIM_NEW_COMMON_OBJS_="$(SIM_NEW_COMMON_OBJS)"
-
 SIM_HW_DEVICES = cfi core pal glue
 
 if SIM_ENABLE_HW
 SIM_NEW_COMMON_OBJS += \
 	$(SIM_COMMON_HW_OBJS) \
 	$(SIM_HW_SOCKSER)
-
-AM_MAKEFLAGS += SIM_HW_DEVICES_="$(SIM_HW_DEVICES)"
 endif
 
 # FIXME This is one very simple-minded way of generating the file hw-config.h.
