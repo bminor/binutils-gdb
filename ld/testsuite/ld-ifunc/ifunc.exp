@@ -735,9 +735,10 @@ run_ld_link_exec_tests [list \
 # in the executable (which is relocated last by ld.so).
 if { [isnative]
      && !([istarget "powerpc-*-*"]
-           || [istarget "aarch64*-*-*"]
-           || [istarget "sparc*-*-*"]
-           || [istarget "riscv*-*-*"]) } {
+	  || [istarget "aarch64*-*-*"]
+	  || [istarget "arm*-*-*"]
+	  || [istarget "sparc*-*-*"]
+	  || [istarget "riscv*-*-*"]) } {
 run_ld_link_exec_tests [list \
     [list \
 	"Run pr23169a" \
