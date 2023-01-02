@@ -287,26 +287,27 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_91 = or1k/run
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_92 = or1k/eng.h
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_93 = $(or1k_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_ppc_TRUE@am__append_94 = ppc/run ppc/psim
-@SIM_ENABLE_ARCH_pru_TRUE@am__append_95 = pru/libsim.a
-@SIM_ENABLE_ARCH_pru_TRUE@am__append_96 = pru/run
-@SIM_ENABLE_ARCH_riscv_TRUE@am__append_97 = riscv/libsim.a
-@SIM_ENABLE_ARCH_riscv_TRUE@am__append_98 = riscv/run
-@SIM_ENABLE_ARCH_rl78_TRUE@am__append_99 = rl78/libsim.a
-@SIM_ENABLE_ARCH_rl78_TRUE@am__append_100 = rl78/run
-@SIM_ENABLE_ARCH_rx_TRUE@am__append_101 = rx/libsim.a
-@SIM_ENABLE_ARCH_rx_TRUE@am__append_102 = rx/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_103 = sh/libsim.a
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_104 = sh/run
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_105 = \
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_94 = common/libcommon.a
+@SIM_ENABLE_ARCH_ppc_TRUE@am__append_95 = ppc/run ppc/psim
+@SIM_ENABLE_ARCH_pru_TRUE@am__append_96 = pru/libsim.a
+@SIM_ENABLE_ARCH_pru_TRUE@am__append_97 = pru/run
+@SIM_ENABLE_ARCH_riscv_TRUE@am__append_98 = riscv/libsim.a
+@SIM_ENABLE_ARCH_riscv_TRUE@am__append_99 = riscv/run
+@SIM_ENABLE_ARCH_rl78_TRUE@am__append_100 = rl78/libsim.a
+@SIM_ENABLE_ARCH_rl78_TRUE@am__append_101 = rl78/run
+@SIM_ENABLE_ARCH_rx_TRUE@am__append_102 = rx/libsim.a
+@SIM_ENABLE_ARCH_rx_TRUE@am__append_103 = rx/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_104 = sh/libsim.a
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_105 = sh/run
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_106 = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/code.c \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/ppi.c
 
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_106 = sh/gencode
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_107 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_108 = v850/libsim.a
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_109 = v850/run
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_110 = \
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_107 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_108 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_109 = v850/libsim.a
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_110 = v850/run
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_111 = \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.h \
@@ -315,7 +316,7 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.h \
 @SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.h
 
-@SIM_ENABLE_ARCH_v850_TRUE@am__append_111 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_112 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -1724,13 +1725,13 @@ noinst_LIBRARIES = common/libcommon.a $(am__append_3) $(am__append_6) \
 	$(am__append_59) $(am__append_63) $(am__append_67) \
 	$(am__append_69) $(am__append_74) $(am__append_82) \
 	$(am__append_86) $(am__append_88) $(am__append_90) \
-	$(am__append_95) $(am__append_97) $(am__append_99) \
-	$(am__append_101) $(am__append_103) $(am__append_108)
+	$(am__append_96) $(am__append_98) $(am__append_100) \
+	$(am__append_102) $(am__append_104) $(am__append_109)
 BUILT_SOURCES = $(am__append_16) $(am__append_20) $(am__append_26) \
 	$(am__append_30) $(am__append_41) $(am__append_49) \
 	$(am__append_53) $(am__append_61) $(am__append_76) \
-	$(am__append_84) $(am__append_92) $(am__append_105) \
-	$(am__append_110)
+	$(am__append_84) $(am__append_92) $(am__append_106) \
+	$(am__append_111)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
@@ -1746,7 +1747,7 @@ MOSTLYCLEANFILES = core $(SIM_ENABLED_ARCHES:%=%/*.o) \
 	$(am__append_42) $(am__append_50) $(am__append_54) \
 	$(am__append_58) $(am__append_62) $(am__append_66) \
 	$(am__append_80) $(am__append_85) $(am__append_93) \
-	$(am__append_107) $(am__append_111)
+	$(am__append_108) $(am__append_112)
 AM_CFLAGS = \
 	$(WERROR_CFLAGS) \
 	$(WARN_CFLAGS) \
@@ -1761,8 +1762,8 @@ AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
-SIM_ALL_RECURSIVE_DEPS = common/libcommon.a \
-	$(common_GEN_MODULES_C_TARGETS)
+SIM_ALL_RECURSIVE_DEPS = $(common_GEN_MODULES_C_TARGETS) \
+	$(am__append_94)
 SIM_INSTALL_DATA_LOCAL_DEPS = 
 SIM_INSTALL_EXEC_LOCAL_DEPS = $(am__append_35)
 SIM_UNINSTALL_LOCAL_DEPS = $(am__append_36)
@@ -5316,6 +5317,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/psim$(EXEEXT): ppc/run$(EXEEXT)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/libsim.a: common/libcommon.a
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: ppc/%.c | ppc/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

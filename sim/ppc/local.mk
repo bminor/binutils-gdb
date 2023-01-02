@@ -24,6 +24,12 @@
 %D%/psim$(EXEEXT): %D%/run$(EXEEXT)
 	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
+## This makes sure common parts are available before building the arch-subdirs
+## which will refer to these.
+SIM_ALL_RECURSIVE_DEPS += common/libcommon.a
+%D%/libsim.a: common/libcommon.a
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 ## Helper targets for running make from the top-level due to run's sis.o.
 %D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

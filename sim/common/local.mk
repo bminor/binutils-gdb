@@ -23,11 +23,6 @@ AM_CPPFLAGS += \
 AM_CPPFLAGS_%C% = -DSIM_COMMON_BUILD
 AM_CPPFLAGS_FOR_BUILD += -I$(srcdir)/%D%
 
-## This makes sure common parts are available before building the arch-subdirs
-## which will refer to these.
-SIM_ALL_RECURSIVE_DEPS += \
-	%D%/libcommon.a
-
 ## NB: libcommon.a isn't used directly by ports.  We need a target for common
 ## objects to be a part of, and ports use the individual objects directly.
 ## We can delete this once ppc/Makefile.in is merged into ppc/local.mk.
