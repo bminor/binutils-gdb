@@ -1,0 +1,94 @@
+# Copyright (C) 2019-2022 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Support library for testing ROCm (AMD GPU) GDB features.
+
+proc skip_hipcc_tests { } {
+    # Only the native target supports ROCm debugging.  E.g., when
+    # testing against GDBserver, there's no point in running the ROCm
+    # tests.
+    if {[target_info gdb_protocol] != ""} {
+        return 1
+    }
+    return 0
+}
+
+# The lock file used to ensure that only one GDB has access to the GPU
+# at a time.
+set gpu_lock_filename $objdir/gpu-parallel.lock
+
+# Acquire lock file LOCKFILE.  Tries forever until the lock file is
+# successfully created.
+
+proc lock_file_acquire {lockfile} {
+    verbose -log "acquiring lock file: $::subdir/${::gdb_test_file_name}.exp"
+    while {true} {
+	if {![catch {open $lockfile {WRONLY CREAT EXCL}} rc]} {
+	    set msg "locked by $::subdir/${::gdb_test_file_name}.exp"
+	    verbose -log "lock file: $msg"
+	    # For debugging, put info in the lockfile about who owns
+	    # it.
+	    puts  $rc $msg
+	    flush $rc
+	    return [list $rc $lockfile]
+	}
+	after 10
+    }
+}
+
+# Release a lock file.
+
+proc lock_file_release {info} {
+    verbose -log "releasing lock file: $::subdir/${::gdb_test_file_name}.exp"
+
+    if {![catch {fconfigure [lindex $info 0]}]} {
+	if {![catch {
+	    close [lindex $info 0]
+	    file delete -force [lindex $info 1]
+	} rc]} {
+	    return ""
+	} else {
+	    return -code error "Error releasing lockfile: '$rc'"
+	}
+    } else {
+	error "invalid lock"
+    }
+}
+
+# Run body under the GPU lock.  Also calls gdb_exit before releasing
+# the GPU lock.
+
+proc with_rocm_gpu_lock { body } {
+    if {[info exists ::GDB_PARALLEL]} {
+	set lock_rc [lock_file_acquire $::gpu_lock_filename]
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    # In case BODY returned early due to some testcase failing, and
+    # left GDB running, debugging the GPU.
+    gdb_exit
+
+    if {[info exists ::GDB_PARALLEL]} {
+	lock_file_release $lock_rc
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}

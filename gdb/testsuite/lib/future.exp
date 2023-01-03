@@ -121,6 +121,19 @@ proc gdb_find_rustc {} {
     return $rustc
 }
 
+proc gdb_find_hipcc {} {
+    global tool_root_dir
+    if {![is_remote host]} {
+	set hipcc [lookfor_file $tool_root_dir hipcc]
+	if {$hipcc == ""} {
+	    set hipcc [lookfor_file /opt/rocm/bin hipcc]
+	}
+    } else {
+	set hipcc ""
+    }
+    return $hipcc
+}
+
 proc gdb_find_ldd {} {
     global LDD_FOR_TARGET
     if [info exists LDD_FOR_TARGET] {
@@ -290,6 +303,18 @@ proc gdb_default_target_compile_1 {source destfile type options} {
 	    }
 	}
 
+	if { $i == "hip" } {
+	    set compiler_type "hip"
+	    if {[board_info $dest exists hipflags]} {
+		append add_flags " [target_info hipflags]"
+	    }
+	    if {[board_info $dest exists hipcompiler]} {
+		set compiler [target_info hipcompiler]
+	    } else {
+		set compiler [find_hipcc]
+	    }
+	}
+
 	if {[regexp "^dest=" $i]} {
 	    regsub "^dest=" $i "" tmp
 	    if {[board_info $tmp exists name]} {
@@ -352,6 +377,7 @@ proc gdb_default_target_compile_1 {source destfile type options} {
     global GO_FOR_TARGET
     global GO_LD_FOR_TARGET
     global RUSTC_FOR_TARGET
+    global HIPCC_FOR_TARGET
 
     if {[info exists GNATMAKE_FOR_TARGET]} {
 	if { $compiler_type == "ada" } {
@@ -395,6 +421,12 @@ proc gdb_default_target_compile_1 {source destfile type options} {
     if {[info exists RUSTC_FOR_TARGET]} {
 	if {$compiler_type == "rust"} {
 	    set compiler $RUSTC_FOR_TARGET
+	}
+    }
+
+    if {[info exists HIPCC_FOR_TARGET]} {
+	if {$compiler_type == "hip"} {
+	    set compiler $HIPCC_FOR_TARGET
 	}
     }
 
@@ -685,6 +717,12 @@ if {[info procs find_rustc] == ""} {
     rename gdb_find_rustc find_rustc
     set use_gdb_compile(rust) 1
     gdb_note [join [list $note_prefix "Rust" $note_suffix] ""]
+}
+
+if {[info procs find_hipcc] == ""} {
+    rename gdb_find_hipcc find_hipcc
+    set use_gdb_compile(hip) 1
+    gdb_note [join [list $note_prefix "HIP" $note_suffix] ""]
 }
 
 # If dejagnu's default_target_compile is missing support for any language,

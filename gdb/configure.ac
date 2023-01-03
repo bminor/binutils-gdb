@@ -61,6 +61,11 @@ AX_CXX_COMPILE_STDCXX(11, , mandatory)
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
 
+# Since the first call to PKG_CHECK_MODULES may not happen (is guarded by
+# a condition), we must call PKG_PROG_PKG_CONFIG explicitly to probe for
+# pkg-config.
+PKG_PROG_PKG_CONFIG
+
 dnl List of object files and targets accumulated by configure.
 
 CONFIG_OBS=
@@ -238,6 +243,53 @@ if test x${all_targets} = xtrue; then
     TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
   else
     TARGET_OBS='$(ALL_TARGET_OBS)'
+  fi
+fi
+
+# AMD debugger API support.
+
+AC_ARG_WITH([amd-dbgapi],
+	    [AS_HELP_STRING([--with-amd-dbgapi],
+			    [support for the amd-dbgapi target (yes / no / auto)])],
+	    [GDB_CHECK_YES_NO_AUTO_VAL([$withval], [--with-amd-dbgapi])],
+	    [with_amd_dbgapi=auto])
+
+# If the user passes --without-amd-dbgapi but also explicitly enables a target
+# that requires amd-dbgapi, it is an error.
+if test "$with_amd_dbgapi" = no -a "$gdb_require_amd_dbgapi" = true; then
+  AC_MSG_ERROR([an explicitly enabled target requires amd-dbgapi, but amd-dbgapi is explicitly disabled])
+fi
+
+# Look for amd-dbgapi if:
+#
+#   - a target architecture requiring it has explicitly been enabled, or
+#   - --enable-targets=all was provided and the user did not explicitly disable
+#     amd-dbgapi support
+if test "$gdb_require_amd_dbgapi" = true \
+     -o \( "$all_targets" = true -a "$with_amd_dbgapi" != no \); then
+  # amd-dbgapi version 0.68 is part of ROCm 5.4.  There is no guarantee of API
+  # stability until amd-dbgapi hits 1.0, but for convenience, still check for
+  # greater or equal that version.  It can be handy when testing with a newer
+  # version of the library.
+  PKG_CHECK_MODULES([AMD_DBGAPI], [amd-dbgapi >= 0.68.0],
+		    [has_amd_dbgapi=yes], [has_amd_dbgapi=no])
+
+  if test "$has_amd_dbgapi" = "yes"; then
+    TARGET_OBS="$TARGET_OBS amd-dbgapi-target.o"
+
+    # If --enable-targets=all was provided, use the list of all files depending
+    # on amd-dbgapi that is hardcoded in the Makefile.  Else, the appropriate
+    # architecture entry in configure.tgt will have added the files to
+    # gdb_target_obs.
+    if test "$all_targets" = true; then
+      TARGET_OBS="$TARGET_OBS \$(ALL_AMD_DBGAPI_TARGET_OBS)"
+    fi
+  elif test "$gdb_require_amd_dbgapi" = true -o "$with_amd_dbgapi" = yes; then
+    # amd-dbgapi was not found and...
+    #
+    #   - a target requiring it was explicitly enabled, or
+    #   - the user explicitly wants to enable amd-dbgapi
+    AC_MSG_ERROR([amd-dbgapi is required, but cannot find an appropriate version: $AMD_DBGAPI_PKG_ERRORS])
   fi
 fi
 

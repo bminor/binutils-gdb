@@ -244,6 +244,8 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 
 GNU/Linux/CSKY (gdbserver) csky*-*linux*
 
+AMDGPU amdgcn-*-*
+
 * MI changes
 
  ** The async record stating the stopped reason 'breakpoint-hit' now
@@ -337,6 +339,11 @@ GNU/Linux/CSKY (gdbserver) csky*-*linux*
 * LoongArch floating-point support
 
 GDB now supports floating-point on LoongArch GNU/Linux.
+
+* AMD GPU ROCm debugging support
+
+GDB now supports debugging programs offloaded to AMD GPUs using the ROCm
+platform.
 
 *** Changes in GDB 12
 

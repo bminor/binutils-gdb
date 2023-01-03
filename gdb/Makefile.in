@@ -227,6 +227,9 @@ PTHREAD_LIBS = @PTHREAD_LIBS@
 DEBUGINFOD_CFLAGS = @DEBUGINFOD_CFLAGS@
 DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
 
+AMD_DBGAPI_CFLAGS = @AMD_DBGAPI_CFLAGS@
+AMD_DBGAPI_LIBS = @AMD_DBGAPI_LIBS@
+
 RDYNAMIC = @RDYNAMIC@
 
 # Where is the INTL library?  Typically in ../intl.
@@ -633,7 +636,8 @@ INTERNAL_CFLAGS_BASE = \
 	$(ZSTD_CFLAGS) $(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(INCGNU) $(INCSUPPORT) $(LIBBACKTRACE_INC) \
 	$(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) $(SRCHIGH_CFLAGS) \
-	$(TOP_CFLAGS) $(PTHREAD_CFLAGS) $(DEBUGINFOD_CFLAGS) $(GMPINC)
+	$(TOP_CFLAGS) $(PTHREAD_CFLAGS) $(DEBUGINFOD_CFLAGS) $(GMPINC) \
+	$(AMD_DBGAPI_CFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -655,7 +659,7 @@ INTERNAL_LDFLAGS = \
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) $(ZSTD_LIBS) \
         $(LIBSUPPORT) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(GDBTKLIBS)  $(LIBBACKTRACE_LIB) \
-	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
+	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ $(AMD_DBGAPI_LIBS) \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
 	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
 	$(GMPLIBS) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
@@ -692,6 +696,12 @@ SIM_OBS = @SIM_OBS@
 
 # Target-dependent object files.
 TARGET_OBS = @TARGET_OBS@
+
+# All target-dependent object files that require the amd-dbgapi
+# target to be available (used with --enable-targets=all).
+ALL_AMD_DBGAPI_TARGET_OBS = \
+	amdgpu-tdep.o \
+	solib-rocm.o
 
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
@@ -1637,6 +1647,7 @@ ALLDEPFILES = \
 	alpha-netbsd-tdep.c \
 	alpha-obsd-tdep.c \
 	alpha-tdep.c \
+	amd-dbgapi-target.c \
 	amd64-bsd-nat.c \
 	amd64-darwin-tdep.c \
 	amd64-dicos-tdep.c \
@@ -1652,6 +1663,7 @@ ALLDEPFILES = \
 	amd64-ravenscar-thread.c \
 	amd64-sol2-tdep.c \
 	amd64-tdep.c \
+	amdgpu-tdep.c \
 	arc-linux-nat.c \
 	arc-tdep.c \
 	arm-bsd-tdep.c \
@@ -1793,6 +1805,7 @@ ALLDEPFILES = \
 	sh-tdep.c \
 	sol2-tdep.c \
 	solib-aix.c \
+	solib-rocm.c \
 	solib-svr4.c \
 	sparc-linux-nat.c \
 	sparc-linux-tdep.c \

@@ -4867,6 +4867,13 @@ proc gdb_compile {source dest type options} {
         lappend new_options "early_flags=-fno-stack-protector"
     }
 
+    # hipcc defaults to -O2, so add -O0 to early flags for the hip language.
+    # If "optimize" is also requested, another -O flag (e.g. -O2) will be added
+    # to the flags, overriding this -O0.
+    if {[lsearch -exact $options hip] != -1} {
+	lappend new_options "early_flags=-O0"
+    }
+
     # Because we link with libraries using their basename, we may need
     # (depending on the platform) to set a special rpath value, to allow
     # the executable to find the libraries it depends on.

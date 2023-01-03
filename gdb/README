@@ -541,6 +541,21 @@ more obscure GDB `configure' options are not listed here.
      speeds up various GDB operations such as symbol loading.  Enabled
      by default if libxxhash is found.
 
+`--with-amd-dbgapi=[auto,yes,no]'
+     Whether to use the amd-dbgapi library to support local debugging of
+     AMD GCN architecture GPUs.
+
+     When explicitly requesting support for an AMD GCN architecture through
+     `--enable-targets' or `--target', there is no need to use
+     `--with-amd-dbgapi': `configure' will automatically look for the
+     amd-dbgapi library and fail if not found.
+
+     When using --enable-targets=all, support for the AMD GCN architecture will
+     only be included if the amd-dbgapi is found.  `--with-amd-dbgapi=yes' can
+     be used to make it a failure if the amd-dbgapi library is not found.
+     `--with-amd-dbgapi=no' can be used to prevent looking for the amd-dbgapi
+     library altogether.
+
 `--without-included-regex'
      Don't use the regex library included with GDB (as part of the
      libiberty library).  This is the default on hosts with version 2
