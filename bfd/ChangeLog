@@ -1,3 +1,9 @@
+2023-01-03  Himal  <himalr@proton.me>
+
+	PR 29947
+	* bfdio.c (_bfd_real_fopen): Do not add a prefix to the Windows'
+	nul device filename.
+
 2023-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French trabslation.

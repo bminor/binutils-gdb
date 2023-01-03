@@ -154,6 +154,11 @@ _bfd_real_fopen (const char *filename, const char *modes)
    wcscpy (fullPath, prefix);
 
    int        prefixLen = sizeof(prefix) / sizeof(wchar_t);
+
+   /* Do not add a prefix to the null device.  */
+   if (stricmp (filename, "nul") == 0)
+    prefixLen = 1;
+
    wchar_t *  fullPathOffset = fullPath + prefixLen - 1;
 
    GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);
