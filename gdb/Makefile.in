@@ -1087,7 +1087,6 @@ COMMON_SFILES = \
 	findvar.c \
 	frame.c \
 	frame-base.c \
-	frame-info.c \
 	frame-unwind.c \
 	gcore.c \
 	gdb-demangle.c \

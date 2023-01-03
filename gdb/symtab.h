@@ -37,6 +37,7 @@
 #include "completer.h"
 #include "gdb-demangle.h"
 #include "split-name.h"
+#include "frame.h"
 
 /* Opaque declarations.  */
 struct ui_file;

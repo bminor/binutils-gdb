@@ -56,7 +56,6 @@
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
-#include "frame-info.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -1733,7 +1732,6 @@ struct func_type
 
     struct type *self_type;
   };
-
 
 /* The type-specific info for TYPE_CODE_FIXED_POINT types.  */
 

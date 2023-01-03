@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "frame-info.h"
 #include "target.h"
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
@@ -3159,6 +3158,48 @@ maintenance_print_frame_id (const char *args, int from_tty)
   gdb_printf ("frame-id for frame #%d: %s\n",
 	      frame_relative_level (frame),
 	      get_frame_id (frame).to_string ().c_str ());
+}
+
+/* See frame-info-ptr.h.  */
+
+intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
+
+/* See frame-info-ptr.h.  */
+
+void
+frame_info_ptr::prepare_reinflate ()
+{
+  m_cached_level = frame_relative_level (*this);
+
+  if (m_cached_level != 0)
+    m_cached_id = get_frame_id (*this);
+}
+
+/* See frame-info-ptr.h.  */
+
+void
+frame_info_ptr::reinflate ()
+{
+  /* Ensure we have a valid frame level (sentinel frame or above), indicating
+     prepare_reinflate was called.  */
+  gdb_assert (m_cached_level >= -1);
+
+  if (m_ptr != nullptr)
+    {
+      /* The frame_info wasn't invalidated, no need to reinflate.  */
+      return;
+    }
+
+  /* Frame #0 needs special handling, see comment in select_frame.  */
+  if (m_cached_level == 0)
+    m_ptr = get_current_frame ().get ();
+  else
+    {
+      gdb_assert (frame_id_p (m_cached_id));
+      m_ptr = frame_find_by_id (m_cached_id).get ();
+    }
+
+  gdb_assert (m_ptr != nullptr);
 }
 
 void _initialize_frame ();

@@ -25,6 +25,7 @@ struct ui_file;
 struct language_arch_info;
 struct type_print_options;
 struct parser_state;
+struct compile_instance;
 
 #include "compile/compile.h"
 #include "value.h"

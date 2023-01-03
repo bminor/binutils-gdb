@@ -23,8 +23,8 @@
 #define CALL_SITE_H
 
 #include "dwarf2/types.h"
+#include "../frame.h"
 #include "gdbsupport/function-view.h"
-#include "frame-info.h"
 
 struct dwarf2_locexpr_baton;
 struct dwarf2_per_cu_data;
