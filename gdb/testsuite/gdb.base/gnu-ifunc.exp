@@ -240,14 +240,19 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
     # Test GDB will automatically indirect the call.
 
     if {!$resolver_debug && !$final_debug} {
+	# Do the test that is supposed to succeed first, to make sure
+	# elf_gnu_ifunc_record_cache is empty.  This excercises PR28224.
+	gdb_test "p (int) gnu_ifunc (3)" " = 4"
+
 	gdb_test "p gnu_ifunc()" \
 	    "'${dot}final' has unknown return type; cast the call to its declared return type"
 	gdb_test "p gnu_ifunc (3)" \
 	    "'${dot}final' has unknown return type; cast the call to its declared return type"
-	gdb_test "p (int) gnu_ifunc (3)" " = 4"
     } else {
-	gdb_test "p gnu_ifunc()" "Too few arguments in function call\\."
+	# Do the test that is supposed to succeed first, see above.
 	gdb_test "p gnu_ifunc (3)" " = 4"
+
+	gdb_test "p gnu_ifunc()" "Too few arguments in function call\\."
     }
 
     # Test that the resolver received its argument.

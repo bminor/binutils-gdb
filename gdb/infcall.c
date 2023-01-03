@@ -848,6 +848,7 @@ call_function_by_hand_dummy (struct value *function,
   bool stack_temporaries = thread_stack_temporaries_enabled_p (call_thread.get ());
 
   frame = get_current_frame ();
+  frame.prepare_reinflate ();
   gdbarch = get_frame_arch (frame);
 
   if (!gdbarch_push_dummy_call_p (gdbarch))
@@ -862,6 +863,8 @@ call_function_by_hand_dummy (struct value *function,
     error (_("Cannot call the function '%s' which does not follow the "
 	     "target calling convention."),
 	   get_function_name (funaddr, name_buf, sizeof (name_buf)));
+
+  frame.reinflate ();
 
   if (values_type == NULL || values_type->is_stub ())
     values_type = default_return_type;
