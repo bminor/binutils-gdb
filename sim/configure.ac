@@ -208,10 +208,5 @@ m4_include([mips/acinclude.m4])
 m4_include([riscv/acinclude.m4])
 m4_include([rx/acinclude.m4])
 
-dnl Hack to output an "include" statement in the Makefile so automake doesn't
-dnl try to follow it itself while processing Makefile.am.
-include_makefile="include"
-AC_SUBST(include_makefile)
-
 AC_CONFIG_FILES([arch-subdir.mk Makefile .gdbinit:gdbinit.in])
 AC_OUTPUT

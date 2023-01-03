@@ -1177,7 +1177,6 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
-include_makefile = @include_makefile@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -3253,7 +3252,7 @@ uninstall-am: uninstall-armdocDATA uninstall-dtbDATA \
 
 .PRECIOUS: Makefile
 
-@include_makefile@ $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
+@am__include@ @am__quote@$(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc@am__quote@
 
 # Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
