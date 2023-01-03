@@ -1,3 +1,8 @@
+2023-01-03  Luis Machado  <luis.machado@arm.com>
+
+	* readelf.c (get_note_type): Add support for NT_ARM_SSVE and
+	NT_ARM_ZA note types.
+
 2022-12-31  Nick Clifton  <nickc@redhat.com>
 
 	* 2.40 branch created.
