@@ -639,18 +639,15 @@ proc gdb_breakpoint { linespec args } {
 	set print_pass 1
     }
 
-    set test_name "gdb_breakpoint: set breakpoint at $linespec"
-
-    send_gdb "$break_command $linespec\n"
     # The first two regexps are what we get with -g, the third is without -g.
-    gdb_expect 30 {
+    gdb_test_multiple "$break_command $linespec" "gdb_breakpoint: set breakpoint at $linespec" {
 	-re "$break_message \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "$break_message \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "$break_message \[0-9\]* at .*$gdb_prompt $" {}
 	-re "$break_message \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
 		if {$pending_response == "n"} {
 			if { $print_fail } {
-				fail $test_name
+				fail $gdb_name_name
 			}
 			return 0
 		}
@@ -658,35 +655,6 @@ proc gdb_breakpoint { linespec args } {
 	-re "Make breakpoint pending.*y or \\\[n\\\]. $" { 
 		send_gdb "$pending_response\n"
 		exp_continue
-	}
-	-re "A problem internal to GDB has been detected" {
-		if { $print_fail } {
-		    fail "$test_name (GDB internal error)"
-		}
-		gdb_internal_error_resync
-		return 0
-	}
-	-re "$gdb_prompt $" {
-		if { $print_fail } {
-			fail $test_name
-		}
-		return 0
-	}
-	eof {
-		perror "GDB process no longer exists"
-		global gdb_spawn_id
-		set wait_status [wait -i $gdb_spawn_id]
-		verbose -log "GDB process exited with wait status $wait_status"
-		if { $print_fail } {
-			fail "$test_name (eof)"
-		}
-		return 0
-	}
-	timeout {
-		if { $print_fail } {
-			fail "$test_name (timeout)"
-		}
-		return 0
 	}
     }
     if { $print_pass } {
