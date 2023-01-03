@@ -1,5 +1,11 @@
 2023-01-03  Nick Clifton  <nickc@redhat.com>
 
+	PR 29952
+	* config/tc-i386.c (md_assemble): Avoid constructing translatable
+	strings.
+
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po: Updated French translation.
 	* po/uk.po: Updated Ukrainian translation.
 
