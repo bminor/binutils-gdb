@@ -24,10 +24,14 @@
 
 noinst_PROGRAMS += %D%/run
 
+## List all generated headers to help Automake dependency tracking.
+## NB: These .c files are only included by other .c files.  They are not
+## compiled individually.  Hence they're really "header" files.
+BUILT_SOURCES += \
+	%D%/code.c \
+	%D%/ppi.c
 %C%_BUILD_OUTPUTS = \
 	%D%/gencode$(EXEEXT) \
-	%D%/code.c \
-	%D%/ppi.c \
 	%D%/table.c
 
 ## This makes sure build tools are available before building the arch-subdirs.
