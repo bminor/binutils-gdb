@@ -63,10 +63,12 @@ AC_SUBST(SIM_COMMON_BUILD_TRUE)
 AC_SUBST(SIM_COMMON_BUILD_FALSE)
 
 AC_CONFIG_FILES(Make-common.sim:common/Make-common.in)
+ENABLE_SIM=no
 dnl Build a particular arch subdir.
 dnl arg[1] is the arch subdir name.
 dnl arg[2] is whether the arch has a dedicated configure script.
 m4_define([SIM_BUILD_TARGET], [dnl
+  ENABLE_SIM=yes
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
     AC_CONFIG_SUBDIRS($1)
@@ -165,7 +167,7 @@ if test "${enable_sim}" != no; then
   AM_CONDITIONAL([SIM_ENABLE_ARCH_examples], [test "${enable_example_sims}" = "yes"])
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
-AM_CONDITIONAL([ENABLE_SIM], [test -n "$SIM_SUBDIRS"])
+AM_CONDITIONAL([ENABLE_SIM], [test "$ENABLE_SIM" = "yes"])
 
 dnl Standard (and optional) simulator options.
 dnl Eventually all simulators will support these.

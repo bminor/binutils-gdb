@@ -14247,6 +14247,7 @@ SIM_COMMON_BUILD_FALSE='#'
 
 ac_config_files="$ac_config_files Make-common.sim:common/Make-common.in"
 
+ENABLE_SIM=no
 
 
 
@@ -14260,7 +14261,8 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
       fi
-        as_fn_append SIM_ENABLED_ARCHES " aarch64"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " aarch64"
       ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
 
     ac_config_commands="$ac_config_commands aarch64/Makefile"
@@ -14431,7 +14433,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-        as_fn_append SIM_ENABLED_ARCHES " arm"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " arm"
       ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
 
     ac_config_commands="$ac_config_commands arm/Makefile"
@@ -14475,7 +14478,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-        as_fn_append SIM_ENABLED_ARCHES " avr"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " avr"
       ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
 
     ac_config_commands="$ac_config_commands avr/Makefile"
@@ -14519,7 +14523,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-        as_fn_append SIM_ENABLED_ARCHES " bfin"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " bfin"
       ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
 
     ac_config_commands="$ac_config_commands bfin/Makefile"
@@ -14563,7 +14568,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
       fi
-        as_fn_append SIM_ENABLED_ARCHES " bpf"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " bpf"
       ac_config_files="$ac_config_files bpf/Makefile.sim:bpf/Makefile.in"
 
     ac_config_commands="$ac_config_commands bpf/Makefile"
@@ -14607,7 +14613,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-        as_fn_append SIM_ENABLED_ARCHES " cr16"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " cr16"
       ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
 
     ac_config_commands="$ac_config_commands cr16/Makefile"
@@ -14651,7 +14658,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-        as_fn_append SIM_ENABLED_ARCHES " cris"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " cris"
       ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
 
     ac_config_commands="$ac_config_commands cris/Makefile"
@@ -14695,7 +14703,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-        as_fn_append SIM_ENABLED_ARCHES " d10v"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " d10v"
       ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
 
     ac_config_commands="$ac_config_commands d10v/Makefile"
@@ -14739,7 +14748,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-        as_fn_append SIM_ENABLED_ARCHES " frv"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " frv"
       ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
 
     ac_config_commands="$ac_config_commands frv/Makefile"
@@ -14783,7 +14793,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
       fi
-        as_fn_append SIM_ENABLED_ARCHES " ft32"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " ft32"
       ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
 
     ac_config_commands="$ac_config_commands ft32/Makefile"
@@ -14827,7 +14838,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-        as_fn_append SIM_ENABLED_ARCHES " h8300"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " h8300"
       ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
 
     ac_config_commands="$ac_config_commands h8300/Makefile"
@@ -14871,7 +14883,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-        as_fn_append SIM_ENABLED_ARCHES " iq2000"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " iq2000"
       ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
 
     ac_config_commands="$ac_config_commands iq2000/Makefile"
@@ -14915,7 +14928,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-        as_fn_append SIM_ENABLED_ARCHES " lm32"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " lm32"
       ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
 
     ac_config_commands="$ac_config_commands lm32/Makefile"
@@ -14959,7 +14973,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-        as_fn_append SIM_ENABLED_ARCHES " m32c"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " m32c"
       ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32c/Makefile"
@@ -15003,7 +15018,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-        as_fn_append SIM_ENABLED_ARCHES " m32r"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " m32r"
       ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32r/Makefile"
@@ -15047,7 +15063,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-        as_fn_append SIM_ENABLED_ARCHES " m68hc11"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " m68hc11"
       ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
 
     ac_config_commands="$ac_config_commands m68hc11/Makefile"
@@ -15091,7 +15108,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-        as_fn_append SIM_ENABLED_ARCHES " mcore"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " mcore"
       ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
 
     ac_config_commands="$ac_config_commands mcore/Makefile"
@@ -15135,7 +15153,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-        as_fn_append SIM_ENABLED_ARCHES " microblaze"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " microblaze"
       ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
 
     ac_config_commands="$ac_config_commands microblaze/Makefile"
@@ -15179,7 +15198,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
       fi
-        as_fn_append SIM_ENABLED_ARCHES " mips"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " mips"
       ac_config_files="$ac_config_files mips/Makefile.sim:mips/Makefile.in"
 
     ac_config_commands="$ac_config_commands mips/Makefile"
@@ -15223,7 +15243,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
       fi
-        as_fn_append SIM_ENABLED_ARCHES " mn10300"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " mn10300"
       ac_config_files="$ac_config_files mn10300/Makefile.sim:mn10300/Makefile.in"
 
     ac_config_commands="$ac_config_commands mn10300/Makefile"
@@ -15267,7 +15288,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-        as_fn_append SIM_ENABLED_ARCHES " moxie"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " moxie"
       ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
 
     ac_config_commands="$ac_config_commands moxie/Makefile"
@@ -15311,7 +15333,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-        as_fn_append SIM_ENABLED_ARCHES " msp430"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " msp430"
       ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
 
     ac_config_commands="$ac_config_commands msp430/Makefile"
@@ -15355,7 +15378,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
-        as_fn_append SIM_ENABLED_ARCHES " or1k"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " or1k"
       ac_config_files="$ac_config_files or1k/Makefile.sim:or1k/Makefile.in"
 
     ac_config_commands="$ac_config_commands or1k/Makefile"
@@ -15399,7 +15423,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ppc
       fi
-        as_fn_append SIM_ENABLED_ARCHES " ppc"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " ppc"
 
 
 subdirs="$subdirs ppc"
@@ -15442,7 +15467,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-        as_fn_append SIM_ENABLED_ARCHES " pru"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " pru"
       ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
 
     ac_config_commands="$ac_config_commands pru/Makefile"
@@ -15486,7 +15512,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
       fi
-        as_fn_append SIM_ENABLED_ARCHES " riscv"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " riscv"
       ac_config_files="$ac_config_files riscv/Makefile.sim:riscv/Makefile.in"
 
     ac_config_commands="$ac_config_commands riscv/Makefile"
@@ -15530,7 +15557,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-        as_fn_append SIM_ENABLED_ARCHES " rl78"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " rl78"
       ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
 
     ac_config_commands="$ac_config_commands rl78/Makefile"
@@ -15574,7 +15602,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-        as_fn_append SIM_ENABLED_ARCHES " rx"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " rx"
       ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
 
     ac_config_commands="$ac_config_commands rx/Makefile"
@@ -15618,7 +15647,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-        as_fn_append SIM_ENABLED_ARCHES " sh"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " sh"
       ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
 
     ac_config_commands="$ac_config_commands sh/Makefile"
@@ -15662,7 +15692,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-        as_fn_append SIM_ENABLED_ARCHES " erc32"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " erc32"
       ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
 
     ac_config_commands="$ac_config_commands erc32/Makefile"
@@ -15706,7 +15737,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
       fi
-        as_fn_append SIM_ENABLED_ARCHES " v850"
+        ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " v850"
       ac_config_files="$ac_config_files v850/Makefile.sim:v850/Makefile.in"
 
     ac_config_commands="$ac_config_commands v850/Makefile"
@@ -15757,7 +15789,8 @@ fi
 
 as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
 
-      as_fn_append SIM_ENABLED_ARCHES " example-synacor"
+      ENABLE_SIM=yes
+  as_fn_append SIM_ENABLED_ARCHES " example-synacor"
       ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 
     ac_config_commands="$ac_config_commands example-synacor/Makefile"
@@ -15787,7 +15820,7 @@ else
   SIM_ENABLE_IGEN_FALSE=
 fi
 
- if test -n "$SIM_SUBDIRS"; then
+ if test "$ENABLE_SIM" = "yes"; then
   ENABLE_SIM_TRUE=
   ENABLE_SIM_FALSE='#'
 else
