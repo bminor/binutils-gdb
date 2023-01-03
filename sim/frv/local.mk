@@ -27,8 +27,9 @@ noinst_PROGRAMS += %D%/run
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/README
 
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += %D%/eng.h
 %C%_BUILD_OUTPUTS = \
-	%D%/eng.h \
 	%D%/mloop.c \
 	%D%/stamp-mloop
 

@@ -34,11 +34,13 @@ AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
 check_PROGRAMS += %D%/rvdummy
 
-%C%_BUILD_OUTPUTS = \
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += \
 	%D%/engv10.h \
+	%D%/engv32.h
+%C%_BUILD_OUTPUTS = \
 	%D%/mloopv10f.c \
 	%D%/stamp-mloop-v10f \
-	%D%/engv32.h \
 	%D%/mloopv32f.c \
 	%D%/stamp-mloop-v32f
 

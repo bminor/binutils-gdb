@@ -24,9 +24,10 @@
 
 noinst_PROGRAMS += %D%/run
 
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += %D%/simops.h
 %C%_BUILD_OUTPUTS = \
 	%D%/gencode$(EXEEXT) \
-	%D%/simops.h \
 	%D%/table.c
 
 ## This makes sure build tools are available before building the arch-subdirs.

@@ -27,6 +27,8 @@ noinst_PROGRAMS += %D%/run
 %C%_SIM_EXTRA_HW_DEVICES = tx3904cpu tx3904irc tx3904tmr tx3904sio
 AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += %D%/itable.h
 %C%_BUILT_SRC_FROM_IGEN_ITABLE = \
 	%D%/itable.h \
 	%D%/itable.c

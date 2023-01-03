@@ -24,6 +24,15 @@
 
 noinst_PROGRAMS += %D%/run
 
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += \
+	%D%/icache.h \
+	%D%/idecode.h \
+	%D%/semantics.h \
+	%D%/model.h \
+	%D%/support.h \
+	%D%/itable.h \
+	%D%/engine.h
 %C%_BUILT_SRC_FROM_IGEN = \
 	%D%/icache.h \
 	%D%/icache.c \

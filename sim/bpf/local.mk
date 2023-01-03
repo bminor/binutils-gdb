@@ -23,11 +23,13 @@
 
 noinst_PROGRAMS += %D%/run
 
-%C%_BUILD_OUTPUTS = \
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += \
 	%D%/eng-le.h \
+	%D%/eng-be.h
+%C%_BUILD_OUTPUTS = \
 	%D%/mloop-le.c \
 	%D%/stamp-mloop-le \
-	%D%/eng-be.h \
 	%D%/mloop-be.c \
 	%D%/stamp-mloop-be
 

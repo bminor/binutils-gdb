@@ -27,8 +27,9 @@ noinst_PROGRAMS += %D%/run
 %C%_SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
 AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
+## List all generated headers to help Automake dependency tracking.
+BUILT_SOURCES += %D%/eng.h
 %C%_BUILD_OUTPUTS = \
-	%D%/eng.h \
 	%D%/mloop.c \
 	%D%/stamp-mloop
 
