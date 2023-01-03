@@ -1,3 +1,8 @@
+2023-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukrainian translation.
+
 2023-01-03  Luis Machado  <luis.machado@arm.com>
 
 	* readelf.c (get_note_type): Add support for NT_ARM_SSVE and
