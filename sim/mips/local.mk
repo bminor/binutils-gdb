@@ -29,6 +29,10 @@ AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
 
 ## List all generated headers to help Automake dependency tracking.
 BUILT_SOURCES += %D%/itable.h
+## The multi files are a bit of a mess with generated multirun files depending
+## on generated igen files.  Be lazy for now and declare them all built so they
+## are generated early on.
+BUILT_SOURCES += $(SIM_MIPS_MULTI_SRC)
 %C%_BUILT_SRC_FROM_IGEN_ITABLE = \
 	%D%/itable.h \
 	%D%/itable.c
