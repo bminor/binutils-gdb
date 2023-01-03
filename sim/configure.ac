@@ -63,10 +63,6 @@ m4_define([SIM_BUILD_TARGET], [dnl
     AC_CONFIG_SUBDIRS($1)
   ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
-  dnl Create the depdirs for ports until we can convert them to automake.
-  AC_CONFIG_COMMANDS([depdir-$1],
-		     [$SHELL $ac_aux_dir/mkinstalldirs $1/$DEPDIR],
-		     [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR])
 ])
 dnl Enable a particular arch subdir.
 dnl arg[1] is the matching target triple.

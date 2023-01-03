@@ -14283,8 +14283,6 @@ if test "${enable_sim}" != no; then
 
   ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-aarch64"
-
 
       sim_enable_arch_aarch64=true
 
@@ -14450,8 +14448,6 @@ fi
 
   ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-arm"
-
 
       sim_enable_arch_arm=true
 
@@ -14489,8 +14485,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " avr"
 
   ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-avr"
 
 
       sim_enable_arch_avr=true
@@ -14530,8 +14524,6 @@ fi
 
   ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-bfin"
-
 
       sim_enable_arch_bfin=true
 
@@ -14569,8 +14561,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " bpf"
 
   ac_config_files="$ac_config_files bpf/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-bpf"
 
 
       sim_enable_arch_bpf=true
@@ -14610,8 +14600,6 @@ fi
 
   ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-cr16"
-
 
       sim_enable_arch_cr16=true
 
@@ -14649,8 +14637,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " cris"
 
   ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-cris"
 
 
       sim_enable_arch_cris=true
@@ -14690,8 +14676,6 @@ fi
 
   ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-d10v"
-
 
       sim_enable_arch_d10v=true
 
@@ -14729,8 +14713,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " frv"
 
   ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-frv"
 
 
       sim_enable_arch_frv=true
@@ -14770,8 +14752,6 @@ fi
 
   ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-ft32"
-
 
       sim_enable_arch_ft32=true
 
@@ -14809,8 +14789,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " h8300"
 
   ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-h8300"
 
 
       sim_enable_arch_h8300=true
@@ -14850,8 +14828,6 @@ fi
 
   ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-iq2000"
-
 
       sim_enable_arch_iq2000=true
 
@@ -14889,8 +14865,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " lm32"
 
   ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-lm32"
 
 
       sim_enable_arch_lm32=true
@@ -14930,8 +14904,6 @@ fi
 
   ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-m32c"
-
 
       sim_enable_arch_m32c=true
 
@@ -14969,8 +14941,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " m32r"
 
   ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-m32r"
 
 
       sim_enable_arch_m32r=true
@@ -15010,8 +14980,6 @@ fi
 
   ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-m68hc11"
-
 
       sim_enable_arch_m68hc11=true
 
@@ -15049,8 +15017,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " mcore"
 
   ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-mcore"
 
 
       sim_enable_arch_mcore=true
@@ -15090,8 +15056,6 @@ fi
 
   ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-microblaze"
-
 
       sim_enable_arch_microblaze=true
 
@@ -15129,8 +15093,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " mips"
 
   ac_config_files="$ac_config_files mips/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-mips"
 
 
       sim_enable_arch_mips=true
@@ -15170,8 +15132,6 @@ fi
 
   ac_config_files="$ac_config_files mn10300/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-mn10300"
-
 
       sim_enable_arch_mn10300=true
       sim_igen=yes
@@ -15209,8 +15169,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " moxie"
 
   ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-moxie"
 
 
       sim_enable_arch_moxie=true
@@ -15250,8 +15208,6 @@ fi
 
   ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-msp430"
-
 
       sim_enable_arch_msp430=true
 
@@ -15289,8 +15245,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " or1k"
 
   ac_config_files="$ac_config_files or1k/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-or1k"
 
 
       sim_enable_arch_or1k=true
@@ -15334,8 +15288,6 @@ subdirs="$subdirs ppc"
 
   ac_config_files="$ac_config_files ppc/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-ppc"
-
 
       sim_enable_arch_ppc=true
 
@@ -15373,8 +15325,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " pru"
 
   ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-pru"
 
 
       sim_enable_arch_pru=true
@@ -15414,8 +15364,6 @@ fi
 
   ac_config_files="$ac_config_files riscv/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-riscv"
-
 
       sim_enable_arch_riscv=true
 
@@ -15453,8 +15401,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " rl78"
 
   ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-rl78"
 
 
       sim_enable_arch_rl78=true
@@ -15494,8 +15440,6 @@ fi
 
   ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-rx"
-
 
       sim_enable_arch_rx=true
 
@@ -15533,8 +15477,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " sh"
 
   ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-sh"
 
 
       sim_enable_arch_sh=true
@@ -15574,8 +15516,6 @@ fi
 
   ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
 
-    ac_config_commands="$ac_config_commands depdir-erc32"
-
 
       sim_enable_arch_erc32=true
 
@@ -15613,8 +15553,6 @@ fi
   as_fn_append SIM_ENABLED_ARCHES " v850"
 
   ac_config_files="$ac_config_files v850/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-v850"
 
 
       sim_enable_arch_v850=true
@@ -15660,8 +15598,6 @@ as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EX
   as_fn_append SIM_ENABLED_ARCHES " example-synacor"
 
   ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
-
-    ac_config_commands="$ac_config_commands depdir-example-synacor"
 
 
   fi
@@ -17676,38 +17612,6 @@ fi
 
 
 AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
-ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
 
 _ACEOF
 
@@ -17721,69 +17625,37 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "aarch64/.gdbinit") CONFIG_FILES="$CONFIG_FILES aarch64/.gdbinit:common/gdbinit.in" ;;
-    "depdir-aarch64") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-aarch64" ;;
     "arm/.gdbinit") CONFIG_FILES="$CONFIG_FILES arm/.gdbinit:common/gdbinit.in" ;;
-    "depdir-arm") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-arm" ;;
     "avr/.gdbinit") CONFIG_FILES="$CONFIG_FILES avr/.gdbinit:common/gdbinit.in" ;;
-    "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
     "bfin/.gdbinit") CONFIG_FILES="$CONFIG_FILES bfin/.gdbinit:common/gdbinit.in" ;;
-    "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
     "bpf/.gdbinit") CONFIG_FILES="$CONFIG_FILES bpf/.gdbinit:common/gdbinit.in" ;;
-    "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
     "cr16/.gdbinit") CONFIG_FILES="$CONFIG_FILES cr16/.gdbinit:common/gdbinit.in" ;;
-    "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
     "cris/.gdbinit") CONFIG_FILES="$CONFIG_FILES cris/.gdbinit:common/gdbinit.in" ;;
-    "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
     "d10v/.gdbinit") CONFIG_FILES="$CONFIG_FILES d10v/.gdbinit:common/gdbinit.in" ;;
-    "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
     "frv/.gdbinit") CONFIG_FILES="$CONFIG_FILES frv/.gdbinit:common/gdbinit.in" ;;
-    "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
     "ft32/.gdbinit") CONFIG_FILES="$CONFIG_FILES ft32/.gdbinit:common/gdbinit.in" ;;
-    "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
     "h8300/.gdbinit") CONFIG_FILES="$CONFIG_FILES h8300/.gdbinit:common/gdbinit.in" ;;
-    "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
     "iq2000/.gdbinit") CONFIG_FILES="$CONFIG_FILES iq2000/.gdbinit:common/gdbinit.in" ;;
-    "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
     "lm32/.gdbinit") CONFIG_FILES="$CONFIG_FILES lm32/.gdbinit:common/gdbinit.in" ;;
-    "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
     "m32c/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32c/.gdbinit:common/gdbinit.in" ;;
-    "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
     "m32r/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32r/.gdbinit:common/gdbinit.in" ;;
-    "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
     "m68hc11/.gdbinit") CONFIG_FILES="$CONFIG_FILES m68hc11/.gdbinit:common/gdbinit.in" ;;
-    "depdir-m68hc11") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m68hc11" ;;
     "mcore/.gdbinit") CONFIG_FILES="$CONFIG_FILES mcore/.gdbinit:common/gdbinit.in" ;;
-    "depdir-mcore") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mcore" ;;
     "microblaze/.gdbinit") CONFIG_FILES="$CONFIG_FILES microblaze/.gdbinit:common/gdbinit.in" ;;
-    "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
     "mips/.gdbinit") CONFIG_FILES="$CONFIG_FILES mips/.gdbinit:common/gdbinit.in" ;;
-    "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
     "mn10300/.gdbinit") CONFIG_FILES="$CONFIG_FILES mn10300/.gdbinit:common/gdbinit.in" ;;
-    "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
     "moxie/.gdbinit") CONFIG_FILES="$CONFIG_FILES moxie/.gdbinit:common/gdbinit.in" ;;
-    "depdir-moxie") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-moxie" ;;
     "msp430/.gdbinit") CONFIG_FILES="$CONFIG_FILES msp430/.gdbinit:common/gdbinit.in" ;;
-    "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "or1k/.gdbinit") CONFIG_FILES="$CONFIG_FILES or1k/.gdbinit:common/gdbinit.in" ;;
-    "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
     "ppc/.gdbinit") CONFIG_FILES="$CONFIG_FILES ppc/.gdbinit:common/gdbinit.in" ;;
-    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
     "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
-    "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
     "riscv/.gdbinit") CONFIG_FILES="$CONFIG_FILES riscv/.gdbinit:common/gdbinit.in" ;;
-    "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
     "rl78/.gdbinit") CONFIG_FILES="$CONFIG_FILES rl78/.gdbinit:common/gdbinit.in" ;;
-    "depdir-rl78") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rl78" ;;
     "rx/.gdbinit") CONFIG_FILES="$CONFIG_FILES rx/.gdbinit:common/gdbinit.in" ;;
-    "depdir-rx") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rx" ;;
     "sh/.gdbinit") CONFIG_FILES="$CONFIG_FILES sh/.gdbinit:common/gdbinit.in" ;;
-    "depdir-sh") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-sh" ;;
     "erc32/.gdbinit") CONFIG_FILES="$CONFIG_FILES erc32/.gdbinit:common/gdbinit.in" ;;
-    "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
     "v850/.gdbinit") CONFIG_FILES="$CONFIG_FILES v850/.gdbinit:common/gdbinit.in" ;;
-    "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
     "example-synacor/.gdbinit") CONFIG_FILES="$CONFIG_FILES example-synacor/.gdbinit:common/gdbinit.in" ;;
-    "depdir-example-synacor") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-example-synacor" ;;
     "arch-subdir.mk") CONFIG_FILES="$CONFIG_FILES arch-subdir.mk" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
@@ -19114,38 +18986,6 @@ $as_echo X"$file" |
   done
 }
  ;;
-    "depdir-aarch64":C) $SHELL $ac_aux_dir/mkinstalldirs aarch64/$DEPDIR ;;
-    "depdir-arm":C) $SHELL $ac_aux_dir/mkinstalldirs arm/$DEPDIR ;;
-    "depdir-avr":C) $SHELL $ac_aux_dir/mkinstalldirs avr/$DEPDIR ;;
-    "depdir-bfin":C) $SHELL $ac_aux_dir/mkinstalldirs bfin/$DEPDIR ;;
-    "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
-    "depdir-cr16":C) $SHELL $ac_aux_dir/mkinstalldirs cr16/$DEPDIR ;;
-    "depdir-cris":C) $SHELL $ac_aux_dir/mkinstalldirs cris/$DEPDIR ;;
-    "depdir-d10v":C) $SHELL $ac_aux_dir/mkinstalldirs d10v/$DEPDIR ;;
-    "depdir-frv":C) $SHELL $ac_aux_dir/mkinstalldirs frv/$DEPDIR ;;
-    "depdir-ft32":C) $SHELL $ac_aux_dir/mkinstalldirs ft32/$DEPDIR ;;
-    "depdir-h8300":C) $SHELL $ac_aux_dir/mkinstalldirs h8300/$DEPDIR ;;
-    "depdir-iq2000":C) $SHELL $ac_aux_dir/mkinstalldirs iq2000/$DEPDIR ;;
-    "depdir-lm32":C) $SHELL $ac_aux_dir/mkinstalldirs lm32/$DEPDIR ;;
-    "depdir-m32c":C) $SHELL $ac_aux_dir/mkinstalldirs m32c/$DEPDIR ;;
-    "depdir-m32r":C) $SHELL $ac_aux_dir/mkinstalldirs m32r/$DEPDIR ;;
-    "depdir-m68hc11":C) $SHELL $ac_aux_dir/mkinstalldirs m68hc11/$DEPDIR ;;
-    "depdir-mcore":C) $SHELL $ac_aux_dir/mkinstalldirs mcore/$DEPDIR ;;
-    "depdir-microblaze":C) $SHELL $ac_aux_dir/mkinstalldirs microblaze/$DEPDIR ;;
-    "depdir-mips":C) $SHELL $ac_aux_dir/mkinstalldirs mips/$DEPDIR ;;
-    "depdir-mn10300":C) $SHELL $ac_aux_dir/mkinstalldirs mn10300/$DEPDIR ;;
-    "depdir-moxie":C) $SHELL $ac_aux_dir/mkinstalldirs moxie/$DEPDIR ;;
-    "depdir-msp430":C) $SHELL $ac_aux_dir/mkinstalldirs msp430/$DEPDIR ;;
-    "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
-    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
-    "depdir-pru":C) $SHELL $ac_aux_dir/mkinstalldirs pru/$DEPDIR ;;
-    "depdir-riscv":C) $SHELL $ac_aux_dir/mkinstalldirs riscv/$DEPDIR ;;
-    "depdir-rl78":C) $SHELL $ac_aux_dir/mkinstalldirs rl78/$DEPDIR ;;
-    "depdir-rx":C) $SHELL $ac_aux_dir/mkinstalldirs rx/$DEPDIR ;;
-    "depdir-sh":C) $SHELL $ac_aux_dir/mkinstalldirs sh/$DEPDIR ;;
-    "depdir-erc32":C) $SHELL $ac_aux_dir/mkinstalldirs erc32/$DEPDIR ;;
-    "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
-    "depdir-example-synacor":C) $SHELL $ac_aux_dir/mkinstalldirs example-synacor/$DEPDIR ;;
 
   esac
 done # for ac_tag
