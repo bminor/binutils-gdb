@@ -20249,11 +20249,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
-#ifdef __QNXTARGET__
 #define ELF_MAXPAGESIZE			0x1000
-#else
-#define ELF_MAXPAGESIZE			0x10000
-#endif
 #define ELF_COMMONPAGESIZE		0x1000
 
 #define bfd_elf32_mkobject			elf32_arm_mkobject
