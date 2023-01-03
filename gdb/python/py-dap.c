@@ -1,6 +1,6 @@
 /* Python DAP interpreter
 
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2022, 2023 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -80,7 +80,7 @@ dap_interp::init (bool top_level)
   if (func == nullptr)
     gdbpy_handle_exception ();
 
-  gdbpy_ref<> result_obj (PyObject_CallNoArgs (func.get ()));
+  gdbpy_ref<> result_obj (PyObject_CallObject (func.get (), nullptr));
   if (result_obj == nullptr)
     gdbpy_handle_exception ();
 
