@@ -283,6 +283,8 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
   static xtensa_insnbuf slot_buffer = NULL;
   int first, first_slot, valid_insn;
   property_table_entry *insn_block;
+  enum dis_insn_type insn_type;
+  bfd_vma target;
 
   if (!xtensa_default_isa)
     xtensa_default_isa = xtensa_isa_init (0, 0);
@@ -422,12 +424,13 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
   if (nslots > 1)
     (*info->fprintf_func) (info->stream, "{ ");
 
-  info->insn_type = dis_nonbranch;
-  info->insn_info_valid = 1;
-
+  insn_type = dis_nonbranch;
+  target = 0;
   first_slot = 1;
   for (n = 0; n < nslots; n++)
     {
+      int imm_pcrel = 0;
+
       if (first_slot)
 	first_slot = 0;
       else
@@ -445,6 +448,8 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
 	info->insn_type = dis_branch;
       else if (xtensa_opcode_is_call (isa, opc))
 	info->insn_type = dis_jsr;
+      else
+	info->insn_type = dis_nonbranch;
 
       /* Print the operands (if any).  */
       noperands = xtensa_opcode_num_operands (isa, opc);
@@ -464,8 +469,20 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
 					   slot_buffer, &operand_val);
 
 	  print_xtensa_operand (memaddr, info, opc, i, operand_val);
+	  if (xtensa_operand_is_PCrelative (isa, opc, i))
+	    ++imm_pcrel;
+	}
+      if (!imm_pcrel)
+	info->insn_type = dis_nonbranch;
+      if (info->insn_type != dis_nonbranch)
+	{
+	  insn_type = info->insn_type;
+	  target = info->target;
 	}
     }
+  info->insn_type = insn_type;
+  info->target = target;
+  info->insn_info_valid = 1;
 
   if (nslots > 1)
     (*info->fprintf_func) (info->stream, " }");
