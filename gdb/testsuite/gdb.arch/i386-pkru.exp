@@ -58,6 +58,26 @@ if { !$supports_pkru } {
     return
 }
 
+# Linux kernel versions 5.14.0 to 6.1.x contain a regression related to writing
+# the PKRU using ptrace, see commit 4a804c4f8356 ("x86/fpu: Allow PKRU to be
+# (once again) written by ptrace.").
+set have_xfail 0
+if { [istarget *-*-linux*] } {
+    set res [remote_exec target "uname -r"]
+    set status [lindex $res 0]
+    set output [lindex $res 1]
+
+    set re ^($decimal)\\.($decimal)\\.($decimal)
+    if { $status == 0
+	 && [regexp $re $output dummy v1 v2 v3] == 1 } {
+	set v [list $v1 $v2 $v3]
+	set have_xfail \
+	    [expr \
+		 [version_compare [list 5 14 0] <= $v] \
+		 && [version_compare $v < [list 6 2 0]]]
+    }
+}
+
 # Test pkru register at startup
 gdb_test "print /x \$pkru" "= $default_pkru_re" "pkru register"
 
@@ -65,11 +85,28 @@ gdb_test "print /x \$pkru" "= $default_pkru_re" "pkru register"
 gdb_breakpoint [ gdb_get_line_number "break here 1" ]
 gdb_continue_to_breakpoint "break here 1" ".*break here 1.*"
 
-gdb_test "info register pkru" ".*pkru.*0x12345678.*" "read pkru register"
-gdb_test "print /x \$pkru = 0x44444444" "= 0x44444444" "set pkru value"
-gdb_test "info register pkru" ".*pkru.*0x44444444.*" "read value after setting value"
+set val1 0x12345678
+gdb_test "info register pkru" ".*pkru.*$val1.*" "read pkru register"
+
+set val2 0x44444444
+gdb_test "print /x \$pkru = $val2" "= $val2" "set pkru value"
+
+set xval $val2
+gdb_test_multiple "info register pkru" "read value after setting value" {
+    -re -wrap ".*pkru.*$val2.*" {
+	pass $gdb_test_name
+    }
+    -re -wrap ".*pkru.*$val1.*" {
+	if { $have_xfail } {
+	    xfail $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+	set xval $val1
+    }
+}
 
 gdb_breakpoint [ gdb_get_line_number "break here 2" ]
 gdb_continue_to_breakpoint "break here 2" ".*break here 2.*"
 
-gdb_test "print /x rd_value" "= 0x44444444" "variable after reading pkru"
+gdb_test "print /x rd_value" "= $xval" "variable after reading pkru"
