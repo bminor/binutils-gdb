@@ -3328,9 +3328,13 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
   /* This has to happen before section positions are set.  */
   bfd_map_over_sections (ibfd, copy_relocations_in_section, obfd);
+  if (status != 0)
+    return false;
 
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, obfd);
+  if (status != 0)
+    return false;
 
   if (add_sections != NULL)
     {
