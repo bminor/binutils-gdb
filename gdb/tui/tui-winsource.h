@@ -124,8 +124,7 @@ protected:
   /* Redraw the complete line of a source or disassembly window.  */
   void show_source_line (int lineno);
 
-  /* Used for horizontal scroll.  */
-  int m_horizontal_offset = 0;
+  /* Where to start generating content from.  */
   struct tui_line_or_address m_start_line_or_addr;
 
   /* Architecture associated with code at this location.  */
@@ -178,6 +177,9 @@ public:
 				   CORE_ADDR *addr_p) = 0;
 
 private:
+
+  /* Used for horizontal scroll.  */
+  int m_horizontal_offset = 0;
 
   void show_source_content ();
 
