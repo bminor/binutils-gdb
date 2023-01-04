@@ -97,13 +97,6 @@
 #define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
 #define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
 
-#define I386_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
-#define X86_64_PCREL_TYPE_P(TYPE) \
-  ((TYPE) == R_X86_64_PC8 \
-   || (TYPE) == R_X86_64_PC16 \
-   || (TYPE) == R_X86_64_PC32 \
-   || (TYPE) == R_X86_64_PC64)
-
 /* This must be the same as sframe_get_hdr_size (sfh).  For x86-64, this value
    is the same as sizeof (sframe_header) because there is no SFrame auxilliary
    header.  */
