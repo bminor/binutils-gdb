@@ -138,10 +138,25 @@ struct scoped_debug_start_end
 
   DISABLE_COPY_AND_ASSIGN (scoped_debug_start_end);
 
-  scoped_debug_start_end (scoped_debug_start_end &&other) = default;
+  scoped_debug_start_end (scoped_debug_start_end &&other)
+    : m_debug_enabled (other.m_debug_enabled),
+      m_module (other.m_module),
+      m_func (other.m_func),
+      m_end_prefix (other.m_end_prefix),
+      m_msg (other.m_msg),
+      m_with_format (other.m_with_format),
+      m_must_decrement_print_depth (other.m_must_decrement_print_depth),
+      m_disabled (other.m_disabled)
+  {
+    /* Avoid the moved-from object doing the side-effects in its destructor.  */
+    other.m_disabled = true;
+  }
 
   ~scoped_debug_start_end ()
   {
+    if (m_disabled)
+      return;
+
     if (m_must_decrement_print_depth)
       {
 	gdb_assert (debug_print_depth > 0);
@@ -194,6 +209,10 @@ private:
      construction but not during destruction, or vice-versa.  We want to make
      sure there are as many increments are there are decrements.  */
   bool m_must_decrement_print_depth = false;
+
+  /* True if this object was moved from, and the destructor behavior must be
+     inhibited.  */
+  bool m_disabled = false;
 };
 
 /* Implementation of is_debug_enabled when PT is an invokable type.  */
