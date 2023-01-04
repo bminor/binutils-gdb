@@ -14,7 +14,10 @@
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 procedure Prog is
+   type Range_Type is range -15 .. 73;
+
    Variable : Integer := 23;
+   Range_Variable : Range_Type := 23;
 begin
    null; -- START
 end Prog;

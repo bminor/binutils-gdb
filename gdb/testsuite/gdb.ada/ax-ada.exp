@@ -29,3 +29,4 @@ set bp_location [gdb_get_line_number "START" ${testdir}/prog.adb]
 runto "prog.adb:$bp_location"
 
 gdb_test "maint agent-eval variable = 23" ".*end"
+gdb_test "maint agent-eval range_variable = 23" ".*end"
