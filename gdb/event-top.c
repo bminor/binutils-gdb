@@ -48,6 +48,10 @@
 #include "readline/readline.h"
 #include "readline/history.h"
 
+#ifdef TUI
+#include "tui/tui.h"
+#endif
+
 /* readline defines this.  */
 #undef savestring
 
@@ -940,6 +944,10 @@ unblock_signal (int sig)
 static void ATTRIBUTE_NORETURN
 handle_fatal_signal (int sig)
 {
+#ifdef TUI
+  tui_disable ();
+#endif
+
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
   const auto sig_write = [] (const char *msg) -> void
   {

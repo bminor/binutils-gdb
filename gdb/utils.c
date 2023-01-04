@@ -29,7 +29,8 @@
 #endif /* HAVE_SYS_RESOURCE_H */
 
 #ifdef TUI
-#include "tui/tui.h"		/* For tui_get_command_dimension.   */
+/* For tui_get_command_dimension and tui_disable.   */
+#include "tui/tui.h"
 #endif
 
 #ifdef __GO32__
@@ -353,6 +354,10 @@ internal_vproblem (struct internal_problem *problem,
 	exit (1);
       }
   }
+
+#ifdef TUI
+  tui_disable ();
+#endif
 
   /* Create a string containing the full error/warning message.  Need
      to call query with this full string, as otherwize the reason
