@@ -3686,7 +3686,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       if (!ok_object)
 	del = !copy_unknown_object (this_element, output_bfd);
 
-      if (!(ok_object && !del ? bfd_close : bfd_close_all_done) (output_bfd))
+      if (!(ok_object && !del && !status
+	    ? bfd_close : bfd_close_all_done) (output_bfd))
 	{
 	  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
 	  /* Error in new object file. Don't change archive.  */
