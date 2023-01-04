@@ -705,6 +705,14 @@ read_section (bfd *abfd,
 	  return false;
 	}
 
+      if ((msec->flags & SEC_HAS_CONTENTS) == 0)
+	{
+	  _bfd_error_handler (_("DWARF error: section %s has no contents"),
+			      section_name);
+	  bfd_set_error (bfd_error_no_contents);
+	  return false;
+	}
+
       if (_bfd_section_size_insane (abfd, msec))
 	{
 	  /* PR 26946 */
