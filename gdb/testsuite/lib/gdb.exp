@@ -639,8 +639,9 @@ proc gdb_breakpoint { linespec args } {
 	set print_pass 1
     }
 
+    set test_name "gdb_breakpoint: set breakpoint at $linespec"
     # The first two regexps are what we get with -g, the third is without -g.
-    gdb_test_multiple "$break_command $linespec" "gdb_breakpoint: set breakpoint at $linespec" {
+    gdb_test_multiple "$break_command $linespec" $test_name {
 	-re "$break_message \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "$break_message \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "$break_message \[0-9\]* at .*$gdb_prompt $" {}
