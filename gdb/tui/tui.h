@@ -36,6 +36,9 @@ extern bool debug_tui;
 #define TUI_SCOPED_DEBUG_ENTER_EXIT \
   scoped_debug_enter_exit (debug_tui, "tui")
 
+#define TUI_SCOPED_DEBUG_START_END(fmt, ...) \
+  scoped_debug_start_end (debug_tui, "tui", fmt, ##__VA_ARGS__)
+
 struct ui_file;
 
 /* Types of error returns.  */

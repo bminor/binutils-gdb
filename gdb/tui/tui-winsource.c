@@ -316,6 +316,8 @@ tui_source_window_base::show_source_line (int lineno)
 void
 tui_source_window_base::refresh_window ()
 {
+  TUI_SCOPED_DEBUG_START_END ("window `%s`", name ());
+
   /* tui_win_info::refresh_window would draw the empty background window to
      the screen, potentially creating a flicker.  */
   wnoutrefresh (handle.get ());
@@ -325,6 +327,12 @@ tui_source_window_base::refresh_window ()
   int view_width = this->view_width ();
   int content_width = m_max_length;
   int pad_x = m_horizontal_offset - m_pad_offset;
+
+  tui_debug_printf ("pad_width = %d, left_margin = %d, view_width = %d",
+		    pad_width, left_margin, view_width);
+  tui_debug_printf ("content_width = %d, pad_x = %d, m_horizontal_offset = %d",
+		    content_width, pad_x, m_horizontal_offset);
+  tui_debug_printf ("m_pad_offset = %d", m_pad_offset);
 
   gdb_assert (m_pad_offset >= 0);
   gdb_assert (m_horizontal_offset + view_width
@@ -346,6 +354,8 @@ tui_source_window_base::refresh_window ()
 void
 tui_source_window_base::show_source_content ()
 {
+  TUI_SCOPED_DEBUG_START_END ("window `%s`", name ());
+
   gdb_assert (!m_content.empty ());
 
   /* The pad should be at least as wide as the window, but ideally, as wide
@@ -390,6 +400,8 @@ tui_source_window_base::show_source_content ()
 	}
 
       m_pad_requested_width = required_pad_width;
+      tui_debug_printf ("requested width %d, allocated width %d",
+			required_pad_width, getmaxx (m_pad.get ()));
     }
 
   gdb_assert (m_pad != nullptr);
@@ -431,6 +443,8 @@ tui_source_window_base::update_tab_width ()
 void
 tui_source_window_base::rerender ()
 {
+  TUI_SCOPED_DEBUG_START_END ("window `%s`", name ());
+
   if (!m_content.empty ())
     {
       struct symtab_and_line cursal
@@ -492,6 +506,8 @@ tui_source_window_base::refill ()
 bool
 tui_source_window_base::validate_scroll_offsets ()
 {
+  TUI_SCOPED_DEBUG_START_END ("window `%s`", name ());
+
   int original_pad_offset = m_pad_offset;
 
   if (m_horizontal_offset < 0)
@@ -500,6 +516,11 @@ tui_source_window_base::validate_scroll_offsets ()
   int content_width = m_max_length;
   int pad_width = getmaxx (m_pad.get ());
   int view_width = this->view_width ();
+
+  tui_debug_printf ("pad_width = %d, view_width = %d, content_width = %d",
+		    pad_width, view_width, content_width);
+  tui_debug_printf ("original_pad_offset = %d, m_horizontal_offset = %d",
+		    original_pad_offset, m_horizontal_offset);
 
   if (m_horizontal_offset + view_width > content_width)
     m_horizontal_offset = std::max (content_width - view_width, 0);
