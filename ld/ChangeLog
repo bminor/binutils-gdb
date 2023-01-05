@@ -1,3 +1,8 @@
+2023-01-05  Andreas K. Huettel  <dilfridge@gentoo.org>
+
+	* testsuite/ld-elf/shared.exp: un-xfail the PR19710 test for the
+	AArch64 architecture.
+
 2023-01-04  Andreas K. Huettel  <dilfridge@gentoo.org>
 
 	PR 29843
