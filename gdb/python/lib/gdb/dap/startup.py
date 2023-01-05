@@ -22,6 +22,7 @@ import signal
 import threading
 import traceback
 from contextlib import contextmanager
+import sys
 
 
 # The GDB thread, aka the main thread.
@@ -173,7 +174,10 @@ def send_gdb_with_response(fn):
     """
     if isinstance(fn, str):
         fn = Invoker(fn)
-    result_q = queue.SimpleQueue()
+    if sys.version_info[0] == 3 and sys.version_info[1] <= 6:
+        result_q = queue.Queue()
+    else:
+        result_q = queue.SimpleQueue()
 
     def message():
         try:
