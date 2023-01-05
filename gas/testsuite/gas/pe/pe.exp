@@ -54,7 +54,7 @@ if ([istarget "x86_64-*-mingw*"]) then {
 
 
 # This test is only for AArch64
-if ([istarget "aarch64-*-pe*"]) {
+if {[istarget "aarch64-*-pe*"] || [istarget "aarch64-*-mingw*"]} {
 	run_dump_test "pe-aarch64"
 }
 

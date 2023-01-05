@@ -2257,13 +2257,12 @@ static const unsigned char jmp_ix86_bytes[] =
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
 };
 
-/* _function:
-  b <__imp_function>
-  nop */
 static const unsigned char jmp_aarch64_bytes[] =
 {
-  0x00, 0x00, 0x00, 0x14,
-  0x1f, 0x20, 0x03, 0xD5
+  0x10, 0x00, 0x00, 0x90, /* adrp x16, 0        */
+  0x10, 0x02, 0x00, 0x91, /* add x16, x16, #0x0 */
+  0x10, 0x02, 0x40, 0xf9, /* ldr x16, [x16]     */
+  0x00, 0x02, 0x1f, 0xd6  /* br x16             */
 };
 
 /* _function:
@@ -2431,7 +2430,8 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
 	  break;
 	case PE_ARCH_aarch64:
-	  quick_reloc (abfd, 0, BFD_RELOC_AARCH64_JUMP26, 2);
+	  quick_reloc (abfd, 0, BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL, 2);
+	  quick_reloc (abfd, 4, BFD_RELOC_AARCH64_ADD_LO12, 2);
 	  break;
 	default:
 	  abort ();

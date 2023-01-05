@@ -442,6 +442,11 @@ static const char *mname = "arm";
 static const char *mname = "arm-wince";
 #endif
 
+#ifdef DLLTOOL_DEFAULT_AARCH64
+/* arm64 rather than aarch64 to match llvm-dlltool */
+static const char *mname = "arm64";
+#endif
+
 #ifdef DLLTOOL_DEFAULT_I386
 static const char *mname = "i386";
 #endif
@@ -558,6 +563,14 @@ static const unsigned char mcore_le_jtab[] =
   0xC1, 0x00,            /* jmp r1         */
   0x00, 0x12,            /* nop            */
   0x00, 0x00, 0x00, 0x00 /* <address>      */
+};
+
+static const unsigned char aarch64_jtab[] =
+{
+  0x10, 0x00, 0x00, 0x90, /* adrp x16, 0        */
+  0x10, 0x02, 0x00, 0x91, /* add x16, x16, #0x0 */
+  0x10, 0x02, 0x40, 0xf9, /* ldr x16, [x16]     */
+  0x00, 0x02, 0x1f, 0xd6  /* br x16             */
 };
 
 static const char i386_trampoline[] =
@@ -717,6 +730,15 @@ mtable[] =
     i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, true, i386_x64_trampoline
   }
   ,
+  {
+#define MAARCH64 10
+    "arm64", ".byte", ".short", ".long", ".asciz", "//",
+    "bl ", ".global", ".space", ".balign\t2", ".balign\t4", "",
+    "pe-aarch64-little", bfd_arch_aarch64,
+    aarch64_jtab, sizeof (aarch64_jtab), 0,
+    0, 0, 0, 0, 0, false, 0
+  }
+  ,
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
@@ -864,6 +886,7 @@ rvaafter (int mach)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_WINCE:
+    case MAARCH64:
       break;
     default:
       /* xgettext:c-format */
@@ -888,6 +911,7 @@ rvabefore (int mach)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_WINCE:
+    case MAARCH64:
       return ".rva\t";
     default:
       /* xgettext:c-format */
@@ -910,6 +934,7 @@ asm_prefix (int mach, const char *name)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_WINCE:
+    case MAARCH64:
       break;
     case M386:
     case MX86:
@@ -2474,6 +2499,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	case TEXT:
 	  if (! exp->data)
 	    {
+	      unsigned int rpp_len;
+
 	      si->size = HOW_JTAB_SIZE;
 	      si->data = xmalloc (HOW_JTAB_SIZE);
 	      memcpy (si->data, HOW_JTAB, HOW_JTAB_SIZE);
@@ -2481,7 +2508,12 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	      /* Add the reloc into idata$5.  */
 	      rel = xmalloc (sizeof (arelent));
 
-	      rpp = xmalloc (sizeof (arelent *) * (delay ? 4 : 2));
+	      rpp_len = delay ? 4 : 2;
+
+	      if (machine == MAARCH64)
+		rpp_len++;
+
+	      rpp = xmalloc (sizeof (arelent *) * rpp_len);
 	      rpp[0] = rel;
 	      rpp[1] = 0;
 
@@ -2507,6 +2539,22 @@ make_one_lib_file (export_type *exp, int i, int delay)
 						      BFD_RELOC_32_PCREL);
 		  rel->sym_ptr_ptr = iname_pp;
 		}
+	      else if (machine == MAARCH64)
+		{
+		  arelent *rel_add;
+
+		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL);
+		  rel->sym_ptr_ptr = secdata[IDATA5].sympp;
+
+		  rel_add = xmalloc (sizeof (arelent));
+		  rel_add->address = 4;
+		  rel_add->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_AARCH64_ADD_LO12);
+		  rel_add->sym_ptr_ptr = secdata[IDATA5].sympp;
+		  rel_add->addend = 0;
+
+		  rpp[rpp_len - 2] = rel_add;
+		  rpp[rpp_len - 1] = 0;
+		}
 	      else
 		{
 		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
@@ -2527,7 +2575,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	        }
 
 	      sec->orelocation = rpp;
-	      sec->reloc_count = delay ? 3 : 1;
+	      sec->reloc_count = rpp_len - 1;
 	    }
 	  break;
 
@@ -3674,7 +3722,7 @@ usage (FILE *file, int status)
   fprintf (file, _("Usage %s <option(s)> <object-file(s)>\n"), program_name);
   /* xgetext:c-format */
   fprintf (file, _("   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"), mname);
-  fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, thumb\n"));
+  fprintf (file, _("        possible <machine>: arm[_interwork], arm64, i386, mcore[-elf]{-le|-be}, thumb\n"));
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -y --output-delaylib <outname> Create a delay-import library.\n"));
@@ -3967,7 +4015,8 @@ main (int ac, char **av)
   machine = i;
 
   /* Check if we generated PE+.  */
-  create_for_pep = strcmp (mname, "i386:x86-64") == 0;
+  create_for_pep = strcmp (mname, "i386:x86-64") == 0 ||
+		   strcmp (mname, "arm64") == 0;
 
   {
     /* Check the default underscore */

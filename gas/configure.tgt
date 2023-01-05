@@ -135,7 +135,7 @@ case ${generic_target} in
     esac ;;
   aarch64*-*-netbsd*)			fmt=elf em=nbsd;;
   aarch64*-*-openbsd*)			fmt=elf;;
-  aarch64*-*-pe*)			fmt=coff em=pepaarch64 ;;
+  aarch64*-*-pe* | aarch64*-*-mingw*)	fmt=coff em=pepaarch64 ;;
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;
   alpha-*-linux*ecoff*)			fmt=ecoff ;;
