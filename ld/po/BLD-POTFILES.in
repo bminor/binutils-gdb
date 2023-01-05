@@ -23,6 +23,7 @@ earclinux.c
 earclinux_nps.c
 earcv2elf.c
 earcv2elfx.c
+earm64pe.c
 earm_wince_pe.c
 earmelf.c
 earmelf_fbsd.c

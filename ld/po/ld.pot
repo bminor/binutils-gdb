@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-12-31 12:21+0000\n"
+"POT-Creation-Date: 2023-01-05 10:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,10 +56,10 @@ msgid "%P: symbol `%pT' missing from main hash table\n"
 msgstr ""
 
 #: ldcref.c:517 ldcref.c:628 ldmain.c:1311 ldmisc.c:324 pe-dll.c:758
-#: pe-dll.c:1324 pe-dll.c:1445 pe-dll.c:1569 eaarch64pe.c:1569
+#: pe-dll.c:1324 pe-dll.c:1445 pe-dll.c:1569 eaarch64pe.c:1573 earm64pe.c:1573
 #: earm_wince_pe.c:1575 earm_wince_pe.c:1747 earmpe.c:1575 earmpe.c:1747
 #: ei386pe.c:1575 ei386pe.c:1747 ei386pe_posix.c:1575 ei386pe_posix.c:1747
-#: ei386pep.c:1569 emcorepe.c:1575 emcorepe.c:1747 eshpe.c:1575 eshpe.c:1747
+#: ei386pep.c:1573 emcorepe.c:1575 emcorepe.c:1747 eshpe.c:1575 eshpe.c:1747
 msgid "%F%P: %pB: could not read symbols: %E\n"
 msgstr ""
 
@@ -193,9 +193,9 @@ msgstr ""
 msgid "%P: warning: .note.gnu.build-id section discarded, --build-id ignored\n"
 msgstr ""
 
-#: ldelf.c:1496 eaarch64pe.c:1353 earm_wince_pe.c:1341 earmpe.c:1341
-#: ei386pe.c:1341 ei386pe_posix.c:1341 ei386pep.c:1353 emcorepe.c:1341
-#: eshpe.c:1341
+#: ldelf.c:1496 eaarch64pe.c:1357 earm64pe.c:1357 earm_wince_pe.c:1341
+#: earmpe.c:1341 ei386pe.c:1341 ei386pe_posix.c:1341 ei386pep.c:1357
+#: emcorepe.c:1341 eshpe.c:1341
 msgid "%P: warning: unrecognized --build-id style ignored\n"
 msgstr ""
 
@@ -316,9 +316,9 @@ msgstr ""
 msgid "%F%P:%pS / by zero\n"
 msgstr ""
 
-#: ldexp.c:745 ldlang.c:3864 ldmain.c:1278 eaarch64pe.c:1758
+#: ldexp.c:745 ldlang.c:3864 ldmain.c:1278 eaarch64pe.c:1762 earm64pe.c:1762
 #: earm_wince_pe.c:1858 earmpe.c:1858 ei386pe.c:1858 ei386pe_posix.c:1858
-#: ei386pep.c:1758 emcorepe.c:1858 eshpe.c:1858
+#: ei386pep.c:1762 emcorepe.c:1858 eshpe.c:1858
 msgid "%F%P: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
 
@@ -1149,7 +1149,7 @@ msgstr ""
 
 #: ldver.c:42
 #, c-format
-msgid "Copyright (C) 2022 Free Software Foundation, Inc.\n"
+msgid "Copyright (C) 2023 Free Software Foundation, Inc.\n"
 msgstr ""
 
 #: ldver.c:43
@@ -4344,222 +4344,222 @@ msgid ""
 "  -z pac-plt                    Protect PLTs with Pointer Authentication.\n"
 msgstr ""
 
-#: eaarch64pe.c:420 earm_wince_pe.c:414 earmpe.c:414 ei386pe.c:414
-#: ei386pe_posix.c:414 ei386pep.c:420 emcorepe.c:414 eshpe.c:414
+#: eaarch64pe.c:424 earm64pe.c:424 earm_wince_pe.c:414 earmpe.c:414
+#: ei386pe.c:414 ei386pe_posix.c:414 ei386pep.c:424 emcorepe.c:414 eshpe.c:414
 #, c-format
 msgid ""
 "  --base_file <basefile>             Generate a base file for relocatable "
 "DLLs\n"
 msgstr ""
 
-#: eaarch64pe.c:421 earm_wince_pe.c:415 earmpe.c:415 ei386pe.c:415
-#: ei386pe_posix.c:415 ei386pep.c:421 emcorepe.c:415 eshpe.c:415
+#: eaarch64pe.c:425 earm64pe.c:425 earm_wince_pe.c:415 earmpe.c:415
+#: ei386pe.c:415 ei386pe_posix.c:415 ei386pep.c:425 emcorepe.c:415 eshpe.c:415
 #, c-format
 msgid ""
 "  --dll                              Set image base to the default for DLLs\n"
 msgstr ""
 
-#: eaarch64pe.c:422 earm_wince_pe.c:416 earmpe.c:416 ei386pe.c:416
-#: ei386pe_posix.c:416 ei386pep.c:422 emcorepe.c:416 eshpe.c:416
+#: eaarch64pe.c:426 earm64pe.c:426 earm_wince_pe.c:416 earmpe.c:416
+#: ei386pe.c:416 ei386pe_posix.c:416 ei386pep.c:426 emcorepe.c:416 eshpe.c:416
 #, c-format
 msgid "  --file-alignment <size>            Set file alignment\n"
 msgstr ""
 
-#: eaarch64pe.c:423 earm_wince_pe.c:417 earmpe.c:417 ei386pe.c:417
-#: ei386pe_posix.c:417 ei386pep.c:423 emcorepe.c:417 eshpe.c:417
+#: eaarch64pe.c:427 earm64pe.c:427 earm_wince_pe.c:417 earmpe.c:417
+#: ei386pe.c:417 ei386pe_posix.c:417 ei386pep.c:427 emcorepe.c:417 eshpe.c:417
 #, c-format
 msgid "  --heap <size>                      Set initial size of the heap\n"
 msgstr ""
 
-#: eaarch64pe.c:424 earm_wince_pe.c:418 earmpe.c:418 ei386pe.c:418
-#: ei386pe_posix.c:418 ei386pep.c:424 emcorepe.c:418 eshpe.c:418
+#: eaarch64pe.c:428 earm64pe.c:428 earm_wince_pe.c:418 earmpe.c:418
+#: ei386pe.c:418 ei386pe_posix.c:418 ei386pep.c:428 emcorepe.c:418 eshpe.c:418
 #, c-format
 msgid ""
 "  --image-base <address>             Set start address of the executable\n"
 msgstr ""
 
-#: eaarch64pe.c:425 earm_wince_pe.c:419 earmpe.c:419 ei386pe.c:419
-#: ei386pe_posix.c:419 ei386pep.c:425 emcorepe.c:419 eshpe.c:419
+#: eaarch64pe.c:429 earm64pe.c:429 earm_wince_pe.c:419 earmpe.c:419
+#: ei386pe.c:419 ei386pe_posix.c:419 ei386pep.c:429 emcorepe.c:419 eshpe.c:419
 #, c-format
 msgid ""
 "  --major-image-version <number>     Set version number of the executable\n"
 msgstr ""
 
-#: eaarch64pe.c:426 earm_wince_pe.c:420 earmpe.c:420 ei386pe.c:420
-#: ei386pe_posix.c:420 ei386pep.c:426 emcorepe.c:420 eshpe.c:420
+#: eaarch64pe.c:430 earm64pe.c:430 earm_wince_pe.c:420 earmpe.c:420
+#: ei386pe.c:420 ei386pe_posix.c:420 ei386pep.c:430 emcorepe.c:420 eshpe.c:420
 #, c-format
 msgid "  --major-os-version <number>        Set minimum required OS version\n"
 msgstr ""
 
-#: eaarch64pe.c:427 earm_wince_pe.c:421 earmpe.c:421 ei386pe.c:421
-#: ei386pe_posix.c:421 ei386pep.c:427 emcorepe.c:421 eshpe.c:421
+#: eaarch64pe.c:431 earm64pe.c:431 earm_wince_pe.c:421 earmpe.c:421
+#: ei386pe.c:421 ei386pe_posix.c:421 ei386pep.c:431 emcorepe.c:421 eshpe.c:421
 #, c-format
 msgid ""
 "  --major-subsystem-version <number> Set minimum required OS subsystem "
 "version\n"
 msgstr ""
 
-#: eaarch64pe.c:428 earm_wince_pe.c:422 earmpe.c:422 ei386pe.c:422
-#: ei386pe_posix.c:422 ei386pep.c:428 emcorepe.c:422 eshpe.c:422
+#: eaarch64pe.c:432 earm64pe.c:432 earm_wince_pe.c:422 earmpe.c:422
+#: ei386pe.c:422 ei386pe_posix.c:422 ei386pep.c:432 emcorepe.c:422 eshpe.c:422
 #, c-format
 msgid ""
 "  --minor-image-version <number>     Set revision number of the executable\n"
 msgstr ""
 
-#: eaarch64pe.c:429 earm_wince_pe.c:423 earmpe.c:423 ei386pe.c:423
-#: ei386pe_posix.c:423 ei386pep.c:429 emcorepe.c:423 eshpe.c:423
+#: eaarch64pe.c:433 earm64pe.c:433 earm_wince_pe.c:423 earmpe.c:423
+#: ei386pe.c:423 ei386pe_posix.c:423 ei386pep.c:433 emcorepe.c:423 eshpe.c:423
 #, c-format
 msgid "  --minor-os-version <number>        Set minimum required OS revision\n"
 msgstr ""
 
-#: eaarch64pe.c:430 earm_wince_pe.c:424 earmpe.c:424 ei386pe.c:424
-#: ei386pe_posix.c:424 ei386pep.c:430 emcorepe.c:424 eshpe.c:424
+#: eaarch64pe.c:434 earm64pe.c:434 earm_wince_pe.c:424 earmpe.c:424
+#: ei386pe.c:424 ei386pe_posix.c:424 ei386pep.c:434 emcorepe.c:424 eshpe.c:424
 #, c-format
 msgid ""
 "  --minor-subsystem-version <number> Set minimum required OS subsystem "
 "revision\n"
 msgstr ""
 
-#: eaarch64pe.c:431 earm_wince_pe.c:425 earmpe.c:425 ei386pe.c:425
-#: ei386pe_posix.c:425 ei386pep.c:431 emcorepe.c:425 eshpe.c:425
+#: eaarch64pe.c:435 earm64pe.c:435 earm_wince_pe.c:425 earmpe.c:425
+#: ei386pe.c:425 ei386pe_posix.c:425 ei386pep.c:435 emcorepe.c:425 eshpe.c:425
 #, c-format
 msgid "  --section-alignment <size>         Set section alignment\n"
 msgstr ""
 
-#: eaarch64pe.c:432 earm_wince_pe.c:426 earmpe.c:426 ei386pe.c:426
-#: ei386pe_posix.c:426 ei386pep.c:432 emcorepe.c:426 eshpe.c:426
+#: eaarch64pe.c:436 earm64pe.c:436 earm_wince_pe.c:426 earmpe.c:426
+#: ei386pe.c:426 ei386pe_posix.c:426 ei386pep.c:436 emcorepe.c:426 eshpe.c:426
 #, c-format
 msgid "  --stack <size>                     Set size of the initial stack\n"
 msgstr ""
 
-#: eaarch64pe.c:433 earm_wince_pe.c:427 earmpe.c:427 ei386pe.c:427
-#: ei386pe_posix.c:427 ei386pep.c:433 emcorepe.c:427 eshpe.c:427
+#: eaarch64pe.c:437 earm64pe.c:437 earm_wince_pe.c:427 earmpe.c:427
+#: ei386pe.c:427 ei386pe_posix.c:427 ei386pep.c:437 emcorepe.c:427 eshpe.c:427
 #, c-format
 msgid ""
 "  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"
 msgstr ""
 
-#: eaarch64pe.c:434 earm_wince_pe.c:428 earmpe.c:428 ei386pe.c:428
-#: ei386pe_posix.c:428 ei386pep.c:434 emcorepe.c:428 eshpe.c:428
+#: eaarch64pe.c:438 earm64pe.c:438 earm_wince_pe.c:428 earmpe.c:428
+#: ei386pe.c:428 ei386pe_posix.c:428 ei386pep.c:438 emcorepe.c:428 eshpe.c:428
 #, c-format
 msgid ""
 "  --support-old-code                 Support interworking with old code\n"
 msgstr ""
 
-#: eaarch64pe.c:435 earm_wince_pe.c:429 earmpe.c:429 ei386pe.c:429
-#: ei386pe_posix.c:429 ei386pep.c:435 emcorepe.c:429 eshpe.c:429
+#: eaarch64pe.c:439 earm64pe.c:439 earm_wince_pe.c:429 earmpe.c:429
+#: ei386pe.c:429 ei386pe_posix.c:429 ei386pep.c:439 emcorepe.c:429 eshpe.c:429
 #, c-format
 msgid ""
 "  --[no-]leading-underscore          Set explicit symbol underscore prefix "
 "mode\n"
 msgstr ""
 
-#: eaarch64pe.c:436 ei386pep.c:436
+#: eaarch64pe.c:440 earm64pe.c:440 ei386pep.c:440
 #, c-format
 msgid ""
 "  --[no-]insert-timestamp            Use a real timestamp rather than zero "
 "(default)\n"
 msgstr ""
 
-#: eaarch64pe.c:437 earm_wince_pe.c:432 earmpe.c:432 ei386pe.c:432
-#: ei386pe_posix.c:432 ei386pep.c:437 emcorepe.c:432 eshpe.c:432
+#: eaarch64pe.c:441 earm64pe.c:441 earm_wince_pe.c:432 earmpe.c:432
+#: ei386pe.c:432 ei386pe_posix.c:432 ei386pep.c:441 emcorepe.c:432 eshpe.c:432
 #, c-format
 msgid ""
 "                                     This makes binaries non-deterministic\n"
 msgstr ""
 
-#: eaarch64pe.c:439 earm_wince_pe.c:434 earmpe.c:434 ei386pe.c:434
-#: ei386pe_posix.c:434 ei386pep.c:439 emcorepe.c:434 eshpe.c:434
+#: eaarch64pe.c:443 earm64pe.c:443 earm_wince_pe.c:434 earmpe.c:434
+#: ei386pe.c:434 ei386pe_posix.c:434 ei386pep.c:443 emcorepe.c:434 eshpe.c:434
 #, c-format
 msgid ""
 "  --add-stdcall-alias                Export symbols with and without @nn\n"
 msgstr ""
 
-#: eaarch64pe.c:440 earm_wince_pe.c:435 earmpe.c:435 ei386pe.c:435
-#: ei386pe_posix.c:435 ei386pep.c:440 emcorepe.c:435 eshpe.c:435
+#: eaarch64pe.c:444 earm64pe.c:444 earm_wince_pe.c:435 earmpe.c:435
+#: ei386pe.c:435 ei386pe_posix.c:435 ei386pep.c:444 emcorepe.c:435 eshpe.c:435
 #, c-format
 msgid "  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"
 msgstr ""
 
-#: eaarch64pe.c:441 earm_wince_pe.c:436 earmpe.c:436 ei386pe.c:436
-#: ei386pe_posix.c:436 ei386pep.c:441 emcorepe.c:436 eshpe.c:436
+#: eaarch64pe.c:445 earm64pe.c:445 earm_wince_pe.c:436 earmpe.c:436
+#: ei386pe.c:436 ei386pe_posix.c:436 ei386pep.c:445 emcorepe.c:436 eshpe.c:436
 #, c-format
 msgid ""
 "  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"
 msgstr ""
 
-#: eaarch64pe.c:442 earm_wince_pe.c:437 earmpe.c:437 ei386pe.c:437
-#: ei386pe_posix.c:437 ei386pep.c:442 emcorepe.c:437 eshpe.c:437
+#: eaarch64pe.c:446 earm64pe.c:446 earm_wince_pe.c:437 earmpe.c:437
+#: ei386pe.c:437 ei386pe_posix.c:437 ei386pep.c:446 emcorepe.c:437 eshpe.c:437
 #, c-format
 msgid ""
 "  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"
 msgstr ""
 
-#: eaarch64pe.c:443 earm_wince_pe.c:438 earmpe.c:438 ei386pe.c:438
-#: ei386pe_posix.c:438 ei386pep.c:443 emcorepe.c:438 eshpe.c:438
+#: eaarch64pe.c:447 earm64pe.c:447 earm_wince_pe.c:438 earmpe.c:438
+#: ei386pe.c:438 ei386pe_posix.c:438 ei386pep.c:447 emcorepe.c:438 eshpe.c:438
 #, c-format
 msgid ""
 "  --exclude-all-symbols              Exclude all symbols from automatic "
 "export\n"
 msgstr ""
 
-#: eaarch64pe.c:444 earm_wince_pe.c:439 earmpe.c:439 ei386pe.c:439
-#: ei386pe_posix.c:439 ei386pep.c:444 emcorepe.c:439 eshpe.c:439
+#: eaarch64pe.c:448 earm64pe.c:448 earm_wince_pe.c:439 earmpe.c:439
+#: ei386pe.c:439 ei386pe_posix.c:439 ei386pep.c:448 emcorepe.c:439 eshpe.c:439
 #, c-format
 msgid ""
 "  --exclude-libs lib,lib,...         Exclude libraries from automatic "
 "export\n"
 msgstr ""
 
-#: eaarch64pe.c:445 earm_wince_pe.c:440 earmpe.c:440 ei386pe.c:440
-#: ei386pe_posix.c:440 ei386pep.c:445 emcorepe.c:440 eshpe.c:440
+#: eaarch64pe.c:449 earm64pe.c:449 earm_wince_pe.c:440 earmpe.c:440
+#: ei386pe.c:440 ei386pe_posix.c:440 ei386pep.c:449 emcorepe.c:440 eshpe.c:440
 #, c-format
 msgid "  --exclude-modules-for-implib mod,mod,...\n"
 msgstr ""
 
-#: eaarch64pe.c:446 earm_wince_pe.c:441 earmpe.c:441 ei386pe.c:441
-#: ei386pe_posix.c:441 ei386pep.c:446 emcorepe.c:441 eshpe.c:441
+#: eaarch64pe.c:450 earm64pe.c:450 earm_wince_pe.c:441 earmpe.c:441
+#: ei386pe.c:441 ei386pe_posix.c:441 ei386pep.c:450 emcorepe.c:441 eshpe.c:441
 #, c-format
 msgid ""
 "                                     Exclude objects, archive members from "
 "auto\n"
 msgstr ""
 
-#: eaarch64pe.c:447 ei386pep.c:447
+#: eaarch64pe.c:451 earm64pe.c:451 ei386pep.c:451
 #, c-format
 msgid ""
 "                                     export, place into import library "
 "instead\n"
 msgstr ""
 
-#: eaarch64pe.c:448 earm_wince_pe.c:443 earmpe.c:443 ei386pe.c:443
-#: ei386pe_posix.c:443 ei386pep.c:448 emcorepe.c:443 eshpe.c:443
+#: eaarch64pe.c:452 earm64pe.c:452 earm_wince_pe.c:443 earmpe.c:443
+#: ei386pe.c:443 ei386pe_posix.c:443 ei386pep.c:452 emcorepe.c:443 eshpe.c:443
 #, c-format
 msgid ""
 "  --export-all-symbols               Automatically export all globals to "
 "DLL\n"
 msgstr ""
 
-#: eaarch64pe.c:449 earm_wince_pe.c:444 earmpe.c:444 ei386pe.c:444
-#: ei386pe_posix.c:444 ei386pep.c:449 emcorepe.c:444 eshpe.c:444
+#: eaarch64pe.c:453 earm64pe.c:453 earm_wince_pe.c:444 earmpe.c:444
+#: ei386pe.c:444 ei386pe_posix.c:444 ei386pep.c:453 emcorepe.c:444 eshpe.c:444
 #, c-format
 msgid "  --kill-at                          Remove @nn from exported symbols\n"
 msgstr ""
 
-#: eaarch64pe.c:450 earm_wince_pe.c:445 earmpe.c:445 ei386pe.c:445
-#: ei386pe_posix.c:445 ei386pep.c:450 emcorepe.c:445 eshpe.c:445
+#: eaarch64pe.c:454 earm64pe.c:454 earm_wince_pe.c:445 earmpe.c:445
+#: ei386pe.c:445 ei386pe_posix.c:445 ei386pep.c:454 emcorepe.c:445 eshpe.c:445
 #, c-format
 msgid ""
 "  --output-def <file>                Generate a .DEF file for the built DLL\n"
 msgstr ""
 
-#: eaarch64pe.c:451 earm_wince_pe.c:446 earmpe.c:446 ei386pe.c:446
-#: ei386pe_posix.c:446 ei386pep.c:451 emcorepe.c:446 eshpe.c:446
+#: eaarch64pe.c:455 earm64pe.c:455 earm_wince_pe.c:446 earmpe.c:446
+#: ei386pe.c:446 ei386pe_posix.c:446 ei386pep.c:455 emcorepe.c:446 eshpe.c:446
 #, c-format
 msgid "  --warn-duplicate-exports           Warn about duplicate exports\n"
 msgstr ""
 
-#: eaarch64pe.c:452 ei386pep.c:452
+#: eaarch64pe.c:456 earm64pe.c:456 ei386pep.c:456
 #, c-format
 msgid ""
 "  --compat-implib                    Create backward compatible import "
@@ -4567,7 +4567,7 @@ msgid ""
 "                                       create __imp_<SYMBOL> as well\n"
 msgstr ""
 
-#: eaarch64pe.c:453 ei386pep.c:453
+#: eaarch64pe.c:457 earm64pe.c:457 ei386pep.c:457
 #, c-format
 msgid ""
 "  --enable-auto-image-base           Automatically choose image base for "
@@ -4575,15 +4575,15 @@ msgid ""
 "                                       unless user specifies one\n"
 msgstr ""
 
-#: eaarch64pe.c:454 ei386pep.c:454
+#: eaarch64pe.c:458 earm64pe.c:458 ei386pep.c:458
 #, c-format
 msgid ""
 "  --disable-auto-image-base          Do not auto-choose image base "
 "(default)\n"
 msgstr ""
 
-#: eaarch64pe.c:455 earm_wince_pe.c:450 earmpe.c:450 ei386pe.c:450
-#: ei386pe_posix.c:450 ei386pep.c:455 emcorepe.c:450 eshpe.c:450
+#: eaarch64pe.c:459 earm64pe.c:459 earm_wince_pe.c:450 earmpe.c:450
+#: ei386pe.c:450 ei386pe_posix.c:450 ei386pep.c:459 emcorepe.c:450 eshpe.c:450
 #, c-format
 msgid ""
 "  --dll-search-prefix=<string>       When linking dynamically to a dll "
@@ -4593,23 +4593,23 @@ msgid ""
 "                                       in preference to lib<basename>.dll \n"
 msgstr ""
 
-#: eaarch64pe.c:456 earm_wince_pe.c:451 earmpe.c:451 ei386pe.c:451
-#: ei386pe_posix.c:451 ei386pep.c:456 emcorepe.c:451 eshpe.c:451
+#: eaarch64pe.c:460 earm64pe.c:460 earm_wince_pe.c:451 earmpe.c:451
+#: ei386pe.c:451 ei386pe_posix.c:451 ei386pep.c:460 emcorepe.c:451 eshpe.c:451
 #, c-format
 msgid ""
 "  --enable-auto-import               Do sophisticated linking of _sym to\n"
 "                                       __imp_sym for DATA references\n"
 msgstr ""
 
-#: eaarch64pe.c:457 earm_wince_pe.c:452 earmpe.c:452 ei386pe.c:452
-#: ei386pe_posix.c:452 ei386pep.c:457 emcorepe.c:452 eshpe.c:452
+#: eaarch64pe.c:461 earm64pe.c:461 earm_wince_pe.c:452 earmpe.c:452
+#: ei386pe.c:452 ei386pe_posix.c:452 ei386pep.c:461 emcorepe.c:452 eshpe.c:452
 #, c-format
 msgid ""
 "  --disable-auto-import              Do not auto-import DATA items from "
 "DLLs\n"
 msgstr ""
 
-#: eaarch64pe.c:458 ei386pep.c:458
+#: eaarch64pe.c:462 earm64pe.c:462 ei386pep.c:462
 #, c-format
 msgid ""
 "  --enable-runtime-pseudo-reloc      Work around auto-import limitations by\n"
@@ -4618,7 +4618,7 @@ msgid ""
 "                                       runtime\n"
 msgstr ""
 
-#: eaarch64pe.c:459 ei386pep.c:459
+#: eaarch64pe.c:463 earm64pe.c:463 ei386pep.c:463
 #, c-format
 msgid ""
 "  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations "
@@ -4626,7 +4626,7 @@ msgid ""
 "                                       auto-imported DATA\n"
 msgstr ""
 
-#: eaarch64pe.c:460 ei386pep.c:460
+#: eaarch64pe.c:464 earm64pe.c:464 ei386pep.c:464
 #, c-format
 msgid ""
 "  --enable-extra-pep-debug            Enable verbose debug output when "
@@ -4635,16 +4635,16 @@ msgid ""
 "import)\n"
 msgstr ""
 
-#: eaarch64pe.c:461 earm_wince_pe.c:459 earmpe.c:459 ei386pe.c:459
-#: ei386pe_posix.c:459 ei386pep.c:461 emcorepe.c:459 eshpe.c:459
+#: eaarch64pe.c:465 earm64pe.c:465 earm_wince_pe.c:459 earmpe.c:459
+#: ei386pe.c:459 ei386pe_posix.c:459 ei386pep.c:465 emcorepe.c:459 eshpe.c:459
 #, c-format
 msgid ""
 "  --enable-long-section-names        Use long COFF section names even in\n"
 "                                       executable image files\n"
 msgstr ""
 
-#: eaarch64pe.c:462 earm_wince_pe.c:460 earmpe.c:460 ei386pe.c:460
-#: ei386pe_posix.c:460 ei386pep.c:462 emcorepe.c:460 eshpe.c:460
+#: eaarch64pe.c:466 earm64pe.c:466 earm_wince_pe.c:460 earmpe.c:460
+#: ei386pe.c:460 ei386pe_posix.c:460 ei386pep.c:466 emcorepe.c:460 eshpe.c:460
 #, c-format
 msgid ""
 "  --disable-long-section-names       Never use long COFF section names, "
@@ -4652,7 +4652,7 @@ msgid ""
 "                                       in object files\n"
 msgstr ""
 
-#: eaarch64pe.c:463 ei386pep.c:463
+#: eaarch64pe.c:467 earm64pe.c:467 ei386pep.c:467
 #, c-format
 msgid ""
 "  --[disable-]high-entropy-va        Image is compatible with 64-bit address "
@@ -4660,8 +4660,8 @@ msgid ""
 "                                       layout randomization (ASLR)\n"
 msgstr ""
 
-#: eaarch64pe.c:464 earm_wince_pe.c:461 earmpe.c:461 ei386pe.c:461
-#: ei386pe_posix.c:461 ei386pep.c:464 emcorepe.c:461 eshpe.c:461
+#: eaarch64pe.c:468 earm64pe.c:468 earm_wince_pe.c:461 earmpe.c:461
+#: ei386pe.c:461 ei386pe_posix.c:461 ei386pep.c:468 emcorepe.c:461 eshpe.c:461
 #, c-format
 msgid ""
 "  --[disable-]dynamicbase            Image base address may be relocated "
@@ -4670,29 +4670,29 @@ msgid ""
 "(ASLR)\n"
 msgstr ""
 
-#: eaarch64pe.c:465 earm_wince_pe.c:462 earmpe.c:462 ei386pe.c:462
-#: ei386pe_posix.c:462 ei386pep.c:465 emcorepe.c:462 eshpe.c:462
+#: eaarch64pe.c:469 earm64pe.c:469 earm_wince_pe.c:462 earmpe.c:462
+#: ei386pe.c:462 ei386pe_posix.c:462 ei386pep.c:469 emcorepe.c:462 eshpe.c:462
 #, c-format
 msgid "  --enable-reloc-section             Create the base relocation table\n"
 msgstr ""
 
-#: eaarch64pe.c:466 earm_wince_pe.c:463 earmpe.c:463 ei386pe.c:463
-#: ei386pe_posix.c:463 ei386pep.c:466 emcorepe.c:463 eshpe.c:463
+#: eaarch64pe.c:470 earm64pe.c:470 earm_wince_pe.c:463 earmpe.c:463
+#: ei386pe.c:463 ei386pe_posix.c:463 ei386pep.c:470 emcorepe.c:463 eshpe.c:463
 #, c-format
 msgid ""
 "  --disable-reloc-section            Do not create the base relocation "
 "table\n"
 msgstr ""
 
-#: eaarch64pe.c:467 earm_wince_pe.c:464 earmpe.c:464 ei386pe.c:464
-#: ei386pe_posix.c:464 ei386pep.c:467 emcorepe.c:464 eshpe.c:464
+#: eaarch64pe.c:471 earm64pe.c:471 earm_wince_pe.c:464 earmpe.c:464
+#: ei386pe.c:464 ei386pe_posix.c:464 ei386pep.c:471 emcorepe.c:464 eshpe.c:464
 #, c-format
 msgid ""
 "  --[disable-]forceinteg             Code integrity checks are enforced\n"
 msgstr ""
 
-#: eaarch64pe.c:468 earm_wince_pe.c:465 earmpe.c:465 ei386pe.c:465
-#: ei386pe_posix.c:465 ei386pep.c:468 emcorepe.c:465 eshpe.c:465
+#: eaarch64pe.c:472 earm64pe.c:472 earm_wince_pe.c:465 earmpe.c:465
+#: ei386pe.c:465 ei386pe_posix.c:465 ei386pep.c:472 emcorepe.c:465 eshpe.c:465
 #, c-format
 msgid ""
 "  --[disable-]nxcompat               Image is compatible with data "
@@ -4700,15 +4700,15 @@ msgid ""
 "                                       prevention\n"
 msgstr ""
 
-#: eaarch64pe.c:469 earm_wince_pe.c:466 earmpe.c:466 ei386pe.c:466
-#: ei386pe_posix.c:466 ei386pep.c:469 emcorepe.c:466 eshpe.c:466
+#: eaarch64pe.c:473 earm64pe.c:473 earm_wince_pe.c:466 earmpe.c:466
+#: ei386pe.c:466 ei386pe_posix.c:466 ei386pep.c:473 emcorepe.c:466 eshpe.c:466
 #, c-format
 msgid ""
 "  --[disable-]no-isolation           Image understands isolation but do not\n"
 "                                       isolate the image\n"
 msgstr ""
 
-#: eaarch64pe.c:470 ei386pep.c:470
+#: eaarch64pe.c:474 earm64pe.c:474 ei386pep.c:474
 #, c-format
 msgid ""
 "  --[disable-]no-seh                 Image does not use SEH; no SE handler "
@@ -4716,113 +4716,123 @@ msgid ""
 "                                       be called in this image\n"
 msgstr ""
 
-#: eaarch64pe.c:471 earm_wince_pe.c:468 earmpe.c:468 ei386pe.c:468
-#: ei386pe_posix.c:468 ei386pep.c:471 emcorepe.c:468 eshpe.c:468
+#: eaarch64pe.c:475 earm64pe.c:475 earm_wince_pe.c:468 earmpe.c:468
+#: ei386pe.c:468 ei386pe_posix.c:468 ei386pep.c:475 emcorepe.c:468 eshpe.c:468
 #, c-format
 msgid "  --[disable-]no-bind                Do not bind this image\n"
 msgstr ""
 
-#: eaarch64pe.c:472 earm_wince_pe.c:469 earmpe.c:469 ei386pe.c:469
-#: ei386pe_posix.c:469 ei386pep.c:472 emcorepe.c:469 eshpe.c:469
+#: eaarch64pe.c:476 earm64pe.c:476 earm_wince_pe.c:469 earmpe.c:469
+#: ei386pe.c:469 ei386pe_posix.c:469 ei386pep.c:476 emcorepe.c:469 eshpe.c:469
 #, c-format
 msgid "  --[disable-]wdmdriver              Driver uses the WDM model\n"
 msgstr ""
 
-#: eaarch64pe.c:473 earm_wince_pe.c:470 earmpe.c:470 ei386pe.c:470
-#: ei386pe_posix.c:470 ei386pep.c:473 emcorepe.c:470 eshpe.c:470
+#: eaarch64pe.c:477 earm64pe.c:477 earm_wince_pe.c:470 earmpe.c:470
+#: ei386pe.c:470 ei386pe_posix.c:470 ei386pep.c:477 emcorepe.c:470 eshpe.c:470
 #, c-format
 msgid "  --[disable-]tsaware                Image is Terminal Server aware\n"
 msgstr ""
 
-#: eaarch64pe.c:474 earm_wince_pe.c:471 earmpe.c:471 ei386pe.c:471
-#: ei386pe_posix.c:471 ei386pep.c:474 emcorepe.c:471 eshpe.c:471
+#: eaarch64pe.c:478 earm64pe.c:478 earm_wince_pe.c:471 earmpe.c:471
+#: ei386pe.c:471 ei386pe_posix.c:471 ei386pep.c:478 emcorepe.c:471 eshpe.c:471
 #, c-format
 msgid "  --build-id[=STYLE]                 Generate build ID\n"
 msgstr ""
 
-#: eaarch64pe.c:476 earm_wince_pe.c:473 earmpe.c:473 ei386pe.c:473
-#: ei386pe_posix.c:473 ei386pep.c:476 emcorepe.c:473 eshpe.c:473
+#: eaarch64pe.c:480 earm64pe.c:480 earm_wince_pe.c:473 earmpe.c:473
+#: ei386pe.c:473 ei386pe_posix.c:473 ei386pep.c:480 emcorepe.c:473 eshpe.c:473
 #, c-format
 msgid "  --pdb=[FILENAME]                   Generate PDB file\n"
 msgstr ""
 
-#: eaarch64pe.c:602 earm_wince_pe.c:619 earmpe.c:619 ei386beos.c:205
-#: ei386pe.c:619 ei386pe_posix.c:619 ei386pep.c:602 emcorepe.c:619 eshpe.c:619
+#: eaarch64pe.c:606 earm64pe.c:606 earm_wince_pe.c:619 earmpe.c:619
+#: ei386beos.c:205 ei386pe.c:619 ei386pe_posix.c:619 ei386pep.c:606
+#: emcorepe.c:619 eshpe.c:619
 msgid "%P: warning: bad version number in -subsystem option\n"
 msgstr ""
 
-#: eaarch64pe.c:627 earm_wince_pe.c:644 earmpe.c:644 ei386beos.c:222
-#: ei386pe.c:644 ei386pe_posix.c:644 ei386pep.c:627 emcorepe.c:644 eshpe.c:644
+#: eaarch64pe.c:631 earm64pe.c:631 earm_wince_pe.c:644 earmpe.c:644
+#: ei386beos.c:222 ei386pe.c:644 ei386pe_posix.c:644 ei386pep.c:631
+#: emcorepe.c:644 eshpe.c:644
 msgid "%F%P: invalid subsystem type %s\n"
 msgstr ""
 
-#: eaarch64pe.c:648 earm_wince_pe.c:665 earmpe.c:665 ei386beos.c:233
-#: ei386pe.c:665 ei386pe_posix.c:665 ei386pep.c:648 emcorepe.c:665 eshpe.c:665
+#: eaarch64pe.c:652 earm64pe.c:652 earm_wince_pe.c:665 earmpe.c:665
+#: ei386beos.c:233 ei386pe.c:665 ei386pe_posix.c:665 ei386pep.c:652
+#: emcorepe.c:665 eshpe.c:665
 msgid "%F%P: invalid hex number for PE parameter '%s'\n"
 msgstr ""
 
-#: eaarch64pe.c:665 earm_wince_pe.c:682 earmpe.c:682 ei386beos.c:250
-#: ei386pe.c:682 ei386pe_posix.c:682 ei386pep.c:665 emcorepe.c:682 eshpe.c:682
+#: eaarch64pe.c:669 earm64pe.c:669 earm_wince_pe.c:682 earmpe.c:682
+#: ei386beos.c:250 ei386pe.c:682 ei386pe_posix.c:682 ei386pep.c:669
+#: emcorepe.c:682 eshpe.c:682
 msgid "%F%P: strange hex info for PE parameter '%s'\n"
 msgstr ""
 
-#: eaarch64pe.c:682 earm_wince_pe.c:698 earmpe.c:698 eelf32mcore.c:319
-#: ei386beos.c:266 ei386pe.c:698 ei386pe_posix.c:698 ei386pep.c:682
-#: emcorepe.c:698 eshpe.c:698
+#: eaarch64pe.c:686 earm64pe.c:686 earm_wince_pe.c:698 earmpe.c:698
+#: eelf32mcore.c:319 ei386beos.c:266 ei386pe.c:698 ei386pe_posix.c:698
+#: ei386pep.c:686 emcorepe.c:698 eshpe.c:698
 msgid "%F%P: cannot open base file %s\n"
 msgstr ""
 
-#: eaarch64pe.c:999 earm_wince_pe.c:1028 earmpe.c:1028 ei386beos.c:362
-#: ei386pe.c:1028 ei386pe_posix.c:1028 ei386pep.c:999 emcorepe.c:1028
-#: eshpe.c:1028
+#: eaarch64pe.c:1003 earm64pe.c:1003 earm_wince_pe.c:1028 earmpe.c:1028
+#: ei386beos.c:362 ei386pe.c:1028 ei386pe_posix.c:1028 ei386pep.c:1003
+#: emcorepe.c:1028 eshpe.c:1028
 msgid "%P: warning, file alignment > section alignment\n"
 msgstr ""
 
-#: eaarch64pe.c:1012 ei386pep.c:1012
+#: eaarch64pe.c:1016 earm64pe.c:1016 ei386pep.c:1016
 msgid ""
 "%P: warning: --export-dynamic is not supported for PE+ targets, did you mean "
 "--export-all-symbols?\n"
 msgstr ""
 
-#: eaarch64pe.c:1085 eaarch64pe.c:1112 ei386pep.c:1085 ei386pep.c:1112
+#: eaarch64pe.c:1089 eaarch64pe.c:1116 earm64pe.c:1089 earm64pe.c:1116
+#: ei386pep.c:1089 ei386pep.c:1116
 #, c-format
 msgid "warning: resolving %s by linking to %s\n"
 msgstr ""
 
-#: eaarch64pe.c:1090 eaarch64pe.c:1117 earm_wince_pe.c:1096 earmpe.c:1096
-#: ei386pe.c:1096 ei386pe_posix.c:1096 ei386pep.c:1090 ei386pep.c:1117
-#: emcorepe.c:1096 eshpe.c:1096
+#: eaarch64pe.c:1094 eaarch64pe.c:1121 earm64pe.c:1094 earm64pe.c:1121
+#: earm_wince_pe.c:1096 earmpe.c:1096 ei386pe.c:1096 ei386pe_posix.c:1096
+#: ei386pep.c:1094 ei386pep.c:1121 emcorepe.c:1096 eshpe.c:1096
 msgid "Use --enable-stdcall-fixup to disable these warnings\n"
 msgstr ""
 
-#: eaarch64pe.c:1091 eaarch64pe.c:1118 earm_wince_pe.c:1097 earmpe.c:1097
-#: ei386pe.c:1097 ei386pe_posix.c:1097 ei386pep.c:1091 ei386pep.c:1118
-#: emcorepe.c:1097 eshpe.c:1097
+#: eaarch64pe.c:1095 eaarch64pe.c:1122 earm64pe.c:1095 earm64pe.c:1122
+#: earm_wince_pe.c:1097 earmpe.c:1097 ei386pe.c:1097 ei386pe_posix.c:1097
+#: ei386pep.c:1095 ei386pep.c:1122 emcorepe.c:1097 eshpe.c:1097
 msgid "Use --disable-stdcall-fixup to disable these fixups\n"
 msgstr ""
 
-#: eaarch64pe.c:1169 earm_wince_pe.c:1166 earmpe.c:1166 ei386pe.c:1166
-#: ei386pe_posix.c:1166 ei386pep.c:1169 emcorepe.c:1166 eshpe.c:1166
+#: eaarch64pe.c:1173 earm64pe.c:1173 earm_wince_pe.c:1166 earmpe.c:1166
+#: ei386pe.c:1166 ei386pe_posix.c:1166 ei386pep.c:1173 emcorepe.c:1166
+#: eshpe.c:1166
 msgid "%P: %C: cannot get section contents - auto-import exception\n"
 msgstr ""
 
-#: eaarch64pe.c:1263 earm_wince_pe.c:1251 earmpe.c:1251 ei386pe.c:1251
-#: ei386pe_posix.c:1251 ei386pep.c:1263 emcorepe.c:1251 eshpe.c:1251
+#: eaarch64pe.c:1267 earm64pe.c:1267 earm_wince_pe.c:1251 earmpe.c:1251
+#: ei386pe.c:1251 ei386pe_posix.c:1251 ei386pep.c:1267 emcorepe.c:1251
+#: eshpe.c:1251
 msgid "%P: warning: .buildid section discarded, --build-id ignored\n"
 msgstr ""
 
-#: eaarch64pe.c:1381 earm_wince_pe.c:1369 earmpe.c:1369 ei386pe.c:1369
-#: ei386pe_posix.c:1369 ei386pep.c:1381 emcorepe.c:1369 eshpe.c:1369
+#: eaarch64pe.c:1385 earm64pe.c:1385 earm_wince_pe.c:1369 earmpe.c:1369
+#: ei386pe.c:1369 ei386pe_posix.c:1369 ei386pep.c:1385 emcorepe.c:1369
+#: eshpe.c:1369
 msgid "%P: warning: cannot create .buildid section, --build-id ignored\n"
 msgstr ""
 
-#: eaarch64pe.c:1457 earm_wince_pe.c:1444 earmpe.c:1444 ei386pe.c:1444
-#: ei386pe_posix.c:1444 ei386pep.c:1457 emcorepe.c:1444 eshpe.c:1444
+#: eaarch64pe.c:1461 earm64pe.c:1461 earm_wince_pe.c:1444 earmpe.c:1444
+#: ei386pe.c:1444 ei386pe_posix.c:1444 ei386pep.c:1461 emcorepe.c:1444
+#: eshpe.c:1444
 msgid "%F%P: cannot perform PE operations on non PE output file '%pB'\n"
 msgstr ""
 
-#: eaarch64pe.c:1581 earm_wince_pe.c:1587 earmpe.c:1587 ei386pe.c:1587
-#: ei386pe_posix.c:1587 ei386pep.c:1581 emcorepe.c:1587 eshpe.c:1587
+#: eaarch64pe.c:1585 earm64pe.c:1585 earm_wince_pe.c:1587 earmpe.c:1587
+#: ei386pe.c:1587 ei386pe_posix.c:1587 ei386pep.c:1585 emcorepe.c:1587
+#: eshpe.c:1587
 msgid "%X%P: unable to process relocs: %E\n"
 msgstr ""
 

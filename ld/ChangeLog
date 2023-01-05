@@ -1,3 +1,12 @@
+2023-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Add arm64pe as an extra emulation for aarch64pe.
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add earm64pe.c
+	* emultempl/pep.em: Add suppport for arm64pe emulation.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2023-01-05  Andreas K. Huettel  <dilfridge@gentoo.org>
 
 	* testsuite/ld-elf/shared.exp: un-xfail the PR19710 test for the
