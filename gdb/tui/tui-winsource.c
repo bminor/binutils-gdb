@@ -348,8 +348,6 @@ tui_source_window_base::show_source_content ()
 {
   gdb_assert (!m_content.empty ());
 
-  check_and_display_highlight_if_needed ();
-
   /* The pad should be at least as wide as the window, but ideally, as wide
      as the content, however, for some very wide content this might not be
      possible.  */
@@ -399,7 +397,11 @@ tui_source_window_base::show_source_content ()
   for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
 
-  refresh_window ();
+  /* Calling check_and_display_highlight_if_needed will call refresh_window
+     (so long as the current window can be boxed), which will ensure that
+     the newly loaded window content is copied to the screen.  */
+  gdb_assert (can_box ());
+  check_and_display_highlight_if_needed ();
 }
 
 tui_source_window_base::tui_source_window_base ()
