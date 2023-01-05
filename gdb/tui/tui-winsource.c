@@ -172,8 +172,8 @@ tui_source_window_base::update_source_window_as_is
     {
       validate_scroll_offsets ();
       update_breakpoint_info (nullptr, false);
+      update_exec_info (false);
       show_source_content ();
-      update_exec_info ();
     }
 }
 
@@ -636,11 +636,10 @@ tui_source_window_base::update_breakpoint_info
   return need_refresh;
 }
 
-/* Function to initialize the content of the execution info window,
-   based upon the input window which is either the source or
-   disassembly window.  */
+/* See tui-winsource.h.  */
+
 void
-tui_source_window_base::update_exec_info ()
+tui_source_window_base::update_exec_info (bool refresh_p)
 {
   update_breakpoint_info (nullptr, true);
   for (int i = 0; i < m_content.size (); i++)
@@ -668,5 +667,6 @@ tui_source_window_base::update_exec_info ()
 
       show_line_number (i);
     }
-  refresh_window ();
+  if (refresh_p)
+    refresh_window ();
 }

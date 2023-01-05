@@ -148,7 +148,14 @@ public:
 
   virtual bool location_matches_p (struct bp_location *loc, int line_no) = 0;
 
-  void update_exec_info ();
+  /* Fill in the left margin of the current window with execution indicator
+     information, e.g. breakpoint indicators, and line numbers.  When
+     REFRESH_P is true this function will call refresh_window to ensure
+     updates are written to the screen, otherwise the refresh is skipped,
+     which will leave the on screen contents out of date.  When passing
+     false for REFRESH_P you should be planning to call refresh_window
+     yourself.  */
+  void update_exec_info (bool refresh_p = true);
 
   /* Update the window to display the given location.  Does nothing if
      the location is already displayed.  */
