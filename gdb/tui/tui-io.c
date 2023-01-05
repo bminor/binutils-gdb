@@ -773,14 +773,10 @@ tui_mld_getc (FILE *fp)
 static int
 tui_mld_read_key (const struct match_list_displayer *displayer)
 {
-  rl_getc_func_t *prev = rl_getc_function;
-  int c;
-
   /* We can't use tui_getc as we need NEWLINE to not get emitted.  */
-  rl_getc_function = tui_mld_getc;
-  c = rl_read_key ();
-  rl_getc_function = prev;
-  return c;
+  scoped_restore restore_getc_function
+    = make_scoped_restore (&rl_getc_function, tui_mld_getc);
+  return rl_read_key ();
 }
 
 /* TUI version of rl_completion_display_matches_hook.
