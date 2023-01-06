@@ -98,7 +98,7 @@ proc dap_to_ton {obj} {
 }
 
 # Format the object OBJ, in TON format, as JSON and send it to gdb.
-proc dap_send_ton {obj} {
+proc _dap_send_ton {obj} {
     set json [namespace eval ton::2json $obj]
     # FIXME this is wrong for non-ASCII characters.
     set len [string length $json]
@@ -111,7 +111,7 @@ proc dap_send_ton {obj} {
 # omitted.  The sequence number of the request is automatically added,
 # and this is also the return value.  OBJ is assumed to already be in
 # TON form.
-proc dap_send_request {command {obj {}}} {
+proc _dap_send_request {command {obj {}}} {
     # We can construct this directly as a TON object.
     set result $::dap_seq
     incr ::dap_seq
@@ -120,13 +120,13 @@ proc dap_send_request {command {obj {}}} {
     if {$obj != ""} {
 	append req " arguments \[$obj\]"
     }
-    dap_send_ton $req
+    _dap_send_ton $req
     return $result
 }
 
 # Read a JSON response from gdb.  This will return a TON object on
 # success, or throw an exception on error.
-proc dap_read_json {} {
+proc _dap_read_json {} {
     set length ""
     gdb_expect {
 	-re "^Content-Length: (\[0-9\]+)\r\n" {
@@ -181,10 +181,10 @@ proc dap_read_json {} {
 # emitted.  The objects are in TON format.  If a response object is
 # seen but has the wrong sequence number or command, throw an
 # exception
-proc dap_read_response {cmd num} {
+proc _dap_read_response {cmd num} {
     set result {}
     while 1 {
-	set obj [dap_read_json]
+	set obj [_dap_read_json]
 	set d [namespace eval ton::2dict $obj]
 	if {[dict get $d type] == "response"} {
 	    if {[dict get $d request_seq] != $num} {
@@ -200,14 +200,14 @@ proc dap_read_response {cmd num} {
     }
 }
 
-# A wrapper for dap_send_request and dap_read_response.  This sends a
+# A wrapper for _dap_send_request and _dap_read_response.  This sends a
 # request to gdb and returns the result.  NAME is used to issue a pass
 # or fail; on failure, this always returns an empty string.
 proc dap_request_and_response {name command {obj {}}} {
     set result {}
     if {[catch {
-	set seq [dap_send_request $command $obj]
-	set result [dap_read_response $command $seq]
+	set seq [_dap_send_request $command $obj]
+	set result [_dap_read_response $command $seq]
     } text]} {
 	verbose "reason: $text"
 	fail $name
@@ -239,7 +239,7 @@ proc dap_check_request_and_response {name command {obj {}}} {
 # desired.  Callers not caring about this should probably use
 # dap_launch.  Returns the empty string on failure.  NAME is used as
 # the test name.
-proc dap_initialize {name} {
+proc _dap_initialize {name} {
     if {[dap_gdb_start]} {
 	return ""
     }
@@ -254,7 +254,7 @@ proc dap_initialize {name} {
 # reasonable default but can be overridden in case a test needs to
 # launch gdb more than once.
 proc dap_launch {file {name startup}} {
-    if {[dap_initialize "$name - initialize"] == ""} {
+    if {[_dap_initialize "$name - initialize"] == ""} {
 	return ""
     }
     return [dap_check_request_and_response "$name - launch" launch \
@@ -303,7 +303,7 @@ proc _dap_read_event {type} {
     while 1 {
 	# We don't do any extra error checking here for the time
 	# being; we'll just get a timeout thrown instead.
-	set obj [dap_read_json]
+	set obj [_dap_read_json]
 	set d [namespace eval ton::2dict $obj]
 	if {[dict get $d type] == "event"
 	    && [dict get $d event] == $type} {
