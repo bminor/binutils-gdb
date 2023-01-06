@@ -75,12 +75,7 @@ set obj [dap_check_request_and_response "reset breakpoint by line number" \
 	     [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
 		  [list s $srcfile] $line]]
 set new_line_bpno [dap_get_breakpoint_number $obj]
-
-if {$new_line_bpno == $line_bpno} {
-    pass "re-setting kept same breakpoint number"
-} else {
-    fail "re-setting kept same breakpoint number"
-}
+gdb_assert {$new_line_bpno == $line_bpno} "re-setting kept same breakpoint number"
 
 # This uses "&address_breakpoint_here" as the address -- this is a
 # hack because we know how this is implemented under the hood.
@@ -131,21 +126,13 @@ dap_match_values "global value in main" [lindex $obj 0] \
 set obj [dap_request_and_response "evaluate non-existing variable" \
 	     evaluate {o expression [s nosuchvariable]}]
 set d [namespace eval ton::2dict [lindex $obj 0]]
-if {[dict get $d success] == "false"} {
-    pass "result of invalid request"
-} else {
-    fail "result of invalid request"
-}
+gdb_assert { [dict get $d success] == "false" } "result of invalid request"
 
 set obj [dap_check_request_and_response "disassemble one instruction" \
 	     disassemble \
 	     [format {o memoryReference [s %s] instructionCount [i 1]} \
 		  $insn_pc]]
 set d [namespace eval ton::2dict [lindex $obj 0]]
-if {[dict exists $d body instructions]} {
-    pass "instructions in disassemble output"
-} else {
-    fail "instructions in disassemble output"
-}
+gdb_assert { [dict exists $d body instructions] } "instructions in disassemble output"
 
 dap_shutdown
