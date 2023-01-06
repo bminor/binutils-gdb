@@ -124,7 +124,7 @@ proc _dap_send_request {command {obj {}}} {
     return $result
 }
 
-# Read a JSON response from gdb.  This will return a TON object on
+# Read a JSON response from gdb.  This will return a dict on
 # success, or throw an exception on error.
 proc _dap_read_json {} {
     set length ""
@@ -171,31 +171,31 @@ proc _dap_read_json {} {
 	incr length -$this_len
     }
 
-    return [ton::json2ton $json]
+    set ton [ton::json2ton $json]
+    return [namespace eval ton::2dict $ton]
 }
 
 # Read a sequence of JSON objects from gdb, until a response object is
 # seen.  If the response object has the request sequence number NUM,
 # and is for command CMD, return a list of two elements: the response
 # object and a list of any preceding events, in the order they were
-# emitted.  The objects are in TON format.  If a response object is
-# seen but has the wrong sequence number or command, throw an
-# exception
+# emitted.  The objects are dicts.  If a response object is seen but has
+# the wrong sequence number or command, throw an exception
+
 proc _dap_read_response {cmd num} {
     set result {}
     while 1 {
-	set obj [_dap_read_json]
-	set d [namespace eval ton::2dict $obj]
+	set d [_dap_read_json]
 	if {[dict get $d type] == "response"} {
 	    if {[dict get $d request_seq] != $num} {
 		error "saw wrong request_seq in $obj"
 	    } elseif {[dict get $d command] != $cmd} {
 		error "saw wrong command in $obj"
 	    } else {
-		return [list $obj $result]
+		return [list $d $result]
 	    }
 	} else {
-	    lappend result $obj
+	    lappend result $d
 	}
     }
 }
@@ -210,15 +210,15 @@ proc dap_request_and_response {command {obj {}}} {
 # Like dap_request_and_response, but also checks that the response
 # indicates success.  NAME is used to issue a test result.
 proc dap_check_request_and_response {name command {obj {}}} {
-    set result [dap_request_and_response $command $obj]
-    set d [namespace eval ton::2dict [lindex $result 0]]
-    if {[dict get $d success] != "true"} {
-	verbose "request failure: $result"
+    set response_and_events [dap_request_and_response $command $obj]
+    set response [lindex $response_and_events 0]
+    if {[dict get $response success] != "true"} {
+	verbose "request failure: $response"
 	fail "$name success"
 	return ""
     }
     pass "$name success"
-    return $result
+    return $response_and_events
 }
 
 # Start gdb, send a DAP initialization request and return the
@@ -257,8 +257,7 @@ proc dap_shutdown {{name shutdown}} {
 # Search the event list EVENTS for an output event matching the regexp
 # RX.  Pass the test NAME if found, fail if not.
 proc dap_search_output {name rx events} {
-    foreach event $events {
-	set d [namespace eval ton::2dict $event]
+    foreach d $events {
 	if {[dict get $d type] != "event"
 	    || [dict get $d event] != "output"} {
 	    continue
@@ -271,10 +270,9 @@ proc dap_search_output {name rx events} {
     fail $name
 }
 
-# Check that OBJ (a single TON object) has values that match the
+# Check that D (a dict object) has values that match the
 # key/value pairs given in ARGS.  NAME is used as the test name.
-proc dap_match_values {name obj args} {
-    set d [namespace eval ton::2dict $obj]
+proc dap_match_values {name d args} {
     foreach {key value} $args {
 	if {[eval dict get [list $d] $key] != $value} {
 	    fail "$name (checking $key)"
@@ -290,21 +288,21 @@ proc _dap_read_event {type} {
     while 1 {
 	# We don't do any extra error checking here for the time
 	# being; we'll just get a timeout thrown instead.
-	set obj [_dap_read_json]
-	set d [namespace eval ton::2dict $obj]
+	set d [_dap_read_json]
 	if {[dict get $d type] == "event"
 	    && [dict get $d event] == $type} {
-	    return $obj
+	    return $d
 	}
     }
 }
 
 # Read JSON objects looking for an event whose "event" field is TYPE.
+#
 # NAME is used as the test name; it defaults to TYPE.  Extra arguments
 # are used to check fields of the event; the arguments alternate
 # between a field name (in "dict get" form) and its expected value.
-# Returns the TON object for the chosen event, or empty string on
-# error.
+#
+# Returns the dict for the chosen event, or empty string on error.
 proc dap_read_event {name type args} {
     if {$name == ""} {
 	set name $type
@@ -320,7 +318,7 @@ proc dap_read_event {name type args} {
 # breakpoint is created.  OBJ is an object as returned by
 # dap_check_request_and_response.
 proc dap_get_breakpoint_number {obj} {
-    set d [namespace eval ton::2dict [lindex $obj 0]]
+    set d [lindex $obj 0]
     set bplist [dict get $d body breakpoints]
     return [dict get [lindex $bplist 0] id]
 }

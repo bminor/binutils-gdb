@@ -53,8 +53,7 @@ set line_bpno [dap_get_breakpoint_number $obj]
 
 # Check the new breakpoint event.
 set ok 0
-foreach event [lindex $obj 1] {
-    set d [namespace eval ton::2dict $event]
+foreach d [lindex $obj 1] {
     if {[dict get $d type] != "event"
 	|| [dict get $d event] != "breakpoint"} {
 	continue
@@ -84,8 +83,8 @@ set obj [dap_check_request_and_response "set breakpoint by address" \
 	     {o breakpoints [a [o instructionReference [s &address_breakpoint_here]]]}]
 set insn_bpno [dap_get_breakpoint_number $obj]
 
-set d [namespace eval ton::2dict [lindex $obj 0]]
-set bplist [dict get $d body breakpoints]
+set response [lindex $obj 0]
+set bplist [dict get $response body breakpoints]
 set insn_pc [dict get [lindex $bplist 0] instructionReference]
 
 dap_check_request_and_response "start inferior" configurationDone
@@ -125,14 +124,14 @@ dap_match_values "global value in main" [lindex $obj 0] \
 
 set obj [dap_request_and_response \
 	     evaluate {o expression [s nosuchvariable]}]
-set d [namespace eval ton::2dict [lindex $obj 0]]
-gdb_assert { [dict get $d success] == "false" } "result of invalid request"
+set response [lindex $obj 0]
+gdb_assert { [dict get $response success] == "false" } "result of invalid request"
 
 set obj [dap_check_request_and_response "disassemble one instruction" \
 	     disassemble \
 	     [format {o memoryReference [s %s] instructionCount [i 1]} \
 		  $insn_pc]]
-set d [namespace eval ton::2dict [lindex $obj 0]]
-gdb_assert { [dict exists $d body instructions] } "instructions in disassemble output"
+set response [lindex $obj 0]
+gdb_assert { [dict exists $response body instructions] } "instructions in disassemble output"
 
 dap_shutdown
