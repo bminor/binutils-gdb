@@ -224,6 +224,15 @@ proc_with_prefix local_url { } {
     set lineno [gdb_get_line_number "Breakpoint here"]
     gdb_test "list $lineno" "return 0;\[^\r\n\]+Breakpoint here\\. .*"
 
+    # Verify that a breakpoint re-sets correctly when the actual location
+    # of the source file in the debuginfod client cache differs from
+    # the contents of DW_AT_comp_dir and DW_AT_name.
+    gdb_test "set cwd $debugdir" "" "file [file tail $binfile] cwd"
+    gdb_test_no_output "del breakpoint 1"
+    gdb_test "break $lineno" "Breakpoint 2 at.*file.*"
+    gdb_test "run" "Breakpoint 2.*" \
+	"file [file tail $binfile] set breakpoint"
+
     # GDB should now find the executable file.
     clean_restart
     gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
