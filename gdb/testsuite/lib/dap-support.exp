@@ -102,7 +102,7 @@ proc _dap_send_ton {obj} {
     set json [namespace eval ton::2json $obj]
     # FIXME this is wrong for non-ASCII characters.
     set len [string length $json]
-    verbose ">>> $json"
+    verbose -log ">>> $json"
     send_gdb "Content-Length: $len\r\n\r\n$json"
 }
 
