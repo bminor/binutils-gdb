@@ -284,7 +284,7 @@ proc dap_match_values {name d args} {
 
 # A helper for dap_read_event that reads events, looking for one
 # matching TYPE.
-proc _dap_read_event {type} {
+proc _dap_wait_for_event {type} {
     while 1 {
 	# We don't do any extra error checking here for the time
 	# being; we'll just get a timeout thrown instead.
@@ -303,12 +303,12 @@ proc _dap_read_event {type} {
 # between a field name (in "dict get" form) and its expected value.
 #
 # Returns the dict for the chosen event, or empty string on error.
-proc dap_read_event {name type args} {
+proc dap_wait_for_event_and_check {name type args} {
     if {$name == ""} {
 	set name $type
     }
 
-    set result [_dap_read_event $type]
+    set result [_dap_wait_for_event $type]
     eval dap_match_values [list $name $result] $args
 
     return $result
