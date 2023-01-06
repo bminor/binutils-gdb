@@ -2108,6 +2108,8 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 			|| language == language_rust
 			|| language == language_fortran);
 
+  gdb_assert (match_for_lcd == nullptr || match_for_lcd->empty ());
+
   while (1)
     {
       if (skip_spaces

@@ -52,8 +52,31 @@ int qux;
 
 } /* namespace Test_NS */
 
+/* The important thing with class baz is that both the class and the
+   constructor must have a template argument, we need the symbol to look
+   like:
+
+   baz<TYPE_1>::baz<TYPE_2>(int,....whatever...)
+
+   It doesn't really matter if TYPE_1 and TYPE_2 are the same or different,
+   but we create them differently in this test as it makes debugging GDB
+   slightly easier.  */
+
+template<typename S>
+struct baz
+{
+  template<typename T>
+  baz (int p1, T a)
+  {
+    s = 0;
+  }
+
+  S s;
+};
+
 int main ()
 {
+  baz<int> obj (2.3, 0.1);
   // Anonymous struct with method.
   struct {
     int get() { return 5; }

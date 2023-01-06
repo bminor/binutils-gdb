@@ -135,3 +135,5 @@ with_test_prefix "expression with namespace" {
     # Add a disambiguating character and we get a unique completion.
     test_gdb_complete_unique "p Test_NS::f" "p Test_NS::foo"
 }
+
+test_gdb_complete_unique "break baz(int" "break baz(int, double)"

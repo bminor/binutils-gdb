@@ -145,7 +145,12 @@ public:
 
   /* Mark the range between [BEGIN, END) as ignored.  */
   void mark_ignored_range (const char *begin, const char *end)
-  { m_ignored_ranges.emplace_back (begin, end); }
+  {
+    gdb_assert (begin < end);
+    gdb_assert (m_ignored_ranges.empty ()
+		|| m_ignored_ranges.back ().second < begin);
+    m_ignored_ranges.emplace_back (begin, end);
+  }
 
   /* Get the resulting LCD, after a successful match.  If there are
      ignored ranges, then this builds a new string with the ignored
@@ -160,9 +165,14 @@ public:
       {
 	m_finished_storage.clear ();
 
+	gdb_assert (m_ignored_ranges.back ().second
+		    <= (m_match + strlen (m_match)));
+
 	const char *prev = m_match;
 	for (const auto &range : m_ignored_ranges)
 	  {
+	    gdb_assert (prev < range.first);
+	    gdb_assert (range.second > range.first);
 	    m_finished_storage.append (prev, range.first);
 	    prev = range.second;
 	  }
@@ -177,6 +187,13 @@ public:
   {
     m_match = NULL;
     m_ignored_ranges.clear ();
+  }
+
+  /* Return true if this object has had no match data set since its
+     creation, or the last call to clear.  */
+  bool empty () const
+  {
+    return m_match == nullptr && m_ignored_ranges.empty ();
   }
 
 private:

@@ -1776,6 +1776,8 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
   completion_match_for_lcd *match_for_lcd
     = (comp_match_res != NULL ? &comp_match_res->match_for_lcd : NULL);
 
+  gdb_assert (match_for_lcd == nullptr || match_for_lcd->empty ());
+
   while (true)
     {
       if (strncmp_iw_with_mode (sname, lookup_name, lookup_name_len,
@@ -1808,6 +1810,11 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
 	    }
 	  return true;
 	}
+
+      /* Clear match_for_lcd so the next strncmp_iw_with_mode call starts
+	 from scratch.  */
+      if (match_for_lcd != nullptr)
+	match_for_lcd->clear ();
 
       unsigned int len = cp_find_first_component (sname);
 
