@@ -310,11 +310,7 @@ proc dap_read_event {name type args} {
 	set name $type
     }
 
-    if {[catch {_dap_read_event $type} result]} {
-	fail $name
-	return ""
-    }
-
+    set result [_dap_read_event $type]
     eval dap_match_values [list $name $result] $args
 
     return $result
