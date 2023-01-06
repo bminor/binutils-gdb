@@ -1090,7 +1090,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   if (bfd_coff_mkobject_hook (abfd, (void *) & internal_f, NULL) == NULL)
     goto error_return;
 
-  coff_data (abfd)->pe = 1;
+  obj_pe (abfd) = true;
 #ifdef THUMBPEMAGIC
   if (vars.magic == THUMBPEMAGIC)
     /* Stop some linker warnings about thumb code not supporting interworking.  */

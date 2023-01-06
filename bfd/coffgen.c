@@ -1826,8 +1826,7 @@ coff_get_normalized_symtab (bfd *abfd)
 	      /* Ordinary short filename, put into memory anyway.  The
 		 Microsoft PE tools sometimes store a filename in
 		 multiple AUX entries.  */
-	      if (internal_ptr->u.syment.n_numaux > 1
-		  && coff_data (abfd)->pe)
+	      if (internal_ptr->u.syment.n_numaux > 1 && obj_pe (abfd))
 		internal_ptr->u.syment._n._n_n._n_offset =
 		  ((uintptr_t)
 		   copy_name (abfd,
@@ -1842,7 +1841,7 @@ coff_get_normalized_symtab (bfd *abfd)
 	    }
 
 	  /* Normalize other strings available in C_FILE aux entries.  */
-	  if (!coff_data (abfd)->pe)
+	  if (!obj_pe (abfd))
 	    for (int numaux = 1; numaux < internal_ptr->u.syment.n_numaux; numaux++)
 	      {
 		aux = internal_ptr + numaux + 1;

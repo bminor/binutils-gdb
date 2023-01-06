@@ -1519,7 +1519,7 @@ gld${EMULATION_NAME}_after_open (void)
 
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_coff_flavour
       || coff_data (link_info.output_bfd) == NULL
-      || coff_data (link_info.output_bfd)->pe == 0)
+      || !obj_pe (link_info.output_bfd))
     einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'\n"),
 	   link_info.output_bfd);
 

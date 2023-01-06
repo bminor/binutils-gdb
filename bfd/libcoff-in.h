@@ -101,7 +101,7 @@ typedef struct coff_tdata
   bool go32;
 
   /* Is this a PE format coff file?  */
-  int pe;
+  bool pe;
 
   /* Copy of some of the f_flags bits in the COFF filehdr structure,
      used by ARM code.  */
