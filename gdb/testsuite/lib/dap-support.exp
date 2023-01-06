@@ -201,29 +201,16 @@ proc _dap_read_response {cmd num} {
 }
 
 # A wrapper for _dap_send_request and _dap_read_response.  This sends a
-# request to gdb and returns the result.  NAME is used to issue a pass
-# or fail; on failure, this always returns an empty string.
-proc dap_request_and_response {name command {obj {}}} {
-    set result {}
-    if {[catch {
-	set seq [_dap_send_request $command $obj]
-	set result [_dap_read_response $command $seq]
-    } text]} {
-	verbose "reason: $text"
-	fail $name
-    } else {
-	pass $name
-    }
-    return $result
+# request to gdb and returns the response as a dict.
+proc dap_request_and_response {command {obj {}}} {
+    set seq [_dap_send_request $command $obj]
+    return [_dap_read_response $command $seq]
 }
 
 # Like dap_request_and_response, but also checks that the response
-# indicates success.
+# indicates success.  NAME is used to issue a test result.
 proc dap_check_request_and_response {name command {obj {}}} {
-    set result [dap_request_and_response $name $command $obj]
-    if {$result == ""} {
-	return ""
-    }
+    set result [dap_request_and_response $command $obj]
     set d [namespace eval ton::2dict [lindex $result 0]]
     if {[dict get $d success] != "true"} {
 	verbose "request failure: $result"

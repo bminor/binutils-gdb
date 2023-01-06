@@ -123,7 +123,7 @@ set obj [dap_check_request_and_response "evaluate global in main" \
 dap_match_values "global value in main" [lindex $obj 0] \
     "body result" 25
 
-set obj [dap_request_and_response "evaluate non-existing variable" \
+set obj [dap_request_and_response \
 	     evaluate {o expression [s nosuchvariable]}]
 set d [namespace eval ton::2dict [lindex $obj 0]]
 gdb_assert { [dict get $d success] == "false" } "result of invalid request"
