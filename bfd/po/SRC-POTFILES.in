@@ -284,7 +284,6 @@ i386bsd.c
 i386lynx.c
 i386msdos.c
 ihex.c
-init.c
 irix-core.c
 libaout.h
 libbfd.c

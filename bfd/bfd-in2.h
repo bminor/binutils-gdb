@@ -1,8 +1,8 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c",
-   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c",
-   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c",
-   "linker.c", "simple.c" and "compress.c".
+   generated from "bfd-in.h", "opncls.c", "libbfd.c", "bfdio.c",
+   "bfdwin.c", "section.c", "archures.c", "reloc.c", "syms.c", "bfd.c",
+   "archive.c", "corefile.c", "targets.c", "format.c", "linker.c",
+   "simple.c" and "compress.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -488,13 +488,6 @@ startswith (const char *str, const char *prefix)
 {
   return strncmp (str, prefix, strlen (prefix)) == 0;
 }
-/* Extracted from init.c.  */
-unsigned int bfd_init (void);
-
-
-/* Value returned by bfd_init.  */
-
-#define BFD_INIT_MAGIC (sizeof (struct bfd_section))
 /* Extracted from opncls.c.  */
 /* Set to N to open the next N BFDs using an alternate id space.  */
 extern unsigned int bfd_use_reserved_id;
@@ -7262,6 +7255,11 @@ bfd_vma bfd_emul_get_maxpagesize (const char *);
 bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 char *bfd_demangle (bfd *, const char *, int);
+
+unsigned int bfd_init (void);
+
+/* Value returned by bfd_init.  */
+#define BFD_INIT_MAGIC (sizeof (struct bfd_section))
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
