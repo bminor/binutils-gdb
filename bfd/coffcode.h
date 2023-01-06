@@ -134,9 +134,10 @@ SUBSUBSECTION
 	in output BFDs at runtime; if it is false, as it will be by default
 	when generating an executable image, long section names are truncated;
 	if true, the long section names extension is employed.  The hook
-	points to a function that allows the value of the flag to be altered
-	at runtime, on formats that support long section names at all; on
-	other formats it points to a stub that returns an error indication.
+	points to a function that allows the value of a copy of the flag
+	in coff object tdata to be altered at runtime, on formats that
+	support long section names at all; on other formats it points
+	to a stub that returns an error indication.
 
 	With input BFDs, the flag is set according to whether any long section
 	names are detected while reading the section headers.  For a completely
@@ -462,15 +463,14 @@ static bool ticoff1_bad_format_hook
 static bool
 bfd_coff_set_long_section_names_allowed (bfd *abfd, int enable)
 {
-  coff_backend_info (abfd)->_bfd_coff_long_section_names = enable;
+  bfd_coff_long_section_names (abfd) = enable;
   return true;
 }
 #else /* !defined (COFF_LONG_SECTION_NAMES) */
 static bool
-bfd_coff_set_long_section_names_disallowed (bfd *abfd, int enable)
+bfd_coff_set_long_section_names_disallowed (bfd *abfd ATTRIBUTE_UNUSED,
+					    int enable ATTRIBUTE_UNUSED)
 {
-  (void) abfd;
-  (void) enable;
   return false;
 }
 #endif /* defined (COFF_LONG_SECTION_NAMES) */
@@ -1541,7 +1541,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .} bfd_coff_backend_data;
 .
 .#define coff_backend_info(abfd) \
-.  ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
+.  ((const bfd_coff_backend_data *) (abfd)->xvec->backend_data)
 .
 .#define bfd_coff_swap_aux_in(a,e,t,c,ind,num,i) \
 .  ((coff_backend_info (a)->_bfd_coff_swap_aux_in) (a,e,t,c,ind,num,i))
@@ -1584,7 +1584,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .#define bfd_coff_long_filenames(abfd) \
 .  (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 .#define bfd_coff_long_section_names(abfd) \
-.  (coff_backend_info (abfd)->_bfd_coff_long_section_names)
+.  (coff_data (abfd)->long_section_names)
 .#define bfd_coff_set_long_section_names(abfd, enable) \
 .  ((coff_backend_info (abfd)->_bfd_coff_set_long_section_names) (abfd, enable))
 .#define bfd_coff_default_section_alignment_power(abfd) \
@@ -2066,6 +2066,9 @@ coff_mkobject (bfd * abfd)
   coff->raw_syments = NULL;
   coff->relocbase = 0;
   coff->local_toc_sym_map = 0;
+
+  bfd_coff_long_section_names (abfd)
+    = coff_backend_info (abfd)->_bfd_coff_long_section_names;
 
 /*  make_abs_section(abfd);*/
 
@@ -5445,7 +5448,7 @@ coff_final_link_postscript (bfd * abfd ATTRIBUTE_UNUSED,
 #define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
 #endif
 
-static bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
+static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5486,7 +5489,7 @@ static bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 #ifdef TICOFF
 /* COFF0 differs in file/section header size and relocation entry size.  */
 
-static bfd_coff_backend_data ticoff0_swap_table =
+static const bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5528,7 +5531,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 #ifdef TICOFF
 /* COFF1 differs in section header size.  */
 
-static bfd_coff_backend_data ticoff1_swap_table =
+static const bfd_coff_backend_data ticoff1_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5789,7 +5792,7 @@ coff_bigobj_swap_aux_out (bfd * abfd,
   return AUXESZ;
 }
 
-static bfd_coff_backend_data bigobj_swap_table =
+static const bfd_coff_backend_data bigobj_swap_table =
 {
   coff_bigobj_swap_aux_in, coff_bigobj_swap_sym_in, coff_SWAP_lineno_in,
   coff_bigobj_swap_aux_out, coff_bigobj_swap_sym_out,

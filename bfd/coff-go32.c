@@ -80,6 +80,9 @@ _bfd_go32_mkobject (bfd * abfd)
 
   coff_data (abfd)->go32 = true;
 
+  bfd_coff_long_section_names (abfd)
+    = coff_backend_info (abfd)->_bfd_coff_long_section_names;
+
   return true;
 }
 

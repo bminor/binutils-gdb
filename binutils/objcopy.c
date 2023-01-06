@@ -2610,6 +2610,19 @@ check_new_section_flags (flagword flags, bfd * abfd, const char * secname)
   return flags;
 }
 
+static void
+set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_handling style)
+{
+  /* This is only relevant to Coff targets.  */
+  if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
+    {
+      if (style == KEEP
+	  && bfd_get_flavour (input_bfd) == bfd_target_coff_flavour)
+	style = bfd_coff_long_section_names (input_bfd) ? ENABLE : DISABLE;
+      bfd_coff_set_long_section_names (output_bfd, style != DISABLE);
+    }
+}
+
 /* Copy object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
@@ -2659,6 +2672,9 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		 bfd_get_archive_filename (ibfd));
       return false;
     }
+
+  /* This is a no-op on non-Coff targets.  */
+  set_long_section_mode (obfd, ibfd, long_section_names);
 
   /* Set the Verilog output endianness based upon the input file's
      endianness.  We may not be producing verilog format output,
@@ -3765,19 +3781,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   free (dir);
 }
 
-static void
-set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_handling style)
-{
-  /* This is only relevant to Coff targets.  */
-  if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
-    {
-      if (style == KEEP
-	  && bfd_get_flavour (input_bfd) == bfd_target_coff_flavour)
-	style = bfd_coff_long_section_names (input_bfd) ? ENABLE : DISABLE;
-      bfd_coff_set_long_section_names (output_bfd, style != DISABLE);
-    }
-}
-
 /* The top-level control.  */
 
 static void
@@ -3885,9 +3888,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	  gnu_debuglink_filename = NULL;
 	}
 
-      /* This is a no-op on non-Coff targets.  */
-      set_long_section_mode (obfd, ibfd, long_section_names);
-
       copy_archive (ibfd, obfd, output_target, force_output_target, input_arch);
     }
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
@@ -3912,9 +3912,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	  status = 1;
  	  return;
  	}
-
-      /* This is a no-op on non-Coff targets.  */
-      set_long_section_mode (obfd, ibfd, long_section_names);
 
       if (! copy_object (ibfd, obfd, input_arch))
 	status = 1;

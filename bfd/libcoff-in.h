@@ -79,21 +79,34 @@ typedef struct coff_tdata
   /* The unswapped external symbols.  May be NULL.  Read by
      _bfd_coff_get_external_symbols.  */
   void * external_syms;
-  /* If this is TRUE, the external_syms may not be freed.  */
-  bool keep_syms;
 
   /* The string table.  May be NULL.  Read by
      _bfd_coff_read_string_table.  */
   char *strings;
   /* The length of the strings table.  For error checking.  */
   bfd_size_type strings_len;
+
+  /* Set if long section names are supported.  A writable copy of the COFF
+     backend flag _bfd_coff_long_section_names.  */
+  bool long_section_names;
+
+  /* If this is TRUE, the external_syms may not be freed.  */
+  bool keep_syms;
   /* If this is TRUE, the strings may not be freed.  */
   bool keep_strings;
   /* If this is TRUE, the strings have been written out already.  */
   bool strings_written;
 
+  /* Is this a GO32 coff file?  */
+  bool go32;
+
   /* Is this a PE format coff file?  */
   int pe;
+
+  /* Copy of some of the f_flags bits in the COFF filehdr structure,
+     used by ARM code.  */
+  flagword flags;
+
   /* Used by the COFF backend linker.  */
   struct coff_link_hash_entry **sym_hashes;
 
@@ -110,13 +123,6 @@ typedef struct coff_tdata
 
   /* The timestamp from the COFF file header.  */
   long timestamp;
-
-  /* Copy of some of the f_flags bits in the COFF filehdr structure,
-     used by ARM code.  */
-  flagword flags;
-
-  /* Is this a GO32 coff file?  */
-  bool go32;
 
   /* A stub (extra data prepended before the COFF image) and its size.
      Used by coff-go32-exe, it contains executable data that loads the

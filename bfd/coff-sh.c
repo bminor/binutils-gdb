@@ -3079,7 +3079,7 @@ coff_small_new_section_hook (bfd *abfd, asection *section)
 /* This is copied from bfd_coff_std_swap_table so that we can change
    the default section alignment power.  */
 
-static bfd_coff_backend_data bfd_coff_small_swap_table =
+static const bfd_coff_backend_data bfd_coff_small_swap_table =
 {
   coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
   coff_swap_aux_out, coff_swap_sym_out,
