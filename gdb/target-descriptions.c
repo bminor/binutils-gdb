@@ -500,7 +500,10 @@ target_find_description (void)
 
       info.target_desc = tdesc_info->tdesc;
       if (!gdbarch_update_p (info))
-	warning (_("Architecture rejected target-supplied description"));
+	{
+	  warning (_("Architecture rejected target-supplied description"));
+	  tdesc_info->tdesc = nullptr;
+	}
       else
 	{
 	  struct tdesc_arch_data *data;
