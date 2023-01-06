@@ -109,6 +109,21 @@ _bfd_ecoff_mkobject_hook (bfd *abfd, void * filehdr, void * aouthdr)
   return (void *) ecoff;
 }
 
+bool
+_bfd_ecoff_close_and_cleanup (bfd *abfd)
+{
+  struct ecoff_tdata *tdata = ecoff_data (abfd);
+
+  if (tdata != NULL && bfd_get_format (abfd) == bfd_object)
+    while (tdata->mips_refhi_list != NULL)
+      {
+	struct mips_hi *ref = tdata->mips_refhi_list;
+	tdata->mips_refhi_list = ref->next;
+	free (ref);
+      }
+  return _bfd_generic_close_and_cleanup (abfd);
+}
+
 /* Initialize a new section.  */
 
 bool
