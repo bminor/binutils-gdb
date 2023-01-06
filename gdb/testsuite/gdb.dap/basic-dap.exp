@@ -90,9 +90,36 @@ set insn_pc [dict get [lindex $bplist 0] instructionReference]
 dap_check_request_and_response "start inferior" configurationDone
 dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
-dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
-    "body reason" breakpoint \
-    "body hitBreakpointIds" $fn_bpno
+# While waiting for the stopped event, we might receive breakpoint changed
+# events indicating some breakpoint addresses were relocated.  Update INSN_PC
+# if necessary.
+lassign [dap_wait_for_event_and_check "stopped at function breakpoint" stopped \
+	    "body reason" breakpoint \
+	    "body hitBreakpointIds" $fn_bpno] unused objs
+foreach obj $objs {
+    if { [dict get $obj "type"] != "event" } {
+	continue
+    }
+
+    if { [dict get $obj "event"] != "breakpoint" } {
+	continue
+    }
+
+    set body [dict get $obj "body"]
+
+    if { [dict get $body "reason"] != "changed" } {
+	continue
+    }
+
+    set breakpoint [dict get $body "breakpoint"]
+    set breakpoint_id [dict get $breakpoint "id"]
+
+    if { $breakpoint_id != $insn_bpno } {
+	continue
+    }
+
+    set insn_pc [dict get $breakpoint "instructionReference"]
+}
 
 set obj [dap_check_request_and_response "evaluate global in function" \
 	     evaluate {o expression [s global_variable]}]
