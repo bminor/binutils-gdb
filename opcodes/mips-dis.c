@@ -2600,12 +2600,15 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 	}
     }
 
-  if (length == 2)
-    infprintf (is, dis_style_assembler_directive, ".short");
-  else
-    infprintf (is, dis_style_assembler_directive, ".word");
+  infprintf (is, dis_style_assembler_directive, ".short");
   infprintf (is, dis_style_text, "\t");
-  infprintf (is, dis_style_immediate, "0x%x", insn);
+  if (length != 2)
+    {
+      infprintf (is, dis_style_immediate, "0x%x", (insn >> 16) & 0xffff);
+      infprintf (is, dis_style_text, ", ");
+    }
+  infprintf (is, dis_style_immediate, "0x%x", (insn & 0xffff));
+
   info->insn_type = dis_noninsn;
 
   return length;
