@@ -584,14 +584,16 @@ sframe_fde_create_func_info (unsigned int fre_type,
 /* FIXME API for linker.  Revisit if its better placed somewhere else?  */
 
 unsigned int
-sframe_calc_fre_type (unsigned int func_size)
+sframe_calc_fre_type (size_t func_size)
 {
   unsigned int fre_type = 0;
   if (func_size < SFRAME_FRE_TYPE_ADDR1_LIMIT)
     fre_type = SFRAME_FRE_TYPE_ADDR1;
   else if (func_size < SFRAME_FRE_TYPE_ADDR2_LIMIT)
     fre_type = SFRAME_FRE_TYPE_ADDR2;
-  else if (func_size < SFRAME_FRE_TYPE_ADDR4_LIMIT)
+  /* Adjust the check a bit so that it remains warning-free but meaningful
+     on 32-bit systems.  */
+  else if (func_size <= (size_t) (SFRAME_FRE_TYPE_ADDR4_LIMIT - 1))
     fre_type = SFRAME_FRE_TYPE_ADDR4;
   return fre_type;
 }

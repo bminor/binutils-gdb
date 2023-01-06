@@ -53,9 +53,9 @@ sframe_estimate_size_before_relax (fragS *frag)
       widthS = exp->X_op_symbol;
       width = resolve_symbol_value (widthS);
 
-      if (width < SFRAME_FRE_TYPE_ADDR1_LIMIT)
+      if (width < (offsetT) SFRAME_FRE_TYPE_ADDR1_LIMIT)
 	ret = 1;
-      else if (width < SFRAME_FRE_TYPE_ADDR2_LIMIT)
+      else if (width < (offsetT) SFRAME_FRE_TYPE_ADDR2_LIMIT)
 	ret = 2;
       else
 	ret = 4;
@@ -123,9 +123,9 @@ sframe_convert_frag (fragS *frag)
       /* Calculate the applicable fre_type.  */
       fsizeS = exp->X_op_symbol;
       fsize = resolve_symbol_value (fsizeS);
-      if (fsize < SFRAME_FRE_TYPE_ADDR1_LIMIT)
+      if (fsize < (offsetT) SFRAME_FRE_TYPE_ADDR1_LIMIT)
 	fre_type = SFRAME_FRE_TYPE_ADDR1;
-      else if (fsize < SFRAME_FRE_TYPE_ADDR2_LIMIT)
+      else if (fsize < (offsetT) SFRAME_FRE_TYPE_ADDR2_LIMIT)
 	fre_type = SFRAME_FRE_TYPE_ADDR2;
       else
 	fre_type = SFRAME_FRE_TYPE_ADDR4;
@@ -150,11 +150,11 @@ sframe_convert_frag (fragS *frag)
       switch (frag->fr_subtype & 7)
 	{
 	case 1:
-	  gas_assert (fsize < SFRAME_FRE_TYPE_ADDR1_LIMIT);
+	  gas_assert (fsize < (offsetT) SFRAME_FRE_TYPE_ADDR1_LIMIT);
 	  frag->fr_literal[frag->fr_fix] = diff;
 	  break;
 	case 2:
-	  gas_assert (fsize < SFRAME_FRE_TYPE_ADDR2_LIMIT);
+	  gas_assert (fsize < (offsetT) SFRAME_FRE_TYPE_ADDR2_LIMIT);
 	  md_number_to_chars (frag->fr_literal + frag->fr_fix, diff, 2);
 	  break;
 	case 4:
