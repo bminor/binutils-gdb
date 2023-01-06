@@ -304,7 +304,8 @@ typedef struct sframe_frame_row_entry_addr1
 
 /* Upper limit of start address in sframe_frame_row_entry_addr1
    is 0x100 (not inclusive).  */
-#define SFRAME_FRE_TYPE_ADDR1_LIMIT  ((SFRAME_FRE_TYPE_ADDR1 + 1) * 8)
+#define SFRAME_FRE_TYPE_ADDR1_LIMIT   \
+  (1ULL << ((SFRAME_FRE_TYPE_ADDR1 + 1) * 8))
 
 /* Used when SFRAME_FRE_TYPE_ADDR2 is specified as FRE type.  */
 typedef struct sframe_frame_row_entry_addr2
@@ -317,7 +318,8 @@ typedef struct sframe_frame_row_entry_addr2
 
 /* Upper limit of start address in sframe_frame_row_entry_addr2
    is 0x10000 (not inclusive).  */
-#define SFRAME_FRE_TYPE_ADDR2_LIMIT  ((SFRAME_FRE_TYPE_ADDR2 * 2) * 8)
+#define SFRAME_FRE_TYPE_ADDR2_LIMIT   \
+  (1ULL << ((SFRAME_FRE_TYPE_ADDR2 * 2) * 8))
 
 /* Used when SFRAME_FRE_TYPE_ADDR4 is specified as FRE type.  */
 typedef struct sframe_frame_row_entry_addr4
@@ -330,7 +332,8 @@ typedef struct sframe_frame_row_entry_addr4
 
 /* Upper limit of start address in sframe_frame_row_entry_addr2
    is 0x100000000 (not inclusive).  */
-#define SFRAME_FRE_TYPE_ADDR4_LIMIT  ((SFRAME_FRE_TYPE_ADDR4 * 2) * 8)
+#define SFRAME_FRE_TYPE_ADDR4_LIMIT   \
+  (1ULL << ((SFRAME_FRE_TYPE_ADDR4 * 2) * 8))
 
 #ifdef	__cplusplus
 }
