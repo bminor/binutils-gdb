@@ -539,6 +539,12 @@ whatis_exp (const char *exp, int show)
       type = value_type (val);
     }
 
+  if (flags.print_offsets && is_dynamic_type (type))
+    {
+      warning (_("ptype/o does not work with dynamic types; disabling '/o'"));
+      flags.print_offsets = 0;
+    }
+
   get_user_print_options (&opts);
   if (val != NULL && opts.objectprint)
     {
