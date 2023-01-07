@@ -23,7 +23,7 @@ if {![istarget *-*-linux*]} {
 }
 
 # Support for XML-output is needed to run this test.
-require !gdb_skip_xml_test
+require allow_xml_test
 
 gdb_exit
 if [mi_gdb_start] {

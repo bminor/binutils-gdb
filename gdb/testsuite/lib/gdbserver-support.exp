@@ -171,7 +171,7 @@ proc skip_gdbserver_tests { } {
     # multiple target descriptions, GDB doesn't know which target
     # description GDBserver uses, and may fail to parse 'g' packet
     # after connection.
-    if { [gdb_skip_xml_test]
+    if { ![allow_xml_test]
 	 && ([istarget "arm*-*-linux*"]
 	     || [istarget "aarch64*-*-linux*"]
 	     || [istarget "mips*-*-linux*"]

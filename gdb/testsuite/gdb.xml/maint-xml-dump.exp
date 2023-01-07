@@ -37,7 +37,7 @@
 #
 # 4. Indentation of lines will be preserved so your input file needs
 #    to follow the expected indentation.
-require !gdb_skip_xml_test
+require allow_xml_test
 
 gdb_start
 

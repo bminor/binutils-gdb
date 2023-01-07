@@ -16,7 +16,7 @@
 # Testing for 'maint print xml-tdesc'.  Check we can print out the
 # current target description and load it back in again.
 
-require !gdb_skip_xml_test
+require allow_xml_test
 
 standard_testfile
 

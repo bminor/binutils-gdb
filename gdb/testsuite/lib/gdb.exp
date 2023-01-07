@@ -6970,17 +6970,16 @@ proc gdb_skip_bogus_test { msg } {
     return 0
 }
 
-# Return true if a test should be skipped due to lack of XML support
-# in the host GDB.
+# Return true if XML support is enabled in the host GDB.
 # NOTE: This must be called while gdb is *not* running.
 
-gdb_caching_proc gdb_skip_xml_test {
+gdb_caching_proc allow_xml_test {
     global gdb_spawn_id
     global gdb_prompt
     global srcdir
 
     if { [info exists gdb_spawn_id] } {
-        error "GDB must not be running in gdb_skip_xml_tests."
+	error "GDB must not be running in allow_xml_tests."
     }
 
     set xml_file [gdb_remote_download host "${srcdir}/gdb.xml/trivial.xml"]
@@ -6994,7 +6993,7 @@ gdb_caching_proc gdb_skip_xml_test {
 	-re ".*$gdb_prompt $" { }
     }
     gdb_exit
-    return $xml_missing
+    return [expr {!$xml_missing}]
 }
 
 # Return true if argv[0] is available.

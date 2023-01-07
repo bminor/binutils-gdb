@@ -19,7 +19,7 @@
 # automatically instead of getting stuck or crashing.
 
 # Valgrind gdbserver requires gdb with xml support.
-require !gdb_skip_xml_test
+require allow_xml_test
 
 load_lib valgrind.exp
 

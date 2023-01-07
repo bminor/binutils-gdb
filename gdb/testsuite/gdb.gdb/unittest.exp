@@ -19,7 +19,7 @@ require !gdb_debug_enabled
 
 load_lib completion-support.exp
 
-set do_xml_test [expr ![gdb_skip_xml_test]]
+set do_xml_test [allow_xml_test]
 
 standard_testfile
 
