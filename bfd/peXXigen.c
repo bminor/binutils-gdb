@@ -1248,6 +1248,24 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
 };
 
 static bool
+get_contents_sanity_check (bfd *abfd, asection *section,
+			   bfd_size_type dataoff, bfd_size_type datasize)
+{
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    return false;
+  if (dataoff > section->size
+      || datasize > section->size - dataoff)
+    return false;
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  if (filesize != 0
+      && ((ufile_ptr) section->filepos > filesize
+	  || dataoff > filesize - section->filepos
+	  || datasize > filesize - section->filepos - dataoff))
+    return false;
+  return true;
+}
+
+static bool
 pe_print_idata (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -1413,6 +1431,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 		{
 		  ft_idx = first_thunk - (ft_section->vma - extra->ImageBase);
 		  ft_datasize = ft_section->size - ft_idx;
+		  if (!get_contents_sanity_check (abfd, ft_section,
+						  ft_idx, ft_datasize))
+		    continue;
 		  ft_data = (bfd_byte *) bfd_malloc (ft_datasize);
 		  if (ft_data == NULL)
 		    continue;
@@ -1582,24 +1603,9 @@ pe_print_edata (bfd * abfd, void * vfile)
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
 	  return true;
 	}
-      else if (!(section->flags & SEC_HAS_CONTENTS))
-	{
-	  fprintf (file,
-		   _("\nThere is an export table in %s, but that section has no contents\n"),
-		   section->name);
-	  return true;
-	}
 
       dataoff = addr - section->vma;
       datasize = extra->DataDirectory[PE_EXPORT_TABLE].Size;
-      if (dataoff > section->size
-	  || datasize > section->size - dataoff)
-	{
-	  fprintf (file,
-		   _("\nThere is an export table in %s, but it does not fit into that section\n"),
-		   section->name);
-	  return true;
-	}
     }
 
   /* PR 17512: Handle corrupt PE binaries.  */
@@ -1609,6 +1615,14 @@ pe_print_edata (bfd * abfd, void * vfile)
 	       /* xgettext:c-format */
 	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
 	       section->name, (int) datasize);
+      return true;
+    }
+
+  if (!get_contents_sanity_check (abfd, section, dataoff, datasize))
+    {
+      fprintf (file,
+	       _("\nThere is an export table in %s, but contents cannot be read\n"),
+	       section->name);
       return true;
     }
 
@@ -1622,7 +1636,10 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   if (! bfd_get_section_contents (abfd, section, data,
 				  (file_ptr) dataoff, datasize))
-    return false;
+    {
+      free (data);
+      return false;
+    }
 
   /* Go get Export Directory Table.  */
   edt.export_flags   = bfd_get_32 (abfd, data +	 0);
@@ -3333,7 +3350,7 @@ rsrc_parse_entry (bfd *abfd,
   if (HighBitSet (val))
     {
       entry->is_dir = true;
-      entry->value.directory = bfd_malloc (sizeof * entry->value.directory);
+      entry->value.directory = bfd_malloc (sizeof (*entry->value.directory));
       if (entry->value.directory == NULL)
 	return dataend;
 
@@ -3344,12 +3361,12 @@ rsrc_parse_entry (bfd *abfd,
     }
 
   entry->is_dir = false;
-  entry->value.leaf = bfd_malloc (sizeof * entry->value.leaf);
+  entry->value.leaf = bfd_malloc (sizeof (*entry->value.leaf));
   if (entry->value.leaf == NULL)
     return dataend;
 
   data = datastart + val;
-  if (data < datastart || data >= dataend)
+  if (data < datastart || data + 12 > dataend)
     return dataend;
 
   addr = bfd_get_32 (abfd, data);
@@ -3357,6 +3374,8 @@ rsrc_parse_entry (bfd *abfd,
   entry->value.leaf->codepage = bfd_get_32 (abfd, data + 8);
   /* FIXME: We assume that the reserved field (data + 12) is OK.  */
 
+  if (size > dataend - datastart - (addr - rva_bias))
+    return dataend;
   entry->value.leaf->data = bfd_malloc (size);
   if (entry->value.leaf->data == NULL)
     return dataend;
@@ -3385,7 +3404,7 @@ rsrc_parse_entries (bfd *abfd,
       return highest_data;
     }
 
-  entry = bfd_malloc (sizeof * entry);
+  entry = bfd_malloc (sizeof (*entry));
   if (entry == NULL)
     return dataend;
 
@@ -3404,7 +3423,7 @@ rsrc_parse_entries (bfd *abfd,
 
       if (i)
 	{
-	  entry->next_entry = bfd_malloc (sizeof * entry);
+	  entry->next_entry = bfd_malloc (sizeof (*entry));
 	  entry = entry->next_entry;
 	  if (entry == NULL)
 	    return dataend;
@@ -4192,13 +4211,7 @@ rsrc_process_section (bfd * abfd,
 
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  data = bfd_malloc (size);
-  if (data == NULL)
-    return;
-
-  datastart = data;
-
-  if (! bfd_get_section_contents (abfd, sec, data, 0, size))
+  if (! bfd_malloc_and_get_section (abfd, sec, &datastart))
     goto end;
 
   /* Step zero: Scan the input bfds looking for .rsrc sections and record
@@ -4210,7 +4223,8 @@ rsrc_process_section (bfd * abfd,
      at the end of a variable amount.  (It does not appear to be based upon
      the section alignment or the file alignment).  We need to skip any
      padding bytes when parsing the input .rsrc sections.  */
-  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof * rsrc_sizes);
+  data = datastart;
+  rsrc_sizes = bfd_malloc (max_num_input_rsrc * sizeof (*rsrc_sizes));
   if (rsrc_sizes == NULL)
     goto end;
 
@@ -4227,7 +4241,7 @@ rsrc_process_section (bfd * abfd,
 	    {
 	      max_num_input_rsrc += 10;
 	      rsrc_sizes = bfd_realloc (rsrc_sizes, max_num_input_rsrc
-					* sizeof * rsrc_sizes);
+					* sizeof (*rsrc_sizes));
 	      if (rsrc_sizes == NULL)
 		goto end;
 	    }
@@ -4280,7 +4294,7 @@ rsrc_process_section (bfd * abfd,
   data = datastart;
   rva_bias = sec->vma - pe->pe_opthdr.ImageBase;
 
-  type_tables = bfd_malloc (num_resource_sets * sizeof * type_tables);
+  type_tables = bfd_malloc (num_resource_sets * sizeof (*type_tables));
   if (type_tables == NULL)
     goto end;
 
@@ -4553,21 +4567,15 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
     if (sec)
       {
 	bfd_size_type x = sec->rawsize;
-	bfd_byte *tmp_data = NULL;
+	bfd_byte *tmp_data;
 
-	if (x)
-	  tmp_data = bfd_malloc (x);
-
-	if (tmp_data != NULL)
+	if (bfd_malloc_and_get_section (abfd, sec, &tmp_data))
 	  {
-	    if (bfd_get_section_contents (abfd, sec, tmp_data, 0, x))
-	      {
-		qsort (tmp_data,
-		       (size_t) (x / 12),
-		       12, sort_x64_pdata);
-		bfd_set_section_contents (pfinfo->output_bfd, sec,
-					  tmp_data, 0, x);
-	      }
+	    qsort (tmp_data,
+		   (size_t) (x / 12),
+		   12, sort_x64_pdata);
+	    bfd_set_section_contents (pfinfo->output_bfd, sec,
+				      tmp_data, 0, x);
 	    free (tmp_data);
 	  }
 	else
