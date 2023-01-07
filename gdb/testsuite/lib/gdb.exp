@@ -3906,15 +3906,15 @@ gdb_caching_proc skip_btrace_pt_tests {
 }
 
 # Run a test on the target to see if it supports Aarch64 SVE hardware.
-# Return 0 if so, 1 if it does not.  Note this causes a restart of GDB.
+# Return 1 if so, 0 if it does not.  Note this causes a restart of GDB.
 
-gdb_caching_proc skip_aarch64_sve_tests {
+gdb_caching_proc allow_aarch64_sve_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
     set me "skip_aarch64_sve_tests"
 
     if { ![is_aarch64_target]} {
-	return 1
+	return 0
     }
 
     set compile_flags "{additional_flags=-march=armv8-a+sve}"
@@ -3927,7 +3927,7 @@ gdb_caching_proc skip_aarch64_sve_tests {
 	}
     }
     if {![gdb_simple_compile $me $src executable $compile_flags]} {
-        return 1
+        return 0
     }
 
     # Compilation succeeded so now run it via gdb.
@@ -3936,22 +3936,22 @@ gdb_caching_proc skip_aarch64_sve_tests {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "\n$me sve hardware not detected"
-            set skip_sve_tests 1
+            set allow_sve_tests 0
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: sve hardware detected"
-            set skip_sve_tests 0
+            set allow_sve_tests 1
         }
         default {
           warning "\n$me: default case taken"
-            set skip_sve_tests 1
+            set allow_sve_tests 0
         }
     }
     gdb_exit
     remote_file build delete $obj
 
-    verbose "$me:  returning $skip_sve_tests" 2
-    return $skip_sve_tests
+    verbose "$me:  returning $allow_sve_tests" 2
+    return $allow_sve_tests
 }
 
 

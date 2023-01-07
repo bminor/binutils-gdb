@@ -15,7 +15,7 @@
 
 # Test a binary that uses SVE and exercise changing the SVE vector length.
 
-require !skip_aarch64_sve_tests
+require allow_aarch64_sve_tests
 
 standard_testfile
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
