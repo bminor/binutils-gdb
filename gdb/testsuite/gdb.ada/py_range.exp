@@ -16,7 +16,7 @@
 load_lib "ada.exp"
 load_lib gdb-python.exp
 
-require !skip_ada_tests !skip_python_tests
+require allow_ada_tests !skip_python_tests
 
 standard_ada_testfile foo
 

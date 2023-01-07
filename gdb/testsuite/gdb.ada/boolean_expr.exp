@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-require !skip_ada_tests
+require allow_ada_tests
 
 gdb_exit
 gdb_start

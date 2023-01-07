@@ -18,7 +18,7 @@
 
 load_lib "ada.exp"
 
-require !skip_ada_tests
+require allow_ada_tests
 
 standard_ada_testfile storage
 

@@ -2410,10 +2410,10 @@ proc skip_fortran_tests {} {
     return 0
 }
 
-# Return a 1 if I don't even want to try to test ada.
+# Return a 1 if I want to try to test ada.
 
-proc skip_ada_tests {} {
-    return 0
+proc allow_ada_tests {} {
+    return 1
 }
 
 # Return a 1 if I don't even want to try to test GO.
