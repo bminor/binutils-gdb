@@ -2449,28 +2449,10 @@ proc skip_rust_tests {} {
 }
 
 # Return a 1 for configurations that do not support Python scripting.
-# PROMPT_REGEXP is the expected prompt.
 
-proc skip_python_tests_prompt { prompt_regexp } {
-    gdb_test_multiple "python print ('test')" "verify python support" \
-	-prompt "$prompt_regexp" {
-	    -re "not supported.*$prompt_regexp" {
-		unsupported "Python support is disabled."
-		return 1
-	    }
-	    -re "$prompt_regexp" {}
-	}
-
-    return 0
-}
-
-# Return a 1 for configurations that do not support Python scripting.
-# Note: This also sets various globals that specify which version of Python
-# is in use.  See skip_python_tests_prompt.
-
-proc skip_python_tests {} {
-    global gdb_prompt
-    return [skip_python_tests_prompt "$gdb_prompt $"]
+gdb_caching_proc skip_python_tests {
+    set output [remote_exec host $::GDB --configuration]
+    return [expr {[string first "--with-python" $output] == -1}]
 }
 
 # Return a 1 if we should skip shared library tests.
