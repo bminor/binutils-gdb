@@ -19,6 +19,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile -main.cc
 
 set srcfile_lib "${testfile}-lib.cc"
@@ -26,12 +28,6 @@ set python_event_handler_file "${srcdir}/${subdir}/${testfile}.py"
 set libname "lib${testfile}"
 set python_autoload_file "${srcdir}/${subdir}/${libname}.so-gdb.py"
 set binfile_lib [standard_output_file "${libname}.so"]
-
-# Start GDB first - needed for skip_python_tests.
-clean_restart
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 # Compile library.
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} \
@@ -46,6 +42,8 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} \
       [list debug c++ shlib=$binfile_lib]] != "" } {
     return -1
 }
+
+clean_restart
 
 # Make the -gdb.py script available to gdb, it is automatically loaded by
 # gdb if it is put in the same directory as the library.

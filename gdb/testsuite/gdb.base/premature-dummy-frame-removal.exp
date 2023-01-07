@@ -36,6 +36,8 @@
 
 standard_testfile .c
 
+require !skip_python_tests
+
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
@@ -43,9 +45,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 if {![runto_main]} {
     return 0
 }
-
-# Skip this test if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 gdb_test_no_output "source ${pyfile}" "load python file"

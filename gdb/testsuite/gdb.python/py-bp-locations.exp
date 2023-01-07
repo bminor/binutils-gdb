@@ -15,6 +15,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++ debug}] != "" } {
@@ -24,8 +26,6 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++ d
 save_vars { GDBFLAGS } {
     clean_restart $testfile
 }
-
-if { [skip_python_tests] } { continue }
 
 if ![runto_main] {
     return -1

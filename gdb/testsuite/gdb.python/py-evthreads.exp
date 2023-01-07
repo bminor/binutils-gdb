@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require support_displaced_stepping
+require support_displaced_stepping !skip_python_tests
 
 load_lib gdb-python.exp
 
@@ -27,8 +27,6 @@ save_vars { GDBFLAGS } {
     append GDBFLAGS " -ex \"set non-stop on\""
     clean_restart $testfile
 }
-
-if { [skip_python_tests] } { continue }
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-events.py]
 gdb_test_no_output "source ${pyfile}" "load python file"

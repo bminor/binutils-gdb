@@ -28,6 +28,8 @@ if {![istarget *-*-linux*]
     return
 }
 
+require !skip_python_tests
+
 standard_testfile
 
 # Make this available to gdb before the program starts, it is
@@ -47,9 +49,6 @@ if {[build_executable $testfile.exp $testfile $srcfile \
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 gdb_reinitialize_dir $srcdir/$subdir
 

@@ -19,15 +19,9 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
-
-# gdb needs to be started here for skip_python_tests to work.
-# prepare_for_testing could be used instead, but it could compile the program
-# unnecessarily, so starting GDB like this is preferable.
-gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
     untested "failed to compile"

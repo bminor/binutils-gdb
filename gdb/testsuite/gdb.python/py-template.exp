@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-require !skip_cplus_tests
+require !skip_cplus_tests !skip_python_tests
 
 standard_testfile .cc
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
@@ -30,9 +30,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 proc test_template_arg {exefile type} {
     global testfile srcdir subdir srcfile

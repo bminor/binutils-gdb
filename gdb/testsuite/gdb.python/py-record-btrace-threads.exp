@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Skip this test if btrace is disabled.
+load_lib gdb-python.exp
 
-require !skip_btrace_tests
+require !skip_btrace_tests !skip_python_tests
 
 standard_testfile
 
@@ -26,14 +26,6 @@ if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" "$binfile" executable {deb
     return -1
 }
 clean_restart $testfile
-
-# Skip this test if python is disabled.
-
-load_lib gdb-python.exp
-if { [skip_python_tests] } {
-    untested "skipping python tests"
-    return -1
-}
 
 if { ![runto_main] } {
     return -1

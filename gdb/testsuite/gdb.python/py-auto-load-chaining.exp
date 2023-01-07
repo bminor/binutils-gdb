@@ -19,6 +19,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile .c -f1.c -f2.c
 
 # Two additional object files needed for this test.
@@ -46,9 +48,6 @@ set remote_python_file [gdb_remote_download host \
 if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 if ![runto_main] {
    return -1

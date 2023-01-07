@@ -18,6 +18,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
@@ -27,8 +29,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 if ![runto_main] {
     return 0
 }
-
-if { [skip_python_tests] } { continue }
 
 proc test_as_string { } {
     gdb_test "p \$_as_string(2)" "\"2\""

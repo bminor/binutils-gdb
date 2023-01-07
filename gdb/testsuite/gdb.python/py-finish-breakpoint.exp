@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-require !skip_shlib_tests
+require !skip_shlib_tests !skip_python_tests
 
 load_lib gdb-python.exp
 
@@ -36,8 +36,6 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
 
 # Start with a fresh gdb.
 clean_restart ${testfile}
-
-if { [skip_python_tests] } { continue }
 
 #
 # Test FinishBreakpoint in normal conditions

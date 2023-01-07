@@ -21,15 +21,7 @@ standard_testfile
 load_lib gdb-python.exp
 load_lib prompt.exp
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
-gdb_exit
+require !skip_python_tests
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1

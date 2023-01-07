@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 load_lib gdb-python.exp
+require !skip_python_tests
 standard_testfile
 
 foreach func_name { foo bar } {
@@ -30,9 +31,6 @@ set binary_foo [standard_output_file "${testfile}-foo"]
 set binary_bar [standard_output_file "${testfile}-bar"]
 
 clean_restart $binary_foo
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 if ![runto_main] {
    return -1

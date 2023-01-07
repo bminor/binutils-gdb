@@ -18,12 +18,11 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 clean_restart
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { return }
 
 # Skip this test if the tracemalloc module is not available.
 if { ![gdb_py_module_available "tracemalloc"] } {

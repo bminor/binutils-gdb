@@ -18,14 +18,13 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 proc run_lang_tests {exefile lang} {
     global srcdir subdir srcfile testfile hex

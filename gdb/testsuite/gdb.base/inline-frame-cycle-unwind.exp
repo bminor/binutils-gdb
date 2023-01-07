@@ -51,12 +51,11 @@
 
 standard_testfile
 
+require !skip_python_tests
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
-
-# Skip this test if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 if {![runto_main]} {
     return 0

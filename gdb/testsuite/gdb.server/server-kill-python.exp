@@ -23,15 +23,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile multi-ui-errors.c
 
-require !skip_gdbserver_tests
-
-# Gdb needs to be running for skip_python_tests, but exit once we're done,
-# we'll start a custom gdb after this.
-clean_restart
-if { [skip_python_tests] } {
-    return 0
-}
-gdb_exit
+require !skip_gdbserver_tests !skip_python_tests
 
 if {[build_executable "failed to prepare" ${testfile} \
 	 ${srcfile}] == -1} {

@@ -17,13 +17,12 @@ set testfile "py-completion"
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 set discard 0
 gdb_exit
 gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 # Tab completion tests require readline support, and this set of tests
 # doesn't work on a remote host either.

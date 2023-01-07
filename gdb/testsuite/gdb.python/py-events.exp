@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require !use_gdb_stub
+require !use_gdb_stub !skip_python_tests
 
 load_lib gdb-python.exp
 
@@ -33,8 +33,6 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
 
 # Start with a fresh gdb.
 clean_restart ${testfile}
-
-if { [skip_python_tests] } { continue }
 
 gdb_test_no_output "python import gdb.events"
 

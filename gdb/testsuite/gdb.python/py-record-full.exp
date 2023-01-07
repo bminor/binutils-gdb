@@ -17,20 +17,13 @@
 
 # Skip this test if target does not support recording.
 
-require supports_process_record
+require supports_process_record !skip_python_tests
 
 load_lib gdb-python.exp
 
 standard_testfile
 
 if [prepare_for_testing "failed to prepare" $testfile $srcfile] { return -1 }
-
-# Skip this test if python is disabled.
-
-if { [skip_python_tests] } {
-    untested "skipping python tests"
-    return -1
-}
 
 if {![runto_main]} {
     return -1

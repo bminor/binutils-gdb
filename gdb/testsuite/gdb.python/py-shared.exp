@@ -17,7 +17,7 @@
 
 load_lib gdb-python.exp
 
-require !skip_shlib_tests
+require !skip_shlib_tests !skip_python_tests
 
 standard_testfile
 
@@ -40,9 +40,6 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opt
 # Start with a fresh gdb.
 clean_restart $testfile
 gdb_load_shlib ${library}
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 # The following tests require execution.
 

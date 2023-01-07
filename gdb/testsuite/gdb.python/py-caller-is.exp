@@ -18,6 +18,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
@@ -27,9 +29,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 if ![runto_main] {
     return 0
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 gdb_breakpoint "bottom_func"
 gdb_continue_to_breakpoint "bottom_func"

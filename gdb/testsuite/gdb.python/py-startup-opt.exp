@@ -16,12 +16,7 @@
 # Test the flags within GDB that can be used to control how Python is
 # initialized.
 
-gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
-
-gdb_exit
+require !skip_python_tests
 
 # Return a list containing two directory paths for newly created home
 # directories.

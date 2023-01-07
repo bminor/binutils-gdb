@@ -17,13 +17,12 @@
 
 standard_testfile
 
+require !skip_python_tests
+
 if { [prepare_for_testing "failed to prepare" \
 	${testfile} ${srcfile}] } {
     return
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 if { ![runto break_here] } {
     untested "could not run to break_here"

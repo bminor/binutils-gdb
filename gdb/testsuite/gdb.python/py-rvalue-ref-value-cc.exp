@@ -17,7 +17,7 @@
 # exposing rvalue reference values to Python.  It is based on
 # gdb.python/py-value-cc.exp.
 
-require !skip_cplus_tests
+require !skip_cplus_tests !skip_python_tests
 
 standard_testfile .cc
 
@@ -25,9 +25,6 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile \
     {debug c++ additional_flags="-std=c++11"}]} {
     return -1
 }
-
-# Skip all tests if Python scripting is not enabled.
-if {[skip_python_tests]} { continue }
 
 if {![runto_main]} {
    return -1

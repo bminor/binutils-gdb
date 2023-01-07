@@ -18,6 +18,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 set has_argv0 [gdb_has_argv0]
@@ -633,9 +635,6 @@ if { [build_inferior "${binfile}" "c"] < 0 } {
 
 # Start with a fresh gdb.
 clean_restart ${binfile}
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 test_history_count
 test_value_creation

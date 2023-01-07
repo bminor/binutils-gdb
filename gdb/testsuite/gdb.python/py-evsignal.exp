@@ -22,14 +22,14 @@ if {[target_info gdb_protocol] == "remote"
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile py-evthreads.c
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1
 }
 clean_restart $testfile
-
-if { [skip_python_tests] } { continue }
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-events.py]
 gdb_test_no_output "source ${pyfile}" "load python file"

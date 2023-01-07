@@ -18,6 +18,8 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
+require !skip_python_tests
+
 #
 # Start here
 #
@@ -28,9 +30,6 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" }
 }
 
 mi_clean_restart $binfile
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 mi_gdb_test "source ${pyfile}" \

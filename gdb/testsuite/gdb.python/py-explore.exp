@@ -15,12 +15,11 @@
 
 standard_testfile
 
+require !skip_python_tests
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 set SS "struct SimpleStruct"
 set SU "union SimpleUnion"

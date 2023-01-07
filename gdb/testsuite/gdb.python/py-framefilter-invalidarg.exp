@@ -15,6 +15,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile amd64-py-framefilter-invalidarg.S
 
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
@@ -31,9 +33,6 @@ if {[build_executable $testfile.exp $testfile $srcfile {}] == -1} {
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 # Make the -gdb.py script available to gdb, it is automagically loaded by gdb.
 # Care is taken to put it in the same directory as the binary so that

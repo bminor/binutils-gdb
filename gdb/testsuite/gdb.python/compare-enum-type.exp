@@ -17,11 +17,11 @@
 
 standard_testfile -a.c -b.c
 
+require !skip_python_tests
+
 if { [prepare_for_testing "failed to prepare" "compare-enum-type" \
 	  [list $srcfile $srcfile2]] } {
     return
 }
-
-if { [skip_python_tests] } { continue }
 
 gdb_test "py print(gdb.parse_and_eval('e1').type == gdb.parse_and_eval('e2').type)" "True"

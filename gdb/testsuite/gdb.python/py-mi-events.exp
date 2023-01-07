@@ -18,6 +18,8 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi2"
 
+require !skip_python_tests
+
 gdb_exit
 if [mi_gdb_start] {
     return
@@ -30,8 +32,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     untested "failed to compile"
     return -1
 }
-
-if { [skip_python_tests] } { return }
 
 set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${pyfile}]
 

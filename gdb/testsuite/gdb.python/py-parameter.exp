@@ -18,11 +18,10 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 # Start with a fresh gdb.
 clean_restart
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 proc py_param_test_maybe_no_output { command pattern args } {
     if [string length $pattern] {

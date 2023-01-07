@@ -16,7 +16,7 @@
 load_lib "ada.exp"
 load_lib gdb-python.exp
 
-require !skip_ada_tests
+require !skip_ada_tests !skip_python_tests
 
 standard_ada_testfile foo
 
@@ -25,9 +25,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } 
 }
 
 clean_restart ${testfile}
-
-# Skip this testcase if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"

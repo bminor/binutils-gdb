@@ -20,12 +20,11 @@ set testfile "py-error"
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 set charset "IBM1047"
 

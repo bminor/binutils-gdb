@@ -18,6 +18,8 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 # Stack protection can make the stack look a bit different, breaking the
@@ -28,9 +30,6 @@ set flags "additional_flags=-fno-stack-protector"
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} "debug $flags"] } {
     return -1
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 # This test runs on a specific platform.
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } { continue }

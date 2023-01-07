@@ -18,16 +18,13 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 tuiterm_env
 
 clean_restart
 
 if {[skip_tui_tests]} {
-    return
-}
-
-if { [skip_python_tests] } {
-    untested "skipping Python tests"
     return
 }
 

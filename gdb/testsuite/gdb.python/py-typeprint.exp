@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require !skip_cplus_tests
+require !skip_cplus_tests !skip_python_tests
 
 load_lib gdb-python.exp
 load_lib cp-support.exp
@@ -23,8 +23,6 @@ standard_testfile .cc
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
-
-if { [skip_python_tests] } { continue }
 
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]

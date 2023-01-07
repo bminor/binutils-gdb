@@ -26,6 +26,8 @@ set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
 set options {debug c++}
@@ -33,9 +35,6 @@ set options {debug c++}
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} ${options}] } {
     return -1
 }
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
 
 proc_with_prefix test_bkpt_basic { } {
     global srcfile testfile hex decimal

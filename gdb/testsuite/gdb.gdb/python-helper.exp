@@ -24,6 +24,8 @@ if [target_info exists gdb,noinferiorio] {
     return
 }
 
+require !skip_python_tests
+
 standard_testfile .cc
 
 if { [build_executable "failed to build" $testfile $srcfile {debug c++}] } {
@@ -37,14 +39,6 @@ if { ![file readable $py_helper_script] \
     untested "failed to find gdb-gdb.py helper script"
     return
 }
-
-# Start GDB and check that we have python support.
-gdb_start
-if { [skip_python_tests] } {
-    untested "skipped gdb-gdb.py tests due to lack of python support"
-    return
-}
-gdb_exit
 
 # The main test.  This is called by the self-test framework once GDB
 # has been started on a copy of itself.

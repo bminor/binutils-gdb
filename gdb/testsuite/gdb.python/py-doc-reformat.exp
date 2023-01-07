@@ -19,9 +19,9 @@
 
 load_lib gdb-python.exp
 
-# Check that Python is supported.
+require !skip_python_tests
+
 clean_restart
-if { [skip_python_tests] } { continue }
 
 # A global counter used to number the tests.
 set idx 0

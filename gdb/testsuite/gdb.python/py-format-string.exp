@@ -18,12 +18,12 @@
 
 load_lib gdb-python.exp
 
+require !skip_python_tests
+
 standard_testfile
 
-# Skip all tests if Python scripting is not enabled.
 gdb_exit
 gdb_start
-if { [skip_python_tests] } { continue }
 
 # Build inferior to language specification.
 proc build_inferior {exefile lang} {
