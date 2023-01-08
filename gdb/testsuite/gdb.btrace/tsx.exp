@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require !skip_btrace_pt_tests !skip_tsx_tests
+require allow_btrace_pt_tests !skip_tsx_tests
 
 standard_testfile .c x86-tsx.S
 if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" {debug}] {
