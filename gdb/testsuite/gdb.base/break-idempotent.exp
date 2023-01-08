@@ -184,7 +184,7 @@ foreach_with_prefix pie { "nopie" "pie" } {
 	    test_break $always_inserted "watch"
 	}
 
-	if {![skip_hw_watchpoint_access_tests]
+	if {[allow_hw_watchpoint_access_tests]
 	    && ![skip_hw_watchpoint_multi_tests]} {
 	    test_break $always_inserted "rwatch"
 	    test_break $always_inserted "awatch"

@@ -24,7 +24,7 @@
 
 standard_testfile .c
 
-require !skip_hw_watchpoint_access_tests
+require allow_hw_watchpoint_access_tests
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1

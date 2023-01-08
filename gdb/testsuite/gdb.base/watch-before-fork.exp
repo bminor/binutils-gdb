@@ -18,7 +18,7 @@
 # followed by a catchpoint hit.
 
 # This test uses "awatch".
-require !skip_hw_watchpoint_access_tests
+require allow_hw_watchpoint_access_tests
 
 standard_testfile
 

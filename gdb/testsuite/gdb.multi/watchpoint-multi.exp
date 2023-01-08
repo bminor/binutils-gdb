@@ -22,7 +22,7 @@ require !use_gdb_stub
 
 # Do not use simple hardware watchpoints ("watch") as its false hit may be
 # unnoticed by GDB if it reads it still has the same value.
-require !skip_hw_watchpoint_access_tests
+require allow_hw_watchpoint_access_tests
 
 if { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested "failed to compile"
