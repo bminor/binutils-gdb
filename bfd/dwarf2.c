@@ -5408,6 +5408,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
       stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
       if (! stash)
 	return false;
+      *pinfo = stash;
     }
   stash->orig_bfd = abfd;
   stash->debug_sections = debug_sections;
@@ -5432,8 +5433,6 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   stash->alt.trie_root = alloc_trie_leaf (abfd);
   if (!stash->alt.trie_root)
     return false;
-
-  *pinfo = stash;
 
   if (debug_bfd == NULL)
     debug_bfd = abfd;
