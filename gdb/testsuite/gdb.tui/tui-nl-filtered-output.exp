@@ -30,12 +30,10 @@
 #
 #  (gdb)
 
+require allow_tui_tests
+
 gdb_exit
 gdb_start
-
-if {[skip_tui_tests]} {
-    return
-}
 
 # Enable the TUI.
 

@@ -18,15 +18,11 @@
 
 load_lib gdb-python.exp
 
-require allow_python_tests
+require allow_python_tests allow_tui_tests
 
 tuiterm_env
 
 clean_restart
-
-if {[skip_tui_tests]} {
-    return
-}
 
 # Define a function we can use as a window constructor.  If this ever
 # gets called we'll throw an error, but that's OK, this test doesn't

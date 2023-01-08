@@ -47,7 +47,7 @@ if { ![readline_is_used] } {
     return -1
 }
 
-set tui_supported_p [expr ![skip_tui_tests]]
+set tui_supported_p [allow_tui_tests]
 
 # Check the completion result, as returned by the "maintenance show
 # test-options-completion-result" command.  TEST is used as test name.

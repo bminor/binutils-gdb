@@ -16,14 +16,12 @@
 # Minimal testcase that just checks that the various "layout $foo"
 # commands do not cause gdb to crash.
 
+require allow_tui_tests
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
-}
-
-if {[skip_tui_tests]} {
-    return
 }
 
 # Test one layout command.  EXECUTION indicates whether to activate

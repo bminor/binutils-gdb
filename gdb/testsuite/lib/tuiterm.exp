@@ -778,7 +778,7 @@ namespace eval Term {
     # Setup ready for starting the tui, but don't actually start it.
     # Returns 1 on success, 0 if TUI tests should be skipped.
     proc prepare_for_tui {} {
-	if {[skip_tui_tests]} {
+	if {![allow_tui_tests]} {
 	    return 0
 	}
 

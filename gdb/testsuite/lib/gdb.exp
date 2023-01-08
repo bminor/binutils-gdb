@@ -2572,20 +2572,11 @@ gdb_caching_proc allow_dlmopen_tests {
     return $allow_dlmopen_tests
 }
 
-# Return 1 if we should skip tui related tests.
+# Return 1 if we should allow TUI-related tests.
 
-proc skip_tui_tests {} {
-    global gdb_prompt
-
-    gdb_test_multiple "help layout" "verify tui support" {
-	-re "Undefined command: \"layout\".*$gdb_prompt $" {
-	    return 1
-	}
-	-re "$gdb_prompt $" {
-	}
-    }
-
-    return 0
+gdb_caching_proc allow_tui_tests {
+    set output [remote_exec host $::GDB --configuration]
+    return [expr {[string first "--enable-tui" $output] != -1}]
 }
 
 # Test files shall make sure all the test result lines in gdb.sum are

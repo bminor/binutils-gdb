@@ -33,7 +33,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" \
 
 clean_restart "$binfile"
 
-if {[skip_tui_tests]} {
+if {![allow_tui_tests]} {
     # TUI support is disabled.  Check for error message.
     gdb_test "layout asm" "Undefined command: \"layout\".  Try \"help\"."
     return

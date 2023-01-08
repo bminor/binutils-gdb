@@ -22,6 +22,7 @@
 # though the tui should be disabled.
 
 load_lib gdb-python.exp
+require allow_tui_tests
 tuiterm_env
 
 standard_testfile
@@ -31,9 +32,6 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
 }
 
 clean_restart
-if {[skip_tui_tests]} {
-    return
-}
 
 # Copy the Python script to where the tests are being run.
 set remote_python_file [gdb_remote_download host \

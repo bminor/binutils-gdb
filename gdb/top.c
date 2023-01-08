@@ -1649,6 +1649,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#ifdef TUI
+  gdb_printf (stream, _("\
+	     --enable-tui\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --disable-tui\n\
+"));
+#endif
+
 #ifdef RELOC_SRCDIR
   gdb_printf (stream, _("\
 	     --with-relocated-sources=%s\n\
