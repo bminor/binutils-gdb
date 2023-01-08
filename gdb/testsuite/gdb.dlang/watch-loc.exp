@@ -18,7 +18,7 @@
 load_lib "d-support.exp"
 load_lib "dwarf.exp"
 
-require !skip_d_tests dwarf2_support
+require allow_d_tests dwarf2_support
 
 standard_testfile watch-loc.c watch-loc-dw.S
 

@@ -2421,10 +2421,10 @@ proc skip_go_tests {} {
     return 0
 }
 
-# Return a 1 if I don't even want to try to test D.
+# Return a 1 if I even want to try to test D.
 
-proc skip_d_tests {} {
-    return 0
+proc allow_d_tests {} {
+    return 1
 }
 
 # Return 1 to skip Rust tests, 0 to try them.

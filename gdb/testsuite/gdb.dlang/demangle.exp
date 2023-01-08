@@ -19,7 +19,7 @@
 
 load_lib "d-support.exp"
 
-require !skip_d_tests
+require allow_d_tests
 
 ### Utility function for test_demangling and test_demangling_exact.
 proc test_demangling {test result} {
