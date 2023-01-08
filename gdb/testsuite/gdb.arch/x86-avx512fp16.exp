@@ -15,7 +15,7 @@
 
 # Test fp16 support in AVX512 registers.
 
-require !skip_avx512fp16_tests
+require allow_avx512fp16_tests
 
 standard_testfile
 

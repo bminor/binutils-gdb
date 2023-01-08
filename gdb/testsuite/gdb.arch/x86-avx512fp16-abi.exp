@@ -15,7 +15,7 @@
 
 # Test support for _Float16 parameters and return values.
 
-require !skip_avx512fp16_tests
+require allow_avx512fp16_tests
 
 standard_testfile
 
