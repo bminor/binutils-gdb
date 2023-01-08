@@ -15,20 +15,20 @@
 
 # Helper functions to make it easier to write debuginfod tests.
 
-# Return true if the debuginfod tests should be skipped, otherwise, return
+# Return true if the debuginfod tests should be run, otherwise, return
 # false.
-proc skip_debuginfod_tests {} {
+proc allow_debuginfod_tests {} {
     if [is_remote host] {
-	return true
+	return false
     }
 
     if { [which debuginfod] == 0 } {
-	return true
+	return false
     }
 
     if { [which curl] == 0 } {
 	untested "cannot find curl"
-	return true
+	return false
     }
 
     # Skip testing if gdb was not configured with debuginfod.
@@ -39,10 +39,10 @@ proc skip_debuginfod_tests {} {
     if { [string first "with-debuginfod" \
 	      [eval exec $::GDB --quiet $::INTERNAL_GDBFLAGS \
 		   --configuration]] == -1 } {
-	return true
+	return false
     }
 
-    return false
+    return true
 }
 
 # Create two directories within the current output directory.  One directory
