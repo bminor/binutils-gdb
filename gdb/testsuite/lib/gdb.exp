@@ -8522,11 +8522,11 @@ proc cmp_binary_files { file1 file2 } {
 # flag?  If not then we should skip these tests.  We should also
 # skip them if libctf was explicitly disabled.
 
-gdb_caching_proc skip_ctf_tests {
+gdb_caching_proc allow_ctf_tests {
     global enable_libctf
 
     if {$enable_libctf eq "no"} {
-	return 1
+	return 0
     }
 
     set can_ctf [gdb_can_simple_compile ctfdebug {
@@ -8535,7 +8535,7 @@ gdb_caching_proc skip_ctf_tests {
 	}
     } executable "additional_flags=-gctf"]
 
-    return [expr {!$can_ctf}]
+    return $can_ctf
 }
 
 # Return 1 if compiler supports -gstatement-frontiers.  Otherwise,

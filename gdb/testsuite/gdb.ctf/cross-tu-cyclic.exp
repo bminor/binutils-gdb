@@ -15,7 +15,7 @@
 
 # This file is a subset of ptype.exp written by Rob Savoye. (rob@cygnus.com)
 
-require !skip_ctf_tests
+require allow_ctf_tests
 
 standard_testfile cross-tu-cyclic-1.c  cross-tu-cyclic-2.c \
 	cross-tu-cyclic-3.c  cross-tu-cyclic-4.c

@@ -15,7 +15,7 @@
 
 # This file is a subset of ptype.exp written by Rob Savoye. (rob@cygnus.com)
 
-require !skip_ctf_tests
+require allow_ctf_tests
 
 # Some tests require GCC.
 set gcc_compiled [is_c_compiler_gcc]

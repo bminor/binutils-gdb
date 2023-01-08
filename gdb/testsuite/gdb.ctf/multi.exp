@@ -15,7 +15,7 @@
 
 # This file is a subset of ptype.exp written by Rob Savoye. (rob@cygnus.com)
 
-require !skip_ctf_tests
+require allow_ctf_tests
 
 standard_testfile ctf-a.c ctf-b.c ctf-c.c
 

@@ -592,7 +592,7 @@ lappend ctf_opts ldflags=-Wl,--ctf-variables
 
 # Build up the set of debug formats for which we will run this test.
 set specs { {dwarf {debug}} }
-if ![skip_ctf_tests] {
+if {[allow_ctf_tests]} {
     lappend specs [list ctf $ctf_opts]
 }
 
