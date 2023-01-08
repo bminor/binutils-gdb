@@ -11551,7 +11551,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		filedata->dynamic_addr,
 		filedata->dynamic_nent);
       else
-	printf (ngettext ("\nDynamic section at offset %#" PRIx64 " contains %" PRId64 " entry:\n",
+	printf (ngettext ("\nDynamic section at offset %#" PRIx64 " contains %" PRIu64 " entry:\n",
 			  "\nDynamic section at offset %#" PRIx64 " contains %" PRIu64 " entries:\n",
 			  filedata->dynamic_nent),
 		filedata->dynamic_addr,
