@@ -43,7 +43,7 @@ proc restart_gdb {exefile} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${exefile}
 
-    if { [skip_guile_tests] } {
+    if { ![allow_guile_tests] } {
 	return 0
     }
 

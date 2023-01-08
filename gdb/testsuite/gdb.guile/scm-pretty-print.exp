@@ -18,14 +18,13 @@
 
 load_lib gdb-guile.exp
 
+require allow_guile_tests
+
 standard_testfile
 
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Guile scripting is not enabled.
-if { [skip_guile_tests] } { continue }
 
 proc run_lang_tests {exefile lang} {
     with_test_prefix "lang=$lang" {

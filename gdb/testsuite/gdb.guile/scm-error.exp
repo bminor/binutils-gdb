@@ -19,12 +19,11 @@ set testfile "scm-error"
 
 load_lib gdb-guile.exp
 
+require allow_guile_tests
+
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-
-# Skip all tests if Guile scripting is not enabled.
-if { [skip_guile_tests] } { continue }
 
 # Test error while loading .scm.
 

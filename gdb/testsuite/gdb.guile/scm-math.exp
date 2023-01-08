@@ -18,6 +18,8 @@
 
 load_lib gdb-guile.exp
 
+require allow_guile_tests
+
 standard_testfile
 
 proc test_value_numeric_ops {} {
@@ -334,9 +336,6 @@ proc test_value_compare {} {
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c}]} {
     return
 }
-
-# Skip all tests if Guile scripting is not enabled.
-if { [skip_guile_tests] } { continue }
 
 if ![gdb_guile_runto_main] {
    return

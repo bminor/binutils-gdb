@@ -18,14 +18,13 @@
 
 load_lib gdb-guile.exp
 
+require allow_guile_tests
+
 standard_testfile
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return
 }
-
-# Skip all tests if Guile scripting is not enabled.
-if { [skip_guile_tests] } { continue }
 
 #gdb_install_guile_utils
 #gdb_install_guile_module
