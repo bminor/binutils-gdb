@@ -15,7 +15,7 @@
 
 load_lib compile-support.exp
 
-require !skip_ifunc_tests
+require allow_ifunc_tests
 
 standard_testfile
 
