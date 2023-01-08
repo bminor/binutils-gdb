@@ -15,13 +15,13 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# The allow_hw_watchpoint_tests checks if watchpoints are supported by the
 # processor.  On PowerPC, the check runs a small test program under gdb
 # to determine if the Power processor supports HW watchpoints.  The check
 # must be done before starting the test so as to not disrupt the execution
 # of the actual test.
 
-set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
+set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
 
@@ -631,14 +631,14 @@ proc test_watch_location {} {
 proc test_wide_location_1 {} {
     global no_hw
     global gdb_prompt
-    global skip_hw_watchpoint_tests_p
+    global allow_hw_watchpoint_tests_p
 
     # This test watches two words on most 32-bit ABIs, and one word on
     # most 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if { $no_hw || $skip_hw_watchpoint_tests_p
+    if { $no_hw || !$allow_hw_watchpoint_tests_p
          || [istarget arm*-*-*]
          || ([istarget powerpc*-*-*] && ![is_lp64_target])} {
 	set hw_expected 0
@@ -679,14 +679,14 @@ proc test_wide_location_1 {} {
 proc test_wide_location_2 {} {
     global no_hw
     global gdb_prompt
-    global skip_hw_watchpoint_tests_p
+    global allow_hw_watchpoint_tests_p
 
     # This test watches four words on most 32-bit ABIs, and two words
     # on 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if { $no_hw || $skip_hw_watchpoint_tests_p
+    if { $no_hw || !$allow_hw_watchpoint_tests_p
          || [istarget arm*-*-*]
          || [istarget powerpc*-*-*]} {
 	set hw_expected 0
@@ -803,7 +803,7 @@ proc test_inaccessible_watchpoint {} {
 
 proc test_no_hw_watchpoints {} {
     global testfile
-    global skip_hw_watchpoint_tests_p
+    global allow_hw_watchpoint_tests_p
 
     clean_restart $testfile
 
@@ -849,7 +849,7 @@ proc test_no_hw_watchpoints {} {
 
 
     # Re-enable hardware watchpoints if necessary.
-    if {!$skip_hw_watchpoint_tests_p} {
+    if {$allow_hw_watchpoint_tests_p} {
         gdb_test_no_output "set can-use-hw-watchpoints 1" ""
     }
 }
@@ -901,9 +901,9 @@ proc test_watchpoint_in_big_blob {} {
 
 proc test_watch_register_location {} {
     global no_hw
-    global skip_hw_watchpoint_tests_p
+    global allow_hw_watchpoint_tests_p
 
-    if {!$no_hw && !$skip_hw_watchpoint_tests_p} {
+    if {!$no_hw && $allow_hw_watchpoint_tests_p} {
 	# Non-memory read/access watchpoints are not supported, they would
 	# require software read/access watchpoint support (which is not
 	# currently available).
@@ -927,11 +927,11 @@ test_no_hw_watchpoints
 proc do_tests {} {
     global testfile
     global no_hw
-    global skip_hw_watchpoint_tests_p
+    global allow_hw_watchpoint_tests_p
 
     clean_restart $testfile
 
-    if {$no_hw || $skip_hw_watchpoint_tests_p} {
+    if {$no_hw || !$allow_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0"\
 	    "disable fast watches, 1"
     }
@@ -951,7 +951,7 @@ proc do_tests {} {
     # `initialize' anymore.
     clean_restart $testfile
 
-    if {$no_hw || $skip_hw_watchpoint_tests_p} {
+    if {$no_hw || !$allow_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" \
 	    "disable fast watches, 2"
     }
@@ -989,7 +989,7 @@ proc do_tests {} {
 # watchpoints force-disabled.
 
 do_tests
-if {!$skip_hw_watchpoint_tests_p} {
+if {$allow_hw_watchpoint_tests_p} {
     with_test_prefix "no-hw" {
 	set no_hw 1
 	do_tests

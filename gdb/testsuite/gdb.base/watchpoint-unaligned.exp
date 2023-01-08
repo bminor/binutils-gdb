@@ -17,7 +17,7 @@
 
 # Test inserting read watchpoints on unaligned addresses.
 
-require !skip_hw_watchpoint_tests
+require allow_hw_watchpoint_tests
 
 standard_testfile
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {

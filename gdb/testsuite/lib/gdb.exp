@@ -4039,12 +4039,12 @@ proc skip_hw_breakpoint_tests {} {
     return 1
 }
 
-# Return a 1 if we should skip tests that require hardware watchpoints
+# Return a 1 if we should run tests that require hardware watchpoints
 
-proc skip_hw_watchpoint_tests {} {
+proc allow_hw_watchpoint_tests {} {
     # Skip tests if requested by the board
     if { [target_info exists gdb,no_hardware_watchpoints]} {
-	return 1
+	return 0
     }
 
     # These targets support hardware watchpoints natively
@@ -4058,17 +4058,17 @@ proc skip_hw_watchpoint_tests {} {
 	 || [istarget "aarch64*-*-*"]
 	 || ([istarget "powerpc*-*-linux*"] && [has_hw_wp_support])
 	 || [istarget "s390*-*-*"] } {
-	return 0
+	return 1
     }
 
-    return 1
+    return 0
 }
 
 # Return a 1 if we should run tests that require *multiple* hardware
 # watchpoints to be active at the same time
 
 proc allow_hw_watchpoint_multi_tests {} {
-    if { [skip_hw_watchpoint_tests] } {
+    if { ![allow_hw_watchpoint_tests] } {
 	return 0
     }
 
@@ -4084,7 +4084,7 @@ proc allow_hw_watchpoint_multi_tests {} {
 # Return a 1 if we should run tests that require read/access watchpoints
 
 proc allow_hw_watchpoint_access_tests {} {
-    if { [skip_hw_watchpoint_tests] } {
+    if { ![allow_hw_watchpoint_tests] } {
 	return 0
     }
 

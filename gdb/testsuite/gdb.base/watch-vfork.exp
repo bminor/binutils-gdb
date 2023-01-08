@@ -44,7 +44,7 @@ proc test_watchpoint_across_vfork { hw teststr } {
 	"Watchpoint triggers after vfork ($teststr)"
 }
 
-if { ![skip_hw_watchpoint_tests] } {
+if { [allow_hw_watchpoint_tests] } {
     test_watchpoint_across_vfork 1 "hw"
 }
 

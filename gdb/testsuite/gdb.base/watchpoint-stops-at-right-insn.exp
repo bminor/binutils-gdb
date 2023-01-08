@@ -71,7 +71,7 @@
 standard_testfile
 
 # No use testing this if we can't use hardware watchpoints.
-require !skip_hw_watchpoint_tests
+require allow_hw_watchpoint_tests
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1

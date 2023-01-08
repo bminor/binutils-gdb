@@ -235,7 +235,7 @@ proc test_detach {multi_process cmd} {
 # Same as test_detach, except set a watchpoint before detaching.
 
 proc test_detach_watch {wp multi_process cmd} {
-    if { $wp == "hw" && [skip_hw_watchpoint_tests] } {
+    if { $wp == "hw" && ![allow_hw_watchpoint_tests] } {
 	unsupported "hw watchpoint"
 	return
     }

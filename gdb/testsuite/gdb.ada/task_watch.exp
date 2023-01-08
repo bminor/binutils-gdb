@@ -19,7 +19,7 @@ load_lib "ada.exp"
 
 require allow_ada_tests
 
-require !skip_hw_watchpoint_tests
+require allow_hw_watchpoint_tests
 
 standard_ada_testfile foo
 

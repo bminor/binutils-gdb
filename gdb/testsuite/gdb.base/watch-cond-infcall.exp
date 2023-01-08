@@ -16,13 +16,13 @@
 # Test for watchpoints with conditions that involve inferior function
 # calls.
 
-# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# The allow_hw_watchpoint_tests checks if watchpoints are supported by the
 # processor.  On PowerPC, the check runs a small test program under gdb
 # to determine if the Power processor supports HW watchpoints.  The check
 # must be done before starting the test so as to not disrupt the execution
 # of the actual test.
 
-set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
+set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
 
@@ -57,7 +57,7 @@ proc test_watchpoint { hw } {
 	"atchpoint \[0-9\]+: var\r\n\r\nOld value = 0\r\nNew value = 1\r\n.*watchpoint-stop.*"
 }
 
-if { !$skip_hw_watchpoint_tests_p } {
+if { $allow_hw_watchpoint_tests_p } {
     with_test_prefix "hw" { test_watchpoint 1 }
 }
 
