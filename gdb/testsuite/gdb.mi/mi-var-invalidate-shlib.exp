@@ -20,7 +20,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile .c -lib.c
 set shlib_path [standard_output_file ${testfile}-lib.so]

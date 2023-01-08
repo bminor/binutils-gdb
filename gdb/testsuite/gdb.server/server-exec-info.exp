@@ -15,10 +15,10 @@
 
 load_lib gdbserver-support.exp
 
-# We test for skip_shlib_tests in this test because without a main
+# We test for allow_shlib_tests in this test because without a main
 # exec file we only have the exec target loaded if shared libraries
 # are present.
-require allow_gdbserver_tests !skip_shlib_tests
+require allow_gdbserver_tests allow_shlib_tests
 
 standard_testfile server.c
 if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {

@@ -20,7 +20,7 @@ set MIFLAGS "-i=mi"
 # test running programs
 #
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile mi-pending.c
 

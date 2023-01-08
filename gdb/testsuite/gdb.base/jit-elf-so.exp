@@ -16,7 +16,7 @@
 # The same tests as in jit.exp, but loading JITer itself from a shared
 # library.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 load_lib jit-elf-helpers.exp
 

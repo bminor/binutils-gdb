@@ -20,7 +20,7 @@
 #
 
 # This only works on GNU/Linux.
-require isnative !skip_shlib_tests
+require isnative allow_shlib_tests
 if { [is_remote host] || ![istarget *-linux*] } {
     return
 }

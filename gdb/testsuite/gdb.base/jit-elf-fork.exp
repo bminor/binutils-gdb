@@ -15,7 +15,7 @@
 
 # Test fork handling of an inferior that has JIT-ed objfiles.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 load_lib jit-elf-helpers.exp
 

@@ -17,7 +17,7 @@
 # when the target doesn't support hw breakpoints doesn't silently
 # error out without informing the user.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 set main_src hbreak-in-shr-unsupported.c
 set lib_src hbreak-in-shr-unsupported-shr.c

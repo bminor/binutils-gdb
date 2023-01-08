@@ -16,7 +16,7 @@
 # Test solib-search-path, and in the case of solib-svr4.c whether l_addr_p
 # is properly reset when the path is changed.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 if {[is_remote target]} {
     untested "skipping remote target and shared library tests"
     return -1

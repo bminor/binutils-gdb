@@ -26,7 +26,7 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 #
 
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 set testfile "watchpoint-solib"
 set libfile "watchpoint-solib-shr"

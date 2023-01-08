@@ -15,7 +15,7 @@
 
 # Test the "print symbol-loading" option.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile print-symbol-loading-main.c
 set libfile print-symbol-loading-lib

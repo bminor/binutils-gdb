@@ -53,7 +53,7 @@
 # 1) GDB does not segfault when stepping
 # 2) The stack frame is printed
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 # Library 2
 set lib2name "solib-vanish-lib2"

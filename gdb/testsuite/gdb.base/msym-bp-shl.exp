@@ -18,7 +18,7 @@
 # static function named "foo" exists in the shared library.  Tests
 # both with and without debug info.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile msym-bp-shl-main.c msym-bp-shl-main-2.c msym-bp-shl-lib.c
 set srcfile ${srcdir}/${subdir}/${srcfile}

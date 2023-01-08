@@ -19,7 +19,7 @@
 # This file was written by Alexandre Oliva <aoliva@redhat.com>
 
 
-require isnative !skip_shlib_tests is_c_compiler_gcc
+require isnative allow_shlib_tests is_c_compiler_gcc
 if { [is_remote host] } {
     return
 }

@@ -19,7 +19,7 @@
 # them gets relocated at load-time. Check that gdb gets the right
 # values for the debugging and minimal symbols.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 #
 # This file uses shreloc.c, shreloc1.c and shreloc2.c

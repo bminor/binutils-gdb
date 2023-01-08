@@ -19,7 +19,7 @@
 
 load_lib mi-support.exp
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile mi-dprintf-pending.c
 

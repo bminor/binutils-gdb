@@ -24,7 +24,7 @@
 # For completeness, also test when the JIT descriptor does not change
 # address between runs.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile
 

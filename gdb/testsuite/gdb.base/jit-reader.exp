@@ -22,7 +22,7 @@ if { (![istarget x86_64-*-*] && ![istarget i?86-*-*]) || ![is_lp64_target] } {
     return -1;
 }
 
-require !skip_shlib_tests isnative
+require allow_shlib_tests isnative
 
 # Increase this to see more detail.
 set test_verbose 0

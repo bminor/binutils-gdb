@@ -17,7 +17,7 @@
 # with shared libraries and a logfile.
 
 # This test suitable only for process record-replay
-require supports_process_record !skip_shlib_tests
+require supports_process_record allow_shlib_tests
 
 standard_testfile solib-reverse.c
 set precsave [standard_output_file solib.precsave]

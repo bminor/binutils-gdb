@@ -342,7 +342,7 @@ foreach at_first_loc { "1" "0" } {
 break_trace_same_addr_6 "trace" "enable" "trace" "disable"
 break_trace_same_addr_6 "trace" "disable" "trace" "enable"
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 set libipa [get_in_proc_agent]
 set remote_libipa [gdb_load_shlib $libipa]

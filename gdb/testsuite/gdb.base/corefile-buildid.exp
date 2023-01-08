@@ -296,7 +296,7 @@ build_corefile_buildid_exec
 do_corefile_buildid_tests
 do_corefile_buildid_tests -sepdebug
 
-if {![skip_shlib_tests]} {
+if {[allow_shlib_tests]} {
     build_corefile_buildid_shared
     do_corefile_buildid_tests -shared
     do_corefile_buildid_tests -shared -sepdebug

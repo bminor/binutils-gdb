@@ -2454,12 +2454,12 @@ gdb_caching_proc allow_python_tests {
     return [expr {[string first "--with-python" $output] != -1}]
 }
 
-# Return a 1 if we should skip shared library tests.
+# Return a 1 if we should run shared library tests.
 
-proc skip_shlib_tests {} {
+proc allow_shlib_tests {} {
     # Run the shared library tests on native systems.
     if {[isnative]} {
-	return 0
+	return 1
     }
 
     # An abbreviated list of remote targets where we should be able to
@@ -2470,10 +2470,10 @@ proc skip_shlib_tests {} {
 	 || [istarget *-*-mingw*]
 	 || [istarget *-*-cygwin*]
 	 || [istarget *-*-pe*])} {
-	return 0
+	return 1
     }
 
-    return 1
+    return 0
 }
 
 # Return 1 if we should run dlmopen tests, 0 if we should not.
@@ -2482,7 +2482,7 @@ gdb_caching_proc allow_dlmopen_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
     # We need shared library support.
-    if { [skip_shlib_tests] } {
+    if { ![allow_shlib_tests] } {
 	return 0
     }
 

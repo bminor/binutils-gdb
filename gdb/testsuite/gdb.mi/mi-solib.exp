@@ -16,7 +16,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi2"
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 gdb_exit
 if [mi_gdb_start] {

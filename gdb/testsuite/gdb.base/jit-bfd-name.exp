@@ -20,7 +20,7 @@
 # Additionally, check that GDB cau use 'dump binary memory' to write
 # out the in-memory JIT files.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 load_lib jit-elf-helpers.exp
 

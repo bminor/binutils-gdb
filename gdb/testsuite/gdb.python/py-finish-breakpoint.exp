@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-require !skip_shlib_tests allow_python_tests
+require allow_shlib_tests allow_python_tests
 
 load_lib gdb-python.exp
 

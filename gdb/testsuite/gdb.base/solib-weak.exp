@@ -17,7 +17,7 @@
 # than one shared library, when one of the implementations is a "weak"
 # symbol.  GDB should set a breakpoint at the first copy it finds.
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 # These targets have shared libraries, but weak symbols are not meaningful.
 if {([istarget *-*-mingw*]

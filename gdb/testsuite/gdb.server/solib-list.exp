@@ -23,7 +23,7 @@
 load_lib gdbserver-support.exp
 load_lib prelink-support.exp
 
-require allow_gdbserver_tests !skip_shlib_tests
+require allow_gdbserver_tests allow_shlib_tests
 
 standard_testfile solib-list-main.c
 set srclibfile ${testfile}-lib.c

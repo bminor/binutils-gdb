@@ -19,7 +19,7 @@
 # test running programs
 #
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 set testfile "unload"
 set libfile "unloadshr"

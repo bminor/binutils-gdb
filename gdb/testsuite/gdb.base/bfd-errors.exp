@@ -46,7 +46,7 @@
 
 # This test can't be run on targets lacking shared library support
 # or for non-ELF targets.
-require !skip_shlib_tests is_elf_target
+require allow_shlib_tests is_elf_target
 
 # Library file names and flags:
 set lib_basename ${::gdb_test_file_name}-lib

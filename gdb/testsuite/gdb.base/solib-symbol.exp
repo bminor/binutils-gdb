@@ -15,7 +15,7 @@
 # Contributed by Markus Deuling <deuling@de.ibm.com>.
 #
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 # Library file.
 set libname "solib-symbol-lib"

@@ -49,7 +49,7 @@
 # which is then used by a shared object.
 
 # This test can't be run on targets lacking shared library support.
-require !skip_shlib_tests
+require allow_shlib_tests
 
 load_lib dwarf.exp
 

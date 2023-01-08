@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require allow_btrace_tests !skip_shlib_tests
+require allow_btrace_tests allow_shlib_tests
 
 standard_testfile
 

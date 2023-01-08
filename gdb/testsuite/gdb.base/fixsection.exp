@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-require !skip_shlib_tests
+require allow_shlib_tests
 
 standard_testfile .c
 

@@ -15,7 +15,7 @@
 
 load_lib trace-support.exp
 
-require !skip_shlib_tests
+require allow_shlib_tests
 require gdb_trace_common_supports_arch
 
 standard_testfile pending.c
