@@ -21,7 +21,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile server.c
 
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 save_vars { GDBFLAGS } {
     # If GDB and GDBserver are both running locally, set the sysroot to avoid

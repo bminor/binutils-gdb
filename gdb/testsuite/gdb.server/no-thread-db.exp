@@ -25,7 +25,7 @@ load_lib gdbserver-support.exp
 standard_testfile
 set unresolvable_thread_db_path "/foo/bar"
 
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1

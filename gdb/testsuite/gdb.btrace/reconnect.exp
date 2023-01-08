@@ -20,7 +20,7 @@
 load_lib gdbserver-support.exp
 
 require allow_btrace_tests
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile $srcfile] {

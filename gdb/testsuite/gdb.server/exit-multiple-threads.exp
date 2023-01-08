@@ -25,7 +25,7 @@
 
 load_lib gdbserver-support.exp
 
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 standard_testfile
 

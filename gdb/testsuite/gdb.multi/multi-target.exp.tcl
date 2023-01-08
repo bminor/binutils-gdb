@@ -165,7 +165,7 @@ proc setup {non-stop} {
 proc multi_target_prepare {} {
     global binfile srcfile
 
-    if { [skip_gdbserver_tests] } {
+    if { ![allow_gdbserver_tests] } {
 	return 0
     }
 

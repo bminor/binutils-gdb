@@ -70,13 +70,13 @@ gdb_test "record btrace" "The process is already being recorded\\.  Use \"record
 # continue to the end and make sure we don't die
 gdb_test "continue" ".*Inferior.*exited.*" "continue to end"
 
-# skip_gdbserver_tests requires GDB not running.
+# allow_gdbserver_tests requires GDB not running.
 gdb_exit
 
 # skip the rerun test when using gdbserver
 # otherwise rerun twice, target should be automatically disabled
 load_lib gdbserver-support.exp
-if [skip_gdbserver_tests] {
+if !{[allow_gdbserver_tests]} {
     unsupported "target does not support gdbserver"
     return 0
 }

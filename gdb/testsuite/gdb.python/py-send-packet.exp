@@ -24,7 +24,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile
 
-require !skip_gdbserver_tests !skip_python_tests
+require allow_gdbserver_tests !skip_python_tests
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1

@@ -160,12 +160,12 @@ proc find_gdbserver { } {
   return ""
 }
 
-# Return non-zero if we should skip gdbserver-specific tests.
+# Return non-zero if we should run gdbserver-specific tests.
 
-proc skip_gdbserver_tests { } {
-  if { [find_gdbserver] == "" } {
-    return 1
-  }
+proc allow_gdbserver_tests { } {
+    if { [find_gdbserver] == "" } {
+	return 0
+    }
 
     # If GDB is lack of XML support, and targets, like arm, have
     # multiple target descriptions, GDB doesn't know which target
@@ -179,10 +179,10 @@ proc skip_gdbserver_tests { } {
 	     || [istarget "s390*-*-linux*"]
 	     || [istarget "x86_64-*-linux*"]
 	     || [istarget "i\[34567\]86-*-linux*"]) } {
-	return 1
+	return 0
     }
 
-  return 0
+    return 1
 }
 
 # Download the currently loaded program to the target if necessary.

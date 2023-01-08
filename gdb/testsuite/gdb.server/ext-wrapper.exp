@@ -19,7 +19,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile wrapper.c
 
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1

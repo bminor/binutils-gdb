@@ -19,7 +19,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile
 
-require !skip_gdbserver_tests
+require allow_gdbserver_tests
 
 global server_spawn_id
 
