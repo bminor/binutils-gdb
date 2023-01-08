@@ -15,7 +15,7 @@
 
 # Testing GDB's implementation of ASSUMED RANK arrays.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile ".f90"
 load_lib fortran.exp

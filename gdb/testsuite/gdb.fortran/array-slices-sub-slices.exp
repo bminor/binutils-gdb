@@ -15,7 +15,7 @@
 
 # Create a slice of an array, then take a slice of that slice.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile ".f90"
 load_lib fortran.exp

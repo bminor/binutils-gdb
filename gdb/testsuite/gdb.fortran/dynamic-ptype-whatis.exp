@@ -16,7 +16,7 @@
 # Test using whatis and ptype on different configurations of dynamic
 # types.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile ".f90"
 load_lib fortran.exp

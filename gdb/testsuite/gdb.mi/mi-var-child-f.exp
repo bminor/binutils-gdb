@@ -19,7 +19,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 load_lib "fortran.exp"
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 gdb_exit
 if [mi_gdb_start] {

@@ -18,7 +18,7 @@
 # This file is part of the gdb testsuite.  It contains test for printing
 # the elements of an array which is passed as pointer to a subroutine.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile .f
 

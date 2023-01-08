@@ -15,7 +15,7 @@
 
 # Further testing of placing breakpoints in nested subroutines.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 load_lib "fortran.exp"
 
 standard_testfile ".f90"

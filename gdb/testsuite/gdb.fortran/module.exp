@@ -15,7 +15,7 @@
 
 load_lib "fortran.exp"
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile .f90
 

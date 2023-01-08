@@ -21,7 +21,7 @@
 # outputs nameless DW_TAG_module, unlike with gfortran which just
 # doesn't emit DW_TAG_module in this case.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile .f
 load_lib "fortran.exp"

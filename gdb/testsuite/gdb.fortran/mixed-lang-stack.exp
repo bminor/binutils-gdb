@@ -23,7 +23,7 @@
 # each case to ensure that trying to print objects or types from one
 # language, while GDB's language is set to another, doesn't crash GDB.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 standard_testfile mixed-lang-stack.c mixed-lang-stack.cpp mixed-lang-stack.f90
 

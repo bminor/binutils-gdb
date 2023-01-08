@@ -2403,10 +2403,10 @@ proc allow_stl_tests {} {
     return [allow_cplus_tests]
 }
 
-# Return a 1 if I don't even want to try to test FORTRAN.
+# Return a 1 if I want to try to test FORTRAN.
 
-proc skip_fortran_tests {} {
-    return 0
+proc allow_fortran_tests {} {
+    return 1
 }
 
 # Return a 1 if I want to try to test ada.

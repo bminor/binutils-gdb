@@ -15,7 +15,7 @@
 
 # Test -symbol-info-modules, listing Fortran modules.
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 load_lib fortran.exp
 load_lib mi-support.exp

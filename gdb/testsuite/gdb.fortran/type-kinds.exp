@@ -19,7 +19,7 @@
 
 load_lib "fortran.exp"
 
-require !skip_fortran_tests
+require allow_fortran_tests
 
 # Cast the value 1 to the type 'BASE_TYPE (kind=TYPE_KIND)'.  The
 # expected result of the cast is CAST_RESULT, and the size of the
