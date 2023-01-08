@@ -19,7 +19,7 @@
 
 load_lib opencl.exp
 
-require !skip_opencl_tests
+require allow_opencl_tests
 
 set testfile "operators"
 set clprogram [remote_download target ${srcdir}/${subdir}/${testfile}.cl]
