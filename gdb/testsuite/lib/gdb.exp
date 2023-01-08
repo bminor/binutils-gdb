@@ -3699,16 +3699,16 @@ gdb_caching_proc skip_tsx_tests {
     return $skip_tsx_tests
 }
 
-# Run a test on the target to see if it supports avx512bf16.  Return 0 if so,
-# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+# Run a test on the target to see if it supports avx512bf16.  Return 1 if so,
+# 0 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
-gdb_caching_proc skip_avx512bf16_tests {
+gdb_caching_proc allow_avx512bf16_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    set me "skip_avx512bf16_tests"
+    set me "allow_avx512bf16_tests"
     if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
-        verbose "$me:  target does not support avx512bf16, returning 1" 2
-        return 1
+	verbose "$me:  target does not support avx512bf16, returning 0" 2
+	return 0
     }
 
     # Compile a test program.
@@ -3719,7 +3719,7 @@ gdb_caching_proc skip_avx512bf16_tests {
         }
     }
     if {![gdb_simple_compile $me $src executable]} {
-        return 1
+	return 0
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -3732,22 +3732,22 @@ gdb_caching_proc skip_avx512bf16_tests {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "$me:  avx512bf16 hardware not detected."
-            set skip_avx512bf16_tests 1
+	    set allow_avx512bf16_tests 0
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "$me:  avx512bf16 hardware detected."
-            set skip_avx512bf16_tests 0
+	    set allow_avx512bf16_tests 1
         }
         default {
             warning "\n$me:  default case taken."
-            set skip_avx512bf16_tests 1
+	    set allow_avx512bf16_tests 0
         }
     }
     gdb_exit
     remote_file build delete $obj
 
-    verbose "$me:  returning $skip_avx512bf16_tests" 2
-    return $skip_avx512bf16_tests
+    verbose "$me:  returning $allow_avx512bf16_tests" 2
+    return $allow_avx512bf16_tests
 }
 
 # Run a test on the target to see if it supports avx512fp16.  Return 0 if so,
