@@ -2415,10 +2415,10 @@ proc allow_ada_tests {} {
     return 1
 }
 
-# Return a 1 if I don't even want to try to test GO.
+# Return a 1 if I want to try to test GO.
 
-proc skip_go_tests {} {
-    return 0
+proc allow_go_tests {} {
+    return 1
 }
 
 # Return a 1 if I even want to try to test D.

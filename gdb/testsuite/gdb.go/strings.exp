@@ -17,7 +17,7 @@
 
 load_lib "go.exp"
 
-require !skip_go_tests support_go_compile
+require allow_go_tests support_go_compile
 
 standard_testfile .go
 

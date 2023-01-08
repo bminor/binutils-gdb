@@ -20,7 +20,7 @@
 
 load_lib "go.exp"
 
-require !skip_go_tests
+require allow_go_tests
 
 proc test_float_accepted {} {
     global gdb_prompt
