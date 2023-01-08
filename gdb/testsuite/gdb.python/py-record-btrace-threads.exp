@@ -17,7 +17,7 @@
 
 load_lib gdb-python.exp
 
-require !skip_btrace_tests !skip_python_tests
+require allow_btrace_tests !skip_python_tests
 
 standard_testfile
 

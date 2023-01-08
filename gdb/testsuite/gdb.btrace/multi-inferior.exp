@@ -22,7 +22,7 @@
 #
 # Each inferior can be recorded separately.
 
-require !skip_btrace_tests
+require allow_btrace_tests
 
 require !use_gdb_stub
 

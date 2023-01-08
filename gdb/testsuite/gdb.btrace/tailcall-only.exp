@@ -20,7 +20,7 @@
 # calls.  This used to cause a crash in get_frame_type.
 #
 
-require !skip_btrace_tests
+require allow_btrace_tests
 
 # This test requires the compiler to generate a tail call.  To guarantee that
 # we always get one, we use an assembly source file.

@@ -20,7 +20,7 @@
 #
 # Test that we can access the vdso memory during replay for stepping.
 
-require !skip_btrace_tests
+require allow_btrace_tests
 
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile $srcfile] {

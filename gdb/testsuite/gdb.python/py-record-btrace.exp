@@ -17,7 +17,7 @@
 
 # Skip this test if btrace is disabled.
 
-require !skip_btrace_tests !skip_python_tests
+require allow_btrace_tests !skip_python_tests
 
 load_lib gdb-python.exp
 
