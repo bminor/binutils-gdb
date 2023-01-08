@@ -16,7 +16,7 @@
 # Test for subtype definitions, i.e., types defined in classes, functions,
 # etc.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib "cp-support.exp"
 

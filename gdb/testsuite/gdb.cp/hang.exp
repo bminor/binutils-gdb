@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile hang1.cc hang2.cc hang3.cc
 

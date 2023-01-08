@@ -19,7 +19,7 @@
 # about the field or baseclass being ambiguous is emitted at the right
 # times.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

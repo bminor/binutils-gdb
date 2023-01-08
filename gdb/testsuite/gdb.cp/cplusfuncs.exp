@@ -16,7 +16,7 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # Adapted for g++ 3.0 ABI by Michael Chastain. (chastain@redhat.com)
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

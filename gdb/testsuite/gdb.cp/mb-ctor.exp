@@ -16,7 +16,7 @@
 # Test that breakpoints on C++ constructors work, despite the
 # fact that gcc generates several versions of constructor function.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 
 standard_testfile .cc

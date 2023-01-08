@@ -17,7 +17,7 @@
 # exposing rvalue reference values to Python.  It is based on
 # gdb.python/py-value-cc.exp.
 
-require !skip_cplus_tests !skip_python_tests
+require allow_cplus_tests !skip_python_tests
 
 standard_testfile .cc
 

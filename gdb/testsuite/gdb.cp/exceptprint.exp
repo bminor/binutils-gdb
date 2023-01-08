@@ -15,7 +15,7 @@
 
 standard_testfile .cc
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1

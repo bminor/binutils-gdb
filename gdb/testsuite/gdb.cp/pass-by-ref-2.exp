@@ -25,7 +25,7 @@
 # - have inlined copy ctor
 # - have deleted destructor
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

@@ -58,7 +58,7 @@
 
 standard_testfile .cc
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 # CXX11_ABI specifies the value to define _GLIBCXX_USE_CXX11_ABI as.
 

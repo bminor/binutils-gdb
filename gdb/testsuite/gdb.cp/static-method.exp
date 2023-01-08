@@ -37,7 +37,7 @@ proc test_breakpoint {func result} {
     }
 }
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 # Tests for c++/12750
 standard_testfile .cc

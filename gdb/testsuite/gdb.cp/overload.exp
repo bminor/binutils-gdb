@@ -24,7 +24,7 @@ set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

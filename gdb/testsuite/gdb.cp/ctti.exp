@@ -21,7 +21,7 @@
 
 # Call to template instantiations.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile cttiadd.cc cttiadd1.cc cttiadd2.cc cttiadd3.cc
 

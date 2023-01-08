@@ -17,7 +17,7 @@
 
 # This contains tests for breakpoints in C++.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 #
 # test running programs

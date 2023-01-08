@@ -18,7 +18,7 @@
 
 load_lib gdb-guile.exp
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

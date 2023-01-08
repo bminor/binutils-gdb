@@ -17,7 +17,7 @@
 
 # C++11 rvalue reference type casting tests, based on gdb.cp/casts.exp.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

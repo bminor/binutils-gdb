@@ -15,7 +15,7 @@
 
 # Tests for explicit linespecs
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 set exefile $testfile

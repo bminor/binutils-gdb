@@ -20,7 +20,7 @@ set execfile $testfile
 set baseone base/one/thefile.cc
 set basetwo base/two/thefile.cc
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 if {[prepare_for_testing "failed to prepare" $execfile \
 	 [list $srcfile $baseone $basetwo] \

@@ -15,7 +15,7 @@
 
 # Tests for breakpoint on labels in methods.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

@@ -17,7 +17,7 @@
 
 # Test expressions in which variable names shadow tag names.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile var-tag.cc var-tag-2.cc var-tag-3.cc var-tag-4.cc
 

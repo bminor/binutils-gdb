@@ -16,7 +16,7 @@
 # Test a C++ reference marked with DW_OP_GNU_implicit_pointer.
 # The referenced value is a DW_AT_const_value.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib dwarf.exp
 

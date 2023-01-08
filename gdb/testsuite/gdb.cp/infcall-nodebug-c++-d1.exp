@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Only test C++ if we are able.  Always use C.
-require !skip_cplus_tests
+require allow_cplus_tests
 set lang {c++}
 
 set debug debug

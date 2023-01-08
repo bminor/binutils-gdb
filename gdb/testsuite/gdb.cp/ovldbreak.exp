@@ -28,7 +28,7 @@ set timeout 15
 # test running programs
 #
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

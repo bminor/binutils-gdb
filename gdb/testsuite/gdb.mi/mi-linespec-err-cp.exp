@@ -17,7 +17,7 @@
 # errors is generated when setting a breakpoint in a non-existent
 # file with a Windows-style logical drive names and C++.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

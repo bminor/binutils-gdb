@@ -16,7 +16,7 @@
 # Test a C++ reference marked with DW_OP_GNU_implicit_pointer.
 # The referenced value is a global variable whose location is a DW_OP_addr.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib dwarf.exp
 

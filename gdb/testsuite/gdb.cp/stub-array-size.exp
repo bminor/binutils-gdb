@@ -18,7 +18,7 @@
 # Test size of arrays of stubbed types (structures where the full definition
 # is not immediately available).
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc stub-array-size2.cc
 

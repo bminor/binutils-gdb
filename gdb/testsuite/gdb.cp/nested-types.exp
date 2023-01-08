@@ -19,7 +19,7 @@
 # the corresponding source file.  It then walks the nodes of this tree
 # to construct input suitable for passing to cp_test_ptype_class.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib "cp-support.exp"
 

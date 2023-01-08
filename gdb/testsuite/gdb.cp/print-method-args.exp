@@ -17,7 +17,7 @@
 
 # This test checks that a constructor and destructor are printed the same.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

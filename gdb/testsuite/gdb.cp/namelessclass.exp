@@ -20,7 +20,7 @@ load_lib dwarf.exp
 
 # Do not run in environments which do not support C++.
 # This test can only be run on x86-like targets which support DWARF.
-require dwarf2_support !skip_cplus_tests
+require dwarf2_support allow_cplus_tests
 
 if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
     return 0

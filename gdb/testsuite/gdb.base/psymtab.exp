@@ -24,7 +24,7 @@
 #
 
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile psymtab1.c psymtab2.c
 

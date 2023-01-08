@@ -20,7 +20,7 @@
 
 # This file is part of the gdb testsuite
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 #
 # test running programs

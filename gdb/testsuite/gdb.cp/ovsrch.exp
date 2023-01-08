@@ -52,7 +52,7 @@ proc test_class {class} {
     gdb_test "break ${class}::hibob if (a_param == 3)" "Breakpoint (\[0-9\]).*"
 }
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 # Test for c++/11734
 standard_testfile ovsrch1.cc ovsrch2.cc ovsrch3.cc ovsrch4.cc

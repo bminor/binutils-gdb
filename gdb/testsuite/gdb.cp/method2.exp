@@ -18,7 +18,7 @@
 # This tests setting a break in an ambiguous c++ method with
 # current_language set to c.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile .cc
 

@@ -20,7 +20,7 @@
 
 # Test returning bool.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 
 standard_testfile .cc

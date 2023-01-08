@@ -51,7 +51,7 @@ proc test_class_complete {class expr name matches} {
     }
 }
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile pr9594.cc
 

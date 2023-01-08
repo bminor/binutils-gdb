@@ -18,7 +18,7 @@
 
 # This file is part of the gdb testsuite
 
-require !skip_stl_tests
+require allow_stl_tests
 
 #
 # test running programs

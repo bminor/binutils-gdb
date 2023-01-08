@@ -176,7 +176,7 @@
 #
 
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile psmang1.cc psmang2.cc
 

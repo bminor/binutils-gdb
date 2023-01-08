@@ -16,7 +16,7 @@
 # Test that children of classes are properly reported.  Regression
 # test for gdb/792.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

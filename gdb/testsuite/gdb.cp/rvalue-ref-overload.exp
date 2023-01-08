@@ -18,7 +18,7 @@
 # Tests for overloaded member functions with rvalue reference parameters,
 # based on gdb.cp/overload.exp.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 load_lib "cp-support.exp"
 

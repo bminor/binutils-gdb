@@ -15,7 +15,7 @@
 
 # Test the detection and printing of repeated elements in C++ arrays.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 set lang c++
 

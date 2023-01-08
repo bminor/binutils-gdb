@@ -135,7 +135,7 @@ proc do_test {lang} {
     set options {debug}
 
     if {$lang == "c++"} {
-	if { [skip_cplus_tests] } {
+	if { ![allow_cplus_tests] } {
 	    return
 	}
 	lappend options $lang

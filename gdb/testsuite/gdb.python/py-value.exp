@@ -664,7 +664,7 @@ test_value_after_death
 
 test_subscript_regression "${binfile}" "c"
 
-if ![skip_cplus_tests] {
+if {[allow_cplus_tests]} {
     if { [build_inferior "${binfile}-cxx" "c++"] < 0 } {
 	return -1
     }

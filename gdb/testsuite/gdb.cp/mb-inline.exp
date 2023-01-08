@@ -18,7 +18,7 @@
 # This test verifies that setting breakpoint on line in inline
 # function will fire in all instantiations of that function.
 
-require !skip_cplus_tests
+require allow_cplus_tests
 
 standard_testfile mb-inline1.cc mb-inline2.cc
 set hdrfile "${testfile}.h"

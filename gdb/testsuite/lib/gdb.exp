@@ -2379,29 +2379,28 @@ proc gdb_compile_test {src output} {
     fail "$msg"
 }
 
-# Return a 1 for configurations for which we don't even want to try to
-# test C++.
+# Return a 1 for configurations for which we want to try to test C++.
 
-proc skip_cplus_tests {} {
+proc allow_cplus_tests {} {
     if { [istarget "h8300-*-*"] } {
-	return 1
+	return 0
     }
 
     # The C++ IO streams are too large for HC11/HC12 and are thus not
     # available.  The gdb C++ tests use them and don't compile.
     if { [istarget "m6811-*-*"] } {
-	return 1
+	return 0
     }
     if { [istarget "m6812-*-*"] } {
-	return 1
+	return 0
     }
-    return 0
+    return 1
 }
 
-# Return a 1 for configurations for which don't have both C++ and the STL.
+# Return a 0 for configurations which are missing either C++ or the STL.
 
-proc skip_stl_tests {} {
-    return [skip_cplus_tests]
+proc allow_stl_tests {} {
+    return [allow_cplus_tests]
 }
 
 # Return a 1 if I don't even want to try to test FORTRAN.

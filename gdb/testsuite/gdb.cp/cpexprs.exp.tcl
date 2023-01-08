@@ -678,7 +678,7 @@ add {policyd5::function} \
     {operation_1<T>::function}
 
 # Start the test
-if {[skip_cplus_tests]} { continue }
+if {![allow_cplus_tests]} { continue }
 
 #
 # test running programs

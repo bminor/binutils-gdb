@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Only test C++ if we are able.
-require !skip_cplus_tests
+require allow_cplus_tests
 set lang c++
 
 source $srcdir/$subdir/max-depth.exp.tcl
