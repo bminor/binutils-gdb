@@ -21,7 +21,7 @@
 # We test that GDB shows the correct number of instances of the libraries
 # the test loaded while unloading them one-by-one.
 
-require !skip_dlmopen_tests
+require allow_dlmopen_tests
 
 standard_testfile
 

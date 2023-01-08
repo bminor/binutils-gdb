@@ -2476,17 +2476,17 @@ proc skip_shlib_tests {} {
     return 1
 }
 
-# Return 1 if we should skip dlmopen tests, 0 if we should not.
+# Return 1 if we should run dlmopen tests, 0 if we should not.
 
-gdb_caching_proc skip_dlmopen_tests {
+gdb_caching_proc allow_dlmopen_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
     # We need shared library support.
     if { [skip_shlib_tests] } {
-	return 1
+	return 0
     }
 
-    set me "skip_dlmopen_tests"
+    set me "allow_dlmopen_tests"
     set lib {
 	int foo (void) {
 	    return 42;
@@ -2536,13 +2536,13 @@ gdb_caching_proc skip_dlmopen_tests {
 
     if { [gdb_compile_shlib $libsrc $libout {debug}] != "" } {
 	verbose -log "failed to build library"
-	return 1
+	return 0
     }
     if { ![gdb_simple_compile $me $src executable \
 	       [list shlib_load debug \
 		    additional_flags=-DDSO_NAME=\"$libout\"]] } {
 	verbose -log "failed to build executable"
-        return 1
+	return 0
     }
 
     gdb_exit
@@ -2552,24 +2552,24 @@ gdb_caching_proc skip_dlmopen_tests {
 
     if { [gdb_run_cmd] != 0 } {
 	verbose -log "failed to start skip test"
-	return 1
+	return 0
     }
     gdb_expect {
         -re "$inferior_exited_re normally.*${gdb_prompt} $" {
-            set skip_dlmopen_tests 0
+	    set allow_dlmopen_tests 1
         }
         -re "$inferior_exited_re with code.*${gdb_prompt} $" {
-            set skip_dlmopen_tests 1
+	    set allow_dlmopen_tests 0
         }
         default {
 	    warning "\n$me: default case taken"
-            set skip_dlmopen_tests 1
+	    set allow_dlmopen_tests 0
         }
     }
     gdb_exit
 
-    verbose "$me:  returning $skip_dlmopen_tests" 2
-    return $skip_dlmopen_tests
+    verbose "$me:  returning $allow_dlmopen_tests" 2
+    return $allow_dlmopen_tests
 }
 
 # Return 1 if we should skip tui related tests.
