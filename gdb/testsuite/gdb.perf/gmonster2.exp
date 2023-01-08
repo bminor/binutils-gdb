@@ -36,7 +36,7 @@
 load_lib perftest.exp
 load_lib gen-perf-test.exp
 
-require !skip_perf_tests
+require allow_perf_tests
 
 if ![info exists MONSTER] {
     set MONSTER "n"

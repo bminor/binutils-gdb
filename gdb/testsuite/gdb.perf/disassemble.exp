@@ -17,7 +17,7 @@
 # some large functions in GDB.
 load_lib perftest.exp
 
-require !skip_perf_tests
+require allow_perf_tests
 
 global GDB
 

@@ -20,6 +20,6 @@
 load_lib perftest.exp
 load_lib gen-perf-test.exp
 
-require !skip_perf_tests
+require allow_perf_tests
 
 GenPerfTest::standard_run_driver gmonster2.exp make_testcase_config gmonster-null-lookup.py NullLookup

@@ -25,7 +25,7 @@
 
 load_lib perftest.exp
 
-require !skip_perf_tests
+require allow_perf_tests
 
 standard_testfile .cc skip-funcs.cc
 set executable $testfile
