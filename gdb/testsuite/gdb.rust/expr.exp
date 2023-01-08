@@ -17,7 +17,7 @@
 # Rust compiler.  This serves as a smoke test.
 
 load_lib "rust-support.exp"
-require !skip_rust_tests
+require allow_rust_tests
 
 gdb_start
 

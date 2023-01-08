@@ -16,7 +16,7 @@
 # Test of "union" for Rust.
 
 load_lib rust-support.exp
-require !skip_rust_tests
+require allow_rust_tests
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {

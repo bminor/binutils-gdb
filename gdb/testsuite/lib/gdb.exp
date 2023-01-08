@@ -2427,10 +2427,10 @@ proc allow_d_tests {} {
     return 1
 }
 
-# Return 1 to skip Rust tests, 0 to try them.
-proc skip_rust_tests {} {
+# Return 1 to try Rust tests, 0 to skip them.
+proc allow_rust_tests {} {
     if { ![isnative] } {
-	return 1
+	return 0
     }
 
     # The rust compiler does not support "-m32", skip.
@@ -2439,12 +2439,12 @@ proc skip_rust_tests {} {
     if {[board_info $board exists multilib_flags]} {
 	foreach flag [board_info $board multilib_flags] {
 	    if { $flag == "-m32" } {
-		return 1
+		return 0
 	    }
 	}
     }
 
-    return 0
+    return 1
 }
 
 # Return a 1 for configurations that support Python scripting.

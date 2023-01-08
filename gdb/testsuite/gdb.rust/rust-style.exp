@@ -16,7 +16,7 @@
 # Test CLI output styling for Rust.
 
 load_lib rust-support.exp
-require !skip_rust_tests
+require allow_rust_tests
 
 save_vars { env(TERM) } {
     # We need an ANSI-capable terminal to get the output.

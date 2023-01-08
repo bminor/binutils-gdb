@@ -16,7 +16,7 @@
 # Test raw identifiers.
 
 load_lib rust-support.exp
-require !skip_rust_tests
+require allow_rust_tests
 
 # Non-ASCII identifiers were allowed starting in 1.53.
 set v [split [rust_compiler_version] .]

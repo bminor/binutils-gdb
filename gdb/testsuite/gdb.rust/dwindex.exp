@@ -16,7 +16,7 @@
 # Test that a rustc-produced .debug_aranges can be read.
 
 load_lib rust-support.exp
-require !skip_rust_tests
+require allow_rust_tests
 
 standard_testfile .rs
 
