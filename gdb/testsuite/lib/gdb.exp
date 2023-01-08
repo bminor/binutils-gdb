@@ -4017,13 +4017,13 @@ proc skip_inline_var_tests {} {
     return 0
 }
 
-# Return a 1 if we should skip tests that require hardware breakpoints
+# Return a 1 if we should run tests that require hardware breakpoints
 
-proc skip_hw_breakpoint_tests {} {
+proc allow_hw_breakpoint_tests {} {
     # Skip tests if requested by the board (note that no_hardware_watchpoints
     # disables both watchpoints and breakpoints)
     if { [target_info exists gdb,no_hardware_watchpoints]} {
-	return 1
+	return 0
     }
 
     # These targets support hardware breakpoints natively
@@ -4033,10 +4033,10 @@ proc skip_hw_breakpoint_tests {} {
 	 || [istarget "arm*-*-*"]
 	 || [istarget "aarch64*-*-*"]
 	 || [istarget "s390*-*-*"] } {
-	return 0
+	return 1
     }
 
-    return 1
+    return 0
 }
 
 # Return a 1 if we should run tests that require hardware watchpoints

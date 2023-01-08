@@ -18,9 +18,7 @@
 # breakpoint locations as duplicate locations, which would lead to bad
 # behavior.  See PR gdb/25741.
 
-if {[skip_hw_breakpoint_tests]} {
-    return 0
-}
+require allow_hw_breakpoint_tests
 
 set test hbreak
 set srcfile ${test}.c

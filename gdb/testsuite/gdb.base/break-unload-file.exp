@@ -149,7 +149,7 @@ foreach initial_load { "cmdline" "file" } {
     # coverage.
     foreach always_inserted { "off" "on" } {
 	test_break $initial_load $always_inserted "break"
-	if {![skip_hw_breakpoint_tests]} {
+	if {[allow_hw_breakpoint_tests]} {
 	    test_break $initial_load $always_inserted "hbreak"
 	}
     }
