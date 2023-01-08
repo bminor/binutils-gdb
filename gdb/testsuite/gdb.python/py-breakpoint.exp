@@ -26,7 +26,7 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 load_lib gdb-python.exp
 
-require !skip_python_tests
+require allow_python_tests
 
 standard_testfile
 

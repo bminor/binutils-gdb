@@ -18,7 +18,7 @@
 
 standard_testfile
 
-require !skip_python_tests
+require allow_python_tests
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1

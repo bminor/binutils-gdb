@@ -19,7 +19,7 @@
 
 load_lib gdb-python.exp
 
-require !skip_python_tests
+require allow_python_tests
 
 standard_testfile -main.cc
 

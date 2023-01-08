@@ -20,7 +20,7 @@
 
 standard_testfile
 
-require can_spawn_for_attach !skip_python_tests
+require can_spawn_for_attach allow_python_tests
 
 load_lib gdb-python.exp
 

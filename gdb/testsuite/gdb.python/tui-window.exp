@@ -16,7 +16,7 @@
 # Test a TUI window implemented in Python.
 
 load_lib gdb-python.exp
-require !skip_python_tests
+require allow_python_tests
 tuiterm_env
 
 # This test doesn't care about the inferior.

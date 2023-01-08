@@ -611,7 +611,7 @@ set show_conv_list \
 	{$_shell_exitsignal = void} \
 	{$_shell_exitcode = 0} \
     }
-if ![skip_python_tests] {
+if [allow_python_tests] {
     append show_conv_list \
 	{
 	    {$_memeq = <internal function _memeq>} \

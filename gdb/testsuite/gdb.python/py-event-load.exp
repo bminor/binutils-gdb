@@ -18,7 +18,7 @@
 
 load_lib gdb-python.exp
 
-require !skip_shlib_tests !skip_python_tests
+require !skip_shlib_tests allow_python_tests
 
 if {[get_compiler_info]} {
     warning "Could not get compiler info"

@@ -17,7 +17,7 @@
 # symbol (i.e. a symbol for a goto label).
 
 load_lib gdb-python.exp
-require !skip_python_tests
+require allow_python_tests
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {

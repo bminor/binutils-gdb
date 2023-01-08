@@ -72,7 +72,7 @@ proc check_thread_local {number} {
 	    "= $expected_value" \
 	    "${number} thread local storage"
 
-    if {![skip_python_tests]} {
+    if {[allow_python_tests]} {
 	gdb_test_no_output \
 	    "python sym = gdb.lookup_symbol('a_thread_local')\[0\]" \
 	    "${number} look up a_thread_local symbol"

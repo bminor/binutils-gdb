@@ -471,7 +471,7 @@ proc test_startup_version_string { } {
 # expected or not, this styling requires Python support in GDB, and
 # the Python pygments module to be available.
 clean_restart ${binfile}
-if {![skip_python_tests] && [gdb_py_module_available "pygments"]} {
+if {[allow_python_tests] && [gdb_py_module_available "pygments"]} {
     set python_disassembly_styling true
 } else {
     set python_disassembly_styling false

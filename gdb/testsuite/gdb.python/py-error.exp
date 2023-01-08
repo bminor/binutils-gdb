@@ -20,7 +20,7 @@ set testfile "py-error"
 
 load_lib gdb-python.exp
 
-require !skip_python_tests
+require allow_python_tests
 
 # Start with a fresh gdb.
 gdb_exit

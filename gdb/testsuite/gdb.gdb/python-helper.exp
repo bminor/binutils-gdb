@@ -24,7 +24,7 @@ if [target_info exists gdb,noinferiorio] {
     return
 }
 
-require !skip_python_tests
+require allow_python_tests
 
 standard_testfile .cc
 

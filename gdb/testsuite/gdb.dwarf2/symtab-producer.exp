@@ -17,7 +17,7 @@ load_lib dwarf.exp
 load_lib gdb-python.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-require dwarf2_support !skip_python_tests
+require dwarf2_support allow_python_tests
 
 standard_testfile main.c -dw.S
 

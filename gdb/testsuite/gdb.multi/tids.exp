@@ -415,7 +415,7 @@ with_test_prefix "two inferiors" {
 	"No threads match '3.1'\."
 }
 
-if { ![skip_python_tests] } {
+if { [allow_python_tests] } {
     with_test_prefix "python" {
 	# Check that InferiorThread.num and InferiorThread.global_num
 	# return the expected numbers.

@@ -17,7 +17,7 @@
 
 standard_testfile -a.c -b.c
 
-require !skip_python_tests
+require allow_python_tests
 
 if { [prepare_for_testing "failed to prepare" "compare-enum-type" \
 	  [list $srcfile $srcfile2]] } {

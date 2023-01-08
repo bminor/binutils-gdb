@@ -78,7 +78,7 @@ foreach_with_prefix scenario {all minimal} {
 	"print second array slice"
 
     # This is only supported for the DWARF encoding.
-    if {$scenario == "minimal" && ![skip_python_tests]} {
+    if {$scenario == "minimal" && [allow_python_tests]} {
 	gdb_test_no_output \
 	    "python o = gdb.parse_and_eval('objects')" \
 	    "fetch value for python"

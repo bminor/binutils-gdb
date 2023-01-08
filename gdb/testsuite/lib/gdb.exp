@@ -2447,11 +2447,11 @@ proc skip_rust_tests {} {
     return 0
 }
 
-# Return a 1 for configurations that do not support Python scripting.
+# Return a 1 for configurations that support Python scripting.
 
-gdb_caching_proc skip_python_tests {
+gdb_caching_proc allow_python_tests {
     set output [remote_exec host $::GDB --configuration]
-    return [expr {[string first "--with-python" $output] == -1}]
+    return [expr {[string first "--with-python" $output] != -1}]
 }
 
 # Return a 1 if we should skip shared library tests.

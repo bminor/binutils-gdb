@@ -18,7 +18,7 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-require !skip_python_tests
+require allow_python_tests
 
 #
 # Start here

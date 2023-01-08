@@ -351,7 +351,7 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
   restart_gdb "${binfile}"
 
   # Skip all tests if Python scripting is not enabled.
-  if { [skip_python_tests] } { continue }
+  if { ![allow_python_tests] } { continue }
 
   gdb_test "python print (gdb.lookup_type ('char').objfile)" "None"
 

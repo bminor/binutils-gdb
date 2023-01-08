@@ -386,7 +386,7 @@ gdb_test "print empty_enum_value.0" ""
 gdb_test "print empty_enum_value.something" ""
 
 load_lib gdb-python.exp
-if {[skip_python_tests]} {
+if {![allow_python_tests]} {
     return
 }
 

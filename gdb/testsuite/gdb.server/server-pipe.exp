@@ -66,7 +66,7 @@ proc do_test { target } {
 
     gdb_test "info connections" "${target} \| ${::gdbserver} - ${::binfile} \[^\r\n\]+"
 
-    if { ![skip_python_tests] } {
+    if { [allow_python_tests] } {
 	gdb_test_no_output "python conn = gdb.selected_inferior().connection"
 	gdb_test "python print(conn.details)" "\| ${::gdbserver} - ${::binfile}"
     }

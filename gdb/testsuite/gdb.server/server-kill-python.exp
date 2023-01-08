@@ -23,7 +23,7 @@ load_lib gdbserver-support.exp
 
 standard_testfile multi-ui-errors.c
 
-require allow_gdbserver_tests !skip_python_tests
+require allow_gdbserver_tests allow_python_tests
 
 if {[build_executable "failed to prepare" ${testfile} \
 	 ${srcfile}] == -1} {

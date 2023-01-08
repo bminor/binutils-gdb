@@ -31,7 +31,7 @@ save_vars { env(TERM) } {
 	return -1
     }
 
-    if { [skip_python_tests] } { continue }
+    if { ![allow_python_tests] } { continue }
 
     if { ![gdb_py_module_available "pygments"] } {
 	unsupported "pygments module not available"

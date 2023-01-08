@@ -36,7 +36,7 @@
 
 standard_testfile .c
 
-require !skip_python_tests
+require allow_python_tests
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1

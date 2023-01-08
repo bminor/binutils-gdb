@@ -17,7 +17,7 @@
 
 # Skip this test if target does not support recording.
 
-require supports_process_record !skip_python_tests
+require supports_process_record allow_python_tests
 
 load_lib gdb-python.exp
 

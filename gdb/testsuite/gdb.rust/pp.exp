@@ -17,7 +17,7 @@
 
 load_lib gdb-python.exp
 load_lib rust-support.exp
-require !skip_rust_tests !skip_python_tests
+require !skip_rust_tests allow_python_tests
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {

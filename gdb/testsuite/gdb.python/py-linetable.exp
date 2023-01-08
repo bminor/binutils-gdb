@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 load_lib gdb-python.exp
-require !skip_python_tests
+require allow_python_tests
 set opts {}
 standard_testfile .S
 

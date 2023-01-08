@@ -16,7 +16,7 @@
 # Test the flags within GDB that can be used to control how Python is
 # initialized.
 
-require !skip_python_tests
+require allow_python_tests
 
 # Return a list containing two directory paths for newly created home
 # directories.

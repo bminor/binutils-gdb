@@ -17,7 +17,7 @@ set testfile "py-completion"
 
 load_lib gdb-python.exp
 
-require !skip_python_tests
+require allow_python_tests
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 set discard 0

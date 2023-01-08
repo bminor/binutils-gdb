@@ -219,7 +219,7 @@ proc jit_reader_test {} {
 		    "cannot assign to register"
 	    }
 
-	    if { ![skip_python_tests] } {
+	    if { [allow_python_tests] } {
 		gdb_test "python print(gdb.objfiles())" \
 		    "$any<gdb.Objfile filename=<< JIT compiled code at $hex >>>$any" \
 		    "python gdb.Objfile.__repr__ ()"
@@ -263,7 +263,7 @@ proc jit_reader_test {} {
 		]
     }
 
-    if {![skip_python_tests]} {
+    if {[allow_python_tests]} {
 	gdb_test "python print(any(\[not x.is_file for x in gdb.objfiles()\]))" \
 	    "True" \
 	    "at least one non-file objfile"
