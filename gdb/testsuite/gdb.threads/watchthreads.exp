@@ -20,7 +20,7 @@
 
 # This test verifies that a watchpoint is detected in the proper thread
 # so the test is only meaningful on a system with hardware watchpoints.
-require !skip_hw_watchpoint_multi_tests
+require allow_hw_watchpoint_multi_tests
 
 proc target_no_stopped_data { } {
     return [istarget s390*-*-*]

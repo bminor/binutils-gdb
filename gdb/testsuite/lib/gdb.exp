@@ -4064,21 +4064,21 @@ proc skip_hw_watchpoint_tests {} {
     return 1
 }
 
-# Return a 1 if we should skip tests that require *multiple* hardware
+# Return a 1 if we should run tests that require *multiple* hardware
 # watchpoints to be active at the same time
 
-proc skip_hw_watchpoint_multi_tests {} {
+proc allow_hw_watchpoint_multi_tests {} {
     if { [skip_hw_watchpoint_tests] } {
-	return 1
+	return 0
     }
 
     # These targets support just a single hardware watchpoint
     if { [istarget "arm*-*-*"]
 	 || [istarget "powerpc*-*-linux*"] } {
-	return 1
+	return 0
     }
 
-    return 0
+    return 1
 }
 
 # Return a 1 if we should run tests that require read/access watchpoints

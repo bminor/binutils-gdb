@@ -25,7 +25,7 @@
 # could be assigned during continuation of a thread with pending SIGTRAP to the
 # different/new watchpoint, just based on the watchpoint/debug register number.
 
-require allow_hw_watchpoint_access_tests !skip_hw_watchpoint_multi_tests
+require allow_hw_watchpoint_access_tests allow_hw_watchpoint_multi_tests
 if {![istarget *-*-linux*]} {
     return 0
 }

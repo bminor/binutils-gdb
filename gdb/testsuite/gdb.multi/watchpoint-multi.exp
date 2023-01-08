@@ -62,7 +62,7 @@ gdb_breakpoint "marker_exit"
 
 gdb_test "inferior 1" "witching to inferior 1 .*" "switch back to inferior 1"
 
-if [skip_hw_watchpoint_multi_tests] {
+if {![allow_hw_watchpoint_multi_tests]} {
     # On single hardware watchpoint at least test the watchpoint in inferior
     # 2 is not hit.
 } else {
