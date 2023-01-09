@@ -8967,7 +8967,17 @@ if ${gdb_cv_cxx_std_thread+:} false; then :
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <thread>
+  #if defined (__MINGW32__) || defined (__CYGWIN__)
+    # ifdef _WIN32_WINNT
+    #  if _WIN32_WINNT < 0x0501
+    #   undef _WIN32_WINNT
+    #   define _WIN32_WINNT 0x0501
+    #  endif
+    # else
+    #  define _WIN32_WINNT 0x0501
+    # endif
+    #endif	/* __MINGW32__ || __CYGWIN__ */
+    #include <thread>
     void callback() { }
 int
 main ()
