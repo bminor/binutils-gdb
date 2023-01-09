@@ -100,7 +100,18 @@ AC_DEFUN([GDB_AC_COMMON], [
   AC_CACHE_CHECK([for std::thread],
 		 gdb_cv_cxx_std_thread,
 		 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-  [[#include <thread>
+  dnl NOTE: this must be kept in sync with common-defs.h.
+  [[#if defined (__MINGW32__) || defined (__CYGWIN__)
+    # ifdef _WIN32_WINNT
+    #  if _WIN32_WINNT < 0x0501
+    #   undef _WIN32_WINNT
+    #   define _WIN32_WINNT 0x0501
+    #  endif
+    # else
+    #  define _WIN32_WINNT 0x0501
+    # endif
+    #endif	/* __MINGW32__ || __CYGWIN__ */
+    #include <thread>
     void callback() { }]],
   [[std::thread t(callback);]])],
 				gdb_cv_cxx_std_thread=yes,
