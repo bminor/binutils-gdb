@@ -2502,7 +2502,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		  if ((off & 1) != 0)
 		    off &= ~1;
-		  else
+		  /* If h has processed (h->got.offset |= 1) or h is hideen
+		     ifunc (h->got.offset == -1), skip it. Hidden ifunc symbol
+		     not has got entry, only has got.plt entry.  */
+		  else if ((h->got.offset & 1) == 0)
 		    {
 		      /* The pr21964-4. Create relocate entry.  */
 		      if (is_pic && h->start_stop)
