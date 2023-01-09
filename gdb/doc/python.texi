@@ -3187,7 +3187,7 @@ MyClass obj(5);
 
 @noindent
 then, after loading the Python script defining the xmethod matchers
-and workers into @code{GDBN}, invoking the method @code{geta} or using
+and workers into @value{GDBN}, invoking the method @code{geta} or using
 the operator @code{+} on @code{obj} will invoke the xmethods
 defined above:
 
