@@ -4690,23 +4690,35 @@ proc gdb_compile {source dest type options} {
 	set new_options [universal_compile_options]
     }
 
-    # Some C/C++ testcases unconditionally pass -Wno-foo as additional
-    # options to disable some warning.  That is OK with GCC, because
-    # by design, GCC accepts any -Wno-foo option, even if it doesn't
-    # support -Wfoo.  Clang however warns about unknown -Wno-foo by
-    # default, unless you pass -Wno-unknown-warning-option as well.
-    # We do that here, so that individual testcases don't have to
-    # worry about it.
+    # C/C++ specific settings.
     if {!$getting_compiler_info
 	&& [lsearch -exact $options rust] == -1
 	&& [lsearch -exact $options ada] == -1
 	&& [lsearch -exact $options f90] == -1
 	&& [lsearch -exact $options go] == -1} {
+
+	# Some C/C++ testcases unconditionally pass -Wno-foo as additional
+	# options to disable some warning.  That is OK with GCC, because
+	# by design, GCC accepts any -Wno-foo option, even if it doesn't
+	# support -Wfoo.  Clang however warns about unknown -Wno-foo by
+	# default, unless you pass -Wno-unknown-warning-option as well.
+	# We do that here, so that individual testcases don't have to
+	# worry about it.
 	if {[test_compiler_info "clang-*"] || [test_compiler_info "icx-*"]} {
 	    lappend new_options "additional_flags=-Wno-unknown-warning-option"
 	} elseif {[test_compiler_info "icc-*"]} {
 	    # This is the equivalent for the icc compiler.
 	    lappend new_options "additional_flags=-diag-disable=10148"
+	}
+
+	# Starting with 2021.7.0 (recognized as icc-20-21-7 by GDB) icc and
+	# icpc are marked as deprecated and both compilers emit the remark
+	# #10441.  To let GDB still compile successfully, we disable these
+	# warnings here.
+	if {([lsearch -exact $options c++] != -1
+	     && [test_compiler_info {icc-20-21-[7-9]} c++])
+	    || [test_compiler_info {icc-20-21-[7-9]}]} {
+	    lappend new_options "additional_flags=-diag-disable=10441"
 	}
     }
 
@@ -4976,6 +4988,17 @@ proc gdb_compile {source dest type options} {
 
     # Prune uninteresting compiler (and linker) output.
     regsub "Creating library file: \[^\r\n\]*\[\r\n\]+" $result "" result
+
+    # Starting with 2021.7.0 icc and icpc are marked as deprecated and both
+    # compilers emit a remark #10441.  To let GDB still compile successfully,
+    # we disable these warnings.  When $getting_compiler_info is true however,
+    # we do not yet know the compiler (nor its version) and instead prune these
+    # lines from the compiler output to let the get_compiler_info pass.
+    if {$getting_compiler_info} {
+	regsub \
+	    "(icc|icpc): remark #10441: The Intel\\(R\\) C\\+\\+ Compiler Classic \\(ICC\\) is deprecated\[^\r\n\]*" \
+	    "$result" "" result
+    }
 
     regsub "\[\r\n\]*$" "$result" "" result
     regsub "^\[\r\n\]*" "$result" "" result
