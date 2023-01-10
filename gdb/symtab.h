@@ -2608,9 +2608,6 @@ extern struct block_symbol
    compiler (armcc).  */
 bool producer_is_realview (const char *producer);
 
-void fixup_section (struct general_symbol_info *ginfo,
-		    CORE_ADDR addr, struct objfile *objfile);
-
 extern unsigned int symtab_create_debug;
 
 /* Print a "symtab-create" debug statement.  */

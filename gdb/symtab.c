@@ -1703,11 +1703,16 @@ symtab_free_objfile_observer (struct objfile *objfile)
 }
 
 /* Debug symbols usually don't have section information.  We need to dig that
-   out of the minimal symbols and stash that in the debug symbol.  */
+   out of the minimal symbols and stash that in the debug symbol.
 
-void
+   DEFAULT_SECTION is the section index to use as the default if the
+   correct section cannot be found.  It may be -1, in which case a
+   built-in default is used.  */
+
+static void
 fixup_section (struct general_symbol_info *ginfo,
-	       CORE_ADDR addr, struct objfile *objfile)
+	       CORE_ADDR addr, struct objfile *objfile,
+	       int default_section)
 {
   struct minimal_symbol *msym;
 
@@ -1758,7 +1763,7 @@ fixup_section (struct general_symbol_info *ginfo,
 	 a search of the section table.  */
 
       struct obj_section *s;
-      int fallback = -1;
+      int fallback = default_section;
 
       ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
@@ -1809,9 +1814,16 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   /* We should have an objfile by now.  */
   gdb_assert (objfile);
 
+  /* Note that if this ends up as -1, fixup_section will handle that
+     reasonably well.  So, it's fine to use the objfile's section
+     index without doing the check that is done by the wrapper macros
+     like SECT_OFF_TEXT.  */
+  int default_section = objfile->sect_index_text;
   switch (sym->aclass ())
     {
     case LOC_STATIC:
+      default_section = objfile->sect_index_data;
+      /* FALLTHROUGH.  */
     case LOC_LABEL:
       addr = sym->value_address ();
       break;
@@ -1825,7 +1837,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
       return sym;
     }
 
-  fixup_section (sym, addr, objfile);
+  fixup_section (sym, addr, objfile, default_section);
 
   return sym;
 }
