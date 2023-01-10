@@ -2714,7 +2714,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      /* This relocation gets optimized away by the local exec
 		 access optimization.  */
 	      BFD_ASSERT (! unresolved_reloc);
-	      bfd_put_64 (output_bfd, -tpoff (info, relocation),
+	      bfd_put_64 (output_bfd, -tpoff (info, relocation) + rel->r_addend,
 			  contents + rel->r_offset);
 	      continue;
 	    }
@@ -2907,7 +2907,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      BFD_ASSERT (! unresolved_reloc);
-	      bfd_put_64 (output_bfd, -tpoff (info, relocation),
+	      bfd_put_64 (output_bfd, -tpoff (info, relocation) + rel->r_addend,
 			  contents + rel->r_offset);
 	    }
 	  continue;
