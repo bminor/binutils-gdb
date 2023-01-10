@@ -174,20 +174,20 @@ software in general.  We will miss him.
 @end ifclear
 * In Memoriam::                 In Memoriam
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
-* Installing GDB::              Installing GDB
+* Installing GDB::              Installing @value{GDBN}
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
-* Agent Expressions::           The GDB Agent Expression Mechanism
+* Agent Expressions::           The @value{GDBN} Agent Expression Mechanism
 * Target Descriptions::         How targets can describe themselves to
                                 @value{GDBN}
 * Operating System Information:: Getting additional information from
                                  the operating system
-* Trace File Format::           GDB trace file format
+* Trace File Format::		@value{GDBN} trace file format
 * Index Section Format::        .gdb_index section format
 * Debuginfod::                  Download debugging resources with @code{debuginfod}
 * Man Pages::                   Manual pages
 * Copying::                     GNU General Public License says
-                                how you can copy and share GDB
+                                how you can copy and share @value{GDBN}
 * GNU Free Documentation License::  The license for this documentation
 * Concept Index::               Index of @value{GDBN} concepts
 * Command and Variable Index::  Index of @value{GDBN} commands, variables,
