@@ -11558,9 +11558,9 @@ code_breakpoint::say_where () const
 
       if (loc->next)
 	{
-	  struct bp_location *loc = loc;
+	  struct bp_location *iter = loc;
 	  int n = 0;
-	  for (; loc; loc = loc->next)
+	  for (; iter; iter = iter->next)
 	    ++n;
 	  gdb_printf (" (%d locations)", n);
 	}
