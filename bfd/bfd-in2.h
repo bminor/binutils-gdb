@@ -7105,6 +7105,11 @@ typedef void (*bfd_assert_handler_type) (const char *bfd_formatmsg,
 
 bfd_assert_handler_type bfd_set_assert_handler (bfd_assert_handler_type);
 
+unsigned int bfd_init (void);
+
+/* Value returned by bfd_init.  */
+#define BFD_INIT_MAGIC (sizeof (struct bfd_section))
+
 long bfd_get_reloc_upper_bound (bfd *abfd, asection *sect);
 
 long bfd_canonicalize_reloc
@@ -7255,11 +7260,6 @@ bfd_vma bfd_emul_get_maxpagesize (const char *);
 bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 char *bfd_demangle (bfd *, const char *, int);
-
-unsigned int bfd_init (void);
-
-/* Value returned by bfd_init.  */
-#define BFD_INIT_MAGIC (sizeof (struct bfd_section))
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
