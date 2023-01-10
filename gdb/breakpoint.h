@@ -898,6 +898,10 @@ protected:
        (location_spec *locspec,
 	struct program_space *search_pspace,
 	int *found);
+
+  /* Helper for breakpoint and tracepoint breakpoint->mention
+     callbacks.  */
+  void say_where () const;
 };
 
 /* An instance of this type is used to represent a watchpoint,

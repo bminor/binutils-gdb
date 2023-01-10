@@ -11496,11 +11496,10 @@ bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
   return 0;
 }
 
-/* Helper for breakpoint and tracepoint breakpoint->mention
-   callbacks.  */
+/* See breakpoint.h.  */
 
-static void
-say_where (const breakpoint *b)
+void
+code_breakpoint::say_where () const
 {
   struct value_print_options opts;
 
@@ -11508,58 +11507,58 @@ say_where (const breakpoint *b)
 
   /* i18n: cagney/2005-02-11: Below needs to be merged into a
      single string.  */
-  if (b->loc == NULL)
+  if (loc == NULL)
     {
       /* For pending locations, the output differs slightly based
-	 on b->extra_string.  If this is non-NULL, it contains either
+	 on extra_string.  If this is non-NULL, it contains either
 	 a condition or dprintf arguments.  */
-      if (b->extra_string == NULL)
+      if (extra_string == NULL)
 	{
-	  gdb_printf (_(" (%s) pending."), b->locspec->to_string ());
+	  gdb_printf (_(" (%s) pending."), locspec->to_string ());
 	}
-      else if (b->type == bp_dprintf)
+      else if (type == bp_dprintf)
 	{
 	  gdb_printf (_(" (%s,%s) pending."),
-		      b->locspec->to_string (),
-		      b->extra_string.get ());
+		      locspec->to_string (),
+		      extra_string.get ());
 	}
       else
 	{
 	  gdb_printf (_(" (%s %s) pending."),
-		      b->locspec->to_string (),
-		      b->extra_string.get ());
+		      locspec->to_string (),
+		      extra_string.get ());
 	}
     }
   else
     {
-      if (opts.addressprint || b->loc->symtab == NULL)
+      if (opts.addressprint || loc->symtab == NULL)
 	gdb_printf (" at %ps",
 		    styled_string (address_style.style (),
-				   paddress (b->loc->gdbarch,
-					     b->loc->address)));
-      if (b->loc->symtab != NULL)
+				   paddress (loc->gdbarch,
+					     loc->address)));
+      if (loc->symtab != NULL)
 	{
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
-	  if (b->loc->next == NULL)
+	  if (loc->next == NULL)
 	    {
 	      const char *filename
-		= symtab_to_filename_for_display (b->loc->symtab);
+		= symtab_to_filename_for_display (loc->symtab);
 	      gdb_printf (": file %ps, line %d.",
 			  styled_string (file_name_style.style (),
 					 filename),
-			  b->loc->line_number);
+			  loc->line_number);
 	    }
 	  else
 	    /* This is not ideal, but each location may have a
 	       different file name, and this at least reflects the
 	       real situation somewhat.  */
-	    gdb_printf (": %s.", b->locspec->to_string ());
+	    gdb_printf (": %s.", locspec->to_string ());
 	}
 
-      if (b->loc->next)
+      if (loc->next)
 	{
-	  struct bp_location *loc = b->loc;
+	  struct bp_location *loc = loc;
 	  int n = 0;
 	  for (; loc; loc = loc->next)
 	    ++n;
@@ -11794,7 +11793,7 @@ ordinary_breakpoint::print_mention () const
       break;
     }
 
-  say_where (this);
+  say_where ();
 }
 
 void
@@ -12054,7 +12053,7 @@ tracepoint::print_mention () const
       internal_error (_("unhandled tracepoint type %d"), (int) type);
     }
 
-  say_where (this);
+  say_where ();
 }
 
 void
