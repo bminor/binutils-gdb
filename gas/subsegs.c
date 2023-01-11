@@ -50,6 +50,8 @@ subsegs_end (struct obstack **obs)
   for (; *obs; obs++)
     _obstack_free (*obs, NULL);
   _obstack_free (&frchains, NULL);
+  bfd_set_section_userdata (bfd_abs_section_ptr, NULL);
+  bfd_set_section_userdata (bfd_und_section_ptr, NULL);
 }
 
 static void
