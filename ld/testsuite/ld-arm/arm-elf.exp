@@ -640,7 +640,9 @@ set armeabitests_nonacl {
     {"Multiple farcalls" "-Ttext 0x1000 --section-start .foo=0x2002020" "" "" {farcall-mix.s}
      {{objdump -d farcall-mix.d}}
      "farcall-mix"}
-    {"Multiple farcalls from several sections" "-Ttext 0x1000 --section-start .mytext=0x2000 --section-start .foo=0x2003020" "" "" {farcall-mix2.s}
+    {"Multiple farcalls from several sections"
+     "-Ttext 0x1000 --section-start .mytext=0x2000 --section-start .foo=0x2003020 -z max-page-size=0x10000"
+     "" "" {farcall-mix2.s}
      {{objdump -d farcall-mix2.d}}
      "farcall-mix2"}
 
@@ -738,7 +740,7 @@ set armeabitests_nonacl {
      {{ld cmse-veneers-wrong-entryfct.out}}
      "cmse-veneers-wrong-entryfct"}
     {"Secure gateway veneers (ARMv8-M Baseline)"
-     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections" ""
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections -z max-page-size=0x10000" ""
      "-march=armv8-m.base -mthumb"
      {cmse-veneers.s}
      {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}
@@ -746,7 +748,7 @@ set armeabitests_nonacl {
       {nm {} cmse-veneers.rd}}
      "cmse-veneers-baseline"}
     {"Secure gateway veneers (ARMv8-M Mainline)"
-     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections" ""
+     "-Ttext=0x8000 --section-start .gnu.sgstubs=0x20000 --gc-sections -z max-page-size=0x10000" ""
      "-march=armv8-m.main -mthumb"
      {cmse-veneers.s}
      {{objdump {-d -j .gnu.sgstubs} cmse-veneers.d}
@@ -909,32 +911,32 @@ set armeabitests_nonacl {
      "-EL -Ttext=0x8f00 --fix-cortex-a8" "" "-EL" {cortex-a8-fix-blx-bcond.s}
      {{objdump -dr cortex-a8-fix-blx-bcond.d}}
      "cortex-a8-fix-blx-bcond"}
-    {"IFUNC test 1" "-T ifunc-static.ld" "" "" {ifunc-1.s}
+    {"IFUNC test 1" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-1.s}
      {{objdump -d ifunc-1.dd}
       {objdump {-s -j.data -j.got} ifunc-1.gd}
       {readelf -dr ifunc-1.rd}}
      "ifunc-1"}
-    {"IFUNC test 2" "-T ifunc-static.ld" "" "" {ifunc-2.s}
+    {"IFUNC test 2" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-2.s}
      {{objdump -d ifunc-2.dd}
       {objdump {-s -j.data -j.got} ifunc-2.gd}
       {readelf -dr ifunc-2.rd}}
      "ifunc-2"}
-    {"IFUNC test 5" "-T ifunc-static.ld" "" "" {ifunc-5.s}
+    {"IFUNC test 5" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-5.s}
      {{objdump -d ifunc-5.dd}
       {objdump {-s -j.data -j.got} ifunc-5.gd}
       {readelf -dr ifunc-5.rd}}
      "ifunc-5"}
-    {"IFUNC test 6" "-T ifunc-static.ld" "" "" {ifunc-6.s}
+    {"IFUNC test 6" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-6.s}
      {{objdump -d ifunc-6.dd}
       {objdump {-s -j.data -j.got} ifunc-6.gd}
       {readelf -dr ifunc-6.rd}}
      "ifunc-6"}
-    {"IFUNC test 11" "-T ifunc-static.ld" "" "" {ifunc-11.s}
+    {"IFUNC test 11" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-11.s}
      {{objdump -d ifunc-11.dd}
       {objdump {-s -j.data -j.got} ifunc-11.gd}
       {readelf -dr ifunc-11.rd}}
      "ifunc-11"}
-    {"IFUNC test 17" "-T ifunc-static.ld" "" "" {ifunc-17.s}
+    {"IFUNC test 17" "-T ifunc-static.ld -z max-page-size=0x10000" "" "" {ifunc-17.s}
      {{objdump -d ifunc-17.dd}
       {objdump {-s -j.data -j.got} ifunc-17.gd}
       {readelf -r ifunc-17.rd}}
@@ -1007,7 +1009,7 @@ set armeabitests_nonacl_shared {
      "farcall-mixed-lib.so"}
 
     {"Cortex-A8 erratum fix, b.w to PLT"
-     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared" "" "-EL"
+     "-EL -Tcortex-a8-fix-plt.ld --fix-cortex-a8 -shared -z max-page-size=0x10000" "" "-EL"
      {cortex-a8-fix-b-plt.s}
      {{objdump -dr cortex-a8-fix-b-plt.d}}
      "cortex-a8-fix-b-plt"}
@@ -1027,65 +1029,66 @@ set armeabitests_nonacl_shared {
      {{objdump -dr cortex-a8-fix-blx-plt.d}}
      "cortex-a8-fix-blx-plt"}
     {"Cortex-A8 erratum fix, relocate bl.w to PLT"
-     "-EL --section-start=.plt=0x8e00 -Ttext=0x8f00 --fix-cortex-a8 -shared --hash-style=sysv" ""
+     "-EL --section-start=.plt=0x8e00 -Ttext=0x8f00 --fix-cortex-a8 -shared --hash-style=sysv -z max-page-size=0x10000"
+     ""
      "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
      {{objdump -dr cortex-a8-fix-bl-rel-plt.d}}
      "cortex-a8-fix-bl-rel-thumb"}
 
-    {"IFUNC test 3" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-3.s}
+    {"IFUNC test 3" "-T ifunc-dynamic.ld -shared -z max-page-size=0x10000" "" "" {ifunc-3.s}
 	{{objdump -d ifunc-3.dd}
 	    {objdump {-s -j.data -j.got} ifunc-3.gd}
 	    {readelf -r ifunc-3.rd}}
 	"ifunc-3.so"}
-    {"IFUNC test 4" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-4.s}
+    {"IFUNC test 4" "-T ifunc-dynamic.ld -shared -z max-page-size=0x10000" "" "" {ifunc-4.s}
 	{{objdump -d ifunc-4.dd}
 	    {objdump {-s -j.data -j.got} ifunc-4.gd}
 	    {readelf -r ifunc-4.rd}}
 	"ifunc-4.so"}
-    {"IFUNC test 7" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so -shared" ""
+    {"IFUNC test 7" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so -shared -z max-page-size=0x10000" ""
 	"" {ifunc-7.s}
 	{{objdump -d ifunc-7.dd}
 	    {objdump {-s -j.data -j.got} ifunc-7.gd}
 	    {readelf -r ifunc-7.rd}}
 	"ifunc-7.so"}
-    {"IFUNC test 12" "-T ifunc-dynamic.ld -shared" "" "" {ifunc-12.s}
+    {"IFUNC test 12" "-T ifunc-dynamic.ld -shared -z max-page-size=0x10000" "" "" {ifunc-12.s}
 	{{objdump -d ifunc-12.dd}
 	    {objdump {-s -j.data -j.got} ifunc-12.gd}
 	    {readelf -r ifunc-12.rd}}
 	"ifunc-12.so"}
-    {"IFUNC test 9" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so" "" "" {ifunc-9.s}
+    {"IFUNC test 9" "-T ifunc-dynamic.ld tmpdir/ifunc-3.so -z max-page-size=0x10000" "" "" {ifunc-9.s}
 	{{objdump -d ifunc-9.dd}
 	    {objdump {-s -j.data -j.got} ifunc-9.gd}
 	    {readelf -r ifunc-9.rd}}
 	"ifunc-9"}
-    {"IFUNC test 10" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so" "" "" {ifunc-10.s}
+    {"IFUNC test 10" "-T ifunc-dynamic.ld tmpdir/ifunc-4.so -z max-page-size=0x10000" "" "" {ifunc-10.s}
 	{{objdump -d ifunc-10.dd}
 	    {objdump {-s -j.data -j.got} ifunc-10.gd}
 	    {readelf -r ifunc-10.rd}}
 	"ifunc-10"}
-    {"IFUNC test 13" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-13.s}
+    {"IFUNC test 13" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so -z max-page-size=0x10000" "" "" {ifunc-13.s}
 	{{objdump -d ifunc-13.dd}
 	    {objdump {-s -j.data -j.got} ifunc-13.gd}
 	    {readelf -r ifunc-13.rd}}
 	"ifunc-13"}
-    {"IFUNC test 14" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-14.s}
+    {"IFUNC test 14" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so -z max-page-size=0x10000" "" "" {ifunc-14.s}
 	{{objdump -d ifunc-14.dd}
 	    {objdump {-s -j.data -j.got} ifunc-14.gd}
 	    {readelf -r ifunc-14.rd}}
 	"ifunc-14"}
-    {"IFUNC test 15" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-15.s}
+    {"IFUNC test 15" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so -z max-page-size=0x10000" "" "" {ifunc-15.s}
 	{{objdump -d ifunc-15.dd}
 	    {objdump {-s -j.data -j.got} ifunc-15.gd}
 	    {readelf -r ifunc-15.rd}}
 	"ifunc-15"}
-    {"IFUNC test 16" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so" "" "" {ifunc-16.s}
+    {"IFUNC test 16" "-T ifunc-dynamic.ld tmpdir/ifunc-12.so -z max-page-size=0x10000" "" "" {ifunc-16.s}
 	{{objdump -d ifunc-16.dd}
 	    {objdump {-s -j.data -j.got} ifunc-16.gd}
 	    {readelf -r ifunc-16.rd}}
 	"ifunc-16"}
 
-    {"Long PLT entries in executables" "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" ""
-	"" {long-plt-format.s}
+    {"Long PLT entries in executables"
+     "--long-plt -shared --section-start=.plt=0x1000 --section-start=.got=0xf0001100" "" "" {long-plt-format.s}
 	{{objdump "-d -j .plt" long-plt-format.d}}
 	"long-plt-format"}
 
