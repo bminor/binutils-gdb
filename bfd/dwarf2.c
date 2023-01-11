@@ -1412,7 +1412,7 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
   offset += unit->dwarf_addr_offset;
   if (offset < unit->dwarf_addr_offset
       || offset > file->dwarf_addr_size
-      || file->dwarf_addr_size - offset < unit->offset_size)
+      || file->dwarf_addr_size - offset < unit->addr_size)
     return 0;
 
   info_ptr = file->dwarf_addr_buffer + offset;
