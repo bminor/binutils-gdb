@@ -1,6 +1,6 @@
 #name: non-contiguous-arm2
 #source: non-contiguous-arm.s
-#ld: --enable-non-contiguous-regions -T non-contiguous-arm2.ld
+#ld: --enable-non-contiguous-regions -T non-contiguous-arm2.ld -z max-page-size=0x10000
 #objdump: -rdth
 #xfail: [is_generic]
 

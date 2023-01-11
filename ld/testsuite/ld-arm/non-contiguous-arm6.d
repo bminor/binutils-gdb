@@ -1,6 +1,6 @@
 #name: non-contiguous-arm6
 #source: non-contiguous-arm.s
-#ld: --enable-non-contiguous-regions -T non-contiguous-arm6.ld
+#ld: --enable-non-contiguous-regions -T non-contiguous-arm6.ld -z max-page-size=0x10000
 #objdump: -rdth
 #xfail: [is_generic]
 #skip: arm*nacl
