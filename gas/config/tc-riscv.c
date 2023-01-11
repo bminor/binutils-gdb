@@ -3266,6 +3266,17 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      continue;
 
 	    case 'a': /* 20-bit PC-relative offset.  */
+	      /* Like in my_getSmallExpression() we need to avoid emitting
+		 a stray undefined symbol if the 1st JAL entry doesn't match,
+		 but the 2nd (with 2 operands) might.  */
+	      if (oparg == insn->args)
+		{
+		  asargStart = asarg;
+		  if (reg_lookup (&asarg, RCLASS_GPR, NULL)
+		      && (*asarg == ',' || (ISSPACE (*asarg) && asarg[1] == ',')))
+		    break;
+		  asarg = asargStart;
+		}
 	    jump:
 	      my_getExpression (imm_expr, asarg);
 	      asarg = expr_end;
