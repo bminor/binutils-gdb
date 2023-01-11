@@ -981,7 +981,7 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
   gcc_type return_type = instance->convert_type (target_type);
 
   std::vector<gcc_type> elements (type->num_fields ());
-  struct gcc_type_array array = { type->num_fields (), elements.data () };
+  struct gcc_type_array array = { (int) type->num_fields (), elements.data () };
   int artificials = 0;
   for (int i = 0; i < type->num_fields (); ++i)
     {

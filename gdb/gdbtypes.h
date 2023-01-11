@@ -818,7 +818,7 @@ struct main_type
   /* * Number of fields described for this type.  This field appears
      at this location because it packs nicely here.  */
 
-  short nfields;
+  unsigned int m_nfields;
 
   /* * Name of this type, or NULL if none.
 
@@ -944,15 +944,15 @@ struct type
   }
 
   /* Get the number of fields of this type.  */
-  int num_fields () const
+  unsigned int num_fields () const
   {
-    return this->main_type->nfields;
+    return this->main_type->m_nfields;
   }
 
   /* Set the number of fields of this type.  */
-  void set_num_fields (int num_fields)
+  void set_num_fields (unsigned int num_fields)
   {
-    this->main_type->nfields = num_fields;
+    this->main_type->m_nfields = num_fields;
   }
 
   /* Get the fields array of this type.  */

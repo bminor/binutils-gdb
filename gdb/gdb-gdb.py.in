@@ -261,8 +261,8 @@ class StructMainTypePrettyPrinter:
         fields.append("flags = [%s]" % self.flags_to_string())
         fields.append("owner = %s" % self.owner_to_string())
         fields.append("target_type = %s" % self.val["m_target_type"])
-        if self.val["nfields"] > 0:
-            for fieldno in range(self.val["nfields"]):
+        if self.val["m_nfields"] > 0:
+            for fieldno in range(self.val["m_nfields"]):
                 fields.append(self.struct_field_img(fieldno))
         if self.val["code"] == gdb.TYPE_CODE_RANGE:
             fields.append(self.bounds_img())
