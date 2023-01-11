@@ -9355,5 +9355,22 @@ proc decompress_bz2 { bz2 } {
     return $copy
 }
 
+# Return 1 if the output of "ldd FILE" contains regexp DEP, 0 if it doesn't,
+# and -1 if there was a problem running the command.
+
+proc has_dependency { file dep } {
+    set ldd [gdb_find_ldd]
+    set command "$ldd $file"
+    set result [remote_exec host $command]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+    verbose -log "status of $command is $status"
+    verbose -log "output of $command is $output"
+    if { $status != 0 || $output == "" } {
+	return -1
+    }
+    return [regexp $dep $output]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

@@ -61,16 +61,32 @@ foreach probe_name $probe_names {
 
 if { !$have_probe } {
     untested "no matching probes"
+    return -1
+}
+
+# We link the exec without -lpthread, but libpthread.so may already be loaded at main
+# due to LD_PRELOAD.
+set libpthread_maybe_preloaded 0
+set binfile [standard_output_file $executable]
+if { [has_dependency $binfile libpthread\\.so] == 1 } {
+    set libpthread_maybe_preloaded 1
+}
+
+# We link the shlib with -lpthread, but since glibc 2.34 libpthread has been
+# merged with libc, so libpthread.so may not be a dependency.
+set libpthread_missing 0
+if { [has_dependency $binfile_lib libpthread\\.so] == 0 } {
+    set libpthread_missing 1
 }
 
 set test "libpthread.so not found"
 gdb_test_multiple "info sharedlibrary" $test {
     -re "/libpthread\\.so.*\r\n$gdb_prompt $" {
-	# With newer glibc, libpthread has been integrated into glibc so we
-	# can expect it to be already loaded at main.  This means we no longer
-	# excercise the scenario we're trying to trigger, but continue
-	# nevertheless.
-	unsupported $test
+	if { $libpthread_maybe_preloaded } {
+	    unsupported $test
+	} else {
+	    fail $test
+	}
     }
     -re "/libc\\.so.*\r\n$gdb_prompt $" {
 	pass $test
@@ -85,4 +101,6 @@ gdb_breakpoint "notify"
 # Cannot find new threads: generic error
 gdb_continue_to_breakpoint "notify" ".* notify-here .*"
 
-gdb_test "info sharedlibrary" {/libpthread\.so.*} "libpthread.so found"
+if { !$libpthread_missing } {
+    gdb_test "info sharedlibrary" {/libpthread\.so.*} "libpthread.so found"
+}
