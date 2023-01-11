@@ -15,17 +15,17 @@ line\.s:[0-9]*23:  Info: .*
 line\.s:4: Warning: m1/2: XYZ
 line\.s:[0-9]*23:  Info: .*
 line\.s:[0-9]*24: Warning: \.warning .*
-Line\.s:10: Warning: m2/1: 987
+Line2\.s:10: Warning: m2/1: 987
 line\.s:[0-9]*26:  Info: .*
-Line\.s:12: Warning: m2/2: 987
+Line2\.s:12: Warning: m2/2: 987
 line\.s:[0-9]*26:  Info: .*
-Line\.s:10: Warning: m2/1: zyx
+Line2\.s:10: Warning: m2/1: zyx
 line\.s:[0-9]*27:  Info: .*
-Line\.s:12: Warning: m2/2: zyx
+Line2\.s:12: Warning: m2/2: zyx
 line\.s:[0-9]*27:  Info: .*
-Line\.s:10: Warning: m2/1: CBA
+Line2\.s:10: Warning: m2/1: CBA
 line\.s:[0-9]*28:  Info: .*
-Line\.s:12: Warning: m2/2: CBA
+Line2\.s:12: Warning: m2/2: CBA
 line\.s:[0-9]*28:  Info: .*
 line\.s:[0-9]*29: Warning: \.warning .*
 line\.s:[0-9]*35: Warning: irp/1: 123
