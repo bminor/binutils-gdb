@@ -28,4 +28,6 @@
 
 #define LOCAL_LABEL_PREFIX "."
 
+#define WINCE
+
 #include "pei-arm.c"

@@ -1528,6 +1528,21 @@ pe_bfd_object_p (bfd * abfd)
       bfd_coff_swap_aouthdr_in (abfd, opthdr, &internal_a);
 
       struct internal_extra_pe_aouthdr *a = &internal_a.pe;
+
+#ifdef ARM
+      /* Use Subsystem to distinguish between pei-arm-little and
+	 pei-arm-wince-little.  */
+#ifdef WINCE
+      if (a->Subsystem != IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+#else
+      if (a->Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CE_GUI)
+#endif
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  return NULL;
+	}
+#endif
+
       if ((a->SectionAlignment & -a->SectionAlignment) != a->SectionAlignment
 	  || a->SectionAlignment >= 0x80000000)
 	{
