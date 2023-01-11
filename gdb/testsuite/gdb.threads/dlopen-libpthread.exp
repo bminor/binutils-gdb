@@ -68,14 +68,14 @@ if { !$have_probe } {
 # due to LD_PRELOAD.
 set libpthread_maybe_preloaded 0
 set binfile [standard_output_file $executable]
-if { [has_dependency $binfile libpthread\\.so] == 1 } {
+if { [has_dependency $binfile /libpthread\\.so] == 1 } {
     set libpthread_maybe_preloaded 1
 }
 
 # We link the shlib with -lpthread, but since glibc 2.34 libpthread has been
 # merged with libc, so libpthread.so may not be a dependency.
 set libpthread_missing 0
-if { [has_dependency $binfile_lib libpthread\\.so] == 0 } {
+if { [has_dependency $binfile_lib /libpthread\\.so] == 0 } {
     set libpthread_missing 1
 }
 
