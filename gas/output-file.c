@@ -99,6 +99,8 @@ output_file_close (void)
     res = bfd_cache_close_all ();
   else
     res = bfd_close (obfd);
+  now_seg = NULL;
+  now_subseg = 0;
 
   filename = out_file_name;
   out_file_name = NULL;
