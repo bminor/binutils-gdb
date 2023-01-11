@@ -23,19 +23,20 @@ set testname "weak symbols"
 
 # This test only works for ELF targets and some PE targets.
 # It ought to work for some a.out targets, but it doesn't.
-if {! [is_elf_format] && ! [is_pecoff_format]} {
+if { [is_elf_format] } {
+    # hppa64 is incredibly broken
+    setup_xfail hppa64-*-*
+} elseif { [is_pecoff_format] } {
+    # Weak symbols are broken for most PE targets.
+    if { ![istarget i?86-*-*]
+	 && ![istarget sh-*-*]
+	 && ![istarget x86_64-*-*] } {
+	setup_xfail *-*-*
+    }
+} else {
     unsupported $testname
     return
 }
-
-# Weak symbols are broken for most PE targets.
-if {! [istarget i?86-*-*] && ! [istarget sh-*-*]} {
-    setup_xfail *-*-pe*
-    setup_xfail *-*-mingw*
-}
-
-# hppa64 is incredibly broken
-setup_xfail hppa64-*-*
 
 if {! [ld_assemble $as $srcdir/$subdir/weak1.s tmpdir/weak1.o]
     || ! [ld_assemble $as $srcdir/$subdir/weak2.s tmpdir/weak2.o]} then {
