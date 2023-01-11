@@ -41770,17 +41770,27 @@ Reply:
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} packet are
-determined by the @value{GDBN} internal gdbarch functions
-@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.
+determined by the target description (@pxref{Target Descriptions}); in
+the absence of a target description, this is done using code internal
+to @value{GDBN}; typically this is some customary register layout for
+the architecture in question.
 
-When reading registers from a trace frame (@pxref{Analyze Collected
-Data,,Using the Collected Data}), the stub may also return a string of
-literal @samp{x}'s in place of the register data digits, to indicate
-that the corresponding register has not been collected, thus its value
-is unavailable.  For example, for an architecture with 4 registers of
+When reading registers, the stub may also return a string of literal
+@samp{x}'s in place of the register data digits, to indicate that the
+corresponding register's value is unavailable.  For example, when
+reading registers from a trace frame (@pxref{Analyze Collected
+Data,,Using the Collected Data}), this means that the register has not
+been collected in the trace frame.  When reading registers from a live
+program, this indicates that the stub has no means to access the
+register contents, even though the corresponding register is known to
+exist.  Note that if a register truly does not exist on the target,
+then it is better to not include it in the target description in the
+first place.
+
+For example, for an architecture with 4 registers of
 4 bytes each, the following reply indicates to @value{GDBN} that
-registers 0 and 2 have not been collected, while registers 1 and 3
-have been collected, and both have zero value:
+registers 0 and 2 are unavailable, while registers 1 and 3
+are available, and both have zero value:
 
 @smallexample
 -> @code{g}
