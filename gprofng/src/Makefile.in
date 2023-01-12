@@ -158,9 +158,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(man1dir)" "$(DESTDIR)$(dbedir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
-am__DEPENDENCIES_1 =
-libgprofng_la_DEPENDENCIES = $(top_builddir)/../opcodes/libopcodes.la \
-	$(top_builddir)/../bfd/libbfd.la $(am__DEPENDENCIES_1)
+libgprofng_la_DEPENDENCIES = $(top_builddir)/../opcodes/libopcodes.la
 am__objects_1 = Application.lo BaseMetric.lo BaseMetricTreeNode.lo \
 	CallStack.lo CatchOutOfMemory.lo ClassFile.lo Command.lo \
 	CompCom.lo DataObject.lo DataSpace.lo Data_window.lo \
@@ -192,6 +190,7 @@ libgprofng_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 PROGRAMS = $(bin_PROGRAMS)
 am_gp_archive_OBJECTS = gp-archive.$(OBJEXT) ArchiveExp.$(OBJEXT)
 gp_archive_OBJECTS = $(am_gp_archive_OBJECTS)
+am__DEPENDENCIES_1 =
 gp_archive_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_gp_collect_app_OBJECTS = gp-collect-app.$(OBJEXT) checks.$(OBJEXT) \
@@ -336,7 +335,6 @@ FGREP = @FGREP@
 GPROFNG_BROKEN_JAVAC = @GPROFNG_BROKEN_JAVAC@
 GPROFNG_CFLAGS = @GPROFNG_CFLAGS@
 GPROFNG_CPPFLAGS = @GPROFNG_CPPFLAGS@
-GPROFNG_LIBADD = @GPROFNG_LIBADD@
 GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS = @GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS@
 GPROFNG_NO_SWITCH_CFLAGS = @GPROFNG_NO_SWITCH_CFLAGS@
 GREP = @GREP@
@@ -556,8 +554,6 @@ libgprofng_la_LDFLAGS = -version-info 0:0:0
 # when -nostdlib is passed to libtool.
 # See bug 29364 - libgprofng.so: needs to link against -pthread
 libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
-	$(top_builddir)/../bfd/libbfd.la \
-	$(GPROFNG_LIBADD) \
 	-lpthread -ldl
 
 dbedir = $(SYSCONFDIR)

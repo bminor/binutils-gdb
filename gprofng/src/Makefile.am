@@ -132,8 +132,6 @@ libgprofng_la_LDFLAGS = -version-info 0:0:0
 # when -nostdlib is passed to libtool.
 # See bug 29364 - libgprofng.so: needs to link against -pthread
 libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
-	$(top_builddir)/../bfd/libbfd.la \
-	$(GPROFNG_LIBADD) \
 	-lpthread -ldl
 
 dbedir = $(SYSCONFDIR)

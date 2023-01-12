@@ -37,12 +37,6 @@ fi
 AC_DISABLE_SHARED
 LT_INIT
 
-GPROFNG_LIBADD="-L../../libiberty -liberty"
-if test "$enable_shared" = "yes"; then
-  GPROFNG_LIBADD="-L../../libiberty/pic -liberty"
-fi
-AC_SUBST(GPROFNG_LIBADD)
-
 # Figure out what compiler warnings we can enable.
 # See config/warnings.m4 for details.
 
