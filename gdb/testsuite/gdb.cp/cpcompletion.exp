@@ -53,7 +53,7 @@ proc test_class_complete {class expr name matches} {
 
 require allow_cplus_tests
 
-standard_testfile pr9594.cc
+standard_testfile .cc
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
