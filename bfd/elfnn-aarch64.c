@@ -5539,7 +5539,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    /* xgettext:c-format */
 	    (_("%pB: relocation %s against STT_GNU_IFUNC "
 	       "symbol `%s' isn't handled by %s"), input_bfd,
-	     howto->name, name, __FUNCTION__);
+	     howto->name, name, __func__);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 

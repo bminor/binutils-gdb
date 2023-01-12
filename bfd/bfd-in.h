@@ -365,10 +365,10 @@ extern int bfd_stat (bfd *, struct stat *);
 /* Deprecated old routines.  */
 #if __GNUC__
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __FUNCTION__),	\
+  (_bfd_warn_deprecated ("bfd_read", __FILE__, __LINE__, __func__),	\
    bfd_bread ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #define bfd_write(BUF, ELTSIZE, NITEMS, ABFD)				\
-  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __FUNCTION__), \
+  (_bfd_warn_deprecated ("bfd_write", __FILE__, __LINE__, __func__),	\
    bfd_bwrite ((BUF), (ELTSIZE) * (NITEMS), (ABFD)))
 #else
 #define bfd_read(BUF, ELTSIZE, NITEMS, ABFD)				\

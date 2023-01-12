@@ -1122,7 +1122,7 @@ pep_fixup_stdcalls (void)
   struct bfd_link_hash_entry *undef, *sym;
 
   if (pep_dll_extra_pe_debug)
-    printf ("%s\n", __FUNCTION__);
+    printf ("%s\n", __func__);
 
   for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
     if (undef->type == bfd_link_hash_undefined)
@@ -1466,7 +1466,7 @@ gld${EMULATION_NAME}_after_open (void)
       bfd *a;
       struct bfd_link_hash_entry *sym;
 
-      printf ("%s()\n", __FUNCTION__);
+      printf ("%s()\n", __func__);
 
       for (sym = link_info.hash->undefs; sym; sym=sym->u.undef.next)
 	printf ("-%s\n", sym->root.string);

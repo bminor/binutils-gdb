@@ -1421,7 +1421,7 @@ pe_find_data_imports (const char *symhead,
 	char *impname;
 
 	if (pe_dll_extra_pe_debug)
-	  printf ("%s:%s\n", __FUNCTION__, undef->root.string);
+	  printf ("%s:%s\n", __func__, undef->root.string);
 
 	strcpy (name, undef->root.string);
 	impname = name - (sizeof "__imp_" - 1);
@@ -3501,7 +3501,7 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    __func__, sec_name, (unsigned long) vaddr,
 		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
       else if (strcmp(sec_name,".rdata") == 0)
@@ -3511,7 +3511,7 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    __func__, sec_name, (unsigned long) vaddr,
 		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
       else if (strcmp (sec_name,".bss") == 0)
@@ -3521,7 +3521,7 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    __func__, sec_name, (unsigned long) vaddr,
 		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
     }
@@ -3579,7 +3579,7 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",
-		    __FUNCTION__, dllname, erva + name_rva,
+		    __func__, dllname, erva + name_rva,
 		    (unsigned long) func_rva, is_data ? "(data)" : "");
 	}
 
@@ -3616,7 +3616,7 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",
-		    __FUNCTION__, dllname, erva + name_rva,
+		    __func__, dllname, erva + name_rva,
 		    (unsigned long) func_rva, is_data ? "(data)" : "");
 	}
     }

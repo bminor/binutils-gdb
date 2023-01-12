@@ -94,7 +94,7 @@ gold_info(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 
 #define gold_unreachable() \
   (gold::do_gold_unreachable(__FILE__, __LINE__, \
-			     static_cast<const char*>(__FUNCTION__)))
+			     static_cast<const char*>(__func__)))
 
 extern void do_gold_unreachable(const char*, int, const char*)
   ATTRIBUTE_NORETURN;

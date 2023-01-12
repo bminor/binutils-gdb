@@ -163,7 +163,7 @@ gold_nomem() ATTRIBUTE_NORETURN;
 #if defined(__GNUC__) && GCC_VERSION < 4003
 #define FUNCTION_NAME static_cast<const char*>(__FUNCTION__)
 #else 
-#define FUNCTION_NAME __FUNCTION__
+#define FUNCTION_NAME __func__
 #endif
 
 // This macro and function are used in cases which can not arise if
