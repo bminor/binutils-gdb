@@ -1518,6 +1518,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "align2"
     run_dump_test "align2-el"
     run_dump_test "align3"
+    run_dump_test "mips-align-after-label"
+    run_dump_test "micromips-align-after-label"
     run_dump_test "odd-float"
     run_dump_test "insn-opts"
 

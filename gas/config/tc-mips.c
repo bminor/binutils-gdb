@@ -16262,6 +16262,8 @@ s_align (int x ATTRIBUTE_UNUSED)
   int temp, fill_value, *fill_ptr;
   long max_alignment = 28;
 
+  file_mips_check_options ();
+
   /* o Note that the assembler pulls down any immediately preceding label
        to the aligned address.
      o It's not documented but auto alignment is reinstated by
@@ -16286,6 +16288,9 @@ s_align (int x ATTRIBUTE_UNUSED)
     }
   else
     fill_ptr = 0;
+
+  mips_mark_labels ();
+
   if (temp)
     {
       segment_info_type *si = seg_info (now_seg);
