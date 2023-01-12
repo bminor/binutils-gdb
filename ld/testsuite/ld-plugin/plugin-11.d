@@ -32,7 +32,7 @@ Hello from testplugin.
 hook called: claim_file tmpdir/main.o \[@0/.* not claimed
 hook called: claim_file tmpdir/func.o \[@0/.* CLAIMED
 #...
-hook called: claim_file tmpdir/libtext.a \[@.* CLAIMED
+hook called: claim_file tmpdir[/\\]libtext.a \[@.* CLAIMED
 #...
 hook called: all symbols read.
 Sym: '_?func' Resolution: LDPR_PREVAILING_DEF
