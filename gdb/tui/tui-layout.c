@@ -343,22 +343,17 @@ make_standard_window (const char *)
   return tui_win_list[V];
 }
 
-/* A map holding all the known window types, keyed by name.  Note that
-   this is heap-allocated and "leaked" at gdb exit.  This avoids
-   ordering issues with destroying elements in the map at shutdown.
-   In particular, destroying this map can occur after Python has been
-   shut down, causing crashes if any window destruction requires
-   running Python code.  */
+/* A map holding all the known window types, keyed by name.  */
 
-static window_types_map *known_window_types;
+static window_types_map known_window_types;
 
 /* See tui-layout.h.  */
 
 known_window_names_range
 all_known_window_names ()
 {
-  auto begin = known_window_names_iterator (known_window_types->begin ());
-  auto end = known_window_names_iterator (known_window_types->end ());
+  auto begin = known_window_names_iterator (known_window_types.begin ());
+  auto end = known_window_names_iterator (known_window_types.end ());
   return known_window_names_range (begin, end);
 }
 
@@ -371,8 +366,8 @@ tui_get_window_by_name (const std::string &name)
     if (name == window->name ())
       return window;
 
-  auto iter = known_window_types->find (name);
-  if (iter == known_window_types->end ())
+  auto iter = known_window_types.find (name);
+  if (iter == known_window_types.end ())
     error (_("Unknown window type \"%s\""), name.c_str ());
 
   tui_win_info *result = iter->second (name.c_str ());
@@ -386,20 +381,18 @@ tui_get_window_by_name (const std::string &name)
 static void
 initialize_known_windows ()
 {
-  known_window_types = new window_types_map;
-
-  known_window_types->emplace (SRC_NAME,
+  known_window_types.emplace (SRC_NAME,
 			       make_standard_window<SRC_WIN,
 						    tui_source_window>);
-  known_window_types->emplace (CMD_NAME,
+  known_window_types.emplace (CMD_NAME,
 			       make_standard_window<CMD_WIN, tui_cmd_window>);
-  known_window_types->emplace (DATA_NAME,
+  known_window_types.emplace (DATA_NAME,
 			       make_standard_window<DATA_WIN,
 						    tui_data_window>);
-  known_window_types->emplace (DISASSEM_NAME,
+  known_window_types.emplace (DISASSEM_NAME,
 			       make_standard_window<DISASSEM_WIN,
 						    tui_disasm_window>);
-  known_window_types->emplace (STATUS_NAME,
+  known_window_types.emplace (STATUS_NAME,
 			       make_standard_window<STATUS_WIN,
 						    tui_locator_window>);
 }
@@ -431,11 +424,11 @@ tui_register_window (const char *name, window_factory &&factory)
      this far then NAME must be a user defined window.  Remove any existing
      factory and replace it with this new version.  */
 
-  auto iter = known_window_types->find (name);
-  if (iter != known_window_types->end ())
-    known_window_types->erase (iter);
+  auto iter = known_window_types.find (name);
+  if (iter != known_window_types.end ())
+    known_window_types.erase (iter);
 
-  known_window_types->emplace (std::move (name_copy),
+  known_window_types.emplace (std::move (name_copy),
 			       std::move (factory));
 }
 
@@ -1216,8 +1209,8 @@ initialize_layouts ()
 static bool
 validate_window_name (const std::string &name)
 {
-  auto iter = known_window_types->find (name);
-  return iter != known_window_types->end ();
+  auto iter = known_window_types.find (name);
+  return iter != known_window_types.end ();
 }
 
 /* Implementation of the "tui new-layout" command.  */
