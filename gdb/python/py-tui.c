@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "python-internal.h"
+#include "gdbsupport/intrusive_list.h"
 
 #ifdef TUI
 
@@ -268,12 +269,14 @@ tui_py_window::output (const char *text, bool full_window)
    user-supplied window constructor.  */
 
 class gdbpy_tui_window_maker
+  : public intrusive_list_node<gdbpy_tui_window_maker>
 {
 public:
 
   explicit gdbpy_tui_window_maker (gdbpy_ref<> &&constr)
     : m_constr (std::move (constr))
   {
+    m_window_maker_list.push_back (*this);
   }
 
   ~gdbpy_tui_window_maker ();
@@ -281,12 +284,14 @@ public:
   gdbpy_tui_window_maker (gdbpy_tui_window_maker &&other) noexcept
     : m_constr (std::move (other.m_constr))
   {
+    m_window_maker_list.push_back (*this);
   }
 
   gdbpy_tui_window_maker (const gdbpy_tui_window_maker &other)
   {
     gdbpy_enter enter_py;
     m_constr = other.m_constr;
+    m_window_maker_list.push_back (*this);
   }
 
   gdbpy_tui_window_maker &operator= (gdbpy_tui_window_maker &&other)
@@ -304,16 +309,43 @@ public:
 
   tui_win_info *operator() (const char *name);
 
+  /* Reset the m_constr field of all gdbpy_tui_window_maker objects back to
+     nullptr, this will allow the Python object referenced to be
+     deallocated.  This function is intended to be called when GDB is
+     shutting down the Python interpreter to allow all Python objects to be
+     deallocated and cleaned up.  */
+  static void
+  invalidate_all ()
+  {
+    gdbpy_enter enter_py;
+    for (gdbpy_tui_window_maker &f : m_window_maker_list)
+      f.m_constr.reset (nullptr);
+  }
+
 private:
 
   /* A constructor that is called to make a TUI window.  */
   gdbpy_ref<> m_constr;
+
+  /* A global list of all gdbpy_tui_window_maker objects.  */
+  static intrusive_list<gdbpy_tui_window_maker> m_window_maker_list;
 };
+
+/* See comment in class declaration above.  */
+
+intrusive_list<gdbpy_tui_window_maker>
+  gdbpy_tui_window_maker::m_window_maker_list;
 
 gdbpy_tui_window_maker::~gdbpy_tui_window_maker ()
 {
-  gdbpy_enter enter_py;
-  m_constr.reset (nullptr);
+  /* Remove this gdbpy_tui_window_maker from the global list.  */
+  m_window_maker_list.erase (m_window_maker_list.iterator_to (*this));
+
+  if (m_constr != nullptr)
+    {
+      gdbpy_enter enter_py;
+      m_constr.reset (nullptr);
+    }
 }
 
 tui_win_info *
@@ -331,6 +363,14 @@ gdbpy_tui_window_maker::operator() (const char *win_name)
 
   std::unique_ptr<tui_py_window> window
     (new tui_py_window (win_name, wrapper));
+
+  /* There's only two ways that m_constr can be reset back to nullptr,
+     first when the parent gdbpy_tui_window_maker object is deleted, in
+     which case it should be impossible to call this method, or second, as
+     a result of a gdbpy_tui_window_maker::invalidate_all call, but this is
+     only called when GDB's Python interpreter is being shut down, after
+     which, this method should not be called.  */
+  gdb_assert (m_constr != nullptr);
 
   gdbpy_ref<> user_window
     (PyObject_CallFunctionObjArgs (m_constr.get (),
@@ -571,4 +611,12 @@ gdbpy_initialize_tui ()
 #endif	/* TUI */
 
   return 0;
+}
+
+/* Finalize this module.  */
+
+void
+gdbpy_finalize_tui ()
+{
+  gdbpy_tui_window_maker::invalidate_all ();
 }

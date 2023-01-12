@@ -550,6 +550,7 @@ int gdbpy_initialize_unwind (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_tui ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+void gdbpy_finalize_tui ();
 int gdbpy_initialize_membuf ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_connection ()

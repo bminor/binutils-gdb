@@ -1950,6 +1950,7 @@ finalize_python (void *ignore)
   gdbpy_enter::finalize ();
 
   gdbpy_finalize_micommands ();
+  gdbpy_finalize_tui ();
 
   Py_Finalize ();
 

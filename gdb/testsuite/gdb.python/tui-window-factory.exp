@@ -71,3 +71,35 @@ with_test_prefix "msg_3" {
     Term::check_box_contents "check test_window box" 0 0 80 15 \
 	"TestWindow \\(msg_3\\)"
 }
+
+# Restart GDB, setup a TUI window factory, and then check that the
+# Python object is deallocated when GDB exits.
+with_test_prefix "call __del__ at exit" {
+    clean_restart
+
+    gdb_test "source ${pyfile}" "Python script imported" \
+	"import python scripts"
+
+    gdb_test "python register_window_factory('msg_1')" \
+	"Entering TestWindowFactory\\.__init__: msg_1"
+
+    gdb_test "python register_window_factory('msg_2')" \
+	[multi_line \
+	     "Entering TestWindowFactory\\.__init__: msg_2" \
+	     "Entering TestWindowFactory\\.__del__: msg_1"]
+
+    set saw_window_factory_del 0
+    gdb_test_multiple "quit" "" {
+	-re "^quit\r\n" {
+	    exp_continue
+	}
+	-re "^Entering TestWindowFactory.__del__: msg_2\r\n" {
+	    incr saw_window_factory_del
+	    exp_continue
+	}
+	eof {
+	    gdb_assert { $saw_window_factory_del == 1 }
+	    pass $gdb_test_name
+	}
+    }
+}
