@@ -427,6 +427,14 @@ tui_register_window (const char *name, window_factory &&factory)
   if (!ISALPHA (name_copy[0]))
     error (_("window name must start with a letter, not '%c'"), name_copy[0]);
 
+  /* We already check above for all the builtin window names.  If we get
+     this far then NAME must be a user defined window.  Remove any existing
+     factory and replace it with this new version.  */
+
+  auto iter = known_window_types->find (name);
+  if (iter != known_window_types->end ())
+    known_window_types->erase (iter);
+
   known_window_types->emplace (std::move (name_copy),
 			       std::move (factory));
 }
