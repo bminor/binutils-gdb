@@ -1258,18 +1258,17 @@ ctf_start_compunit_symtab (ctf_psymtab *pst,
 }
 
 /* Finish reading symbol/type definitions in CTF format.
-   END_ADDR is the end address of the file's text.  SECTION is
-   the .text section number.  */
+   END_ADDR is the end address of the file's text.  */
 
 static struct compunit_symtab *
 ctf_end_compunit_symtab (ctf_psymtab *pst,
-			 CORE_ADDR end_addr, int section)
+			 CORE_ADDR end_addr)
 {
   struct ctf_context *ccp;
 
   ccp = &pst->context;
   struct compunit_symtab *result
-    = ccp->builder->end_compunit_symtab (end_addr, section);
+    = ccp->builder->end_compunit_symtab (end_addr);
   delete ccp->builder;
   ccp->builder = nullptr;
   return result;
@@ -1411,8 +1410,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
 
       set_text_low (offset);
       set_text_high (offset + tsize);
-      compunit_symtab = ctf_end_compunit_symtab (this, offset + tsize,
-						 SECT_OFF_TEXT (objfile));
+      compunit_symtab = ctf_end_compunit_symtab (this, offset + tsize);
 
       /* Finish up the debug error message.  */
       if (info_verbose)

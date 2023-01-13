@@ -1045,8 +1045,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	{
 	  if (get_last_source_file ())
 	    {
-	      pst->compunit_symtab = end_compunit_symtab
-		(cur_src_end_addr, SECT_OFF_TEXT (objfile));
+	      pst->compunit_symtab = end_compunit_symtab (cur_src_end_addr);
 	      end_stabs ();
 	    }
 
@@ -1136,14 +1135,13 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_compunit_symtab (file_end_addr,
-					       SECT_OFF_TEXT (objfile));
+			  end_compunit_symtab (file_end_addr);
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
 			     name.  */
 			  start_compunit_symtab (objfile, filestring, NULL,
-					0, pst_symtab_language);
+						 0, pst_symtab_language);
 			  record_debugformat (debugfmt);
 			}
 
@@ -1243,7 +1241,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+	  end_compunit_symtab (file_end_addr);
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the
@@ -1431,7 +1429,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      cust = end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+      cust = end_compunit_symtab (file_end_addr);
       /* When reading symbols for the last C_FILE of the objfile, try
 	 to make sure that we set pst->compunit_symtab to the symtab for the
 	 file, not to the _globals_ symtab.  I'm not sure whether this

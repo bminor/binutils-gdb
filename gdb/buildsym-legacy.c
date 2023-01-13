@@ -171,11 +171,11 @@ free_buildsym_compunit (void)
 }
 
 struct compunit_symtab *
-end_compunit_symtab (CORE_ADDR end_addr, int section)
+end_compunit_symtab (CORE_ADDR end_addr)
 {
   gdb_assert (buildsym_compunit != nullptr);
   struct compunit_symtab *result
-    = buildsym_compunit->end_compunit_symtab (end_addr, section);
+    = buildsym_compunit->end_compunit_symtab (end_addr);
   free_buildsym_compunit ();
   return result;
 }

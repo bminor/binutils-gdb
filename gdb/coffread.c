@@ -404,7 +404,7 @@ coff_end_compunit_symtab (struct objfile *objfile)
 {
   set_last_source_start_addr (current_source_start_addr);
 
-  end_compunit_symtab (current_source_end_addr, SECT_OFF_TEXT (objfile));
+  end_compunit_symtab (current_source_end_addr);
 
   /* Reinitialize for beginning of new file.  */
   set_last_source_file (NULL);
