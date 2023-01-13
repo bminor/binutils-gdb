@@ -34,7 +34,7 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "trad-frame.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "score-tdep.h"
 
 #define G_FLD(_i,_ms,_ls) \

@@ -38,7 +38,7 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "objfiles.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
 #include "remote.h"

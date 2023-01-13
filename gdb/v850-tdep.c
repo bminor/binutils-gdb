@@ -22,7 +22,7 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "gdbtypes.h"
 #include "inferior.h"
 #include "gdbcore.h"

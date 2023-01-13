@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf2expr.h"
+#include "dwarf2/expr.h"
 #include "dwarf2.h"
 #include "dwarf2/leb.h"
 #include "frame.h"
@@ -35,11 +35,11 @@
 #include "record.h"
 
 #include "complaints.h"
-#include "dwarf2-frame.h"
-#include "dwarf2read.h"
+#include "dwarf2/frame.h"
+#include "dwarf2/read.h"
 #include "ax.h"
-#include "dwarf2loc.h"
-#include "dwarf2-frame-tailcall.h"
+#include "dwarf2/loc.h"
+#include "dwarf2/frame-tailcall.h"
 #include "gdbsupport/gdb_binary_search.h"
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"

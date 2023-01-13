@@ -35,8 +35,8 @@
 
 #include "dummy-frame.h"
 #include "dwarf2.h"
-#include "dwarf2-frame.h"
-#include "dwarf2loc.h"
+#include "dwarf2/frame.h"
+#include "dwarf2/loc.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 

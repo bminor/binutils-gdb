@@ -1,5 +1,40 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/expr.c: Rename from dwarf2expr.c.
+	* dwarf2/expr.h: Rename from dwarf2expr.h.
+	* dwarf2/frame-tailcall.c: Rename from dwarf2-frame-tailcall.c.
+	* dwarf2/frame-tailcall.h: Rename from dwarf2-frame-tailcall.h.
+	* dwarf2/frame.c: Rename from dwarf2-frame.c.
+	* dwarf2/frame.h: Rename from dwarf2-frame.h.
+	* dwarf2/index-cache.c: Rename from dwarf-index-cache.c.
+	* dwarf2/index-cache.h: Rename from dwarf-index-cache.h.
+	* dwarf2/index-common.c: Rename from dwarf-index-common.c.
+	* dwarf2/index-common.h: Rename from dwarf-index-common.h.
+	* dwarf2/index-write.c: Rename from dwarf-index-write.c.
+	* dwarf2/index-write.h: Rename from dwarf-index-write.h.
+	* dwarf2/loc.c: Rename from dwarf2loc.c.
+	* dwarf2/loc.h: Rename from dwarf2loc.h.
+	* dwarf2/read.c: Rename from dwarf2read.c.
+	* dwarf2/read.h: Rename from dwarf2read.h.
+	* dwarf2/abbrev.c, aarch64-tdep.c, alpha-tdep.c,
+	amd64-darwin-tdep.c, arc-tdep.c, arm-tdep.c, bfin-tdep.c,
+	compile/compile-c-symbols.c, compile/compile-cplus-symbols.c,
+	compile/compile-loc2c.c, cris-tdep.c, csky-tdep.c, findvar.c,
+	gdbtypes.c, guile/scm-type.c, h8300-tdep.c, hppa-bsd-tdep.c,
+	hppa-linux-tdep.c, i386-darwin-tdep.c, i386-linux-tdep.c,
+	i386-tdep.c, iq2000-tdep.c, m32c-tdep.c, m68hc11-tdep.c,
+	m68k-tdep.c, microblaze-tdep.c, mips-tdep.c, mn10300-tdep.c,
+	msp430-tdep.c, nds32-tdep.c, nios2-tdep.c, or1k-tdep.c,
+	riscv-tdep.c, rl78-tdep.c, rs6000-tdep.c, rx-tdep.c, s12z-tdep.c,
+	s390-tdep.c, score-tdep.c, sh-tdep.c, sparc-linux-tdep.c,
+	sparc-tdep.c, sparc64-linux-tdep.c, sparc64-tdep.c, tic6x-tdep.c,
+	tilegx-tdep.c, v850-tdep.c, xstormy16-tdep.c, xtensa-tdep.c:
+	Update.
+	* Makefile.in (COMMON_SFILES): Update.
+	(HFILES_NO_SRCDIR): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (struct die_reader_specs) <comp_dir>: Remove.
 	(init_cu_die_reader, read_cutu_die_from_dwo): Update.
 

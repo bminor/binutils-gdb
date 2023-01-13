@@ -18,15 +18,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf-index-cache.h"
+#include "dwarf2/index-cache.h"
 
 #include "build-id.h"
 #include "cli/cli-cmds.h"
 #include "command.h"
 #include "gdbsupport/scoped_mmap.h"
 #include "gdbsupport/pathstuff.h"
-#include "dwarf-index-write.h"
-#include "dwarf2read.h"
+#include "dwarf2/index-write.h"
+#include "dwarf2/read.h"
 #include "objfiles.h"
 #include "gdbsupport/selftest.h"
 #include <string>

@@ -21,7 +21,7 @@
 
 #include "arch-utils.h"
 #include "ax-gdb.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "elf/s390.h"
 #include "elf-bfd.h"
 #include "frame-base.h"

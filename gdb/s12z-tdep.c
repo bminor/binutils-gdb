@@ -21,7 +21,7 @@
 #include "defs.h"
 
 #include "arch-utils.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "gdbsupport/errors.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"

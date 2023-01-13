@@ -34,7 +34,7 @@
 #include "i386-darwin-tdep.h"
 #include "solib.h"
 #include "solib-darwin.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include <algorithm>
 
 /* Offsets into the struct i386_thread_state where we'll find the saved regs.

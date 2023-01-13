@@ -21,7 +21,7 @@
 #define DWARF2READ_H
 
 #include <unordered_map>
-#include "dwarf-index-cache.h"
+#include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"

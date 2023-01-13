@@ -34,7 +34,7 @@
 #include "dis-asm.h"
 #include "user-regs.h"
 #include "elf-bfd.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "remote.h"
 #include "target-descriptions.h"
 

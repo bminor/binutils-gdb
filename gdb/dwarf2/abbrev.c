@@ -25,7 +25,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf2read.h"
+#include "dwarf2/read.h"
 #include "dwarf2/abbrev.h"
 #include "dwarf2/leb.h"
 #include "bfd.h"

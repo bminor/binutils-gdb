@@ -20,7 +20,7 @@
 #if !defined (DWARF2LOC_H)
 #define DWARF2LOC_H
 
-#include "dwarf2expr.h"
+#include "dwarf2/expr.h"
 
 struct symbol_computed_ops;
 struct objfile;

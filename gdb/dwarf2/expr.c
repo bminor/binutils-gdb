@@ -25,8 +25,8 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "dwarf2.h"
-#include "dwarf2expr.h"
-#include "dwarf2loc.h"
+#include "dwarf2/expr.h"
+#include "dwarf2/loc.h"
 #include "gdbsupport/underlying.h"
 #include "gdbarch.h"
 

@@ -37,7 +37,7 @@
 #include "sim-regno.h"
 #include "gdb/sim-ppc.h"
 #include "reggroups.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "record-full.h"

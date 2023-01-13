@@ -36,7 +36,7 @@
 #include "hashtab.h"
 #include "cp-support.h"
 #include "bcache.h"
-#include "dwarf2loc.h"
+#include "dwarf2/loc.h"
 #include "gdbcore.h"
 #include "floatformat.h"
 

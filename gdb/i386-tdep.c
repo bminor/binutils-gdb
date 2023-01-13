@@ -22,7 +22,7 @@
 #include "arch-utils.h"
 #include "command.h"
 #include "dummy-frame.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
