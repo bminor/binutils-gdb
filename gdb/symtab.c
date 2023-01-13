@@ -2252,7 +2252,7 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
     {
       symbol_lookup_debug_printf_v ("lookup_symbol_in_block (...) = %s",
 				    host_address_to_string (sym));
-      return fixup_symbol_section (sym, NULL);
+      return sym;
     }
 
   symbol_lookup_debug_printf_v ("lookup_symbol_in_block (...) = NULL");
@@ -2337,7 +2337,6 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 	("lookup_symbol_in_objfile_symtabs (...) = %s (block %s)",
 	 host_address_to_string (other.symbol),
 	 host_address_to_string (other.block));
-      other.symbol = fixup_symbol_section (other.symbol, objfile);
       return other;
     }
 
@@ -2443,7 +2442,6 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
      host_address_to_string (result.symbol),
      host_address_to_string (block));
 
-  result.symbol = fixup_symbol_section (result.symbol, objfile);
   result.block = block;
   return result;
 }
@@ -2925,7 +2923,6 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 		  const struct block *b = bv->block (b_index);
 		  ALL_BLOCK_SYMBOLS (b, iter, sym)
 		    {
-		      fixup_symbol_section (sym, obj_file);
 		      if (matching_obj_sections (sym->obj_section (obj_file),
 						 section))
 			break;
@@ -3668,7 +3665,6 @@ find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
 symtab_and_line
 find_function_start_sal (symbol *sym, bool funfirstline)
 {
-  fixup_symbol_section (sym, NULL);
   symtab_and_line sal
     = find_function_start_sal_1 (sym->value_block ()->entry_pc (),
 				 sym->obj_section (sym->objfile ()),
@@ -3796,8 +3792,6 @@ skip_prologue_sal (struct symtab_and_line *sal)
   sym = find_pc_sect_function (sal->pc, sal->section);
   if (sym != NULL)
     {
-      fixup_symbol_section (sym, NULL);
-
       objfile = sym->objfile ();
       pc = sym->value_block ()->entry_pc ();
       section = sym->obj_section (objfile);

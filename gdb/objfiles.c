@@ -582,8 +582,6 @@ static void
 relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
 		     const section_offsets &delta)
 {
-  fixup_symbol_section (sym, objfile);
-
   /* The RS6000 code from which this was taken skipped
      any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
      But I'm leaving out that test, on the theory that

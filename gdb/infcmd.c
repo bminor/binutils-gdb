@@ -1106,7 +1106,6 @@ jump_command (const char *arg, int from_tty)
     {
       struct obj_section *section;
 
-      fixup_symbol_section (sfn, 0);
       section = sfn->obj_section (sfn->objfile ());
       if (section_is_overlay (section)
 	  && !section_is_mapped (section))

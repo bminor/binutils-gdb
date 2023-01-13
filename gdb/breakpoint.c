@@ -9210,11 +9210,8 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	{
 	  sym = block_linkage_function (b);
 	  if (sym != NULL)
-	    {
-	      fixup_symbol_section (sym, sal->symtab->compunit ()->objfile ());
-	      sal->section
-		= sym->obj_section (sal->symtab->compunit ()->objfile ());
-	    }
+	    sal->section
+	      = sym->obj_section (sal->symtab->compunit ()->objfile ());
 	  else
 	    {
 	      /* It really is worthwhile to have the section, so we'll

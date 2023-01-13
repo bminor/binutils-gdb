@@ -5389,9 +5389,7 @@ match_data::operator() (struct block_symbol *bsym)
   if (sym == NULL)
     {
       if (!found_sym && arg_sym != NULL)
-	add_defn_to_vec (*resultp,
-			 fixup_symbol_section (arg_sym, objfile),
-			 block);
+	add_defn_to_vec (*resultp, arg_sym, block);
       found_sym = false;
       arg_sym = NULL;
     }
@@ -5404,9 +5402,7 @@ match_data::operator() (struct block_symbol *bsym)
       else
 	{
 	  found_sym = true;
-	  add_defn_to_vec (*resultp,
-			   fixup_symbol_section (sym, objfile),
-			   block);
+	  add_defn_to_vec (*resultp, sym, block);
 	}
     }
   return true;
@@ -5808,9 +5804,7 @@ ada_lookup_symbol (const char *name, const struct block *block0,
   if (candidates.empty ())
     return {};
 
-  block_symbol info = candidates[0];
-  info.symbol = fixup_symbol_section (info.symbol, NULL);
-  return info;
+  return candidates[0];
 }
 
 
@@ -6098,9 +6092,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	      else
 		{
 		  found_sym = true;
-		  add_defn_to_vec (result,
-				   fixup_symbol_section (sym, objfile),
-				   block);
+		  add_defn_to_vec (result, sym, block);
 		}
 	    }
 	}
@@ -6113,9 +6105,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 
   if (!found_sym && arg_sym != NULL)
     {
-      add_defn_to_vec (result,
-		       fixup_symbol_section (arg_sym, objfile),
-		       block);
+      add_defn_to_vec (result, arg_sym, block);
     }
 
   if (!lookup_name.ada ().wild_match_p ())
@@ -6152,9 +6142,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		    else
 		      {
 			found_sym = true;
-			add_defn_to_vec (result,
-					 fixup_symbol_section (sym, objfile),
-					 block);
+			add_defn_to_vec (result, sym, block);
 		      }
 		  }
 	      }
@@ -6165,9 +6153,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	 They aren't parameters, right?  */
       if (!found_sym && arg_sym != NULL)
 	{
-	  add_defn_to_vec (result,
-			   fixup_symbol_section (arg_sym, objfile),
-			   block);
+	  add_defn_to_vec (result, arg_sym, block);
 	}
     }
 }
