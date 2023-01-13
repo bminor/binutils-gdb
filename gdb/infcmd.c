@@ -1720,22 +1720,25 @@ finish_backward (struct finish_command_fsm *sm)
   sal = find_pc_line (func_addr, 0);
 
   frame_info_ptr frame = get_selected_frame (nullptr);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  CORE_ADDR alt_entry_point = sal.pc;
+  CORE_ADDR entry_point = alt_entry_point;
 
-  if (sal.pc != pc)
+  if (gdbarch_skip_entrypoint_p (gdbarch))
     {
-      struct gdbarch *gdbarch = get_frame_arch (frame);
-
-      /* Set a step-resume at the function's entry point.  Once that's
-	 hit, we'll do one more step backwards.  */
-      symtab_and_line sr_sal;
-      sr_sal.pc = sal.pc;
-      sr_sal.pspace = get_frame_program_space (frame);
-      insert_step_resume_breakpoint_at_sal (gdbarch,
-					    sr_sal, null_frame_id);
+      /* Some architectures, like PowerPC use local and global entry points.
+	 There is only one Entry Point (GEP = LEP) for other architectures.
+	 The GEP is an alternate entry point.  The LEP is the normal entry
+	 point.  The value of entry_point was initialized to the alternate
+	 entry point (GEP).  It will be adjusted if the normal entry point
+	 (LEP) was used.  */
+       entry_point = gdbarch_skip_entrypoint (gdbarch, entry_point);
     }
-  else
+
+  if (alt_entry_point <= pc && pc <= entry_point)
     {
-      /* We are exactly at the function entry point.  Note that this
+      /* We are exactly at the function entry point, or between the entry
+	 point on platforms that have two (like PowerPC).  Note that this
 	 can only happen at frame #0.
 
 	 When setting a step range, need to call set_step_info
@@ -1744,8 +1747,17 @@ finish_backward (struct finish_command_fsm *sm)
 
       /* Return using a step range so we will keep stepping back
 	 to the first instruction in the source code line.  */
-      tp->control.step_range_start = sal.pc;
-      tp->control.step_range_end = sal.pc;
+      tp->control.step_range_start = alt_entry_point;
+      tp->control.step_range_end = entry_point;
+    }
+  else
+    {
+      symtab_and_line sr_sal;
+      /* Set a step-resume at the function's entry point.  */
+      sr_sal.pc = entry_point;
+      sr_sal.pspace = get_frame_program_space (frame);
+      insert_step_resume_breakpoint_at_sal (gdbarch,
+					    sr_sal, null_frame_id);
     }
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }
