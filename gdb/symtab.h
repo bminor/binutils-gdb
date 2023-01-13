@@ -2381,8 +2381,12 @@ extern void skip_prologue_sal (struct symtab_and_line *);
 extern CORE_ADDR skip_prologue_using_sal (struct gdbarch *gdbarch,
 					  CORE_ADDR func_addr);
 
-extern struct symbol *fixup_symbol_section (struct symbol *,
-					    struct objfile *);
+/* If SYM requires a section index, find it either via minimal symbols
+   or examining OBJFILE's sections.  Note that SYM's current address
+   must not have any runtime offsets applied.  */
+
+extern void fixup_symbol_section (struct symbol *sym,
+				  struct objfile *objfile);
 
 /* If MSYMBOL is an text symbol, look for a function debug symbol with
    the same address.  Returns NULL if not found.  This is necessary in

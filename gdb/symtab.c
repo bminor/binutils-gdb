@@ -1701,18 +1701,39 @@ symtab_free_objfile_observer (struct objfile *objfile)
   symbol_cache_flush (objfile->pspace);
 }
 
-/* Debug symbols usually don't have section information.  We need to dig that
-   out of the minimal symbols and stash that in the debug symbol.
+/* See symtab.h.  */
 
-   DEFAULT_SECTION is the section index to use as the default if the
-   correct section cannot be found.  It may be -1, in which case a
-   built-in default is used.  */
-
-static void
-fixup_section (struct general_symbol_info *ginfo,
-	       CORE_ADDR addr, struct objfile *objfile,
-	       int default_section)
+void
+fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 {
+  gdb_assert (sym != nullptr);
+  gdb_assert (sym->is_objfile_owned ());
+  gdb_assert (objfile != nullptr);
+  gdb_assert (sym->section_index () == -1);
+
+  /* Note that if this ends up as -1, fixup_section will handle that
+     reasonably well.  So, it's fine to use the objfile's section
+     index without doing the check that is done by the wrapper macros
+     like SECT_OFF_TEXT.  */
+  int fallback;
+  switch (sym->aclass ())
+    {
+    case LOC_STATIC:
+      fallback = objfile->sect_index_data;
+      break;
+
+    case LOC_LABEL:
+      fallback = objfile->sect_index_text;
+      break;
+
+    default:
+      /* Nothing else will be listed in the minsyms -- no use looking
+	 it up.  */
+      return;
+    }
+
+  CORE_ADDR addr = sym->value_address ();
+
   struct minimal_symbol *msym;
 
   /* First, check whether a minimal symbol with the same name exists
@@ -1720,10 +1741,10 @@ fixup_section (struct general_symbol_info *ginfo,
      e.g. on PowerPC64, where the minimal symbol for a function will
      point to the function descriptor, while the debug symbol will
      point to the actual function code.  */
-  msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->linkage_name (),
+  msym = lookup_minimal_symbol_by_pc_name (addr, sym->linkage_name (),
 					   objfile);
   if (msym)
-    ginfo->set_section_index (msym->section_index ());
+    sym->set_section_index (msym->section_index ());
   else
     {
       /* Static, function-local variables do appear in the linker
@@ -1762,10 +1783,12 @@ fixup_section (struct general_symbol_info *ginfo,
 	 a search of the section table.  */
 
       struct obj_section *s;
-      int fallback = default_section;
 
       ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
+	  if ((bfd_section_flags (s->the_bfd_section) & SEC_ALLOC) == 0)
+	    continue;
+
 	  int idx = s - objfile->sections;
 	  CORE_ADDR offset = objfile->section_offsets[idx];
 
@@ -1774,7 +1797,7 @@ fixup_section (struct general_symbol_info *ginfo,
 
 	  if (s->addr () - offset <= addr && addr < s->endaddr () - offset)
 	    {
-	      ginfo->set_section_index (idx);
+	      sym->set_section_index (idx);
 	      return;
 	    }
 	}
@@ -1783,62 +1806,10 @@ fixup_section (struct general_symbol_info *ginfo,
 	 section.  If there is no allocated section, then it hardly
 	 matters what we pick, so just pick zero.  */
       if (fallback == -1)
-	ginfo->set_section_index (0);
+	sym->set_section_index (0);
       else
-	ginfo->set_section_index (fallback);
+	sym->set_section_index (fallback);
     }
-}
-
-struct symbol *
-fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
-{
-  CORE_ADDR addr;
-
-  if (!sym)
-    return NULL;
-
-  if (!sym->is_objfile_owned ())
-    return sym;
-
-  /* We either have an OBJFILE, or we can get at it from the sym's
-     symtab.  Anything else is a bug.  */
-  gdb_assert (objfile || sym->symtab ());
-
-  if (objfile == NULL)
-    objfile = sym->objfile ();
-
-  if (sym->obj_section (objfile) != nullptr)
-    return sym;
-
-  /* We should have an objfile by now.  */
-  gdb_assert (objfile);
-
-  /* Note that if this ends up as -1, fixup_section will handle that
-     reasonably well.  So, it's fine to use the objfile's section
-     index without doing the check that is done by the wrapper macros
-     like SECT_OFF_TEXT.  */
-  int default_section = objfile->sect_index_text;
-  switch (sym->aclass ())
-    {
-    case LOC_STATIC:
-      default_section = objfile->sect_index_data;
-      /* FALLTHROUGH.  */
-    case LOC_LABEL:
-      addr = sym->value_address ();
-      break;
-    case LOC_BLOCK:
-      addr = sym->value_block ()->entry_pc ();
-      break;
-
-    default:
-      /* Nothing else will be listed in the minsyms -- no use looking
-	 it up.  */
-      return sym;
-    }
-
-  fixup_section (sym, addr, objfile, default_section);
-
-  return sym;
 }
 
 /* See symtab.h.  */
