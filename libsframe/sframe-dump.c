@@ -176,8 +176,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
       const char *ra_mangled_p_str
 	= ((sframe_fre_get_ra_mangled_p (sfd_ctx, &fre, &err[2]))
 	   ? "[s]" : "   ");
-      size_t ra_mangled_p_str_size = strlen (ra_mangled_p_str);
-      strncat (temp, ra_mangled_p_str, ra_mangled_p_str_size);
+      strcat (temp, ra_mangled_p_str);
       printf ("%-13s", temp);
     }
 }
