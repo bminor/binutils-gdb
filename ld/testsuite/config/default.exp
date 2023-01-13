@@ -383,6 +383,7 @@ proc compiler_supports { flag args } {
 	    append flags " [board_info [target_info name] ldflags]"
 	}
 	set fn "cs[pid].c"
+	set rfno "cs[pid].exe"
 	set f [open $fn "w"]
 	if { [llength $args] > 0 } {
 	    puts $f [lindex $args 0]
@@ -391,7 +392,8 @@ proc compiler_supports { flag args } {
 	}
 	close $f
 	set rfn [remote_download host $fn]
-	set avail [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $flag $rfn -o /dev/null"]
+	set avail [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $flag $rfn -o $rfno"]
+	remote_file host delete $rfno
 	remote_file host delete $rfn
 	file delete $fn
 	return $avail
