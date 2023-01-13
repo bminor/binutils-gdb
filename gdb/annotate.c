@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,14 +22,16 @@
 #include "target.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
-#include "observer.h"
+#include "observable.h"
 #include "inferior.h"
 #include "infrun.h"
+#include "top.h"
+#include "source.h"
+#include "objfiles.h"
+#include "source-cache.h"
 
 
 /* Prototypes for local functions.  */
-
-extern void _initialize_annotate (void);
 
 static void print_value_flags (struct type *);
 
@@ -46,16 +48,6 @@ void (*deprecated_annotate_signal_hook) (void);
 static int frames_invalid_emitted;
 static int breakpoints_invalid_emitted;
 
-/* True if the target can async, and a synchronous execution command
-   is not in progress.  If true, input is accepted, so don't suppress
-   annotations.  */
-
-static int
-async_background_execution_p (void)
-{
-  return (target_can_async_p () && !sync_execution);
-}
-
 static void
 print_value_flags (struct type *t)
 {
@@ -70,19 +62,12 @@ annotate_breakpoints_invalid (void)
 {
   if (annotation_level == 2
       && (!breakpoints_invalid_emitted
-	  || async_background_execution_p ()))
+	  || current_ui->prompt_state != PROMPT_BLOCKED))
     {
-      /* If the inferior owns the terminal (e.g., we're resuming),
-	 make sure to leave with the inferior still owning it.  */
-      int was_inferior = target_terminal_is_inferior ();
-
-      target_terminal_ours_for_output ();
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
 
       printf_unfiltered (("\n\032\032breakpoints-invalid\n"));
-
-      if (was_inferior)
-	target_terminal_inferior ();
-
       breakpoints_invalid_emitted = 1;
     }
 }
@@ -217,19 +202,12 @@ annotate_frames_invalid (void)
 {
   if (annotation_level == 2
       && (!frames_invalid_emitted
-	  || async_background_execution_p ()))
+	  || current_ui->prompt_state != PROMPT_BLOCKED))
     {
-      /* If the inferior owns the terminal (e.g., we're resuming),
-	 make sure to leave with the inferior still owning it.  */
-      int was_inferior = target_terminal_is_inferior ();
-
-      target_terminal_ours_for_output ();
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
 
       printf_unfiltered (("\n\032\032frames-invalid\n"));
-
-      if (was_inferior)
-	target_terminal_inferior ();
-
       frames_invalid_emitted = 1;
     }
 }
@@ -249,6 +227,19 @@ annotate_thread_changed (void)
   if (annotation_level > 1)
     {
       printf_unfiltered (("\n\032\032thread-changed\n"));
+    }
+}
+
+/* Emit notification on thread exit.  */
+
+static void
+annotate_thread_exited (struct thread_info *t, int silent)
+{
+  if (annotation_level > 1)
+    {
+      printf_filtered(("\n\032\032thread-exited,"
+                       "id=\"%d\",group-id=\"i%d\"\n"),
+                      t->global_num, t->inf->num);
     }
 }
 
@@ -429,8 +420,8 @@ annotate_arg_end (void)
     printf_filtered (("\n\032\032arg-end\n"));
 }
 
-void
-annotate_source (char *filename, int line, int character, int mid,
+static void
+annotate_source (const char *filename, int line, int character, int mid,
 		 struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (annotation_level > 1)
@@ -441,6 +432,29 @@ annotate_source (char *filename, int line, int character, int mid,
   printf_filtered (("%s:%d:%d:%s:%s\n"), filename, line, character,
 		   mid ? "middle" : "beg", paddress (gdbarch, pc));
 }
+
+/* See annotate.h.  */
+
+void
+annotate_source_line (struct symtab *s, int line, int mid_statement,
+		      CORE_ADDR pc)
+{
+  if (annotation_level > 0)
+    {
+      const std::vector<off_t> *offsets;
+      if (!g_source_cache.get_line_charpos (s, &offsets))
+	return;
+
+      /* Don't index off the end of the line_charpos array.  */
+      if (line > offsets->size ())
+	return;
+
+      annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
+		       mid_statement, get_objfile_arch (SYMTAB_OBJFILE (s)),
+		       pc);
+    }
+}
+
 
 void
 annotate_frame_begin (int level, struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -600,10 +614,12 @@ breakpoint_changed (struct breakpoint *b)
   annotate_breakpoints_invalid ();
 }
 
+void _initialize_annotate ();
 void
-_initialize_annotate (void)
+_initialize_annotate ()
 {
-  observer_attach_breakpoint_created (breakpoint_changed);
-  observer_attach_breakpoint_deleted (breakpoint_changed);
-  observer_attach_breakpoint_modified (breakpoint_changed);
+  gdb::observers::breakpoint_created.attach (breakpoint_changed);
+  gdb::observers::breakpoint_deleted.attach (breakpoint_changed);
+  gdb::observers::breakpoint_modified.attach (breakpoint_changed);
+  gdb::observers::thread_exit.attach (annotate_thread_exited);
 }

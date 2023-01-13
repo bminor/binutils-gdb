@@ -1,6 +1,6 @@
 /* Readline support for Python.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #include "python-internal.h"
 #include "top.h"
 #include "cli/cli-utils.h"
+
 /* Readline function suitable for PyOS_ReadlineFunctionPointer, which
    is used for Python's interactive parser and raw_input.  In both
    cases, sys_stdin and sys_stdout are always stdin and stdout
@@ -36,14 +37,15 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 #endif
 {
   int n;
-  char *p = NULL, *q;
+  const char *p = NULL;
+  char *q;
 
-  TRY
+  try
     {
-      p = command_line_input (prompt, 0, "python");
+      p = command_line_input (prompt, "python");
     }
   /* Handle errors by raising Python exceptions.  */
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
       /* Detect user interrupt (Ctrl-C).  */
       if (except.reason == RETURN_QUIT)
@@ -58,12 +60,11 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
       PyEval_SaveThread ();
       return NULL;
     }
-  END_CATCH
 
   /* Detect EOF (Ctrl-D).  */
   if (p == NULL)
     {
-      q = (char *) PyMem_Malloc (1);
+      q = (char *) PyMem_RawMalloc (1);
       if (q != NULL)
 	q[0] = '\0';
       return q;
@@ -72,10 +73,10 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
   n = strlen (p);
 
   /* Copy the line to Python and return.  */
-  q = (char *) PyMem_Malloc (n + 2);
+  q = (char *) PyMem_RawMalloc (n + 2);
   if (q != NULL)
     {
-      strncpy (q, p, n);
+      strcpy (q, p);
       q[n] = '\n';
       q[n + 1] = '\0';
     }

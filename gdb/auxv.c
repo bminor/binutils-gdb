@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,8 +24,8 @@
 #include "inferior.h"
 #include "valprint.h"
 #include "gdbcore.h"
-#include "observer.h"
-#include "filestuff.h"
+#include "observable.h"
+#include "gdbsupport/filestuff.h"
 #include "objfiles.h"
 
 #include "auxv.h"
@@ -46,13 +46,11 @@ procfs_xfer_auxv (gdb_byte *readbuf,
 		  ULONGEST len,
 		  ULONGEST *xfered_len)
 {
-  char *pathname;
   int fd;
   ssize_t l;
 
-  pathname = xstrprintf ("/proc/%d/auxv", ptid_get_pid (inferior_ptid));
+  std::string pathname = string_printf ("/proc/%d/auxv", inferior_ptid.pid ());
   fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
-  xfree (pathname);
   if (fd < 0)
     return TARGET_XFER_E_IO;
 
@@ -283,58 +281,35 @@ default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 int
-target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
-                  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+target_auxv_parse (gdb_byte **readptr,
+		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   struct gdbarch *gdbarch = target_gdbarch();
 
   if (gdbarch_auxv_parse_p (gdbarch))
     return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
 
-  return current_target.to_auxv_parse (&current_target, readptr, endptr,
-				       typep, valp);
+  return current_top_target ()->auxv_parse (readptr, endptr, typep, valp);
 }
 
-
-/* Per-inferior data key for auxv.  */
-static const struct inferior_data *auxv_inferior_data;
 
 /*  Auxiliary Vector information structure.  This is used by GDB
     for caching purposes for each inferior.  This helps reduce the
     overhead of transfering data from a remote target to the local host.  */
 struct auxv_info
 {
-  LONGEST length;
-  gdb_byte *data;
+  gdb::optional<gdb::byte_vector> data;
 };
 
-/* Handles the cleanup of the auxv cache for inferior INF.  ARG is ignored.
-   Frees whatever allocated space there is to be freed and sets INF's auxv cache
-   data pointer to NULL.
-
-   This function is called when the following events occur: inferior_appeared,
-   inferior_exit and executable_changed.  */
-
-static void
-auxv_inferior_data_cleanup (struct inferior *inf, void *arg)
-{
-  struct auxv_info *info;
-
-  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
-  if (info != NULL)
-    {
-      xfree (info->data);
-      xfree (info);
-      set_inferior_data (inf, auxv_inferior_data, NULL);
-    }
-}
+/* Per-inferior data key for auxv.  */
+static const struct inferior_key<auxv_info> auxv_inferior_data;
 
 /* Invalidate INF's auxv cache.  */
 
 static void
 invalidate_auxv_cache_inf (struct inferior *inf)
 {
-  auxv_inferior_data_cleanup (inf, NULL);
+  auxv_inferior_data.clear (inf);
 }
 
 /* Invalidate current inferior's auxv cache.  */
@@ -355,13 +330,11 @@ get_auxv_inferior_data (struct target_ops *ops)
   struct auxv_info *info;
   struct inferior *inf = current_inferior ();
 
-  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
+  info = auxv_inferior_data.get (inf);
   if (info == NULL)
     {
-      info = XCNEW (struct auxv_info);
-      info->length = target_read_alloc (ops, TARGET_OBJECT_AUXV,
-					NULL, &info->data);
-      set_inferior_data (inf, auxv_inferior_data, info);
+      info = auxv_inferior_data.emplace (inf);
+      info->data = target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
     }
 
   return info;
@@ -375,20 +348,17 @@ int
 target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 {
   CORE_ADDR type, val;
-  gdb_byte *data;
-  gdb_byte *ptr;
-  struct auxv_info *info;
+  auxv_info *info = get_auxv_inferior_data (ops);
 
-  info = get_auxv_inferior_data (ops);
+  if (!info->data)
+    return -1;
 
-  data = info->data;
-  ptr = data;
-
-  if (info->length <= 0)
-    return info->length;
+  gdb_byte *data = info->data->data ();
+  gdb_byte *ptr = data;
+  size_t len = info->data->size ();
 
   while (1)
-    switch (target_auxv_parse (ops, &ptr, data + info->length, &type, &val))
+    switch (target_auxv_parse (&ptr, data + len, &type, &val))
       {
       case 1:			/* Here's an entry, check it.  */
 	if (type == match)
@@ -407,112 +377,151 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 }
 
 
+/* Print the description of a single AUXV entry on the specified file.  */
+
+void
+fprint_auxv_entry (struct ui_file *file, const char *name,
+		   const char *description, enum auxv_format format,
+		   CORE_ADDR type, CORE_ADDR val)
+{
+  fprintf_filtered (file, ("%-4s %-20s %-30s "),
+		    plongest (type), name, description);
+  switch (format)
+    {
+    case AUXV_FORMAT_DEC:
+      fprintf_filtered (file, ("%s\n"), plongest (val));
+      break;
+    case AUXV_FORMAT_HEX:
+      fprintf_filtered (file, ("%s\n"), paddress (target_gdbarch (), val));
+      break;
+    case AUXV_FORMAT_STR:
+      {
+	struct value_print_options opts;
+
+	get_user_print_options (&opts);
+	if (opts.addressprint)
+	  fprintf_filtered (file, ("%s "), paddress (target_gdbarch (), val));
+	val_print_string (builtin_type (target_gdbarch ())->builtin_char,
+			  NULL, val, -1, file, &opts);
+	fprintf_filtered (file, ("\n"));
+      }
+      break;
+    }
+}
+
+/* The default implementation of gdbarch_print_auxv_entry.  */
+
+void
+default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
+			  CORE_ADDR type, CORE_ADDR val)
+{
+  const char *name = "???";
+  const char *description = "";
+  enum auxv_format format = AUXV_FORMAT_HEX;
+
+  switch (type)
+    {
+#define TAG(tag, text, kind) \
+      case tag: name = #tag; description = text; format = kind; break
+      TAG (AT_NULL, _("End of vector"), AUXV_FORMAT_HEX);
+      TAG (AT_IGNORE, _("Entry should be ignored"), AUXV_FORMAT_HEX);
+      TAG (AT_EXECFD, _("File descriptor of program"), AUXV_FORMAT_DEC);
+      TAG (AT_PHDR, _("Program headers for program"), AUXV_FORMAT_HEX);
+      TAG (AT_PHENT, _("Size of program header entry"), AUXV_FORMAT_DEC);
+      TAG (AT_PHNUM, _("Number of program headers"), AUXV_FORMAT_DEC);
+      TAG (AT_PAGESZ, _("System page size"), AUXV_FORMAT_DEC);
+      TAG (AT_BASE, _("Base address of interpreter"), AUXV_FORMAT_HEX);
+      TAG (AT_FLAGS, _("Flags"), AUXV_FORMAT_HEX);
+      TAG (AT_ENTRY, _("Entry point of program"), AUXV_FORMAT_HEX);
+      TAG (AT_NOTELF, _("Program is not ELF"), AUXV_FORMAT_DEC);
+      TAG (AT_UID, _("Real user ID"), AUXV_FORMAT_DEC);
+      TAG (AT_EUID, _("Effective user ID"), AUXV_FORMAT_DEC);
+      TAG (AT_GID, _("Real group ID"), AUXV_FORMAT_DEC);
+      TAG (AT_EGID, _("Effective group ID"), AUXV_FORMAT_DEC);
+      TAG (AT_CLKTCK, _("Frequency of times()"), AUXV_FORMAT_DEC);
+      TAG (AT_PLATFORM, _("String identifying platform"), AUXV_FORMAT_STR);
+      TAG (AT_HWCAP, _("Machine-dependent CPU capability hints"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_FPUCW, _("Used FPU control word"), AUXV_FORMAT_DEC);
+      TAG (AT_DCACHEBSIZE, _("Data cache block size"), AUXV_FORMAT_DEC);
+      TAG (AT_ICACHEBSIZE, _("Instruction cache block size"), AUXV_FORMAT_DEC);
+      TAG (AT_UCACHEBSIZE, _("Unified cache block size"), AUXV_FORMAT_DEC);
+      TAG (AT_IGNOREPPC, _("Entry should be ignored"), AUXV_FORMAT_DEC);
+      TAG (AT_BASE_PLATFORM, _("String identifying base platform"),
+	   AUXV_FORMAT_STR);
+      TAG (AT_RANDOM, _("Address of 16 random bytes"), AUXV_FORMAT_HEX);
+      TAG (AT_HWCAP2, _("Extension of AT_HWCAP"), AUXV_FORMAT_HEX);
+      TAG (AT_EXECFN, _("File name of executable"), AUXV_FORMAT_STR);
+      TAG (AT_SECURE, _("Boolean, was exec setuid-like?"), AUXV_FORMAT_DEC);
+      TAG (AT_SYSINFO, _("Special system info/entry points"), AUXV_FORMAT_HEX);
+      TAG (AT_SYSINFO_EHDR, _("System-supplied DSO's ELF header"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_L1I_CACHESHAPE, _("L1 Instruction cache information"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_L1D_CACHESHAPE, _("L1 Data cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_L2_CACHESHAPE, _("L2 cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_L3_CACHESHAPE, _("L3 cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_SUN_UID, _("Effective user ID"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_RUID, _("Real user ID"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_GID, _("Effective group ID"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_RGID, _("Real group ID"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_LDELF, _("Dynamic linker's ELF header"), AUXV_FORMAT_HEX);
+      TAG (AT_SUN_LDSHDR, _("Dynamic linker's section headers"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_LDNAME, _("String giving name of dynamic linker"),
+	   AUXV_FORMAT_STR);
+      TAG (AT_SUN_LPAGESZ, _("Large pagesize"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_PLATFORM, _("Platform name string"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_CAP_HW1, _("Machine-dependent CPU capability hints"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_IFLUSH, _("Should flush icache?"), AUXV_FORMAT_DEC);
+      TAG (AT_SUN_CPU, _("CPU name string"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_EMUL_ENTRY, _("COFF entry point address"), AUXV_FORMAT_HEX);
+      TAG (AT_SUN_EMUL_EXECFD, _("COFF executable file descriptor"),
+	   AUXV_FORMAT_DEC);
+      TAG (AT_SUN_EXECNAME,
+	   _("Canonicalized file name given to execve"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_MMU, _("String for name of MMU module"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_LDDATA, _("Dynamic linker's data segment address"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_AUXFLAGS,
+	   _("AF_SUN_ flags passed from the kernel"), AUXV_FORMAT_HEX);
+      TAG (AT_SUN_EMULATOR, _("Name of emulation binary for runtime linker"),
+	   AUXV_FORMAT_STR);
+      TAG (AT_SUN_BRANDNAME, _("Name of brand library"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_BRAND_AUX1, _("Aux vector for brand modules 1"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_BRAND_AUX2, _("Aux vector for brand modules 2"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_BRAND_AUX3, _("Aux vector for brand modules 3"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_CAP_HW2, _("Machine-dependent CPU capability hints 2"),
+	   AUXV_FORMAT_HEX);
+    }
+
+  fprint_auxv_entry (file, name, description, format, type, val);
+}
+
 /* Print the contents of the target's AUXV on the specified file.  */
+
 int
 fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
+  struct gdbarch *gdbarch = target_gdbarch ();
   CORE_ADDR type, val;
-  gdb_byte *data;
-  gdb_byte *ptr;
-  struct auxv_info *info;
   int ents = 0;
+  auxv_info *info = get_auxv_inferior_data (ops);
 
-  info = get_auxv_inferior_data (ops);
+  if (!info->data)
+    return -1;
 
-  data = info->data;
-  ptr = data;
-  if (info->length <= 0)
-    return info->length;
+  gdb_byte *data = info->data->data ();
+  gdb_byte *ptr = data;
+  size_t len = info->data->size ();
 
-  while (target_auxv_parse (ops, &ptr, data + info->length, &type, &val) > 0)
+  while (target_auxv_parse (&ptr, data + len, &type, &val) > 0)
     {
-      const char *name = "???";
-      const char *description = "";
-      enum { dec, hex, str } flavor = hex;
-
-      switch (type)
-	{
-#define TAG(tag, text, kind) \
-	case tag: name = #tag; description = text; flavor = kind; break
-	  TAG (AT_NULL, _("End of vector"), hex);
-	  TAG (AT_IGNORE, _("Entry should be ignored"), hex);
-	  TAG (AT_EXECFD, _("File descriptor of program"), dec);
-	  TAG (AT_PHDR, _("Program headers for program"), hex);
-	  TAG (AT_PHENT, _("Size of program header entry"), dec);
-	  TAG (AT_PHNUM, _("Number of program headers"), dec);
-	  TAG (AT_PAGESZ, _("System page size"), dec);
-	  TAG (AT_BASE, _("Base address of interpreter"), hex);
-	  TAG (AT_FLAGS, _("Flags"), hex);
-	  TAG (AT_ENTRY, _("Entry point of program"), hex);
-	  TAG (AT_NOTELF, _("Program is not ELF"), dec);
-	  TAG (AT_UID, _("Real user ID"), dec);
-	  TAG (AT_EUID, _("Effective user ID"), dec);
-	  TAG (AT_GID, _("Real group ID"), dec);
-	  TAG (AT_EGID, _("Effective group ID"), dec);
-	  TAG (AT_CLKTCK, _("Frequency of times()"), dec);
-	  TAG (AT_PLATFORM, _("String identifying platform"), str);
-	  TAG (AT_HWCAP, _("Machine-dependent CPU capability hints"), hex);
-	  TAG (AT_FPUCW, _("Used FPU control word"), dec);
-	  TAG (AT_DCACHEBSIZE, _("Data cache block size"), dec);
-	  TAG (AT_ICACHEBSIZE, _("Instruction cache block size"), dec);
-	  TAG (AT_UCACHEBSIZE, _("Unified cache block size"), dec);
-	  TAG (AT_IGNOREPPC, _("Entry should be ignored"), dec);
-	  TAG (AT_BASE_PLATFORM, _("String identifying base platform"), str);
-	  TAG (AT_RANDOM, _("Address of 16 random bytes"), hex);
-	  TAG (AT_HWCAP2, _("Extension of AT_HWCAP"), hex);
-	  TAG (AT_EXECFN, _("File name of executable"), str);
-	  TAG (AT_SECURE, _("Boolean, was exec setuid-like?"), dec);
-	  TAG (AT_SYSINFO, _("Special system info/entry points"), hex);
-	  TAG (AT_SYSINFO_EHDR, _("System-supplied DSO's ELF header"), hex);
-	  TAG (AT_L1I_CACHESHAPE, _("L1 Instruction cache information"), hex);
-	  TAG (AT_L1D_CACHESHAPE, _("L1 Data cache information"), hex);
-	  TAG (AT_L2_CACHESHAPE, _("L2 cache information"), hex);
-	  TAG (AT_L3_CACHESHAPE, _("L3 cache information"), hex);
-	  TAG (AT_SUN_UID, _("Effective user ID"), dec);
-	  TAG (AT_SUN_RUID, _("Real user ID"), dec);
-	  TAG (AT_SUN_GID, _("Effective group ID"), dec);
-	  TAG (AT_SUN_RGID, _("Real group ID"), dec);
-	  TAG (AT_SUN_LDELF, _("Dynamic linker's ELF header"), hex);
-	  TAG (AT_SUN_LDSHDR, _("Dynamic linker's section headers"), hex);
-	  TAG (AT_SUN_LDNAME, _("String giving name of dynamic linker"), str);
-	  TAG (AT_SUN_LPAGESZ, _("Large pagesize"), dec);
-	  TAG (AT_SUN_PLATFORM, _("Platform name string"), str);
-	  TAG (AT_SUN_HWCAP, _("Machine-dependent CPU capability hints"), hex);
-	  TAG (AT_SUN_IFLUSH, _("Should flush icache?"), dec);
-	  TAG (AT_SUN_CPU, _("CPU name string"), str);
-	  TAG (AT_SUN_EMUL_ENTRY, _("COFF entry point address"), hex);
-	  TAG (AT_SUN_EMUL_EXECFD, _("COFF executable file descriptor"), dec);
-	  TAG (AT_SUN_EXECNAME,
-	       _("Canonicalized file name given to execve"), str);
-	  TAG (AT_SUN_MMU, _("String for name of MMU module"), str);
-	  TAG (AT_SUN_LDDATA, _("Dynamic linker's data segment address"), hex);
-	  TAG (AT_SUN_AUXFLAGS,
-	       _("AF_SUN_ flags passed from the kernel"), hex);
-	}
-
-      fprintf_filtered (file, "%-4s %-20s %-30s ",
-			plongest (type), name, description);
-      switch (flavor)
-	{
-	case dec:
-	  fprintf_filtered (file, "%s\n", plongest (val));
-	  break;
-	case hex:
-	  fprintf_filtered (file, "%s\n", paddress (target_gdbarch (), val));
-	  break;
-	case str:
-	  {
-	    struct value_print_options opts;
-
-	    get_user_print_options (&opts);
-	    if (opts.addressprint)
-	      fprintf_filtered (file, "%s ", paddress (target_gdbarch (), val));
-	    val_print_string (builtin_type (target_gdbarch ())->builtin_char,
-			      NULL, val, -1, file, &opts);
-	    fprintf_filtered (file, "\n");
-	  }
-	  break;
-	}
+      gdbarch_print_auxv_entry (gdbarch, file, type, val);
       ++ents;
       if (type == AT_NULL)
 	break;
@@ -522,13 +531,13 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 }
 
 static void
-info_auxv_command (char *cmd, int from_tty)
+info_auxv_command (const char *cmd, int from_tty)
 {
   if (! target_has_stack)
     error (_("The program has no auxiliary information now."));
   else
     {
-      int ents = fprint_target_auxv (gdb_stdout, &current_target);
+      int ents = fprint_target_auxv (gdb_stdout, current_top_target ());
 
       if (ents < 0)
 	error (_("No auxiliary vector found, or failed reading it."));
@@ -537,22 +546,16 @@ info_auxv_command (char *cmd, int from_tty)
     }
 }
 
-
-extern initialize_file_ftype _initialize_auxv; /* -Wmissing-prototypes; */
-
+void _initialize_auxv ();
 void
-_initialize_auxv (void)
+_initialize_auxv ()
 {
   add_info ("auxv", info_auxv_command,
 	    _("Display the inferior's auxiliary vector.\n\
 This is information provided by the operating system at program startup."));
 
-  /* Set an auxv cache per-inferior.  */
-  auxv_inferior_data
-    = register_inferior_data_with_cleanup (NULL, auxv_inferior_data_cleanup);
-
   /* Observers used to invalidate the auxv cache when needed.  */
-  observer_attach_inferior_exit (invalidate_auxv_cache_inf);
-  observer_attach_inferior_appeared (invalidate_auxv_cache_inf);
-  observer_attach_executable_changed (invalidate_auxv_cache);
+  gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf);
+  gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf);
+  gdb::observers::executable_changed.attach (invalidate_auxv_cache);
 }

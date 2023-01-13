@@ -1,5 +1,5 @@
 /* MIPS ELF support for BFD.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    By Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>, from
    information in the System V Application Binary Interface, MIPS
@@ -29,6 +29,10 @@
 #define _ELF_MIPS_H
 
 #include "elf/reloc-macros.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Relocation types.  */
 START_RELOC_NUMBERS (elf_mips_reloc_type)
@@ -110,7 +114,8 @@ START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS16_TLS_GOTTPREL, 110)
   RELOC_NUMBER (R_MIPS16_TLS_TPREL_HI16, 111)
   RELOC_NUMBER (R_MIPS16_TLS_TPREL_LO16, 112)
-  FAKE_RELOC (R_MIPS16_max, 113)
+  RELOC_NUMBER (R_MIPS16_PC16_S1, 113)
+  FAKE_RELOC (R_MIPS16_max, 114)
   /* These relocations are specific to VxWorks.  */
   RELOC_NUMBER (R_MIPS_COPY, 126)
   RELOC_NUMBER (R_MIPS_JUMP_SLOT, 127)
@@ -289,11 +294,14 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 #define E_MIPS_MACH_OCTEON3	0x008e0000
 #define E_MIPS_MACH_5400	0x00910000
 #define E_MIPS_MACH_5900	0x00920000
+#define E_MIPS_MACH_IAMR2	0x00930000
 #define E_MIPS_MACH_5500	0x00980000
 #define E_MIPS_MACH_9000	0x00990000
 #define E_MIPS_MACH_LS2E        0x00A00000
 #define E_MIPS_MACH_LS2F        0x00A10000
-#define E_MIPS_MACH_LS3A        0x00A20000
+#define E_MIPS_MACH_GS464       0x00A20000
+#define E_MIPS_MACH_GS464E	0x00A30000
+#define E_MIPS_MACH_GS264E	0x00A40000
 
 /* Processor specific section indices.  These sections do not actually
    exist.  Symbols with a st_shndx field corresponding to one of these
@@ -443,6 +451,9 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 
 /* ABI related flags section.  */
 #define SHT_MIPS_ABIFLAGS	0x7000002a
+
+/* GNU style symbol hash table with xlat.  */
+#define SHT_MIPS_XHASH		0x7000002b
 
 /* A section of type SHT_MIPS_LIBLIST contains an array of the
    following structure.  The sh_link field is the section index of the
@@ -751,6 +762,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Relative offset of run time loader map, used for debugging.  */
 #define DT_MIPS_RLD_MAP_REL    0x70000035
+
+/* Address of .MIPS.xhash section.  */
+#define DT_MIPS_XHASH	       0x70000036
 
 /* Flags which may appear in a DT_MIPS_FLAGS entry.  */
 
@@ -1096,7 +1110,7 @@ typedef struct
   unsigned char flags2[4];
 } Elf_External_ABIFlags_v0;
 
-typedef struct
+typedef struct elf_internal_abiflags_v0
 {
   /* Version of flags structure.  */
   unsigned short version;
@@ -1227,14 +1241,22 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_ASE_MIPS16       0x00000400 /* MIPS16 ASE.  */
 #define AFL_ASE_MICROMIPS    0x00000800 /* MICROMIPS ASE.  */
 #define AFL_ASE_XPA          0x00001000 /* XPA ASE.  */
-#define AFL_ASE_MASK         0x00001fff /* All ASEs.  */
+#define AFL_ASE_DSPR3        0x00002000 /* DSP R3 ASE.  */
+#define AFL_ASE_MIPS16E2     0x00004000 /* MIPS16e2 ASE.  */
+#define AFL_ASE_CRC          0x00008000 /* CRC ASE.  */
+#define AFL_ASE_RESERVED1    0x00010000 /* Reserved by MIPS Tech for WIP.  */
+#define AFL_ASE_GINV         0x00020000 /* GINV ASE.  */
+#define AFL_ASE_LOONGSON_MMI 0x00040000 /* Loongson MMI ASE.  */
+#define AFL_ASE_LOONGSON_CAM 0x00080000 /* Loongson CAM ASE.  */
+#define AFL_ASE_LOONGSON_EXT 0x00100000 /* Loongson EXT instructions.  */
+#define AFL_ASE_LOONGSON_EXT2 0x00200000 /* Loongson EXT2 instructions.  */
+#define AFL_ASE_MASK         0x003effff /* All ASEs.  */
 
 /* Values for the isa_ext word of an ABI flags structure.  */
 
 #define AFL_EXT_XLR           1  /* RMI Xlr instruction.  */
 #define AFL_EXT_OCTEON2       2  /* Cavium Networks Octeon2.  */
 #define AFL_EXT_OCTEONP       3  /* Cavium Networks OcteonP.  */
-#define AFL_EXT_LOONGSON_3A   4  /* Loongson 3A.  */
 #define AFL_EXT_OCTEON        5  /* Cavium Networks Octeon.  */
 #define AFL_EXT_5900          6  /* MIPS R5900 instruction.  */
 #define AFL_EXT_4650          7  /* MIPS R4650 instruction.  */
@@ -1250,6 +1272,7 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_EXT_LOONGSON_2E  17  /* ST Microelectronics Loongson 2E.  */
 #define AFL_EXT_LOONGSON_2F  18  /* ST Microelectronics Loongson 2F.  */
 #define AFL_EXT_OCTEON3      19  /* Cavium Networks Octeon3.  */
+#define AFL_EXT_INTERAPTIV_MR2 20  /* Imagination interAptiv MR2.  */
 
 /* Masks for the flags1 word of an ABI flags structure.  */
 #define AFL_FLAGS1_ODDSPREG   1	 /* Uses odd single-precision registers.  */
@@ -1310,5 +1333,9 @@ enum
   /* Using 128-bit MSA.  */
   Val_GNU_MIPS_ABI_MSA_128 = 1,
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _ELF_MIPS_H */

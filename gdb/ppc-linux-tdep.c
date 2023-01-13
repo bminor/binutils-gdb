@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,22 +31,22 @@
 #include "osabi.h"
 #include "regset.h"
 #include "solib-svr4.h"
-#include "solib-spu.h"
 #include "solib.h"
 #include "solist.h"
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppc-linux-tdep.h"
+#include "arch/ppc-linux-common.h"
+#include "arch/ppc-linux-tdesc.h"
 #include "glibc-tdep.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "tramp-frame.h"
-#include "observer.h"
+#include "observable.h"
 #include "auxv.h"
 #include "elf/common.h"
 #include "elf/ppc64.h"
 #include "arch-utils.h"
-#include "spu-tdep.h"
 #include "xml-syscall.h"
 #include "linux-tdep.h"
 #include "linux-record.h"
@@ -60,22 +60,26 @@
 #include "parser-defs.h"
 #include "user-regs.h"
 #include <ctype.h>
-#include "elf-bfd.h"            /* for elfcore_write_* */
+#include "elf-bfd.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
-#include "features/rs6000/powerpc-cell32l.c"
 #include "features/rs6000/powerpc-vsx32l.c"
 #include "features/rs6000/powerpc-isa205-32l.c"
 #include "features/rs6000/powerpc-isa205-altivec32l.c"
 #include "features/rs6000/powerpc-isa205-vsx32l.c"
+#include "features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.c"
+#include "features/rs6000/powerpc-isa207-vsx32l.c"
+#include "features/rs6000/powerpc-isa207-htm-vsx32l.c"
 #include "features/rs6000/powerpc-64l.c"
 #include "features/rs6000/powerpc-altivec64l.c"
-#include "features/rs6000/powerpc-cell64l.c"
 #include "features/rs6000/powerpc-vsx64l.c"
 #include "features/rs6000/powerpc-isa205-64l.c"
 #include "features/rs6000/powerpc-isa205-altivec64l.c"
 #include "features/rs6000/powerpc-isa205-vsx64l.c"
+#include "features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.c"
+#include "features/rs6000/powerpc-isa207-vsx64l.c"
+#include "features/rs6000/powerpc-isa207-htm-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
 /* Shared library operations for PowerPC-Linux.  */
@@ -146,7 +150,7 @@ static struct target_so_ops powerpc_so_ops;
 	Examine the PLT again.  Note that the loading of the shared
 	library has initialized the PLT to code which loads a constant
 	(which I think is an index into the GOT) into r11 and then
-	branchs a short distance to the code which actually does the
+	branches a short distance to the code which actually does the
 	resolving.
 
 	    (gdb) x/2i 0x100409d4
@@ -218,15 +222,13 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   int val;
   int bplen;
   gdb_byte old_contents[BREAKPOINT_MAX];
-  struct cleanup *cleanup;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
-  if (bp == NULL)
-    error (_("Software breakpoints not implemented for this target."));
 
   /* Make sure we see the memory breakpoints.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, old_contents, bplen);
 
   /* If our breakpoint is no longer at the address, this means that the
@@ -235,7 +237,6 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
   if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
     val = target_write_raw_memory (addr, bp_tgt->shadow_contents, bplen);
 
-  do_cleanups (cleanup);
   return val;
 }
 
@@ -259,8 +260,8 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 				      readbuf, writebuf);
 }
 
-/* PLT stub in executable.  */
-static struct ppc_insn_pattern powerpc32_plt_stub[] =
+/* PLT stub in an executable.  */
+static const struct ppc_insn_pattern powerpc32_plt_stub[] =
   {
     { 0xffff0000, 0x3d600000, 0 },	/* lis   r11, xxxx	 */
     { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
@@ -269,16 +270,30 @@ static struct ppc_insn_pattern powerpc32_plt_stub[] =
     {          0,          0, 0 }
   };
 
-/* PLT stub in shared library.  */
-static struct ppc_insn_pattern powerpc32_plt_stub_so[] =
+/* PLT stubs in a shared library or PIE.
+   The first variant is used when the PLT entry is within +/-32k of
+   the GOT pointer (r30).  */
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_1[] =
   {
     { 0xffff0000, 0x817e0000, 0 },	/* lwz   r11, xxxx(r30)  */
     { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
     { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
-    { 0xffffffff, 0x60000000, 0 },	/* nop			 */
     {          0,          0, 0 }
   };
-#define POWERPC32_PLT_STUB_LEN 	ARRAY_SIZE (powerpc32_plt_stub)
+
+/* The second variant is used when the PLT entry is more than +/-32k
+   from the GOT pointer (r30).  */
+static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
+  {
+    { 0xffff0000, 0x3d7e0000, 0 },	/* addis r11, r30, xxxx  */
+    { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
+    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
+    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
+    {          0,          0, 0 }
+  };
+
+/* The max number of insns we check using ppc_insns_match_pattern.  */
+#define POWERPC32_PLT_CHECK_LEN (ARRAY_SIZE (powerpc32_plt_stub) - 1)
 
 /* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
    section.  For secure PLT, stub is in .text and we need to check
@@ -297,9 +312,8 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
   /* Check if we are in the resolver.  */
   sym = lookup_minimal_symbol_by_pc (pc);
   if (sym.minsym != NULL
-      && (strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym), "__glink") == 0
-	  || strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym),
-		     "__glink_PLTresolve") == 0))
+      && (strcmp (sym.minsym->linkage_name (), "__glink") == 0
+	  || strcmp (sym.minsym->linkage_name (), "__glink_PLTresolve") == 0))
     return 1;
 
   return 0;
@@ -309,13 +323,13 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 
    When the execution direction is EXEC_REVERSE, scan backward to
    check whether we are in the middle of a PLT stub.  Currently,
-   we only look-behind at most 4 instructions (the max length of PLT
+   we only look-behind at most 4 instructions (the max length of a PLT
    stub sequence.  */
 
 static CORE_ADDR
 ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  unsigned int insnbuf[POWERPC32_PLT_STUB_LEN];
+  unsigned int insnbuf[POWERPC32_PLT_CHECK_LEN];
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -326,40 +340,47 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   /* When reverse-debugging, scan backward to check whether we are
      in the middle of trampoline code.  */
   if (execution_direction == EXEC_REVERSE)
-    scan_limit = 4;	/* At more 4 instructions.  */
+    scan_limit = 4;	/* At most 4 instructions.  */
 
   for (i = 0; i < scan_limit; i++)
     {
       if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub, insnbuf))
 	{
-	  /* Insn pattern is
+	  /* Calculate PLT entry address from
 	     lis   r11, xxxx
-	     lwz   r11, xxxx(r11)
-	     Branch target is in r11.  */
-
-	  target = (ppc_insn_d_field (insnbuf[0]) << 16)
-		   | ppc_insn_d_field (insnbuf[1]);
-	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	     lwz   r11, xxxx(r11).  */
+	  target = ((ppc_insn_d_field (insnbuf[0]) << 16)
+		    + ppc_insn_d_field (insnbuf[1]));
 	}
-      else if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so,
+      else if (i < ARRAY_SIZE (powerpc32_plt_stub_so_1) - 1
+	       && ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so_1,
+					   insnbuf))
+	{
+	  /* Calculate PLT entry address from
+	     lwz   r11, xxxx(r30).  */
+	  target = (ppc_insn_d_field (insnbuf[0])
+		    + get_frame_register_unsigned (frame,
+						   tdep->ppc_gp0_regnum + 30));
+	}
+      else if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so_2,
 					insnbuf))
 	{
-	  /* Insn pattern is
-	     lwz   r11, xxxx(r30)
-	     Branch target is in r11.  */
-
-	  target = get_frame_register_unsigned (frame,
-						tdep->ppc_gp0_regnum + 30)
-		   + ppc_insn_d_field (insnbuf[0]);
-	  target = read_memory_unsigned_integer (target, 4, byte_order);
+	  /* Calculate PLT entry address from
+	     addis r11, r30, xxxx
+	     lwz   r11, xxxx(r11).  */
+	  target = ((ppc_insn_d_field (insnbuf[0]) << 16)
+		    + ppc_insn_d_field (insnbuf[1])
+		    + get_frame_register_unsigned (frame,
+						   tdep->ppc_gp0_regnum + 30));
 	}
       else
 	{
-	  /* Scan backward one more instructions if doesn't match.  */
+	  /* Scan backward one more instruction if it doesn't match.  */
 	  pc -= 4;
 	  continue;
 	}
 
+      target = read_memory_unsigned_integer (target, 4, byte_order);
       return target;
     }
 
@@ -378,7 +399,7 @@ ppc_linux_supply_gregset (const struct regset *regset,
 
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);
 
-  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+  if (ppc_linux_trap_reg_p (regcache->arch ()))
     {
       /* "orig_r3" is stored 2 slots after "pc".  */
       if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
@@ -408,7 +429,7 @@ ppc_linux_collect_gregset (const struct regset *regset,
 
   ppc_collect_gregset (regset, regcache, regnum, gregs, len);
 
-  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+  if (ppc_linux_trap_reg_p (regcache->arch ()))
     {
       /* "orig_r3" is stored 2 slots after "pc".  */
       if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
@@ -442,12 +463,7 @@ static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
     /* Floating-point registers.  */
     /* .f0_offset = */ 0,
     /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8,
-
-    /* AltiVec registers.  */
-    /* .vr0_offset = */ 0,
-    /* .vscr_offset = */ 512 + 12,
-    /* .vrsave_offset = */ 528
+    /* .fpscr_size = */ 8
   };
 
 static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
@@ -467,12 +483,7 @@ static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
     /* Floating-point registers.  */
     /* .f0_offset = */ 0,
     /* .fpscr_offset = */ 256,
-    /* .fpscr_size = */ 8,
-
-    /* AltiVec registers.  */
-    /* .vr0_offset = */ 0,
-    /* .vscr_offset = */ 512 + 12,
-    /* .vrsave_offset = */ 528
+    /* .fpscr_size = */ 8
   };
 
 static const struct regset ppc32_linux_gregset = {
@@ -493,16 +504,367 @@ static const struct regset ppc32_linux_fpregset = {
   ppc_collect_fpregset
 };
 
-static const struct regset ppc32_linux_vrregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_supply_vrregset,
-  ppc_collect_vrregset
+static const struct regcache_map_entry ppc32_le_linux_vrregmap[] =
+  {
+      { 32, PPC_VR0_REGNUM, 16 },
+      { 1, PPC_VSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc32_be_linux_vrregmap[] =
+  {
+      { 32, PPC_VR0_REGNUM, 16 },
+      { 1, REGCACHE_MAP_SKIP, 12},
+      { 1, PPC_VSCR_REGNUM, 4 },
+      { 1, PPC_VRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regset ppc32_le_linux_vrregset = {
+  ppc32_le_linux_vrregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
+static const struct regset ppc32_be_linux_vrregset = {
+  ppc32_be_linux_vrregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+static const struct regcache_map_entry ppc32_linux_vsxregmap[] =
+  {
+      { 32, PPC_VSR0_UPPER_REGNUM, 8 },
+      { 0 }
+  };
+
 static const struct regset ppc32_linux_vsxregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_supply_vsxregset,
-  ppc_collect_vsxregset
+  ppc32_linux_vsxregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Program Priorty Register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_ppr[] =
+  {
+      { 1, PPC_PPR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Program Priorty Register regset.  */
+
+const struct regset ppc32_linux_pprregset = {
+  ppc32_regmap_ppr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Data Stream Control Register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_dscr[] =
+  {
+      { 1, PPC_DSCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Data Stream Control Register regset.  */
+
+const struct regset ppc32_linux_dscrregset = {
+  ppc32_regmap_dscr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Target Address Register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_tar[] =
+  {
+      { 1, PPC_TAR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Target Address Register regset.  */
+
+const struct regset ppc32_linux_tarregset = {
+  ppc32_regmap_tar,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Event-Based Branching regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_ebb[] =
+  {
+      { 1, PPC_EBBRR_REGNUM, 8 },
+      { 1, PPC_EBBHR_REGNUM, 8 },
+      { 1, PPC_BESCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Event-Based Branching regset.  */
+
+const struct regset ppc32_linux_ebbregset = {
+  ppc32_regmap_ebb,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Performance Monitoring Unit regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_pmu[] =
+  {
+      { 1, PPC_SIAR_REGNUM, 8 },
+      { 1, PPC_SDAR_REGNUM, 8 },
+      { 1, PPC_SIER_REGNUM, 8 },
+      { 1, PPC_MMCR2_REGNUM, 8 },
+      { 1, PPC_MMCR0_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Performance Monitoring Unit regset.  */
+
+const struct regset ppc32_linux_pmuregset = {
+  ppc32_regmap_pmu,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory special-purpose register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_tm_spr[] =
+  {
+      { 1, PPC_TFHAR_REGNUM, 8 },
+      { 1, PPC_TEXASR_REGNUM, 8 },
+      { 1, PPC_TFIAR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory special-purpose register regset.  */
+
+const struct regset ppc32_linux_tm_sprregset = {
+  ppc32_regmap_tm_spr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Regmaps for the Hardware Transactional Memory checkpointed
+   general-purpose regsets for 32-bit, 64-bit big-endian, and 64-bit
+   little endian targets.  The ptrace and core file buffers for 64-bit
+   targets use 8-byte fields for the 4-byte registers, and the
+   position of the register in the fields depends on the endianness.
+   The 32-bit regmap is the same for both endian types because the
+   fields are all 4-byte long.
+
+   The layout of checkpointed GPR regset is the same as a regular
+   struct pt_regs, but we skip all registers that are not actually
+   checkpointed by the processor (e.g. msr, nip), except when
+   generating a core file.  The 64-bit regset is 48 * 8 bytes long.
+   In some 64-bit kernels, the regset for a 32-bit inferior has the
+   same length, but all the registers are squeezed in the first half
+   (48 * 4 bytes).  The pt_regs struct calls the regular cr ccr, but
+   we use ccr for "checkpointed condition register".  Note that CR
+   (condition register) field 0 is not checkpointed, but the kernel
+   returns all 4 bytes.  The skipped registers should not be touched
+   when writing the regset to the inferior (with
+   PTRACE_SETREGSET).  */
+
+static const struct regcache_map_entry ppc32_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 4 },
+      { 3, REGCACHE_MAP_SKIP, 4 }, /* nip, msr, orig_gpr3.  */
+      { 1, PPC_CCTR_REGNUM, 4 },
+      { 1, PPC_CLR_REGNUM, 4 },
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 9, REGCACHE_MAP_SKIP, 4 }, /* All the rest.  */
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc64_le_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 8 },
+      { 3, REGCACHE_MAP_SKIP, 8 },
+      { 1, PPC_CCTR_REGNUM, 8 },
+      { 1, PPC_CLR_REGNUM, 8 },
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* CXER padding.  */
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
+      { 9, REGCACHE_MAP_SKIP, 8},
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc64_be_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 8 },
+      { 3, REGCACHE_MAP_SKIP, 8 },
+      { 1, PPC_CCTR_REGNUM, 8 },
+      { 1, PPC_CLR_REGNUM, 8 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CXER padding.  */
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 9, REGCACHE_MAP_SKIP, 8},
+      { 0 }
+  };
+
+/* Regsets for the Hardware Transactional Memory checkpointed
+   general-purpose registers for 32-bit, 64-bit big-endian, and 64-bit
+   little endian targets.
+
+   Some 64-bit kernels generate a checkpointed gpr note section with
+   48*8 bytes for a 32-bit thread, of which only 48*4 are actually
+   used, so we set the variable size flag in the corresponding regset
+   to accept this case.  */
+
+static const struct regset ppc32_linux_cgprregset = {
+  ppc32_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset,
+  REGSET_VARIABLE_SIZE
+};
+
+static const struct regset ppc64_be_linux_cgprregset = {
+  ppc64_be_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+static const struct regset ppc64_le_linux_cgprregset = {
+  ppc64_le_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed floating-point regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cfpr[] =
+  {
+      { 32, PPC_CF0_REGNUM, 8 },
+      { 1, PPC_CFPSCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed floating-point regset.  */
+
+const struct regset ppc32_linux_cfprregset = {
+  ppc32_regmap_cfpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Regmaps for the Hardware Transactional Memory checkpointed vector
+   regsets, for big and little endian targets.  The position of the
+   4-byte VSCR in its 16-byte field depends on the endianness.  */
+
+static const struct regcache_map_entry ppc32_le_regmap_cvmx[] =
+  {
+      { 32, PPC_CVR0_REGNUM, 16 },
+      { 1, PPC_CVSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc32_be_regmap_cvmx[] =
+  {
+      { 32, PPC_CVR0_REGNUM, 16 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_CVSCR_REGNUM, 4 },
+      { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12},
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed vector regsets, for little
+   and big endian targets.  */
+
+static const struct regset ppc32_le_linux_cvmxregset = {
+  ppc32_le_regmap_cvmx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+static const struct regset ppc32_be_linux_cvmxregset = {
+  ppc32_be_regmap_cvmx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed vector-scalar regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cvsx[] =
+  {
+      { 32, PPC_CVSR0_UPPER_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed vector-scalar regset.  */
+
+const struct regset ppc32_linux_cvsxregset = {
+  ppc32_regmap_cvsx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Program Priority Register
+   regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cppr[] =
+  {
+      { 1, PPC_CPPR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Program Priority Register
+   regset.  */
+
+const struct regset ppc32_linux_cpprregset = {
+  ppc32_regmap_cppr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Data Stream Control
+   Register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cdscr[] =
+  {
+      { 1, PPC_CDSCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Data Stream Control
+   Register regset.  */
+
+const struct regset ppc32_linux_cdscrregset = {
+  ppc32_regmap_cdscr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Target Address Register
+   regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_ctar[] =
+  {
+      { 1, PPC_CTAR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Target Address Register
+   regset.  */
+
+const struct regset ppc32_linux_ctarregset = {
+  ppc32_regmap_ctar,
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
 const struct regset *
@@ -517,6 +879,103 @@ ppc_linux_fpregset (void)
   return &ppc32_linux_fpregset;
 }
 
+const struct regset *
+ppc_linux_vrregset (struct gdbarch *gdbarch)
+{
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    return &ppc32_be_linux_vrregset;
+  else
+    return &ppc32_le_linux_vrregset;
+}
+
+const struct regset *
+ppc_linux_vsxregset (void)
+{
+  return &ppc32_linux_vsxregset;
+}
+
+const struct regset *
+ppc_linux_cgprregset (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->wordsize == 4)
+    {
+      return &ppc32_linux_cgprregset;
+    }
+  else
+    {
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	return &ppc64_be_linux_cgprregset;
+      else
+	return &ppc64_le_linux_cgprregset;
+    }
+}
+
+const struct regset *
+ppc_linux_cvmxregset (struct gdbarch *gdbarch)
+{
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    return &ppc32_be_linux_cvmxregset;
+  else
+    return &ppc32_le_linux_cvmxregset;
+}
+
+/* Collect function used to generate the core note for the
+   checkpointed GPR regset.  Here, we don't want to skip the
+   "checkpointed" NIP and MSR, so that the note section we generate is
+   similar to the one generated by the kernel.  To avoid having to
+   define additional registers in GDB which are not actually
+   checkpointed in the architecture, we copy TFHAR to the checkpointed
+   NIP slot, which is what the kernel does, and copy the regular MSR
+   to the checkpointed MSR slot, which will have a similar value in
+   most cases.  */
+
+static void
+ppc_linux_collect_core_cpgrregset (const struct regset *regset,
+				   const struct regcache *regcache,
+				   int regnum, void *buf, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  const struct regset *cgprregset = ppc_linux_cgprregset (gdbarch);
+
+  /* We collect the checkpointed GPRs already defined in the regular
+     regmap, then overlay TFHAR/MSR on the checkpointed NIP/MSR
+     slots.  */
+  cgprregset->collect_regset (cgprregset, regcache, regnum, buf, len);
+
+  /* Check that we are collecting all the registers, which should be
+     the case when generating a core file.  */
+  if (regnum != -1)
+    return;
+
+  /* PT_NIP and PT_MSR are 32 and 33 for powerpc.  Don't redefine
+     these symbols since this file can run on clients in other
+     architectures where they can already be defined to other
+     values.  */
+  int pt_offset = 32;
+
+  /* Check that our buffer is long enough to hold two slots at
+     pt_offset * wordsize, one for NIP and one for MSR.  */
+  gdb_assert ((pt_offset + 2) * tdep->wordsize <= len);
+
+  /* TFHAR is 8 bytes wide, but the NIP slot for a 32-bit thread is
+     4-bytes long.  We use raw_collect_integer which handles
+     differences in the sizes for the source and destination buffers
+     for both endian modes.  */
+  (regcache->raw_collect_integer
+   (PPC_TFHAR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
+    tdep->wordsize, false));
+
+  pt_offset = 33;
+
+  (regcache->raw_collect_integer
+   (PPC_MSR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
+    tdep->wordsize, false));
+}
+
 /* Iterate over supported core file register note sections. */
 
 static void
@@ -528,19 +987,174 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int have_altivec = tdep->ppc_vr0_regnum != -1;
   int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
+  int have_ppr = tdep->ppc_ppr_regnum != -1;
+  int have_dscr = tdep->ppc_dscr_regnum != -1;
+  int have_tar = tdep->ppc_tar_regnum != -1;
 
   if (tdep->wordsize == 4)
-    cb (".reg", 48 * 4, &ppc32_linux_gregset, NULL, cb_data);
+    cb (".reg", 48 * 4, 48 * 4, &ppc32_linux_gregset, NULL, cb_data);
   else
-    cb (".reg", 48 * 8, &ppc64_linux_gregset, NULL, cb_data);
+    cb (".reg", 48 * 8, 48 * 8, &ppc64_linux_gregset, NULL, cb_data);
 
-  cb (".reg2", 264, &ppc32_linux_fpregset, NULL, cb_data);
+  cb (".reg2", 264, 264, &ppc32_linux_fpregset, NULL, cb_data);
 
   if (have_altivec)
-    cb (".reg-ppc-vmx", 544, &ppc32_linux_vrregset, "ppc Altivec", cb_data);
+    {
+      const struct regset *vrregset = ppc_linux_vrregset (gdbarch);
+      cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, PPC_LINUX_SIZEOF_VRREGSET,
+	  vrregset, "ppc Altivec", cb_data);
+    }
 
   if (have_vsx)
-    cb (".reg-ppc-vsx", 256, &ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
+    cb (".reg-ppc-vsx", PPC_LINUX_SIZEOF_VSXREGSET, PPC_LINUX_SIZEOF_VSXREGSET,
+	&ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
+
+  if (have_ppr)
+    cb (".reg-ppc-ppr", PPC_LINUX_SIZEOF_PPRREGSET,
+	PPC_LINUX_SIZEOF_PPRREGSET,
+	&ppc32_linux_pprregset, "Priority Program Register", cb_data);
+
+  if (have_dscr)
+    cb (".reg-ppc-dscr", PPC_LINUX_SIZEOF_DSCRREGSET,
+	PPC_LINUX_SIZEOF_DSCRREGSET,
+	&ppc32_linux_dscrregset, "Data Stream Control Register",
+	cb_data);
+
+  if (have_tar)
+    cb (".reg-ppc-tar", PPC_LINUX_SIZEOF_TARREGSET,
+	PPC_LINUX_SIZEOF_TARREGSET,
+	&ppc32_linux_tarregset, "Target Address Register", cb_data);
+
+  /* EBB registers are unavailable when ptrace returns ENODATA.  Check
+     availability when generating a core file (regcache != NULL).  */
+  if (tdep->have_ebb)
+    if (regcache == NULL
+	|| REG_VALID == regcache->get_register_status (PPC_BESCR_REGNUM))
+      cb (".reg-ppc-ebb", PPC_LINUX_SIZEOF_EBBREGSET,
+	  PPC_LINUX_SIZEOF_EBBREGSET,
+	  &ppc32_linux_ebbregset, "Event-based Branching Registers",
+	  cb_data);
+
+  if (tdep->ppc_mmcr0_regnum != -1)
+    cb (".reg-ppc-pmu", PPC_LINUX_SIZEOF_PMUREGSET,
+	PPC_LINUX_SIZEOF_PMUREGSET,
+	&ppc32_linux_pmuregset, "Performance Monitor Registers",
+	cb_data);
+
+  if (tdep->have_htm_spr)
+    cb (".reg-ppc-tm-spr", PPC_LINUX_SIZEOF_TM_SPRREGSET,
+	PPC_LINUX_SIZEOF_TM_SPRREGSET,
+	&ppc32_linux_tm_sprregset,
+	"Hardware Transactional Memory Special Purpose Registers",
+	cb_data);
+
+  /* Checkpointed registers can be unavailable, don't call back if
+     we are generating a core file.  */
+
+  if (tdep->have_htm_core)
+    {
+      /* Only generate the checkpointed GPR core note if we also have
+	 access to the HTM SPRs, because we need TFHAR to fill the
+	 "checkpointed" NIP slot.  We can read a core file without it
+	 since GDB is not aware of this NIP as a visible register.  */
+      if (regcache == NULL ||
+	  (REG_VALID == regcache->get_register_status (PPC_CR0_REGNUM)
+	   && tdep->have_htm_spr))
+	{
+	  int cgpr_size = (tdep->wordsize == 4?
+			   PPC32_LINUX_SIZEOF_CGPRREGSET
+			   : PPC64_LINUX_SIZEOF_CGPRREGSET);
+
+	  const struct regset *cgprregset =
+	    ppc_linux_cgprregset (gdbarch);
+
+	  if (regcache != NULL)
+	    {
+	      struct regset core_cgprregset = *cgprregset;
+
+	      core_cgprregset.collect_regset
+		= ppc_linux_collect_core_cpgrregset;
+
+	      cb (".reg-ppc-tm-cgpr",
+		  cgpr_size, cgpr_size,
+		  &core_cgprregset,
+		  "Checkpointed General Purpose Registers", cb_data);
+	    }
+	  else
+	    {
+	      cb (".reg-ppc-tm-cgpr",
+		  cgpr_size, cgpr_size,
+		  cgprregset,
+		  "Checkpointed General Purpose Registers", cb_data);
+	    }
+	}
+    }
+
+  if (tdep->have_htm_fpu)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CF0_REGNUM))
+	cb (".reg-ppc-tm-cfpr", PPC_LINUX_SIZEOF_CFPRREGSET,
+	    PPC_LINUX_SIZEOF_CFPRREGSET,
+	    &ppc32_linux_cfprregset,
+	    "Checkpointed Floating Point Registers", cb_data);
+    }
+
+  if (tdep->have_htm_altivec)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CVR0_REGNUM))
+	{
+	  const struct regset *cvmxregset =
+	    ppc_linux_cvmxregset (gdbarch);
+
+	  cb (".reg-ppc-tm-cvmx", PPC_LINUX_SIZEOF_CVMXREGSET,
+	      PPC_LINUX_SIZEOF_CVMXREGSET,
+	      cvmxregset,
+	      "Checkpointed Altivec (VMX) Registers", cb_data);
+	}
+    }
+
+  if (tdep->have_htm_vsx)
+    {
+      if (regcache == NULL ||
+	  (REG_VALID
+	   == regcache->get_register_status (PPC_CVSR0_UPPER_REGNUM)))
+	cb (".reg-ppc-tm-cvsx", PPC_LINUX_SIZEOF_CVSXREGSET,
+	    PPC_LINUX_SIZEOF_CVSXREGSET,
+	    &ppc32_linux_cvsxregset,
+	    "Checkpointed VSX Registers", cb_data);
+    }
+
+  if (tdep->ppc_cppr_regnum != -1)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CPPR_REGNUM))
+	cb (".reg-ppc-tm-cppr", PPC_LINUX_SIZEOF_CPPRREGSET,
+	    PPC_LINUX_SIZEOF_CPPRREGSET,
+	    &ppc32_linux_cpprregset,
+	    "Checkpointed Priority Program Register", cb_data);
+    }
+
+  if (tdep->ppc_cdscr_regnum != -1)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CDSCR_REGNUM))
+	cb (".reg-ppc-tm-cdscr", PPC_LINUX_SIZEOF_CDSCRREGSET,
+	    PPC_LINUX_SIZEOF_CDSCRREGSET,
+	    &ppc32_linux_cdscrregset,
+	    "Checkpointed Data Stream Control Register", cb_data);
+    }
+
+  if (tdep->ppc_ctar_regnum)
+    {
+      if ( regcache == NULL ||
+	   REG_VALID == regcache->get_register_status (PPC_CTAR_REGNUM))
+	cb (".reg-ppc-tm-ctar", PPC_LINUX_SIZEOF_CTARREGSET,
+	    PPC_LINUX_SIZEOF_CTARREGSET,
+	    &ppc32_linux_ctarregset,
+	    "Checkpointed Target Address Register", cb_data);
+    }
 }
 
 static void
@@ -666,8 +1280,8 @@ static struct tramp_frame ppc32_linux_sigaction_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x380000ac, -1 }, /* li r0, 172 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc32_linux_sigaction_cache_init
@@ -676,9 +1290,9 @@ static struct tramp_frame ppc64_linux_sigaction_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x38210080, -1 }, /* addi r1,r1,128 */
-    { 0x380000ac, -1 }, /* li r0, 172 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc64_linux_sigaction_cache_init
@@ -687,8 +1301,8 @@ static struct tramp_frame ppc32_linux_sighandler_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x38000077, -1 }, /* li r0,119 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc32_linux_sighandler_cache_init
@@ -697,9 +1311,9 @@ static struct tramp_frame ppc64_linux_sighandler_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x38210080, -1 }, /* addi r1,r1,128 */
-    { 0x38000077, -1 }, /* li r0,119 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc64_linux_sighandler_cache_init
@@ -723,33 +1337,24 @@ ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
    r0 register.  When the function fails, it returns -1.  */
 static LONGEST
 ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
-                              ptid_t ptid)
+			      thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (thread);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct cleanup *cleanbuf;
-  /* The content of a register */
-  gdb_byte *buf;
-  /* The result */
-  LONGEST ret;
 
   /* Make sure we're in a 32- or 64-bit machine */
   gdb_assert (tdep->wordsize == 4 || tdep->wordsize == 8);
 
-  buf = (gdb_byte *) xmalloc (tdep->wordsize * sizeof (gdb_byte));
-
-  cleanbuf = make_cleanup (xfree, buf);
+  /* The content of a register */
+  gdb::byte_vector buf (tdep->wordsize);
 
   /* Getting the system call number from the register.
      When dealing with PowerPC architecture, this information
      is stored at 0th register.  */
-  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf);
+  regcache->cooked_read (tdep->ppc_gp0_regnum, buf.data ());
 
-  ret = extract_signed_integer (buf, tdep->wordsize, byte_order);
-  do_cleanups (cleanbuf);
-
-  return ret;
+  return extract_signed_integer (buf.data (), tdep->wordsize, byte_order);
 }
 
 /* PPC process record-replay */
@@ -761,7 +1366,7 @@ static struct linux_record_tdep ppc64_linux_record_tdep;
    syscall ids into a canonical set of syscall ids used by process
    record.  (See arch/powerpc/include/uapi/asm/unistd.h in kernel tree.)
    Return -1 if this system call is not supported by process record.
-   Otherwise, return the syscall number for preocess reocrd of given
+   Otherwise, return the syscall number for process record of given
    SYSCALL.  */
 
 static enum gdb_syscall
@@ -801,12 +1406,11 @@ ppc_canonicalize_syscall (int syscall)
 static int
 ppc_linux_syscall_record (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST scnum;
   enum gdb_syscall syscall_gdb;
   int ret;
-  int i;
 
   regcache_raw_read_unsigned (regcache, tdep->ppc_gp0_regnum, &scnum);
   syscall_gdb = ppc_canonicalize_syscall (scnum);
@@ -861,7 +1465,7 @@ ppc_linux_syscall_record (struct regcache *regcache)
     return ret;
 
   /* Record registers clobbered during syscall.  */
-  for (i = 3; i <= 12; i++)
+  for (int i = 3; i <= 12; i++)
     {
       if (record_full_arch_list_add_reg (regcache, tdep->ppc_gp0_regnum + i))
 	return -1;
@@ -930,7 +1534,7 @@ ppc_linux_record_signal (struct gdbarch *gdbarch, struct regcache *regcache,
 static void
 ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
 
   regcache_cooked_write_unsigned (regcache, gdbarch_pc_regnum (gdbarch), pc);
 
@@ -946,49 +1550,63 @@ ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
     regcache_cooked_write_unsigned (regcache, PPC_TRAP_REGNUM, -1);
 }
 
-static int
-ppc_linux_spu_section (bfd *abfd, asection *asect, void *user_data)
-{
-  return startswith (bfd_section_name (abfd, asect), "SPU/");
-}
-
 static const struct target_desc *
 ppc_linux_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
-  asection *cell = bfd_sections_find_if (abfd, ppc_linux_spu_section, NULL);
+  struct ppc_linux_features features = ppc_linux_no_features;
   asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
   asection *vsx = bfd_get_section_by_name (abfd, ".reg-ppc-vsx");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
+  asection *ppr = bfd_get_section_by_name (abfd, ".reg-ppc-ppr");
+  asection *dscr = bfd_get_section_by_name (abfd, ".reg-ppc-dscr");
+  asection *tar = bfd_get_section_by_name (abfd, ".reg-ppc-tar");
+  asection *pmu = bfd_get_section_by_name (abfd, ".reg-ppc-pmu");
+  asection *htmspr = bfd_get_section_by_name (abfd, ".reg-ppc-tm-spr");
+
   if (! section)
     return NULL;
 
-  switch (bfd_section_size (abfd, section))
+  switch (bfd_section_size (section))
     {
     case 48 * 4:
-      if (cell)
-	return tdesc_powerpc_cell32l;
-      else if (vsx)
-	return tdesc_powerpc_vsx32l;
-      else if (altivec)
-	return tdesc_powerpc_altivec32l;
-      else
-	return tdesc_powerpc_32l;
-
+      features.wordsize = 4;
+      break;
     case 48 * 8:
-      if (cell)
-	return tdesc_powerpc_cell64l;
-      else if (vsx)
-	return tdesc_powerpc_vsx64l;
-      else if (altivec)
-	return tdesc_powerpc_altivec64l;
-      else
-	return tdesc_powerpc_64l;
-
+      features.wordsize = 8;
+      break;
     default:
       return NULL;
     }
+
+  if (altivec)
+    features.altivec = true;
+
+  if (vsx)
+    features.vsx = true;
+
+  CORE_ADDR hwcap = linux_get_hwcap (target);
+
+  features.isa205 = ppc_linux_has_isa205 (hwcap);
+
+  if (ppr && dscr)
+    {
+      features.ppr_dscr = true;
+
+      /* We don't require the EBB note section to be present in the
+	 core file to select isa207 because these registers could have
+	 been unavailable when the core file was created.  They will
+	 be in the tdep but will show as unavailable.  */
+      if (tar && pmu)
+	{
+	  features.isa207 = true;
+	  if (htmspr)
+	    features.htm = true;
+	}
+    }
+
+  return ppc_linux_match_description (features);
 }
 
 
@@ -1109,295 +1727,6 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 
   return 1;
 }
-
-/* Cell/B.E. active SPE context tracking support.  */
-
-static struct objfile *spe_context_objfile = NULL;
-static CORE_ADDR spe_context_lm_addr = 0;
-static CORE_ADDR spe_context_offset = 0;
-
-static ptid_t spe_context_cache_ptid;
-static CORE_ADDR spe_context_cache_address;
-
-/* Hook into inferior_created, solib_loaded, and solib_unloaded observers
-   to track whether we've loaded a version of libspe2 (as static or dynamic
-   library) that provides the __spe_current_active_context variable.  */
-static void
-ppc_linux_spe_context_lookup (struct objfile *objfile)
-{
-  struct bound_minimal_symbol sym;
-
-  if (!objfile)
-    {
-      spe_context_objfile = NULL;
-      spe_context_lm_addr = 0;
-      spe_context_offset = 0;
-      spe_context_cache_ptid = minus_one_ptid;
-      spe_context_cache_address = 0;
-      return;
-    }
-
-  sym = lookup_minimal_symbol ("__spe_current_active_context", NULL, objfile);
-  if (sym.minsym)
-    {
-      spe_context_objfile = objfile;
-      spe_context_lm_addr = svr4_fetch_objfile_link_map (objfile);
-      spe_context_offset = MSYMBOL_VALUE_RAW_ADDRESS (sym.minsym);
-      spe_context_cache_ptid = minus_one_ptid;
-      spe_context_cache_address = 0;
-      return;
-    }
-}
-
-static void
-ppc_linux_spe_context_inferior_created (struct target_ops *t, int from_tty)
-{
-  struct objfile *objfile;
-
-  ppc_linux_spe_context_lookup (NULL);
-  ALL_OBJFILES (objfile)
-    ppc_linux_spe_context_lookup (objfile);
-}
-
-static void
-ppc_linux_spe_context_solib_loaded (struct so_list *so)
-{
-  if (strstr (so->so_original_name, "/libspe") != NULL)
-    {
-      solib_read_symbols (so, 0);
-      ppc_linux_spe_context_lookup (so->objfile);
-    }
-}
-
-static void
-ppc_linux_spe_context_solib_unloaded (struct so_list *so)
-{
-  if (so->objfile == spe_context_objfile)
-    ppc_linux_spe_context_lookup (NULL);
-}
-
-/* Retrieve contents of the N'th element in the current thread's
-   linked SPE context list into ID and NPC.  Return the address of
-   said context element, or 0 if not found.  */
-static CORE_ADDR
-ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
-		       int n, int *id, unsigned int *npc)
-{
-  CORE_ADDR spe_context = 0;
-  gdb_byte buf[16];
-  int i;
-
-  /* Quick exit if we have not found __spe_current_active_context.  */
-  if (!spe_context_objfile)
-    return 0;
-
-  /* Look up cached address of thread-local variable.  */
-  if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
-    {
-      struct target_ops *target = &current_target;
-
-      TRY
-	{
-	  /* We do not call target_translate_tls_address here, because
-	     svr4_fetch_objfile_link_map may invalidate the frame chain,
-	     which must not do while inside a frame sniffer.
-
-	     Instead, we have cached the lm_addr value, and use that to
-	     directly call the target's to_get_thread_local_address.  */
-	  spe_context_cache_address
-	    = target->to_get_thread_local_address (target, inferior_ptid,
-						   spe_context_lm_addr,
-						   spe_context_offset);
-	  spe_context_cache_ptid = inferior_ptid;
-	}
-
-      CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  return 0;
-	}
-      END_CATCH
-    }
-
-  /* Read variable value.  */
-  if (target_read_memory (spe_context_cache_address, buf, wordsize) == 0)
-    spe_context = extract_unsigned_integer (buf, wordsize, byte_order);
-
-  /* Cyle through to N'th linked list element.  */
-  for (i = 0; i < n && spe_context; i++)
-    if (target_read_memory (spe_context + align_up (12, wordsize),
-			    buf, wordsize) == 0)
-      spe_context = extract_unsigned_integer (buf, wordsize, byte_order);
-    else
-      spe_context = 0;
-
-  /* Read current context.  */
-  if (spe_context
-      && target_read_memory (spe_context, buf, 12) != 0)
-    spe_context = 0;
-
-  /* Extract data elements.  */
-  if (spe_context)
-    {
-      if (id)
-	*id = extract_signed_integer (buf, 4, byte_order);
-      if (npc)
-	*npc = extract_unsigned_integer (buf + 4, 4, byte_order);
-    }
-
-  return spe_context;
-}
-
-
-/* Cell/B.E. cross-architecture unwinder support.  */
-
-struct ppu2spu_cache
-{
-  struct frame_id frame_id;
-  struct regcache *regcache;
-};
-
-static struct gdbarch *
-ppu2spu_prev_arch (struct frame_info *this_frame, void **this_cache)
-{
-  struct ppu2spu_cache *cache = (struct ppu2spu_cache *) *this_cache;
-  return get_regcache_arch (cache->regcache);
-}
-
-static void
-ppu2spu_this_id (struct frame_info *this_frame,
-		 void **this_cache, struct frame_id *this_id)
-{
-  struct ppu2spu_cache *cache = (struct ppu2spu_cache *) *this_cache;
-  *this_id = cache->frame_id;
-}
-
-static struct value *
-ppu2spu_prev_register (struct frame_info *this_frame,
-		       void **this_cache, int regnum)
-{
-  struct ppu2spu_cache *cache = (struct ppu2spu_cache *) *this_cache;
-  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
-  gdb_byte *buf;
-
-  buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
-
-  if (regnum < gdbarch_num_regs (gdbarch))
-    regcache_raw_read (cache->regcache, regnum, buf);
-  else
-    gdbarch_pseudo_register_read (gdbarch, cache->regcache, regnum, buf);
-
-  return frame_unwind_got_bytes (this_frame, regnum, buf);
-}
-
-struct ppu2spu_data
-{
-  struct gdbarch *gdbarch;
-  int id;
-  unsigned int npc;
-  gdb_byte gprs[128*16];
-};
-
-static enum register_status
-ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
-{
-  struct ppu2spu_data *data = (struct ppu2spu_data *) src;
-  enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
-
-  if (regnum >= 0 && regnum < SPU_NUM_GPRS)
-    memcpy (buf, data->gprs + 16*regnum, 16);
-  else if (regnum == SPU_ID_REGNUM)
-    store_unsigned_integer (buf, 4, byte_order, data->id);
-  else if (regnum == SPU_PC_REGNUM)
-    store_unsigned_integer (buf, 4, byte_order, data->npc);
-  else
-    return REG_UNAVAILABLE;
-
-  return REG_VALID;
-}
-
-static int
-ppu2spu_sniffer (const struct frame_unwind *self,
-		 struct frame_info *this_frame, void **this_prologue_cache)
-{
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct ppu2spu_data data;
-  struct frame_info *fi;
-  CORE_ADDR base, func, backchain, spe_context;
-  gdb_byte buf[8];
-  int n = 0;
-
-  /* Count the number of SPU contexts already in the frame chain.  */
-  for (fi = get_next_frame (this_frame); fi; fi = get_next_frame (fi))
-    if (get_frame_type (fi) == ARCH_FRAME
-	&& gdbarch_bfd_arch_info (get_frame_arch (fi))->arch == bfd_arch_spu)
-      n++;
-
-  base = get_frame_sp (this_frame);
-  func = get_frame_pc (this_frame);
-  if (target_read_memory (base, buf, tdep->wordsize))
-    return 0;
-  backchain = extract_unsigned_integer (buf, tdep->wordsize, byte_order);
-
-  spe_context = ppc_linux_spe_context (tdep->wordsize, byte_order,
-				       n, &data.id, &data.npc);
-  if (spe_context && base <= spe_context && spe_context < backchain)
-    {
-      char annex[32];
-
-      /* Find gdbarch for SPU.  */
-      struct gdbarch_info info;
-      gdbarch_info_init (&info);
-      info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
-      info.byte_order = BFD_ENDIAN_BIG;
-      info.osabi = GDB_OSABI_LINUX;
-      info.tdep_info = &data.id;
-      data.gdbarch = gdbarch_find_by_info (info);
-      if (!data.gdbarch)
-	return 0;
-
-      xsnprintf (annex, sizeof annex, "%d/regs", data.id);
-      if (target_read (&current_target, TARGET_OBJECT_SPU, annex,
-		       data.gprs, 0, sizeof data.gprs)
-	  == sizeof data.gprs)
-	{
-	  struct ppu2spu_cache *cache
-	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
-
-	  struct address_space *aspace = get_frame_address_space (this_frame);
-	  struct regcache *regcache = regcache_xmalloc (data.gdbarch, aspace);
-	  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
-	  regcache_save (regcache, ppu2spu_unwind_register, &data);
-	  discard_cleanups (cleanups);
-
-	  cache->frame_id = frame_id_build (base, func);
-	  cache->regcache = regcache;
-	  *this_prologue_cache = cache;
-	  return 1;
-	}
-    }
-
-  return 0;
-}
-
-static void
-ppu2spu_dealloc_cache (struct frame_info *self, void *this_cache)
-{
-  struct ppu2spu_cache *cache = (struct ppu2spu_cache *) this_cache;
-  regcache_xfree (cache->regcache);
-}
-
-static const struct frame_unwind ppu2spu_unwind = {
-  ARCH_FRAME,
-  default_frame_unwind_stop_reason,
-  ppu2spu_this_id,
-  ppu2spu_prev_register,
-  NULL,
-  ppu2spu_sniffer,
-  ppu2spu_dealloc_cache,
-  ppu2spu_prev_arch,
-};
 
 /* Initialize linux_record_tdep if not initialized yet.
    WORDSIZE is 4 or 8 for 32- or 64-bit PowerPC Linux respectively.
@@ -1628,13 +1957,36 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   record_tdep->ioctl_FIOQSIZE = 0x40086680;
 }
 
+/* Return a floating-point format for a floating-point variable of
+   length LEN in bits.  If non-NULL, NAME is the name of its type.
+   If no suitable type is found, return NULL.  */
+
+static const struct floatformat **
+ppc_floatformat_for_type (struct gdbarch *gdbarch,
+                          const char *name, int len)
+{
+  if (len == 128 && name)
+    {
+      if (strcmp (name, "__float128") == 0
+	  || strcmp (name, "_Float128") == 0
+	  || strcmp (name, "_Float64x") == 0
+	  || strcmp (name, "complex _Float128") == 0
+	  || strcmp (name, "complex _Float64x") == 0)
+	return floatformats_ia64_quad;
+
+      if (strcmp (name, "__ibm128") == 0)
+	return floatformats_ibm_long_double;
+    }
+
+  return default_floatformat_for_type (gdbarch, name, len);
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  struct tdesc_arch_data *tdesc_data
-    = (struct tdesc_arch_data *) info.tdep_info;
+  struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   static const char *const stap_integer_prefixes[] = { "i", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "(",
 								    NULL };
@@ -1644,12 +1996,18 @@ ppc_linux_init_abi (struct gdbarch_info info,
   linux_init_abi (info, gdbarch);
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
-     128-bit, they are IBM long double, not IEEE quad long double as
-     in the System V ABI PowerPC Processor Supplement.  We can safely
-     let them default to 128-bit, since the debug info will give the
-     size of type actually used in each case.  */
+     128-bit, they can be either IBM long double or IEEE quad long double.
+     The 64-bit long double case will be detected automatically using
+     the size specified in debug info.  We use a .gnu.attribute flag
+     to distinguish between the IBM long double and IEEE quad cases.  */
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
+  if (tdep->long_double_abi == POWERPC_LONG_DOUBLE_IEEE128)
+    set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  else
+    set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
+
+  /* Support for floating-point data type variants.  */
+  set_gdbarch_floatformat_for_type (gdbarch, ppc_floatformat_for_type);
 
   /* Handle inferior calls during interrupted system calls.  */
   set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);
@@ -1755,12 +2113,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
     }
 
-  /* PPC32 uses a different prpsinfo32 compared to most other Linux
-     archs.  */
-  if (tdep->wordsize == 4)
-    set_gdbarch_elfcore_write_linux_prpsinfo (gdbarch,
-					      elfcore_write_ppc_linux_prpsinfo32);
-
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
   set_gdbarch_iterate_over_regset_sections (gdbarch,
 					    ppc_linux_iterate_over_regset_sections);
@@ -1791,17 +2143,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	}
     }
 
-  /* Enable Cell/B.E. if supported by the target.  */
-  if (tdesc_compatible_p (info.target_desc,
-			  bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu)))
-    {
-      /* Cell/B.E. multi-architecture support.  */
-      set_spu_solib_ops (gdbarch);
-
-      /* Cell/B.E. cross-architecture unwinder support.  */
-      frame_unwind_prepend_unwinder (gdbarch, &ppu2spu_unwind);
-    }
-
   set_gdbarch_displaced_step_location (gdbarch,
 				       linux_displaced_step_location);
 
@@ -1814,13 +2155,11 @@ ppc_linux_init_abi (struct gdbarch_info info,
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ppc_linux_tdep;
-
+void _initialize_ppc_linux_tdep ();
 void
-_initialize_ppc_linux_tdep (void)
+_initialize_ppc_linux_tdep ()
 {
-  /* Register for all sub-familes of the POWER/PowerPC: 32-bit and
+  /* Register for all sub-families of the POWER/PowerPC: 32-bit and
      64-bit PowerPC, and the older rs6k.  */
   gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);
@@ -1829,25 +2168,24 @@ _initialize_ppc_linux_tdep (void)
   gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);
 
-  /* Attach to observers to track __spe_current_active_context.  */
-  observer_attach_inferior_created (ppc_linux_spe_context_inferior_created);
-  observer_attach_solib_loaded (ppc_linux_spe_context_solib_loaded);
-  observer_attach_solib_unloaded (ppc_linux_spe_context_solib_unloaded);
-
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();
   initialize_tdesc_powerpc_altivec32l ();
-  initialize_tdesc_powerpc_cell32l ();
   initialize_tdesc_powerpc_vsx32l ();
   initialize_tdesc_powerpc_isa205_32l ();
   initialize_tdesc_powerpc_isa205_altivec32l ();
   initialize_tdesc_powerpc_isa205_vsx32l ();
+  initialize_tdesc_powerpc_isa205_ppr_dscr_vsx32l ();
+  initialize_tdesc_powerpc_isa207_vsx32l ();
+  initialize_tdesc_powerpc_isa207_htm_vsx32l ();
   initialize_tdesc_powerpc_64l ();
   initialize_tdesc_powerpc_altivec64l ();
-  initialize_tdesc_powerpc_cell64l ();
   initialize_tdesc_powerpc_vsx64l ();
   initialize_tdesc_powerpc_isa205_64l ();
   initialize_tdesc_powerpc_isa205_altivec64l ();
   initialize_tdesc_powerpc_isa205_vsx64l ();
+  initialize_tdesc_powerpc_isa205_ppr_dscr_vsx64l ();
+  initialize_tdesc_powerpc_isa207_vsx64l ();
+  initialize_tdesc_powerpc_isa207_htm_vsx64l ();
   initialize_tdesc_powerpc_e500l ();
 }

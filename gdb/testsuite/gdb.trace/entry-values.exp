@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Free Software Foundation, Inc.
+# Copyright 2013-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ gdb_test_multiple $test $test {
 }
 
 if { [string equal $returned_from_foo ""] } {
-    fail "Find the call or branch instruction offset in bar"
+    fail "find the call or branch instruction offset in bar"
     # The following test makes no sense if the offset is unknown.  We need
     # to update the pattern above to match call or branch instruction for
     # the target architecture.
@@ -109,7 +109,7 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    foo_label: subprogram {
-		{decl_file 1 sdata}
+		{decl_file 0 udata}
 		{MACRO_AT_func { foo ${srcdir}/${subdir}/${srcfile} }}
 	    } {
 		formal_parameter {
@@ -126,7 +126,7 @@ Dwarf::assemble $asm_file {
 
 	    subprogram {
 		{name bar}
-		{decl_file 1 sdata}
+		{decl_file 0 udata}
 		{low_pc $bar_start addr}
 		{high_pc "$bar_start + $bar_length" addr}
 		{GNU_all_call_sites 1 sdata}
@@ -175,7 +175,7 @@ if  {[gdb_compile [list ${binfile}1.o ${binfile}2.o] \
 clean_restart ${testfile}
 
 if ![runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return -1
 }
 
@@ -194,8 +194,8 @@ gdb_test_sequence "bt" "bt (1)" {
 # Update global variables 'global1' and 'global2' and test that the
 # entry values are updated too.
 
-gdb_test_no_output "set var global1=10"
-gdb_test_no_output "set var global2=11"
+gdb_test_no_output "set var *(int *) &global1=10"
+gdb_test_no_output "set var *(int *) &global2=11"
 
 gdb_test_sequence "bt" "bt (2)" {
     "\[\r\n\]#0 .* foo \\(i=[-]?[0-9]+, i@entry=10, j=[-]?[0-9]+, j@entry=11\\)"
@@ -210,7 +210,7 @@ clean_restart $binfile
 load_lib "trace-support.exp"
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -226,7 +226,7 @@ gdb_test "trace foo" "Tracepoint $decimal at .*"
 # argument j.
 
 gdb_trace_setactions "set action for tracepoint 1" "" \
-    "collect i, j, global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 128" "^$"
+    "collect i, j, (int) global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 128" "^$"
 
 gdb_test_no_output "tstart"
 

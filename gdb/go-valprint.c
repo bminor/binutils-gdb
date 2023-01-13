@@ -1,6 +1,6 @@
 /* Support for printing Go values for GDB, the GNU debugger.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,6 +29,7 @@
 #include "go-lang.h"
 #include "c-lang.h"
 #include "valprint.h"
+#include "cli/cli-style.h"
 
 /* Print a Go string.
 
@@ -36,10 +37,10 @@
    gdb_assert (go_classify_struct_type (type) == GO_TYPE_STRING).  */
 
 static void
-print_go_string (struct type *type, const gdb_byte *valaddr,
-		 int embedded_offset, CORE_ADDR address,
+print_go_string (struct type *type,
+		 LONGEST embedded_offset, CORE_ADDR address,
 		 struct ui_file *stream, int recurse,
-		 const struct value *val,
+		 struct value *val,
 		 const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
@@ -51,8 +52,8 @@ print_go_string (struct type *type, const gdb_byte *valaddr,
      unpack_value_field_as_pointer.  Do this until we can get
      unpack_value_field_as_pointer.  */
   LONGEST addr;
+  const gdb_byte *valaddr = value_contents_for_printing (val);
 
-  gdb_assert (valaddr == value_contents_for_printing_const (val));
 
   if (! unpack_value_field_as_long (type, valaddr, embedded_offset, 0,
 				    val, &addr))
@@ -71,9 +72,9 @@ print_go_string (struct type *type, const gdb_byte *valaddr,
 
   if (length < 0)
     {
-      fputs_filtered (_("<invalid length: "), stream);
-      fputs_filtered (plongest (addr), stream);
-      fputs_filtered (">", stream);
+      printf_filtered (_("<invalid length: %ps>"),
+		       styled_string (metadata_style.style (),
+				      plongest (addr)));
       return;
     }
 
@@ -86,9 +87,9 @@ print_go_string (struct type *type, const gdb_byte *valaddr,
 /* Implements the la_val_print routine for language Go.  */
 
 void
-go_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
+go_val_print (struct type *type, int embedded_offset,
 	      CORE_ADDR address, struct ui_file *stream, int recurse,
-	      const struct value *val,
+	      struct value *val,
 	      const struct value_print_options *options)
 {
   type = check_typedef (type);
@@ -104,7 +105,7 @@ go_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    case GO_TYPE_STRING:
 	      if (! options->raw)
 		{
-		  print_go_string (type, valaddr, embedded_offset, address,
+		  print_go_string (type, embedded_offset, address,
 				   stream, recurse, val, options);
 		  return;
 		}
@@ -116,7 +117,7 @@ go_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	/* Fall through.  */
 
       default:
-	c_val_print (type, valaddr, embedded_offset, address, stream,
+	c_val_print (type, embedded_offset, address, stream,
 		     recurse, val, options);
 	break;
     }

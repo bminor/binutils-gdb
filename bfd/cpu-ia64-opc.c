@@ -1,4 +1,4 @@
-/* Copyright (C) 1998-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2020 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -86,7 +86,7 @@ ins_immu (const struct ia64_operand *self, ia64_insn value, ia64_insn *code)
   for (i = 0; i < NELEMS (self->field) && self->field[i].bits; ++i)
     {
       new_insn |= ((value & ((((ia64_insn) 1) << self->field[i].bits) - 1))
-                 << self->field[i].shift);
+		 << self->field[i].shift);
       value >>= self->field[i].bits;
     }
   if (value)
@@ -170,7 +170,7 @@ ins_imms_scaled (const struct ia64_operand *self, ia64_insn value,
   for (i = 0; i < NELEMS (self->field) && self->field[i].bits; ++i)
     {
       new_insn |= ((svalue & ((((ia64_insn) 1) << self->field[i].bits) - 1))
-                 << self->field[i].shift);
+		 << self->field[i].shift);
       sign_bit = (svalue >> (self->field[i].bits - 1)) & 1;
       svalue >>= self->field[i].bits;
     }
@@ -186,7 +186,7 @@ ext_imms_scaled (const struct ia64_operand *self, ia64_insn code,
 		 ia64_insn *valuep, int scale)
 {
   int i, bits = 0, total = 0;
-  BFD_HOST_64_BIT val = 0, sign;
+  BFD_HOST_U_64_BIT val = 0, sign;
 
   for (i = 0; i < NELEMS (self->field) && self->field[i].bits; ++i)
     {
@@ -196,10 +196,10 @@ ext_imms_scaled (const struct ia64_operand *self, ia64_insn code,
       total += bits;
     }
   /* sign extend: */
-  sign = (BFD_HOST_64_BIT) 1 << (total - 1);
+  sign = (BFD_HOST_U_64_BIT) 1 << (total - 1);
   val = (val ^ sign) - sign;
 
-  *valuep = (val << scale);
+  *valuep = val << scale;
   return 0;
 }
 
@@ -657,7 +657,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
       "a branch target" },
     { REL, ins_imms4, ext_imms4, 0, {{20, 13}, { 1, 36}}, 0,	/* TGT25c */
       "a branch target" },
-    { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,                  /* TGT64  */
+    { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,			/* TGT64  */
       "a branch target" },
 
     { ABS, ins_const, ext_const, 0, {{0, 0}}, 0,		/* LDXMOV */

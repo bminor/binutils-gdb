@@ -3,7 +3,7 @@
 extern void bar (void);
 extern void foo (void);
 extern void foo_alias (void);
-extern void check_ptr_eq (void *, void *);
+extern void check_ptr_eq (void (*) (void), void (*) (void));
 
 #if defined(__GNUC__) && (__GNUC__ * 1000 + __GNUC_MINOR__) >= 4005
 __attribute__ ((noinline, noclone))

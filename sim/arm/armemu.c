@@ -1140,10 +1140,6 @@ handle_VFP_move (ARMul_State * state, ARMword instr)
 
 /* EMULATION of ARM6.  */
 
-/* The PC pipeline value depends on whether ARM
-   or Thumb instructions are being executed.  */
-ARMword isize;
-
 ARMword
 #ifdef MODE32
 ARMul_Emulate32 (ARMul_State * state)
@@ -5950,10 +5946,10 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 	;
       else
 #endif
-	if (nRdHi == nRm || nRdLo == nRm)
+	/* BAD code can trigger this result.  So only complain if debugging.  */
+	if (state->Debug && (nRdHi == nRm || nRdLo == nRm))
 	  fprintf (stderr, "sim: MULTIPLY64 - INVALID ARGUMENTS: %d %d %d\n",
 		   nRdHi, nRdLo, nRm);
-
       if (msigned)
 	{
 	  /* Compute sign of result and adjust operands if necessary.  */
@@ -5998,7 +5994,7 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
       state->Reg[nRdLo] = RdLo;
       state->Reg[nRdHi] = RdHi;
     }
-  else
+  else if (state->Debug)
     fprintf (stderr, "sim: MULTIPLY64 - INVALID ARGUMENTS\n");
 
   if (scc)

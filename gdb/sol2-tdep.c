@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,32 +40,27 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is how we want PTIDs from Solaris core files to be
    printed.  */
 
-char *
+std::string
 sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
-  static char buf[80];
   struct inferior *inf;
   int pid;
 
   /* Check whether we're printing an LWP (gdb thread) or a
      process.  */
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid != 0)
     {
       /* A thread.  */
-      xsnprintf (buf, sizeof buf, "LWP %ld", ptid_get_lwp (ptid));
-      return buf;
+      return string_printf ("LWP %ld", ptid.lwp ());
     }
 
   /* GDB didn't use to put a NT_PSTATUS note in Solaris cores.  If
      that's missing, then we're dealing with a fake PID corelow.c made
      up.  */
-  inf = find_inferior_ptid (ptid);
+  inf = find_inferior_ptid (current_inferior ()->process_target (), ptid);
   if (inf == NULL || inf->fake_pid_p)
-    {
-      xsnprintf (buf, sizeof buf, "<core>");
-      return buf;
-    }
+    return "<core>";
 
   /* Not fake; print as usual.  */
   return normal_pid_to_str (ptid);

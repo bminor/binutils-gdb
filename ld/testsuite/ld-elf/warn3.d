@@ -2,8 +2,7 @@
 #ld: tmpdir/symbol3w.o tmpdir/symbol3.a 
 #warning: .*: warning: badsym warning$
 #readelf: -s
-#notarget: hppa64*-hpux*
-#xfail: d30v-*-* dlx-*-* i960-*-* pj*-*-*
+#xfail: [is_generic]
 # generic linker targets don't support .gnu.warning sections.
 
 # Check that warnings are generated for the symbols in .gnu.warning

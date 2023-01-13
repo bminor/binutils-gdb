@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    0:	d500419f 	msr	pan, #0x1
    4:	d500409f 	msr	pan, #0x0
    8:	d5184260 	msr	pan, x0

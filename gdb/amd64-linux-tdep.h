@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux AMD64.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +26,7 @@
 /* Register number for the "orig_rax" register.  If this register
    contains a value >= 0 it is interpreted as the system call number
    that the kernel is supposed to restart.  */
-#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_ZMM31H_REGNUM + 1)
+#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_GSBASE_REGNUM + 1)
 
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)
@@ -35,11 +35,19 @@
 extern struct target_desc *tdesc_amd64_linux;
 extern struct target_desc *tdesc_amd64_avx_linux;
 extern struct target_desc *tdesc_amd64_mpx_linux;
-extern struct target_desc *tdesc_amd64_avx512_linux;
+extern struct target_desc *tdesc_amd64_avx_mpx_linux;
+extern struct target_desc *tdesc_amd64_avx_avx512_linux;
+extern struct target_desc *tdesc_amd64_avx_mpx_avx512_pku_linux;
 
 extern struct target_desc *tdesc_x32_linux;
 extern struct target_desc *tdesc_x32_avx_linux;
-extern struct target_desc *tdesc_x32_avx512_linux;
+extern struct target_desc *tdesc_x32_avx_avx512_linux;
+
+/* Return the right amd64-linux target descriptions according to
+   XCR0_FEATURES_BIT and IS_X32.  */
+
+const target_desc *amd64_linux_read_description (uint64_t xcr0_features_bit,
+						 bool is_x32);
 
 /* Enum that defines the syscall identifiers for amd64 linux.
    Used for process record/replay, these will be translated into

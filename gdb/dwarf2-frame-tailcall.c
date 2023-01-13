@@ -1,6 +1,6 @@
 /* Virtual tail call frames unwinder for GDB.
 
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "dwarf2-frame.h"
+#include "gdbarch.h"
 
 /* Contains struct tailcall_cache indexed by next_bottom_frame.  */
 static htab_t cache_htab;
@@ -44,7 +45,7 @@ struct tailcall_cache
      tailcall_cache.  */
   int refc;
 
-  /* Associated found virtual taill call frames chain, it is never NULL.  */
+  /* Associated found virtual tail call frames chain, it is never NULL.  */
   struct call_site_chain *chain;
 
   /* Cached pretended_chain_levels result.  */
@@ -318,6 +319,9 @@ tailcall_frame_sniffer (const struct frame_unwind *self,
   int next_levels;
   struct tailcall_cache *cache;
 
+  if (!dwarf2_frame_unwinders_enabled_p)
+    return 0;
+
   /* Inner tail call element does not make sense for a sentinel frame.  */
   next_frame = get_next_frame (this_frame);
   if (next_frame == NULL)
@@ -374,7 +378,7 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
   this_pc = get_frame_address_in_block (this_frame);
 
   /* Catch any unwinding errors.  */
-  TRY
+  try
     {
       int sp_regnum;
 
@@ -396,13 +400,12 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 	    }
 	}
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_error &except)
     {
       if (entry_values_debug)
 	exception_print (gdb_stdout, except);
       return;
     }
-  END_CATCH
 
   /* Ambiguous unwind or unambiguous unwind verified as matching.  */
   if (chain == NULL || chain->length == 0)
@@ -464,11 +467,9 @@ const struct frame_unwind dwarf2_tailcall_frame_unwind =
   tailcall_frame_prev_arch
 };
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tailcall_frame;
-
+void _initialize_tailcall_frame ();
 void
-_initialize_tailcall_frame (void)
+_initialize_tailcall_frame ()
 {
   cache_htab = htab_create_alloc (50, cache_hash, cache_eq, NULL, xcalloc,
 				  xfree);

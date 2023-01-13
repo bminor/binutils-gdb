@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -240,6 +240,7 @@
 #include "bucomm.h"
 #include "dlltool.h"
 #include "safe-ctype.h"
+#include "coff-bfd.h"
 
 #include <time.h>
 #include <assert.h>
@@ -434,10 +435,6 @@ static FILE *base_file;
 
 #ifdef DLLTOOL_DEFAULT_ARM
 static const char *mname = "arm";
-#endif
-
-#ifdef DLLTOOL_DEFAULT_ARM_EPOC
-static const char *mname = "arm-epoc";
 #endif
 
 #ifdef DLLTOOL_DEFAULT_ARM_WINCE
@@ -733,17 +730,7 @@ mtable[] =
   }
   ,
   {
-#define MARM_EPOC 9
-    "arm-epoc", ".byte", ".short", ".long", ".asciz", "@",
-    "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4", "",
-    "epoc-pe-arm-little", bfd_arch_arm,
-    arm_jtab, sizeof (arm_jtab), 8,
-    0, 0, 0, 0, 0, 0
-  }
-  ,
-  {
-#define MARM_WINCE 10
+#define MARM_WINCE 9
     "arm-wince", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
@@ -753,7 +740,7 @@ mtable[] =
   }
   ,
   {
-#define MX86 11
+#define MX86 10
     "i386:x86-64", ".byte", ".short", ".long", ".asciz", "#",
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-x86-64",bfd_arch_i386,
@@ -780,10 +767,9 @@ typedef struct export
   int ordinal;
   int constant;
   int noname;		/* Don't put name in image file.  */
-  int private;	/* Don't put reference in import lib.  */
+  int private;		/* Don't put reference in import lib.  */
   int data;
-  int hint;
-  int forward;	/* Number of forward label, 0 means no forward.  */
+  int forward;		/* Number of forward label, 0 means no forward.  */
   struct export *next;
 }
 export_type;
@@ -909,7 +895,6 @@ rvaafter (int mach)
     case MMCORE_LE:
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
-    case MARM_EPOC:
     case MARM_WINCE:
       break;
     default:
@@ -935,7 +920,6 @@ rvabefore (int mach)
     case MMCORE_LE:
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
-    case MARM_EPOC:
     case MARM_WINCE:
       return ".rva\t";
     default:
@@ -959,7 +943,6 @@ asm_prefix (int mach, const char *name)
     case MMCORE_LE:
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
-    case MARM_EPOC:
     case MARM_WINCE:
       break;
     case M386:
@@ -1402,7 +1385,7 @@ scan_drectve_symbols (bfd *abfd)
   if (s == NULL)
     return;
 
-  size = bfd_get_section_size (s);
+  size = bfd_section_size (s);
   buf  = xmalloc (size);
 
   bfd_get_section_contents (abfd, s, buf, 0, size);
@@ -2500,11 +2483,9 @@ make_one_lib_file (export_type *exp, int i, int delay)
       if (si->id != i)
 	abort ();
       si->sec = bfd_make_section_old_way (abfd, si->name);
-      bfd_set_section_flags (abfd,
-			     si->sec,
-			     si->flags & applicable);
+      bfd_set_section_flags (si->sec, si->flags & applicable);
 
-      bfd_set_section_alignment(abfd, si->sec, si->align);
+      bfd_set_section_alignment (si->sec, si->align);
       si->sec->output_section = si->sec;
       si->sym = bfd_make_empty_symbol(abfd);
       si->sym->name = si->sec->name;
@@ -2708,7 +2689,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	      sec->orelocation = rpp;
 	      break;
 	    }
-	  /* else fall through */
+	  /* Fall through.  */
+
 	case IDATA4:
 	  /* An idata$4 or idata$5 is one word long, and has an
 	     rva to idata$6.  */
@@ -2775,10 +2757,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	case IDATA6:
 	  if (!exp->noname)
 	    {
-	      /* This used to add 1 to exp->hint.  I don't know
-		 why it did that, and it does not match what I see
-		 in programs compiled with the MS tools.  */
-	      int idx = exp->hint;
+	      int idx = exp->ordinal;
+
 	      if (exp->its_name)
 	        si->size = strlen (exp->its_name) + 3;
 	      else
@@ -2841,7 +2821,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	    arelent *imglue, *ba_rel, *ea_rel, *pea_rel;
 
 	    /* Alignment must be set to 2**2 or you get extra stuff.  */
-	    bfd_set_section_alignment(abfd, sec, 2);
+	    bfd_set_section_alignment (sec, 2);
 
 	    si->size = 4 * 5;
 	    si->data = xmalloc (si->size);
@@ -2927,8 +2907,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
       {
 	sinfo *si = secdata + i;
 
-	bfd_set_section_size (abfd, si->sec, si->size);
-	bfd_set_section_vma (abfd, si->sec, vma);
+	bfd_set_section_size (si->sec, si->size);
+	bfd_set_section_vma (si->sec, vma);
       }
   }
   /* Write them out.  */
@@ -3262,7 +3242,6 @@ gen_lib_file (int delay)
 	  alias_exp.noname = exp->noname;
 	  alias_exp.private = exp->private;
 	  alias_exp.data = exp->data;
-	  alias_exp.hint = exp->hint;
 	  alias_exp.forward = exp->forward;
 	  alias_exp.next = exp->next;
 	  n = make_one_lib_file (&alias_exp, i + PREFIX_ALIAS_BASE, delay);
@@ -3524,7 +3503,8 @@ identify_dll_for_implib (void)
   search_data.symname = "__NULL_IMPORT_DESCRIPTOR";
   search_data.found = FALSE;
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    fatal (_("fatal error: libbfd ABI mismatch"));
 
   abfd = bfd_openr (identify_imp_name, 0);
   if (abfd == NULL)
@@ -3710,7 +3690,7 @@ identify_search_section (bfd * abfd, asection * section, void * obj)
   if (ms_style && ((section->flags & SEC_DATA) == 0))
     return;
 
-  if ((datasize = bfd_section_size (abfd, section)) == 0)
+  if ((datasize = bfd_section_size (section)) == 0)
     return;
 
   data = (bfd_byte *) xmalloc (datasize + 1);
@@ -3926,10 +3906,8 @@ mangle_defs (void)
 {
   /* First work out the minimum ordinal chosen.  */
   export_type *exp;
-
-  int i;
-  int hint = 0;
   export_type **d_export_vec = xmalloc (sizeof (export_type *) * d_nfuncs);
+  int i;
 
   inform (_("Processing definitions"));
 
@@ -3957,11 +3935,6 @@ mangle_defs (void)
   d_exports_lexically[i] = 0;
 
   qsort (d_exports_lexically, i, sizeof (export_type *), nfunc);
-
-  /* Fill exp entries with their hint values.  */
-  for (i = 0; i < d_nfuncs; i++)
-    if (!d_exports_lexically[i]->noname || show_allnames)
-      d_exports_lexically[i]->hint = hint++;
 
   inform (_("Processed definitions"));
 }

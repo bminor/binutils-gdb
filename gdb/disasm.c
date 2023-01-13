@@ -1,6 +1,6 @@
 /* Disassemble support for GDB.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,17 +18,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "target.h"
 #include "value.h"
 #include "ui-out.h"
 #include "disasm.h"
 #include "gdbcore.h"
+#include "gdbcmd.h"
 #include "dis-asm.h"
 #include "source.h"
+#include "safe-ctype.h"
+#include <algorithm>
+#include "gdbsupport/gdb_optional.h"
+#include "valprint.h"
+#include "cli/cli-style.h"
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
    the same thing: disassemble_command() and the gdbtk variation.  */
+
+/* This variable is used to hold the prospective disassembler_options value
+   which is set by the "set disassembler_options" command.  */
+static char *prospective_options = NULL;
 
 /* This structure is used to store line number information for the
    deprecated /m option.
@@ -118,53 +129,61 @@ line_has_code_p (htab_t table, struct symtab *symtab, int line)
   return htab_find (table, &dle) != NULL;
 }
 
-/* Like target_read_memory, but slightly different parameters.  */
-static int
-dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
-		     struct disassemble_info *info)
+/* Wrapper of target_read_code.  */
+
+int
+gdb_disassembler::dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
+				       unsigned int len,
+				       struct disassemble_info *info)
 {
   return target_read_code (memaddr, myaddr, len);
 }
 
-/* Like memory_error with slightly different parameters.  */
-static void
-dis_asm_memory_error (int err, bfd_vma memaddr,
-		      struct disassemble_info *info)
+/* Wrapper of memory_error.  */
+
+void
+gdb_disassembler::dis_asm_memory_error (int err, bfd_vma memaddr,
+					struct disassemble_info *info)
 {
-  memory_error (TARGET_XFER_E_IO, memaddr);
+  gdb_disassembler *self
+    = static_cast<gdb_disassembler *>(info->application_data);
+
+  self->m_err_memaddr = memaddr;
 }
 
-/* Like print_address with slightly different parameters.  */
-static void
-dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
-{
-  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
+/* Wrapper of print_address.  */
 
-  print_address (gdbarch, addr, (struct ui_file *) info->stream);
+void
+gdb_disassembler::dis_asm_print_address (bfd_vma addr,
+					 struct disassemble_info *info)
+{
+  gdb_disassembler *self
+    = static_cast<gdb_disassembler *>(info->application_data);
+
+  print_address (self->arch (), addr, self->stream ());
 }
 
-static int
-compare_lines (const void *mle1p, const void *mle2p)
+static bool
+line_is_less_than (const deprecated_dis_line_entry &mle1,
+		   const deprecated_dis_line_entry &mle2)
 {
-  struct deprecated_dis_line_entry *mle1, *mle2;
-  int val;
-
-  mle1 = (struct deprecated_dis_line_entry *) mle1p;
-  mle2 = (struct deprecated_dis_line_entry *) mle2p;
+  bool val;
 
   /* End of sequence markers have a line number of 0 but don't want to
      be sorted to the head of the list, instead sort by PC.  */
-  if (mle1->line == 0 || mle2->line == 0)
+  if (mle1.line == 0 || mle2.line == 0)
     {
-      val = mle1->start_pc - mle2->start_pc;
-      if (val == 0)
-        val = mle1->line - mle2->line;
+      if (mle1.start_pc != mle2.start_pc)
+	val = mle1.start_pc < mle2.start_pc;
+    else
+        val = mle1.line < mle2.line;
     }
   else
     {
-      val = mle1->line - mle2->line;
-      if (val == 0)
-        val = mle1->start_pc - mle2->start_pc;
+      if (mle1.line != mle2.line)
+	val = mle1.line < mle2.line;
+      else
+        val = mle1.start_pc < mle2.start_pc;
     }
   return val;
 }
@@ -172,122 +191,110 @@ compare_lines (const void *mle1p, const void *mle2p)
 /* See disasm.h.  */
 
 int
-gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
-		       struct disassemble_info * di,
-		       const struct disasm_insn *insn, int flags,
-		       struct ui_file *stb)
+gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn,
+						  gdb_disassembly_flags flags)
 {
   /* parts of the symbolic representation of the address */
   int unmapped;
   int offset;
   int line;
   int size;
-  struct cleanup *ui_out_chain;
-  char *filename = NULL;
-  char *name = NULL;
   CORE_ADDR pc;
+  struct gdbarch *gdbarch = arch ();
 
-  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-  pc = insn->addr;
+  {
+    ui_out_emit_tuple tuple_emitter (m_uiout, NULL);
+    pc = insn->addr;
 
-  if (insn->number != 0)
-    {
-      ui_out_field_fmt (uiout, "insn-number", "%u", insn->number);
-      ui_out_text (uiout, "\t");
-    }
+    if (insn->number != 0)
+      {
+	m_uiout->field_unsigned ("insn-number", insn->number);
+	m_uiout->text ("\t");
+      }
 
-  if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
-    {
-      if (insn->is_speculative)
-	{
-	  ui_out_field_string (uiout, "is-speculative", "?");
+    if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
+      {
+	if (insn->is_speculative)
+	  {
+	    m_uiout->field_string ("is-speculative", "?");
 
-	  /* The speculative execution indication overwrites the first
-	     character of the PC prefix.
-	     We assume a PC prefix length of 3 characters.  */
-	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	    ui_out_text (uiout, pc_prefix (pc) + 1);
-	  else
-	    ui_out_text (uiout, "  ");
-	}
-      else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	ui_out_text (uiout, pc_prefix (pc));
-      else
-	ui_out_text (uiout, "   ");
-    }
-  else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-    ui_out_text (uiout, pc_prefix (pc));
-  ui_out_field_core_addr (uiout, "address", gdbarch, pc);
+	    /* The speculative execution indication overwrites the first
+	       character of the PC prefix.
+	       We assume a PC prefix length of 3 characters.  */
+	    if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	      m_uiout->text (pc_prefix (pc) + 1);
+	    else
+	      m_uiout->text ("  ");
+	  }
+	else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	  m_uiout->text (pc_prefix (pc));
+	else
+	  m_uiout->text ("   ");
+      }
+    else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+      m_uiout->text (pc_prefix (pc));
+    m_uiout->field_core_addr ("address", gdbarch, pc);
 
-  if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
-			       &line, &unmapped))
-    {
-      /* We don't care now about line, filename and unmapped.  But we might in
-	 the future.  */
-      ui_out_text (uiout, " <");
-      if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
-	ui_out_field_string (uiout, "func-name", name);
-      ui_out_text (uiout, "+");
-      ui_out_field_int (uiout, "offset", offset);
-      ui_out_text (uiout, ">:\t");
-    }
-  else
-    ui_out_text (uiout, ":\t");
+    std::string name, filename;
+    bool omit_fname = ((flags & DISASSEMBLY_OMIT_FNAME) != 0);
+    if (!build_address_symbolic (gdbarch, pc, false, omit_fname, &name,
+                                 &offset, &filename, &line, &unmapped))
+      {
+	/* We don't care now about line, filename and unmapped.  But we might in
+	   the future.  */
+	m_uiout->text (" <");
+	if (!omit_fname)
+	  m_uiout->field_string ("func-name", name.c_str (),
+				 function_name_style.style ());
+	/* For negative offsets, avoid displaying them as +-N; the sign of
+	   the offset takes the place of the "+" here.  */
+	if (offset >= 0)
+	  m_uiout->text ("+");
+	m_uiout->field_signed ("offset", offset);
+	m_uiout->text (">:\t");
+      }
+    else
+      m_uiout->text (":\t");
 
-  if (filename != NULL)
-    xfree (filename);
-  if (name != NULL)
-    xfree (name);
+    m_insn_stb.clear ();
 
-  ui_file_rewind (stb);
-  if (flags & DISASSEMBLY_RAW_INSN)
-    {
-      CORE_ADDR end_pc;
-      bfd_byte data;
-      int err;
-      const char *spacer = "";
+    if (flags & DISASSEMBLY_RAW_INSN)
+      {
+	CORE_ADDR end_pc;
+	bfd_byte data;
+	const char *spacer = "";
 
-      /* Build the opcodes using a temporary stream so we can
-	 write them out in a single go for the MI.  */
-      struct ui_file *opcode_stream = mem_fileopen ();
-      struct cleanup *cleanups =
-	make_cleanup_ui_file_delete (opcode_stream);
+	/* Build the opcodes using a temporary stream so we can
+	   write them out in a single go for the MI.  */
+	m_opcode_stb.clear ();
 
-      size = gdbarch_print_insn (gdbarch, pc, di);
-      end_pc = pc + size;
+	size = m_di.print_insn (pc);
+	end_pc = pc + size;
 
-      for (;pc < end_pc; ++pc)
-	{
-	  err = (*di->read_memory_func) (pc, &data, 1, di);
-	  if (err != 0)
-	    (*di->memory_error_func) (err, pc, di);
-	  fprintf_filtered (opcode_stream, "%s%02x",
-			    spacer, (unsigned) data);
-	  spacer = " ";
-	}
+	for (;pc < end_pc; ++pc)
+	  {
+	    read_code (pc, &data, 1);
+	    m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
+	    spacer = " ";
+	  }
 
-      ui_out_field_stream (uiout, "opcodes", opcode_stream);
-      ui_out_text (uiout, "\t");
+	m_uiout->field_stream ("opcodes", m_opcode_stb);
+	m_uiout->text ("\t");
+      }
+    else
+      size = m_di.print_insn (pc);
 
-      do_cleanups (cleanups);
-    }
-  else
-    size = gdbarch_print_insn (gdbarch, pc, di);
-
-  ui_out_field_stream (uiout, "inst", stb);
-  ui_file_rewind (stb);
-  do_cleanups (ui_out_chain);
-  ui_out_text (uiout, "\n");
+    m_uiout->field_stream ("inst", m_insn_stb);
+  }
+  m_uiout->text ("\n");
 
   return size;
 }
 
 static int
-dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
-	    struct disassemble_info * di,
-	    CORE_ADDR low, CORE_ADDR high,
-	    int how_many, int flags, struct ui_file *stb,
-	    CORE_ADDR *end_pc)
+dump_insns (struct gdbarch *gdbarch,
+	    struct ui_out *uiout, CORE_ADDR low, CORE_ADDR high,
+	    int how_many, gdb_disassembly_flags flags, CORE_ADDR *end_pc)
 {
   struct disasm_insn insn;
   int num_displayed = 0;
@@ -295,11 +302,13 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
   memset (&insn, 0, sizeof (insn));
   insn.addr = low;
 
+  gdb_pretty_print_disassembler disasm (gdbarch, uiout);
+
   while (insn.addr < high && (how_many < 0 || num_displayed < how_many))
     {
       int size;
 
-      size = gdb_pretty_print_insn (gdbarch, uiout, di, &insn, flags, stb);
+      size = disasm.pretty_print_insn (&insn, flags);
       if (size <= 0)
 	break;
 
@@ -326,9 +335,9 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 static void
 do_mixed_source_and_assembly_deprecated
   (struct gdbarch *gdbarch, struct ui_out *uiout,
-   struct disassemble_info *di, struct symtab *symtab,
+   struct symtab *symtab,
    CORE_ADDR low, CORE_ADDR high,
-   int how_many, int flags, struct ui_file *stb)
+   int how_many, gdb_disassembly_flags flags)
 {
   int newlines = 0;
   int nlines;
@@ -340,9 +349,6 @@ do_mixed_source_and_assembly_deprecated
   int next_line = 0;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-  struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
 
   gdb_assert (symtab != NULL && SYMTAB_LINETABLE (symtab) != NULL);
 
@@ -397,14 +403,16 @@ do_mixed_source_and_assembly_deprecated
   /* Now, sort mle by line #s (and, then by addresses within lines).  */
 
   if (out_of_order)
-    qsort (mle, newlines, sizeof (struct deprecated_dis_line_entry),
-	   compare_lines);
+    std::sort (mle, mle + newlines, line_is_less_than);
 
   /* Now, for each line entry, emit the specified lines (unless
      they have been emitted before), followed by the assembly code
      for that line.  */
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_list (uiout, "asm_insns");
+
+  gdb::optional<ui_out_emit_tuple> outer_tuple_emitter;
+  gdb::optional<ui_out_emit_list> inner_list_emitter;
 
   for (i = 0; i < newlines; i++)
     {
@@ -416,9 +424,7 @@ do_mixed_source_and_assembly_deprecated
 	      /* Just one line to print.  */
 	      if (next_line == mle[i].line)
 		{
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	      else
@@ -426,59 +432,44 @@ do_mixed_source_and_assembly_deprecated
 		  /* Several source lines w/o asm instructions associated.  */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
-		      struct cleanup *ui_out_list_chain_line;
-		      struct cleanup *ui_out_tuple_chain_line;
-		      
-		      ui_out_tuple_chain_line
-			= make_cleanup_ui_out_tuple_begin_end (uiout,
-							       "src_and_asm_line");
+		      ui_out_emit_tuple tuple_emitter (uiout,
+						       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  psl_flags);
-		      ui_out_list_chain_line
-			= make_cleanup_ui_out_list_begin_end (uiout,
-							      "line_asm_insn");
-		      do_cleanups (ui_out_list_chain_line);
-		      do_cleanups (ui_out_tuple_chain_line);
+		      ui_out_emit_list temp_list_emitter (uiout,
+							  "line_asm_insn");
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added.  */
-		  ui_out_tuple_chain
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	    }
 	  else
 	    {
-	      ui_out_tuple_chain
-		= make_cleanup_ui_out_tuple_begin_end (uiout,
-						       "src_and_asm_line");
+	      outer_tuple_emitter.emplace (uiout, "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, psl_flags);
 	    }
 
 	  next_line = mle[i].line + 1;
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	  inner_list_emitter.emplace (uiout, "line_asm_insn");
 	}
 
-      num_displayed += dump_insns (gdbarch, uiout, di,
+      num_displayed += dump_insns (gdbarch, uiout,
 				   mle[i].start_pc, mle[i].end_pc,
-				   how_many, flags, stb, NULL);
+				   how_many, flags, NULL);
 
       /* When we've reached the end of the mle array, or we've seen the last
          assembly range for this source line, close out the list/tuple.  */
       if (i == (newlines - 1) || mle[i + 1].line > mle[i].line)
 	{
-	  do_cleanups (ui_out_list_chain);
-	  do_cleanups (ui_out_tuple_chain);
-	  ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
-	  ui_out_list_chain = make_cleanup (null_cleanup, 0);
-	  ui_out_text (uiout, "\n");
+	  inner_list_emitter.reset ();
+	  outer_tuple_emitter.reset ();
+	  uiout->text ("\n");
 	}
       if (how_many >= 0 && num_displayed >= how_many)
 	break;
     }
-  do_cleanups (ui_out_chain);
 }
 
 /* The idea here is to present a source-O-centric view of a
@@ -487,28 +478,19 @@ do_mixed_source_and_assembly_deprecated
    immediately following.  */
 
 static void
-do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-			      struct disassemble_info *di,
+do_mixed_source_and_assembly (struct gdbarch *gdbarch,
+			      struct ui_out *uiout,
 			      struct symtab *main_symtab,
 			      CORE_ADDR low, CORE_ADDR high,
-			      int how_many, int flags, struct ui_file *stb)
+			      int how_many, gdb_disassembly_flags flags)
 {
-  int newlines = 0;
   const struct linetable_entry *le, *first_le;
-  struct symtab_and_line sal;
   int i, nlines;
-  int out_of_order = 0;
-  int next_line = 0;
   int num_displayed = 0;
   print_source_lines_flags psl_flags = 0;
-  struct cleanup *cleanups;
-  struct cleanup *ui_out_chain;
-  struct cleanup *ui_out_tuple_chain;
-  struct cleanup *ui_out_list_chain;
   CORE_ADDR pc;
   struct symtab *last_symtab;
   int last_line;
-  htab_t dis_line_table;
 
   gdb_assert (main_symtab != NULL && SYMTAB_LINETABLE (main_symtab) != NULL);
 
@@ -518,8 +500,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
      but if that text is for code that will be disassembled later, then
      we'll want to defer printing it until later with its associated code.  */
 
-  dis_line_table = allocate_dis_line_table ();
-  cleanups = make_cleanup_htab_delete (dis_line_table);
+  htab_up dis_line_table (allocate_dis_line_table ());
 
   pc = low;
 
@@ -551,7 +532,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       pc += length;
 
       if (sal.symtab != NULL)
-	add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
+	add_dis_line_entry (dis_line_table.get (), sal.symtab, sal.line);
     }
 
   /* Second pass: print the disassembly.
@@ -567,24 +548,21 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
      CLI output works on top of this because MI ignores ui_out_text output,
      which is where we put file name and source line contents output.
 
-     Cleanup usage:
-     cleanups:
-       For things created at the beginning of this function and need to be
-       kept until the end of this function.
-     ui_out_chain
+     Emitter usage:
+     asm_insns_emitter
        Handles the outer "asm_insns" list.
-     ui_out_tuple_chain
+     tuple_emitter
        The tuples for each group of consecutive disassemblies.
-     ui_out_list_chain
+     list_emitter
        List of consecutive source lines or disassembled insns.  */
 
   if (flags & DISASSEMBLY_FILENAME)
     psl_flags |= PRINT_SOURCE_LINES_FILENAME;
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+  ui_out_emit_list asm_insns_emitter (uiout, "asm_insns");
 
-  ui_out_tuple_chain = NULL;
-  ui_out_list_chain = NULL;
+  gdb::optional<ui_out_emit_tuple> tuple_emitter;
+  gdb::optional<ui_out_emit_list> list_emitter;
 
   last_symtab = NULL;
   last_line = 0;
@@ -592,7 +570,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
   while (pc < high)
     {
-      struct linetable_entry *le = NULL;
       struct symtab_and_line sal;
       CORE_ADDR end_pc;
       int start_preceding_line_to_display = 0;
@@ -629,7 +606,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		     not associated with code that we'll print later.  */
 		  for (l = sal.line - 1; l > last_line; --l)
 		    {
-		      if (line_has_code_p (dis_line_table, sal.symtab, l))
+		      if (line_has_code_p (dis_line_table.get (),
+					   sal.symtab, l))
 			break;
 		    }
 		  if (l < sal.line - 1)
@@ -652,12 +630,12 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	{
 	  /* Skip the newline if this is the first instruction.  */
 	  if (pc > low)
-	    ui_out_text (uiout, "\n");
-	  if (ui_out_tuple_chain != NULL)
+	    uiout->text ("\n");
+	  if (tuple_emitter.has_value ())
 	    {
-	      gdb_assert (ui_out_list_chain != NULL);
-	      do_cleanups (ui_out_list_chain);
-	      do_cleanups (ui_out_tuple_chain);
+	      gdb_assert (list_emitter.has_value ());
+	      list_emitter.reset ();
+	      tuple_emitter.reset ();
 	    }
 	  if (sal.symtab != last_symtab
 	      && !(flags & DISASSEMBLY_FILENAME))
@@ -667,12 +645,11 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		 output includes the source specs for each line.  */
 	      if (sal.symtab != NULL)
 		{
-		  ui_out_text (uiout,
-			       symtab_to_filename_for_display (sal.symtab));
+		  uiout->text (symtab_to_filename_for_display (sal.symtab));
 		}
 	      else
-		ui_out_text (uiout, "unknown");
-	      ui_out_text (uiout, ":\n");
+		uiout->text ("unknown");
+	      uiout->text (":\n");
 	    }
 	  if (start_preceding_line_to_display > 0)
 	    {
@@ -680,49 +657,40 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		 We need to preserve the structure of the output, so output
 		 a bunch of line tuples with no asm entries.  */
 	      int l;
-	      struct cleanup *ui_out_list_chain_line;
-	      struct cleanup *ui_out_tuple_chain_line;
 
 	      gdb_assert (sal.symtab != NULL);
 	      for (l = start_preceding_line_to_display;
 		   l < end_preceding_line_to_display;
 		   ++l)
 		{
-		  ui_out_tuple_chain_line
-		    = make_cleanup_ui_out_tuple_begin_end (uiout,
-							   "src_and_asm_line");
+		  ui_out_emit_tuple line_tuple_emitter (uiout,
+							"src_and_asm_line");
 		  print_source_lines (sal.symtab, l, l + 1, psl_flags);
-		  ui_out_list_chain_line
-		    = make_cleanup_ui_out_list_begin_end (uiout,
-							  "line_asm_insn");
-		  do_cleanups (ui_out_list_chain_line);
-		  do_cleanups (ui_out_tuple_chain_line);
+		  ui_out_emit_list chain_line_emitter (uiout, "line_asm_insn");
 		}
 	    }
-	  ui_out_tuple_chain
-	    = make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+	  tuple_emitter.emplace (uiout, "src_and_asm_line");
 	  if (sal.symtab != NULL)
 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, psl_flags);
 	  else
-	    ui_out_text (uiout, _("--- no source info for this pc ---\n"));
-	  ui_out_list_chain
-	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+	    uiout->text (_("--- no source info for this pc ---\n"));
+	  list_emitter.emplace (uiout, "line_asm_insn");
 	}
       else
 	{
 	  /* Here we're appending instructions to an existing line.
 	     By construction the very first insn will have a symtab
 	     and follow the new_source_line path above.  */
-	  gdb_assert (ui_out_tuple_chain != NULL);
-	  gdb_assert (ui_out_list_chain != NULL);
+	  gdb_assert (tuple_emitter.has_value ());
+	  gdb_assert (list_emitter.has_value ());
 	}
 
       if (sal.end != 0)
-	end_pc = min (sal.end, high);
+	end_pc = std::min (sal.end, high);
       else
 	end_pc = pc + 1;
-      num_displayed += dump_insns (gdbarch, uiout, di, pc, end_pc,
-				   how_many, flags, stb, &end_pc);
+      num_displayed += dump_insns (gdbarch, uiout, pc, end_pc,
+				   how_many, flags, &end_pc);
       pc = end_pc;
 
       if (how_many >= 0 && num_displayed >= how_many)
@@ -731,26 +699,16 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       last_symtab = sal.symtab;
       last_line = sal.line;
     }
-
-  do_cleanups (ui_out_chain);
-  do_cleanups (cleanups);
 }
 
 static void
 do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
-		  struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
-		  int how_many, int flags, struct ui_file *stb)
+		  int how_many, gdb_disassembly_flags flags)
 {
-  int num_displayed = 0;
-  struct cleanup *ui_out_chain;
+  ui_out_emit_list list_emitter (uiout, "asm_insns");
 
-  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
-
-  num_displayed = dump_insns (gdbarch, uiout, di, low, high, how_many,
-                              flags, stb, NULL);
-
-  do_cleanups (ui_out_chain);
+  dump_insns (gdbarch, uiout, low, high, how_many, flags, NULL);
 }
 
 /* Initialize the disassemble info struct ready for the specified
@@ -768,43 +726,93 @@ fprintf_disasm (void *stream, const char *format, ...)
   return 0;
 }
 
-struct disassemble_info
-gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
-{
-  struct disassemble_info di;
+/* Combine implicit and user disassembler options and return them
+   in a newly-created string.  */
 
-  init_disassemble_info (&di, file, fprintf_disasm);
-  di.flavour = bfd_target_unknown_flavour;
-  di.memory_error_func = dis_asm_memory_error;
-  di.print_address_func = dis_asm_print_address;
+static std::string
+get_all_disassembler_options (struct gdbarch *gdbarch)
+{
+  const char *implicit = gdbarch_disassembler_options_implicit (gdbarch);
+  const char *options = get_disassembler_options (gdbarch);
+  const char *comma = ",";
+
+  if (implicit == nullptr)
+    {
+      implicit = "";
+      comma = "";
+    }
+
+  if (options == nullptr)
+    {
+      options = "";
+      comma = "";
+    }
+
+  return string_printf ("%s%s%s", implicit, comma, options);
+}
+
+gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
+				    struct ui_file *file,
+				    di_read_memory_ftype read_memory_func)
+  : m_gdbarch (gdbarch),
+    m_err_memaddr (0)
+{
+  init_disassemble_info (&m_di, file, fprintf_disasm);
+  m_di.flavour = bfd_target_unknown_flavour;
+  m_di.memory_error_func = dis_asm_memory_error;
+  m_di.print_address_func = dis_asm_print_address;
   /* NOTE: cagney/2003-04-28: The original code, from the old Insight
-     disassembler had a local optomization here.  By default it would
+     disassembler had a local optimization here.  By default it would
      access the executable file, instead of the target memory (there
      was a growing list of exceptions though).  Unfortunately, the
      heuristic was flawed.  Commands like "disassemble &variable"
      didn't work as they relied on the access going to the target.
-     Further, it has been supperseeded by trust-read-only-sections
+     Further, it has been superseeded by trust-read-only-sections
      (although that should be superseeded by target_trust..._p()).  */
-  di.read_memory_func = dis_asm_read_memory;
-  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
-  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
-  di.endian = gdbarch_byte_order (gdbarch);
-  di.endian_code = gdbarch_byte_order_for_code (gdbarch);
-  di.application_data = gdbarch;
-  disassemble_init_for_target (&di);
-  return di;
+  m_di.read_memory_func = read_memory_func;
+  m_di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+  m_di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  m_di.endian = gdbarch_byte_order (gdbarch);
+  m_di.endian_code = gdbarch_byte_order_for_code (gdbarch);
+  m_di.application_data = this;
+  m_disassembler_options_holder = get_all_disassembler_options (gdbarch);
+  if (!m_disassembler_options_holder.empty ())
+    m_di.disassembler_options = m_disassembler_options_holder.c_str ();
+  disassemble_init_for_target (&m_di);
+}
+
+gdb_disassembler::~gdb_disassembler ()
+{
+  disassemble_free_target (&m_di);
+}
+
+int
+gdb_disassembler::print_insn (CORE_ADDR memaddr,
+			      int *branch_delay_insns)
+{
+  m_err_memaddr = 0;
+
+  int length = gdbarch_print_insn (arch (), memaddr, &m_di);
+
+  if (length < 0)
+    memory_error (TARGET_XFER_E_IO, m_err_memaddr);
+
+  if (branch_delay_insns != NULL)
+    {
+      if (m_di.insn_info_valid)
+	*branch_delay_insns = m_di.branch_delay_insns;
+      else
+	*branch_delay_insns = 0;
+    }
+  return length;
 }
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		 char *file_string, int flags, int how_many,
+		 gdb_disassembly_flags flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
-  struct ui_file *stb = mem_fileopen ();
-  struct cleanup *cleanups = make_cleanup_ui_file_delete (stb);
-  struct disassemble_info di = gdb_disassemble_info (gdbarch, stb);
   struct symtab *symtab;
-  struct linetable_entry *le = NULL;
   int nlines = -1;
 
   /* Assume symtab is valid for whole PC range.  */
@@ -815,17 +823,16 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
   if (!(flags & (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
       || nlines <= 0)
-    do_assembly_only (gdbarch, uiout, &di, low, high, how_many, flags, stb);
+    do_assembly_only (gdbarch, uiout, low, high, how_many, flags);
 
   else if (flags & DISASSEMBLY_SOURCE)
-    do_mixed_source_and_assembly (gdbarch, uiout, &di, symtab, low, high,
-				  how_many, flags, stb);
+    do_mixed_source_and_assembly (gdbarch, uiout, symtab, low, high,
+				  how_many, flags);
 
   else if (flags & DISASSEMBLY_SOURCE_DEPRECATED)
-    do_mixed_source_and_assembly_deprecated (gdbarch, uiout, &di, symtab,
-					     low, high, how_many, flags, stb);
+    do_mixed_source_and_assembly_deprecated (gdbarch, uiout, symtab,
+					     low, high, how_many, flags);
 
-  do_cleanups (cleanups);
   gdb_flush (gdb_stdout);
 }
 
@@ -837,25 +844,10 @@ int
 gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 		struct ui_file *stream, int *branch_delay_insns)
 {
-  struct disassemble_info di;
-  int length;
 
-  di = gdb_disassemble_info (gdbarch, stream);
-  length = gdbarch_print_insn (gdbarch, memaddr, &di);
-  if (branch_delay_insns)
-    {
-      if (di.insn_info_valid)
-	*branch_delay_insns = di.branch_delay_insns;
-      else
-	*branch_delay_insns = 0;
-    }
-  return length;
-}
+  gdb_disassembler di (gdbarch, stream);
 
-static void
-do_ui_file_delete (void *arg)
-{
-  ui_file_delete ((struct ui_file *) arg);
+  return di.print_insn (memaddr, branch_delay_insns);
 }
 
 /* Return the length in bytes of the instruction at address MEMADDR in
@@ -864,16 +856,7 @@ do_ui_file_delete (void *arg)
 int
 gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  static struct ui_file *null_stream = NULL;
-
-  /* Dummy file descriptor for the disassembler.  */
-  if (!null_stream)
-    {
-      null_stream = ui_file_new ();
-      make_final_cleanup (do_ui_file_delete, null_stream);
-    }
-
-  return gdb_print_insn (gdbarch, addr, null_stream, NULL);
+  return gdb_print_insn (gdbarch, addr, &null_stream, NULL);
 }
 
 /* fprintf-function for gdb_buffered_insn_length.  This function is a
@@ -886,13 +869,16 @@ gdb_buffered_insn_length_fprintf (void *stream, const char *format, ...)
   return 0;
 }
 
-/* Initialize a struct disassemble_info for gdb_buffered_insn_length.  */
+/* Initialize a struct disassemble_info for gdb_buffered_insn_length.
+   Upon return, *DISASSEMBLER_OPTIONS_HOLDER owns the string pointed
+   to by DI.DISASSEMBLER_OPTIONS.  */
 
 static void
 gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
 				   struct disassemble_info *di,
 				   const gdb_byte *insn, int max_len,
-				   CORE_ADDR addr)
+				   CORE_ADDR addr,
+				   std::string *disassembler_options_holder)
 {
   init_disassemble_info (di, NULL, gdb_buffered_insn_length_fprintf);
 
@@ -908,6 +894,9 @@ gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
   di->endian = gdbarch_byte_order (gdbarch);
   di->endian_code = gdbarch_byte_order_for_code (gdbarch);
 
+  *disassembler_options_holder = get_all_disassembler_options (gdbarch);
+  if (!disassembler_options_holder->empty ())
+    di->disassembler_options = disassembler_options_holder->c_str ();
   disassemble_init_for_target (di);
 }
 
@@ -919,8 +908,248 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
 			  const gdb_byte *insn, int max_len, CORE_ADDR addr)
 {
   struct disassemble_info di;
+  std::string disassembler_options_holder;
 
-  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
+  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr,
+				     &disassembler_options_holder);
 
-  return gdbarch_print_insn (gdbarch, addr, &di);
+  int result = gdbarch_print_insn (gdbarch, addr, &di);
+  disassemble_free_target (&di);
+  return result;
+}
+
+char *
+get_disassembler_options (struct gdbarch *gdbarch)
+{
+  char **disassembler_options = gdbarch_disassembler_options (gdbarch);
+  if (disassembler_options == NULL)
+    return NULL;
+  return *disassembler_options;
+}
+
+void
+set_disassembler_options (char *prospective_options)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  char **disassembler_options = gdbarch_disassembler_options (gdbarch);
+  const disasm_options_and_args_t *valid_options_and_args;
+  const disasm_options_t *valid_options;
+  char *options = remove_whitespace_and_extra_commas (prospective_options);
+  const char *opt;
+
+  /* Allow all architectures, even ones that do not support 'set disassembler',
+     to reset their disassembler options to NULL.  */
+  if (options == NULL)
+    {
+      if (disassembler_options != NULL)
+	{
+	  free (*disassembler_options);
+	  *disassembler_options = NULL;
+	}
+      return;
+    }
+
+  valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
+  if (valid_options_and_args == NULL)
+    {
+      fprintf_filtered (gdb_stderr, _("\
+'set disassembler-options ...' is not supported on this architecture.\n"));
+      return;
+    }
+
+  valid_options = &valid_options_and_args->options;
+
+  /* Verify we have valid disassembler options.  */
+  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
+    {
+      size_t i;
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	  {
+	    size_t len = strlen (valid_options->name[i]);
+	    bool found = false;
+	    const char *arg;
+	    size_t j;
+
+	    if (memcmp (opt, valid_options->name[i], len) != 0)
+	      continue;
+	    arg = opt + len;
+	    for (j = 0; valid_options->arg[i]->values[j] != NULL; j++)
+	      if (disassembler_options_cmp
+		    (arg, valid_options->arg[i]->values[j]) == 0)
+		{
+		  found = true;
+		  break;
+		}
+	    if (found)
+	      break;
+	  }
+	else if (disassembler_options_cmp (opt, valid_options->name[i]) == 0)
+	  break;
+      if (valid_options->name[i] == NULL)
+	{
+	  fprintf_filtered (gdb_stderr,
+			    _("Invalid disassembler option value: '%s'.\n"),
+			    opt);
+	  return;
+	}
+    }
+
+  free (*disassembler_options);
+  *disassembler_options = xstrdup (options);
+}
+
+static void
+set_disassembler_options_sfunc (const char *args, int from_tty,
+				struct cmd_list_element *c)
+{
+  set_disassembler_options (prospective_options);
+}
+
+static void
+show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  const disasm_options_and_args_t *valid_options_and_args;
+  const disasm_option_arg_t *valid_args;
+  const disasm_options_t *valid_options;
+
+  const char *options = get_disassembler_options (gdbarch);
+  if (options == NULL)
+    options = "";
+
+  fprintf_filtered (file, _("The current disassembler options are '%s'\n\n"),
+		    options);
+
+  valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
+
+  if (valid_options_and_args == NULL)
+    {
+      fputs_filtered (_("There are no disassembler options available "
+			"for this architecture.\n"),
+		      file);
+      return;
+    }
+
+  valid_options = &valid_options_and_args->options;
+
+  fprintf_filtered (file, _("\
+The following disassembler options are supported for use with the\n\
+'set disassembler-options OPTION [,OPTION]...' command:\n"));
+
+  if (valid_options->description != NULL)
+    {
+      size_t i, max_len = 0;
+
+      fprintf_filtered (file, "\n");
+
+      /* Compute the length of the longest option name.  */
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	{
+	  size_t len = strlen (valid_options->name[i]);
+
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    len += strlen (valid_options->arg[i]->name);
+	  if (max_len < len)
+	    max_len = len;
+	}
+
+      for (i = 0, max_len++; valid_options->name[i] != NULL; i++)
+	{
+	  fprintf_filtered (file, "  %s", valid_options->name[i]);
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
+	  if (valid_options->description[i] != NULL)
+	    {
+	      size_t len = strlen (valid_options->name[i]);
+
+	      if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+		len += strlen (valid_options->arg[i]->name);
+	      fprintf_filtered (file, "%*c %s", (int) (max_len - len), ' ',
+				valid_options->description[i]);
+	    }
+	  fprintf_filtered (file, "\n");
+	}
+    }
+  else
+    {
+      size_t i;
+      fprintf_filtered (file, "  ");
+      for (i = 0; valid_options->name[i] != NULL; i++)
+	{
+	  fprintf_filtered (file, "%s", valid_options->name[i]);
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
+	  if (valid_options->name[i + 1] != NULL)
+	    fprintf_filtered (file, ", ");
+	  wrap_here ("  ");
+	}
+      fprintf_filtered (file, "\n");
+    }
+
+  valid_args = valid_options_and_args->args;
+  if (valid_args != NULL)
+    {
+      size_t i, j;
+
+      for (i = 0; valid_args[i].name != NULL; i++)
+	{
+	  fprintf_filtered (file, _("\n\
+  For the options above, the following values are supported for \"%s\":\n   "),
+			    valid_args[i].name);
+	  for (j = 0; valid_args[i].values[j] != NULL; j++)
+	    {
+	      fprintf_filtered (file, " %s", valid_args[i].values[j]);
+	      wrap_here ("   ");
+	    }
+	  fprintf_filtered (file, "\n");
+	}
+    }
+}
+
+/* A completion function for "set disassembler".  */
+
+static void
+disassembler_options_completer (struct cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char *word)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  const disasm_options_and_args_t *opts_and_args
+    = gdbarch_valid_disassembler_options (gdbarch);
+
+  if (opts_and_args != NULL)
+    {
+      const disasm_options_t *opts = &opts_and_args->options;
+
+      /* Only attempt to complete on the last option text.  */
+      const char *separator = strrchr (text, ',');
+      if (separator != NULL)
+	text = separator + 1;
+      text = skip_spaces (text);
+      complete_on_enum (tracker, opts->name, text, word);
+    }
+}
+
+
+/* Initialization code.  */
+
+void _initialize_disasm ();
+void
+_initialize_disasm ()
+{
+  struct cmd_list_element *cmd;
+
+  /* Add the command that controls the disassembler options.  */
+  cmd = add_setshow_string_noescape_cmd ("disassembler-options", no_class,
+					 &prospective_options, _("\
+Set the disassembler options.\n\
+Usage: set disassembler-options OPTION [,OPTION]...\n\n\
+See: 'show disassembler-options' for valid option values."), _("\
+Show the disassembler options."), NULL,
+					 set_disassembler_options_sfunc,
+					 show_disassembler_options_sfunc,
+					 &setlist, &showlist);
+  set_cmd_completer (cmd, disassembler_options_completer);
 }

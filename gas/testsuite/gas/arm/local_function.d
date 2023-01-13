@@ -1,7 +1,8 @@
 #objdump: -r
-#name: Relocations agains local function symbols
+#as:  --generate-missing-build-notes=no
+#name: Relocations against local function symbols
 # This test is only valid on ELF based ports.
-#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix* *-*-vxworks
+#notarget: *-*-pe *-*-wince *-*-vxworks
 
 .*:     file format.*
 

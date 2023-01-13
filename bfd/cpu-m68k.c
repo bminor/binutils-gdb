@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -23,6 +23,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "opcode/m68k.h"
+#include "cpu-m68k.h"
 
 static const bfd_arch_info_type *
 bfd_m68k_compatible (const bfd_arch_info_type *a,
@@ -30,7 +31,7 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
 
 #define N(name, print,d,next)  \
 {  32, 32, 8, bfd_arch_m68k, name, "m68k",print,2,d,bfd_m68k_compatible, \
-   bfd_default_scan, bfd_arch_default_fill, next, }
+   bfd_default_scan, bfd_arch_default_fill, next, 0 }
 
 static const bfd_arch_info_type arch_info_struct[] =
   {
@@ -259,7 +260,7 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
 	  if (!cpu32_fido_mix_warning)
 	    {
 	      cpu32_fido_mix_warning = 1;
-	      (*_bfd_error_handler) ("warning: linking CPU32 objects with fido objects");
+	      _bfd_error_handler ("warning: linking CPU32 objects with fido objects");
 	    }
 	  return bfd_lookup_arch (a->arch,
 				  bfd_m68k_features_to_mach (fido_a | m68881));

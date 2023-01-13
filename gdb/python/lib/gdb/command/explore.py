@@ -1,5 +1,5 @@
 # GDB 'explore' command.
-# Copyright (C) 2012-2016 Free Software Foundation, Inc.
+# Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -132,6 +132,7 @@ class Explorer(object):
             gdb.TYPE_CODE_UNION : CompoundExplorer,
             gdb.TYPE_CODE_PTR : PointerExplorer,
             gdb.TYPE_CODE_REF : ReferenceExplorer,
+            gdb.TYPE_CODE_RVALUE_REF : ReferenceExplorer,
             gdb.TYPE_CODE_TYPEDEF : TypedefExplorer,
             gdb.TYPE_CODE_ARRAY : ArrayExplorer
         }
@@ -317,7 +318,6 @@ class ReferenceExplorer(object):
         target_type = datatype.target()
         Explorer.explore_type(name, target_type, is_child)
         return False
-
 
 class ArrayExplorer(object):
     """Internal class used to explore arrays."""
@@ -649,14 +649,11 @@ class ExploreUtils(object):
 class ExploreCommand(gdb.Command):
     """Explore a value or a type valid in the current context.
 
-       Usage:
+Usage: explore ARG
 
-         explore ARG
-
-         - ARG is either a valid expression or a type name.
-         - At any stage of exploration, hit the return key (instead of a
-           choice, if any) to return to the enclosing type or value.
-    """
+- ARG is either a valid expression or a type name.
+- At any stage of exploration, hit the return key (instead of a
+choice, if any) to return to the enclosing type or value."""
 
     def __init__(self):
         super(ExploreCommand, self).__init__(name = "explore",
@@ -689,14 +686,11 @@ class ExploreCommand(gdb.Command):
 class ExploreValueCommand(gdb.Command):
     """Explore value of an expression valid in the current context.
 
-       Usage:
+Usage: explore value ARG
 
-         explore value ARG
-
-         - ARG is a valid expression.
-         - At any stage of exploration, hit the return key (instead of a
-           choice, if any) to return to the enclosing value.
-    """
+- ARG is a valid expression.
+- At any stage of exploration, hit the return key (instead of a
+choice, if any) to return to the enclosing value."""
  
     def __init__(self):
         super(ExploreValueCommand, self).__init__(
@@ -718,17 +712,13 @@ class ExploreValueCommand(gdb.Command):
 
 
 class ExploreTypeCommand(gdb.Command):            
-    """Explore a type or the type of an expression valid in the current
-       context.
+    """Explore a type or the type of an expression.
 
-       Usage:
+Usage: explore type ARG
 
-         explore type ARG
-
-         - ARG is a valid expression or a type name.
-         - At any stage of exploration, hit the return key (instead of a
-           choice, if any) to return to the enclosing type.
-    """
+- ARG is a valid expression or a type name.
+- At any stage of exploration, hit the return key (instead of a
+choice, if any) to return to the enclosing type."""
 
     def __init__(self):
         super(ExploreTypeCommand, self).__init__(

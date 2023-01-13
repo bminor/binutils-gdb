@@ -1,6 +1,6 @@
 /* Read MiniDebugInfo data from an objfile.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"
+#include <algorithm>
 
 #ifdef HAVE_LIBLZMA
 
@@ -82,12 +83,11 @@ lzma_open (struct bfd *nbfd, void *open_closure)
   gdb_byte footer[LZMA_STREAM_HEADER_SIZE];
   gdb_byte *indexdata;
   lzma_index *index;
-  int ret;
   uint64_t memlimit = UINT64_MAX;
   struct gdb_lzma_stream *lstream;
   size_t pos;
 
-  size = bfd_get_section_size (section);
+  size = bfd_section_size (section);
   offset = section->filepos + size - LZMA_STREAM_HEADER_SIZE;
   if (size < LZMA_STREAM_HEADER_SIZE
       || bfd_seek (section->owner, offset, SEEK_SET) != 0
@@ -201,7 +201,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 			       + iter.block.uncompressed_size);
 	}
 
-      chunk_size = min (nbytes, lstream->data_end - offset);
+      chunk_size = std::min (nbytes, (file_ptr) lstream->data_end - offset);
       memcpy (buf, lstream->data + offset - lstream->data_start, chunk_size);
       buf = (gdb_byte *) buf + chunk_size;
       offset += chunk_size;
@@ -255,11 +255,11 @@ lzma_stat (struct bfd *abfd,
    If we find one we create a iovec based bfd that decompresses the
    object data on demand.  If we don't find one, return NULL.  */
 
-bfd *
+gdb_bfd_ref_ptr
 find_separate_debug_file_in_section (struct objfile *objfile)
 {
   asection *section;
-  bfd *abfd;
+  gdb_bfd_ref_ptr abfd;
 
   if (objfile->obfd == NULL)
     return NULL;
@@ -269,21 +269,22 @@ find_separate_debug_file_in_section (struct objfile *objfile)
     return NULL;
 
 #ifdef HAVE_LIBLZMA
-  abfd = gdb_bfd_openr_iovec (objfile_name (objfile), gnutarget, lzma_open,
+  std::string filename = string_printf (_(".gnu_debugdata for %s"),
+					objfile_name (objfile));
+
+  abfd = gdb_bfd_openr_iovec (filename.c_str (), gnutarget, lzma_open,
 			      section, lzma_pread, lzma_close, lzma_stat);
   if (abfd == NULL)
     return NULL;
 
-  if (!bfd_check_format (abfd, bfd_object))
+  if (!bfd_check_format (abfd.get (), bfd_object))
     {
       warning (_("Cannot parse .gnu_debugdata section; not a BFD object"));
-      gdb_bfd_unref (abfd);
       return NULL;
     }
 #else
   warning (_("Cannot parse .gnu_debugdata section; LZMA support was "
 	     "disabled at compile time"));
-  abfd = NULL;
 #endif /* !HAVE_LIBLZMA */
 
   return abfd;

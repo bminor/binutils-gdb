@@ -1,5 +1,5 @@
 /* Mach-O object file format
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -29,7 +29,7 @@
    which subsections are generated like __text, __const etc.
 
    The well-known as short-hand section switch directives like .text, .data
-   etc. are mapped onto predefined segment/section pairs using facilites
+   etc. are mapped onto predefined segment/section pairs using facilities
    supplied by the mach-o port of bfd.
 
    A number of additional mach-o short-hand section switch directives are
@@ -181,7 +181,7 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
      attributes along with the canonical name.  */
   xlat = bfd_mach_o_section_data_for_mach_sect (stdoutput, segname, sectname);
 
-  /* TODO: more checking of whether overides are acually allowed.  */
+  /* TODO: more checking of whether overrides are actually allowed.  */
 
   if (xlat != NULL)
     {
@@ -192,7 +192,7 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
 	  if ((sectype == BFD_MACH_O_S_ZEROFILL
 	       || sectype == BFD_MACH_O_S_GB_ZEROFILL)
 	      && sectype != usectype)
-	    as_bad (_("cannot overide zerofill section type for `%s,%s'"),
+	    as_bad (_("cannot override zerofill section type for `%s,%s'"),
 		    segname, sectname);
 	  else
 	    sectype = usectype;
@@ -206,16 +206,7 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
       /* There is no normal BFD section name for this section.  Create one.
          The name created doesn't really matter as it will never be written
          on disk.  */
-      size_t seglen = strlen (segname);
-      size_t sectlen = strlen (sectname);
-      char *n;
-
-      n = xmalloc (seglen + 1 + sectlen + 1);
-      memcpy (n, segname, seglen);
-      n[seglen] = '.';
-      memcpy (n + seglen + 1, sectname, sectlen);
-      n[seglen + 1 + sectlen] = 0;
-      name = n;
+      name = concat (segname, ".", sectname, (char *) NULL);
       if (specified_mask & SECT_TYPE_SPECIFIED)
 	sectype = usectype;
       else
@@ -236,7 +227,7 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
   /* Sub-segments don't exists as is on Mach-O.  */
   sec = subseg_new (name, 0);
 
-  oldflags = bfd_get_section_flags (stdoutput, sec);
+  oldflags = bfd_section_flags (sec);
   msect = bfd_mach_o_get_mach_o_section (sec);
 
   if (oldflags == SEC_NO_FLAGS)
@@ -254,13 +245,15 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
 	flags |= SEC_DEBUGGING;
 
       /* New, so just use the defaults or what's specified.  */
-      if (! bfd_set_section_flags (stdoutput, sec, flags))
+      if (!bfd_set_section_flags (sec, flags))
 	as_warn (_("failed to set flags for \"%s\": %s"),
-		 bfd_section_name (stdoutput, sec),
+		 bfd_section_name (sec),
 		 bfd_errmsg (bfd_get_error ()));
 
-      strncpy (msect->segname, segname, sizeof (msect->segname));
-      strncpy (msect->sectname, sectname, sizeof (msect->sectname));
+      strncpy (msect->segname, segname, BFD_MACH_O_SEGNAME_SIZE);
+      msect->segname[BFD_MACH_O_SEGNAME_SIZE] = 0;
+      strncpy (msect->sectname, sectname, BFD_MACH_O_SECTNAME_SIZE);
+      msect->sectname[BFD_MACH_O_SECTNAME_SIZE] = 0;
 
       msect->align = secalign;
       msect->flags = sectype | secattr;
@@ -317,7 +310,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-  /* Get the User's segment annd section names.  */
+  /* Get the User's segment and section names.  */
   if (! obj_mach_o_get_section_names (segname, sectname, 17, 17))
     return;
 
@@ -458,7 +451,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-  /* Get the User's segment annd section names.  */
+  /* Get the User's segment and section names.  */
   if (! obj_mach_o_get_section_names (segname, sectname, 17, 17))
     return;
 
@@ -1204,8 +1197,7 @@ obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
 	     indirect, it is promoted to a 'real' one.  Fetching the bfd sym
 	     achieves this.  */
 	  symbol_get_bfdsym (sym);
-	  isym = (obj_mach_o_indirect_sym *)
-			xmalloc (sizeof (obj_mach_o_indirect_sym));
+	  isym = XNEW (obj_mach_o_indirect_sym);
 
 	  /* Just record the data for now, we will validate it when we
 	     compute the output in obj_mach_o_set_indirect_symbols.  */
@@ -1705,7 +1697,7 @@ static void
 obj_mach_o_set_section_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *v_p)
 {
   bfd_mach_o_section *ms = bfd_mach_o_get_mach_o_section (sec);
-  unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
+  unsigned bfd_align = bfd_section_alignment (sec);
   obj_mach_o_set_vma_data *p = (struct obj_mach_o_set_vma_data *)v_p;
   unsigned sectype = (ms->flags & BFD_MACH_O_SECTION_TYPE_MASK);
   unsigned zf;
@@ -1727,16 +1719,16 @@ obj_mach_o_set_section_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *v_p
 
   /* We know the section size now - so make a vma for the section just
      based on order.  */
-  ms->size = bfd_get_section_size (sec);
+  ms->size = bfd_section_size (sec);
 
   /* Make sure that the align agrees, and set to the largest value chosen.  */
   ms->align = ms->align > bfd_align ? ms->align : bfd_align;
-  bfd_set_section_alignment (abfd, sec, ms->align);
+  bfd_set_section_alignment (sec, ms->align);
 
   p->vma += (1 << ms->align) - 1;
   p->vma &= ~((1 << ms->align) - 1);
   ms->addr = p->vma;
-  bfd_set_section_vma (abfd, sec, p->vma);
+  bfd_set_section_vma (sec, p->vma);
   p->vma += ms->size;
 }
 
@@ -1760,7 +1752,7 @@ static void
 obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 				 void *xxx ATTRIBUTE_UNUSED)
 {
-  bfd_vma sect_size = bfd_section_size (abfd, sec);
+  bfd_vma sect_size = bfd_section_size (sec);
   bfd_mach_o_section *ms = bfd_mach_o_get_mach_o_section (sec);
   unsigned lazy = 0;
 
@@ -1818,15 +1810,21 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	    {
 	      unsigned n;
 	      bfd_mach_o_asymbol *sym;
+
+	      /* FIXME: It seems that there can be more indirect symbols
+		 than is computed by the loop above.  So be paranoid and
+		 allocate enough space for every symbol to be indirect.
+		 See PR 21939 for an example of where this is needed.  */
+	      if (nactual < bfd_get_symcount (abfd))
+		nactual = bfd_get_symcount (abfd);
+
 	      ms->indirect_syms =
 			bfd_zalloc (abfd,
 				    nactual * sizeof (bfd_mach_o_asymbol *));
 
 	      if (ms->indirect_syms == NULL)
-		{
-		  as_fatal (_("internal error: failed to allocate %d indirect"
-			      "symbol pointers"), nactual);
-		}
+		as_fatal (_("internal error: failed to allocate %d indirect"
+			    "symbol pointers"), nactual);
 
 	      for (isym = list, n = 0; isym != NULL; isym = isym->next, n++)
 		{
@@ -1837,7 +1835,11 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 
 		     Absolute symbols are handled specially.  */
 		  if (sym->symbol.section == bfd_abs_section_ptr)
-		    ms->indirect_syms[n] = sym;
+		    {
+		      if (n >= nactual)
+			as_fatal (_("internal error: more indirect mach-o symbols than expected"));
+		      ms->indirect_syms[n] = sym;
+		    }
 		  else if (S_IS_LOCAL (isym->sym) && ! lazy)
 		    ;
 		  else
@@ -1857,6 +1859,8 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 			      && ! (sym->n_type & BFD_MACH_O_N_PEXT)
 			      && (sym->n_type & BFD_MACH_O_N_EXT))
 			    sym->n_desc |= lazy;
+			  if (n >= nactual)
+			    as_fatal (_("internal error: more indirect mach-o symbols than expected"));
 			  ms->indirect_syms[n] = sym;
 		        }
 		    }

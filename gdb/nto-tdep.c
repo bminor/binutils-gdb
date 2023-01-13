@@ -1,6 +1,6 @@
 /* nto-tdep.c - general QNX Neutrino target functionality.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -31,6 +31,8 @@
 #include "solib-svr4.h"
 #include "gdbcore.h"
 #include "objfiles.h"
+#include "source.h"
+#include "gdbsupport/pathstuff.h"
 
 #define QNX_NOTE_NAME	"QNX"
 #define QNX_INFO_SECT_NAME "QNX_info"
@@ -49,7 +51,8 @@ static char default_nto_target[] = "";
 
 struct nto_target_ops current_nto_target;
 
-static const struct inferior_data *nto_inferior_data_reg;
+static const struct inferior_key<struct nto_inferior_data>
+  nto_inferior_data_reg;
 
 static char *
 nto_target (void)
@@ -87,7 +90,8 @@ nto_map_arch_to_cputype (const char *arch)
 }
 
 int
-nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
+nto_find_and_open_solib (const char *solib, unsigned o_flags,
+			 gdb::unique_xmalloc_ptr<char> *temp_pathname)
 {
   char *buf, *arch_path, *nto_root;
   const char *endian;
@@ -143,7 +147,7 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 	  if (ret >= 0)
 	    *temp_pathname = gdb_realpath (arch_path);
 	  else
-	    *temp_pathname = NULL;
+	    temp_pathname->reset (NULL);
 	}
     }
   return ret;
@@ -189,7 +193,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
 		       const char **perr)
 {
   char **argv;
-  char *in, *out, *err, *p;
+  const char *in, *out, *err, *p;
   int argc, i, n;
 
   for (n = 0; pargv[n]; n++);
@@ -238,43 +242,12 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
   return argv;
 }
 
-/* The struct lm_info, lm_addr, and nto_truncate_ptr are copied from
-   solib-svr4.c to support nto_relocate_section_addresses
-   which is different from the svr4 version.  */
-
-/* Link map info to include in an allocated so_list entry */
-
-struct lm_info
-  {
-    /* Pointer to copy of link map from inferior.  The type is char *
-       rather than void *, so that we may use byte offsets to find the
-       various fields without the need for a cast.  */
-    gdb_byte *lm;
-
-    /* Amount by which addresses in the binary should be relocated to
-       match the inferior.  This could most often be taken directly
-       from lm, but when prelinking is involved and the prelink base
-       address changes, we may need a different offset, we want to
-       warn about the difference and compute it only once.  */
-    CORE_ADDR l_addr;
-
-    /* The target location of lm.  */
-    CORE_ADDR lm_addr;
-  };
-
-
 static CORE_ADDR
 lm_addr (struct so_list *so)
 {
-  if (so->lm_info->l_addr == (CORE_ADDR)-1)
-    {
-      struct link_map_offsets *lmo = nto_fetch_link_map_offsets ();
-      struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
 
-      so->lm_info->l_addr =
-	extract_typed_address (so->lm_info->lm + lmo->l_addr_offset, ptr_type);
-    }
-  return so->lm_info->l_addr;
+  return li->l_addr;
 }
 
 static CORE_ADDR
@@ -346,8 +319,8 @@ nto_sniff_abi_note_section (bfd *abfd, asection *sect, void *obj)
   const char *name;
   const unsigned sizeof_Elf_Nhdr = 12;
 
-  sectname = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
+  sectname = bfd_section_name (sect);
+  sectsize = bfd_section_size (sect);
 
   if (sectsize > 128)
     sectsize = 128;
@@ -407,12 +380,16 @@ static const char *nto_thread_state_str[] =
   "NET_REPLY"	/* 20 0x14 */
 };
 
-char *
+const char *
 nto_extra_thread_info (struct target_ops *self, struct thread_info *ti)
 {
-  if (ti && ti->priv
-      && ti->priv->state < ARRAY_SIZE (nto_thread_state_str))
-    return (char *)nto_thread_state_str [ti->priv->state];
+  if (ti != NULL && ti->priv != NULL)
+    {
+      nto_thread_info *priv = get_nto_thread_info (ti);
+
+      if (priv->state < ARRAY_SIZE (nto_thread_state_str))
+	return nto_thread_state_str [priv->state];
+    }
   return "";
 }
 
@@ -522,25 +499,6 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
   return len_read;
 }
 
-/* Allocate new nto_inferior_data object.  */
-
-static struct nto_inferior_data *
-nto_new_inferior_data (void)
-{
-  struct nto_inferior_data *const inf_data
-    = XCNEW (struct nto_inferior_data);
-
-  return inf_data;
-}
-
-/* Free inferior data.  */
-
-static void
-nto_inferior_data_cleanup (struct inferior *const inf, void *const dat)
-{
-  xfree (dat);
-}
-
 /* Return nto_inferior_data for the given INFERIOR.  If not yet created,
    construct it.  */
 
@@ -552,23 +510,9 @@ nto_inferior_data (struct inferior *const inferior)
 
   gdb_assert (inf != NULL);
 
-  inf_data
-    = (struct nto_inferior_data *) inferior_data (inf, nto_inferior_data_reg);
+  inf_data = nto_inferior_data_reg.get (inf);
   if (inf_data == NULL)
-    {
-      set_inferior_data (inf, nto_inferior_data_reg,
-			 (inf_data = nto_new_inferior_data ()));
-    }
+    inf_data = nto_inferior_data_reg.emplace (inf);
 
   return inf_data;
-}
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_nto_tdep;
-
-void
-_initialize_nto_tdep (void)
-{
-  nto_inferior_data_reg
-    = register_inferior_data_with_cleanup (NULL, nto_inferior_data_cleanup);
 }

@@ -17,10 +17,7 @@
 .*:25: Error: .*
 .*:26: Error: .*
 .*:27: Error: .*
-.*:27: Error: .*
 .*:28: Error: .*
-.*:28: Error: .*
-.*:29: Error: .*
 .*:29: Error: .*
 .*:31: Error: .*
 .*:32: Error: .*
@@ -37,6 +34,13 @@
 .*:46: Error: .*
 .*:47: Error: .*
 .*:48: Error: .*
+.*:51: Error: .*
+.*:52: Error: .*
+.*:55: Error: .*
+.*:56: Error: .*
+.*:58: Error: .*
+.*:61: Error: .*unsupported broadcast for `vdpbf16ps'
+.*:62: Error: .*unsupported broadcast for `vcvtne2ps2bf16'
 GAS LISTING .*
 
 
@@ -88,3 +92,18 @@ GAS LISTING .*
 [ 	]*46[ 	]+vaddps zmm2, zmm1, ZMMWORD PTR \[rax\]\{1to16\}
 [ 	]*47[ 	]+vaddps zmm2, zmm1, DWORD PTR \[rax\]
 [ 	]*48[ 	]+vaddpd zmm2, zmm1, QWORD PTR \[rax\]
+[ 	]*49[ 	]*
+[ 	]*50[ 	]+\.att_syntax prefix
+[ 	]*51[ 	]+vaddps %zmm0, %zmm1, %zmm2\{%rcx\}
+[ 	]*52[ 	]+vaddps %zmm0, %zmm1, %zmm2\{z\}
+[ 	]*53[ 	]*
+[ 	]*54[ 	]+\.intel_syntax noprefix
+[ 	]*55[ 	]+vaddps zmm2\{rcx\}, zmm1, zmm0
+[ 	]*56[ 	]+vaddps zmm2\{z\}, zmm1, zmm0
+[ 	]*57[ 	]*
+GAS LISTING .*
+[ 	]*58[ 	]+vcvtps2qq xmm0, DWORD PTR \[rax\]
+[ 	]*59[ 	]*
+[ 	]*60[ 	]+\.att_syntax prefix
+[ 	]*61[ 	]+vdpbf16ps 8\(%rax\)\{1to8\}, %zmm2, %zmm2
+[ 	]*62[ 	]+vcvtne2ps2bf16 8\(%rax\)\{1to8\}, %zmm2, %zmm2

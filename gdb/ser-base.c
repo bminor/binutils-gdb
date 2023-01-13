@@ -1,6 +1,6 @@
 /* Generic serial interface functions.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,7 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include "gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #endif
@@ -46,7 +46,7 @@ enum {
   /* >= 0 (TIMER_SCHEDULED) */
   /* The ID of the currently scheduled timer event.  This state is
      rarely encountered.  Timer events are one-off so as soon as the
-     event is delivered the state is shanged to NOTHING_SCHEDULED.  */
+     event is delivered the state is changed to NOTHING_SCHEDULED.  */
   FD_SCHEDULED = -1,
   /* The fd_event() handler is scheduled.  It is called when ever the
      file descriptor becomes ready.  */
@@ -164,7 +164,13 @@ fd_event (int error, void *context)
          pull characters out of the buffer.  See also
          generic_readchar().  */
       int nr;
-      nr = scb->ops->read_prim (scb, BUFSIZ);
+
+      do
+	{
+	  nr = scb->ops->read_prim (scb, BUFSIZ);
+	}
+      while (nr < 0 && errno == EINTR);
+
       if (nr == 0)
 	{
 	  scb->bufcnt = SERIAL_EOF;
@@ -185,7 +191,7 @@ fd_event (int error, void *context)
 /* PUSH_EVENT: The input FIFO is non-empty (or there is a pending
    error).  Nag the client until all the data has been read.  In the
    case of errors, the client will need to close or de-async the
-   device before naging stops.  */
+   device before nagging stops.  */
 
 static void
 push_event (void *context)
@@ -199,6 +205,11 @@ push_event (void *context)
 /* Wait for input on scb, with timeout seconds.  Returns 0 on success,
    otherwise SERIAL_TIMEOUT or SERIAL_ERROR.  */
 
+/* NOTE: Some of the code below is dead.  The only possible values of
+   the TIMEOUT parameter are ONE and ZERO.  OTOH, we should probably
+   get rid of the deprecated_ui_loop_hook call in do_ser_base_readchar
+   instead and support infinite time outs here.  */
+
 static int
 ser_base_wait_for (struct serial *scb, int timeout)
 {
@@ -207,6 +218,7 @@ ser_base_wait_for (struct serial *scb, int timeout)
       int numfds;
       struct timeval tv;
       fd_set readfds, exceptfds;
+      int nfds;
 
       /* NOTE: Some OS's can scramble the READFDS when the select()
          call fails (ex the kernel with Red Hat 5.2).  Initialize all
@@ -220,10 +232,13 @@ ser_base_wait_for (struct serial *scb, int timeout)
       FD_SET (scb->fd, &readfds);
       FD_SET (scb->fd, &exceptfds);
 
+      QUIT;
+
+      nfds = scb->fd + 1;
       if (timeout >= 0)
-	numfds = gdb_select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
+	numfds = interruptible_select (nfds, &readfds, 0, &exceptfds, &tv);
       else
-	numfds = gdb_select (scb->fd + 1, &readfds, 0, &exceptfds, 0);
+	numfds = interruptible_select (nfds, &readfds, 0, &exceptfds, 0);
 
       if (numfds <= 0)
 	{
@@ -273,6 +288,8 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  if (s == 0 && close_fd)
 	    {
 	      /* End of file.  */
+	      if (serial_is_async_p (scb))
+		delete_file_handler (scb->error_fd);
 	      close (scb->error_fd);
 	      scb->error_fd = -1;
 	      break;
@@ -298,10 +315,22 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
     }
 }
 
-/* Read a character with user-specified timeout.  TIMEOUT is number of seconds
-   to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
-   char if successful.  Returns -2 if timeout expired, EOF if line dropped
-   dead, or -3 for any other error (see errno in that case).  */
+/* Event-loop callback for a serial's error_fd.  Flushes any error
+   output we might have.  */
+
+static void
+handle_error_fd (int error, gdb_client_data client_data)
+{
+  serial *scb = (serial *) client_data;
+
+  ser_base_read_error_fd (scb, 0);
+}
+
+/* Read a character with user-specified timeout.  TIMEOUT is number of
+   seconds to wait, or -1 to wait forever.  Use timeout of 0 to effect
+   a poll.  Returns char if successful.  Returns SERIAL_TIMEOUT if
+   timeout expired, SERIAL_EOF if line dropped dead, or SERIAL_ERROR
+   for any other error (see errno in that case).  */
 
 static int
 do_ser_base_readchar (struct serial *scb, int timeout)
@@ -358,7 +387,11 @@ do_ser_base_readchar (struct serial *scb, int timeout)
   if (status < 0)
     return status;
 
-  status = scb->ops->read_prim (scb, BUFSIZ);
+  do
+    {
+      status = scb->ops->read_prim (scb, BUFSIZ);
+    }
+  while (status < 0 && errno == EINTR);
 
   if (status <= 0)
     {
@@ -445,10 +478,16 @@ ser_base_write (struct serial *scb, const void *buf, size_t count)
 
   while (count > 0)
     {
+      QUIT;
+
       cc = scb->ops->write_prim (scb, str, count);
 
       if (cc < 0)
-	return 1;
+	{
+	  if (errno == EINTR)
+	    continue;
+	  return 1;
+	}
       count -= cc;
       str += cc;
     }
@@ -512,14 +551,6 @@ ser_base_set_tty_state (struct serial *scb, serial_ttystate ttystate)
   return 0;
 }
 
-int
-ser_base_noflush_set_tty_state (struct serial *scb,
-				serial_ttystate new_ttystate,
-				serial_ttystate old_ttystate)
-{
-  return 0;
-}
-
 void
 ser_base_print_tty_state (struct serial *scb, 
 			  serial_ttystate ttystate,
@@ -563,6 +594,9 @@ ser_base_async (struct serial *scb,
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->asynchronous]\n",
 			    scb->fd);
       reschedule (scb);
+
+      if (scb->error_fd != -1)
+	add_file_handler (scb->error_fd, handle_error_fd, scb);
     }
   else
     {
@@ -581,5 +615,8 @@ ser_base_async (struct serial *scb,
 	  delete_timer (scb->async_state);
 	  break;
 	}
+
+      if (scb->error_fd != -1)
+	delete_file_handler (scb->error_fd);
     }
 }

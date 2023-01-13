@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2020 Free Software Foundation, Inc.
 
    This file is part of ARM SIM.
 
@@ -37,6 +37,7 @@
 #include "gdb/signals.h"
 #include "libiberty.h"
 #include "iwmmxt.h"
+#include "maverick.h"
 
 /* TODO: This should get pulled from the SIM_DESC.  */
 host_callback *sim_callback;
@@ -92,44 +93,14 @@ void
 print_insn (ARMword instr)
 {
   int size;
+  disassembler_ftype disassemble_fn;
 
   opbuf[0] = 0;
   info.application_data = & instr;
-  size = print_insn_little_arm (0, & info);
+  disassemble_fn = disassembler (bfd_arch_arm, 0, 0, NULL);
+  size = disassemble_fn (0, & info);
   fprintf (stderr, " %*s\n", size, opbuf);
 }
-
-/* Cirrus DSP registers.
-
-   We need to define these registers outside of maverick.c because
-   maverick.c might not be linked in unless --target=arm9e-* in which
-   case wrapper.c will not compile because it tries to access Cirrus
-   registers.  This should all go away once we get the Cirrus and ARM
-   Coprocessor to coexist in armcopro.c-- aldyh.  */
-
-struct maverick_regs
-{
-  union
-  {
-    int i;
-    float f;
-  } upper;
-
-  union
-  {
-    int i;
-    float f;
-  } lower;
-};
-
-union maverick_acc_regs
-{
-  long double ld;		/* Acc registers are 72-bits.  */
-};
-
-struct maverick_regs     DSPregs[16];
-union maverick_acc_regs  DSPacc[4];
-ARMword DSPsc;
 
 static void
 init (void)
@@ -234,7 +205,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 {
   int argvlen = 0;
   int mach;
-  char **arg;
+  char * const *arg;
 
   init ();
 
@@ -740,7 +711,7 @@ sim_target_parse_command_line (int argc, char ** argv)
 	{
 	  int i;
 
-	  for (i = sizeof options / sizeof options[0]; i--;)
+	  for (i = ARRAY_SIZE (options); i--;)
 	    if (strncmp (ptr, options[i].swi_option,
 			 strlen (options[i].swi_option)) == 0)
 	      {

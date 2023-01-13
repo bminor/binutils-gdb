@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenVMS IA-64.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "osabi.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
+#include "gdbarch.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
 
@@ -34,15 +35,13 @@ ia64_vms_find_proc_info_x (unw_addr_space_t as, unw_word_t ip,
                            int need_unwind_info, void *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  unw_dyn_info_t di;
-  int ret;
   gdb_byte buf[32];
   const char *annex = core_addr_to_string (ip);
   LONGEST res;
   CORE_ADDR table_addr;
   unsigned int info_len;
 
-  res = target_read (&current_target, TARGET_OBJECT_OPENVMS_UIB,
+  res = target_read (current_top_target (), TARGET_OBJECT_OPENVMS_UIB,
                      annex + 2, buf, 0, sizeof (buf));
 
   if (res != sizeof (buf))
@@ -76,7 +75,7 @@ ia64_vms_find_proc_info_x (unw_addr_space_t as, unw_word_t ip,
   pi->unwind_info = xmalloc (pi->unwind_info_size);
 
   res = target_read_memory (table_addr + 8,
-                            pi->unwind_info, pi->unwind_info_size);
+                            (gdb_byte *) pi->unwind_info, pi->unwind_info_size);
   if (res != 0)
     {
       xfree (pi->unwind_info);
@@ -154,11 +153,9 @@ ia64_openvms_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 #endif
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ia64_vms_tdep;
-
+void _initialize_ia64_vms_tdep ();
 void
-_initialize_ia64_vms_tdep (void)
+_initialize_ia64_vms_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_ia64, 0, GDB_OSABI_OPENVMS,
 			  ia64_openvms_init_abi);

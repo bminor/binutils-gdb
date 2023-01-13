@@ -1,6 +1,5 @@
 /* IEEE floating point support routines, for GDB, the GNU Debugger.
-   Copyright 1991, 1994, 1999, 2000, 2003, 2005, 2006, 2010, 2012, 2015
-   Free Software Foundation, Inc.
+   Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -490,7 +489,7 @@ floatformat_to_double (const struct floatformat *fmt,
       int nan = mant_bits_set (fmt, ufrom);
 
       /* On certain systems (such as GNU/Linux), the use of the
-	 INFINITY macro below may generate a warning that can not be
+	 INFINITY macro below may generate a warning that cannot be
 	 silenced due to a bug in GCC (PR preprocessor/11931).  The
 	 preprocessor fails to recognise the __extension__ keyword in
 	 conjunction with the GNU/C99 extension for hexadecimal

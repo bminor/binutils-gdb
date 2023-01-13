@@ -1,3 +1,22 @@
+2019-09-06  Alan Modra  <amodra@gmail.com>
+
+	* sim-if.c (sim_open): Constify filename variable.
+
+2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Replace uses of CGEN_CPU_DIR with CPU_DIR, and
+	remove the definition of CGEN_CPU_DIR.
+
+2017-09-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure: Regenerate.
+
+2017-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* decodev10.c (crisv10f_init_idesc_table): Use ARRAY_SIZE.
+	* decodev32.c (crisv32f_init_idesc_table): Likewise.
+	* sim-if.c (sim_open): Likewise.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

@@ -1,6 +1,6 @@
 /* Pascal language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,9 +30,9 @@
 #include "valprint.h"
 #include "value.h"
 #include <ctype.h>
-
-extern void _initialize_pascal_language (void);
-
+#include "c-lang.h"
+#include "gdbarch.h"
+#include "cli/cli-style.h"
 
 /* All GPC versions until now (2007-09-27) also define a symbol called
    '_p_initialize'.  Check for the presence of this symbol first.  */
@@ -152,6 +152,16 @@ is_pascal_string_type (struct type *type,int *length_pos,
   return 0;
 }
 
+/* This is a wrapper around IS_PASCAL_STRING_TYPE that returns true if TYPE
+   is a string.  */
+
+static bool
+pascal_is_string_type_p (struct type *type)
+{
+  return is_pascal_string_type (type, nullptr, nullptr, nullptr,
+				nullptr, nullptr) > 0;
+}
+
 static void pascal_one_char (int, struct ui_file *, int *);
 
 /* Print the character C on STREAM as part of the contents of a literal
@@ -220,7 +230,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 		 const char *encoding, int force_ellipses,
 		 const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
@@ -283,7 +293,9 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	      in_quotes = 0;
 	    }
 	  pascal_printchar (current_char, type, stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  fprintf_filtered (stream, " %p[<repeats %u times>%p]",
+			    metadata_style.style ().ptr (),
+			    reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
@@ -412,7 +424,12 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
-const struct language_defn pascal_language_defn =
+static const char *p_extensions[] =
+{
+  ".pas", ".p", ".pp", NULL
+};
+
+extern const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
   "Pascal",
@@ -421,9 +438,9 @@ const struct language_defn pascal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  p_extensions,
   &exp_descriptor_standard,
   pascal_parse,
-  pascal_error,
   null_post_parser,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
@@ -435,29 +452,27 @@ const struct language_defn pascal_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
+  false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific class_name_from_physname */
   pascal_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   pascal_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_compare_symbol_for_completion */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  pascal_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
-
-void
-_initialize_pascal_language (void)
-{
-  add_language (&pascal_language_defn);
-}

@@ -1,5 +1,5 @@
 /* tc-c30.c -- Assembly code for the Texas Instruments TMS320C30
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2020 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of GAS, the GNU Assembler.
@@ -380,11 +380,10 @@ tic30_find_parallel_insn (char *current_line, char *next_line)
 	}
       }
   }
-  parallel_insn = malloc (strlen (first_opcode) + strlen (first_operands)
-			  + strlen (second_opcode) + strlen (second_operands) + 8);
-  sprintf (parallel_insn, "q_%s_%s %s | %s",
-	   first_opcode, second_opcode,
-	   first_operands, second_operands);
+
+  parallel_insn = concat ("q_", first_opcode, "_", second_opcode, " ",
+			  first_operands, " | ", second_operands,
+			  (char *) NULL);
   debug ("parallel insn = %s\n", parallel_insn);
   return parallel_insn;
 }

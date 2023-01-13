@@ -2,8 +2,8 @@
 #as: --compress-debug-sections=none
 #ld: -shared --compress-debug-sections=zlib-gnu
 #readelf: -SW
-#target: *-*-linux* *-*-gnu*
-#notarget: cris*-*-elf frv-*-*
+#target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: cris*-*-elf frv-*-elf
 
 #failif
 #...

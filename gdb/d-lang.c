@@ -1,6 +1,6 @@
 /* D language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "c-lang.h"
 #include "demangle.h"
 #include "cp-support.h"
+#include "gdbarch.h"
 
 /* The name of the symbol to use to get the name of the main subprogram.  */
 static const char D_MAIN[] = "D main";
@@ -53,6 +54,15 @@ char *
 d_demangle (const char *symbol, int options)
 {
   return gdb_demangle (symbol, options | DMGL_DLANG);
+}
+
+/* la_sniff_from_mangled_name implementation for D.  */
+
+static int
+d_sniff_from_mangled_name (const char *mangled, char **demangled)
+{
+  *demangled = d_demangle (mangled, 0);
+  return *demangled != NULL;
 }
 
 /* Table mapping opcodes into strings for printing operators
@@ -190,7 +200,12 @@ d_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
-static const struct language_defn d_language_defn =
+static const char *d_extensions[] =
+{
+  ".d", NULL
+};
+
+extern const struct language_defn d_language_defn =
 {
   "d",
   "D",
@@ -199,9 +214,9 @@ static const struct language_defn d_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  d_extensions,
   &exp_descriptor_c,
   d_parse,
-  d_error,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
@@ -214,26 +229,30 @@ static const struct language_defn d_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */
   "this",
+  false,			/* la_store_sym_names_in_linkage_form_p */
   d_lookup_symbol_nonlocal,
   basic_lookup_transparent_type,
   d_demangle,			/* Language specific symbol demangler.  */
+  d_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   d_op_print_tab,		/* Expression operators for printing.  */
   1,				/* C-style arrays.  */
   0,				/* String lower bound.  */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   d_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  c_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  c_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Build all D language types for the specified architecture.  */
@@ -246,7 +265,7 @@ build_d_types (struct gdbarch *gdbarch)
 
   /* Basic types.  */
   builtin_d_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
   builtin_d_type->builtin_bool
     = arch_boolean_type (gdbarch, 8, 1, "bool");
   builtin_d_type->builtin_byte
@@ -271,13 +290,13 @@ build_d_types (struct gdbarch *gdbarch)
     = arch_integer_type (gdbarch, 128, 1, "ucent");
   builtin_d_type->builtin_float
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "float", NULL);
+		       "float", gdbarch_float_format (gdbarch));
   builtin_d_type->builtin_double
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "double", NULL);
+		       "double", gdbarch_double_format (gdbarch));
   builtin_d_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-		       "real", NULL);
+		       "real", gdbarch_long_double_format (gdbarch));
 
   TYPE_INSTANCE_FLAGS (builtin_d_type->builtin_byte)
     |= TYPE_INSTANCE_FLAG_NOTTEXT;
@@ -287,13 +306,13 @@ build_d_types (struct gdbarch *gdbarch)
   /* Imaginary and complex types.  */
   builtin_d_type->builtin_ifloat
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "ifloat", NULL);
+		       "ifloat", gdbarch_float_format (gdbarch));
   builtin_d_type->builtin_idouble
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "idouble", NULL);
+		       "idouble", gdbarch_double_format (gdbarch));
   builtin_d_type->builtin_ireal
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-		       "ireal", NULL);
+		       "ireal", gdbarch_long_double_format (gdbarch));
   builtin_d_type->builtin_cfloat
     = arch_complex_type (gdbarch, "cfloat",
 			 builtin_d_type->builtin_float);
@@ -325,13 +344,9 @@ builtin_d_type (struct gdbarch *gdbarch)
   return (const struct builtin_d_type *) gdbarch_data (gdbarch, d_type_data);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_d_language;
-
+void _initialize_d_language ();
 void
-_initialize_d_language (void)
+_initialize_d_language ()
 {
   d_type_data = gdbarch_data_register_post_init (build_d_types);
-
-  add_language (&d_language_defn);
 }

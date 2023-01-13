@@ -1,6 +1,6 @@
 /* nto-tdep.h - QNX Neutrino target header.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _NTO_TDEP_H
-#define _NTO_TDEP_H
+#ifndef NTO_TDEP_H
+#define NTO_TDEP_H
 
 #include "solist.h"
 #include "osabi.h"
@@ -134,22 +134,28 @@ typedef struct _debug_regs
   qnx_reg64 padding[1024];
 } nto_regset_t;
 
-struct private_thread_info
+struct nto_thread_info : public private_thread_info
 {
-  short tid;
-  unsigned char state;
-  unsigned char flags;
-  char name[1];
+  short tid = 0;
+  unsigned char state = 0;
+  unsigned char flags = 0;
+  std::string name;
 };
+
+static inline nto_thread_info *
+get_nto_thread_info (thread_info *thread)
+{
+  return static_cast<nto_thread_info *> (thread->priv.get ());
+}
 
 /* Per-inferior data, common for both procfs and remote.  */
 struct nto_inferior_data
 {
   /* Last stopped flags result from wait function */
-  unsigned int stopped_flags;
+  unsigned int stopped_flags = 0;
 
   /* Last known stopped PC */
-  CORE_ADDR stopped_pc;
+  CORE_ADDR stopped_pc = 0;
 };
 
 /* Generic functions in nto-tdep.c.  */
@@ -164,7 +170,8 @@ void nto_relocate_section_addresses (struct so_list *,
 
 int nto_map_arch_to_cputype (const char *);
 
-int nto_find_and_open_solib (char *, unsigned, char **);
+int nto_find_and_open_solib (const char *, unsigned,
+			     gdb::unique_xmalloc_ptr<char> *);
 
 enum gdb_osabi nto_elf_osabi_sniffer (bfd *abfd);
 
@@ -176,7 +183,7 @@ void nto_dummy_supply_regset (struct regcache *regcache, char *regs);
 
 int nto_in_dynsym_resolve_code (CORE_ADDR pc);
 
-char *nto_extra_thread_info (struct target_ops *self, struct thread_info *);
+const char *nto_extra_thread_info (struct target_ops *self, struct thread_info *);
 
 LONGEST nto_read_auxv_from_initial_stack (CORE_ADDR inital_stack,
 					  gdb_byte *readbuf,
@@ -184,4 +191,4 @@ LONGEST nto_read_auxv_from_initial_stack (CORE_ADDR inital_stack,
 
 struct nto_inferior_data *nto_inferior_data (struct inferior *inf);
 
-#endif
+#endif /* NTO_TDEP_H */

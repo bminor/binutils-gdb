@@ -1,6 +1,6 @@
 /* tc-ft32.h -- Header file for tc-ft32.c.
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2020 Free Software Foundation, Inc.
    Contributed by FTDI (support@ftdichip.com)
 
    This file is part of GAS, the GNU Assembler.
@@ -24,9 +24,7 @@
 #define WORKING_DOT_WORD
 
 /* This macro is the BFD architecture to pass to `bfd_set_arch_mach'.  */
-const char *ft32_target_format;
-#define DEFAULT_TARGET_FORMAT  "elf32-ft32"
-#define TARGET_FORMAT          ft32_target_format
+#define TARGET_FORMAT  "elf32-ft32"
 
 #define TARGET_ARCH bfd_arch_ft32
 
@@ -37,19 +35,34 @@ const char *ft32_target_format;
 #define md_estimate_size_before_relax(A, B) (as_fatal (_("estimate size\n")), 0)
 #define md_convert_frag(B, S, F)            (as_fatal (_("convert_frag\n")))
 
-/* If you define this macro, it should return the offset between the
-   address of a PC relative fixup and the position from which the PC
-   relative adjustment should be made.  On many processors, the base
-   of a PC relative instruction is the next instruction, so this
-   macro would return the length of an instruction.  */
-// #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from (FIX)
-// extern long md_pcrel_from (struct fix *);
-
 /* PC relative operands are relative to the start of the opcode, and
    the operand is always one byte into the opcode.  */
 #define md_pcrel_from(FIX)						\
 	((FIX)->fx_where + (FIX)->fx_frag->fr_address - 1)
 
 #define md_section_align(SEGMENT, SIZE)     (SIZE)
+
+/* If this macro returns non-zero, it guarantees that a relocation will be emitted
+   even when the value can be resolved locally. Do that if linkrelax is turned on */
+#define TC_FORCE_RELOCATION(fix)	ft32_force_relocation (fix)
+#define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
+  (! SEG_NORMAL (seg) || ft32_force_relocation (fix))
+extern int ft32_force_relocation (struct fix *);
+
+#define TC_LINKRELAX_FIXUP(seg) \
+  ((seg->flags & SEC_CODE) || (seg->flags & SEC_DEBUGGING))
+
+/* This macro is evaluated for any fixup with a fx_subsy that
+   fixup_segment cannot reduce to a number.  If the macro returns
+   false an error will be reported. */
+#define TC_VALIDATE_FIX_SUB(fix, seg)   ft32_validate_fix_sub (fix)
+extern int ft32_validate_fix_sub (struct fix *);
+
+/* The difference between same-section symbols may be affected by linker
+   relaxation, so do not resolve such expressions in the assembler.  */
+#define md_allow_local_subtract(l,r,s) ft32_allow_local_subtract (l, r, s)
+extern bfd_boolean ft32_allow_local_subtract (expressionS *,
+                                              expressionS *,
+                                              segT);
 
 #define md_operand(x)

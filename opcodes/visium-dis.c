@@ -1,6 +1,6 @@
 /* Single instruction disassembler for the Visium.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -20,7 +20,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/visium.h"
 
 #include <string.h>
@@ -94,7 +94,7 @@ disassem_class0 (disassemble_info *info, unsigned int ins)
       /* BRR instruction.  */
       {
 	unsigned cbf = (ins >> 27) & 0x000f;
-	int displacement = ((int) (ins << 16)) >> 16;
+	int displacement = ((ins & 0xffff) ^ 0x8000) - 0x8000;
 
 	if (ins == 0)
 	  (*info->fprintf_func) (info->stream, "nop");
@@ -189,7 +189,7 @@ disassem_class1 (disassemble_info *info, unsigned int ins)
     {
     case 0:
       /* Stop.  */
-      (*info->fprintf_func) (info->stream, "stop");
+      (*info->fprintf_func) (info->stream, "stop    %d,r%d", indx, source_a);
       break;
     case 1:
       /* BMI - Block Move Indirect.  */
@@ -789,7 +789,7 @@ print_insn_visium (bfd_vma addr, disassemble_info *info)
 
   /* Get 32-bit instruction word.  */
   FETCH_DATA (info, buffer + 4);
-  ins = buffer[0] << 24;
+  ins = (unsigned) buffer[0] << 24;
   ins |= buffer[1] << 16;
   ins |= buffer[2] << 8;
   ins |= buffer[3];

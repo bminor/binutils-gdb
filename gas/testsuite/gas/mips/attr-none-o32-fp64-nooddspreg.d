@@ -1,6 +1,6 @@
 #as: -mfp64 -mno-odd-spreg -32
 #source: empty.s
-#PROG: readelf
+#DUMPPROG: readelf
 #readelf: -A
 #name: MIPS infer fpabi (O32 fp64 nooddspreg)
 
@@ -17,7 +17,7 @@ CPR2 size: 0
 FP ABI: Hard float compat \(32-bit CPU, 64-bit FPU\)
 ISA Extension: .*
 ASEs:
-	.*
+#...
 FLAGS 1: 00000000
 FLAGS 2: 00000000
 

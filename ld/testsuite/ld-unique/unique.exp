@@ -1,6 +1,6 @@
 # Expect script for linker support of STB_GNU_UNIQUE symbols
 #
-#   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 #   Contributed by Red Hat.
 #
 # This file is part of the GNU Binutils.
@@ -24,36 +24,28 @@
 # Adapted for unique checking by Mark J. Wielaard <mjw@redhat.com>
 
 
-# STB_GNU_UNIQUE support has only been implemented for the ix86, x86_64,
-# arm, powerpc, and sparc so far.
-if {!(([istarget "i?86-*-*"]
-       || [istarget "x86_64-*-*"]
-       || [istarget "arm*-*-*"]
-       || [istarget "powerpc*-*-*"]
-       || [istarget "sparc*-*-*"])
-      && ([istarget "*-*-elf*"]
-	  || [istarget "*-*-nacl*"]
-	  || (([istarget "*-*-linux*"]
-	       || [istarget "*-*-gnu*"])
-	      && ![istarget "*-*-*aout*"]
-	      && ![istarget "*-*-*oldld*"]))) } {
+# Exclude non-ELF targets.
+if { ![is_elf_format] } {
+    return
+}
+
+# Require STB_GNU_UNIQUE support with OSABI set to GNU.
+if { ![supports_gnu_unique] || [istarget tic6x-*-*] } {
     verbose "UNIQUE tests not run - target does not support UNIQUE"
     return
 }
 
-# We need a native system.  FIXME: Strictly speaking this
-# is not true, we just need to know how to create a fully
-# linked executable, including the C and Z libraries, using
-# the linker that is under test.
-if ![isnative] {
-    verbose "UNIQUE tests not run - not a native toolchain"
-    return
+set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+foreach t $test_list {
+    # We need to strip the ".d", but can leave the dirname.
+    verbose [file rootname $t]
+    run_dump_test [file rootname $t]
 }
 
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
-if { [which $CC] == 0 } {
-    verbose "UNIQUE tests not run - no compiler available"
+if { ![check_compiler_available] } {
+    verbose "UNIQUE compiled tests not run - no compiler available"
     return
 }
 
@@ -100,7 +92,7 @@ proc contains_unique_symbol { binary_file } {
     # Look for a line like this:
     #    54: 0000000000400474     4 OBJECT  UNIQUE DEFAULT   13 a
 
-    if { ![regexp ".*\[ \]*OBJECT\[ \]+UNIQUE\[ \]+DEFAULT\[ \]+\[UND0-9\]+\[ \]+\[ab\]\n" [file_contents readelf.out]] } {
+    if { ![regexp ".*\[ \]*OBJECT\[ \]+UNIQUE\[ \]+DEFAULT\[ \]+\[UND0-9\]+\[ \]+\[ab\]_val\n" [file_contents readelf.out]] } {
 	return 0
     }
 
@@ -121,33 +113,18 @@ if ![ld_compile "$CC -c" "$srcdir/$subdir/unique_empty.s" "tmpdir/unique_empty.o
     set fails [expr $fails + 1]
 }
 
-# Create pic object file containing unique symbol.
-if ![ld_compile "$CC -c -fPIC" "$srcdir/$subdir/unique_shared.s" "tmpdir/unique_shared.o"] {
-    fail "Could not create a pic unique object"
-    set fails [expr $fails + 1]
+# When using GCC as the linker driver, we need to specify board cflags when
+# linking because cflags may contain linker options.  For example when linker
+# options are included in GCC spec files then we need the -specs option.
+if [board_info [target_info name] exists cflags] {
+  set board_cflags " [board_info [target_info name] cflags]"
+} else {
+  set board_cflags ""
 }
 
 # Create executable containing unique symbol.
-if ![default_ld_link $ld "tmpdir/unique_prog" "tmpdir/unique.o"] {
+if ![ld_link "$CC $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
     fail "Could not link a unique executable"
-    set fails [expr $fails + 1]
-}
-
-# Create shared library containing unique symbol.
-if ![ld_simple_link $ld "tmpdir/libunique_shared.so" "-shared tmpdir/unique_shared.o"] {
-    fail "Could not create a shared library containing an unique symbol"
-    set fails [expr $fails + 1]
-}
-
-# Create executable NOT containing unique symbol linked against library.
-if ![default_ld_link $ld "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Bdynamic -lunique_shared -rpath ./tmpdir"] {
-    fail "Could not link a dynamic executable"
-    set fails [expr $fails + 1]
-}
-
-# Create shared library containing unique symbol with reference.
-if ![ld_simple_link $ld "tmpdir/libunique_shared_ref.so" "-shared tmpdir/unique_shared.o tmpdir/unique_empty.o"] {
-    fail "Could not create a shared library containing an unique symbol with reference"
     set fails [expr $fails + 1]
 }
 
@@ -186,8 +163,12 @@ if { $fails == 0 } {
 }
 
 # Check the empty object file.
-if {! [check_osabi tmpdir/unique_empty.o {UNIX - System V}]} {
-    fail "Object NOT containing unique does not have an OS/ABI field of System V"
+switch -glob $target_triplet {
+    hppa*-*-linux* { set expected_none {UNIX - GNU} }
+    default { set expected_none {UNIX - System V} }
+}
+if {! [check_osabi tmpdir/unique_empty.o $expected_none]} {
+    fail "Object NOT containing unique does not have an OS/ABI field of $expected_none"
     set fails [expr $fails + 1]
 }
 
@@ -198,6 +179,42 @@ if {[contains_unique_symbol tmpdir/unique_empty.o] == 1} {
 
 if { $fails == 0 } {
   pass "Checking empty unique object"
+}
+
+# ------------------------------------------------------------------------------
+# Only shared library tests below.
+# ------------------------------------------------------------------------------
+
+if { ![check_shared_lib_support] } {
+    return
+}
+
+# Create pic object file containing unique symbol.
+if {![ld_compile "$CC -c -fPIC" "$srcdir/$subdir/unique_shared.s" "tmpdir/unique_shared.o"] } {
+    fail "Could not create a pic unique object"
+    set fails [expr $fails + 1]
+}
+
+# Create shared library containing unique symbol.
+if {![ld_link $ld "tmpdir/libunique_shared.so" "-shared tmpdir/unique_shared.o"] } {
+    fail "Could not create a shared library containing an unique symbol"
+    set fails [expr $fails + 1]
+}
+
+# Create executable NOT containing unique symbol linked against library.
+if {![ld_link "$CC $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
+    fail "Could not link a dynamic executable"
+    set fails [expr $fails + 1]
+}
+
+# Create shared library containing unique symbol with reference.
+if {![ld_link $ld "tmpdir/libunique_shared_ref.so" "-shared tmpdir/unique_shared.o tmpdir/unique_empty.o"] } {
+    fail "Could not create a shared library containing an unique symbol with reference"
+    set fails [expr $fails + 1]
+}
+
+if { $fails != 0 } {
+    return
 }
 
 # Check the unique PIC file.
@@ -212,7 +229,7 @@ if {[contains_unique_symbol tmpdir/unique_shared.o] != 1} {
 }
 
 if { $fails == 0 } {
-  pass "Checking unique PIC object"
+  pass "Checking unique PIC object 1"
 }
 
 # Check the unique shared library.
@@ -238,12 +255,12 @@ if {[contains_unique_symbol tmpdir/libunique_shared_ref.so] != 1} {
 }
 
 if { $fails == 0 } {
-  pass "Checking unique PIC object"
+  pass "Checking unique PIC object 2"
 }
 
 # Check the empty executable linked against unique shared library.
-if {! [check_osabi tmpdir/unique_shared_prog {UNIX - System V}]} {
-    fail "Executable NOT containing unique does not have an OS/ABI field of System V"
+if {! [check_osabi tmpdir/unique_shared_prog $expected_none]} {
+    fail "Executable NOT containing unique does not have an OS/ABI field of $expected_none"
     set fails [expr $fails + 1]
 }
 
@@ -254,15 +271,4 @@ if {[contains_unique_symbol tmpdir/unique_shared_prog] == 1} {
 
 if { $fails == 0 } {
   pass "Checking shared empty executable"
-}
-
-# Clean up, unless we are being verbose, in which case we leave the files available.
-if { $verbose < 1 } {
-    remote_file host delete "tmpdir/unique_empty.o"
-    remote_file host delete "tmpdir/unique.o"
-    remote_file host delete "tmpdir/unique_shared.o"
-    remote_file host delete "tmpdir/libunique_shared.so"
-    remote_file host delete "tmpdir/libunique_shared_ref.so"
-    remote_file host delete "tmpdir/unique_prog"
-    remote_file host delete "tmpdir/unique_shared_prog"
 }

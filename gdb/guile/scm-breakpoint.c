@@ -1,6 +1,6 @@
 /* Scheme interface to breakpoints.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,7 @@
 #include "breakpoint.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
-#include "observer.h"
+#include "observable.h"
 #include "cli/cli-script.h"
 #include "ada-lang.h"
 #include "arch-utils.h"
@@ -184,7 +184,7 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
       gdbscm_printf (port, " hit:%d", b->hit_count);
       gdbscm_printf (port, " ignore:%d", b->ignore_count);
 
-      str = event_location_to_string (b->location);
+      str = event_location_to_string (b->location.get ());
       if (str != NULL)
 	gdbscm_printf (port, " @%s", str);
     }
@@ -411,10 +411,8 @@ gdbscm_register_breakpoint_x (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  struct gdb_exception except = exception_none;
-  char *location, *copy;
-  struct event_location *eloc;
-  struct cleanup *cleanup;
+  gdbscm_gdb_exception except {};
+  const char *location, *copy;
 
   /* We only support registering breakpoints created with make-breakpoint.  */
   if (!bp_smob->is_scheme_bkpt)
@@ -426,10 +424,12 @@ gdbscm_register_breakpoint_x (SCM self)
   pending_breakpoint_scm = self;
   location = bp_smob->spec.location;
   copy = skip_spaces (location);
-  eloc = string_to_event_location_basic (&copy, current_language);
-  cleanup = make_cleanup_delete_event_location (eloc);
+  event_location_up eloc
+    = string_to_event_location_basic (&copy,
+				      current_language,
+				      symbol_name_match_type::WILD);
 
-  TRY
+  try
     {
       int internal = bp_smob->spec.is_internal;
 
@@ -437,13 +437,15 @@ gdbscm_register_breakpoint_x (SCM self)
 	{
 	case bp_breakpoint:
 	  {
+	    const breakpoint_ops *ops =
+	      breakpoint_ops_for_event_location (eloc.get (), false);
 	    create_breakpoint (get_current_arch (),
-			       eloc, NULL, -1, NULL,
+			       eloc.get (), NULL, -1, NULL,
 			       0,
 			       0, bp_breakpoint,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
-			       &bkpt_breakpoint_ops,
+			       ops,
 			       0, 1, internal, 0);
 	    break;
 	  }
@@ -465,16 +467,14 @@ gdbscm_register_breakpoint_x (SCM self)
 	  gdb_assert_not_reached ("invalid breakpoint type");
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception &ex)
     {
-      except = ex;
+      except = unpack (ex);
     }
-  END_CATCH
 
   /* Ensure this gets reset, even if there's an error.  */
   pending_breakpoint_scm = SCM_BOOL_F;
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
-  do_cleanups (cleanup);
 
   return SCM_UNSPECIFIED;
 }
@@ -491,25 +491,25 @@ gdbscm_delete_breakpoint_x (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY
+  gdbscm_gdb_exception exc {};
+  try
     {
       delete_breakpoint (bp_smob->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return SCM_UNSPECIFIED;
 }
 
 /* iterate_over_breakpoints function for gdbscm_breakpoints.  */
 
-static int
-bpscm_build_bp_list (struct breakpoint *bp, void *arg)
+static bool
+bpscm_build_bp_list (struct breakpoint *bp, SCM *list)
 {
-  SCM *list = (SCM *) arg;
   breakpoint_smob *bp_smob = bp->scm_bp_object;
 
   /* Lazily create wrappers for breakpoints created outside Scheme.  */
@@ -535,7 +535,7 @@ bpscm_build_bp_list (struct breakpoint *bp, void *arg)
   if (bp_smob != NULL)
     *list = scm_cons (bp_smob->containing_scm, *list);
 
-  return 0;
+  return false;
 }
 
 /* (breakpoints) -> list
@@ -546,11 +546,10 @@ gdbscm_breakpoints (void)
 {
   SCM list = SCM_EOL;
 
-  /* If iterate_over_breakpoints returns non-NULL it means the iteration
-     terminated early.
-     In that case abandon building the list and return #f.  */
-  if (iterate_over_breakpoints (bpscm_build_bp_list, &list) != NULL)
-    return SCM_BOOL_F;
+  iterate_over_breakpoints ([&] (breakpoint *bp)
+    {
+      return bpscm_build_bp_list(bp, &list);
+    });
 
   return scm_reverse_x (list, SCM_EOL);
 }
@@ -589,19 +588,20 @@ gdbscm_set_breakpoint_enabled_x (SCM self, SCM newvalue)
   SCM_ASSERT_TYPE (gdbscm_is_bool (newvalue), newvalue, SCM_ARG2, FUNC_NAME,
 		   _("boolean"));
 
-  TRY
+  gdbscm_gdb_exception exc {};
+  try
     {
       if (gdbscm_is_true (newvalue))
 	enable_breakpoint (bp_smob->bp);
       else
 	disable_breakpoint (bp_smob->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return SCM_UNSPECIFIED;
 }
 
@@ -627,16 +627,17 @@ gdbscm_set_breakpoint_silent_x (SCM self, SCM newvalue)
   SCM_ASSERT_TYPE (gdbscm_is_bool (newvalue), newvalue, SCM_ARG2, FUNC_NAME,
 		   _("boolean"));
 
-  TRY
+  gdbscm_gdb_exception exc {};
+  try
     {
       breakpoint_set_silent (bp_smob->bp, gdbscm_is_true (newvalue));
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return SCM_UNSPECIFIED;
 }
 
@@ -668,16 +669,17 @@ gdbscm_set_breakpoint_ignore_count_x (SCM self, SCM newvalue)
   if (value < 0)
     value = 0;
 
-  TRY
+  gdbscm_gdb_exception exc {};
+  try
     {
       set_ignore_count (bp_smob->number, (int) value, 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return SCM_UNSPECIFIED;
 }
 
@@ -789,16 +791,17 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
     {
       id = scm_to_long (newvalue);
 
-      TRY
+      gdbscm_gdb_exception exc {};
+      try
 	{
 	  valid_id = valid_task_id (id);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception &except)
 	{
-	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+	  exc = unpack (except);
 	}
-      END_CATCH
 
+      GDBSCM_HANDLE_GDB_EXCEPTION (exc);
       if (! valid_id)
 	{
 	  gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG2, newvalue,
@@ -810,16 +813,17 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
   else
     SCM_ASSERT_TYPE (0, newvalue, SCM_ARG2, FUNC_NAME, _("integer or #f"));
 
-  TRY
+  gdbscm_gdb_exception exc {};
+  try
     {
       breakpoint_set_task (bp_smob->bp, id);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return SCM_UNSPECIFIED;
 }
 
@@ -835,7 +839,7 @@ gdbscm_breakpoint_location (SCM self)
   if (bp_smob->bp->type != bp_breakpoint)
     return SCM_BOOL_F;
 
-  str = event_location_to_string (bp_smob->bp->location);
+  str = event_location_to_string (bp_smob->bp->location.get ());
   if (! str)
     str = "";
 
@@ -851,7 +855,6 @@ gdbscm_breakpoint_expression (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  char *str;
   struct watchpoint *wp;
 
   if (!is_watchpoint (bp_smob->bp))
@@ -859,7 +862,7 @@ gdbscm_breakpoint_expression (SCM self)
 
   wp = (struct watchpoint *) bp_smob->bp;
 
-  str = wp->exp_string;
+  const char *str = wp->exp_string;
   if (! str)
     str = "";
 
@@ -890,32 +893,22 @@ gdbscm_set_breakpoint_condition_x (SCM self, SCM newvalue)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  char *exp;
-  struct gdb_exception except = exception_none;
 
   SCM_ASSERT_TYPE (scm_is_string (newvalue) || gdbscm_is_false (newvalue),
 		   newvalue, SCM_ARG2, FUNC_NAME,
 		   _("string or #f"));
 
-  if (gdbscm_is_false (newvalue))
-    exp = NULL;
-  else
-    exp = gdbscm_scm_to_c_string (newvalue);
-
-  TRY
+  return gdbscm_wrap ([=]
     {
-      set_breakpoint_condition (bp_smob->bp, exp ? exp : "", 0);
-    }
-  CATCH (ex, RETURN_MASK_ALL)
-    {
-      except = ex;
-    }
-  END_CATCH
+      gdb::unique_xmalloc_ptr<char> exp
+	= (gdbscm_is_false (newvalue)
+	   ? nullptr
+	   : gdbscm_scm_to_c_string (newvalue));
 
-  xfree (exp);
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      set_breakpoint_condition (bp_smob->bp, exp ? exp.get () : "", 0);
 
-  return SCM_UNSPECIFIED;
+      return SCM_UNSPECIFIED;
+    });
 }
 
 /* (breakpoint-stop <gdb:breakpoint>) -> procedure or #f */
@@ -977,38 +970,30 @@ gdbscm_breakpoint_commands (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct breakpoint *bp;
-  long length;
-  struct ui_file *string_file;
-  struct cleanup *chain;
   SCM result;
-  char *cmdstr;
 
   bp = bp_smob->bp;
 
   if (bp->commands == NULL)
     return SCM_BOOL_F;
 
-  string_file = mem_fileopen ();
-  chain = make_cleanup_ui_file_delete (string_file);
+  string_file buf;
 
-  ui_out_redirect (current_uiout, string_file);
-  TRY
+  current_uiout->redirect (&buf);
+  gdbscm_gdb_exception exc {};
+  try
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  ui_out_redirect (current_uiout, NULL);
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception &except)
     {
-      do_cleanups (chain);
-      gdbscm_throw_gdb_exception (except);
+      exc = unpack (except);
     }
-  END_CATCH
 
-  cmdstr = ui_file_xstrdup (string_file, &length);
-  make_cleanup (xfree, cmdstr);
-  result = gdbscm_scm_from_c_string (cmdstr);
+  current_uiout->redirect (NULL);
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
+  result = gdbscm_scm_from_c_string (buf.c_str ());
 
-  do_cleanups (chain);
   return result;
 }
 
@@ -1337,8 +1322,8 @@ gdbscm_initialize_breakpoints (void)
   scm_set_smob_free (breakpoint_smob_tag, bpscm_free_breakpoint_smob);
   scm_set_smob_print (breakpoint_smob_tag, bpscm_print_breakpoint_smob);
 
-  observer_attach_breakpoint_created (bpscm_breakpoint_created);
-  observer_attach_breakpoint_deleted (bpscm_breakpoint_deleted);
+  gdb::observers::breakpoint_created.attach (bpscm_breakpoint_created);
+  gdb::observers::breakpoint_deleted.attach (bpscm_breakpoint_deleted);
 
   gdbscm_define_integer_constants (breakpoint_integer_constants, 1);
   gdbscm_define_functions (breakpoint_functions, 1);

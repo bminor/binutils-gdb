@@ -1,6 +1,6 @@
 /* Parser definitions for GDB.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo.
@@ -23,28 +23,53 @@
 #if !defined (PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
-#include "doublest.h"
-#include "vec.h"
 #include "expression.h"
+#include "symtab.h"
 
 struct block;
 struct language_defn;
 struct internalvar;
+class innermost_block_tracker;
 
-extern int parser_debug;
+extern bool parser_debug;
 
-#define parse_gdbarch(ps) ((ps)->expout->gdbarch)
-#define parse_language(ps) ((ps)->expout->language_defn)
+/* A class that can be used to build a "struct expression".  */
 
-struct parser_state
+struct expr_builder
 {
-  /* The expression related to this parser state.  */
+  /* Constructor.  LANG is the language used to parse the expression.
+     And GDBARCH is the gdbarch to use during parsing.  */
 
-  struct expression *expout;
+  expr_builder (const struct language_defn *lang,
+		struct gdbarch *gdbarch);
+
+  DISABLE_COPY_AND_ASSIGN (expr_builder);
+
+  /* Resize the allocated expression to the correct size, and return
+     it as an expression_up -- passing ownership to the caller.  */
+  ATTRIBUTE_UNUSED_RESULT expression_up release ();
+
+  /* Return the gdbarch that was passed to the constructor.  */
+
+  struct gdbarch *gdbarch ()
+  {
+    return expout->gdbarch;
+  }
+
+  /* Return the language that was passed to the constructor.  */
+
+  const struct language_defn *language ()
+  {
+    return expout->language_defn;
+  }
 
   /* The size of the expression above.  */
 
   size_t expout_size;
+
+  /* The expression related to this parser state.  */
+
+  expression_up expout;
 
   /* The number of elements already in the expression.  This is used
      to know where to put new elements.  */
@@ -52,23 +77,171 @@ struct parser_state
   size_t expout_ptr;
 };
 
-/* If this is nonzero, this block is used as the lexical context
-   for symbol names.  */
+/* This is used for expression completion.  */
 
-extern const struct block *expression_context_block;
+struct expr_completion_state
+{
+  /* The index of the last struct expression directly before a '.' or
+     '->'.  This is set when parsing and is only used when completing a
+     field name.  It is -1 if no dereference operation was found.  */
+  int expout_last_struct = -1;
 
-/* If expression_context_block is non-zero, then this is the PC within
-   the block that we want to evaluate expressions at.  When debugging
-   C or C++ code, we use this to find the exact line we're at, and
-   then look up the macro definitions active at that point.  */
-extern CORE_ADDR expression_context_pc;
+  /* If we are completing a tagged type name, this will be nonzero.  */
+  enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
 
-/* The innermost context required by the stack and register variables
-   we've encountered so far.  */
-extern const struct block *innermost_block;
+  /* The token for tagged type name completion.  */
+  gdb::unique_xmalloc_ptr<char> expout_completion_name;
+};
 
-/* Number of arguments seen so far in innermost function call.  */
-extern int arglist_len;
+/* An instance of this type is instantiated during expression parsing,
+   and passed to the appropriate parser.  It holds both inputs to the
+   parser, and result.  */
+
+struct parser_state : public expr_builder
+{
+  /* Constructor.  LANG is the language used to parse the expression.
+     And GDBARCH is the gdbarch to use during parsing.  */
+
+  parser_state (const struct language_defn *lang,
+		struct gdbarch *gdbarch,
+		const struct block *context_block,
+		CORE_ADDR context_pc,
+		int comma,
+		const char *input,
+		int completion,
+		innermost_block_tracker *tracker)
+    : expr_builder (lang, gdbarch),
+      expression_context_block (context_block),
+      expression_context_pc (context_pc),
+      comma_terminates (comma),
+      lexptr (input),
+      parse_completion (completion),
+      block_tracker (tracker)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (parser_state);
+
+  /* Begin counting arguments for a function call,
+     saving the data about any containing call.  */
+
+  void start_arglist ()
+  {
+    m_funcall_chain.push_back (arglist_len);
+    arglist_len = 0;
+  }
+
+  /* Return the number of arguments in a function call just terminated,
+     and restore the data for the containing function call.  */
+
+  int end_arglist ()
+  {
+    int val = arglist_len;
+    arglist_len = m_funcall_chain.back ();
+    m_funcall_chain.pop_back ();
+    return val;
+  }
+
+  /* Mark the current index as the starting location of a structure
+     expression.  This is used when completing on field names.  */
+
+  void mark_struct_expression ();
+
+  /* Indicate that the current parser invocation is completing a tag.
+     TAG is the type code of the tag, and PTR and LENGTH represent the
+     start of the tag name.  */
+
+  void mark_completion_tag (enum type_code tag, const char *ptr, int length);
+
+
+  /* If this is nonzero, this block is used as the lexical context for
+     symbol names.  */
+
+  const struct block * const expression_context_block;
+
+  /* If expression_context_block is non-zero, then this is the PC
+     within the block that we want to evaluate expressions at.  When
+     debugging C or C++ code, we use this to find the exact line we're
+     at, and then look up the macro definitions active at that
+     point.  */
+  const CORE_ADDR expression_context_pc;
+
+  /* Nonzero means stop parsing on first comma (if not within parentheses).  */
+
+  int comma_terminates;
+
+  /* During parsing of a C expression, the pointer to the next character
+     is in this variable.  */
+
+  const char *lexptr;
+
+  /* After a token has been recognized, this variable points to it.
+     Currently used only for error reporting.  */
+  const char *prev_lexptr = nullptr;
+
+  /* Number of arguments seen so far in innermost function call.  */
+
+  int arglist_len = 0;
+
+  /* True if parsing an expression to attempt completion.  */
+  int parse_completion;
+
+  /* Completion state is updated here.  */
+  expr_completion_state m_completion_state;
+
+  /* The innermost block tracker.  */
+  innermost_block_tracker *block_tracker;
+
+private:
+
+  /* Data structure for saving values of arglist_len for function calls whose
+     arguments contain other function calls.  */
+
+  std::vector<int> m_funcall_chain;
+};
+
+/* When parsing expressions we track the innermost block that was
+   referenced.  */
+
+class innermost_block_tracker
+{
+public:
+  innermost_block_tracker (innermost_block_tracker_types types
+			   = INNERMOST_BLOCK_FOR_SYMBOLS)
+    : m_types (types),
+      m_innermost_block (NULL)
+  { /* Nothing.  */ }
+
+  /* Update the stored innermost block if the new block B is more inner
+     than the currently stored block, or if no block is stored yet.  The
+     type T tells us whether the block B was for a symbol or for a
+     register.  The stored innermost block is only updated if the type T is
+     a type we are interested in, the types we are interested in are held
+     in M_TYPES and set during RESET.  */
+  void update (const struct block *b, innermost_block_tracker_types t);
+
+  /* Overload of main UPDATE method which extracts the block from BS.  */
+  void update (const struct block_symbol &bs)
+  {
+    update (bs.block, INNERMOST_BLOCK_FOR_SYMBOLS);
+  }
+
+  /* Return the stored innermost block.  Can be nullptr if no symbols or
+     registers were found during an expression parse, and so no innermost
+     block was defined.  */
+  const struct block *block () const
+  {
+    return m_innermost_block;
+  }
+
+private:
+  /* The type of innermost block being looked for.  */
+  innermost_block_tracker_types m_types;
+
+  /* The currently stored innermost block found while parsing an
+     expression.  */
+  const struct block *m_innermost_block;
+};
 
 /* A string token, either a char-string or bit-string.  Char-strings are
    used, for example, for the names of symbols.  */
@@ -117,136 +290,48 @@ struct objc_class_str
     int theclass;
   };
 
-typedef struct type *type_ptr;
-DEF_VEC_P (type_ptr);
-
-/* For parsing of complicated types.
-   An array should be preceded in the list by the size of the array.  */
-enum type_pieces
-  {
-    tp_end = -1, 
-    tp_pointer, 
-    tp_reference, 
-    tp_array, 
-    tp_function,
-    tp_function_with_arguments,
-    tp_const, 
-    tp_volatile, 
-    tp_space_identifier,
-    tp_type_stack
-  };
-/* The stack can contain either an enum type_pieces or an int.  */
-union type_stack_elt
-  {
-    enum type_pieces piece;
-    int int_val;
-    struct type_stack *stack_val;
-    VEC (type_ptr) *typelist_val;
-  };
-
-/* The type stack is an instance of this structure.  */
-
-struct type_stack
-{
-  /* Elements on the stack.  */
-  union type_stack_elt *elements;
-  /* Current stack depth.  */
-  int depth;
-  /* Allocated size of stack.  */
-  int size;
-};
-
-/* Helper function to initialize the expout, expout_size, expout_ptr
-   trio inside PS before it is used to store expression elements created
-   during the parsing of an expression.  INITIAL_SIZE is the initial size of
-   the expout array.  LANG is the language used to parse the expression.
-   And GDBARCH is the gdbarch to use during parsing.  */
-
-extern void initialize_expout (struct parser_state *ps,
-			       size_t initial_size,
-			       const struct language_defn *lang,
-			       struct gdbarch *gdbarch);
-
-/* Helper function that reallocates the EXPOUT inside PS in order to
-   eliminate any unused space.  It is generally used when the expression
-   has just been parsed and created.  */
-
-extern void reallocate_expout (struct parser_state *ps);
-
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).
-   Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
+   Ordinarily this always returns -1.  However, if LAST_STRUCT
    is not -1 (i.e., we are trying to complete a field name), it will
    return the index of the subexpression which is the left-hand-side
-   of the struct operation at EXPOUT_LAST_STRUCT.  */
+   of the struct operation at LAST_STRUCT.  */
 
-extern int prefixify_expression (struct expression *expr);
+extern int prefixify_expression (struct expression *expr,
+				 int last_struct = -1);
 
-extern void write_exp_elt_opcode (struct parser_state *, enum exp_opcode);
+extern void write_exp_elt_opcode (struct expr_builder *, enum exp_opcode);
 
-extern void write_exp_elt_sym (struct parser_state *, struct symbol *);
+extern void write_exp_elt_sym (struct expr_builder *, struct symbol *);
 
-extern void write_exp_elt_longcst (struct parser_state *, LONGEST);
+extern void write_exp_elt_longcst (struct expr_builder *, LONGEST);
 
-extern void write_exp_elt_dblcst (struct parser_state *, DOUBLEST);
+extern void write_exp_elt_floatcst (struct expr_builder *, const gdb_byte *);
 
-extern void write_exp_elt_decfloatcst (struct parser_state *, gdb_byte *);
+extern void write_exp_elt_type (struct expr_builder *, struct type *);
 
-extern void write_exp_elt_type (struct parser_state *, struct type *);
+extern void write_exp_elt_intern (struct expr_builder *, struct internalvar *);
 
-extern void write_exp_elt_intern (struct parser_state *, struct internalvar *);
+extern void write_exp_string (struct expr_builder *, struct stoken);
 
-extern void write_exp_string (struct parser_state *, struct stoken);
-
-void write_exp_string_vector (struct parser_state *, int type,
+void write_exp_string_vector (struct expr_builder *, int type,
 			      struct stoken_vector *vec);
 
-extern void write_exp_bitstring (struct parser_state *, struct stoken);
+extern void write_exp_bitstring (struct expr_builder *, struct stoken);
 
-extern void write_exp_elt_block (struct parser_state *, const struct block *);
+extern void write_exp_elt_block (struct expr_builder *, const struct block *);
 
-extern void write_exp_elt_objfile (struct parser_state *,
+extern void write_exp_elt_objfile (struct expr_builder *,
 				   struct objfile *objfile);
 
-extern void write_exp_msymbol (struct parser_state *,
+extern void write_exp_msymbol (struct expr_builder *,
 			       struct bound_minimal_symbol);
 
 extern void write_dollar_variable (struct parser_state *, struct stoken str);
 
-extern void mark_struct_expression (struct parser_state *);
-
 extern const char *find_template_name_end (const char *);
 
-extern void start_arglist (void);
-
-extern int end_arglist (void);
-
-extern char *copy_name (struct stoken);
-
-extern void insert_type (enum type_pieces);
-
-extern void push_type (enum type_pieces);
-
-extern void push_type_int (int);
-
-extern void insert_type_address_space (struct parser_state *, char *);
-
-extern enum type_pieces pop_type (void);
-
-extern int pop_type_int (void);
-
-extern struct type_stack *get_type_stack (void);
-
-extern struct type_stack *append_type_stack (struct type_stack *to,
-					     struct type_stack *from);
-
-extern void push_type_stack (struct type_stack *stack);
-
-extern void type_stack_cleanup (void *arg);
-
-extern void push_typelist (VEC (type_ptr) *typelist);
-
-extern int length_of_subexp (struct expression *, int);
+extern std::string copy_name (struct stoken);
 
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 
@@ -263,34 +348,13 @@ extern int operator_check_standard (struct expression *exp, int pos,
 				      (struct objfile *objfile, void *data),
 				    void *data);
 
-extern char *op_name_standard (enum exp_opcode);
+extern const char *op_name_standard (enum exp_opcode);
 
-extern struct type *follow_types (struct type *);
+extern void null_post_parser (expression_up *, int, int,
+			      innermost_block_tracker *);
 
-extern void null_post_parser (struct expression **, int);
-
-extern int parse_float (const char *p, int len, DOUBLEST *d,
-			const char **suffix);
-
-extern int parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
-			  DOUBLEST *d, struct type **t);
-
-/* During parsing of a C expression, the pointer to the next character
-   is in this variable.  */
-
-extern const char *lexptr;
-
-/* After a token has been recognized, this variable points to it.
-   Currently used only for error reporting.  */
-extern const char *prev_lexptr;
-
-/* Current depth in parentheses within the expression.  */
-
-extern int paren_depth;
-
-/* Nonzero means stop parsing on first comma (if not within parentheses).  */
-
-extern int comma_terminates;
+extern bool parse_float (const char *p, int len,
+			 const struct type *type, gdb_byte *data);
 
 /* These codes indicate operator precedences for expression printing,
    least tightly binding first.  */
@@ -313,7 +377,7 @@ enum precedence
 
 struct op_print
   {
-    char *string;
+    const char *string;
     enum exp_opcode opcode;
     /* Precedence of operator.  These values are used only by comparisons.  */
     enum precedence precedence;
@@ -353,7 +417,7 @@ struct exp_descriptor
        The returned value should never be NULL, even if EXP_OPCODE is
        an unknown opcode (a string containing an image of the numeric
        value of the opcode can be returned, for instance).  */
-    char *(*op_name) (enum exp_opcode);
+    const char *(*op_name) (enum exp_opcode);
 
     /* Dump the rest of this (prefix) expression after the operator
        itself has been printed.  See dump_subexp_body_standard in
@@ -385,15 +449,6 @@ extern void print_subexp_standard (struct expression *, int *,
 extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern int exp_uses_objfile (struct expression *exp, struct objfile *objfile);
-
-extern void mark_completion_tag (enum type_code, const char *ptr,
-				 int length);
-
-/* Reallocate the `expout' pointer inside PS so that it can accommodate
-   at least LENELT expression elements.  This function does nothing if
-   there is enough room for the elements.  */
-
-extern void increase_expout_size (struct parser_state *ps, size_t lenelt);
 
 #endif /* PARSER_DEFS_H */
 

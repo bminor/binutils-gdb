@@ -1,6 +1,6 @@
 /* Block-related functions for the GNU debugger, GDB.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,10 +31,10 @@
    C++ files, namely using declarations and the current namespace in
    scope.  */
 
-struct block_namespace_info
+struct block_namespace_info : public allocate_on_obstack
 {
-  const char *scope;
-  struct using_direct *using_decl;
+  const char *scope = nullptr;
+  struct using_direct *using_decl = nullptr;
 };
 
 static void block_initialize_namespace (struct block *block,
@@ -65,29 +65,28 @@ block_gdbarch (const struct block *block)
   return get_objfile_arch (block_objfile (block));
 }
 
-/* Return Nonzero if block a is lexically nested within block b,
-   or if a and b have the same pc range.
-   Return zero otherwise.  */
+/* See block.h.  */
 
-int
-contained_in (const struct block *a, const struct block *b)
+bool
+contained_in (const struct block *a, const struct block *b,
+	      bool allow_nested)
 {
   if (!a || !b)
-    return 0;
+    return false;
 
   do
     {
       if (a == b)
-	return 1;
+	return true;
       /* If A is a function block, then A cannot be contained in B,
          except if A was inlined.  */
-      if (BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
-        return 0;
+      if (!allow_nested && BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
+        return false;
       a = BLOCK_SUPERBLOCK (a);
     }
   while (a != NULL);
 
-  return 0;
+  return false;
 }
 
 
@@ -131,16 +130,16 @@ block_inlined_p (const struct block *bl)
 /* A helper function that checks whether PC is in the blockvector BL.
    It returns the containing block if there is one, or else NULL.  */
 
-static struct block *
+static const struct block *
 find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 {
-  struct block *b;
+  const struct block *b;
   int bot, top, half;
 
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
   if (BLOCKVECTOR_MAP (bl))
-    return (struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
+    return (const struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
 
   /* Otherwise, use binary search to find the last block that starts
      before PC.
@@ -186,7 +185,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 			 struct compunit_symtab *cust)
 {
   const struct blockvector *bl;
-  struct block *b;
+  const struct block *b;
 
   if (cust == NULL)
     {
@@ -239,11 +238,11 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* DW_TAG_gnu_call_site will be missing just if GCC could not determine
 	 the call target.  */
       throw_error (NO_ENTRY_VALUE_ERROR,
-		   _("DW_OP_GNU_entry_value resolving cannot find "
-		     "DW_TAG_GNU_call_site %s in %s"),
+		   _("DW_OP_entry_value resolving cannot find "
+		     "DW_TAG_call_site %s in %s"),
 		   paddress (gdbarch, pc),
 		   (msym.minsym == NULL ? "???"
-		    : MSYMBOL_PRINT_NAME (msym.minsym)));
+		    : msym.minsym->print_name ()));
     }
 
   return (struct call_site *) *slot;
@@ -344,17 +343,13 @@ block_set_using (struct block *block,
 }
 
 /* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
-   ititialize its members to zero.  */
+   initialize its members to zero.  */
 
 static void
 block_initialize_namespace (struct block *block, struct obstack *obstack)
 {
   if (BLOCK_NAMESPACE (block) == NULL)
-    {
-      BLOCK_NAMESPACE (block) = XOBNEW (obstack, struct block_namespace_info);
-      BLOCK_NAMESPACE (block)->scope = NULL;
-      BLOCK_NAMESPACE (block)->using_decl = NULL;
-    }
+    BLOCK_NAMESPACE (block) = new (obstack) struct block_namespace_info ();
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block
@@ -391,9 +386,9 @@ block_global_block (const struct block *block)
    zero/NULL.  This is useful for creating "dummy" blocks that don't
    correspond to actual source files.
 
-   Warning: it sets the block's BLOCK_DICT to NULL, which isn't a
+   Warning: it sets the block's BLOCK_MULTIDICT to NULL, which isn't a
    valid value.  If you really don't want the block to have a
-   dictionary, then you should subsequently set its BLOCK_DICT to
+   dictionary, then you should subsequently set its BLOCK_MULTIDICT to
    dict_create_linear (obstack, NULL).  */
 
 struct block *
@@ -548,10 +543,11 @@ block_iterator_step (struct block_iterator *iterator, int first)
 
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
-	  sym = dict_iterator_first (BLOCK_DICT (block), &iterator->dict_iter);
+	  sym = mdict_iterator_first (BLOCK_MULTIDICT (block),
+				      &iterator->mdict_iter);
 	}
       else
-	sym = dict_iterator_next (&iterator->dict_iter);
+	sym = mdict_iterator_next (&iterator->mdict_iter);
 
       if (sym != NULL)
 	return sym;
@@ -573,7 +569,7 @@ block_iterator_first (const struct block *block,
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iterator_first (block->dict, &iterator->dict_iter);
+    return mdict_iterator_first (block->multidict, &iterator->mdict_iter);
 
   return block_iterator_step (iterator, 1);
 }
@@ -584,78 +580,9 @@ struct symbol *
 block_iterator_next (struct block_iterator *iterator)
 {
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iterator_next (&iterator->dict_iter);
+    return mdict_iterator_next (&iterator->mdict_iter);
 
   return block_iterator_step (iterator, 0);
-}
-
-/* Perform a single step for a "name" block iterator, iterating across
-   symbol tables as needed.  Returns the next symbol, or NULL when
-   iteration is complete.  */
-
-static struct symbol *
-block_iter_name_step (struct block_iterator *iterator, const char *name,
-		      int first)
-{
-  struct symbol *sym;
-
-  gdb_assert (iterator->which != FIRST_LOCAL_BLOCK);
-
-  while (1)
-    {
-      if (first)
-	{
-	  struct compunit_symtab *cust
-	    = find_iterator_compunit_symtab (iterator);
-	  const struct block *block;
-
-	  /* Iteration is complete.  */
-	  if (cust == NULL)
-	    return  NULL;
-
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
-				     iterator->which);
-	  sym = dict_iter_name_first (BLOCK_DICT (block), name,
-				      &iterator->dict_iter);
-	}
-      else
-	sym = dict_iter_name_next (name, &iterator->dict_iter);
-
-      if (sym != NULL)
-	return sym;
-
-      /* We have finished iterating the appropriate block of one
-	 symtab.  Now advance to the next symtab and begin iteration
-	 there.  */
-      ++iterator->idx;
-      first = 1;
-    }
-}
-
-/* See block.h.  */
-
-struct symbol *
-block_iter_name_first (const struct block *block,
-		       const char *name,
-		       struct block_iterator *iterator)
-{
-  initialize_block_iterator (block, iterator);
-
-  if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_name_first (block->dict, name, &iterator->dict_iter);
-
-  return block_iter_name_step (iterator, name, 1);
-}
-
-/* See block.h.  */
-
-struct symbol *
-block_iter_name_next (const char *name, struct block_iterator *iterator)
-{
-  if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_name_next (name, &iterator->dict_iter);
-
-  return block_iter_name_step (iterator, name, 0);
 }
 
 /* Perform a single step for a "match" block iterator, iterating
@@ -664,8 +591,7 @@ block_iter_name_next (const char *name, struct block_iterator *iterator)
 
 static struct symbol *
 block_iter_match_step (struct block_iterator *iterator,
-		       const char *name,
-		       symbol_compare_ftype *compare,
+		       const lookup_name_info &name,
 		       int first)
 {
   struct symbol *sym;
@@ -686,11 +612,11 @@ block_iter_match_step (struct block_iterator *iterator,
 
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
-	  sym = dict_iter_match_first (BLOCK_DICT (block), name,
-				       compare, &iterator->dict_iter);
+	  sym = mdict_iter_match_first (BLOCK_MULTIDICT (block), name,
+					&iterator->mdict_iter);
 	}
       else
-	sym = dict_iter_match_next (name, compare, &iterator->dict_iter);
+	sym = mdict_iter_match_next (name, &iterator->mdict_iter);
 
       if (sym != NULL)
 	return sym;
@@ -707,30 +633,65 @@ block_iter_match_step (struct block_iterator *iterator,
 
 struct symbol *
 block_iter_match_first (const struct block *block,
-			const char *name,
-			symbol_compare_ftype *compare,
+			const lookup_name_info &name,
 			struct block_iterator *iterator)
 {
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_match_first (block->dict, name, compare,
-				  &iterator->dict_iter);
+    return mdict_iter_match_first (block->multidict, name,
+				   &iterator->mdict_iter);
 
-  return block_iter_match_step (iterator, name, compare, 1);
+  return block_iter_match_step (iterator, name, 1);
 }
 
 /* See block.h.  */
 
 struct symbol *
-block_iter_match_next (const char *name,
-		       symbol_compare_ftype *compare,
+block_iter_match_next (const lookup_name_info &name,
 		       struct block_iterator *iterator)
 {
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_match_next (name, compare, &iterator->dict_iter);
+    return mdict_iter_match_next (name, &iterator->mdict_iter);
 
-  return block_iter_match_step (iterator, name, compare, 0);
+  return block_iter_match_step (iterator, name, 0);
+}
+
+/* Return true if symbol A is the best match possible for DOMAIN.  */
+
+static bool
+best_symbol (struct symbol *a, const domain_enum domain)
+{
+  return (SYMBOL_DOMAIN (a) == domain
+	  && SYMBOL_CLASS (a) != LOC_UNRESOLVED);
+}
+
+/* Return symbol B if it is a better match than symbol A for DOMAIN.
+   Otherwise return A.  */
+
+static struct symbol *
+better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
+{
+  if (a == NULL)
+    return b;
+  if (b == NULL)
+    return a;
+
+  if (SYMBOL_DOMAIN (a) == domain
+      && SYMBOL_DOMAIN (b) != domain)
+    return a;
+  if (SYMBOL_DOMAIN (b) == domain
+      && SYMBOL_DOMAIN (a) != domain)
+    return b;
+
+  if (SYMBOL_CLASS (a) != LOC_UNRESOLVED
+      && SYMBOL_CLASS (b) == LOC_UNRESOLVED)
+    return a;
+  if (SYMBOL_CLASS (b) != LOC_UNRESOLVED
+      && SYMBOL_CLASS (a) == LOC_UNRESOLVED)
+    return b;
+
+  return a;
 }
 
 /* See block.h.
@@ -746,26 +707,31 @@ block_iter_match_next (const char *name,
 
 struct symbol *
 block_lookup_symbol (const struct block *block, const char *name,
+		     symbol_name_match_type match_type,
 		     const domain_enum domain)
 {
   struct block_iterator iter;
   struct symbol *sym;
 
+  lookup_name_info lookup_name (name, match_type);
+
   if (!BLOCK_FUNCTION (block))
     {
       struct symbol *other = NULL;
 
-      ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+      ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain)
+	  /* See comment related to PR gcc/debug/91507 in
+	     block_lookup_symbol_primary.  */
+	  if (best_symbol (sym, domain))
 	    return sym;
 	  /* This is a bit of a hack, but symbol_matches_domain might ignore
 	     STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	     make sure there is no "better" matching symbol, i.e., one with
 	     exactly the same domain.  PR 16253.  */
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+	  if (symbol_matches_domain (sym->language (),
 				     SYMBOL_DOMAIN (sym), domain))
-	    other = sym;
+	    other = better_symbol (other, sym, domain);
 	}
       return other;
     }
@@ -782,9 +748,9 @@ block_lookup_symbol (const struct block *block, const char *name,
 
       struct symbol *sym_found = NULL;
 
-      ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+      ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+	  if (symbol_matches_domain (sym->language (),
 				     SYMBOL_DOMAIN (sym), domain))
 	    {
 	      sym_found = sym;
@@ -805,27 +771,56 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 			     const domain_enum domain)
 {
   struct symbol *sym, *other;
-  struct dict_iterator dict_iter;
+  struct mdict_iterator mdict_iter;
+
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
 	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
 
   other = NULL;
-  for (sym = dict_iter_name_first (block->dict, name, &dict_iter);
+  for (sym
+	 = mdict_iter_match_first (block->multidict, lookup_name, &mdict_iter);
        sym != NULL;
-       sym = dict_iter_name_next (name, &dict_iter))
+       sym = mdict_iter_match_next (lookup_name, &mdict_iter))
     {
-      if (SYMBOL_DOMAIN (sym) == domain)
+      /* With the fix for PR gcc/debug/91507, we get for:
+	 ...
+	 extern char *zzz[];
+	 char *zzz[ ] = {
+	   "abc",
+	   "cde"
+	 };
+	 ...
+	 DWARF which will result in two entries in the symbol table, a decl
+	 with type char *[] and a def with type char *[2].
+
+	 If we return the decl here, we don't get the value of zzz:
+	 ...
+	 $ gdb a.spec.out -batch -ex "p zzz"
+	 $1 = 0x601030 <zzz>
+	 ...
+	 because we're returning the symbol without location information, and
+	 because the fallback that uses the address from the minimal symbols
+	 doesn't work either because the type of the decl does not specify a
+	 size.
+
+	 To fix this, we prefer def over decl in best_symbol and
+	 better_symbol.
+
+	 In absence of the gcc fix, both def and decl have type char *[], so
+	 the only option to make this work is improve the fallback to use the
+	 size of the minimal symbol.  Filed as PR exp/24989.  */
+      if (best_symbol (sym, domain))
 	return sym;
 
       /* This is a bit of a hack, but symbol_matches_domain might ignore
 	 STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	 make sure there is no "better" matching symbol, i.e., one with
 	 exactly the same domain.  PR 16253.  */
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain))
-	other = sym;
+      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+	other = better_symbol (other, sym, domain);
     }
 
   return other;
@@ -841,16 +836,17 @@ block_find_symbol (const struct block *block, const char *name,
   struct block_iterator iter;
   struct symbol *sym;
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
 	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
 
-  ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
     {
       /* MATCHER is deliberately called second here so that it never sees
 	 a non-domain-matching symbol.  */
-      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				 SYMBOL_DOMAIN (sym), domain)
+      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain)
 	  && matcher (sym, data))
 	return sym;
     }
@@ -877,3 +873,24 @@ block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
   *best = sym;
   return 0;
 }
+
+/* See block.h.  */
+
+struct blockranges *
+make_blockranges (struct objfile *objfile,
+                  const std::vector<blockrange> &rangevec)
+{
+  struct blockranges *blr;
+  size_t n = rangevec.size();
+
+  blr = (struct blockranges *)
+    obstack_alloc (&objfile->objfile_obstack,
+                   sizeof (struct blockranges)
+		   + (n - 1) * sizeof (struct blockrange));
+
+  blr->nranges = n;
+  for (int i = 0; i < n; i++)
+    blr->range[i] = rangevec[i];
+  return blr;
+}
+

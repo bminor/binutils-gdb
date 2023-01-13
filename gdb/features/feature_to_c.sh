@@ -2,7 +2,7 @@
 
 # Convert text files to compilable C arrays.
 #
-# Copyright (C) 2007-2016 Free Software Foundation, Inc.
+# Copyright (C) 2007-2020 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -31,6 +31,8 @@ if test -e "$output"; then
   echo "Output file \"$output\" already exists; refusing to overwrite."
   exit 1
 fi
+
+echo '#include "xml-builtin.h"' >> $output
 
 for input; do
   arrayname=xml_feature_`echo $input | sed 's,.*/,,; s/[-.]/_/g'`
@@ -64,12 +66,7 @@ done
 
 echo >> $output
 
-echo "#ifdef __cplusplus"                    >> $output
-echo "#  define EXPORTED_CONST extern const" >> $output
-echo "#else"                                 >> $output
-echo "#  define EXPORTED_CONST const"        >> $output
-echo "#endif"                                >> $output
-echo "EXPORTED_CONST char *const xml_builtin[][2] = {" >> $output
+echo "extern const char *const xml_builtin[][2] = {" >> $output
 
 for input; do
   basename=`echo $input | sed 's,.*/,,'`

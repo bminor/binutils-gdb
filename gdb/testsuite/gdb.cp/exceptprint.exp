@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Free Software Foundation, Inc.
+# Copyright 2013-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ if {[skip_cplus_tests]} {
     return -1
 }
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
@@ -27,7 +27,7 @@ if {![runto_main]} {
     return -1
 }
 
-if {![skip_libstdcxx_probe_tests]} {
+if {[skip_libstdcxx_probe_tests]} {
     untested "could not find libstdc++ stap probe"
     return -1
 }
@@ -60,12 +60,9 @@ proc do_exceptprint_tests {prefix output} {
     }
 }
 
-gdb_test "catch catch" "Catchpoint \[0-9\]+ \\(catch\\)" \
-    "catch catch"
-gdb_test "catch throw" "Catchpoint \[0-9\]+ \\(throw\\)" \
-    "catch throw"
-gdb_test "catch rethrow" "Catchpoint \[0-9\]+ \\(rethrow\\)" \
-    "catch rethrow"
+gdb_test "catch catch" "Catchpoint \[0-9\]+ \\(catch\\)"
+gdb_test "catch throw" "Catchpoint \[0-9\]+ \\(throw\\)"
+gdb_test "catch rethrow" "Catchpoint \[0-9\]+ \\(rethrow\\)"
 
 do_exceptprint_tests string "$hex \"hi bob\""
 do_exceptprint_tests int 23

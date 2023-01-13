@@ -5,7 +5,7 @@ power8:
 	tabortdc.    20,11,10
 	tabortwci.   17,10,-13
 	tabortdci.   29,3,-5
-	tbegin.
+	tbegin.      0
 	tcheck       7
 	tend.        0
 	tend.
@@ -152,3 +152,153 @@ power8:
 	stxvd2x      41,0,7
 	stxvx        11,21,8
 	stxvd2x      11,21,8
+	lbarx        20,0,7
+	lbarx        20,0,7,0
+	lbarx        20,0,7,1
+	lbarx        20,1,7
+	lbarx        20,1,7,0
+	lbarx        20,1,7,1
+	ldarx        21,0,8
+	ldarx        21,0,8,0
+	ldarx        21,0,8,1
+	ldarx        21,1,8
+	ldarx        21,1,8,0
+	ldarx        21,1,8,1
+	lharx        22,0,9
+	lharx        22,0,9,0
+	lharx        22,0,9,1
+	lharx        22,1,9
+	lharx        22,1,9,0
+	lharx        22,1,9,1
+	lwarx        23,0,10
+	lwarx        23,0,10,0
+	lwarx        23,0,10,1
+	lwarx        23,1,10
+	lwarx        23,1,10,0
+	lwarx        23,1,10,1
+	stbcx.       10,0,7
+	stbcx.       10,1,7
+	sthcx.       11,0,8
+	sthcx.       11,1,8
+	stwcx.       12,0,9
+	stwcx.       12,1,9
+	stdcx.       13,0,10
+	stdcx.       13,1,10
+	bctar	     0b10100,lt
+	btar
+	bdnztar
+	bdnztarl
+	bdztar
+	bdztarl
+	btar
+	btarl
+	bdnztar-
+	bdnztarl-
+	bdnztar+
+	bdnztarl+
+	bdztar-
+	bdztarl-
+	bdztar+
+	bdztarl+
+	bgetar       cr4
+	bnltar       cr4
+	bgetarl      cr4
+	bnltarl      cr4
+	bletar       cr4
+	bngtar       cr4
+	bletarl      cr4
+	bngtarl      cr4
+	bnetar       cr4
+	bnetarl      cr4
+	bnstar       cr4
+	bnutar       cr4
+	bnstarl      cr4
+	bnutarl      cr4
+	bgetar-      cr4
+	bnltar-      cr4
+	bgetarl-     cr4
+	bnltarl-     cr4
+	bletar-      cr4
+	bngtar-      cr4
+	bletarl-     cr4
+	bngtarl-     cr4
+	bnetar-      cr4
+	bnetarl-     cr4
+	bnstar-      cr4
+	bnutar-      cr4
+	bnstarl-     cr4
+	bnutarl-     cr4
+	bgetar+      cr4
+	bnltar+      cr4
+	bgetarl+     cr4
+	bnltarl+     cr4
+	bletar+      cr4
+	bngtar+      cr4
+	bletarl+     cr4
+	bngtarl+     cr4
+	bnetar+      cr4
+	bnetarl+     cr4
+	bnstar+      cr4
+	bnutar+      cr4
+	bnstarl+     cr4
+	bnutarl+     cr4
+	blttar       cr4
+	blttarl      cr4
+	bgttar       cr4
+	bgttarl      cr4
+	beqtar       cr4
+	beqtarl      cr4
+	bsotar       cr4
+	buntar       cr4
+	bsotarl      cr4
+	buntarl      cr4
+	blttar-      cr4
+	blttarl-     cr4
+	bgttar-      cr4
+	bgttarl-     cr4
+	beqtar-      cr4
+	beqtarl-     cr4
+	bsotar-      cr4
+	buntar-      cr4
+	bsotarl-     cr4
+	buntarl-     cr4
+	blttar+      cr4
+	blttarl+     cr4
+	bgttar+      cr4
+	bgttarl+     cr4
+	beqtar+      cr4
+	beqtarl+     cr4
+	bsotar+      cr4
+	buntar+      cr4
+	bsotarl+     cr4
+	buntarl+     cr4
+	bdnzftar     4*cr2+lt
+	bdnzftarl    4*cr2+lt
+	bdzftar      4*cr2+lt
+	bdzftarl     4*cr2+lt
+	bftar	     4*cr2+lt
+	bftarl       4*cr2+lt
+	bftar-       4*cr2+lt
+	bftarl-      4*cr2+lt
+	bftar+       4*cr2+lt
+	bftarl+      4*cr2+lt
+	bdnzttar     4*cr2+lt
+	bdnzttarl    4*cr2+lt
+	bdzttar      4*cr2+lt
+	bdzttarl     4*cr2+lt
+	bttar	     4*cr2+lt
+	bttarl       4*cr2+lt
+	bttar-       4*cr2+lt
+	bttarl-      4*cr2+lt
+	bttar+       4*cr2+lt
+	bttarl+      4*cr2+lt
+	bctar-       0b01100,4*cr2+eq
+	bctarl-      0b01100,4*cr2+eq
+	bctar+       0b01100,4*cr2+eq
+	bctarl+      0b01100,4*cr2+eq
+	bctar	     0b01100,4*cr2+gt
+	bctar	     0b01100,4*cr2+gt,0
+	bctar	     0b01100,4*cr2+gt,3
+	bctarl       0b01100,4*cr2+gt
+	bctarl       0b01100,4*cr2+gt,0
+	bctarl       0b01100,4*cr2+gt,3

@@ -1,5 +1,5 @@
 /* v850.h -- Header file for NEC V850 opcode table
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2020 Free Software Foundation, Inc.
    Written by J.T. Conklin, Cygnus Support
 
    This file is part of GDB, GAS, and the GNU binutils.
@@ -21,6 +21,10 @@
 
 #ifndef V850_H
 #define V850_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* The opcode table is an array of struct v850_opcode.  */
 
@@ -226,15 +230,19 @@ extern const struct v850_operand v850_operands[];
 /* The operand has '%' prefix.  */
 #define V850_OPERAND_PERCENT	0x200000
 
-/* This operand is a cache oparation.  */
+/* This operand is a cache operation.  */
 #define V850_OPERAND_CACHEOP	0x400000
 
-/* This operand is a prefetch oparation.  */
+/* This operand is a prefetch operation.  */
 #define V850_OPERAND_PREFOP	0x800000
 
 /* A PC-relative displacement where a positive value indicates a backwards displacement.  */
 #define V850_INVERSE_PCREL	0x1000000
 
 extern int v850_msg_is_out_of_range (const char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* V850_H */

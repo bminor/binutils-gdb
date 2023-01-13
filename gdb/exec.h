@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "target.h"
 #include "progspace.h"
 #include "memrange.h"
+#include "symfile-add-flags.h"
 
 struct target_section;
 struct target_ops;
@@ -42,6 +43,13 @@ extern int build_section_table (struct bfd *, struct target_section **,
 /* Remove all entries from TABLE.  */
 
 extern void clear_section_table (struct target_section_table *table);
+
+/* The current inferior is a child vforked and its program space is
+   shared with its parent.  This pushes the exec target on the
+   current/child inferior's target stack if there are sections in the
+   program space's section table.  */
+
+extern void exec_on_vfork ();
 
 /* Read from mappable read-only sections of BFD executable files.
    Return TARGET_XFER_OK, if read is successful.  Return
@@ -113,4 +121,11 @@ extern void print_section_info (struct target_section_table *table,
 
 extern void exec_close (void);
 
+/* Helper function that attempts to open the symbol file at EXEC_FILE_HOST.
+   If successful, it proceeds to add the symbol file as the main symbol file.
+
+   ADD_FLAGS is passed on to the function adding the symbol file.  */
+extern void try_open_exec_file (const char *exec_file_host,
+				struct inferior *inf,
+				symfile_add_flags add_flags);
 #endif

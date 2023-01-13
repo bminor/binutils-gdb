@@ -1,6 +1,6 @@
 /* MI Command Set for GDB, the GNU debugger.
 
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_CMDS_H
-#define MI_CMDS_H
+#ifndef MI_MI_CMDS_H
+#define MI_MI_CMDS_H
 
 enum print_values {
    PRINT_NO_VALUES,
@@ -28,7 +28,7 @@ enum print_values {
    PRINT_SIMPLE_VALUES
 };
 
-typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
+typedef void (mi_cmd_argv_ftype) (const char *command, char **argv, int argc);
 
 /* Declarations of the functions implementing each command.  */
 
@@ -41,8 +41,12 @@ extern mi_cmd_argv_ftype mi_cmd_break_passcount;
 extern mi_cmd_argv_ftype mi_cmd_break_watch;
 extern mi_cmd_argv_ftype mi_cmd_catch_assert;
 extern mi_cmd_argv_ftype mi_cmd_catch_exception;
+extern mi_cmd_argv_ftype mi_cmd_catch_handlers;
 extern mi_cmd_argv_ftype mi_cmd_catch_load;
 extern mi_cmd_argv_ftype mi_cmd_catch_unload;
+extern mi_cmd_argv_ftype mi_cmd_catch_throw;
+extern mi_cmd_argv_ftype mi_cmd_catch_rethrow;
+extern mi_cmd_argv_ftype mi_cmd_catch_catch;
 extern mi_cmd_argv_ftype mi_cmd_disassemble;
 extern mi_cmd_argv_ftype mi_cmd_data_evaluate_expression;
 extern mi_cmd_argv_ftype mi_cmd_data_list_register_names;
@@ -70,6 +74,7 @@ extern mi_cmd_argv_ftype mi_cmd_exec_step;
 extern mi_cmd_argv_ftype mi_cmd_exec_step_instruction;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_file;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_files;
+extern mi_cmd_argv_ftype mi_cmd_file_list_shared_libraries;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_set;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_show;
@@ -89,10 +94,17 @@ extern mi_cmd_argv_ftype mi_cmd_stack_list_locals;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_variables;
 extern mi_cmd_argv_ftype mi_cmd_stack_select_frame;
 extern mi_cmd_argv_ftype mi_cmd_symbol_list_lines;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_functions;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_module_functions;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_module_variables;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_modules;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_types;
+extern mi_cmd_argv_ftype mi_cmd_symbol_info_variables;
 extern mi_cmd_argv_ftype mi_cmd_target_detach;
 extern mi_cmd_argv_ftype mi_cmd_target_file_get;
 extern mi_cmd_argv_ftype mi_cmd_target_file_put;
 extern mi_cmd_argv_ftype mi_cmd_target_file_delete;
+extern mi_cmd_argv_ftype mi_cmd_target_flash_erase;
 extern mi_cmd_argv_ftype mi_cmd_thread_info;
 extern mi_cmd_argv_ftype mi_cmd_thread_list_ids;
 extern mi_cmd_argv_ftype mi_cmd_thread_select;
@@ -122,6 +134,7 @@ extern mi_cmd_argv_ftype mi_cmd_var_update;
 extern mi_cmd_argv_ftype mi_cmd_enable_pretty_printing;
 extern mi_cmd_argv_ftype mi_cmd_enable_frame_filters;
 extern mi_cmd_argv_ftype mi_cmd_var_set_update_range;
+extern mi_cmd_argv_ftype mi_cmd_complete;
 
 /* Description of a single command.  */
 
@@ -157,9 +170,6 @@ extern struct mi_cmd *mi_lookup (const char *command);
 /* Debug flag */
 extern int mi_debug_p;
 
-/* Raw console output - FIXME: should this be a parameter? */
-extern struct ui_file *raw_stdout;
-
 extern void mi_execute_command (const char *cmd, int from_tty);
 
-#endif
+#endif /* MI_MI_CMDS_H */

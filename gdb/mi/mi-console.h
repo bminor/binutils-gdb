@@ -1,5 +1,5 @@
 /* MI Command Set - MI Console.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -17,14 +17,42 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_CONSOLE_H
-#define MI_CONSOLE_H
+#ifndef MI_MI_CONSOLE_H
+#define MI_MI_CONSOLE_H
 
-extern struct ui_file *mi_console_file_new (struct ui_file *raw,
-					    const char *prefix,
-					    char quote);
+/* An output stream for MI.  Wraps a given output stream with a prefix
+   and handles quoting.  This stream is locally buffered.  */
 
-extern void mi_console_set_raw (struct ui_file *console,
-				struct ui_file *raw);
+class mi_console_file : public ui_file
+{
+public:
+  /* Create a console that wraps the given output stream RAW with the
+     string PREFIX and quoting it with QUOTE.  */
+  mi_console_file (ui_file *raw, const char *prefix, char quote);
 
-#endif
+  /* MI-specific API.  */
+  void set_raw (ui_file *raw);
+
+  /* ui_file-specific methods.  */
+
+  void flush () override;
+
+  void write (const char *buf, long length_buf) override;
+
+  void write_async_safe (const char *buf, long length_buf) override;
+
+private:
+  /* The wrapped raw output stream.  */
+  ui_file *m_raw;
+
+  /* The local buffer.  */
+  string_file m_buffer;
+
+  /* The prefix.  */
+  const char *m_prefix;
+
+  /* The quote char.  */
+  char m_quote;
+};
+
+#endif /* MI_MI_CONSOLE_H */

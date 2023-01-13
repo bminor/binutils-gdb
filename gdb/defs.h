@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,16 @@
 #  error gdbserver should not include gdb/defs.h
 #endif
 
-#include "common-defs.h"
+#include "gdbsupport/common-defs.h"
+
+#undef PACKAGE
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+
+#include <config.h>
+#include "bfd.h"
 
 #include <sys/types.h>
 #include <limits.h>
@@ -52,7 +61,8 @@
 
 #include "ui-file.h"
 
-#include "host-defs.h"
+#include "gdbsupport/host-defs.h"
+#include "gdbsupport/enum-flags.h"
 
 /* Scope types enumerator.  List the types of scopes the compiler will
    accept.  */
@@ -81,6 +91,11 @@ enum compile_i_scope_types
     COMPILE_I_PRINT_VALUE_SCOPE,
   };
 
+
+template<typename T>
+using RequireLongest = gdb::Requires<gdb::Or<std::is_same<T, LONGEST>,
+					     std::is_same<T, ULONGEST>>>;
+
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET
@@ -102,13 +117,6 @@ enum compile_i_scope_types
 
 #include "hashtab.h"
 
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
 /* * Enable dbx commands if set.  */
 extern int dbx_commands;
 
@@ -116,36 +124,58 @@ extern int dbx_commands;
 extern char *gdb_sysroot;
 
 /* * GDB datadir, used to store data files.  */
-extern char *gdb_datadir;
+extern std::string gdb_datadir;
 
-/* * If non-NULL, the possibly relocated path to python's "lib" directory
+/* * If not empty, the possibly relocated path to python's "lib" directory
    specified with --with-python.  */
-extern char *python_libdir;
+extern std::string python_libdir;
 
 /* * Search path for separate debug files.  */
 extern char *debug_file_directory;
 
-/* GDB has two methods for handling SIGINT.  When immediate_quit is
-   nonzero, a SIGINT results in an immediate longjmp out of the signal
-   handler.  Otherwise, SIGINT simply sets a flag; code that might
-   take a long time, and which ought to be interruptible, checks this
-   flag using the QUIT macro.
+/* GDB's SIGINT handler basically sets a flag; code that might take a
+   long time before it gets back to the event loop, and which ought to
+   be interruptible, checks this flag using the QUIT macro, which, if
+   GDB has the terminal, throws a quit exception.
+
+   In addition to setting a flag, the SIGINT handler also marks a
+   select/poll-able file descriptor as read-ready.  That is used by
+   interruptible_select in order to support interrupting blocking I/O
+   in a race-free manner.
 
    These functions use the extension_language_ops API to allow extension
    language(s) and GDB SIGINT handling to coexist seamlessly.  */
 
-/* * Clear the quit flag.  */
-extern void clear_quit_flag (void);
 /* * Evaluate to non-zero if the quit flag is set, zero otherwise.  This
    will clear the quit flag as a side effect.  */
 extern int check_quit_flag (void);
 /* * Set the quit flag.  */
 extern void set_quit_flag (void);
 
+/* The current quit handler (and its type).  This is called from the
+   QUIT macro.  See default_quit_handler below for default behavior.
+   Parts of GDB temporarily override this to e.g., completely suppress
+   Ctrl-C because it would not be safe to throw.  E.g., normally, you
+   wouldn't want to quit between a RSP command and its response, as
+   that would break the communication with the target, but you may
+   still want to intercept the Ctrl-C and offer to disconnect if the
+   user presses Ctrl-C multiple times while the target is stuck
+   waiting for the wedged remote stub.  */
+typedef void (quit_handler_ftype) (void);
+extern quit_handler_ftype *quit_handler;
+
+/* The default quit handler.  Checks whether Ctrl-C was pressed, and
+   if so:
+
+     - If GDB owns the terminal, throws a quit exception.
+
+     - If GDB does not own the terminal, forwards the Ctrl-C to the
+       target.
+*/
+extern void default_quit_handler (void);
+
 /* Flag that function quit should call quit_force.  */
 extern volatile int sync_quit_force_run;
-
-extern int immediate_quit;
 
 extern void quit (void);
 
@@ -153,34 +183,49 @@ extern void quit (void);
 
 extern void maybe_quit (void);
 
-/* Check whether a Ctrl-C was typed, and if so, call quit.  The target
-   is given a chance to process the Ctrl-C.  E.g., it may detect that
-   repeated Ctrl-C requests were issued, and choose to close the
-   connection.  */
+/* Check whether a Ctrl-C was typed, and if so, call the current quit
+   handler.  */
 #define QUIT maybe_quit ()
+
+/* Set the serial event associated with the quit flag.  */
+extern void quit_serial_event_set (void);
+
+/* Clear the serial event associated with the quit flag.  */
+extern void quit_serial_event_clear (void);
 
 /* * Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't
    be forward declared to satisfy opaque references before their
-   actual definition, needs to be here.  */
+   actual definition, needs to be here.
+
+   The constants here are in priority order.  In particular,
+   demangling is attempted according to this order.
+
+   Note that there's ambiguity between the mangling schemes of some of
+   these languages, so some symbols could be successfully demangled by
+   several languages.  For that reason, the constants here are sorted
+   in the order we'll attempt demangling them.  For example: Rust uses
+   C++ mangling, so must come after C++; Ada must come last (see
+   ada_sniff_from_mangled_name).  (Keep this order in sync with the
+   'languages' array in language.c.)  */
 
 enum language
   {
     language_unknown,		/* Language not known */
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
+    language_objc,		/* Objective-C */
     language_cplus,		/* C++ */
     language_d,			/* D */
     language_go,		/* Go */
-    language_objc,		/* Objective-C */
-    language_java,		/* Java */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
     language_pascal,		/* Pascal */
-    language_ada,		/* Ada */
     language_opencl,		/* OpenCL */
+    language_rust,		/* Rust */
     language_minimal,		/* All other languages, minimal support only */
+    language_ada,		/* Ada */
     nr_languages
   };
 
@@ -246,7 +291,7 @@ struct value;
 
 /* This really belong in utils.c (path-utils.c?), but it references some
    globals that are currently only available to main.c.  */
-extern char *relocate_gdb_directory (const char *initial, int flag);
+extern std::string relocate_gdb_directory (const char *initial, bool relocatable);
 
 
 /* Annotation stuff.  */
@@ -262,24 +307,7 @@ EXTERN_C char *re_comp (const char *);
 
 /* From symfile.c */
 
-extern void symbol_file_command (char *, int);
-
-/* * Remote targets may wish to use this as their load function.  */
-extern void generic_load (const char *name, int from_tty);
-
-/* * Report on STREAM the performance of memory transfer operation,
-   such as 'load'.
-   @param DATA_COUNT is the number of bytes transferred.
-   @param WRITE_COUNT is the number of separate write operations, or 0,
-   if that information is not available.
-   @param START_TIME is the time at which an operation was started.
-   @param END_TIME is the time at which an operation ended.  */
-struct timeval;
-extern void print_transfer_performance (struct ui_file *stream,
-					unsigned long data_count,
-					unsigned long write_count,
-					const struct timeval *start_time,
-					const struct timeval *end_time);
+extern void symbol_file_command (const char *, int);
 
 /* From top.c */
 
@@ -287,53 +315,26 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (const char *, int, char *);
+extern const char *command_line_input (const char *, const char *);
 
 extern void print_prompt (void);
 
-extern int input_from_terminal_p (void);
+struct ui;
 
-extern int info_verbose;
+extern int input_interactive_p (struct ui *);
+
+extern bool info_verbose;
 
 /* From printcmd.c */
 
 extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
 extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
-				   struct ui_file *, int, char *);
-
-extern int build_address_symbolic (struct gdbarch *,
-				   CORE_ADDR addr,
-				   int do_demangle, 
-				   char **name, 
-				   int *offset, 
-				   char **filename, 
-				   int *line, 	
-				   int *unmapped);
+				   struct ui_file *, int,
+				   const char *);
 
 extern void print_address (struct gdbarch *, CORE_ADDR, struct ui_file *);
 extern const char *pc_prefix (CORE_ADDR);
-
-/* From source.c */
-
-/* See openp function definition for their description.  */
-#define OPF_TRY_CWD_FIRST     0x01
-#define OPF_SEARCH_IN_PATH    0x02
-#define OPF_RETURN_REALPATH   0x04
-
-extern int openp (const char *, int, const char *, int, char **);
-
-extern int source_full_path_of (const char *, char **);
-
-extern void mod_path (char *, char **);
-
-extern void add_path (char *, char **, int);
-
-extern void directory_switch (char *, int);
-
-extern char *source_path;
-
-extern void init_source_path (void);
 
 /* From exec.c */
 
@@ -369,66 +370,6 @@ enum lval_type
     lval_computed
   };
 
-/* * Control types for commands.  */
-
-enum misc_command_type
-  {
-    ok_command,
-    end_command,
-    else_command,
-    nop_command
-  };
-
-enum command_control_type
-  {
-    simple_control,
-    break_control,
-    continue_control,
-    while_control,
-    if_control,
-    commands_control,
-    python_control,
-    compile_control,
-    guile_control,
-    while_stepping_control,
-    invalid_control
-  };
-
-/* * Structure for saved commands lines (for breakpoints, defined
-   commands, etc).  */
-
-struct command_line
-  {
-    struct command_line *next;
-    char *line;
-    enum command_control_type control_type;
-    union
-      {
-	struct
-	  {
-	    enum compile_i_scope_types scope;
-	    void *scope_data;
-	  }
-	compile;
-      }
-    control_u;
-    /* * The number of elements in body_list.  */
-    int body_count;
-    /* * For composite commands, the nested lists of commands.  For
-       example, for "if" command this will contain the then branch and
-       the else branch, if that is available.  */
-    struct command_line **body_list;
-  };
-
-extern struct command_line *read_command_lines (char *, int, int,
-						void (*)(char *, void *),
-						void *);
-extern struct command_line *read_command_lines_1 (char * (*) (void), int,
-						  void (*)(char *, void *),
-						  void *);
-
-extern void free_command_lines (struct command_line **);
-
 /* * Parameters of the "info proc" command.  */
 
 enum info_proc_what
@@ -454,13 +395,12 @@ enum info_proc_what
     /* * Display `info proc cwd'.  */
     IP_CWD,
 
+    /* * Display `info proc files'.  */
+    IP_FILES,
+
     /* * Display all of the above.  */
     IP_ALL
   };
-
-/* * String containing the current directory (what getwd would return).  */
-
-extern char *current_directory;
 
 /* * Default radixes for input and output.  Only some values supported.  */
 extern unsigned input_radix;
@@ -542,24 +482,18 @@ extern int longest_to_int (LONGEST);
    table in osabi.c.  */
 enum gdb_osabi
 {
-  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
-
   GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+  GDB_OSABI_NONE,
 
   GDB_OSABI_SVR4,
   GDB_OSABI_HURD,
   GDB_OSABI_SOLARIS,
   GDB_OSABI_LINUX,
-  GDB_OSABI_FREEBSD_AOUT,
-  GDB_OSABI_FREEBSD_ELF,
-  GDB_OSABI_NETBSD_AOUT,
-  GDB_OSABI_NETBSD_ELF,
-  GDB_OSABI_OPENBSD_ELF,
+  GDB_OSABI_FREEBSD,
+  GDB_OSABI_NETBSD,
+  GDB_OSABI_OPENBSD,
   GDB_OSABI_WINCE,
   GDB_OSABI_GO32,
-  GDB_OSABI_IRIX,
-  GDB_OSABI_HPUX_ELF,
-  GDB_OSABI_HPUX_SOM,
   GDB_OSABI_QNXNTO,
   GDB_OSABI_CYGWIN,
   GDB_OSABI_AIX,
@@ -570,35 +504,48 @@ enum gdb_osabi
   GDB_OSABI_LYNXOS178,
   GDB_OSABI_NEWLIB,
   GDB_OSABI_SDE,
+  GDB_OSABI_PIKEOS,
 
   GDB_OSABI_INVALID		/* keep this last */
 };
 
-/* Global functions from other, non-gdb GNU thingies.
-   Libiberty thingies are no longer declared here.  We include libiberty.h
-   above, instead.  */
+/* Enumerate the requirements a symbol has in order to be evaluated.
+   These are listed in order of "strength" -- a later entry subsumes
+   earlier ones.  This fine-grained distinction is important because
+   it allows for the evaluation of a TLS symbol during unwinding --
+   when unwinding one has access to registers, but not the frame
+   itself, because that is being constructed.  */
 
-/* From other system libraries */
+enum symbol_needs_kind
+{
+  /* No special requirements -- just memory.  */
+  SYMBOL_NEEDS_NONE,
 
-#ifndef atof
-extern double atof (const char *);	/* X3.159-1989  4.10.1.1 */
-#endif
+  /* The symbol needs registers.  */
+  SYMBOL_NEEDS_REGISTERS,
 
-/* Dynamic target-system-dependent parameters for GDB.  */
-#include "gdbarch.h"
-
-/* * Maximum size of a register.  Something small, but large enough for
-   all known ISAs.  If it turns out to be too small, make it bigger.  */
-
-enum { MAX_REGISTER_SIZE = 64 };
+  /* The symbol needs a frame.  */
+  SYMBOL_NEEDS_FRAME
+};
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (const gdb_byte *, int,
-				       enum bfd_endian);
+template<typename T, typename = RequireLongest<T>>
+T extract_integer (const gdb_byte *addr, int len, enum bfd_endian byte_order);
 
-extern ULONGEST extract_unsigned_integer (const gdb_byte *, int,
-					  enum bfd_endian);
+static inline LONGEST
+extract_signed_integer (const gdb_byte *addr, int len,
+			enum bfd_endian byte_order)
+{
+  return extract_integer<LONGEST> (addr, len, byte_order);
+}
+
+static inline ULONGEST
+extract_unsigned_integer (const gdb_byte *addr, int len,
+			  enum bfd_endian byte_order)
+{
+  return extract_integer<ULONGEST> (addr, len, byte_order);
+}
 
 extern int extract_long_unsigned_integer (const gdb_byte *, int,
 					  enum bfd_endian, LONGEST *);
@@ -606,24 +553,35 @@ extern int extract_long_unsigned_integer (const gdb_byte *, int,
 extern CORE_ADDR extract_typed_address (const gdb_byte *buf,
 					struct type *type);
 
-extern void store_signed_integer (gdb_byte *, int,
-				  enum bfd_endian, LONGEST);
+/* All 'store' functions accept a host-format integer and store a
+   target-format integer at ADDR which is LEN bytes long.  */
 
-extern void store_unsigned_integer (gdb_byte *, int,
-				    enum bfd_endian, ULONGEST);
+template<typename T, typename = RequireLongest<T>>
+extern void store_integer (gdb_byte *addr, int len, enum bfd_endian byte_order,
+			   T val);
+
+static inline void
+store_signed_integer (gdb_byte *addr, int len,
+		      enum bfd_endian byte_order, LONGEST val)
+{
+  return store_integer (addr, len, byte_order, val);
+}
+
+static inline void
+store_unsigned_integer (gdb_byte *addr, int len,
+			enum bfd_endian byte_order, ULONGEST val)
+{
+  return store_integer (addr, len, byte_order, val);
+}
 
 extern void store_typed_address (gdb_byte *buf, struct type *type,
 				 CORE_ADDR addr);
 
-
-/* From valops.c */
-
-extern int watchdog;
+extern void copy_integer_to_size (gdb_byte *dest, int dest_size,
+				  const gdb_byte *source, int source_size,
+				  bool is_signed, enum bfd_endian byte_order);
 
 /* Hooks for alternate command interfaces.  */
-
-/* * The name of the interpreter if specified on the command line.  */
-extern char *interpreter_p;
 
 struct target_waitstatus;
 struct cmd_list_element;
@@ -645,8 +603,7 @@ extern int (*deprecated_query_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_warning_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
-extern void (*deprecated_interactive_hook) (void);
-extern void (*deprecated_readline_begin_hook) (char *, ...)
+extern void (*deprecated_readline_begin_hook) (const char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);
@@ -658,7 +615,7 @@ extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);
 extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
-					     char *cmd, int from_tty);
+					     const char *cmd, int from_tty);
 
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);
@@ -685,6 +642,21 @@ enum block_enum
   STATIC_BLOCK = 1,
   FIRST_LOCAL_BLOCK = 2
 };
+
+/* User selection used in observable.h and multiple print functions.  */
+
+enum user_selected_what_flag
+  {
+    /* Inferior selected.  */
+    USER_SELECTED_INFERIOR = 1 << 1,
+
+    /* Thread selected.  */
+    USER_SELECTED_THREAD = 1 << 2,
+
+    /* Frame selected.  */
+    USER_SELECTED_FRAME = 1 << 3
+  };
+DEF_ENUM_FLAGS_TYPE (enum user_selected_what_flag, user_selected_what);
 
 #include "utils.h"
 

@@ -1,5 +1,5 @@
 /* Print DEC PDP-11 instructions.
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -19,7 +19,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/pdp11.h"
 
 #define AFTER_INSTRUCTION	"\t"
@@ -31,8 +31,7 @@
 #define F	info->stream
 
 /* Sign-extend a 16-bit number in an int.  */
-#define SIGN_BITS	(8 * sizeof (int) - 16)
-#define sign_extend(x) (((x) << SIGN_BITS) >> SIGN_BITS)
+#define sign_extend(x) ((((x) & 0xffff) ^ 0x8000) - 0x8000)
 
 static int
 read_word (bfd_vma memaddr, int *word, disassemble_info *info)

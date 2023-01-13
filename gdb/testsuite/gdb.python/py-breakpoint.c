@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2010-2016 Free Software Foundation, Inc.
+   Copyright 2010-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,19 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see  <http://www.gnu.org/licenses/>.  */
 
+#ifdef USE_PROBES
+#include <sys/sdt.h>
+#endif
+
 int result = 0;
+
+namespace foo_ns
+{
+  int multiply (int i)
+  {
+    return i * i;
+  }
+}
 
 int multiply (int i)
 {
@@ -24,7 +36,7 @@ int multiply (int i)
 
 int add (int i)
 {
-  return i + i; 
+  return i + i;  /* Break at function add.  */
 }
 
 
@@ -38,6 +50,9 @@ int main (int argc, char *argv[])
     {
       result += multiply (foo);  /* Break at multiply. */
       result += add (bar); /* Break at add. */
+#ifdef USE_PROBES
+      DTRACE_PROBE1 (test, result_updated, result);
+#endif
     }
 
   return 0; /* Break at end. */

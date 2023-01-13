@@ -1,6 +1,6 @@
 /* Generic serial interface routines
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,18 +23,13 @@
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
 
-extern void _initialize_serial (void);
-
 /* Is serial being debugged?  */
 
 static unsigned int global_serial_debug_p;
 
-typedef const struct serial_ops *serial_ops_p;
-DEF_VEC_P (serial_ops_p);
-
 /* Serial I/O handlers.  */
 
-VEC (serial_ops_p) *serial_ops_list = NULL;
+static std::vector<const struct serial_ops *> serial_ops_list;
 
 /* Pointer to list of scb's.  */
 
@@ -148,10 +143,7 @@ serial_log_command (struct target_ops *self, const char *cmd)
 static const struct serial_ops *
 serial_interface_lookup (const char *name)
 {
-  const struct serial_ops *ops;
-  int i;
-
-  for (i = 0; VEC_iterate (serial_ops_p, serial_ops_list, i, ops); ++i)
+  for (const serial_ops *ops : serial_ops_list)
     if (strcmp (name, ops->name) == 0)
       return ops;
 
@@ -161,7 +153,7 @@ serial_interface_lookup (const char *name)
 void
 serial_add_interface (const struct serial_ops *optable)
 {
-  VEC_safe_push (serial_ops_p, serial_ops_list, optable);
+  serial_ops_list.push_back (optable);
 }
 
 /* Return the open serial device for FD, if found, or NULL if FD is
@@ -179,25 +171,41 @@ serial_for_fd (int fd)
   return NULL;
 }
 
+/* Create a new serial for OPS.  */
+
+static struct serial *
+new_serial (const struct serial_ops *ops)
+{
+  struct serial *scb;
+
+  scb = XCNEW (struct serial);
+
+  scb->ops = ops;
+
+  scb->bufp = scb->buf;
+  scb->error_fd = -1;
+  scb->refcnt = 1;
+
+  return scb;
+}
+
+static struct serial *serial_open_ops_1 (const struct serial_ops *ops,
+					 const char *open_name);
+
 /* Open up a device or a network socket, depending upon the syntax of NAME.  */
 
 struct serial *
 serial_open (const char *name)
 {
-  struct serial *scb;
   const struct serial_ops *ops;
   const char *open_name = name;
 
-  if (strcmp (name, "pc") == 0)
-    ops = serial_interface_lookup ("pc");
-  else if (startswith (name, "lpt"))
-    ops = serial_interface_lookup ("parallel");
-  else if (startswith (name, "|"))
+  if (startswith (name, "|"))
     {
       ops = serial_interface_lookup ("pipe");
       /* Discard ``|'' and any space before the command itself.  */
       ++open_name;
-      open_name = skip_spaces_const (open_name);
+      open_name = skip_spaces (open_name);
     }
   /* Check for a colon, suggesting an IP address/port pair.
      Do this *after* checking for all the interesting prefixes.  We
@@ -205,19 +213,32 @@ serial_open (const char *name)
   else if (strchr (name, ':'))
     ops = serial_interface_lookup ("tcp");
   else
-    ops = serial_interface_lookup ("hardwire");
+    {
+#ifndef USE_WIN32API
+      /* Check to see if name is a socket.  If it is, then treat it
+         as such.  Otherwise assume that it's a character device.  */
+      struct stat sb;
+      if (stat (name, &sb) == 0 && (sb.st_mode & S_IFMT) == S_IFSOCK)
+	ops = serial_interface_lookup ("local");
+      else
+#endif
+	ops = serial_interface_lookup ("hardwire");
+    }
 
   if (!ops)
     return NULL;
 
-  scb = XNEW (struct serial);
+  return serial_open_ops_1 (ops, open_name);
+}
 
-  scb->ops = ops;
+/* Open up a serial for OPS, passing OPEN_NAME to the open method.  */
 
-  scb->bufcnt = 0;
-  scb->bufp = scb->buf;
-  scb->error_fd = -1;
-  scb->refcnt = 1;
+static struct serial *
+serial_open_ops_1 (const struct serial_ops *ops, const char *open_name)
+{
+  struct serial *scb;
+
+  scb = new_serial (ops);
 
   /* `...->open (...)' would get expanded by the open(2) syscall macro.  */
   if ((*scb->ops->open) (scb, open_name))
@@ -226,22 +247,29 @@ serial_open (const char *name)
       return NULL;
     }
 
-  scb->name = xstrdup (name);
+  scb->name = open_name != NULL ? xstrdup (open_name) : NULL;
   scb->next = scb_base;
-  scb->debug_p = 0;
-  scb->async_state = 0;
-  scb->async_handler = NULL;
-  scb->async_context = NULL;
   scb_base = scb;
 
   if (serial_logfile != NULL)
     {
-      serial_logfp = gdb_fopen (serial_logfile, "w");
-      if (serial_logfp == NULL)
+      stdio_file_up file (new stdio_file ());
+
+      if (!file->open (serial_logfile, "w"))
 	perror_with_name (serial_logfile);
+
+      serial_logfp = file.release ();
     }
 
   return scb;
+}
+
+/* See serial.h.  */
+
+struct serial *
+serial_open_ops (const struct serial_ops *ops)
+{
+  return serial_open_ops_1 (ops, NULL);
 }
 
 /* Open a new serial stream using a file handle, using serial
@@ -262,21 +290,10 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
   if (!ops)
     return NULL;
 
-  scb = XCNEW (struct serial);
-
-  scb->ops = ops;
-
-  scb->bufcnt = 0;
-  scb->bufp = scb->buf;
-  scb->error_fd = -1;
-  scb->refcnt = 1;
+  scb = new_serial (ops);
 
   scb->name = NULL;
   scb->next = scb_base;
-  scb->debug_p = 0;
-  scb->async_state = 0;
-  scb->async_handler = NULL;
-  scb->async_context = NULL;
   scb_base = scb;
 
   if ((ops->fdopen) != NULL)
@@ -304,7 +321,7 @@ do_serial_close (struct serial *scb, int really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr?  */
-      ui_file_delete (serial_logfp);
+      delete serial_logfp;
       serial_logfp = NULL;
     }
 
@@ -315,8 +332,7 @@ do_serial_close (struct serial *scb, int really_close)
   if (really_close)
     scb->ops->close (scb);
 
-  if (scb->name)
-    xfree (scb->name);
+  xfree (scb->name);
 
   /* For serial_is_open.  */
   scb->bufp = NULL;
@@ -432,16 +448,14 @@ serial_write (struct serial *scb, const void *buf, size_t count)
 }
 
 void
-serial_printf (struct serial *desc, const char *format,...)
+serial_printf (struct serial *desc, const char *format, ...)
 {
   va_list args;
-  char *buf;
   va_start (args, format);
 
-  buf = xstrvprintf (format, args);
-  serial_write (desc, buf, strlen (buf));
+  std::string buf = string_vprintf (format, args);
+  serial_write (desc, buf.c_str (), buf.length ());
 
-  xfree (buf);
   va_end (args);
 }
 
@@ -502,14 +516,6 @@ serial_print_tty_state (struct serial *scb,
 			struct ui_file *stream)
 {
   scb->ops->print_tty_state (scb, ttystate, stream);
-}
-
-int
-serial_noflush_set_tty_state (struct serial *scb,
-			      serial_ttystate new_ttystate,
-			      serial_ttystate old_ttystate)
-{
-  return scb->ops->noflush_set_tty_state (scb, new_ttystate, old_ttystate);
 }
 
 int
@@ -618,7 +624,7 @@ static struct cmd_list_element *serial_set_cmdlist;
 static struct cmd_list_element *serial_show_cmdlist;
 
 static void
-serial_set_cmd (char *args, int from_tty)
+serial_set_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"set serial\" must be followed "
 		     "by the name of a command.\n");
@@ -626,7 +632,7 @@ serial_set_cmd (char *args, int from_tty)
 }
 
 static void
-serial_show_cmd (char *args, int from_tty)
+serial_show_cmd (const char *args, int from_tty)
 {
   cmd_show_list (serial_show_cmdlist, from_tty, "");
 }
@@ -660,7 +666,7 @@ static const char *parity = parity_none;
 /* Set serial_parity value.  */
 
 static void
-set_parity (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_parity (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   if (parity == parity_odd)
     serial_parity = GDBPARITY_ODD;
@@ -670,8 +676,9 @@ set_parity (char *ignore_args, int from_tty, struct cmd_list_element *c)
     serial_parity = GDBPARITY_NONE;
 }
 
+void _initialize_serial ();
 void
-_initialize_serial (void)
+_initialize_serial ()
 {
 #if 0
   add_com ("connect", class_obscure, connect_command, _("\
@@ -704,8 +711,8 @@ using remote targets."),
 
   add_setshow_enum_cmd ("parity", no_class, parity_enums,
                         &parity, _("\
-Set parity for remote serial I/O"), _("\
-Show parity for remote serial I/O"), NULL,
+Set parity for remote serial I/O."), _("\
+Show parity for remote serial I/O."), NULL,
                         set_parity,
                         NULL, /* FIXME: i18n: */
                         &serial_set_cmdlist, &serial_show_cmdlist);
@@ -721,8 +728,8 @@ by gdbserver."),
 
   add_setshow_enum_cmd ("remotelogbase", no_class, logbase_enums,
 			&serial_logbase, _("\
-Set numerical base for remote session logging"), _("\
-Show numerical base for remote session logging"), NULL,
+Set numerical base for remote session logging."), _("\
+Show numerical base for remote session logging."), NULL,
 			NULL,
 			NULL, /* FIXME: i18n: */
 			&setlist, &showlist);

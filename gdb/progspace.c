@@ -1,6 +1,6 @@
 /* Program and address space management, for GDB, the GNU debugger.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,10 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 #include "solib.h"
+#include "solist.h"
 #include "gdbthread.h"
+#include "inferior.h"
+#include <algorithm>
 
 /* The last program space number assigned.  */
 int last_program_space_num = 0;
@@ -43,18 +46,6 @@ static int highest_address_space_num;
    modules.  */
 
 DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
-
-/* An address space.  It is used for comparing if pspaces/inferior/threads
-   see the same address space and for associating caches to each address
-   space.  */
-
-struct address_space
-{
-  int num;
-
-  /* Per aspace data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS;
-};
 
 /* Keep a registry of per-address_space data-pointers required by other GDB
    modules.  */
@@ -121,30 +112,21 @@ init_address_spaces (void)
 /* Adds a new empty program space to the program space list, and binds
    it to ASPACE.  Returns the pointer to the new object.  */
 
-struct program_space *
-add_program_space (struct address_space *aspace)
+program_space::program_space (address_space *aspace_)
+: num (++last_program_space_num), aspace (aspace_)
 {
-  struct program_space *pspace;
-
-  pspace = XCNEW (struct program_space);
-
-  pspace->num = ++last_program_space_num;
-  pspace->aspace = aspace;
-
-  program_space_alloc_data (pspace);
+  program_space_alloc_data (this);
 
   if (program_spaces == NULL)
-    program_spaces = pspace;
+    program_spaces = this;
   else
     {
       struct program_space *last;
 
       for (last = program_spaces; last->next != NULL; last = last->next)
 	;
-      last->next = pspace;
+      last->next = this;
     }
-
-  return pspace;
 }
 
 /* Releases program space PSPACE, and all its contents (shared
@@ -153,28 +135,79 @@ add_program_space (struct address_space *aspace)
    is the current program space, since there should always be a
    program space.  */
 
-static void
-release_program_space (struct program_space *pspace)
+program_space::~program_space ()
 {
-  struct cleanup *old_chain = save_current_program_space ();
+  gdb_assert (this != current_program_space);
 
-  gdb_assert (pspace != current_program_space);
+  scoped_restore_current_program_space restore_pspace;
 
-  set_current_program_space (pspace);
+  set_current_program_space (this);
 
-  breakpoint_program_space_exit (pspace);
+  breakpoint_program_space_exit (this);
   no_shared_libraries (NULL, 0);
   exec_close ();
   free_all_objfiles ();
+  /* Defer breakpoint re-set because we don't want to create new
+     locations for this pspace which we're tearing down.  */
+  clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
-    free_address_space (pspace->aspace);
-  clear_section_table (&pspace->target_sections);
-  clear_program_space_solib_cache (pspace);
+    free_address_space (this->aspace);
+  clear_section_table (&this->target_sections);
+  clear_program_space_solib_cache (this);
     /* Discard any data modules have associated with the PSPACE.  */
-  program_space_free_data (pspace);
-  xfree (pspace);
+  program_space_free_data (this);
+}
 
-  do_cleanups (old_chain);
+/* See progspace.h.  */
+
+void
+program_space::free_all_objfiles ()
+{
+  struct so_list *so;
+
+  /* Any objfile reference would become stale.  */
+  for (so = master_so_list (); so; so = so->next)
+    gdb_assert (so->objfile == NULL);
+
+  while (!objfiles_list.empty ())
+    objfiles_list.front ()->unlink ();
+}
+
+/* See progspace.h.  */
+
+void
+program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
+			    struct objfile *before)
+{
+  if (before == nullptr)
+    objfiles_list.push_back (std::move (objfile));
+  else
+    {
+      auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
+				[=] (const std::shared_ptr<::objfile> &objf)
+				{
+				  return objf.get () == before;
+				});
+      gdb_assert (iter != objfiles_list.end ());
+      objfiles_list.insert (iter, std::move (objfile));
+    }
+}
+
+/* See progspace.h.  */
+
+void
+program_space::remove_objfile (struct objfile *objfile)
+{
+  auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
+			    [=] (const std::shared_ptr<::objfile> &objf)
+			    {
+			      return objf.get () == objfile;
+			    });
+  gdb_assert (iter != objfiles_list.end ());
+  objfiles_list.erase (iter);
+
+  if (objfile == symfile_object_file)
+    symfile_object_file = NULL;
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
@@ -183,9 +216,7 @@ release_program_space (struct program_space *pspace)
 struct program_space *
 clone_program_space (struct program_space *dest, struct program_space *src)
 {
-  struct cleanup *old_chain;
-
-  old_chain = save_current_program_space ();
+  scoped_restore_current_program_space restore_pspace;
 
   set_current_program_space (dest);
 
@@ -193,9 +224,9 @@ clone_program_space (struct program_space *dest, struct program_space *src)
     exec_file_attach (src->pspace_exec_filename, 0);
 
   if (src->symfile_object_file != NULL)
-    symbol_file_add_main (objfile_name (src->symfile_object_file), 0);
+    symbol_file_add_main (objfile_name (src->symfile_object_file),
+			  SYMFILE_DEFER_BP_RESET);
 
-  do_cleanups (old_chain);
   return dest;
 }
 
@@ -215,30 +246,6 @@ set_current_program_space (struct program_space *pspace)
 
   /* Different symbols change our view of the frame chain.  */
   reinit_frame_cache ();
-}
-
-/* A cleanups callback, helper for save_current_program_space
-   below.  */
-
-static void
-restore_program_space (void *arg)
-{
-  struct program_space *saved_pspace = (struct program_space *) arg;
-
-  set_current_program_space (saved_pspace);
-}
-
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_program_space (void)
-{
-  struct cleanup *old_chain = make_cleanup (restore_program_space,
-					    current_program_space);
-
-  return old_chain;
 }
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
@@ -276,7 +283,7 @@ delete_program_space (struct program_space *pspace)
       ss = *ss_link;
     }
 
-  release_program_space (pspace);
+  delete pspace;
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If
@@ -288,7 +295,6 @@ print_program_space (struct ui_out *uiout, int requested)
 {
   struct program_space *pspace;
   int count = 0;
-  struct cleanup *old_chain;
 
   /* Compute number of pspaces we will print.  */
   ALL_PSPACES (pspace)
@@ -302,34 +308,33 @@ print_program_space (struct ui_out *uiout, int requested)
   /* There should always be at least one.  */
   gdb_assert (count > 0);
 
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 3, count, "pspaces");
-  ui_out_table_header (uiout, 1, ui_left, "current", "");
-  ui_out_table_header (uiout, 4, ui_left, "id", "Id");
-  ui_out_table_header (uiout, 17, ui_left, "exec", "Executable");
-  ui_out_table_body (uiout);
+  ui_out_emit_table table_emitter (uiout, 3, count, "pspaces");
+  uiout->table_header (1, ui_left, "current", "");
+  uiout->table_header (4, ui_left, "id", "Id");
+  uiout->table_header (17, ui_left, "exec", "Executable");
+  uiout->table_body ();
 
   ALL_PSPACES (pspace)
     {
-      struct cleanup *chain2;
       struct inferior *inf;
       int printed_header;
 
       if (requested != -1 && requested != pspace->num)
 	continue;
 
-      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       if (pspace == current_program_space)
-	ui_out_field_string (uiout, "current", "*");
+	uiout->field_string ("current", "*");
       else
-	ui_out_field_skip (uiout, "current");
+	uiout->field_skip ("current");
 
-      ui_out_field_int (uiout, "id", pspace->num);
+      uiout->field_signed ("id", pspace->num);
 
       if (pspace->pspace_exec_filename)
-	ui_out_field_string (uiout, "exec", pspace->pspace_exec_filename);
+	uiout->field_string ("exec", pspace->pspace_exec_filename);
       else
-	ui_out_field_skip (uiout, "exec");
+	uiout->field_skip ("exec");
 
       /* Print extra info that doesn't really fit in tabular form.
 	 Currently, we print the list of inferiors bound to a pspace.
@@ -345,19 +350,16 @@ print_program_space (struct ui_out *uiout, int requested)
 		printed_header = 1;
 		printf_filtered ("\n\tBound inferiors: ID %d (%s)",
 				 inf->num,
-				 target_pid_to_str (pid_to_ptid (inf->pid)));
+				 target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	      }
 	    else
 	      printf_filtered (", ID %d (%s)",
 			       inf->num,
-			       target_pid_to_str (pid_to_ptid (inf->pid)));
+			       target_pid_to_str (ptid_t (inf->pid)).c_str ());
 	  }
 
-      ui_out_text (uiout, "\n");
-      do_cleanups (chain2);
+      uiout->text ("\n");
     }
-
-  do_cleanups (old_chain);
 }
 
 /* Boolean test for an already-known program space id.  */
@@ -379,7 +381,7 @@ valid_program_space_id (int num)
    indicating which the program space to print information about.  */
 
 static void
-maintenance_info_program_spaces_command (char *args, int from_tty)
+maintenance_info_program_spaces_command (const char *args, int from_tty)
 {
   int requested = -1;
 
@@ -449,51 +451,6 @@ update_address_spaces (void)
       inf->aspace = inf->pspace->aspace;
 }
 
-/* Save the current program space so that it may be restored by a later
-   call to do_cleanups.  Returns the struct cleanup pointer needed for
-   later doing the cleanup.  */
-
-struct cleanup *
-save_current_space_and_thread (void)
-{
-  struct cleanup *old_chain;
-
-  /* If restoring to null thread, we need to restore the pspace as
-     well, hence, we need to save the current program space first.  */
-  old_chain = save_current_program_space ();
-  /* There's no need to save the current inferior here.
-     That is handled by make_cleanup_restore_current_thread.  */
-  make_cleanup_restore_current_thread ();
-
-  return old_chain;
-}
-
-/* See progspace.h  */
-
-void
-switch_to_program_space_and_thread (struct program_space *pspace)
-{
-  struct inferior *inf;
-
-  inf = find_inferior_for_program_space (pspace);
-  if (inf != NULL && inf->pid != 0)
-    {
-      struct thread_info *tp;
-
-      tp = any_live_thread_of_process (inf->pid);
-      if (tp != NULL)
-	{
-	  switch_to_thread (tp->ptid);
-	  /* Switching thread switches pspace implicitly.  We're
-	     done.  */
-	  return;
-	}
-    }
-
-  switch_to_thread (null_ptid);
-  set_current_program_space (pspace);
-}
-
 
 
 /* See progspace.h.  */
@@ -501,10 +458,8 @@ switch_to_program_space_and_thread (struct program_space *pspace)
 void
 clear_program_space_solib_cache (struct program_space *pspace)
 {
-  VEC_free (so_list_ptr, pspace->added_solibs);
-
-  free_char_ptr_vec (pspace->deleted_solibs);
-  pspace->deleted_solibs = NULL;
+  pspace->added_solibs.clear ();
+  pspace->deleted_solibs.clear ();
 }
 
 
@@ -524,5 +479,5 @@ initialize_progspace (void)
      modules have done that.  Do this before
      initialize_current_architecture, because that accesses exec_bfd,
      which in turn dereferences current_program_space.  */
-  current_program_space = add_program_space (new_address_space ());
+  current_program_space = new program_space (new_address_space ());
 }

@@ -1,4 +1,4 @@
-# Copyright 2012-2016 Free Software Foundation, Inc.
+# Copyright 2012-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ set executable ${testfile}
 
 # Multiple inferiors are needed, therefore both native and extended gdbserver
 # modes are supported.  Only non-extended gdbserver is not supported.
-if [target_info exists use_gdb_stub] {
-    untested ${testfile}.exp
+if [use_gdb_stub] {
+    untested "using gdb stub"
     return
 }
 
@@ -31,7 +31,7 @@ if [skip_hw_watchpoint_access_tests] {
 }
 
 if { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
@@ -53,7 +53,7 @@ if [support_displaced_stepping] {
 gdb_breakpoint main {temporary}
 gdb_test "run" "Temporary breakpoint.* main .*" "start to main inferior 1"
 
-gdb_test "add-inferior" "Added inferior 2" "add inferior 2"
+gdb_test "add-inferior" "Added inferior 2 on connection .*" "add inferior 2"
 gdb_test "inferior 2" "witching to inferior 2 .*" "switch to inferior 2, first time"
 gdb_load $binfile
 

@@ -1,5 +1,5 @@
 /* tc-m32c.h -- Header file for tc-m32c.c.
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,9 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA. */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #define TC_M32C
 
@@ -28,9 +28,6 @@
 #define TARGET_FORMAT "elf32-m32c"
 
 #define TARGET_BYTES_BIG_ENDIAN 0
-
-#define md_end  m32c_md_end
-extern void m32c_md_end (void);
 
 #define md_start_line_hook m32c_start_line_hook
 extern void m32c_start_line_hook (void);
@@ -85,3 +82,7 @@ extern long md_pcrel_from_section (struct fix *, segT);
 extern int m32c_is_colon_insn (char *, char *);
 
 #define H_TICK_HEX 1
+
+#define NOP_OPCODE (bfd_get_mach (stdoutput) == bfd_mach_m32c ? 0xde : 0x04)
+#define HANDLE_ALIGN(fragP)
+#define MAX_MEM_FOR_RS_ALIGN_CODE 1

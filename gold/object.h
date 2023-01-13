@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -39,6 +39,7 @@ class General_options;
 class Task;
 class Cref;
 class Layout;
+class Kept_section;
 class Output_data;
 class Output_section;
 class Output_section_data;
@@ -372,6 +373,7 @@ struct Compressed_section_info
 {
   section_size_type size;
   elfcpp::Elf_Xword flag;
+  uint64_t addralign;
   const unsigned char* contents;
 };
 typedef std::map<unsigned int, Compressed_section_info> Compressed_section_map;
@@ -807,7 +809,8 @@ class Object
 
   bool
   section_is_compressed(unsigned int shndx,
-			section_size_type* uncompressed_size) const
+			section_size_type* uncompressed_size,
+			elfcpp::Elf_Xword* palign = NULL) const
   {
     if (this->compressed_sections_ == NULL)
       return false;
@@ -817,6 +820,8 @@ class Object
       {
 	if (uncompressed_size != NULL)
 	  *uncompressed_size = p->second.size;
+	if (palign != NULL)
+	  *palign = p->second.addralign;
 	return true;
       }
     return false;
@@ -827,7 +832,7 @@ class Object
   // by the caller.
   const unsigned char*
   decompressed_section_contents(unsigned int shndx, section_size_type* plen,
-				bool* is_cached);
+				bool* is_cached, uint64_t* palign = NULL);
 
   // Discard any buffers of decompressed sections.  This is done
   // at the end of the Add_symbols task.
@@ -2304,7 +2309,17 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // and return its output address.  This is used only for relocations in
   // debugging sections.
   Address
-  map_to_kept_section(unsigned int shndx, bool* found) const;
+  map_to_kept_section(unsigned int shndx, std::string& section_name,
+		      bool* found) const;
+
+  // Look for a kept section corresponding to the given discarded section,
+  // and return its object file.
+  Relobj*
+  find_kept_section_object(unsigned int shndx, unsigned int* symndx_p) const;
+
+  // Return the name of symbol SYMNDX.
+  const char*
+  get_symbol_name(unsigned int symndx);
 
   // Compute final local symbol value.  R_SYM is the local symbol index.
   // LV_IN points to a local symbol value containing the input value.
@@ -2562,6 +2577,13 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 		       const unsigned char* pshdrs, Output_file* of,
 		       Views* pviews);
 
+  // Relocate section data for a range of sections.
+  void
+  relocate_section_range(const Symbol_table* symtab, const Layout* layout,
+			 const unsigned char* pshdrs, Output_file* of,
+			 Views* pviews, unsigned int start_shndx,
+			 unsigned int end_shndx);
+
   // Adjust this local symbol value.  Return false if the symbol
   // should be discarded from the output file.
   virtual bool
@@ -2584,17 +2606,22 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
+  typedef elfcpp::Shdr_write<size, big_endian> Shdr_write;
 
   // To keep track of discarded comdat sections, we need to map a member
   // section index to the object and section index of the corresponding
   // kept section.
   struct Kept_comdat_section
   {
-    Kept_comdat_section(Relobj* a_object, unsigned int a_shndx)
-      : object(a_object), shndx(a_shndx)
+    Kept_comdat_section(uint64_t a_sh_size, Kept_section* a_kept_section,
+			unsigned int a_symndx, bool a_is_comdat)
+      : sh_size(a_sh_size), kept_section(a_kept_section),
+	symndx (a_symndx), is_comdat(a_is_comdat)
     { }
-    Relobj* object;
-    unsigned int shndx;
+    uint64_t sh_size;		// Section size
+    Kept_section* kept_section;	// Kept section info
+    unsigned int symndx;	// Index of key symbol
+    bool is_comdat;		// True if comdat group, false if linkonce
   };
   typedef std::map<unsigned int, Kept_comdat_section>
       Kept_comdat_section_table;
@@ -2628,8 +2655,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Layout an input section.
   void
   layout_section(Layout* layout, unsigned int shndx, const char* name,
-                 const typename This::Shdr& shdr, unsigned int reloc_shndx,
-                 unsigned int reloc_type);
+                 const typename This::Shdr& shdr, unsigned int sh_type,
+                 unsigned int reloc_shndx, unsigned int reloc_type);
 
   // Layout an input .eh_frame section.
   void
@@ -2639,6 +2666,10 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 			  section_size_type symbol_names_size,
 			  unsigned int shndx, const typename This::Shdr&,
 			  unsigned int reloc_shndx, unsigned int reloc_type);
+
+  // Layout an input .note.gnu.property section.
+  void
+  layout_gnu_property_section(Layout* layout, unsigned int shndx);
 
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
@@ -2739,25 +2770,29 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Record a mapping from discarded section SHNDX to the corresponding
   // kept section.
   void
-  set_kept_comdat_section(unsigned int shndx, Relobj* kept_object,
-			  unsigned int kept_shndx)
+  set_kept_comdat_section(unsigned int shndx, bool is_comdat,
+			  unsigned int symndx, uint64_t sh_size,
+			  Kept_section* kept_section)
   {
-    Kept_comdat_section kept(kept_object, kept_shndx);
+    Kept_comdat_section kept(sh_size, kept_section, symndx, is_comdat);
     this->kept_comdat_sections_.insert(std::make_pair(shndx, kept));
   }
 
   // Find the kept section corresponding to the discarded section
   // SHNDX.  Return true if found.
   bool
-  get_kept_comdat_section(unsigned int shndx, Relobj** kept_object,
-			  unsigned int* kept_shndx) const
+  get_kept_comdat_section(unsigned int shndx, bool* is_comdat,
+			  unsigned int *symndx, uint64_t* sh_size,
+			  Kept_section** kept_section) const
   {
     typename Kept_comdat_section_table::const_iterator p =
       this->kept_comdat_sections_.find(shndx);
     if (p == this->kept_comdat_sections_.end())
       return false;
-    *kept_object = p->second.object;
-    *kept_shndx = p->second.shndx;
+    *is_comdat = p->second.is_comdat;
+    *symndx = p->second.symndx;
+    *sh_size = p->second.sh_size;
+    *kept_section = p->second.kept_section;
     return true;
   }
 
@@ -2791,15 +2826,18 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   {
     static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
     Deferred_layout(unsigned int shndx, const char* name,
+                    unsigned int sh_type,
                     const unsigned char* pshdr,
                     unsigned int reloc_shndx, unsigned int reloc_type)
-      : shndx_(shndx), name_(name), reloc_shndx_(reloc_shndx),
+      : name_(name), shndx_(shndx), reloc_shndx_(reloc_shndx),
         reloc_type_(reloc_type)
     {
+      typename This::Shdr_write shdr(this->shdr_data_);
       memcpy(this->shdr_data_, pshdr, shdr_size);
+      shdr.put_sh_type(sh_type);
     }
-    unsigned int shndx_;
     std::string name_;
+    unsigned int shndx_;
     unsigned int reloc_shndx_;
     unsigned int reloc_type_;
     unsigned char shdr_data_[shdr_size];
@@ -2835,9 +2873,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   Kept_comdat_section_table kept_comdat_sections_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
-  // If this object has a GNU style .eh_frame section that is discarded in
-  // output, record the index here.  Otherwise it is -1U.
-  unsigned int discarded_eh_frame_shndx_;
   // True if the layout of this object was deferred, waiting for plugin
   // replacement files.
   bool is_deferred_layout_;

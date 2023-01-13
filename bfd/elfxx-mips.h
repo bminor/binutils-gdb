@@ -1,5 +1,5 @@
 /* MIPS ELF specific backend routines.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -29,7 +29,7 @@ extern bfd_boolean _bfd_mips_elf_new_section_hook
 extern void _bfd_mips_elf_symbol_processing
   (bfd *, asymbol *);
 extern unsigned int _bfd_mips_elf_eh_frame_address_size
-  (bfd *, asection *);
+  (bfd *, const asection *);
 extern bfd_boolean _bfd_mips_elf_name_local_section_symbols
   (bfd *);
 extern bfd_boolean _bfd_mips_elf_section_processing
@@ -69,8 +69,10 @@ extern bfd_boolean _bfd_mips_elf_finish_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_sort_relocs_p
   (asection *);
-extern void _bfd_mips_elf_final_write_processing
-  (bfd *, bfd_boolean);
+extern void _bfd_mips_final_write_processing
+  (bfd *);
+extern bfd_boolean _bfd_mips_elf_final_write_processing
+  (bfd *);
 extern int _bfd_mips_elf_additional_program_headers
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_modify_segment_map
@@ -78,11 +80,11 @@ extern bfd_boolean _bfd_mips_elf_modify_segment_map
 extern asection * _bfd_mips_elf_gc_mark_hook
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
-extern bfd_boolean _bfd_mips_elf_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 extern void _bfd_mips_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
+extern void _bfd_mips_elf_hide_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 extern bfd_boolean _bfd_mips_elf_ignore_discarded_relocs
   (asection *);
 extern bfd_boolean _bfd_mips_elf_is_target_special_symbol
@@ -107,7 +109,7 @@ extern struct bfd_link_hash_table *_bfd_mips_vxworks_link_hash_table_create
 extern bfd_boolean _bfd_mips_elf_final_link
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_merge_private_bfd_data
-  (bfd *, bfd *);
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_set_private_flags
   (bfd *, flagword);
 extern const char * _bfd_mips_fp_abi_string
@@ -139,8 +141,6 @@ extern bfd_reloc_status_type _bfd_mips_elf_generic_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 extern unsigned long _bfd_elf_mips_mach
   (flagword);
-extern bfd_boolean _bfd_mips_relax_section
-  (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 extern bfd_vma _bfd_mips_elf_sign_extend
   (bfd_vma, int);
 extern void _bfd_mips_elf_merge_symbol_attribute
@@ -150,7 +150,9 @@ extern bfd_boolean _bfd_mips_elf_ignore_undef_symbol
   (struct elf_link_hash_entry *);
 extern void _bfd_mips_elf_use_plts_and_copy_relocs
   (struct bfd_link_info *);
-extern void _bfd_mips_elf_insn32
+extern void _bfd_mips_elf_linker_flags
+  (struct bfd_link_info *, bfd_boolean, bfd_boolean, bfd_boolean);
+extern void _bfd_mips_elf_compact_branches
   (struct bfd_link_info *, bfd_boolean);
 extern bfd_boolean _bfd_mips_elf_init_stubs
   (struct bfd_link_info *,
@@ -161,7 +163,7 @@ extern long _bfd_mips_elf_get_synthetic_symtab
   (bfd *, long, asymbol **, long, asymbol **, asymbol **);
 extern bfd_boolean _bfd_mips_elf_gc_mark_extra_sections
   (struct bfd_link_info *, elf_gc_mark_hook_fn);
-extern void _bfd_mips_post_process_headers
+extern bfd_boolean _bfd_mips_init_file_header
   (bfd *abfd, struct bfd_link_info *link_info);
 
 extern const struct bfd_elf_special_section _bfd_mips_elf_special_sections [];
@@ -170,6 +172,12 @@ extern bfd_boolean _bfd_mips_elf_common_definition (Elf_Internal_Sym *);
 
 extern int _bfd_mips_elf_compact_eh_encoding (struct bfd_link_info *);
 extern int _bfd_mips_elf_cant_unwind_opcode (struct bfd_link_info *);
+
+extern void _bfd_mips_elf_record_xhash_symbol
+  (struct elf_link_hash_entry *h, bfd_vma xlat_loc);
+
+/* MIPS ABI flags data access.  For the disassembler.  */
+extern struct elf_internal_abiflags_v0 *bfd_mips_elf_get_abiflags (bfd *);
 
 static inline bfd_boolean
 gprel16_reloc_p (unsigned int r_type)
@@ -193,6 +201,8 @@ literal_reloc_p (int r_type)
 #define elf_backend_eh_frame_address_size _bfd_mips_elf_eh_frame_address_size
 #define elf_backend_merge_symbol_attribute  _bfd_mips_elf_merge_symbol_attribute
 #define elf_backend_ignore_undef_symbol _bfd_mips_elf_ignore_undef_symbol
-#define elf_backend_post_process_headers _bfd_mips_post_process_headers
+#define elf_backend_init_file_header _bfd_mips_init_file_header
 #define elf_backend_compact_eh_encoding _bfd_mips_elf_compact_eh_encoding
 #define elf_backend_cant_unwind_opcode _bfd_mips_elf_cant_unwind_opcode
+#define elf_backend_record_xhash_symbol _bfd_mips_elf_record_xhash_symbol
+#define elf_backend_always_renumber_dynsyms TRUE

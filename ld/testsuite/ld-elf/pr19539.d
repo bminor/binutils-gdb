@@ -2,8 +2,8 @@
 #source: pr19539.s
 #ld: -pie -T pr19539.t
 #readelf : --dyn-syms --wide
-#target: *-*-linux* *-*-gnu* *-*-solaris*
-#notarget: cris*-*-*
+#target: *-*-linux* *-*-gnu* *-*-solaris* arm*-*-uclinuxfdpiceabi
+#xfail: cris*-*-*
 
-Symbol table '\.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entr(y|ies):
 #pass

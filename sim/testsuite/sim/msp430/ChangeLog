@@ -1,3 +1,7 @@
+2020-01-22  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* rrux.s: New test.
+
 2016-01-05  Nick Clifton  <nickc@redhat.com>
 
 	* testutils.inc (__pass): Use the LMA addresses of the _passmsg

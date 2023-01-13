@@ -1,5 +1,5 @@
 /* tc-h8300.c -- Assemble code for the Renesas H8/300
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -28,10 +28,7 @@
 #define h8_opcodes ops
 #include "opcode/h8300.h"
 #include "safe-ctype.h"
-
-#ifdef OBJ_ELF
 #include "elf/h8.h"
-#endif
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -212,12 +209,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"page",    listing_eject, 0},
   {"program", s_ignore, 0},
 
-#ifdef OBJ_ELF
   {"section",   h8300_elf_section, 0},
   {"section.s", h8300_elf_section, 0},
   {"sect",      h8300_elf_section, 0},
   {"sect.s",    h8300_elf_section, 0},
-#endif
 
   {0, 0, 0}
 };
@@ -252,8 +247,7 @@ md_begin (void)
 
   nopcodes = sizeof (h8_opcodes) / sizeof (struct h8_opcode);
 
-  h8_instructions = (struct h8_instruction *)
-    xmalloc (nopcodes * sizeof (struct h8_instruction));
+  h8_instructions = XNEWVEC (struct h8_instruction, nopcodes);
 
   pi = h8_instructions;
   p1 = h8_opcodes;
@@ -273,7 +267,7 @@ md_begin (void)
 	break;
       /* Strip off any . part when inserting the opcode and only enter
 	 unique codes into the hash table.  */
-      dst = buffer = malloc (strlen (src) + 1);
+      dst = buffer = XNEWVEC (char, strlen (src) + 1);
       while (*src)
 	{
 	  if (*src == '.')
@@ -1373,7 +1367,6 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
 	  check_operand (operand, 0xffff, t);
 	  bytes[0] |= operand->exp.X_add_number >> 8;
 	  bytes[1] |= operand->exp.X_add_number >> 0;
-#ifdef OBJ_ELF
 	  /* MOVA needs both relocs to relax the second operand properly.  */
 	  if (relaxmode != 0
 	      && (OP_KIND(this_try->opcode->how) == O_MOVAB
@@ -1383,7 +1376,6 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
 	      idx = BFD_RELOC_16;
 	      fix_new_exp (frag_now, offset, 2, &operand->exp, 0, idx);
 	    }
-#endif
 	  break;
 	case L_24:
 	  check_operand (operand, 0xffffff, t);
@@ -1400,11 +1392,9 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
 	  bytes[3] |= operand->exp.X_add_number >> 0;
 	  if (relaxmode != 0)
 	    {
-#ifdef OBJ_ELF
 	      if ((operand->mode & MODE) == DISP && relaxmode == 1)
 		idx = BFD_RELOC_H8_DISP32A16;
 	      else
-#endif
 		idx = (relaxmode == 2) ? R_MOV24B1 : R_MOVL1;
 	      fix_new_exp (frag_now, offset, 4, &operand->exp, 0, idx);
 	    }
@@ -1419,12 +1409,9 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
 	case L_32:
 	  size = 4;
 	  where = (operand->mode & SIZE) == L_24 ? -1 : 0;
-#ifdef OBJ_ELF
 	  if ((operand->mode & MODE) == DISP && relaxmode == 1)
 	    idx = BFD_RELOC_H8_DISP32A16;
-	  else
-#endif
-	  if (relaxmode == 2)
+	  else if (relaxmode == 2)
 	    idx = R_MOV24B1;
 	  else if (relaxmode == 1)
 	    idx = R_MOVL1;
@@ -1433,6 +1420,7 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, cons
 	  break;
 	default:
 	  as_bad (_("Can't work out size of operand.\n"));
+	  /* Fall through.  */
 	case L_16:
 	case L_16U:
 	  size = 2;
@@ -1656,17 +1644,9 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
       int x_mode = x & MODE;
 
       if (x_mode == IMM || x_mode == DISP)
-	{
-#ifndef OBJ_ELF
-	  /* Remove MEMRELAX flag added in h8300.h on mov with
-	     addressing mode "register indirect with displacement".  */
-	  if (x_mode == DISP)
-	    x &= ~MEMRELAX;
-#endif
-	  do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
-			op_at[i] & 1, operand + i, (x & MEMRELAX) != 0,
-			this_try);
-	}
+	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
+		      op_at[i] & 1, operand + i, (x & MEMRELAX) != 0,
+		      this_try);
       else if (x_mode == ABS)
 	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
 		      op_at[i] & 1, operand + i,
@@ -1685,14 +1665,6 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 	  if (operand[i].exp.X_add_number & 1)
 	    as_warn (_("branch operand has odd offset (%lx)\n"),
 		     (unsigned long) operand->exp.X_add_number);
-#ifndef OBJ_ELF
-	  /* The COFF port has always been off by one, changing it
-	     now would be an incompatible change, so we leave it as-is.
-
-	     We don't want to do this for ELF as we want to be
-	     compatible with the proposed ELF format from Hitachi.  */
-	  operand[i].exp.X_add_number -= 1;
-#endif
 	  if (size16)
 	    {
 	      operand[i].exp.X_add_number =
@@ -1744,7 +1716,6 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 	  int where = 0;
 	  bfd_reloc_code_real_type reloc_type = R_JMPL1;
 
-#ifdef OBJ_ELF
 	  /* To be compatible with the proposed H8 ELF format, we
 	     want the relocation's offset to point to the first byte
 	     that will be modified, not to the start of the instruction.  */
@@ -1756,7 +1727,6 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 	    }
 	  else
 	    where = 1;
-#endif
 
 	  /* This jmp may be a jump or a branch.  */
 
@@ -2255,7 +2225,7 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED,
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & (-1U << align));
 }
 

@@ -1,6 +1,6 @@
 # Test ALIGN in a linker script.
 # By Nathan Sidwell, CodeSourcery LLC
-#   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-if [istarget "rs6000-*-aix*"] {
+if {[istarget "powerpc*-*-aix*"] || [istarget "rs6000-*-aix*"]} {
     # Target maps .text and .data to other sections.
     return
 }
@@ -38,7 +38,7 @@ if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
-if ![ld_simple_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {
+if ![ld_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {
     fail $testname
 } else {
     pass $testname
@@ -47,6 +47,13 @@ if ![ld_simple_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir
 if ![is_aout_format] {
     run_dump_test align2a
     run_dump_test align2b
+    run_dump_test align3
+    run_dump_test align4
+    run_dump_test align5
 }
 run_dump_test align2c
 set LDFLAGS "$saved_LDFLAGS"
+
+if { [is_elf_format] && ![uses_genelf] } {
+    run_dump_test pr23571
+}

@@ -1,5 +1,5 @@
 /* tc-epiphany.c -- Assembler for the Adapteva EPIPHANY
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
    Contributed by Embecosm on behalf of Adapteva, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -28,7 +28,6 @@
 #include "elf/common.h"
 #include "elf/epiphany.h"
 #include "dwarf2dbg.h"
-#include "libbfd.h"
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -146,12 +145,14 @@ md_begin (void)
 
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_epiphany, bfd_mach_epiphany32);
+
+  literal_prefix_dollar_hex = TRUE;
 }
 
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
 
   return ((size + (1 << align) - 1) & -(1 << align));
 }
@@ -289,7 +290,7 @@ epiphany_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
 	case BFD_RELOC_EPIPHANY_HIGH:
 	  value >>= 16;
-	  /* fall thru */
+	  /* fallthru */
 	case BFD_RELOC_EPIPHANY_LOW:
 	  value = (((value & 0xff) << 5) | insn[0])
 	    | (insn[1] << 8)
@@ -341,7 +342,7 @@ epiphany_handle_align (fragS *fragp)
 }
 
 /* Read a comma separated incrementing list of register names
-   and form a bit mask of upto 15 registers 0..14.  */
+   and form a bit mask of up to 15 registers 0..14.  */
 
 static const char *
 parse_reglist (const char * s, int * mask)
@@ -430,7 +431,7 @@ epiphany_assemble (const char *str)
 #define DISPMOD _("destination register modified by displacement-post-modified address")
 #define LDSTODD _("ldrd/strd requires even:odd register pair")
 
-  /* Helper macros for spliting apart instruction fields.  */
+  /* Helper macros for splitting apart instruction fields.  */
 #define ADDR_POST_MODIFIED(i) (((i) >> 25) & 0x1)
 #define ADDR_SIZE(i)          (((i) >>  5) &   3)
 #define ADDR_LOADSTORE(i)     (((i) >>  4) & 0x1)
@@ -503,7 +504,7 @@ epiphany_assemble (const char *str)
 	    return;
 	  }
       }
-      /* fall-thru.  */
+      /* fallthru */
 
     case OP4_LDSTRX:
       {
@@ -726,6 +727,8 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	 handling to md_convert_frag.  */
 
       EPIPHANY_RELAX_TYPES subtype;
+      const CGEN_INSN *insn;
+      int i;
       /* We haven't relaxed this at all, so the relaxation type may be
 	 completely wrong.  Set the subtype correctly.  */
       epiphany_relax_frag (segment, fragP, 0);
@@ -752,26 +755,29 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 
       fragP->fr_subtype = subtype;
 
-      {
-	const CGEN_INSN *insn;
-	int i;
+      /* Update the recorded insn.  */
+      for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
+	{
+	  if (strcmp (CGEN_INSN_MNEMONIC (insn),
+		      CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn)) == 0
+	      && CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED))
+	    break;
+	}
 
-	/* Update the recorded insn.  */
+      if (i == 4)
+	abort ();
 
-	for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
-	  {
-	    if ((strcmp (CGEN_INSN_MNEMONIC (insn),
-			 CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn))
-		 == 0)
-		&& CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED))
-	      break;
-	  }
+      /* When changing from a 2-byte to 4-byte insn, don't leave
+	 opcode bytes uninitialised.  */
+      if (CGEN_INSN_BITSIZE (fragP->fr_cgen.insn) < CGEN_INSN_BITSIZE (insn))
+	{
+	  gas_assert (CGEN_INSN_BITSIZE (fragP->fr_cgen.insn) == 16);
+	  gas_assert (CGEN_INSN_BITSIZE (insn) == 32);
+	  fragP->fr_opcode[2] = 0;
+	  fragP->fr_opcode[3] = 0;
+	}
 
-	if (i == 4)
-	  abort ();
-
-	fragP->fr_cgen.insn = insn;
-      }
+      fragP->fr_cgen.insn = insn;
     }
 
   return md_relax_table[fragP->fr_subtype].rlx_length;
@@ -995,7 +1001,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
 	return BFD_RELOC_EPIPHANY_LOW;
       else
 	as_bad ("unknown imm16 operand");
-      /* fall-thru */
+      /* fallthru */
 
     default:
       break;
@@ -1008,9 +1014,6 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
    of type TYPE, and store the appropriate bytes in *LITP.  The number
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
-
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
 
 const char *
 md_atof (int type, char *litP, int *sizeP)
@@ -1056,7 +1059,7 @@ epiphany_fix_adjustable (fixS *fixP)
     return FALSE;
 
   /* Since we don't use partial_inplace, we must not reduce symbols in
-     mergable sections to their section symbol.  */
+     mergeable sections to their section symbol.  */
   if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
     return FALSE;
 

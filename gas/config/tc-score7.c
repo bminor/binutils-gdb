@@ -1,5 +1,5 @@
 /* tc-score7.c -- Assembler for Score7
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
    Contributed by:
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -27,7 +27,6 @@
 #include "subsegs.h"
 #include "safe-ctype.h"
 #include "opcode/score-inst.h"
-#include "struc-symbol.h"
 #include "libiberty.h"
 
 #ifdef OBJ_ELF
@@ -143,7 +142,6 @@ static void s7_do_lw_pic (char *);
 #define s7_GET_INSN_SIZE(type) ((s7_GET_INSN_CLASS (type) == INSN_CLASS_16) \
                              ? s7_INSN16_SIZE : s7_INSN_SIZE)
 
-#define s7_MAX_LITTLENUMS 6
 #define s7_INSN_NAME_LEN 16
 
 /* Relax will need some padding for alignment.  */
@@ -324,7 +322,7 @@ static const struct s7_insn_to_dependency s7_insn_to_dependency_table[] =
   {"mvpl",      s7_D_cond_mv},
   {"mvvs",      s7_D_cond_mv},
   {"mvvc",      s7_D_cond_mv},
-  /* move spectial instruction.  */
+  /* move special instruction.  */
   {"mtcr",      s7_D_mtcr},
   {"mftlb",     s7_D_mftlb},
   {"mtptlb",    s7_D_mtptlb},
@@ -401,9 +399,9 @@ static const struct s7_data_dependency s7_data_dependency_table[] =
   {s7_D_mtcr, "cr1", s7_D_pce, "", 2, 1, 0},
   {s7_D_mtcr, "cr1", s7_D_cond_br, "", 1, 0, 1},
   {s7_D_mtcr, "cr1", s7_D_cond_mv, "", 1, 0, 1},
-  /* Status regiser.  */
+  /* Status register.  */
   {s7_D_mtcr, "cr0", s7_D_all_insn, "", 5, 4, 0},
-  /* CCR regiser.  */
+  /* CCR register.  */
   {s7_D_mtcr, "cr4", s7_D_all_insn, "", 6, 5, 0},
   /* EntryHi/EntryLo register.  */
   {s7_D_mftlb, "", s7_D_mtptlb, "", 1, 1, 1},
@@ -2491,7 +2489,7 @@ s7_handle_dependency (struct s7_score_it *theinst)
 	      if (remainder_bubbles <= 2)
 		{
 		  if (s7_warn_fix_data_dependency)
-		    as_warn (_("Fix data dependency: %s %s -- %s %s  (insert %d nop!/%d)"),
+		    as_warn (_("Fix data dependency: %s %s -- %s %s (insert %d nop!/%d)"),
 			     s7_dependency_vector[i].name, s7_dependency_vector[i].reg,
 			     s7_dependency_vector[0].name, s7_dependency_vector[0].reg,
 			     remainder_bubbles, bubbles);
@@ -2510,7 +2508,7 @@ s7_handle_dependency (struct s7_score_it *theinst)
 	      else
 		{
 		  if (s7_warn_fix_data_dependency)
-		    as_warn (_("Fix data dependency: %s %s -- %s %s  (insert 1 pflush/%d)"),
+		    as_warn (_("Fix data dependency: %s %s -- %s %s (insert 1 pflush/%d)"),
 			     s7_dependency_vector[i].name, s7_dependency_vector[i].reg,
 			     s7_dependency_vector[0].name, s7_dependency_vector[0].reg,
 			     bubbles);
@@ -2526,14 +2524,14 @@ s7_handle_dependency (struct s7_score_it *theinst)
             {
 	      if (warn_or_error)
 		{
-                  as_bad (_("data dependency: %s %s -- %s %s  (%d/%d bubble)"),
+                  as_bad (_("data dependency: %s %s -- %s %s (%d/%d bubble)"),
                            s7_dependency_vector[i].name, s7_dependency_vector[i].reg,
                            s7_dependency_vector[0].name, s7_dependency_vector[0].reg,
                            remainder_bubbles, bubbles);
 		}
 	      else
 		{
-                  as_warn (_("data dependency: %s %s -- %s %s  (%d/%d bubble)"),
+                  as_warn (_("data dependency: %s %s -- %s %s (%d/%d bubble)"),
                            s7_dependency_vector[i].name, s7_dependency_vector[i].reg,
                            s7_dependency_vector[0].name, s7_dependency_vector[0].reg,
                            remainder_bubbles, bubbles);
@@ -2723,7 +2721,7 @@ s7_gen_insn_frag (struct s7_score_it *part_1, struct s7_score_it *part_2)
   /* Here, we must call frag_grow in order to keep the instruction frag type is
      rs_machine_dependent.
      For, frag_var may change frag_now->fr_type to rs_fill by calling frag_grow which
-     acturally will call frag_wane.
+     actually will call frag_wane.
      Calling frag_grow first will create a new frag_now which free size is 20 that is enough
      for frag_var.  */
   frag_grow (20);
@@ -4200,7 +4198,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       /* Fix part
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15 or BFD_RELOC_SCORE_CALL15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
 	return;
 
@@ -4214,7 +4212,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 	 addi rD, <sym>       (BFD_RELOC_GOT_LO16) */
       s7_inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
-      sprintf (tmp, "addi_s_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "addi_s_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
 	return;
 
@@ -4224,7 +4222,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
   else if (add_number >= -0x8000 && add_number <= 0x7fff)
     {
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
 	return;
 
@@ -4241,7 +4239,8 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 
       /* Var part
  	 For a local symbol: addi rD, <sym>+<constant>    (BFD_RELOC_GOT_LO16)  */
-      sprintf (tmp, "addi_s_pic r%d, %s + %d", reg_rd, add_symbol->bsym->name, (int) add_number);
+      sprintf (tmp, "addi_s_pic r%d, %s + %d", reg_rd,
+	       S_GET_NAME (add_symbol), (int) add_number);
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
 	return;
 
@@ -4254,7 +4253,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       int lo = add_number & 0x0000FFFF;
 
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
 	return;
 
@@ -4271,7 +4270,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 
       /* Var part
 	 For a local symbol: ldis r1, HI%<constant>
-         but, if lo is outof 16 bit, make hi plus 1  */
+         but, if lo is out of 16 bit, make hi plus 1  */
       if ((lo < -0x8000) || (lo > 0x7fff))
 	{
 	  hi += 1;
@@ -4296,7 +4295,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 
       /* Var part
   	 For a local symbol: addi r1, <sym>+LO%<constant>    (BFD_RELOC_GOT_LO16)  */
-      sprintf (tmp, "addi_u_pic r1, %s + %d", add_symbol->bsym->name, lo);
+      sprintf (tmp, "addi_u_pic r1, %s + %d", S_GET_NAME (add_symbol), lo);
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
 	return;
 
@@ -4661,7 +4660,7 @@ s7_build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
       /* Fix part
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r1, %s", add_symbol->bsym->name);
+      sprintf (tmp, "lw_pic r1, %s", S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
         return;
 
@@ -4673,7 +4672,7 @@ s7_build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
 	 addi rD, <sym>       (BFD_RELOC_GOT_LO16) */
       s7_inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
-      sprintf (tmp, "addi_s_pic r1, %s", add_symbol->bsym->name);
+      sprintf (tmp, "addi_s_pic r1, %s", S_GET_NAME (add_symbol));
       if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
         return;
 
@@ -5189,7 +5188,7 @@ s7_pic_need_relax (symbolS *sym, asection *segtype)
   linkonce = FALSE;
   if (symsec != segtype && ! S_IS_LOCAL (sym))
     {
-      if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE) != 0)
+      if ((bfd_section_flags (symsec) & SEC_LINK_ONCE) != 0)
 	linkonce = TRUE;
 
       /* The GNU toolchain uses an extension for ELF: a section
@@ -5226,7 +5225,7 @@ s7_judge_size_before_relax (fragS * fragp, asection *sec)
   if (change == 1)
     {
       /* Only at the first time determining whether s7_GP instruction relax should be done,
-         return the difference between insntruction size and instruction relax size.  */
+         return the difference between instruction size and instruction relax size.  */
       if (fragp->fr_opcode == NULL)
 	{
 	  fragp->fr_fix = s7_RELAX_NEW (fragp->fr_subtype);
@@ -5263,10 +5262,7 @@ s7_b32_relax_to_b16 (fragS * fragp)
   if (s == NULL)
     frag_addr = 0;
   else
-    {
-      if (s->bsym != NULL)
-	symbol_address = (addressT) symbol_get_frag (s)->fr_address;
-    }
+    symbol_address = (addressT) symbol_get_frag (s)->fr_address;
 
   value = s7_md_chars_to_number (fragp->fr_literal, s7_INSN_SIZE);
 
@@ -5280,7 +5276,7 @@ s7_b32_relax_to_b16 (fragS * fragp)
     abs_value = 0xffffffff - abs_value + 1;
 
   /* Relax branch 32 to branch 16.  */
-  if (relaxable_p && (s->bsym != NULL) && ((abs_value & 0xffffff00) == 0)
+  if (relaxable_p && ((abs_value & 0xffffff00) == 0)
       && (S_IS_DEFINED (s) && !S_IS_COMMON (s) && !S_IS_EXTERNAL (s)))
     {
       /* do nothing.  */
@@ -5403,7 +5399,7 @@ static void
 s7_s_section (int ignore)
 {
   obj_elf_section (ignore);
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     record_alignment (now_seg, 2);
 
 }
@@ -5426,14 +5422,14 @@ s7_s_change_sec (int sec)
     {
     case 'r':
       seg = subseg_new (s7_RDATA_SECTION_NAME, (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_DATA));
+      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_DATA));
       if (strcmp (TARGET_OS, "elf") != 0)
         record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (stdoutput, seg, SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+      bfd_set_section_flags (seg, SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
       if (strcmp (TARGET_OS, "elf") != 0)
         record_alignment (seg, 4);
       demand_empty_rest_of_line ();
@@ -5544,7 +5540,7 @@ s7_s_score_ent (int aent)
     s7_get_number ();
 
 #ifdef BFD_ASSEMBLER
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;
@@ -5654,7 +5650,7 @@ s7_s_score_end (int x ATTRIBUTE_UNUSED)
     p = NULL;
 
 #ifdef BFD_ASSEMBLER
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+  if ((bfd_section_flags (now_seg) & SEC_CODE) != 0)
     maybe_text = 1;
   else
     maybe_text = 0;
@@ -5997,7 +5993,7 @@ s7_s_score_lcomm (int bytes_p)
           bss_seg = subseg_new (".sbss", 1);
           seg_info (bss_seg)->bss = 1;
 #ifdef BFD_ASSEMBLER
-          if (!bfd_set_section_flags (stdoutput, bss_seg, SEC_ALLOC))
+          if (!bfd_set_section_flags (bss_seg, SEC_ALLOC))
             as_warn (_("error setting flags for \".sbss\": %s"), bfd_errmsg (bfd_get_error ()));
 #endif
         }
@@ -6077,8 +6073,7 @@ s7_s_score_lcomm (int bytes_p)
   *p = c;
 
   if (
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT) \
-     || defined (OBJ_BOUT) || defined (OBJ_MAYBE_BOUT))
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
 #ifdef BFD_ASSEMBLER
        (OUTPUT_FLAVOR != bfd_target_aout_flavour
         || (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0)) &&
@@ -6157,8 +6152,8 @@ s7_begin (void)
   seg = now_seg;
   subseg = now_subseg;
   s7_pdr_seg = subseg_new (".pdr", (subsegT) 0);
-  (void) bfd_set_section_flags (stdoutput, s7_pdr_seg, SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
-  (void) bfd_set_section_alignment (stdoutput, s7_pdr_seg, 2);
+  bfd_set_section_flags (s7_pdr_seg, SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
+  bfd_set_section_alignment (s7_pdr_seg, 2);
   subseg_set (seg, subseg);
 
   if (s7_USE_GLOBAL_POINTER_OPT)
@@ -6213,7 +6208,7 @@ static const char *
 s7_atof (int type, char *litP, int *sizeP)
 {
   int prec;
-  LITTLENUM_TYPE words[s7_MAX_LITTLENUMS];
+  LITTLENUM_TYPE words[MAX_LITTLENUMS];
   char *t;
   int i;
 
@@ -6480,7 +6475,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
                       grows -= 2;
                       do_relax_p = 1;
                     }
-                  /* Make the 32 bit insturction word align.  */
+                  /* Make the 32 bit instruction word align.  */
                   else
                     {
                       fragp->insn_addr += 2;
@@ -6500,7 +6495,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
       else
         {
 	  /* Here, try best to do relax regardless fragp->fr_next->fr_type.  */
-          if (word_align_p == FALSE)
+          if (!word_align_p)
             {
               if (insn_size % 4 == 0)
                 {
@@ -6566,8 +6561,8 @@ s7_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
 		 fragS * fragp)
 {
-  int r_old;
-  int r_new;
+  unsigned int r_old;
+  unsigned int r_new;
   char backup[20];
   fixS *fixp;
 
@@ -6633,7 +6628,7 @@ s7_pcrel_from (fixS * fixP)
 static valueT
 s7_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
 
   return ((size + (1 << align) - 1) & -(1 << align));
 }
@@ -6787,7 +6782,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
         }
       else
         {
-          /* In differnt section.  */
+          /* In different section.  */
           if ((S_GET_SEGMENT (fixP->fx_addsy) != seg) ||
               (fixP->fx_addsy != NULL && S_IS_EXTERNAL (fixP->fx_addsy)))
             value = fixP->fx_offset;
@@ -6930,6 +6925,7 @@ s7_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
           code = BFD_RELOC_32_PCREL;
           break;
         }
+      /* Fall through.  */
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_LO16:
     case BFD_RELOC_SCORE_JMP:

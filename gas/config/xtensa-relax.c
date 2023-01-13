@@ -1,5 +1,5 @@
 /* Table of relaxations for Xtensa assembly.
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -87,13 +87,7 @@
    when the first and second operands are not the same as specified
    by the "| %at!=%as" precondition clause.
    {"l32i %at,%as,%imm | %at!=%as",
-   "LITERAL %imm; l32r %at,%LITERAL; add %at,%at,%as; l32i %at,%at,0"}
-
-   There is special case for loop instructions here, but because we do
-   not currently have the ability to represent the difference of two
-   symbols, the conversion requires special code in the assembler to
-   write the operands of the addi/addmi pair representing the
-   difference of the old and new loop end label.  */
+   "LITERAL %imm; l32r %at,%LITERAL; add %at,%at,%as; l32i %at,%at,0"}  */
 
 #include "as.h"
 #include "xtensa-isa.h"
@@ -306,44 +300,83 @@ static string_pattern_pair widen_spec_list[] =
   {"l32i %at,%as,%imm | %at!=%as ? IsaUseConst16",
    "const16 %at,HI16U(%imm); const16 %at,LOW16U(%imm); add %at,%at,%as; l32i %at,%at,0"},
 
-  /* This is only PART of the loop instruction.  In addition,
-     hardcoded into its use is a modification of the final operand in
-     the instruction in bytes 9 and 12.  */
-  {"loop %as,%label | %as!=1 ? IsaUseLoops",
+  /* Widening loops with literals.  */
+  {"loop %as,%label | %as!=1 ? IsaUseLoops ? IsaUseL32R",
    "loop %as,%LABEL;"
    "rsr.lend    %as;"		/* LEND */
    "wsr.lbeg    %as;"		/* LBEG */
-   "addi    %as, %as, 0;"	/* lo8(%label-%LABEL1) */
-   "addmi   %as, %as, 0;"	/* mid8(%label-%LABEL1) */
+   "LITERAL     %label;"
+   "l32r        %as, %LITERAL;"
+   "nop;"
    "wsr.lend    %as;"
    "isync;"
    "rsr.lcount    %as;"		/* LCOUNT */
-   "addi    %as, %as, 1;"	/* density -> addi.n %as, %as, 1 */
+   "addi    %as, %as, 1;"
    "LABEL"},
-  {"loopgtz %as,%label | %as!=1 ? IsaUseLoops",
+  {"loopgtz %as,%label | %as!=1 ? IsaUseLoops ? IsaUseL32R",
    "beqz    %as,%label;"
    "bltz    %as,%label;"
    "loopgtz %as,%LABEL;"
    "rsr.lend    %as;"		/* LEND */
    "wsr.lbeg    %as;"		/* LBEG */
-   "addi    %as, %as, 0;"	/* lo8(%label-%LABEL1) */
-   "addmi   %as, %as, 0;"	/* mid8(%label-%LABEL1) */
+   "LITERAL     %label;"
+   "l32r        %as, %LITERAL;"
+   "nop;"
    "wsr.lend    %as;"
    "isync;"
    "rsr.lcount    %as;"		/* LCOUNT */
-   "addi    %as, %as, 1;"	/* density -> addi.n %as, %as, 1 */
+   "addi    %as, %as, 1;"
    "LABEL"},
-  {"loopnez %as,%label | %as!=1 ? IsaUseLoops",
+  {"loopnez %as,%label | %as!=1 ? IsaUseLoops ? IsaUseL32R",
    "beqz     %as,%label;"
    "loopnez %as,%LABEL;"
    "rsr.lend    %as;"		/* LEND */
    "wsr.lbeg    %as;"		/* LBEG */
-   "addi    %as, %as, 0;"	/* lo8(%label-%LABEL1) */
-   "addmi   %as, %as, 0;"	/* mid8(%label-%LABEL1) */
+   "LITERAL     %label;"
+   "l32r        %as, %LITERAL;"
+   "nop;"
    "wsr.lend    %as;"
    "isync;"
    "rsr.lcount    %as;"		/* LCOUNT */
-   "addi    %as, %as, 1;"	/* density -> addi.n %as, %as, 1 */
+   "addi    %as, %as, 1;"
+   "LABEL"},
+
+  /* Widening loops with const16.  */
+  {"loop %as,%label | %as!=1 ? IsaUseLoops ? IsaUseConst16",
+   "loop %as,%LABEL;"
+   "rsr.lend    %as;"		/* LEND */
+   "wsr.lbeg    %as;"		/* LBEG */
+   "const16     %as,HI16U(%label);"
+   "const16     %as,LOW16U(%label);"
+   "wsr.lend    %as;"
+   "isync;"
+   "rsr.lcount    %as;"		/* LCOUNT */
+   "addi    %as, %as, 1;"
+   "LABEL"},
+  {"loopgtz %as,%label | %as!=1 ? IsaUseLoops ? IsaUseConst16",
+   "beqz    %as,%label;"
+   "bltz    %as,%label;"
+   "loopgtz %as,%LABEL;"
+   "rsr.lend    %as;"		/* LEND */
+   "wsr.lbeg    %as;"		/* LBEG */
+   "const16     %as,HI16U(%label);"
+   "const16     %as,LOW16U(%label);"
+   "wsr.lend    %as;"
+   "isync;"
+   "rsr.lcount    %as;"		/* LCOUNT */
+   "addi    %as, %as, 1;"
+   "LABEL"},
+  {"loopnez %as,%label | %as!=1 ? IsaUseLoops ? IsaUseConst16",
+   "beqz     %as,%label;"
+   "loopnez %as,%LABEL;"
+   "rsr.lend    %as;"		/* LEND */
+   "wsr.lbeg    %as;"		/* LBEG */
+   "const16     %as,HI16U(%label);"
+   "const16     %as,LOW16U(%label);"
+   "wsr.lend    %as;"
+   "isync;"
+   "rsr.lcount    %as;"		/* LCOUNT */
+   "addi    %as, %as, 1;"
    "LABEL"},
 
   /* Relaxing to wide branches.  Order is important here.  With wide
@@ -522,7 +555,7 @@ append_transition (TransitionTable *tt,
 		   TransitionRule *t,
 		   transition_cmp_fn cmp)
 {
-  TransitionList *tl = (TransitionList *) xmalloc (sizeof (TransitionList));
+  TransitionList *tl = XNEW (TransitionList);
   TransitionList *prev;
   TransitionList **t_p;
   gas_assert (tt != NULL);
@@ -554,8 +587,7 @@ append_transition (TransitionTable *tt,
 static void
 append_condition (TransitionRule *tr, Precondition *cond)
 {
-  PreconditionList *pl =
-    (PreconditionList *) xmalloc (sizeof (PreconditionList));
+  PreconditionList *pl = XNEW (PreconditionList);
   PreconditionList *prev = tr->conditions;
   PreconditionList *nxt;
 
@@ -582,7 +614,7 @@ append_value_condition (TransitionRule *tr,
 			unsigned op1,
 			unsigned op2)
 {
-  Precondition *cond = (Precondition *) xmalloc (sizeof (Precondition));
+  Precondition *cond = XNEW (Precondition);
 
   cond->cmp = cmp;
   cond->op_num = op1;
@@ -598,7 +630,7 @@ append_constant_value_condition (TransitionRule *tr,
 				 unsigned op1,
 				 unsigned cnst)
 {
-  Precondition *cond = (Precondition *) xmalloc (sizeof (Precondition));
+  Precondition *cond = XNEW (Precondition);
 
   cond->cmp = cmp;
   cond->op_num = op1;
@@ -654,7 +686,7 @@ append_op (BuildInstr *bi, BuildOp *b_op)
 static void
 append_literal_op (BuildInstr *bi, unsigned op1, unsigned src_op)
 {
-  BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
+  BuildOp *b_op = XNEW (BuildOp);
 
   b_op->op_num = op1;
   b_op->typ = OP_LITERAL;
@@ -667,7 +699,7 @@ append_literal_op (BuildInstr *bi, unsigned op1, unsigned src_op)
 static void
 append_label_op (BuildInstr *bi, unsigned op1)
 {
-  BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
+  BuildOp *b_op = XNEW (BuildOp);
 
   b_op->op_num = op1;
   b_op->typ = OP_LABEL;
@@ -680,7 +712,7 @@ append_label_op (BuildInstr *bi, unsigned op1)
 static void
 append_constant_op (BuildInstr *bi, unsigned op1, unsigned cnst)
 {
-  BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
+  BuildOp *b_op = XNEW (BuildOp);
 
   b_op->op_num = op1;
   b_op->typ = OP_CONSTANT;
@@ -693,7 +725,7 @@ append_constant_op (BuildInstr *bi, unsigned op1, unsigned cnst)
 static void
 append_field_op (BuildInstr *bi, unsigned op1, unsigned src_op)
 {
-  BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
+  BuildOp *b_op = XNEW (BuildOp);
 
   b_op->op_num = op1;
   b_op->typ = OP_OPERAND;
@@ -711,7 +743,7 @@ append_user_fn_field_op (BuildInstr *bi,
 			 OpType typ,
 			 unsigned src_op)
 {
-  BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
+  BuildOp *b_op = XNEW (BuildOp);
 
   b_op->op_num = op1;
   b_op->typ = typ;
@@ -819,10 +851,8 @@ enter_opname_n (const char *name, int len)
 	  && strncmp (op->opname, name, len) == 0)
 	return op->opname;
     }
-  op = (opname_e *) xmalloc (sizeof (opname_e));
-  op->opname = (char *) xmalloc (len + 1);
-  strncpy (op->opname, name, len);
-  op->opname[len] = '\0';
+  op = XNEW (opname_e);
+  op->opname = xmemdup0 (name, len);
   return op->opname;
 }
 
@@ -837,7 +867,7 @@ enter_opname (const char *name)
       if (strcmp (op->opname, name) == 0)
 	return op->opname;
     }
-  op = (opname_e *) xmalloc (sizeof (opname_e));
+  op = XNEW (opname_e);
   op->opname = xstrdup (name);
   return op->opname;
 }
@@ -1107,7 +1137,7 @@ split_string (split_rec *rec,
   if (rec->count == 0)
     return;
 
-  rec->vec = (char **) xmalloc (sizeof (char *) * cnt);
+  rec->vec = XNEWVEC (char *, cnt);
   for (i = 0; i < cnt; i++)
     rec->vec[i] = 0;
 
@@ -1127,9 +1157,7 @@ split_string (split_rec *rec,
       else
 	{
 	  len = p - q;
-	  rec->vec[i] = (char *) xmalloc (sizeof (char) * (len + 1));
-	  strncpy (rec->vec[i], q, len);
-	  rec->vec[i][len] = '\0';
+	  rec->vec[i] = xmemdup0 (q, len);
 	  p++;
 	}
 
@@ -1193,7 +1221,7 @@ parse_insn_templ (const char *s, insn_templ *t)
   for (i = 0; i < oprec.count; i++)
     {
       const char *opname = oprec.vec[i];
-      opname_map_e *e = (opname_map_e *) xmalloc (sizeof (opname_map_e));
+      opname_map_e *e = XNEW (opname_map_e);
       e->next = NULL;
       e->operand_name = NULL;
       e->constant_value = 0;
@@ -1311,7 +1339,7 @@ clone_req_or_option_list (ReqOrOption *req_or_option)
   if (req_or_option == NULL)
     return NULL;
 
-  new_req_or_option = (ReqOrOption *) xmalloc (sizeof (ReqOrOption));
+  new_req_or_option = XNEW (ReqOrOption);
   new_req_or_option->option_name = xstrdup (req_or_option->option_name);
   new_req_or_option->is_true = req_or_option->is_true;
   new_req_or_option->next = NULL;
@@ -1328,7 +1356,7 @@ clone_req_option_list (ReqOption *req_option)
   if (req_option == NULL)
     return NULL;
 
-  new_req_option = (ReqOption *) xmalloc (sizeof (ReqOption));
+  new_req_option = XNEW (ReqOption);
   new_req_option->or_option_terms = NULL;
   new_req_option->next = NULL;
   new_req_option->or_option_terms =
@@ -1372,7 +1400,7 @@ parse_option_cond (const char *s, ReqOption *option)
       else
 	option_name = xstrdup (option_name);
 
-      req = (ReqOrOption *) xmalloc (sizeof (ReqOrOption));
+      req = XNEW (ReqOrOption);
       req->option_name = option_name;
       req->is_true = is_true;
       req->next = NULL;
@@ -1440,7 +1468,7 @@ parse_insn_pattern (const char *in, insn_pattern *insn)
 
   for (i = 1; i < rec.count; i++)
     {
-      precond_e *cond = (precond_e *) xmalloc (sizeof (precond_e));
+      precond_e *cond = XNEW (precond_e);
 
       if (!parse_precond (rec.vec[i], cond))
 	{
@@ -1459,7 +1487,7 @@ parse_insn_pattern (const char *in, insn_pattern *insn)
     {
       /* Handle the option conditions.  */
       ReqOption **r_p;
-      ReqOption *req_option = (ReqOption *) xmalloc (sizeof (ReqOption));
+      ReqOption *req_option = XNEW (ReqOption);
       req_option->or_option_terms = NULL;
       req_option->next = NULL;
 
@@ -1496,7 +1524,7 @@ parse_insn_repl (const char *in, insn_repl *r_p)
 
   for (i = 0; i < rec.count; i++)
     {
-      insn_repl_e *e = (insn_repl_e *) xmalloc (sizeof (insn_repl_e));
+      insn_repl_e *e = XNEW (insn_repl_e);
 
       e->next = NULL;
 
@@ -1632,7 +1660,7 @@ build_transition (insn_pattern *initial_insn,
       return NULL;
     }
 
-  tr = (TransitionRule *) xmalloc (sizeof (TransitionRule));
+  tr = XNEW (TransitionRule);
   tr->opcode = opcode;
   tr->conditions = NULL;
   tr->to_instr = NULL;
@@ -1688,7 +1716,7 @@ build_transition (insn_pattern *initial_insn,
 	  op2 = get_opmatch (&initial_insn->t.operand_map, precond->opname2);
 	  if (op2 == NULL)
 	    as_fatal (_("opcode '%s': no bound opname '%s' "
-			"for precondition in %s"),
+			"for precondition in '%s'"),
 		      xtensa_opcode_name (isa, opcode),
 		      precond->opname2, from_string);
 	}
@@ -1727,7 +1755,7 @@ build_transition (insn_pattern *initial_insn,
       const char *fn_name;
       const char *operand_arg_name;
 
-      bi = (BuildInstr *) xmalloc (sizeof (BuildInstr));
+      bi = XNEW (BuildInstr);
       append_build_insn (tr, bi);
 
       bi->opcode = XTENSA_UNDEFINED;
@@ -1769,7 +1797,9 @@ build_transition (insn_pattern *initial_insn,
 	  /* Check for the right number of ops.  */
 	  if (xtensa_opcode_num_operands (isa, bi->opcode)
 	      != (int) operand_count)
-	    as_fatal (_("opcode '%s': replacement does not have %d ops"),
+	    as_fatal (ngettext ("opcode '%s': replacement does not have %d op",
+				"opcode '%s': replacement does not have %d ops",
+				xtensa_opcode_num_operands (isa, bi->opcode)),
 		      opcode_name,
 		      xtensa_opcode_num_operands (isa, bi->opcode));
 	}
@@ -1799,7 +1829,7 @@ build_transition (insn_pattern *initial_insn,
 	      orig_op = get_opmatch (&initial_insn->t.operand_map,
 				     op->operand_name);
 	      if (orig_op == NULL)
-		as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
+		as_fatal (_("opcode '%s': unidentified operand '%s' in '%s'"),
 			  opcode_name, op->operand_name, to_string);
 	      append_field_op (bi, op->operand_num, orig_op->operand_num);
 	    }
@@ -1829,13 +1859,13 @@ build_transition (insn_pattern *initial_insn,
 	      orig_op = get_opmatch (&initial_insn->t.operand_map,
 				     operand_arg_name);
 	      if (orig_op == NULL)
-		as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
+		as_fatal (_("opcode '%s': unidentified operand '%s' in '%s'"),
 			  opcode_name, op->operand_name, to_string);
 	      append_user_fn_field_op (bi, op->operand_num,
 				       typ, orig_op->operand_num);
 	    }
 	  else
-	    as_fatal (_("opcode %s: could not parse operand '%s' in '%s'"),
+	    as_fatal (_("opcode '%s': could not parse operand '%s' in '%s'"),
 		      opcode_name, op->operand_name, to_string);
 	}
     }
@@ -1857,10 +1887,9 @@ build_transition_table (const string_pattern_pair *transitions,
     return table;
 
   /* Otherwise, build it now.  */
-  table = (TransitionTable *) xmalloc (sizeof (TransitionTable));
+  table = XNEW (TransitionTable);
   table->num_opcodes = num_opcodes;
-  table->table =
-    (TransitionList **) xmalloc (sizeof (TransitionTable *) * num_opcodes);
+  table->table = XNEWVEC (TransitionList *, num_opcodes);
 
   for (i = 0; i < num_opcodes; i++)
     table->table[i] = NULL;

@@ -1,6 +1,6 @@
 /* This is the machine dependent code of the Visium Assembler.
 
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -15,9 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA. */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include "as.h"
 #include "safe-ctype.h"
@@ -112,9 +112,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -222,7 +222,7 @@ visium_rdata (int xxx)
 valueT
 md_section_align (asection *seg, valueT addr)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
 
   return ((addr + (1 << align) - 1) & -(1 << align));
 }
@@ -275,7 +275,6 @@ static struct visium_arch_option_table visium_archs[] =
   {"mcm",   VISIUM_ARCH_MCM},
   {"gr5",   VISIUM_ARCH_MCM},
   {"gr6",   VISIUM_ARCH_GR6},
-  {NULL, 0}
 };
 
 struct visium_long_option_table
@@ -289,7 +288,7 @@ struct visium_long_option_table
 static int
 visium_parse_arch (const char *str)
 {
-  struct visium_arch_option_table *opt;
+  unsigned int i;
 
   if (strlen (str) == 0)
     {
@@ -297,11 +296,10 @@ visium_parse_arch (const char *str)
       return 0;
     }
 
-
-  for (opt = visium_archs; opt->name != NULL; opt++)
-    if (strcmp (opt->name, str) == 0)
+  for (i = 0; i < ARRAY_SIZE (visium_archs); i++)
+    if (strcmp (visium_archs[i].name, str) == 0)
       {
-	visium_arch = opt->value;
+	visium_arch = visium_archs[i].value;
 	return 1;
       }
 
@@ -823,9 +821,6 @@ md_begin (void)
    emitted is stored in *sizeP .  An error message is returned,
    or NULL on OK.  */
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
@@ -1068,10 +1063,10 @@ md_assemble (char *str0)
 
   /* Look up mnemonic in opcode table, and get the code,
      the instruction format, and the flags that indicate
-     which family members support this mnenonic.  */
+     which family members support this mnemonic.  */
   if (get_opcode (&opcode, &amode, &arch_flags, mnem) < 0)
     {
-      as_bad ("Unknown instruction mnenonic `%s'", mnem);
+      as_bad ("Unknown instruction mnemonic `%s'", mnem);
       return;
     }
 
@@ -1370,12 +1365,16 @@ md_assemble (char *str0)
       if (previous_mode == mode_cad || previous_mode == mode_ci)
 	as_bad ("branch instruction in delay slot");
 
+      /* For the GR6, BRA insns must be aligned on 64-bit boundaries.  */
+      if (visium_arch == VISIUM_ARCH_GR6)
+	do_align (3, NULL, 0, 0);
+
       this_dest = r3;
       condition_code = cc;
       break;
 
     case mode_das:
-      /* register := register * 5-bit imediate/register shift count
+      /* register := register * 5-bit immediate/register shift count
          Example:
          asl.l  r1,r2,4  */
       ans = parse_gen_reg (&str, &r1);
@@ -1522,8 +1521,7 @@ md_assemble (char *str0)
 	  return;
 	}
       this_dest = r1;
-
-      /* fall through...  */
+      /* Fall through.  */
 
     case mode_i:
       /* MOVIL/WRTL traditionally get an implicit "%l" applied

@@ -1,6 +1,6 @@
 // elfcpp.h -- main header file for elfcpp    -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
@@ -268,6 +268,7 @@ enum EM
   EM_UNICORE = 110,
   EM_ALTERA_NIOS2 = 113,
   EM_CRX = 114,
+  EM_TI_PRU = 144,
   EM_AARCH64 = 183,
   EM_TILEGX = 191,
   // The Morph MT.
@@ -406,6 +407,8 @@ enum SHT
   SHT_MIPS_REGINFO = 0x70000006,
   // Section contains miscellaneous options.
   SHT_MIPS_OPTIONS = 0x7000000d,
+  // ABI related flags section.
+  SHT_MIPS_ABIFLAGS = 0x7000002a,
 
   // AARCH64-specific section type.
   SHT_AARCH64_ATTRIBUTES = 0x70000003,
@@ -512,7 +515,9 @@ enum PT
   // Platform architecture compatibility information
   PT_AARCH64_ARCHEXT = 0x70000000,
   // Exception unwind tables
-  PT_AARCH64_UNWIND = 0x70000001
+  PT_AARCH64_UNWIND = 0x70000001,
+  // 4k page table size
+  PT_S390_PGSTE = 0x70000000,
 };
 
 // The valid bit flags found in the Phdr p_flags field.
@@ -763,12 +768,18 @@ enum DT
   // Specify the value of _GLOBAL_OFFSET_TABLE_.
   DT_PPC_GOT = 0x70000000,
 
+  // Specify whether various optimisations are possible.
+  DT_PPC_OPT = 0x70000001,
+
   // Specify the start of the .glink section.
   DT_PPC64_GLINK = 0x70000000,
 
   // Specify the start and size of the .opd section.
   DT_PPC64_OPD = 0x70000001,
   DT_PPC64_OPDSZ = 0x70000002,
+
+  // Specify whether various optimisations are possible.
+  DT_PPC64_OPT = 0x70000003,
 
   // The index of an STT_SPARC_REGISTER symbol within the DT_SYMTAB
   // symbol table.  One dynamic entry exists for every STT_SPARC_REGISTER
@@ -866,6 +877,8 @@ enum DT
   DT_MIPS_PLTGOT = 0x70000032,
   // Points to the base of a writable PLT.
   DT_MIPS_RWPLT = 0x70000034,
+  // Relative offset of run time loader map, used for debugging.
+  DT_MIPS_RLD_MAP_REL = 0x70000035,
 
   DT_AUXILIARY = 0x7ffffffd,
   DT_USED = 0x7ffffffe,
@@ -971,7 +984,9 @@ enum
   NT_GNU_BUILD_ID = 3,
   // The version of gold used to link.  Th descriptor is just a
   // string.
-  NT_GNU_GOLD_VERSION = 4
+  NT_GNU_GOLD_VERSION = 4,
+  // Program property note, as described in "Linux Extensions to the gABI".
+  NT_GNU_PROPERTY_TYPE_0 = 5
 };
 
 // The OS values which may appear in word 0 of a NT_GNU_ABI_TAG note.
@@ -984,6 +999,21 @@ enum
   ELF_NOTE_OS_FREEBSD = 3,
   ELF_NOTE_OS_NETBSD = 4,
   ELF_NOTE_OS_SYLLABLE = 5
+};
+
+// Program property types for NT_GNU_PROPERTY_TYPE_0.
+
+enum
+{
+  GNU_PROPERTY_STACK_SIZE = 1,
+  GNU_PROPERTY_NO_COPY_ON_PROTECTED = 2,
+  GNU_PROPERTY_LOPROC = 0xc0000000,
+  GNU_PROPERTY_X86_ISA_1_USED = 0xc0000000,
+  GNU_PROPERTY_X86_ISA_1_NEEDED = 0xc0000001,
+  GNU_PROPERTY_X86_FEATURE_1_AND = 0xc0000002,
+  GNU_PROPERTY_HIPROC = 0xdfffffff,
+  GNU_PROPERTY_LOUSER = 0xe0000000,
+  GNU_PROPERTY_HIUSER = 0xffffffff
 };
 
 } // End namespace elfcpp.
@@ -1341,9 +1371,26 @@ class Chdr_write
   put_ch_addralign(typename Elf_types<size>::Elf_WXword v)
   { this->p_->ch_addralign = Convert<size, big_endian>::convert_host(v); }
 
+  void
+  put_ch_reserved(Elf_Word);
+
  private:
   internal::Chdr_data<size>* p_;
 };
+
+template<>
+inline void
+elfcpp::Chdr_write<64, true>::put_ch_reserved(Elf_Word v)
+{
+  this->p_->ch_reserved = v;
+}
+
+template<>
+inline void
+elfcpp::Chdr_write<64, false>::put_ch_reserved(Elf_Word v)
+{
+  this->p_->ch_reserved = v;
+}
 
 // Accessor class for an ELF segment header.
 

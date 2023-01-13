@@ -1,6 +1,6 @@
 /* Caching code for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "target-dcache.h"
 #include "inferior.h"
 #include "splay-tree.h"
+#include "gdbarch.h"
 
 /* Commands with a prefix of `{set,show} dcache'.  */
 static struct cmd_list_element *dcache_set_list = NULL;
@@ -65,7 +66,7 @@ static struct cmd_list_element *dcache_show_list = NULL;
    is set, etc., then the chunk is skipped.  Those chunks are handled
    in target_xfer_memory() (or target_xfer_memory_partial()).
 
-   This doesn't occur very often.  The most common occurance is when
+   This doesn't occur very often.  The most common occurrence is when
    the last bit of the .text segment and the first bit of the .data
    segment fall within the same dcache page with a ro/cacheable memory
    region defined for the .text segment and a rw/non-cacheable memory
@@ -125,11 +126,7 @@ static int dcache_read_line (DCACHE *dcache, struct dcache_block *db);
 
 static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
 
-static void dcache_info (char *exp, int tty);
-
-void _initialize_dcache (void);
-
-static int dcache_enabled_p = 0; /* OBSOLETE */
+static bool dcache_enabled_p = false; /* OBSOLETE */
 
 static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
@@ -476,7 +473,7 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
   /* If this is a different inferior from what we've recorded,
      flush the cache.  */
 
-  if (! ptid_equal (inferior_ptid, dcache->ptid))
+  if (inferior_ptid != dcache->ptid)
     {
       dcache_invalidate (dcache);
       dcache->ptid = inferior_ptid;
@@ -587,7 +584,7 @@ dcache_print_line (DCACHE *dcache, int index)
 /* Parse EXP and show the info about DCACHE.  */
 
 static void
-dcache_info_1 (DCACHE *dcache, char *exp)
+dcache_info_1 (DCACHE *dcache, const char *exp)
 {
   splay_tree_node n;
   int i, refcount;
@@ -599,7 +596,7 @@ dcache_info_1 (DCACHE *dcache, char *exp)
       i = strtol (exp, &linestart, 10);
       if (linestart == exp || i < 0)
 	{
-	  printf_filtered (_("Usage: info dcache [linenumber]\n"));
+	  printf_filtered (_("Usage: info dcache [LINENUMBER]\n"));
           return;
 	}
 
@@ -612,14 +609,14 @@ dcache_info_1 (DCACHE *dcache, char *exp)
 		   dcache ? (unsigned) dcache->line_size
 		   : dcache_line_size);
 
-  if (dcache == NULL || ptid_equal (dcache->ptid, null_ptid))
+  if (dcache == NULL || dcache->ptid == null_ptid)
     {
       printf_filtered (_("No data cache available.\n"));
       return;
     }
 
   printf_filtered (_("Contains data for %s\n"),
-		   target_pid_to_str (dcache->ptid));
+		   target_pid_to_str (dcache->ptid).c_str ());
 
   refcount = 0;
 
@@ -642,13 +639,13 @@ dcache_info_1 (DCACHE *dcache, char *exp)
 }
 
 static void
-dcache_info (char *exp, int tty)
+info_dcache_command (const char *exp, int tty)
 {
   dcache_info_1 (target_dcache_get (), exp);
 }
 
 static void
-set_dcache_size (char *args, int from_tty,
+set_dcache_size (const char *args, int from_tty,
 		 struct cmd_list_element *c)
 {
   if (dcache_size == 0)
@@ -660,7 +657,7 @@ set_dcache_size (char *args, int from_tty,
 }
 
 static void
-set_dcache_line_size (char *args, int from_tty,
+set_dcache_line_size (const char *args, int from_tty,
 		      struct cmd_list_element *c)
 {
   if (dcache_line_size < 2
@@ -674,7 +671,7 @@ set_dcache_line_size (char *args, int from_tty,
 }
 
 static void
-set_dcache_command (char *arg, int from_tty)
+set_dcache_command (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set dcache\" must be followed by the name of a subcommand.\n");
@@ -682,13 +679,14 @@ set_dcache_command (char *arg, int from_tty)
 }
 
 static void
-show_dcache_command (char *args, int from_tty)
+show_dcache_command (const char *args, int from_tty)
 {
   cmd_show_list (dcache_show_list, from_tty, "");
 }
 
+void _initialize_dcache ();
 void
-_initialize_dcache (void)
+_initialize_dcache ()
 {
   add_setshow_boolean_cmd ("remotecache", class_support,
 			   &dcache_enabled_p, _("\
@@ -702,12 +700,13 @@ exists only for compatibility reasons."),
 			   show_dcache_enabled_p,
 			   &setlist, &showlist);
 
-  add_info ("dcache", dcache_info,
+  add_info ("dcache", info_dcache_command,
 	    _("\
 Print information on the dcache performance.\n\
+Usage: info dcache [LINENUMBER]\n\
 With no arguments, this command prints the cache configuration and a\n\
-summary of each line in the cache.  Use \"info dcache <lineno> to dump\"\n\
-the contents of a given line."));
+summary of each line in the cache.  With an argument, dump\"\n\
+the contents of the given line."));
 
   add_prefix_cmd ("dcache", class_obscure, set_dcache_command, _("\
 Use this command to set number of lines in dcache and line-size."),

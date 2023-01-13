@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris SPARC.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -234,12 +234,12 @@ sparc_sol2_static_transform_name (const char *name)
      globalization prefix is followed by the function name (nested
      static variables within a function are supposed to generate a
      warning message, and are left alone).  The procedure is
-     documented in the Stabs Interface Manual, which is distrubuted
+     documented in the Stabs Interface Manual, which is distributed
      with the compilers, although version 4.0 of the manual seems to
      be incorrect in some places, at least for SPARC.  The
      globalization prefix is encoded into an N_OPT stab, with the form
      "G=<prefix>".  The globalization prefix always seems to start
-     with a dollar sign '$'; a dot '.' is used as a seperator.  So we
+     with a dollar sign '$'; a dot '.' is used as a separator.  So we
      simply strip everything up until the last dot.  */
 
   if (name[0] == '$')
@@ -292,13 +292,10 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* How to print LWP PTIDs from core files.  */
   set_gdbarch_core_pid_to_str (gdbarch, sol2_core_pid_to_str);
 }
-
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc_sol2_tdep (void);
-
+void _initialize_sparc_sol2_tdep ();
 void
-_initialize_sparc_sol2_tdep (void)
+_initialize_sparc_sol2_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0,
 			  GDB_OSABI_SOLARIS, sparc32_sol2_init_abi);

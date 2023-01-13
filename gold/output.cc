@@ -1,6 +1,6 @@
 // output.cc -- manage the output file for gold
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -127,14 +127,26 @@ namespace gold
 static int
 gold_fallocate(int o, off_t offset, off_t len)
 {
+  if (len <= 0)
+    return 0;
+
 #ifdef HAVE_POSIX_FALLOCATE
   if (parameters->options().posix_fallocate())
-    return ::posix_fallocate(o, offset, len);
+    {
+      int err = ::posix_fallocate(o, offset, len);
+      if (err != EINVAL && err != ENOSYS && err != EOPNOTSUPP)
+	return err;
+    }
 #endif // defined(HAVE_POSIX_FALLOCATE)
+
 #ifdef HAVE_FALLOCATE
-  if (::fallocate(o, 0, offset, len) == 0)
-    return 0;
+  {
+    int err = ::fallocate(o, 0, offset, len);
+    if (err != EINVAL && err != ENOSYS && err != EOPNOTSUPP)
+      return err;
+  }
 #endif // defined(HAVE_FALLOCATE)
+
   if (::ftruncate(o, offset + len) < 0)
     return errno;
   return 0;
@@ -1882,6 +1894,27 @@ Output_data_dynamic::do_adjust_output_section(Output_section* os)
     gold_unreachable();
 }
 
+// Get a dynamic entry offset.
+
+unsigned int
+Output_data_dynamic::get_entry_offset(elfcpp::DT tag) const
+{
+  int dyn_size;
+
+  if (parameters->target().get_size() == 32)
+    dyn_size = elfcpp::Elf_sizes<32>::dyn_size;
+  else if (parameters->target().get_size() == 64)
+    dyn_size = elfcpp::Elf_sizes<64>::dyn_size;
+  else
+    gold_unreachable();
+
+  for (size_t i = 0; i < entries_.size(); ++i)
+    if (entries_[i].tag() == tag)
+      return i * dyn_size;
+
+  return -1U;
+}
+
 // Set the final data size.
 
 void
@@ -2362,7 +2395,8 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     lookup_maps_(new Output_section_lookup_maps),
     free_list_(),
     free_space_fill_(NULL),
-    patch_space_(0)
+    patch_space_(0),
+    reloc_section_(NULL)
 {
   // An unallocated section has no address.  Forcing this means that
   // we don't need special treatment for symbols defined in debug
@@ -2414,7 +2448,13 @@ Output_section::add_input_section(Layout* layout,
 				  unsigned int reloc_shndx,
 				  bool have_sections_script)
 {
+  section_size_type input_section_size = shdr.get_sh_size();
+  section_size_type uncompressed_size;
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
+  if (object->section_is_compressed(shndx, &uncompressed_size,
+				    &addralign))
+    input_section_size = uncompressed_size;
+
   if ((addralign & (addralign - 1)) != 0)
     {
       object->error(_("invalid alignment %lu for section \"%s\""),
@@ -2463,11 +2503,6 @@ Output_section::add_input_section(Layout* layout,
 	  return -1;
 	}
     }
-
-  section_size_type input_section_size = shdr.get_sh_size();
-  section_size_type uncompressed_size;
-  if (object->section_is_compressed(shndx, &uncompressed_size))
-    input_section_size = uncompressed_size;
 
   off_t offset_in_section;
 
@@ -3144,17 +3179,17 @@ Output_section::set_final_data_size()
 
       uint64_t address = this->address();
       off_t startoff = this->offset();
-      off_t off = startoff + this->first_input_offset_;
+      off_t off = this->first_input_offset_;
       for (Input_section_list::iterator p = this->input_sections_.begin();
 	   p != this->input_sections_.end();
 	   ++p)
 	{
 	  off = align_address(off, p->addralign());
-	  p->set_address_and_file_offset(address + (off - startoff), off,
+	  p->set_address_and_file_offset(address + off, startoff + off,
 					 startoff);
 	  off += p->data_size();
 	}
-      data_size = off - startoff;
+      data_size = off;
     }
 
   // For full incremental links, we want to allocate some patch space
@@ -3512,8 +3547,10 @@ Output_section::Input_section_sort_section_prefix_special_ordering_compare
     const Output_section::Input_section_sort_entry& s2) const
 {
   // Some input section names have special ordering requirements.
-  int o1 = Layout::special_ordering_of_input_section(s1.section_name().c_str());
-  int o2 = Layout::special_ordering_of_input_section(s2.section_name().c_str());
+  const char *s1_section_name = s1.section_name().c_str();
+  const char *s2_section_name = s2.section_name().c_str();
+  int o1 = Layout::special_ordering_of_input_section(s1_section_name);
+  int o2 = Layout::special_ordering_of_input_section(s2_section_name);
   if (o1 != o2)
     {
       if (o1 < 0)
@@ -3523,6 +3560,8 @@ Output_section::Input_section_sort_section_prefix_special_ordering_compare
       else
 	return o1 < o2;
     }
+  else if (is_prefix_of(".text.sorted", s1_section_name))
+    return strcmp(s1_section_name, s2_section_name) <= 0;
 
   // Keep input order otherwise.
   return s1.index() < s2.index();
@@ -4377,12 +4416,14 @@ Output_segment::set_section_addresses(const Target* target,
   this->offset_ = orig_off;
 
   off_t off = 0;
-  uint64_t ret;
+  off_t foff = *poff;
+  uint64_t ret = 0;
   for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
     {
       if (i == static_cast<int>(ORDER_RELRO_LAST))
 	{
 	  *poff += last_relro_pad;
+	  foff += last_relro_pad;
 	  addr += last_relro_pad;
 	  if (this->output_lists_[i].empty())
 	    {
@@ -4394,12 +4435,20 @@ Output_segment::set_section_addresses(const Target* target,
 	}
       addr = this->set_section_list_addresses(layout, reset,
 					      &this->output_lists_[i],
-					      addr, poff, pshndx, &in_tls);
-      if (i < static_cast<int>(ORDER_SMALL_BSS))
-	{
-	  this->filesz_ = *poff - orig_off;
-	  off = *poff;
-	}
+					      addr, poff, &foff, pshndx,
+					      &in_tls);
+
+      // FOFF tracks the last offset used for the file image,
+      // and *POFF tracks the last offset used for the memory image.
+      // When not using a linker script, bss sections should all
+      // be processed in the ORDER_SMALL_BSS and later buckets.
+      gold_assert(*poff == foff
+		  || i == static_cast<int>(ORDER_TLS_BSS)
+		  || i >= static_cast<int>(ORDER_SMALL_BSS)
+		  || layout->script_options()->saw_sections_clause());
+
+      this->filesz_ = foff - orig_off;
+      off = foff;
 
       ret = addr;
     }
@@ -4464,6 +4513,7 @@ uint64_t
 Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 					   Output_data_list* pdl,
 					   uint64_t addr, off_t* poff,
+					   off_t* pfoff,
 					   unsigned int* pshndx,
 					   bool* in_tls)
 {
@@ -4473,10 +4523,14 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
   off_t maxoff = startoff;
 
   off_t off = startoff;
+  off_t foff = *pfoff;
   for (Output_data_list::iterator p = pdl->begin();
        p != pdl->end();
        ++p)
     {
+      bool is_bss = (*p)->is_section_type(elfcpp::SHT_NOBITS);
+      bool is_tls = (*p)->is_section_flag_set(elfcpp::SHF_TLS);
+
       if (reset)
 	(*p)->reset_address_and_file_offset();
 
@@ -4486,7 +4540,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	{
 	  uint64_t align = (*p)->addralign();
 
-	  if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+	  if (is_tls)
 	    {
 	      // Give the first TLS section the alignment of the
 	      // entire TLS segment.  Otherwise the TLS segment as a
@@ -4521,8 +4575,11 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 
 	  if (!parameters->incremental_update())
 	    {
+	      gold_assert(off == foff || is_bss);
 	      off = align_address(off, align);
-	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	      if (is_tls || !is_bss)
+		foff = off;
+	      (*p)->set_address_and_file_offset(addr + (off - startoff), foff);
 	    }
 	  else
 	    {
@@ -4530,6 +4587,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	      (*p)->pre_finalize_data_size();
 	      off_t current_size = (*p)->current_data_size();
 	      off = layout->allocate(current_size, align, startoff);
+	      foff = off;
 	      if (off == -1)
 		{
 		  gold_assert((*p)->output_section() != NULL);
@@ -4537,7 +4595,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 				  "relink with --incremental-full"),
 				(*p)->output_section()->name());
 		}
-	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	      (*p)->set_address_and_file_offset(addr + (off - startoff), foff);
 	      if ((*p)->data_size() > current_size)
 		{
 		  gold_assert((*p)->output_section() != NULL);
@@ -4552,13 +4610,22 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	  // For incremental updates, use the fixed offset for the
 	  // high-water mark computation.
 	  off = (*p)->offset();
+	  foff = off;
 	}
       else
 	{
 	  // The script may have inserted a skip forward, but it
 	  // better not have moved backward.
 	  if ((*p)->address() >= addr + (off - startoff))
-	    off += (*p)->address() - (addr + (off - startoff));
+	    {
+	      if (!is_bss && off > foff)
+	        gold_warning(_("script places BSS section in the middle "
+			       "of a LOAD segment; space will be allocated "
+			       "in the file"));
+	      off += (*p)->address() - (addr + (off - startoff));
+	      if (is_tls || !is_bss)
+		foff = off;
+	    }
 	  else
 	    {
 	      if (!layout->script_options()->saw_sections_clause())
@@ -4582,7 +4649,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 			       os->name(), previous_dot, dot);
 		}
 	    }
-	  (*p)->set_file_offset(off);
+	  (*p)->set_file_offset(foff);
 	  (*p)->finalize_data_size();
 	}
 
@@ -4597,9 +4664,13 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
       // We want to ignore the size of a SHF_TLS SHT_NOBITS
       // section.  Such a section does not affect the size of a
       // PT_LOAD segment.
-      if (!(*p)->is_section_flag_set(elfcpp::SHF_TLS)
-	  || !(*p)->is_section_type(elfcpp::SHT_NOBITS))
+      if (!is_tls || !is_bss)
 	off += (*p)->data_size();
+
+      // We don't allocate space in the file for SHT_NOBITS sections,
+      // unless a script has force-placed one in the middle of a segment.
+      if (!is_bss)
+	foff = off;
 
       if (off > maxoff)
 	maxoff = off;
@@ -4612,6 +4683,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
     }
 
   *poff = maxoff;
+  *pfoff = foff;
   return addr + (maxoff - startoff);
 }
 
@@ -4747,7 +4819,7 @@ Output_segment::first_section() const
 	    return (*p)->output_section();
 	}
     }
-  gold_unreachable();
+  return NULL;
 }
 
 // Return the number of Output_sections in an Output_segment.

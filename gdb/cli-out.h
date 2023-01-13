@@ -1,5 +1,5 @@
 /* Output generating routines for GDB CLI.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GDB.
@@ -21,32 +21,68 @@
 #define CLI_OUT_H
 
 #include "ui-out.h"
-#include "vec.h"
+#include <vector>
 
-/* Used for cli_ui_out_data->streams.  */
+class cli_ui_out : public ui_out
+{
+public:
 
-typedef struct ui_file *ui_filep;
-DEF_VEC_P (ui_filep);
+  explicit cli_ui_out (ui_file *stream, ui_out_flags flags);
+  virtual ~cli_ui_out ();
 
-/* These are exported so that they can be extended by other `ui_out'
-   implementations, like TUI's.  */
+  ui_file *set_stream (ui_file *stream);
 
-struct cli_ui_out_data
-  {
-    VEC (ui_filep) *streams;
-    int suppress_output;
-  };
+  bool can_emit_style_escape () const override;
 
-extern const struct ui_out_impl cli_ui_out_impl;
+protected:
 
+  virtual void do_table_begin (int nbrofcols, int nr_rows,
+			       const char *tblid) override;
+  virtual void do_table_body () override;
+  virtual void do_table_end () override;
+  virtual void do_table_header (int width, ui_align align,
+				const std::string &col_name,
+				const std::string &col_hdr) override;
+  /* Note: level 0 is the top-level so LEVEL is always greater than
+     zero.  */
+  virtual void do_begin (ui_out_type type, const char *id) override;
+  virtual void do_end (ui_out_type type) override;
+  virtual void do_field_signed (int fldno, int width, ui_align align,
+				const char *fldname, LONGEST value) override;
+  virtual void do_field_unsigned (int fldno, int width, ui_align align,
+				  const char *fldname, ULONGEST value)
+    override;
+  virtual void do_field_skip (int fldno, int width, ui_align align,
+			      const char *fldname) override;
+  virtual void do_field_string (int fldno, int width, ui_align align,
+				const char *fldname,
+				const char *string,
+				const ui_file_style &style) override;
+  virtual void do_field_fmt (int fldno, int width, ui_align align,
+			     const char *fldname, const ui_file_style &style,
+			     const char *format, va_list args)
+    override ATTRIBUTE_PRINTF (7, 0);
+  virtual void do_spaces (int numspaces) override;
+  virtual void do_text (const char *string) override;
+  virtual void do_message (const ui_file_style &style,
+			   const char *format, va_list args) override
+    ATTRIBUTE_PRINTF (3,0);
+  virtual void do_wrap_hint (const char *identstring) override;
+  virtual void do_flush () override;
+  virtual void do_redirect (struct ui_file *outstream) override;
 
-extern struct ui_out *cli_out_new (struct ui_file *stream);
+  bool suppress_output ()
+  { return m_suppress_output; }
 
-extern void cli_out_data_ctor (struct cli_ui_out_data *data,
-			       struct ui_file *stream);
+private:
 
-extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,
-					   struct ui_file *stream);
+  void field_separator ();
+
+  std::vector<ui_file *> m_streams;
+  bool m_suppress_output;
+};
+
+extern cli_ui_out *cli_out_new (struct ui_file *stream);
 
 extern void cli_display_match_list (char **matches, int len, int max);
 

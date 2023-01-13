@@ -3,7 +3,7 @@
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,8 +20,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CP_ABI_H_
-#define CP_ABI_H_ 1
+#ifndef CP_ABI_H
+#define CP_ABI_H
 
 struct fn_field;
 struct type;
@@ -135,7 +135,7 @@ extern struct value *value_virtual_fn_field (struct value **valuep,
    FULL, TOP, and USING_ENC can each be zero, in which case we don't
    provide the corresponding piece of information.  */
 extern struct type *value_rtti_type (struct value *value,
-                                     int *full, int *top,
+                                     int *full, LONGEST *top,
 				     int *using_enc);
 
 /* Compute the offset of the baseclass which is the INDEXth baseclass
@@ -146,7 +146,7 @@ extern struct type *value_rtti_type (struct value *value,
 
 extern int baseclass_offset (struct type *type,
 			     int index, const gdb_byte *valaddr,
-			     int embedded_offset,
+			     LONGEST embedded_offset,
 			     CORE_ADDR address,
 			     const struct value *val);
 
@@ -196,10 +196,9 @@ extern struct type *cplus_type_from_type_info (struct value *value);
 
 /* Given a value which holds a pointer to a std::type_info, return the
    name of the type which that type_info represents.  Throw an
-   exception if the type name cannot be found.  The result is
-   xmalloc'd and must be freed by the caller.  */
+   exception if the type name cannot be found.  */
 
-extern char *cplus_typename_from_type_info (struct value *value);
+extern std::string cplus_typename_from_type_info (struct value *value);
 
 /* Determine if we are currently in a C++ thunk.  If so, get the
    address of the routine we are thunking to and continue to there
@@ -208,9 +207,11 @@ extern char *cplus_typename_from_type_info (struct value *value);
 CORE_ADDR cplus_skip_trampoline (struct frame_info *frame,
 				 CORE_ADDR stop_pc);
 
-/* Return non-zero if an argument of type TYPE should be passed by
-   reference instead of value.  */
-extern int cp_pass_by_reference (struct type *type);
+/* Return a struct that provides pass-by-reference information
+   about the given TYPE.  */
+
+extern struct language_pass_by_ref_info cp_pass_by_reference
+  (struct type *type);
 
 struct cp_abi_ops
 {
@@ -229,9 +230,9 @@ struct cp_abi_ops
 				     int j, struct type * type,
 				     int offset);
   struct type *(*rtti_type) (struct value *v, int *full,
-			     int *top, int *using_enc);
+			     LONGEST *top, int *using_enc);
   int (*baseclass_offset) (struct type *type, int index,
-			   const bfd_byte *valaddr, int embedded_offset,
+			   const bfd_byte *valaddr, LONGEST embedded_offset,
 			   CORE_ADDR address, const struct value *val);
   void (*print_method_ptr) (const gdb_byte *contents,
 			    struct type *type,
@@ -245,14 +246,13 @@ struct cp_abi_ops
   struct value *(*get_typeid) (struct value *value);
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
   struct type *(*get_type_from_type_info) (struct value *value);
-  char *(*get_typename_from_type_info) (struct value *value);
+  std::string (*get_typename_from_type_info) (struct value *value);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
-  int (*pass_by_reference) (struct type *type);
+  struct language_pass_by_ref_info (*pass_by_reference) (struct type *type);
 };
 
 
 extern int register_cp_abi (struct cp_abi_ops *abi);
 extern void set_cp_abi_as_auto_default (const char *short_name);
 
-#endif
-
+#endif /* CP_ABI_H */

@@ -1,5 +1,5 @@
 #source: mov1.s
-#as: --32
+#as: --32 -mrelax-relocations=yes
 #ld: -pie -melf_i386 --no-dynamic-linker
 #objdump: -dw
 

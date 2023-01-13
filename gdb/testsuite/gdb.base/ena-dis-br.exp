@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 1997-2016 Free Software Foundation, Inc.
+# Copyright 1997-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 standard_testfile break.c break1.c
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} \
+if {[prepare_for_testing "failed to prepare" ${testfile} \
 	 [list $srcfile $srcfile2] {debug nowarnings}]} {
     return -1
 }
@@ -60,7 +60,7 @@ gdb_test_no_output "enable $bp" "enable break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y.*" \
-    "info break marker1"
+    "info break marker1 before hitting breakpoint"
 
 # See the comments in condbreak.exp for "run until breakpoint at
 # marker1" for an explanation of the xfail below.
@@ -84,7 +84,7 @@ gdb_test_no_output "enable once $bp" "enable once break marker2"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+dis\[ \t\]+y.*" \
-    "info auto-disabled break marker2"
+    "info auto-disabled break marker2 before hitting breakpoint"
 
 # See the comments in condbreak.exp for "run until breakpoint at
 # marker1" for an explanation of the xfail below.
@@ -100,7 +100,7 @@ gdb_test_multiple "continue" "$test" {
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+dis\[ \t\]+n.*" \
-    "info auto-disabled break marker2"
+    "info auto-disabled break marker2 after hitting breakpoint"
 
 # Verify that we don't stop at a disabled breakpoint.
 gdb_continue_to_end "no stop"
@@ -209,7 +209,7 @@ gdb_test "ignore $bp 0" \
 
 gdb_test "ignore $bp 1" \
     "Will ignore next crossing of breakpoint \[0-9\]*.*" \
-    "ignore break marker1"
+    "ignore break marker1 1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y.*ignore next 1 hits.*" \
@@ -246,7 +246,7 @@ gdb_test_no_output "enable del $bp" "enable del break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+del\[ \t\]+y.*ignore next 1 hits.*" \
-    "info break marker1"
+    "info break marker1 after hitting breakpoint"
 
 gdb_continue_to_end "no stop at ignored & auto-deleted break marker1"
 rerun_to_main
@@ -266,7 +266,7 @@ set bp [break_at marker1 " line $bp_location15"]
 
 gdb_test "ignore $bp 10" \
     "Will ignore next 10 crossings of breakpoint \[0-9\]*.*" \
-    "ignore break marker1"
+    "ignore break marker1 10"
 
 gdb_test_no_output "disable $bp" "disable break marker1"
 
@@ -324,6 +324,9 @@ set b4 [break_at main ""]
 #
 # WHAT - the command to test (disable/enable).
 #
+# Note: tests involving location ranges (and more) are found in
+# gdb.cp/ena-dis-br-range.exp.
+#
 proc test_ena_dis_br { what } {
     global b1
     global b2
@@ -369,7 +372,7 @@ proc test_ena_dis_br { what } {
 
     # Now enable(disable) $b1 fooo.1, it should give error on fooo.
     gdb_test "$what $b1 fooo.1" \
-       "Bad breakpoint number 'fooo'" \
+       "Bad breakpoint number 'fooo\\.1'" \
        "$what \$b1 fooo.1"
 
     # $b1 should be enabled(disabled).
@@ -392,10 +395,10 @@ proc test_ena_dis_br { what } {
        }
     }
 
-    # Now enable(disable) $b4.1 fooobaar and
-    # it should give warning on fooobaar.
+    # Now enable(disable) '$b4.1 fooobaar'.  This should error on
+    # fooobaar.
     gdb_test "$what $b4.1 fooobaar" \
-       "warning: bad breakpoint number at or near 'fooobaar'" \
+       "Bad breakpoint number 'fooobaar'" \
        "$what \$b4.1 fooobar"
     set test1 "${what}d \$b4.1"
 

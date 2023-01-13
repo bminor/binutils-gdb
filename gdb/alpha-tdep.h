@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on Alpha systems.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -83,7 +83,7 @@ struct gdbarch_tdep
 
   /* Does the PC fall in a signal trampoline.  */
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
-     look at tramp-frame.h and other simplier per-architecture
+     look at tramp-frame.h and other simpler per-architecture
      sigtramp unwinders.  */
   int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc,
 			 const char *name);
@@ -103,7 +103,8 @@ struct gdbarch_tdep
 };
 
 extern unsigned int alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern int alpha_software_single_step (struct frame_info *frame);
+extern std::vector<CORE_ADDR> alpha_software_single_step
+  (struct regcache *regcache);
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);

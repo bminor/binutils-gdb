@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -19,14 +19,13 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra xtensa-elf
+# This file is sourced from elf.em, and defines extra xtensa-elf
 # specific routines.
 #
 fragment <<EOF
 
 #include <xtensa-config.h>
 #include "../bfd/elf-bfd.h"
-#include "../bfd/libbfd.h"
 #include "elf/xtensa.h"
 #include "bfd.h"
 
@@ -116,12 +115,7 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
 
   if (insn_sec->size != 0)
     {
-      insn_contents = (bfd_byte *) bfd_malloc (insn_sec->size);
-      if (insn_contents == NULL)
-	{
-	  *error_message = _("out of memory");
-	  goto cleanup;
-	}
+      insn_contents = (bfd_byte *) xmalloc (insn_sec->size);
       if (! bfd_get_section_contents (abfd, insn_sec, insn_contents,
 				      (file_ptr) 0, insn_sec->size))
 	{
@@ -133,9 +127,9 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   /* Create a property table section for it.  */
   prop_sec_name = strdup (prop_sec_name);
   prop_sec = bfd_make_section_with_flags
-    (abfd, prop_sec_name, bfd_get_section_flags (abfd, insn_sec));
+    (abfd, prop_sec_name, bfd_section_flags (insn_sec));
   if (prop_sec == NULL
-      || ! bfd_set_section_alignment (abfd, prop_sec, 2))
+      || !bfd_set_section_alignment (prop_sec, 2))
     {
       *error_message = _("could not create new section");
       goto cleanup;
@@ -253,7 +247,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
   char *owned_prop_sec_name = NULL;
   const char *sec_name;
 
-  sec_name = bfd_get_section_name (abfd, sec);
+  sec_name = bfd_section_name (sec);
   if (strcmp (sec_name, INSN_SEC_BASE_NAME) == 0)
     {
       insn_sec_name = INSN_SEC_BASE_NAME;
@@ -273,7 +267,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
       if (! replace_insn_sec_with_prop_sec (abfd, insn_sec_name, prop_sec_name,
 					    &message))
 	{
-	  einfo (_("%P: warning: failed to convert %s table in %B (%s); subsequent disassembly may be incomplete\n"),
+	  einfo (_("%P: warning: failed to convert %s table in %pB (%s); subsequent disassembly may be incomplete\n"),
 		 insn_sec_name, abfd, message);
 	}
     }
@@ -390,7 +384,7 @@ check_xtensa_info (bfd *abfd, asection *info_sec)
 
   data = xmalloc (info_sec->size);
   if (! bfd_get_section_contents (abfd, info_sec, data, 0, info_sec->size))
-    einfo (_("%F%P:%B: cannot read contents of section %A\n"), abfd, info_sec);
+    einfo (_("%F%P: %pB: cannot read contents of section %pA\n"), abfd, info_sec);
 
   if (info_sec->size > 24
       && info_sec->size >= 24 + bfd_get_32 (abfd, data + 4)
@@ -401,11 +395,11 @@ check_xtensa_info (bfd *abfd, asection *info_sec)
 					  &mismatch, &errmsg))
     {
       if (mismatch)
-	einfo (_("%P:%B: warning: incompatible Xtensa configuration (%s)\n"),
+	einfo (_("%P: %pB: warning: incompatible Xtensa configuration (%s)\n"),
 	       abfd, errmsg);
     }
   else
-    einfo (_("%P:%B: warning: cannot parse .xtensa.info section\n"), abfd);
+    einfo (_("%P: %pB: warning: cannot parse .xtensa.info section\n"), abfd);
 
   free (data);
 }
@@ -456,7 +450,7 @@ elf_xtensa_before_allocation (void)
 	 cannot go any further if there are any mismatches.  */
       if ((is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
 	  || (!is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_BIG))
-	einfo (_("%F%P: cross-endian linking for %B not supported\n"),
+	einfo (_("%F%P: cross-endian linking for %pB not supported\n"),
 	       f->the_bfd);
 
       if (! first_bfd)
@@ -602,8 +596,12 @@ xtensa_get_section_deps (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
   /* We have a separate function for this so that
      we could in the future keep a completely independent
      structure that maps a section to its dependence edges.
-     For now, we place these in the sec->userdata field.  */
-  reloc_deps_section *sec_deps = sec->userdata;
+     For now, we place these in the sec->userdata field.
+     This doesn't clash with ldlang.c use of userdata for output
+     sections, and during map output for input sections, since the
+     xtensa use is only for input sections and only extant in
+     before_allocation.  */
+  reloc_deps_section *sec_deps = bfd_section_userdata (sec);
   return sec_deps;
 }
 
@@ -612,7 +610,7 @@ xtensa_set_section_deps (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
 			 asection *sec,
 			 reloc_deps_section *deps_section)
 {
-  sec->userdata = deps_section;
+  bfd_set_section_userdata (sec, deps_section);
 }
 
 
@@ -1299,10 +1297,10 @@ static bfd_boolean
 is_inconsistent_linkonce_section (asection *sec)
 {
   bfd *abfd = sec->owner;
-  const char *sec_name = bfd_get_section_name (abfd, sec);
+  const char *sec_name = bfd_section_name (sec);
   const char *name;
 
-  if ((bfd_get_section_flags (abfd, sec) & SEC_LINK_ONCE) == 0
+  if ((bfd_section_flags (sec) & SEC_LINK_ONCE) == 0
       || strncmp (sec_name, ".gnu.linkonce.", linkonce_len) != 0)
     return FALSE;
 
@@ -1438,7 +1436,7 @@ xtensa_wild_group_interleave_callback (lang_statement_union_type *statement)
 	  struct wildcard_list *l;
 	  for (l = w->section_list; l != NULL; l = l->next)
 	    {
-	      if (l->spec.sorted == TRUE)
+	      if (l->spec.sorted == by_name)
 		{
 		  no_reorder = TRUE;
 		  break;

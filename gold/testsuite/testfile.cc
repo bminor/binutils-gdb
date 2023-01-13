@@ -1,6 +1,6 @@
 // testfile.cc -- Dummy ELF objects for testing purposes.
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -118,6 +118,7 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   NULL,					// attributes_vendor
   "_start",				// entry_symbol_name
   32,					// hash_entry_size
+  elfcpp::SHT_PROGBITS,			// unwind_section_type
 };
 
 // The test targets.

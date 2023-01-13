@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,8 +35,7 @@ extern int default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
    Return 0 if *READPTR is already at the end of the buffer.
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
-extern int target_auxv_parse (struct target_ops *ops,
-			      gdb_byte **readptr, gdb_byte *endptr,
+extern int target_auxv_parse (gdb_byte **readptr, gdb_byte *endptr,
 			      CORE_ADDR *typep, CORE_ADDR *valp);
 
 /* Extract the auxiliary vector entry with a_type matching MATCH.
@@ -45,6 +44,20 @@ extern int target_auxv_parse (struct target_ops *ops,
    storing the entry's value field in *VALP.  */
 extern int target_auxv_search (struct target_ops *ops,
 			       CORE_ADDR match, CORE_ADDR *valp);
+
+/* Print a description of a single AUXV entry on the specified file.  */
+enum auxv_format { AUXV_FORMAT_DEC, AUXV_FORMAT_HEX, AUXV_FORMAT_STR };
+
+extern void fprint_auxv_entry (struct ui_file *file, const char *name,
+			       const char *description,
+			       enum auxv_format format, CORE_ADDR type,
+			       CORE_ADDR val);
+
+/* The default implementation of gdbarch_print_auxv_entry.  */
+
+extern void default_print_auxv_entry (struct gdbarch *gdbarch,
+				      struct ui_file *file, CORE_ADDR type,
+				      CORE_ADDR val);
 
 /* Print the contents of the target's AUXV on the specified file.  */
 extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);

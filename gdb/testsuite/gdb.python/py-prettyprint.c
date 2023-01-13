@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2008-2016 Free Software Foundation, Inc.
+   Copyright 2008-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -112,6 +112,16 @@ class Fake
 };
 #endif
 
+struct to_string_returns_value_inner
+{
+  int val;
+};
+
+struct to_string_returns_value_wrapper
+{
+  struct to_string_returns_value_inner inner;
+};
+
 struct substruct {
   int a;
   int b;
@@ -165,6 +175,7 @@ struct container
   string name;
   int len;
   int *elements;
+  int is_map_p;
 };
 
 typedef struct container zzz_type;
@@ -185,6 +196,7 @@ make_container (const char *s)
   result.name = make_string (s);
   result.len = 0;
   result.elements = 0;
+  result.is_map_p = 0;
 
   return result;
 }
@@ -257,6 +269,17 @@ bug_14741()
   set_item(&c, 0, 5);
 }
 
+/* Some typedefs/variables for checking that GDB doesn't lose typedefs
+   when looking for a printer.  */
+typedef int int_type;
+typedef int_type int_type2;
+typedef int_type int_type3;
+
+int an_int = -1;
+int_type an_int_type = 1;
+int_type2 an_int_type2 = 2;
+int_type3 an_int_type3 = 3;
+
 int
 main ()
 {
@@ -275,6 +298,7 @@ main ()
   struct lazystring estring, estring2, estring3;
   struct hint_error hint_error;
   struct children_as_list children_as_list;
+  struct to_string_returns_value_wrapper tsrvw = { { 1989 } };
 
   nstype.elements = narray;
   nstype.len = 0;

@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,23 +20,21 @@
 #define ARM_TDEP_H
 
 /* Forward declarations.  */
-struct gdbarch;
 struct regset;
 struct address_space;
 struct get_next_pcs;
 struct arm_get_next_pcs;
 struct gdb_get_next_pcs;
 
+/* Set to true if the 32-bit mode is in use.  */
+
+extern bool arm_apcs_32;
+
+#include "gdbarch.h"
 #include "arch/arm.h"
+#include "infrun.h"
 
-/* Say how long FP registers are.  Used for documentation purposes and
-   code readability in this header.  IEEE extended doubles are 80
-   bits.  DWORD aligned they use 96 bits.  */
-#define FP_REGISTER_SIZE	12
-
-/* Say how long VFP double precision registers are.  Used for documentation
-   purposes and code readability.  These are fixed at 64 bits.  */
-#define VFP_REGISTER_SIZE	8
+#include <vector>
 
 /* Number of machine registers.  The only define actually required 
    is gdbarch_num_regs.  The other definitions are used for documentation
@@ -149,9 +147,9 @@ struct gdbarch_tdep
 /* The maximum number of modified instructions generated for one single-stepped
    instruction, including the breakpoint (usually at the end of the instruction
    sequence) and any scratch words, etc.  */
-#define DISPLACED_MODIFIED_INSNS	8
+#define ARM_DISPLACED_MODIFIED_INSNS	8
 
-struct displaced_step_closure
+struct arm_displaced_step_closure : public displaced_step_closure
 {
   ULONGEST tmp[DISPLACED_TEMPS];
   int rd;
@@ -198,7 +196,7 @@ struct displaced_step_closure
       /* If non-NULL, override generic SVC handling (e.g. for a particular
          OS).  */
       int (*copy_svc_os) (struct gdbarch *gdbarch, struct regcache *regs,
-			  struct displaced_step_closure *dsc);
+			  arm_displaced_step_closure *dsc);
     } svc;
   } u;
 
@@ -212,12 +210,12 @@ struct displaced_step_closure
      - ARM instruction occupies one slot,
      - Thumb 16 bit instruction occupies one slot,
      - Thumb 32-bit instruction occupies *two* slots, one part for each.  */
-  unsigned long modinsn[DISPLACED_MODIFIED_INSNS];
+  unsigned long modinsn[ARM_DISPLACED_MODIFIED_INSNS];
   int numinsns;
   CORE_ADDR insn_addr;
   CORE_ADDR scratch_base;
   void (*cleanup) (struct gdbarch *, struct regcache *,
-		   struct displaced_step_closure *);
+		   arm_displaced_step_closure *);
 };
 
 /* Values for the WRITE_PC argument to displaced_write_reg.  If the register
@@ -236,16 +234,16 @@ enum pc_write_style
 extern void
   arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
 			      CORE_ADDR to, struct regcache *regs,
-			      struct displaced_step_closure *dsc);
+			      arm_displaced_step_closure *dsc);
 extern void
   arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
-			      CORE_ADDR to, struct displaced_step_closure *dsc);
+			      CORE_ADDR to, arm_displaced_step_closure *dsc);
 extern ULONGEST
-  displaced_read_reg (struct regcache *regs, struct displaced_step_closure *dsc,
+  displaced_read_reg (struct regcache *regs, arm_displaced_step_closure *dsc,
 		      int regno);
 extern void
   displaced_write_reg (struct regcache *regs,
-		       struct displaced_step_closure *dsc, int regno,
+		       arm_displaced_step_closure *dsc, int regno,
 		       ULONGEST val, enum pc_write_style write_pc);
 
 CORE_ADDR arm_skip_stub (struct frame_info *, CORE_ADDR);
@@ -259,9 +257,7 @@ CORE_ADDR arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 
 int arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
 
-void arm_insert_single_step_breakpoint (struct gdbarch *,
-					struct address_space *, CORE_ADDR);
-int arm_software_single_step (struct frame_info *);
+std::vector<CORE_ADDR> arm_software_single_step (struct regcache *);
 int arm_is_thumb (struct regcache *regcache);
 int arm_frame_is_thumb (struct frame_info *frame);
 
@@ -278,7 +274,7 @@ extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
 extern int arm_process_record (struct gdbarch *gdbarch, 
                                struct regcache *regcache, CORE_ADDR addr);
-/* Functions exported from armbsd-tdep.h.  */
+/* Functions exported from arm-bsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
@@ -289,11 +285,11 @@ extern void
 				       void *cb_data,
 				       const struct regcache *regcache);
 
-/* Target descriptions.  */
-extern struct target_desc *tdesc_arm_with_m;
-extern struct target_desc *tdesc_arm_with_iwmmxt;
-extern struct target_desc *tdesc_arm_with_vfpv2;
-extern struct target_desc *tdesc_arm_with_vfpv3;
-extern struct target_desc *tdesc_arm_with_neon;
+/* Get the correct Arm target description with given FP hardware type.  */
+const target_desc *arm_read_description (arm_fp_type fp_type);
+
+/* Get the correct Arm M-Profile target description with given hardware
+   type.  */
+const target_desc *arm_read_mprofile_description (arm_m_profile_type m_type);
 
 #endif /* arm-tdep.h */

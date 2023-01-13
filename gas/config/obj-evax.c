@@ -1,5 +1,5 @@
 /* obj-evax.c - EVAX (openVMS/Alpha) object file format.
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2020 Free Software Foundation, Inc.
    Contributed by Klaus Kämpf (kkaempf@progis.de) of
      proGIS Software, Aachen, Germany.
    Extensively enhanced by Douglas Rupp of AdaCore.
@@ -27,14 +27,9 @@
 #include "bfd.h"
 #include "vms.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "safe-ctype.h"
 
 static void s_evax_weak (int);
-static unsigned int crc32 (unsigned char *, int);
-static char *encode_32 (unsigned int);
-static char *encode_16 (unsigned int);
-static int decode_16 (const char *);
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -86,8 +81,7 @@ evax_symbol_new_hook (symbolS *sym)
 {
   struct evax_private_udata_struct *udata;
 
-  udata = (struct evax_private_udata_struct *)
-    xmalloc (sizeof (struct evax_private_udata_struct));
+  udata = XNEW (struct evax_private_udata_struct);
 
   udata->bsym = symbol_get_bfdsym (sym);
   udata->enbsym = NULL;
@@ -217,7 +211,7 @@ evax_frob_file_before_fix (void)
 
 /* The length is computed from the maximum allowable length of 64 less the
    4 character ..xx extension that must be preserved (removed before
-   krunching and appended back on afterwards).  The $<nnn>.. prefix is
+   crunching and appended back on afterwards).  The $<nnn>.. prefix is
    also removed and prepened back on, but doesn't enter into the length
    computation because symbols with that prefix are always resolved
    by the assembler and will never appear in the symbol table. At least
@@ -272,10 +266,8 @@ evax_shorten_name (char *id)
         }
     }
 
-  /* We only need worry about krunching the base symbol.  */
-  base_id = xmalloc (suffix_dotdot - prefix_dotdot + 1);
-  strncpy (base_id, &id[prefix_dotdot], suffix_dotdot - prefix_dotdot);
-  base_id [suffix_dotdot - prefix_dotdot] = 0;
+  /* We only need worry about crunching the base symbol.  */
+  base_id = xmemdup0 (&id[prefix_dotdot], suffix_dotdot - prefix_dotdot);
 
   if (strlen (base_id) > MAX_LABEL_LENGTH)
     {
@@ -299,8 +291,7 @@ evax_shorten_name (char *id)
 	strcat (new_id, suffix);
 
       /* Save it on the heap and return.  */
-      return_id = xmalloc (strlen (new_id) + 1);
-      strcpy (return_id, new_id);
+      return_id = xstrdup (new_id);
 
       return return_id;
     }
@@ -343,21 +334,18 @@ evax_shorten_name (char *id)
 
 /* Table used to convert an integer into a string.  */
 
-static const char codings[] = {
+static const unsigned char codings[] = {
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
   'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
   'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_'};
 
-/* The number of codings in the above table.  */
-static const int number_of_codings = sizeof (codings) / sizeof (char);
-
 /* Table used by decode_16 () to convert an encoded string back into
    an integer.  */
-static char decodings[256];
+static unsigned char decodings[256];
 
-/* Table used by the crc32 function to calcuate the checksum.  */
+/* Table used by the crc32 function to calculate the checksum.  */
 static unsigned int crc32_table[256] = {0, 0};
 
 /* Given a string in BUF, calculate a 32-bit CRC for it.
@@ -372,7 +360,7 @@ crc32 (unsigned char *buf, int len)
   if (! crc32_table[1])
     {
       /* Initialize the CRC table and the decoding table. */
-      int i, j;
+      unsigned int i, j;
       unsigned int c;
 
       for (i = 0; i < 256; i++)
@@ -382,8 +370,8 @@ crc32 (unsigned char *buf, int len)
 	  crc32_table[i] = c;
 	  decodings[i] = 0;
 	}
-      for (i = 0; i < number_of_codings; i++)
-	decodings[codings[i] & 255] = i;
+      for (i = 0; i < ARRAY_SIZE (codings); i++)
+	decodings[codings[i]] = i;
     }
 
   while (len--)
@@ -396,34 +384,34 @@ crc32 (unsigned char *buf, int len)
 
 /* Encode the lower 32 bits of VALUE as a 5-character string.  */
 
-static char *
+static unsigned char *
 encode_32 (unsigned int value)
 {
-  static char res[6];
+  static unsigned char res[6];
   int x;
 
   res[5] = 0;
   for(x = 0; x < 5; x++)
     {
-      res[x] = codings[value % number_of_codings];
-      value = value / number_of_codings;
+      res[x] = codings[value % ARRAY_SIZE (codings)];
+      value = value / ARRAY_SIZE (codings);
     }
   return res;
 }
 
 /* Encode the lower 16 bits of VALUE as a 3-character string.  */
 
-static char *
+static unsigned char *
 encode_16 (unsigned int value)
 {
-  static char res[4];
+  static unsigned char res[4];
   int x;
 
   res[3] = 0;
   for(x = 0; x < 3; x++)
     {
-      res[x] = codings[value % number_of_codings];
-      value = value / number_of_codings;
+      res[x] = codings[value % ARRAY_SIZE (codings)];
+      value = value / ARRAY_SIZE (codings);
     }
   return res;
 }
@@ -432,11 +420,11 @@ encode_16 (unsigned int value)
    16-bit integer.  */
 
 static int
-decode_16 (const char *string)
+decode_16 (const unsigned char *string)
 {
-  return decodings[(int) string[2]] * number_of_codings * number_of_codings
-    + decodings[(int) string[1]] * number_of_codings
-    + decodings[(int) string[0]];
+  return (decodings[string[2]] * ARRAY_SIZE (codings) * ARRAY_SIZE (codings)
+	  + decodings[string[1]] * ARRAY_SIZE (codings)
+	  + decodings[string[0]]);
 }
 
 /* ID_SUFFIX_LENGTH is used to determine how many characters in the
@@ -457,14 +445,14 @@ static char *
 shorten_identifier (char *name)
 {
   int crc, len, sum, x, final_len;
-  char *crc_chars;
+  unsigned char *crc_chars;
   int suffix_length = ID_SUFFIX_LENGTH (name);
 
   if ((len = strlen (name)) <= MAX_LABEL_LENGTH)
     return name;
 
   final_len = MAX_LABEL_LENGTH - 2 - 5 - 3 - 3 - suffix_length;
-  crc = crc32 ((unsigned char *)name + final_len,
+  crc = crc32 ((unsigned char *) name + final_len,
 	       len - final_len - suffix_length);
   crc_chars = encode_32 (crc);
   sum = 0;
@@ -474,13 +462,13 @@ shorten_identifier (char *name)
   newname [MAX_LABEL_LENGTH] = 0;
   /* Now append the suffix of the original identifier, if any.  */
   if (suffix_length)
-  strncpy (newname + MAX_LABEL_LENGTH - suffix_length,
-	   name + len - suffix_length,
-	   suffix_length);
-  strncpy (newname + final_len, "_h", 2);
-  strncpy (newname + final_len + 2 , crc_chars, 5);
-  strncpy (newname + final_len + 2 + 5, encode_16 (len), 3);
-  strncpy (newname + final_len + 2 + 5 + 3, encode_16 (sum), 3);
+    strncpy (newname + MAX_LABEL_LENGTH - suffix_length,
+	     name + len - suffix_length,
+	     suffix_length);
+  memcpy (newname + final_len, "_h", 2);
+  memcpy (newname + final_len + 2 , crc_chars, 5);
+  memcpy (newname + final_len + 2 + 5, encode_16 (len), 3);
+  memcpy (newname + final_len + 2 + 5 + 3, encode_16 (sum), 3);
   if (!is_truncated_identifier (newname))
     abort ();
   return newname;
@@ -492,7 +480,7 @@ shorten_identifier (char *name)
 static int
 is_truncated_identifier (char *id)
 {
-  char *ptr;
+  unsigned char *ptr;
   int len = strlen (id);
   /* If it's not exactly MAX_LABEL_LENGTH characters long, it can't be
      a truncated identifier.  */
@@ -501,12 +489,12 @@ is_truncated_identifier (char *id)
 
   /* Start scanning backwards for a _h.  */
   len = len - 3 - 3 - 5 - 2;
-  ptr = id + len;
-  while (ptr >= id)
+  ptr = (unsigned char *) id + len;
+  while (ptr >= (unsigned char *) id)
     {
       if (ptr[0] == '_' && ptr[1] == 'h')
 	{
-	  /* Now see if the sum encoded in the identifer matches.  */
+	  /* Now see if the sum encoded in the identifier matches.  */
 	  int x, sum;
 	  sum = 0;
 	  for (x = 0; x < 5; x++)

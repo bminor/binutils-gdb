@@ -1,8 +1,8 @@
 #name: Valid v8-A barrier (Thumb)
 #as: -march=armv8-a -mthumb
-#source: armv8-a-barrier.s
+#source: armv8-ar-barrier.s
 #objdump: -dr --prefix-addresses --show-raw-insn
-#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
+#skip: *-*-pe *-*-wince
 
 .*: +file format .*arm.*
 

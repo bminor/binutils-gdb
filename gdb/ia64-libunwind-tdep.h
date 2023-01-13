@@ -1,6 +1,6 @@
 /* Frame unwinder for ia64 frames with libunwind frame information.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    Contributed by Jeff Johnston.
 
@@ -35,6 +35,8 @@ struct frame_unwind;
    that ends up including the libunwind-$(arch).h for the host gdb is
    running on.  */
 #include "libunwind-ia64.h"
+
+#include "gdbarch.h"
 
 struct libunwind_descr
 {
@@ -71,7 +73,7 @@ unw_word_t libunwind_find_dyn_list (unw_addr_space_t, unw_dyn_info_t *,
 				    void *);
 
 int libunwind_get_reg_special (struct gdbarch *gdbarch,
-			       struct regcache *regcache,
+			       readable_regcache *regcache,
 			       int regnum, void *buf);
 
 #endif /* IA64_LIBUNWIND_TDEP_H */

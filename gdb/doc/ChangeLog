@@ -1,3 +1,1589 @@
+2020-01-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (M68K Features): Document floating-point feature
+	correspondence.
+
+2020-01-25  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Attach): Document the new option and the
+	set/show commands.
+	(Connecting): Reference the exec-file-mismatch option.
+
+2020-01-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Starting): Say "current inferior not connected"
+	instead of "GDB not connected".
+	(Inferiors and Programs): Rename node to ...
+	(Inferiors Connections and Programs): ... this.  Update all
+	references.  Talk about multiple target connections.  Update "info
+	inferiors" info to mention the connections column.  Describe "info
+	connections".  Document "add-inferior -no-connection".
+	* guile.texi, python.texi: Update cross references.
+
+2020-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo, refcard.tex: Update copyright year range.
+
+2019-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Symbols In Python): Remove duplicate description of
+	gdb.lookup_global_symbol.
+
+2019-12-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.texinfo (Writing JIT Debug Info Readers): Fix typo.
+
+2019-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command Options): Use -p and -pretty in the example,
+	as -r is ambiguous.  Update the print - TAB TAB completion result.
+	(Data): Document new option -raw-values.  Use -p and -pretty in the
+	 example, as -r is ambiguous.
+	(Print Settings): Document set print raw values.
+	(Pretty-Printer Commands): Document interaction between enabled
+	pretty printers and -raw-values/-raw-frame-arguments.
+
+2019-12-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (gdb.prompt): Use correct quotes in example.
+	Shorten sample text.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Add documentation of
+	-max-results to some -symbol-info-* commands.
+
+2019-12-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
+	-symbol-info-module-functions and -symbol-info-module-variables.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Configuration): Mention TUI border styles.
+	(Output Styling): Document new settings.
+
+2019-12-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Configuration): Document new setting.
+
+2019-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Define): Indicate that user-defined prefix can
+	be used in 'define' command.  Document 'define-prefix' command.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
+	-symbol-info-modules.
+
+2019-11-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/gdb.texinfo (GDB/MI Symbol Query): Document new MI command
+	-symbol-info-functions, -symbol-info-types, and
+	-symbol-info-variables.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new maint
+	commands.
+
+2019-11-25  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.texinfo (Debugging Output): Document set debug
+	remote-packet-max-chars.
+
+2019-11-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo: Fix typos.
+	* python.texi: Same.
+	* stabs.texinfo: Same.
+
+2019-11-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new command.
+
+2019-11-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Keys): Document readline function names.
+
+2019-11-11  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Editing): Document operate-and-get-next.
+
+2019-11-11  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Host I/O Packets): Fix typo in "vFile:pwrite".
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Symbols In Python): Add documentation for
+	gdb.lookup_static_symbols.
+
+2019-11-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Symbols In Python): Extend documentation for
+	gdb.lookup_static_symbol.
+
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document new 'info module variables' and
+	'info module functions' commands.
+
+2019-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document new 'info modules' command.
+
+2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Convenience Funs): Document the new
+	$_gdb_setting_str, $_gdb_maint_setting and $_gdb_maint_setting_str
+	convenience functions.
+
+2019-10-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Also set SYSTEM_GDBINIT_DIR for the info manual
+	generation.
+	* gdb.texinfo (many sections): Document new --with-system-gdbinit-dir
+	option.
+
+2019-10-23  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (READLINE_DIR): Update.
+
+2019-10-23  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi (Threads In Python): Add a note for how to get the
+	list of threads.
+
+2019-10-07  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo: Fix typo.
+	* guile.texi: Same.
+	* python.texi: Same.
+
+2019-10-03  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* doc/gdb.texinfo (Fortran Operators): Describe scope operator.
+
+2019-10-02  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints, Convenience Vars): Document
+	$_ada_exception.
+
+2019-09-20  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* doc/gdb.texinfo (Remote Configuration): Remove documentation for
+	qXfer:spu:read and qXfer:spu:write.
+	(General Query Packets): Likewise.
+	(Cell Broadband Engine SPU architecture): Remove subsection.
+
+2019-09-18  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Editing): Document readline application name.
+	(TUI Single Key Mode): Document TUI SingleKey keymap name.
+
+2019-09-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Source Path): Additional text to better describe
+	how the source path directory list is used when searching for
+	source files.
+
+2019-09-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Ada Tasks): Tell the task name is printed, update
+	examples.
+
+2019-09-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Index Files): Update Ada text.
+
+2019-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Add information about the -n flag to
+	"info variables" and "info functions".
+
+2019-08-25  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+        * gdb.texinfo (Standard Target Features): Add RX Features sub-section.
+
+2019-08-16  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (AArch64 Pointer Authentication)
+	(GDB/MI Breakpoint Information) (Frame Information): Document
+	addr_field.
+
+2019-08-12  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Configure Options): Document minimum version of
+	readline.
+
+2019-08-09  Alan Hayward  <alan.hayward@arm.com>
+
+        * gdb.texinfo (AArch64 Pointer Authentication): Fix typo.
+
+2019-08-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (AArch64 Pointer Authentication): New subsection.
+
+2019-08-05  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi (Blocks In Python): Document dictionary access on blocks.
+
+2019-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+        * gdb.texinfo (Symbols): Document new args -dirname and -basename
+        of "info sources" command.
+
+2019-07-30  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi (Symbols In Python): Document new function
+	gdb.lookup_static_symbol.
+
+2019-07-29  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi (Objfiles In Python): Document new functions
+	  Objfile.lookup_{global,static}_symbol.
+
+2019-07-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Backtrace): Document the new '-frame-info'
+	backtrace option.  Reference 'set print frame-info'.
+	(Print Settings): Document 'set|show print frame-info'.
+	Document new 'presence' value for 'set print frame-arguments.
+
+2019-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Add information about -q flag to "info
+	types".
+
+2019-07-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (python command): Revise example to match
+	command behavior.
+
+2019-07-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (C++ Exception GDB/MI Catchpoint Commands): Adjust
+	examples to show type=catchpoint instead of type=breakpoint and an
+	address.
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command Settings): New node documenting the general
+	concept of settings, how to change them, and the new "with"
+	command.
+	(Maintenance Commands): Document "maint with".
+
+2019-07-03  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint set/show
+	test-settings" instead of "maint test-settings set/show".
+
+2019-06-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.texinfo (Invoking GDB): Remove sentence about how GDB
+	deals with a file that has the same name as the specified pid to
+	attach to.  Add example using -p option.
+	(gdb man): Remove same sentence as in previous item.
+
+2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (GDB/MI Catchpoint Commands): Add menu entry to new
+	node.
+	(C++ Exception GDB/MI Catchpoint Commands): New node to describe
+	new MI commands.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Command Completion): Mention command options too.
+	(Command Options): New node.
+	(Threads): Add anchors.  Extend descriptions of the "taas" and
+	"tfaas" commands.
+	(Backtrace): Describe new options of the "backtrace" command.  Add
+	anchors.
+	(Frame Apply): Describe new options of the "frame apply" and
+	"faas" commands.  Add anchors.
+	(Data): Describe new options of the "print" command.  Add anchors.
+	(Compiling and Injecting Code): Mention options of the "compile
+	print" command.
+	(Maintenance Commands): Mention "maint test-options" subcommands
+	and the "maint show test-options-completion-result" command.
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Print Settings): Document "set/show print
+	raw-frame-arguments" instead of "set/show print raw
+	frame-arguments".
+
+2019-06-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint
+	test-settings" commands.
+
+2019-06-06  Amos Bird  <amosbird@gmail.com>
+
+	* annotate.texinfo (Multi-threaded Apps): Add entry for thread-exited
+	annotation.
+
+2019-06-04  Christian Biesinger  <cbiesinger@google.com>
+
+	* python.texi: Document new gdb.Type.objfile property.
+
+2019-06-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Help): Document the new -v apropos flag.
+	(Output Styling): Document the style name styling done by "show style".
+	Document the new title and highlight styles.
+
+2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Shell Commands): Document pipe command.
+	(Logging Output): Add a reference to pipe command.
+	(Convenience Variables): Document $_shell_exitcode and
+	$_shell_exitstatus.
+
+2019-05-29  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Continuing and Stepping): Document new
+	commands.
+
+2019-05-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (Shell Commands): Add debugredirect.
+
+2019-05-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo: Minor formatting fixes.
+
+2019-01-28  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo (Miscellaneous GDB/MI Commands): Document new
+	MI command -complete.
+
+2019-05-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo (Automatic symbol index cache): Add concept and command
+	index entries.
+
+2019-05-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo (Maintenance Commands): Remove superfluous
+	quoting on command index entry for "maint info selftests".
+
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
+	* python.texi (Pretty Printing API): Mention lazy computation for
+	"children".
+
+2019-05-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Add text for parameter to "catch
+	exception" and "catch handlers".  Move "catch exception unhandled"
+	text.  Use @var for "catch load" and "catch unload"
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Symbols): Document change to ptype/o.
+
+2019-05-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Separate Debug Files): Document how the
+	subdirectory of the global debug directory is computed on
+	MS-Windows/MS-DOS.
+
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Print Settings): Document 'print max-depth'.
+	* guile.texi (Guile Pretty Printing API): Document that 'print
+	max-depth' can effect the display of a values children.
+	* python.texi (Pretty Printing API): Likewise.
+	(Values From Inferior): Document max_depth keyword.
+
+2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Calling): Document the new
+	set|show may-call-functions.
+
+2019-04-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Reverse Execution): Mention and xref process record
+	and replay.  Mention remote and system emulators.
+	(Process Record and Replay): List supported architectures.
+	Mention that "record btrace" is only supported on Intel
+	processors.
+
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (Other Command-Line Arguments for gdbserver)
+	(Monitor Commands for gdbserver)
+	(gdbserver man): Add debug-file option.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Inferiors In Python): Rename
+	Inferior.thread_from_thread_handle to Inferior.thread_from_handle.
+	Add note about the former being deprecated.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Threads In Python): Add description for method
+	InferiorThread.handle.
+
+2019-04-07  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (all): Depend on "info".
+
+2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Convenience Funs): Document '$_creal' and
+	'$_cimag'.
+
+2019-03-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Convenience Vars): Document $_gdb_major and
+	$_gdb_minor.
+
+2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Pretty Printing API): Document use of None for the
+	display_hint.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* gdb.texinfo (AArch64 Features): Describe pauth feature.
+
+2019-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* python.texi (Selecting Pretty-Printers): Use @defvar for
+	gdb.pretty_printers.
+
+2019-03-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends): Fix closing
+	of table, "@end @table" -> "@end table".
+
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Output Styling): Document "set style source" and
+	"show style source".
+
+2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Mode Options): Mention mi3.
+	(Interpreters): Likewise.
+	(GDB/MI Development and Front Ends): Add entry for MI 3 in
+	version table.  Document -fix-multi-location-breakpoint-output.
+	(GDB/MI Breakpoint Information): Document format of breakpoint
+	location output.
+
+2019-03-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	* python.texi (Values From Inferior): Change synopsys of the
+	second form of Value.__init__.
+
+2019-03-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Output Styling): Fix typos.  Document the default
+	foreground colors of the available styles.
+
+2019-02-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (Configure Options): Document minimum python
+	version.
+
+2019-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Values From Inferior): Document second form
+	of Value.__init__.
+
+2019-02-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo: Update copyright year ranges.
+	* refcard.tex: Likewise.
+
+2019-02-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo: Update style defaults.
+
+2019-02-21  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Remote Configuration): Remove trailing "." from
+	@item.
+
+2019-01-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends): Add table of
+	MI versions.  Update text around it.
+
+2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Document the alias
+	pseudo-registers for the org.gnu.gdb.power.altivec feature.
+
+2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Print Settings): Remove mention of specific
+	demangle-style values, just refer to the in-process help.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Output Styling): New node.
+
+2018-12-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Set Catchpoints): Add an anchor for 'catch syscall'.
+	(Native): Add a FreeBSD subsection.
+	(FreeBSD): Document use of system call aliases for compatibility
+	system calls.
+
+2018-11-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Standard Target Features): Add RISC-V Features
+	sub-section.
+
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Examining the Symbol Table): Document language choice
+	for 'info types|functions|variables' commands.
+	(Setting Breakpoints): Document language choice to print
+	the functions in which a breakpoint is set.
+
+2018-11-09  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Document the altivec and fpu
+	requirements for the org.gnu.gdb.power.vsx feature.
+
+2018-11-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Tasks): Update the "info task 2" example
+	output to match the current implementation.
+
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Information About a Frame): Document changes
+	to 'info args' and 'info locals'.
+	(Examining the Symbol Table): Document changes to 'info functions'
+	and 'info variables'.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Describe new features
+	"org.gnu.gdb.power.htm.spr", "org.gnu.gdb.power.htm.core",
+	"org.gnu.gdb.power.htm.fpu", "org.gnu.gdb.power.htm.altivec",
+	"org.gnu.gdb.power.htm.vsx", "org.gnu.gdb.power.htm.ppr",
+	"org.gnu.gdb.power.htm.dscr", "org.gnu.gdb.power.htm.tar".
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Describe new features
+	"org.gnu.gdb.power.ebb" and "org.gnu.gdb.power.linux.pmu".
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Describe new feature
+	"org.gnu.gdb.power.tar".
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Describe new features
+	"org.gnu.gdb.power.ppr" and "org.gnu.gdb.power.dscr".
+
+2018-10-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Commands): Add @end table.
+	(TUI Configuration): Remove stray @end table.
+
+2018-10-19  Tom Tromey  <tom@tromey.com>
+
+	PR tui/18388:
+	* gdb.texinfo (TUI Commands): Remove tabset documentation.
+	(TUI Configuration): Document "set tui tab-width".
+
+2018-10-09  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Inferiors In Python): Link to "Frames In Python",
+	not "Unwinding Frames in Python".
+
+2018-10-09  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Configure Options): Update --enable-ubsan
+	documentation.
+
+2018-10-08  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Contributors): Add SRI International and University
+	of Cambridge for FreeBSD/riscv.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
+	PR python/19399:
+	* python.texi (Inferiors In Python): Document
+	Inferior.Architecture.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
+	PR python/21765:
+	* python.texi (Symbols In Python): Document the module and
+	common-block domains.  Remove documentation for incorrect
+	domains.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Configure Options): Document --enable-ubsan.
+
+2018-10-02  John Darrington <john@darrington.wattle.id.au>
+
+        * gdb.texinfo (Remote Connection Commands): Describe
+	  the changes to target remote and target extended-remote
+	  relating to Unix domain sockets.
+
+2018-10-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Configure Options): Document configure options.
+
+2018-09-29  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Requirements): Mention C++, GNU make.
+	(Requirements): Sort the table.  Add more libraries.
+	(Running Configure): Remove obsolete text.
+	(Separate Objdir): Likewise.
+	(Configure Options): Likewise.
+
+2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Frames): Rewrite the description of 'frame number'
+	to highlight that the number is also the frame's level.
+	(Selection): Rewrite documentation for 'frame' and 'select-frame'
+	commands.
+	(Frame Info): Rewrite documentation for 'info frame' command.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/18852:
+	* python.texi (Parameters In Python): Document exception behavior
+	of get_set_string.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (info proc): Remove "running".
+	(info proc mappings): Replace "program" with "process".
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Process Information): Document "info proc files"
+	command.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Index Files): Update for cache directory change on
+	macOS.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Basic Python): Update docs for find_pc_line,
+	solib_name.
+	(Progspaces In Python): Update docs for current_progspace.
+	Document block_for_pc, find_pc_line, is_valid, nsolib_name.
+	Move method documentation before example.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Objfiles In Python): Update gdb.objfiles() doc.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Program Spaces In Python): Document the
+	Progspace.objfiles method.
+	(Objfiles In Python): Mention that gdb.objfiles() is identical
+	to gdb.selected_inferior().progspace.objfiles().
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Inferiors In Python): Document
+	Inferior.progspace.
+	(Program Spaces In Python): Document that
+	gdb.current_progspace() is the same as
+	gdb.selected_inferior().progspace.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Basic Python): Mention the string representation
+	of GDB Python objects.
+
+2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Document
+	set/show debug skip.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Frames In Python, Blocks In Python)
+	(Symbols In Python, Symbol Tables In Python)
+	(Lazy Strings In Python): Remove periods from section titles.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Pretty Printing API): Swap sentence order.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/16461:
+	* python.texi (Values From Inferior): Mention use of virtual
+	table.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Basic Python): Parenthesize argument to
+	decode_line.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Python): Mention Python versions.  Don't mention
+	execfile.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/19808:
+	* python.texi (Unwinding Frames in Python): Rewrite
+	create_unwind_info documentation.  Update read_register
+	documentation and add a note about unwinder caution.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/18909:
+	* python.texi (Events In Python): Fix inferior_call
+	documentation.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/17752:
+	* python.texi (Frame Filter API): Remove period from subsection
+	title.  Mention 100 as good default priority.
+	(Frame Decorator API): Remove period from subsection title.
+	Mention FrameDecorator module.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/23108:
+	* python.texi (Exception Handling): Rearrange gdb.GdbError text
+	and add a table.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Compilation): Use "gcc", not "gcc.info", in @xref.
+	(Machine Code): Use "binutils", not "binutils.info", in @pxref.
+	(Separate Debug Files): Use "ld", not "ld.info", in @ref.
+	* python.texi (Objfiles In Python): Use "ld", not "ld.info", in @ref.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/16484:
+	* python.texi (Frames In Python): Document that Frame.block can
+	throw.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/23487:
+	* gdb.texinfo (Pretty-Printer Commands): Fix typo in example.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/16033:
+	* python.texi (Blocks In Python): Document that Block.end is
+	exclusive.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Compiling and injecting code in GDB): Document
+	set/show "compile-oracle" and "compile-cplus-types" commands.
+
+2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo (The -stack-list-frames Command): Update description
+	to mention "arch".
+	Update MI examples throughout the document to contain "arch" in
+	frame output.
+
+2018-08-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (AArch64 SVE): New subsubsection.
+
+2018-08-14  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Document
+	"-data-disassemble -a addr".
+	(GDB/MI Support Commands): Document "data-disassemble-a-option"
+	feature.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Index Files Speed Up GDB): Add section about
+	symbol index cache.
+
+2018-07-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (gcore man): Rewrite "Description" and "-o"
+	option sections to further clarify that gcore can take more
+	than one PID, and that "-o" is used to specify a prefix, not a
+	filename.
+
+2018-07-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Add description of
+	maintenance command to control dwarf unwinders.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Debugging Programs with Multiple Threads):
+	Document changes to 'thread apply'.  Document 'taas'.
+	Document 'tfaas'.
+	(Examining the Stack): Document 'frame apply'.  Document 'faas'.
+
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Fertser  <fercerpav@gmail.com>
+	    Tsutomu Seki  <sekiriki@gmail.com>
+
+	* gdb.texinfo (Remote Connection Commands): Add explanation
+	about new IPv6 support.  Add new connection prefixes.
+
+2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Remote Configuration): Update descriptions for
+	set/show of hardware-watchpoint-limit, hardware-breakpoint-limit,
+	and hardware-watchpoint-length-limit variables.
+
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	PR tdep/8282
+	* gdb.texinfo (Source and Machine Code): Document `set
+	disassembler-options' support for the MIPS target.
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
+	* gdb.texinfo (Files): Document "add-symbol-file -o offset".
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
+	* gdb.texinfo (Files): The address argument for "add-symbol-file"
+	is no longer mandatory.
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
+	* gdb.texinfo (Files): Document "symbol-file -o offset".
+
+2018-06-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo (Background Execution): Add @cindex for '&'.
+
+2018-06-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Maintenance Commands): Add a missing @anchor.
+
+2018-06-08  Gary Benson <gbenson@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint check
+	libthread-db" and "maint set/show check-libthread-db".
+
+2018-06-05  Tom Tromey	<tom@tromey.com>
+
+	PR cli/12326:
+	* gdb.texinfo (Screen Size): Document "c" response to pagination
+	prompt.
+
+2018-05-31  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.texinfo (Choosing Target Byte Order): Document endianness
+	selection details with the `set endian auto' mode.
+
+2018-05-31  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo: Describe SVE feature.
+
+2018-05-04  Tom Tromey  <tom@tromey.com>
+
+	PR python/22731:
+	* python.texi (Breakpoints In Python): Mention that "commands" is
+	writable.
+
+2018-05-02  Tom Tromey  <tom@tromey.com>
+
+	PR python/20084:
+	* python.texi (Parameters In Python): Document PARAM_ZUINTEGER and
+	PARAM_ZUINTEGER_UNLIMITED.
+
+2018-04-30  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Types In Python): Document Type.align.
+
+2018-04-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (Symbols): Mention the fact that "info
+	variables/functions/types" show source files and line numbers.
+
+2018-04-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo: Document set/show record btrace cpu.
+
+2018-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Settings): New subsubsection.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
+	PR backtrace/15582:
+	* gdb.texinfo (Backtrace): Mention "hide" argument.
+
+2018-03-26  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Backtrace): Describe options individually.
+
+2018-03-19  Tom Tromey  <tom@tromey.com>
+
+	* observer.texi: Remove.
+
+2018-03-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Document "set/show debug
+	fbsd-nat".
+
+2018-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Machine Code): Additional information about "info
+	line" command.
+
+2018-01-15  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (gdb-add-index man): Add pindex.
+
+2018-01-15  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (set cwd): Add period.
+	(gdb-add-index man): Move anchor.
+
+2017-01-12  Tom Tromey  <tom@tromey.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Index Files): Mention gdb-add-index.
+	(gdb-add-index man): New section.
+	* Makefile.in (gdb-add-index.1): New rule to generate manpage
+	from gdb.texinfo.
+
+2018-01-11  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* gdb.texinfo (pwd): Fix whitespace.
+
+2018-01-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (pwd): Update cross-reference for Process Information
+	node and remove explicit /proc reference.
+	(Native): Rename subsection from SVR4 Process Information to
+	Process Information.
+	(Process Information): Reword introduction to be less /proc
+	centric.  Document support for "info proc" on FreeBSD.
+
+2018-01-03  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Add documentation for new
+	"catch handlers" action.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.texinfo (Target Description Format): Explain that arbitrary
+	strings are now allowed for register groups.
+
+2017-12-27  Stafford Horne  <shorne@gmail.com>
+
+	* gdb.texinfo (Registers): Document info reg $reggroup feature.
+
+2017-12-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/16224
+	* gdb.texinfo (ptype): Add documentation for new flag '/o'.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Document
+	qualified parameter to gdb.Breakpoint.
+
+2017-12-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Manipulating breakpoints using Python): Split doc
+	of Breakpoint.__init__ in two, split text in multiple
+	paragraphs, don't nest parameter square brackets.
+
+2017-12-12  Stafford Horne  <shorne@gmail.com>
+	    Stefan Wallentowitz  <stefan@wallentowitz.de>
+	    Franck Jullien  <franck.jullien@gmail.com>
+	    Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* gdb.texinfo: Add OpenRISC documentation.
+
+2017-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Index Files): Document .debug_names and -dwarf-5.
+
+2017-12-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Symbols): Document "set print type nested-type-limit"
+	and "show print type nested-type-limit".
+
+2017-12-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+       * python.texi (Breakpoints In Python): Add text relating
+	to allowed explicit locations and keywords in gdb.Breakpoints.
+
+2017-12-04  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Rust): Update trait object status
+
+2017-12-01  Andrew Cagney  <cagney@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (File Options): Document --readnever.
+	(Commands to Specify Files): Likewise, for 'symbol-file' and
+	'add-symbol-file'.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	PR c++/19436
+	* gdb.texinfo (Debugging C Plus Plus): Document setting
+	breakpoints in functions with ABI tags.
+
+2017-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Linespec Locations): Document how "function" is
+	interpreted in C++ and Ada.  Document "-qualified".
+	(Explicit Locations): Document how "-function" is interpreted in
+	C++ and Ada.  Document "-qualified".
+
+2017-11-26  Dominik Czarnota  <dominik.b.czarnota@gmail.com>
+
+	PR gdb/21945
+	* gdb.texinfo (Search Memory): Update description and example
+	about how to search a string without NULL terminator.
+
+2017-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	new "exception-message" field.
+
+2017-11-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Memory Map Format): Update gdb-memory-map.dtd.
+
+2017-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Completion): Update need-quoting examples.  Remove
+	false claim that GDB inserts quoting automatically.
+	(Symbols): Add anchor.
+
+2017-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Requirements): Document use of GNU MPFR.
+
+2017-11-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python.texi (Basic Python): Add rbreak documentation.
+
+2017-11-07  Xavier Roirand  <roirand@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Document support for breakpoint
+	location ranges in the enable/disable commands.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention remote debugging.
+	(Working Directory) <Your Program's Working Directory>:
+	Likewise.
+	(Connecting) <Remote Packet>: Add "set-working-dir"
+	and "QSetWorkingDir" to the table.
+	(Remote Protocol) <QSetWorkingDir>: New item, explaining the
+	packet.
+
+2017-10-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting your Program) <The working directory.>:
+	Mention new "set cwd" command.
+	(Working Directory) <Your Program's Working Directory>:
+	Rephrase to explain that "set cwd" exists and is the default
+	way to change the inferior's cwd.
+
+2017-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (S/390 and System z Features): Document the new
+	features org.gnu.gdb.s390.gs and org.gnu.gdb.s390.gsbc.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (qXfer:threads:read): Add documentation for handle
+	attribute.
+
+2017-09-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Inferiors In Python): Add description for method
+	Inferior.thread_from_thread_handle.
+
+2017-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Starting your Program): Add description of
+	starti command.  Mention starti command as an alternative for
+	debugging the elaboration phase.
+
+2017-09-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Maintenance Commands): Document filter parameter
+	of "maint selftest".  Document "maint info selftests" command.
+
+2017-09-11  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Events In Python): Document new events.
+
+2017-09-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Variables) <Program Variables>: Document inspecting
+	no-debug-info variables.
+	(Symbols) <Examining the Symbol Table>: Document inspecting
+	no-debug-info types.
+	(Calling) <Calling functions with no debug info>: New subsection,
+	documenting calling no-debug-info functions.
+	(Non-debug DLL Symbols) <Working with Minimal Symbols>: Update.
+
+2017-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (set environment): Add @anchor.  Explain that
+	environment variables set by the user are sent to GDBserver.
+	(unset environment): Likewise, but for unsetting variables.
+	(Connecting) <Remote Packet>: Add "environment-hex-encoded",
+	"QEnvironmentHexEncoded", "environment-unset", "QEnvironmentUnset",
+	"environment-reset" and "QEnvironmentReset" to the table.
+	(Remote Protocol) <QEnvironmentHexEncoded, QEnvironmentUnset,
+	QEnvironmentReset>: New item, explaining the packet.
+
+2017-08-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Compiling and Injecting Code): Add to subsection
+	"Compiler search for the compile command" descriptions of set
+	compile-gcc and show compile-gcc.
+
+2017-08-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.texinfo (Architectures): Add new Sparc64 section to document
+	ADI support.
+	* NEWS: Add "adi examine" and "adi assign" commands.
+
+2017-08-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Server): Document "--selftest".
+
+2017-08-16  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+
+	* gdb.texinfo (TUI Single Key Mode): Document the new shortcuts in
+	Single-Key mode.
+
+2017-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21925
+	* gdb.texinfo (Starting) <startup-with-shell>: Fix typo ("show
+	set...").
+
+2017-08-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Packets): Fix Z0 cmd_list doc referring to
+	conditional expression.
+
+2017-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* agentexpr.texi (rot): Fix symbolic description, improve
+	textual description.
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document command
+	"maint check xml-descriptions".
+
+2017-07-26  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Document optional
+	argument of "maint print c-tdesc".
+
+2017-07-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Maintenance Commands): Improve the doc to
+	command "maint print c-tdesc".
+
+2017-06-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/21606
+	* python.texi (Python representation of Symbols.): Replace
+	SYMBOL_FUNCTION_DOMAIN by SYMBOL_FUNCTIONS_DOMAIN, fixing typo.
+	* guile.texi (Guile representation of Symbols.): Likewise.
+
+2017-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Optional Messages about Internal Happenings):
+	Document {set,show} debug separate-debug-file commands.
+
+2017-06-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Starting) <startup-with-shell>: Add @anchor.
+	(Connecting) <Remote Packet>: Add "startup-with-shell"
+	and "QStartupWithShell" to the table.
+	(Remote Protocol) <QStartupWithShell>: New item, explaining the
+	packet.
+
+2017-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Packets): Document vMustReplyEmpty packet.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Factor out the documentation of
+	gdb.RecordInstruction's super class.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Replace gdb.BtraceFunction with
+	gdb.RecordFunctionSegment.  Rename prev_sibling and next_sibling to
+	prev and next.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Replace gdb.BtraceInstruction with
+	gdb.RecordInstruction
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Add documentation for
+	gdb.RecordGap and remove documentation of special cases for
+	gdb.BtraceInstruction.
+
+2017-05-01  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recording in Python): Remove Record.ptid defvar.
+
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Thread Information): Add missing
+	fields, re-word some things.
+	(GDB/MI Thread Commands): Describe fields found in the output of
+	-thread-info, remove description of fields in the
+	thread output tuple, replace with a cross-reference to "GDB/MI
+	Thread Information".
+
+2017-04-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Thread Commands): Remove "current" field
+	from -thread-info output.
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Document "set debug arc 2".
+
+2017-03-28  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Add "maint print arc arc-instruction".
+
+2017-03-22  Yao Qi  <yao.qi@linaro.org>
+
+	* python.texi (Inferiors In Python): Remove @code from Python.
+
+2017-03-21  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recordings In Python): Document return type of
+	gdb.BtraceInstruction.data.
+
+2017-03-20  Marc-Andre Laperle  <marc-andre.laperle@ericsson.com>
+
+	* gdb.texinfo (gdb/mi Symbol Query Commands): Document new MI
+	command file-list-shared-libraries
+	(GDB/MI Async Records): Update documentation of library-loaded with new
+	field.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* doc/gdb.texinfo (C Plus Plus Expressions): Mention that GDB
+	supports both lvalue and rvalue references.
+
+2017-03-20  Artemiy Volkov  <artemiyv@acm.org>
+
+	PR gdb/14441
+	* python.texi (Types in Python): Add TYPE_CODE_RVALUE_REF to
+	table of constants.
+
+2017-03-16  Doug Evans  <dje@google.com>
+
+	* guile.texi (Lazy Strings In Guile): Mention arrays.
+	* python.texi (Lazy Strings In Python): Ditto.
+
+2017-03-08  Jiong Wang  <jiong.wang@arm.com>
+
+        * gdb.texinfo (Memory Protection Extensions): Add missing escape
+	character "@".
+
+2017-03-07  Walfred Tedeschi <walfred.tedeschi@intel.com>
+
+	* Memory Protection Extensions: Add information about inferior
+	calls.
+
+2017-02-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gdb.texinfo: Document new set/show disassembler-options
+	commands.
+
+2017-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Print Settings, Tail Call Frames): Rename DW_OP_GNU_*,
+	DW_TAG_GNU_* and DW_AT_GNU_*.
+
+2017-02-14  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* python.texi (Recordings In Python): New section.
+
+2017-02-14  Tom Tromey  <tom@tromey.com>
+
+	PR python/13598:
+	* python.texi (Events In Python): Document events.before_prompt.
+
+2017-02-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (Target Commands): Document the optional offset
+	argument for the load command.
+
+2017-02-10  Martin Galvan  <martingalvan@sourceware.org>
+
+	PR gdb/21122
+	* gdb.texinfo (Breakpoints): Reword documentation to speak in terms of
+	space-separated breakpoint lists.  Also add a missing @table command
+	and @cindex for breakpoint lists.
+
+2017-02-06  Ivo Raisr  <ivo.raisr@oracle.com>
+
+	PR tdep/20936
+	* gdb.texinfo: (Standard Target Features): Document SPARC features.
+	(Sparc Features): New node.
+
+2017-01-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add system segment registers
+	as feature.
+
+2017-01-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Events In Python): Fix typo.
+
+2017-01-20  Mike Wrighton  <mike_wrighton@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (-target-flash-erase): New MI command description.
+	(flash-erase): New CLI command description.
+
+2017-01-04  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Contributors): Add SRI International and University
+	of Cambridge for FreeBSD/mips.
+
+2016-12-22  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Symbols): Update docs for symbol printing maintenance
+	commands.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (User-defined Commands): Limit on number of
+	arguments passed to user-defined commands removed; update.
+
+2016-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR cli/20559
+	* gdb.texinfo (Define): Add example of using "eval" to process a
+	variable number of arguments.
+	(Output) <eval>: Add anchor.
+
+2016-11-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Likewise.
+
+2016-11-18  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Add missing comma after
+	xref.
+
+2016-10-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Packets) <vCont>: Remove mention of default
+	actions.
+
+2016-10-26  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Packets): Clarify vCont packets with multiple
+	actions that match a thread, and what happens when an action
+	matches a thread that is already running.
+
+2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Using Trace Files): Fix typo.
+	(GDB/MI Tracepoint Commands): Likewise.
+
+2016-10-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Tracepoint Commands): Document -ctf switch
+	of -trace-save.
+
+2016-10-06  Tom Tromey  <tom@tromey.com>
+
+	* guile.texi (Types In Guile): Remove Java mentions.
+	* python.texi (Types In Python): Remove Java mentions.
+	* gdb.texinfo (Address Locations, Supported Languages)
+	(Index Section Format): Remove Java mentions.
+
+2016-08-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Target Description Format): Update docs on "end"
+	field spec and field default type.
+
+2016-10-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+2016-10-03  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/20487
+	* gdb.texinfo (Context management): Update mention of frame
+	change notifications.
+	(gdb/mi Async Records): Document frame field in
+	=thread-select event.
+	* observer.texi (GDB Observers): New user_selected_context_changed
+	observer.
+
+2016-09-28  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Packets) <z0>: Use "software breakpoint" rather
+	than "memory breakpoint".  Further document "kind".  Move
+	protocol-details link earlier.
+	<z1>: Document the cmd_list argument.  Fix typo.
+	<g>: Remove incorrect sentence.
+	(Stop Reply Packets): Document "OK" response to requests when in
+	non-stop mode.
+	<swbreak>: Use "software breakpoint" rather than "memory
+	breakpoint".
+	<create>: Document that "R" is ignored.
+	<W, X, w>: Document formatting of "AA".
+	(Notification Packets): Use "%Stop", not "%%Stop".
+
+2016-09-21  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* gdb.texinfo (Embedded Processors): Document ARC.
+	(Synopsys ARC): New section.
+	(Standard Target Features): Document ARC features.
+	(ARC Features): New section.
+
+2016-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* .gitignore: New file.
+
+2016-08-24  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Input/Output): Mention possibility to unset
+	inferior-tty.
+
+2016-07-25  Tim Wiederhake  <tim.wiederhake@intel.com>
+
+	* gdb.texinfo: Resume btrace on reconnect.
+
+2016-07-23  Gabriel Krisman Bertazi  <gabriel@krisman.be>
+
+	* gdb.texinfo (Set Catchpoints): Add 'group' argument to catch
+	syscall.
+
+2016-06-30  Руслан Ижбулатов  <lrn1986@gmail.com>
+
+	* gdb.texinfo (Cygwin Native): Document the new 'signal-event'
+	command.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/15620, PR python/18620:
+	* python.texi (Events In Python): Document new breakpoint events.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	PR python/17698:
+	* python.texi (Breakpoints In Python): Document
+	Breakpoint.pending.
+
+2016-07-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Breakpoints In Python): Move table of types and
+	table of watchpoint types earlier in node.
+
+2016-07-12  Tom Tromey  <tom@tromey.com>
+
+	PR python/19293:
+	* python.texi (Frames In Python): Document
+	gdb.invalidate_cached_frames.
+
+2016-06-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Interpreters): Update intepreter-exec section,
+	document new-ui and explain use case.
+
+2016-06-17  Yan-Ting Lin  <currygt52@gmail.com>
+
+	* gdb.texinfo (Standard Target Features): Document NDS32 features.
+	(NDS32 Features): New Section.
+
+2016-06-09  Toshihito Kikuchi  <k.toshihito@yahoo.de>
+
+	* gdb.texinfo (Examining Memory): Document negative repeat
+	count in the 'x' command.
+
+2016-06-06  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document method and
+	format fields in =record-started.
+	* observer.texi (record_changed): Add method and format
+	parameters.
+
+2016-05-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (General Query Packets): Move the description of the
+	response before the long list of the specific 'read' and 'write'
+	requests.
+
+2016-05-23  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Basic Python): Document gdb.breakpoints return.
+
+2016-05-24  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/19194:
+	* gdb.texinfo (gdb man): Fix typo.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Supported Languages): Mention Rust.  Update menu.
+	(Rust): New node.
+
+2016-05-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint selftest".
+
+2016-04-27  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (tfind): Complete doc about tfind without
+	argument.
+
+2016-04-13  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* agentexpr.texi (byte): Fix zero_ext description.
+
 2016-03-31  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (M32R/SDI): Delete node.
@@ -386,6 +1972,15 @@
 
 	* gdb.texinfo (Selection): Update documentation for 'frame'
 	command.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI): Restructure documentation on TUI layout and
+	focus commands.
+
+2015-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (TUI): Add comma after @xref.
 
 2015-07-02  Markus Metzger  <markus.t.metzger@intel.com>
 
@@ -789,6 +2384,11 @@
 
 2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
 
+	* observer.texi (inferior_call_pre, inferior_call_post)
+	(memory_changed, register_changed): New observers.
+
+2014-12-02  Nick Bull  <nicholaspbull@gmail.com>
+
 	* python.texi (Events In Python): Document new events
 	InferiorCallPreEvent, InferiorCallPostEvent, MemoryChangedEvent
 	and RegisterChangedEvent.
@@ -907,6 +2507,10 @@
 
 	* gdb.texinfo (Signaling) <signal command>: Explain what happens
 	with multi-threaded programs.
+
+2014-07-19  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* gdb.texinfo (MicroBlaze Features): Added.
 
 2014-06-27  Yao Qi  <yao@codesourcery.com>
 
@@ -2106,6 +3710,12 @@
 2012-12-12 Mircea Gherzan <mircea.gherzan@intel.com>
 
 	* gdb.texinfo (GDB/MI Catchpoint Commands): New section.
+
+2012-12-12  Paul Koning  <paul_koning@dell.com>
+
+	Add support for Python 3.
+	* gdb.texinfo (Inferior.read_memory): Mention that the return
+	value is a memoryview object if Python 3.
 
 2012-12-11  Pedro Alves  <palves@redhat.com>
 
@@ -4570,6 +6180,10 @@
 	* observer.texi (solib_unloaded): Document explicitly the fact that
 	this observer is called before the associated symbols are unloaded.
 
+2009-09-21  Jie Zhang  <jie.zhang@analog.com>
+
+	* gdb.texinfo: Escape "{" and "}".
+
 2009-09-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Document
@@ -5740,6 +7354,11 @@
 	* gdb.texinfo (Thread Commands): Document
 	-thread-info.  Remove -thread-list-all-threads.
 
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement MI notification for new threads.
+	* observer.texi (new_thread): Document.
+
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 	    Sandra Loosemore  <sandra@codesourcery.com>
 
@@ -5996,6 +7615,11 @@
 	* gdbint.texinfo (Target Conditionals): Use
 	frame_unwind_register_unsigned in examples instead of
 	frame_unwind_unsigned_register.
+
+2007-10-16  Gaius Mulley  <gaius@glam.ac.uk>
+
+        * gdb.texinfo: Add TSIZE definition, removed statement about
+	unbounded arrays being unimplemented.
 
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -6272,6 +7896,10 @@
 	* gdb.texinfo (GDB/MI Variable Objects): Document
 	frozen variables objects.
 
+2007-04-13  Paul Brook  <paul@codesourcery.com>
+
+	* gdb.texinfo: Document ieee_single and ieee_double target types.
+
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Memory): Reference Remote Debugging chapter.
@@ -6282,6 +7910,10 @@
 	(Remote configuration): Delete description of "set remotedevice"
 	and "show remotedevice".
 	(Embedded Processors): Delete H8/300, H8/500, and SH nodes.
+
+2007-04-11  Steve Ellcey  <sje@cup.hp.com>
+
+	* gdbint.texinfo (warning flags): Add -Wno-char-subscripts.
 
 2007-04-11  Bob Wilson  <bob.wilson@acm.org>
 
@@ -6731,6 +8363,11 @@
 	remote supported-packets.
 	(General Query Packets): Document qSupported packet.
 
+2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.texinfo (system): Document behaviour with zero length
+	string.
+
 2006-06-10  Sandra Loosemore <sandra@codesourcery.com>
 
 	* gdb.texinfo (File-I/O overview): Copy edit for grammar, spelling,
@@ -6878,6 +8515,10 @@
 2006-03-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Overview): Add an index entry to "empty response".
+
+2006-03-29  Steve Ellcey  <sje@cup.hp.com>
+
+	* gdb.texinfo: Remove gdbserve.nlm documentation.
 
 2006-03-28  Jim Blandy  <jimb@codesourcery.com>
 
@@ -7478,6 +9119,10 @@
 	* gdb.texinfo (General Query Packets): Fix texinfo compile warning and
 	error.
 
+2005-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* observer.texi (executable_changed): New observer.
+
 2005-02-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Document qGetTLSAddr packet.
@@ -7646,6 +9291,11 @@
 
 	* gdbint.texinfo (Host Definition): Delete description of
 	FCLOSE_PROVIDED and GETENV_PROVIDED.
+
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Host Definition): Remove documentation for
+	USE_O_NOCTTY, no longer used.
 
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
@@ -8621,6 +10271,10 @@
 	* gdbint.texinfo: Ditto.
 	* gdb.texinfo: Ditto.
 
+2002-12-29  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* fdl.texi: Revert the last change.
+
 2002-12-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Update
@@ -8739,6 +10393,10 @@
 2002-09-20  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo: Add character set documentation.
+
+2002-09-20  George Helffrich  <george@gly.bris.ac.uk>
+
+	* gdb.texinfo: Document edit command.
 
 2002-09-19  Andrew Cagney  <ac131313@redhat.com>
 
@@ -8939,6 +10597,10 @@
 	* gdbint.texinfo (Releasing GDB): Rename ``Obsoleting any code''
 	to ``Obsoleting code''.  Revise.
 
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* gdbint.texinfo: Document new generic OS ABI framework.
+
 2002-05-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (C Preprocessor Macros): New chapter.
@@ -9075,6 +10737,11 @@
 	* Makefile.in (gdb.info): Add explicit path to gdb.texinfo.
 	Remove reference to 3.12.
 
+2002-02-23  Paul Eggert  <eggert@twinsun.com>
+
+	* Makefile.in (GDBvn.texi): Change "head -1" to "sed q", since
+	POSIX 1003.1-2001 no longer allows "head -1".
+
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo: Include fdl.texi.
@@ -9113,6 +10780,11 @@
 	* gdb.texinfo (overlays): Mention new magic symbol
 	'_ovly_debug_event', which allows GDB to keep better track
 	of overlays.
+
+2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gdbint.texinfo (FLOAT_INFO): Mark as deprecated.
+	(PRINT_FLOAT_INFO): Document it.
 
 2002-02-03  Eli Zaretskii  <eliz@gnu.org>
 
@@ -9941,6 +11613,10 @@ Thu Oct 14 21:17:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Add PARM_BOUNDARY.
 
+1999-10-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdbint.texinfo (SYMBOLS_CAN_START_WITH_DOLLAR): Document.
+
 1999-10-05  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Dmitry Sivachenko <demon@gpad.ac.ru>:
@@ -10044,6 +11720,10 @@ Wed Aug 11 13:18:14 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* Makefile.in: Rename inc-hist.texi to inc-hist.texinfo.
 	* gdb.texinfo: Ditto.
+
+Sun Aug  8 12:06:47 1999  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo (find_sym_fns): This replaces symfile_init.
 
 1999-08-06  Tom Tromey  <tromey@cygnus.com>
 
@@ -10366,6 +12046,11 @@ Mon Dec  9 12:23:32 1996  Roland Pesch  <roland@wrs.com>
 
 	* gdb.texinfo, refcard.tex: Restore author credit
 
+Wed Oct  2 22:07:16 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo: Document that SIGTRAMP_START and SIGTRAMP_END
+	are macros that take an single argument.
+
 Wed Oct  2 22:01:36 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
 
 	* gdbint.texinfo (SIGTRAMP_START, SIGTRAMP_END): Update
@@ -10471,6 +12156,10 @@ Wed Sep 20 13:14:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New target, synonym for
 	realclean.
+
+Wed Sep 20 08:16:03 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* gdbint.texinfo (GETENV_PROVIDED, FCLOSE_PROVIDED): Document.
 
 Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
 
@@ -11324,6 +13013,17 @@ Thu Apr 29 09:36:25 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.texinfo (Environment): Mention pitfall with .cshrc.
 
+Thu Apr 29 00:03:59 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdbint.texinfo (LONG_LONG):  Replace with CC_HAS_LONG_LONG.
+	Add PRINTF_HAS_LONG_LONG references.
+
+Wed Apr 28 11:39:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: Make node "Shell Commands" unconditional; describe
+	`set demangle-style arm' (not cfront); mention can type `q' to
+	discard output, when gdb pages.
+
 Tue Apr 27 14:02:57 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdbint.texinfo (new node Debugging GDB, elsewhere):
@@ -11380,6 +13080,10 @@ Fri Apr  2 16:55:13 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo: Fixes about N_SO.
 
+Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdbinit.texinfo:  Document renaming of tm-29k.h to tm-a29k.h.
+
 Fri Mar 26 18:00:35 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo: include list of nonstandard init file names
@@ -11409,6 +13113,11 @@ Wed Mar 24 14:03:19 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 Tue Mar 23 16:03:24 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, gdvinv-s.texinfo: formatting improvements.
+
+Tue Feb 23 11:46:11 1993  Mike Stump  (mrs@cygnus.com)
+
+	* stabs.texi: The `this' pointer is now known by the name
+	`this' instead of `$t'.
 
 Fri Mar 19 21:46:50 1993  John Gilmore  (gnu@cygnus.com)
 
@@ -11446,6 +13155,10 @@ Thu Feb 11 10:38:40 1993  John Gilmore  (gnu@cygnus.com)
 Wed Feb 10 23:59:19 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Eliminate IBM6000_HOST, document IBM6000_TARGET.
+
+Wed Feb 10 23:42:37 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo: Eliminate IBM6000_HOST, document IBM6000_TARGET.
 
 Tue Feb  9 18:26:21 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
@@ -11485,6 +13198,18 @@ Mon Feb  1 15:35:47 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 	* gdbinv-s.texi:  Mention that Z8000 simulator can simulate Z8001
 	as well as Z8002.
 
+Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo (Host Conditionals): Remove
+	NAMES_HAVE_UNDERSCORE, SOME_NAMES_HAVE_DOT, document
+	MEM_FNS_DECLARED.
+	(Target Conditionals):  Remove all of the above.
+
+Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo: SWAP_HOST_AND_TARGET => SWAP_TARGET_AND_HOST.
+	Noticed by Andy Jackson, <arj@cam-orl.co.uk>.
+
 Sat Nov 28 06:51:35 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Add sections on clean design and on how to send
@@ -11494,6 +13219,10 @@ Mon Nov  9 23:57:02 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Add how to declare the result of make_cleanup.
 
+Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* gdbint.texinfo: nm.h now included in defs.h.
+
 Mon Oct 26 11:09:47 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo:  Fix typo, reported by Karl Berry.
@@ -11502,10 +13231,37 @@ Fri Oct 23 00:41:21 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo:  Add opcodes dir to GDB distribution description.
 
+Wed Oct 21 03:51:01 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Improve REGISTER_U_ADDR and USE_PROC_FS doc.
+
+Tue Oct 20 23:27:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo: Document obsolete STACK_END_ADDR.
+	(all @node commands): Use new form to avoid nitpicking errors.
+	* gdbint.texinfo: Document host/native/target split.
+
+Tue Oct 20 21:32:18 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* gdbint.texinfo: add PUSH_DUMMY_FRAME, POP_FRAME.
+
+Fri Oct 16 03:34:01 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo: Update GET_LONGJMP_TARGET, L_SET doc.
+
 Sat Oct 10 18:04:58 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* gdbint.texinfo: fixed a stray email address (needs @@),
 	added @table @code to node "Native Conditionals"
+
+Thu Oct  8 16:27:45 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* gdbint.texinfo: document a few more macros, create new section
+	for native macros.
+
+Thu Oct  1 01:57:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdb.texinfo: Document command hooks.
 
 Tue Sep 22 00:34:15 1992  John Gilmore  (gnu@cygnus.com)
 
@@ -11519,6 +13275,19 @@ Tue Sep 15 02:57:09 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Improve release doc slightly.
 
+Fri Sep 11 18:28:28 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, gdbinv-m.m4.in, gdbinv-s.m4.in: First pass at doc
+	for two new remote targets---29K using UDI, and Tandem ST2000
+	using STDBUG.
+
+	* all.m4, none.m4: new m4 switch, _ST2000__
+
+	* all.m4: turn on H8/300 stuff for generic manual
+
+	* gdbinv-s.m4.in: remove text on special procedures to continue
+	after explicit call to breakpoint() in serial stubs.
+
 Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
 
 	* gdbint.texinfo:  Improve doc of GDB config macros.
@@ -11527,6 +13296,15 @@ Wed Sep  9 16:52:06 1992  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Remove Bothner's changes for C++ nested types.
 	These will be reinserted when examined.
+
+Fri Sep  4 18:53:57 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: fix shameful error of agreement reported by
+	jimb@occs.cs.oberlin.edu (Jim Blandy)
+	* gdb.texinfo: remove old partial discussion of remote serial
+	protocol (via serial debug stubs)
+	* gdbinv-m.m4.in, gdbinv-s.m4.in: new section discussing
+	use of serial debug stubs
 
 Mon Aug 24 01:17:55 1992  John Gilmore  (gnu@cygnus.com)
 
@@ -11575,6 +13353,10 @@ Sat Aug 15 03:14:59 1992  John Gilmore  (gnu@cygnus.com)
 Fri Aug 14 21:08:47 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Add section on partial symbol tables.
+
+Fri Jun 19 10:28:05 1992  John Gilmore  (gnu at cygnus.com)
+
+	* gdb.texinfo:  Document new am29k setting.
 
 Sat Jun 20 16:31:10 1992  John Gilmore  (gnu at cygnus.com)
 
@@ -11647,4 +13429,5 @@ mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
+coding: utf-8
 End:

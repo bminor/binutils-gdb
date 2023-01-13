@@ -1,5 +1,5 @@
 # Makefile for regression testing the GNU debugger.
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2020 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -51,6 +51,9 @@ RUNTEST = $(RUNTEST_FOR_TARGET)
 RUNTESTFLAGS =
 
 FORCE_PARALLEL =
+
+GDB_DEBUG =
+GDBSERVER_DEBUG =
 
 # Default number of iterations that we will use to run the testsuite
 # if the user does not specify the RACY_ITER environment variable
@@ -137,18 +140,17 @@ $(abs_builddir)/site.exp site.exp: ./config.status Makefile
 
 installcheck:
 
-# See whether -j was given to make.  Either it was given with no
-# arguments, and appears as "j" in the first word, or it was given an
-# argument and appears as "-j" in a separate word.
-@GMAKE_TRUE@saw_dash_j = $(or $(findstring j,$(firstword $(MAKEFLAGS))),$(filter -j,$(MAKEFLAGS)))
+# See whether -j was given to make.  Before GNU make 4.2, either it was
+# given with no arguments, and appears as "j" in the first word, or it was
+# given an argument and appears as "-j" in a separate word.  Starting with
+# GNU make 4.2, it always appears as "-j"/"-jN" in a separate word.
+saw_dash_j = $(or $(findstring j,$(firstword $(MAKEFLAGS))),$(filter -j%,$(MAKEFLAGS)))
 
-# For GNU make, try to run the tests in parallel if any -j option is
-# given.  If RUNTESTFLAGS is not empty, then by default the tests will
-# be serialized.  This can be overridden by setting FORCE_PARALLEL to
-# any non-empty value.  For a non-GNU make, do not parallelize.
-@GMAKE_TRUE@CHECK_TARGET_TMP = $(if $(FORCE_PARALLEL),check-parallel,$(if $(RUNTESTFLAGS),check-single,$(if $(saw_dash_j),check-parallel,check-single)))
-@GMAKE_TRUE@CHECK_TARGET = $(if $(RACY_ITER),$(addsuffix -racy,$(CHECK_TARGET_TMP)),$(CHECK_TARGET_TMP))
-@GMAKE_FALSE@CHECK_TARGET = check-single
+# Try to run the tests in parallel if any -j option is given.  If RUNTESTFLAGS
+# is not empty, then by default the tests will be serialized.  This can be
+# overridden by setting FORCE_PARALLEL to any non-empty value.
+CHECK_TARGET_TMP = $(if $(FORCE_PARALLEL),check-parallel,$(if $(RUNTESTFLAGS),check-single,$(if $(saw_dash_j),check-parallel,check-single)))
+CHECK_TARGET = $(if $(RACY_ITER),$(addsuffix -racy,$(CHECK_TARGET_TMP)),$(CHECK_TARGET_TMP))
 
 # Note that we must resort to a recursive make invocation here,
 # because GNU make 3.82 has a bug preventing MAKEFLAGS from being used
@@ -159,13 +161,21 @@ check: all $(abs_builddir)/site.exp
 check-read1:
 	$(MAKE) READ1="1" check
 
+# Check whether we need to print the timestamp for each line of
+# status.
+TIMESTAMP = $(if $(TS),| $(srcdir)/print-ts.py $(if $(TS_FORMAT),$(TS_FORMAT),),)
+
+gdb_debug = $(if $(GDB_DEBUG),GDB_DEBUG=$(GDB_DEBUG) ; export GDB_DEBUG ;,)
+gdbserver_debug = $(if $(GDBSERVER_DEBUG),GDBSERVER_DEBUG=$(GDBSERVER_DEBUG) ; export GDBSERVER_DEBUG ;,)
+
+
 # All the hair to invoke dejagnu.  A given invocation can just append
 # $(RUNTESTFLAGS)
 DO_RUNTEST = \
 	rootme=`pwd`; export rootme; \
 	srcdir=${srcdir} ; export srcdir ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-	EXEEXT=${EXEEXT} ; export EXEEXT ; \
+	EXEEXT=${EXEEXT} ; export EXEEXT ;  $(gdb_debug) $(gdbserver_debug) \
         $(RPATH_ENVVAR)=$$rootme/../../expect:$$rootme/../../libstdc++:$$rootme/../../tk/unix:$$rootme/../../tcl/unix:$$rootme/../../bfd:$$rootme/../../opcodes:$$$(RPATH_ENVVAR); \
 	export $(RPATH_ENVVAR); \
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
@@ -179,23 +189,21 @@ DO_RUNTEST = \
 # of tests.  For consistency we support it for check-single as well.
 # To specify all tests in a subdirectory, use TESTS=gdb.subdir/*.exp.
 # E.g., make check TESTS="gdb.server/*.exp gdb.threads/*.exp".
-@GMAKE_TRUE@TESTS :=
-@GMAKE_FALSE@TESTS =
+TESTS :=
 
-@GMAKE_TRUE@ifeq ($(strip $(TESTS)),)
-@GMAKE_TRUE@expanded_tests_or_none :=
-@GMAKE_TRUE@else
-@GMAKE_TRUE@expanded_tests := $(patsubst $(srcdir)/%,%,$(wildcard $(addprefix $(srcdir)/,$(TESTS))))
-@GMAKE_TRUE@expanded_tests_or_none := $(or $(expanded_tests),no-matching-tests-found)
-@GMAKE_TRUE@endif
-@GMAKE_FALSE@expanded_tests_or_none = $(TESTS)
+ifeq ($(strip $(TESTS)),)
+expanded_tests_or_none :=
+else
+expanded_tests := $(patsubst $(srcdir)/%,%,$(wildcard $(addprefix $(srcdir)/,$(TESTS))))
+expanded_tests_or_none := $(or $(expanded_tests),no-matching-tests-found)
+endif
 
 # Shorthand for running all the tests in a single directory.
-@GMAKE_TRUE@check-gdb.%:
-@GMAKE_TRUE@	$(MAKE) check TESTS="gdb.$*/*.exp"
+check-gdb.%:
+	$(MAKE) check TESTS="gdb.$*/*.exp"
 
 check-single:
-	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
+	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none) $(TIMESTAMP)
 
 check-single-racy:
 	-rm -rf cache racy_outputs temp
@@ -211,7 +219,7 @@ check-single-racy:
 	for n in `seq $$racyiter` ; do \
 	  mkdir -p racy_outputs/$$n; \
 	  $(DO_RUNTEST) --outdir=racy_outputs/$$n $(RUNTESTFLAGS) \
-	    $(expanded_tests_or_none); \
+	    $(expanded_tests_or_none) $(TIMESTAMP); \
 	done; \
 	$(srcdir)/analyze-racy-logs.py \
 	  `ls racy_outputs/*/gdb.sum` > racy.sum; \
@@ -221,9 +229,9 @@ check-parallel:
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
 	result=$$?; \
-	$(SHELL) $(srcdir)/dg-extract-results.sh \
+	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
 	  `find outputs -name gdb.sum -print` > gdb.sum; \
-	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
 	  `find outputs -name gdb.log -print` > gdb.log; \
 	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
 	exit $$result
@@ -241,10 +249,10 @@ check-parallel-racy:
 	for n in `seq $$racyiter` ; do \
 	  $(MAKE) -k do-check-parallel-racy \
 	    RACY_OUTPUT_N=$$n; \
-	  $(SHELL) $(srcdir)/dg-extract-results.sh \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
 	    `find racy_outputs/$$n -name gdb.sum -print` > \
 	    racy_outputs/$$n/gdb.sum; \
-	  $(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
 	    `find racy_outputs/$$n -name gdb.log -print` > \
 	    racy_outputs/$$n/gdb.log; \
 	  sed -n '/=== gdb Summary ===/,$$ p' racy_outputs/$$n/gdb.sum; \
@@ -261,31 +269,31 @@ check-parallel-racy:
 # them to the front of the list to try to lessen the overall time
 # taken by the test suite -- if one of these tests happens to be run
 # late, it will cause the overall time to increase.
-@GMAKE_TRUE@ifeq ($(strip $(TESTS)),)
+ifeq ($(strip $(TESTS)),)
 slow_tests = gdb.base/break-interp.exp gdb.base/interp.exp \
 	gdb.base/multi-forks.exp
-@GMAKE_TRUE@all_tests := $(shell cd $(srcdir) && find gdb.* -name '*.exp' -print)
-@GMAKE_TRUE@reordered_tests := $(slow_tests) $(filter-out $(slow_tests),$(all_tests))
-@GMAKE_TRUE@TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(reordered_tests))
-@GMAKE_TRUE@else
-@GMAKE_TRUE@TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(expanded_tests_or_none))
-@GMAKE_TRUE@endif
+all_tests := $(shell cd $(srcdir) && find gdb.* -name '*.exp' -print)
+reordered_tests := $(slow_tests) $(filter-out $(slow_tests),$(all_tests))
+TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(reordered_tests))
+else
+TEST_TARGETS := $(addprefix $(if $(RACY_ITER),check-racy,check)/,$(expanded_tests_or_none))
+endif
 
 do-check-parallel: $(TEST_TARGETS)
 	@:
 
-@GMAKE_TRUE@check/%.exp:
-@GMAKE_TRUE@	-mkdir -p outputs/$*
-@GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
+check/%.exp:
+	-mkdir -p outputs/$*
+	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS) $(TIMESTAMP)
 
 do-check-parallel-racy: $(TEST_TARGETS)
 	@:
 
-@GMAKE_TRUE@check-racy/%.exp:
-@GMAKE_TRUE@	-mkdir -p racy_outputs/$(RACY_OUTPUT_N)/$*
-@GMAKE_TRUE@	$(DO_RUNTEST) GDB_PARALLEL=yes \
-@GMAKE_TRUE@	  --outdir=racy_outputs/$(RACY_OUTPUT_N)/$* $*.exp \
-@GMAKE_TRUE@	  $(RUNTESTFLAGS)
+check-racy/%.exp:
+	-mkdir -p racy_outputs/$(RACY_OUTPUT_N)/$*
+	$(DO_RUNTEST) GDB_PARALLEL=yes \
+	  --outdir=racy_outputs/$(RACY_OUTPUT_N)/$* $*.exp \
+	  $(RUNTESTFLAGS) $(TIMESTAMP)
 
 check/no-matching-tests-found:
 	@echo ""
@@ -293,9 +301,9 @@ check/no-matching-tests-found:
 	@echo ""
 
 # Utility rule invoked by step 2 of the build-perf rule.
-@GMAKE_TRUE@workers/%.worker:
-@GMAKE_TRUE@	mkdir -p gdb.perf/outputs/$*
-@GMAKE_TRUE@	$(DO_RUNTEST) --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces
+workers/%.worker:
+	mkdir -p gdb.perf/outputs/$*
+	$(DO_RUNTEST) --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces $(TIMESTAMP)
 
 # Utility rule to build tests that support it in parallel.
 # The build is broken into 3 steps distinguished by GDB_PERFTEST_SUBMODE:
@@ -311,22 +319,22 @@ check/no-matching-tests-found:
 # The point of step 1 is to construct the set of worker tasks for step 2.
 # All of the information needed by build-piece.exp is contained in the name
 # of the generated .worker file.
-@GMAKE_TRUE@build-perf: $(abs_builddir)/site.exp
-@GMAKE_TRUE@	rm -rf gdb.perf/workers
-@GMAKE_TRUE@	mkdir -p gdb.perf/workers
-@GMAKE_TRUE@	@: Step 1: Generate the build .worker files.
-@GMAKE_TRUE@	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers
-@GMAKE_TRUE@	@: Step 2: Compile the pieces.  Here is the build parallelism.
-@GMAKE_TRUE@	$(MAKE) $$(cd gdb.perf && echo workers/*/*.worker)
-@GMAKE_TRUE@	@: Step 3: Do the final link.
-@GMAKE_TRUE@	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final
+build-perf: $(abs_builddir)/site.exp
+	rm -rf gdb.perf/workers
+	mkdir -p gdb.perf/workers
+	@: Step 1: Generate the build .worker files.
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers $(TIMESTAMP)
+	@: Step 2: Compile the pieces.  Here is the build parallelism.
+	$(MAKE) $$(cd gdb.perf && echo workers/*/*.worker)
+	@: Step 3: Do the final link.
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final $(TIMESTAMP)
 
 # The default is to both compile and run the tests.
 GDB_PERFTEST_MODE = both
 
 check-perf: all $(abs_builddir)/site.exp
 	@if test ! -d gdb.perf; then mkdir gdb.perf; fi
-	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=$(GDB_PERFTEST_MODE) $(RUNTESTFLAGS)
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=$(GDB_PERFTEST_MODE) $(RUNTESTFLAGS) $(TIMESTAMP)
 
 force:;
 
@@ -351,7 +359,9 @@ config.status: configure
 
 TAGS: force
 	find $(srcdir) -name '*.exp' -print | \
-	    etags --regex='/proc[ \t]+\([^ \t]+\)/\1/' -
+	    etags \
+		--regex='/\(proc\|proc_with_prefix\|gdb_caching_proc\)[ \t]+\([^ \t]+\)/\2/' \
+		-
 
 # Build the expect wrapper script that preloads the read1.so library.
 expect-read1:
@@ -376,3 +386,6 @@ read1.so: lib/read1.c
 # Build the read1 machinery.
 .PHONY: read1
 read1: read1.so expect-read1
+
+# Disable implicit make rules.
+include $(srcdir)/../disable-implicit-rules.mk

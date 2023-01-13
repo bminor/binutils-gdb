@@ -1,6 +1,6 @@
 /* Native-dependent code for SPARC.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 
 #include <signal.h>
 #include <sys/ptrace.h>
-#include "gdb_wait.h"
+#include "gdbsupport/gdb_wait.h"
 #ifdef HAVE_MACHINE_REG_H
 #include <machine/reg.h>
 #endif
@@ -134,11 +134,10 @@ sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
    for all registers (including the floating-point registers).  */
 
 void
-sparc_fetch_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int pid;
+  struct gdbarch *gdbarch = regcache->arch ();
+  pid_t pid;
 
   /* NOTE: cagney/2002-12-03: This code assumes that the currently
      selected light weight processes' registers can be written
@@ -150,18 +149,16 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
      belong to the selected thread (the LWP could be in the middle of
      executing the thread switch code).
 
-     These functions should instead be paramaterized with an explicit
+     These functions should instead be parameterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
-  pid = ptid_get_lwp (inferior_ptid);
-  if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+  pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == SPARC_G0_REGNUM)
     {
       gdb_byte zero[8] = { 0 };
 
-      regcache_raw_supply (regcache, SPARC_G0_REGNUM, &zero);
+      regcache->raw_supply (SPARC_G0_REGNUM, &zero);
       return;
     }
 
@@ -189,17 +186,14 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
 }
 
 void
-sparc_store_inferior_registers (struct target_ops *ops,
-				struct regcache *regcache, int regnum)
+sparc_store_inferior_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int pid;
+  struct gdbarch *gdbarch = regcache->arch ();
+  pid_t pid;
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
      about threaded assumptions.  */
-  pid = ptid_get_lwp (inferior_ptid);
-  if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+  pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {
@@ -257,8 +251,8 @@ sparc_store_inferior_registers (struct target_ops *ops,
 /* Implement the to_xfer_partial target_ops method for
    TARGET_OBJECT_WCOOKIE.  Fetch StackGhost Per-Process XOR cookie.  */
 
-static enum target_xfer_status
-sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
+enum target_xfer_status
+sparc_xfer_wcookie (enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
 		    ULONGEST *xfered_len)
@@ -280,7 +274,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
      later).  Since release 3.6, OpenBSD uses a fully randomized
      cookie.  */
   {
-    int pid = ptid_get_pid (inferior_ptid);
+    int pid = inferior_ptid.pid ();
 
     /* Sanity check.  The proper type for a cookie is register_t, but
        we can't assume that this type exists on all systems supported
@@ -309,47 +303,13 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   *xfered_len = (ULONGEST) len;
   return TARGET_XFER_OK;
 }
-
-target_xfer_partial_ftype *inf_ptrace_xfer_partial;
-
-static enum target_xfer_status
-sparc_xfer_partial (struct target_ops *ops, enum target_object object,
-		    const char *annex, gdb_byte *readbuf,
-		    const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		    ULONGEST *xfered_len)
-{
-  if (object == TARGET_OBJECT_WCOOKIE)
-    return sparc_xfer_wcookie (ops, object, annex, readbuf, writebuf, 
-			       offset, len, xfered_len);
-
-  return inf_ptrace_xfer_partial (ops, object, annex, readbuf, writebuf,
-				  offset, len, xfered_len);
-}
 
-/* Create a prototype generic SPARC target.  The client can override
-   it with local methods.  */
 
-struct target_ops *
-sparc_target (void)
-{
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = sparc_fetch_inferior_registers;
-  t->to_store_registers = sparc_store_inferior_registers;
-  inf_ptrace_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = sparc_xfer_partial;
-  return t;
-}
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc_nat (void);
-
+void _initialize_sparc_nat ();
 void
-_initialize_sparc_nat (void)
+_initialize_sparc_nat ()
 {
-  /* Deafult to using SunOS 4 register sets.  */
+  /* Default to using SunOS 4 register sets.  */
   if (sparc_gregmap == NULL)
     sparc_gregmap = &sparc32_sunos4_gregmap;
   if (sparc_fpregmap == NULL)

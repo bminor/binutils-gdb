@@ -1,5 +1,5 @@
 /* Interface to C preprocessor macro tables for GDB.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -20,9 +20,14 @@
 #ifndef MACROTAB_H
 #define MACROTAB_H
 
+#include "gdbsupport/function-view.h"
+
 struct obstack;
-struct bcache;
 struct compunit_symtab;
+
+namespace gdb {
+struct bcache;
+}
 
 /* How do we represent a source location?  I mean, how should we
    represent them within GDB; the user wants to use all sorts of
@@ -168,7 +173,7 @@ struct macro_source_file
    the same source location (although 'gcc -DFOO -UFOO -DFOO=2' does
    do that in GCC 4.1.2.).  */
 struct macro_table *new_macro_table (struct obstack *obstack,
-                                     struct bcache *bcache,
+                                     gdb::bcache *bcache,
 				     struct compunit_symtab *cust);
 
 
@@ -228,9 +233,9 @@ void macro_define_special (struct macro_table *table);
    path.  e.g., `stdio.h', not `/usr/include/stdio.h'.  If NAME
    appears more than once in the inclusion tree, return the
    least-nested inclusion --- the one closest to the main source file.  */
-struct macro_source_file *(macro_lookup_inclusion
-                           (struct macro_source_file *source,
-                            const char *name));
+struct macro_source_file *macro_lookup_inclusion
+                          (struct macro_source_file *source,
+                           const char *name);
 
 
 /* Record an object-like #definition (i.e., one with no parameter list).
@@ -313,9 +318,9 @@ struct macro_definition
    effect at the end of the file.  The macro table owns the structure;
    the caller need not free it.  Return zero if NAME is not #defined
    at that point.  */
-struct macro_definition *(macro_lookup_definition
-                          (struct macro_source_file *source,
-                           int line, const char *name));
+struct macro_definition *macro_lookup_definition
+                         (struct macro_source_file *source,
+                          int line, const char *name);
 
 
 /* Return the source location of the definition for NAME in scope at
@@ -323,43 +328,37 @@ struct macro_definition *(macro_lookup_definition
    number of the definition, and return a source file structure for
    the file.  Return zero if NAME has no definition in scope at that
    point, and leave *DEFINITION_LINE unchanged.  */
-struct macro_source_file *(macro_definition_location
-                           (struct macro_source_file *source,
-                            int line,
-                            const char *name,
-                            int *definition_line));
+struct macro_source_file *macro_definition_location
+                          (struct macro_source_file *source,
+                           int line,
+                           const char *name,
+                           int *definition_line);
 
-/* Callback function when walking a macro table.  NAME is the name of
-   the macro, and DEFINITION is the definition.  SOURCE is the file at the
-   start of the include path, and LINE is the line number of the SOURCE file
-   where the macro was defined.  USER_DATA is an arbitrary pointer which is
-   passed by the caller to macro_for_each or macro_for_each_in_scope.  */
-typedef void (*macro_callback_fn) (const char *name,
-				   const struct macro_definition *definition,
-				   struct macro_source_file *source,
-				   int line,
-				   void *user_data);
+/* Prototype for a callback callable when walking a macro table.  NAME
+   is the name of the macro, and DEFINITION is the definition.  SOURCE
+   is the file at the start of the include path, and LINE is the line
+   number of the SOURCE file where the macro was defined.  */
+typedef void (macro_callback_fn) (const char *name,
+				  const struct macro_definition *definition,
+				  struct macro_source_file *source,
+				  int line);
 
-/* Call the function FN for each macro in the macro table TABLE.
-   USER_DATA is passed, untranslated, to FN.  */
-void macro_for_each (struct macro_table *table, macro_callback_fn fn,
-		     void *user_data);
+/* Call the callable FN for each macro in the macro table TABLE.  */
+void macro_for_each (struct macro_table *table,
+		     gdb::function_view<macro_callback_fn> fn);
 
-/* Call the function FN for each macro that is visible in a given
-   scope.  The scope is represented by FILE and LINE.  USER_DATA is
-   passed, untranslated, to FN.  */
+/* Call FN for each macro that is visible in a given scope.  The scope
+   is represented by FILE and LINE.  */
 void macro_for_each_in_scope (struct macro_source_file *file, int line,
-			      macro_callback_fn fn,
-			      void *user_data);
+			      gdb::function_view<macro_callback_fn> fn);
 
 /* Return FILE->filename with possibly prepended compilation directory name.
    This is raw concatenation without the "set substitute-path" and gdb_realpath
-   applications done by symtab_to_fullname.  Returned string must be freed by
-   xfree.
+   applications done by symtab_to_fullname.
 
    THis function ignores the "set filename-display" setting.  Its default
    setting is "relative" which is backward compatible but the former behavior
    of macro filenames printing was "absolute".  */
-extern char *macro_source_fullname (struct macro_source_file *file);
+extern std::string macro_source_fullname (struct macro_source_file *file);
 
 #endif /* MACROTAB_H */

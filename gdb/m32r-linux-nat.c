@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux m32r.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,7 @@
 #include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/procfs.h>
+#include "inf-ptrace.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -33,7 +34,15 @@
 #include "m32r-tdep.h"
 
 
+class m32r_linux_nat_target final : public linux_nat_target
+{
+public:
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
 
+static m32r_linux_nat_target the_m32r_linux_nat_target;
 
 /* Since EVB register is not available for native debug, we reduce
    the number of registers.  */
@@ -92,11 +101,11 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t * gregsetp)
 	}
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_supply (regcache, i, &regval);
+	regcache->raw_supply (i, &regval);
       else if (psw & 0x8000)
-	regcache_raw_supply (regcache, i, regp + SPU_REGMAP);
+	regcache->raw_supply (i, regp + SPU_REGMAP);
       else
-	regcache_raw_supply (regcache, i, regp + SPI_REGMAP);
+	regcache->raw_supply (i, regp + SPI_REGMAP);
     }
 }
 
@@ -141,11 +150,11 @@ fill_gregset (const struct regcache *regcache,
 	continue;
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_collect (regcache, i, regp + regmap[i]);
+	regcache->raw_collect (i, regp + regmap[i]);
       else if (psw & 0x8000)
-	regcache_raw_collect (regcache, i, regp + SPU_REGMAP);
+	regcache->raw_collect (i, regp + SPU_REGMAP);
       else
-	regcache_raw_collect (regcache, i, regp + SPI_REGMAP);
+	regcache->raw_collect (i, regp + SPI_REGMAP);
     }
 }
 
@@ -190,16 +199,10 @@ fill_fpregset (const struct regcache *regcache,
    this for all registers (including the floating point and SSE
    registers).  */
 
-static void
-m32r_linux_fetch_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+m32r_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  int tid;
-
-  /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* Not a threaded program.  */
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_GETREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -217,15 +220,10 @@ m32r_linux_fetch_inferior_registers (struct target_ops *ops,
 /* Store register REGNO back into the child process.  If REGNO is -1,
    do this for all registers (including the floating point and SSE
    registers).  */
-static void
-m32r_linux_store_inferior_registers (struct target_ops *ops,
-				     struct regcache *regcache, int regno)
+void
+m32r_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
-  int tid;
-
-  /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = ptid_get_lwp (inferior_ptid)) == 0)
-    tid = ptid_get_pid (inferior_ptid);	/* Not a threaded program.  */
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_SETREGS request whenever possible, since it
      transfers more registers in one system call.  */
@@ -239,20 +237,11 @@ m32r_linux_store_inferior_registers (struct target_ops *ops,
 		  _("Got request to store bad register number %d."), regno);
 }
 
-void _initialize_m32r_linux_nat (void);
-
+void _initialize_m32r_linux_nat ();
 void
-_initialize_m32r_linux_nat (void)
+_initialize_m32r_linux_nat ()
 {
-  struct target_ops *t;
-
-  /* Fill in the generic GNU/Linux methods.  */
-  t = linux_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = m32r_linux_fetch_inferior_registers;
-  t->to_store_registers = m32r_linux_store_inferior_registers;
-
   /* Register the target.  */
-  linux_nat_add_target (t);
+  linux_target = &the_m32r_linux_nat_target;
+  add_inf_child_target (&the_m32r_linux_nat_target);
 }

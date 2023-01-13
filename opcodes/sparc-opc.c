@@ -1,5 +1,5 @@
 /* Table of opcodes for the sparc.
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -37,17 +37,29 @@
 #define MASK_V9		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9)
 #define MASK_V9A	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A)
 #define MASK_V9B	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9B)
+#define MASK_V9C	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9C)
+#define MASK_V9D	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9D)
+#define MASK_V9E	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9E)
+#define MASK_V9V	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9V)
+#define MASK_V9M	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9M)
+#define MASK_M8	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_M8)
 
 /* Bit masks of architectures supporting the insn.  */
 
 #define v6		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE \
-			 | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
 /* v6 insns not supported on the sparclet.  */
 #define v6notlet	(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
-			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
 #define v7		(MASK_V7 | MASK_V8 | MASK_LEON | MASK_SPARCLET \
-			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
 /* Although not all insns are implemented in hardware, sparclite is defined
    to be a superset of v8.  Unimplemented insns trap and are then theoretically
    implemented in software.
@@ -55,16 +67,35 @@
    suggest it is.  Rather than complicating things, the sparclet assembler
    recognizes all v8 insns.  */
 #define v8		(MASK_V8 | MASK_LEON | MASK_SPARCLET | MASK_SPARCLITE \
-			 | MASK_V9 | MASK_V9A | MASK_V9B)
+			 | MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
 #define sparclet	(MASK_SPARCLET)
+#define leon		(MASK_LEON)
 /* sparclet insns supported by leon.  */
 #define letandleon	(MASK_SPARCLET | MASK_LEON)
 #define sparclite	(MASK_SPARCLITE)
-#define v9		(MASK_V9 | MASK_V9A | MASK_V9B)
+#define v9		(MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
 /* v9 insns supported by leon.  */
-#define v9andleon	(MASK_V9 | MASK_V9A | MASK_V9B | MASK_LEON)
-#define v9a		(MASK_V9A | MASK_V9B)
-#define v9b		(MASK_V9B)
+#define v9andleon	(MASK_V9 | MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8 | MASK_LEON)
+#define v9a		(MASK_V9A | MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
+#define v9b		(MASK_V9B \
+                         | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
+#define v9c		(MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M \
+                         | MASK_M8)
+#define v9d		(MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M | MASK_M8)
+#define v9e		(MASK_V9E | MASK_V9V | MASK_V9M | MASK_M8)
+#define v9v		(MASK_V9V | MASK_V9M | MASK_M8)
+#define v9m		(MASK_V9M | MASK_M8)
+#define m8		(MASK_M8)
+
 /* v6 insns not supported by v9.  */
 #define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE)
@@ -72,24 +103,68 @@
    otherwise.  */
 #define v9notv9a	(MASK_V9)
 
+/* Hardware capability sets, used to keep sparc_opcode_archs easy to
+   read.  */
+#define HWS_V8 HWCAP_MUL32 | HWCAP_DIV32 | HWCAP_FSMULD
+#define HWS_V9 HWS_V8 | HWCAP_POPC
+#define HWS_VA HWS_V9 | HWCAP_VIS
+#define HWS_VB HWS_VA | HWCAP_VIS2
+#define HWS_VC HWS_VB | HWCAP_ASI_BLK_INIT
+#define HWS_VD HWS_VC | HWCAP_FMAF | HWCAP_VIS3 | HWCAP_HPC
+#define HWS_VE HWS_VD                                                   \
+  | HWCAP_AES | HWCAP_DES | HWCAP_KASUMI | HWCAP_CAMELLIA               \
+  | HWCAP_MD5 | HWCAP_SHA1 | HWCAP_SHA256 |HWCAP_SHA512 | HWCAP_MPMUL   \
+  | HWCAP_MONT | HWCAP_CRC32C | HWCAP_CBCOND | HWCAP_PAUSE
+#define HWS_VV HWS_VE | HWCAP_FJFMAU | HWCAP_IMA
+#define HWS_VM HWS_VV
+#define HWS_VM8 HWS_VM
+
+#define HWS2_VM							\
+  HWCAP2_VIS3B | HWCAP2_ADP | HWCAP2_SPARC5 | HWCAP2_MWAIT	\
+  | HWCAP2_XMPMUL | HWCAP2_XMONT
+#define HWS2_VM8 HWS2_VM \
+  | HWCAP2_SPARC6 | HWCAP2_ONADDSUB | HWCAP2_ONMUL | HWCAP2_ONDIV \
+  | HWCAP2_DICTUNP | HWCAP2_FPCMPSHL | HWCAP2_RLE | HWCAP2_SHA3
+
+
 /* Table of opcode architectures.
    The order is defined in opcode/sparc.h.  */
 
 const struct sparc_opcode_arch sparc_opcode_archs[] =
 {
-  { "v6", MASK_V6 },
-  { "v7", MASK_V6 | MASK_V7 },
-  { "v8", MASK_V6 | MASK_V7 | MASK_V8 },
-  { "leon", MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON },
-  { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET },
-  { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE },
+  { "v6", MASK_V6, 0, 0 },
+  { "v7", MASK_V6 | MASK_V7, 0, 0 },
+  { "v8", MASK_V6 | MASK_V7 | MASK_V8, HWS_V8, 0 },
+  { "leon", MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON, HWS_V8, 0 },
+  { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET, HWS_V8, 0 },
+  { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE, HWS_V8, 0 },
   /* ??? Don't some v8 priviledged insns conflict with v9?  */
-  { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 },
+  { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9, HWS_V9, 0 },
   /* v9 with ultrasparc additions */
-  { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A },
+  { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A, HWS_VA, 0 },
   /* v9 with cheetah additions */
-  { "v9b", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B },
-  { NULL, 0 }
+  { "v9b", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B, HWS_VB, 0 },
+  /* v9 with UA2005 and T1 additions.  */
+  { "v9c", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C), HWS_VC, 0 },
+  /* v9 with UA2007 and T3 additions.  */
+  { "v9d", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D), HWS_VD, 0 },
+  /* v9 with OSA2011 and T4 additions modulus integer multiply-add.  */
+  { "v9e", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E), HWS_VE, 0 },
+  /* V9 with OSA2011 and T4 additions, integer multiply and Fujitsu fp
+     multiply-add.  */
+  { "v9v", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V), HWS_VV, 0 },
+  /* v9 with OSA2015 and M7 additions.  */
+  { "v9m", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+            | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M), HWS_VM, HWS2_VM },
+  /* v9 with OSA2017 and M8 additions.  */
+  { "m8", (MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A | MASK_V9B
+           | MASK_V9C | MASK_V9D | MASK_V9E | MASK_V9V | MASK_V9M | MASK_M8),
+    HWS_VM8, HWS2_VM8 },
+  { NULL, 0, 0, 0 }
 };
 
 /* Given NAME, return it's architecture entry.  */
@@ -314,12 +389,12 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "ldx",	F3(3, 0x21, 1)|RD(1), F3(~3, ~0x21, ~1)|RS1_G0|RD(~1),	"[i],F", 0, 0, 0, v9 },
 { "ldx",	F3(3, 0x21, 1)|RD(1), F3(~3, ~0x21, ~1)|SIMM13(~0)|RD(~1),"[1],F", 0, 0, 0, v9 }, /* ld [rs1+0],d */
 
-{ "ldx", F3(3, 0x21, 0)|RD(3), F3(~3, ~0x21, ~0)|RD(~3), "[1+2],(", 0, 0, HWCAP2_VIS3B, v9b },
-{ "ldx", F3(3, 0x21, 0)|RD(3), F3(~3, ~0x21, ~0)|RS2_G0|RD(~3),"[1],(", 0, 0, HWCAP2_VIS3B, v9b },
-{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RD(~3), "[1+i],(", 0, 0, HWCAP2_VIS3B, v9b },
-{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RD(~3), "[i+1],(", 0, 0, HWCAP2_VIS3B, v9b },
-{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RS1_G0|RD(~3),"[i],(", 0, 0, HWCAP2_VIS3B, v9b },
-{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|SIMM13(~0)|RD(~3),"[1],(", 0, 0, HWCAP2_VIS3B, v9b },
+{ "ldx", F3(3, 0x21, 0)|RD(3), F3(~3, ~0x21, ~0)|RD(~3), "[1+2],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [rs1+rs2],%efsr */
+{ "ldx", F3(3, 0x21, 0)|RD(3), F3(~3, ~0x21, ~0)|RS2_G0|RD(~3),"[1],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [rs1],%efsr */
+{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RD(~3), "[1+i],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [%rs1+0],%efsr */
+{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RD(~3), "[i+1],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [0+%rs1],%efsr */
+{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|RS1_G0|RD(~3),"[i],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [0],%efsr */
+{ "ldx", F3(3, 0x21, 1)|RD(3), F3(~3, ~0x21, ~1)|SIMM13(~0)|RD(~3),"[1],(", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d }, /* ldx [%rs1], %efsr */
 
 { "lda",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0),		"[1+2]A,d", 0, 0, 0, v6 },
 { "lda",	F3(3, 0x10, 0), F3(~3, ~0x10, ~0)|RS2_G0,	"[1]A,d", 0, 0, 0, v6 }, /* lda [rs1+%g0],d */
@@ -333,6 +408,28 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "lda",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1),		"[i+1]o,g", 0, 0, 0, v9 },
 { "lda",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|RS1_G0,	"[i]o,g", 0, 0, 0, v9 },
 { "lda",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|SIMM13(~0),	"[1]o,g", 0, 0, 0, v9 }, /* ld [rs1+0],d */
+
+/* Note that the LDTXA instructions share an opcode with the
+   (deprecated) LDTWA instructions below.  They are differenciated by
+   the combination of the `i' instruction field and the ASI used in
+   the instruction.  */
+
+#define ldtxa(asi) \
+{ "ldtxa",	F3(3, 0x13, 0)|ASI((asi)), F3(~3, ~0x13, ~0)|ASI(~(asi)), "[1+2]A,d", 0, HWCAP_ASI_BLK_INIT, 0, v9c }, \
+{ "ldtxa",	F3(3, 0x13, 0)|ASI((asi)), F3(~3, ~0x13, ~0)|ASI(~(asi))|RS2_G0, "[1]A,d", 0, HWCAP_ASI_BLK_INIT, 0, v9c }
+
+ldtxa (0x22), /* #ASI_TWINX_AIUP  */
+ldtxa (0x23), /* #ASI_TWINX_AIUS  */
+ldtxa (0x26), /* #ASI_TWINX_REAL  */
+ldtxa (0x27), /* #ASI_TWINX_N  */
+ldtxa (0x2A), /* #ASI_TWINX_AIUP_L  */
+ldtxa (0x2B), /* #ASI_TWINX_AIUS_L  */
+ldtxa (0x2E), /* #ASI_TWINX_REAL_L  */
+ldtxa (0x2F), /* #ASI_TWINX_NL  */
+ldtxa (0xE2), /* #ASI_TWINX_P  */
+ldtxa (0xE3), /* #ASI_TWINX_S  */
+ldtxa (0xEA), /* #ASI_TWINX_PL  */
+ldtxa (0xEB), /* #ASI_TWINX_SL  */
 
 { "ldtwa",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0),		"[1+2]A,d", 0, 0, 0, v9 },
 { "ldtwa",	F3(3, 0x13, 0), F3(~3, ~0x13, ~0)|RS2_G0,	"[1]A,d", 0, 0, 0, v9 }, /* ldda [rs1+%g0],d */
@@ -711,13 +808,13 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "restore",	F3(2, 0x3d, 1), F3(~2, ~0x3d, ~1),				"1,i,d", 0, 0, 0, v6 },
 { "restore",	F3(2, 0x3d, 1), F3(~2, ~0x3d, ~1)|RD_G0|RS1_G0|SIMM13(~0),	"", 0, 0, 0, v6 }, /* restore %g0,0,%g0 */
 
-{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI(~0),	"1+2", F_UNBR|F_DELAYED, 0, 0, v6 }, /* rett rs1+rs2 */
-{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI_RS2(~0),	"1", F_UNBR|F_DELAYED, 0, 0, v6 },	/* rett rs1,%g0 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,		"1+i", F_UNBR|F_DELAYED, 0, 0, v6 }, /* rett rs1+X */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,		"i+1", F_UNBR|F_DELAYED, 0, 0, v6 }, /* rett X+rs1 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,		"i", F_UNBR|F_DELAYED, 0, 0, v6 }, /* rett X+rs1 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,		"i", F_UNBR|F_DELAYED, 0, 0, v6 },	/* rett X */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|SIMM13(~0),	"1", F_UNBR|F_DELAYED, 0, 0, v6 },	/* rett rs1+0 */
+{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI(~0),	"1+2", F_UNBR|F_DELAYED, 0, 0, v6notv9 }, /* rett rs1+rs2 */
+{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI_RS2(~0),	"1", F_UNBR|F_DELAYED, 0, 0, v6notv9 },	/* rett rs1,%g0 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,		"1+i", F_UNBR|F_DELAYED, 0, 0, v6notv9 }, /* rett rs1+X */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,		"i+1", F_UNBR|F_DELAYED, 0, 0, v6notv9 }, /* rett X+rs1 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,		"i", F_UNBR|F_DELAYED, 0, 0, v6notv9 }, /* rett X+rs1 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,		"i", F_UNBR|F_DELAYED, 0, 0, v6notv9 },	/* rett X */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|SIMM13(~0),	"1", F_UNBR|F_DELAYED, 0, 0, v6notv9 },	/* rett rs1+0 */
 
 { "save",	F3(2, 0x3c, 0), F3(~2, ~0x3c, ~0)|ASI(~0),	"1,2,d", 0, 0, 0, v6 },
 { "save",	F3(2, 0x3c, 1), F3(~2, ~0x3c, ~1),		"1,i,d", 0, 0, 0, v6 },
@@ -901,55 +998,65 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 1)|RD(3),	F3(~2, ~0x30, ~1)|RD(~3),		"1,i,o", 0, 0, 0, v9 }, /* wr r,i,%asi */
 { "wr", F3(2, 0x30, 0)|RD(6),	F3(~2, ~0x30, ~0)|RD(~6)|ASI(~0),	"1,2,s", 0, 0, 0, v9 }, /* wr r,r,%fprs */
 { "wr", F3(2, 0x30, 1)|RD(6),	F3(~2, ~0x30, ~1)|RD(~6),		"1,i,s", 0, 0, 0, v9 }, /* wr r,i,%fprs */
-{ "wr", F3(2, 0x30, 0)|RD(14),  F3(~2, ~0x30, ~0)|RD(~14),              "1,2,{", 0, 0, HWCAP2_SPARC5, v9b }, /* wr r,r,%mcdper */
-{ "wr", F3(2, 0x30, 1)|RD(14),  F3(~2, ~0x30, ~1)|RD(~14),              "1,i,{", 0, 0, HWCAP2_SPARC5, v9b }, /* wr r,i,%mcdper */
+{ "wr", F3(2, 0x30, 0)|RD(14),  F3(~2, ~0x30, ~0)|RD(~14),              "1,2,{", 0, 0, HWCAP2_SPARC5, v9m }, /* wr r,r,%mcdper */
+{ "wr", F3(2, 0x30, 1)|RD(14),  F3(~2, ~0x30, ~1)|RD(~14),              "1,i,{", 0, 0, HWCAP2_SPARC5, v9m }, /* wr r,i,%mcdper */
 
-{ "wr", F3(2, 0x30, 0)|RD(16),	F3(~2, ~0x30, ~0)|RD(~16)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%pcr */
-{ "wr", F3(2, 0x30, 1)|RD(16),	F3(~2, ~0x30, ~1)|RD(~16),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%pcr */
-{ "wr", F3(2, 0x30, 0)|RD(17),	F3(~2, ~0x30, ~0)|RD(~17)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%pic */
-{ "wr", F3(2, 0x30, 1)|RD(17),	F3(~2, ~0x30, ~1)|RD(~17),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%pic */
-{ "wr", F3(2, 0x30, 0)|RD(18),	F3(~2, ~0x30, ~0)|RD(~18)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%dcr */
-{ "wr", F3(2, 0x30, 1)|RD(18),	F3(~2, ~0x30, ~1)|RD(~18),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%dcr */
-{ "wr", F3(2, 0x30, 0)|RD(19),	F3(~2, ~0x30, ~0)|RD(~19)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%gsr */
-{ "wr", F3(2, 0x30, 1)|RD(19),	F3(~2, ~0x30, ~1)|RD(~19),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%gsr */
-{ "wr", F3(2, 0x30, 0)|RD(20),	F3(~2, ~0x30, ~0)|RD(~20)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%set_softint */
-{ "wr", F3(2, 0x30, 1)|RD(20),	F3(~2, ~0x30, ~1)|RD(~20),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%set_softint */
-{ "wr", F3(2, 0x30, 0)|RD(21),	F3(~2, ~0x30, ~0)|RD(~21)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%clear_softint */
-{ "wr", F3(2, 0x30, 1)|RD(21),	F3(~2, ~0x30, ~1)|RD(~21),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%clear_softint */
-{ "wr", F3(2, 0x30, 0)|RD(22),	F3(~2, ~0x30, ~0)|RD(~22)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%softint */
-{ "wr", F3(2, 0x30, 1)|RD(22),	F3(~2, ~0x30, ~1)|RD(~22),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%softint */
-{ "wr", F3(2, 0x30, 0)|RD(23),	F3(~2, ~0x30, ~0)|RD(~23)|ASI(~0),	"1,2,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,r,%tick_cmpr */
-{ "wr", F3(2, 0x30, 1)|RD(23),	F3(~2, ~0x30, ~1)|RD(~23),		"1,i,_", 0, HWCAP_VIS, 0, v9a }, /* wr r,i,%tick_cmpr */
-{ "wr", F3(2, 0x30, 0)|RD(24),	F3(~2, ~0x30, ~0)|RD(~24)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick */
-{ "wr", F3(2, 0x30, 1)|RD(24),	F3(~2, ~0x30, ~1)|RD(~24),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick */
-{ "wr", F3(2, 0x30, 0)|RD(25),	F3(~2, ~0x30, ~0)|RD(~25)|ASI(~0),	"1,2,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick_cmpr */
-{ "wr", F3(2, 0x30, 1)|RD(25),	F3(~2, ~0x30, ~1)|RD(~25),		"1,i,_", 0, HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick_cmpr */
-{ "wr", F3(2, 0x30, 0)|RD(26),	F3(~2, ~0x30, ~0)|RD(~26)|ASI(~0),	"1,2,_", 0, HWCAP_CBCOND, 0, v9b }, /* wr r,r,%cfr */
-{ "wr", F3(2, 0x30, 1)|RD(26),	F3(~2, ~0x30, ~1)|RD(~26),		"1,i,_", 0, HWCAP_CBCOND, 0, v9b }, /* wr r,i,%cfr */
-{ "wr", F3(2, 0x30, 0)|RD(27),	F3(~2, ~0x30, ~0)|RD(~27)|ASI(~0),	"1,2,_", 0, HWCAP_PAUSE, 0, v9b }, /* wr r,r,%pause */
-{ "wr", F3(2, 0x30, 1)|RD(27),	F3(~2, ~0x30, ~1)|RD(~27),		"1,i,_", 0, HWCAP_PAUSE, 0, v9b }, /* wr r,i,%pause */
-{ "wr",    F3(2, 0x30, 0)|RD(28), F3(~2, ~0x30, ~0)|RD(~28)|ASI(~0), "1,2,_", 0, 0, HWCAP2_MWAIT, v9b }, /* wr r,r,%mwait */
-{ "wr", F3(2, 0x30, 1)|RD(28),	F3(~2, ~0x30, ~1)|RD(~28),		"1,i,_", 0, 0, HWCAP2_MWAIT, v9b }, /* wr r,i,%mwait */
+/* Write to ASR registers 16..31, which is the range defined in SPARC
+   V9 for implementation-dependent uses.  Note that the read-only ASR
+   registers can't be used in a `wr' instruction.  */
 
-{ "pause", F3(2, 0x30, 1)|RD(27)|RS1(0), F3(~2, ~0x30, ~1)|RD(~27)|RS1(~0), "i", 0, HWCAP_PAUSE, 0, v9b }, /* wr %g0,i,%pause */
+#define wrasr(asr,hwcap,hwcap2,arch) \
+{ "wr", F3(2, 0x30, 0)|RD((asr)), F3(~2, ~0x30, ~0)|RD(~(asr))|ASI(~0),	"1,2,_", 0, (hwcap), (hwcap2), (arch) }, /* wr r,r,%asr */ \
+{ "wr", F3(2, 0x30, 1)|RD((asr)), F3(~2, ~0x30, ~1)|RD(~(asr)),		"1,i,_", 0, (hwcap), (hwcap2), (arch) }, /* wr r,i,%asr */ \
+{ "wr", F3(2, 0x30, 1)|RD((asr)), F3(~2, ~0x30, ~1)|RD(~(asr)),		"i,1,_", F_ALIAS, (hwcap), (hwcap2), (arch) } /* wr i,r,%asr */
+
+wrasr (16, HWCAP_VIS, 0, v9a), /* wr ...,%pcr  */
+wrasr (17, HWCAP_VIS, 0, v9a), /* wr ...,%pic  */
+wrasr (18, HWCAP_VIS, 0, v9a), /* wr ...,%dcr  */
+wrasr (19, HWCAP_VIS, 0, v9a), /* wr ...,%gsr  */
+wrasr (20, HWCAP_VIS, 0, v9a), /* wr ...,%softint_set  */
+wrasr (21, HWCAP_VIS, 0, v9a), /* wr ...,%softint_clear  */
+wrasr (22, HWCAP_VIS, 0, v9a), /* wr ...,%softint  */
+wrasr (23, HWCAP_VIS, 0, v9a), /* wr ...,%tick_cmpr  */
+wrasr (24, HWCAP_VIS2, 0, v9b), /* wr ...,%sys_tick  */
+wrasr (25, HWCAP_VIS2, 0, v9b), /* wr ...,%sys_tick_cmpr  */
+wrasr (26, HWCAP_CBCOND, 0, v9e), /* wr ...,%cfr  */
+wrasr (27, HWCAP_PAUSE, 0, v9e),  /* wr ...,%pause  */
+wrasr (28, 0, HWCAP2_MWAIT, v9m), /* wr ...,%mwait  */
+
+{ "pwr",	F3(2, 0x31, 0)|RD(1),	F3(~2, ~0x31, ~0)|RD(~1)|ASI(~0),		"1,2,p", 0, 0, 0, leon }, /* pwr r,r,%psr */
+{ "pwr",	F3(2, 0x31, 1)|RD(1),	F3(~2, ~0x31, ~1)|RD(~1),			"1,i,p", 0, 0, 0, leon }, /* pwr r,i,%psr */
+{ "pwr",	F3(2, 0x31, 0)|RD(1),	F3(~2, ~0x31, ~0)|RD(~1)|RS1_G0|ASI(~0),	"2,p", F_PREF_ALIAS, 0, 0, leon }, /* pwr %g0,rs2,%psr */
+{ "pwr",	F3(2, 0x31, 1)|RD(1),	F3(~2, ~0x31, ~1)|RD(~1)|RS1_G0,		"i,p", F_PREF_ALIAS, 0, 0, leon }, /* pwr %g0,i,%psr */
+{ "pwr",	F3(2, 0x31, 1)|RD(1),	F3(~2, ~0x31, ~1)|RD(~1)|SIMM13(~0),		"1,p", F_PREF_ALIAS, 0, 0, leon }, /* pwr rs1,0,%psr */
+{ "pwr",	F3(2, 0x31, 0)|RD(1),	F3(~2, ~0x31, ~0)|RD(~1)|ASI_RS2(~0),		"1,p", F_PREF_ALIAS, 0, 0, leon }, /* pwr rs1,%g0,%psr */
+
+{ "pause", F3(2, 0x30, 1)|RD(27)|RS1(0), F3(~2, ~0x30, ~1)|RD(~27)|RS1(~0), "i", 0, HWCAP_PAUSE, 0, v9e }, /* wr %g0,i,%pause */
 
 { "rd",	F3(2, 0x28, 0)|RS1(2),		F3(~2, ~0x28, ~0)|RS1(~2)|SIMM13(~0),	"E,d", 0, 0, 0, v9 }, /* rd %ccr,r */
 { "rd",	F3(2, 0x28, 0)|RS1(3),		F3(~2, ~0x28, ~0)|RS1(~3)|SIMM13(~0),	"o,d", 0, 0, 0, v9 }, /* rd %asi,r */
 { "rd",	F3(2, 0x28, 0)|RS1(4),		F3(~2, ~0x28, ~0)|RS1(~4)|SIMM13(~0),	"W,d", 0, 0, 0, v9 }, /* rd %tick,r */
 { "rd",	F3(2, 0x28, 0)|RS1(5),		F3(~2, ~0x28, ~0)|RS1(~5)|SIMM13(~0),	"P,d", 0, 0, 0, v9 }, /* rd %pc,r */
 { "rd",	F3(2, 0x28, 0)|RS1(6),		F3(~2, ~0x28, ~0)|RS1(~6)|SIMM13(~0),	"s,d", 0, 0, 0, v9 }, /* rd %fprs,r */
-{ "rd", F3(2, 0x28, 0)|RS1(14),         F3(~2, ~0x28, ~0)|RS1(~14)|SIMM13(~0),  "{,d", 0, 0, HWCAP2_SPARC5, v9b }, /* rd %mcdper,r */
+{ "rd", F3(2, 0x28, 0)|RS1(13),         F3(~2, ~0x28, ~0)|RS1(~13)|SIMM13(~0),  "&,d", 0, 0, HWCAP2_SPARC6, m8 }, /* rd %entropy,r */
+{ "rd", F3(2, 0x28, 0)|RS1(14),         F3(~2, ~0x28, ~0)|RS1(~14)|SIMM13(~0),  "{,d", 0, 0, HWCAP2_SPARC5, v9m }, /* rd %mcdper,r */
 
-{ "rd",	F3(2, 0x28, 0)|RS1(16),		F3(~2, ~0x28, ~0)|RS1(~16)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %pcr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(17),		F3(~2, ~0x28, ~0)|RS1(~17)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %pic,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(18),		F3(~2, ~0x28, ~0)|RS1(~18)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %dcr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(19),		F3(~2, ~0x28, ~0)|RS1(~19)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %gsr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(22),		F3(~2, ~0x28, ~0)|RS1(~22)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %softint,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(23),		F3(~2, ~0x28, ~0)|RS1(~23)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, 0, v9a }, /* rd %tick_cmpr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(24),		F3(~2, ~0x28, ~0)|RS1(~24)|SIMM13(~0),	"/,d", 0, HWCAP_VIS2, 0, v9b }, /* rd %sys_tick,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(25),		F3(~2, ~0x28, ~0)|RS1(~25)|SIMM13(~0),	"/,d", 0, HWCAP_VIS2, 0, v9b }, /* rd %sys_tick_cmpr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(26),		F3(~2, ~0x28, ~0)|RS1(~26)|SIMM13(~0),	"/,d", 0, HWCAP_CBCOND, 0, v9b }, /* rd %cfr,r */
-{ "rd",	F3(2, 0x28, 0)|RS1(28),		F3(~2, ~0x28, ~0)|RS1(~28)|SIMM13(~0),	"/,d", 0, 0, HWCAP2_MWAIT, v9b }, /* rd %mwait,r */
+/* Read from ASR registers 16..31, which is the range defined in SPARC
+   V9 for implementation-dependent uses.  Note that the write-only ASR
+   registers can't be used in a `rd' instruction.  */
+
+#define rdasr(asr,hwcap,hwcap2,arch) \
+  { "rd", F3(2, 0x28, 0)|RS1((asr)),	F3(~2, ~0x28, ~0)|RS1(~(asr))|SIMM13(~0), "/,d", 0, (hwcap), (hwcap2), (arch) }
+
+rdasr (16, HWCAP_VIS,    0, v9a), /* rd %pcr,r  */
+rdasr (17, HWCAP_VIS,    0, v9a), /* rd %pic,r  */
+rdasr (18, HWCAP_VIS,    0, v9a), /* rd %dcr,r  */
+rdasr (19, HWCAP_VIS,    0, v9a), /* rd %gsr,r  */
+rdasr (22, HWCAP_VIS,    0, v9a), /* rd %softint,r  */
+rdasr (23, HWCAP_VIS,    0, v9a), /* rd %tick_cmpr,r  */
+rdasr (24, HWCAP_VIS2,   0, v9b), /* rd %sys_tick,r  */
+rdasr (25, HWCAP_VIS2,   0, v9b), /* rd %sys_tick_cmpr,r  */
+rdasr (26, HWCAP_CBCOND, 0, v9e), /* rd %cfr,r  */
 
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, 0, 0, v8 }, /* rd %asrX,r */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", 0, 0, 0, v6 }, /* rd %y,r */
@@ -957,19 +1064,93 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", 0, 0, 0, v6notv9 }, /* rd %wim,r */
 { "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", 0, 0, 0, v6notv9 }, /* rd %tbr,r */
 
-{ "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, 0, 0, v9 },   /* rdpr %priv,r */
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0),		"1,2,!", 0, 0, 0, v9 }, /* wrpr r1,r2,%priv */
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"1,!", 0, 0, 0, v9 },   /* wrpr r1,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"1,i,!", 0, 0, 0, v9 }, /* wrpr r1,i,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"i,1,!", F_ALIAS, 0, 0, v9 }, /* wrpr i,r1,%priv */
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RS1(~0),	"i,!", 0, 0, 0, v9 },   /* wrpr i,%priv */
+/* Instructions to read and write from/to privileged registers.  */
 
-{ "rdhpr",	F3(2, 0x29, 0),		F3(~2, ~0x29, ~0)|SIMM13(~0),	"$,d", 0, 0, 0, v9 },   /* rdhpr %hpriv,r */
-{ "wrhpr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0),		"1,2,%", 0, 0, 0, v9 }, /* wrhpr r1,r2,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|SIMM13(~0),	"1,%", 0, 0, 0, v9 },   /* wrhpr r1,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1),		"1,i,%", 0, 0, 0, v9 }, /* wrhpr r1,i,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1),		"i,1,%", F_ALIAS, 0, 0, v9 }, /* wrhpr i,r1,%hpriv */
-{ "wrhpr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RS1(~0),	"i,%", 0, 0, 0, v9 },   /* wrhpr i,%hpriv */
+#define rdpr(reg,hwcap,hwcap2,arch) \
+  { "rdpr", F3(2, 0x2a, 0)|RS1((reg)), F3(~2, ~0x2a, ~0)|RS1(~(reg))|SIMM13(~0),"?,d", 0, (hwcap), (hwcap2), (arch) } /* rdpr %priv,r */
+
+rdpr (0, 0, 0, v9), /* rdpr %tpc,r  */
+rdpr (1, 0, 0, v9), /* rdpr %tnpc,r  */
+rdpr (2, 0, 0, v9), /* rdpr %tstate,r  */
+rdpr (3, 0, 0, v9), /* rdpr %tt,r  */
+rdpr (4, 0, 0, v9), /* rdpr %tick,r  */
+rdpr (5, 0, 0, v9), /* rdpr %tba,r  */
+rdpr (6, 0, 0, v9), /* rdpr %pstate,r  */
+rdpr (7, 0, 0, v9), /* rdpr %tl,r  */
+rdpr (8, 0, 0, v9), /* rdpr %pil,r  */
+rdpr (9, 0, 0, v9), /* rdpr %cwp,r  */
+rdpr (10, 0, 0, v9), /* rdpr %cansave,r  */
+rdpr (11, 0, 0, v9), /* rdpr %canrestore,r  */
+rdpr (12, 0, 0, v9), /* rdpr %cleanwin,r  */
+rdpr (13, 0, 0, v9), /* rdpr %otherwin,r  */
+rdpr (14, 0, 0, v9), /* rdpr %wstate,r  */
+rdpr (15, 0, 0, v9), /* rdpr %fq,r  */
+rdpr (16, 0, 0, v9), /* rdpr %gl,r  */
+rdpr (23, 0, HWCAP2_SPARC5, v9m), /* rdpr %pmcdper,r  */
+rdpr (31, 0, 0, v9), /* rdpr %ver,r  */
+
+#define wrpr(reg,hwcap,hwcap2,arch) \
+{ "wrpr", F3(2, 0x32, 0)|RD((reg)), F3(~2, ~0x32, ~0)|RD(~(reg)), "1,2,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,r2,%priv */ \
+{ "wrpr", F3(2, 0x32, 0)|RD((reg)), F3(~2, ~0x32, ~0)|RD(~(reg))|SIMM13(~0), "1,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg)), "1,i,!", 0, (hwcap), (hwcap2), (arch) }, /* wrpr r1,i,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg)), "i,1,!", F_ALIAS, (hwcap), (hwcap2), (arch) }, /* wrpr i,r1,%priv */ \
+{ "wrpr", F3(2, 0x32, 1)|RD((reg)), F3(~2, ~0x32, ~1)|RD(~(reg))|RS1(~0), "i,!", 0, (hwcap), (hwcap2), (arch) } /* wrpr i,%priv */
+
+wrpr (0, 0, 0, v9), /* wrpr ...,%tpc  */
+wrpr (1, 0, 0, v9), /* wrpr ...,%tnpc  */
+wrpr (2, 0, 0, v9), /* wrpr ...,%tstate  */
+wrpr (3, 0, 0, v9), /* wrpr ...,%tt  */
+wrpr (4, 0, 0, v9), /* wrpr ...,%tick  */
+wrpr (5, 0, 0, v9), /* wrpr ...,%tba  */
+wrpr (6, 0, 0, v9), /* wrpr ...,%pstate  */
+wrpr (7, 0, 0, v9), /* wrpr ...,%tl  */
+wrpr (8, 0, 0, v9), /* wrpr ...,%pil  */
+wrpr (9, 0, 0, v9), /* wrpr ...,%cwp  */
+wrpr (10, 0, 0, v9), /* wrpr ...,%cansave  */
+wrpr (11, 0, 0, v9), /* wrpr ...,%canrestore  */
+wrpr (12, 0, 0, v9), /* wrpr ...,%cleanwin  */
+wrpr (13, 0, 0, v9), /* wrpr ...,%otherwin  */
+wrpr (14, 0, 0, v9), /* wrpr ...,%wstate  */
+wrpr (15, 0, 0, v9), /* wrpr ...,%fq  */
+wrpr (16, 0, 0, v9), /* wrpr ...,%gl  */
+wrpr (23, 0, HWCAP2_SPARC5, v9m), /* wdpr ...,%pmcdper  */
+wrpr (31, 0, 0, v9), /* wrpr ...,%ver */
+
+/* Instructions to read and write from/to hyperprivileged
+   registers.  */
+
+#define rdhpr(reg,hwcap,hwcap2,arch) \
+{ "rdhpr",	F3(2, 0x29, 0)|RS1((reg)),	F3(~2, ~0x29, ~0)|RS1(~(reg))|SIMM13(~0), "$,d", 0, (hwcap), (hwcap2), (arch) }
+
+rdhpr (0, HWCAP_VIS, 0, v9a), /* rdhpr %hpstate,r  */
+rdhpr (1, HWCAP_VIS, 0, v9a), /* rdhpr %htstate,r  */
+rdhpr (3, HWCAP_VIS, 0, v9a), /* rdhpr %hintp,r  */
+rdhpr (5, HWCAP_VIS, 0, v9a), /* rdhpr %htba,r  */
+rdhpr (6, HWCAP_VIS, 0, v9a), /* rdhpr %hver,r  */
+rdhpr (23, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hmcdper,r  */
+rdhpr (24, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hmcddfr,r  */
+rdhpr (27, 0, HWCAP2_SPARC5, v9m), /* rdhpr %hva_mask_nz,r  */
+rdhpr (28, HWCAP_VIS, 0, v9a), /* rdhpr %hstick_offset,r  */
+rdhpr (29, HWCAP_VIS, 0, v9a), /* rdhpar %hstick_enable,r  */
+rdhpr (31, HWCAP_VIS, 0, v9a), /* rdhpr %hstick_cmpr,r  */
+
+#define wrhpr(reg,hwcap,hwcap2,arch) \
+{ "wrhpr", F3(2, 0x33, 0)|RD((reg)), F3(~2, ~0x33, ~0)|RD(~(reg)),"1,2,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,r2,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 0)|RD((reg)), F3(~2, ~0x33, ~0)|RD(~(reg))|SIMM13(~0), "1,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg)), "1,i,%", 0, (hwcap), (hwcap2), (arch) }, /* wrhpr r1,i,%hpriv */  \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg)), "i,1,%", F_ALIAS, (hwcap), (hwcap2), (arch)  }, /* wrhpr i,r1,%hpriv */ \
+{ "wrhpr", F3(2, 0x33, 1)|RD((reg)), F3(~2, ~0x33, ~1)|RD(~(reg))|RS1(~0), "i,%", 0, (hwcap), (hwcap2), (arch) } /* wrhpr i,%hpriv */
+
+wrhpr (0,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%hpstate  */
+wrhpr (1,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%htstate  */
+wrhpr (3,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%hintp  */
+wrhpr (5,  HWCAP_VIS, 0, v9a), /* wrhpr ...,%htba  */
+wrhpr (23, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hmcdper  */
+wrhpr (24, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hmcddfr  */
+wrhpr (27, 0, HWCAP2_SPARC5, v9m), /* wrhpr ...,%hva_mask_nz  */
+wrhpr (28, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_offset  */
+wrhpr (29, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_enable  */
+wrhpr (31, HWCAP_VIS, 0, v9a), /* wrhpr ...,%hstick_cmpr  */
 
 { "mov",	F3(2, 0x28, 0), F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", F_ALIAS, 0, 0, v8 }, /* rd %asr1,r */
 { "mov",	F3(2, 0x28, 0), F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", F_ALIAS, 0, 0, v6 }, /* rd %y,r */
@@ -1229,13 +1410,13 @@ cond ("bz",	"tz",   CONDZ, F_CONDBR|F_ALIAS), /* for e */
 
 #define cbcond(cop, cmask, flgs) \
   { "cw" cop, F2(0, 3)|CBCOND(cmask)|F3I(0),F2(~0,~3)|CBCOND(~(cmask))|F3I(~0)|CBCOND_XCC, \
-    "1,2,=", flgs, HWCAP_CBCOND, 0, v9}, \
+    "1,2,=", flgs, HWCAP_CBCOND, 0, v9e}, \
   { "cw" cop, F2(0, 3)|CBCOND(cmask)|F3I(1),F2(~0,~3)|CBCOND(~(cmask))|F3I(~1)|CBCOND_XCC, \
-    "1,X,=", flgs, HWCAP_CBCOND, 0, v9}, \
+    "1,X,=", flgs, HWCAP_CBCOND, 0, v9e}, \
   { "cx" cop, F2(0, 3)|CBCOND(cmask)|F3I(0)|CBCOND_XCC,F2(~0,~3)|CBCOND(~(cmask))|F3I(~0), \
-    "1,2,=", flgs, HWCAP_CBCOND, 0, v9}, \
+    "1,2,=", flgs, HWCAP_CBCOND, 0, v9e}, \
   { "cx" cop, F2(0, 3)|CBCOND(cmask)|F3I(1)|CBCOND_XCC,F2(~0,~3)|CBCOND(~(cmask))|F3I(~1), \
-    "1,X,=", flgs, HWCAP_CBCOND, 0, v9},
+    "1,X,=", flgs, HWCAP_CBCOND, 0, v9e},
 
 cbcond("be",   0x09, F_CONDBR)
 cbcond("bz",   0x09, F_CONDBR|F_ALIAS)
@@ -1834,7 +2015,8 @@ SLCBCC("cbnefr", 15),
 
 { "alignaddr",	F3F(2, 0x36, 0x018), F3F(~2, ~0x36, ~0x018), "1,2,d", 0, HWCAP_VIS, 0, v9a },
 { "alignaddrl",	F3F(2, 0x36, 0x01a), F3F(~2, ~0x36, ~0x01a), "1,2,d", 0, HWCAP_VIS, 0, v9a },
-{ "faligndata",	F3F(2, 0x36, 0x048), F3F(~2, ~0x36, ~0x048), "v,B,H", 0, HWCAP_VIS, 0, v9a },
+{ "faligndata",	F3F(2, 0x36, 0x048), F3F(~2, ~0x36, ~0x048), "v,B,H", 0, HWCAP_VIS, 0, v9a }, /* faligndatag */
+{ "faligndata", F3F(2, 0x36, 0x049), F3F(~2, ~0x36, ~0x049), "v,B,5,}", 0, 0, HWCAP2_SPARC5, v9m }, /* faligndatai  */
 
 { "fzerod",	F3F(2, 0x36, 0x060), F3F(~2, ~0x36, ~0x060), "H", 0, HWCAP_VIS, 0, v9a },
 { "fzero",	F3F(2, 0x36, 0x060), F3F(~2, ~0x36, ~0x060), "H", F_ALIAS, HWCAP_VIS, 0, v9a },
@@ -1939,158 +2121,319 @@ SLCBCC("cbnefr", 15),
 
 { "siam",      F3F(2, 0x36, 0x081), F3F(~2, ~0x36, ~0x081)|RD_G0|RS1_G0|RS2(~7), "3", 0, HWCAP_VIS2, 0, v9b },
 
-{ "fnadds",	F3F(2, 0x34, 0x051), F3F(~2, ~0x34, ~0x051), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnaddd",	F3F(2, 0x34, 0x052), F3F(~2, ~0x34, ~0x052), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnmuls",	F3F(2, 0x34, 0x059), F3F(~2, ~0x34, ~0x059), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnmuld",	F3F(2, 0x34, 0x05a), F3F(~2, ~0x34, ~0x05a), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fhadds",	F3F(2, 0x34, 0x061), F3F(~2, ~0x34, ~0x061), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fhaddd",	F3F(2, 0x34, 0x062), F3F(~2, ~0x34, ~0x062), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fhsubs",	F3F(2, 0x34, 0x065), F3F(~2, ~0x34, ~0x065), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fhsubd",	F3F(2, 0x34, 0x066), F3F(~2, ~0x34, ~0x066), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnhadds",	F3F(2, 0x34, 0x071), F3F(~2, ~0x34, ~0x071), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnhaddd",	F3F(2, 0x34, 0x072), F3F(~2, ~0x34, ~0x072), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fnsmuld",	F3F(2, 0x34, 0x079), F3F(~2, ~0x34, ~0x079), "e,f,H", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "fpmaddx",	F3(2, 0x37, 0)|OPF_LOW4(0), F3(~2, ~0x37, 0)|OPF_LOW4(~0), "v,B,5,H", F_FLOAT, HWCAP_IMA, 0, v9b },
-{ "fmadds",	F3(2, 0x37, 0)|OPF_LOW4(1), F3(~2, ~0x37, 0)|OPF_LOW4(~1), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fmaddd",	F3(2, 0x37, 0)|OPF_LOW4(2), F3(~2, ~0x37, 0)|OPF_LOW4(~2), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fpmaddxhi",	F3(2, 0x37, 0)|OPF_LOW4(4), F3(~2, ~0x37, 0)|OPF_LOW4(~4), "v,B,5,H", F_FLOAT, HWCAP_IMA, 0, v9b },
-{ "fmsubs",	F3(2, 0x37, 0)|OPF_LOW4(5), F3(~2, ~0x37, 0)|OPF_LOW4(~5), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fmsubd",	F3(2, 0x37, 0)|OPF_LOW4(6), F3(~2, ~0x37, 0)|OPF_LOW4(~6), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fnmsubs",	F3(2, 0x37, 0)|OPF_LOW4(9), F3(~2, ~0x37, 0)|OPF_LOW4(~9), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fnmsubd",	F3(2, 0x37, 0)|OPF_LOW4(10), F3(~2, ~0x37, 0)|OPF_LOW4(~10), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fnmadds",	F3(2, 0x37, 0)|OPF_LOW4(13), F3(~2, ~0x37, 0)|OPF_LOW4(~13), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fnmaddd",	F3(2, 0x37, 0)|OPF_LOW4(14), F3(~2, ~0x37, 0)|OPF_LOW4(~14), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9b },
-{ "fumadds",	F3(2, 0x3f, 0)|OPF_LOW4(1), F3(~2, ~0x3f, 0)|OPF_LOW4(~1), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fumaddd",	F3(2, 0x3f, 0)|OPF_LOW4(2), F3(~2, ~0x3f, 0)|OPF_LOW4(~2), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fumsubs",	F3(2, 0x3f, 0)|OPF_LOW4(5), F3(~2, ~0x3f, 0)|OPF_LOW4(~5), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fumsubd",	F3(2, 0x3f, 0)|OPF_LOW4(6), F3(~2, ~0x3f, 0)|OPF_LOW4(~6), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fnumsubs",	F3(2, 0x3f, 0)|OPF_LOW4(9), F3(~2, ~0x3f, 0)|OPF_LOW4(~9), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fnumsubd",	F3(2, 0x3f, 0)|OPF_LOW4(10), F3(~2, ~0x3f, 0)|OPF_LOW4(~10), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fnumadds",	F3(2, 0x3f, 0)|OPF_LOW4(13), F3(~2, ~0x3f, 0)|OPF_LOW4(~13), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "fnumaddd",	F3(2, 0x3f, 0)|OPF_LOW4(14), F3(~2, ~0x3f, 0)|OPF_LOW4(~14), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9b },
-{ "addxc",	F3F(2, 0x36, 0x011), F3F(~2, ~0x36, ~0x011), "1,2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "addxccc",	F3F(2, 0x36, 0x013), F3F(~2, ~0x36, ~0x013), "1,2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "umulxhi",	F3F(2, 0x36, 0x016), F3F(~2, ~0x36, ~0x016), "1,2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "lzcnt",	F3F(2, 0x36, 0x017), F3F(~2, ~0x36, ~0x017), "2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "lzd",	F3F(2, 0x36, 0x017), F3F(~2, ~0x36, ~0x017), "2,d", F_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "cmask8",	F3F(2, 0x36, 0x01b), F3F(~2, ~0x36, ~0x01b), "2", 0, HWCAP_VIS3, 0, v9b },
-{ "cmask16",	F3F(2, 0x36, 0x01d), F3F(~2, ~0x36, ~0x01d), "2", 0, HWCAP_VIS3, 0, v9b },
-{ "cmask32",	F3F(2, 0x36, 0x01f), F3F(~2, ~0x36, ~0x01f), "2", 0, HWCAP_VIS3, 0, v9b },
-{ "fsll16",	F3F(2, 0x36, 0x021), F3F(~2, ~0x36, ~0x021), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fsrl16",	F3F(2, 0x36, 0x023), F3F(~2, ~0x36, ~0x023), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fsll32",	F3F(2, 0x36, 0x025), F3F(~2, ~0x36, ~0x025), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fsrl32",	F3F(2, 0x36, 0x027), F3F(~2, ~0x36, ~0x027), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fslas16",	F3F(2, 0x36, 0x029), F3F(~2, ~0x36, ~0x029), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fsra16",	F3F(2, 0x36, 0x02b), F3F(~2, ~0x36, ~0x02b), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fslas32",	F3F(2, 0x36, 0x02d), F3F(~2, ~0x36, ~0x02d), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fsra32",	F3F(2, 0x36, 0x02f), F3F(~2, ~0x36, ~0x02f), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "pdistn",	F3F(2, 0x36, 0x03f), F3F(~2, ~0x36, ~0x03f), "v,B,d", 0, HWCAP_VIS3, 0, v9b },
-{ "fmean16",	F3F(2, 0x36, 0x040), F3F(~2, ~0x36, ~0x040), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpadd64",	F3F(2, 0x36, 0x042), F3F(~2, ~0x36, ~0x042), "v,B,H", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fchksm16",	F3F(2, 0x36, 0x044), F3F(~2, ~0x36, ~0x044), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpsub64",	F3F(2, 0x36, 0x046), F3F(~2, ~0x36, ~0x046), "v,B,H", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fpadds16",	F3F(2, 0x36, 0x058), F3F(~2, ~0x36, ~0x058), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpadds16s",	F3F(2, 0x36, 0x059), F3F(~2, ~0x36, ~0x059), "e,f,g", 0, HWCAP_VIS3, 0, v9b },
-{ "fpadds32",	F3F(2, 0x36, 0x05a), F3F(~2, ~0x36, ~0x05a), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpadds32s",	F3F(2, 0x36, 0x05b), F3F(~2, ~0x36, ~0x05b), "e,f,g", 0, HWCAP_VIS3, 0, v9b },
-{ "fpsubs16",	F3F(2, 0x36, 0x05c), F3F(~2, ~0x36, ~0x05c), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpsubs16s",	F3F(2, 0x36, 0x05d), F3F(~2, ~0x36, ~0x05d), "e,f,g", 0, HWCAP_VIS3, 0, v9b },
-{ "fpsubs32",	F3F(2, 0x36, 0x05e), F3F(~2, ~0x36, ~0x05e), "v,B,H", 0, HWCAP_VIS3, 0, v9b },
-{ "fpsubs32s",	F3F(2, 0x36, 0x05f), F3F(~2, ~0x36, ~0x05f), "e,f,g", 0, HWCAP_VIS3, 0, v9b },
-{ "movdtox",	F3F(2, 0x36, 0x110), F3F(~2, ~0x36, ~0x110), "B,d", F_FLOAT, HWCAP_VIS3, 0, v9b },
-{ "movstouw",	F3F(2, 0x36, 0x111), F3F(~2, ~0x36, ~0x111), "f,d", F_FLOAT, HWCAP_VIS3, 0, v9b },
-{ "movstosw",	F3F(2, 0x36, 0x113), F3F(~2, ~0x36, ~0x113), "f,d", F_FLOAT, HWCAP_VIS3, 0, v9b },
-{ "movxtod",	F3F(2, 0x36, 0x118), F3F(~2, ~0x36, ~0x118), "2,H", F_FLOAT, HWCAP_VIS3, 0, v9b },
-{ "movwtos",	F3F(2, 0x36, 0x119), F3F(~2, ~0x36, ~0x119), "2,g", F_FLOAT, HWCAP_VIS3, 0, v9b },
-{ "xmulx",	F3F(2, 0x36, 0x115), F3F(~2, ~0x36, ~0x115), "1,2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "xmulxhi",	F3F(2, 0x36, 0x116), F3F(~2, ~0x36, ~0x116), "1,2,d", 0, HWCAP_VIS3, 0, v9b },
-{ "fpcmpule8",	F3F(2, 0x36, 0x120), F3F(~2, ~0x36, ~0x120), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fucmple8",	F3F(2, 0x36, 0x120), F3F(~2, ~0x36, ~0x120), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "fpcmpune8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fpcmpne8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", F_PREF_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "fucmpne8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "fpcmpugt8",	F3F(2, 0x36, 0x128), F3F(~2, ~0x36, ~0x128), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fucmpgt8",	F3F(2, 0x36, 0x128), F3F(~2, ~0x36, ~0x128), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "fpcmpueq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9b },
-{ "fpcmpeq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", F_PREF_ALIAS, HWCAP_VIS3, 0, v9b },
-{ "fucmpeq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9b },
-{"aes_kexpand0",F3F(2, 0x36, 0x130), F3F(~2, ~0x36, ~0x130), "v,B,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_kexpand2",F3F(2, 0x36, 0x131), F3F(~2, ~0x36, ~0x131), "v,B,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{ "des_ip",     F3F(2, 0x36, 0x134), F3F(~2, ~0x36, ~0x134), "v,H", F_FLOAT, HWCAP_DES, 0, v9b },
-{ "des_iip",    F3F(2, 0x36, 0x135), F3F(~2, ~0x36, ~0x135), "v,H", F_FLOAT, HWCAP_DES, 0, v9b },
-{ "des_kexpand",F3F(2, 0x36, 0x136), F3F(~2, ~0x36, ~0x136), "v,X,H", F_FLOAT, HWCAP_DES, 0, v9b },
-{"kasumi_fi_fi",F3F(2, 0x36, 0x138), F3F(~2, ~0x36, ~0x138), "v,B,H", F_FLOAT, HWCAP_KASUMI, 0, v9b },
-{ "camellia_fi",F3F(2, 0x36, 0x13c), F3F(~2, ~0x36, ~0x13c), "v,B,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9b },
-{"camellia_fli",F3F(2, 0x36, 0x13d), F3F(~2, ~0x36, ~0x13d), "v,B,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9b },
-{ "md5",        F3F(2, 0x36, 0x140), F3F(~2, ~0x36, ~0x140), "", F_FLOAT, HWCAP_MD5, 0, v9b },
-{ "sha1",       F3F(2, 0x36, 0x141), F3F(~2, ~0x36, ~0x141), "", F_FLOAT, HWCAP_SHA1, 0, v9b },
-{ "sha256",     F3F(2, 0x36, 0x142), F3F(~2, ~0x36, ~0x142), "", F_FLOAT, HWCAP_SHA256, 0, v9b },
-{ "sha512",     F3F(2, 0x36, 0x143), F3F(~2, ~0x36, ~0x143), "", F_FLOAT, HWCAP_SHA512, 0, v9b },
-{ "crc32c",     F3F(2, 0x36, 0x147), F3F(~2, ~0x36, ~0x147), "v,B,H", F_FLOAT, HWCAP_CRC32C, 0, v9b },
-{ "xmpmul",     F3F(2, 0x36, 0x148)|RD(1), F3F(~2, ~0x36, ~0x148)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMPMUL, v9b },
-{ "mpmul",      F3F(2, 0x36, 0x148), F3F(~2, ~0x36, ~0x148), "X", F_FLOAT, HWCAP_MPMUL, 0, v9b },
-{ "xmontmul",   F3F(2, 0x36, 0x149)|RD(1), F3F(~2, ~0x36, ~0x149)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMONT, v9b },
-{ "montmul",    F3F(2, 0x36, 0x149), F3F(~2, ~0x36, ~0x149), "X", F_FLOAT, HWCAP_MONT, 0, v9b },
-{ "xmontsqr",   F3F(2, 0x36, 0x14a)|RD(1), F3F(~2, ~0x36, ~0x14a)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMONT, v9b },
-{ "montsqr",    F3F(2, 0x36, 0x14a), F3F(~2, ~0x36, ~0x14a), "X", F_FLOAT, HWCAP_MONT, 0, v9b },
-{"aes_eround01",  F3F4(2, 0x19, 0), F3F4(~2, ~0x19, ~0), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_eround23",  F3F4(2, 0x19, 1), F3F4(~2, ~0x19, ~1), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_dround01",  F3F4(2, 0x19, 2), F3F4(~2, ~0x19, ~2), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_dround23",  F3F4(2, 0x19, 3), F3F4(~2, ~0x19, ~3), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_eround01_l",F3F4(2, 0x19, 4), F3F4(~2, ~0x19, ~4), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_eround23_l",F3F4(2, 0x19, 5), F3F4(~2, ~0x19, ~5), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_dround01_l",F3F4(2, 0x19, 6), F3F4(~2, ~0x19, ~6), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_dround23_l",F3F4(2, 0x19, 7), F3F4(~2, ~0x19, ~7), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"aes_kexpand1",  F3F4(2, 0x19, 8), F3F4(~2, ~0x19, ~8), "v,B,),H", F_FLOAT, HWCAP_AES, 0, v9b },
-{"des_round",     F3F4(2, 0x19, 9), F3F4(~2, ~0x19, ~9), "v,B,5,H", F_FLOAT, HWCAP_DES, 0, v9b },
-{"kasumi_fl_xor", F3F4(2, 0x19, 10), F3F4(~2, ~0x19, ~10), "v,B,5,H", F_FLOAT, HWCAP_KASUMI, 0, v9b },
-{"kasumi_fi_xor", F3F4(2, 0x19, 11), F3F4(~2, ~0x19, ~11), "v,B,5,H", F_FLOAT, HWCAP_KASUMI, 0, v9b },
-{"camellia_f",    F3F4(2, 0x19, 12), F3F4(~2, ~0x19, ~12), "v,B,5,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9b },
-{ "flcmps",	CMPFCC(0)|F3F(2, 0x36, 0x151), CMPFCC(~0)|F3F(~2, ~0x36, ~0x151), "6,e,f", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmps",	CMPFCC(1)|F3F(2, 0x36, 0x151), CMPFCC(~1)|F3F(~2, ~0x36, ~0x151), "7,e,f", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmps",	CMPFCC(2)|F3F(2, 0x36, 0x151), CMPFCC(~2)|F3F(~2, ~0x36, ~0x151), "8,e,f", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmps",	CMPFCC(3)|F3F(2, 0x36, 0x151), CMPFCC(~3)|F3F(~2, ~0x36, ~0x151), "9,e,f", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmpd",	CMPFCC(0)|F3F(2, 0x36, 0x152), CMPFCC(~0)|F3F(~2, ~0x36, ~0x152), "6,v,B", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmpd",	CMPFCC(1)|F3F(2, 0x36, 0x152), CMPFCC(~1)|F3F(~2, ~0x36, ~0x152), "7,v,B", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmpd",	CMPFCC(2)|F3F(2, 0x36, 0x152), CMPFCC(~2)|F3F(~2, ~0x36, ~0x152), "8,v,B", F_FLOAT, HWCAP_HPC, 0, v9b },
-{ "flcmpd",	CMPFCC(3)|F3F(2, 0x36, 0x152), CMPFCC(~3)|F3F(~2, ~0x36, ~0x152), "9,v,B", F_FLOAT, HWCAP_HPC, 0, v9b },
+{ "fnadds",	F3F(2, 0x34, 0x051), F3F(~2, ~0x34, ~0x051), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnaddd",	F3F(2, 0x34, 0x052), F3F(~2, ~0x34, ~0x052), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnmuls",	F3F(2, 0x34, 0x059), F3F(~2, ~0x34, ~0x059), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnmuld",	F3F(2, 0x34, 0x05a), F3F(~2, ~0x34, ~0x05a), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fhadds",	F3F(2, 0x34, 0x061), F3F(~2, ~0x34, ~0x061), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fhaddd",	F3F(2, 0x34, 0x062), F3F(~2, ~0x34, ~0x062), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fhsubs",	F3F(2, 0x34, 0x065), F3F(~2, ~0x34, ~0x065), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fhsubd",	F3F(2, 0x34, 0x066), F3F(~2, ~0x34, ~0x066), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnhadds",	F3F(2, 0x34, 0x071), F3F(~2, ~0x34, ~0x071), "e,f,g", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnhaddd",	F3F(2, 0x34, 0x072), F3F(~2, ~0x34, ~0x072), "v,B,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fnsmuld",	F3F(2, 0x34, 0x079), F3F(~2, ~0x34, ~0x079), "e,f,H", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "fpmaddx",	F3(2, 0x37, 0)|OPF_LOW4(0), F3(~2, ~0x37, 0)|OPF_LOW4(~0), "v,B,5,H", F_FLOAT, HWCAP_IMA, 0, v9v },
+{ "fmadds",	F3(2, 0x37, 0)|OPF_LOW4(1), F3(~2, ~0x37, 0)|OPF_LOW4(~1), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fmaddd",	F3(2, 0x37, 0)|OPF_LOW4(2), F3(~2, ~0x37, 0)|OPF_LOW4(~2), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fpmaddxhi",	F3(2, 0x37, 0)|OPF_LOW4(4), F3(~2, ~0x37, 0)|OPF_LOW4(~4), "v,B,5,H", F_FLOAT, HWCAP_IMA, 0, v9v },
+{ "fmsubs",	F3(2, 0x37, 0)|OPF_LOW4(5), F3(~2, ~0x37, 0)|OPF_LOW4(~5), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fmsubd",	F3(2, 0x37, 0)|OPF_LOW4(6), F3(~2, ~0x37, 0)|OPF_LOW4(~6), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fnmsubs",	F3(2, 0x37, 0)|OPF_LOW4(9), F3(~2, ~0x37, 0)|OPF_LOW4(~9), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fnmsubd",	F3(2, 0x37, 0)|OPF_LOW4(10), F3(~2, ~0x37, 0)|OPF_LOW4(~10), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fnmadds",	F3(2, 0x37, 0)|OPF_LOW4(13), F3(~2, ~0x37, 0)|OPF_LOW4(~13), "e,f,4,g", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fnmaddd",	F3(2, 0x37, 0)|OPF_LOW4(14), F3(~2, ~0x37, 0)|OPF_LOW4(~14), "v,B,5,H", F_FLOAT, HWCAP_FMAF, 0, v9d },
+{ "fumadds",	F3(2, 0x3f, 0)|OPF_LOW4(1), F3(~2, ~0x3f, 0)|OPF_LOW4(~1), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fumaddd",	F3(2, 0x3f, 0)|OPF_LOW4(2), F3(~2, ~0x3f, 0)|OPF_LOW4(~2), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fumsubs",	F3(2, 0x3f, 0)|OPF_LOW4(5), F3(~2, ~0x3f, 0)|OPF_LOW4(~5), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fumsubd",	F3(2, 0x3f, 0)|OPF_LOW4(6), F3(~2, ~0x3f, 0)|OPF_LOW4(~6), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fnumsubs",	F3(2, 0x3f, 0)|OPF_LOW4(9), F3(~2, ~0x3f, 0)|OPF_LOW4(~9), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fnumsubd",	F3(2, 0x3f, 0)|OPF_LOW4(10), F3(~2, ~0x3f, 0)|OPF_LOW4(~10), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fnumadds",	F3(2, 0x3f, 0)|OPF_LOW4(13), F3(~2, ~0x3f, 0)|OPF_LOW4(~13), "e,f,4,g", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "fnumaddd",	F3(2, 0x3f, 0)|OPF_LOW4(14), F3(~2, ~0x3f, 0)|OPF_LOW4(~14), "v,B,5,H", F_FLOAT, HWCAP_FJFMAU, 0, v9v },
+{ "addxc",	F3F(2, 0x36, 0x011), F3F(~2, ~0x36, ~0x011), "1,2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "addxccc",	F3F(2, 0x36, 0x013), F3F(~2, ~0x36, ~0x013), "1,2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "umulxhi",	F3F(2, 0x36, 0x016), F3F(~2, ~0x36, ~0x016), "1,2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "lzcnt",	F3F(2, 0x36, 0x017), F3F(~2, ~0x36, ~0x017), "2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "lzd",	F3F(2, 0x36, 0x017), F3F(~2, ~0x36, ~0x017), "2,d", F_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "cmask8",	F3F(2, 0x36, 0x01b), F3F(~2, ~0x36, ~0x01b), "2", 0, HWCAP_VIS3, 0, v9d },
+{ "cmask16",	F3F(2, 0x36, 0x01d), F3F(~2, ~0x36, ~0x01d), "2", 0, HWCAP_VIS3, 0, v9d },
+{ "cmask32",	F3F(2, 0x36, 0x01f), F3F(~2, ~0x36, ~0x01f), "2", 0, HWCAP_VIS3, 0, v9d },
+{ "fsll16",	F3F(2, 0x36, 0x021), F3F(~2, ~0x36, ~0x021), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fsrl16",	F3F(2, 0x36, 0x023), F3F(~2, ~0x36, ~0x023), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fsll32",	F3F(2, 0x36, 0x025), F3F(~2, ~0x36, ~0x025), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fsrl32",	F3F(2, 0x36, 0x027), F3F(~2, ~0x36, ~0x027), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fslas16",	F3F(2, 0x36, 0x029), F3F(~2, ~0x36, ~0x029), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fsra16",	F3F(2, 0x36, 0x02b), F3F(~2, ~0x36, ~0x02b), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fslas32",	F3F(2, 0x36, 0x02d), F3F(~2, ~0x36, ~0x02d), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fsra32",	F3F(2, 0x36, 0x02f), F3F(~2, ~0x36, ~0x02f), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "pdistn",	F3F(2, 0x36, 0x03f), F3F(~2, ~0x36, ~0x03f), "v,B,d", 0, HWCAP_VIS3, 0, v9d },
+{ "fmean16",	F3F(2, 0x36, 0x040), F3F(~2, ~0x36, ~0x040), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpadd64",	F3F(2, 0x36, 0x042), F3F(~2, ~0x36, ~0x042), "v,B,H", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fchksm16",	F3F(2, 0x36, 0x044), F3F(~2, ~0x36, ~0x044), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpsub64",	F3F(2, 0x36, 0x046), F3F(~2, ~0x36, ~0x046), "v,B,H", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fpadds16",	F3F(2, 0x36, 0x058), F3F(~2, ~0x36, ~0x058), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpadds16s",	F3F(2, 0x36, 0x059), F3F(~2, ~0x36, ~0x059), "e,f,g", 0, HWCAP_VIS3, 0, v9d },
+{ "fpadds32",	F3F(2, 0x36, 0x05a), F3F(~2, ~0x36, ~0x05a), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpadds32s",	F3F(2, 0x36, 0x05b), F3F(~2, ~0x36, ~0x05b), "e,f,g", 0, HWCAP_VIS3, 0, v9d },
+{ "fpsubs16",	F3F(2, 0x36, 0x05c), F3F(~2, ~0x36, ~0x05c), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpsubs16s",	F3F(2, 0x36, 0x05d), F3F(~2, ~0x36, ~0x05d), "e,f,g", 0, HWCAP_VIS3, 0, v9d },
+{ "fpsubs32",	F3F(2, 0x36, 0x05e), F3F(~2, ~0x36, ~0x05e), "v,B,H", 0, HWCAP_VIS3, 0, v9d },
+{ "fpsubs32s",	F3F(2, 0x36, 0x05f), F3F(~2, ~0x36, ~0x05f), "e,f,g", 0, HWCAP_VIS3, 0, v9d },
+{ "movdtox",	F3F(2, 0x36, 0x110), F3F(~2, ~0x36, ~0x110), "B,d", F_FLOAT, HWCAP_VIS3, 0, v9d },
+{ "movstouw",	F3F(2, 0x36, 0x111), F3F(~2, ~0x36, ~0x111), "f,d", F_FLOAT, HWCAP_VIS3, 0, v9d },
+{ "movstosw",	F3F(2, 0x36, 0x113), F3F(~2, ~0x36, ~0x113), "f,d", F_FLOAT, HWCAP_VIS3, 0, v9d },
+{ "movxtod",	F3F(2, 0x36, 0x118), F3F(~2, ~0x36, ~0x118), "2,H", F_FLOAT, HWCAP_VIS3, 0, v9d },
+{ "movwtos",	F3F(2, 0x36, 0x119), F3F(~2, ~0x36, ~0x119), "2,g", F_FLOAT, HWCAP_VIS3, 0, v9d },
+{ "xmulx",	F3F(2, 0x36, 0x115), F3F(~2, ~0x36, ~0x115), "1,2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "xmulxhi",	F3F(2, 0x36, 0x116), F3F(~2, ~0x36, ~0x116), "1,2,d", 0, HWCAP_VIS3, 0, v9d },
+{ "fpcmpule8",	F3F(2, 0x36, 0x120), F3F(~2, ~0x36, ~0x120), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fucmple8",	F3F(2, 0x36, 0x120), F3F(~2, ~0x36, ~0x120), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "fpcmpune8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fpcmpne8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", F_PREF_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "fucmpne8",	F3F(2, 0x36, 0x122), F3F(~2, ~0x36, ~0x122), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "fpcmpugt8",	F3F(2, 0x36, 0x128), F3F(~2, ~0x36, ~0x128), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fucmpgt8",	F3F(2, 0x36, 0x128), F3F(~2, ~0x36, ~0x128), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "fpcmpueq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", 0, HWCAP_VIS3, HWCAP2_VIS3B, v9d },
+{ "fpcmpeq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", F_PREF_ALIAS, HWCAP_VIS3, 0, v9d },
+{ "fucmpeq8",	F3F(2, 0x36, 0x12a), F3F(~2, ~0x36, ~0x12a), "v,B,d", F_ALIAS, HWCAP_VIS3, 0, v9d },
+{"aes_kexpand0",F3F(2, 0x36, 0x130), F3F(~2, ~0x36, ~0x130), "v,B,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_kexpand2",F3F(2, 0x36, 0x131), F3F(~2, ~0x36, ~0x131), "v,B,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{ "des_ip",     F3F(2, 0x36, 0x134), F3F(~2, ~0x36, ~0x134), "v,H", F_FLOAT, HWCAP_DES, 0, v9e },
+{ "des_iip",    F3F(2, 0x36, 0x135), F3F(~2, ~0x36, ~0x135), "v,H", F_FLOAT, HWCAP_DES, 0, v9e },
+{ "des_kexpand",F3F(2, 0x36, 0x136), F3F(~2, ~0x36, ~0x136), "v,X,H", F_FLOAT, HWCAP_DES, 0, v9e },
+{"kasumi_fi_fi",F3F(2, 0x36, 0x138), F3F(~2, ~0x36, ~0x138), "v,B,H", F_FLOAT, HWCAP_KASUMI, 0, v9e },
+{ "camellia_fl",F3F(2, 0x36, 0x13c), F3F(~2, ~0x36, ~0x13c), "v,B,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9e },
+{"camellia_fli",F3F(2, 0x36, 0x13d), F3F(~2, ~0x36, ~0x13d), "v,B,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9e },
+{ "md5",        F3F(2, 0x36, 0x140), F3F(~2, ~0x36, ~0x140), "", F_FLOAT, HWCAP_MD5, 0, v9e },
+{ "sha1",       F3F(2, 0x36, 0x141), F3F(~2, ~0x36, ~0x141), "", F_FLOAT, HWCAP_SHA1, 0, v9e },
+{ "sha256",     F3F(2, 0x36, 0x142), F3F(~2, ~0x36, ~0x142), "", F_FLOAT, HWCAP_SHA256, 0, v9e },
+{ "sha512",     F3F(2, 0x36, 0x143), F3F(~2, ~0x36, ~0x143), "", F_FLOAT, HWCAP_SHA512, 0, v9e },
+{ "sha3",	F3F(2, 0x36, 0x144), F3F(~2, ~0x36, ~0x144), "", F_FLOAT, 0, HWCAP2_SHA3, m8 },
+{ "crc32c",     F3F(2, 0x36, 0x147), F3F(~2, ~0x36, ~0x147), "v,B,H", F_FLOAT, HWCAP_CRC32C, 0, v9e },
+{ "xmpmul",     F3F(2, 0x36, 0x148)|RD(1), F3F(~2, ~0x36, ~0x148)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMPMUL, v9m },
+{ "mpmul",      F3F(2, 0x36, 0x148), F3F(~2, ~0x36, ~0x148), "X", F_FLOAT, HWCAP_MPMUL, 0, v9e },
+{ "xmontmul",   F3F(2, 0x36, 0x149)|RD(1), F3F(~2, ~0x36, ~0x149)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMONT, v9m },
+{ "montmul",    F3F(2, 0x36, 0x149), F3F(~2, ~0x36, ~0x149), "X", F_FLOAT, HWCAP_MONT, 0, v9e },
+{ "xmontsqr",   F3F(2, 0x36, 0x14a)|RD(1), F3F(~2, ~0x36, ~0x14a)|RD(~1), "X", F_FLOAT, 0, HWCAP2_XMONT, v9m },
+{ "montsqr",    F3F(2, 0x36, 0x14a), F3F(~2, ~0x36, ~0x14a), "X", F_FLOAT, HWCAP_MONT, 0, v9e },
+{"aes_eround01",  F3F4(2, 0x19, 0), F3F4(~2, ~0x19, ~0), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_eround23",  F3F4(2, 0x19, 1), F3F4(~2, ~0x19, ~1), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_dround01",  F3F4(2, 0x19, 2), F3F4(~2, ~0x19, ~2), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_dround23",  F3F4(2, 0x19, 3), F3F4(~2, ~0x19, ~3), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_eround01_l",F3F4(2, 0x19, 4), F3F4(~2, ~0x19, ~4), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_eround23_l",F3F4(2, 0x19, 5), F3F4(~2, ~0x19, ~5), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_dround01_l",F3F4(2, 0x19, 6), F3F4(~2, ~0x19, ~6), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_dround23_l",F3F4(2, 0x19, 7), F3F4(~2, ~0x19, ~7), "v,B,5,H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"aes_kexpand1",  F3F4(2, 0x19, 8), F3F4(~2, ~0x19, ~8), "v,B,),H", F_FLOAT, HWCAP_AES, 0, v9e },
+{"des_round",     F3F4(2, 0x19, 9), F3F4(~2, ~0x19, ~9), "v,B,5,H", F_FLOAT, HWCAP_DES, 0, v9e },
+{"kasumi_fl_xor", F3F4(2, 0x19, 10), F3F4(~2, ~0x19, ~10), "v,B,5,H", F_FLOAT, HWCAP_KASUMI, 0, v9e },
+{"kasumi_fi_xor", F3F4(2, 0x19, 11), F3F4(~2, ~0x19, ~11), "v,B,5,H", F_FLOAT, HWCAP_KASUMI, 0, v9e },
+{"camellia_f",    F3F4(2, 0x19, 12), F3F4(~2, ~0x19, ~12), "v,B,5,H", F_FLOAT, HWCAP_CAMELLIA, 0, v9e },
+{ "flcmps",	CMPFCC(0)|F3F(2, 0x36, 0x151), CMPFCC(~0)|F3F(~2, ~0x36, ~0x151), "6,e,f", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmps",	CMPFCC(1)|F3F(2, 0x36, 0x151), CMPFCC(~1)|F3F(~2, ~0x36, ~0x151), "7,e,f", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmps",	CMPFCC(2)|F3F(2, 0x36, 0x151), CMPFCC(~2)|F3F(~2, ~0x36, ~0x151), "8,e,f", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmps",	CMPFCC(3)|F3F(2, 0x36, 0x151), CMPFCC(~3)|F3F(~2, ~0x36, ~0x151), "9,e,f", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmpd",	CMPFCC(0)|F3F(2, 0x36, 0x152), CMPFCC(~0)|F3F(~2, ~0x36, ~0x152), "6,v,B", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmpd",	CMPFCC(1)|F3F(2, 0x36, 0x152), CMPFCC(~1)|F3F(~2, ~0x36, ~0x152), "7,v,B", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmpd",	CMPFCC(2)|F3F(2, 0x36, 0x152), CMPFCC(~2)|F3F(~2, ~0x36, ~0x152), "8,v,B", F_FLOAT, HWCAP_HPC, 0, v9d },
+{ "flcmpd",	CMPFCC(3)|F3F(2, 0x36, 0x152), CMPFCC(~3)|F3F(~2, ~0x36, ~0x152), "9,v,B", F_FLOAT, HWCAP_HPC, 0, v9d },
 
-{ "mwait", F3(2, 0x30, 0)|RD(28), F3(~2, ~0x30, ~0)|RD(~28)|RS1_G0|ASI(~0),  "2", 0, 0, HWCAP2_MWAIT, v9b }, /* mwait r */
-{ "mwait", F3(2, 0x30, 1)|RD(28), F3(~2, ~0x30, ~1)|RD(~28)|RS1_G0, "i", 0, 0, HWCAP2_MWAIT, v9b }, /* mwait imm */
+{ "mwait", F3(2, 0x30, 0)|RD(28), F3(~2, ~0x30, ~0)|RD(~28)|RS1_G0|ASI(~0),  "2", 0, 0, HWCAP2_MWAIT, v9m }, /* mwait r */
+{ "mwait", F3(2, 0x30, 1)|RD(28), F3(~2, ~0x30, ~1)|RD(~28)|RS1_G0, "i", 0, 0, HWCAP2_MWAIT, v9m }, /* mwait imm */
 
-/* SPARC5 and VIS4.0 instructions.  */
+/* Other SPARC5 and VIS4.0 instructions.  */
 
-{ "subxc",      F3(2, 0x36, 0)|OPF(0x41), F3(~2, ~0x36, ~0)|OPF(~0x41), "1,2,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "subxccc",    F3(2, 0x36, 0)|OPF(0x43), F3(~2, ~0x36, ~0)|OPF(~0x43), "1,2,d", 0, 0, HWCAP2_SPARC5, v9b },
+{ "subxc",      F3(2, 0x36, 0)|OPF(0x41), F3(~2, ~0x36, ~0)|OPF(~0x41), "1,2,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "subxccc",    F3(2, 0x36, 0)|OPF(0x43), F3(~2, ~0x36, ~0)|OPF(~0x43), "1,2,d", 0, 0, HWCAP2_SPARC5, v9m },
 
-{ "faligndatai", F3F(2, 0x36, 0x049), F3F(~2, ~0x36, ~0x049), "v,B,5,}", 0, 0, HWCAP2_SPARC5, v9b },
+{ "fpadd8",     F3F(2, 0x36, 0x124), F3F(~2, ~0x36, ~0x124), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpadds8",    F3F(2, 0x36, 0x126), F3F(~2, ~0x36, ~0x126), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpaddus8",   F3F(2, 0x36, 0x127), F3F(~2, ~0x36, ~0x127), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpaddus16",  F3F(2, 0x36, 0x123), F3F(~2, ~0x36, ~0x123), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmple8",   F3F(2, 0x36, 0x034), F3F(~2, ~0x36, ~0x034), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmpgt8",   F3F(2, 0x36, 0x03c), F3F(~2, ~0x36, ~0x03c), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmpule16", F3F(2, 0x36, 0x12e), F3F(~2, ~0x36, ~0x12e), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmpugt16", F3F(2, 0x36, 0x12b), F3F(~2, ~0x36, ~0x12b), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmpule32", F3F(2, 0x36, 0x12f), F3F(~2, ~0x36, ~0x12f), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpcmpugt32", F3F(2, 0x36, 0x12c), F3F(~2, ~0x36, ~0x12c), "v,B,d", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmax8",     F3F(2, 0x36, 0x11d), F3F(~2, ~0x36, ~0x11d), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmax16",    F3F(2, 0x36, 0x11e), F3F(~2, ~0x36, ~0x11e), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmax32",    F3F(2, 0x36, 0x11f), F3F(~2, ~0x36, ~0x11f), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmaxu8",    F3F(2, 0x36, 0x15d), F3F(~2, ~0x36, ~0x15d), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmaxu16",   F3F(2, 0x36, 0x15e), F3F(~2, ~0x36, ~0x15e), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmaxu32",   F3F(2, 0x36, 0x15f), F3F(~2, ~0x36, ~0x15f), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmin8",     F3F(2, 0x36, 0x11a), F3F(~2, ~0x36, ~0x11a), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmin16",    F3F(2, 0x36, 0x11b), F3F(~2, ~0x36, ~0x11b), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpmin32",    F3F(2, 0x36, 0x11c), F3F(~2, ~0x36, ~0x11c), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpminu8",    F3F(2, 0x36, 0x15a), F3F(~2, ~0x36, ~0x15a), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpminu16",   F3F(2, 0x36, 0x15b), F3F(~2, ~0x36, ~0x15b), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpminu32",   F3F(2, 0x36, 0x15c), F3F(~2, ~0x36, ~0x15c), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpsub8",     F3F(2, 0x36, 0x154), F3F(~2, ~0x36, ~0x154), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpsubs8",    F3F(2, 0x36, 0x156), F3F(~2, ~0x36, ~0x156), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpsubus8",   F3F(2, 0x36, 0x157), F3F(~2, ~0x36, ~0x157), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
+{ "fpsubus16",  F3F(2, 0x36, 0x153), F3F(~2, ~0x36, ~0x153), "v,B,H", 0, 0, HWCAP2_SPARC5, v9m },
 
-{ "fpadd8",     F3F(2, 0x36, 0x124), F3F(~2, ~0x36, ~0x124), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpadds8",    F3F(2, 0x36, 0x126), F3F(~2, ~0x36, ~0x126), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpaddus8",   F3F(2, 0x36, 0x127), F3F(~2, ~0x36, ~0x127), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpaddus16",  F3F(2, 0x36, 0x123), F3F(~2, ~0x36, ~0x123), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmple8",   F3F(2, 0x36, 0x034), F3F(~2, ~0x36, ~0x034), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmpgt8",   F3F(2, 0x36, 0x03c), F3F(~2, ~0x36, ~0x03c), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmpule16", F3F(2, 0x36, 0x12e), F3F(~2, ~0x36, ~0x12e), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmpugt16", F3F(2, 0x36, 0x12b), F3F(~2, ~0x36, ~0x12b), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmpule32", F3F(2, 0x36, 0x12f), F3F(~2, ~0x36, ~0x12f), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpcmpugt32", F3F(2, 0x36, 0x12c), F3F(~2, ~0x36, ~0x12c), "v,B,d", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmax8",     F3F(2, 0x36, 0x11d), F3F(~2, ~0x36, ~0x11d), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmax16",    F3F(2, 0x36, 0x11e), F3F(~2, ~0x36, ~0x11e), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmax32",    F3F(2, 0x36, 0x11f), F3F(~2, ~0x36, ~0x11f), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmaxu8",    F3F(2, 0x36, 0x15d), F3F(~2, ~0x36, ~0x15d), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmaxu16",   F3F(2, 0x36, 0x15e), F3F(~2, ~0x36, ~0x15e), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmaxu32",   F3F(2, 0x36, 0x15f), F3F(~2, ~0x36, ~0x15f), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmin8",     F3F(2, 0x36, 0x11a), F3F(~2, ~0x36, ~0x11a), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmin16",    F3F(2, 0x36, 0x11b), F3F(~2, ~0x36, ~0x11b), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpmin32",    F3F(2, 0x36, 0x11c), F3F(~2, ~0x36, ~0x11c), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpminu8",    F3F(2, 0x36, 0x15a), F3F(~2, ~0x36, ~0x15a), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpminu16",   F3F(2, 0x36, 0x15b), F3F(~2, ~0x36, ~0x15b), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpminu32",   F3F(2, 0x36, 0x15c), F3F(~2, ~0x36, ~0x15c), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpsub8",     F3F(2, 0x36, 0x154), F3F(~2, ~0x36, ~0x154), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpsubs8",    F3F(2, 0x36, 0x156), F3F(~2, ~0x36, ~0x156), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpsubus8",   F3F(2, 0x36, 0x157), F3F(~2, ~0x36, ~0x157), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
-{ "fpsubus16",  F3F(2, 0x36, 0x153), F3F(~2, ~0x36, ~0x153), "v,B,H", 0, 0, HWCAP2_SPARC5, v9b },
+/* Other OSA2017 and M8 instructions.  */
+
+{ "dictunpack", F3F(2, 0x36, 0x1c), F3F(~2, ~0x36, ~0x1c), "v,X,H", 0, 0, HWCAP2_DICTUNP, m8 },
+
+#define fpcmpshl(cbits, opf) \
+  { "fpcmp" cbits "shl", F3F(2, 0x36, (opf)), F3F(~2, ~0x36, ~(opf)), "v,',|,d", 0, 0, HWCAP2_FPCMPSHL, m8 }
+
+fpcmpshl ("ule8", 0x190),
+fpcmpshl ("ugt8", 0x191),
+fpcmpshl ("eq8", 0x192),
+fpcmpshl ("ne8", 0x193),
+
+fpcmpshl ("ule16", 0x194),
+fpcmpshl ("ugt16", 0x195),
+fpcmpshl ("eq16", 0x196),
+fpcmpshl ("ne16", 0x197),
+
+fpcmpshl ("ule32", 0x198),
+fpcmpshl ("ugt32", 0x199),
+fpcmpshl ("eq32", 0x19a),
+fpcmpshl ("ne32", 0x19b),
+
+fpcmpshl ("de8", 0x45),
+fpcmpshl ("de16", 0x47),
+fpcmpshl  ("de32", 0x4a),
+
+fpcmpshl ("ur8", 0x19c),
+fpcmpshl ("ur16", 0x19d),
+fpcmpshl ("ur32", 0x19e),
+
+#undef fpcmpshl
+  
+#define fps64x(dir, opf) \
+  { "fps" dir "64x", F3F(2, 0x36, (opf)), F3F(~2, ~0x36, ~(opf)), "v,B,H", 0, 0, HWCAP2_SPARC6, m8 }
+
+fps64x ("ll", 0x106),
+fps64x ("ra", 0x10f),
+fps64x ("rl", 0x107),
+
+#undef fps64x
+
+#define ldm(width,opm,flags)                                                 \
+  { "ldm" width, F3(3, 0x31, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~0), "[1+2],d", (flags), 0, HWCAP2_SPARC6, m8 }, \
+  { "ldm" width, F3(3, 0x31, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~0)|RS2_G0, "[1],d", (flags), 0, HWCAP2_SPARC6, m8 }, /* ldm [rs1+%g0],d */ \
+  { "ldm" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm)), "[1+j],d", (flags), 0, HWCAP2_SPARC6, m8 }, \
+  { "ldm" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm)), "[j+1],d", (flags), 0, HWCAP2_SPARC6, m8 }, /* ldm [rs1+j],d  */ \
+  { "ldm" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm))|RS1_G0, "[j],d", (flags), 0, HWCAP2_SPARC6, m8 }, \
+  { "ldm" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm))|SIMM10(~0), "[1],d", (flags), 0, HWCAP2_SPARC6, m8 } /* ldm [rs1+0],d  */
+
+ldm ("sh", 0x0, 0),
+ldm ("uh", 0x1, 0),
+ldm ("sw", 0x2, 0),
+ldm ("uw", 0x3, 0),
+/* Note that opm=0x4 is reserved.  */
+ldm ("x",  0x5, 0),
+ldm ("ux", 0x5, F_ALIAS),
+
+#undef ldm
+
+#define ldma(width,opm,flags)                   \
+  { "ldm" width "a", F3(3, 0x31, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~1), "[1+2]o,d", (flags), 0, HWCAP2_SPARC6, m8 }, \
+  { "ldm" width "a", F3(3, 0x31, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~1)|RS2_G0, "[1]o,d", (flags), 0, HWCAP2_SPARC6, m8 }
+
+ldma ("sh", 0x0, 0),
+ldma ("uh", 0x1, 0),
+ldma ("sw", 0x2, 0),
+ldma ("uw", 0x3, 0),
+/* Note that opm=0x4 is reserved.  */
+ldma ("x",  0x5, 0),
+ldma ("ux", 0x5, F_ALIAS),
+
+#undef ldma
+
+#define ldmf(width,opm,rd)                                                \
+  { "ldmf" width, F3(3, 0x31, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~0), "[1+2]," rd, 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "ldmf" width, F3(3, 0x31, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~0)|RS2_G0, "[1]," rd, 0, 0, HWCAP2_SPARC6, m8 },  /* ldmf [rs1+%g0],rd  */ \
+  { "ldmf" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm)), "[1+j]," rd, 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "ldmf" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm)), "[j+1]," rd, 0, 0, HWCAP2_SPARC6, m8 }, /* ldmf [rs1+j],rd  */ \
+  { "ldmf" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm))|RS1_G0, "[j]," rd, 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "ldmf" width, F3(3, 0x31, 1)|OPM((opm)), F3(~3, ~0x31, ~1)|OPM(~(opm))|SIMM10(~0), "[1]," rd, 0, 0, HWCAP2_SPARC6, m8 } /* ldmf [rs1+0],rd  */
+
+ldmf ("s", 0x6, "g"),
+ldmf ("d", 0x7, "H"),
+
+#undef ldmf
+
+#define ldmfa(width,opm,rd)                                                \
+  { "ldmf" width "a", F3(3, 0x31, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~1), "[1+2]o," rd, 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "ldmf" width "a", F3(3, 0x31, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x31, ~0)|OPM(~(opm))|OPMI(~1)|RS2_G0, "[1]o," rd, 0, 0, HWCAP2_SPARC6, m8}
+
+ldmfa ("s", 0x6, "g"),
+ldmfa ("d", 0x7, "H"),
+
+#undef ldmfa
+
+#define stm(width,opm) \
+  { "stm" width, F3(3, 0x35, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~0), "d,[1+2]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stm" width, F3(3, 0x35, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~0)|RS2_G0, "d,[1]", 0, 0, HWCAP2_SPARC6, m8 }, /* stm d,[rs1+%g0]  */ \
+  { "stm" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm)), "d,[1+j]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stm" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm)), "d,[j+1]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stm" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm))|RS1_G0, "d,[j]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stm" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm))|SIMM10(~0), "d,[1]", 0, 0, HWCAP2_SPARC6, m8 }
+
+stm ("h", 0x1),
+stm ("w", 0x3),
+stm ("x", 0x5),
+
+#undef stm
+
+#define stma(width,opm) \
+  { "stm" width "a", F3(3, 0x35, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~1), "d,[1+2]o", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stm" width "a", F3(3, 0x35, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~1)|RS2_G0, "d,[1]o", 0, 0, HWCAP2_SPARC6, m8 }
+
+stma ("h", 0x1),
+stma ("w", 0x3),
+stma ("x", 0x5),
+
+#undef stma
+
+#define stmf(width, opm, rd)                                               \
+  { "stmf" width, F3(3, 0x35, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~0), rd ",[1+2]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stmf" width, F3(3, 0x35, 0)|OPM((opm))|OPMI(0), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~0)|RS2_G0, rd ",[1]", 0, 0, HWCAP2_SPARC6, m8 }, /* stmf rd,[rs1+%g0]  */ \
+  { "stmf" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm)), rd ",[1+j]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stmf" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm)), rd ",[j+1]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stmf" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm))|RS1_G0, rd ",[j]", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stmf" width, F3(3, 0x35, 1)|OPM((opm)), F3(~3, ~0x35, ~1)|OPM(~(opm))|SIMM10(~0), rd ",[1]", 0, 0, HWCAP2_SPARC6, m8 }
+
+stmf ("s", 0x6, "g"),
+stmf ("d", 0x7, "H"),
+
+#define stmfa(width, opm, rd) \
+  { "stmf" width "a", F3(3, 0x35, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~1), rd ",[1+2]o", 0, 0, HWCAP2_SPARC6, m8 }, \
+  { "stmf" width "a", F3(3, 0x35, 0)|OPM((opm))|OPMI(1), F3(~3, ~0x35, ~0)|OPM(~(opm))|OPMI(~1)|RS2_G0, rd ",[1]o", 0, 0, HWCAP2_SPARC6, m8 }
+
+stmfa ("s", 0x6, "g"),
+stmfa ("d", 0x7, "H"),
+
+#undef stmfa
+
+#define on(op,fcn,hwcaps2)                                                     \
+  { "on" op, F3F(2, 0x36, 0x15)|ONFCN((fcn)), F3F(~2, ~0x36, ~0x15)|ONFCN(~(fcn)), ";,:,^", 0, 0, (hwcaps2), m8 }
+
+on ("add", 0x0, HWCAP2_ONADDSUB),
+on ("sub", 0x1, HWCAP2_ONADDSUB),
+on ("mul", 0x2, HWCAP2_ONMUL),
+on ("div", 0x3, HWCAP2_ONDIV),
+
+#undef on
+
+#define rev(what,width,fcn)                        \
+  { "rev" what width, F3F(2, 0x36, 0x1e)|REVFCN((fcn)), F3F(~2, ~0x36, ~0x1e)|REVFCN(~(fcn)), "1,d", 0, 0, HWCAP2_SPARC6, m8 }
+
+rev ("bits",  "b", 0x0),
+rev ("bytes", "h", 0x1),
+rev ("bytes", "w", 0x2),
+rev ("bytes", "x", 0x3),
+
+#undef rev
+
+{ "rle_burst", F3F(2, 0x36, 0x30), F3F(~2, ~0x36, ~0x30), "1,2,d", 0, 0, HWCAP2_RLE, m8 },
+{ "rle_length", F3F(2, 0x36, 0x32)|RS1(0), F3F(~2, ~0x36, ~0x32)|RS1(~0), "2,d", 0, 0, HWCAP2_RLE, m8 },
 
 /* More v9 specific insns, these need to come last so they do not clash
    with v9a instructions such as "edge8" which looks like impdep1. */
@@ -2109,6 +2452,231 @@ IMPDEP ("impdep2", 0x37),
 };
 
 const int sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
+
+/* Handle ASI's.  */
+
+static sparc_asi asi_table[] =
+{
+  /* These are in the v9 architecture manual.  */
+  /* The shorter versions appear first, they're here because Sun's as has them.
+     Sun's as uses #ASI_P_L instead of #ASI_PL (which appears in the
+     UltraSPARC architecture manual).  */
+  { 0x04, "#ASI_N", v9 },
+  { 0x0c, "#ASI_N_L", v9 },
+  { 0x10, "#ASI_AIUP", v9 },
+  { 0x11, "#ASI_AIUS", v9 },
+  { 0x18, "#ASI_AIUP_L", v9 },
+  { 0x19, "#ASI_AIUS_L", v9 },
+  { 0x80, "#ASI_P", v9 },
+  { 0x81, "#ASI_S", v9 },
+  { 0x82, "#ASI_PNF", v9 },
+  { 0x83, "#ASI_SNF", v9 },
+  { 0x88, "#ASI_P_L", v9 },
+  { 0x89, "#ASI_S_L", v9 },
+  { 0x8a, "#ASI_PNF_L", v9 },
+  { 0x8b, "#ASI_SNF_L", v9 },
+  { 0x04, "#ASI_NUCLEUS", v9 },
+  { 0x0c, "#ASI_NUCLEUS_LITTLE", v9 },
+  { 0x10, "#ASI_AS_IF_USER_PRIMARY", v9 },
+  { 0x11, "#ASI_AS_IF_USER_SECONDARY", v9 },
+  { 0x18, "#ASI_AS_IF_USER_PRIMARY_LITTLE", v9 },
+  { 0x19, "#ASI_AS_IF_USER_SECONDARY_LITTLE", v9 },
+  { 0x80, "#ASI_PRIMARY", v9 },
+  { 0x81, "#ASI_SECONDARY", v9 },
+  { 0x82, "#ASI_PRIMARY_NOFAULT", v9 },
+  { 0x83, "#ASI_SECONDARY_NOFAULT", v9 },
+  { 0x88, "#ASI_PRIMARY_LITTLE", v9 },
+  { 0x89, "#ASI_SECONDARY_LITTLE", v9 },
+  { 0x8a, "#ASI_PRIMARY_NOFAULT_LITTLE", v9 },
+  { 0x8b, "#ASI_SECONDARY_NOFAULT_LITTLE", v9 },
+  /* These are UltraSPARC and Niagara extensions.  */
+  { 0x14, "#ASI_PHYS_USE_EC", v9b },
+  { 0x15, "#ASI_PHYS_BYPASS_EC_E", v9b },
+  { 0x16, "#ASI_BLK_AIUP_4V", v9c },
+  { 0x17, "#ASI_BLK_AIUS_4V", v9c },
+  { 0x1c, "#ASI_PHYS_USE_EC_L", v9b },
+  { 0x1d, "#ASI_PHYS_BYPASS_EC_E_L", v9b },
+  { 0x1e, "#ASI_BLK_AIUP_L_4V", v9c },
+  { 0x1f, "#ASI_BLK_AIUS_L_4V", v9c },
+  { 0x20, "#ASI_SCRATCHPAD", v9c },
+  { 0x21, "#ASI_MMU", v9c },
+  { 0x23, "#ASI_BLK_INIT_QUAD_LDD_AIUS", v9c },
+  { 0x24, "#ASI_NUCLEUS_QUAD_LDD", v9b },
+  { 0x24, "#ASI_CORE_COMMIT_COUNT", m8 },
+  { 0x24, "#ASI_CORE_SELECT_COUNT", m8 },
+  { 0x25, "#ASI_QUEUE", v9c },
+  { 0x26, "#ASI_QUAD_LDD_PHYS_4V", v9c },
+  { 0x2c, "#ASI_NUCLEUS_QUAD_LDD_L", v9b },
+  { 0x30, "#ASI_PCACHE_DATA_STATUS", v9b },
+  { 0x31, "#ASI_PCACHE_DATA", v9b },
+  { 0x32, "#ASI_PCACHE_TAG", v9b },
+  { 0x33, "#ASI_PCACHE_SNOOP_TAG", v9b },
+  { 0x34, "#ASI_QUAD_LDD_PHYS", v9b },
+  { 0x38, "#ASI_WCACHE_VALID_BITS", v9b },
+  { 0x39, "#ASI_WCACHE_DATA", v9b },
+  { 0x3a, "#ASI_WCACHE_TAG", v9b },
+  { 0x3b, "#ASI_WCACHE_SNOOP_TAG", v9b },
+  { 0x3c, "#ASI_QUAD_LDD_PHYS_L", v9b },
+  { 0x40, "#ASI_SRAM_FAST_INIT", v9b },
+  { 0x41, "#ASI_CORE_AVAILABLE", v9b },
+  { 0x41, "#ASI_CORE_ENABLE_STAT", v9b },
+  { 0x41, "#ASI_CORE_ENABLE", v9b },
+  { 0x41, "#ASI_XIR_STEERING", v9b },
+  { 0x41, "#ASI_CORE_RUNNING_RW", v9b },
+  { 0x41, "#ASI_CORE_RUNNING_W1S", v9b },
+  { 0x41, "#ASI_CORE_RUNNING_W1C", v9b },
+  { 0x41, "#ASI_CORE_RUNNING_STAT", v9b },
+  { 0x41, "#ASI_CMT_ERROR_STEERING", v9b },
+  { 0x45, "#ASI_LSU_CONTROL_REG", v9b },
+  { 0x45, "#ASI_DCU_CONTROL_REG", v9b },
+  { 0x46, "#ASI_DCACHE_DATA", v9b },
+  { 0x47, "#ASI_DCACHE_TAG", v9b },
+  { 0x48, "#ASI_INTR_DISPATCH_STAT", v9b },
+  { 0x49, "#ASI_INTR_RECEIVE", v9b },
+  { 0x4b, "#ASI_ESTATE_ERROR_EN", v9b },
+  { 0x4c, "#ASI_AFSR", v9b },
+  { 0x4d, "#ASI_AFAR", v9b },
+  { 0x4e, "#ASI_EC_TAG_DATA", v9b },
+  { 0x48, "#ASI_ARF_ECC_REG", m8 },
+  { 0x50, "#ASI_IMMU", v9b },
+  { 0x51, "#ASI_IMMU_TSB_8KB_PTR", v9b },
+  { 0x52, "#ASI_IMMU_TSB_64KB_PTR", v9b },
+  { 0x53, "#ASI_ITLB_PROBE", m8 },
+  { 0x54, "#ASI_ITLB_DATA_IN", v9b },
+  { 0x55, "#ASI_ITLB_DATA_ACCESS", v9b },
+  { 0x56, "#ASI_ITLB_TAG_READ", v9b },
+  { 0x57, "#ASI_IMMU_DEMAP", v9b },
+  { 0x58, "#ASI_DMMU", v9b },
+  { 0x58, "#ASI_DSFAR", m8 },
+  { 0x59, "#ASI_DMMU_TSB_8KB_PTR", v9b },
+  { 0x5a, "#ASI_DMMU_TSB_64KB_PTR", v9b },
+  { 0x5a, "#ASI_DTLB_PROBE_PRIMARY", m8 },
+  { 0x5b, "#ASI_DMMU_TSB_DIRECT_PTR", v9b },
+  { 0x5b, "#ASI_DTLB_PROBE_REAL", m8 },
+  { 0x5c, "#ASI_DTLB_DATA_IN", v9b },
+  { 0x5d, "#ASI_DTLB_DATA_ACCESS", v9b },
+  { 0x5e, "#ASI_DTLB_TAG_READ", v9b },
+  { 0x5f, "#ASI_DMMU_DEMAP", v9b },
+  { 0x60, "#ASI_IIU_INST_TRAP", v9b },
+  { 0x63, "#ASI_INTR_ID", v9b },
+  { 0x63, "#ASI_CORE_ID", v9b },
+  { 0x63, "#ASI_CESR_ID", v9b },
+  { 0x64, "#ASI_CORE_SELECT_COMMIT_NHT", m8 },
+  { 0x66, "#ASI_IC_INSTR", v9b },
+  { 0x67, "#ASI_IC_TAG", v9b },
+  { 0x68, "#ASI_IC_STAG", v9b },
+  { 0x6f, "#ASI_BRPRED_ARRAY", v9b },
+  { 0x70, "#ASI_BLK_AIUP", v9b },
+  { 0x71, "#ASI_BLK_AIUS", v9b },
+  { 0x72, "#ASI_MCU_CTRL_REG", v9b },
+  { 0x74, "#ASI_EC_DATA", v9b },
+  { 0x75, "#ASI_EC_CTRL", v9b },
+  { 0x76, "#ASI_EC_W", v9b },
+  { 0x77, "#ASI_INTR_W", v9b },
+  { 0x77, "#ASI_INTR_DATAN_W", v9b },
+  { 0x77, "#ASI_INTR_DISPATCH_W", v9b },
+  { 0x78, "#ASI_BLK_AIUPL", v9b },
+  { 0x79, "#ASI_BLK_AIUSL", v9b },
+  { 0x7e, "#ASI_EC_R", v9b },
+  { 0x7f, "#ASI_INTR_R", v9b },
+  { 0x7f, "#ASI_INTR_DATAN_R", v9b },
+  { 0xc0, "#ASI_PST8_P", v9b },
+  { 0xc1, "#ASI_PST8_S", v9b },
+  { 0xc2, "#ASI_PST16_P", v9b },
+  { 0xc3, "#ASI_PST16_S", v9b },
+  { 0xc4, "#ASI_PST32_P", v9b },
+  { 0xc5, "#ASI_PST32_S", v9b },
+  { 0xc8, "#ASI_PST8_PL", v9b },
+  { 0xc9, "#ASI_PST8_SL", v9b },
+  { 0xca, "#ASI_PST16_PL", v9b },
+  { 0xcb, "#ASI_PST16_SL", v9b },
+  { 0xcc, "#ASI_PST32_PL", v9b },
+  { 0xcd, "#ASI_PST32_SL", v9b },
+  { 0xd0, "#ASI_FL8_P", v9b },
+  { 0xd1, "#ASI_FL8_S", v9b },
+  { 0xd2, "#ASI_FL16_P", v9b },
+  { 0xd3, "#ASI_FL16_S", v9b },
+  { 0xd8, "#ASI_FL8_PL", v9b },
+  { 0xd9, "#ASI_FL8_SL", v9b },
+  { 0xda, "#ASI_FL16_PL", v9b },
+  { 0xdb, "#ASI_FL16_SL", v9b },
+  { 0xe0, "#ASI_BLK_COMMIT_P", v9b },
+  { 0xe1, "#ASI_BLK_COMMIT_S", v9b },
+  { 0xe2, "#ASI_BLK_INIT_QUAD_LDD_P", v9b },
+  { 0xf0, "#ASI_BLK_P", v9b },
+  { 0xf1, "#ASI_BLK_S", v9b },
+  { 0xf8, "#ASI_BLK_PL", v9b },
+  { 0xf9, "#ASI_BLK_SL", v9b },
+  { 0x22, "#ASI_TWINX_AIUP", v9c },
+  { 0x23, "#ASI_TWINX_AIUS", v9c },
+  { 0x26, "#ASI_TWINX_REAL", v9c },
+  { 0x27, "#ASI_TWINX_N", v9c },
+  { 0x2A, "#ASI_TWINX_AIUP_L", v9c },
+  { 0x2B, "#ASI_TWINX_AIUS_L", v9c },
+  { 0x2E, "#ASI_TWINX_REAL_L", v9c },
+  { 0x2F, "#ASI_TWINX_NL", v9c },
+  { 0xE2, "#ASI_TWINX_P", v9c },
+  { 0xE3, "#ASI_TWINX_S", v9c },
+  { 0xEA, "#ASI_TWINX_PL", v9c },
+  { 0xEB, "#ASI_TWINX_SL", v9c },
+  /* These are ASIs from UA2005, UA2007, OSA2011, & OSA 2015 */
+  { 0x12, "#ASI_MAIUP", v9m },
+  { 0x13, "#ASI_MAIUS", v9m },
+  { 0x14, "#ASI_REAL", v9c },
+  { 0x15, "#ASI_REAL_IO", v9c },
+  { 0x1c, "#ASI_REAL_L", v9c },
+  { 0x1d, "#ASI_REAL_IO_L", v9c },
+  { 0x30, "#ASI_AIPP", v9d },
+  { 0x31, "#ASI_AIPS", v9d },
+  { 0x36, "#ASI_AIPN", v9d },
+  { 0x38, "#ASI_AIPP_L", v9d },
+  { 0x39, "#ASI_AIPS_L", v9d },
+  { 0x3e, "#ASI_AIPN_L", v9d },
+  { 0x42, "#ASI_INST_MASK_REG", v9d },
+  { 0x42, "#ASI_LSU_DIAG_REG", v9d },
+  { 0x43, "#ASI_ERROR_INJECT_REG", v9d },
+  { 0x48, "#ASI_IRF_ECC_REG", v9d },
+  { 0x49, "#ASI_FRF_ECC_REG", v9d },
+  { 0x4e, "#ASI_SPARC_PWR_MGMT", v9d },
+  { 0x4f, "#ASI_HYP_SCRATCHPAD", v9c },
+  { 0x59, "#ASI_SCRATCHPAD_ACCESS", v9d },
+  { 0x5a, "#ASI_TICK_ACCESS", v9d },
+  { 0x5b, "#ASI_TSA_ACCESS", v9d },
+  { 0xb0, "#ASI_PIC", v9e },
+  { 0xf2, "#ASI_STBI_PM", v9e },
+  { 0xf3, "#ASI_STBI_SM", v9e },
+  { 0xfa, "#ASI_STBI_PLM", v9e },
+  { 0xfb, "#ASI_STBI_SLM", v9e },
+  { 0, 0, 0 }
+};
+
+/* Return the a pointer to the matching sparc_asi struct, NULL if not found.  */
+
+const sparc_asi *
+sparc_encode_asi (const char *name)
+{
+  const sparc_asi *p;
+
+  for (p = asi_table; p->name; ++p)
+    if (strcmp (name, p->name) == 0)
+      return p;
+
+  return NULL;
+}
+
+/* Return the name for ASI value VALUE or NULL if not found.  */
+
+const char *
+sparc_decode_asi (int value)
+{
+  const sparc_asi *p;
+
+  for (p = asi_table; p->name; ++p)
+    if (value == p->value)
+      return p->name;
+
+  return NULL;
+}
 
 /* Utilities for argument parsing.  */
 
@@ -2145,190 +2713,7 @@ lookup_value (const arg *table, int value)
 
   return NULL;
 }
-
-/* Handle ASI's.  */
 
-static arg asi_table[] =
-{
-  /* These are in the v9 architecture manual.  */
-  /* The shorter versions appear first, they're here because Sun's as has them.
-     Sun's as uses #ASI_P_L instead of #ASI_PL (which appears in the
-     UltraSPARC architecture manual).  */
-  { 0x04, "#ASI_N" },
-  { 0x0c, "#ASI_N_L" },
-  { 0x10, "#ASI_AIUP" },
-  { 0x11, "#ASI_AIUS" },
-  { 0x18, "#ASI_AIUP_L" },
-  { 0x19, "#ASI_AIUS_L" },
-  { 0x80, "#ASI_P" },
-  { 0x81, "#ASI_S" },
-  { 0x82, "#ASI_PNF" },
-  { 0x83, "#ASI_SNF" },
-  { 0x88, "#ASI_P_L" },
-  { 0x89, "#ASI_S_L" },
-  { 0x8a, "#ASI_PNF_L" },
-  { 0x8b, "#ASI_SNF_L" },
-  { 0x04, "#ASI_NUCLEUS" },
-  { 0x0c, "#ASI_NUCLEUS_LITTLE" },
-  { 0x10, "#ASI_AS_IF_USER_PRIMARY" },
-  { 0x11, "#ASI_AS_IF_USER_SECONDARY" },
-  { 0x18, "#ASI_AS_IF_USER_PRIMARY_LITTLE" },
-  { 0x19, "#ASI_AS_IF_USER_SECONDARY_LITTLE" },
-  { 0x80, "#ASI_PRIMARY" },
-  { 0x81, "#ASI_SECONDARY" },
-  { 0x82, "#ASI_PRIMARY_NOFAULT" },
-  { 0x83, "#ASI_SECONDARY_NOFAULT" },
-  { 0x88, "#ASI_PRIMARY_LITTLE" },
-  { 0x89, "#ASI_SECONDARY_LITTLE" },
-  { 0x8a, "#ASI_PRIMARY_NOFAULT_LITTLE" },
-  { 0x8b, "#ASI_SECONDARY_NOFAULT_LITTLE" },
-  /* These are UltraSPARC and Niagara extensions.  */
-  { 0x14, "#ASI_PHYS_USE_EC" },
-  { 0x15, "#ASI_PHYS_BYPASS_EC_E" },
-  { 0x16, "#ASI_BLK_AIUP_4V" },
-  { 0x17, "#ASI_BLK_AIUS_4V" },
-  { 0x1c, "#ASI_PHYS_USE_EC_L" },
-  { 0x1d, "#ASI_PHYS_BYPASS_EC_E_L" },
-  { 0x1e, "#ASI_BLK_AIUP_L_4V" },
-  { 0x1f, "#ASI_BLK_AIUS_L_4V" },
-  { 0x20, "#ASI_SCRATCHPAD" },
-  { 0x21, "#ASI_MMU" },
-  { 0x23, "#ASI_BLK_INIT_QUAD_LDD_AIUS" },
-  { 0x24, "#ASI_NUCLEUS_QUAD_LDD" },
-  { 0x25, "#ASI_QUEUE" },
-  { 0x26, "#ASI_QUAD_LDD_PHYS_4V" },
-  { 0x2c, "#ASI_NUCLEUS_QUAD_LDD_L" },
-  { 0x30, "#ASI_PCACHE_DATA_STATUS" },
-  { 0x31, "#ASI_PCACHE_DATA" },
-  { 0x32, "#ASI_PCACHE_TAG" },
-  { 0x33, "#ASI_PCACHE_SNOOP_TAG" },
-  { 0x34, "#ASI_QUAD_LDD_PHYS" },
-  { 0x38, "#ASI_WCACHE_VALID_BITS" },
-  { 0x39, "#ASI_WCACHE_DATA" },
-  { 0x3a, "#ASI_WCACHE_TAG" },
-  { 0x3b, "#ASI_WCACHE_SNOOP_TAG" },
-  { 0x3c, "#ASI_QUAD_LDD_PHYS_L" },
-  { 0x40, "#ASI_SRAM_FAST_INIT" },
-  { 0x41, "#ASI_CORE_AVAILABLE" },
-  { 0x41, "#ASI_CORE_ENABLE_STAT" },
-  { 0x41, "#ASI_CORE_ENABLE" },
-  { 0x41, "#ASI_XIR_STEERING" },
-  { 0x41, "#ASI_CORE_RUNNING_RW" },
-  { 0x41, "#ASI_CORE_RUNNING_W1S" },
-  { 0x41, "#ASI_CORE_RUNNING_W1C" },
-  { 0x41, "#ASI_CORE_RUNNING_STAT" },
-  { 0x41, "#ASI_CMT_ERROR_STEERING" },
-  { 0x41, "#ASI_DCACHE_INVALIDATE" },
-  { 0x41, "#ASI_DCACHE_UTAG" },
-  { 0x41, "#ASI_DCACHE_SNOOP_TAG" },
-  { 0x42, "#ASI_DCACHE_INVALIDATE" },
-  { 0x43, "#ASI_DCACHE_UTAG" },
-  { 0x44, "#ASI_DCACHE_SNOOP_TAG" },
-  { 0x45, "#ASI_LSU_CONTROL_REG" },
-  { 0x45, "#ASI_DCU_CONTROL_REG" },
-  { 0x46, "#ASI_DCACHE_DATA" },
-  { 0x47, "#ASI_DCACHE_TAG" },
-  { 0x48, "#ASI_INTR_DISPATCH_STAT" },
-  { 0x49, "#ASI_INTR_RECEIVE" },
-  { 0x4a, "#ASI_UPA_CONFIG" },
-  { 0x4a, "#ASI_JBUS_CONFIG" },
-  { 0x4a, "#ASI_SAFARI_CONFIG" },
-  { 0x4a, "#ASI_SAFARI_ADDRESS" },
-  { 0x4b, "#ASI_ESTATE_ERROR_EN" },
-  { 0x4c, "#ASI_AFSR" },
-  { 0x4d, "#ASI_AFAR" },
-  { 0x4e, "#ASI_EC_TAG_DATA" },
-  { 0x50, "#ASI_IMMU" },
-  { 0x51, "#ASI_IMMU_TSB_8KB_PTR" },
-  { 0x52, "#ASI_IMMU_TSB_16KB_PTR" },
-  { 0x54, "#ASI_ITLB_DATA_IN" },
-  { 0x55, "#ASI_ITLB_DATA_ACCESS" },
-  { 0x56, "#ASI_ITLB_TAG_READ" },
-  { 0x57, "#ASI_IMMU_DEMAP" },
-  { 0x58, "#ASI_DMMU" },
-  { 0x59, "#ASI_DMMU_TSB_8KB_PTR" },
-  { 0x5a, "#ASI_DMMU_TSB_64KB_PTR" },
-  { 0x5b, "#ASI_DMMU_TSB_DIRECT_PTR" },
-  { 0x5c, "#ASI_DTLB_DATA_IN" },
-  { 0x5d, "#ASI_DTLB_DATA_ACCESS" },
-  { 0x5e, "#ASI_DTLB_TAG_READ" },
-  { 0x5f, "#ASI_DMMU_DEMAP" },
-  { 0x60, "#ASI_IIU_INST_TRAP" },
-  { 0x63, "#ASI_INTR_ID" },
-  { 0x63, "#ASI_CORE_ID" },
-  { 0x63, "#ASI_CESR_ID" },
-  { 0x66, "#ASI_IC_INSTR" },
-  { 0x67, "#ASI_IC_TAG" },
-  { 0x68, "#ASI_IC_STAG" },
-  { 0x6e, "#ASI_IC_PRE_DECODE" },
-  { 0x6f, "#ASI_IC_NEXT_FIELD" },
-  { 0x6f, "#ASI_BRPRED_ARRAY" },
-  { 0x70, "#ASI_BLK_AIUP" },
-  { 0x71, "#ASI_BLK_AIUS" },
-  { 0x72, "#ASI_MCU_CTRL_REG" },
-  { 0x74, "#ASI_EC_DATA" },
-  { 0x75, "#ASI_EC_CTRL" },
-  { 0x76, "#ASI_EC_W" },
-  { 0x77, "#ASI_UDB_ERROR_W" },
-  { 0x77, "#ASI_UDB_CONTROL_W" },
-  { 0x77, "#ASI_INTR_W" },
-  { 0x77, "#ASI_INTR_DATAN_W" },
-  { 0x77, "#ASI_INTR_DISPATCH_W" },
-  { 0x78, "#ASI_BLK_AIUPL" },
-  { 0x79, "#ASI_BLK_AIUSL" },
-  { 0x7e, "#ASI_EC_R" },
-  { 0x7f, "#ASI_UDBH_ERROR_R" },
-  { 0x7f, "#ASI_UDBL_ERROR_R" },
-  { 0x7f, "#ASI_UDBH_CONTROL_R" },
-  { 0x7f, "#ASI_UDBL_CONTROL_R" },
-  { 0x7f, "#ASI_INTR_R" },
-  { 0x7f, "#ASI_INTR_DATAN_R" },
-  { 0xc0, "#ASI_PST8_P" },
-  { 0xc1, "#ASI_PST8_S" },
-  { 0xc2, "#ASI_PST16_P" },
-  { 0xc3, "#ASI_PST16_S" },
-  { 0xc4, "#ASI_PST32_P" },
-  { 0xc5, "#ASI_PST32_S" },
-  { 0xc8, "#ASI_PST8_PL" },
-  { 0xc9, "#ASI_PST8_SL" },
-  { 0xca, "#ASI_PST16_PL" },
-  { 0xcb, "#ASI_PST16_SL" },
-  { 0xcc, "#ASI_PST32_PL" },
-  { 0xcd, "#ASI_PST32_SL" },
-  { 0xd0, "#ASI_FL8_P" },
-  { 0xd1, "#ASI_FL8_S" },
-  { 0xd2, "#ASI_FL16_P" },
-  { 0xd3, "#ASI_FL16_S" },
-  { 0xd8, "#ASI_FL8_PL" },
-  { 0xd9, "#ASI_FL8_SL" },
-  { 0xda, "#ASI_FL16_PL" },
-  { 0xdb, "#ASI_FL16_SL" },
-  { 0xe0, "#ASI_BLK_COMMIT_P", },
-  { 0xe1, "#ASI_BLK_COMMIT_S", },
-  { 0xe2, "#ASI_BLK_INIT_QUAD_LDD_P" },
-  { 0xf0, "#ASI_BLK_P", },
-  { 0xf1, "#ASI_BLK_S", },
-  { 0xf8, "#ASI_BLK_PL", },
-  { 0xf9, "#ASI_BLK_SL", },
-  { 0, 0 }
-};
-
-/* Return the value for ASI NAME, or -1 if not found.  */
-
-int
-sparc_encode_asi (const char *name)
-{
-  return lookup_name (asi_table, name);
-}
-
-/* Return the name for ASI value VALUE or NULL if not found.  */
-
-const char *
-sparc_decode_asi (int value)
-{
-  return lookup_value (asi_table, value);
-}
-
 /* Handle membar masks.  */
 
 static arg membar_table[] =

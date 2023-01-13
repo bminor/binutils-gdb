@@ -1,6 +1,6 @@
 // ehframe.h -- handle exception frame sections for gold  -*- C++ -*-
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -203,8 +203,13 @@ class Fde
 
   // Return whether this FDE was added after merge mapping.
   bool
-  post_map()
+  post_map() const
   { return this->object_ == NULL && this->u_.from_linker.post_map; }
+
+  // Return whether this FDE was added for the PLT after merge mapping.
+  bool
+  post_map(const Output_data* plt) const
+  { return this->post_map() && this->u_.from_linker.plt == plt; }
 
   // Write the FDE to OVIEW starting at OFFSET.  FDE_ENCODING is the
   // encoding, from the CIE.  Round up the bytes to ADDRALIGN if
@@ -297,6 +302,16 @@ class Cie
   void
   add_fde(Fde* fde)
   { this->fdes_.push_back(fde); }
+
+  // Remove the last FDE associated with this CIE.
+  void
+  remove_fde()
+  { this->fdes_.pop_back(); }
+
+  // Access the last FDE associated with this CIE.
+  const Fde*
+  last_fde() const
+  { return this->fdes_.back(); }
 
   // Return the number of FDEs.
   unsigned int
@@ -404,6 +419,11 @@ class Eh_frame : public Output_section_data
   add_ehframe_for_plt(Output_data* plt, const unsigned char* cie_data,
 		      size_t cie_length, const unsigned char* fde_data,
 		      size_t fde_length);
+
+  // Remove all post-map unwind information for a PLT.
+  void
+  remove_ehframe_for_plt(Output_data* plt, const unsigned char* cie_data,
+			 size_t cie_length);
 
   // Return the number of FDEs.
   unsigned int

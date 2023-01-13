@@ -1,5 +1,5 @@
 /* ELF object file format.
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -75,6 +75,17 @@ struct elf_obj_sy
   struct localsym *ecoff_symbol;
   valueT ecoff_extern_size;
 #endif
+};
+
+/* Match section group name, the sh_info field and the section_id
+   field.  */
+struct elf_section_match
+{
+  const char *group_name;
+  const char *linked_to_symbol_name;
+  unsigned int info;
+  unsigned int section_id;
+  flagword flags;
 };
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
@@ -162,9 +173,12 @@ extern void obj_elf_common (int);
 extern void obj_elf_data (int);
 extern void obj_elf_text (int);
 extern void obj_elf_change_section
-  (const char *, unsigned int, bfd_vma, int, const char *, int, int);
-extern struct fix *obj_elf_vtable_inherit (int);
-extern struct fix *obj_elf_vtable_entry (int);
+  (const char *, unsigned int, bfd_vma, int, struct elf_section_match *,
+   int, int);
+extern void obj_elf_vtable_inherit (int);
+extern void obj_elf_vtable_entry (int);
+extern struct fix * obj_elf_get_vtable_inherit (void);
+extern struct fix * obj_elf_get_vtable_entry (void);
 extern bfd_boolean obj_elf_seen_attribute
   (int, unsigned int);
 extern int obj_elf_vendor_attribute (int);

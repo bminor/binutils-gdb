@@ -1,5 +1,5 @@
 /* tc-hppa.h -- Header file for the PA
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -166,7 +166,7 @@ int hppa_fix_adjustable (struct fix *);
    limitations as those for the 32-bit SOM target.  */
 #define DIFF_EXPR_OK 1
 
-/* Handle .type psuedo.  Given a type string of `millicode', set the
+/* Handle .type pseudo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
    BSF_FUNCTION for the BFD symbol type.  */
 #define md_elf_symbol_type(name, sym, elf)				\
@@ -176,6 +176,14 @@ int hppa_fix_adjustable (struct fix *);
        (ELF_ST_BIND ((elf)->internal_elf_sym.st_info), STT_PARISC_MILLI)\
        ), BSF_FUNCTION)							\
    : -1)
+
+/* Handle type change from .type pseudo: Zap STT_PARISC_MILLI when
+   switching to a non-function type.  */
+#define md_elf_symbol_type_change(sym, elf, type)			\
+  ((type) != BSF_FUNCTION						\
+   && (((elf)->internal_elf_sym.st_info = 				\
+	ELF_ST_INFO (ELF_ST_BIND ((elf)->internal_elf_sym.st_info),	\
+		     STT_NOTYPE)), 0))
 
 #define tc_frob_symbol(sym,punt) \
   { \

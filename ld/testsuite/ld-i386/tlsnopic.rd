@@ -19,9 +19,9 @@ Section Headers:
  +\[[ 0-9]+\] \.dynamic +DYNAMIC +0+20f4 .*
  +\[[ 0-9]+\] \.got +PROGBITS +0+2174 .*
  +\[[ 0-9]+\] \.got.plt +PROGBITS +0+218c .*
- +\[[ 0-9]+\] \.shstrtab +.*
  +\[[ 0-9]+\] \.symtab +.*
  +\[[ 0-9]+\] \.strtab +.*
+ +\[[ 0-9]+\] \.shstrtab +.*
 Key to Flags:
 #...
 
@@ -75,10 +75,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +[0-9]+: 0+1000 +0 +FUNC +GLOBAL +DEFAULT +5 fn3
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg5
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg1
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 __bss_start
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg2
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 _edata
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -110,7 +107,4 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+1000 +0 +FUNC +GLOBAL +DEFAULT +5 fn3
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg5
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg1
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 __bss_start
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sg2
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 _edata
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +9 _end

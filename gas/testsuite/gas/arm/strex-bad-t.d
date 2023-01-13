@@ -1,3 +1,4 @@
 # name: Bad addressing modes STREXH/STREXB. - THUMB
-# error-output: strex-bad-t.l
+# as: -march=armv7-a
+# error_output: strex-bad-t.l
 

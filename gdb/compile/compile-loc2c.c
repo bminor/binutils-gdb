@@ -1,6 +1,6 @@
 /* Convert a DWARF location expression to C
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,11 +24,13 @@
 #include "ui-file.h"
 #include "utils.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "compile.h"
 #include "block.h"
 #include "dwarf2-frame.h"
-#include "gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "value.h"
+#include "gdbarch.h"
 
 
 
@@ -48,9 +50,9 @@ struct insn_info
 
   unsigned int label : 1;
 
-  /* Whether this instruction is DW_OP_GNU_push_tls_address.  This is
-     a hack until we can add a feature to glibc to let us properly
-     generate code for TLS.  */
+  /* Whether this instruction is DW_OP_GNU_push_tls_address or
+     DW_OP_form_tls_address.  This is a hack until we can add a
+     feature to glibc to let us properly generate code for TLS.  */
 
   unsigned int is_tls : 1;
 };
@@ -62,7 +64,7 @@ struct insn_info
    NEED_TEMPVAR is an out parameter which is set if this expression
    needs a special temporary variable to be emitted (see the code
    generator).
-   INFO is an array of insn_info objects, indexed by offset from the
+   INFO is a vector of insn_info objects, indexed by offset from the
    start of the DWARF expression.
    TO_DO is a list of bytecodes which must be examined; it may be
    added to by this function.
@@ -71,8 +73,8 @@ struct insn_info
 
 static void
 compute_stack_depth_worker (int start, int *need_tempvar,
-			    struct insn_info *info,
-			    VEC (int) **to_do,
+			    std::vector<struct insn_info> *info,
+			    std::vector<int> *to_do,
 			    enum bfd_endian byte_order, unsigned int addr_size,
 			    const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
@@ -80,8 +82,8 @@ compute_stack_depth_worker (int start, int *need_tempvar,
   int stack_depth;
 
   op_ptr += start;
-  gdb_assert (info[start].visited);
-  stack_depth = info[start].depth;
+  gdb_assert ((*info)[start].visited);
+  stack_depth = (*info)[start].depth;
 
   while (op_ptr < op_end)
     {
@@ -91,16 +93,16 @@ compute_stack_depth_worker (int start, int *need_tempvar,
       int ndx = op_ptr - base;
 
 #define SET_CHECK_DEPTH(WHERE)				\
-      if (info[WHERE].visited)				\
+      if ((*info)[WHERE].visited)				\
 	{						\
-	  if (info[WHERE].depth != stack_depth)		\
+	  if ((*info)[WHERE].depth != stack_depth)		\
 	    error (_("inconsistent stack depths"));	\
 	}						\
       else						\
 	{						\
 	  /* Stack depth not set, so set it.  */	\
-	  info[WHERE].visited = 1;			\
-	  info[WHERE].depth = stack_depth;		\
+	  (*info)[WHERE].visited = 1;			\
+	  (*info)[WHERE].depth = stack_depth;		\
 	}
 
       SET_CHECK_DEPTH (ndx);
@@ -323,7 +325,8 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
-	  info[ndx].is_tls = 1;
+	case DW_OP_form_tls_address:
+	  (*info)[ndx].is_tls = 1;
 	  break;
 
 	case DW_OP_skip:
@@ -332,10 +335,10 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  offset = op_ptr + offset - base;
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
-	  if (!info[offset].visited)
-	    VEC_safe_push (int, *to_do, offset);
+	  if (!(*info)[offset].visited)
+	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
-	  info[offset].label = 1;
+	  (*info)[offset].label = 1;
 	  /* We're done with this line of code.  */
 	  return;
 
@@ -346,10 +349,10 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  --stack_depth;
 	  /* If the destination has not been seen yet, add it to the
 	     to-do list.  */
-	  if (!info[offset].visited)
-	    VEC_safe_push (int, *to_do, offset);
+	  if (!(*info)[offset].visited)
+	    to_do->push_back (offset);
 	  SET_CHECK_DEPTH (offset);
-	  info[offset].label = 1;
+	  (*info)[offset].label = 1;
 	  break;
 
 	case DW_OP_nop:
@@ -386,27 +389,23 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 		     int *need_tempvar, int *is_tls,
 		     const gdb_byte *op_ptr, const gdb_byte *op_end,
 		     int initial_depth,
-		     struct insn_info **info)
+		     std::vector<struct insn_info> *info)
 {
-  unsigned char *set;
-  struct cleanup *outer_cleanup, *cleanup;
-  VEC (int) *to_do = NULL;
+  std::vector<int> to_do;
   int stack_depth, i;
 
-  *info = XCNEWVEC (struct insn_info, op_end - op_ptr);
-  outer_cleanup = make_cleanup (xfree, *info);
+  info->resize (op_end - op_ptr);
 
-  cleanup = make_cleanup (VEC_cleanup (int), &to_do);
-
-  VEC_safe_push (int, to_do, 0);
+  to_do.push_back (0);
   (*info)[0].depth = initial_depth;
   (*info)[0].visited = 1;
 
-  while (!VEC_empty (int, to_do))
+  while (!to_do.empty ())
     {
-      int ndx = VEC_pop (int, to_do);
+      int ndx = to_do.back ();
+      to_do.pop_back ();
 
-      compute_stack_depth_worker (ndx, need_tempvar, *info, &to_do,
+      compute_stack_depth_worker (ndx, need_tempvar, info, &to_do,
 				  byte_order, addr_size,
 				  op_ptr, op_end);
     }
@@ -421,8 +420,6 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 	*is_tls = 1;
     }
 
-  do_cleanups (cleanup);
-  discard_cleanups (outer_cleanup);
   return stack_depth + 1;
 }
 
@@ -434,7 +431,7 @@ compute_stack_depth (enum bfd_endian byte_order, unsigned int addr_size,
 /* Emit code to push a constant.  */
 
 static void
-push (int indent, struct ui_file *stream, ULONGEST l)
+push (int indent, string_file *stream, ULONGEST l)
 {
   fprintfi_filtered (indent, stream,
 		     "__gdb_stack[++__gdb_tos] = (" GCC_UINTPTR ") %s;\n",
@@ -444,19 +441,19 @@ push (int indent, struct ui_file *stream, ULONGEST l)
 /* Emit code to push an arbitrary expression.  This works like
    printf.  */
 
-static void pushf (int indent, struct ui_file *stream, const char *format, ...)
+static void pushf (int indent, string_file *stream, const char *format, ...)
   ATTRIBUTE_PRINTF (3, 4);
 
 static void
-pushf (int indent, struct ui_file *stream, const char *format, ...)
+pushf (int indent, string_file *stream, const char *format, ...)
 {
   va_list args;
 
   fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos + 1] = ");
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  stream->vprintf (format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  stream->puts (";\n");
 
   fprintfi_filtered (indent, stream, "++__gdb_tos;\n");
 }
@@ -464,36 +461,36 @@ pushf (int indent, struct ui_file *stream, const char *format, ...)
 /* Emit code for a unary expression -- one which operates in-place on
    the top-of-stack.  This works like printf.  */
 
-static void unary (int indent, struct ui_file *stream, const char *format, ...)
+static void unary (int indent, string_file *stream, const char *format, ...)
   ATTRIBUTE_PRINTF (3, 4);
 
 static void
-unary (int indent, struct ui_file *stream, const char *format, ...)
+unary (int indent, string_file *stream, const char *format, ...)
 {
   va_list args;
 
   fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos] = ");
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  stream->vprintf (format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  stream->puts (";\n");
 }
 
 /* Emit code for a unary expression -- one which uses the top two
    stack items, popping the topmost one.  This works like printf.  */
-static void binary (int indent, struct ui_file *stream, const char *format, ...)
+static void binary (int indent, string_file *stream, const char *format, ...)
   ATTRIBUTE_PRINTF (3, 4);
 
 static void
-binary (int indent, struct ui_file *stream, const char *format, ...)
+binary (int indent, string_file *stream, const char *format, ...)
 {
   va_list args;
 
   fprintfi_filtered (indent, stream, "__gdb_stack[__gdb_tos - 1] = ");
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  stream->vprintf (format, args);
   va_end (args);
-  fprintf_filtered (stream, ";\n");
+  stream->puts (";\n");
   fprintfi_filtered (indent, stream, "--__gdb_tos;\n");
 }
 
@@ -502,10 +499,9 @@ binary (int indent, struct ui_file *stream, const char *format, ...)
    corresponding to the label's point of definition.  */
 
 static void
-print_label (struct ui_file *stream, unsigned int scope, int target)
+print_label (string_file *stream, unsigned int scope, int target)
 {
-  fprintf_filtered (stream, "__label_%u_%s",
-		    scope, pulongest (target));
+  stream->printf ("__label_%u_%s", scope, pulongest (target));
 }
 
 /* Emit code that pushes a register's address on the stack.
@@ -513,19 +509,16 @@ print_label (struct ui_file *stream, unsigned int scope, int target)
    register was needed by this expression.  */
 
 static void
-pushf_register_address (int indent, struct ui_file *stream,
+pushf_register_address (int indent, string_file *stream,
 			unsigned char *registers_used,
 			struct gdbarch *gdbarch, int regnum)
 {
-  char *regname = compile_register_name_mangled (gdbarch, regnum);
-  struct cleanup *cleanups = make_cleanup (xfree, regname);
+  std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
   registers_used[regnum] = 1;
   pushf (indent, stream,
 	 "(" GCC_UINTPTR ") &" COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
-	 regname);
-
-  do_cleanups (cleanups);
+	 regname.c_str ());
 }
 
 /* Emit code that pushes a register's value on the stack.
@@ -534,23 +527,20 @@ pushf_register_address (int indent, struct ui_file *stream,
    register's value before it is pushed.  */
 
 static void
-pushf_register (int indent, struct ui_file *stream,
+pushf_register (int indent, string_file *stream,
 		unsigned char *registers_used,
 		struct gdbarch *gdbarch, int regnum, uint64_t offset)
 {
-  char *regname = compile_register_name_mangled (gdbarch, regnum);
-  struct cleanup *cleanups = make_cleanup (xfree, regname);
+  std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
   registers_used[regnum] = 1;
   if (offset == 0)
     pushf (indent, stream, COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
-	   regname);
+	   regname.c_str ());
   else
     pushf (indent, stream,
 	   COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s + (" GCC_UINTPTR ") %s",
-	   regname, hex_string (offset));
-
-  do_cleanups (cleanups);
+	   regname.c_str (), hex_string (offset));
 }
 
 /* Compile a DWARF expression to C code.
@@ -583,7 +573,7 @@ pushf_register (int indent, struct ui_file *stream,
    things.  */
 
 static void
-do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
+do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 			    const char *type_name,
 			    const char *result_name,
 			    struct symbol *sym, CORE_ADDR pc,
@@ -602,8 +592,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
   const gdb_byte * const base = op_ptr;
   int need_tempvar = 0;
   int is_tls = 0;
-  struct cleanup *cleanup;
-  struct insn_info *info;
+  std::vector<struct insn_info> info;
   int stack_depth;
 
   ++scope;
@@ -617,7 +606,6 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 				     &need_tempvar, &is_tls,
 				     op_ptr, op_end, initial != NULL,
 				     &info);
-  cleanup = make_cleanup (xfree, info);
 
   /* This is a hack until we can add a feature to glibc to let us
      properly generate code for TLS.  You might think we could emit
@@ -634,24 +622,23 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
       if (frame == NULL)
 	error (_("Symbol \"%s\" cannot be used because "
 		 "there is no selected frame"),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       val = read_var_value (sym, NULL, frame);
       if (VALUE_LVAL (val) != lval_memory)
 	error (_("Symbol \"%s\" cannot be used for compilation evaluation "
 		 "as its address has not been found."),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       warning (_("Symbol \"%s\" is thread-local and currently can only "
 		 "be referenced from the current thread in "
 		 "compiled code."),
-	       SYMBOL_PRINT_NAME (sym));
+	       sym->print_name ());
 
       fprintfi_filtered (indent, stream, "%s = %s;\n",
 			 result_name,
 			 core_addr_to_string (value_address (val)));
       fprintfi_filtered (indent - 2, stream, "}\n");
-      do_cleanups (cleanup);
       return;
     }
 
@@ -675,9 +662,9 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
       if (info[op_ptr - base].label)
 	{
 	  print_label (stream, scope, op_ptr - base);
-	  fprintf_filtered (stream, ":;");
+	  stream->puts (":;");
 	}
-      fprintf_filtered (stream, "/* %s */\n", get_DW_OP_name (op));
+      stream->printf ("/* %s */\n", get_DW_OP_name (op));
 
       /* This is handy for debugging the generated code:
       fprintf_filtered (stream, "if (__gdb_tos != %d) abort ();\n",
@@ -724,6 +711,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 	  break;
 
 	case DW_OP_addr:
+	  uoffset = extract_unsigned_integer (op_ptr, addr_size, byte_order);
 	  op_ptr += addr_size;
 	  /* Some versions of GCC emit DW_OP_addr before
 	     DW_OP_GNU_push_tls_address.  In this case the value is an
@@ -1100,7 +1088,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 	  op_ptr += 2;
 	  fprintfi_filtered (indent, stream, "goto ");
 	  print_label (stream, scope, op_ptr + offset - base);
-	  fprintf_filtered (stream, ";\n");
+	  stream->puts (";\n");
 	  break;
 
 	case DW_OP_bra:
@@ -1110,7 +1098,7 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
 			     "if ((( " GCC_INTPTR
 			     ") __gdb_stack[__gdb_tos--]) != 0) goto ");
 	  print_label (stream, scope, op_ptr + offset - base);
-	  fprintf_filtered (stream, ";\n");
+	  stream->puts (";\n");
 	  break;
 
 	case DW_OP_nop:
@@ -1124,14 +1112,12 @@ do_compile_dwarf_expr_to_c (int indent, struct ui_file *stream,
   fprintfi_filtered (indent, stream, "%s = __gdb_stack[__gdb_tos];\n",
 		     result_name);
   fprintfi_filtered (indent - 2, stream, "}\n");
-
-  do_cleanups (cleanup);
 }
 
 /* See compile.h.  */
 
 void
-compile_dwarf_expr_to_c (struct ui_file *stream, const char *result_name,
+compile_dwarf_expr_to_c (string_file *stream, const char *result_name,
 			 struct symbol *sym, CORE_ADDR pc,
 			 struct gdbarch *arch, unsigned char *registers_used,
 			 unsigned int addr_size,
@@ -1146,7 +1132,7 @@ compile_dwarf_expr_to_c (struct ui_file *stream, const char *result_name,
 /* See compile.h.  */
 
 void
-compile_dwarf_bounds_to_c (struct ui_file *stream,
+compile_dwarf_bounds_to_c (string_file *stream,
 			   const char *result_name,
 			   const struct dynamic_prop *prop,
 			   struct symbol *sym, CORE_ADDR pc,

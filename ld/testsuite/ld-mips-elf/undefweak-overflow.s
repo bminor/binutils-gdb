@@ -3,6 +3,7 @@
 
 	.module mips64r6
 	.globl	start
+	.type	start, @function
 	.weak	foo
 start:
 	.set noreorder
@@ -13,13 +14,16 @@ start:
 	lwpc	$2, foo
 	ldpc	$2, foo
 	bc	foo
-	auipc	$4, %pcrel_hi(foo)
-	addiu	$4, $4, %pcrel_lo(foo+4)
 
 	b	foo
 	nop
 	bal	foo
 	lui	$4, %gp_rel(foo)
+
+	jal	foo
+	nop
+	j	foo
+	nop
 
 	.set mips32r2
 	.set micromips
@@ -29,4 +33,19 @@ micro:
 	b16	foo
 	nop
 	b	foo
+	nop
+	bal	foo
+	nop
+
+	jal	foo
+	nop
+	j	foo
+	nop
+
+	.set nomicromips
+	.set mips16
+mips16:
+	b	foo
+
+	jal	foo
 	nop

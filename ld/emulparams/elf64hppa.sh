@@ -17,7 +17,7 @@ SHLIB_DATA_ADDR=0x8000000000001000
 ARCH=hppa
 MACHINE=hppa2.0w
 ENTRY="main"
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 GENERATE_SHLIB_SCRIPT=yes
 
 # We really want multiple .stub sections, one for each input .text section,
@@ -67,7 +67,7 @@ PLT_BEFORE_GOT=
 TEXT_DYNAMIC=
 
 # The linker is required to define these two symbols.
-EXECUTABLE_SYMBOLS='PROVIDE (__SYSTEM_ID = 0x214); PROVIDE (_FPU_STATUS = 0x0);'
+OTHER_SYMBOLS='PROVIDE (__SYSTEM_ID = 0x214); PROVIDE (_FPU_STATUS = 0x0);'
 # The PA64 ELF port needs two additional initializer sections and also wants
 # a start/end symbol pair for the .init and .fini sections.
 INIT_START='KEEP (*(.HP.init)); PROVIDE (__preinit_start = .); KEEP (*(.preinit)); PROVIDE (__preinit_end = .); PROVIDE (__init_start = .);'

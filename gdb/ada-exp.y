@@ -1,5 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,63 +48,12 @@
 #include "frame.h"
 #include "block.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
 
-/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
-   as well as gratuitiously global symbol names, so we can have multiple
-   yacc generated parsers in gdb.  These are only the variables
-   produced by yacc.  If other parser generators (bison, byacc, etc) produce
-   additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list.  */
-
-/* NOTE: This is clumsy, especially since BISON and FLEX provide --prefix
-   options.  I presume we are maintaining it to accommodate systems
-   without BISON?  (PNH) */
-
-#define	yymaxdepth ada_maxdepth
-/* ada_parse calls this after initialization */
-#define	yyparse	ada_parse_internal
-#define	yylex	ada_lex
-#define	yyerror	ada_error
-#define	yylval	ada_lval
-#define	yychar	ada_char
-#define	yydebug	ada_debug
-#define	yypact	ada_pact
-#define	yyr1	ada_r1
-#define	yyr2	ada_r2
-#define	yydef	ada_def
-#define	yychk	ada_chk
-#define	yypgo	ada_pgo
-#define	yyact	ada_act
-#define	yyexca	ada_exca
-#define yyerrflag ada_errflag
-#define yynerrs	ada_nerrs
-#define	yyps	ada_ps
-#define	yypv	ada_pv
-#define	yys	ada_s
-#define	yy_yys	ada_yys
-#define	yystate	ada_state
-#define	yytmp	ada_tmp
-#define	yyv	ada_v
-#define	yy_yyv	ada_yyv
-#define	yyval	ada_val
-#define	yylloc	ada_lloc
-#define yyreds	ada_reds		/* With YYDEBUG defined */
-#define yytoks	ada_toks		/* With YYDEBUG defined */
-#define yyname	ada_name		/* With YYDEBUG defined */
-#define yyrule	ada_rule		/* With YYDEBUG defined */
-#define yyss	ada_yyss
-#define yysslim	ada_yysslim
-#define yyssp	ada_yyssp
-#define yystacksize ada_yystacksize
-#define yyvs	ada_yyvs
-#define yyvsp	ada_yyvsp
-
-#ifndef YYDEBUG
-#define	YYDEBUG	1		/* Default to yydebug support */
-#endif
-
-#define YYFPRINTF parser_fprintf
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
+   etc).  */
+#define GDB_YY_REMAP_PREFIX ada_
+#include "yy-remap.h"
 
 struct name_info {
   struct symbol *sym;
@@ -128,7 +77,7 @@ int yyparse (void);
 
 static int yylex (void);
 
-void yyerror (char *);
+static void yyerror (const char *);
 
 static void write_int (struct parser_state *, LONGEST, struct type *);
 
@@ -157,10 +106,6 @@ static struct type *type_long (struct parser_state *);
 
 static struct type *type_long_long (struct parser_state *);
 
-static struct type *type_float (struct parser_state *);
-
-static struct type *type_double (struct parser_state *);
-
 static struct type *type_long_double (struct parser_state *);
 
 static struct type *type_char (struct parser_state *);
@@ -179,7 +124,7 @@ static struct type *type_system_address (struct parser_state *);
       struct type *type;
     } typed_val;
     struct {
-      DOUBLEST dval;
+      gdb_byte val[16];
       struct type *type;
     } typed_val_float;
     struct type *tval;
@@ -206,7 +151,7 @@ static struct type *type_system_address (struct parser_state *);
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token <sval> SPECIAL_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 %nonassoc ASSIGN
 %left _AND_ OR XOR THEN ELSE
@@ -330,7 +275,7 @@ primary :	var_or_type	%prec VAR
 			}
 	;
 
-primary :	SPECIAL_VARIABLE /* Various GDB extensions */
+primary :	DOLLAR_VARIABLE /* Various GDB extensions */
 			{ write_dollar_variable (pstate, $1); }
 	;
 
@@ -604,10 +549,10 @@ primary	:	CHARLIT
 	;
 
 primary	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_DOUBLE);
+			{ write_exp_elt_opcode (pstate, OP_FLOAT);
 			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_dblcst (pstate, $1.dval);
-			  write_exp_elt_opcode (pstate, OP_DOUBLE);
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
 			}
 	;
 
@@ -772,7 +717,6 @@ primary	:	'*' primary		%prec '.'
 #define yy_switch_to_buffer ada_yy_switch_to_buffer
 #define yyrestart ada_yyrestart
 #define yytext ada_yytext
-#define yywrap ada_yywrap
 
 static struct obstack temp_parse_space;
 
@@ -784,10 +728,8 @@ static struct obstack temp_parse_space;
 int
 ada_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *c = make_cleanup_clear_parser_state (&pstate);
-
   /* Setting up the parser state.  */
+  scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
@@ -796,31 +738,25 @@ ada_parse (struct parser_state *par_state)
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
 
-  result = yyparse ();
-  do_cleanups (c);
-  return result;
+  return yyparse ();
 }
 
-void
-yyerror (char *msg)
+static void
+yyerror (const char *msg)
 {
-  error (_("Error in expression, near `%s'."), lexptr);
+  error (_("Error in expression, near `%s'."), pstate->lexptr);
 }
 
 /* Emit expression to access an instance of SYM, in block BLOCK (if
- * non-NULL), and with :: qualification ORIG_LEFT_CONTEXT.  */
+   non-NULL).  */
+
 static void
 write_var_from_sym (struct parser_state *par_state,
-		    const struct block *orig_left_context,
 		    const struct block *block,
 		    struct symbol *sym)
 {
-  if (orig_left_context == NULL && symbol_read_needs_frame (sym))
-    {
-      if (innermost_block == 0
-	  || contained_in (block, innermost_block))
-	innermost_block = block;
-    }
+  if (symbol_read_needs_frame (sym))
+    par_state->block_tracker->update (block, INNERMOST_BLOCK_FOR_SYMBOLS);
 
   write_exp_elt_opcode (par_state, OP_VAR_VALUE);
   write_exp_elt_block (par_state, block);
@@ -876,11 +812,11 @@ write_object_renaming (struct parser_state *par_state,
   if (orig_left_context == NULL)
     orig_left_context = get_selected_block (NULL);
 
-  name = (char *) obstack_copy0 (&temp_parse_space, renamed_entity,
-				 renamed_entity_len);
+  name = obstack_strndup (&temp_parse_space, renamed_entity,
+			  renamed_entity_len);
   ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, &sym_info);
   if (sym_info.symbol == NULL)
-    error (_("Could not find renamed variable: %s"), ada_decode (name));
+    error (_("Could not find renamed variable: %s"), ada_decode (name).c_str ());
   else if (SYMBOL_CLASS (sym_info.symbol) == LOC_TYPEDEF)
     /* We have a renaming of an old-style renaming symbol.  Don't
        trust the block information.  */
@@ -896,8 +832,7 @@ write_object_renaming (struct parser_state *par_state,
 				&inner_renaming_expr))
       {
       case ADA_NOT_RENAMING:
-	write_var_from_sym (par_state, orig_left_context, sym_info.block,
-			    sym_info.symbol);
+	write_var_from_sym (par_state, sym_info.block, sym_info.symbol);
 	break;
       case ADA_OBJECT_RENAMING:
 	write_object_renaming (par_state, sym_info.block,
@@ -946,19 +881,18 @@ write_object_renaming (struct parser_state *par_state,
 	    if (end == NULL)
 	      end = renaming_expr + strlen (renaming_expr);
 
-	    index_name
-	      = (char *) obstack_copy0 (&temp_parse_space, renaming_expr,
-					end - renaming_expr);
+	    index_name = obstack_strndup (&temp_parse_space, renaming_expr,
+					  end - renaming_expr);
 	    renaming_expr = end;
 
-	    ada_lookup_encoded_symbol (index_name, NULL, VAR_DOMAIN,
-				       &index_sym_info);
+	    ada_lookup_encoded_symbol (index_name, orig_left_context,
+				       VAR_DOMAIN, &index_sym_info);
 	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
 	    else if (SYMBOL_CLASS (index_sym_info.symbol) == LOC_TYPEDEF)
 	      /* Index is an old-style renaming symbol.  */
 	      index_sym_info.block = orig_left_context;
-	    write_var_from_sym (par_state, NULL, index_sym_info.block,
+	    write_var_from_sym (par_state, index_sym_info.block,
 				index_sym_info.symbol);
 	  }
 	if (slice_state == SIMPLE_INDEX)
@@ -1014,9 +948,10 @@ static const struct block*
 block_lookup (const struct block *context, const char *raw_name)
 {
   const char *name;
-  struct block_symbol *syms;
+  std::vector<struct block_symbol> syms;
   int nsyms;
   struct symtab *symtab;
+  const struct block *result = NULL;
 
   if (raw_name[0] == '\'')
     {
@@ -1027,6 +962,7 @@ block_lookup (const struct block *context, const char *raw_name)
     name = ada_encode (raw_name);
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
+
   if (context == NULL
       && (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
     symtab = lookup_symtab (name);
@@ -1034,7 +970,7 @@ block_lookup (const struct block *context, const char *raw_name)
     symtab = NULL;
 
   if (symtab != NULL)
-    return BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
+    result = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
   else if (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)
@@ -1046,19 +982,21 @@ block_lookup (const struct block *context, const char *raw_name)
     {
       if (nsyms > 1)
 	warning (_("Function name \"%s\" ambiguous here"), raw_name);
-      return SYMBOL_BLOCK_VALUE (syms[0].symbol);
+      result = SYMBOL_BLOCK_VALUE (syms[0].symbol);
     }
+
+  return result;
 }
 
 static struct symbol*
-select_possible_type_sym (struct block_symbol *syms, int nsyms)
+select_possible_type_sym (const std::vector<struct block_symbol> &syms)
 {
   int i;
   int preferred_index;
   struct type *preferred_type;
 	  
   preferred_index = -1; preferred_type = NULL;
-  for (i = 0; i < nsyms; i += 1)
+  for (i = 0; i < syms.size (); i += 1)
     switch (SYMBOL_CLASS (syms[i].symbol))
       {
       case LOC_TYPEDEF:
@@ -1087,8 +1025,8 @@ static struct type*
 find_primitive_type (struct parser_state *par_state, char *name)
 {
   struct type *type;
-  type = language_lookup_primitive_type (parse_language (par_state),
-					 parse_gdbarch (par_state),
+  type = language_lookup_primitive_type (par_state->language (),
+					 par_state->gdbarch (),
 					 name);
   if (type == NULL && strcmp ("system__address", name) == 0)
     type = type_system_address (par_state);
@@ -1102,7 +1040,7 @@ find_primitive_type (struct parser_state *par_state, char *name)
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
-      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN, NULL).symbol;
+      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN).symbol;
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	type = SYMBOL_TYPE (sym);
     }
@@ -1164,13 +1102,11 @@ static void
 write_ambiguous_var (struct parser_state *par_state,
 		     const struct block *block, char *name, int len)
 {
-  struct symbol *sym = XOBNEW (&temp_parse_space, struct symbol);
+  struct symbol *sym = new (&temp_parse_space) symbol ();
 
-  memset (sym, 0, sizeof (struct symbol));
   SYMBOL_DOMAIN (sym) = UNDEF_DOMAIN;
-  SYMBOL_LINKAGE_NAME (sym)
-    = (const char *) obstack_copy0 (&temp_parse_space, name, len);
-  SYMBOL_LANGUAGE (sym) = language_ada;
+  sym->set_linkage_name (obstack_strndup (&temp_parse_space, name, len));
+  sym->set_language (language_ada, nullptr);
 
   write_exp_elt_opcode (par_state, OP_VAR_VALUE);
   write_exp_elt_block (par_state, block);
@@ -1263,12 +1199,11 @@ write_var_or_type (struct parser_state *par_state,
   int name_len;
 
   if (block == NULL)
-    block = expression_context_block;
+    block = par_state->expression_context_block;
 
   encoded_name = ada_encode (name0.ptr);
   name_len = strlen (encoded_name);
-  encoded_name
-    = (char *) obstack_copy0 (&temp_parse_space, encoded_name, name_len);
+  encoded_name = obstack_strndup (&temp_parse_space, encoded_name, name_len);
   for (depth = 0; depth < MAX_RENAMING_CHAIN_LENGTH; depth += 1)
     {
       int tail_index;
@@ -1277,7 +1212,7 @@ write_var_or_type (struct parser_state *par_state,
       while (tail_index > 0)
 	{
 	  int nsyms;
-	  struct block_symbol *syms;
+	  std::vector<struct block_symbol> syms;
 	  struct symbol *type_sym;
 	  struct symbol *renaming_sym;
 	  const char* renaming;
@@ -1290,20 +1225,7 @@ write_var_or_type (struct parser_state *par_state,
 					  VAR_DOMAIN, &syms);
 	  encoded_name[tail_index] = terminator;
 
-	  /* A single symbol may rename a package or object. */
-
-	  /* This should go away when we move entirely to new version.
-	     FIXME pnh 7/20/2007. */
-	  if (nsyms == 1)
-	    {
-	      struct symbol *ren_sym =
-		ada_find_renaming_symbol (syms[0].symbol, syms[0].block);
-
-	      if (ren_sym != NULL)
-		syms[0].symbol = ren_sym;
-	    }
-
-	  type_sym = select_possible_type_sym (syms, nsyms);
+	  type_sym = select_possible_type_sym (syms);
 
 	  if (type_sym != NULL)
 	    renaming_sym = type_sym;
@@ -1345,7 +1267,7 @@ write_var_or_type (struct parser_state *par_state,
               struct type *field_type;
               
               if (tail_index == name_len)
-                return SYMBOL_TYPE (type_sym);
+		return SYMBOL_TYPE (type_sym);
 
               /* We have some extraneous characters after the type name.
                  If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",
@@ -1353,7 +1275,7 @@ write_var_or_type (struct parser_state *par_state,
               field_type
                 = get_symbol_field_type (type_sym, encoded_name + tail_index);
               if (field_type != NULL)
-                return field_type;
+		return field_type;
 	      else 
 		error (_("Invalid attempt to select from type: \"%s\"."),
                        name0.ptr);
@@ -1369,8 +1291,7 @@ write_var_or_type (struct parser_state *par_state,
 
 	  if (nsyms == 1)
 	    {
-	      write_var_from_sym (par_state, block, syms[0].block,
-				  syms[0].symbol);
+	      write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    }
@@ -1404,7 +1325,7 @@ write_var_or_type (struct parser_state *par_state,
 
       if (!have_full_symbols () && !have_partial_symbols () && block == NULL)
 	error (_("No symbol table is loaded.  Use the \"file\" command."));
-      if (block == expression_context_block)
+      if (block == par_state->expression_context_block)
 	error (_("No definition of \"%s\" in current context."), name0.ptr);
       else
 	error (_("No definition of \"%s\" in specified context."), name0.ptr);
@@ -1436,14 +1357,15 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
 {
   if (strchr (name.ptr, '.') == NULL)
     {
-      struct block_symbol *syms;
-      int nsyms = ada_lookup_symbol_list (name.ptr, expression_context_block,
+      std::vector<struct block_symbol> syms;
+      int nsyms = ada_lookup_symbol_list (name.ptr,
+					  par_state->expression_context_block,
 					  VAR_DOMAIN, &syms);
 
       if (nsyms != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
 	write_exp_op_with_string (par_state, OP_NAME, name);
       else
-	write_var_from_sym (par_state, NULL, syms[0].block, syms[0].symbol);
+	write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
     }
   else
     if (write_var_or_type (par_state, NULL, name) != NULL)
@@ -1467,10 +1389,21 @@ convert_char_literal (struct type *type, LONGEST val)
   if (TYPE_CODE (type) != TYPE_CODE_ENUM)
     return val;
 
-  xsnprintf (name, sizeof (name), "QU%02x", (int) val);
+  if ((val >= 'a' && val <= 'z') || (val >= '0' && val <= '9'))
+    xsnprintf (name, sizeof (name), "Q%c", (int) val);
+  else
+    xsnprintf (name, sizeof (name), "QU%02x", (int) val);
+  size_t len = strlen (name);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1)
     {
-      if (strcmp (name, TYPE_FIELD_NAME (type, f)) == 0)
+      /* Check the suffix because an enum constant in a package will
+	 have a name like "pkg__QUxx".  This is safe enough because we
+	 already have the correct type, and because mangling means
+	 there can't be clashes.  */
+      const char *ename = TYPE_FIELD_NAME (type, f);
+      size_t elen = strlen (ename);
+
+      if (elen >= len && strcmp (name, ename + elen - len) == 0)
 	return TYPE_FIELD_ENUMVAL (type, f);
     }
   return val;
@@ -1495,18 +1428,6 @@ type_long_long (struct parser_state *par_state)
 }
 
 static struct type *
-type_float (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_float;
-}
-
-static struct type *
-type_double (struct parser_state *par_state)
-{
-  return parse_type (par_state)->builtin_double;
-}
-
-static struct type *
 type_long_double (struct parser_state *par_state)
 {
   return parse_type (par_state)->builtin_long_double;
@@ -1515,8 +1436,8 @@ type_long_double (struct parser_state *par_state)
 static struct type *
 type_char (struct parser_state *par_state)
 {
-  return language_string_char_type (parse_language (par_state),
-				    parse_gdbarch (par_state));
+  return language_string_char_type (par_state->language (),
+				    par_state->gdbarch ());
 }
 
 static struct type *
@@ -1529,17 +1450,15 @@ static struct type *
 type_system_address (struct parser_state *par_state)
 {
   struct type *type 
-    = language_lookup_primitive_type (parse_language (par_state),
-				      parse_gdbarch (par_state),
+    = language_lookup_primitive_type (par_state->language (),
+				      par_state->gdbarch (),
 				      "system__address");
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ada_exp;
-
+void _initialize_ada_exp ();
 void
-_initialize_ada_exp (void)
+_initialize_ada_exp ()
 {
   obstack_init (&temp_parse_space);
 }

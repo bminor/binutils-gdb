@@ -1,5 +1,5 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1943,7 +1943,7 @@ s_prefix (int unused ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&p);
   
-  /* Reseting prefix?  */
+  /* Resetting prefix?  */
   if (*p == ':' && p[1] == 0)
     mmix_current_prefix = NULL;
   else
@@ -2130,9 +2130,8 @@ s_bspec (int unused ATTRIBUTE_UNUSED)
       if (sec == NULL)
 	as_fatal (_("can't create section %s"), newsecname);
 
-      if (!bfd_set_section_flags (stdoutput, sec,
-				  bfd_get_section_flags (stdoutput, sec)
-				  | SEC_READONLY))
+      if (!bfd_set_section_flags (sec,
+				  bfd_section_flags (sec) | SEC_READONLY))
 	as_fatal (_("can't set section flags for section %s"), newsecname);
     }
 
@@ -2638,7 +2637,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
      than just helping the user around this limitation here; hopefully the
      code using the local expression is around.  Putting the LOCAL
      semantics in a relocation still seems right; a section didn't do.  */
-  if (bfd_section_size (section->owner, section) == 0)
+  if (bfd_section_size (section) == 0)
     as_bad_where
       (fixP->fx_file, fixP->fx_line,
        fixP->fx_r_type == BFD_RELOC_MMIX_LOCAL
@@ -2708,7 +2707,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 	 resolve the relocation here.  */
       if (addsy != NULL
 	  && (bfd_is_und_section (addsec)
-	      || strcmp (bfd_get_section_name (addsec->owner, addsec),
+	      || strcmp (bfd_section_name (addsec),
 			 MMIX_REG_CONTENTS_SECTION_NAME) == 0))
 	{
 	  code = fixP->fx_r_type;
@@ -2735,7 +2734,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
     case BFD_RELOC_MMIX_BASE_PLUS_OFFSET:
       if (addsy != NULL
-	  && strcmp (bfd_get_section_name (addsec->owner, addsec),
+	  && strcmp (bfd_section_name (addsec),
 		     MMIX_REG_CONTENTS_SECTION_NAME) == 0)
 	{
 	  /* This changed into a register; the relocation is for the
@@ -2838,7 +2837,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     case BFD_RELOC_MMIX_REG:
       if (addsy != NULL
 	  && (bfd_is_und_section (addsec)
-	      || strcmp (bfd_get_section_name (addsec->owner, addsec),
+	      || strcmp (bfd_section_name (addsec),
 			 MMIX_REG_CONTENTS_SECTION_NAME) == 0))
 	{
 	  code = fixP->fx_r_type;
@@ -2874,9 +2873,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
       return NULL;
     }
 
-  relP = (arelent *) xmalloc (sizeof (arelent));
+  relP = XNEW (arelent);
   gas_assert (relP != 0);
-  relP->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  relP->sym_ptr_ptr = XNEW (asymbol *);
   *relP->sym_ptr_ptr = baddsy;
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -3794,7 +3793,7 @@ mmix_frob_file (void)
   if (real_reg_section != NULL)
     {
       /* FIXME: Pass error state gracefully.  */
-      if (bfd_get_section_flags (stdoutput, real_reg_section) & SEC_HAS_CONTENTS)
+      if (bfd_section_flags (real_reg_section) & SEC_HAS_CONTENTS)
 	as_fatal (_("register section has contents\n"));
 
       bfd_section_list_remove (stdoutput, real_reg_section);
@@ -3813,7 +3812,7 @@ int
 mmix_parse_predefined_name (char *name, expressionS *expP)
 {
   char *canon_name;
-  char *handler_charp;
+  const char *handler_charp;
   const char handler_chars[] = "DVWIOUZX";
   symbolS *symp;
 
@@ -3924,7 +3923,7 @@ mmix_md_elf_section_change_hook (void)
   if (doing_bspec)
     as_bad (_("section change from within a BSPEC/ESPEC pair is not supported"));
 
-  last_alignment = bfd_get_section_alignment (now_seg->owner, now_seg);
+  last_alignment = bfd_section_alignment (now_seg);
   want_unaligned = 0;
 }
 
@@ -4089,8 +4088,7 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
       if (section == undefined_section)
 	{
 	  struct loc_assert_s *next = loc_asserts;
-	  loc_asserts
-	    = (struct loc_assert_s *) xmalloc (sizeof (*loc_asserts));
+	  loc_asserts = XNEW (struct loc_assert_s);
 	  loc_asserts->next = next;
 	  loc_asserts->old_seg = now_seg;
 	  loc_asserts->loc_sym = esym;

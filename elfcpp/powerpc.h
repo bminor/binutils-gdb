@@ -1,6 +1,6 @@
 // powerpc.h -- ELF definitions specific to EM_PPC and EM_PPC64  -*- C++ -*-
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2020 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>.
 
 // This file is part of elfcpp.
@@ -179,6 +179,36 @@ enum
   R_PPC64_REL24_NOTOC = 116,
   R_PPC64_ADDR64_LOCAL = 117,
   R_PPC64_ENTRY = 118,
+  R_POWERPC_PLTSEQ = 119,
+  R_POWERPC_PLTCALL = 120,
+  R_PPC64_PLTSEQ_NOTOC = 121,
+  R_PPC64_PLTCALL_NOTOC = 122,
+  R_PPC64_PCREL_OPT = 123,
+
+  R_PPC64_D34 = 128,
+  R_PPC64_D34_LO = 129,
+  R_PPC64_D34_HI30 = 130,
+  R_PPC64_D34_HA30 = 131,
+  R_PPC64_PCREL34 = 132,
+  R_PPC64_GOT_PCREL34 = 133,
+  R_PPC64_PLT_PCREL34 = 134,
+  R_PPC64_PLT_PCREL34_NOTOC = 135,
+  R_PPC64_ADDR16_HIGHER34 = 136,
+  R_PPC64_ADDR16_HIGHERA34 = 137,
+  R_PPC64_ADDR16_HIGHEST34 = 138,
+  R_PPC64_ADDR16_HIGHESTA34 = 139,
+  R_PPC64_REL16_HIGHER34 = 140,
+  R_PPC64_REL16_HIGHERA34 = 141,
+  R_PPC64_REL16_HIGHEST34 = 142,
+  R_PPC64_REL16_HIGHESTA34 = 143,
+  R_PPC64_D28 = 144,
+  R_PPC64_PCREL28 = 145,
+  R_PPC64_TPREL34 = 146,
+  R_PPC64_DTPREL34 = 147,
+  R_PPC64_GOT_TLSGD34 = 148,
+  R_PPC64_GOT_TLSLD34 = 149,
+  R_PPC64_GOT_TPREL34 = 150,
+  R_PPC64_GOT_DTPREL34 = 151,
 
   R_PPC_VLE_REL8 = 216,
   R_PPC_VLE_REL15 = 217,
@@ -197,6 +227,13 @@ enum
   R_PPC_VLE_SDAREL_HI16D = 230,
   R_PPC_VLE_SDAREL_HA16A = 231,
   R_PPC_VLE_SDAREL_HA16D = 232,
+
+  R_PPC64_REL16_HIGH = 240,
+  R_PPC64_REL16_HIGHA = 241,
+  R_PPC64_REL16_HIGHER = 242,
+  R_PPC64_REL16_HIGHERA = 243,
+  R_PPC64_REL16_HIGHEST = 244,
+  R_PPC64_REL16_HIGHESTA = 245,
 
   R_POWERPC_REL16DX_HA = 246,
   R_PPC64_JMP_IREL = 247,
@@ -226,6 +263,46 @@ enum
   // 2 for revised ABI without function descriptors,
   // 0 for unspecified or not using any features affected by the differences.
   EF_PPC64_ABI = 3
+};
+
+// Object attribute tags.  0-3 are generic.
+enum
+{
+  // FP ABI, low 2 bits:
+  // 1 for double precision hard-float,
+  // 2 for soft-float,
+  // 3 for single precision hard-float.
+  // 0 for not tagged or not using any ABIs affected by the differences.
+  // Next 2 bits:
+  // 1 for ibm long double
+  // 2 for 64-bit long double
+  // 3 for IEEE long double.
+  // 0 for not tagged or not using any ABIs affected by the differences.
+  Tag_GNU_Power_ABI_FP = 4,
+
+  // Value 1 for general purpose registers only, 2 for AltiVec
+  // registers, 3 for SPE registers; 0 for not tagged or not using any
+  // ABIs affected by the differences.
+  Tag_GNU_Power_ABI_Vector = 8,
+
+  // Value 1 for ABIs using r3/r4 for returning structures <= 8 bytes,
+  // 2 for ABIs using memory; 0 for not tagged or not using any ABIs
+  // affected by the differences.
+  Tag_GNU_Power_ABI_Struct_Return = 12
+};
+
+// DT_PPC_OPT bits
+enum
+{
+  PPC_OPT_TLS = 1
+};
+
+// DT_PPC64_OPT bits
+enum
+{
+  PPC64_OPT_TLS = 1,
+  PPC64_OPT_MULTI_TOC = 2,
+  PPC64_OPT_LOCALENTRY = 4
 };
 
 enum

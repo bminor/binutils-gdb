@@ -1,4 +1,4 @@
-# Copyright 2012-2016 Free Software Foundation, Inc.
+# Copyright 2012-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,17 +28,17 @@ set objfile [standard_output_file ${testfile}.o]
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} {debug}] != ""
      || [gdb_compile ${srcdir}/${subdir}/${srcfile} ${objfile} object {debug}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 set opts [list debug shlib=${binfile_lib}]
 if { [gdb_compile ${objfile} ${binfile} executable $opts] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
 clean_restart ${binfile}
-gdb_load_shlibs ${binfile_lib}
+gdb_load_shlib ${binfile_lib}
 
 if ![runto lib] {
     return -1
@@ -56,7 +56,7 @@ proc test_load_core { print_symbol_loading } {
 	gdb_reinitialize_dir $srcdir/$subdir
 	gdb_test_no_output "set print symbol-loading $print_symbol_loading"
 	if { ${print_symbol_loading} != "off" } {
-	    gdb_test "file $binfile" "Reading symbols from.*done\\." "file"
+	    gdb_test "file $binfile" "Reading symbols from.*" "file"
 	} else {
 	    gdb_test_no_output "file $binfile" "file"
 	}

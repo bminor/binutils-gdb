@@ -6,7 +6,7 @@ foo:
 	addsubpd	%xmm2,%xmm1
 	addsubps	(%ebx),%xmm2
 	addsubps	%xmm4,%xmm3
-	fisttp		0x90909090(%eax)
+	fisttps		0x90909090(%eax)
 	fisttpl		0x90909090(%eax)
 	fisttpll	0x90909090(%eax)
 	haddpd		0x0(%ebp),%xmm4

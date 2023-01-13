@@ -1,4 +1,4 @@
-# Copyright 2008-2016 Free Software Foundation, Inc.
+# Copyright 2008-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,5 +27,4 @@ set bp_location [gdb_get_line_number "START" ${testdir}/dummy.adb]
 runto "dummy.adb:$bp_location"
 
 gdb_test "p /x \$pc" \
-         "= 0x\[0-9a-zA-Z\]+" \
-         "p /x \$pc"
+         "= 0x\[0-9a-zA-Z\]+"

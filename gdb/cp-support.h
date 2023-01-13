@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -25,14 +25,16 @@
 /* We need this for 'domain_enum', alas...  */
 
 #include "symtab.h"
-#include "vec.h"
-#include "gdb_vecs.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "gdb_obstack.h"
+#include "gdbsupport/array-view.h"
+#include <vector>
 
 /* Opaque declarations.  */
 
 struct symbol;
 struct block;
+struct buildsym_compunit;
 struct objfile;
 struct type;
 struct demangle_component;
@@ -46,10 +48,22 @@ struct using_direct;
 
 #define CP_ANONYMOUS_NAMESPACE_LEN 21
 
+/* A string representing the start of an operator name.  */
+
+#define CP_OPERATOR_STR "operator"
+
+/* The length of CP_OPERATOR_STR.  */
+
+#define CP_OPERATOR_LEN 8
+
 /* The result of parsing a name.  */
 
 struct demangle_parse_info
 {
+  demangle_parse_info ();
+
+  ~demangle_parse_info ();
+
   /* The memory used during the parse.  */
   struct demangle_info *info;
 
@@ -63,15 +77,15 @@ struct demangle_parse_info
 
 /* Functions from cp-support.c.  */
 
-extern char *cp_canonicalize_string (const char *string);
+extern std::string cp_canonicalize_string (const char *string);
 
-extern char *cp_canonicalize_string_no_typedefs (const char *string);
+extern std::string cp_canonicalize_string_no_typedefs (const char *string);
 
 typedef const char *(canonicalization_ftype) (struct type *, void *);
 
-extern char *cp_canonicalize_string_full (const char *string,
-					  canonicalization_ftype *finder,
-					  void *data);
+extern std::string cp_canonicalize_string_full (const char *string,
+						canonicalization_ftype *finder,
+						void *data);
 
 extern char *cp_class_name_from_physname (const char *physname);
 
@@ -81,25 +95,48 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
-extern char *cp_func_name (const char *full_name);
+extern gdb::unique_xmalloc_ptr<char> cp_func_name (const char *full_name);
 
-extern char *cp_remove_params (const char *demangled_name);
+extern gdb::unique_xmalloc_ptr<char> cp_remove_params
+  (const char *demanged_name);
 
-extern struct symbol **make_symbol_overload_list (const char *,
-						  const char *);
+/* DEMANGLED_NAME is the name of a function, (optionally) including
+   parameters and (optionally) a return type.  Return the name of the
+   function without parameters or return type, or NULL if we can not
+   parse the name.  If COMPLETION_MODE is true, then tolerate a
+   non-existing or unbalanced parameter list.  */
+extern gdb::unique_xmalloc_ptr<char> cp_remove_params_if_any
+  (const char *demangled_name, bool completion_mode);
 
-extern struct symbol **make_symbol_overload_list_adl (struct type **arg_types,
-                                                      int nargs,
-                                                      const char *func_name);
+extern std::vector<symbol *> make_symbol_overload_list (const char *,
+							const char *);
+
+extern void add_symbol_overload_list_adl
+  (gdb::array_view<type *> arg_types,
+   const char *func_name,
+   std::vector<symbol *> *overload_list);
 
 extern struct type *cp_lookup_rtti_type (const char *name,
-					 struct block *block);
+					 const struct block *block);
+
+/* Produce an unsigned hash value from SEARCH_NAME that is compatible
+   with cp_symbol_name_matches.  Only the last component in
+   "foo::bar::function()" is considered for hashing purposes (i.e.,
+   the entire prefix is skipped), so that later on looking up for
+   "function" or "bar::function" in all namespaces is possible.  */
+extern unsigned int cp_search_name_hash (const char *search_name);
+
+/* Implement the "la_get_symbol_name_matcher" language_defn method for
+   C++.  */
+extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher
+  (const lookup_name_info &lookup_name);
 
 /* Functions/variables from cp-namespace.c.  */
 
 extern int cp_is_in_anonymous (const char *symbol_name);
 
-extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol,
+extern void cp_scan_for_anonymous_namespaces (struct buildsym_compunit *,
+					      const struct symbol *symbol,
 					      struct objfile *objfile);
 
 extern struct block_symbol cp_lookup_symbol_nonlocal
@@ -135,20 +172,15 @@ struct type *cp_find_type_baseclass_by_name (struct type *parent_type,
 
 /* Functions from cp-name-parser.y.  */
 
-extern struct demangle_parse_info *cp_demangled_name_to_comp
-     (const char *demangled_name, const char **errmsg);
+extern std::unique_ptr<demangle_parse_info> cp_demangled_name_to_comp
+     (const char *demangled_name, std::string *errmsg);
 
-extern char *cp_comp_to_string (struct demangle_component *result,
-				int estimated_len);
+extern gdb::unique_xmalloc_ptr<char> cp_comp_to_string
+  (struct demangle_component *result, int estimated_len);
 
-extern void cp_demangled_name_parse_free (struct demangle_parse_info *);
-extern struct cleanup *make_cleanup_cp_demangled_name_parse_free
-     (struct demangle_parse_info *);
 extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
 					   struct demangle_component *,
 					   struct demangle_parse_info *);
-
-extern struct demangle_parse_info *cp_new_demangle_parse_info (void);
 
 /* The list of "maint cplus" commands.  */
 
@@ -157,5 +189,9 @@ extern struct cmd_list_element *maint_cplus_cmd_list;
 /* A wrapper for bfd_demangle.  */
 
 char *gdb_demangle (const char *name, int options);
+
+/* Like gdb_demangle, but suitable for use as la_sniff_from_mangled_name.  */
+
+int gdb_sniff_from_mangled_name (const char *mangled, char **demangled);
 
 #endif /* CP_SUPPORT_H */

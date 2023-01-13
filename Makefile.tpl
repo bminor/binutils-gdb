@@ -7,7 +7,7 @@ in
 # Makefile for directory with subdirs to build.
 #   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
 #   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-#   2011, 2012, 2013, 2014, 2015, 2016
+#   2011, 2012, 2013, 2014, 2015, 2016, 2017
 #   Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
@@ -157,7 +157,6 @@ BUILD_EXPORTS = \
 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
 	CXX="$(CXX_FOR_BUILD)"; export CXX; \
 	CXXFLAGS="$(CXXFLAGS_FOR_BUILD)"; export CXXFLAGS; \
-	GCJ="$(GCJ_FOR_BUILD)"; export GCJ; \
 	GFORTRAN="$(GFORTRAN_FOR_BUILD)"; export GFORTRAN; \
 	GOC="$(GOC_FOR_BUILD)"; export GOC; \
 	GOCFLAGS="$(GOCFLAGS_FOR_BUILD)"; export GOCFLAGS; \
@@ -195,7 +194,6 @@ HOST_EXPORTS = \
 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
 	CXX="$(CXX)"; export CXX; \
 	CXXFLAGS="$(CXXFLAGS)"; export CXXFLAGS; \
-	GCJ="$(GCJ)"; export GCJ; \
 	GFORTRAN="$(GFORTRAN)"; export GFORTRAN; \
 	GOC="$(GOC)"; export GOC; \
 	AR="$(AR)"; export AR; \
@@ -283,7 +281,6 @@ BASE_TARGET_EXPORTS = \
 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
 	CPPFLAGS="$(CPPFLAGS_FOR_TARGET)"; export CPPFLAGS; \
 	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
-	GCJ="$(GCJ_FOR_TARGET) $(XGCC_FLAGS_FOR_TARGET) $$TFLAGS"; export GCJ; \
 	GFORTRAN="$(GFORTRAN_FOR_TARGET) $(XGCC_FLAGS_FOR_TARGET) $$TFLAGS"; export GFORTRAN; \
 	GOC="$(GOC_FOR_TARGET) $(XGCC_FLAGS_FOR_TARGET) $$TFLAGS"; export GOC; \
 	DLLTOOL="$(DLLTOOL_FOR_TARGET)"; export DLLTOOL; \
@@ -326,8 +323,6 @@ HOST_ISLVER = @islver@
 HOST_LIBELFLIBS = @libelflibs@
 HOST_LIBELFINC = @libelfinc@
 
-EXTRA_CONFIGARGS_LIBJAVA = @EXTRA_CONFIGARGS_LIBJAVA@
-
 # ----------------------------------------------
 # Programs producing files for the BUILD machine
 # ----------------------------------------------
@@ -351,7 +346,6 @@ CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 CXXFLAGS_FOR_BUILD = @CXXFLAGS_FOR_BUILD@
 CXX_FOR_BUILD = @CXX_FOR_BUILD@
 DLLTOOL_FOR_BUILD = @DLLTOOL_FOR_BUILD@
-GCJ_FOR_BUILD = @GCJ_FOR_BUILD@
 GFORTRAN_FOR_BUILD = @GFORTRAN_FOR_BUILD@
 GOC_FOR_BUILD = @GOC_FOR_BUILD@
 LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@
@@ -382,6 +376,8 @@ M4 = @M4@
 MAKEINFO = @MAKEINFO@
 EXPECT = @EXPECT@
 RUNTEST = @RUNTEST@
+
+AUTO_PROFILE = gcc-auto-profile -c 1000000
 
 # This just becomes part of the MAKEINFO definition passed down to
 # sub-makes.  It lets flags be given on the command line while still
@@ -418,6 +414,8 @@ LIBCFLAGS = $(CFLAGS)
 CXXFLAGS = @CXXFLAGS@
 LIBCXXFLAGS = $(CXXFLAGS) -fno-implicit-templates
 GOCFLAGS = $(CFLAGS)
+
+CREATE_GCOV = create_gcov
 
 TFLAGS =
 
@@ -463,6 +461,12 @@ STAGEprofile_TFLAGS = $(STAGE2_TFLAGS)
 STAGEfeedback_CFLAGS = $(STAGE3_CFLAGS) -fprofile-use
 STAGEfeedback_TFLAGS = $(STAGE3_TFLAGS)
 
+STAGEautoprofile_CFLAGS = $(STAGE2_CFLAGS) -g
+STAGEautoprofile_TFLAGS = $(STAGE2_TFLAGS)
+
+STAGEautofeedback_CFLAGS = $(STAGE3_CFLAGS)
+STAGEautofeedback_TFLAGS = $(STAGE3_TFLAGS)
+
 do-compare = @do_compare@
 do-compare3 = $(do-compare)
 
@@ -481,7 +485,6 @@ CC_FOR_TARGET=$(STAGE_CC_WRAPPER) @CC_FOR_TARGET@
 GCC_FOR_TARGET=$(STAGE_CC_WRAPPER) @GCC_FOR_TARGET@
 CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) @CXX_FOR_TARGET@
 RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) @RAW_CXX_FOR_TARGET@
-GCJ_FOR_TARGET=$(STAGE_CC_WRAPPER) @GCJ_FOR_TARGET@
 GFORTRAN_FOR_TARGET=$(STAGE_CC_WRAPPER) @GFORTRAN_FOR_TARGET@
 GOC_FOR_TARGET=$(STAGE_CC_WRAPPER) @GOC_FOR_TARGET@
 DLLTOOL_FOR_TARGET=@DLLTOOL_FOR_TARGET@
@@ -607,7 +610,6 @@ EXTRA_HOST_FLAGS = \
 	'CC=$(CC)' \
 	'CXX=$(CXX)' \
 	'DLLTOOL=$(DLLTOOL)' \
-	'GCJ=$(GCJ)' \
 	'GFORTRAN=$(GFORTRAN)' \
 	'GOC=$(GOC)' \
 	'LD=$(LD)' \
@@ -618,7 +620,8 @@ EXTRA_HOST_FLAGS = \
 	'READELF=$(READELF)' \
 	'STRIP=$(STRIP)' \
 	'WINDRES=$(WINDRES)' \
-	'WINDMC=$(WINDMC)'
+	'WINDMC=$(WINDMC)' \
+	'CREATE_GCOV=$(CREATE_GCOV)'
 
 FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
@@ -662,7 +665,6 @@ EXTRA_TARGET_FLAGS = \
 	 $$(XGCC_FLAGS_FOR_TARGET) $$(TFLAGS)' \
 	'CXXFLAGS=$$(CXXFLAGS_FOR_TARGET)' \
 	'DLLTOOL=$$(DLLTOOL_FOR_TARGET)' \
-	'GCJ=$$(GCJ_FOR_TARGET) $$(XGCC_FLAGS_FOR_TARGET) $$(TFLAGS)' \
 	'GFORTRAN=$$(GFORTRAN_FOR_TARGET) $$(XGCC_FLAGS_FOR_TARGET) $$(TFLAGS)' \
 	'GOC=$$(GOC_FOR_TARGET) $$(XGCC_FLAGS_FOR_TARGET) $$(TFLAGS)' \
 	'GOCFLAGS=$$(GOCFLAGS_FOR_TARGET)' \
@@ -811,7 +813,7 @@ local-clean:
 
 local-distclean:
 	-rm -f Makefile config.status config.cache mh-frag mt-frag
-	-rm -f maybedep.tmp serdep.tmp
+	-rm -f maybedep.tmp serdep.tmp stage_final
 	-if [ "$(TARGET_SUBDIR)" != "." ]; then \
 	  rm -rf $(TARGET_SUBDIR); \
 	else true; fi
@@ -823,7 +825,8 @@ local-distclean:
 	-rm -f texinfo/doc/Makefile texinfo/po/POTFILES
 	-rmdir texinfo/doc texinfo/info texinfo/intl texinfo/lib 2>/dev/null
 	-rmdir texinfo/makeinfo texinfo/po texinfo/util 2>/dev/null
-	-rmdir fastjar gcc libiberty texinfo zlib 2>/dev/null
+	-rmdir fastjar gcc gnattools gotools libcc1 libiberty 2>/dev/null
+	-rmdir texinfo zlib 2>/dev/null
 	-find . -name config.cache -exec rm -f {} \; \; 2>/dev/null
 
 local-maintainer-clean:
@@ -1147,6 +1150,7 @@ all-stage[+id+]-[+prefix+][+module+]: configure-stage[+id+]-[+prefix+][+module+]
 	[+exports+][+ IF prev +] \
 	[+poststage1_exports+][+ ENDIF prev +] [+extra_exports+] \
 	cd [+subdir+]/[+module+] && \
+	[+autoprofile+] \
 	$(MAKE) $(BASE_FLAGS_TO_PASS)[+ IF prefix +] \
 		CFLAGS="$(CFLAGS_FOR_TARGET)" \
 		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
@@ -1160,7 +1164,7 @@ all-stage[+id+]-[+prefix+][+module+]: configure-stage[+id+]-[+prefix+][+module+]
 		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
 		[+args+] [+IF prev +][+poststage1_args+][+ ELSE prev +] \
 		[+stage1_args+][+ ENDIF prev +] [+extra_make_flags+] \
-		TFLAGS="$(STAGE[+id+]_TFLAGS)" \
+		TFLAGS="$(STAGE[+id+]_TFLAGS)" [+profile_data+] \
 		$(TARGET-stage[+id+]-[+prefix+][+module+])
 
 maybe-clean-stage[+id+]-[+prefix+][+module+]: clean-stage[+id+]-[+prefix+][+module+]
@@ -1455,6 +1459,10 @@ ENDIF raw_cxx +]
 .PHONY: check-target-libgomp-c++
 check-target-libgomp-c++:
 	$(MAKE) RUNTESTFLAGS="$(RUNTESTFLAGS) c++.exp" check-target-libgomp
+
+.PHONY: check-target-libgomp-fortran
+check-target-libgomp-fortran:
+	$(MAKE) RUNTESTFLAGS="$(RUNTESTFLAGS) fortran.exp" check-target-libgomp
 
 @endif target-libgomp
 
@@ -1810,25 +1818,46 @@ configure-target-[+module+]: maybe-all-gcc[+
    (define dep-maybe (lambda ()
       (if (exist? "hard") "" "maybe-")))
 
-   ;; dep-kind returns "normal" if the dependency is on an "install" target,
-   ;; or if either module is not bootstrapped.  It returns "bootstrap" for
-   ;; configure or build dependencies between bootstrapped modules; it returns
-   ;; "prebootstrap" for configure or build dependencies of bootstrapped
-   ;; modules on a build module (e.g. all-gcc on all-build-bison).  All this
-   ;; is only necessary for host modules.
+   ;; dep-kind returns returns "prebootstrap" for configure or build
+   ;; dependencies of bootstrapped modules on a build module
+   ;; (e.g. all-gcc on all-build-bison); "normal" if the dependency is
+   ;; on an "install" target, or if the dependence module is not
+   ;; bootstrapped; otherwise, it returns "bootstrap" or
+   ;; "postbootstrap" depending on whether the dependent module is
+   ;; bootstrapped.  All this is only necessary for host and target
+   ;; modules.  It might seem like, in order to avoid build races, we
+   ;; might need more elaborate detection between prebootstrap and
+   ;; postbootstrap modules, but there are no host prebootstrap
+   ;; modules.  If there were any non-bootstrap host modules that
+   ;; bootstrap modules depended on, we'd get unsatisfied per-stage
+   ;; dependencies on them, which would be immediately noticed.
    (define dep-kind (lambda ()
-      (if (and (hash-ref boot-modules (dep-module "module"))
-	       (=* (dep-module "on") "build-"))
-	  "prebootstrap"
+      (cond
+       ((and (hash-ref boot-modules (dep-module "module"))
+	     (=* (dep-module "on") "build-"))
+	"prebootstrap")
 
-	  (if (or (= (dep-subtarget "on") "install-")
-		  (not (hash-ref boot-modules (dep-module "module")))
-		  (not (hash-ref boot-modules (dep-module "on"))))
-              "normal"
-	      "bootstrap"))))
+       ((or (= (dep-subtarget "on") "install-")
+	    (not (hash-ref boot-modules (dep-module "on"))))
+	"normal")
+
+       ((hash-ref boot-modules (dep-module "module"))
+	"bootstrap")
+
+       (1 "postbootstrap"))))
+
+   (define make-postboot-dep (lambda ()
+     (let ((target (dep-module "module")) (dep "stage_last"))
+       (unless (= (hash-ref postboot-targets target) dep)
+	 (hash-create-handle! postboot-targets target dep)
+	 ;; All non-bootstrap modules' configure target already
+	 ;; depend on dep.
+	 (unless (=* target "target-")
+           (string-append "configure-" target ": " dep "\n"))))))
 
    ;; We now build the hash table that is used by dep-kind.
    (define boot-modules (make-hash-table 113))
+   (define postboot-targets (make-hash-table 113))
 +]
 
 [+ FOR host_modules +][+
@@ -1845,18 +1874,23 @@ configure-target-[+module+]: maybe-all-gcc[+
 # to check for bootstrap/prebootstrap dependencies.  To resolve
 # prebootstrap dependencies, prebootstrap modules are gathered in
 # a hash table.
-[+ FOR dependencies +][+ (make-dep "" "") +]
-[+ CASE (dep-kind) +]
-[+ == "prebootstrap"
-     +][+ FOR bootstrap_stage +]
-[+ (make-dep (dep-stage) "") +][+
-       ENDFOR bootstrap_stage +]
-[+ == "bootstrap"
-     +][+ FOR bootstrap_stage +]
-[+ (make-dep (dep-stage) (dep-stage)) +][+
-       ENDFOR bootstrap_stage +]
-[+ ESAC +][+
-ENDFOR dependencies +]
+[+ FOR dependencies +][+ CASE (dep-kind) +]
+[+ == "prebootstrap" +][+ (make-dep "" "") +][+ FOR bootstrap_stage +]
+[+ (make-dep (dep-stage) "") +][+ ENDFOR bootstrap_stage +]
+[+ == "bootstrap" +][+ (make-dep "" "") +][+ FOR bootstrap_stage +]
+[+ (make-dep (dep-stage) (dep-stage)) +][+ ENDFOR bootstrap_stage +]
+[+ == "normal" +][+ (make-dep "" "") +]
+[+ ESAC +][+ ENDFOR dependencies +]
+
+@if gcc-bootstrap
+[+ FOR dependencies +][+ CASE (dep-kind) +]
+[+ == "postbootstrap" +][+ (make-postboot-dep) +][+ ESAC +][+
+ENDFOR dependencies +]@endif gcc-bootstrap
+
+@unless gcc-bootstrap
+[+ FOR dependencies +][+ CASE (dep-kind) +]
+[+ == "postbootstrap" +][+ (make-dep "" "") +]
+[+ ESAC +][+ ENDFOR dependencies +]@endunless gcc-bootstrap
 
 # Dependencies for target modules on other target modules are
 # described by lang_env_dependencies; the defaults apply to anything
@@ -1931,7 +1965,10 @@ config.status: configure
 # Rebuilding configure.
 AUTOCONF = autoconf
 $(srcdir)/configure: @MAINT@ $(srcdir)/configure.ac $(srcdir)/config/acx.m4 \
-	$(srcdir)/config/override.m4 $(srcdir)/config/proginstall.m4
+	$(srcdir)/config/override.m4 $(srcdir)/config/proginstall.m4 \
+	$(srcdir)/config/elf.m4 $(srcdir)/config/isl.m4 \
+	$(srcdir)/libtool.m4 $(srcdir)/ltoptions.m4 $(srcdir)/ltsugar.m4 \
+	$(srcdir)/ltversion.m4 $(srcdir)/lt~obsolete.m4
 	cd $(srcdir) && $(AUTOCONF)
 
 # ------------------------------

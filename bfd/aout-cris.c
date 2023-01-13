@@ -1,5 +1,5 @@
 /* BFD backend for CRIS a.out binaries.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
 
@@ -24,7 +24,7 @@
    functions.  Beware; some of the information there is outdated.  */
 
 #define N_HEADER_IN_TEXT(x) 0
-#define N_TXTOFF(x)         32
+#define N_TXTOFF(x)	    32
 #define ENTRY_CAN_BE_ZERO
 #define TEXT_START_ADDR     0
 
@@ -169,14 +169,14 @@ MY (swap_ext_reloc_out) (bfd *abfd,
      from the abs section, or as a symbol which has an abs value.
      check for that here.  */
 
-  if (bfd_is_abs_section (bfd_get_section (sym)))
+  if (bfd_is_abs_section (bfd_asymbol_section (sym)))
     {
       r_extern = 0;
       r_index = N_ABS;
     }
   else if ((sym->flags & BSF_SECTION_SYM) == 0)
     {
-      if (bfd_is_und_section (bfd_get_section (sym))
+      if (bfd_is_und_section (bfd_asymbol_section (sym))
 	  /* Remember to check for weak symbols; they count as global.  */
 	  || (sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
 	r_extern = 1;
@@ -196,8 +196,9 @@ MY (swap_ext_reloc_out) (bfd *abfd,
      We may change this later, but assert this for the moment.  */
   if (r_type > 2)
     {
-      (*_bfd_error_handler) (_("%s: Invalid relocation type exported: %d"),
-			     bfd_get_filename (abfd), r_type);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type exported: %#x"),
+			  abfd, r_type);
 
       bfd_set_error (bfd_error_wrong_format);
     }
@@ -239,8 +240,9 @@ MY (swap_ext_reloc_in) (bfd *abfd,
 
   if (r_type > 2)
     {
-      (*_bfd_error_handler) (_("%B: Invalid relocation type imported: %d"),
-			     abfd, r_type);
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type imported: %#x"),
+			  abfd, r_type);
 
       bfd_set_error (bfd_error_wrong_format);
     }
@@ -249,8 +251,9 @@ MY (swap_ext_reloc_in) (bfd *abfd,
 
   if (r_extern && r_index > symcount)
     {
-      (*_bfd_error_handler)
-        (_("%B: Bad relocation record imported: %d"), abfd, r_index);
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: bad relocation record imported: %d"), abfd, r_index);
 
       bfd_set_error (bfd_error_wrong_format);
 

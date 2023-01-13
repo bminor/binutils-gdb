@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = 1.11 dejagnu foreign no-dist
+AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 SUBDIRS = doc po
@@ -43,14 +43,14 @@ AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
-TARG_CPU_O = tc-@target_cpu_type@.@OBJEXT@
+TARG_CPU_O = config/tc-@target_cpu_type@.@OBJEXT@
 TARG_CPU_H = $(srcdir)/config/tc-@target_cpu_type@.h
 OBJ_FORMAT_C = $(srcdir)/config/obj-@obj_format@.c
-OBJ_FORMAT_O = obj-@obj_format@.@OBJEXT@
+OBJ_FORMAT_O = config/obj-@obj_format@.@OBJEXT@
 OBJ_FORMAT_H = $(srcdir)/config/obj-@obj_format@.h
 TARG_ENV_H = $(srcdir)/config/te-@te_file@.h
 ATOF_TARG_C = $(srcdir)/config/atof-@atof@.c
-ATOF_TARG_O = atof-@atof@.@OBJEXT@
+ATOF_TARG_O = config/atof-@atof@.@OBJEXT@
 
 # use @target_cpu_type@ for refering to configured target name
 IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h
@@ -120,7 +120,6 @@ HFILES = \
 	output-file.h \
 	read.h \
 	sb.h \
-	struc-symbol.h \
 	subsegs.h \
 	symbols.h \
 	tc.h \
@@ -135,9 +134,11 @@ TARGET_CPU_CFILES = \
 	config/tc-arm.c \
 	config/tc-avr.c \
 	config/tc-bfin.c \
+	config/tc-bpf.c \
 	config/tc-cr16.c \
 	config/tc-cris.c \
 	config/tc-crx.c \
+	config/tc-csky.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-dlx.c \
@@ -148,10 +149,7 @@ TARGET_CPU_CFILES = \
 	config/tc-h8300.c \
 	config/tc-hppa.c \
 	config/tc-ia64.c \
-	config/tc-i370.c \
 	config/tc-i386.c \
-	config/tc-i860.c \
-	config/tc-i960.c \
 	config/tc-ip2k.c \
 	config/tc-iq2000.c \
 	config/tc-lm32.c \
@@ -159,6 +157,7 @@ TARGET_CPU_CFILES = \
 	config/tc-m32r.c \
 	config/tc-m68hc11.c \
 	config/tc-m68k.c \
+	config/tc-s12z.c \
 	config/tc-mcore.c \
 	config/tc-mep.c \
 	config/tc-metag.c \
@@ -177,12 +176,13 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-pru.c \
+	config/tc-riscv.c \
 	config/tc-rl78.c \
 	config/tc-rx.c \
 	config/tc-s390.c \
 	config/tc-score.c \
 	config/tc-sh.c \
-	config/tc-sh64.c \
 	config/tc-sparc.c \
 	config/tc-spu.c \
 	config/tc-tic30.c \
@@ -194,6 +194,7 @@ TARGET_CPU_CFILES = \
 	config/tc-v850.c \
 	config/tc-vax.c \
 	config/tc-visium.c \
+	config/tc-wasm32.c \
 	config/tc-xstormy16.c \
 	config/tc-xc16x.c \
 	config/tc-xgate.c \
@@ -209,9 +210,11 @@ TARGET_CPU_HFILES = \
 	config/tc-arm.h \
 	config/tc-avr.h \
 	config/tc-bfin.h \
+	config/tc-bpf.h \
 	config/tc-cr16.h \
 	config/tc-cris.h \
 	config/tc-crx.h \
+	config/tc-csky.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-dlx.h \
@@ -222,10 +225,7 @@ TARGET_CPU_HFILES = \
 	config/tc-h8300.h \
 	config/tc-hppa.h \
 	config/tc-ia64.h \
-	config/tc-i370.h \
 	config/tc-i386.h \
-	config/tc-i860.h \
-	config/tc-i960.h \
 	config/tc-ip2k.h \
 	config/tc-iq2000.h \
 	config/tc-lm32.h \
@@ -233,6 +233,7 @@ TARGET_CPU_HFILES = \
 	config/tc-m32r.h \
 	config/tc-m68hc11.h \
 	config/tc-m68k.h \
+	config/tc-s12z.h \
 	config/tc-mcore.h \
 	config/tc-mep.h \
 	config/tc-metag.h \
@@ -250,12 +251,13 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-pru.h \
+	config/tc-riscv.h \
 	config/tc-rl78.h \
 	config/tc-rx.h \
 	config/tc-s390.h \
 	config/tc-score.h \
 	config/tc-sh.h \
-	config/tc-sh64.h \
 	config/tc-sparc.h \
 	config/tc-spu.h \
 	config/tc-tic30.h \
@@ -267,6 +269,7 @@ TARGET_CPU_HFILES = \
 	config/tc-v850.h \
 	config/tc-vax.h \
 	config/tc-visium.h \
+	config/tc-wasm32.h \
 	config/tc-xstormy16.h \
 	config/tc-xc16x.h \
 	config/tc-xgate.h \
@@ -308,8 +311,10 @@ TARG_ENV_HFILES = \
 	config/te-armfbsdeabi.h \
 	config/te-armfbsdvfp.h \
 	config/te-armlinuxeabi.h \
-	config/te-dynix.h \
-	config/te-epoc-pe.h \
+	config/te-csky_abiv1.h \
+	config/te-csky_abiv1_linux.h \
+	config/te-csky_abiv2.h \
+	config/te-csky_abiv2_linux.h \
 	config/te-freebsd.h \
 	config/te-generic.h \
 	config/te-gnu.h \
@@ -317,22 +322,15 @@ TARG_ENV_HFILES = \
 	config/te-hppa.h \
 	config/te-hppa64.h \
 	config/te-hppalinux64.h \
-	config/te-i386aix.h \
 	config/te-ia64aix.h \
 	config/te-interix.h \
 	config/te-lynx.h \
-	config/te-mach.h \
 	config/te-macos.h \
 	config/te-nbsd.h \
 	config/te-nbsd532.h \
-	config/te-netware.h \
 	config/te-pc532mach.h \
 	config/te-pe.h \
-	config/te-psos.h \
-	config/te-riscix.h \
 	config/te-solaris.h \
-	config/te-sparcaout.h \
-	config/te-sun3.h \
 	config/te-svr4.h \
 	config/te-symbian.h \
 	config/te-tmips.h \
@@ -435,9 +433,13 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
 # The m68k operand parser.
 
-EXTRA_as_new_SOURCES += config/m68k-parse.y config/bfin-parse.y
+EXTRA_as_new_SOURCES += config/m68k-parse.y
 
 # If m68k-parse.y is in a different directory, then ylwrap will use an
 # absolute path when it invokes yacc, which will cause yacc to put the
@@ -479,13 +481,10 @@ endif
 m68k-parse.h: ; @true
 $(srcdir)/config/m68k-parse.h: ; @true
 
-bfin-parse.c: $(srcdir)/config/bfin-parse.y
+EXTRA_as_new_SOURCES += config/bfin-parse.y
+bfin-parse.c: $(srcdir)/config/bfin-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
 bfin-parse.h: bfin-parse.c
-bfin-parse.@OBJEXT@: bfin-parse.c \
- $(srcdir)/config/bfin-aux.h $(srcdir)/config/bfin-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/bfin.h $(BFDDIR)/libbfd.h
-
 bfin-parse.h: ; @true
 $(srcdir)/config/bfin-parse.h: ; @true
 
@@ -503,20 +502,17 @@ endif
 	$(COMPILE) -c $(srcdir)/config/bfin-lex-wrapper.c $(NO_WERROR)
 endif
 
-rl78-parse.c: $(srcdir)/config/rl78-parse.y
+EXTRA_as_new_SOURCES += config/rl78-parse.y
+rl78-parse.c: $(srcdir)/config/rl78-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rl78-parse.y y.tab.c rl78-parse.c y.tab.h rl78-parse.h -- $(YACCCOMPILE) -d ;
 rl78-parse.h: rl78-parse.c
-rl78-parse.@OBJEXT@: rl78-parse.c rl78-parse.h $(srcdir)/config/rl78-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/rl78.h $(BFDDIR)/libbfd.h
-
 rl78-defs.h: ; @true
+$(srcdir)/config/rl78-defs.h: ; @true
 
-rx-parse.c: $(srcdir)/config/rx-parse.y
+EXTRA_as_new_SOURCES += config/rx-parse.y
+rx-parse.c: $(srcdir)/config/rx-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;
 rx-parse.h: rx-parse.c
-rx-parse.@OBJEXT@: rx-parse.c rx-parse.h $(srcdir)/config/rx-defs.h \
- $(INCDIR)/elf/common.h $(INCDIR)/elf/rx.h $(BFDDIR)/libbfd.h
-
 rx-defs.h: ; @true
 $(srcdir)/config/rx-defs.h: ; @true
 
@@ -600,7 +596,7 @@ cgen.@OBJEXT@: cgen.c cgen.h cgen-desc.h subsegs.h \
 
 MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/*.@OBJEXT@ testsuite/*.out testsuite/gas.log testsuite/gas.sum \
-	testsuite/site.exp site.bak site.exp stage stage1 stage2
+	testsuite/site.exp site.bak site.exp development.exp stage stage1 stage2
 
 .PHONY: install-exec-local install-data-local
 .PHONY: install-exec-bindir install-exec-tooldir
@@ -671,21 +667,15 @@ stage3:
 
 against=stage2
 
-# This rule is derived from corresponding code in the Makefile.in for gcc.
-# The "tail +16c" is to bypass headers which may include timestamps or
-# temporary assembly file names.
 comparison:
 	x=0 ; \
 	for file in *.@OBJEXT@ ; do \
-	  tail +16c ./$$file > tmp-foo1; \
-	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
-	    if cmp tmp-foo1 tmp-foo2 ; then \
-	      true ; \
-	    else \
-	      echo $$file differs ; \
-	      x=1 ; \
-	    fi ; \
-	  else true; fi ; \
+	  f1=./$$file; f2=${against}/$$file; \
+	  $(do_compare) > /dev/null 2>&1; \
+	  if test $$? -ne 0; then \
+	    echo $$file differs ; \
+	    x=1 ; \
+	  fi ; \
 	done ; \
 	exit $$x
 	-rm -f tmp-foo*
@@ -707,3 +697,5 @@ de-stage3:
 # Reconfigure if configure.tgt changes.
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh
+
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp

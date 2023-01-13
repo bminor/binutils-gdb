@@ -1,6 +1,6 @@
 /* Multiple source language support for GDB.
 
-   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+   Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -39,21 +39,15 @@
 #include "varobj.h"
 #include "target.h"
 #include "parser-defs.h"
-#include "jv-lang.h"
 #include "demangle.h"
 #include "symfile.h"
 #include "cp-support.h"
 #include "frame.h"
-
-extern void _initialize_language (void);
-
-static void unk_lang_error (char *);
+#include "c-lang.h"
+#include <algorithm>
+#include "gdbarch.h"
 
 static int unk_lang_parser (struct parser_state *);
-
-static void show_check (char *, int);
-
-static void set_check (char *, int);
 
 static void set_range_case (void);
 
@@ -91,24 +85,36 @@ enum language_mode language_mode = language_mode_auto;
 
 const struct language_defn *expected_language;
 
-/* The list of supported languages.  The list itself is malloc'd.  */
+/* The list of supported languages.  Keep this in the same order as
+   the 'enum language' values.  */
 
-static const struct language_defn **languages;
-static unsigned languages_size;
-static unsigned languages_allocsize;
-#define	DEFAULT_ALLOCSIZE 4
+static const struct language_defn *languages[] = {
+  &unknown_language_defn,
+  &auto_language_defn,
+  &c_language_defn,
+  &objc_language_defn,
+  &cplus_language_defn,
+  &d_language_defn,
+  &go_language_defn,
+  &f_language_defn,
+  &m2_language_defn,
+  &asm_language_defn,
+  &pascal_language_defn,
+  &opencl_language_defn,
+  &rust_language_defn,
+  &minimal_language_defn,
+  &ada_language_defn,
+};
 
-/* The current values of the "set language/type/range" enum
+/* The current values of the "set language/range/case-sensitive" enum
    commands.  */
 static const char *language;
-static const char *type;
 static const char *range;
 static const char *case_sensitive;
 
-/* Warning issued when current_language and the language of the current
-   frame do not match.  */
-char lang_frame_mismatch_warn[] =
-"Warning: the current language does not match this frame.";
+/* See language.h.  */
+const char lang_frame_mismatch_warn[] =
+N_("Warning: the current language does not match this frame.");
 
 /* This page contains the functions corresponding to GDB commands
    and their helpers.  */
@@ -140,40 +146,43 @@ show_language_command (struct ui_file *file, int from_tty,
       if (flang != language_unknown
 	  && language_mode == language_mode_manual
 	  && current_language->la_language != flang)
-	printf_filtered ("%s\n", lang_frame_mismatch_warn);
+	printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
     }
 }
 
 /* Set command.  Change the current working language.  */
 static void
-set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_language_command (const char *ignore,
+		      int from_tty, struct cmd_list_element *c)
 {
-  int i;
   enum language flang = language_unknown;
 
+  /* "local" is a synonym of "auto".  */
+  if (strcmp (language, "local") == 0)
+    language = "auto";
+
   /* Search the list of languages for a match.  */
-  for (i = 0; i < languages_size; i++)
+  for (const auto &lang : languages)
     {
-      if (strcmp (languages[i]->la_name, language) == 0)
+      if (strcmp (lang->la_name, language) == 0)
 	{
 	  /* Found it!  Go into manual mode, and use this language.  */
-	  if (languages[i]->la_language == language_auto)
+	  if (lang->la_language == language_auto)
 	    {
 	      /* Enter auto mode.  Set to the current frame's language, if
                  known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
-	      TRY
+	      try
 		{
 		  struct frame_info *frame;
 
 		  frame = get_selected_frame (NULL);
 		  flang = get_frame_language (frame);
 		}
-	      CATCH (ex, RETURN_MASK_ERROR)
+	      catch (const gdb_exception_error &ex)
 		{
 		  flang = language_unknown;
 		}
-	      END_CATCH
 
 	      if (flang != language_unknown)
 		set_language (flang);
@@ -186,7 +195,7 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	    {
 	      /* Enter manual mode.  Set the specified language.  */
 	      language_mode = language_mode_manual;
-	      current_language = languages[i];
+	      current_language = lang;
 	      set_range_case ();
 	      expected_language = current_language;
 	      return;
@@ -207,7 +216,7 @@ show_range_command (struct ui_file *file, int from_tty,
 {
   if (range_mode == range_mode_auto)
     {
-      char *tmp;
+      const char *tmp;
 
       switch (range_check)
 	{
@@ -240,7 +249,8 @@ show_range_command (struct ui_file *file, int from_tty,
 
 /* Set command.  Change the setting for range checking.  */
 static void
-set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_range_command (const char *ignore,
+		   int from_tty, struct cmd_list_element *c)
 {
   if (strcmp (range, "on") == 0)
     {
@@ -281,7 +291,7 @@ show_case_command (struct ui_file *file, int from_tty,
 {
   if (case_mode == case_mode_auto)
     {
-      char *tmp = NULL;
+      const char *tmp = NULL;
 
       switch (case_sensitivity)
 	{
@@ -314,7 +324,7 @@ show_case_command (struct ui_file *file, int from_tty,
 /* Set command.  Change the setting for case sensitivity.  */
 
 static void
-set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_case_command (const char *ignore, int from_tty, struct cmd_list_element *c)
 {
    if (strcmp (case_sensitive, "on") == 0)
      {
@@ -364,21 +374,11 @@ set_range_case (void)
 enum language
 set_language (enum language lang)
 {
-  int i;
   enum language prev_language;
 
   prev_language = current_language->la_language;
-
-  for (i = 0; i < languages_size; i++)
-    {
-      if (languages[i]->la_language == lang)
-	{
-	  current_language = languages[i];
-	  set_range_case ();
-	  break;
-	}
-    }
-
+  current_language = languages[lang];
+  set_range_case ();
   return prev_language;
 }
 
@@ -410,8 +410,7 @@ language_info (int quietly)
 int
 pointer_type (struct type *type)
 {
-  return TYPE_CODE (type) == TYPE_CODE_PTR ||
-    TYPE_CODE (type) == TYPE_CODE_REF;
+  return TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
 }
 
 
@@ -473,13 +472,14 @@ range_error (const char *string,...)
 /* Return the language enum for a given language string.  */
 
 enum language
-language_enum (char *str)
+language_enum (const char *str)
 {
-  int i;
+  for (const auto &lang : languages)
+    if (strcmp (lang->la_name, str) == 0)
+      return lang->la_language;
 
-  for (i = 0; i < languages_size; i++)
-    if (strcmp (languages[i]->la_name, str) == 0)
-      return languages[i]->la_language;
+  if (strcmp (str, "local") == 0)
+    return language_auto;
 
   return language_unknown;
 }
@@ -489,36 +489,19 @@ language_enum (char *str)
 const struct language_defn *
 language_def (enum language lang)
 {
-  int i;
-
-  for (i = 0; i < languages_size; i++)
-    {
-      if (languages[i]->la_language == lang)
-	{
-	  return languages[i];
-	}
-    }
-  return NULL;
+  return languages[lang];
 }
 
 /* Return the language as a string.  */
+
 const char *
 language_str (enum language lang)
 {
-  int i;
-
-  for (i = 0; i < languages_size; i++)
-    {
-      if (languages[i]->la_language == lang)
-	{
-	  return languages[i]->la_name;
-	}
-    }
-  return "Unknown";
+  return languages[lang]->la_name;
 }
 
 static void
-set_check (char *ignore, int from_tty)
+set_check (const char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
@@ -526,93 +509,84 @@ set_check (char *ignore, int from_tty)
 }
 
 static void
-show_check (char *ignore, int from_tty)
+show_check (const char *ignore, int from_tty)
 {
   cmd_show_list (showchecklist, from_tty, "");
 }
 
-/* Add a language to the set of known languages.  */
 
-void
-add_language (const struct language_defn *lang)
+/* Build and install the "set language LANG" command.  */
+
+static void
+add_set_language_command ()
 {
-  /* For the "set language" command.  */
-  static const char **language_names = NULL;
-  /* For the "help set language" command.  */
-  char *language_set_doc = NULL;
-
-  int i;
-  struct ui_file *tmp_stream;
-
-  if (lang->la_magic != LANG_MAGIC)
-    {
-      fprintf_unfiltered (gdb_stderr,
-			  "Magic number of %s language struct wrong\n",
-			  lang->la_name);
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
-    }
-
-  if (!languages)
-    {
-      languages_allocsize = DEFAULT_ALLOCSIZE;
-      languages = XNEWVEC (const struct language_defn *, languages_allocsize);
-    }
-  if (languages_size >= languages_allocsize)
-    {
-      languages_allocsize *= 2;
-      languages = (const struct language_defn **) xrealloc ((char *) languages,
-				 languages_allocsize * sizeof (*languages));
-    }
-  languages[languages_size++] = lang;
+  static const char **language_names;
 
   /* Build the language names array, to be used as enumeration in the
-     set language" enum command.  */
-  language_names = XRESIZEVEC (const char *, language_names,
-			       languages_size + 1);
+     "set language" enum command.  +1 for "local" and +1 for NULL
+     termination.  */
+  language_names = new const char *[ARRAY_SIZE (languages) + 2];
 
-  for (i = 0; i < languages_size; ++i)
-    language_names[i] = languages[i]->la_name;
-  language_names[i] = NULL;
+  /* Display "auto", "local" and "unknown" first, and then the rest,
+     alpha sorted.  */
+  const char **language_names_p = language_names;
+  *language_names_p++ = auto_language_defn.la_name;
+  *language_names_p++ = "local";
+  *language_names_p++ = unknown_language_defn.la_name;
+  const char **sort_begin = language_names_p;
+  for (const auto &lang : languages)
+    {
+      /* Already handled above.  */
+      if (lang->la_language == language_auto
+	  || lang->la_language == language_unknown)
+	continue;
+      *language_names_p++ = lang->la_name;
+    }
+  *language_names_p = NULL;
+  std::sort (sort_begin, language_names_p, compare_cstrings);
+
+  /* Add the filename extensions.  */
+  for (const auto &lang : languages)
+    if (lang->la_filename_extensions != NULL)
+      {
+	for (size_t i = 0; lang->la_filename_extensions[i] != NULL; ++i)
+	  add_filename_language (lang->la_filename_extensions[i],
+				 lang->la_language);
+      }
 
   /* Build the "help set language" docs.  */
-  tmp_stream = mem_fileopen ();
+  string_file doc;
 
-  fprintf_unfiltered (tmp_stream,
-		      _("Set the current source language.\n"
-			"The currently understood settings are:\n\nlocal or "
-			"auto    Automatic setting based on source file\n"));
+  doc.printf (_("Set the current source language.\n"
+		"The currently understood settings are:\n\nlocal or "
+		"auto    Automatic setting based on source file"));
 
-  for (i = 0; i < languages_size; ++i)
+  for (const auto &lang : languages)
     {
       /* Already dealt with these above.  */
-      if (languages[i]->la_language == language_unknown
-	  || languages[i]->la_language == language_auto)
+      if (lang->la_language == language_unknown
+	  || lang->la_language == language_auto)
 	continue;
 
-      /* FIXME: i18n: for now assume that the human-readable name
-	 is just a capitalization of the internal name.  */
-      fprintf_unfiltered (tmp_stream, "%-16s Use the %c%s language\n",
-			  languages[i]->la_name,
-			  /* Capitalize first letter of language
-			     name.  */
-			  toupper (languages[i]->la_name[0]),
-			  languages[i]->la_name + 1);
+      /* FIXME: i18n: for now assume that the human-readable name is
+	 just a capitalization of the internal name.  */
+      /* Note that we add the newline at the front, so we don't wind
+	 up with a trailing newline.  */
+      doc.printf ("\n%-16s Use the %c%s language",
+		  lang->la_name,
+		  /* Capitalize first letter of language name.  */
+		  toupper (lang->la_name[0]),
+		  lang->la_name + 1);
     }
 
-  language_set_doc = ui_file_xstrdup (tmp_stream, NULL);
-  ui_file_delete (tmp_stream);
-
   add_setshow_enum_cmd ("language", class_support,
-			(const char **) language_names,
+			language_names,
 			&language,
-			language_set_doc,
+			doc.c_str (),
 			_("Show the current source language."),
 			NULL, set_language_command,
 			show_language_command,
 			&setlist, &showlist);
-
-  xfree (language_set_doc);
 }
 
 /* Iterate through all registered languages looking for and calling
@@ -622,13 +596,11 @@ add_language (const struct language_defn *lang)
 CORE_ADDR 
 skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
 {
-  int i;
-
-  for (i = 0; i < languages_size; i++)
+  for (const auto &lang : languages)
     {
-      if (languages[i]->skip_trampoline)
+      if (lang->skip_trampoline != NULL)
 	{
-	  CORE_ADDR real_pc = (languages[i]->skip_trampoline) (frame, pc);
+	  CORE_ADDR real_pc = lang->skip_trampoline (frame, pc);
 
 	  if (real_pc)
 	    return real_pc;
@@ -653,6 +625,23 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
+/* See language.h.  */
+
+int
+language_sniff_from_mangled_name (const struct language_defn *lang,
+				  const char *mangled, char **demangled)
+{
+  gdb_assert (lang != NULL);
+
+  if (lang->la_sniff_from_mangled_name == NULL)
+    {
+      *demangled = NULL;
+      return 0;
+    }
+
+  return lang->la_sniff_from_mangled_name (mangled, demangled);
+}
+
 /* Return class name from physname or NULL.  */
 char *
 language_class_name_from_physname (const struct language_defn *lang,
@@ -663,28 +652,30 @@ language_class_name_from_physname (const struct language_defn *lang,
   return NULL;
 }
 
-/* Return non-zero if TYPE should be passed (and returned) by
-   reference at the language level.  */
-int
+/* Return information about whether TYPE should be passed
+   (and returned) by reference at the language level.  */
+
+struct language_pass_by_ref_info
 language_pass_by_reference (struct type *type)
 {
   return current_language->la_pass_by_reference (type);
 }
 
-/* Return zero; by default, types are passed by value at the language
-   level.  The target ABI may pass or return some structs by reference
-   independent of this.  */
-int
+/* Return a default struct that provides pass-by-reference information
+   about the given TYPE.  Languages should update the default values
+   as appropriate.  */
+
+struct language_pass_by_ref_info
 default_pass_by_reference (struct type *type)
 {
-  return 0;
+  return {};
 }
 
 /* Return the default string containing the list of characters
    delimiting words.  This is a reasonable default value that
    most languages should be able to use.  */
 
-char *
+const char *
 default_word_break_characters (void)
 {
   return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
@@ -701,11 +692,61 @@ default_print_array_index (struct value *index_value, struct ui_file *stream,
   fprintf_filtered (stream, "] = ");
 }
 
-void
-default_get_string (struct value *value, gdb_byte **buffer, int *length,
-		    struct type **char_type, const char **charset)
+/* See language.h.  */
+
+bool
+default_symbol_name_matcher (const char *symbol_search_name,
+			     const lookup_name_info &lookup_name,
+			     completion_match_result *comp_match_res)
 {
-  error (_("Getting a string is unsupported in this language."));
+  const std::string &name = lookup_name.name ();
+  completion_match_for_lcd *match_for_lcd
+    = (comp_match_res != NULL ? &comp_match_res->match_for_lcd : NULL);
+  strncmp_iw_mode mode = (lookup_name.completion_mode ()
+			  ? strncmp_iw_mode::NORMAL
+			  : strncmp_iw_mode::MATCH_PARAMS);
+
+  if (strncmp_iw_with_mode (symbol_search_name, name.c_str (), name.size (),
+			    mode, language_minimal, match_for_lcd) == 0)
+    {
+      if (comp_match_res != NULL)
+	comp_match_res->set_match (symbol_search_name);
+      return true;
+    }
+  else
+    return false;
+}
+
+/* See language.h.  */
+
+bool
+default_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      type = check_typedef (type);
+    }
+  return (TYPE_CODE (type)  == TYPE_CODE_STRING);
+}
+
+/* See language.h.  */
+
+symbol_name_matcher_ftype *
+get_symbol_name_matcher (const language_defn *lang,
+			 const lookup_name_info &lookup_name)
+{
+  /* If currently in Ada mode, and the lookup name is wrapped in
+     '<...>', hijack all symbol name comparisons using the Ada
+     matcher, which handles the verbatim matching.  */
+  if (current_language->la_language == language_ada
+      && lookup_name.ada ().verbatim_p ())
+    return current_language->la_get_symbol_name_matcher (lookup_name);
+
+  if (lang->la_get_symbol_name_matcher != nullptr)
+    return lang->la_get_symbol_name_matcher (lookup_name);
+  return default_symbol_name_matcher;
 }
 
 /* Define the language that is no language.  */
@@ -714,12 +755,6 @@ static int
 unk_lang_parser (struct parser_state *ps)
 {
   return 1;
-}
-
-static void
-unk_lang_error (char *msg)
-{
-  error (_("Attempted to parse an expression with unknown language"));
 }
 
 static void
@@ -757,10 +792,10 @@ unk_lang_print_type (struct type *type, const char *varstring,
 }
 
 static void
-unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
+unk_lang_val_print (struct type *type,
 		    int embedded_offset, CORE_ADDR address,
 		    struct ui_file *stream, int recurse,
-		    const struct value *val,
+		    struct value *val,
 		    const struct value_print_options *options)
 {
   error (_("internal error - unimplemented "
@@ -815,9 +850,9 @@ const struct language_defn unknown_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
-  unk_lang_error,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
@@ -829,26 +864,30 @@ const struct language_defn unknown_language_defn =
   default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",        	    	/* name_of_this */
+  true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  default_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* These two structs define fake entries for the "local" and "auto"
@@ -862,9 +901,9 @@ const struct language_defn auto_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
+  NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
-  unk_lang_error,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
@@ -876,72 +915,32 @@ const struct language_defn auto_language_defn =
   default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
+  false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  default_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
-const struct language_defn local_language_defn =
-{
-  "local",
-  "Local",
-  language_auto,
-  range_check_off,
-  case_sensitive_on,
-  array_row_major,
-  macro_expansion_no,
-  &exp_descriptor_standard,
-  unk_lang_parser,
-  unk_lang_error,
-  null_post_parser,
-  unk_lang_printchar,		/* Print character constant */
-  unk_lang_printstr,
-  unk_lang_emit_char,
-  unk_lang_print_type,		/* Print a type using appropriate syntax */
-  default_print_typedef,	/* Print a typedef using appropriate syntax */
-  unk_lang_val_print,		/* Print a value using appropriate syntax */
-  unk_lang_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
-  unk_lang_trampoline,		/* Language specific skip_trampoline */
-  "this", 		        /* name_of_this */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
-  unk_lang_demangle,		/* Language specific symbol demangler */
-  unk_lang_class_name,		/* Language specific
-				   class_name_from_physname */
-  unk_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
-  0,				/* String lower bound */
-  default_word_break_characters,
-  default_make_symbol_completion_list,
-  unknown_language_arch_info,	/* la_language_arch_info.  */
-  default_print_array_index,
-  default_pass_by_reference,
-  default_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
-  iterate_over_symbols,
-  &default_varobj_ops,
-  NULL,
-  NULL,
-  LANG_MAGIC
-};
 
 /* Per-architecture language information.  */
 
@@ -958,16 +957,15 @@ static void *
 language_gdbarch_post_init (struct gdbarch *gdbarch)
 {
   struct language_gdbarch *l;
-  int i;
 
   l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
-  for (i = 0; i < languages_size; i++)
-    {
-      if (languages[i] != NULL
-	  && languages[i]->la_language_arch_info != NULL)
-	languages[i]->la_language_arch_info
-	  (gdbarch, l->arch_info + languages[i]->la_language);
-    }
+  for (const auto &lang : languages)
+    if (lang != NULL && lang->la_language_arch_info != NULL)
+      {
+	lang->la_language_arch_info (gdbarch,
+				     l->arch_info + lang->la_language);
+      }
+
   return l;
 }
 
@@ -1052,10 +1050,10 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   gdb_assert (!TYPE_OBJFILE_OWNED (type));
 
   gdbarch = TYPE_OWNER (type).gdbarch;
-  symbol = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct symbol);
+  symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
 
-  symbol->ginfo.name = TYPE_NAME (type);
-  symbol->ginfo.language = lang;
+  symbol->m_name = TYPE_NAME (type);
+  symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;
   SYMBOL_TYPE (symbol) = type;
@@ -1074,9 +1072,6 @@ language_init_primitive_type_symbols (struct language_arch_info *lai,
 				      struct gdbarch *gdbarch)
 {
   int n;
-  struct compunit_symtab *cust;
-  struct symtab *symtab;
-  struct block *static_block, *global_block;
 
   gdb_assert (lai->primitive_type_vector != NULL);
 
@@ -1141,8 +1136,9 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
 
 /* Initialize the language routines.  */
 
+void _initialize_language ();
 void
-_initialize_language (void)
+_initialize_language ()
 {
   static const char *const type_or_range_names[]
     = { "on", "off", "warn", "auto", NULL };
@@ -1169,29 +1165,26 @@ _initialize_language (void)
 
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,
-			_("Set range checking.  (on/warn/off/auto)"),
-			_("Show range checking.  (on/warn/off/auto)"),
+			_("Set range checking (on/warn/off/auto)."),
+			_("Show range checking (on/warn/off/auto)."),
 			NULL, set_range_command,
 			show_range_command,
 			&setchecklist, &showchecklist);
 
   add_setshow_enum_cmd ("case-sensitive", class_support, case_sensitive_names,
 			&case_sensitive, _("\
-Set case sensitivity in name search.  (on/off/auto)"), _("\
-Show case sensitivity in name search.  (on/off/auto)"), _("\
+Set case sensitivity in name search (on/off/auto)."), _("\
+Show case sensitivity in name search (on/off/auto)."), _("\
 For Fortran the default is off; for other languages the default is on."),
 			set_case_command,
 			show_case_command,
 			&setlist, &showlist);
 
-  add_language (&auto_language_defn);
-  add_language (&local_language_defn);
-  add_language (&unknown_language_defn);
+  add_set_language_command ();
 
-  language = xstrdup ("auto");
-  type = xstrdup ("auto");
-  range = xstrdup ("auto");
-  case_sensitive = xstrdup ("auto");
+  language = "auto";
+  range = "auto";
+  case_sensitive = "auto";
 
   /* Have the above take effect.  */
   set_language (language_auto);

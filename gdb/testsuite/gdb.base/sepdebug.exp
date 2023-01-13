@@ -1,4 +1,4 @@
-#   Copyright 1988-2016 Free Software Foundation, Inc.
+#   Copyright 1988-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    untested sepdebug.exp
+    untested "failed to compile"
     return -1
 }
 
@@ -63,7 +63,7 @@ remote_exec build "mkdir [file dirname $new_name]"
 remote_exec build "ln -s ${binfile}${EXEEXT} $new_name"
 clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
-    fail "No debug information found."
+    fail "no debug information found."
 }
 
 # Restore subdir
@@ -71,7 +71,7 @@ set subdir ${old_subdir}
 
 clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
-    fail "No debug information found."
+    fail "no debug information found."
 }
 
 #
@@ -227,7 +227,7 @@ delete_breakpoints
 # test temporary breakpoint at function
 #
 
-gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "Temporary breakpoint function"
+gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
 
 #
 # test break at function in file
@@ -242,11 +242,11 @@ gdb_test "tbreak $srcfile:factorial" "Temporary breakpoint.*at.* file .*$srcfile
 
 gdb_test "tbreak $bp_location1" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location1.*" \
-    "Temporary breakpoint line number #1"
+    "temporary breakpoint line number #1"
 
 gdb_test "tbreak $bp_location6" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" \
-    "Temporary breakpoint line number #2"
+    "temporary breakpoint line number #2"
 
 #
 # test break at line number in file
@@ -254,7 +254,7 @@ gdb_test "tbreak $bp_location6" \
 
 gdb_test "tbreak $srcfile:$bp_location2" \
     "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location2.*" \
-    "Temporary breakpoint line number in file #1"
+    "temporary breakpoint line number in file #1"
 
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
 gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"
@@ -660,7 +660,7 @@ if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
 
     set escapedobjdirsubdir [string_to_regexp [standard_output_file {}]]
 
-    gdb_test "file [standard_output_file sepdebug2]" "warning: the debug information found in \"${escapedobjdirsubdir}/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(no debugging symbols found\\).*" "CRC mismatch is reported"
+    gdb_test "file [standard_output_file sepdebug2]" "warning: the debug information found in \"${escapedobjdirsubdir}/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(No debugging symbols found in .*\\).*" "CRC mismatch is reported"
 }
 
 

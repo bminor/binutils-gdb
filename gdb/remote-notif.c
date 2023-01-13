@@ -1,6 +1,6 @@
 /* Remote notification in GDB protocol
 
-   Copyright (C) 1988-2016 Free Software Foundation, Inc.
+   Copyright (C) 1988-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,14 +34,14 @@
 #include "defs.h"
 #include "remote.h"
 #include "remote-notif.h"
-#include "observer.h"
+#include "observable.h"
 #include "event-loop.h"
 #include "target.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbcmd.h"
 
-int notif_debug = 0;
+bool notif_debug = false;
 
 /* Supported clients of notifications.  */
 
@@ -52,47 +52,38 @@ static struct notif_client *notifs[] =
 
 gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
 
-static void do_notif_event_xfree (void *arg);
-
 /* Parse the BUF for the expected notification NC, and send packet to
    acknowledge.  */
 
 void
-remote_notif_ack (struct notif_client *nc, char *buf)
+remote_notif_ack (remote_target *remote,
+		  struct notif_client *nc, const char *buf)
 {
-  struct notif_event *event = nc->alloc_event ();
-  struct cleanup *old_chain
-    = make_cleanup (do_notif_event_xfree, event);
+  notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog, "notif: ack '%s'\n",
 			nc->ack_command);
 
-  nc->parse (nc, buf, event);
-  nc->ack (nc, buf, event);
-
-  discard_cleanups (old_chain);
+  nc->parse (remote, nc, buf, event.get ());
+  nc->ack (remote, nc, buf, event.release ());
 }
 
 /* Parse the BUF for the expected notification NC.  */
 
 struct notif_event *
-remote_notif_parse (struct notif_client *nc, char *buf)
+remote_notif_parse (remote_target *remote,
+		    struct notif_client *nc, const char *buf)
 {
-  struct notif_event *event = nc->alloc_event ();
-  struct cleanup *old_chain
-    = make_cleanup (do_notif_event_xfree, event);
+  notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog, "notif: parse '%s'\n", nc->name);
 
-  nc->parse (nc, buf, event);
+  nc->parse (remote, nc, buf, event.get ());
 
-  discard_cleanups (old_chain);
-  return event;
+  return event.release ();
 }
-
-DEFINE_QUEUE_P (notif_client_p);
 
 /* Process notifications in STATE's notification queue one by one.
    EXCEPT is not expected in the queue.  */
@@ -101,15 +92,15 @@ void
 remote_notif_process (struct remote_notif_state *state,
 		      struct notif_client *except)
 {
-  while (!QUEUE_is_empty (notif_client_p, state->notif_queue))
+  while (!state->notif_queue.empty ())
     {
-      struct notif_client *nc = QUEUE_deque (notif_client_p,
-					     state->notif_queue);
+      struct notif_client *nc = state->notif_queue.front ();
+      state->notif_queue.pop_front ();
 
       gdb_assert (nc != except);
 
-      if (nc->can_get_pending_events (nc))
-	remote_notif_get_pending_events (nc);
+      if (nc->can_get_pending_events (state->remote, nc))
+	remote_notif_get_pending_events (state->remote, nc);
     }
 }
 
@@ -124,7 +115,7 @@ remote_async_get_pending_events_handler (gdb_client_data data)
    update STATE.  */
 
 void
-handle_notification (struct remote_notif_state *state, char *buf)
+handle_notification (struct remote_notif_state *state, const char *buf)
 {
   struct notif_client *nc;
   size_t i;
@@ -157,7 +148,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
   else
     {
       struct notif_event *event
-	= remote_notif_parse (nc, buf + strlen (nc->name) + 1);
+	= remote_notif_parse (state->remote, nc, buf + strlen (nc->name) + 1);
 
       /* Be careful to only set it after parsing, since an error
 	 may be thrown then.  */
@@ -165,7 +156,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
 
       /* Notify the event loop there's a stop reply to acknowledge
 	 and that there may be more events to fetch.  */
-      QUEUE_enque (notif_client_p, state->notif_queue, nc);
+      state->notif_queue.push_back (nc);
       if (target_is_non_stop_p ())
 	{
 	  /* In non-stop, We mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
@@ -214,33 +205,14 @@ handle_notification (struct remote_notif_state *state, char *buf)
     }
 }
 
-/* Invoke destructor of EVENT and xfree it.  */
-
-void
-notif_event_xfree (struct notif_event *event)
-{
-  if (event != NULL && event->dtr != NULL)
-    event->dtr (event);
-
-  xfree (event);
-}
-
-/* Cleanup wrapper.  */
-
-static void
-do_notif_event_xfree (void *arg)
-{
-  notif_event_xfree ((struct notif_event *) arg);
-}
-
 /* Return an allocated remote_notif_state.  */
 
 struct remote_notif_state *
-remote_notif_state_allocate (void)
+remote_notif_state_allocate (remote_target *remote)
 {
-  struct remote_notif_state *notif_state = XCNEW (struct remote_notif_state);
+  struct remote_notif_state *notif_state = new struct remote_notif_state;
 
-  notif_state->notif_queue = QUEUE_alloc (notif_client_p, NULL);
+  notif_state->remote = remote;
 
   /* Register async_event_handler for notification.  */
 
@@ -253,28 +225,21 @@ remote_notif_state_allocate (void)
 
 /* Free STATE and its fields.  */
 
-void
-remote_notif_state_xfree (struct remote_notif_state *state)
+remote_notif_state::~remote_notif_state ()
 {
   int i;
 
-  QUEUE_free (notif_client_p, state->notif_queue);
-
   /* Unregister async_event_handler for notification.  */
-  if (state->get_pending_events_token != NULL)
-    delete_async_event_handler (&state->get_pending_events_token);
+  if (get_pending_events_token != NULL)
+    delete_async_event_handler (&get_pending_events_token);
 
   for (i = 0; i < REMOTE_NOTIF_LAST; i++)
-    notif_event_xfree (state->pending_event[i]);
-
-  xfree (state);
+    delete pending_event[i];
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_notif;
-
+void _initialize_notif ();
 void
-_initialize_notif (void)
+_initialize_notif ()
 {
   add_setshow_boolean_cmd ("notification", no_class, &notif_debug,
 			   _("\

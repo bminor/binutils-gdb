@@ -1,23 +1,42 @@
 # Test -march=
 	.text
+
 #SMAP feature
-clac
-stac
+	clac
+	stac
 #ADCX ADOX 
-adcx    %edx, %ecx
-adox    %edx, %ecx
+	adcx    %edx, %ecx
+	adox    %edx, %ecx
 #RDSEED
-rdseed    %eax
+	rdseed    %eax
 #CLZERO
-clzero
+	clzero
+	clzero  %eax
+	clzero  %ax
 #XSAVEC
-xsavec  (%ecx)
+	xsavec  (%ecx)
 #XSAVES
-xsaves  (%ecx)
+	xsaves  (%ecx)
 #CLFLUSHOPT
-clflushopt      (%ecx)
-monitorx %eax, %ecx, %edx
-monitorx %ax, %ecx, %edx
-monitorx
-mwaitx %eax, %ecx, %ebx
-mwaitx
+	clflushopt      (%ecx)
+	monitorx %eax, %ecx, %edx
+	monitorx %ax, %ecx, %edx
+	monitorx
+	mwaitx %eax, %ecx, %ebx
+	mwaitx
+
+#CLWB instruction
+	clwb	(%ecx)	 # CLWB
+	clwb	-123456(%esp,%esi,8)	 # CLWB
+
+# mcommit instruction
+	mcommit
+
+# rdpid instruction
+	rdpid %eax
+
+# rdpru instruction
+	rdpru
+
+# wbnoinvd instruction
+	wbnoinvd

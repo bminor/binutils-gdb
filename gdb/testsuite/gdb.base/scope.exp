@@ -1,4 +1,4 @@
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 standard_testfile scope0.c scope1.c
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} \
+if {[build_executable "failed to build" ${testfile} \
 	 [list $srcfile $srcfile2] {debug}]} {
     return -1
 }
@@ -49,7 +49,7 @@ proc test_at_main {} {
 
     # Print scope0.c::filelocal, which is 1
 
-    if [gdb_test "print filelocal" "\\\$$decimal = 1" "print filelocal" ] { 
+    if [gdb_test "print filelocal" "\\\$$decimal = 1"] { 
       gdb_suppress_tests
     }
 
@@ -61,7 +61,7 @@ proc test_at_main {} {
 
     # Print scope0.c::filelocal_bss, which is 101
 
-    if [gdb_test "print filelocal_bss" "\\\$$decimal = 101" "print filelocal_bss" ] { 
+    if [gdb_test "print filelocal_bss" "\\\$$decimal = 101"] { 
       gdb_suppress_tests
     }
 
@@ -112,7 +112,7 @@ proc test_at_main {} {
 
     # Print scope1.c::foo::funclocal, which is 3
 
-    if [gdb_test "print foo::funclocal" "\\\$$decimal = 3" "print foo::funclocal" ] { 
+    if [gdb_test "print foo::funclocal" "\\\$$decimal = 3"] { 
       gdb_suppress_tests
     }
 
@@ -125,7 +125,7 @@ proc test_at_main {} {
 
     # Print scope1.c::foo::funclocal_ro, which is 203
 
-    if [gdb_test "print foo::funclocal_ro" "\\\$$decimal = 203" "print foo::funclocal_ro" ] { 
+    if [gdb_test "print foo::funclocal_ro" "\\\$$decimal = 203"] { 
       gdb_suppress_tests
     }
 
@@ -138,7 +138,7 @@ proc test_at_main {} {
 
     # Print scope1.c::bar::funclocal, which is 4
 
-    if [gdb_test "print bar::funclocal" "\\\$$decimal = 4" "print bar::funclocal" ] { 
+    if [gdb_test "print bar::funclocal" "\\\$$decimal = 4"] { 
       gdb_suppress_tests
     }
 
@@ -497,6 +497,13 @@ proc test_at_localscopes {} {
     gdb_stop_suppressing_tests
 }
 
+# Note, we don't pass a binfile to clean_restart because we need to
+# avoid gdb_load here.  With remote targets, gdb_load connects to the
+# remote target, and we specificaly want the following tests to run
+# before the program is started.
+clean_restart
+gdb_file_cmd $binfile
+
 # Test that variables in various segments print out correctly before
 # the program is run.  
 
@@ -505,21 +512,15 @@ setup_xfail "rs6000-*-*"
 
 gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 
-# gdb currently cannot access bss memory on some targets if the inferior
-# is not running.
+# Check that gdb can access bss memory if the inferior is not running.
 #
-# For PA boards using monitor/remote-pa.c, the bss test is going to 
-# randomly fail.  We've already put remote-pa on the target stack,
-# so we actually read memory from the board.  Problem is crt0.o
-# is responsible for clearing bss and that hasnt' happened yet.
-#
-# This is a problem for all non-native targets. -- manson
-if [is_remote target] {
-    unsupported "print 'scope0.c'::filelocal_bss before run"
-} else {
-    gdb_test "print 'scope0.c'::filelocal_bss" "= 0" \
-	"print 'scope0.c'::filelocal_bss before run"
-}
+# Note the care above about avoiding gdb_load.  Otherwise, for
+# embedded stub-like boards, this test would randomly fail.  If we'd
+# already put target remote on the target stack, we'd read memory from
+# the board instead of the program's binary, and we would have
+# connected before crt0.o had had a chance to clear bss.
+gdb_test "print 'scope0.c'::filelocal_bss" "= 0" \
+    "print 'scope0.c'::filelocal_bss before run"
 
 gdb_test "print 'scope0.c'::filelocal" "= 1" \
     "print 'scope0.c'::filelocal before run"

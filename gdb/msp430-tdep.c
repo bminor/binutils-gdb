@@ -1,7 +1,7 @@
 /* Target-dependent code for the Texas Instruments MSP430 for GDB, the
    GNU debugger.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -218,27 +218,25 @@ msp430_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static enum register_status
 msp430_pseudo_register_read (struct gdbarch *gdbarch,
-			     struct regcache *regcache,
+			     readable_regcache *regcache,
 			     int regnum, gdb_byte *buffer)
 {
-  enum register_status status = REG_UNKNOWN;
-
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
     {
+      enum register_status status;
       ULONGEST val;
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int regsize = register_size (gdbarch, regnum);
       int raw_regnum = regnum - MSP430_NUM_REGS;
 
-      status = regcache_raw_read_unsigned (regcache, raw_regnum, &val);
+      status = regcache->raw_read (raw_regnum, &val);
       if (status == REG_VALID)
 	store_unsigned_integer (buffer, regsize, byte_order, val);
 
+      return status;
     }
   else
     gdb_assert_not_reached ("invalid pseudo register number");
-
-  return status;
 }
 
 /* Implement the "pseudo_register_write" gdbarch method.  */
@@ -248,7 +246,6 @@ msp430_pseudo_register_write (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regnum, const gdb_byte *buffer)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   if (MSP430_NUM_REGS <= regnum && regnum < MSP430_NUM_TOTAL_REGS)
 
     {
@@ -278,17 +275,9 @@ msp430_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   return regnum;
 }
 
-/* Implement the "breakpoint_from_pc" gdbarch method.  */
+constexpr gdb_byte msp430_break_insn[] = { 0x43, 0x43 };
 
-static const gdb_byte *
-msp430_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			   int *lenptr)
-{
-  static gdb_byte breakpoint[] = { 0x43, 0x43 };
-
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+typedef BP_MANIPULATION (msp430_break_insn) msp430_breakpoint;
 
 /* Define a "handle" struct for fetching the next opcode.  */
 
@@ -322,7 +311,7 @@ msp430_get_opcode_byte (void *handle)
 }
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -350,8 +339,6 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[MSP430_NUM_TOTAL_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
   int code_model = gdbarch_tdep (gdbarch)->code_model;
   int sz;
@@ -364,13 +351,12 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (MSP430_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (MSP430_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   /* The call instruction has saved the return address on the stack.  */
   sz = code_model == MSP_LARGE_CODE_MODEL ? 4 : 2;
   reg[MSP430_SP_REGNUM] = pv_add_constant (reg[MSP430_SP_REGNUM], -sz);
-  pv_area_store (stack, reg[MSP430_SP_REGNUM], sz, reg[MSP430_PC_REGNUM]);
+  stack.store (reg[MSP430_SP_REGNUM], sz, reg[MSP430_PC_REGNUM]);
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -389,7 +375,7 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  int rsrc = opc.op[0].reg;
 
 	  reg[MSP430_SP_REGNUM] = pv_add_constant (reg[MSP430_SP_REGNUM], -2);
-	  pv_area_store (stack, reg[MSP430_SP_REGNUM], 2, reg[rsrc]);
+	  stack.store (reg[MSP430_SP_REGNUM], 2, reg[rsrc]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == MSO_push	/* PUSHM  */
@@ -404,7 +390,7 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	    {
 	      reg[MSP430_SP_REGNUM]
 		= pv_add_constant (reg[MSP430_SP_REGNUM], -size);
-	      pv_area_store (stack, reg[MSP430_SP_REGNUM], size, reg[rsrc]);
+	      stack.store (reg[MSP430_SP_REGNUM], size, reg[rsrc]);
 	      rsrc--;
 	      count--;
 	    }
@@ -439,11 +425,9 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
     result->frame_size = reg[MSP430_SP_REGNUM].k;
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, result);
+  stack.scan (check_for_saved, result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 /* Implement the "skip_prologue" gdbarch method.  */
@@ -461,22 +445,6 @@ msp430_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   msp430_analyze_prologue (gdbarch, pc, func_end, &p);
   return p.prologue_end;
-}
-
-/* Implement the "unwind_pc" gdbarch method.  */
-
-static CORE_ADDR
-msp430_unwind_pc (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MSP430_PC_REGNUM);
-}
-
-/* Implement the "unwind_sp" gdbarch method.  */
-
-static CORE_ADDR
-msp430_unwind_sp (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MSP430_SP_REGNUM);
 }
 
 /* Given a frame described by THIS_FRAME, decode the prologue of its
@@ -666,26 +634,14 @@ msp430_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return align_down (sp, 2);
 }
 
-
-/* Implement the "dummy_id" gdbarch method.  */
-
-static struct frame_id
-msp430_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return
-    frame_id_build (get_frame_register_unsigned
-		    (this_frame, MSP430_SP_REGNUM),
-		    get_frame_pc (this_frame));
-}
-
-
 /* Implement the "push_dummy_call" gdbarch method.  */
 
 static CORE_ADDR
 msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+			function_call_return_method return_method,
+			CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int write_pass;
@@ -715,7 +671,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	sp = align_down (sp - sp_off, 4);
       sp_off = 0;
 
-      if (struct_return)
+      if (return_method == return_method_struct)
 	{
 	  if (write_pass)
 	    regcache_cooked_write_unsigned (regcache, arg_reg, struct_addr);
@@ -731,6 +687,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
 	  int offset;
 	  int current_arg_on_stack;
+	  gdb_byte struct_addr_buf[4];
 
 	  current_arg_on_stack = 0;
 
@@ -738,11 +695,9 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      || TYPE_CODE (arg_type) == TYPE_CODE_UNION)
 	    {
 	      /* Aggregates of any size are passed by reference.  */
-	      gdb_byte struct_addr[4];
-
-	      store_unsigned_integer (struct_addr, 4, byte_order,
+	      store_unsigned_integer (struct_addr_buf, 4, byte_order,
 				      value_address (arg));
-	      arg_bits = struct_addr;
+	      arg_bits = struct_addr_buf;
 	      arg_size = (code_model == MSP_LARGE_CODE_MODEL) ? 4 : 2;
 	    }
 	  else
@@ -769,7 +724,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
 		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
-		          || TYPE_CODE (arg_type) == TYPE_CODE_REF
+		          || TYPE_IS_REFERENCE (arg_type)
 			  || TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
 			  || TYPE_CODE (arg_type) == TYPE_CODE_UNION))
 		    {
@@ -853,7 +808,7 @@ msp430_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   if (!bms.minsym)
     return pc;
 
-  stub_name = MSYMBOL_LINKAGE_NAME (bms.minsym);
+  stub_name = bms.minsym->linkage_name ();
 
   if (gdbarch_tdep (gdbarch)->code_model == MSP_SMALL_CODE_MODEL
       && msp430_in_return_stub (gdbarch, pc, stub_name))
@@ -924,8 +879,8 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      code_model = ca_tdep->code_model;
 	      break;
 	    }
-	  /* Otherwise, fall through...  */
 	}
+	/* Fall through.  */
       default:
 	error (_("Unknown msp430 isa"));
 	break;
@@ -955,7 +910,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
   tdep->isa = isa;
@@ -1002,23 +957,20 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, msp430_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch,
+				       msp430_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch,
+				       msp430_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
-
-  /* Disassembly.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_msp430);
 
   /* Frames, prologues, etc.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_prologue (gdbarch, msp430_skip_prologue);
-  set_gdbarch_unwind_pc (gdbarch, msp430_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, msp430_unwind_sp);
   set_gdbarch_frame_align (gdbarch, msp430_frame_align);
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &msp430_unwind);
 
   /* Dummy frames, return values.  */
-  set_gdbarch_dummy_id (gdbarch, msp430_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, msp430_push_dummy_call);
   set_gdbarch_return_value (gdbarch, msp430_return_value);
 
@@ -1032,13 +984,11 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_msp430_tdep;
-
 /* Register the initialization routine.  */
 
+void _initialize_msp430_tdep ();
 void
-_initialize_msp430_tdep (void)
+_initialize_msp430_tdep ()
 {
   register_gdbarch_init (bfd_arch_msp430, msp430_gdbarch_init);
 }

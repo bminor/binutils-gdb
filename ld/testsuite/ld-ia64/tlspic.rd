@@ -24,9 +24,9 @@ Section Headers:
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+112d8 0+12d8 0+50 00 WAp +0 +0 +8
  +\[[ 0-9]+\] .IA_64.pltoff +.*
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 Key to Flags:
 #...
 
@@ -52,7 +52,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 6 entries:
 [0-9a-f ]+R_IA64_TPREL64LSB +44
 [0-9a-f ]+R_IA64_TPREL64LSB +24
 
-Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 
@@ -66,12 +66,9 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +10 sg1
 .* FUNC +GLOBAL +DEFAULT +7 fn1
-.* NOTYPE +GLOBAL +DEFAULT +14 __bss_start
 .* TLS +GLOBAL +DEFAULT +10 sg2
 .* TLS +GLOBAL +DEFAULT +10 sg6
 .* TLS +GLOBAL +DEFAULT +10 sg7
-.* NOTYPE +GLOBAL +DEFAULT +14 _edata
-.* NOTYPE +GLOBAL +DEFAULT +14 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
@@ -125,9 +122,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +10 sg1
 .* FUNC +GLOBAL +DEFAULT +7 fn1
-.* NOTYPE +GLOBAL +DEFAULT +14 __bss_start
 .* TLS +GLOBAL +DEFAULT +10 sg2
 .* TLS +GLOBAL +DEFAULT +10 sg6
 .* TLS +GLOBAL +DEFAULT +10 sg7
-.* NOTYPE +GLOBAL +DEFAULT +14 _edata
-.* NOTYPE +GLOBAL +DEFAULT +14 _end

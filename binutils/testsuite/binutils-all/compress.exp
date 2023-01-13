@@ -1,4 +1,4 @@
-#   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -162,6 +162,7 @@ if ![string match "" $got] then {
     }
 }
 
+setup_xfail "nds32*-*-*"
 set testname "objdump compress debug sections"
 set got [remote_exec host "$OBJDUMP -W ${compressedfile}.o" "" "/dev/null" "objdump.out"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
@@ -174,6 +175,7 @@ if { [regexp_diff objdump.out $srcdir/$subdir/dw2-1.W] } then {
     pass "$testname"
 }
 
+setup_xfail "nds32*-*-*"
 set testname "objdump compress debug sections 3"
 set got [remote_exec host "$OBJDUMP -W ${compressedfile3}.o" "" "/dev/null" "objdump.out"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
@@ -503,16 +505,16 @@ if ![string match "" $exec_output] then {
     pass "objcopy ($testname)"
 }
 
-set testname "objcopy zlib-gnu compress debug sections 3"
-set got [binutils_run $OBJCOPY "${compressedfile3}gnu.o ${copyfile}gnu.o"]
+set testname "objcopy zlib-gabi compress debug sections 3"
+set got [binutils_run $OBJCOPY "${compressedfile3}gabi.o ${copyfile}gabi.o"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
     return
 }
-send_log "cmp ${compressedfile3}gnu.o ${copyfile}gnu.o\n"
-verbose "cmp ${compressedfile3}gnu.o ${copyfile}gnu.o"
-set src1 ${compressedfile3}gnu.o
-set src2 ${copyfile}gnu.o
+send_log "cmp ${compressedfile3}gabi.o ${copyfile}gabi.o\n"
+verbose "cmp ${compressedfile3}gabi.o ${copyfile}gabi.o"
+set src1 ${compressedfile3}gabi.o
+set src2 ${copyfile}gabi.o
 set status [remote_exec build cmp "${src1} ${src2}"]
 set exec_output [lindex $status 1]
 set exec_output [prune_warnings $exec_output]
@@ -544,6 +546,7 @@ if ![string match "" $got] then {
     }
 }
 
+setup_xfail "nds32*-*-*"
 set testname "objcopy compress debug sections in archive with zlib-gabi"
 set got [binutils_run $OBJCOPY "--compress-debug-sections=zlib-gabi ${copyfile}gabi.a ${compressedcopyfile}gabi.a"]
 if ![string match "" $got] then {
@@ -564,6 +567,7 @@ if ![string match "" $got] then {
     }
 }
 
+setup_xfail "nds32*-*-*"
 set testname "objdump compress debug sections 3 with zlib-gabi"
 set got [remote_exec host "$OBJDUMP -W ${compressedfile3}gabi.o" "" "/dev/null" "objdump.out"]
 if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
@@ -673,22 +677,14 @@ proc test_gnu_debuglink {} {
     global srcdir
     global subdir
     global env
-    global CC_FOR_TARGET
     global STRIP
     global OBJCOPY
     global OBJDUMP
 
     set test "gnu-debuglink"
-    if {![info exists CC_FOR_TARGET]} {
-	set CC_FOR_TARGET $env(CC)
-    }
-    if { $CC_FOR_TARGET == "" } {
-	unsupported $test
-	return
-    }
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
-	fail "$test (build)"
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+	unsupported "$test (build)"
 	return
     }
     set got [remote_exec host "$OBJDUMP -S tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.dump"]
@@ -758,6 +754,6 @@ proc test_gnu_debuglink {} {
     }
 }
 
-if {[isnative] && [is_elf_format]} then {
+if {[is_elf_format]} then {
     test_gnu_debuglink
 }

@@ -1,4 +1,4 @@
-#   Copyright 1997-2016 Free Software Foundation, Inc.
+#   Copyright 1997-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,16 @@ if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
     continue
 }
 
+# Test relies on checking follow-fork output. Do not run if gdb debug is
+# enabled as it will be redirected to the log.
+if [gdb_debug_enabled] {
+    untested "debug is enabled"
+    return 0
+}
+
 standard_testfile
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
@@ -85,8 +91,7 @@ proc test_follow_fork { who detach cmd } {
 	}
 
 	gdb_test "show follow-fork" \
-	"Debugger response to a program call of fork or vfork is \"$who\"." \
-	"show follow-fork"
+	"Debugger response to a program call of fork or vfork is \"$who\"."
 
 	# Set detach-on-fork mode if we aren't using the default.
 	if {$detach == "default"} {
@@ -96,8 +101,7 @@ proc test_follow_fork { who detach cmd } {
 	}
 
 	gdb_test "show detach-on-fork" \
-		 "Whether gdb will detach.* fork is $detach." \
-		 "show detach-on-fork"
+		 "Whether gdb will detach.* fork is $detach."
 
 	# Set a breakpoint after the fork if we aren't single-stepping
 	# past the fork.
@@ -111,13 +115,13 @@ proc test_follow_fork { who detach cmd } {
 	# Set up the output we expect to see after we run.
 	set expected_re ""
 	if {$who == "child"} {
-	    set expected_re "Attaching after.* fork to.*"
+	    set expected_re "\\\[Attaching after.* fork to.*"
 	    if {$detach == "on"} {
-		append expected_re "Detaching after fork from .*"
+		append expected_re "\\\[Detaching after fork from .*"
 	    }
 	    append expected_re "set breakpoint here.*"
 	} elseif {$who == "parent" && $detach == "on"} {
-	    set expected_re "Detaching after fork from .*set breakpoint here.*"
+	    set expected_re "\\\[Detaching after fork from .*set breakpoint here.*"
 	} else {
 	    set expected_re ".*set breakpoint here.*"
 	}
@@ -132,15 +136,13 @@ proc test_follow_fork { who detach cmd } {
 	if {$who == "parent" && $detach == "on"} {
 
 	    # Follow parent / detach child: the only inferior is the parent.
-	    gdb_test "info inferiors" "\\* 1 .* process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" "\\* 1 .* process.*"
 
 	} elseif {$who == "parent" && $detach == "off"} {
 
 	    # Follow parent / keep child: two inferiors under debug, the
 	    # parent is the current inferior.
-	    gdb_test "info inferiors" "\\* 1 .*process.* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" "\\* 1 .*process.* 2 .*process.*"
 
 	    gdb_test "inferior 2" "Switching to inferior 2 .*"
 	    set resume_unfollowed 1
@@ -150,15 +152,13 @@ proc test_follow_fork { who detach cmd } {
 	    # Follow child / detach parent: the child is under debug and is
 	    # the current inferior.  The parent is listed but is not under
 	    # debug.
-	    gdb_test "info inferiors" " 1 .*<null>.*\\* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" " 1 .*<null>.*\\* 2 .*process.*"
 
 	} elseif {$who == "child" && $detach == "off"} {
 
 	    # Follow child / keep parent: two inferiors under debug, the
 	    # child is the current inferior.
-	    gdb_test "info inferiors" " 1 .*process.*\\* 2 .*process.*" \
-		     "info inferiors"
+	    gdb_test "info inferiors" " 1 .*process.*\\* 2 .*process.*"
 
 	    gdb_test "inferior 1" "Switching to inferior 1 .*"
 	    set resume_unfollowed 1
@@ -218,7 +218,7 @@ proc catch_fork_child_follow {} {
 	"Temporary breakpoint.*, line $bp_after_fork.*" \
 	"set follow-fork child, tbreak"
 
-    set expected_re "Attaching after.* fork to.*Detaching after fork from"
+    set expected_re "\\\[Attaching after.* fork to.*\\\[Detaching after fork from"
     append expected_re ".* at .*$bp_after_fork.*"
     gdb_test "continue" $expected_re "set follow-fork child, hit tbreak"
 
@@ -306,7 +306,7 @@ proc tcatch_fork_parent_follow {} {
 	"set follow-fork parent, tbreak"
 
     gdb_test "continue" \
-	"Detaching after fork from.* at .*$bp_after_fork.*" \
+	"\\\[Detaching after fork from.* at .*$bp_after_fork.*" \
 	"set follow-fork parent, hit tbreak"
 
     # The child has been detached; allow time for any output it might
@@ -334,8 +334,7 @@ A fork or vfork creates a new process.  follow-fork-mode can be:.*
 .*parent  - the original process is debugged after a fork.*
 .*child   - the new process is debugged after a fork.*
 The unfollowed process will continue to run..*
-By default, the debugger will follow the parent process..*" \
-	"help set follow-fork"
+By default, the debugger will follow the parent process..*"
 
     # Verify that we can set follow-fork-mode, using an abbreviation
     # for both the flag and its value.
@@ -398,10 +397,6 @@ By default, the debugger will follow the parent process..*" \
     #
     if [runto_main] then { tcatch_fork_parent_follow }
 }
-
-# The "Detaching..." and "Attaching..." messages may be hidden by
-# default.
-gdb_test_no_output "set verbose"
 
 # This is a test of gdb's ability to follow the parent, child or both
 # parent and child of a Unix fork() system call.

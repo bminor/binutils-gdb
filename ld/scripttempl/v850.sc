@@ -1,11 +1,11 @@
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
-# 
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 
 cat << EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -16,7 +16,7 @@ OUTPUT_FORMAT("elf32-v850", "elf32-v850",
 OUTPUT_ARCH(v850:old-gcc-abi)
 ${RELOCATING+ENTRY(_start)}
 SEARCH_DIR(.);
-EXTERN(__ctbp __ep __gp);
+${RELOCATING+EXTERN(__ctbp __ep __gp)};
 SECTIONS
 {
   /* This saves a little space in the ELF file, since the zda starts
@@ -25,13 +25,13 @@ SECTIONS
   .zdata ${ZDATA_START_ADDR} :
   {
 	*(.zdata)
-	*(.zbss)
+	${RELOCATING+*(.zbss)
 	*(reszdata)
-	*(.zcommon)
+	*(.zcommon)}
   }
 
   /* This is the read only part of the zero data area.
-     Having it as a seperate section prevents its
+     Having it as a separate section prevents its
      attributes from being inherited by the zdata
      section.  Specifically it prevents the zdata
      section from being marked READONLY.  */
@@ -39,8 +39,8 @@ SECTIONS
   .rozdata ${ROZDATA_START_ADDR} :
   {
 	*(.rozdata)
-	*(romzdata)
-	*(romzbss)
+	${RELOCATING+*(romzdata)
+	*(romzbss)}
   }
 
   /* Read-only sections, merged into text segment.  */
@@ -71,17 +71,17 @@ SECTIONS
   .rela.bss	: { *(.rela.bss) }
   .rel.plt	: { *(.rel.plt) }
   .rela.plt	: { *(.rela.plt) }
-  .init		: { KEEP (*(.init)) } =0
+  .init		: { KEEP (*(SORT_NONE(.init))) } =0
   .plt		: { *(.plt) }
 
   .text		:
   {
     *(.text)
     ${RELOCATING+*(.text.*)}
-    
-    /* .gnu.warning sections are handled specially by elf32.em.  */
+
+    /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
-    *(.gnu.linkonce.t*)
+    ${RELOCATING+*(.gnu.linkonce.t*)}
   } =0
 
   ${RELOCATING+_etext = .;}
@@ -96,29 +96,29 @@ SECTIONS
     ${RELOCATING+PROVIDE(__ctbp = .);}
     *(.call_table_data)
   } = 0xff   /* Fill gaps with 0xff.  */
-  
+
   .call_table_text :
   {
     *(.call_table_text)
   }
 
-  .fini		: { KEEP (*(.fini)) } =0
-  .rodata	: { *(.rodata) ${RELOCATING+*(.rodata.*)} *(.gnu.linkonce.r*) }
+  .fini		: { KEEP (*(SORT_NONE(.fini))) } =0
+  .rodata	: { *(.rodata) ${RELOCATING+*(.rodata.*) *(.gnu.linkonce.r*)} }
   .rodata1	: { *(.rodata1) }
 
   .data		:
   {
     *(.data)
-    ${RELOCATING+*(.data.*)}
-    *(.gnu.linkonce.d*)
-    CONSTRUCTORS
+    ${RELOCATING+*(.data.*)
+    *(.gnu.linkonce.d*)}
+    ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1	: { *(.data1) }
   .ctors	:
   {
     ${CONSTRUCTING+___ctors = .;}
     KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
+    ${RELOCATING+KEEP (*(SORT(.ctors.*)))}
     KEEP (*crtend(.ctors))
     ${CONSTRUCTING+___ctors_end = .;}
   }
@@ -126,7 +126,7 @@ SECTIONS
   {
     ${CONSTRUCTING+___dtors = .;}
     KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
+    ${RELOCATING+KEEP (*(SORT(.dtors.*)))}
     KEEP (*crtend.o(.dtors))
     ${CONSTRUCTING+___dtors_end = .;}
   }
@@ -137,23 +137,23 @@ SECTIONS
 
   .gcc_except_table : { *(.gcc_except_table) }
 
-  .got		: { *(.got.plt) *(.got) }
+  .got		: {${RELOCATING+ *(.got.plt)} *(.got) }
   .dynamic	: { *(.dynamic) }
 
   .tdata ${TDATA_START_ADDR} :
   {
-	${RELOCATING+PROVIDE (__ep = .);}
+	${RELOCATING+PROVIDE (__ep = .);
 	*(.tbyte)
-	*(.tcommon_byte)
+	*(.tcommon_byte)}
 	*(.tdata)
-	*(.tbss)
-	*(.tcommon)
+	${RELOCATING+*(.tbss)
+	*(.tcommon)}
   }
 
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-     
+
   .sdata ${SDATA_START_ADDR} :
   {
 	${RELOCATING+PROVIDE (__gp = . + 0x8000);}
@@ -167,15 +167,15 @@ SECTIONS
   }
 
   /* We place the .sbss data section AFTER the .rosdata section, so that
-     it can directly preceed the .bss section.  This allows runtime startup
+     it can directly precede the .bss section.  This allows runtime startup
      code to initialise all the zero-data sections by simply taking the
      value of '_edata' and zeroing until it reaches '_end'.  */
-     
+
   .sbss :
   {
 	${RELOCATING+__sbss_start = .;}
 	*(.sbss)
-	*(.scommon)
+	${RELOCATING+*(.scommon)}
   }
 
   ${RELOCATING+_edata  = DEFINED (__sbss_start) ? __sbss_start : . ;}
@@ -185,16 +185,16 @@ SECTIONS
   {
 	${RELOCATING+__bss_start = DEFINED (__sbss_start) ? __sbss_start : . ;}
 	${RELOCATING+__real_bss_start = . ;}
-	*(.dynbss)
+	${RELOCATING+*(.dynbss)}
 	*(.bss)
-	*(COMMON)
+	${RELOCATING+*(COMMON)}
   }
 
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
   ${RELOCATING+PROVIDE (_heap_start = .);}
 
-  .note.renesas 0 : { KEEP(*(.note.renesas)) }  
+  .note.renesas 0 : { KEEP(*(.note.renesas)) }
 
   /* Stabs debugging sections.  */
   .stab 0		: { *(.stab) }

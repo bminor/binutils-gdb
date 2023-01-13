@@ -1,6 +1,6 @@
 # Expect script for common symbol override.
 #
-# Copyright (C) 2011-2016 Free Software Foundation, Inc.
+# Copyright (C) 2011-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -41,6 +41,12 @@ set LFLAGS ""
 if [istarget "tic6x-*-*"] {
     append LFLAGS " -melf32_tic6x_le"
 }
+# These targets do not default to linking with shared libraries.
+if { [istarget "mips*vr4100*-*-elf*"] \
+     || [istarget "mips*vr4300*-*-elf*"] \
+     || [istarget "mips*vr5000*-*-elf*"] } {
+    append LFLAGS " -call_shared"
+}
 
 set testname "Common symbol override test"
 
@@ -67,6 +73,9 @@ if [is_elf64 "tmpdir/libcomm-data.so"] {
 if [istarget "*-*-hpux*"] {
     append AFLAGS " --defsym HPUX=1"
 }
+
+# bfin does not currently support copy relocs.
+setup_xfail "bfin-*-*"
 
 setup_xfail "arm*-*-*" "ld/13802"
 

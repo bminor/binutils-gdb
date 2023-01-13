@@ -1,6 +1,6 @@
 /* Python interface to inferior thread event registries.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,22 +79,18 @@ evregpy_disconnect (PyObject *self, PyObject *function)
 eventregistry_object *
 create_eventregistry_object (void)
 {
-  eventregistry_object *eventregistry_obj;
+  gdbpy_ref<eventregistry_object>
+    eventregistry_obj (PyObject_New (eventregistry_object,
+				     &eventregistry_object_type));
 
-  eventregistry_obj = PyObject_New (eventregistry_object,
-                                    &eventregistry_object_type);
-
-  if (!eventregistry_obj)
+  if (eventregistry_obj == NULL)
     return NULL;
 
   eventregistry_obj->callbacks = PyList_New (0);
   if (!eventregistry_obj->callbacks)
-    {
-      Py_DECREF (eventregistry_obj);
-      return NULL;
-    }
+    return NULL;
 
-  return eventregistry_obj;
+  return eventregistry_obj.release ();
 }
 
 static void
@@ -116,7 +112,7 @@ gdbpy_initialize_eventregistry (void)
 				 (PyObject *) &eventregistry_object_type);
 }
 
-/* Retern the number of listeners currently connected to this
+/* Return the number of listeners currently connected to this
    registry.  */
 
 int

@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -30,15 +30,32 @@
 #include "gdb_proc_service.h"
 
 #include "amd64-nat.h"
-#include "linux-nat.h"
 #include "amd64-tdep.h"
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
-#include "x86-xstate.h"
+#include "gdbsupport/x86-xstate.h"
 
 #include "x86-linux-nat.h"
 #include "nat/linux-ptrace.h"
 #include "nat/amd64-linux-siginfo.h"
+
+/* This definition comes from prctl.h.  Kernels older than 2.5.64
+   do not have it.  */
+#ifndef PTRACE_ARCH_PRCTL
+#define PTRACE_ARCH_PRCTL      30
+#endif
+
+struct amd64_linux_nat_target final : public x86_linux_nat_target
+{
+  /* Add our register access methods.  */
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+
+  bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+    override;
+};
+
+static amd64_linux_nat_target the_amd64_linux_nat_target;
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
@@ -67,12 +84,78 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  -1,				  /* PKEYS register PKRU  */
   ORIG_RAX * 8			  /* "orig_eax"  */
 };
 
 
 /* Transfering the general-purpose registers between GDB, inferiors
    and core files.  */
+
+/* See amd64_collect_native_gregset.  This linux specific version handles
+   issues with negative EAX values not being restored correctly upon syscall
+   return when debugging 32-bit targets.  It has no effect on 64-bit
+   targets.  */
+
+static void
+amd64_linux_collect_native_gregset (const struct regcache *regcache,
+			            void *gregs, int regnum)
+{
+  amd64_collect_native_gregset (regcache, gregs, regnum);
+
+  struct gdbarch *gdbarch = regcache->arch ();
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    {
+      /* Sign extend EAX value to avoid potential syscall restart
+	 problems.  
+
+	 On Linux, when a syscall is interrupted by a signal, the
+	 (kernel function implementing the) syscall may return
+	 -ERESTARTSYS when a signal occurs.  Doing so indicates that
+	 the syscall is restartable.  Then, depending on settings
+	 associated with the signal handler, and after the signal
+	 handler is called, the kernel can then either return -EINTR
+	 or it can cause the syscall to be restarted.  We are
+	 concerned with the latter case here.
+	 
+	 On (32-bit) i386, the status (-ERESTARTSYS) is placed in the
+	 EAX register.  When debugging a 32-bit process from a 64-bit
+	 (amd64) GDB, the debugger fetches 64-bit registers even
+	 though the process being debugged is only 32-bit.  The
+	 register cache is only 32 bits wide though; GDB discards the
+	 high 32 bits when placing 64-bit values in the 32-bit
+	 regcache.  Normally, this is not a problem since the 32-bit
+	 process should only care about the lower 32-bit portions of
+	 these registers.  That said, it can happen that the 64-bit
+	 value being restored will be different from the 64-bit value
+	 that was originally retrieved from the kernel.  The one place
+	 (that we know of) where it does matter is in the kernel's
+	 syscall restart code.  The kernel's code for restarting a
+	 syscall after a signal expects to see a negative value
+	 (specifically -ERESTARTSYS) in the 64-bit RAX register in
+	 order to correctly cause a syscall to be restarted.
+	 
+	 The call to amd64_collect_native_gregset, above, is setting
+	 the high 32 bits of RAX (and other registers too) to 0.  For
+	 syscall restart, we need to sign extend EAX so that RAX will
+	 appear as a negative value when EAX is set to -ERESTARTSYS. 
+	 This in turn will cause the signal handling code in the
+	 kernel to recognize -ERESTARTSYS which will in turn cause the
+	 syscall to be restarted.
+
+	 The test case gdb.base/interrupt.exp tests for this problem.
+	 Without this sign extension code in place, it'll show
+	 a number of failures when testing against unix/-m32.  */
+
+      if (regnum == -1 || regnum == I386_EAX_REGNUM)
+	{
+	  void *ptr = ((gdb_byte *) gregs 
+		       + amd64_linux_gregset32_reg_offset[I386_EAX_REGNUM]);
+
+	  *(int64_t *) ptr = *(int32_t *) ptr;
+	}
+    }
+}
 
 /* Fill GDB's register cache with the general-purpose register values
    in *GREGSETP.  */
@@ -91,7 +174,7 @@ void
 fill_gregset (const struct regcache *regcache,
 	      elf_gregset_t *gregsetp, int regnum)
 {
-  amd64_collect_native_gregset (regcache, gregsetp, regnum);
+  amd64_linux_collect_native_gregset (regcache, gregsetp, regnum);
 }
 
 /* Transfering floating-point registers between GDB, inferiors and cores.  */
@@ -123,17 +206,16 @@ fill_fpregset (const struct regcache *regcache,
    this for all registers (including the floating point and SSE
    registers).  */
 
-static void
-amd64_linux_fetch_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regnum)
+void
+amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = regcache->ptid ().lwp ();
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = regcache->ptid ().pid (); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -156,6 +238,12 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 	  char xstateregs[X86_XSTATE_MAX_SIZE];
 	  struct iovec iov;
 
+	  /* Pre-4.14 kernels have a bug (fixed by commit 0852b374173b
+	     "x86/fpu: Add FPU state copying quirk to handle XRSTOR failure on
+	     Intel Skylake CPUs") that sometimes causes the mxcsr location in
+	     xstateregs not to be copied by PTRACE_GETREGSET.  Make sure that
+	     the location is at least initialized with a defined value.  */
+	  memset (xstateregs, 0, sizeof (xstateregs));
 	  iov.iov_base = xstateregs;
 	  iov.iov_len = sizeof (xstateregs);
 	  if (ptrace (PTRACE_GETREGSET, tid,
@@ -171,6 +259,30 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 	  amd64_supply_fxsave (regcache, -1, &fpregs);
 	}
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	unsigned long base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) < 0)
+	      perror_with_name (_("Couldn't get segment register fs_base"));
+
+	    regcache->raw_supply (AMD64_FSBASE_REGNUM, &base);
+	  }
+
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) < 0)
+	      perror_with_name (_("Couldn't get segment register gs_base"));
+
+	    regcache->raw_supply (AMD64_GSBASE_REGNUM, &base);
+	  }
+      }
+#endif
     }
 }
 
@@ -178,17 +290,16 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
    -1, do this for all registers (including the floating-point and SSE
    registers).  */
 
-static void
-amd64_linux_store_inferior_registers (struct target_ops *ops,
-				      struct regcache *regcache, int regnum)
+void
+amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = regcache->ptid ().lwp ();
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = regcache->ptid ().pid (); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -197,7 +308,7 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
       if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
 	perror_with_name (_("Couldn't get registers"));
 
-      amd64_collect_native_gregset (regcache, &regs, regnum);
+      amd64_linux_collect_native_gregset (regcache, &regs, regnum);
 
       if (ptrace (PTRACE_SETREGS, tid, 0, (long) &regs) < 0)
 	perror_with_name (_("Couldn't write registers"));
@@ -237,6 +348,30 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
 	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	void *base;
+
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    regcache->raw_collect (AMD64_FSBASE_REGNUM, &base);
+
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_FS) < 0)
+	      perror_with_name (_("Couldn't write segment register fs_base"));
+	  }
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+
+	    regcache->raw_collect (AMD64_GSBASE_REGNUM, &base);
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_GS) < 0)
+	      perror_with_name (_("Couldn't write segment register gs_base"));
+	  }
+      }
+#endif
     }
 }
 
@@ -245,10 +380,10 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
    a request for a thread's local storage address.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph,
+ps_get_thread_area (struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
-  if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
+  if (gdbarch_bfd_arch_info (ph->thread->inf->gdbarch)->bits_per_word == 32)
     {
       unsigned int base_addr;
       ps_err_e result;
@@ -265,11 +400,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
     }
   else
     {
-      /* This definition comes from prctl.h, but some kernels may not
-         have it.  */
-#ifndef PTRACE_ARCH_PRCTL
-#define PTRACE_ARCH_PRCTL      30
-#endif
+
       /* FIXME: ezannoni-2003-07-09 see comment above about include
 	 file order.  We could be getting bogus values for these two.  */
       gdb_assert (FS < ELF_NGREG);
@@ -321,38 +452,36 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
+/* Convert a ptrace/host siginfo object, into/from the siginfo in the
    layout of the inferiors' architecture.  Returns true if any
    conversion was done; false otherwise.  If DIRECTION is 1, then copy
-   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
-static int
-amd64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+bool
+amd64_linux_nat_target::low_siginfo_fixup (siginfo_t *ptrace,
+					   gdb_byte *inf,
+					   int direction)
 {
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
 
   /* Is the inferior 32-bit?  If so, then do fixup the siginfo
      object.  */
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
-					       FIXUP_32);
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
+					     FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (gdbarch_addr_bit (gdbarch) == 32 && sizeof (void *) == 8)
-      return amd64_linux_siginfo_fixup_common (native, inf, direction,
-					       FIXUP_X32);
+    return amd64_linux_siginfo_fixup_common (ptrace, inf, direction,
+					     FIXUP_X32);
   else
-    return 0;
+    return false;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_amd64_linux_nat (void);
-
+void _initialize_amd64_linux_nat ();
 void
-_initialize_amd64_linux_nat (void)
+_initialize_amd64_linux_nat ()
 {
-  struct target_ops *t;
-
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
   amd64_native_gregset64_reg_offset = amd64_linux_gregset_reg_offset;
@@ -361,16 +490,8 @@ _initialize_amd64_linux_nat (void)
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
 
-  /* Create a generic x86 GNU/Linux target.  */
-  t = x86_linux_create_target ();
-
-  /* Add our register access methods.  */
-  t->to_fetch_registers = amd64_linux_fetch_inferior_registers;
-  t->to_store_registers = amd64_linux_store_inferior_registers;
+  linux_target = &the_amd64_linux_nat_target;
 
   /* Add the target.  */
-  x86_linux_add_target (t);
-
-  /* Add our siginfo layout converter.  */
-  linux_nat_set_siginfo_fixup (t, amd64_linux_siginfo_fixup);
+  add_inf_child_target (linux_target);
 }

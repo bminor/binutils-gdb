@@ -1,4 +1,4 @@
-#as:
+#as: -O0
 #objdump: -drw
 #name: x86-64 32bit displacement
 

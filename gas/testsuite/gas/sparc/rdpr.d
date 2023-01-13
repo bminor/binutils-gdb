@@ -1,4 +1,4 @@
-#as: -64 -Av9
+#as: -64 -Av9m
 #objdump: -dr
 #name: sparc64 rdpr
 

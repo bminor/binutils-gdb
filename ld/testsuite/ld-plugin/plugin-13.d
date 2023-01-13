@@ -23,5 +23,5 @@ hook called: claim_file tmpdir/main.o \[@0/.* not claimed
 hook called: claim_file .*/ld/testsuite/ld-plugin/func.c \[@0/.* CLAIMED
 hook called: claim_file tmpdir/text.o \[@0/.* not claimed
 #...
-.*main.c.*: undefined reference to `func'
+.*main.c.*: undefined reference to `\.?func'
 #...

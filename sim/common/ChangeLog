@@ -1,3 +1,170 @@
+2020-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* nrun.c: Include stdlib.h.
+	* sim-core.c: Likewise.
+	* sim-engine.c: Likewise.
+	* sim-io.c: Likewise.
+	* sim-module.c: Likewise.
+	* sim-reason.c: Likewise.
+
+2019-12-19  Tom Tromey  <tromey@adacore.com>
+
+	PR build/24572:
+	* Makefile.in (install-strip): New target.
+
+2019-12-01  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	* sim-utils.c: Prevent buffer overflow.
+
+2019-09-23  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* gennltvals.sh: Add PRU libgloss target.
+	* nltvals.def: Regenerate from the latest libgloss sources.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
+	* cgen-accfp.c (unorderedsf, unordereddf): New functions.
+	(cgen_init_accurate_fpu): Wire up unorderedsf and unordereddf.
+	* cgen-fpu.h (cgen_fp_ops): Define fields unorderedsf and unordereddf.
+
+2019-06-13  Stafford Horne  <shorne@gmail.com>
+
+	* cgen-accfp.c (floatdidf, fixdfdi): New functions.
+	(cgen_init_accurate_fpu): Add floatdidf and fixdfdi.
+
+2019-04-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cgen-ops.h (SUBWORDXFSI): Compare HOST_BYTE_ORDER not
+	CURRENT_TARGET_BYTE_ORDER.
+	(SUBWORDTFSI): Likewise.
+	(JOINSIDF): Likewise.
+	(JOINSIXF): Likewise.
+	(JOINSITF): Likewise.
+
+2019-03-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* sim-base.h: Add 'sim-assert.h' include.
+	* sim-basics.h: Add 'libiberty.h' include.
+
+2019-03-28  Stafford Horne  <shorne@gmail.com>
+
+	* sim-options.c: Include "config.h".
+	Include <stdio.h>.
+	* sim-watch.c: Include "config.h".
+	Include <stdio.h>.
+	* hw-device.c: Include <string.h>.
+	* hw-events.c: Include <string.h>.
+	* hw-handles.c: Include <stdlib.h>.
+	* sim-fpu.c: Include <stdlib.h>.
+
+2019-03-28  Stafford Horne  <shorne@gmail.com>
+
+	* Make-common.in (sim-arange_h): Remove sim-arange.c
+	* sim-arange.c: Remove SIM_ARANGE_C.
+	Add ifdef for _SIM_ARANGE_C_.
+	Include "sim-arange.h".
+	Remove include for unused "sim-assert.h".
+	Remove DEFINE_INLINE_P.  Remove DEFINE_NON_INLINE_P.
+	(sim_addr_range_add): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_delete): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_hit_p): Change from SIM_ARANGE_INLINE to
+	INLINE_SIM_ARANGE.
+	* sim-arange.h (sim_addr_range_add): Declare as
+	INLINE_SIM_ARANGE.
+	(sim_addr_range_delete): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_hit_p) Declare as INLINE_SIM_ARANGE.
+	Remove definition of SIM_ARANGE_INLINE.
+	Remove [HAVE_INLINE].
+	Wrap include "sim-arange.c" in H_REVEALS_MODULE_P.
+	* sim-base.h: Include "sim-arange.h"
+	* sim-basics.h: Remove include of "sim-arange.h"
+	* sim-inline.c: Include "sim-arange.c"
+	* sim-inline.h: Define INLINE_SIM_ARANGE.
+	Define SIM_ARANGE_INLINE.  Define EXTERN_SIM_ARANGE_P.
+	Define STATIC_INLINE_SIM_ARANGE.  Define STATIC_SIM_ARANGE.
+
+2019-01-26  Tom Tromey  <tom@tromey.com>
+
+	* Make-common.in (version.c): Use sim's create-version.sh.
+	* create-version.sh: New file.
+
+2019-01-16  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	* sim-arange.c (DEFINE_INLINE_P, DEFINE_NON_INLINE_P): Remove.
+
+2019-01-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sim-arange.h (SIM_ARANGE_INLINE): Change EXTERN to extern.
+
+2018-12-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* sim-syscall.c (sim_syscall_multi): Don't update sc->errcode at
+	this point, it should have already been set in cb_syscall.
+
+2018-10-05  Stafford Horne  <shorne@gmail.com>
+
+	* cgen-ops.h (ADDCFDI): New function, add carry flag DI variant.
+	(ADDOFDI): New function, add overflow flag DI variant.
+	(SUBCFDI): New function, subtract carry flag DI variant.
+	(SUBOFDI): New function, subtract overflow flag DI variant.
+
+2018-09-28  Компан, Вячеслав Олегович  <kompan.vo@phystech.edu>
+
+	* sim-core.h (sim_cpu_core): Rename cpu_core.xor to
+	cpu_core.byte_xor.
+	* sim-core.c (sim_core_set_xor): Likewise.
+	(sim_core_xor_read_buffer): Likewise.
+	(sim_core_xor_write_buffer): Likewise.
+
+2017-12-12  Peter Gavin  <pgavin@gmail.com>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* cgen-ops.h (MUL2OFSI): New function, 2's complement overflow
+	flag.
+	(MUL1OFSI): New function, 1's complement overflow flag.
+
+2017-12-12  Peter Gavin  <pgavin@gmail.com>
+	    Stafford Horne <shorne@gmail.com>
+
+	* cgen-accfp.c (remsf, remdf): New function.
+	(cgen_init_accurate_fpu): Add remsf and remdf.
+	* cgen-fpu.h (cgen_fp_ops): Add remsf, remdf, remxf and remtf.
+	* sim-fpu.c (sim_fpu_rem): New function.
+	* sim-fpu.h (sim_fpu_status_invalid_irx): New enum.
+	(sim_fpu_rem): New function.
+	(sim_fpu_print_status): Add case for sim_fpu_status_invalid_irx.
+
+2017-09-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* acinclude.m4 (SIM_AC_COMMON): Honor existing CC_FOR_BUILD in
+	environment.
+
+2017-05-24  Yao Qi  <yao.qi@linaro.org>
+
+	* sim-trace.c (trace_disasm): Caller update.
+
+2016-08-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-base.h (sim_state_base): Add prog_syms_count.
+	(STATE_PROG_SYMS_COUNT): Define.
+	* sim-trace.c (trace_uninstall): Free STATE_PROG_SYMS memory.
+	(trace_load_symbols): New function.
+	(trace_sym_value): Likewise.
+	(trace_prefix): Change STATE_CPU(cpu) to sd.  Replace symbol
+	loading logic with a call to trace_load_symbols.
+	* sim-trace.h (trace_load_symbols, trace_sym_value): New
+	prototypes.
+
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-types.h (mode_names): Mark const.
+	* cgen-utils.c (mode_names): Likewise.
+
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-defs.h (struct cgen_state): Delete argv and envp.
+	(STATE_ARGV, STATE_ENVP): Delete.
+
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
 	* cgen-scache.c (scache_option_handler): Prevent possible

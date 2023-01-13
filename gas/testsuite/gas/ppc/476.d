@@ -40,20 +40,20 @@ Disassembly of section \.text:
   78:	(48 00 00 02|02 00 00 48) 	ba      0 <ppc476>
   7c:	(40 01 00 00|00 00 01 40) 	bdnzf   gt,7c <ppc476\+0x7c>
   80:	(40 85 00 02|02 00 85 40) 	blea    cr1,0 <ppc476>
-  84:	(4d 80 04 20|20 04 80 4d) 	bltctr  
+  84:	(4d 80 04 20|20 04 80 4d) 	bltctr
   88:	(4c 8a 04 20|20 04 8a 4c) 	bnectr  cr2
   8c:	(4c 86 04 20|20 04 86 4c) 	bnectr  cr1
   90:	(4c 86 04 20|20 04 86 4c) 	bnectr  cr1
-  94:	(4d 80 04 21|21 04 80 4d) 	bltctrl 
+  94:	(4d 80 04 21|21 04 80 4d) 	bltctrl
   98:	(4c 8a 04 21|21 04 8a 4c) 	bnectrl cr2
   9c:	(4c 86 04 21|21 04 86 4c) 	bnectrl cr1
   a0:	(4c 86 04 21|21 04 86 4c) 	bnectrl cr1
   a4:	(40 43 00 01|01 00 43 40) 	bdzfl   so,a4 <ppc476\+0xa4>
-  a8:	(4d 80 00 20|20 00 80 4d) 	bltlr   
+  a8:	(4d 80 00 20|20 00 80 4d) 	bltlr
   ac:	(4c 8a 00 20|20 00 8a 4c) 	bnelr   cr2
   b0:	(4c 86 00 20|20 00 86 4c) 	bnelr   cr1
   b4:	(4c 86 00 20|20 00 86 4c) 	bnelr   cr1
-  b8:	(4d 80 00 21|21 00 80 4d) 	bltlrl  
+  b8:	(4d 80 00 21|21 00 80 4d) 	bltlrl
   bc:	(4c 8a 00 21|21 00 8a 4c) 	bnelrl  cr2
   c0:	(4c 86 00 21|21 00 86 4c) 	bnelrl  cr1
   c4:	(4c 86 00 21|21 00 86 4c) 	bnelrl  cr1
@@ -100,9 +100,9 @@ Disassembly of section \.text:
  168:	(7d 4b 61 0c|0c 61 4b 7d) 	dcbtstls 10,r11,r12
  16c:	(7c 01 17 ec|ec 17 01 7c) 	dcbz    r1,r2
  170:	(7c 05 37 ec|ec 37 05 7c) 	dcbz    r5,r6
- 174:	(7c 00 03 8c|8c 03 00 7c) 	dccci   
- 178:	(7c 00 03 8c|8c 03 00 7c) 	dccci   
- 17c:	(7c 00 03 8c|8c 03 00 7c) 	dccci   
+ 174:	(7c 00 03 8c|8c 03 00 7c) 	dccci
+ 178:	(7c 00 03 8c|8c 03 00 7c) 	dccci
+ 17c:	(7c 00 03 8c|8c 03 00 7c) 	dccci
  180:	(7c 20 03 8c|8c 03 20 7c) 	dci     1
  184:	(7d 4b 63 d6|d6 63 4b 7d) 	divw    r10,r11,r12
  188:	(7d 6c 6b d7|d7 6b 6c 7d) 	divw\.   r11,r12,r13
@@ -203,9 +203,9 @@ Disassembly of section \.text:
  304:	(7e 11 91 cc|cc 91 11 7e) 	icblc   16,r17,r18
  308:	(7c a8 48 2c|2c 48 a8 7c) 	icbt    5,r8,r9
  30c:	(7d ae 7b cc|cc 7b ae 7d) 	icbtls  13,r14,r15
- 310:	(7c 00 07 8c|8c 07 00 7c) 	iccci   
- 314:	(7c 00 07 8c|8c 07 00 7c) 	iccci   
- 318:	(7c 00 07 8c|8c 07 00 7c) 	iccci   
+ 310:	(7c 00 07 8c|8c 07 00 7c) 	iccci
+ 314:	(7c 00 07 8c|8c 07 00 7c) 	iccci
+ 318:	(7c 00 07 8c|8c 07 00 7c) 	iccci
  31c:	(7c 20 07 8c|8c 07 20 7c) 	ici     1
  320:	(7c 03 27 cc|cc 27 03 7c) 	icread  r3,r4
  324:	(50 83 65 36|36 65 83 50) 	rlwimi  r3,r4,12,20,27
@@ -292,8 +292,8 @@ Disassembly of section \.text:
  468:	(10 64 2b 19|19 2b 64 10) 	maclhwu\. r3,r4,r5
  46c:	(10 64 2f 18|18 2f 64 10) 	maclhwuo r3,r4,r5
  470:	(10 64 2f 19|19 2f 64 10) 	maclhwuo\. r3,r4,r5
- 474:	(7c 00 06 ac|ac 06 00 7c) 	mbar    
- 478:	(7c 00 06 ac|ac 06 00 7c) 	mbar    
+ 474:	(7c 00 06 ac|ac 06 00 7c) 	mbar
+ 478:	(7c 00 06 ac|ac 06 00 7c) 	mbar
  47c:	(7c 20 06 ac|ac 06 20 7c) 	mbar    1
  480:	(4c 04 00 00|00 00 04 4c) 	mcrf    cr0,cr1
  484:	(fd 90 00 80|80 00 90 fd) 	mcrfs   cr3,cr4
@@ -315,18 +315,18 @@ Disassembly of section \.text:
  4c4:	(7d 10 6b 86|86 6b 10 7d) 	mtdcr   432,r8
  4c8:	(7c 83 03 46|46 03 83 7c) 	mtdcrux r3,r4
  4cc:	(7c e6 03 06|06 03 e6 7c) 	mtdcrx  r6,r7
- 4d0:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  so
- 4d4:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. so
- 4d8:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  so
- 4dc:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. so
+ 4d0:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  3
+ 4d4:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. 3
+ 4d8:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  3
+ 4dc:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. 3
  4e0:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e4:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e8:	(fc 0d 55 8e|8e 55 0d fc) 	mtfsf   6,f10,0,1
- 4ec:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1,0
+ 4ec:	(fe 0c 55 8e|8e 55 0c fe) 	mtfsf   6,f10,1
  4f0:	(fc 0c 5d 8f|8f 5d 0c fc) 	mtfsf\.  6,f11
  4f4:	(fc 0c 5d 8f|8f 5d 0c fc) 	mtfsf\.  6,f11
  4f8:	(fc 0d 5d 8f|8f 5d 0d fc) 	mtfsf\.  6,f11,0,1
- 4fc:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf\.  6,f11,1,0
+ 4fc:	(fe 0c 5d 8f|8f 5d 0c fe) 	mtfsf\.  6,f11,1
  500:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
  504:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
  508:	(ff 00 01 0c|0c 01 00 ff) 	mtfsfi  6,0
@@ -412,7 +412,7 @@ Disassembly of section \.text:
  648:	(5c 83 28 3f|3f 28 83 5c) 	rotlw\.  r3,r4,r5
  64c:	(5c 83 28 3e|3e 28 83 5c) 	rotlw   r3,r4,r5
  650:	(5c 83 28 3f|3f 28 83 5c) 	rotlw\.  r3,r4,r5
- 654:	(44 00 00 02|02 00 00 44) 	sc      
+ 654:	(44 00 00 02|02 00 00 44) 	sc
  658:	(7c 83 28 30|30 28 83 7c) 	slw     r3,r4,r5
  65c:	(7c 83 28 31|31 28 83 7c) 	slw\.    r3,r4,r5
  660:	(7c 83 2e 30|30 2e 83 7c) 	sraw    r3,r4,r5
@@ -476,8 +476,8 @@ Disassembly of section \.text:
  748:	(7d 8d 77 24|24 77 8d 7d) 	tlbsx   r12,r13,r14
  74c:	(7d 8d 77 25|25 77 8d 7d) 	tlbsx\.  r12,r13,r14
  750:	(7c 00 04 6c|6c 04 00 7c) 	tlbsync
- 754:	(7c 00 07 a4|a4 07 00 7c) 	tlbwe   
- 758:	(7c 00 07 a4|a4 07 00 7c) 	tlbwe   
+ 754:	(7c 00 07 a4|a4 07 00 7c) 	tlbwe
+ 758:	(7c 00 07 a4|a4 07 00 7c) 	tlbwe
  75c:	(7c 21 0f a4|a4 0f 21 7c) 	tlbwe   r1,r1,1
  760:	(7f e0 00 08|08 00 e0 7f) 	trap
  764:	(7f e0 00 08|08 00 e0 7f) 	trap

@@ -1,6 +1,6 @@
 /* Fortran language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -27,17 +27,19 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "varobj.h"
+#include "gdbcore.h"
 #include "f-lang.h"
 #include "valprint.h"
 #include "value.h"
 #include "cp-support.h"
 #include "charset.h"
 #include "c-lang.h"
+#include "target-float.h"
+#include "gdbarch.h"
 
+#include <math.h>
 
 /* Local functions */
-
-extern void _initialize_f_language (void);
 
 static void f_printchar (int c, struct type *type, struct ui_file * stream);
 static void f_emit_char (int c, struct type *type,
@@ -57,7 +59,7 @@ f_get_encoding (struct type *type)
       encoding = target_charset (get_type_arch (type));
       break;
     case 4:
-      if (gdbarch_byte_order (get_type_arch (type)) == BFD_ENDIAN_BIG)
+      if (type_byte_order (type) == BFD_ENDIAN_BIG)
 	encoding = "UTF-32BE";
       else
 	encoding = "UTF-32LE";
@@ -203,7 +205,7 @@ f_language_arch_info (struct gdbarch *gdbarch,
 
 /* Remove the modules separator :: from the default break list.  */
 
-static char *
+static const char *
 f_word_break_characters (void)
 {
   static char *retval;
@@ -228,14 +230,405 @@ f_word_break_characters (void)
 /* Consider the modules separator :: as a valid symbol name character
    class.  */
 
-static VEC (char_ptr) *
-f_make_symbol_completion_list (const char *text, const char *word,
-			       enum type_code code)
+static void
+f_collect_symbol_completion_matches (completion_tracker &tracker,
+				     complete_symbol_mode mode,
+				     symbol_name_match_type compare_name,
+				     const char *text, const char *word,
+				     enum type_code code)
 {
-  return default_make_symbol_completion_list_break_on (text, word, ":", code);
+  default_collect_symbol_completion_matches_break_on (tracker, mode,
+						      compare_name,
+						      text, word, ":", code);
 }
 
-const struct language_defn f_language_defn =
+/* Special expression evaluation cases for Fortran.  */
+
+static struct value *
+evaluate_subexp_f (struct type *expect_type, struct expression *exp,
+		   int *pos, enum noside noside)
+{
+  struct value *arg1 = NULL, *arg2 = NULL;
+  enum exp_opcode op;
+  int pc;
+  struct type *type;
+
+  pc = *pos;
+  *pos += 1;
+  op = exp->elts[pc].opcode;
+
+  switch (op)
+    {
+    default:
+      *pos -= 1;
+      return evaluate_subexp_standard (expect_type, exp, pos, noside);
+
+    case UNOP_ABS:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+      type = value_type (arg1);
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_FLT:
+	  {
+	    double d
+	      = fabs (target_float_to_host_double (value_contents (arg1),
+						   value_type (arg1)));
+	    return value_from_host_double (type, d);
+	  }
+	case TYPE_CODE_INT:
+	  {
+	    LONGEST l = value_as_long (arg1);
+	    l = llabs (l);
+	    return value_from_longest (type, l);
+	  }
+	}
+      error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
+
+    case BINOP_MOD:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+      type = value_type (arg1);
+      if (TYPE_CODE (type) != TYPE_CODE (value_type (arg2)))
+	error (_("non-matching types for parameters to MOD ()"));
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_FLT:
+	  {
+	    double d1
+	      = target_float_to_host_double (value_contents (arg1),
+					     value_type (arg1));
+	    double d2
+	      = target_float_to_host_double (value_contents (arg2),
+					     value_type (arg2));
+	    double d3 = fmod (d1, d2);
+	    return value_from_host_double (type, d3);
+	  }
+	case TYPE_CODE_INT:
+	  {
+	    LONGEST v1 = value_as_long (arg1);
+	    LONGEST v2 = value_as_long (arg2);
+	    if (v2 == 0)
+	      error (_("calling MOD (N, 0) is undefined"));
+	    LONGEST v3 = v1 - (v1 / v2) * v2;
+	    return value_from_longest (value_type (arg1), v3);
+	  }
+	}
+      error (_("MOD of type %s not supported"), TYPE_SAFE_NAME (type));
+
+    case UNOP_FORTRAN_CEILING:
+      {
+	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	if (noside == EVAL_SKIP)
+	  return eval_skip_value (exp);
+	type = value_type (arg1);
+	if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	  error (_("argument to CEILING must be of type float"));
+	double val
+	  = target_float_to_host_double (value_contents (arg1),
+					 value_type (arg1));
+	val = ceil (val);
+	return value_from_host_double (type, val);
+      }
+
+    case UNOP_FORTRAN_FLOOR:
+      {
+	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	if (noside == EVAL_SKIP)
+	  return eval_skip_value (exp);
+	type = value_type (arg1);
+	if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	  error (_("argument to FLOOR must be of type float"));
+	double val
+	  = target_float_to_host_double (value_contents (arg1),
+					 value_type (arg1));
+	val = floor (val);
+	return value_from_host_double (type, val);
+      }
+
+    case BINOP_FORTRAN_MODULO:
+      {
+	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+	if (noside == EVAL_SKIP)
+	  return eval_skip_value (exp);
+	type = value_type (arg1);
+	if (TYPE_CODE (type) != TYPE_CODE (value_type (arg2)))
+	  error (_("non-matching types for parameters to MODULO ()"));
+        /* MODULO(A, P) = A - FLOOR (A / P) * P */
+	switch (TYPE_CODE (type))
+	  {
+	  case TYPE_CODE_INT:
+	    {
+	      LONGEST a = value_as_long (arg1);
+	      LONGEST p = value_as_long (arg2);
+	      LONGEST result = a - (a / p) * p;
+	      if (result != 0 && (a < 0) != (p < 0))
+		result += p;
+	      return value_from_longest (value_type (arg1), result);
+	    }
+	  case TYPE_CODE_FLT:
+	    {
+	      double a
+		= target_float_to_host_double (value_contents (arg1),
+					       value_type (arg1));
+	      double p
+		= target_float_to_host_double (value_contents (arg2),
+					       value_type (arg2));
+	      double result = fmod (a, p);
+	      if (result != 0 && (a < 0.0) != (p < 0.0))
+		result += p;
+	      return value_from_host_double (type, result);
+	    }
+	  }
+	error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
+      }
+
+    case BINOP_FORTRAN_CMPLX:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+      type = builtin_f_type(exp->gdbarch)->builtin_complex_s16;
+      return value_literal_complex (arg1, arg2, type);
+
+    case UNOP_FORTRAN_KIND:
+      arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      type = value_type (arg1);
+
+      switch (TYPE_CODE (type))
+        {
+          case TYPE_CODE_STRUCT:
+          case TYPE_CODE_UNION:
+          case TYPE_CODE_MODULE:
+          case TYPE_CODE_FUNC:
+            error (_("argument to kind must be an intrinsic type"));
+        }
+
+      if (!TYPE_TARGET_TYPE (type))
+        return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+				   TYPE_LENGTH (type));
+      return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+				 TYPE_LENGTH (TYPE_TARGET_TYPE(type)));
+    }
+
+  /* Should be unreachable.  */
+  return nullptr;
+}
+
+/* Return true if TYPE is a string.  */
+
+static bool
+f_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  return (TYPE_CODE (type) == TYPE_CODE_STRING
+	  || (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR));
+}
+
+/* Special expression lengths for Fortran.  */
+
+static void
+operator_length_f (const struct expression *exp, int pc, int *oplenp,
+		   int *argsp)
+{
+  int oplen = 1;
+  int args = 0;
+
+  switch (exp->elts[pc - 1].opcode)
+    {
+    default:
+      operator_length_standard (exp, pc, oplenp, argsp);
+      return;
+
+    case UNOP_FORTRAN_KIND:
+    case UNOP_FORTRAN_FLOOR:
+    case UNOP_FORTRAN_CEILING:
+      oplen = 1;
+      args = 1;
+      break;
+
+    case BINOP_FORTRAN_CMPLX:
+    case BINOP_FORTRAN_MODULO:
+      oplen = 1;
+      args = 2;
+      break;
+    }
+
+  *oplenp = oplen;
+  *argsp = args;
+}
+
+/* Helper for PRINT_SUBEXP_F.  Arguments are as for PRINT_SUBEXP_F, except
+   the extra argument NAME which is the text that should be printed as the
+   name of this operation.  */
+
+static void
+print_unop_subexp_f (struct expression *exp, int *pos,
+		     struct ui_file *stream, enum precedence prec,
+		     const char *name)
+{
+  (*pos)++;
+  fprintf_filtered (stream, "%s(", name);
+  print_subexp (exp, pos, stream, PREC_SUFFIX);
+  fputs_filtered (")", stream);
+}
+
+/* Helper for PRINT_SUBEXP_F.  Arguments are as for PRINT_SUBEXP_F, except
+   the extra argument NAME which is the text that should be printed as the
+   name of this operation.  */
+
+static void
+print_binop_subexp_f (struct expression *exp, int *pos,
+		      struct ui_file *stream, enum precedence prec,
+		      const char *name)
+{
+  (*pos)++;
+  fprintf_filtered (stream, "%s(", name);
+  print_subexp (exp, pos, stream, PREC_SUFFIX);
+  fputs_filtered (",", stream);
+  print_subexp (exp, pos, stream, PREC_SUFFIX);
+  fputs_filtered (")", stream);
+}
+
+/* Special expression printing for Fortran.  */
+
+static void
+print_subexp_f (struct expression *exp, int *pos,
+		struct ui_file *stream, enum precedence prec)
+{
+  int pc = *pos;
+  enum exp_opcode op = exp->elts[pc].opcode;
+
+  switch (op)
+    {
+    default:
+      print_subexp_standard (exp, pos, stream, prec);
+      return;
+
+    case UNOP_FORTRAN_KIND:
+      print_unop_subexp_f (exp, pos, stream, prec, "KIND");
+      return;
+
+    case UNOP_FORTRAN_FLOOR:
+      print_unop_subexp_f (exp, pos, stream, prec, "FLOOR");
+      return;
+
+    case UNOP_FORTRAN_CEILING:
+      print_unop_subexp_f (exp, pos, stream, prec, "CEILING");
+      return;
+
+    case BINOP_FORTRAN_CMPLX:
+      print_binop_subexp_f (exp, pos, stream, prec, "CMPLX");
+      return;
+
+    case BINOP_FORTRAN_MODULO:
+      print_binop_subexp_f (exp, pos, stream, prec, "MODULO");
+      return;
+    }
+}
+
+/* Special expression names for Fortran.  */
+
+static const char *
+op_name_f (enum exp_opcode opcode)
+{
+  switch (opcode)
+    {
+    default:
+      return op_name_standard (opcode);
+
+#define OP(name)	\
+    case name:		\
+      return #name ;
+#include "fortran-operator.def"
+#undef OP
+    }
+}
+
+/* Special expression dumping for Fortran.  */
+
+static int
+dump_subexp_body_f (struct expression *exp,
+		    struct ui_file *stream, int elt)
+{
+  int opcode = exp->elts[elt].opcode;
+  int oplen, nargs, i;
+
+  switch (opcode)
+    {
+    default:
+      return dump_subexp_body_standard (exp, stream, elt);
+
+    case UNOP_FORTRAN_KIND:
+    case UNOP_FORTRAN_FLOOR:
+    case UNOP_FORTRAN_CEILING:
+    case BINOP_FORTRAN_CMPLX:
+    case BINOP_FORTRAN_MODULO:
+      operator_length_f (exp, (elt + 1), &oplen, &nargs);
+      break;
+    }
+
+  elt += oplen;
+  for (i = 0; i < nargs; i += 1)
+    elt = dump_subexp (exp, stream, elt);
+
+  return elt;
+}
+
+/* Special expression checking for Fortran.  */
+
+static int
+operator_check_f (struct expression *exp, int pos,
+		  int (*objfile_func) (struct objfile *objfile,
+				       void *data),
+		  void *data)
+{
+  const union exp_element *const elts = exp->elts;
+
+  switch (elts[pos].opcode)
+    {
+    case UNOP_FORTRAN_KIND:
+    case UNOP_FORTRAN_FLOOR:
+    case UNOP_FORTRAN_CEILING:
+    case BINOP_FORTRAN_CMPLX:
+    case BINOP_FORTRAN_MODULO:
+      /* Any references to objfiles are held in the arguments to this
+	 expression, not within the expression itself, so no additional
+	 checking is required here, the outer expression iteration code
+	 will take care of checking each argument.  */
+      break;
+
+    default:
+      return operator_check_standard (exp, pos, objfile_func, data);
+    }
+
+  return 0;
+}
+
+static const char *f_extensions[] =
+{
+  ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
+  ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",
+  NULL
+};
+
+/* Expression processing for Fortran.  */
+static const struct exp_descriptor exp_descriptor_f =
+{
+  print_subexp_f,
+  operator_length_f,
+  operator_check_f,
+  op_name_f,
+  dump_subexp_body_f,
+  evaluate_subexp_f
+};
+
+extern const struct language_defn f_language_defn =
 {
   "fortran",
   "Fortran",
@@ -244,40 +637,50 @@ const struct language_defn f_language_defn =
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,
-  &exp_descriptor_standard,
+  f_extensions,
+  &exp_descriptor_f,
   f_parse,			/* parser */
-  f_error,			/* parser error function */
   null_post_parser,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
   f_print_type,			/* Print a type using appropriate syntax */
-  default_print_typedef,	/* Print a typedef using appropriate syntax */
+  f_print_typedef,		/* Print a typedef using appropriate syntax */
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,                    	/* name_of_this */
+  false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
+
+  /* We could support demangling here to provide module namespaces
+     also for inferiors with only minimal symbol table (ELF symbols).
+     Just the mangling standard is not standardized across compilers
+     and there is no DW_AT_producer available for inferiors with only
+     the ELF symbols to check the mangling kind.  */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   f_word_break_characters,
-  f_make_symbol_completion_list,
+  f_collect_symbol_completion_matches,
   f_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  default_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  cp_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  f_is_string_type_p,
+  "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
 static void *
@@ -287,10 +690,10 @@ build_fortran_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_f_type);
 
   builtin_f_type->builtin_void
-    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "VOID");
+    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
 
   builtin_f_type->builtin_character
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
+    = arch_type (gdbarch, TYPE_CODE_CHAR, TARGET_CHAR_BIT, "character");
 
   builtin_f_type->builtin_logical_s1
     = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "logical*1");
@@ -298,6 +701,10 @@ build_fortran_types (struct gdbarch *gdbarch)
   builtin_f_type->builtin_integer_s2
     = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0,
 			 "integer*2");
+
+  builtin_f_type->builtin_integer_s8
+    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
+			 "integer*8");
 
   builtin_f_type->builtin_logical_s2
     = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1,
@@ -317,13 +724,21 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "real", NULL);
+		       "real", gdbarch_float_format (gdbarch));
   builtin_f_type->builtin_real_s8
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-		       "real*8", NULL);
-  builtin_f_type->builtin_real_s16
-    = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-		       "real*16", NULL);
+		       "real*8", gdbarch_double_format (gdbarch));
+  auto fmt = gdbarch_floatformat_for_type (gdbarch, "real(kind=16)", 128);
+  if (fmt != nullptr)
+    builtin_f_type->builtin_real_s16
+      = arch_float_type (gdbarch, 128, "real*16", fmt);
+  else if (gdbarch_long_double_bit (gdbarch) == 128)
+    builtin_f_type->builtin_real_s16
+      = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+			 "real*16", gdbarch_long_double_format (gdbarch));
+  else
+    builtin_f_type->builtin_real_s16
+      = arch_type (gdbarch, TYPE_CODE_ERROR, 128, "real*16");
 
   builtin_f_type->builtin_complex_s8
     = arch_complex_type (gdbarch, "complex*8",
@@ -346,10 +761,46 @@ builtin_f_type (struct gdbarch *gdbarch)
   return (const struct builtin_f_type *) gdbarch_data (gdbarch, f_type_data);
 }
 
+void _initialize_f_language ();
 void
-_initialize_f_language (void)
+_initialize_f_language ()
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
+}
 
-  add_language (&f_language_defn);
+/* See f-lang.h.  */
+
+struct value *
+fortran_argument_convert (struct value *value, bool is_artificial)
+{
+  if (!is_artificial)
+    {
+      /* If the value is not in the inferior e.g. registers values,
+	 convenience variables and user input.  */
+      if (VALUE_LVAL (value) != lval_memory)
+	{
+	  struct type *type = value_type (value);
+	  const int length = TYPE_LENGTH (type);
+	  const CORE_ADDR addr
+	    = value_as_long (value_allocate_space_in_inferior (length));
+	  write_memory (addr, value_contents (value), length);
+	  struct value *val
+	    = value_from_contents_and_address (type, value_contents (value),
+					       addr);
+	  return value_addr (val);
+	}
+      else
+	return value_addr (value); /* Program variables, e.g. arrays.  */
+    }
+    return value;
+}
+
+/* See f-lang.h.  */
+
+struct type *
+fortran_preserve_arg_pointer (struct value *arg, struct type *type)
+{
+  if (TYPE_CODE (value_type (arg)) == TYPE_CODE_PTR)
+    return value_type (arg);
+  return type;
 }

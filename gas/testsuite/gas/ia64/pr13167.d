@@ -4,7 +4,7 @@ Raw dump of debug contents of section \.debug_line:
 
   Offset:                      0x0
   Length:                      51
-  DWARF Version:               2
+  DWARF Version:               3
   Prologue Length:             26
   Minimum Instruction Length:  1
   Initial value of 'is_stmt':  1
@@ -14,17 +14,17 @@ Raw dump of debug contents of section \.debug_line:
 
  Opcodes:
   Opcode 1 has 0 args
-  Opcode 2 has 1 args
-  Opcode 3 has 1 args
-  Opcode 4 has 1 args
-  Opcode 5 has 1 args
+  Opcode 2 has 1 arg
+  Opcode 3 has 1 arg
+  Opcode 4 has 1 arg
+  Opcode 5 has 1 arg
   Opcode 6 has 0 args
   Opcode 7 has 0 args
   Opcode 8 has 0 args
-  Opcode 9 has 1 args
+  Opcode 9 has 1 arg
   Opcode 10 has 0 args
   Opcode 11 has 0 args
-  Opcode 12 has 1 args
+  Opcode 12 has 1 arg
 
  The Directory Table is empty\.
 

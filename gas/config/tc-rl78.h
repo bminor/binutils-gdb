@@ -1,5 +1,5 @@
 /* tc-rl78.h - header file for Renesas RL78
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -53,7 +53,7 @@ extern void rl78_md_end (void);
 extern int rl78_relax_frag (segT, fragS *, long);
 
 #define TC_FRAG_TYPE struct rl78_bytesT *
-#define TC_FRAG_INIT rl78_frag_init
+#define TC_FRAG_INIT(fragp, max_bytes) rl78_frag_init (fragp)
 extern void rl78_frag_init (fragS *);
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
@@ -93,9 +93,9 @@ extern void rl78_elf_final_processing (void);
    linker, but this fix is simpler, and it pretty much only affects
    object size a little bit.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
-  (   ((SEC)->flags & SEC_CODE) != 0		\
+  (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
+   || ((SEC)->flags & SEC_CODE) != 0		\
    || ((SEC)->flags & SEC_DEBUGGING) != 0	\
-   || ! SEG_NORMAL (SEC)			\
    || TC_FORCE_RELOCATION (FIX))
 
 #define DWARF2_USE_FIXED_ADVANCE_PC 1

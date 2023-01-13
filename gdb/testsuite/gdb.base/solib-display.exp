@@ -1,4 +1,4 @@
-# Copyright 2009-2016 Free Software Foundation, Inc.
+# Copyright 2009-2020 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -28,7 +28,24 @@
 # (and thus aren't affected by shared library unloading) are not
 # disabled prematurely.
 
-if { [skip_shlib_tests] || [is_remote target] } {
+if { [skip_shlib_tests] } {
+    return 0
+}
+
+# This test is currently not supported for stub targets, because it uses the
+# start command (through gdb_start_cmd).  In theory, it could be changed to
+# use something else (kill + gdb_run_cmd with a manual breakpoint at main).
+# However, when we try that with the native-gdbserver board, we see that the
+# test fails and gdb outputs this upon connection:
+#
+#   warning: Unable to display "a_global": No symbol "a_global" in current context.
+#   warning: Unable to display "b_global": No symbol "b_global" in current context.
+#   warning: Unable to display "c_global": No symbol "c_global" in current context.
+#
+# This is because the initial stop is done before the shared libraries are
+# loaded.
+
+if { [use_gdb_stub] } {
     return 0
 }
 
@@ -57,13 +74,13 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
     }
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $sep_lib_flags] != ""
 	 || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-      untested "Could not compile $binfile_lib or $binfile."
+      untested "failed to compile"
       return -1
     }
 
     if {$libsepdebug == "SEP"} {
 	if {[gdb_gnu_strip_debug $binfile_lib] != 0} {
-	    unsupported "Could not split debug of $binfile_lib."
+	    unsupported "could not split debug of $binfile_lib."
 	    return
 	} else {
 	    pass "split solib"
@@ -73,29 +90,29 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
     clean_restart $executable
 
     if ![runto_main] then {
-      fail "Can't run to main"
+      fail "can't run to main"
       return 0
     }
 
-    gdb_test "display a_global" "1: a_global = 41"
-    gdb_test "display b_global" "2: b_global = 42"
-    gdb_test "display c_global" "3: c_global = 43"
+    gdb_test "display (int) a_global" "1: \\(int\\) a_global = 41"
+    gdb_test "display (int) b_global" "2: \\(int\\) b_global = 42"
+    gdb_test "display (int) c_global" "3: \\(int\\) c_global = 43"
 
     if { [gdb_start_cmd] < 0 } {
-	fail "Can't run to main (2)"
+	fail "can't run to main (2)"
 	continue
     }
 
     gdb_test "" [multi_line \
-		     "1: a_global = 41" \
-		     "2: b_global = 42"  \
-		     "3: c_global = 43" \
+		     "1: \\(int\\) a_global = 41" \
+		     "2: \\(int\\) b_global = 42"  \
+		     "3: \\(int\\) c_global = 43" \
 		    ] "after rerun"
 
     # Now rebuild the library without b_global
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} \
 	      "$sep_lib_flags additional_flags=-DNO_B_GLOBAL"] != ""} {
-	fail "Can't rebuild $binfile_lib"
+	fail "can't rebuild $binfile_lib"
     }
 
     if {$libsepdebug == "SEP"} {
@@ -109,15 +126,15 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
     }
 
     if { [gdb_start_cmd] < 0 } {
-	fail "Can't run to main (3)"
+	fail "can't run to main (3)"
 	continue
     }
 
 
     gdb_test "" [multi_line \
-		     "1: a_global = 41" \
+		     "1: \\(int\\) a_global = 41" \
 		     "warning: .*b_global.*"  \
-		     "3: c_global = 43" \
+		     "3: \\(int\\) c_global = 43" \
 		    ] "after rerun (2)"
 
     # Now verify that displays which are not in the shared library
@@ -132,7 +149,7 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
     gdb_test "display a_static" "6: a_static = 46"
 
     if { [gdb_start_cmd] < 0 } {
-	fail "Can't run to main (4)"
+	fail "can't run to main (4)"
 	continue
     }
 

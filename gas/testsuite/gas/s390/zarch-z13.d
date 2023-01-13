@@ -495,16 +495,16 @@ Disassembly of section .text:
 .*:	e7 f1 40 10 36 ea [ 	]*vfchedbs	%v15,%v17,%v20
 .*:	e7 f1 40 08 36 ea [ 	]*wfchedb	%v15,%v17,%v20
 .*:	e7 f1 40 18 36 ea [ 	]*wfchedbs	%v15,%v17,%v20
-.*:	e7 f1 00 bc d4 c3 [ 	]*vcdg	%v15,%v17,13,12,11
+.*:	e7 f1 00 bc d4 c3 [ 	]*vcfps	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c3 [ 	]*wcdgb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c3 [ 	]*wcdgb	%v15,%v17,5,12
-.*:	e7 f1 00 bc d4 c1 [ 	]*vcdlg	%v15,%v17,13,12,11
+.*:	e7 f1 00 bc d4 c1 [ 	]*vcfpl	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c1 [ 	]*wcdlgb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c1 [ 	]*wcdlgb	%v15,%v17,5,12
-.*:	e7 f1 00 bc d4 c2 [ 	]*vcgd	%v15,%v17,13,12,11
+.*:	e7 f1 00 bc d4 c2 [ 	]*vcsfp	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c2 [ 	]*wcgdb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c2 [ 	]*wcgdb	%v15,%v17,5,12
-.*:	e7 f1 00 bc d4 c0 [ 	]*vclgd	%v15,%v17,13,12,11
+.*:	e7 f1 00 bc d4 c0 [ 	]*vclfp	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c0 [ 	]*wclgdb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c0 [ 	]*wclgdb	%v15,%v17,5,12
 .*:	e7 f1 40 0c d6 e5 [ 	]*vfd	%v15,%v17,%v20,13,12
@@ -513,12 +513,12 @@ Disassembly of section .text:
 .*:	e7 f1 00 bc d4 c7 [ 	]*vfi	%v15,%v17,13,12,11
 .*:	e7 f1 00 cd 34 c7 [ 	]*wfidb	%v15,%v17,5,12
 .*:	e7 f1 00 cd 34 c7 [ 	]*wfidb	%v15,%v17,5,12
-.*:	e7 f1 00 0c d4 c4 [ 	]*vlde	%v15,%v17,13,12
-.*:	e7 f1 00 00 24 c4 [ 	]*vldeb	%v15,%v17
-.*:	e7 f1 00 08 24 c4 [ 	]*wldeb	%v15,%v17
-.*:	e7 f1 00 bc d4 c5 [ 	]*vled	%v15,%v17,13,12,11
-.*:	e7 f1 00 cd 34 c5 [ 	]*wledb	%v15,%v17,5,12
-.*:	e7 f1 00 cd 34 c5 [ 	]*wledb	%v15,%v17,5,12
+.*:	e7 f1 00 0c d4 c4 [ 	]*vfll	%v15,%v17,13,12
+.*:	e7 f1 00 00 24 c4 [ 	]*vflls	%v15,%v17
+.*:	e7 f1 00 08 24 c4 [ 	]*wflls	%v15,%v17
+.*:	e7 f1 00 bc d4 c5 [ 	]*vflr	%v15,%v17,13,12,11
+.*:	e7 f1 00 cd 34 c5 [ 	]*wflrd	%v15,%v17,5,12
+.*:	e7 f1 00 cd 34 c5 [ 	]*wflrd	%v15,%v17,5,12
 .*:	e7 f1 40 0c d6 e7 [ 	]*vfm	%v15,%v17,%v20,13,12
 .*:	e7 f1 40 00 36 e7 [ 	]*vfmdb	%v15,%v17,%v20
 .*:	e7 f1 40 08 36 e7 [ 	]*wfmdb	%v15,%v17,%v20
@@ -679,4 +679,4 @@ Disassembly of section .text:
 .*:	e3 69 b8 f0 fd 3a [ 	]*llzrgf	%r6,-10000\(%r9,%r11\)
 .*:	e3 69 b8 f0 fd 3b [ 	]*lzrf	%r6,-10000\(%r9,%r11\)
 .*:	e3 69 b8 f0 fd 2a [ 	]*lzrg	%r6,-10000\(%r9,%r11\)
-.*:	b9 3c 00 69 [ 	]*ppno	%r6,%r9
+.*:	b9 3c 00 69 [ 	]*prno	%r6,%r9

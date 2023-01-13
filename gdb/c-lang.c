@@ -1,6 +1,6 @@
 /* C language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"
+#include "c-support.h"
 #include "valprint.h"
 #include "macroscope.h"
 #include "charset.h"
@@ -34,8 +35,7 @@
 #include "gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
-
-extern void _initialize_c_language (void);
+#include "gdbarch.h"
 
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */
@@ -235,7 +235,7 @@ c_printstr (struct ui_file *stream, struct type *type,
    target charset.  */
 
 void
-c_get_string (struct value *value, gdb_byte **buffer,
+c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	      int *length, struct type **char_type,
 	      const char **charset)
 {
@@ -245,7 +245,7 @@ c_get_string (struct value *value, gdb_byte **buffer,
   struct type *element_type = TYPE_TARGET_TYPE (type);
   int req_length = *length;
   enum bfd_endian byte_order
-    = gdbarch_byte_order (get_type_arch (type));
+    = type_byte_order (type);
 
   if (element_type == NULL)
     goto error;
@@ -280,10 +280,21 @@ c_get_string (struct value *value, gdb_byte **buffer,
   /* If the string lives in GDB's memory instead of the inferior's,
      then we just need to copy it to BUFFER.  Also, since such strings
      are arrays with known size, FETCHLIMIT will hold the size of the
-     array.  */
+     array.
+
+     An array is assumed to live in GDB's memory, so we take this path
+     here.
+
+     However, it's possible for the caller to request more array
+     elements than apparently exist -- this can happen when using the
+     C struct hack.  So, only do this if either no length was
+     specified, or the length is within the existing bounds.  This
+     avoids running off the end of the value's contents.  */
   if ((VALUE_LVAL (value) == not_lval
-       || VALUE_LVAL (value) == lval_internalvar)
-      && fetchlimit != UINT_MAX)
+       || VALUE_LVAL (value) == lval_internalvar
+       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      && fetchlimit != UINT_MAX
+      && (*length < 0 || *length <= fetchlimit))
     {
       int i;
       const gdb_byte *contents = value_contents (value);
@@ -292,22 +303,34 @@ c_get_string (struct value *value, gdb_byte **buffer,
       if (*length >= 0)
 	i  = *length;
       else
- 	/* Otherwise, look for a null character.  */
- 	for (i = 0; i < fetchlimit; i++)
+	/* Otherwise, look for a null character.  */
+	for (i = 0; i < fetchlimit; i++)
 	  if (extract_unsigned_integer (contents + i * width,
 					width, byte_order) == 0)
- 	    break;
+	    break;
   
       /* I is now either a user-defined length, the number of non-null
- 	 characters, or FETCHLIMIT.  */
+	 characters, or FETCHLIMIT.  */
       *length = i * width;
-      *buffer = (gdb_byte *) xmalloc (*length);
-      memcpy (*buffer, contents, *length);
+      buffer->reset ((gdb_byte *) xmalloc (*length));
+      memcpy (buffer->get (), contents, *length);
       err = 0;
     }
   else
     {
-      CORE_ADDR addr = value_as_address (value);
+      /* value_as_address does not return an address for an array when
+	 c_style_arrays is false, so we handle that specially
+	 here.  */
+      CORE_ADDR addr;
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	{
+	  if (VALUE_LVAL (value) != lval_memory)
+	    error (_("Attempt to take address of value "
+		     "not located in memory."));
+	  addr = value_address (value);
+	}
+      else
+	addr = value_as_address (value);
 
       /* Prior to the fix for PR 16196 read_string would ignore fetchlimit
 	 if length > 0.  The old "broken" behaviour is the behaviour we want:
@@ -327,10 +350,7 @@ c_get_string (struct value *value, gdb_byte **buffer,
       err = read_string (addr, *length, width, fetchlimit,
 			 byte_order, buffer, length);
       if (err != 0)
-	{
-	  xfree (*buffer);
-	  memory_error (TARGET_XFER_E_IO, addr);
-	}
+	memory_error (TARGET_XFER_E_IO, addr);
     }
 
   /* If the LENGTH is specified at -1, we want to return the string
@@ -340,7 +360,7 @@ c_get_string (struct value *value, gdb_byte **buffer,
   if (req_length == -1)
     /* If the last character is null, subtract it from LENGTH.  */
     if (*length > 0
- 	&& extract_unsigned_integer (*buffer + *length - width,
+	&& extract_unsigned_integer (buffer->get () + *length - width,
 				     width, byte_order) == 0)
       *length -= width;
   
@@ -356,14 +376,11 @@ c_get_string (struct value *value, gdb_byte **buffer,
 
  error:
   {
-    char *type_str;
-
-    type_str = type_to_string (type);
-    if (type_str)
+    std::string type_str = type_to_string (type);
+    if (!type_str.empty ())
       {
-	make_cleanup (xfree, type_str);
 	error (_("Trying to read string with inappropriate type `%s'."),
-	       type_str);
+	       type_str.c_str ());
       }
     else
       error (_("Trying to read string with inappropriate type."));
@@ -387,7 +404,7 @@ convert_ucn (char *p, char *limit, const char *dest_charset,
   gdb_byte data[4];
   int i;
 
-  for (i = 0; i < length && p < limit && isxdigit (*p); ++i, ++p)
+  for (i = 0; i < length && p < limit && ISXDIGIT (*p); ++i, ++p)
     result = (result << 4) + host_hex_value (*p);
 
   for (i = 3; i >= 0; --i)
@@ -429,7 +446,7 @@ convert_octal (struct type *type, char *p,
   unsigned long value = 0;
 
   for (i = 0;
-       i < 3 && p < limit && isdigit (*p) && *p != '8' && *p != '9';
+       i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
       value = 8 * value + host_hex_value (*p);
@@ -452,7 +469,7 @@ convert_hex (struct type *type, char *p,
 {
   unsigned long value = 0;
 
-  while (p < limit && isxdigit (*p))
+  while (p < limit && ISXDIGIT (*p))
     {
       value = 16 * value + host_hex_value (*p);
       ++p;
@@ -493,7 +510,7 @@ convert_escape (struct type *type, const char *dest_charset,
 
     case 'x':
       ADVANCE;
-      if (!isxdigit (*p))
+      if (!ISXDIGIT (*p))
 	error (_("\\x used with no following hex digits."));
       p = convert_hex (type, p, limit, output);
       break;
@@ -515,7 +532,7 @@ convert_escape (struct type *type, const char *dest_charset,
 	int length = *p == 'u' ? 4 : 8;
 
 	ADVANCE;
-	if (!isxdigit (*p))
+	if (!ISXDIGIT (*p))
 	  error (_("\\u used with no following hex digits"));
 	p = convert_ucn (p, limit, dest_charset, output, length);
       }
@@ -573,15 +590,12 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
       {
 	int oplen, limit;
 	struct type *type;
-	struct obstack output;
-	struct cleanup *cleanup;
 	struct value *result;
 	c_string_type dest_type;
 	const char *dest_charset;
 	int satisfy_expected = 0;
 
-	obstack_init (&output);
-	cleanup = make_cleanup_obstack_free (&output);
+	auto_obstack output;
 
 	++*pos;
 	oplen = longest_to_int (exp->elts[*pos].longconst);
@@ -597,16 +611,13 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 					      exp->gdbarch);
 	    break;
 	  case C_WIDE_STRING:
-	    type = lookup_typename (exp->language_defn, exp->gdbarch,
-				    "wchar_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, "wchar_t", NULL, 0);
 	    break;
 	  case C_STRING_16:
-	    type = lookup_typename (exp->language_defn, exp->gdbarch,
-				    "char16_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, "char16_t", NULL, 0);
 	    break;
 	  case C_STRING_32:
-	    type = lookup_typename (exp->language_defn, exp->gdbarch,
-				    "char32_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, "char32_t", NULL, 0);
 	    break;
 	  default:
 	    internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
@@ -659,7 +670,6 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	      result = allocate_value (type);
 	    else
 	      result = value_cstring ("", 0, type);
-	    do_cleanups (cleanup);
 	    return result;
 	  }
 
@@ -705,7 +715,6 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 				      obstack_object_size (&output),
 				      type);
 	  }
-	do_cleanups (cleanup);
 	return result;
       }
       break;
@@ -715,7 +724,53 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
     }
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
 }
+
+/* la_watch_location_expression for C.  */
 
+gdb::unique_xmalloc_ptr<char>
+c_watch_location_expression (struct type *type, CORE_ADDR addr)
+{
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
+}
+
+/* See c-lang.h.  */
+
+bool
+c_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      type = check_typedef (type);
+    }
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      {
+	/* See if target type looks like a string.  */
+	struct type *array_target_type = TYPE_TARGET_TYPE (type);
+	return (TYPE_LENGTH (type) > 0
+		&& TYPE_LENGTH (array_target_type) > 0
+		&& c_textual_element_type (array_target_type, 0));
+      }
+    case TYPE_CODE_STRING:
+      return true;
+    case TYPE_CODE_PTR:
+      {
+	struct type *element_type = TYPE_TARGET_TYPE (type);
+	return c_textual_element_type (element_type, 0);
+      }
+    default:
+      break;
+    }
+
+  return false;
+}
 
 
 /* Table mapping opcodes into strings for printing operators
@@ -751,6 +806,7 @@ const struct op_print c_op_print_tab[] =
   {"*", UNOP_IND, PREC_PREFIX, 0},
   {"&", UNOP_ADDR, PREC_PREFIX, 0},
   {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
+  {"alignof ", UNOP_ALIGNOF, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
   {NULL, OP_NULL, PREC_PREFIX, 0}
@@ -824,7 +880,12 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
-const struct language_defn c_language_defn =
+static const char *c_extensions[] =
+{
+  ".c", NULL
+};
+
+extern const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
   "C",
@@ -833,9 +894,9 @@ const struct language_defn c_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  c_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -847,26 +908,30 @@ const struct language_defn c_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
+  true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  c_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &c_varobj_ops,
   c_get_compile_context,
   c_compute_program,
-  LANG_MAGIC
+  c_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 enum cplus_primitive_types {
@@ -891,6 +956,9 @@ enum cplus_primitive_types {
   cplus_primitive_type_decfloat,
   cplus_primitive_type_decdouble,
   cplus_primitive_type_declong,
+  cplus_primitive_type_char16_t,
+  cplus_primitive_type_char32_t,
+  cplus_primitive_type_wchar_t,
   nr_cplus_primitive_types
 };
 
@@ -946,12 +1014,23 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_decdouble;
   lai->primitive_type_vector [cplus_primitive_type_declong]
     = builtin->builtin_declong;
+  lai->primitive_type_vector [cplus_primitive_type_char16_t]
+    = builtin->builtin_char16;
+  lai->primitive_type_vector [cplus_primitive_type_char32_t]
+    = builtin->builtin_char32;
+  lai->primitive_type_vector [cplus_primitive_type_wchar_t]
+    = builtin->builtin_wchar;
 
   lai->bool_type_symbol = "bool";
   lai->bool_type_default = builtin->builtin_bool;
 }
 
-const struct language_defn cplus_language_defn =
+static const char *cplus_extensions[] =
+{
+  ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
+};
+
+extern const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
   "C++",
@@ -960,9 +1039,9 @@ const struct language_defn cplus_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  cplus_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -974,29 +1053,38 @@ const struct language_defn cplus_language_defn =
   default_read_var_value,	/* la_read_var_value */
   cplus_skip_trampoline,	/* Language specific skip_trampoline */
   "this",                       /* name_of_this */
+  false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cp_lookup_transparent_type,   /* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
+  gdb_sniff_from_mangled_name,
   cp_class_name_from_physname,  /* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   cplus_language_arch_info,
   default_print_array_index,
   cp_pass_by_reference,
-  c_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  cp_get_symbol_name_matcher,
   iterate_over_symbols,
+  cp_search_name_hash,
   &cplus_varobj_ops,
-  NULL,
-  NULL,
-  LANG_MAGIC
+  cplus_get_compile_context,
+  cplus_compute_program,
+  c_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
-const struct language_defn asm_language_defn =
+static const char *asm_extensions[] =
+{
+  ".s", ".sx", ".S", NULL
+};
+
+extern const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
   "assembly",
@@ -1005,9 +1093,9 @@ const struct language_defn asm_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  asm_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1019,26 +1107,30 @@ const struct language_defn asm_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
+  true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
-  c_language_arch_info, 	/* FIXME: la_language_arch_info.  */
+  default_collect_symbol_completion_matches,
+  c_language_arch_info,		/* FIXME: la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
-  c_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  c_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* The following language_defn does not represent a real language.
@@ -1046,7 +1138,7 @@ const struct language_defn asm_language_defn =
    to do some simple operations when debugging applications that use
    a language currently not supported by GDB.  */
 
-const struct language_defn minimal_language_defn =
+extern const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
   "Minimal",
@@ -1055,9 +1147,9 @@ const struct language_defn minimal_language_defn =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
+  NULL,
   &exp_descriptor_c,
   c_parse,
-  c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1069,33 +1161,28 @@ const struct language_defn minimal_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
+  true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
-  default_make_symbol_completion_list,
+  default_collect_symbol_completion_matches,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
-  c_get_string,
-  NULL,				/* la_get_symbol_name_cmp */
+  c_watch_location_expression,
+  NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
+  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   NULL,
-  LANG_MAGIC
+  c_is_string_type_p,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
-
-void
-_initialize_c_language (void)
-{
-  add_language (&c_language_defn);
-  add_language (&cplus_language_defn);
-  add_language (&asm_language_defn);
-  add_language (&minimal_language_defn);
-}

@@ -1,6 +1,6 @@
 /* Fortran language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992-2016 Free Software Foundation, Inc.
+   Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -20,35 +20,28 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef F_LANG_H
+#define F_LANG_H
+
 struct type_print_options;
 struct parser_state;
 
 extern int f_parse (struct parser_state *);
 
-extern void f_error (char *);	/* Defined in f-exp.y */
+/* Implement the la_print_typedef language method for Fortran.  */
+
+extern void f_print_typedef (struct type *type, struct symbol *new_symbol,
+			     struct ui_file *stream);
 
 extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 			  int, const struct type_print_options *);
 
-extern void f_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
+extern void f_val_print (struct type *, int, CORE_ADDR,
 			 struct ui_file *, int,
-			 const struct value *,
+			 struct value *,
 			 const struct value_print_options *);
 
 /* Language-specific data structures */
-
-/* In F90 subrange expression, either bound could be empty, indicating that
-   its value is by default that of the corresponding bound of the array or
-   string.  So we have four sorts of subrange in F90.  This enumeration type
-   is to identify this.  */
-   
-enum f90_range_type
-  {
-    BOTH_BOUND_DEFAULT,		/* "(:)"  */
-    LOW_BOUND_DEFAULT,		/* "(:high)"  */
-    HIGH_BOUND_DEFAULT,		/* "(low:)"  */
-    NONE_BOUND_DEFAULT		/* "(low:high)"  */
-  };
 
 /* A common block.  */
 
@@ -62,9 +55,9 @@ struct common_block
   struct symbol *contents[1];
 };
 
-extern int f77_get_upperbound (struct type *);
+extern LONGEST f77_get_upperbound (struct type *);
 
-extern int f77_get_lowerbound (struct type *);
+extern LONGEST f77_get_lowerbound (struct type *);
 
 extern void f77_get_dynamic_array_length (struct type *);
 
@@ -78,6 +71,7 @@ struct builtin_f_type
   struct type *builtin_character;
   struct type *builtin_integer;
   struct type *builtin_integer_s2;
+  struct type *builtin_integer_s8;
   struct type *builtin_logical;
   struct type *builtin_logical_s1;
   struct type *builtin_logical_s2;
@@ -94,3 +88,37 @@ struct builtin_f_type
 /* Return the Fortran type table for the specified architecture.  */
 extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
 
+/* Ensures that function argument VALUE is in the appropriate form to
+   pass to a Fortran function.  Returns a possibly new value that should
+   be used instead of VALUE.
+
+   When IS_ARTIFICIAL is true this indicates an artificial argument,
+   e.g. hidden string lengths which the GNU Fortran argument passing
+   convention specifies as being passed by value.
+
+   When IS_ARTIFICIAL is false, the argument is passed by pointer.  If the
+   value is already in target memory then return a value that is a pointer
+   to VALUE.  If VALUE is not in memory (e.g. an integer literal), allocate
+   space in the target, copy VALUE in, and return a pointer to the in
+   memory copy.  */
+
+extern struct value *fortran_argument_convert (struct value *value,
+					       bool is_artificial);
+
+/* Ensures that function argument TYPE is appropriate to inform the debugger
+   that ARG should be passed as a pointer.  Returns the potentially updated
+   argument type.
+
+   If ARG is of type pointer then the type of ARG is returned, otherwise
+   TYPE is returned untouched.
+
+   This function exists to augment the types of Fortran function call
+   parameters to be pointers to the reported value, when the corresponding ARG
+   has also been wrapped in a pointer (by fortran_argument_convert).  This
+   informs the debugger that these arguments should be passed as a pointer
+   rather than as the pointed to type.  */
+
+extern struct type *fortran_preserve_arg_pointer (struct value *arg,
+						  struct type *type);
+
+#endif /* F_LANG_H */

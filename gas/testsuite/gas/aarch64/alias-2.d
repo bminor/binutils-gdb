@@ -3,9 +3,9 @@
 
 .*:     file format .*
 
-Disassembly of section \.text:
+Disassembly of section .*:
 
-0000000000000000 <.*>:
+.* <.*>:
    [0-9a-f]+:	b34107e0 	bfxil	x0, xzr, #1, #1
    [0-9a-f]+:	b3410420 	bfxil	x0, x1, #1, #1
    [0-9a-f]+:	b341043f 	bfxil	xzr, x1, #1, #1
@@ -78,23 +78,23 @@ Disassembly of section \.text:
  [0-9a-f]+:	b3613820 	bfi	x0, x1, #31, #15
  [0-9a-f]+:	b361383f 	bfi	xzr, x1, #31, #15
  [0-9a-f]+:	b3613bff 	bfc	xzr, #31, #15
- [0-9a-f]+:	b34003e0 	bfxil	x0, xzr, #0, #1
+ [0-9a-f]+:	b37f03e0 	bfc	x0, #1, #1
+ [0-9a-f]+:	b37f03ff 	bfc	xzr, #1, #1
+ [0-9a-f]+:	b37f1fe0 	bfc	x0, #1, #8
+ [0-9a-f]+:	b37f1fff 	bfc	xzr, #1, #8
+ [0-9a-f]+:	b37f3be0 	bfc	x0, #1, #15
+ [0-9a-f]+:	b37f3bff 	bfc	xzr, #1, #15
+ [0-9a-f]+:	b37003e0 	bfc	x0, #16, #1
+ [0-9a-f]+:	b37003ff 	bfc	xzr, #16, #1
+ [0-9a-f]+:	b3701fe0 	bfc	x0, #16, #8
+ [0-9a-f]+:	b3701fff 	bfc	xzr, #16, #8
+ [0-9a-f]+:	b3703be0 	bfc	x0, #16, #15
+ [0-9a-f]+:	b3703bff 	bfc	xzr, #16, #15
+ [0-9a-f]+:	b36103e0 	bfc	x0, #31, #1
  [0-9a-f]+:	b36103ff 	bfc	xzr, #31, #1
- [0-9a-f]+:	b3401fe0 	bfxil	x0, xzr, #0, #8
+ [0-9a-f]+:	b3611fe0 	bfc	x0, #31, #8
  [0-9a-f]+:	b3611fff 	bfc	xzr, #31, #8
- [0-9a-f]+:	b3403be0 	bfxil	x0, xzr, #0, #15
- [0-9a-f]+:	b3613bff 	bfc	xzr, #31, #15
- [0-9a-f]+:	b34003e0 	bfxil	x0, xzr, #0, #1
- [0-9a-f]+:	b36103ff 	bfc	xzr, #31, #1
- [0-9a-f]+:	b3401fe0 	bfxil	x0, xzr, #0, #8
- [0-9a-f]+:	b3611fff 	bfc	xzr, #31, #8
- [0-9a-f]+:	b3403be0 	bfxil	x0, xzr, #0, #15
- [0-9a-f]+:	b3613bff 	bfc	xzr, #31, #15
- [0-9a-f]+:	b34003e0 	bfxil	x0, xzr, #0, #1
- [0-9a-f]+:	b36103ff 	bfc	xzr, #31, #1
- [0-9a-f]+:	b3401fe0 	bfxil	x0, xzr, #0, #8
- [0-9a-f]+:	b3611fff 	bfc	xzr, #31, #8
- [0-9a-f]+:	b3403be0 	bfxil	x0, xzr, #0, #15
+ [0-9a-f]+:	b3613be0 	bfc	x0, #31, #15
  [0-9a-f]+:	b3613bff 	bfc	xzr, #31, #15
  [0-9a-f]+:	dac00fe0 	rev	x0, xzr
  [0-9a-f]+:	dac00c20 	rev	x0, x1

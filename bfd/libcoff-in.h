@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -19,6 +19,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _LIBCOFF_H
+#define _LIBCOFF_H 1
+
 #include "bfdlink.h"
 #include "coff-bfd.h"
 
@@ -29,7 +32,7 @@ extern "C" {
 /* Object file tdata; access macros.  */
 
 #define coff_data(bfd)		      ((bfd)->tdata.coff_obj_data)
-#define obj_pe(bfd)                   (coff_data (bfd)->pe)
+#define obj_pe(bfd)		      (coff_data (bfd)->pe)
 #define obj_symbols(bfd)	      (coff_data (bfd)->symbols)
 #define	obj_sym_filepos(bfd)	      (coff_data (bfd)->sym_filepos)
 #define obj_relocbase(bfd)	      (coff_data (bfd)->relocbase)
@@ -124,6 +127,7 @@ typedef struct pe_tdata
   int dll;
   int has_reloc_section;
   int dont_strip_reloc;
+  int dos_message[16];
   bfd_boolean insert_timestamp;
   bfd_boolean (*in_reloc_p) (bfd *, reloc_howto_type *);
   flagword real_flags;
@@ -267,11 +271,11 @@ struct coff_link_hash_table
 
 struct coff_reloc_cookie
 {
-  struct internal_reloc *         rels;
-  struct internal_reloc *         rel;
-  struct internal_reloc *         relend;
-  struct coff_symbol_struct *     symbols;	/* Symtab for input bfd.  */
-  bfd *                           abfd;
+  struct internal_reloc *	  rels;
+  struct internal_reloc *	  rel;
+  struct internal_reloc *	  relend;
+  struct coff_symbol_struct *	  symbols;	/* Symtab for input bfd.  */
+  bfd *				  abfd;
   struct coff_link_hash_entry **  sym_hashes;
 };
 
@@ -363,6 +367,8 @@ extern bfd_vma bfd_coff_reloc16_get_value
   (arelent *, struct bfd_link_info *, asection *);
 extern void bfd_perform_slip
   (bfd *, unsigned int, asection *, bfd_vma);
+extern bfd_boolean _bfd_coff_close_and_cleanup
+  (bfd *);
 
 /* Functions and types in cofflink.c.  */
 
@@ -574,7 +580,8 @@ extern bfd_boolean _bfd_coff_reloc_link_order
    struct bfd_link_order *);
 extern bfd_boolean bfd_coff_gc_sections
   (bfd *, struct bfd_link_info *);
-
+extern const char *bfd_coff_group_name
+  (bfd *, const asection *);
 
 #define coff_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window

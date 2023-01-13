@@ -1,3 +1,34 @@
+2019-12-19  Tom Tromey  <tromey@adacore.com>
+
+	PR build/24572:
+	* Makefile.in (install-strip): New target.
+
+2019-01-26  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (version.c): Use sim's create-version.sh.
+
+2018-05-09  Sebastian Rasmussen  <sebras@gmail.com>
+
+	* e500_registers.h: Comment typo fix.
+	* ppc-instructions (ppc_insn_mfcr): Likewise.
+
+2017-09-05  John Baldwin  <jhb@FreeBSD.org>
+
+	PR sim/20863
+	* sim_calls.c (error): New function.
+
+2017-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.h: Include libiberty.h.
+	* emul_bugapi.c (emul_bugapi_instruction_name): Use ARRAY_SIZE.
+	* emul_generic.h: Include libiberty.h.
+	* emul_netbsd.c (emul_netbsd_syscalls): Use ARRAY_SIZE.
+	* emul_unix.c (convert_to_solaris_stat): Likewise.
+	(emul_solaris_syscalls): Likewise.
+	(emul_linux_syscalls): Likewise.
+	* options.c (print_options): Likewise.
+	* ppc-instructions: Likewise.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (sim-assert): Call AC_MSG_CHECKING,

@@ -3,7 +3,7 @@
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -30,6 +30,7 @@ fragment <<EOF
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "getopt.h"
 
 #include "ld.h"
@@ -78,17 +79,17 @@ gld${EMULATION_NAME}_handle_option (int optc)
 
     case OPTION_COFF_FORMAT:
       if ((*optarg == '0' || *optarg == '1' || *optarg == '2')
-          && optarg[1] == '\0')
-      {
-        static char buf[] = "coffX-${OUTPUT_FORMAT_TEMPLATE}";
-        coff_version = *optarg - '0';
-        buf[4] = *optarg;
-	lang_add_output_format (buf, NULL, NULL, 0);
-      }
+	  && optarg[1] == '\0')
+	{
+	  static char buf[] = "coffX-${OUTPUT_FORMAT_TEMPLATE}";
+	  coff_version = *optarg - '0';
+	  buf[4] = *optarg;
+	  lang_add_output_format (buf, NULL, NULL, 0);
+	}
       else
-        {
-	  einfo (_("%P%F: invalid COFF format version %s\n"), optarg);
-        }
+	{
+	  einfo (_("%F%P: invalid COFF format version %s\n"), optarg);
+	}
       break;
     }
   return FALSE;
@@ -161,6 +162,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   hll_default,
   after_parse_default,
   after_open_default,
+  after_check_relocs_default,
+  before_place_orphans_default,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
@@ -181,6 +184,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* recognized file */
   NULL,	/* find_potential_libraries */
   NULL,	/* new_vers_pattern */
-  NULL  /* extra_map_file_text */
+  NULL,  /* extra_map_file_text */
+  ${LDEMUL_EMIT_CTF_EARLY-NULL},
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
 };
 EOF

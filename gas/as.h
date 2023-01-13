@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -76,8 +76,8 @@
    150 isn't special; it's just an arbitrary non-ASCII char value.  */
 #define OPTION_STD_BASE 150
 /* The first getopt value for machine-dependent long options.
-   190 gives the standard options room to grow.  */
-#define OPTION_MD_BASE 190
+   290 gives the standard options room to grow.  */
+#define OPTION_MD_BASE  290
 
 #ifdef DEBUG
 #undef NDEBUG
@@ -85,8 +85,7 @@
 #if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 6)
 #define __PRETTY_FUNCTION__  ((char *) NULL)
 #endif
-#define gas_assert(P) \
-  ((void) ((P) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0)))
+#define gas_assert(P)	((void) ((P) ? 0 : (abort (), 0)))
 #undef abort
 #define abort()		as_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
 
@@ -97,13 +96,6 @@
 
 /* Define the standard progress macros.  */
 #include "progress.h"
-
-/* This doesn't get taken care of anywhere.  */
-#ifndef __MWERKS__  /* Metrowerks C chokes on the "defined (inline)"  */
-#if !defined (__GNUC__) && !defined (inline)
-#define inline
-#endif
-#endif /* !__MWERKS__ */
 
 /* Other stuff from config.h.  */
 #ifdef NEED_DECLARATION_ENVIRON
@@ -142,14 +134,6 @@ extern int vsnprintf(char *, size_t, const char *, va_list);
 /* Hack to make "gcc -Wall" not complain about obstack macros.  */
 #if !defined (memcpy) && !defined (bcopy)
 #define bcopy(src,dest,size)	memcpy (dest, src, size)
-#endif
-
-/* Make Saber happier on obstack.h.  */
-#ifdef SABER
-#undef  __PTR_TO_INT
-#define __PTR_TO_INT(P) ((int) (P))
-#undef  __INT_TO_PTR
-#define __INT_TO_PTR(P) ((char *) (P))
 #endif
 
 #ifndef __LINE__
@@ -242,7 +226,7 @@ COMMON subsegT now_subseg;
 /* Segment our instructions emit to.  */
 COMMON segT now_seg;
 
-#define segment_name(SEG)	bfd_get_section_name (stdoutput, SEG)
+#define segment_name(SEG)	bfd_section_name (SEG)
 
 extern segT reg_section, expr_section;
 /* Shouldn't these be eliminated someday?  */
@@ -294,6 +278,16 @@ enum _relax_state
      fr_symbol: operand
      1 variable char: fill character  */
   rs_space,
+
+  /* .nop directive with expression operand that needs to be computed
+     later.  Similar to rs_space, but different.  It fills with no-op
+     instructions.
+     fr_symbol: operand
+     1 constant byte: no-op fill control byte.  */
+  rs_space_nop,
+
+  /* Similar to rs_fill.  It is used to implement .nop directive .  */
+  rs_fill_nop,
 
   /* A DWARF leb128 value; only ELF uses this.  The subtype is 0 for
      unsigned, 1 for signed.  */
@@ -392,6 +386,8 @@ COMMON int need_pass_2;
    leave lots of padding.  */
 COMMON int linkrelax;
 
+COMMON int do_not_pad_sections_to_alignment;
+
 /* TRUE if we should produce a listing.  */
 extern int listing;
 
@@ -416,6 +412,7 @@ enum debug_info_type
 extern enum debug_info_type debug_type;
 extern int use_gnu_debug_info_extensions;
 COMMON bfd_boolean flag_dwarf_sections;
+extern int flag_dwarf_cie_version;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;
@@ -472,8 +469,8 @@ PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
 
-void   as_assert (const char *, int, const char *);
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
+void   signal_init (void);
 void   sprint_value (char *, addressT);
 int    had_errors (void);
 int    had_warnings (void);
@@ -483,7 +480,12 @@ void   as_bad_value_out_of_range (const char *, offsetT, offsetT, offsetT,
 				  const char *, unsigned);
 void   print_version_id (void);
 char * app_push (void);
+
+/* Number of littlenums required to hold an extended precision number.	*/
+#define MAX_LITTLENUMS 6
+
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
+char * atof_ieee_detail (char *, int, int, LITTLENUM_TYPE *, FLONUM_TYPE *);
 const char * ieee_md_atof (int, char *, int *, bfd_boolean);
 const char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (const char *, char *);
@@ -500,6 +502,7 @@ void   cond_exit_macro (int);
 int    seen_at_least_1_file (void);
 void   app_pop (char *);
 const char * as_where (unsigned int *);
+const char * as_where_physical (unsigned int *);
 void   bump_line_counters (void);
 void   do_scrub_begin (int);
 void   input_scrub_begin (void);
@@ -522,6 +525,14 @@ segT   subseg_get (const char *, int);
 const char *remap_debug_filename (const char *);
 void add_debug_prefix_map (const char *);
 
+static inline char *
+xmemdup0 (const char *in, size_t len)
+{
+  char *out = (char *) xmalloc (len + 1);
+  out[len] = 0;
+  return (char *) memcpy (out, in, len);
+}
+
 struct expressionS;
 struct fix;
 typedef struct symbol symbolS;
@@ -538,7 +549,7 @@ int generic_force_reloc (struct fix *);
 
 #include "expr.h"		/* Before targ-*.h */
 
-/* This one starts the chain of target dependant headers.  */
+/* This one starts the chain of target dependent headers.  */
 #include "targ-env.h"
 
 #ifdef OBJ_MAYBE_ELF
@@ -577,6 +588,10 @@ COMMON int flag_m68k_mri;
 #define flag_m68k_mri 0
 #endif
 
+#ifndef TC_STRING_ESCAPES
+#define TC_STRING_ESCAPES 1
+#endif
+
 #ifdef WARN_COMMENTS
 COMMON int           warn_comment;
 COMMON unsigned int  found_comment;
@@ -589,6 +604,10 @@ COMMON int flag_allow_nonconst_size;
 
 /* If we should generate ELF common symbols with the STT_COMMON type.  */
 extern int flag_use_elf_stt_common;
+
+/* TRUE iff GNU Build attribute notes should
+   be generated if none are in the input files.  */
+extern bfd_boolean flag_generate_build_notes;
 
 /* If section name substitution sequences should be honored */
 COMMON int flag_sectname_subst;
@@ -632,6 +651,13 @@ COMMON int flag_sectname_subst;
 #endif
 #if OCTETS_PER_BYTE != (1<<OCTETS_PER_BYTE_POWER)
  #error "Octets per byte conflicts with its power-of-two definition!"
+#endif
+
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
+/* On ELF platforms, mark debug sections with SEC_ELF_OCTETS */
+#define SEC_OCTETS (IS_ELF ? SEC_ELF_OCTETS : 0)
+#else
+#define SEC_OCTETS 0
 #endif
 
 #endif /* GAS */

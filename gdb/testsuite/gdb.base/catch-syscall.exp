@@ -1,4 +1,4 @@
-#   Copyright 1997-2016 Free Software Foundation, Inc.
+#   Copyright 1997-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,25 +19,39 @@
 # It was written by Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 # on September/2008.
 
-if { ![isnative] } then {
-    continue
-}
-
-# This shall be updated whenever 'catch syscall' is implemented
-# on some architecture.
-if { ![istarget "x86_64-*-linux*"] && ![istarget "i\[34567\]86-*-linux*"]
-     && ![istarget "powerpc-*-linux*"] && ![istarget "powerpc64-*-linux*"]
-     && ![istarget "sparc-*-linux*"] && ![istarget "sparc64-*-linux*"]
-     && ![istarget "mips*-linux*"] && ![istarget "arm*-linux*"]
-     && ![istarget "s390*-linux*"] && ![istarget "aarch64*-*-linux*"] } {
-     continue
-}
-
 standard_testfile
 
-if  { [prepare_for_testing ${testfile}.exp $testfile ${testfile}.c] } {
-     untested catch-syscall.exp
+if  { [prepare_for_testing "failed to prepare" $testfile ${testfile}.c] } {
      return -1
+}
+
+# Check target supports catch syscall or not.
+clean_restart $binfile
+if ![runto_main] then {
+    fail "can't run to main"
+    return
+}
+
+set test "catch syscall"
+gdb_test_multiple $test $test {
+    -re "The feature \'catch syscall\' is not supported.*\r\n$gdb_prompt $" {
+	unsupported "catch syscall isn't supported"
+	return -1
+    }
+    -re ".*$gdb_prompt $" {
+	pass $test
+    }
+}
+
+set test "check catch syscall"
+gdb_test_multiple "continue" $test {
+    -re ".*Your system does not support this type\r\nof catchpoint.*$gdb_prompt $" {
+	unsupported "catch syscall isn't supported"
+	return -1
+    }
+    -re ".*Catchpoint.*$gdb_prompt $" {
+      pass $test
+    }
 }
 
 # All (but the last) syscalls from the example code.  It is filled in
@@ -165,7 +179,7 @@ proc check_for_program_end {} {
     # Deleting the catchpoints
     delete_breakpoints
 
-    gdb_continue_to_end
+    gdb_continue_to_end "" continue 1
 }
 
 proc test_catch_syscall_without_args {} {
@@ -236,7 +250,7 @@ proc test_catch_syscall_with_wrong_args {} {
 	# If it doesn't, everything is right (since we don't have
 	# a syscall named "mlock" in it).  Otherwise, this is a failure.
 	set thistest "catch syscall with unused syscall ($syscall_name)"
-	gdb_continue_to_end $thistest
+	gdb_continue_to_end $thistest continue 1
     }
 }
 
@@ -370,13 +384,48 @@ proc test_catch_syscall_fail_nodatadir {} {
     }
 }
 
+proc test_catch_syscall_group {} {
+    global decimal
+
+    set sysnum "\\\[${decimal}\\\]"
+
+    gdb_test "catch syscall g:process" \
+	"Catchpoint $decimal \\(syscalls (\'(clone|fork|execve|exit)\' $sysnum)+.*" \
+	"set catchpoint on a group of syscalls"
+
+    gdb_test "catch syscall group:process read" \
+	"Catchpoint $decimal \\(syscalls (\'(clone|fork|execve|exit)\' $sysnum)+.*read.*\\)" \
+	"set catchpoints on a group of syscalls and on a single syscall"
+
+    gdb_test "catch syscall group:" \
+	"Unknown syscall group ''\." \
+	"set catchpoints on an invalid group"
+
+    gdb_test "catch syscall g:junk" \
+	"Unknown syscall group 'junk'\." \
+	"set catchpoints on an unknown group."
+
+    gdb_test "complete catch syscall g:proc" \
+	"catch syscall g:process" \
+	"complete catch syscall group with 'g:' prefix"
+
+    gdb_test "complete catch syscall group:proc" \
+	"catch syscall group:process" \
+	"complete catch syscall group with 'group:' prefix"
+
+    gdb_test_sequence "complete catch syscall g" \
+	"complete catch syscall group suggests 'group:' prefix" {
+	    "group:descriptor" "group:file" "group:ipc" "group:memory"
+	    "group:network" "group:process" "group:signal"
+	}
+}
+
 proc do_syscall_tests {} {
     # NOTE: We don't have to point gdb at the correct data-directory.
     # For the build tree that is handled by INTERNAL_GDBFLAGS.
 
     # Verify that the 'catch syscall' help is available
-    set thistest "help catch syscall"
-    gdb_test "help catch syscall" "Catch system calls.*" $thistest
+    gdb_test "help catch syscall" "Catch system calls.*"
 
     # Try to set a catchpoint to a nonsense syscall
     set thistest "catch syscall to a nonsense syscall is prohibited"
@@ -420,6 +469,9 @@ proc do_syscall_tests {} {
     # Testing if the 'catch syscall' command works when switching to
     # different architectures on-the-fly (PR gdb/10737).
     if [runto_main] then { test_catch_syscall_multi_arch }
+
+    # Testing the 'catch' syscall command for a group of syscalls.
+    if [runto_main] then { test_catch_syscall_group }
 }
 
 proc test_catch_syscall_without_args_noxml {} {
@@ -541,16 +593,14 @@ proc test_catch_syscall_multi_arch {} {
 	gdb_start
 
 	gdb_test "set architecture $arch1" \
-	    "The target architecture is assumed to be $arch1" \
-	    "set arch to $arch1"
+	    "The target architecture is assumed to be $arch1"
 
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall1_name}. \\\[${syscall_number}\\\]\\)" \
 	    "insert catch syscall on syscall $syscall_number -- $syscall1_name on $arch1"
 
 	gdb_test "set architecture $arch2" \
-	    "The target architecture is assumed to be $arch2" \
-	    "set arch to $arch2"
+	    "The target architecture is assumed to be $arch2"
 
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall2_name}. \\\[${syscall_number}\\\]\\)" \

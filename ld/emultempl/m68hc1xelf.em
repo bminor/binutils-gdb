@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 1991-2016 Free Software Foundation, Inc.
+#   Copyright (C) 1991-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra m68hc12-elf
+# This file is sourced from elf.em, and defines extra m68hc12-elf
 # and m68hc11-elf specific routines.  It is used to generate the
 # HC11/HC12 trampolines to call a far function by using a normal 'jsr/bsr'.
 #
@@ -66,6 +66,9 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 
   gld${EMULATION_NAME}_before_allocation ();
 
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
+    return;
+
   /* If generating a relocatable output file, then we don't
      have to generate the trampolines.  */
   if (bfd_link_relocatable (&link_info))
@@ -76,7 +79,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
     {
       if (ret < 0)
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
+	  einfo (_("%X%P: can not size stub section: %E\n"));
 	  return;
 	}
 
@@ -86,7 +89,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 				     &link_info,
 				     &m68hc11elf_add_stub_section))
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
+	  einfo (_("%X%P: can not size stub section: %E\n"));
 	  return;
 	}
     }
@@ -127,9 +130,8 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 
       if (pinfo->bank_size != region->length)
 	{
-	  einfo (_("warning: the size of the 'window' memory region "
-		   "is not a power of 2\n"));
-	  einfo (_("warning: its size %d is truncated to %d\n"),
+	  einfo (_("%P: warning: the size of the 'window' memory region "
+		   "is not a power of 2; its size %d is truncated to %d\n"),
 		 region->length, pinfo->bank_size);
 	}
     }
@@ -141,6 +143,13 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation (void)
 static void
 m68hc11elf_create_output_section_statements (void)
 {
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
+    {
+      einfo (_("%X%P: changing output format whilst linking "
+	       "is not supported\n"));
+      return;
+    }
+
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
 				   NULL);
@@ -150,7 +159,7 @@ m68hc11elf_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo (_("%F%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -203,10 +212,8 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 
 	case lang_input_section_enum:
 	  if (l->input_section.section == info->input_section
-	      || strcmp (bfd_get_section_name (l->input_section.section->owner,
-					       l->input_section.section),
-			 bfd_get_section_name (info->input_section->owner,
-					       info->input_section)) == 0)
+	      || strcmp (bfd_section_name (l->input_section.section),
+			 bfd_section_name (info->input_section)) == 0)
 	    {
 	      /* We've found our section.  Insert the stub immediately
 		 before its associated input section.  */
@@ -277,7 +284,7 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
     return stub_sec;
 
  err_ret:
-  einfo ("%X%P: can not make stub section: %E\n");
+  einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }
 
@@ -286,47 +293,29 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
 static void
 m68hc11elf_after_allocation (void)
 {
-  /* Now build the linker stubs.  */
-  if (stub_file->the_bfd->sections != NULL)
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
     {
-      /* Call again the trampoline analyzer to initialize the trampoline
-	 stubs with the correct symbol addresses.  Since there could have
-	 been relaxation, the symbol addresses that were found during
-	 first call may no longer be correct.  */
-      if (!elf32_m68hc11_size_stubs (link_info.output_bfd,
-				     stub_file->the_bfd,
-				     &link_info, 0))
+      /* Now build the linker stubs.  */
+      if (stub_file->the_bfd->sections != NULL)
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
-	  return;
+	  /* Call again the trampoline analyzer to initialize the trampoline
+	     stubs with the correct symbol addresses.  Since there could have
+	     been relaxation, the symbol addresses that were found during
+	     first call may no longer be correct.  */
+	  if (!elf32_m68hc11_size_stubs (link_info.output_bfd,
+					 stub_file->the_bfd,
+					 &link_info, 0))
+	    {
+	      einfo (_("%X%P: can not size stub section: %E\n"));
+	      return;
+	    }
+	  if (!elf32_m68hc11_build_stubs (link_info.output_bfd, &link_info))
+	    einfo (_("%X%P: can not build stubs: %E\n"));
 	}
-      if (!elf32_m68hc11_build_stubs (link_info.output_bfd, &link_info))
-	einfo ("%X%P: can not build stubs: %E\n");
     }
 
   gld${EMULATION_NAME}_after_allocation ();
 }
-
-
-/* Avoid processing the fake stub_file in vercheck, stat_needed and
-   check_needed routines.  */
-
-static void (*real_func) (lang_input_statement_type *);
-
-static void m68hc11_for_each_input_file_wrapper (lang_input_statement_type *l)
-{
-  if (l != stub_file)
-    (*real_func) (l);
-}
-
-static void
-m68hc11_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
-{
-  real_func = func;
-  lang_for_each_input_file (&m68hc11_for_each_input_file_wrapper);
-}
-
-#define lang_for_each_input_file m68hc11_lang_for_each_input_file
 
 EOF
 
@@ -348,10 +337,10 @@ PARSE_AND_LIST_LONGOPTS='
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _(
 "  --no-trampoline             Do not generate the far trampolines used to call\n"
-"                                a far function using 'jsr' or 'bsr'.\n"
+"                                a far function using 'jsr' or 'bsr'\n"));
+  fprintf (file, _(
 "  --bank-window NAME          Specify the name of the memory region describing\n"
-"                                the layout of the memory bank window.\n"
-		   ));
+"                                the layout of the memory bank window\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='

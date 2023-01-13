@@ -1,3 +1,4 @@
+#as: -mabi=lp64
 #objdump: -dr
 
 .*:     file format .*
@@ -102,15 +103,15 @@ Disassembly of section \.text:
 			e8: R_AARCH64_LDST8_ABS_LO12_NC	xdata\+0x10
   ec:	394000a5 	ldrb	w5, \[x5\]
 			ec: R_AARCH64_LDST8_ABS_LO12_NC	xdata\+0xff8
-  f0:	397ffcc6 	ldrb	w6, \[x6,#4095\]
+  f0:	397ffcc6 	ldrb	w6, \[x6, #4095\]
   f4:	36000560 	tbz	w0, #0, 1a0 <lab>
   f8:	b6f80001 	tbz	x1, #63, 0 <xlab>
 			f8: R_AARCH64_TSTBR14	xlab
   fc:	37400522 	tbnz	w2, #8, 1a0 <lab>
  100:	b7780002 	tbnz	x2, #47, 0 <xlab>
 			100: R_AARCH64_TSTBR14	xlab
- 104:	540004e0 	b\.eq	1a0 <lab>
- 108:	54000000 	b\.eq	0 <xlab>
+ 104:	540004e0 	b\.eq	1a0 <lab>  // b\.none
+ 108:	54000000 	b\.eq	0 <xlab>  // b\.none
 			108: R_AARCH64_CONDBR19	xlab
  10c:	b40004a0 	cbz	x0, 1a0 <lab>
  110:	b500001e 	cbnz	x30, 0 <xlab>
@@ -137,10 +138,10 @@ Disassembly of section \.text:
  158:	91200000 	add	x0, x0, #0x800
  15c:	d13ffc00 	sub	x0, x0, #0xfff
  160:	d41fffe1 	svc	#0xffff
- 164:	f8500420 	ldr	x0, \[x1\],#-256
- 168:	f8500c20 	ldr	x0, \[x1,#-256\]!
- 16c:	f8500020 	ldur	x0, \[x1,#-256\]
- 170:	f97ffc20 	ldr	x0, \[x1,#32760\]
+ 164:	f8500420 	ldr	x0, \[x1\], #-256
+ 168:	f8500c20 	ldr	x0, \[x1, #-256\]!
+ 16c:	f8500020 	ldur	x0, \[x1, #-256\]
+ 170:	f97ffc20 	ldr	x0, \[x1, #32760\]
  174:	79400000 	ldrh	w0, \[x0\]
 			174: R_AARCH64_LDST16_ABS_LO12_NC	\.text\+0x19c
  178:	b9400021 	ldr	w1, \[x1\]

@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C30 a.out binaries.
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2020 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -21,10 +21,10 @@
 
 #define TARGET_IS_BIG_ENDIAN_P
 #define N_HEADER_IN_TEXT(x)	1
-#define TEXT_START_ADDR 	1024
-#define TARGET_PAGE_SIZE 	128
-#define SEGMENT_SIZE   		TARGET_PAGE_SIZE
-#define DEFAULT_ARCH 		bfd_arch_tic30
+#define TEXT_START_ADDR		1024
+#define TARGET_PAGE_SIZE	128
+#define SEGMENT_SIZE		TARGET_PAGE_SIZE
+#define DEFAULT_ARCH		bfd_arch_tic30
 #define ARCH_SIZE 32
 
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
@@ -43,11 +43,11 @@
 
 #define MY_reloc_howto(BFD, REL, IN, EX, PC)   tic30_aout_reloc_howto (BFD, REL, & IN, & EX, & PC)
 
-#define MY_final_link_relocate    tic30_aout_final_link_relocate
-#define MY_object_p               tic30_aout_object_p
-#define MY_mkobject               NAME (aout,mkobject)
+#define MY_final_link_relocate	  tic30_aout_final_link_relocate
+#define MY_object_p		  tic30_aout_object_p
+#define MY_mkobject		  NAME (aout,mkobject)
 #define MY_write_object_contents  tic30_aout_write_object_contents
-#define MY_set_sizes              tic30_aout_set_sizes
+#define MY_set_sizes		  tic30_aout_set_sizes
 
 #ifndef MY_exec_hdr_flags
 #define MY_exec_hdr_flags 1
@@ -324,9 +324,9 @@ tic30_aout_reloc_howto (bfd *abfd,
  (bfd_get_8 (BFD, ADDR + 2)      )
 
 #define bfd_putb_24(BFD,DATA,ADDR)				\
- bfd_put_8 (BFD, (bfd_byte) ((DATA >> 16) & 0xFF), ADDR    );	\
+ bfd_put_8 (BFD, (bfd_byte) ((DATA >> 16) & 0xFF), ADDR	   );	\
  bfd_put_8 (BFD, (bfd_byte) ((DATA >>  8) & 0xFF), ADDR + 1);	\
- bfd_put_8 (BFD, (bfd_byte) ( DATA        & 0xFF), ADDR + 2)
+ bfd_put_8 (BFD, (bfd_byte) ( DATA	  & 0xFF), ADDR + 2)
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
@@ -710,53 +710,87 @@ static bfd_boolean
 MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 {
   struct internal_exec *execp = exec_hdr (abfd);
+  asection *objsym_section;
   file_ptr pos;
   bfd_vma vma = 0;
-  int pad;
 
   /* Set the executable header size to 0, as we don't want one for an
-     output.  */
+     output.  FIXME: Really?  tic30_aout_object_p doesn't accept such
+     an executable!  */
   adata (abfd).exec_bytes_size = 0;
+
   pos = adata (abfd).exec_bytes_size;
+  /* ??? Why are we looking at create_object_symbols_section?  */
+  objsym_section = info->create_object_symbols_section;
+  if (objsym_section != NULL)
+    vma = objsym_section->vma;
+
   /* Text.  */
-  vma = info->create_object_symbols_section->vma;
-  pos += vma;
-  obj_textsec (abfd)->filepos = pos;
-  obj_textsec (abfd)->vma = vma;
-  obj_textsec (abfd)->user_set_vma = 1;
-  pos += obj_textsec (abfd)->size;
-  vma += obj_textsec (abfd)->size;
+  if (obj_textsec (abfd) != NULL)
+    {
+      pos += vma;
+      obj_textsec (abfd)->filepos = pos;
+      obj_textsec (abfd)->vma = vma;
+      obj_textsec (abfd)->user_set_vma = 1;
+      execp->a_text = obj_textsec (abfd)->size;
+      pos += obj_textsec (abfd)->size;
+      vma += obj_textsec (abfd)->size;
+    }
 
   /* Data.  */
-  if (abfd->flags & D_PAGED)
+  if (obj_datasec (abfd) != NULL)
     {
-      if (info->create_object_symbols_section->next->vma > 0)
-	obj_datasec (abfd)->vma = info->create_object_symbols_section->next->vma;
+      if (abfd->flags & D_PAGED)
+	{
+	  if (objsym_section != NULL
+	      && objsym_section->next != NULL
+	      && objsym_section->next->vma != 0)
+	    obj_datasec (abfd)->vma = objsym_section->next->vma;
+	  else
+	    obj_datasec (abfd)->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
+	}
       else
-	obj_datasec (abfd)->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
+	obj_datasec (abfd)->vma = BFD_ALIGN (vma, 4);
+
+      if (obj_datasec (abfd)->vma < vma)
+	obj_datasec (abfd)->vma = BFD_ALIGN (vma, 4);
+
+      pos += obj_datasec (abfd)->vma - vma;
+      obj_datasec (abfd)->filepos = pos;
+      obj_datasec (abfd)->user_set_vma = 1;
+
+      vma = obj_datasec (abfd)->vma;
+      if (obj_textsec (abfd) != NULL)
+	{
+	  execp->a_text = vma - obj_textsec (abfd)->vma;
+	  obj_textsec (abfd)->size = execp->a_text;
+	}
+      execp->a_data = obj_datasec (abfd)->size;
+      vma += obj_datasec (abfd)->size;
     }
-  else
-    obj_datasec (abfd)->vma = BFD_ALIGN (vma, 4);
-
-  if (obj_datasec (abfd)->vma < vma)
-    obj_datasec (abfd)->vma = BFD_ALIGN (vma, 4);
-
-  obj_datasec (abfd)->user_set_vma = 1;
-  vma = obj_datasec (abfd)->vma;
-  obj_datasec (abfd)->filepos = vma + adata (abfd).exec_bytes_size;
-  execp->a_text = vma - obj_textsec (abfd)->vma;
-  obj_textsec (abfd)->size = execp->a_text;
 
   /* Since BSS follows data immediately, see if it needs alignment.  */
-  vma += obj_datasec (abfd)->size;
-  pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
-  obj_datasec (abfd)->size += pad;
-  pos += obj_datasec (abfd)->size;
-  execp->a_data = obj_datasec (abfd)->size;
+  if (obj_bsssec (abfd) != NULL)
+    {
+      int pad;
 
-  /* BSS.  */
-  obj_bsssec (abfd)->vma = vma;
-  obj_bsssec (abfd)->user_set_vma = 1;
+      pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
+      if (obj_datasec (abfd) != NULL)
+	{
+	  obj_datasec (abfd)->size += pad;
+	  execp->a_data += pad;
+	}
+      else if (obj_textsec (abfd) != NULL)
+	{
+	  obj_textsec (abfd)->size += pad;
+	  execp->a_text += pad;
+	}
+
+      /* BSS.  */
+      vma += pad;
+      obj_bsssec (abfd)->vma = vma;
+      obj_bsssec (abfd)->user_set_vma = 1;
+    }
 
   /* We are fully resized, so don't readjust in final_link.  */
   adata (abfd).magic = z_magic;
@@ -828,7 +862,7 @@ tic30_aout_set_arch_mach (bfd *abfd,
   _bfd_archive_bsd_construct_extended_name_table
 #endif
 #ifndef	MY_write_armap
-#define	MY_write_armap			bsd_write_armap
+#define	MY_write_armap			_bfd_bsd_write_armap
 #endif
 #ifndef MY_read_ar_hdr
 #define MY_read_ar_hdr			_bfd_generic_read_ar_hdr
@@ -840,12 +874,12 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #define	MY_truncate_arname		bfd_bsd_truncate_arname
 #endif
 #ifndef MY_update_armap_timestamp
-#define MY_update_armap_timestamp 	_bfd_archive_bsd_update_armap_timestamp
+#define MY_update_armap_timestamp	_bfd_archive_bsd_update_armap_timestamp
 #endif
 
 /* No core file defined here -- configure in trad-core.c separately.  */
 #ifndef	MY_core_file_failing_command
-#define	MY_core_file_failing_command 	_bfd_nocore_core_file_failing_command
+#define	MY_core_file_failing_command	_bfd_nocore_core_file_failing_command
 #endif
 #ifndef	MY_core_file_failing_signal
 #define	MY_core_file_failing_signal	_bfd_nocore_core_file_failing_signal
@@ -855,21 +889,20 @@ tic30_aout_set_arch_mach (bfd *abfd,
 				_bfd_nocore_core_file_matches_executable_p
 #endif
 #ifndef	MY_core_file_pid
-#define	MY_core_file_pid  		_bfd_nocore_core_file_pid
+#define	MY_core_file_pid		_bfd_nocore_core_file_pid
 #endif
 #ifndef	MY_core_file_p
 #define	MY_core_file_p			_bfd_dummy_target
 #endif
 
 #ifndef MY_bfd_debug_info_start
-#define MY_bfd_debug_info_start		bfd_void
+#define MY_bfd_debug_info_start		_bfd_void_bfd
 #endif
 #ifndef MY_bfd_debug_info_end
-#define MY_bfd_debug_info_end		bfd_void
+#define MY_bfd_debug_info_end		_bfd_void_bfd
 #endif
 #ifndef MY_bfd_debug_info_accumulate
-#define MY_bfd_debug_info_accumulate	\
-		(void (*) (bfd*, struct bfd_section *)) bfd_void
+#define MY_bfd_debug_info_accumulate	_bfd_void_bfd_asection
 #endif
 
 #ifndef MY_core_file_failing_command
@@ -904,6 +937,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #endif
 #ifndef MY_canonicalize_reloc
 #define MY_canonicalize_reloc NAME (aout, canonicalize_reloc)
+#endif
+#ifndef MY_set_reloc
+#define MY_set_reloc _bfd_generic_set_reloc
 #endif
 #ifndef MY_make_empty_symbol
 #define MY_make_empty_symbol NAME (aout, make_empty_symbol)
@@ -955,6 +991,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_bfd_is_group_section
 #define MY_bfd_is_group_section bfd_generic_is_group_section
 #endif
+#ifndef MY_bfd_group_name
+#define MY_bfd_group_name bfd_generic_group_name
+#endif
 #ifndef MY_bfd_discard_group
 #define MY_bfd_discard_group bfd_generic_discard_group
 #endif
@@ -964,6 +1003,12 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #endif
 #ifndef MY_bfd_define_common_symbol
 #define MY_bfd_define_common_symbol bfd_generic_define_common_symbol
+#endif
+#ifndef MY_bfd_link_hide_symbol
+#define MY_bfd_link_hide_symbol _bfd_generic_link_hide_symbol
+#endif
+#ifndef MY_bfd_define_start_stop
+#define MY_bfd_define_start_stop bfd_generic_define_start_stop
 #endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup tic30_aout_reloc_type_lookup
@@ -997,6 +1042,10 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section
 #endif
 
+#ifndef MY_bfd_link_check_relocs
+#define MY_bfd_link_check_relocs   _bfd_generic_link_check_relocs
+#endif
+
 #ifndef MY_bfd_copy_private_bfd_data
 #define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #endif
@@ -1026,8 +1075,7 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #endif
 
 #ifndef MY_bfd_is_target_special_symbol
-#define MY_bfd_is_target_special_symbol  \
-  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#define MY_bfd_is_target_special_symbol _bfd_bool_bfd_asymbol_false
 #endif
 
 #ifndef MY_bfd_free_cached_info
@@ -1089,12 +1137,24 @@ const bfd_target tic30_aout_vec =
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Headers.  */
-  {_bfd_dummy_target, MY_object_p,		/* bfd_check_format.  */
-   bfd_generic_archive_p, MY_core_file_p},
-  {bfd_false, MY_mkobject,			/* bfd_set_format.  */
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, MY_write_object_contents,		/* bfd_write_contents.  */
-   _bfd_write_archive_contents, bfd_false},
+  {				/* bfd_check_format.  */
+    _bfd_dummy_target,
+    MY_object_p,
+    bfd_generic_archive_p,
+    MY_core_file_p
+  },
+  {				/* bfd_set_format.  */
+    _bfd_bool_bfd_false_error,
+    MY_mkobject,
+    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error
+  },
+  {				/* bfd_write_contents.  */
+    _bfd_bool_bfd_false_error,
+    MY_write_object_contents,
+    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error
+  },
 
   BFD_JUMP_TABLE_GENERIC (MY),
   BFD_JUMP_TABLE_COPY (MY),

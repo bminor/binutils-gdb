@@ -1,4 +1,4 @@
-# Copyright 2008-2016 Free Software Foundation, Inc.
+# Copyright 2008-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,6 +30,4 @@ if ![runto "p.adb:$bp_location" ] then {
 } 
 
 gdb_test "print w.e.all" \
-         "= \\(month => 8, year => 1974\\)" \
-         "print w.e.all"
-
+         "= \\(month => 8, year => 1974\\)"

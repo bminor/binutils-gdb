@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em and used to define MMIX and ELF
+# This file is sourced from elf.em and used to define MMIX and ELF
 # specific things.  First include what we have in common with mmo.
 
 source_em ${srcdir}/emultempl/mmix-elfnmmo.em
@@ -29,7 +29,7 @@ fragment <<EOF
 static void
 elfmmix_before_parse (void)
 {
-  gld${EMULATION_NAME}_before_parse ();
+  mmix_before_parse ();
 
   /* Make sure we don't create a demand-paged executable.  Unfortunately
      this isn't changeable with a command-line option.  It makes no

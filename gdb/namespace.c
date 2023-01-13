@@ -1,5 +1,5 @@
 /* Code dealing with "using" directives for GDB.
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,12 +26,12 @@
    into the scope DEST.  ALIAS is the name of the imported namespace
    in the current scope.  If ALIAS is NULL then the namespace is known
    by its original name.  DECLARATION is the name if the imported
-   varable if this is a declaration import (Eg. using A::x), otherwise
+   variable if this is a declaration import (Eg. using A::x), otherwise
    it is NULL.  EXCLUDES is a list of names not to import from an
    imported module or NULL.  If COPY_NAMES is non-zero, then the
    arguments are copied into newly allocated memory so they can be
-   temporaries.  For EXCLUDES the VEC pointers are copied but the
-   pointed to characters are not copied.  */
+   temporaries.  For EXCLUDES the contents of the vector are copied,
+   but the pointed to characters are not copied.  */
 
 void
 add_using_directive (struct using_direct **using_directives,
@@ -39,7 +39,7 @@ add_using_directive (struct using_direct **using_directives,
 		     const char *src,
 		     const char *alias,
 		     const char *declaration,
-		     VEC (const_char_ptr) *excludes,
+		     const std::vector<const char *> &excludes,
 		     int copy_names,
 		     struct obstack *obstack)
 {
@@ -52,7 +52,6 @@ add_using_directive (struct using_direct **using_directives,
   for (current = *using_directives; current != NULL; current = current->next)
     {
       int ix;
-      const char *param;
 
       if (strcmp (current->import_src, src) != 0)
 	continue;
@@ -70,12 +69,11 @@ add_using_directive (struct using_direct **using_directives,
 	continue;
 
       /* Compare the contents of EXCLUDES.  */
-      for (ix = 0; VEC_iterate (const_char_ptr, excludes, ix, param); ix++)
+      for (ix = 0; ix < excludes.size (); ++ix)
 	if (current->excludes[ix] == NULL
-	    || strcmp (param, current->excludes[ix]) != 0)
+	    || strcmp (excludes[ix], current->excludes[ix]) != 0)
 	  break;
-      if (ix < VEC_length (const_char_ptr, excludes)
-	  || current->excludes[ix] != NULL)
+      if (ix < excludes.size () || current->excludes[ix] != NULL)
 	continue;
 
       /* Parameters exactly match CURRENT.  */
@@ -83,17 +81,14 @@ add_using_directive (struct using_direct **using_directives,
     }
 
   alloc_len = (sizeof(*newobj)
-	       + (VEC_length (const_char_ptr, excludes)
-		  * sizeof(*newobj->excludes)));
+	       + (excludes.size () * sizeof(*newobj->excludes)));
   newobj = (struct using_direct *) obstack_alloc (obstack, alloc_len);
   memset (newobj, 0, sizeof (*newobj));
 
   if (copy_names)
     {
-      newobj->import_src
-	= (const char *) obstack_copy0 (obstack, src, strlen (src));
-      newobj->import_dest
-	= (const char *) obstack_copy0 (obstack, dest, strlen (dest));
+      newobj->import_src = obstack_strdup (obstack, src);
+      newobj->import_dest = obstack_strdup (obstack, dest);
     }
   else
     {
@@ -102,21 +97,19 @@ add_using_directive (struct using_direct **using_directives,
     }
 
   if (alias != NULL && copy_names)
-    newobj->alias
-      = (const char *) obstack_copy0 (obstack, alias, strlen (alias));
+    newobj->alias = obstack_strdup (obstack, alias);
   else
     newobj->alias = alias;
 
   if (declaration != NULL && copy_names)
-    newobj->declaration
-      = (const char *) obstack_copy0 (obstack, declaration,
-				      strlen (declaration));
+    newobj->declaration = obstack_strdup (obstack, declaration);
   else
     newobj->declaration = declaration;
 
-  memcpy (newobj->excludes, VEC_address (const_char_ptr, excludes),
-	  VEC_length (const_char_ptr, excludes) * sizeof (*newobj->excludes));
-  newobj->excludes[VEC_length (const_char_ptr, excludes)] = NULL;
+  if (!excludes.empty ())
+    memcpy (newobj->excludes, excludes.data (),
+	    excludes.size () * sizeof (*newobj->excludes));
+  newobj->excludes[excludes.size ()] = NULL;
 
   newobj->next = *using_directives;
   *using_directives = newobj;

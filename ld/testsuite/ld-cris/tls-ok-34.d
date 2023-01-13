@@ -1,6 +1,6 @@
 #source: tls-gottprelm.s --defsym r=8189
 #as: --no-underscore --em=criself --pic
-#ld: --shared -m crislinux
+#ld: --shared -m crislinux --hash-style=sysv
 #objdump: -s -j .got -R
 
 # Check that a R_CRIS_16_DTPREL just below the theoretical limit
@@ -12,17 +12,17 @@
 
 DYNAMIC RELOCATION RECORDS
 OFFSET   TYPE              VALUE 
-000b3870 R_CRIS_32_TPREL   x2814
+000b3808 R_CRIS_32_TPREL   x2814
 #...
-000b485c R_CRIS_32_TPREL   x8188
+000b47f4 R_CRIS_32_TPREL   x8188
 #...
-000ba564 R_CRIS_32_TPREL   x0
+000ba4fc R_CRIS_32_TPREL   x0
 #...
-000bb860 R_CRIS_32_TPREL   x1345
+000bb7f8 R_CRIS_32_TPREL   x1345
 
 Contents of section .got:
- b3864 ec370b00 00000000 00000000 00000000  .*
- b3874 00000000 00000000 00000000 00000000  .*
+ b37fc 84370b00 00000000 00000000 00000000  .*
+ b380c 00000000 00000000 00000000 00000000  .*
 #...
- bb844 00000000 00000000 00000000 00000000  .*
- bb854 00000000 00000000 00000000 00000000  .*
+ bb7dc 00000000 00000000 00000000 00000000  .*
+ bb7ec 00000000 00000000 00000000 00000000  .*

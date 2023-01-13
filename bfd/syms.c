@@ -1,5 +1,5 @@
 /* Generic symbol-table support for the BFD library.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -63,29 +63,29 @@ SUBSECTION
 	allocating storage, and the actual reading process. This is an
 	excerpt from an application which reads the symbol table:
 
-|	  long storage_needed;
-|	  asymbol **symbol_table;
-|	  long number_of_symbols;
-|	  long i;
+|         long storage_needed;
+|         asymbol **symbol_table;
+|         long number_of_symbols;
+|         long i;
 |
-|	  storage_needed = bfd_get_symtab_upper_bound (abfd);
+|         storage_needed = bfd_get_symtab_upper_bound (abfd);
 |
 |         if (storage_needed < 0)
 |           FAIL
 |
-|	  if (storage_needed == 0)
-|	    return;
+|         if (storage_needed == 0)
+|           return;
 |
-|	  symbol_table = xmalloc (storage_needed);
-|	    ...
-|	  number_of_symbols =
-|	     bfd_canonicalize_symtab (abfd, symbol_table);
+|         symbol_table = xmalloc (storage_needed);
+|           ...
+|         number_of_symbols =
+|            bfd_canonicalize_symtab (abfd, symbol_table);
 |
 |         if (number_of_symbols < 0)
 |           FAIL
 |
-|	  for (i = 0; i < number_of_symbols; i++)
-|	    process_symbol (symbol_table[i]);
+|         for (i = 0; i < number_of_symbols; i++)
+|           process_symbol (symbol_table[i]);
 
 	All storage for the symbols themselves is in an objalloc
 	connected to the BFD; it is freed when the BFD is closed.
@@ -105,36 +105,36 @@ SUBSECTION
 	which has been created using <<bfd_make_empty_symbol>>.  Here is an
 	example showing the creation of a symbol table with only one element:
 
-|	#include "sysdep.h"
-|	#include "bfd.h"
-|	int main (void)
-|	{
-|	  bfd *abfd;
-|	  asymbol *ptrs[2];
-|	  asymbol *new;
+|       #include "sysdep.h"
+|       #include "bfd.h"
+|       int main (void)
+|       {
+|         bfd *abfd;
+|         asymbol *ptrs[2];
+|         asymbol *new;
 |
-|	  abfd = bfd_openw ("foo","a.out-sunos-big");
-|	  bfd_set_format (abfd, bfd_object);
-|	  new = bfd_make_empty_symbol (abfd);
-|	  new->name = "dummy_symbol";
-|	  new->section = bfd_make_section_old_way (abfd, ".text");
-|	  new->flags = BSF_GLOBAL;
-|	  new->value = 0x12345;
+|         abfd = bfd_openw ("foo","a.out-sunos-big");
+|         bfd_set_format (abfd, bfd_object);
+|         new = bfd_make_empty_symbol (abfd);
+|         new->name = "dummy_symbol";
+|         new->section = bfd_make_section_old_way (abfd, ".text");
+|         new->flags = BSF_GLOBAL;
+|         new->value = 0x12345;
 |
-|	  ptrs[0] = new;
-|	  ptrs[1] = 0;
+|         ptrs[0] = new;
+|         ptrs[1] = 0;
 |
-|	  bfd_set_symtab (abfd, ptrs, 1);
-|	  bfd_close (abfd);
-|	  return 0;
-|	}
+|         bfd_set_symtab (abfd, ptrs, 1);
+|         bfd_close (abfd);
+|         return 0;
+|       }
 |
-|	./makesym
-|	nm foo
-|	00012345 A dummy_symbol
+|       ./makesym
+|       nm foo
+|       00012345 A dummy_symbol
 
 	Many formats cannot represent arbitrary symbol information; for
- 	instance, the <<a.out>> object format does not allow an
+	instance, the <<a.out>> object format does not allow an
 	arbitrary number of sections. A symbol pointing to a section
 	which is not one  of <<.text>>, <<.data>> or <<.bss>> cannot
 	be described.
@@ -204,98 +204,98 @@ CODE_FRAGMENT
 .  symvalue value;
 .
 .  {* Attributes of a symbol.  *}
-.#define BSF_NO_FLAGS    	0x00
+.#define BSF_NO_FLAGS            0
 .
 .  {* The symbol has local scope; <<static>> in <<C>>. The value
 .     is the offset into the section of the data.  *}
-.#define BSF_LOCAL		(1 << 0)
+.#define BSF_LOCAL               (1 << 0)
 .
 .  {* The symbol has global scope; initialized data in <<C>>. The
 .     value is the offset into the section of the data.  *}
-.#define BSF_GLOBAL		(1 << 1)
+.#define BSF_GLOBAL              (1 << 1)
 .
 .  {* The symbol has global scope and is exported. The value is
 .     the offset into the section of the data.  *}
-.#define BSF_EXPORT	BSF_GLOBAL {* No real difference.  *}
+.#define BSF_EXPORT              BSF_GLOBAL {* No real difference.  *}
 .
 .  {* A normal C symbol would be one of:
 .     <<BSF_LOCAL>>, <<BSF_UNDEFINED>> or <<BSF_GLOBAL>>.  *}
 .
 .  {* The symbol is a debugging record. The value has an arbitrary
 .     meaning, unless BSF_DEBUGGING_RELOC is also set.  *}
-.#define BSF_DEBUGGING		(1 << 2)
+.#define BSF_DEBUGGING           (1 << 2)
 .
 .  {* The symbol denotes a function entry point.  Used in ELF,
 .     perhaps others someday.  *}
-.#define BSF_FUNCTION		(1 << 3)
+.#define BSF_FUNCTION            (1 << 3)
 .
 .  {* Used by the linker.  *}
-.#define BSF_KEEP		(1 << 5)
+.#define BSF_KEEP                (1 << 5)
 .
 .  {* An ELF common symbol.  *}
-.#define BSF_ELF_COMMON		(1 << 6)
+.#define BSF_ELF_COMMON          (1 << 6)
 .
 .  {* A weak global symbol, overridable without warnings by
 .     a regular global symbol of the same name.  *}
-.#define BSF_WEAK		(1 << 7)
+.#define BSF_WEAK                (1 << 7)
 .
 .  {* This symbol was created to point to a section, e.g. ELF's
 .     STT_SECTION symbols.  *}
-.#define BSF_SECTION_SYM	(1 << 8)
+.#define BSF_SECTION_SYM         (1 << 8)
 .
 .  {* The symbol used to be a common symbol, but now it is
 .     allocated.  *}
-.#define BSF_OLD_COMMON		(1 << 9)
+.#define BSF_OLD_COMMON          (1 << 9)
 .
 .  {* In some files the type of a symbol sometimes alters its
 .     location in an output file - ie in coff a <<ISFCN>> symbol
 .     which is also <<C_EXT>> symbol appears where it was
 .     declared and not at the end of a section.  This bit is set
 .     by the target BFD part to convey this information.  *}
-.#define BSF_NOT_AT_END		(1 << 10)
+.#define BSF_NOT_AT_END          (1 << 10)
 .
 .  {* Signal that the symbol is the label of constructor section.  *}
-.#define BSF_CONSTRUCTOR	(1 << 11)
+.#define BSF_CONSTRUCTOR         (1 << 11)
 .
 .  {* Signal that the symbol is a warning symbol.  The name is a
 .     warning.  The name of the next symbol is the one to warn about;
 .     if a reference is made to a symbol with the same name as the next
 .     symbol, a warning is issued by the linker.  *}
-.#define BSF_WARNING		(1 << 12)
+.#define BSF_WARNING             (1 << 12)
 .
 .  {* Signal that the symbol is indirect.  This symbol is an indirect
 .     pointer to the symbol with the same name as the next symbol.  *}
-.#define BSF_INDIRECT		(1 << 13)
+.#define BSF_INDIRECT            (1 << 13)
 .
 .  {* BSF_FILE marks symbols that contain a file name.  This is used
 .     for ELF STT_FILE symbols.  *}
-.#define BSF_FILE		(1 << 14)
+.#define BSF_FILE                (1 << 14)
 .
 .  {* Symbol is from dynamic linking information.  *}
-.#define BSF_DYNAMIC		(1 << 15)
+.#define BSF_DYNAMIC             (1 << 15)
 .
 .  {* The symbol denotes a data object.  Used in ELF, and perhaps
 .     others someday.  *}
-.#define BSF_OBJECT		(1 << 16)
+.#define BSF_OBJECT              (1 << 16)
 .
 .  {* This symbol is a debugging symbol.  The value is the offset
 .     into the section of the data.  BSF_DEBUGGING should be set
 .     as well.  *}
-.#define BSF_DEBUGGING_RELOC	(1 << 17)
+.#define BSF_DEBUGGING_RELOC     (1 << 17)
 .
 .  {* This symbol is thread local.  Used in ELF.  *}
-.#define BSF_THREAD_LOCAL	(1 << 18)
+.#define BSF_THREAD_LOCAL        (1 << 18)
 .
 .  {* This symbol represents a complex relocation expression,
 .     with the expression tree serialized in the symbol name.  *}
-.#define BSF_RELC		(1 << 19)
+.#define BSF_RELC                (1 << 19)
 .
 .  {* This symbol represents a signed complex relocation expression,
 .     with the expression tree serialized in the symbol name.  *}
-.#define BSF_SRELC		(1 << 20)
+.#define BSF_SRELC               (1 << 20)
 .
 .  {* This symbol was created by bfd_get_synthetic_symtab.  *}
-.#define BSF_SYNTHETIC		(1 << 21)
+.#define BSF_SYNTHETIC           (1 << 21)
 .
 .  {* This symbol is an indirect code object.  Unrelated to BSF_INDIRECT.
 .     The dynamic linker will compute the value of this symbol by
@@ -305,7 +305,7 @@ CODE_FRAGMENT
 .  {* This symbol is a globally unique data object.  The dynamic linker
 .     will make sure that in the entire process there is just one symbol
 .     with this name and type in use.  BSF_OBJECT must also be set.  *}
-.#define BSF_GNU_UNIQUE		(1 << 23)
+.#define BSF_GNU_UNIQUE          (1 << 23)
 .
 .  flagword flags;
 .
@@ -352,7 +352,7 @@ DESCRIPTION
 	the BFD, then return 0.  If an error occurs, return -1.
 
 .#define bfd_get_symtab_upper_bound(abfd) \
-.     BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
+.	BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
 .
 */
 
@@ -361,7 +361,7 @@ FUNCTION
 	bfd_is_local_label
 
 SYNOPSIS
-        bfd_boolean bfd_is_local_label (bfd *abfd, asymbol *sym);
+	bfd_boolean bfd_is_local_label (bfd *abfd, asymbol *sym);
 
 DESCRIPTION
 	Return TRUE if the given symbol @var{sym} in the BFD @var{abfd} is
@@ -386,7 +386,7 @@ FUNCTION
 	bfd_is_local_label_name
 
 SYNOPSIS
-        bfd_boolean bfd_is_local_label_name (bfd *abfd, const char *name);
+	bfd_boolean bfd_is_local_label_name (bfd *abfd, const char *name);
 
 DESCRIPTION
 	Return TRUE if a symbol with the name @var{name} in the BFD
@@ -395,7 +395,7 @@ DESCRIPTION
 	local label.
 
 .#define bfd_is_local_label_name(abfd, name) \
-.  BFD_SEND (abfd, _bfd_is_local_label_name, (abfd, name))
+.	BFD_SEND (abfd, _bfd_is_local_label_name, (abfd, name))
 .
 */
 
@@ -404,7 +404,7 @@ FUNCTION
 	bfd_is_target_special_symbol
 
 SYNOPSIS
-        bfd_boolean bfd_is_target_special_symbol (bfd *abfd, asymbol *sym);
+	bfd_boolean bfd_is_target_special_symbol (bfd *abfd, asymbol *sym);
 
 DESCRIPTION
 	Return TRUE iff a symbol @var{sym} in the BFD @var{abfd} is something
@@ -412,7 +412,7 @@ DESCRIPTION
 	should normally not be mentioned to the user.
 
 .#define bfd_is_target_special_symbol(abfd, sym) \
-.  BFD_SEND (abfd, _bfd_is_target_special_symbol, (abfd, sym))
+.	BFD_SEND (abfd, _bfd_is_target_special_symbol, (abfd, sym))
 .
 */
 
@@ -428,7 +428,7 @@ DESCRIPTION
 	including the NULL.
 
 .#define bfd_canonicalize_symtab(abfd, location) \
-.  BFD_SEND (abfd, _bfd_canonicalize_symtab, (abfd, location))
+.	BFD_SEND (abfd, _bfd_canonicalize_symtab, (abfd, location))
 .
 */
 
@@ -455,8 +455,8 @@ bfd_set_symtab (bfd *abfd, asymbol **location, unsigned int symcount)
       return FALSE;
     }
 
-  bfd_get_outsymbols (abfd) = location;
-  bfd_get_symcount (abfd) = symcount;
+  abfd->outsymbols = location;
+  abfd->symcount = symcount;
   return TRUE;
 }
 
@@ -517,7 +517,7 @@ DESCRIPTION
 	information, and will cause problems later on.
 
 .#define bfd_make_empty_symbol(abfd) \
-.  BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
+.	BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 .
 */
 
@@ -555,7 +555,7 @@ DESCRIPTION
 	yet to be worked out.
 
 .#define bfd_make_debug_symbol(abfd,ptr,size) \
-.  BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
+.	BFD_SEND (abfd, _bfd_make_debug_symbol, (abfd, ptr, size))
 .
 */
 
@@ -574,13 +574,13 @@ static const struct section_to_type stt[] =
   {"code", 't'},		/* MRI .text */
   {".data", 'd'},
   {"*DEBUG*", 'N'},
-  {".debug", 'N'},              /* MSVC's .debug (non-standard debug syms) */
-  {".drectve", 'i'},            /* MSVC's .drective section */
-  {".edata", 'e'},              /* MSVC's .edata (export) section */
+  {".debug", 'N'},		/* MSVC's .debug (non-standard debug syms) */
+  {".drectve", 'i'},		/* MSVC's .drective section */
+  {".edata", 'e'},		/* MSVC's .edata (export) section */
   {".fini", 't'},		/* ELF fini section */
-  {".idata", 'i'},              /* MSVC's .idata (import) section */
+  {".idata", 'i'},		/* MSVC's .idata (import) section */
   {".init", 't'},		/* ELF init section */
-  {".pdata", 'p'},              /* MSVC's .pdata (stack unwind) section */
+  {".pdata", 'p'},		/* MSVC's .pdata (stack unwind) section */
   {".rdata", 'r'},		/* Read only data.  */
   {".rodata", 'r'},		/* Read only data.  */
   {".sbss", 's'},		/* Small BSS (uninitialized data).  */
@@ -595,8 +595,9 @@ static const struct section_to_type stt[] =
 /* Return the single-character symbol type corresponding to
    section S, or '?' for an unknown COFF section.
 
-   Check for any leading string which matches, so .text5 returns
-   't' as well as .text */
+   Check for leading strings which match, followed by a number, '.',
+   or '$' so .text5 matches the .text entry, but .init_array doesn't
+   match the .init entry.  */
 
 static char
 coff_section_type (const char *s)
@@ -604,8 +605,12 @@ coff_section_type (const char *s)
   const struct section_to_type *t;
 
   for (t = &stt[0]; t->section; t++)
-    if (!strncmp (s, t->section, strlen (t->section)))
-      return t->type;
+    {
+      size_t len = strlen (t->section);
+      if (strncmp (s, t->section, len) == 0
+	  && memchr (".$0123456789", s[len], 13) != 0)
+	return t->type;
+    }
 
   return '?';
 }
@@ -700,9 +705,9 @@ bfd_decode_symclass (asymbol *symbol)
     c = 'a';
   else if (symbol->section)
     {
-      c = coff_section_type (symbol->section->name);
+      c = decode_section_type (symbol->section);
       if (c == '?')
-	c = decode_section_type (symbol->section);
+	c = coff_section_type (symbol->section->name);
     }
   else
     return '?';
@@ -783,8 +788,8 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{osec}.
 
 .#define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
-.  BFD_SEND (obfd, _bfd_copy_private_symbol_data, \
-.            (ibfd, isymbol, obfd, osymbol))
+.	BFD_SEND (obfd, _bfd_copy_private_symbol_data, \
+.		  (ibfd, isymbol, obfd, osymbol))
 .
 */
 
@@ -822,9 +827,16 @@ _bfd_generic_read_minisymbols (bfd *abfd,
   if (symcount < 0)
     goto error_return;
 
-  *minisymsp = syms;
-  *sizep = sizeof (asymbol *);
-
+  if (symcount == 0)
+    /* We return 0 above when storage is 0.  Exit in the same state
+       here, so as to not complicate callers with having to deal with
+       freeing memory for zero symcount.  */
+    free (syms);
+  else
+    {
+      *minisymsp = syms;
+      *sizep = sizeof (asymbol *);
+    }
   return symcount;
 
  error_return:
@@ -872,6 +884,7 @@ struct indexentry
   char *directory_name;
   char *file_name;
   char *function_name;
+  int idx;
 };
 
 /* Compare two indexentry structures.  This is called via qsort.  */
@@ -884,10 +897,9 @@ cmpindexentry (const void *a, const void *b)
 
   if (contestantA->val < contestantB->val)
     return -1;
-  else if (contestantA->val > contestantB->val)
+  if (contestantA->val > contestantB->val)
     return 1;
-  else
-    return 0;
+  return contestantA->idx - contestantB->idx;
 }
 
 /* A pointer to this structure is stored in *pinfo.  */
@@ -1035,6 +1047,10 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 					 0, strsize))
 	return FALSE;
 
+      /* Stab strings ought to be nul terminated.  Ensure the last one
+	 is, to prevent running off the end of the buffer.  */
+      info->strs[strsize - 1] = 0;
+
       /* If this is a relocatable object file, we have to relocate
 	 the entries in .stab.  This should always be simple 32 bit
 	 relocations against symbols defined in this object file, so
@@ -1062,34 +1078,35 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      arelent *r;
 	      unsigned long val;
 	      asymbol *sym;
+	      bfd_size_type octets;
 
 	      r = *pr;
 	      /* Ignore R_*_NONE relocs.  */
 	      if (r->howto->dst_mask == 0)
 		continue;
 
+	      octets = r->address * bfd_octets_per_byte (abfd, NULL);
 	      if (r->howto->rightshift != 0
 		  || r->howto->size != 2
 		  || r->howto->bitsize != 32
 		  || r->howto->pc_relative
 		  || r->howto->bitpos != 0
-		  || r->howto->dst_mask != 0xffffffff)
+		  || r->howto->dst_mask != 0xffffffff
+		  || octets + 4 > stabsize)
 		{
-		  (*_bfd_error_handler)
-		    (_("Unsupported .stab relocation"));
+		  _bfd_error_handler
+		    (_("unsupported .stab relocation"));
 		  bfd_set_error (bfd_error_invalid_operation);
 		  if (reloc_vector != NULL)
 		    free (reloc_vector);
 		  return FALSE;
 		}
 
-	      val = bfd_get_32 (abfd, info->stabs
-				+ r->address * bfd_octets_per_byte (abfd));
+	      val = bfd_get_32 (abfd, info->stabs + octets);
 	      val &= r->howto->src_mask;
 	      sym = *r->sym_ptr_ptr;
 	      val += sym->value + sym->section->vma + r->addend;
-	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs
-			  + r->address * bfd_octets_per_byte (abfd));
+	      bfd_put_32 (abfd, (bfd_vma) val, info->stabs + octets);
 	    }
 	}
 
@@ -1169,10 +1186,10 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      /* The main file name.  */
 
 	      /* The following code creates a new indextable entry with
-	         a NULL function name if there were no N_FUNs in a file.
-	         Note that a N_SO without a file name is an EOF and
-	         there could be 2 N_SO following it with the new filename
-	         and directory.  */
+		 a NULL function name if there were no N_FUNs in a file.
+		 Note that a N_SO without a file name is an EOF and
+		 there could be 2 N_SO following it with the new filename
+		 and directory.  */
 	      if (nul_fun != NULL)
 		{
 		  info->indextable[i].val = bfd_get_32 (abfd, nul_fun + VALOFF);
@@ -1181,6 +1198,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  info->indextable[i].directory_name = directory_name;
 		  info->indextable[i].file_name = file_name;
 		  info->indextable[i].function_name = NULL;
+		  info->indextable[i].idx = i;
 		  ++i;
 		}
 
@@ -1195,7 +1213,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		{
 		  nul_fun = stab;
 		  nul_str = str;
-		  if (file_name >= (char *) info->strs + strsize || file_name < (char *) str)
+		  if (file_name >= (char *) info->strs + strsize
+		      || file_name < (char *) str)
 		    file_name = NULL;
 		  if (stab + STABSIZE + TYPEOFF < info->stabs + stabsize
 		      && *(stab + STABSIZE + TYPEOFF) == (bfd_byte) N_SO)
@@ -1206,7 +1225,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		      directory_name = file_name;
 		      file_name = ((char *) str
 				   + bfd_get_32 (abfd, stab + STRDXOFF));
-		      if (file_name >= (char *) info->strs + strsize || file_name < (char *) str)
+		      if (file_name >= (char *) info->strs + strsize
+			  || file_name < (char *) str)
 			file_name = NULL;
 		    }
 		}
@@ -1217,7 +1237,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      file_name = (char *) str + bfd_get_32 (abfd, stab + STRDXOFF);
 	      /* PR 17512: file: 0c680a1f.  */
 	      /* PR 17512: file: 5da8aec4.  */
-	      if (file_name >= (char *) info->strs + strsize || file_name < (char *) str)
+	      if (file_name >= (char *) info->strs + strsize
+		  || file_name < (char *) str)
 		file_name = NULL;
 	      break;
 
@@ -1226,7 +1247,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      function_name = (char *) str + bfd_get_32 (abfd, stab + STRDXOFF);
 	      if (function_name == (char *) str)
 		continue;
-	      if (function_name >= (char *) info->strs + strsize)
+	      if (function_name >= (char *) info->strs + strsize
+		  || function_name < (char *) str)
 		function_name = NULL;
 
 	      nul_fun = NULL;
@@ -1236,6 +1258,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      info->indextable[i].directory_name = directory_name;
 	      info->indextable[i].file_name = file_name;
 	      info->indextable[i].function_name = function_name;
+	      info->indextable[i].idx = i;
 	      ++i;
 	      break;
 	    }
@@ -1249,6 +1272,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  info->indextable[i].directory_name = directory_name;
 	  info->indextable[i].file_name = file_name;
 	  info->indextable[i].function_name = NULL;
+	  info->indextable[i].idx = i;
 	  ++i;
 	}
 
@@ -1258,6 +1282,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       info->indextable[i].directory_name = NULL;
       info->indextable[i].file_name = NULL;
       info->indextable[i].function_name = NULL;
+      info->indextable[i].idx = i;
       ++i;
 
       info->indextablesize = i;
@@ -1269,7 +1294,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 
   /* We are passed a section relative offset.  The offsets in the
      stabs information are absolute.  */
-  offset += bfd_get_section_vma (abfd, section);
+  offset += bfd_section_vma (section);
 
 #ifdef ENABLE_CACHING
   if (info->cached_indexentry != NULL
@@ -1287,7 +1312,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       long mid = -1;
 
       /* Cache non-existent or invalid.  Do binary search on
-         indextable.  */
+	 indextable.  */
       indexentry = NULL;
 
       low = 0;
@@ -1335,7 +1360,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  if (val <= offset)
 	    {
 	      file_name = (char *) str + bfd_get_32 (abfd, stab + STRDXOFF);
-	      if (file_name >= (char *) info->strs + strsize || file_name < (char *) str)
+	      if (file_name >= (char *) info->strs + strsize
+		  || file_name < (char *) str)
 		file_name = NULL;
 	      *pline = 0;
 	    }
@@ -1416,8 +1442,8 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       char *s;
 
       /* This will typically be something like main:F(0,1), so we want
-         to clobber the colon.  It's OK to change the name, since the
-         string is in our own local storage anyhow.  */
+	 to clobber the colon.  It's OK to change the name, since the
+	 string is in our own local storage anyhow.  */
       s = strchr (indexentry->function_name, ':');
       if (s != NULL)
 	*s = '\0';
@@ -1426,4 +1452,118 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
     }
 
   return TRUE;
+}
+
+long
+_bfd_nosymbols_canonicalize_symtab (bfd *abfd ATTRIBUTE_UNUSED,
+				    asymbol **location ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+void
+_bfd_nosymbols_print_symbol (bfd *abfd ATTRIBUTE_UNUSED,
+			     void *afile ATTRIBUTE_UNUSED,
+			     asymbol *symbol ATTRIBUTE_UNUSED,
+			     bfd_print_symbol_type how ATTRIBUTE_UNUSED)
+{
+}
+
+void
+_bfd_nosymbols_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
+				asymbol *sym ATTRIBUTE_UNUSED,
+				symbol_info *ret ATTRIBUTE_UNUSED)
+{
+}
+
+const char *
+_bfd_nosymbols_get_symbol_version_string (bfd *abfd,
+					  asymbol *symbol ATTRIBUTE_UNUSED,
+					  bfd_boolean *hidden ATTRIBUTE_UNUSED)
+{
+  return (const char *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+bfd_boolean
+_bfd_nosymbols_bfd_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
+					const char *name ATTRIBUTE_UNUSED)
+{
+  return FALSE;
+}
+
+alent *
+_bfd_nosymbols_get_lineno (bfd *abfd, asymbol *sym ATTRIBUTE_UNUSED)
+{
+  return (alent *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+bfd_boolean
+_bfd_nosymbols_find_nearest_line
+    (bfd *abfd,
+     asymbol **symbols ATTRIBUTE_UNUSED,
+     asection *section ATTRIBUTE_UNUSED,
+     bfd_vma offset ATTRIBUTE_UNUSED,
+     const char **filename_ptr ATTRIBUTE_UNUSED,
+     const char **functionname_ptr ATTRIBUTE_UNUSED,
+     unsigned int *line_ptr ATTRIBUTE_UNUSED,
+     unsigned int *discriminator_ptr ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_boolean
+_bfd_nosymbols_find_line (bfd *abfd,
+			  asymbol **symbols ATTRIBUTE_UNUSED,
+			  asymbol *symbol ATTRIBUTE_UNUSED,
+			  const char **filename_ptr ATTRIBUTE_UNUSED,
+			  unsigned int *line_ptr ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bfd_boolean
+_bfd_nosymbols_find_inliner_info
+    (bfd *abfd,
+     const char **filename_ptr ATTRIBUTE_UNUSED,
+     const char **functionname_ptr ATTRIBUTE_UNUSED,
+     unsigned int *line_ptr ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+asymbol *
+_bfd_nosymbols_bfd_make_debug_symbol (bfd *abfd,
+				      void *ptr ATTRIBUTE_UNUSED,
+				      unsigned long sz ATTRIBUTE_UNUSED)
+{
+  return (asymbol *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+long
+_bfd_nosymbols_read_minisymbols (bfd *abfd,
+				 bfd_boolean dynamic ATTRIBUTE_UNUSED,
+				 void **minisymsp ATTRIBUTE_UNUSED,
+				 unsigned int *sizep ATTRIBUTE_UNUSED)
+{
+  return _bfd_long_bfd_n1_error (abfd);
+}
+
+asymbol *
+_bfd_nosymbols_minisymbol_to_symbol (bfd *abfd,
+				     bfd_boolean dynamic ATTRIBUTE_UNUSED,
+				     const void *minisym ATTRIBUTE_UNUSED,
+				     asymbol *sym ATTRIBUTE_UNUSED)
+{
+  return (asymbol *) _bfd_ptr_bfd_null_error (abfd);
+}
+
+long
+_bfd_nodynamic_get_synthetic_symtab (bfd *abfd,
+				     long symcount ATTRIBUTE_UNUSED,
+				     asymbol **syms ATTRIBUTE_UNUSED,
+				     long dynsymcount ATTRIBUTE_UNUSED,
+				     asymbol **dynsyms ATTRIBUTE_UNUSED,
+				     asymbol **ret ATTRIBUTE_UNUSED)
+{
+  return _bfd_long_bfd_n1_error (abfd);
 }

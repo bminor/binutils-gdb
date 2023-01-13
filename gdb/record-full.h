@@ -1,6 +1,6 @@
 /* Process record and replay target for GDB, the GNU debugger.
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,7 @@
 #ifndef RECORD_FULL_H
 #define RECORD_FULL_H
 
-extern int record_full_memory_query;
+extern bool record_full_memory_query;
 
 extern int record_full_arch_list_add_reg (struct regcache *regcache, int num);
 extern int record_full_arch_list_add_mem (CORE_ADDR addr, int len);
@@ -29,6 +29,6 @@ extern int record_full_arch_list_add_end (void);
 /* Returns true if the process record target is open.  */
 extern int record_full_is_used (void);
 
-extern struct cleanup *record_full_gdb_operation_disable_set (void);
+extern scoped_restore_tmpl<int> record_full_gdb_operation_disable_set ();
 
 #endif /* RECORD_FULL_H */

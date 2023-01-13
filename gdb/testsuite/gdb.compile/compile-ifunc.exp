@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,11 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if {[skip_ifunc_tests]} {
+    return 0
+}
+
 standard_testfile
 
 with_test_prefix "nodebug" {
 
-    if { [prepare_for_testing ${testfile}.exp "$testfile-nodebug" $srcfile {}] } {
+    if { [prepare_for_testing "failed to prepare" "$testfile-nodebug" $srcfile {}] } {
 	return -1
     }
 
@@ -36,25 +40,27 @@ with_test_prefix "nodebug" {
 	return -1
     }
 
-    gdb_test_no_output "compile code resultvar = gnu_ifunc (10);"
+    gdb_test "compile code resultvar = gnu_ifunc (10);" \
+	[multi_line \
+	     "warning: variable has unknown type; assuming int" \
+	     "warning: function has unknown return type; assuming int"]
 
-    gdb_test "p resultvar" " = 11"
+    gdb_test "p (int) resultvar" " = 11"
 
 }
 
 with_test_prefix "debug" {
 
-    if { [prepare_for_testing ${testfile}.exp "$testfile-debug" $srcfile] } {
+    if { [prepare_for_testing "failed to prepare" "$testfile-debug" $srcfile] } {
 	return -1
     }
 
     if ![runto_main] {
 	return -1
     }
-
     # gnu_ifunc (10): error: too many arguments to function 'gnu_ifunc'
-    gdb_test_no_output "compile code resultvar = gnu_ifunc_alias (10);"
-
+    gdb_test "compile code resultvar = gnu_ifunc_alias (10);" \
+	"warning: function has unknown return type; assuming int"
     gdb_test "p resultvar" " = 11"
 
 }

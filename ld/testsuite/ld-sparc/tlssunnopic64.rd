@@ -18,9 +18,9 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS +0+102000 0+2000 0+24 0+ WAT +0 +0 +4
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+102000 0+2000 0+100 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+102100 0+2100 0+38 08 +WA +0 +0 +8
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
@@ -55,14 +55,10 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION +LOCAL +DEFAULT +5 *
-.* SECTION +LOCAL +DEFAULT +6 *
 .* SECTION +LOCAL +DEFAULT +8 *
 .* FUNC +GLOBAL +DEFAULT +5 fn3
 .* TLS +GLOBAL +DEFAULT +UND sg1
-.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sg2
-.* NOTYPE +GLOBAL +DEFAULT +8 _edata
-.* NOTYPE +GLOBAL +DEFAULT +8 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -91,7 +87,4 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +6 sh2
 .* FUNC +GLOBAL +DEFAULT +5 fn3
 .* TLS +GLOBAL +DEFAULT +UND sg1
-.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sg2
-.* NOTYPE +GLOBAL +DEFAULT +8 _edata
-.* NOTYPE +GLOBAL +DEFAULT +8 _end

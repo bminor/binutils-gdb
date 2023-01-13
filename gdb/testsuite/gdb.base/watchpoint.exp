@@ -1,4 +1,4 @@
-# Copyright 1992-2016 Free Software Foundation, Inc.
+# Copyright 1992-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ if [get_compiler_info] {
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested watchpoint.exp
+     untested "failed to compile"
      return -1
 }
 
@@ -146,7 +146,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
     }
 
     # Check that the hit count is reported correctly
-    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 1 time.*" "Watchpoint hit count is 1"
+    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 1 time.*" "watchpoint hit count is 1"
 
     gdb_test_no_output "delete \$func1_breakpoint_number"
 
@@ -154,19 +154,19 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*" "watchpoint hit, second time"
 
     # Check that the hit count is reported correctly
-    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 2 times.*" "Watchpoint hit count is 2"
+    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 2 times.*" "watchpoint hit count is 2"
 
     # Continue until the next change, from 1 to 2.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 1.*New value = 2.*ival3 = count; ival4 = count;.*" "watchpoint hit, third time"
 
     # Check that the hit count is reported correctly
-    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 3 times.*" "Watchpoint hit count is 3"
+    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 3 times.*" "watchpoint hit count is 3"
     
     # Continue until the next change, from 2 to 3.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 2.*New value = 3.*ival3 = count; ival4 = count;.*" "watchpoint hit, fourth time"
 
     # Check that the hit count is reported correctly
-    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 4 times.*" "Watchpoint hit count is 4"
+    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 4 times.*" "watchpoint hit count is 4"
 
     # Continue until the next change, from 3 to 4.
     # Note that this one is outside the loop.
@@ -174,7 +174,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 3.*New value = 4.*ival3 = count; ival4 = count;.*" "watchpoint hit, fifth time"
 
     # Check that the hit count is reported correctly
-    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 5 times.*" "Watchpoint hit count is 5"
+    gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 5 times.*" "watchpoint hit count is 5"
 
     # Continue until we hit the finishing marker function.
     # Make sure we hit no more watchpoints.
@@ -347,7 +347,7 @@ proc test_watchpoint_triggered_in_syscall {} {
     # Run until we get to the first marker function.
     set x 0
     set y 0
-    set testname "Watch buffer passed to read syscall"
+    set testname "watch buffer passed to read syscall"
     if [runto marker2] then {
 	gdb_test "watch buf\[0\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[0\\\]"
 	gdb_test "watch buf\[1\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[1\\\]"
@@ -432,7 +432,7 @@ proc test_complex_watchpoint {} {
 	gdb_test "watch ptr1->val" ".*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
 	gdb_test "break marker5" ".*Breakpoint.*"
 
-	gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ptr1->val.*Old value = 1.*New value = 2.*" "Test complex watchpoint"
+	gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ptr1->val.*Old value = 1.*New value = 2.*" "test complex watchpoint"
 
 	# Continue until we hit the marker5 function.
 	# Make sure we hit no more watchpoints.
@@ -444,12 +444,12 @@ proc test_complex_watchpoint {} {
         # In particular, test that a watch of stack-based things
         # is deleted when the stack-based things go out of scope.
         #
-	gdb_test_no_output "disable" "disable in test_complex_watchpoint"
+	gdb_test_no_output "disable" "disable in test_complex_watchpoint, first time"
         gdb_test "break marker6" ".*Breakpoint.*"
         gdb_test "cont" "Continuing.*Breakpoint.*marker6 \\(\\).*" \
             "continue to marker6"
 	gdb_breakpoint [gdb_get_line_number "func2 breakpoint here"]
-	gdb_continue_to_breakpoint "func2 breakpoint here"
+	gdb_continue_to_breakpoint "func2 breakpoint here, first time"
 
         # Test a watch of a single stack-based variable, whose scope
         # is the function we're now in.  This should auto-delete when
@@ -478,7 +478,7 @@ proc test_complex_watchpoint {} {
 	    }
 	}
 
-	gdb_continue_to_breakpoint "func2 breakpoint here"
+	gdb_continue_to_breakpoint "func2 breakpoint here, second time"
         # We should be in "func2" again now.  Test a watch of an
         # expression which includes both a stack-based local and
         # something whose scope is larger than this invocation
@@ -498,7 +498,7 @@ proc test_complex_watchpoint {} {
         # across any invocations of "func2", it should not auto-
         # delete.
         #
-	gdb_continue_to_breakpoint "func2 breakpoint here"
+	gdb_continue_to_breakpoint "func2 breakpoint here, third time"
         gdb_test "watch static_b" ".*\[Ww\]atchpoint \[0-9\]*: static_b" \
                  "set static local watch"
         gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: static_b.*" \
@@ -514,31 +514,35 @@ proc test_complex_watchpoint {} {
         # local to a recursing function should be bound only to that
         # one invocation, and should not trigger for other invocations.
         #
-        gdb_test "tbreak recurser" ".*breakpoint.*"
-        gdb_test "cont" "Continuing.*recurser.*"
-        gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
-        gdb_test "watch local_x" ".*\[Ww\]atchpoint \[0-9\]*: local_x" \
-                 "set local watch in recursive call"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_x.*New value = 2.*" \
-                 "trigger local watch in recursive call"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
-                 "self-delete local watch in recursive call"
+	with_test_prefix "local_x" {
+	    gdb_test "tbreak recurser" ".*breakpoint.*"
+	    gdb_test "cont" "Continuing.*recurser.*"
+	    gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
+	    gdb_test "watch local_x" ".*\[Ww\]atchpoint \[0-9\]*: local_x" \
+		"set local watch in recursive call"
+	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_x.*New value = 2.*" \
+		"trigger local watch in recursive call"
+	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
+		"self-delete local watch in recursive call"
+	}
 
         # Repeat the preceding test, but this time use "recurser::local_x" as
         # the variable to track.
-        gdb_test "cont" "Continuing.*marker6.*"
-        gdb_test "tbreak recurser" ".*breakpoint.*"
-        gdb_test "cont" "Continuing.*recurser.*"
-        gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
-        gdb_test "watch recurser::local_x" ".*\[Ww\]atchpoint \[0-9\]*: recurser::local_x" \
-                 "set local watch in recursive call with explicit scope"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: recurser::local_x.*New value = 2.*" \
-                 "trigger local watch with explicit scope in recursive call"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
-                 "self-delete local watch with explicit scope in recursive call (2)"
+	with_test_prefix "recurser::local_x" {
+	    gdb_test "cont" "Continuing.*marker6.*" "continue to marker6"
+	    gdb_test "tbreak recurser" ".*breakpoint.*"
+	    gdb_test "cont" "Continuing.*recurser.*" "continue to recurser"
+	    gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
+	    gdb_test "watch recurser::local_x" ".*\[Ww\]atchpoint \[0-9\]*: recurser::local_x" \
+		"set local watch in recursive call with explicit scope"
+	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: recurser::local_x.*New value = 2.*" \
+		"trigger local watch with explicit scope in recursive call"
+	    gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
+		"self-delete local watch with explicit scope in recursive call (2)"
+	}
 
 	# Disable everything so we can finish the program at full speed
-	gdb_test_no_output "disable" "disable in test_complex_watchpoint"
+	gdb_test_no_output "disable" "disable in test_complex_watchpoint, second time"
 
 	if [target_info exists gdb,noresults] { return }
 
@@ -642,12 +646,12 @@ proc test_wide_location_1 {} {
     gdb_continue_to_breakpoint "func6 breakpoint here"
 
     if { $hw_expected } {
-	gdb_test "watch foo2" "Hardware watchpoint .*: .*" "watch foo2"
+	gdb_test "watch foo2" "Hardware watchpoint .*: .*"
 	gdb_test "continue" \
 	    "Continuing.*Hardware watchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*" \
 	    "continue with watch foo2"
     } else {
-	gdb_test "watch foo2" "atchpoint .*: .*" "watch foo2"
+	gdb_test "watch foo2" "atchpoint .*: .*"
 	set test "continue with watch foo2"
 	gdb_test_multiple "cont" $test {
 	    -re "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*$gdb_prompt $" {
@@ -689,12 +693,12 @@ proc test_wide_location_2 {} {
     gdb_continue_to_breakpoint "func7 breakpoint here"
 
     if { $hw_expected } {
-	gdb_test "watch foo4" "Hardware watchpoint .*: .*" "watch foo4"
+	gdb_test "watch foo4" "Hardware watchpoint .*: .*"
 	gdb_test "continue" \
 	    "Continuing.*Hardware watchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*" \
 	    "continue with watch foo4"
     } else {
-	gdb_test "watch foo4" "atchpoint .*: .*" "watch foo4"
+	gdb_test "watch foo4" "atchpoint .*: .*"
 	set test "continue with watch foo4"
 	gdb_test_multiple "cont" $test {
 	    -re "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*$gdb_prompt $" {

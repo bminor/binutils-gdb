@@ -1,4 +1,4 @@
-# Copyright 2008-2016 Free Software Foundation, Inc.
+# Copyright 2008-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@ runto "foo.adb:$bp_location"
 # works without problem.
 
 gdb_test "print call_me (\"bonjour\")" \
-         "= void" \
-         "print call_me (\"bonjour\")"
+         "= void"
 
 # Verify that the array was passed properly by checking the global
 # variables that Call_Me sets as side-effects.  Use the package name to avoid

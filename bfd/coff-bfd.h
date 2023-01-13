@@ -1,5 +1,5 @@
 /* BFD COFF interfaces used outside of BFD.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -50,6 +50,8 @@ struct coff_section_tdata
   /* If this is TRUE, the contents entry may not be freed.  */
   bfd_boolean keep_contents;
   /* Information cached by coff_find_nearest_line.  */
+  bfd_boolean saved_bias;
+  bfd_signed_vma bias;
   bfd_vma offset;
   unsigned int i;
   const char *function;
@@ -84,3 +86,6 @@ extern bfd_boolean bfd_coff_get_syment
 
 extern bfd_boolean bfd_coff_get_auxent
   (bfd *, struct bfd_symbol *, int, union internal_auxent *);
+
+extern bfd_boolean bfd_coff_set_symbol_class
+  (bfd *, struct bfd_symbol *, unsigned int);

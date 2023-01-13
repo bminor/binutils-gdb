@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
 		      for now.  */
 /* I/O, string, cleanup, and other random utilities for GDB.
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,114 +22,270 @@
 #define UTILS_H
 
 #include "exceptions.h"
+#include "gdbsupport/scoped_restore.h"
+#include <chrono>
 
-extern void initialize_utils (void);
+#ifdef HAVE_LIBXXHASH
+#include <xxhash.h>
+#endif
+
+struct completion_match_for_lcd;
+class compiled_regex;
 
 /* String utilities.  */
 
-extern int sevenbit_strings;
+extern bool sevenbit_strings;
 
-extern int strcmp_iw (const char *, const char *);
+/* Modes of operation for strncmp_iw_with_mode.  */
+
+enum class strncmp_iw_mode
+{
+/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  Returns 0 if they match, non-zero if
+   they don't (slightly different than strcmp()'s range of return
+   values).  */
+  NORMAL,
+
+  /* Like NORMAL, but also apply the strcmp_iw hack.  I.e.,
+     string1=="FOO(PARAMS)" matches string2=="FOO".  */
+  MATCH_PARAMS,
+};
+
+/* Helper for strcmp_iw and strncmp_iw.  Exported so that languages
+   can implement both NORMAL and MATCH_PARAMS variants in a single
+   function and defer part of the work to strncmp_iw_with_mode.
+
+   LANGUAGE is used to implement some context-sensitive
+   language-specific comparisons.  For example, for C++,
+   "string1=operator()" should not match "string2=operator" even in
+   MATCH_PARAMS mode.
+
+   MATCH_FOR_LCD is passed down so that the function can mark parts of
+   the symbol name as ignored for completion matching purposes (e.g.,
+   to handle abi tags).  */
+extern int strncmp_iw_with_mode
+  (const char *string1, const char *string2, size_t string2_len,
+   strncmp_iw_mode mode, enum language language,
+   completion_match_for_lcd *match_for_lcd = NULL);
+
+/* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  STRING2_LEN is STRING2's length.
+   Returns 0 if STRING1 matches STRING2_LEN characters of STRING2,
+   non-zero otherwise (slightly different than strncmp()'s range of
+   return values).  Note: passes language_minimal to
+   strncmp_iw_with_mode, and should therefore be avoided if a more
+   suitable language is available.  */
+extern int strncmp_iw (const char *string1, const char *string2,
+		       size_t string2_len);
+
+/* Do a strcmp() type operation on STRING1 and STRING2, ignoring any
+   differences in whitespace.  Returns 0 if they match, non-zero if
+   they don't (slightly different than strcmp()'s range of return
+   values).
+
+   As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
+   This "feature" is useful when searching for matching C++ function
+   names (such as if the user types 'break FOO', where FOO is a
+   mangled C++ function).
+
+   Note: passes language_minimal to strncmp_iw_with_mode, and should
+   therefore be avoided if a more suitable language is available.  */
+extern int strcmp_iw (const char *string1, const char *string2);
 
 extern int strcmp_iw_ordered (const char *, const char *);
 
-extern int streq (const char *, const char *);
+/* Return true if the strings are equal.  */
 
-extern int subset_compare (char *, char *);
+extern bool streq (const char *, const char *);
 
-int compare_positive_ints (const void *ap, const void *bp);
-int compare_strings (const void *ap, const void *bp);
+/* A variant of streq that is suitable for use as an htab
+   callback.  */
+
+extern int streq_hash (const void *, const void *);
+
+extern int subset_compare (const char *, const char *);
+
+/* Compare C strings for std::sort.  */
+
+static inline bool
+compare_cstrings (const char *str1, const char *str2)
+{
+  return strcmp (str1, str2) < 0;
+}
 
 /* A wrapper for bfd_errmsg to produce a more helpful error message
    in the case of bfd_error_file_ambiguously recognized.
    MATCHING, if non-NULL, is the corresponding argument to
    bfd_check_format_matches, and will be freed.  */
 
-extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
+extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 /* Reset the prompt_for_continue clock.  */
 void reset_prompt_for_continue_wait_time (void);
 /* Return the time spent in prompt_for_continue.  */
-struct timeval get_prompt_for_continue_wait_time (void);
+std::chrono::steady_clock::duration get_prompt_for_continue_wait_time ();
 
-/* Parsing utilites.  */
+/* Parsing utilities.  */
 
 extern int parse_pid_to_attach (const char *args);
 
 extern int parse_escape (struct gdbarch *, const char **);
 
-char **gdb_buildargv (const char *);
+/* A wrapper for an array of char* that was allocated in the way that
+   'buildargv' does, and should be freed with 'freeargv'.  */
+
+class gdb_argv
+{
+public:
+
+  /* A constructor that initializes to NULL.  */
+
+  gdb_argv ()
+    : m_argv (NULL)
+  {
+  }
+
+  /* A constructor that calls buildargv on STR.  STR may be NULL, in
+     which case this object is initialized with a NULL array.  */
+
+  explicit gdb_argv (const char *str)
+    : m_argv (NULL)
+  {
+    reset (str);
+  }
+
+  /* A constructor that takes ownership of an existing array.  */
+
+  explicit gdb_argv (char **array)
+    : m_argv (array)
+  {
+  }
+
+  gdb_argv (const gdb_argv &) = delete;
+  gdb_argv &operator= (const gdb_argv &) = delete;
+
+  ~gdb_argv ()
+  {
+    freeargv (m_argv);
+  }
+
+  /* Call buildargv on STR, storing the result in this object.  Any
+     previous state is freed.  STR may be NULL, in which case this
+     object is reset with a NULL array.  If buildargv fails due to
+     out-of-memory, call malloc_failure.  Therefore, the value is
+     guaranteed to be non-NULL, unless the parameter itself is
+     NULL.  */
+
+  void reset (const char *str);
+
+  /* Return the underlying array.  */
+
+  char **get ()
+  {
+    return m_argv;
+  }
+
+  /* Return the underlying array, transferring ownership to the
+     caller.  */
+
+  ATTRIBUTE_UNUSED_RESULT char **release ()
+  {
+    char **result = m_argv;
+    m_argv = NULL;
+    return result;
+  }
+
+  /* Return the number of items in the array.  */
+
+  int count () const
+  {
+    return countargv (m_argv);
+  }
+
+  /* Index into the array.  */
+
+  char *operator[] (int arg)
+  {
+    gdb_assert (m_argv != NULL);
+    return m_argv[arg];
+  }
+
+  /* The iterator type.  */
+
+  typedef char **iterator;
+
+  /* Return an iterator pointing to the start of the array.  */
+
+  iterator begin ()
+  {
+    return m_argv;
+  }
+
+  /* Return an iterator pointing to the end of the array.  */
+
+  iterator end ()
+  {
+    return m_argv + count ();
+  }
+
+  bool operator!= (std::nullptr_t)
+  {
+    return m_argv != NULL;
+  }
+
+  bool operator== (std::nullptr_t)
+  {
+    return m_argv == NULL;
+  }
+
+private:
+
+  /* The wrapped array.  */
+
+  char **m_argv;
+};
+
 
 /* Cleanup utilities.  */
 
-extern struct cleanup *make_cleanup_freeargv (char **);
+/* A deleter for a hash table.  */
+struct htab_deleter
+{
+  void operator() (htab *ptr) const
+  {
+    htab_delete (ptr);
+  }
+};
 
-struct dyn_string;
-extern struct cleanup *make_cleanup_dyn_string_delete (struct dyn_string *);
-
-struct ui_file;
-extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
-
-struct ui_out;
-extern struct cleanup *
-  make_cleanup_ui_out_redirect_pop (struct ui_out *uiout);
-
-struct section_addr_info;
-extern struct cleanup *(make_cleanup_free_section_addr_info 
-                        (struct section_addr_info *));
-
-/* For make_cleanup_close see common/filestuff.h.  */
-
-extern struct cleanup *make_cleanup_fclose (FILE *file);
-
-extern struct cleanup *make_cleanup_bfd_unref (bfd *abfd);
-
-struct obstack;
-extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
-
-extern struct cleanup *make_cleanup_restore_integer (int *variable);
-extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
-
-struct target_ops;
-extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
-
-
-extern struct cleanup *
-  make_cleanup_restore_ui_out (struct ui_out **variable);
-extern struct cleanup *
-  make_cleanup_restore_ui_file (struct ui_file **variable);
-
-extern struct cleanup *make_cleanup_value_free_to_mark (struct value *);
-extern struct cleanup *make_cleanup_value_free (struct value *);
-
-struct so_list;
-extern struct cleanup *make_cleanup_free_so (struct so_list *so);
-
-extern struct cleanup *make_cleanup_restore_current_language (void);
-
-extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
-
-struct parser_state;
-extern struct cleanup *make_cleanup_clear_parser_state
-  (struct parser_state **p);
-
-extern void free_current_contents (void *);
+/* A unique_ptr wrapper for htab_t.  */
+typedef std::unique_ptr<htab, htab_deleter> htab_up;
 
 extern void init_page_info (void);
 
-extern struct cleanup *make_cleanup_restore_page_info (void);
-extern struct cleanup *
-  set_batch_flag_and_make_cleanup_restore_page_info (void);
+/* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
+   Restore when destroyed.  */
 
-extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
+struct set_batch_flag_and_restore_page_info
+{
+public:
+
+  set_batch_flag_and_restore_page_info ();
+  ~set_batch_flag_and_restore_page_info ();
+
+  DISABLE_COPY_AND_ASSIGN (set_batch_flag_and_restore_page_info);
+
+private:
+
+  /* Note that this doesn't use scoped_restore, because it's important
+     to control the ordering of operations in the destruction, and it
+     was simpler to avoid introducing a new ad hoc class.  */
+  unsigned m_save_lines_per_page;
+  unsigned m_save_chars_per_line;
+  int m_save_batch_flag;
+};
+
 
 /* Path utilities.  */
-
-extern char *gdb_realpath (const char *);
-
-extern char *gdb_realpath_keepfile (const char *);
-
-extern char *gdb_abspath (const char *);
 
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);
@@ -137,7 +293,7 @@ extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 extern void substitute_path_component (char **stringp, const char *from,
 				       const char *to);
 
-char *ldirname (const char *filename);
+std::string ldirname (const char *filename);
 
 extern int count_path_elements (const char *path);
 
@@ -153,24 +309,39 @@ extern int yquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void begin_line (void);
 
-extern void wrap_here (char *);
+extern void wrap_here (const char *);
 
 extern void reinitialize_more_filter (void);
 
-extern int pagination_enabled;
+extern bool pagination_enabled;
 
-/* Global ui_file streams.  These are all defined in main.c.  */
+extern struct ui_file **current_ui_gdb_stdout_ptr (void);
+extern struct ui_file **current_ui_gdb_stdin_ptr (void);
+extern struct ui_file **current_ui_gdb_stderr_ptr (void);
+extern struct ui_file **current_ui_gdb_stdlog_ptr (void);
+
+/* Flush STREAM.  This is a wrapper for ui_file_flush that also
+   flushes any output pending from uses of the *_filtered output
+   functions; that output is kept in a special buffer so that
+   pagination and styling are handled properly.  */
+extern void gdb_flush (struct ui_file *);
+
+/* The current top level's ui_file streams.  */
+
 /* Normal results */
-extern struct ui_file *gdb_stdout;
+#define gdb_stdout (*current_ui_gdb_stdout_ptr ())
 /* Input stream */
-extern struct ui_file *gdb_stdin;
+#define gdb_stdin (*current_ui_gdb_stdin_ptr ())
 /* Serious error notifications */
-extern struct ui_file *gdb_stderr;
+#define gdb_stderr (*current_ui_gdb_stderr_ptr ())
 /* Log/debug/trace messages that should bypass normal stdout/stderr
    filtering.  For moment, always call this stream using
    *_unfiltered.  In the very near future that restriction shall be
    removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
-extern struct ui_file *gdb_stdlog;
+#define gdb_stdlog (*current_ui_gdb_stdlog_ptr ())
+
+/* Truly global ui_file streams.  These are all defined in main.c.  */
+
 /* Target output that should bypass normal stdout/stderr filtering.
    For moment, always call this stream using *_unfiltered.  In the
    very near future that restriction shall be removed - either call
@@ -184,7 +355,10 @@ extern struct ui_file *gdb_stdtargin;
 extern void set_screen_width_and_height (int width, int height);
 
 /* More generic printf like operations.  Filtered versions may return
-   non-locally on error.  */
+   non-locally on error.  As an extension over plain printf, these
+   support some GDB-specific format specifiers.  Particularly useful
+   here are the styling formatters: '%p[', '%p]' and '%ps'.  See
+   ui_out::message for details.  */
 
 extern void fputs_filtered (const char *, struct ui_file *);
 
@@ -246,11 +420,60 @@ extern void fputstr_unfiltered (const char *str, int quotr,
 extern void fputstrn_filtered (const char *str, int n, int quotr,
 			       struct ui_file * stream);
 
+typedef int (*do_fputc_ftype) (int c, ui_file *stream);
+
 extern void fputstrn_unfiltered (const char *str, int n, int quotr,
+				 do_fputc_ftype do_fputc,
 				 struct ui_file * stream);
 
 /* Return nonzero if filtered printing is initialized.  */
 extern int filtered_printing_initialized (void);
+
+/* Like fprintf_filtered, but styles the output according to STYLE,
+   when appropriate.  */
+
+extern void fprintf_styled (struct ui_file *stream,
+			    const ui_file_style &style,
+			    const char *fmt,
+			    ...)
+  ATTRIBUTE_PRINTF (3, 4);
+
+extern void vfprintf_styled (struct ui_file *stream,
+			     const ui_file_style &style,
+			     const char *fmt,
+			     va_list args)
+  ATTRIBUTE_PRINTF (3, 0);
+
+/* Like vfprintf_styled, but do not process gdb-specific format
+   specifiers.  */
+extern void vfprintf_styled_no_gdbfmt (struct ui_file *stream,
+				       const ui_file_style &style,
+				       bool filter,
+				       const char *fmt, va_list args)
+  ATTRIBUTE_PRINTF (4, 0);
+
+/* Like fputs_filtered, but styles the output according to STYLE, when
+   appropriate.  */
+
+extern void fputs_styled (const char *linebuffer,
+			  const ui_file_style &style,
+			  struct ui_file *stream);
+
+/* Unfiltered variant of fputs_styled.  */
+
+extern void fputs_styled_unfiltered (const char *linebuffer,
+				     const ui_file_style &style,
+				     struct ui_file *stream);
+
+/* Like fputs_styled, but uses highlight_style to highlight the
+   parts of STR that match HIGHLIGHT.  */
+
+extern void fputs_highlighted (const char *str, const compiled_regex &highlight,
+			       struct ui_file *stream);
+
+/* Reset the terminal style to the default, if needed.  */
+
+extern void reset_terminal_style (struct ui_file *stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address_1 (const void *addr, struct ui_file *stream);
@@ -258,6 +481,9 @@ extern void gdb_print_host_address_1 (const void *addr, struct ui_file *stream);
 /* Wrapper that avoids adding a pointless cast to all callers.  */
 #define gdb_print_host_address(ADDR, STREAM) \
   gdb_print_host_address_1 ((const void *) ADDR, STREAM)
+
+/* Return the address only having significant bits.  */
+extern CORE_ADDR address_significant (gdbarch *gdbarch, CORE_ADDR addr);
 
 /* Convert CORE_ADDR to string in platform-specific manner.
    This is usually formatted similar to 0x%lx.  */
@@ -291,9 +517,9 @@ extern void (*deprecated_error_begin_hook) (void);
 
 /* Message to be printed before the warning message, when a warning occurs.  */
 
-extern char *warning_pre_print;
+extern const char *warning_pre_print;
 
-extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
+extern void error_stream (const string_file &) ATTRIBUTE_NORETURN;
 
 extern void demangler_vwarning (const char *file, int line,
 			       const char *, va_list ap)
@@ -314,42 +540,7 @@ void dummy_obstack_deallocate (void *object, void *data);
 extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 #endif
 
-extern int producer_is_gcc_ge_4 (const char *producer);
-extern int producer_is_gcc (const char *producer, int *major, int *minor);
-
 extern int myread (int, char *, int);
-
-/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
-   power of 2).  Round up/down when necessary.  Examples of correct
-   use include:
-
-   addr = align_up (addr, 8); -- VALUE needs 8 byte alignment
-   write_memory (addr, value, len);
-   addr += len;
-
-   and:
-
-   sp = align_down (sp - len, 16); -- Keep SP 16 byte aligned
-   write_memory (sp, value, len);
-
-   Note that uses such as:
-
-   write_memory (addr, value, len);
-   addr += align_up (len, 8);
-
-   and:
-
-   sp -= align_up (len, 8);
-   write_memory (sp, value, len);
-
-   are typically not correct as they don't ensure that the address (SP
-   or ADDR) is correctly aligned (relying on previous alignment to
-   keep things right).  This is also why the methods are called
-   "align_..." instead of "round_..." as the latter reads better with
-   this incorrect coding style.  */
-
-extern ULONGEST align_up (ULONGEST v, int n);
-extern ULONGEST align_down (ULONGEST v, int n);
 
 /* Resource limits used by getrlimit and setrlimit.  */
 
@@ -375,9 +566,27 @@ extern void warn_cant_dump_core (const char *reason);
 
 extern void dump_core (void);
 
-/* Return the hex string form of LENGTH bytes of DATA.
-   Space for the result is malloc'd, caller must free.  */
+/* Copy NBITS bits from SOURCE to DEST starting at the given bit
+   offsets.  Use the bit order as specified by BITS_BIG_ENDIAN.
+   Source and destination buffers must not overlap.  */
 
-extern char *make_hex_string (const gdb_byte *data, size_t length);
+extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
+			  const gdb_byte *source, ULONGEST source_offset,
+			  ULONGEST nbits, int bits_big_endian);
+
+/* A fast hashing function.  This can be used to hash data in a fast way
+   when the length is known.  If no fast hashing library is available, falls
+   back to iterative_hash from libiberty.  START_VALUE can be set to
+   continue hashing from a previous value.  */
+
+static inline unsigned int
+fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
+{
+#ifdef HAVE_LIBXXHASH
+  return XXH64 (ptr, len, start_value);
+#else
+  return iterative_hash (ptr, len, start_value);
+#endif
+}
 
 #endif /* UTILS_H */

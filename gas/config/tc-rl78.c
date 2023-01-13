@@ -1,5 +1,5 @@
 /* tc-rl78.c -- Assembler for the Renesas RL78
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,10 +19,8 @@
    02110-1301, USA.  */
 
 #include "as.h"
-#include "struc-symbol.h"
 #include "safe-ctype.h"
 #include "dwarf2dbg.h"
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/rl78.h"
 #include "rl78-defs.h"
@@ -131,7 +129,7 @@ rl78_prefix (int p)
 }
 
 int
-rl78_has_prefix ()
+rl78_has_prefix (void)
 {
   return rl78_bytes.n_prefix;
 }
@@ -1235,8 +1233,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	   fragP->fr_next);
 
   if (fragP->fr_next != NULL
-	  && ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
-	      != fragP->fr_fix))
+      && fragP->fr_next->fr_address - fragP->fr_address != fragP->fr_fix)
     as_bad (_("bad frag at %p : fix %ld addr %ld %ld \n"), fragP,
 	    (long) fragP->fr_fix,
 	    (long) fragP->fr_address, (long) fragP->fr_next->fr_address);
@@ -1271,8 +1268,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       fixp->fx_subsy = NULL;
     }
 
-  reloc[0]		  = (arelent *) xmalloc (sizeof (arelent));
-  reloc[0]->sym_ptr_ptr   = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc[0]		  = XNEW (arelent);
+  reloc[0]->sym_ptr_ptr   = XNEW (asymbol *);
   * reloc[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc[0]->address       = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc[0]->addend        = fixp->fx_offset;
@@ -1284,8 +1281,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
     }
 
 #define OPX(REL,SYM,ADD)							\
-  reloc[rp]		   = (arelent *) xmalloc (sizeof (arelent));		\
-  reloc[rp]->sym_ptr_ptr   = (asymbol **) xmalloc (sizeof (asymbol *));		\
+  reloc[rp]		   = XNEW (arelent);		\
+  reloc[rp]->sym_ptr_ptr   = XNEW (asymbol *);		\
   reloc[rp]->howto         = bfd_reloc_type_lookup (stdoutput, REL);		\
   reloc[rp]->addend        = ADD;						\
   * reloc[rp]->sym_ptr_ptr = SYM;						\
@@ -1523,6 +1520,6 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & -(1 << align));
 }

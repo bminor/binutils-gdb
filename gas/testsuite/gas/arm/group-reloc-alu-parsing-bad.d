@@ -1,3 +1,3 @@
 #name: Group relocation tests, parsing failures (alu)
-#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
-#error-output: group-reloc-alu-parsing-bad.l
+#skip: *-*-pe *-*-wince
+#error_output: group-reloc-alu-parsing-bad.l

@@ -42,5 +42,7 @@
   vldr s0,=0x42000000
   .pool
 
-  nop
+  # PR 20067
+  FLDD D11, =0
+  .pool
 	

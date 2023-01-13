@@ -1,5 +1,5 @@
 /* TI C6X assembler.
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2020 Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
 
@@ -201,7 +201,7 @@ static tic6x_unwind_info *tic6x_get_unwind (void)
   if (unwind)
     return unwind;
 
-  unwind = (tic6x_unwind_info *)xmalloc (sizeof (tic6x_unwind_info));
+  unwind =XNEW (tic6x_unwind_info);
   seg_info (now_seg)->tc_segment_info_data.unwind = unwind;
   memset (unwind, 0, sizeof (*unwind));
   return unwind;
@@ -781,7 +781,7 @@ md_begin (void)
 
   /* This is copied from perform_an_assembly_pass.  */
   applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
+  bfd_set_section_flags (sbss_section, applicable & SEC_ALLOC);
 
   subseg_set (seg, subseg);
 
@@ -4483,7 +4483,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
 {
   /* Round up section sizes to ensure that text sections consist of
      whole fetch packets.  */
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 
@@ -4526,7 +4526,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   if (reloc->howto->pcrel_offset && reloc->howto->partial_inplace)
     {
       reloc->addend += reloc->address;
-      if (!bfd_is_com_section (symbol))
+      if (!bfd_is_com_section (bfd_asymbol_section (symbol)))
 	reloc->addend -= symbol->value;
     }
   if (r_type == BFD_RELOC_C6000_PCR_H16
@@ -4606,7 +4606,7 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
   const char * text_name;
   const char * prefix;
   const char * prefix_once;
-  const char * group_name;
+  struct elf_section_match match;
   size_t prefix_len;
   size_t text_len;
   char * sec_name;
@@ -4642,20 +4642,20 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
   prefix_len = strlen (prefix);
   text_len = strlen (text_name);
   sec_name_len = prefix_len + text_len;
-  sec_name = (char *) xmalloc (sec_name_len + 1);
+  sec_name = XNEWVEC (char, sec_name_len + 1);
   memcpy (sec_name, prefix, prefix_len);
   memcpy (sec_name + prefix_len, text_name, text_len);
   sec_name[prefix_len + text_len] = '\0';
 
   flags = SHF_ALLOC;
   linkonce = 0;
-  group_name = 0;
+  memset (&match, 0, sizeof (match));
 
   /* Handle COMDAT group.  */
   if (prefix != prefix_once && (text_seg->flags & SEC_LINK_ONCE) != 0)
     {
-      group_name = elf_group_name (text_seg);
-      if (group_name == NULL)
+      match.group_name = elf_group_name (text_seg);
+      if (match.group_name == NULL)
 	{
 	  as_bad (_("group section `%s' has no group signature"),
 		  segment_name (text_seg));
@@ -4666,7 +4666,8 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
       linkonce = 1;
     }
 
-  obj_elf_change_section (sec_name, type, flags, 0, group_name, linkonce, 0);
+  obj_elf_change_section (sec_name, type, flags, 0, &match,
+			  linkonce, 0);
 
   /* Set the section link for index tables.  */
   if (idx)
@@ -5059,7 +5060,7 @@ tic6x_output_unwinding (bfd_boolean need_extab)
       if (unwind->personality_index == -1)
 	{
 	  tmp = md_chars_to_number (unwind->frag_start + 4, 4);
-	  tmp |= ((unwind->data_bytes - 8) >> 2) << 24;
+	  tmp |= (valueT) ((unwind->data_bytes - 8) >> 2) << 24;
 	  md_number_to_chars (unwind->frag_start + 4, tmp, 4);
 	}
       else if (unwind->personality_index == 1 || unwind->personality_index == 2)

@@ -1,7 +1,7 @@
 /* Internal format of COFF object file data structures, for GNU BFD.
    This file is part of BFD, the Binary File Descriptor library.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ struct internal_extra_pe_filehdr
   unsigned short e_oeminfo;	/* OEM information; e_oemid specific, 0x0 */
   unsigned short e_res2[10];	/* Reserved words, all 0x0 */
   bfd_vma  e_lfanew;		/* File address of new exe header, 0x80 */
-  unsigned long dos_message[16]; /* text which always follows dos header */
+  unsigned int dos_message[16]; /* Text which always follows DOS header.  */
   bfd_vma  nt_signature;   	/* required NT signature, 0x4550 */
 };
 
@@ -157,6 +157,11 @@ struct internal_IMAGE_DEBUG_DIRECTORY
 #define PE_IMAGE_DEBUG_TYPE_BORLAND          9
 #define PE_IMAGE_DEBUG_TYPE_RESERVED10       10
 #define PE_IMAGE_DEBUG_TYPE_CLSID            11
+#define PE_IMAGE_DEBUG_TYPE_VC_FEATURE       12
+#define PE_IMAGE_DEBUG_TYPE_POGO             13
+#define PE_IMAGE_DEBUG_TYPE_ILTCG            14
+#define PE_IMAGE_DEBUG_TYPE_MPX              15
+#define PE_IMAGE_DEBUG_TYPE_REPRO            16
 
 /* Extra structure for a codeview debug record */
 #define CV_INFO_SIGNATURE_LENGTH 16
@@ -197,11 +202,11 @@ struct internal_extra_pe_aouthdr
   /* Linker minor version number.  */
   char MinorLinkerVersion;	
   /* Total size of all code sections.  */
-  long SizeOfCode;
+  bfd_vma SizeOfCode;
   /* Total size of all initialized data sections.  */
-  long SizeOfInitializedData;
+  bfd_vma SizeOfInitializedData;
   /* Total size of all uninitialized data sections.  */
-  long SizeOfUninitializedData;
+  bfd_vma SizeOfUninitializedData;
   /* Address of entry point relative to image base.  */
   bfd_vma AddressOfEntryPoint;
   /* Address of the first code section relative to image base.  */
@@ -211,21 +216,21 @@ struct internal_extra_pe_aouthdr
 
   /* PE stuff  */
   bfd_vma ImageBase;		/* Address of specific location in memory that
-				    file is located, NT default 0x10000.  */
+				   file is located, NT default 0x10000.  */
 
-  bfd_vma SectionAlignment;	/* Section alignment default 0x1000.  */
-  bfd_vma FileAlignment;	/* File alignment default 0x200.  */
-  short   MajorOperatingSystemVersion; /* Minimum version of the operating.  */
-  short   MinorOperatingSystemVersion; /* System req'd for exe, default to 1.  */
-  short   MajorImageVersion;	/* User defineable field to store version of */
-  short   MinorImageVersion;	/*  exe or dll being created, default to 0.  */ 
-  short   MajorSubsystemVersion; /* Minimum subsystem version required to */
-  short   MinorSubsystemVersion; /*  run exe; default to 3.1.  */
-  long    Reserved1;		/* Seems to be 0.  */
-  long    SizeOfImage;		/* Size of memory to allocate for prog.  */
-  long    SizeOfHeaders;	/* Size of PE header and section table.  */
-  long    CheckSum;		/* Set to 0.  */
-  short   Subsystem;	
+  uint32_t SectionAlignment;	/* Section alignment default 0x1000.  */
+  uint32_t FileAlignment;	/* File alignment default 0x200.  */
+  short MajorOperatingSystemVersion; /* Minimum version of the operating.  */
+  short MinorOperatingSystemVersion; /* System req'd for exe, default 1.  */
+  short MajorImageVersion;	/* User defineable field to store version of */
+  short MinorImageVersion;	/*  exe or dll being created, default to 0.  */
+  short MajorSubsystemVersion;	/* Minimum subsystem version required to */
+  short MinorSubsystemVersion;	/*  run exe; default to 3.1.  */
+  uint32_t Reserved1;		/* Seems to be 0.  */
+  uint32_t SizeOfImage;		/* Size of memory to allocate for prog.  */
+  uint32_t SizeOfHeaders;	/* Size of PE header and section table.  */
+  uint32_t CheckSum;		/* Set to 0.  */
+  short Subsystem;
 
   /* Type of subsystem exe uses for user interface,
      possible values:
@@ -237,11 +242,11 @@ struct internal_extra_pe_aouthdr
   unsigned short DllCharacteristics; /* flags for DLL init.  */
   bfd_vma SizeOfStackReserve;	/* Amount of memory to reserve.  */
   bfd_vma SizeOfStackCommit;	/* Amount of memory initially committed for
-				    initial thread's stack, default is 0x1000.  */
+				   initial thread's stack, default 0x1000.  */
   bfd_vma SizeOfHeapReserve;	/* Amount of virtual memory to reserve and */
   bfd_vma SizeOfHeapCommit;	/*  commit, don't know what to defaut it to.  */
-  long    LoaderFlags;		/* Can probably set to 0.  */
-  long    NumberOfRvaAndSizes;	/* Number of entries in next entry, 16.  */
+  uint32_t LoaderFlags;		/* Can probably set to 0.  */
+  uint32_t NumberOfRvaAndSizes;	/* Number of entries in next entry, 16.  */
   IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 };
 
@@ -256,9 +261,6 @@ struct internal_aouthdr
   bfd_vma entry;		/* entry pt.				*/
   bfd_vma text_start;		/* base of text used for this file */
   bfd_vma data_start;		/* base of data used for this file */
-
-  /* i960 stuff */
-  unsigned long tagentries;	/* number of tag entries to follow */
 
   /* RS/6000 stuff */
   bfd_vma o_toc;		/* address of TOC			*/
@@ -347,10 +349,6 @@ struct internal_aouthdr
 #define C_PRAGMA	111	/* Advice to compiler or linker	*/
 #define C_SEGMENT	112	/* 80960 segment name		*/
 
-  /* Storage classes for m88k */
-#define C_SHADOW        107     /* shadow symbol                */
-#define C_VERSION       108     /* coff version symbol          */
-
  /* New storage classes for RS/6000 */
 #define C_HIDEXT        107	/* Un-named external symbol */
 #define C_BINCL         108	/* Marks beginning of include file */
@@ -400,7 +398,7 @@ struct internal_aouthdr
 
 struct internal_scnhdr
 {
-  char s_name[SCNNMLEN];	/* section name			*/
+  char s_name[SCNNMLEN] ATTRIBUTE_NONSTRING;	/* section name	*/
 
   /* Physical address, aliased s_nlib.
      In the pei format, this field is the virtual section size
@@ -416,7 +414,6 @@ struct internal_scnhdr
   unsigned long s_nreloc;	/* number of relocation entries	*/
   unsigned long s_nlnno;	/* number of line number entries*/
   long s_flags;			/* flags			*/
-  long s_align;			/* used on I960			*/
   unsigned char s_page;         /* TI COFF load page            */
 };
 
@@ -474,7 +471,7 @@ struct internal_syment
 {
   union
   {
-    char _n_name[SYMNMLEN];	/* old COFF version		*/
+    char _n_name[SYMNMLEN] ATTRIBUTE_NONSTRING;	/* old COFF version	*/
     struct
     {
       bfd_hostptr_t _n_zeroes;	/* new == 0			*/
@@ -668,28 +665,6 @@ union internal_auxent
 /* 		14	??? */
 #define	XMC_TC0	15		/* Read-write TOC anchor */
 #define XMC_TD	16		/* Read-write data in TOC */
-
-  /******************************************
-   *  I960-specific *2nd* aux. entry formats
-   ******************************************/
-  struct
-  {
-    /* This is a very old typo that keeps getting propagated. */
-#define x_stdindx x_stindx
-    long x_stindx;		/* sys. table entry */
-  }      x_sc;			/* system call entry */
-
-  struct
-  {
-    unsigned long x_balntry;	/* BAL entry point */
-  }      x_bal;			/* BAL-callable function */
-
-  struct
-  {
-    unsigned long x_timestamp;	/* time stamp */
-    char x_idstring[20];	/* producer identity string */
-  }      x_ident;		/* Producer ident info */
-
 };
 
 /********************** RELOCATION DIRECTIVES **********************/
@@ -837,35 +812,13 @@ struct internal_reloc
 /* Z80 modes */
 #define R_OFF8    0x32		/* 8 bit signed abs, for (i[xy]+d) */
 #define R_IMM24   0x33          /* 24 bit abs */
+#define R_IMM16BE 0x3A          /* 16 bit abs, big endian */
 /* R_JR, R_IMM8, R_IMM16, R_IMM32 - as for Z8k */
-
-/* H8500 modes */
-
-#define R_H8500_IMM8  	1		/*  8 bit immediate 	*/
-#define R_H8500_IMM16 	2		/* 16 bit immediate	*/
-#define R_H8500_PCREL8 	3		/*  8 bit pcrel 	*/
-#define R_H8500_PCREL16 4		/* 16 bit pcrel 	*/
-#define R_H8500_HIGH8  	5		/* high 8 bits of 24 bit address */
-#define R_H8500_LOW16 	7		/* low 16 bits of 24 bit immediate */
-#define R_H8500_IMM24	6		/* 24 bit immediate */
-#define R_H8500_IMM32   8               /* 32 bit immediate */
-#define R_H8500_HIGH16  9		/* high 16 bits of 32 bit immediate */
-
-/* W65 modes */
-
-#define R_W65_ABS8	1  /* addr & 0xff 		*/
-#define R_W65_ABS16	2  /* addr & 0xffff 		*/
-#define R_W65_ABS24	3  /* addr & 0xffffff 		*/
-
-#define R_W65_ABS8S8    4  /* (addr >> 8) & 0xff 	*/
-#define R_W65_ABS8S16   5  /* (addr >> 16) & 0xff 	*/
-
-#define R_W65_ABS16S8   6  /* (addr >> 8) & 0ffff 	*/
-#define R_W65_ABS16S16  7  /* (addr >> 16) & 0ffff 	*/
-
-#define R_W65_PCR8	8
-#define R_W65_PCR16	9
-
-#define R_W65_DP       10  /* direct page 8 bits only   */
+#define R_BYTE0  0x34		/* first (lowest) 8 bits of multibyte value */
+#define R_BYTE1  0x35		/* second 8 bits of multibyte value */
+#define R_BYTE2  0x36		/* third 8 bits of multibyte value */
+#define R_BYTE3  0x37		/* fourth (highest) 8 bits of multibyte value */
+#define R_WORD0  0x38		/* lowest 16 bits of 32 or 24 bit value */
+#define R_WORD1  0x39		/* highest 16 bits of 32 or 24 bit value */
 
 #endif /* GNU_COFF_INTERNAL_H */

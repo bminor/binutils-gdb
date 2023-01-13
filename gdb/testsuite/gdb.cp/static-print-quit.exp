@@ -1,4 +1,4 @@
-# Copyright 2010-2016 Free Software Foundation, Inc.
+# Copyright 2010-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile.o object {debug c++}] != ""} {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
@@ -29,26 +29,26 @@ gdb_test_no_output "set height 2"
 
 set test "print c - <return>"
 gdb_test_multiple "print c" $test {
-    -re "\\$\[0-9\]+ = \{loooooooooooooooooooooooooooooooooooooooooooooong = 0, static field = \{\r\n---Type <return>" {
+    -re "\\$\[0-9\]+ = \{loooooooooooooooooooooooooooooooooooooooooooooong = 0, static field = \{\r\n--Type <RET>" {
 	pass $test
     }
-    -re "\r\n---Type <return>" {
+    -re "\r\n--Type <RET>" {
 	# gdb-7.1 did not crash with this testcase but it had the same bug.
-	untested ${testfile}.exp
+	untested "bug does not reproduce"
 	return 0
     }
 }
 
 set test "print c - q <return>"
 gdb_test_multiple "" $test {
-    -re " to continue, or q <return>" {
+    -re " for more, q to quit, " {
 	pass $test
     }
 }
 
-set test "print c - to quit"
+set test "print c - remainder"
 gdb_test_multiple "" $test {
-    -re " to quit---$" {
+    -re "c to continue without paging--$" {
 	pass $test
     }
 }

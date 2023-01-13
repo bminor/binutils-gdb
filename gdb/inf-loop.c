@@ -1,5 +1,5 @@
 /* Handling of inferior events for the event loop for GDB, the GNU debugger.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "target.h"             /* For enum inferior_event_type.  */
 #include "event-loop.h"
 #include "event-top.h"
 #include "inf-loop.h"
@@ -30,7 +29,7 @@
 #include "continuations.h"
 #include "interps.h"
 #include "top.h"
-#include "observer.h"
+#include "observable.h"
 
 /* General function to handle events in the inferior.  */
 
@@ -56,27 +55,34 @@ inferior_event_handler (enum inferior_event_type event_type,
 
       /* Do all continuations associated with the whole inferior (not
 	 a particular thread).  */
-      if (!ptid_equal (inferior_ptid, null_ptid))
+      if (inferior_ptid != null_ptid)
 	do_all_inferior_continuations (0);
 
       /* When running a command list (from a user command, say), these
 	 are only run when the command list is all done.  */
-      if (interpreter_async)
+      if (current_ui->async)
 	{
 	  check_frame_language_change ();
 
 	  /* Don't propagate breakpoint commands errors.  Either we're
 	     stopping or some command resumes the inferior.  The user will
 	     be informed.  */
-	  TRY
+	  try
 	    {
 	      bpstat_do_actions ();
 	    }
-	  CATCH (e, RETURN_MASK_ALL)
+	  catch (const gdb_exception &e)
 	    {
-	      exception_print (gdb_stderr, e);
+	      /* If the user was running a foreground execution
+		 command, then propagate the error so that the prompt
+		 can be reenabled.  Otherwise, the user already has
+		 the prompt and is typing some unrelated command, so
+		 just inform the user and swallow the exception.  */
+	      if (current_ui->prompt_state == PROMPT_BLOCKED)
+		throw;
+	      else
+		exception_print (gdb_stderr, e);
 	    }
-	  END_CATCH
 	}
       break;
 

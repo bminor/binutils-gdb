@@ -1,4 +1,4 @@
-# Copyright 2010-2016 Free Software Foundation, Inc.
+# Copyright 2010-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ proc build_executable_from_fission_assembler { testname executable sources optio
 	return -1
     }
 
-    set result [gdb_compile $object_file $executable executable {nodebug}]
+    set result [gdb_compile $object_file $executable executable $options]
     if { "$result" != "" } {
 	return -1
     }
@@ -229,6 +229,8 @@ proc function_range { func src } {
 # * If VALUE starts with the ":" character, then it is a label
 #   reference.  The rest of VALUE is taken to be the name of a label,
 #   and DW_FORM_ref4 is used.  See 'new_label' and 'define_label'.
+# * If VALUE starts with the "%" character, then it is a label
+#   reference too, but DW_FORM_ref_addr is used.
 # * Otherwise, VALUE is taken to be a string and DW_FORM_string is
 #   used.  In order to prevent bugs where a numeric value is given but
 #   no form is specified, it is an error if the value looks like a number
@@ -479,6 +481,10 @@ namespace eval Dwarf {
 		_op .8byte $value
 	    }
 
+	    DW_FORM_data16 {
+		_op .8byte $value
+	    }
+
 	    DW_FORM_strp {
 		variable _strings
 		variable _cu_offset_size
@@ -521,6 +527,12 @@ namespace eval Dwarf {
 	    DW_FORM_indirect -
 	    DW_FORM_exprloc -
 
+	    DW_FORM_strx -
+	    DW_FORM_strx1 -
+	    DW_FORM_strx2 -
+	    DW_FORM_strx3 -
+	    DW_FORM_strx4 -
+
 	    DW_FORM_GNU_addr_index -
 	    DW_FORM_GNU_str_index -
 	    DW_FORM_GNU_ref_alt -
@@ -552,6 +564,13 @@ namespace eval Dwarf {
 		set new_value "[string range $value 1 end] - $_cu_label"
 
 		return DW_FORM_ref4
+	    }
+
+	    % {
+		# Label reference, an offset from .debug_info.
+		set new_value "[string range $value 1 end]"
+
+		return DW_FORM_ref_addr
 	    }
 
 	    default {
@@ -649,7 +668,12 @@ namespace eval Dwarf {
 		_handle_macro_at_range $attr_value
 	    } else {
 		if {[llength $attr] > 2} {
-		    set attr_form [lindex $attr end]
+		    set attr_form [uplevel 2 [list subst [lindex $attr end]]]
+
+		    if { [string index $attr_value 0] == ":" } {
+			# It is a label, get its value.
+			_guess_form $attr_value attr_value
+		    }
 		} else {
 		    # If the value looks like an integer, a form is required.
 		    if [string is integer $attr_value] {
@@ -840,6 +864,7 @@ namespace eval Dwarf {
     proc _location {body} {
 	variable _constants
 	variable _cu_label
+	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
 
@@ -906,15 +931,53 @@ namespace eval Dwarf {
 		    _op .2byte [lindex $line 1]
 		}
 
+		DW_OP_implicit_value {
+		    set l1 [new_label "value_start"]
+		    set l2 [new_label "value_end"]
+		    _op .uleb128 "$l2 - $l1"
+		    define_label $l1
+		    foreach value [lrange $line 1 end] {
+			switch -regexp -- $value {
+			    {^0x[[:xdigit:]]{1,2}$} {_op .byte $value}
+			    {^0x[[:xdigit:]]{4}$} {_op .2byte $value}
+			    {^0x[[:xdigit:]]{8}$} {_op .4byte $value}
+			    {^0x[[:xdigit:]]{16}$} {_op .8byte $value}
+			    default {
+				error "bad value '$value' in DW_OP_implicit_value"
+			    }
+			}
+		    }
+		    define_label $l2
+		}
+
+		DW_OP_implicit_pointer -
 		DW_OP_GNU_implicit_pointer {
 		    if {[llength $line] != 3} {
-			error "usage: DW_OP_GNU_implicit_pointer LABEL OFFSET"
+			error "usage: $opcode LABEL OFFSET"
 		    }
 
 		    # Here label is a section offset.
 		    set label [lindex $line 1]
-		    _op .${_cu_offset_size}byte $label
+		    if { $_cu_version == 2 } {
+			_op .${_cu_addr_size}byte $label
+		    } else {
+			_op .${_cu_offset_size}byte $label
+		    }
 		    _op .sleb128 [lindex $line 2]
+		}
+
+		DW_OP_GNU_variable_value {
+		    if {[llength $line] != 2} {
+			error "usage: $opcode LABEL"
+		    }
+
+		    # Here label is a section offset.
+		    set label [lindex $line 1]
+		    if { $_cu_version == 2 } {
+			_op .${_cu_addr_size}byte $label
+		    } else {
+			_op .${_cu_offset_size}byte $label
+		    }
 		}
 
 		DW_OP_deref_size {
@@ -971,6 +1034,7 @@ namespace eval Dwarf {
 	set _abbrev_section ".debug_abbrev"
 
 	foreach { name value } $options {
+	    set value [uplevel 1 "subst \"$value\""]
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
@@ -1245,6 +1309,8 @@ namespace eval Dwarf {
 	set is_64 0
 	set _unit_version 4
 	set _unit_addr_size default
+	set _line_saw_program 0
+	set _line_saw_file 0
 
 	foreach { name value } $options {
 	    switch -exact -- $name {

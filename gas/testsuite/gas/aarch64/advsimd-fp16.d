@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.*>:
+0+ <.*>:
    [0-9a-f]+:	4e63c441 	fmaxnm	v1.2d, v2.2d, v3.2d
    [0-9a-f]+:	0e23c441 	fmaxnm	v1.2s, v2.2s, v3.2s
    [0-9a-f]+:	4e23c441 	fmaxnm	v1.4s, v2.4s, v3.4s
@@ -435,6 +435,9 @@ Disassembly of section \.text:
  [0-9a-f]+:	0f031041 	fmla	v1.4h, v2.4h, v3.h\[0\]
  [0-9a-f]+:	4f001000 	fmla	v0.8h, v0.8h, v0.h\[0\]
  [0-9a-f]+:	4f031041 	fmla	v1.8h, v2.8h, v3.h\[0\]
+ [0-9a-f]+:	4fca10a1 	fmla	v1.2d, v5.2d, v10.d\[0\]
+ [0-9a-f]+:	0fab1808 	fmla	v8.2s, v0.2s, v11.s\[3\]
+ [0-9a-f]+:	0f3f1920 	fmla	v0.4h, v9.4h, v15.h\[7\]
  [0-9a-f]+:	4fc35841 	fmls	v1.2d, v2.2d, v3.d\[1\]
  [0-9a-f]+:	0f835841 	fmls	v1.2s, v2.2s, v3.s\[2\]
  [0-9a-f]+:	4fa35041 	fmls	v1.4s, v2.4s, v3.s\[1\]
@@ -442,6 +445,9 @@ Disassembly of section \.text:
  [0-9a-f]+:	0f035041 	fmls	v1.4h, v2.4h, v3.h\[0\]
  [0-9a-f]+:	4f005000 	fmls	v0.8h, v0.8h, v0.h\[0\]
  [0-9a-f]+:	4f035041 	fmls	v1.8h, v2.8h, v3.h\[0\]
+ [0-9a-f]+:	4fca50a1 	fmls	v1.2d, v5.2d, v10.d\[0\]
+ [0-9a-f]+:	0fab5808 	fmls	v8.2s, v0.2s, v11.s\[3\]
+ [0-9a-f]+:	0f3f5920 	fmls	v0.4h, v9.4h, v15.h\[7\]
  [0-9a-f]+:	4fc39841 	fmul	v1.2d, v2.2d, v3.d\[1\]
  [0-9a-f]+:	0f839841 	fmul	v1.2s, v2.2s, v3.s\[2\]
  [0-9a-f]+:	4fa39041 	fmul	v1.4s, v2.4s, v3.s\[1\]
@@ -449,6 +455,9 @@ Disassembly of section \.text:
  [0-9a-f]+:	0f039041 	fmul	v1.4h, v2.4h, v3.h\[0\]
  [0-9a-f]+:	4f009000 	fmul	v0.8h, v0.8h, v0.h\[0\]
  [0-9a-f]+:	4f039041 	fmul	v1.8h, v2.8h, v3.h\[0\]
+ [0-9a-f]+:	4fca90a1 	fmul	v1.2d, v5.2d, v10.d\[0\]
+ [0-9a-f]+:	0fab9808 	fmul	v8.2s, v0.2s, v11.s\[3\]
+ [0-9a-f]+:	0f3f9920 	fmul	v0.4h, v9.4h, v15.h\[7\]
  [0-9a-f]+:	6fc39841 	fmulx	v1.2d, v2.2d, v3.d\[1\]
  [0-9a-f]+:	2f839841 	fmulx	v1.2s, v2.2s, v3.s\[2\]
  [0-9a-f]+:	6fa39041 	fmulx	v1.4s, v2.4s, v3.s\[1\]
@@ -456,6 +465,9 @@ Disassembly of section \.text:
  [0-9a-f]+:	2f039041 	fmulx	v1.4h, v2.4h, v3.h\[0\]
  [0-9a-f]+:	6f009000 	fmulx	v0.8h, v0.8h, v0.h\[0\]
  [0-9a-f]+:	6f039041 	fmulx	v1.8h, v2.8h, v3.h\[0\]
+ [0-9a-f]+:	6fca90a1 	fmulx	v1.2d, v5.2d, v10.d\[0\]
+ [0-9a-f]+:	2fab9808 	fmulx	v8.2s, v0.2s, v11.s\[3\]
+ [0-9a-f]+:	2f3f9920 	fmulx	v0.4h, v9.4h, v15.h\[7\]
  [0-9a-f]+:	5fc31841 	fmla	d1, d2, v3.d\[1\]
  [0-9a-f]+:	5fa31041 	fmla	s1, s2, v3.s\[1\]
  [0-9a-f]+:	5f131041 	fmla	h1, h2, v3.h\[1\]

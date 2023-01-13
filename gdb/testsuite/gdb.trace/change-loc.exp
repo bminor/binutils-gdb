@@ -1,4 +1,4 @@
-# Copyright 2011-2016 Free Software Foundation, Inc.
+# Copyright 2011-2020 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -16,6 +16,11 @@ load_lib "trace-support.exp"
 
 if {[skip_shlib_tests]} {
     return 0
+}
+
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
 }
 
 standard_testfile
@@ -39,22 +44,22 @@ set additional_flags [list debug shlib=$lib_sl1 shlib_load [gdb_target_symbol_pr
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags] != ""} {
-    untested "Could not compile either $libsrc1 or $srcdir/$subdir/$srcfile."
+    untested "failed to compile"
     return -1
 }
 
 clean_restart $executable
 
-gdb_load_shlibs $lib_sl1
-gdb_load_shlibs $lib_sl2
+gdb_load_shlib $lib_sl1
+gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
 if { ![gdb_target_supports_trace] } then {
-    unsupported "Current target does not support trace"
+    unsupported "current target does not support trace"
     return -1
 }
 
@@ -70,7 +75,7 @@ proc tracepoint_change_loc_1 { trace_type } {
 
 	clean_restart ${testfile}
 	if ![runto_main] {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return -1
 	}
 	gdb_test_no_output "delete break 1"
@@ -298,7 +303,7 @@ proc tracepoint_install_in_trace_disabled { trace_type } {
 
 	clean_restart ${testfile}
 	if ![runto_main] {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return -1
 	}
 
@@ -354,11 +359,11 @@ tracepoint_install_in_trace_disabled "trace"
 
 # Re-compile test case with IPA.
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+gdb_load_shlib $libipa
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable \
 	  [list debug nowarnings shlib=$libipa shlib=$lib_sl1 shlib_load] ] != "" } {
-    untested change-loc.exp
+    untested "failed to compile"
     return -1
 }
 

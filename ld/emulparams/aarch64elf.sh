@@ -1,6 +1,6 @@
 ARCH=aarch64
 MACHINE=
-NOP=0
+NOP=0x1f2003d5
 
 SCRIPT_NAME=elf
 ELFSIZE=64
@@ -9,10 +9,12 @@ BIG_OUTPUT_FORMAT="elf64-bigaarch64"
 LITTLE_OUTPUT_FORMAT="elf64-littleaarch64"
 NO_REL_RELOCS=yes
 
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 EXTRA_EM_FILE=aarch64elf
 
 GENERATE_SHLIB_SCRIPT=yes
+GENERATE_PIE_SCRIPT=yes
+
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 
 ENTRY=_start
@@ -21,14 +23,14 @@ SEPARATE_GOTPLT=24
 IREL_IN_PLT=
 TEXT_START_ADDR=0x00400000
 
-DATA_START_SYMBOLS='__data_start = . ;';
+DATA_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__data_start = .${CREATE_SHLIB+)};"
 
 # AArch64 does not support .s* sections.
 NO_SMALL_DATA=yes
 
-OTHER_BSS_SYMBOLS='__bss_start__ = .;'
-OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ;'
-OTHER_END_SYMBOLS='__end__ = . ;'
+OTHER_BSS_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__bss_start__ = .${CREATE_SHLIB+)};"
+OTHER_BSS_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_bss_end__ = .${CREATE_SHLIB+)}; ${CREATE_SHLIB+PROVIDE (}__bss_end__ = .${CREATE_SHLIB+)};"
+OTHER_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__end__ = .${CREATE_SHLIB+)};"
 
 OTHER_SECTIONS='.note.gnu.arm.ident 0 : { KEEP (*(.note.gnu.arm.ident)) }'
 ATTRS_SECTIONS='.ARM.attributes 0 : { KEEP (*(.ARM.attributes)) KEEP (*(.gnu.attributes)) }'

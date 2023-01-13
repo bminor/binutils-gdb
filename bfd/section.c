@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -65,10 +65,7 @@ SUBSECTION
 	data in place until a <<bfd_get_section_contents>> call is
 	made. Other back ends may read in all the data at once.  For
 	example, an S-record file has to be read once to determine the
-	size of the data. An IEEE-695 file doesn't contain raw data in
-	sections, but data and relocation expressions intermixed, so
-	the data area has to be parsed to get out the data and
-	relocations.
+	size of the data.
 
 INODE
 Section Output, typedef asection, Section Input, Sections
@@ -157,6 +154,10 @@ CODE_FRAGMENT
 .  {* A unique sequence number.  *}
 .  unsigned int id;
 .
+.  {* A unique section number which can be used by assembler to
+.     distinguish different sections with the same section name.  *}
+.  unsigned int section_id;
+.
 .  {* Which section in the bfd; 0..n-1 as sections are created in a bfd.  *}
 .  unsigned int index;
 .
@@ -171,31 +172,31 @@ CODE_FRAGMENT
 .     synthesized from other information.  *}
 .  flagword flags;
 .
-.#define SEC_NO_FLAGS   0x000
+.#define SEC_NO_FLAGS                      0x0
 .
 .  {* Tells the OS to allocate space for this section when loading.
 .     This is clear for a section containing debug information only.  *}
-.#define SEC_ALLOC      0x001
+.#define SEC_ALLOC                         0x1
 .
 .  {* Tells the OS to load the section from the file when loading.
 .     This is clear for a .bss section.  *}
-.#define SEC_LOAD       0x002
+.#define SEC_LOAD                          0x2
 .
 .  {* The section contains data still to be relocated, so there is
 .     some relocation information too.  *}
-.#define SEC_RELOC      0x004
+.#define SEC_RELOC                         0x4
 .
 .  {* A signal to the OS that the section contains read only data.  *}
-.#define SEC_READONLY   0x008
+.#define SEC_READONLY                      0x8
 .
 .  {* The section contains code only.  *}
-.#define SEC_CODE       0x010
+.#define SEC_CODE                         0x10
 .
 .  {* The section contains data only.  *}
-.#define SEC_DATA       0x020
+.#define SEC_DATA                         0x20
 .
 .  {* The section will reside in ROM.  *}
-.#define SEC_ROM        0x040
+.#define SEC_ROM                          0x40
 .
 .  {* The section contains constructor information. This section
 .     type is used by the linker to create lists of constructors and
@@ -207,75 +208,72 @@ CODE_FRAGMENT
 .     sections called <<__CTOR_LIST__>> and relocate the data
 .     contained within - exactly the operations it would peform on
 .     standard data.  *}
-.#define SEC_CONSTRUCTOR 0x080
+.#define SEC_CONSTRUCTOR                  0x80
 .
 .  {* The section has contents - a data section could be
 .     <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>; a debug section could be
 .     <<SEC_HAS_CONTENTS>>  *}
-.#define SEC_HAS_CONTENTS 0x100
+.#define SEC_HAS_CONTENTS                0x100
 .
 .  {* An instruction to the linker to not output the section
 .     even if it has information which would normally be written.  *}
-.#define SEC_NEVER_LOAD 0x200
+.#define SEC_NEVER_LOAD                  0x200
 .
 .  {* The section contains thread local data.  *}
-.#define SEC_THREAD_LOCAL 0x400
+.#define SEC_THREAD_LOCAL                0x400
 .
-.  {* The section has GOT references.  This flag is only for the
-.     linker, and is currently only used by the elf32-hppa back end.
-.     It will be set if global offset table references were detected
-.     in this section, which indicate to the linker that the section
-.     contains PIC code, and must be handled specially when doing a
-.     static link.  *}
-.#define SEC_HAS_GOT_REF 0x800
+.  {* The section's size is fixed.  Generic linker code will not
+.     recalculate it and it is up to whoever has set this flag to
+.     get the size right.  *}
+.#define SEC_FIXED_SIZE                  0x800
 .
 .  {* The section contains common symbols (symbols may be defined
 .     multiple times, the value of a symbol is the amount of
 .     space it requires, and the largest symbol value is the one
 .     used).  Most targets have exactly one of these (which we
 .     translate to bfd_com_section_ptr), but ECOFF has two.  *}
-.#define SEC_IS_COMMON 0x1000
+.#define SEC_IS_COMMON                  0x1000
 .
 .  {* The section contains only debugging information.  For
 .     example, this is set for ELF .debug and .stab sections.
 .     strip tests this flag to see if a section can be
 .     discarded.  *}
-.#define SEC_DEBUGGING 0x2000
+.#define SEC_DEBUGGING                  0x2000
 .
 .  {* The contents of this section are held in memory pointed to
 .     by the contents field.  This is checked by bfd_get_section_contents,
 .     and the data is retrieved from memory if appropriate.  *}
-.#define SEC_IN_MEMORY 0x4000
+.#define SEC_IN_MEMORY                  0x4000
 .
 .  {* The contents of this section are to be excluded by the
 .     linker for executable and shared objects unless those
 .     objects are to be further relocated.  *}
-.#define SEC_EXCLUDE 0x8000
+.#define SEC_EXCLUDE                    0x8000
 .
 .  {* The contents of this section are to be sorted based on the sum of
 .     the symbol and addend values specified by the associated relocation
 .     entries.  Entries without associated relocation entries will be
 .     appended to the end of the section in an unspecified order.  *}
-.#define SEC_SORT_ENTRIES 0x10000
+.#define SEC_SORT_ENTRIES              0x10000
 .
 .  {* When linking, duplicate sections of the same name should be
 .     discarded, rather than being combined into a single section as
 .     is usually done.  This is similar to how common symbols are
 .     handled.  See SEC_LINK_DUPLICATES below.  *}
-.#define SEC_LINK_ONCE 0x20000
+.#define SEC_LINK_ONCE                 0x20000
 .
 .  {* If SEC_LINK_ONCE is set, this bitfield describes how the linker
 .     should handle duplicate sections.  *}
-.#define SEC_LINK_DUPLICATES 0xc0000
+.#define SEC_LINK_DUPLICATES           0xc0000
 .
 .  {* This value for SEC_LINK_DUPLICATES means that duplicate
 .     sections with the same name should simply be discarded.  *}
-.#define SEC_LINK_DUPLICATES_DISCARD 0x0
+.#define SEC_LINK_DUPLICATES_DISCARD       0x0
 .
 .  {* This value for SEC_LINK_DUPLICATES means that the linker
 .     should warn if there are any duplicate sections, although
 .     it should still only link one copy.  *}
-.#define SEC_LINK_DUPLICATES_ONE_ONLY 0x40000
+.#define SEC_LINK_DUPLICATES_ONE_ONLY  0x40000
 .
 .  {* This value for SEC_LINK_DUPLICATES means that the linker
 .     should warn if any duplicate sections are a different size.  *}
@@ -291,28 +289,32 @@ CODE_FRAGMENT
 .     relocation or other arcane processing.  It is skipped when
 .     going through the first-pass output, trusting that someone
 .     else up the line will take care of it later.  *}
-.#define SEC_LINKER_CREATED 0x100000
+.#define SEC_LINKER_CREATED           0x100000
+.
+.  {* This section contains a section ID to distinguish different
+.     sections with the same section name.  *}
+.#define SEC_ASSEMBLER_SECTION_ID     0x100000
 .
 .  {* This section should not be subject to garbage collection.
 .     Also set to inform the linker that this section should not be
 .     listed in the link map as discarded.  *}
-.#define SEC_KEEP 0x200000
+.#define SEC_KEEP                     0x200000
 .
 .  {* This section contains "short" data, and should be placed
 .     "near" the GP.  *}
-.#define SEC_SMALL_DATA 0x400000
+.#define SEC_SMALL_DATA               0x400000
 .
 .  {* Attempt to merge identical entities in the section.
 .     Entity size is given in the entsize field.  *}
-.#define SEC_MERGE 0x800000
+.#define SEC_MERGE                    0x800000
 .
 .  {* If given with SEC_MERGE, entities to merge are zero terminated
 .     strings where entsize specifies character size instead of fixed
 .     size entries.  *}
-.#define SEC_STRINGS 0x1000000
+.#define SEC_STRINGS                 0x1000000
 .
 .  {* This section contains data about section groups.  *}
-.#define SEC_GROUP 0x2000000
+.#define SEC_GROUP                   0x2000000
 .
 .  {* The section is a COFF shared library section.  This flag is
 .     only for the linker.  If this type of section appears in
@@ -323,46 +325,51 @@ CODE_FRAGMENT
 .     might be cleaner to have some more general mechanism to
 .     allow the back end to control what the linker does with
 .     sections.  *}
-.#define SEC_COFF_SHARED_LIBRARY 0x4000000
+.#define SEC_COFF_SHARED_LIBRARY     0x4000000
 .
 .  {* This input section should be copied to output in reverse order
 .     as an array of pointers.  This is for ELF linker internal use
 .     only.  *}
-.#define SEC_ELF_REVERSE_COPY 0x4000000
+.#define SEC_ELF_REVERSE_COPY        0x4000000
 .
 .  {* This section contains data which may be shared with other
 .     executables or shared objects. This is for COFF only.  *}
-.#define SEC_COFF_SHARED 0x8000000
+.#define SEC_COFF_SHARED             0x8000000
 .
 .  {* This section should be compressed.  This is for ELF linker
 .     internal use only.  *}
-.#define SEC_ELF_COMPRESS 0x8000000
+.#define SEC_ELF_COMPRESS            0x8000000
 .
 .  {* When a section with this flag is being linked, then if the size of
 .     the input section is less than a page, it should not cross a page
 .     boundary.  If the size of the input section is one page or more,
 .     it should be aligned on a page boundary.  This is for TI
 .     TMS320C54X only.  *}
-.#define SEC_TIC54X_BLOCK 0x10000000
+.#define SEC_TIC54X_BLOCK           0x10000000
 .
 .  {* This section should be renamed.  This is for ELF linker
 .     internal use only.  *}
-.#define SEC_ELF_RENAME 0x10000000
+.#define SEC_ELF_RENAME             0x10000000
 .
 .  {* Conditionally link this section; do not link if there are no
 .     references found to any symbol in the section.  This is for TI
 .     TMS320C54X only.  *}
-.#define SEC_TIC54X_CLINK 0x20000000
+.#define SEC_TIC54X_CLINK           0x20000000
 .
 .  {* This section contains vliw code.  This is for Toshiba MeP only.  *}
-.#define SEC_MEP_VLIW 0x20000000
+.#define SEC_MEP_VLIW               0x20000000
+.
+.  {* All symbols, sizes and relocations in this section are octets
+.     instead of bytes.  Required for DWARF debug sections as DWARF
+.     information is organized in octets, not bytes.  *}
+.#define SEC_ELF_OCTETS             0x40000000
 .
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
-.#define SEC_COFF_NOREAD 0x40000000
+.#define SEC_COFF_NOREAD            0x40000000
 .
-.  {* Indicate that section has the no read flag set.  *}
-.#define SEC_ELF_NOREAD 0x80000000
+.  {* Indicate that section has the purecode flag set.  *}
+.#define SEC_ELF_PURECODE           0x80000000
 .
 .  {*  End of section flags.  *}
 .
@@ -537,10 +544,12 @@ CODE_FRAGMENT
 .  {* Early in the link process, map_head and map_tail are used to build
 .     a list of input sections attached to an output section.  Later,
 .     output sections use these fields for a list of bfd_link_order
-.     structs.  *}
+.     structs.  The linked_to_symbol_name field is for ELF assembler
+.     internal use.  *}
 .  union {
 .    struct bfd_link_order *link_order;
 .    struct bfd_section *s;
+.    const char *linked_to_symbol_name;
 .  } map_head, map_tail;
 .} asection;
 .
@@ -555,29 +564,83 @@ CODE_FRAGMENT
 .  int size;
 .};
 .
+.static inline const char *
+.bfd_section_name (const asection *sec)
+.{
+.  return sec->name;
+.}
+.
+.static inline bfd_size_type
+.bfd_section_size (const asection *sec)
+.{
+.  return sec->size;
+.}
+.
+.static inline bfd_vma
+.bfd_section_vma (const asection *sec)
+.{
+.  return sec->vma;
+.}
+.
+.static inline bfd_vma
+.bfd_section_lma (const asection *sec)
+.{
+.  return sec->lma;
+.}
+.
+.static inline unsigned int
+.bfd_section_alignment (const asection *sec)
+.{
+.  return sec->alignment_power;
+.}
+.
+.static inline flagword
+.bfd_section_flags (const asection *sec)
+.{
+.  return sec->flags;
+.}
+.
+.static inline void *
+.bfd_section_userdata (const asection *sec)
+.{
+.  return sec->userdata;
+.}
+.static inline bfd_boolean
+.bfd_is_com_section (const asection *sec)
+.{
+.  return (sec->flags & SEC_IS_COMMON) != 0;
+.}
+.
 .{* Note: the following are provided as inline functions rather than macros
 .   because not all callers use the return value.  A macro implementation
 .   would use a comma expression, eg: "((ptr)->foo = val, TRUE)" and some
 .   compilers will complain about comma expressions that have no effect.  *}
 .static inline bfd_boolean
-.bfd_set_section_userdata (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, void * val)
+.bfd_set_section_userdata (asection *sec, void *val)
 .{
-.  ptr->userdata = val;
+.  sec->userdata = val;
 .  return TRUE;
 .}
 .
 .static inline bfd_boolean
-.bfd_set_section_vma (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, bfd_vma val)
+.bfd_set_section_vma (asection *sec, bfd_vma val)
 .{
-.  ptr->vma = ptr->lma = val;
-.  ptr->user_set_vma = TRUE;
+.  sec->vma = sec->lma = val;
+.  sec->user_set_vma = TRUE;
 .  return TRUE;
 .}
 .
 .static inline bfd_boolean
-.bfd_set_section_alignment (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, unsigned int val)
+.bfd_set_section_lma (asection *sec, bfd_vma val)
 .{
-.  ptr->alignment_power = val;
+.  sec->lma = val;
+.  return TRUE;
+.}
+.
+.static inline bfd_boolean
+.bfd_set_section_alignment (asection *sec, unsigned int val)
+.{
+.  sec->alignment_power = val;
 .  return TRUE;
 .}
 .
@@ -600,109 +663,43 @@ CODE_FRAGMENT
 .{* Pointer to the indirect section.  *}
 .#define bfd_ind_section_ptr (&_bfd_std_section[3])
 .
-.#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
-.#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
-.#define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
+.static inline bfd_boolean
+.bfd_is_und_section (const asection *sec)
+.{
+.  return sec == bfd_und_section_ptr;
+.}
 .
-.#define bfd_is_const_section(SEC)		\
-. (   ((SEC) == bfd_abs_section_ptr)		\
-.  || ((SEC) == bfd_und_section_ptr)		\
-.  || ((SEC) == bfd_com_section_ptr)		\
-.  || ((SEC) == bfd_ind_section_ptr))
+.static inline bfd_boolean
+.bfd_is_abs_section (const asection *sec)
+.{
+.  return sec == bfd_abs_section_ptr;
+.}
 .
-.{* Macros to handle insertion and deletion of a bfd's sections.  These
-.   only handle the list pointers, ie. do not adjust section_count,
-.   target_index etc.  *}
-.#define bfd_section_list_remove(ABFD, S) \
-.  do							\
-.    {							\
-.      asection *_s = S;				\
-.      asection *_next = _s->next;			\
-.      asection *_prev = _s->prev;			\
-.      if (_prev)					\
-.        _prev->next = _next;				\
-.      else						\
-.        (ABFD)->sections = _next;			\
-.      if (_next)					\
-.        _next->prev = _prev;				\
-.      else						\
-.        (ABFD)->section_last = _prev;			\
-.    }							\
-.  while (0)
-.#define bfd_section_list_append(ABFD, S) \
-.  do							\
-.    {							\
-.      asection *_s = S;				\
-.      bfd *_abfd = ABFD;				\
-.      _s->next = NULL;					\
-.      if (_abfd->section_last)				\
-.        {						\
-.          _s->prev = _abfd->section_last;		\
-.          _abfd->section_last->next = _s;		\
-.        }						\
-.      else						\
-.        {						\
-.          _s->prev = NULL;				\
-.          _abfd->sections = _s;			\
-.        }						\
-.      _abfd->section_last = _s;			\
-.    }							\
-.  while (0)
-.#define bfd_section_list_prepend(ABFD, S) \
-.  do							\
-.    {							\
-.      asection *_s = S;				\
-.      bfd *_abfd = ABFD;				\
-.      _s->prev = NULL;					\
-.      if (_abfd->sections)				\
-.        {						\
-.          _s->next = _abfd->sections;			\
-.          _abfd->sections->prev = _s;			\
-.        }						\
-.      else						\
-.        {						\
-.          _s->next = NULL;				\
-.          _abfd->section_last = _s;			\
-.        }						\
-.      _abfd->sections = _s;				\
-.    }							\
-.  while (0)
-.#define bfd_section_list_insert_after(ABFD, A, S) \
-.  do							\
-.    {							\
-.      asection *_a = A;				\
-.      asection *_s = S;				\
-.      asection *_next = _a->next;			\
-.      _s->next = _next;				\
-.      _s->prev = _a;					\
-.      _a->next = _s;					\
-.      if (_next)					\
-.        _next->prev = _s;				\
-.      else						\
-.        (ABFD)->section_last = _s;			\
-.    }							\
-.  while (0)
-.#define bfd_section_list_insert_before(ABFD, B, S) \
-.  do							\
-.    {							\
-.      asection *_b = B;				\
-.      asection *_s = S;				\
-.      asection *_prev = _b->prev;			\
-.      _s->prev = _prev;				\
-.      _s->next = _b;					\
-.      _b->prev = _s;					\
-.      if (_prev)					\
-.        _prev->next = _s;				\
-.      else						\
-.        (ABFD)->sections = _s;				\
-.    }							\
-.  while (0)
-.#define bfd_section_removed_from_list(ABFD, S) \
-.  ((S)->next == NULL ? (ABFD)->section_last != (S) : (S)->next->prev != (S))
+.static inline bfd_boolean
+.bfd_is_ind_section (const asection *sec)
+.{
+.  return sec == bfd_ind_section_ptr;
+.}
 .
-.#define BFD_FAKE_SECTION(SEC, FLAGS, SYM, NAME, IDX)			\
-.  {* name, id,  index, next, prev, flags, user_set_vma,            *}	\
-.  { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,				\
+.static inline bfd_boolean
+.bfd_is_const_section (const asection *sec)
+.{
+.  return sec >= bfd_abs_section_ptr && sec <= bfd_ind_section_ptr;
+.}
+.
+.{* Return TRUE if input section SEC has been discarded.  *}
+.static inline bfd_boolean
+.discarded_section (const asection *sec)
+.{
+.  return (!bfd_is_abs_section (sec)
+.          && bfd_is_abs_section (sec->output_section)
+.          && sec->sec_info_type != SEC_INFO_TYPE_MERGE
+.          && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS);
+.}
+.
+.#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)			\
+.  {* name, id,  section_id, index, next, prev, flags, user_set_vma, *}	\
+.  {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,		\
 .									\
 .  {* linker_mark, linker_has_input, gc_mark, decompress_status,    *}	\
 .     0,           0,                1,       0,			\
@@ -738,19 +735,19 @@ CODE_FRAGMENT
 .     { NULL }, { NULL }						\
 .    }
 .
+.{* We use a macro to initialize the static asymbol structures because
+.   traditional C does not permit us to initialize a union member while
+.   gcc warns if we don't initialize it.
+.   the_bfd, name, value, attr, section [, udata]  *}
+.#ifdef __STDC__
+.#define GLOBAL_SYM_INIT(NAME, SECTION) \
+.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
+.#else
+.#define GLOBAL_SYM_INIT(NAME, SECTION) \
+.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
+.#endif
+.
 */
-
-/* We use a macro to initialize the static asymbol structures because
-   traditional C does not permit us to initialize a union member while
-   gcc warns if we don't initialize it.  */
- /* the_bfd, name, value, attr, section [, udata] */
-#ifdef __STDC__
-#define GLOBAL_SYM_INIT(NAME, SECTION) \
-  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
-#else
-#define GLOBAL_SYM_INIT(NAME, SECTION) \
-  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
-#endif
 
 /* These symbols are global, not specific to any BFD.  Therefore, anything
    that tries to change them is broken, and should be repaired.  */
@@ -764,7 +761,7 @@ static const asymbol global_syms[] =
 };
 
 #define STD_SECTION(NAME, IDX, FLAGS) \
-  BFD_FAKE_SECTION(_bfd_std_section[IDX], FLAGS, &global_syms[IDX], NAME, IDX)
+  BFD_FAKE_SECTION(_bfd_std_section[IDX], &global_syms[IDX], NAME, IDX, FLAGS)
 
 asection _bfd_std_section[] = {
   STD_SECTION (BFD_COM_SECTION_NAME, 0, SEC_IS_COMMON),
@@ -824,21 +821,21 @@ _bfd_generic_new_section_hook (bfd *abfd, asection *newsect)
   return TRUE;
 }
 
-static unsigned int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+unsigned int _bfd_section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
 
 /* Initializes a new section.  NEWSECT->NAME is already set.  */
 
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {
-  newsect->id = section_id;
+  newsect->id = _bfd_section_id;
   newsect->index = abfd->section_count;
   newsect->owner = abfd;
 
   if (! BFD_SEND (abfd, _new_section_hook, (abfd, newsect)))
     return NULL;
 
-  section_id++;
+  _bfd_section_id++;
   abfd->section_count++;
   bfd_section_list_append (abfd, newsect);
   return newsect;
@@ -1240,7 +1237,7 @@ bfd_make_section_with_flags (bfd *abfd, const char *name,
   struct section_hash_entry *sh;
   asection *newsect;
 
-  if (abfd->output_has_begun)
+  if (abfd == NULL || name == NULL || abfd->output_has_begun)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
@@ -1290,33 +1287,15 @@ bfd_make_section (bfd *abfd, const char *name)
 
 /*
 FUNCTION
-	bfd_get_next_section_id
-
-SYNOPSIS
-	int bfd_get_next_section_id (void);
-
-DESCRIPTION
-	Returns the id that the next section created will have.
-*/
-
-int
-bfd_get_next_section_id (void)
-{
-  return section_id;
-}
-
-/*
-FUNCTION
 	bfd_set_section_flags
 
 SYNOPSIS
-	bfd_boolean bfd_set_section_flags
-	  (bfd *abfd, asection *sec, flagword flags);
+	bfd_boolean bfd_set_section_flags (asection *sec, flagword flags);
 
 DESCRIPTION
-	Set the attributes of the section @var{sec} in the BFD
-	@var{abfd} to the value @var{flags}. Return <<TRUE>> on success,
-	<<FALSE>> on error. Possible error returns are:
+	Set the attributes of the section @var{sec} to the value @var{flags}.
+	Return <<TRUE>> on success, <<FALSE>> on error.  Possible error
+	returns are:
 
 	o <<bfd_error_invalid_operation>> -
 	The section cannot have one or more of the attributes
@@ -1326,9 +1305,7 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
-		       sec_ptr section,
-		       flagword flags)
+bfd_set_section_flags (asection *section, flagword flags)
 {
   section->flags = flags;
   return TRUE;
@@ -1340,21 +1317,21 @@ FUNCTION
 
 SYNOPSIS
 	void bfd_rename_section
-	  (bfd *abfd, asection *sec, const char *newname);
+	  (asection *sec, const char *newname);
 
 DESCRIPTION
-	Rename section @var{sec} in @var{abfd} to @var{newname}.
+	Rename section @var{sec} to @var{newname}.
 */
 
 void
-bfd_rename_section (bfd *abfd, sec_ptr sec, const char *newname)
+bfd_rename_section (asection *sec, const char *newname)
 {
   struct section_hash_entry *sh;
 
   sh = (struct section_hash_entry *)
     ((char *) sec - offsetof (struct section_hash_entry, section));
   sh->section.name = newname;
-  bfd_hash_rename (&abfd->section_htab, newname, &sh->root);
+  bfd_hash_rename (&sec->owner->section_htab, newname, &sh->root);
 }
 
 /*
@@ -1438,8 +1415,7 @@ FUNCTION
 	bfd_set_section_size
 
 SYNOPSIS
-	bfd_boolean bfd_set_section_size
-	  (bfd *abfd, asection *sec, bfd_size_type val);
+	bfd_boolean bfd_set_section_size (asection *sec, bfd_size_type val);
 
 DESCRIPTION
 	Set @var{sec} to the size @var{val}. If the operation is
@@ -1452,18 +1428,18 @@ DESCRIPTION
 */
 
 bfd_boolean
-bfd_set_section_size (bfd *abfd, sec_ptr ptr, bfd_size_type val)
+bfd_set_section_size (asection *sec, bfd_size_type val)
 {
   /* Once you've started writing to any section you cannot create or change
      the size of any others.  */
 
-  if (abfd->output_has_begun)
+  if (sec->owner == NULL || sec->owner->output_has_begun)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
 
-  ptr->size = val;
+  sec->size = val;
   return TRUE;
 }
 
@@ -1478,16 +1454,20 @@ SYNOPSIS
 
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
-	@var{abfd} to the data starting in memory at @var{data}. The
-	data is written to the output section starting at offset
+	@var{abfd} to the data starting in memory at @var{location}.
+	The data is written to the output section starting at offset
 	@var{offset} for @var{count} octets.
 
-	Normally <<TRUE>> is returned, else <<FALSE>>. Possible error
-	returns are:
+	Normally <<TRUE>> is returned, but <<FALSE>> is returned if
+	there was an error.  Possible error returns are:
 	o <<bfd_error_no_contents>> -
 	The output section does not have the <<SEC_HAS_CONTENTS>>
 	attribute, so nothing can be written to it.
-	o and some more too
+	o <<bfd_error_bad_value>> -
+	The section is unable to contain all of the data.
+	o <<bfd_error_invalid_operation>> -
+	The BFD is not writeable.
+	o and some more too.
 
 	This routine is front end to the back end function
 	<<_bfd_set_section_contents>>.
@@ -1503,7 +1483,7 @@ bfd_set_section_contents (bfd *abfd,
 {
   bfd_size_type sz;
 
-  if (!(bfd_get_section_flags (abfd, section) & SEC_HAS_CONTENTS))
+  if (!(bfd_section_flags (section) & SEC_HAS_CONTENTS))
     {
       bfd_set_error (bfd_error_no_contents);
       return FALSE;
@@ -1657,8 +1637,8 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{osec}.
 
 .#define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
-.     BFD_SEND (obfd, _bfd_copy_private_section_data, \
-.		(ibfd, isection, obfd, osection))
+.	BFD_SEND (obfd, _bfd_copy_private_section_data, \
+.		  (ibfd, isection, obfd, osection))
 */
 
 /*
@@ -1681,6 +1661,24 @@ bfd_generic_is_group_section (bfd *abfd ATTRIBUTE_UNUSED,
 
 /*
 FUNCTION
+	bfd_generic_group_name
+
+SYNOPSIS
+	const char *bfd_generic_group_name (bfd *, const asection *sec);
+
+DESCRIPTION
+	Returns group name if @var{sec} is a member of a group.
+*/
+
+const char *
+bfd_generic_group_name (bfd *abfd ATTRIBUTE_UNUSED,
+			const asection *sec ATTRIBUTE_UNUSED)
+{
+  return NULL;
+}
+
+/*
+FUNCTION
 	bfd_generic_discard_group
 
 SYNOPSIS
@@ -1695,4 +1693,14 @@ bfd_generic_discard_group (bfd *abfd ATTRIBUTE_UNUSED,
 			   asection *group ATTRIBUTE_UNUSED)
 {
   return TRUE;
+}
+
+bfd_boolean
+_bfd_nowrite_set_section_contents (bfd *abfd,
+				   sec_ptr section ATTRIBUTE_UNUSED,
+				   const void *location ATTRIBUTE_UNUSED,
+				   file_ptr offset ATTRIBUTE_UNUSED,
+				   bfd_size_type count ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
 }

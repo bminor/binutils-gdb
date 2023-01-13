@@ -1,192 +1,214 @@
-2016-04-04  Nick Clifton  <nickc@redhat.com>
+2020-02-07  Nick Clifton  <nickc@redhat.com>
 
-	PR 19872
-	* dwarf.c (display_debug_aranges): Skip warning about unrecognised
-	version number if the version is zero.
+	* README-how-to-make-a-release: Add note about updating the
+	GAS/NEWS URL in the next release.
 
-2016-03-29  Alan Modra  <amodra@gmail.com>
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
-	* readelf.c (get_data): Use BFD_VMA_FMT to print bfd_size_type vars.
-	(get_dynamic_data): Likewise.
+	PR 25469
+	* readelf.c (get_machine_flags): Add support for Z80N machine
+	number.
 
-2016-03-22  Nick Clifton  <nickc@redhat.com>
+2020-02-07  Nick Clifton  <nickc@redhat.com>
 
-	PR 19851
-	* dwarf.c (SAFE_BYTE_GET): Replace local dynamic array allocation
-	with run time size check.
+	* dwarf.c (display_debug_lines_decoded): Force a NUL termination
+	of the truncated file name.
 
-	* configure: Regenerate.
+2020-02-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* objdump.c (print_jump_visualisation): New function.
+	(disassemble_bytes): Call new function.
 
-	* readelf.c (decode_ARC_machine_flags): Handle nps400.
+2020-02-06  Alan Modra  <amodra@gmail.com>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* testsuite/lib/binutils-common.exp (match_target): Accept '!' before
+	TCL procedure.
+	(supports_gnu_osabi): New procedure.
+	(is_generic): New, from ld-lib.exp.
+	(supports_gnu_unique): Use the above.
 
-	* readelf.c (get_machine_flags): Move arc processing into...
-	(decode_ARC_machine_flags): ... new function.  Remove use of
-	EF_ARC_CPU_GENERIC, change default case from "generic arc" to
-	"unknown arc".  Merged ABI printing between two machine types.
+2020-02-04  Alan Modra  <amodra@gmail.com>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* Makefile.am (CFILES): Add od-elf32_avr.c.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
 
-	* testsuite/binutils-all/objdump.exp (cpus_expected): Add ARC700
-	to the architecture list.
+2020-02-03  Andreas Schwab  <schwab@linux-m68k.org>
 
-2016-03-21  Nick Clifton  <nickc@redhat.com>
+	* readelf.c (dump_relocations, dump_relocations)
+	(decode_arm_unwind_bytecode, process_dynamic_section)
+	(get_symbol_visibility, get_alpha_symbol_other): Add newline to
+	error message.
 
-	* dlltool.c: Replace use of alloca with call to xmalloc.
-	* dllwrap.c: Likewise.
-	* nlmconv.c: Likewise.
-	* objdump.c: Likewise.
-	* resrc.c: Likewise.
-	* winduni.c: Likewise.
-	* configure: Regenerate.
+2020-02-03  Sergei Trofimovich  <siarheit@google.com>
 
-2016-03-07  Nick Clifton  <nickc@redhat.com>
+	* coffdump.c (program_name): Drop redundant definition.
+	* srconv.c (program_name): Likewise
+	* sysdump.c (program_name): Likewise
 
-	PR binutils/19775
-	* testsuite/binutils-all/ar.exp (proc empty_archive): New proc.
-	Run the new proc.
-	* testsuite/binutils-all/empty: New, empty, file.
+2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
-2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+	PR gas/25380
+	* objdump.c (sym_ok): Return FALSE if 2 sections are in the
+	same file with different section pointers.
 
-	* readelf.c (arm_attry_tag_FP_arch): Add "NEON for ARMv8.1".
+2020-02-01  Nick Clifton  <nickc@redhat.com>
 
-2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+	* README-how-to-make-a-release: Update with more details on the
+	release making process.
 
-	PR ld/19645
-	* NEWS: Mention --elf-stt-common= for objcopy.
-	* doc/binutils.texi: Document --elf-stt-common= for objcopy.
-	* objcopy.c (do_elf_stt_common): New.
-	(command_line_switch): Add OPTION_ELF_STT_COMMON.
-	(copy_options): Add --elf-stt-common=.
-	(copy_usage): Add --elf-stt-common=.
-	(copy_object): Also check do_elf_stt_common for ELF targets.
-	(copy_file): Handle do_elf_stt_common.
-	(copy_main): Handle OPTION_ELF_STT_COMMON.
-	* readelf.c (apply_relocations): Support STT_COMMON.
-	* testsuite/binutils-all/common-1.s: New file.
-	* testsuite/binutils-all/common-1a.d: Likewise.
-	* testsuite/binutils-all/common-1b.d: Likewise.
-	* testsuite/binutils-all/common-1c.d: Likewise.
-	* testsuite/binutils-all/common-1d.d: Likewise.
-	* testsuite/binutils-all/common-1e.d: Likewise.
-	* testsuite/binutils-all/common-1f.d: Likewise.
-	* testsuite/binutils-all/common-2.s: Likewise.
-	* testsuite/binutils-all/common-2a.d: Likewise.
-	* testsuite/binutils-all/common-2b.d: Likewise.
-	* testsuite/binutils-all/common-2c.d: Likewise.
-	* testsuite/binutils-all/common-2d.d: Likewise.
-	* testsuite/binutils-all/common-2e.d: Likewise.
-	* testsuite/binutils-all/common-2f.d: Likewise.
-	* testsuite/binutils-all/objcopy.exp
-	(objcopy_test_elf_common_symbols): New proc.
-	Run objcopy_test_elf_common_symbols for ELF targets
+2020-01-31  Nick Clifton  <nickc@redhat.com>
 
-2016-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+	* po/sv.po: Updated Swedish translation.
 
-	PR binutils/19647
-	* readelf.c (get_section_type_name): Add a missing break.
+2020-01-28  Nick Clifton  <nickc@redhat.com>
 
-2016-02-16  Claudiu Zissulescu  <claziss@synopsys.com>
+	* readelf.c (get_build_id): Simplify warning message about corrupt
+	notes encountered whilst scanning for the build-id.
 
-	* readelf.c (is_32bit_pcrel_reloc): Add R_ARC_32_PCREL.
+2020-01-27  Roland McGrath  <mcgrathr@google.com>
 
-2016-02-15  Nick Clifton  <nickc@redhat.com>
+	* objcopy.c (compare_gnu_build_notes): Fix comparison results
+	for overlapping ranges so that (A == B) == (B == A) holds.
 
-	* readelf.c (get_section_type_name): Add hex prefix to offsets
-	printed for LOPROC and LOOS values.  Ensure that a result is
-	always returned for the V850 target, even when an unrecognised
-	processor specific value is encountered.
-	(process_section_headers): Display key values in the order in
-	which they appear to the user.  Add the "C (compressed)" value to
-	the list.
+2020-01-27  Alan Modra  <amodra@gmail.com>
 
-2016-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* testsuite/lib/binutils-common.exp (big_or_little_endian): Replace
+	case statement with switch statement.
 
-	* doc/binutils.texi: Fix a typo.
+2020-01-24  Nick Clifton  <nickc@redhat.com>
 
-2016-02-05  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+	* readelf.c (get_build_id): Fix warning messages about corrupt
+	notes.
 
-	* testsuite/binutils-all/objdump.exp: Update expected default
-	architecture value for ARC binaries.
+2020-01-23  Nick Clifton  <nickc@redhat.com>
 
-2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+	* po/fr.po: Updated French translation.
 
-	PR binutils/19547
-	* testsuite/binutils-all/objcopy.exp
-	(objcopy_test_without_global_symbol): New proc.
-	Run objcopy_test_without_global_symbol.
-	* testsuite/binutils-all/pr19547.c: New file.
+2020-01-22  Yuri Chornoivan  <yurchor@mageia.org>
 
-2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+	PR 25417
+	* readelf.c (get_alpha_symbol_other): Fix error message typo.
 
-	PR binutils/19523
-	* Makefile.am (check-DEJAGNU): Pass CC and CC_FOR_BUILD to
-	runtest.
-	* Makefile.in: Regenerated.
-	* testsuite/binutils-all/compress.exp (test_gnu_debuglink): New
-	proc.
-	Run test_gnu_debuglink for native ELF build.
+2020-01-20  Nick Clifton  <nickc@redhat.com>
 
-2016-01-20  Nick Clifton  <nickc@redhat.com>
+	* po/pt.po: Updated Portuguese translation.
+	* po/uk.po: Updated Ukranian translation.
 
-	PR 19495
-	* testsuite/binutils-all/dlltool.exp: Fix tests for targets which
-	do not support inserting leading underscores.
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-2016-01-20  Mickael Guene  <mickael.guene@st.com>
+	* README-how-to-make-a-release: Update notes on how to cut a
+	branch for a release.
 
-	* readelf.c (get_elf_section_flags): Display y letter for section
-	with SHF_ARM_NOREAD section flag in readelf section output.
-	(process_section_headers): Add y letter in readelf section output
-	key mapping for ARM architecture.
-	* objdump.c (dump_section_header): Display NOREAD attributes as
-	well.
-	* doc/binutils.texi (objdump): Note that it is correct for
-	sections to have both the READONLY and NOREAD attributes.
-
-2016-01-19  John Baldwin  <jhb@FreeBSD.org>
-
-	* readelf.c (get_freebsd_elfcore_note_type): Remove unused variable.
-
-2016-01-19  John Baldwin  <jhb@FreeBSD.org>
-
-	* readelf.c (get_freebsd_elfcore_note_type): New
-	(process_note): Add support for FreeBSD core notes.
-
-2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
-	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
-
-	* readelf.c (get_machine_flags): Add support for newer ARC ELF
-	header flags.
-
-2016-01-18  Alan Modra  <amodra@gmail.com>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
 
-2016-01-17  Alan Modra  <amodra@gmail.com>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-	* configure: Regenerate.
+	Binutils 2.34 branch created.
 
-2016-01-17  Alan Modra  <amodra@gmail.com>
+2020-01-17  Thomas Troeger  <tstroege@gmx.de>
 
-	* testsuite/lib/binutils-common.exp (is_elf_format): Return true
-	for m68hc11/12 and xgate triples.
+	* objdump.c (jump_info_visualize_address): Discard jumps that are
+	no longer needed.
+	(disassemble_bytes): Only compute the maximum level if jumps were
+	detected.
 
-2016-01-17  Alan Modra  <amodra@gmail.com>
+2020-01-13  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (is_32bit_abs_reloc): Add R_M68HC11_32.
+	* objdump.c (disassemble_bytes): Remove C99-ism.
+	* testsuite/binutils-all/debuginfod.exp: New tests.
 
-2016-01-01  Alan Modra  <amodra@gmail.com>
+2020-01-13  Thomas Troeger  <tstroege@gmx.de>
+
+	* objdump.c (visualize_jumps, color_output, extended_color_output)
+	(detected_jumps): New variables.
+	(usage): Add the new jump visualization options.
+	(option_values): Add new option value.
+	(long_options): Add the new option.
+	(jump_info_new, jump_info_free): New functions.
+	(jump_info_min_address, jump_info_max_address): Likewise.
+	(jump_info_end_address, jump_info_is_start_address): Likewise.
+	(jump_info_is_end_address, jump_info_size): Likewise.
+	(jump_info_unlink, jump_info_insert): Likewise.
+	(jump_info_add_front, jump_info_move_linked): Likewise.
+	(jump_info_intersect, jump_info_merge): Likewise.
+	(jump_info_sort, jump_info_visualize_address): Likewise.
+	(disassemble_jumps): New function - used to locate jumps.
+	(disassemble_bytes): Add ascii art generation.
+	(disassemble_section): Add scan to locate jumps.
+	(main): Parse the new visualization option.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	PR 25360
+	PR 25361
+	* dwarf.c (display_debug_frames): Move fde_fc earlier.  Free
+	fde_fc col_type and col_offset.
+	* readelf.c (apply_relocations): Move symsec check earlier.
+	(free_debug_section): Free reloc_info.
+	(process_notes_at): Free pnotes on error path.
+	(process_object): Free dump_sects here..
+	(process_archive): ..not here.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	PR 25362
+	* nm.c (display_rel_file): Free dyn_syms.
+
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 25220
+	* objcopy.c (empty_name): New variable.
+	(need_sym_before): Prevent an attempt to free a static variable.
+	(filter_symbols): Avoid strcmp test by checking for pointer
+	equality.
+
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Traditional Chinese translation.
+
+2020-01-09  Aaron Merey  <amerey@redhat.com>
+
+        * Makefile.am (readelf_LDADD, objdump_LDADD): Add libdebuginfod.
+        * Makefile.in: Regenerate.
+        * NEWS: Update.
+        * config.in: Regenerate.
+        * configure: Regenerate.
+        * configure.ac: Call AC_DEBUGINFOD.
+        * doc/Makefile.in: Regenerate.
+        * doc/binutils.texi: Add section on using binutils
+        with debuginfod.
+        * dwarf.c (debuginfod_fetch_separate_debug_info): New function.
+        Query debuginfod servers for the target debug file.
+        (load_separate_debug_info): Call
+        debuginfod_fetch_separate_debug_info if configured with
+        debuginfod.
+        (load_separate_debug_files): Add file argument to
+        load_separate_debug_info calls.
+        * dwarf.h (get_build_id): Add declaration.
+        * objdump.c (get_build_id): New function. Get build-id of file.
+        * readelf.c (get_build_id): Likewise.
+        * testsuite/binutils-all/debuginfod.exp: New tests.
+        * testsuite/binutils-all/linkdebug.s: Add .note.gnu.build-id
+        section.
+
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* readelf.c: Add support for new Z*) relocations and machine
+	types.
+
+2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
 
-For older changes see ChangeLog-2015 and testsuite/ChangeLog-1215
+For older changes see ChangeLog-2019
 
-Copyright (C) 2016 Free Software Foundation, Inc.
+Copyright (C) 2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

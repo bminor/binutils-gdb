@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -26,7 +26,6 @@
 #include "dwarf2dbg.h"
 
 #include "symbols.h"
-#include "struc-symbol.h"
 
 #ifdef OBJ_COMPLEX_RELC
 static expressionS * make_right_shifted_expr
@@ -92,7 +91,7 @@ static int num_fixups;
    ??? May wish to make this static and delete calls in md_assemble.  */
 
 void
-gas_cgen_init_parse ()
+gas_cgen_init_parse (void)
 {
   num_fixups = 0;
 }
@@ -154,7 +153,7 @@ struct saved_fixups
 static struct saved_fixups stored_fixups[MAX_SAVED_FIXUP_CHAINS];
 
 void
-gas_cgen_initialize_saved_fixups_array ()
+gas_cgen_initialize_saved_fixups_array (void)
 {
   int i = 0;
 
@@ -416,6 +415,8 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
       if (! errmsg)
 	{
+	  asymbol *bsym;
+
 	  /* Fragment the expression as necessary, and queue a reloc.  */
 	  memset (& dummy_fixup, 0, sizeof (fixS));
 
@@ -423,11 +424,12 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
 	  if (exp.X_op == O_symbol
 	      && reloc_type == BFD_RELOC_RELC
-	      && exp.X_add_symbol->sy_value.X_op == O_constant
-	      && (!exp.X_add_symbol->bsym
-		  || (exp.X_add_symbol->bsym->section != expr_section
-		      && exp.X_add_symbol->bsym->section != absolute_section
-		      && exp.X_add_symbol->bsym->section != undefined_section)))
+	      && symbol_constant_p (exp.X_add_symbol)
+	      && (!symbol_symbolS (exp.X_add_symbol)
+		  || (bsym = symbol_get_bfdsym (exp.X_add_symbol)) == NULL
+		  || (bsym->section != expr_section
+		      && bsym->section != absolute_section
+		      && bsym->section != undefined_section)))
 	    {
 	      /* Local labels will have been (eagerly) turned into constants
 		 by now, due to the inappropriately deep insight of the
@@ -455,13 +457,15 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	  if (operand && (operand->hw_type == HW_H_SINT))
 	    signed_p = 1;
 
-	  if (stmp->bsym && (stmp->bsym->section == expr_section)
+	  if (symbol_symbolS (stmp)
+	      && (bsym = symbol_get_bfdsym (stmp)) != NULL
+	      && bsym->section == expr_section
 	      && ! S_IS_LOCAL (stmp))
 	    {
 	      if (signed_p)
-		stmp->bsym->flags |= BSF_SRELC;
+		bsym->flags |= BSF_SRELC;
 	      else
-		stmp->bsym->flags |= BSF_RELC;
+		bsym->flags |= BSF_RELC;
 	    }
 
 	  /* Now package it all up for the fixup emitter.  */
@@ -771,12 +775,12 @@ weak_operand_overflow_check (const expressionS *  exp,
   mask = exp->X_add_number;
 
   if (exp->X_add_symbol
-      && exp->X_add_symbol->sy_value.X_op == O_constant)
-    mask |= exp->X_add_symbol->sy_value.X_add_number;
+      && symbol_constant_p (exp->X_add_symbol))
+    mask |= *symbol_X_add_number (exp->X_add_symbol);
 
   if (exp->X_op_symbol
-      && exp->X_op_symbol->sy_value.X_op == O_constant)
-    mask |= exp->X_op_symbol->sy_value.X_add_number;
+      && symbol_constant_p (exp->X_op_symbol))
+    mask |= *symbol_X_add_number (exp->X_op_symbol);
 
   /* Want to know if mask covers more bits than opmask.
      this is the same as asking if mask has any bits not in opmask,
@@ -800,18 +804,20 @@ make_right_shifted_expr (expressionS * exp,
 {
   symbolS * stmp = 0;
   expressionS * new_exp;
+  asymbol *bsym;
 
   stmp = expr_build_binary (O_right_shift,
 			    make_expr_symbol (exp),
 			    expr_build_uconstant (amount));
+  bsym = symbol_get_bfdsym (stmp);
 
   if (signed_p)
-    stmp->bsym->flags |= BSF_SRELC;
+    bsym->flags |= BSF_SRELC;
   else
-    stmp->bsym->flags |= BSF_RELC;
+    bsym->flags |= BSF_RELC;
 
   /* Then wrap that in a "symbol expr" for good measure.  */
-  new_exp = xmalloc (sizeof (expressionS));
+  new_exp = XNEW (expressionS);
   memset (new_exp, 0, sizeof (expressionS));
   new_exp->X_op = O_symbol;
   new_exp->X_op_symbol = 0;
@@ -1012,7 +1018,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   bfd_reloc_code_real_type r_type = fixP->fx_r_type;
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = XNEW (arelent);
 
 #ifdef GAS_CGEN_PCREL_R_TYPE
   if (fixP->fx_pcrel)
@@ -1029,7 +1035,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
 
   /* Use fx_offset for these cases.  */
@@ -1047,7 +1053,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
    Called after gas_cgen_cpu_desc has been created.  */
 
 void
-gas_cgen_begin ()
+gas_cgen_begin (void)
 {
   if (flag_signed_overflow_ok)
     cgen_set_signed_overflow_ok (gas_cgen_cpu_desc);

@@ -23,9 +23,9 @@
 [0-9a-f ]+:	80 fc ff e8 	setlos 0xf*ffffffe8,gr0
 [0-9a-f ]+:	80 f4 ff d8 	setlo 0xffd8,gr0
 [0-9a-f ]+:	80 f8 ff ff 	sethi 0xffff,gr0
-[0-9a-f ]+:	80 40 ff bc 	addi gr15,-68,gr0
-[0-9a-f ]+:	80 fc ff bc 	setlos 0xf+fbc,gr0
-[0-9a-f ]+:	80 f4 ff bc 	setlo 0xffbc,gr0
+[0-9a-f ]+:	80 40 ff (bc|c0) 	addi gr15,.*,gr0
+[0-9a-f ]+:	80 fc ff (bc|c0) 	setlos .*,gr0
+[0-9a-f ]+:	80 f4 ff (bc|c0) 	setlo .*,gr0
 [0-9a-f ]+:	80 f8 ff ff 	sethi 0xffff,gr0
 [0-9a-f ]+:	80 f4 00 24 	setlo 0x24,gr0
 [0-9a-f ]+:	80 f8 00 00 	sethi hi\(0x0\),gr0
@@ -42,7 +42,7 @@ Disassembly of section \.dat[0-9a-f ]+:
 [0-9a-f	 ]+: R_FRV_32	\.text
 Disassembly of section \.got:
 
-[0-9a-f ]+<_GLOBAL_OFFSET_TABLE_-0x38>:
+[0-9a-f ]+<.got>:
 [0-9a-f ]+:	00 00 00 04 	add\.p gr0,gr4,gr0
 [0-9a-f	 ]+: R_FRV_FUNCDESC_VALUE	\.text
 [0-9a-f ]+:	00 00 00 00 	add\.p gr0,gr0,gr0

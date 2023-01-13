@@ -1,5 +1,5 @@
 # Expect script for .tls_common tests
-#   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -24,13 +24,9 @@
 # Make sure that binutils can correctly handle ld output in ELF.
 
 if { ![istarget *-*-linux*]
+     && ![istarget arm*-*-uclinuxfdpiceabi]
      && ![istarget *-*-nacl*]
      && ![istarget *-*-gnu*] } {
-    return
-}
-
-if { [istarget *-*-linux*aout*]
-     || [istarget *-*-linux*oldld*] } {
     return
 }
 
@@ -47,17 +43,17 @@ if { ![ld_assemble $as "--elf-stt-common=no $srcdir/$subdir/tls_common.s" tmpdir
     return
 }
 
-if { ![ld_simple_link $ld tmpdir/tls_common1a.o "-r tmpdir/tls_commona.o"]
-     || ![ld_simple_link $ld tmpdir/tls_common1b.o "-r tmpdir/tls_commona.o"] } {
+if { ![ld_link $ld tmpdir/tls_common1a.o "-r tmpdir/tls_commona.o"]
+     || ![ld_link $ld tmpdir/tls_common1b.o "-r tmpdir/tls_commona.o"] } {
     fail "tls_common"
     return
 }
 
-if { ![ld_simple_link $ld tmpdir/tls_commona "tmpdir/tls_common1a.o"] } {
+if { ![ld_link $ld tmpdir/tls_commona "tmpdir/tls_common1a.o"] } {
     if { [string match "*not supported*" $link_output]
 	 || [string match "*unrecognized option*" $link_output] } {
 	unsupported "$ld_options is not supported by this target"
-    } elseif { [string match "*Warning*alignment*of common symbol*" $link_output] } {
+    } elseif { [string match "*warning*alignment*of common symbol*" $link_output] } {
 	fail "tls_common"
     } else {
 	unresolved "tls_common"
@@ -65,11 +61,11 @@ if { ![ld_simple_link $ld tmpdir/tls_commona "tmpdir/tls_common1a.o"] } {
     return
 }
 
-if { ![ld_simple_link $ld tmpdir/tls_commonb "tmpdir/tls_common1b.o"] } {
+if { ![ld_link $ld tmpdir/tls_commonb "tmpdir/tls_common1b.o"] } {
     if { [string match "*not supported*" $link_output]
 	 || [string match "*unrecognized option*" $link_output] } {
 	unsupported "$ld_options is not supported by this target"
-    } elseif { [string match "*Warning*alignment*of common symbol*" $link_output] } {
+    } elseif { [string match "*warning*alignment*of common symbol*" $link_output] } {
 	fail "tls_common"
     } else {
 	unresolved "tls_common"

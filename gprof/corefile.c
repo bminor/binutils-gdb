@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -28,6 +28,7 @@
 #include "hist.h"
 #include "corefile.h"
 #include "safe-ctype.h"
+#include <limits.h>    /* For UINT_MAX.  */
 
 bfd *core_bfd;
 static int core_num_syms;
@@ -50,7 +51,6 @@ static bfd_boolean get_src_info
 extern void i386_find_call  (Sym *, bfd_vma, bfd_vma);
 extern void alpha_find_call (Sym *, bfd_vma, bfd_vma);
 extern void vax_find_call   (Sym *, bfd_vma, bfd_vma);
-extern void tahoe_find_call (Sym *, bfd_vma, bfd_vma);
 extern void sparc_find_call (Sym *, bfd_vma, bfd_vma);
 extern void mips_find_call  (Sym *, bfd_vma, bfd_vma);
 extern void aarch64_find_call (Sym *, bfd_vma, bfd_vma);
@@ -72,11 +72,15 @@ cmp_symbol_map (const void * l, const void * r)
 		 ((struct function_map *) r)->function_name);
 }
 
+#define BUFSIZE      (1024)
+/* This is BUFSIZE - 1 as a string.  Suitable for use in fprintf/sscanf format strings.  */
+#define STR_BUFSIZE  "1023"
+
 static void
 read_function_mappings (const char *filename)
 {
   FILE * file = fopen (filename, "r");
-  char dummy[1024];
+  char dummy[BUFSIZE];
   int count = 0;
   unsigned int i;
 
@@ -93,7 +97,7 @@ read_function_mappings (const char *filename)
     {
       int matches;
 
-      matches = fscanf (file, "%[^\n:]", dummy);
+      matches = fscanf (file, "%" STR_BUFSIZE "[^\n:]", dummy);
       if (!matches)
 	parse_error (filename);
 
@@ -107,7 +111,7 @@ read_function_mappings (const char *filename)
 	}
 
       /* Don't care what else is on this line at this point.  */
-      matches = fscanf (file, "%[^\n]\n", dummy);
+      matches = fscanf (file, "%" STR_BUFSIZE "[^\n]\n", dummy);
       if (!matches)
 	parse_error (filename);
       count++;
@@ -127,7 +131,7 @@ read_function_mappings (const char *filename)
       int matches;
       char *tmp;
 
-      matches = fscanf (file, "%[^\n:]", dummy);
+      matches = fscanf (file, "%" STR_BUFSIZE "[^\n:]", dummy);
       if (!matches)
 	parse_error (filename);
 
@@ -145,7 +149,7 @@ read_function_mappings (const char *filename)
       strcpy (symbol_map[count].file_name, dummy);
 
       /* Now we need the function name.  */
-      matches = fscanf (file, "%[^\n]\n", dummy);
+      matches = fscanf (file, "%" STR_BUFSIZE "[^\n]\n", dummy);
       if (!matches)
 	parse_error (filename);
       tmp = strrchr (dummy, ' ') + 1;
@@ -181,6 +185,8 @@ core_init (const char * aout_name)
       perror (aout_name);
       done (1);
     }
+
+  core_bfd->flags |= BFD_DECOMPRESS;
 
   if (!bfd_check_format (core_bfd, bfd_object))
     {
@@ -245,7 +251,6 @@ core_init (const char * aout_name)
   switch (bfd_get_arch (core_bfd))
     {
     case bfd_arch_vax:
-    case bfd_arch_tahoe:
       offset_to_code = 2;
       break;
 
@@ -266,17 +271,17 @@ core_init (const char * aout_name)
 void
 core_get_text_space (bfd *cbfd)
 {
-  core_text_space = malloc (bfd_get_section_size (core_text_sect));
+  core_text_space = malloc (bfd_section_size (core_text_sect));
 
   if (!core_text_space)
     {
       fprintf (stderr, _("%s: ran out room for %lu bytes of text space\n"),
-	       whoami, (unsigned long) bfd_get_section_size (core_text_sect));
+	       whoami, (unsigned long) bfd_section_size (core_text_sect));
       done (1);
     }
 
   if (!bfd_get_section_contents (cbfd, core_text_sect, core_text_space,
-				 0, bfd_get_section_size (core_text_sect)))
+				 0, bfd_section_size (core_text_sect)))
     {
       bfd_perror ("bfd_get_section_contents");
       free (core_text_space);
@@ -312,10 +317,6 @@ find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 
     case bfd_arch_sparc:
       sparc_find_call (parent, p_lowpc, p_highpc);
-      break;
-
-    case bfd_arch_tahoe:
-      tahoe_find_call (parent, p_lowpc, p_highpc);
       break;
 
     case bfd_arch_mips:
@@ -480,28 +481,28 @@ get_src_info (bfd_vma addr, const char **filename, const char **name, int *line_
     }
 }
 
+static char buf[BUFSIZE];
+static char address[BUFSIZE];
+static char name[BUFSIZE];
+
 /* Return number of symbols in a symbol-table file.  */
 
-static int
+static unsigned int
 num_of_syms_in (FILE * f)
 {
-  const int BUFSIZE = 1024;
-  char * buf = (char *) xmalloc (BUFSIZE);
-  char * address = (char *) xmalloc (BUFSIZE);
   char   type;
-  char * name = (char *) xmalloc (BUFSIZE);
-  int num = 0;
+  unsigned int num = 0;
 
   while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
     {
-      if (sscanf (buf, "%s %c %s", address, &type, name) == 3)
+      if (sscanf (buf, "%" STR_BUFSIZE "s %c %" STR_BUFSIZE "s", address, &type, name) == 3)
         if (type == 't' || type == 'T')
-          ++num;
+	  {
+	    /* PR 20499 - prevent integer overflow computing argument to xmalloc.  */	  
+	    if (++num >= UINT_MAX / sizeof (Sym))
+	      return -1U;
+	  }
     }
-
-  free (buf);
-  free (address);
-  free (name);
 
   return num;
 }
@@ -511,11 +512,7 @@ num_of_syms_in (FILE * f)
 void
 core_create_syms_from (const char * sym_table_file)
 {
-  const int BUFSIZE = 1024;
-  char * buf = (char *) xmalloc (BUFSIZE);
-  char * address = (char *) xmalloc (BUFSIZE);
   char type;
-  char * name = (char *) xmalloc (BUFSIZE);
   bfd_vma min_vma = ~(bfd_vma) 0;
   bfd_vma max_vma = 0;
   FILE * f;
@@ -535,6 +532,12 @@ core_create_syms_from (const char * sym_table_file)
       fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, sym_table_file);
       done (1);
     }
+  else if (symtab.len == -1U)
+    {
+      fprintf (stderr, _("%s: file `%s' has too many symbols\n"),
+	       whoami, sym_table_file);
+      done (1);
+    }
 
   symtab.base = (Sym *) xmalloc (symtab.len * sizeof (Sym));
 
@@ -549,9 +552,10 @@ core_create_syms_from (const char * sym_table_file)
 
   while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
     {
-      if (sscanf (buf, "%s %c %s", address, &type, name) == 3)
-        if (type != 't' && type != 'T')
-          continue;
+      if (sscanf (buf, "%" STR_BUFSIZE "s %c %" STR_BUFSIZE "s", address, &type, name) != 3)
+	continue;
+      if (type != 't' && type != 'T')
+	continue;
 
       sym_init (symtab.limit);
 
@@ -572,10 +576,6 @@ core_create_syms_from (const char * sym_table_file)
 
   symtab.len = symtab.limit - symtab.base;
   symtab_finalize (&symtab);
-
-  free (buf);
-  free (address);
-  free (name);
 }
 
 static int
@@ -605,7 +605,6 @@ core_create_function_syms (void)
     case bfd_target_ecoff_flavour:
     case bfd_target_xcoff_flavour:
     case bfd_target_elf_flavour:
-    case bfd_target_nlm_flavour:
     case bfd_target_som_flavour:
       core_has_func_syms = 1;
     }
@@ -676,7 +675,7 @@ core_create_function_syms (void)
       sym_sec = core_syms[i]->section;
       symtab.limit->addr = core_syms[i]->value;
       if (sym_sec)
-	symtab.limit->addr += bfd_get_section_vma (sym_sec->owner, sym_sec);
+	symtab.limit->addr += bfd_section_vma (sym_sec);
 
       if (found)
 	{
@@ -735,8 +734,8 @@ core_create_function_syms (void)
 	 section containing the symbol, if available.  */
       min_vma = MIN (symtab.limit->addr, min_vma);
       if (sym_sec)
-	max_vma = MAX (bfd_get_section_vma (sym_sec->owner, sym_sec)
-		       + bfd_section_size (sym_sec->owner, sym_sec) - 1,
+	max_vma = MAX (bfd_section_vma (sym_sec)
+		       + bfd_section_size (sym_sec) - 1,
 		       max_vma);
       else
 	max_vma = MAX (symtab.limit->addr, max_vma);
@@ -788,7 +787,7 @@ core_create_line_syms (void)
   ltab.len = 0;
   prev_line_num = 0;
 
-  vma_high = core_text_sect->vma + bfd_get_section_size (core_text_sect);
+  vma_high = core_text_sect->vma + bfd_section_size (core_text_sect);
   for (vma = core_text_sect->vma; vma < vma_high; vma += min_insn_size)
     {
       unsigned int len;
@@ -843,7 +842,7 @@ core_create_line_syms (void)
      The old way called symtab_finalize before the is_static pass,
      causing a problem since symtab_finalize uses is_static as part of
      its address conflict resolution algorithm.  Since global symbols
-     were prefered over static symbols, and all line symbols were
+     were preferred over static symbols, and all line symbols were
      global at that point, static function names that conflicted with
      their own line numbers (static, but labeled as global) were
      rejected in favor of the line num.

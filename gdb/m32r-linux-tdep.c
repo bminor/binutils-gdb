@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux m32r.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,7 @@
 
 #include "m32r-tdep.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 
 
@@ -353,7 +354,7 @@ m32r_linux_supply_gregset (const struct regset *regset,
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
   enum bfd_endian byte_order =
-    gdbarch_byte_order (get_regcache_arch (regcache));
+    gdbarch_byte_order (regcache->arch ());
   ULONGEST psw, bbpsw;
   gdb_byte buf[4];
   const gdb_byte *p;
@@ -385,7 +386,7 @@ m32r_linux_supply_gregset (const struct regset *regset,
 	  p = regs + m32r_pt_regs_offset[i];
 	}
 
-      regcache_raw_supply (regcache, i, p);
+      regcache->raw_supply (i, p);
     }
 }
 
@@ -397,11 +398,11 @@ m32r_linux_collect_gregset (const struct regset *regset,
   gdb_byte *regs = (gdb_byte *) gregs;
   int i;
   enum bfd_endian byte_order =
-    gdbarch_byte_order (get_regcache_arch (regcache));
+    gdbarch_byte_order (regcache->arch ());
   ULONGEST psw;
   gdb_byte buf[4];
 
-  regcache_raw_collect (regcache, PSW_REGNUM, buf);
+  regcache->raw_collect (PSW_REGNUM, buf);
   psw = extract_unsigned_integer (buf, 4, byte_order);
 
   for (i = 0; i < ARRAY_SIZE (m32r_pt_regs_offset); i++)
@@ -420,12 +421,11 @@ m32r_linux_collect_gregset (const struct regset *regset,
 	case CBR_REGNUM:
 	  break;
 	case M32R_SP_REGNUM:
-	  regcache_raw_collect (regcache, i, regs
-				+ ((psw & 0x80) ? SPU_OFFSET : SPI_OFFSET));
+	  regcache->raw_collect
+	    (i, regs + ((psw & 0x80) ? SPU_OFFSET : SPI_OFFSET));
 	  break;
 	default:
-	  regcache_raw_collect (regcache, i,
-				regs + m32r_pt_regs_offset[i]);
+	  regcache->raw_collect (i, regs + m32r_pt_regs_offset[i]);
 	}
     }
 }
@@ -441,13 +441,13 @@ m32r_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", M32R_LINUX_GREGS_SIZE, &m32r_linux_gregset, NULL, cb_data);
+  cb (".reg", M32R_LINUX_GREGS_SIZE, M32R_LINUX_GREGS_SIZE, &m32r_linux_gregset,
+      NULL, cb_data);
 }
 
 static void
 m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch);
 
@@ -471,11 +471,9 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_m32r_linux_tdep (void);
-
+void _initialize_m32r_linux_tdep ();
 void
-_initialize_m32r_linux_tdep (void)
+_initialize_m32r_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_m32r, 0, GDB_OSABI_LINUX,
 			  m32r_linux_init_abi);

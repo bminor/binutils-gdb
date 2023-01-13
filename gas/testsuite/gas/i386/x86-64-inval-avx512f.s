@@ -46,3 +46,17 @@ _start:
 	vaddps zmm2, zmm1, ZMMWORD PTR [rax]{1to16}
 	vaddps zmm2, zmm1, DWORD PTR [rax]
 	vaddpd zmm2, zmm1, QWORD PTR [rax]
+
+	.att_syntax prefix
+	vaddps %zmm0, %zmm1, %zmm2{%rcx}
+	vaddps %zmm0, %zmm1, %zmm2{z}
+
+	.intel_syntax noprefix
+	vaddps zmm2{rcx}, zmm1, zmm0
+	vaddps zmm2{z}, zmm1, zmm0
+
+	vcvtps2qq xmm0, DWORD PTR [rax]
+
+	.att_syntax prefix
+	vdpbf16ps 8(%rax){1to8}, %zmm2, %zmm2
+	vcvtne2ps2bf16 8(%rax){1to8}, %zmm2, %zmm2

@@ -1,6 +1,6 @@
 // sparc.cc -- sparc target support for gold.
 
-// Copyright (C) 2008-2016 Free Software Foundation, Inc.
+// Copyright (C) 2008-2020 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>.
 
 // This file is part of gold.
@@ -499,6 +499,7 @@ Target::Target_info Target_sparc<32, true>::sparc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 template<>
@@ -527,6 +528,7 @@ Target::Target_info Target_sparc<64, true>::sparc_info =
   NULL,			// attributes_vendor
   "_start",		// entry_symbol_name
   32,			// hash_entry_size
+  elfcpp::SHT_PROGBITS,	// unwind_section_type
 };
 
 // We have to take care here, even when operating in little-endian
@@ -2150,6 +2152,7 @@ Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int
 	case elfcpp::R_SPARC_RELATIVE:
 	case elfcpp::R_SPARC_IRELATIVE:
 	case elfcpp::R_SPARC_COPY:
+	case elfcpp::R_SPARC_32:
 	case elfcpp::R_SPARC_64:
 	case elfcpp::R_SPARC_GLOB_DAT:
 	case elfcpp::R_SPARC_JMP_SLOT:
@@ -2292,7 +2295,9 @@ Target_sparc<size, big_endian>::Scan::local(
       // apply the link-time value, so we flag the location with
       // an R_SPARC_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
-      if (parameters->options().output_is_position_independent())
+      if (parameters->options().output_is_position_independent()
+	  && ((size == 64 && r_type == elfcpp::R_SPARC_64)
+	      || (size == 32 && r_type == elfcpp::R_SPARC_32)))
 	{
 	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -2300,8 +2305,9 @@ Target_sparc<size, big_endian>::Scan::local(
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
 				       reloc.get_r_addend(), is_ifunc);
+	  break;
 	}
-      break;
+      // Fall through.
 
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
@@ -2766,8 +2772,8 @@ Target_sparc<size, big_endian>::Scan::global(
 						       reloc.get_r_offset(),
 						       reloc.get_r_addend());
 	      }
-	    else if ((r_type == elfcpp::R_SPARC_32
-		      || r_type == elfcpp::R_SPARC_64)
+	    else if (((size == 64 && r_type == elfcpp::R_SPARC_64)
+		      || (size == 32 && r_type == elfcpp::R_SPARC_32))
 		     && gsym->can_use_relative_reloc(false))
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
@@ -2811,6 +2817,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	  // and code transform the GOT load into an addition.
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3350,6 +3357,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  gdop_valid = true;
 	  break;
 	}
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3465,6 +3473,13 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       Reloc::lo10(view, object, psymval, addend);
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      if (gdop_valid)
+	{
+	  Reloc::gdop_lox10(view, got_offset);
+	  break;
+	}
+      // Fall through.
     case elfcpp::R_SPARC_GOT10:
       Reloc::lo10(view, got_offset, addend);
       break;
@@ -3483,13 +3498,6 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	}
       break;
 
-    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
-      if (gdop_valid)
-	{
-	  Reloc::gdop_lox10(view, got_offset);
-	  break;
-	}
-      /* Fall through.  */
     case elfcpp::R_SPARC_GOT13:
       Reloc::rela32_13(view, got_offset, addend);
       break;
@@ -3500,7 +3508,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  Reloc::gdop_hix22(view, got_offset);
 	  break;
 	}
-      /* Fall through.  */
+      // Fall through.
     case elfcpp::R_SPARC_GOT22:
       Reloc::hi22(view, got_offset, addend);
       break;
@@ -3724,7 +3732,7 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 
   const bool is_final =
     (gsym == NULL
-     ? !parameters->options().output_is_position_independent()
+     ? !parameters->options().shared()
      : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = optimize_tls_reloc(is_final, r_type);
@@ -4158,7 +4166,7 @@ Target_sparc<size, big_endian>::Relocate::relax_call(
   if (op3 != 0x3d)
     {
       // First check RS1
-      reg = (delay_insn >> 14) & 0x15;
+      reg = (delay_insn >> 14) & 0x1f;
       if (reg == 15)
 	return;
 

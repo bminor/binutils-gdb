@@ -1,4 +1,4 @@
-# Copyright 2007-2016 Free Software Foundation, Inc.
+# Copyright 2007-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 standard_testfile
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
-    untested $testfile.exp
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
@@ -34,4 +33,4 @@ gdb_test "ptype integer" "type = int"
 
 # We should report that integer comes from the header file.
 if { $non_dwarf } { setup_xfail *-*-* }
-gdb_test "info variables integer" "\r\nFile \[^\r\n\]*/${subdir}/${testfile}.h:\r\nint integer;"
+gdb_test "info variables integer" "\r\nFile \[^\r\n\]*/${subdir}/${testfile}.h:\r\n.*\tint integer;"

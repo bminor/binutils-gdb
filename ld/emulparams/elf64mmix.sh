@@ -1,4 +1,4 @@
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 GENERATE_SHLIB_SCRIPT=yes
 ELFSIZE=64
 SCRIPT_NAME=elf
@@ -40,7 +40,7 @@ EXTRA_EM_FILE=mmixelf
 OTHER_TEXT_SECTIONS="
 ${RELOCATING+
  _start. = (DEFINED (_start) ? _start
-            : (DEFINED (Main) ? Main : (DEFINED (.text) ? .text : 0)));
+	    : (DEFINED (Main) ? Main : (DEFINED (.text) ? .text : 0)));
  PROVIDE (Main = DEFINED (Main) ? Main : (DEFINED (_start) ? _start : _start.));
 }"
 

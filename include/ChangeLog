@@ -1,215 +1,112 @@
-22016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
-        * opcode/arc.h (DPA, DPX, SPX): New subclass enums.
-        (ARC_FPUDA): Define.
-        (arc_aux_reg): Add new field.
+	PR 25469
+	* coff/internal.h (R_IMM16BE): Define.
+	* elf/z80.h (EF_Z80_MACH_Z80N): Define.
+	(R_Z80_16_BE): New reloc.
 
-016-04-05  Cupertino Miranda  <cmiranda@synopsys.com>
+2020-02-04  Alan Modra  <amodra@gmail.com>
 
-	* opcode/arc-func.h (replace_bits24): Changed.
-	(replace_bits24_be): Created.
+	* opcode/d30v.h (struct pd_reg): Make value field unsigned.
 
-2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
+2020-01-16  Jon Turney  <jon.turney@dronecode.org.uk>
 
-        * opcode/arc.h (insn_subclass_t): Add QUARKSE subclass.
-        (FIELDA, FIELDB, FIELDC, FIELDF, FIELDQ, INSN3OP, INSN2OP)
-        (INSN2OP, INSN3OP_ABC, INSN3OP_ALC, INSN3OP_ABL, INSN3OP_ALL)
-        (INSN3OP_0BC, INSN3OP_0LC, INSN3OP_0BL, INSN3OP_0LL, INSN3OP_ABU)
-        (INSN3OP_ALU, INSN3OP_0BU, INSN3OP_0LU, INSN3OP_BBS, INSN3OP_0LS)
-        (INSN3OP_CBBC, INSN3OP_CBBL, INSN3OP_C0LC, INSN3OP_C0LL)
-        (INSN3OP_CBBU, INSN3OP_C0LU, MINSN3OP_ABC, MINSN3OP_ALC)
-        (MINSN3OP_ABL, MINSN3OP_ALL, MINSN3OP_0BC, MINSN3OP_0LC)
-        (MINSN3OP_0BL, MINSN3OP_0LL, MINSN3OP_ABU, MINSN3OP_ALU)
-        (MINSN3OP_0BU, MINSN3OP_0LU, MINSN3OP_BBS, MINSN3OP_0LS)
-        (MINSN3OP_CBBC, MINSN3OP_CBBL, MINSN3OP_C0LC, MINSN3OP_C0LL)
-        (MINSN3OP_CBBU, MINSN3OP_C0LU, INSN2OP_BC, INSN2OP_BL, INSN2OP_0C)
-        (INSN2OP_0L INSN2OP_BU, INSN2OP_0U, MINSN2OP_BC, MINSN2OP_BL)
-        (MINSN2OP_0C, MINSN2OP_0L, MINSN2OP_BU, MINSN2OP_0U): Define.
+	* coff/internal.h (PE_IMAGE_DEBUG_TYPE_VC_FEATURE)
+	(PE_IMAGE_DEBUG_TYPE_POGO, PE_IMAGE_DEBUG_TYPE_ILTCG)
+	(PE_IMAGE_DEBUG_TYPE_MPX, PE_IMAGE_DEBUG_TYPE_REPRO): Add.
 
-2016-03-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-	* opcode/i960.h: Add const qualifiers.
-	* opcode/tic4x.h (struct tic4x_inst): Likewise.
+	Binutils 2.34 branch created.
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-01-17  Nick Clifton  <nickc@redhat.com>
 
-	* opcodes/arc.h (insn_class_t): Add BITOP type.
+	* Import from gcc mainline:
+	2019-06-10  Martin Liska  <mliska@suse.cz>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* ansidecl.h (ATTRIBUTE_WARN_UNUSED_RESULT): New macro.
+	* libiberty.h (xmalloc): Use it.
+	(xrealloc): Likewise.
+	(xcalloc): Likewise.
+	(xstrdup): Likewise.
+	(xstrndup): Likewise.
+	(xmemdup): Likewise.
 
-	* opcode/arc.h (flag_class_t): Remove all old flag classes, add 3
-	new classes instead.
+	2019-06-10  Martin Liska  <mliska@suse.cz>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* ansidecl.h:
+	(ATTRIBUTE_RESULT_SIZE_1): Define new macro.
+	(ATTRIBUTE_RESULT_SIZE_2): Likewise.
+	(ATTRIBUTE_RESULT_SIZE_1_2): Likewise.
+	* libiberty.h (xmalloc): Add RESULT_SIZE attribute.
+	(xrealloc): Likewise.
+	(xcalloc): Likewise.
 
-	* elf/arc.h (E_ARC_MACH_NPS400): Define.
-	* opcode/arc.h (ARC_OPCODE_NPS400): Define.
+	2019-11-16  Tim Ruehsen  <tim.ruehsen@gmx.de>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* demangle.h (struct demangle_component): Add member
+	d_counting.
 
-	* elf/arc.h (EF_ARC_CPU_GENERIC): Delete.  Update related comment.
+	2019-11-16  Eduard-Mihai Burtescu  <eddyb@lyken.rs>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* demangle.h (rust_demangle_callback): Add.
 
-	* elf/arc.h (EF_ARC_MACH): Delete.
-	(EF_ARC_MACH_MSK): Remove out of date comment.
+	2019-07-18  Eduard-Mihai Burtescu  <eddyb@lyken.rs>
 
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* demangle.h (rust_is_mangled): Move to libiberty/rust-demangle.h.
+	(rust_demangle_sym): Move to libiberty/rust-demangle.h.
 
-	* opcode/arc.h (ARC_OPCODE_BASE): Delete.
+2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
-2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+	PR 25376
+	* opcodes/arm.h (FPU_MVE, FPU_MVE_FPU): Move these features to...
+	(ARM_EXT2_MVE, ARM_EXT2_MVE_FP): ... the CORE_HIGH space.
+	(ARM_ANY): Redefine to not include any MVE bits.
+	(ARM_FEATURE_ALL): Removed.
 
-	PR ld/19807
-	* bfdlink.h (bfd_link_info): Add no_reloc_overflow_check.
+2020-01-15  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
-2016-03-08  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
-	    Andrew Burgess  <andrew.burgess@embecosm.com>
+	* opcode/msp430.h (enum msp430_expp_e): New.
+	(struct msp430_operand_s): Add expp member to struct.
 
-	* elf/arc-reloc.def: Add a call to ME within the formula for each
-	relocation that requires middle-endian correction.
+2020-01-13  Claudiu Zissulescu  <claziss@gmail.com>
 
-2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+	* elf/arc-cpu.def: Update ARC cpu list.
 
-	* opcode/dlx.h (struct dlx_opcode): Add const qualifiers.
-	* opcode/h8300.h (struct h8_opcode): Likewise.
-	* opcode/hppa.h (struct pa_opcode): Likewise.
-	* opcode/msp430.h: Likewise.
-	* opcode/spu.h (struct spu_opcode): Likewise.
-	* opcode/tic30.h (struct _register): Likewise.
-	* opcode/tic4x.h (struct tic4x_register): Likewise.
-	(struct tic4x_cond): Likewise.
-	(struct tic4x_indirect): Likewise.
-	(struct tic4x_inst): Likewise.
-	* opcode/visium.h (struct reg_entry): Likewise.
+2020-01-13  Alan Modra  <amodra@gmail.com>
 
-2016-03-04  Matthew Wahab  <matthew.wahab@arm.com>
+	* opcode/tic4x.h (EXTR): Delete.
+	(EXTRU, EXTRS, INSERTU, INSERTS): Rewrite without zero/sign
+	extension using shifts.  Do trim INSERTU value to specified bitfield.
 
-	* arm.h (ARM_ARCH_V8_1A): Add FPU_NEON_EXT_RDMA.
-	(ARM_CPU_HAS_FEATURE): Add comment.
+2020-01-10  Alan Modra  <amodra@gmail.com>
 
-2016-03-03  Than McIntosh <thanm@google.com>
+	* opcode/spu.h: Formatting.
+	(UNSIGNED_EXTRACT): Use 1u.
+	(SIGNED_EXTRACT): Don't sign extend with shifts.
+	(DECODE_INSN_I9a, DECODE_INSN_I9b): Avoid left shift of signed value.
+	Keep result signed.
+	(DECODE_INSN_U9a, DECODE_INSN_U9b): Delete.
 
-	* plugin-api.h: Add new hooks to the plugin transfer vector to
-	to support querying section alignment and section size.
-	(ld_plugin_get_input_section_alignment): New hook.
-	(ld_plugin_get_input_section_size): New hook.
-	(ld_plugin_tag): Add LDPT_GET_INPUT_SECTION_ALIGNMENT
-	and LDPT_GET_INPUT_SECTION_SIZE.
-	(ld_plugin_tv): Add tv_get_input_section_alignment and
-	tv_get_input_section_size.
+2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
 
-2016-03-03  Evgenii Stepanov  <eugenis@google.com>
+	* opcode/arc.h (insn_class_t): Add 'LLOCK' and 'SCOND'.
 
-	* plugin-api.h (enum ld_plugin_tag): Add LDPT_GET_SYMBOLS_V3.
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
-2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+	* coff/internal.h: Add defintions of Z80 reloc names.
 
-	PR ld/19645
-	* bfdlink.h (bfd_link_elf_stt_common): New enum.
-	(bfd_link_info): Add elf_stt_common.
+2020-01-02  Christian Biesinger  <cbiesinger@google.com>
 
-2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+	* opcode/s12z.h: Undef REG_Y.
 
-	PR ld/19636
-	PR ld/19704
-	PR ld/19719
-	* bfdlink.h (bfd_link_info): Add dynamic_undefined_weak.
-
-2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
-	    Jiong Wang  <jiong.wang@arm.com>
-
-	* opcode/arm.h (ARM_EXT2_FP16_INSN): New.
-
-2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
-	    Janek van Oirschot  <jvanoirs@synopsys.com>
-
-        * opcode/arc.h (arc_opcode arc_relax_opcodes, arc_num_relax_opcodes):
-        Declare.
-
-2016-02-09  Nick Clifton  <nickc@redhat.com>
-
-	* opcode/metag.h (metag_scondtab): Mark as possibly unused.
-	* opcode/nds32.h (nds32_r45map): Likewise.
-	(nds32_r54map): Likewise.
-	* opcode/visium.h (gen_reg_table): Likewise.
-	(fp_reg_table, cc_table, opcode_table): Likewise.
-
-2016-02-09  Alan Modra  <amodra@gmail.com>
-
-	PR 16583
-	* elf/common.h (AT_SUN_HWCAP): Undef before defining.
-
-2016-02-04  Nick Clifton  <nickc@redhat.com>
-
-	PR target/19561
-	* opcode/msp430.h (IGNORE_CARRY_BIT): New define.
-	(RRUX): Synthesise using case 2 rather than 7.
-
-2016-01-19  John Baldwin  <jhb@FreeBSD.org>
-
-	* elf/common.h (NT_FREEBSD_THRMISC): Define.
-	(NT_FREEBSD_PROCSTAT_PROC): Define.
-	(NT_FREEBSD_PROCSTAT_FILES): Define.
-	(NT_FREEBSD_PROCSTAT_VMMAP): Define.
-	(NT_FREEBSD_PROCSTAT_GROUPS): Define.
-	(NT_FREEBSD_PROCSTAT_UMASK): Define.
-	(NT_FREEBSD_PROCSTAT_RLIMIT): Define.
-	(NT_FREEBSD_PROCSTAT_OSREL): Define.
-	(NT_FREEBSD_PROCSTAT_PSSTRINGS): Define.
-	(NT_FREEBSD_PROCSTAT_AUXV): Define.
-
-2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
-	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
-
-	* elf/arc-reloc.def (ARC_32, ARC_GOTPC, ARC_TLS_GD_GOT)
-	(ARC_TLS_IE_GOT, ARC_TLS_DTPOFF, ARC_TLS_DTPOFF_S9, ARC_TLS_LE_S9)
-	(ARC_TLS_LE_32): Fixed formula.
-	(ARC_TLS_GD_LD): Use new special function.
-	* opcode/arc-func.h: Changed all the replacement
-	functions to clear the patching bits before doing an or it with the value
-	argument.
-
-2016-01-18  Nick Clifton  <nickc@redhat.com>
-
-	PR ld/19440
-	* coff/internal.h (internal_syment): Use int to hold section
-	number.
-	(N_UNDEF): Cast to int not short.
-	(N_ABS): Likewise.
-	(N_DEBUG): Likewise.
-	(N_TV): Likewise.
-	(P_TV): Likewise.
-
-2016-01-11  Nick Clifton  <nickc@redhat.com>
-
-	Import this change from GCC mainline:
-
-	2016-01-07  Mike Frysinger  <vapier@gentoo.org>
-
-	* longlong.h: Change !__SHMEDIA__ to
-	(!defined (__SHMEDIA__) || !__SHMEDIA__).
-	Change __SHMEDIA__ to defined (__SHMEDIA__) && __SHMEDIA__.
-
-2016-01-06  Maciej W. Rozycki  <macro@imgtec.com>
-
-	* opcode/mips.h: Add a summary of MIPS16 operand codes.
-
-2016-01-05  Mike Frysinger  <vapier@gentoo.org>
-
-	* libiberty.h (dupargv): Change arg to char * const *.
-	(writeargv, countargv): Likewise.
-
-2016-01-01  Alan Modra  <amodra@gmail.com>
+2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
 
-For older changes see ChangeLog-0415, aout/ChangeLog-9115,
-cgen/ChangeLog-0915, coff/ChangeLog-0415, elf/ChangeLog-0415,
-mach-o/ChangeLog-1115, nlm/ChangeLog-9315, opcode/ChangeLog-0415,
-som/ChangeLog-1015, and vms/ChangeLog-1015
+For older changes see ChangeLog-2019
 
-Copyright (C) 2016 Free Software Foundation, Inc.
+Copyright (C) 2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

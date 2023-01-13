@@ -1,7 +1,7 @@
 /* Target-dependent code for Lattice Mico32 processor, for GDB.
    Contributed by Jon Beniston <jon@beniston.com>
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,7 @@
 #include "trad-frame.h"
 #include "reggroups.h"
 #include "opcodes/lm32-desc.h"
+#include <algorithm>
 
 /* Macros to extract fields from an instruction.  */
 #define LM32_OPCODE(insn)       ((insn >> 26) & 0x3f)
@@ -90,7 +91,7 @@ lm32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static const char *
 lm32_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  static char *register_names[] = {
+  static const char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
@@ -197,7 +198,7 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-	return max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine
@@ -215,16 +216,10 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 /* Create a breakpoint instruction.  */
+constexpr gdb_byte lm32_break_insn[4] = { OP_RAISE << 2, 0, 0, 2 };
 
-static const gdb_byte *
-lm32_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
-			 int *lenptr)
-{
-  static const gdb_byte breakpoint[4] = { OP_RAISE << 2, 0, 0, 2 };
+typedef BP_MANIPULATION (lm32_break_insn) lm32_breakpoint;
 
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
 
 /* Setup registers and stack for faking a call to a function in the 
    inferior.  */
@@ -233,7 +228,8 @@ static CORE_ADDR
 lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int first_arg_reg = SIM_LM32_R1_REGNUM;
@@ -245,7 +241,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* If we're returning a large struct, a pointer to the address to
      store it at is passed as a first hidden parameter.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, first_arg_reg, struct_addr);
       first_arg_reg++;
@@ -308,7 +304,7 @@ static void
 lm32_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST l;
   CORE_ADDR return_buffer;
@@ -345,7 +341,7 @@ static void
 lm32_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -385,26 +381,6 @@ lm32_return_value (struct gdbarch *gdbarch, struct value *function,
     lm32_store_return_value (valtype, regcache, writebuf);
 
   return RETURN_VALUE_REGISTER_CONVENTION;
-}
-
-static CORE_ADDR
-lm32_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, SIM_LM32_PC_REGNUM);
-}
-
-static CORE_ADDR
-lm32_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, SIM_LM32_SP_REGNUM);
-}
-
-static struct frame_id
-lm32_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, SIM_LM32_SP_REGNUM);
-
-  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 /* Put here the code to store, into fi->saved_regs, the addresses of
@@ -526,7 +502,7 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* None found, create a new architecture from the information provided.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Type sizes.  */
@@ -556,21 +532,16 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame unwinding.  */
   set_gdbarch_frame_align (gdbarch, lm32_frame_align);
   frame_base_set_default (gdbarch, &lm32_frame_base);
-  set_gdbarch_unwind_pc (gdbarch, lm32_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, lm32_unwind_sp);
-  set_gdbarch_dummy_id (gdbarch, lm32_dummy_id);
   frame_unwind_append_unwinder (gdbarch, &lm32_frame_unwind);
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, lm32_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, lm32_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, lm32_breakpoint::bp_from_kind);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, lm32_push_dummy_call);
   set_gdbarch_return_value (gdbarch, lm32_return_value);
-
-  /* Instruction disassembler.  */
-  set_gdbarch_print_insn (gdbarch, print_insn_lm32);
 
   lm32_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, lm32_register_reggroup_p);
@@ -578,11 +549,9 @@ lm32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_lm32_tdep;
-
+void _initialize_lm32_tdep ();
 void
-_initialize_lm32_tdep (void)
+_initialize_lm32_tdep ()
 {
   register_gdbarch_init (bfd_arch_lm32, lm32_gdbarch_init);
 }

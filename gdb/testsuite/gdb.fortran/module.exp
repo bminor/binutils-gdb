@@ -1,4 +1,4 @@
-# Copyright 2009-2016 Free Software Foundation, Inc.
+# Copyright 2009-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,9 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+load_lib "fortran.exp"
+
 standard_testfile .f90
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}] } {
     return -1
 }
 
@@ -31,6 +33,31 @@ if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"
     continue
 }
+
+set int_type [fortran_int4]
+
+# Test 'info variables' can find module variables.
+gdb_test "info variables -n" \
+    [multi_line \
+	 "All defined variables:" \
+	 "" \
+	 "File .*$srcfile:" \
+	 "18:\[ \t\]+${int_type} mod1::var_const;" \
+	 "17:\[ \t\]+${int_type} mod1::var_i;" \
+	 "23:\[ \t\]+${int_type} mod2::var_i;" \
+	 "28:\[ \t\]+${int_type} mod3::mod1;" \
+	 "27:\[ \t\]+${int_type} mod3::mod2;" \
+	 "29:\[ \t\]+${int_type} mod3::var_i;" \
+	 "33:\[ \t\]+${int_type} modmany::var_a;" \
+	 "33:\[ \t\]+${int_type} modmany::var_b;" \
+	 "33:\[ \t\]+${int_type} modmany::var_c;" \
+	 "33:\[ \t\]+${int_type} modmany::var_i;" \
+	 "37:\[ \t\]+${int_type} moduse::var_x;" \
+	 "37:\[ \t\]+${int_type} moduse::var_y;(" \
+	 "" \
+	 "File .*:(" \
+	 "$decimal:.*)+)*"]
+
 
 # Do not use simple single-letter names as GDB would pick up for expectedly
 # nonexisting symbols some static variables from system libraries debuginfos.

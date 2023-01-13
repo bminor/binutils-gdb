@@ -1,5 +1,5 @@
 /* crx.h -- Header file for CRX opcode and register tables.
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
    Contributed by Tomer Levi, NSC, Israel.
    Originally written for GAS 2.12 by Tomer Levi, NSC, Israel.
    Updates, BFDizing, GNUifying and ELF support by Tomer Levi.
@@ -260,7 +260,7 @@ typedef struct
     /* Size (in words).  */
     unsigned int size;
     /* Constant prefix (matched by the disassembler).  */
-    unsigned long match;
+    unsigned int match;
     /* Match size (in bits).  */
     int match_bits;
     /* Attributes.  */
@@ -384,14 +384,11 @@ extern const int crx_num_traps;
 #define NUMTRAPS crx_num_traps
 
 /* cst4 operand mapping.  */
-extern const int cst4_map[];
-extern const int cst4_maps;
+extern const int crx_cst4_map[];
+extern const int crx_cst4_maps;
 
 /* Table of instructions with no operands.  */
-extern const char* no_op_insn[];
-
-/* Current instruction we're assembling.  */
-extern const inst *instruction;
+extern const char* crx_no_op_insn[];
 
 /* A macro for representing the instruction "constant" opcode, that is,
    the FIXED part of the instruction. The "constant" opcode is represented

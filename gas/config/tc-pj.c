@@ -1,5 +1,5 @@
 /* tc-pj.c -- Assemble code for Pico Java
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -439,6 +439,10 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	  *buf++ = val >> 8;
 	}
       break;
+
+    case BFD_RELOC_PJ_CODE_REL32:
+      fixP->fx_done = 0;
+      return;
 
     default:
       abort ();

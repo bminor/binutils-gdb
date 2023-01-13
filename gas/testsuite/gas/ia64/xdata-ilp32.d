@@ -23,7 +23,7 @@ Section Headers:
   \[13\] \.xreal\[4\]         PROGBITS        00000000 [[:xdigit:]]+ 000020 00   A  0   0 16
   \[14\] \.xstr<1>          PROGBITS        00000000 [[:xdigit:]]+ 000003 00   A  0   0  1
   \[15\] \.xstr\{2\}          PROGBITS        00000000 [[:xdigit:]]+ 000004 00   A  0   0  1
-  \[16\] .shstrtab         STRTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 00      0   0  1
-  \[17\] .symtab           SYMTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 10     18  15  4
-  \[18\] .strtab           STRTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 00      0   0  1
+  \[16\] .symtab           SYMTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 10     17  15  4
+  \[17\] .strtab           STRTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 00      0   0  1
+  \[18\] .shstrtab         STRTAB          00000000 [[:xdigit:]]+ [[:xdigit:]]+ 00      0   0  1
 #pass

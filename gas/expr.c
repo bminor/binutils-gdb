@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987-2016 Free Software Foundation, Inc.
+   Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -34,6 +34,8 @@
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
+
+bfd_boolean literal_prefix_dollar_hex = FALSE;
 
 static void floating_constant (expressionS * expressionP);
 static valueT generic_bignum_to_int32 (void);
@@ -515,6 +517,14 @@ integer_constant (int radix, expressionS *expressionP)
   if (tc_allow_U_suffix && (c == 'U' || c == 'u'))
     c = * input_line_pointer++;
 
+#ifndef tc_allow_L_suffix
+#define tc_allow_L_suffix 1
+#endif
+  /* PR 20732: Look for, and ignore, a L or LL suffix to the number.  */
+  if (tc_allow_L_suffix)
+    while (c == 'L' || c == 'l')
+      c = * input_line_pointer++;
+
   if (small)
     {
       /* Here with number, in correct radix. c is the next char.
@@ -770,15 +780,6 @@ operand (expressionS *expressionP, enum expr_mode mode)
 			expressionP);
       break;
 
-#ifdef LITERAL_PREFIXDOLLAR_HEX
-    case '$':
-      /* $L is the start of a local label, not a hex constant.  */
-      if (* input_line_pointer == 'L')
-      goto isname;
-      integer_constant (16, expressionP);
-      break;
-#endif
-
 #ifdef LITERAL_PREFIXPERCENT_BIN
     case '%':
       integer_constant (2, expressionP);
@@ -949,8 +950,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
       if (md_need_index_operator())
 	goto de_fault;
 # endif
-      /* FALLTHROUGH */
 #endif
+      /* Fall through.  */
     case '(':
       /* Didn't begin with digit & not a name.  */
       segment = expr (0, expressionP, mode);
@@ -980,8 +981,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
       if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
       ++input_line_pointer;
-      /* Fall through.  */
 #endif
+      /* Fall through.  */
     case '\'':
       if (! flag_m68k_mri)
 	{
@@ -1002,12 +1003,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
       /* Double quote is the bitwise not operator in MRI mode.  */
       if (! flag_m68k_mri)
 	goto de_fault;
-      /* Fall through.  */
 #endif
+      /* Fall through.  */
     case '~':
       /* '~' is permitted to start a label on the Delta.  */
       if (is_name_beginner (c))
 	goto isname;
+      /* Fall through.  */
     case '!':
     case '-':
     case '+':
@@ -1105,7 +1107,21 @@ operand (expressionS *expressionP, enum expr_mode mode)
       }
       break;
 
-#if defined (DOLLAR_DOT) || defined (TC_M68K)
+#if !defined (DOLLAR_DOT) && !defined (TC_M68K)
+    case '$':
+      if (literal_prefix_dollar_hex)
+	{
+	  /* $L is the start of a local label, not a hex constant.  */
+	  if (* input_line_pointer == 'L')
+		goto isname;
+	  integer_constant (16, expressionP);
+	}
+      else
+	{
+	  goto isname;
+	}
+      break;
+#else
     case '$':
       /* '$' is the program counter when in MRI mode, or when
 	 DOLLAR_DOT is defined.  */
@@ -1145,6 +1161,10 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		   || input_line_pointer[1] == 'T');
 	  input_line_pointer += start ? 8 : 7;
 	  SKIP_WHITESPACE ();
+
+	  /* Cover for the as_bad () invocations below.  */
+	  expressionP->X_op = O_absent;
+
 	  if (*input_line_pointer != '(')
 	    as_bad (_("syntax error in .startof. or .sizeof."));
 	  else
@@ -1154,12 +1174,19 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      c = get_symbol_name (& name);
+	      if (! *name)
+		{
+		  as_bad (_("expected symbol name"));
+		  (void) restore_line_pointer (c);
+		  if (c != ')')
+		    ignore_rest_of_line ();
+		  else
+		    ++input_line_pointer;
+		  break;
+		}
 
-	      buf = (char *) xmalloc (strlen (name) + 10);
-	      if (start)
-		sprintf (buf, ".startof.%s", name);
-	      else
-		sprintf (buf, ".sizeof.%s", name);
+	      buf = concat (start ? ".startof." : ".sizeof.", name,
+			    (char *) NULL);
 	      symbolP = symbol_make (buf);
 	      free (buf);
 
@@ -1282,43 +1309,6 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	    }
 #endif
 
-#ifdef TC_I960
-	  /* The MRI i960 assembler permits
-	         lda sizeof code,g13
-	     FIXME: This should use md_parse_name.  */
-	  if (flag_mri
-	      && (strcasecmp (name, "sizeof") == 0
-		  || strcasecmp (name, "startof") == 0))
-	    {
-	      int start;
-	      char *buf;
-
-	      start = (name[1] == 't'
-		       || name[1] == 'T');
-
-	      *input_line_pointer = c;
-	      SKIP_WHITESPACE_AFTER_NAME ();
-
-	      c = get_symbol_name (& name);
-
-	      buf = (char *) xmalloc (strlen (name) + 10);
-	      if (start)
-		sprintf (buf, ".startof.%s", name);
-	      else
-		sprintf (buf, ".sizeof.%s", name);
-	      symbolP = symbol_make (buf);
-	      free (buf);
-
-	      expressionP->X_op = O_symbol;
-	      expressionP->X_add_symbol = symbolP;
-	      expressionP->X_add_number = 0;
-
-	      *input_line_pointer = c;
-	      SKIP_WHITESPACE_AFTER_NAME ();
-	      break;
-	    }
-#endif
-
 	  symbolP = symbol_find_or_make (name);
 
 	  /* If we have an absolute symbol or a reg, then we know its
@@ -1368,7 +1358,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   /* It is more 'efficient' to clean up the expressionS when they are
      created.  Doing it here saves lines of code.  */
   clean_up_expression (expressionP);
-  SKIP_WHITESPACE ();		/* -> 1st char after operand.  */
+  SKIP_ALL_WHITESPACE ();		/* -> 1st char after operand.  */
   know (*input_line_pointer != ' ');
 
   /* The PA port needs this information.  */
@@ -1855,6 +1845,13 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  right.X_op_symbol = NULL;
 	}
 
+      if (mode == expr_defer
+	  && ((resultP->X_add_symbol != NULL
+	       && S_IS_FORWARD_REF (resultP->X_add_symbol))
+	      || (right.X_add_symbol != NULL
+		  && S_IS_FORWARD_REF (right.X_add_symbol))))
+	goto general;
+
       /* Optimize common cases.  */
 #ifdef md_optimize_expr
       if (md_optimize_expr (resultP, op_left, &right))
@@ -2189,7 +2186,10 @@ resolve_expression (expressionS *expressionP)
 		|| op == O_lt || op == O_le || op == O_ge || op == O_gt)
 	       && seg_left == seg_right
 	       && (finalize_syms
-		   || frag_offset_fixed_p (frag_left, frag_right, &frag_off))
+		   || frag_offset_fixed_p (frag_left, frag_right, &frag_off)
+		   || (op == O_gt
+		       && frag_gtoffset_p (left, frag_left,
+					   right, frag_right, &frag_off)))
 	       && (seg_left != reg_section || left == right)
 	       && (seg_left != undefined_section || add_symbol == op_symbol)))
 	{
@@ -2344,12 +2344,13 @@ get_symbol_name (char ** ilp_return)
   char c;
 
   * ilp_return = input_line_pointer;
-  /* We accept \001 in a name in case this is being called with a
+  /* We accept FAKE_LABEL_CHAR in a name in case this is being called with a
      constructed string.  */
-  if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
+  if (is_name_beginner (c = *input_line_pointer++)
+      || (input_from_string && c == FAKE_LABEL_CHAR))
     {
       while (is_part_of_name (c = *input_line_pointer++)
-	     || c == '\001')
+	     || (input_from_string && c == FAKE_LABEL_CHAR))
 	;
       if (is_name_ender (c))
 	c = *input_line_pointer++;

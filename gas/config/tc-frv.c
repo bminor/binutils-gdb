@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -24,7 +24,6 @@
 #include "opcodes/frv-desc.h"
 #include "opcodes/frv-opc.h"
 #include "cgen.h"
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/frv.h"
 #include "dwarf2dbg.h"
@@ -470,7 +469,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("-mno-pack       Do not allow instructions to be packed\n"));
   fprintf (stream, _("-mpic           Mark generated file as using small position independent code\n"));
   fprintf (stream, _("-mPIC           Mark generated file as using large position independent code\n"));
-  fprintf (stream, _("-mlibrary-pic   Mark generated file as using position indepedent code for libraries\n"));
+  fprintf (stream, _("-mlibrary-pic   Mark generated file as using position independent code for libraries\n"));
   fprintf (stream, _("-mfdpic         Assemble for the FDPIC ABI\n"));
   fprintf (stream, _("-mnopic         Disable -mpic, -mPIC, -mlibrary-pic and -mfdpic\n"));
   fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr405|fr450|fr300|frv|simple|tomcat}\n"));
@@ -524,7 +523,7 @@ frv_insert_vliw_insn (bfd_boolean count)
 
   if (current_vliw_chain == NULL)
     {
-      vliw_chain_entry = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
+      vliw_chain_entry = XNEW (struct vliw_chain);
       vliw_chain_entry->insn_count = 0;
       vliw_chain_entry->insn_list  = NULL;
       vliw_chain_entry->next       = NULL;
@@ -537,7 +536,7 @@ frv_insert_vliw_insn (bfd_boolean count)
 	previous_vliw_chain->next = vliw_chain_entry;
     }
 
-  vliw_insn_list_entry = (struct vliw_insn_list *) xmalloc (sizeof (struct vliw_insn_list));
+  vliw_insn_list_entry = XNEW (struct vliw_insn_list);
   vliw_insn_list_entry->type      = VLIW_GENERIC_TYPE;
   vliw_insn_list_entry->insn      = NULL;
   vliw_insn_list_entry->sym       = NULL;
@@ -678,9 +677,9 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
   struct vliw_insn_list *prev_insn = NULL;
   struct vliw_insn_list *curr_insn = vliw_to_split->insn_list;
 
-  struct vliw_chain *double_nop = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
-  struct vliw_chain *single_nop = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
-  struct vliw_chain *second_part = (struct vliw_chain *) xmalloc (sizeof (struct vliw_chain));
+  struct vliw_chain *double_nop = XNEW (struct vliw_chain);
+  struct vliw_chain *single_nop = XNEW (struct vliw_chain);
+  struct vliw_chain *second_part = XNEW (struct vliw_chain);
   struct vliw_chain *curr_vliw = vliw_chain_top;
   struct vliw_chain *prev_vliw = NULL;
 
@@ -728,7 +727,7 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
 	      buffer[0] |= 0x80;
 	    }
 	  /* The branch is in the middle.  Split this vliw insn into first
-	     and second parts.  Insert the NOP inbetween.  */
+	     and second parts.  Insert the NOP between.  */
 
           second_part->insn_list = insert_before_insn;
 	  second_part->insn_list->type = VLIW_BRANCH_HAS_NOPS;
@@ -768,7 +767,7 @@ frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
 	    }
 
 	/* The branch is in the middle.  Split this vliw insn into first
-	   and second parts.  Insert the NOP inbetween.  */
+	   and second parts.  Insert the NOP in between.  */
           second_part->insn_list = insert_before_insn;
 	  second_part->insn_list->type = VLIW_BRANCH_HAS_NOPS;
           second_part->next      = vliw_to_split->next;
@@ -1226,7 +1225,7 @@ md_operand (expressionS *expressionP)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   return ((size + (1 << align) - 1) & -(1 << align));
 }
 
@@ -1652,7 +1651,7 @@ frv_frob_file_section (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
   CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
-  flagword flags = bfd_get_section_flags (abfd, sec);
+  flagword flags = bfd_section_flags (sec);
 
   /* Skip relocations in known sections (.ctors, .dtors, and .gcc_except_table)
      since we can fix those up by hand.  */

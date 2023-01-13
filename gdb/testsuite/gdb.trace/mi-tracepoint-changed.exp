@@ -1,4 +1,4 @@
-# Copyright 2012-2016 Free Software Foundation, Inc.
+# Copyright 2012-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,10 @@ load_lib trace-support.exp
 if {[skip_shlib_tests]} {
     return 0
 }
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
 
 standard_testfile pending.c
 set libfile1 "pendshr1"
@@ -32,13 +36,13 @@ set lib_opts [gdb_target_symbol_prefix_flags]
 
 if { [gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""} {
-    untested "Could not compile either $libsrc1 or $libsrc2"
+    untested "failed to compile shared library"
     return -1
 }
 
 set exec_opts [list debug shlib=$lib_sl1 shlib_load]
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
-    untested "Failed to compile $srcfile"
+    untested "failed to compile"
     return -1
 }
 
@@ -63,10 +67,10 @@ proc test_reconnect { } {
 	}
 
 	clean_restart $executable
-	gdb_load_shlibs $lib_sl1
-	gdb_load_shlibs $lib_sl2
+	gdb_load_shlib $lib_sl1
+	gdb_load_shlib $lib_sl2
 	if ![runto_main] then {
-	    fail "Can't run to main"
+	    fail "can't run to main"
 	    return 0
 	}
 	# Create tracepoints on marker and main, and leave them in the
@@ -243,16 +247,16 @@ proc test_pending_resolved { } {
 
 clean_restart $executable
 
-gdb_load_shlibs $lib_sl1
-gdb_load_shlibs $lib_sl2
+gdb_load_shlib $lib_sl1
+gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
 if ![gdb_target_supports_trace] {
-    unsupported "Current target does not support trace"
+    unsupported "current target does not support trace"
     return -1
 }
 

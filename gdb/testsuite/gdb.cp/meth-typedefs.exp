@@ -1,4 +1,4 @@
-# Copyright 2011-2016 Free Software Foundation, Inc.
+# Copyright 2011-2020 Free Software Foundation, Inc.
 #
 # Contributed by Red Hat, originally written by Keith Seitz.
 #
@@ -35,7 +35,8 @@ if {[skip_cplus_tests]} { continue }
 # Tests for c++/12266 et al
 standard_testfile .cc
 
-if {[prepare_for_testing $testfile $testfile $srcfile {c++ debug}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {c++ debug additional_flags=-std=c++11}]} {
     return -1
 }
 
@@ -137,6 +138,11 @@ foreach t $typedefs(_BAR_) {
     add methods "test" "$t&" {_BAR_&}
 }
 
+# Tests for c++/24367
+foreach t {int incomplete_struct another_incomplete_struct} {
+    add methods "test_incomplete" "${t}*" [string_to_regexp "${t}*"]
+}
+
 gdb_test_no_output "set listsize 1" ""
 
 # Finally, for each method in the list METHODS, check whether
@@ -145,14 +151,40 @@ foreach test $methods {
     set func [lindex $test 0]
     set result [lindex $test 1]
 
-    gdb_test "list $func" $result
-    gdb_test "list '$func'" $result
-    if {[gdb_breakpoint $func]} {
-      pass "break $func"
+    gdb_test "list -qualified $func" $result
+    gdb_test "list -qualified '$func'" $result
+    if {[gdb_breakpoint "-qualified $func"]} {
+      pass "break -qualified $func"
     }
-    if {[gdb_breakpoint '$func']} {
-      pass "break '$func'"
+    if {[gdb_breakpoint "-qualified '$func'"]} {
+      pass "break -qualified '$func'"
     }
+}
+
+# The tests above use -qualified to explicitly pick the one "test"
+# symbol each test cares about.  Now check that both "break test(..)"
+# and "list test(..)" without -qualified find "test(..)" in all the 3
+# scopes that have the this particular overload.
+set func "test(aenum, astruct const&, aunion const***)"
+set func_re "test\\(anon_enum, anon_struct const&, anon_union const\\*\\*\\*\\)"
+set line1 [gdb_get_line_number " A::FOO::$func"]
+set line2 [gdb_get_line_number " B::$func"]
+set line3 [gdb_get_line_number " $func"]
+
+foreach f [list "$func" "'$func'"] {
+    set any "\[^\r\n\]*"
+    gdb_test \
+	"list $f" \
+	[multi_line \
+	     "file: \".*$srcfile\", line number: $line1, symbol: \"A::foo::$func_re\"" \
+	     "$line1${any}A::FOO::test${any}" \
+	     "file: \".*$srcfile\", line number: $line2, symbol: \"B::$func_re\"" \
+	     "$line2${any}B::test${any}" \
+	     "file: \".*$srcfile\", line number: $line3, symbol: \"$func_re\"" \
+	     "$line3${any}// test${any}"]
+
+    delete_breakpoints
+    gdb_test "break $f" "\\(3 locations\\)"
 }
 
 gdb_exit

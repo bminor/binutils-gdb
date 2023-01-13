@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support, prototypes.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,15 +17,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef ARM_LINUX_TDEP_H
+#define ARM_LINUX_TDEP_H
+
 struct regset;
 struct regcache;
 
-#define ARM_LINUX_SIZEOF_NWFPE (8 * FP_REGISTER_SIZE \
-				+ 2 * INT_REGISTER_SIZE \
-				+ 8 + INT_REGISTER_SIZE)
-
-/* The index to access CSPR in user_regs defined in GLIBC.  */
-#define ARM_CPSR_GREGNUM 16
+#define ARM_LINUX_SIZEOF_NWFPE (8 * ARM_FP_REGISTER_SIZE \
+				+ 2 * ARM_INT_REGISTER_SIZE \
+				+ 8 + ARM_INT_REGISTER_SIZE)
 
 /* Support for register format used by the NWFPE FPA emulator.  Each
    register takes three words, where either the first one, two, or
@@ -35,9 +35,9 @@ struct regcache;
    final word flag which indicates whether NWFPE has been
    initialized.  */
 
-#define NWFPE_FPSR_OFFSET (8 * FP_REGISTER_SIZE)
-#define NWFPE_FPCR_OFFSET (NWFPE_FPSR_OFFSET + INT_REGISTER_SIZE)
-#define NWFPE_TAGS_OFFSET (NWFPE_FPCR_OFFSET + INT_REGISTER_SIZE)
+#define NWFPE_FPSR_OFFSET (8 * ARM_FP_REGISTER_SIZE)
+#define NWFPE_FPCR_OFFSET (NWFPE_FPSR_OFFSET + ARM_INT_REGISTER_SIZE)
+#define NWFPE_TAGS_OFFSET (NWFPE_FPCR_OFFSET + ARM_INT_REGISTER_SIZE)
 #define NWFPE_INITFLAG_OFFSET (NWFPE_TAGS_OFFSET + 8)
 
 void arm_linux_supply_gregset (const struct regset *regset,
@@ -67,3 +67,4 @@ void arm_linux_collect_nwfpe (const struct regset *regset,
 #define HWCAP_VFPv3     8192
 #define HWCAP_VFPv3D16  16384
 
+#endif /* ARM_LINUX_TDEP_H */

@@ -1,6 +1,6 @@
 /* Simulator for TI MSP430 and MSP430X
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2020 Free Software Foundation, Inc.
    Contributed by Red Hat.
    Based on sim/bfin/bfin-sim.c which was contributed by Analog Devices, Inc.
 
@@ -26,7 +26,6 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <assert.h>
-#include "bfd.h"
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
 #include "sim-syscall.h"
@@ -42,39 +41,6 @@ static void
 msp430_pc_store (SIM_CPU *cpu, sim_cia newpc)
 {
   cpu->state.regs[0] = newpc;
-}
-
-static long
-lookup_symbol (SIM_DESC sd, const char *name)
-{
-  struct bfd *abfd = STATE_PROG_BFD (sd);
-  asymbol **symbol_table = STATE_SYMBOL_TABLE (sd);
-  long number_of_symbols = STATE_NUM_SYMBOLS (sd);
-  long i;
-
-  if (abfd == NULL)
-    return -1;
-
-  if (symbol_table == NULL)
-    {
-      long storage_needed;
-
-      storage_needed = bfd_get_symtab_upper_bound (abfd);
-      if (storage_needed <= 0)
-	return -1;
-
-      STATE_SYMBOL_TABLE (sd) = symbol_table = xmalloc (storage_needed);
-      STATE_NUM_SYMBOLS (sd) = number_of_symbols =
-	bfd_canonicalize_symtab (abfd, symbol_table);
-    }
-
-  for (i = 0; i < number_of_symbols; i++)
-    if (strcmp (symbol_table[i]->name, name) == 0)
-      {
-	long val = symbol_table[i]->section->vma + symbol_table[i]->value;
-	return val;
-      }
-  return -1;
 }
 
 static int
@@ -207,18 +173,12 @@ sim_open (SIM_OPEN_KIND kind,
   assert (MAX_NR_PROCESSORS == 1);
   msp430_initialize_cpu (sd, MSP430_CPU (sd));
 
-  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
-  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+  MSP430_CPU (sd)->state.cio_breakpoint = trace_sym_value (sd, "C$$IO$$");
+  MSP430_CPU (sd)->state.cio_buffer = trace_sym_value (sd, "__CIOBUF__");
   if (MSP430_CPU (sd)->state.cio_buffer == -1)
-    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
+    MSP430_CPU (sd)->state.cio_buffer = trace_sym_value (sd, "_CIOBUF_");
 
   return sd;
-}
-
-void
-msp430_sim_close (SIM_DESC sd, int quitting)
-{
-  free (STATE_SYMBOL_TABLE (sd));
 }
 
 SIM_RC
@@ -318,7 +278,7 @@ static int
 get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 {
   MSP430_Opcode_Operand *op = opc->op + n;
-  int rv;
+  int rv = 0;
   int addr;
   unsigned char buf[4];
   int incval = 0;
@@ -505,7 +465,7 @@ static int
 put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 {
   MSP430_Opcode_Operand *op = opc->op + n;
-  int rv;
+  int rv = 0;
   int addr;
   unsigned char buf[4];
   int incval = 0;
@@ -1026,11 +986,26 @@ maybe_perform_syscall (SIM_DESC sd, int call_addr)
   if ((call_addr & ~0x3f) == 0x00180)
     {
       /* Syscall!  */
+      int arg1, arg2, arg3, arg4;
       int syscall_num = call_addr & 0x3f;
-      int arg1 = MSP430_CPU (sd)->state.regs[12];
-      int arg2 = MSP430_CPU (sd)->state.regs[13];
-      int arg3 = MSP430_CPU (sd)->state.regs[14];
-      int arg4 = MSP430_CPU (sd)->state.regs[15];
+
+      /* syscall_num == 2 is used for the variadic function "open".
+	 The arguments are set up differently for variadic functions.
+	 See slaa534.pdf distributed by TI.  */
+      if (syscall_num == 2)
+	{
+	  arg1 = MSP430_CPU (sd)->state.regs[12];
+	  arg2 = mem_get_val (sd, SP, 16);
+	  arg3 = mem_get_val (sd, SP + 2, 16);
+	  arg4 = mem_get_val (sd, SP + 4, 16);
+	}
+      else
+	{
+	  arg1 = MSP430_CPU (sd)->state.regs[12];
+	  arg2 = MSP430_CPU (sd)->state.regs[13];
+	  arg3 = MSP430_CPU (sd)->state.regs[14];
+	  arg4 = MSP430_CPU (sd)->state.regs[15];
+	}
 
       MSP430_CPU (sd)->state.regs[12] = sim_syscall (MSP430_CPU (sd),
 						     syscall_num, arg1, arg2,
@@ -1052,13 +1027,13 @@ msp430_step_once (SIM_DESC sd)
   MSP430_Opcode_Decoded opcode_buf;
   MSP430_Opcode_Decoded *opcode = &opcode_buf;
   int s1, s2, result;
-  int u1, u2, uresult;
-  int c, reg;
+  int u1 = 0, u2, uresult;
+  int c = 0, reg;
   int sp;
   int carry_to_use;
   int n_repeats;
   int rept;
-  int op_bytes, op_bits;
+  int op_bytes = 0, op_bits;
 
   PC &= 0xfffff;
   opcode_pc = PC;
@@ -1112,7 +1087,7 @@ msp430_step_once (SIM_DESC sd)
 
   if (TRACE_ANY_P (MSP430_CPU (sd)))
     trace_prefix (sd, MSP430_CPU (sd), NULL_CIA, opcode_pc,
-		  TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, "");
+		  TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, " ");
 
   TRACE_DISASM (MSP430_CPU (sd), opcode_pc);
 
@@ -1317,8 +1292,10 @@ msp430_step_once (SIM_DESC sd)
 	  u1 = SRC;
 	  carry_to_use = u1 & 1;
 	  uresult = u1 >> 1;
-	  if (SR & MSP430_FLAG_C)
-	  uresult |= (1 << (opcode->size - 1));
+	  /* If the ZC bit of the opcode is set, it means we are synthesizing
+	     RRUX, so the carry bit must be ignored.  */
+	  if (opcode->zc == 0 && (SR & MSP430_FLAG_C))
+	    uresult |= (1 << (opcode->size - 1));
 	  TRACE_ALU (MSP430_CPU (sd), "RRC: %#x >>= %#x",
 		     u1, uresult);
 	  DEST (uresult);

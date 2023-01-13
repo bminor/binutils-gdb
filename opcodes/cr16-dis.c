@@ -1,5 +1,5 @@
 /* Disassembler code for CR16.
-   Copyright (C) 2007-2016 Free Software Foundation, Inc.
+   Copyright (C) 2007-2020 Free Software Foundation, Inc.
    Contributed by M R Swami Reddy (MR.Swami.Reddy@nsc.com).
 
    This file is part of GAS, GDB and the GNU binutils.
@@ -19,7 +19,7 @@
    Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/cr16.h"
 #include "libiberty.h"
 
@@ -30,11 +30,11 @@
 
 /* Extract 'n_bits' from 'a' starting from offset 'offs'.  */
 #define EXTRACT(a, offs, n_bits)                    \
-  (n_bits == 32 ? (((a) >> (offs)) & 0xffffffffL)   \
-  : (((a) >> (offs)) & ((1 << (n_bits)) -1)))
+  (((a) >> (offs)) & ((1ul << ((n_bits) - 1) << 1) - 1))
 
-/* Set Bit Mask - a mask to set all bits starting from offset 'offs'.  */
-#define SBM(offs)  ((((1 << (32 - offs)) -1) << (offs)))
+/* Set Bit Mask - a mask to set all bits in a 32-bit word starting
+   from offset 'offs'.  */
+#define SBM(offs)  ((1ul << 31 << 1) - (1ul << (offs)))
 
 typedef struct
 {
@@ -54,7 +54,7 @@ typedef struct
 cinv_entry;
 
 /* CR16 'cinv' options mapping.  */
-const cinv_entry cr16_cinvs[] =
+static const cinv_entry cr16_cinvs[] =
 {
   {"cinv[i]",     "cinv    [i]"},
   {"cinv[i,u]",   "cinv    [i,u]"},
@@ -78,20 +78,20 @@ typedef enum REG_ARG_TYPE
 REG_ARG_TYPE;
 
 /* Current opcode table entry we're disassembling.  */
-const inst *instruction;
+static const inst *instruction;
 /* Current instruction we're disassembling.  */
-ins cr16_currInsn;
+static ins cr16_currInsn;
 /* The current instruction is read into 3 consecutive words.  */
-wordU cr16_words[3];
+static wordU cr16_words[3];
 /* Contains all words in appropriate order.  */
-ULONGLONG cr16_allWords;
+static ULONGLONG cr16_allWords;
 /* Holds the current processed argument number.  */
-int processing_argument_number;
+static int processing_argument_number;
 /* Nonzero means a IMM4 instruction.  */
-int imm4flag;
+static int imm4flag;
 /* Nonzero means the instruction's original size is
    incremented (escape sequence is used).  */
-int size_changed;
+static int size_changed;
 
 
 /* Print the constant expression length.  */
@@ -319,8 +319,7 @@ cr16_match_opcode (void)
 {
   unsigned long mask;
   /* The instruction 'constant' opcode doesn't exceed 32 bits.  */
-  unsigned long doubleWord = (cr16_words[1]
-			     + (cr16_words[0] << 16)) & 0xffffffff;
+  unsigned long doubleWord = cr16_words[1] + ((unsigned) cr16_words[0] << 16);
 
   /* Start searching from end of instruction table.  */
   instruction = &cr16_instruction[NUMOPCODES - 2];
@@ -329,9 +328,6 @@ cr16_match_opcode (void)
   while (instruction >= cr16_instruction)
     {
       mask = build_mask ();
-      /* Adjust mask for bcond with 32-bit size instruction */
-      if ((IS_INSN_MNEMONIC("b") && instruction->size == 2))
-        mask = 0xff0f0000;
 
       if ((doubleWord & mask) == BIN (instruction->match,
                                       instruction->match_bits))
@@ -815,7 +811,7 @@ print_insn_cr16 (bfd_vma memaddr, struct disassemble_info *info)
   /* Find a matching opcode in table.  */
   is_decoded = cr16_match_opcode ();
   /* If found, print the instruction's mnemonic and arguments.  */
-  if (is_decoded > 0 && (cr16_words[0] << 16 || cr16_words[1]) != 0)
+  if (is_decoded > 0 && (cr16_words[0] != 0 || cr16_words[1] != 0))
     {
       if (strneq (instruction->mnemonic, "cinv", 4))
         info->fprintf_func (info->stream,"%s", getcinvstring (instruction->mnemonic));

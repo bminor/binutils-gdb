@@ -1,5 +1,5 @@
 /* Target-dependent mdebug code for the ALPHA architecture.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@
 
 #include "alpha-tdep.h"
 #include "mdebugread.h"
+#include "gdbarch.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips.  */
 
@@ -402,8 +403,6 @@ alpha_mdebug_frame_base_sniffer (struct frame_info *this_frame)
 void
 alpha_mdebug_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   frame_unwind_append_unwinder (gdbarch, &alpha_mdebug_frame_unwind);
   frame_base_append_sniffer (gdbarch, alpha_mdebug_frame_base_sniffer);
 }

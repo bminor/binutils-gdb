@@ -1,4 +1,4 @@
-# Copyright 2009-2016 Free Software Foundation, Inc.
+# Copyright 2009-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,19 +38,19 @@ if [get_compiler_info] {
 # Compile the first without debug info so that
 # stepping and reverse stepping doesn't end up inside them.
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib1src} ${library1} ""] != "" } {
-    untested "Could not compile shared library1."
+    untested "failed to compile shared library 1"
     return -1
 }
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib2src} ${library2} "debug"] != "" } {
-    untested "Could not compile shared library2."
+    untested "failed to compile shared library 2"
     return -1
 }
 
 set exec_opts [list debug shlib=${library1} shlib=${library2}]
 
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
-    untested "Could not compile $binfile."
+    untested "failed to compile"
     return -1
 }
      
@@ -68,14 +68,14 @@ gdb_start
 
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-gdb_load_shlibs $library1
-gdb_load_shlibs $library2
+gdb_load_shlib $library1
+gdb_load_shlib $library2
 
 runto main
 
 if [supports_process_record] {
     # Activate process record/replay
-    gdb_test_no_output "record" "Turn on process record"
+    gdb_test_no_output "record" "turn on process record"
 }
 
 #
@@ -86,7 +86,15 @@ if [supports_process_record] {
 
 set end_part_one [gdb_get_line_number " end part one" "$srcfile"]
 set end_part_two [gdb_get_line_number " end part two" "$srcfile"]
-gdb_test "until $end_part_one" " end part one.*" "run until end part one"
+gdb_test_multiple "until $end_part_one" "run until end part one" {
+    -wrap -re " end part one.*" {
+	pass $gdb_test_name
+    }
+    -wrap -re "Process record does not support instruction 0xfae64 at.*" {
+	kfail "gdb/25038" $gdb_test_name
+	return -1
+    }
+}
 
 gdb_test "reverse-step" " shr1 three .*" "reverse-step third shr1"
 gdb_test "reverse-step" " shr1 two .*"   "reverse-step second shr1"

@@ -1,5 +1,5 @@
 /* BFD back-end definitions used by all NetBSD targets.
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -31,7 +31,7 @@
 #define N_HEADER_IN_TEXT(x)	1
 
 /* Determine if this is a shared library using the flags.  */
-#define N_SHARED_LIB(x) 	(N_DYNAMIC (x))
+#define N_SHARED_LIB(x)		(N_DYNAMIC (x))
 
 /* We have 6 bits of flags and 10 bits of machine ID.  */
 #define N_MACHTYPE(execp) \
@@ -45,10 +45,10 @@
 	 | (((flags) & 0x3f) << 24))
 #define N_SET_MACHTYPE(execp, machtype) \
 	((execp)->a_info = \
-         ((execp)->a_info & 0xfb00ffff) | ((((int) (machtype)) & 0x3ff) << 16))
+	 ((execp)->a_info & 0xfb00ffff) | ((((int) (machtype)) & 0x3ff) << 16))
 #define N_SET_FLAGS(execp, flags) \
 	((execp)->a_info = \
-	 ((execp)->a_info & 0x03ffffff) | ((flags & 0x03f) << 26))
+	 ((execp)->a_info & 0x03ffffff) | ((flags & 0x3fu) << 26))
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -104,7 +104,7 @@ MY (write_object_contents) (bfd *abfd)
   /* XXX aren't there any macro to change byteorder of a word independent of
      the host's or target's endiannesses?  */
   execp->a_info
-    = (execp->a_info & 0xff) << 24 | (execp->a_info & 0xff00) << 8
+    = (execp->a_info & 0xffu) << 24 | (execp->a_info & 0xff00) << 8
       | (execp->a_info & 0xff0000) >> 8 | (execp->a_info & 0xff000000) >> 24;
 #endif
 

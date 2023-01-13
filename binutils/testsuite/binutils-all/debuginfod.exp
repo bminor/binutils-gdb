@@ -1,0 +1,189 @@
+# Copyright (C) 2002-2019 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
+# test debuginfod with readelf and objdump
+
+set test "debuginfod"
+
+if {[which debuginfod] == 0} {
+    unsupported "$test (not found)"
+    return
+}
+
+if {[which curl] == 0} {
+    unsupported "$test (curl not found)"
+    return
+}
+
+if { ![is_elf_format] } {
+    unsupported "$test (unsupported target)"
+}
+
+if { [which $OBJDUMP] == 0} {
+    perror "$test $OBJDUMP (does not exist)"
+    return
+}
+
+ if { [which $READELF] == 0} {
+    perror "$test $READELF (does not exist)"
+    return
+}
+
+# Compile testprog.c, move the debuginfo to a separate file and add .gnu_debuglink.
+if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != ""} {
+    fail "$test (compilation failed)"
+    return
+}
+
+if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog tmpdir/testprog.debug"] != "" } {
+    fail "$test (create separate debug info file)"
+    return
+}
+
+if { [binutils_run $OBJCOPY "--strip-debug tmpdir/testprog"] != "" } {
+    fail "$test (strip debug info)"
+    return
+}
+
+if { [binutils_run $OBJCOPY "--add-gnu-debuglink=tmpdir/testprog.debug tmpdir/testprog"] != "" } {
+    fail "$test (add debuglink)"
+    return
+}
+
+# Assemble an elf file with a debugaltlink
+if { ![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o] } {
+    fail "$test (assemble debuglink)"
+}
+
+if { ![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug] } {
+    fail "$test (assemble linkdebug)"
+}
+
+# Find an unused port
+set port [exec sh -c "while true; do PORT=`expr '(' \$RANDOM % 1000 ')' + 9000`; ss -atn | fgrep \":\$PORT\" || break; done; echo \$PORT"]
+
+# Specify the directory that files retrieved from the server are written to.
+set cache [file join [pwd] "tmpdir/.debuginfod_cache"]
+
+set ::env(DEBUGINFOD_URLS) http://127.0.0.1:$port
+set ::env(DEBUGINFOD_TIMEOUT) 30
+set ::env(DEBUGINFOD_CACHE_PATH) $cache
+
+# Move debug files into another directory so that readelf and objdump cannot
+# find them without debuginfod.
+file mkdir tmpdir/dbg
+file rename -force tmpdir/testprog.debug tmpdir/dbg
+file rename -force tmpdir/linkdebug.debug tmpdir/dbg
+
+# Remove an old cache if it exists
+file delete -force $cache
+
+# Check whether objdump and readelf are configured with debuginfod.
+# To check this we attempt to follow a broken debuglink. If configured
+# with debuginfod the output will contain the debuginfod URLs that were
+# queried (these queries fail since the server is not yet running).
+set conf_objdump [binutils_run $OBJDUMP "-WK tmpdir/testprog"]
+set conf_readelf [binutils_run $READELF "-wK tmpdir/testprog"]
+
+set debuginfod_pid 0
+
+# Kill the server if we abort early
+proc sigint_handler {} {
+    global debuginfod_pid
+
+    if { $debuginfod_pid != 0 } {
+        catch {exec kill -INT $debuginfod_pid}
+    }
+
+    exit
+}
+
+trap sigint_handler INT
+
+# Start a debuginfod server.
+set debuginfod_pid [exec debuginfod -p $port -F tmpdir/dbg 2>/dev/null &]
+
+if { !$debuginfod_pid } {
+    fail "$test (server init)"
+    return
+}
+
+# Wait for debuginfod indicate it's ready.
+set ready 0
+for {set timelim 30} {$timelim != 0} {incr timelim -1} {
+    sleep 1
+    set want ".*ready 1.*"
+    catch {exec curl -s http://127.0.0.1:$port/metrics} got
+
+    if { [regexp $want $got] } {
+      set ready 1
+      break
+    }
+}
+
+if { !$ready } {
+    fail "$test (server ready)"
+    catch {exec kill -INT $debuginfod_pid}
+    return
+}
+
+# Test whether prog can fetch separate debuginfo using debuginfod
+# if it's configured to do so.
+proc test_fetch_debuglink { prog progargs } {
+    global test
+    global cache
+
+    set got [binutils_run $prog "$progargs tmpdir/testprog"]
+
+    if { [regexp ".*Found separate debug info file.*Contents\[^\n\]*loaded from\[^\n\]*$cache.*" $got] } {
+       pass "$test ($prog debuglink)"
+    } else {
+       fail "$test ($prog debuglink)"
+    }
+}
+
+# Test whether prog can fetch debugaltlink files using debuginfod
+# if it's configured to do so.
+proc test_fetch_debugaltlink { prog progargs } {
+    global test
+    global cache
+
+    set got [binutils_run $prog "$progargs tmpdir/debuglink.o"]
+    set buildid "00112233445566778899aabbccddeeff0123456789abcdef"
+
+    if { [regexp ".*Found separate debug info file\[^\n\]*$cache/$buildid" $got] } {
+        pass "$test ($prog debugaltlink)"
+    } else {
+        fail "$test ($prog debugaltlink)"
+    }
+}
+
+if { [regexp ".*DEBUGINFOD.*" $conf_objdump] } {
+    test_fetch_debuglink $OBJDUMP "-W"
+    test_fetch_debugaltlink $OBJDUMP "-WK"
+} else {
+    untested "$test (objdump not configured with debuginfod)"
+}
+
+if { [regexp ".*DEBUGINFOD.*" $conf_readelf] } {
+    test_fetch_debuglink $READELF "-w"
+    test_fetch_debugaltlink $READELF "-wK"
+} else {
+    untested "$test (readelf not configured with debuginfod)"
+}
+
+file delete -force $cache
+catch {exec kill -INT $debuginfod_pid}

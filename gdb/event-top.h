@@ -1,6 +1,6 @@
 /* Definitions used by event-top.c, for GDB, the GNU debugger.
 
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
@@ -22,28 +22,26 @@
 #ifndef EVENT_TOP_H
 #define EVENT_TOP_H
 
+#include <signal.h>
+
 struct cmd_list_element;
 
 /* Exported functions from event-top.c.
    FIXME: these should really go into top.h.  */
 
 extern void display_gdb_prompt (const char *new_prompt);
-void gdb_setup_readline (void);
-void gdb_disable_readline (void);
+extern void gdb_setup_readline (int);
+extern void gdb_disable_readline (void);
 extern void async_init_signals (void);
-extern void set_async_editing_command (char *args, int from_tty,
-				       struct cmd_list_element *c);
+extern void change_line_handler (int);
 
-extern void command_handler (char *command);
+extern void command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl);
+extern void command_handler (const char *command);
 
-/* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
-#ifndef STOP_SIGNAL
-#include <signal.h>
 #ifdef SIGTSTP
-#define STOP_SIGNAL SIGTSTP
-extern void handle_stop_sig (int sig);
+extern void handle_sigtstp (int sig);
 #endif
-#endif
+
 extern void handle_sigint (int sig);
 extern void handle_sigterm (int sig);
 extern void async_request_quit (void *arg);
@@ -54,12 +52,9 @@ extern void async_enable_stdin (void);
 /* Exported variables from event-top.c.
    FIXME: these should really go into top.h.  */
 
-extern int async_command_editing_p;
-extern int exec_done_display_p;
+extern bool set_editing_cmd_var;
+extern bool exec_done_display_p;
 extern struct prompts the_prompts;
-extern void (*call_readline) (void *);
-extern void (*input_handler) (char *);
-extern int input_fd;
 extern void (*after_char_processing_hook) (void);
 extern int call_stdin_event_handler_again_p;
 extern void gdb_readline_no_editing_callback (void *client_data);
@@ -75,6 +70,10 @@ extern void gdb_rl_callback_handler_install (const char *prompt);
    currently installed.  */
 extern void gdb_rl_callback_handler_reinstall (void);
 
-extern void cli_command_loop (void *);
+/* The SIGSEGV handler for this thread, or NULL if there is none.  GDB
+   always installs a global SIGSEGV handler, and then lets threads
+   indicate their interest in handling the signal by setting this
+   thread-local variable.  */
+extern thread_local void (*thread_local_segv_handler) (int);
 
 #endif

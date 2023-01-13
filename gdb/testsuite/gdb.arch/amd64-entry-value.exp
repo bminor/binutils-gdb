@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2016 Free Software Foundation, Inc.
+# Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 standard_testfile .s
-set opts {}
+set opts {nopie}
 
 if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.arch/amd64-entry-value.exp COMPILE=1"
@@ -25,7 +25,7 @@ if [info exists COMPILE] {
     return
 }
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }
 
@@ -87,6 +87,14 @@ gdb_test "p d9@entry" " = 11\\.5" "entry_stack: p d9@entry"
 gdb_test "p da" " = 4\\.5" "entry_stack: p da"
 gdb_test "p da@entry" " = 12\\.5" "entry_stack: p da@entry"
 
+# Test @entry values for a static file scoped variable, and for an
+# unknown symbol.  Both of these should give an error.
+gdb_test "p v@entry" \
+    "@entry can be used only for function parameters, not for \"v\"" \
+    "attempt to print global v@entry"
+gdb_test "p unknown@entry" \
+    "@entry can be used only for function parameters, not for \"unknown\"" \
+    "attempt to print unknown@entry"
 
 # Test various kinds of `set print entry-values'.
 
@@ -159,7 +167,7 @@ gdb_test_no_output "set print entry-values default" "entry_invalid: set print en
 gdb_test "frame" {\(inv=<optimized out>\).*} "entry_invalid: frame: default"
 
 
-# Test @entry values for DW_AT_GNU_call_site_data_value parameters.
+# Test @entry values for DW_AT_call_data_value parameters.
 
 gdb_continue_to_breakpoint "entry_reference: reference"
 
@@ -188,7 +196,7 @@ gdb_test "p regparam@entry" " = \\(int &\\) @$addr: 1" "entry_reference: p regpa
 gdb_test "p &regparam@entry" " = \\(int \\*\\) $addr" "entry_reference: p &regparam@entry"
 gdb_test "p regcopy" " = 1" "entry_reference: p regcopy"
 gdb_test "p nodataparam" " = \\(int &\\) @0x\[0-9a-f\]+: 22" "entry_reference: p nodataparam"
-gdb_test "p nodataparam@entry" "Cannot resolve DW_AT_GNU_call_site_data_value" "entry_reference: p nodataparam@entry"
+gdb_test "p nodataparam@entry" "Cannot resolve DW_AT_call_data_value" "entry_reference: p nodataparam@entry"
 
 
 # Test virtual tail call frames.
@@ -249,5 +257,5 @@ gdb_test "bt" "^bt\r\n#0 +d \\(i=<optimized out>, j=<optimized out>\\)\[^\r\n\]*
 	 "self: bt"
 
 gdb_test_no_output "set debug entry-values 1"
-gdb_test "bt" "DW_OP_GNU_entry_value resolving has found function \"self\\(int\\)\" at 0x\[0-9a-f\]+ can call itself via tail calls\r\n.*" \
+gdb_test "bt" "DW_OP_entry_value resolving has found function \"self\\(int\\)\" at 0x\[0-9a-f\]+ can call itself via tail calls\r\n.*" \
 	 "self: bt debug entry-values"

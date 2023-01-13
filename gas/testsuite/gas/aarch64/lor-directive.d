@@ -7,7 +7,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.text>:
+0+ <.text>:
    0:	889f7c00 	stllr	w0, \[x0\]
    4:	c89f7c00 	stllr	x0, \[x0\]
    8:	889f7c01 	stllr	w1, \[x0\]

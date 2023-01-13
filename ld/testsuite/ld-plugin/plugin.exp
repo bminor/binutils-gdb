@@ -1,5 +1,5 @@
 # Expect script for ld-plugin tests
-#   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -26,7 +26,7 @@ if ![check_plugin_api_available] {
 # And a compiler to be available.
 set can_compile 1
 set failure_kind "unresolved"
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
   # Don't fail immediately, 
   set can_compile 0
   set failure_kind "unsupported"
@@ -55,6 +55,10 @@ set plugin3_name [file_contents "$base_dir/libldtestplug3.la"]
 set plugin3_name [regsub "'.*" [regsub ".*dlname='" "$plugin3_name" ""] ""]
 verbose "plugin3 name is '$plugin3_name'"
 
+set plugin4_name [file_contents "$base_dir/libldtestplug4.la"]
+set plugin4_name [regsub "'.*" [regsub ".*dlname='" "$plugin4_name" ""] ""]
+verbose "plugin4 name is '$plugin4_name'"
+
 # Use libtool to find full path to plugin rather than worrying
 # about run paths or anything like that.
 catch "exec $base_dir/libtool --config" lt_config
@@ -66,9 +70,11 @@ set lt_objdir [regsub "objdir=" "$lt_objdir" ""]
 set plugin_path "$base_dir/$lt_objdir/$plugin_name"
 set plugin2_path "$base_dir/$lt_objdir/$plugin2_name"
 set plugin3_path "$base_dir/$lt_objdir/$plugin3_name"
+set plugin4_path "$base_dir/$lt_objdir/$plugin4_name"
 verbose "Full plugin path $plugin_path" 2
 verbose "Full plugin2 path $plugin2_path" 2
 verbose "Full plugin3 path $plugin3_path" 2
+verbose "Full plugin4 path $plugin4_path" 2
 
 set regclm "-plugin-opt registerclaimfile"
 set regas "-plugin-opt registerallsymbolsread"
@@ -93,17 +99,22 @@ if { $can_compile && \
 	(![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o] \
 	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/func.c tmpdir/func.o] \
 	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o] \
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/pr20070a.c tmpdir/pr20070a.o] \
 	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/dummy.s tmpdir/dummy.o] \
 	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/pr17973.s tmpdir/pr17973.o]) } {
     # Defer fail until we have list of tests set.
     set failed_compile 1
 }
 
+set dotsym 0
 if { $can_compile && !$failed_compile } {
     # Find out if symbols have prefix on this platform before setting tests.
     catch "exec $NM tmpdir/func.o" plugin_nm_output
     if { [regexp "_func" "$plugin_nm_output"] } {
 	set _ "_"
+    }
+    if { [regexp "\\.func" "$plugin_nm_output"] } {
+	set dotsym 1
     }
 }
 
@@ -113,7 +124,10 @@ set testsrcfiles "tmpdir/main.o $srcdir/$subdir/func.c tmpdir/text.o"
 set testsrcfiles_notext "tmpdir/main.o $srcdir/$subdir/func.c"
 # Rather than having libs we just define dummy values for anything
 # we may need to link a target exe; we aren't going to run it anyway.
-set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
+set libs "[ld_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
+if { $dotsym } {
+    append libs " --defsym .printf=.main --defsym .puts=.main"
+}
 
 set plugin_tests [list \
     [list "load plugin" "-plugin $plugin_path \
@@ -183,10 +197,14 @@ set plugin_tests [list \
     $testobjfiles $libs" "" "" "" {{ld plugin-28.d}} "main.x" ] \
     [list "plugin warning" "-plugin $plugin2_path -plugin-opt warning \
     $testobjfiles $libs" "" "" "" {{ld plugin-29.d}} "main.x" ] \
-    [list "PR ld/17973" "-plugin $plugin2_path -shared $regassilent \
-			-plugin-opt add:tmpdir/pr17973.o \
-    tmpdir/dummy.o" "" "" "" {{readelf -sW pr17973.d}} "main.x" ] \
 ]
+
+if [check_shared_lib_support] {
+    lappend plugin_tests [list "PR ld/17973" "-plugin $plugin2_path -shared $regassilent \
+                       -plugin-opt add:tmpdir/pr17973.o \
+    tmpdir/dummy.o" "" "" "" {{readelf -sW pr17973.d}} "main.x" ]
+}
+
 
 set plugin_lib_tests [list \
     [list "plugin ignore lib" "-plugin $plugin_path $regclm \
@@ -225,6 +243,10 @@ set plugin_lib_tests [list \
 			-plugin-opt sym:${_}text::0:0:0 \
 			-plugin-opt add:tmpdir/text.o \
     $testsrcfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-19.d}} "main.x" ] \
+    [list "plugin with empty archive" \
+	               "-plugin $plugin_path $regclm \
+			-plugin-opt read:8 \
+    $testobjfiles tmpdir/libempty.a $libs" "" "" "" {{ld plugin-30.d}} "main.x" ] \
 ]
 
 set plugin_extra_elf_tests [list \
@@ -278,7 +300,8 @@ if { [is_elf_format] \
     run_ld_link_tests $plugin_extra_elf_tests
 }
 
-if ![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] {
+if {![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] || \
+    ![ar_simple_create $ar "" "tmpdir/libempty.a" ""]} {
     foreach testitem $plugin_lib_tests {
 	unresolved [lindex $testitem 0]
     }
@@ -346,4 +369,23 @@ if [ar_simple_create $ar "--plugin $plugin2_path" "tmpdir/libfunc.a" \
     foreach testitem $plugin_src_tests {
 	unresolved [lindex $testitem 0]
     }
+}
+
+file delete tmpdir/libpr20070.a
+if [ar_simple_create $ar "--plugin $plugin4_path" "tmpdir/libpr20070.a" \
+			 "$srcdir/$subdir/pr20070b.c"] {
+    run_ld_link_tests [list \
+	[list \
+	    "PR ld/20070" \
+	    "-Bstatic -plugin $plugin4_path $regclm \
+	     $regas $regcln \
+	     -plugin-opt claim:$srcdir/$subdir/pr20070b.c \
+	     -plugin-opt claim:tmpdir/libpr20070.a \
+	     -plugin-opt dumpresolutions \
+	     tmpdir/pr20070a.o tmpdir/text.o tmpdir/libpr20070.a $libs" \
+	    "" "" "" {{ld pr20070.d}} "pr20070.x" \
+	] \
+    ]
+} else {
+    unresolved "PR ld/20070"
 }

@@ -23,9 +23,9 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ +WA +0 +0 +8
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -37,7 +37,7 @@ Program Headers:
  +LOAD +0x0+ 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x10000
  +LOAD +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RW  0x10000
  +DYNAMIC +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RW +0x8
- +TLS +0x0+10e0 0x0+110e0 0x0+110e0 0x0+60 0x0+80 R +0x4
+ +TLS +0x0+10d8 0x0+110d8 0x0+110d8 0x0+60 0x0+80 R +0x4
 #...
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:
@@ -50,7 +50,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPMOD64 +0+
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +24
 
-Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_JMP_SLOT +0+ __tls_get_addr \+ 0
 
@@ -63,13 +63,10 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg5
 .* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg1
-.* [0-9a-f]+ +172 +FUNC +GLOBAL +DEFAULT +\[<other>: 88\] +7 fn1
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 __bss_start
+.* [0-9a-f]+ +172 +FUNC +GLOBAL +DEFAULT +\[STD GPLOAD\] +7 fn1
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg2
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg6
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg7
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 _edata
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -121,10 +118,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg5
 .* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg1
-.* [0-9a-f]+ +172 +FUNC +GLOBAL +DEFAULT +\[<other>: 88\] +7 fn1
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 __bss_start
+.* [0-9a-f]+ +172 +FUNC +GLOBAL +DEFAULT +\[STD GPLOAD\] +7 fn1
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg2
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg6
 .* [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg7
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 _edata
-.* [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +12 _end

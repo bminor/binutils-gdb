@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2013-2020 Free Software Foundation, Inc.
 #
 # This file is part of GNU Binutils.
 #
@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra metagelf
+# This file is sourced from elf.em, and defines extra metagelf
 # specific routines. Taken from hppaelf.em.
 #
 fragment <<EOF
@@ -59,7 +59,7 @@ metagelf_create_output_section_statements (void)
 			      bfd_get_arch (link_info.output_bfd),
 			      bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo (_("%F%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -178,7 +178,7 @@ metagelf_add_stub_section (const char *stub_sec_name, asection *input_section)
     return stub_sec;
 
  err_ret:
-  einfo ("%X%P: can not make stub section: %E\n");
+  einfo (_("%X%P: can not make stub section: %E\n"));
   return NULL;
 }
 
@@ -191,7 +191,7 @@ metagelf_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  gld${EMULATION_NAME}_map_segments (TRUE);
+  ldelf_map_segments (TRUE);
   need_laying_out = -1;
 }
 
@@ -228,7 +228,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   ret = bfd_elf_discard_info (link_info.output_bfd, &link_info);
   if (ret < 0)
     {
-      einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+      einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
       return;
     }
   else if (ret > 0)
@@ -243,7 +243,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	{
 	  if (ret < 0)
 	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
+	      einfo (_("%X%P: can not size stub section: %E\n"));
 	      return;
 	    }
 
@@ -257,14 +257,14 @@ gld${EMULATION_NAME}_after_allocation (void)
 				      &metagelf_add_stub_section,
 				      &metagelf_layout_sections_again))
 	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
+	      einfo (_("%X%P: can not size stub section: %E\n"));
 	      return;
 	    }
 	}
     }
 
   if (need_laying_out != -1)
-    gld${EMULATION_NAME}_map_segments (need_laying_out);
+    ldelf_map_segments (need_laying_out);
 
   if (!bfd_link_relocatable (&link_info))
     {
@@ -272,31 +272,10 @@ gld${EMULATION_NAME}_after_allocation (void)
       if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
 	{
 	  if (! elf_metag_build_stubs (&link_info))
-	    einfo ("%X%P: can not build stubs: %E\n");
+	    einfo (_("%X%P: can not build stubs: %E\n"));
 	}
     }
 }
-
-
-/* Avoid processing the fake stub_file in vercheck, stat_needed and
-   check_needed routines.  */
-
-static void (*real_func) (lang_input_statement_type *);
-
-static void metag_for_each_input_file_wrapper (lang_input_statement_type *l)
-{
-  if (l != stub_file)
-    (*real_func) (l);
-}
-
-static void
-metag_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
-{
-  real_func = func;
-  lang_for_each_input_file (&metag_for_each_input_file_wrapper);
-}
-
-#define lang_for_each_input_file metag_lang_for_each_input_file
 
 EOF
 
@@ -328,9 +307,9 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_STUBGROUP_SIZE:
       {
 	const char *end;
-        group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
-	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
+	group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
+	  einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
       }
       break;
 '

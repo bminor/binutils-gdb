@@ -1,0 +1,92 @@
+# Expect script for simple native Linux/x86 tests.
+#   Copyright (C) 2018-2020 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+
+# Test very simple native Linux/x86 programs with linux-x86.S.
+if { ![isnative] || ![check_compiler_available] \
+     || (![istarget "i?86-*-linux*"] \
+         && ![istarget "x86_64-*-linux*"] \
+         && ![istarget "amd64-*-linux*"]) } {
+    return
+}
+
+# Add $PLT_CFLAGS if PLT is expected.
+global PLT_CFLAGS
+# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
+global NOPIE_CFLAGS NOPIE_LDFLAGS
+
+run_ld_link_exec_tests [list \
+    [list \
+	"Run PR ld/23428 test" \
+	"--no-dynamic-linker -z separate-code" \
+	"" \
+	{ linux-x86.S pr23428.c dummy.s } \
+	"pr23428" \
+	"pass.out" \
+	"$NOPIE_CFLAGS -fno-asynchronous-unwind-tables" \
+	"asm" \
+    ] \
+]
+
+run_ld_link_tests [list \
+    [list \
+	"Build x86-feature-1" \
+	"-z separate-code -z shstk" \
+	"" \
+	"-mx86-used-note=yes" \
+	{ start.s } \
+	{{readelf -n x86-feature-1a.rd}} \
+	"x86-feature-1" \
+    ] \
+]
+
+proc elfedit_test { options test output } {
+    global ELFEDIT
+    global READELF
+    global srcdir
+    global subdir
+
+    set test_name "elfedit $options"
+    send_log "$ELFEDIT $options tmpdir/$test\n"
+    set got [remote_exec host "$ELFEDIT $options tmpdir/$test" "" "/dev/null"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	send_log "$got\n"
+	unresolved "$test_name"
+    }
+    send_log "$READELF -n $options tmpdir/$test > tmpdir/$output.out\n"
+    set got [remote_exec host "$READELF -n tmpdir/$test" "" "/dev/null" "tmpdir/$output.out"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	send_log "$got\n"
+	unresolved "$test_name"
+}
+    if { [regexp_diff tmpdir/$output.out $srcdir/$subdir/$output.rd] } then {
+	fail "$test_name"
+    } else {
+	pass "$test_name"
+    }
+}
+
+elfedit_test "--enable-x86-feature ibt --disable-x86-feature shstk" \
+		x86-feature-1 x86-feature-1b
+elfedit_test "--enable-x86-feature ibt" x86-feature-1 x86-feature-1b
+elfedit_test "--disable-x86-feature shstk" x86-feature-1 x86-feature-1c
+elfedit_test "--disable-x86-feature ibt" x86-feature-1 x86-feature-1d
+elfedit_test "--enable-x86-feature ibt --enable-x86-feature shstk" \
+		x86-feature-1 x86-feature-1e

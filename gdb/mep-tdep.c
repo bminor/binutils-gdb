@@ -1,6 +1,6 @@
 /* Target-dependent code for the Toshiba MeP for GDB, the GNU debugger.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -36,7 +36,6 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "remote.h"
-#include "floatformat.h"
 #include "sim-regno.h"
 #include "disasm.h"
 #include "trad-frame.h"
@@ -285,7 +284,7 @@ me_module_register_set (CONFIG_ATTR me_module,
 
 /* Given a hardware table entry HW representing a register set, return
    a pointer to the keyword table with all the register names.  If HW
-   is NULL, return NULL, to propage the "no such register set" info
+   is NULL, return NULL, to propagate the "no such register set" info
    along.  */
 static CGEN_KEYWORD *
 register_set_keyword_table (const CGEN_HW_ENTRY *hw)
@@ -305,7 +304,7 @@ register_set_keyword_table (const CGEN_HW_ENTRY *hw)
 /* Given a keyword table KEYWORD and a register number REGNUM, return
    the name of the register, or "" if KEYWORD contains no register
    whose number is REGNUM.  */
-static char *
+static const char *
 register_name_from_keyword (CGEN_KEYWORD *keyword_table, int regnum)
 {
   const CGEN_KEYWORD_ENTRY *entry
@@ -928,8 +927,6 @@ current_ccr_names (void)
 static const char *
 mep_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);  
-
   /* General-purpose registers.  */
   static const char *gpr_names[] = {
     "r0",   "r1",   "r2",   "r3",   /* 0 */
@@ -1115,18 +1112,9 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type (gdbarch)->builtin_uint32;
 }
 
-
-static CORE_ADDR
-mep_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, MEP_PC_REGNUM, &pc);
-  return pc;
-}
-
 static enum register_status
 mep_pseudo_cr32_read (struct gdbarch *gdbarch,
-                      struct regcache *regcache,
+		      readable_regcache *regcache,
                       int cookednum,
                       gdb_byte *buf)
 {
@@ -1139,7 +1127,7 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
 
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, rawnum)) == sizeof (buf64));
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
-  status = regcache_raw_read (regcache, rawnum, buf64);
+  status = regcache->raw_read (rawnum, buf64);
   if (status == REG_VALID)
     {
       /* Slow, but legible.  */
@@ -1152,23 +1140,23 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
 
 static enum register_status
 mep_pseudo_cr64_read (struct gdbarch *gdbarch,
-                      struct regcache *regcache,
+                      readable_regcache *regcache,
                       int cookednum,
                       gdb_byte *buf)
 {
-  return regcache_raw_read (regcache, mep_pseudo_to_raw[cookednum], buf);
+  return regcache->raw_read (mep_pseudo_to_raw[cookednum], buf);
 }
 
 
 static enum register_status
 mep_pseudo_register_read (struct gdbarch *gdbarch,
-                          struct regcache *regcache,
+			  readable_regcache *regcache,
                           int cookednum,
                           gdb_byte *buf)
 {
   if (IS_CSR_REGNUM (cookednum)
       || IS_CCR_REGNUM (cookednum))
-    return regcache_raw_read (regcache, mep_pseudo_to_raw[cookednum], buf);
+    return regcache->raw_read (mep_pseudo_to_raw[cookednum], buf);
   else if (IS_CR32_REGNUM (cookednum)
            || IS_FP_CR32_REGNUM (cookednum))
     return mep_pseudo_cr32_read (gdbarch, regcache, cookednum, buf);
@@ -1228,7 +1216,7 @@ mep_pseudo_cr32_write (struct gdbarch *gdbarch,
   /* Slow, but legible.  */
   store_unsigned_integer (buf64, 8, byte_order,
 			  extract_unsigned_integer (buf, 4, byte_order));
-  regcache_raw_write (regcache, rawnum, buf64);
+  regcache->raw_write (rawnum, buf64);
 }
 
 
@@ -1238,7 +1226,7 @@ mep_pseudo_cr64_write (struct gdbarch *gdbarch,
                      int cookednum,
                      const gdb_byte *buf)
 {
-  regcache_raw_write (regcache, mep_pseudo_to_raw[cookednum], buf);
+  regcache->raw_write (mep_pseudo_to_raw[cookednum], buf);
 }
 
 
@@ -1257,7 +1245,7 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
            || IS_FP_CR64_REGNUM (cookednum))
     mep_pseudo_cr64_write (gdbarch, regcache, cookednum, buf);
   else if (IS_CCR_REGNUM (cookednum))
-    regcache_raw_write (regcache, mep_pseudo_to_raw[cookednum], buf);
+    regcache->raw_write (mep_pseudo_to_raw[cookednum], buf);
   else
     gdb_assert_not_reached ("unexpected pseudo register");
 }
@@ -1266,13 +1254,12 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
 
 /* Disassembly.  */
 
-/* The mep disassembler needs to know about the section in order to
-   work correctly.  */
 static int
 mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
 {
   struct obj_section * s = find_pc_section (pc);
 
+  info->arch = bfd_arch_mep;
   if (s)
     {
       /* The libopcodes disassembly code uses the section to find the
@@ -1280,12 +1267,9 @@ mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
          the me_module index, and the me_module index to select the
          right instructions to print.  */
       info->section = s->the_bfd_section;
-      info->arch = bfd_arch_mep;
-	
-      return print_insn_mep (pc, info);
     }
-  
-  return 0;
+
+  return print_insn_mep (pc, info);
 }
 
 
@@ -1645,12 +1629,12 @@ is_arg_spill (struct gdbarch *gdbarch, pv_t value, pv_t addr,
 {
   return (is_arg_reg (value)
           && pv_is_register (addr, MEP_SP_REGNUM)
-          && ! pv_area_find_reg (stack, gdbarch, value.reg, 0));
+          && ! stack->find_reg (gdbarch, value.reg, 0));
 }
 
 
 /* Function for finding saved registers in a 'struct pv_area'; we pass
-   this to pv_area_scan.
+   this to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -1677,24 +1661,19 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
 {
   CORE_ADDR pc;
   unsigned long insn;
-  int rn;
-  int found_lp = 0;
   pv_t reg[MEP_NUM_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
   result->gdbarch = gdbarch;
 
-  for (rn = 0; rn < MEP_NUM_REGS; rn++)
+  for (int rn = 0; rn < MEP_NUM_REGS; rn++)
     {
       reg[rn] = pv_register (rn, 0);
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (MEP_SP_REGNUM, gdbarch_addr_bit (gdbarch));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (MEP_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   pc = start_pc;
   while (pc < limit_pc)
@@ -1746,13 +1725,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           /* If simulating this store would require us to forget
              everything we know about the stack frame in the name of
              accuracy, it would be better to just quit now.  */
-          if (pv_area_store_would_trash (stack, reg[rm]))
+          if (stack.store_would_trash (reg[rm]))
             break;
           
-          if (is_arg_spill (gdbarch, reg[rn], reg[rm], stack))
+          if (is_arg_spill (gdbarch, reg[rn], reg[rm], &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, reg[rm], 4, reg[rn]);
+          stack.store (reg[rm], 4, reg[rn]);
         }
       else if (IS_SW_IMMD (insn))
         {
@@ -1763,13 +1742,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           /* If simulating this store would require us to forget
              everything we know about the stack frame in the name of
              accuracy, it would be better to just quit now.  */
-          if (pv_area_store_would_trash (stack, addr))
+          if (stack.store_would_trash (addr))
             break;
 
-          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, addr, 4, reg[rn]);
+          stack.store (addr, 4, reg[rn]);
         }
       else if (IS_MOV (insn))
 	{
@@ -1791,13 +1770,13 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
                       : (gdb_assert (IS_SW (insn)), 4));
           pv_t addr = pv_add_constant (reg[rm], disp);
 
-          if (pv_area_store_would_trash (stack, addr))
+          if (stack.store_would_trash (addr))
             break;
 
-          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, &stack))
             after_last_frame_setup_insn = next_pc;
 
-          pv_area_store (stack, addr, size, reg[rn]);
+          stack.store (addr, size, reg[rn]);
 	}
       else if (IS_LDC (insn))
 	{
@@ -1813,7 +1792,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           int offset = LW_OFFSET (insn);
           pv_t addr = pv_add_constant (reg[rm], offset);
 
-          reg[rn] = pv_area_fetch (stack, addr, 4);
+          reg[rn] = stack.fetch (addr, 4);
         }
       else if (IS_BRA (insn) && BRA_DISP (insn) > 0)
 	{
@@ -1892,11 +1871,9 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 
@@ -1918,15 +1895,9 @@ mep_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 
 /* Breakpoints.  */
+constexpr gdb_byte mep_break_insn[] = { 0x70, 0x32 };
 
-static const unsigned char *
-mep_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
-{
-  static unsigned char breakpoint[] = { 0x70, 0x32 };
-  *lenptr = sizeof (breakpoint);
-  return breakpoint;
-}
-
+typedef BP_MANIPULATION (mep_break_insn) mep_breakpoint;
 
 
 /* Frames and frame unwinding.  */
@@ -2033,7 +2004,6 @@ mep_frame_prev_register (struct frame_info *this_frame,
 				       MEP_LP_REGNUM);
       lp = value_as_long (value);
       release_value (value);
-      value_free (value);
 
       return frame_unwind_got_constant (this_frame, regnum, lp & ~1);
     }
@@ -2064,13 +2034,11 @@ mep_frame_prev_register (struct frame_info *this_frame,
 
 	  psw = value_as_long (value);
 	  release_value (value);
-	  value_free (value);
 
           /* Get the LP's value, too.  */
 	  value = get_frame_register_value (this_frame, MEP_LP_REGNUM);
 	  lp = value_as_long (value);
 	  release_value (value);
-	  value_free (value);
 
           /* If LP.LTOM is set, then toggle PSW.OM.  */
 	  if (lp & 0x1)
@@ -2092,23 +2060,6 @@ static const struct frame_unwind mep_frame_unwind = {
   NULL,
   default_frame_sniffer
 };
-
-
-/* Our general unwinding function can handle unwinding the PC.  */
-static CORE_ADDR
-mep_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MEP_PC_REGNUM);
-}
-
-
-/* Our general unwinding function can handle unwinding the SP.  */
-static CORE_ADDR
-mep_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MEP_SP_REGNUM);
-}
-
 
 
 /* Return values.  */
@@ -2144,9 +2095,8 @@ mep_extract_return_value (struct gdbarch *arch,
     offset = 0;
 
   /* Return values that do fit in a single register are returned in R0.  */
-  regcache_cooked_read_part (regcache, MEP_R0_REGNUM,
-                             offset, TYPE_LENGTH (type),
-                             valbuf);
+  regcache->cooked_read_part (MEP_R0_REGNUM, offset, TYPE_LENGTH (type),
+			      valbuf);
 }
 
 
@@ -2171,9 +2121,8 @@ mep_store_return_value (struct gdbarch *arch,
       else
         offset = 0;
 
-      regcache_cooked_write_part (regcache, MEP_R0_REGNUM,
-                                  offset, TYPE_LENGTH (type),
-                                  valbuf);
+      regcache->cooked_write_part (MEP_R0_REGNUM, offset, TYPE_LENGTH (type),
+				   valbuf);
     }
 
   /* Return values larger than a single register are returned in
@@ -2292,12 +2241,11 @@ static CORE_ADDR
 mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      struct regcache *regcache, CORE_ADDR bp_addr,
                      int argc, struct value **argv, CORE_ADDR sp,
-                     int struct_return,
+		     function_call_return_method return_method,
                      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR *copy = (CORE_ADDR *) alloca (argc * sizeof (copy[0]));
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
   int i;
 
   /* The number of the next register available to hold an argument.  */
@@ -2322,7 +2270,7 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* If we're returning a structure by value, push the pointer to the
      buffer as the first argument.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, arg_reg, struct_addr);
       arg_reg++;
@@ -2368,15 +2316,6 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   
   return sp;
 }
-
-
-static struct frame_id
-mep_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, MEP_SP_REGNUM);
-  return frame_id_build (sp, get_frame_pc (this_frame));
-}
-
 
 
 /* Initialization.  */
@@ -2447,7 +2386,7 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     if (gdbarch_tdep (arches->gdbarch)->me_module == me_module)
       return arches->gdbarch;
 
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Get a CGEN CPU descriptor for this architecture.  */
@@ -2465,7 +2404,6 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->me_module = me_module;
 
   /* Register set.  */
-  set_gdbarch_read_pc (gdbarch, mep_read_pc);
   set_gdbarch_num_regs (gdbarch, MEP_NUM_RAW_REGS);
   set_gdbarch_pc_regnum (gdbarch, MEP_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, MEP_SP_REGNUM);
@@ -2490,14 +2428,13 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, mep_gdb_print_insn); 
 
   /* Breakpoints.  */
-  set_gdbarch_breakpoint_from_pc (gdbarch, mep_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, mep_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, mep_breakpoint::bp_from_kind);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, mep_skip_prologue);
 
   /* Frames and frame unwinding.  */
   frame_unwind_append_unwinder (gdbarch, &mep_frame_unwind);
-  set_gdbarch_unwind_pc (gdbarch, mep_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, mep_unwind_sp);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
@@ -2507,16 +2444,13 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Inferior function calls.  */
   set_gdbarch_frame_align (gdbarch, mep_frame_align);
   set_gdbarch_push_dummy_call (gdbarch, mep_push_dummy_call);
-  set_gdbarch_dummy_id (gdbarch, mep_dummy_id);
 
   return gdbarch;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mep_tdep;
-
+void _initialize_mep_tdep ();
 void
-_initialize_mep_tdep (void)
+_initialize_mep_tdep ()
 {
   mep_csr_reggroup = reggroup_new ("csr", USER_REGGROUP);
   mep_cr_reggroup  = reggroup_new ("cr", USER_REGGROUP); 

@@ -1,0 +1,157 @@
+# Copyright 2019-2020 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Import a CU into an "artificial" CU.  For each DW_TAG DIE in the
+# artificial CU, use DW_AT_abstract_origin to refer to a DIE in the
+# imported CU.  This DWARF file organization is frequently found in
+# programs compiled with -flto (and -g) using GCC.
+#
+# This test reproduces the bug described in BZ 25065 without relying
+# on specific compiler versions or use of optimization switches, in
+# this case -flto.
+
+if [skip_cplus_tests] {
+    continue
+}
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+if {![dwarf2_support]} {
+    return 0
+};
+
+standard_testfile .c .S
+
+# ${testfile} is now "implref-struct".  srcfile2 is "implref-struct.S".
+set executable ${testfile}
+set asm_file [standard_output_file ${srcfile2}]
+
+# We need to know the size of integer and address types in order
+# to write some of the debugging info we'd like to generate.
+if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++}] {
+    return -1
+}
+
+# Create the DWARF.
+Dwarf::assemble $asm_file {
+    declare_labels cu_label main_label doit_label int_label
+    declare_labels Foo_label Foo_pointer_type doit_self_label
+    declare_labels foo_label Foo_destructor_obj_pointer_label
+    declare_labels Foo_constructor_obj_pointer_label
+    set int_size [get_sizeof "int" 4]
+    set addr_size [get_sizeof "void *" 8]
+
+    global srcdir subdir srcfile
+
+    extern main
+    extern doit
+
+    set main_range [function_range main ${srcdir}/${subdir}/${srcfile}]
+    set main_start [lindex $main_range 0]
+    set main_length [lindex $main_range 1]
+
+    set doit_range [function_range doit ${srcdir}/${subdir}/${srcfile}]
+    set doit_start [lindex $doit_range 0]
+    set doit_length [lindex $doit_range 1]
+
+    cu {} {
+	compile_unit {
+	    {language @DW_LANG_C_plus_plus}
+	    {name "<artificial>"}
+	} {
+	    imported_unit {
+		{import %$cu_label}
+	    }
+	    subprogram {
+		{abstract_origin %$main_label}
+		{low_pc $main_start addr}
+		{high_pc "$main_start + $main_length" addr}
+	    } {
+		subprogram {
+		    {abstract_origin %$doit_label}
+		    {low_pc $doit_start addr}
+		    {high_pc "$doit_start + $doit_length" addr}
+		} {
+		    formal_parameter {
+			{abstract_origin %$doit_self_label}
+		    }
+		}
+	        DW_TAG_variable {
+		    {abstract_origin %$foo_label}
+		    {location 4 data1}
+		}
+	    }
+	}
+    }
+
+    cu {} {
+	cu_label: compile_unit {
+	    {language @DW_LANG_C_plus_plus}
+	    {name "imported_unit.c"}
+	} {
+	    int_label: base_type {
+		{byte_size $int_size sdata}
+		{encoding @DW_ATE_signed}
+		{name int}
+	    }
+
+	    main_label: subprogram {
+		{name main}
+		{type :$int_label}
+		{external 1 flag}
+	    } {
+		Foo_label: class_type {
+		    {name Foo}
+		    {byte_size 1 sdata}
+		} {
+		    doit_label: subprogram {
+			{name doit}
+			{type :$int_label}
+			{accessibility 1 DW_FORM_data1}
+		    } {
+			doit_self_label: formal_parameter {
+			    {name this}
+			    {artificial 1 DW_FORM_flag_present}
+			    {type :$Foo_pointer_type}
+			}
+		    }
+		    Foo_pointer_type: pointer_type {
+			{byte_size $addr_size sdata}
+			{type :$Foo_label}
+		    }
+		}
+		foo_label: DW_TAG_variable {
+		    {name foo}
+		    {type :$Foo_label}
+		}
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing "failed to prepare" ${testfile} \
+	  [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+gdb_test_no_output "set language c++"
+
+# Sanity check
+gdb_test "ptype main" "= int \\(void\\)"
+
+# Each of these tests caused a segfault prior to fixing BZ 25065.
+gdb_test "ptype main::Foo" "= class Foo \{\\s+public:\\s+int doit\\(void\\);\\s+\}"
+gdb_test "ptype main::foo" "= class Foo \{\\s+public:\\s+int doit\\(void\\);\\s+\}"

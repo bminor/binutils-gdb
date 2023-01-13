@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -52,8 +52,8 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 
 static bfd_boolean
 gld${EMULATION_NAME}_open_dynamic_archive (const char *arch ATTRIBUTE_UNUSED,
-                                           search_dirs_type *search,
-                                           lang_input_statement_type *entry)
+					   search_dirs_type *search,
+					   lang_input_statement_type *entry)
 {
   char *string;
 
@@ -85,7 +85,7 @@ gld${EMULATION_NAME}_find_potential_libraries
 }
 
 /* Place an orphan section.  We use this to put random OVR sections.
-   Much borrowed from elf32.em.  */
+   Much borrowed from elf.em.  */
 
 static lang_output_section_statement_type *
 vms_place_orphan (asection *s,
@@ -174,6 +174,7 @@ if test "$OUTPUT_FORMAT" = "elf64-ia64-vms"; then
 
 fragment <<EOF
 #include "elf-bfd.h"
+#include "ldelfgen.h"
 EOF
 
 source_em ${srcdir}/emultempl/elf-generic.em
@@ -198,8 +199,8 @@ gld${EMULATION_NAME}_before_allocation (void)
   if (elf_hash_table (&link_info)->dynamic_sections_created
       && bed->elf_backend_size_dynamic_sections
       && ! (*bed->elf_backend_size_dynamic_sections) (link_info.output_bfd,
-                                                      &link_info))
-    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+						      &link_info))
+    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
 
   before_allocation_default ();
 }
@@ -210,9 +211,9 @@ gld${EMULATION_NAME}_after_allocation (void)
   int need_layout = bfd_elf_discard_info (link_info.output_bfd, &link_info);
 
   if (need_layout < 0)
-    einfo ("%X%P: .eh_frame/.stab edit: %E\n");
+    einfo (_("%X%P: .eh_frame/.stab edit: %E\n"));
   else
-    gld${EMULATION_NAME}_map_segments (need_layout);
+    ldelf_map_segments (need_layout);
 }
 
 static void

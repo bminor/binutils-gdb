@@ -1,6 +1,6 @@
 /* Target-dependent, architecture-independent code for DICOS, for GDB.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,12 +23,11 @@
 #include "solib-target.h"
 #include "inferior.h"
 #include "dicos-tdep.h"
+#include "gdbarch.h"
 
 void
 dicos_init_abi (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
   /* Every process, although has its own address space, sees the same
@@ -71,7 +70,7 @@ dicos_load_module_p (bfd *abfd, int header_size)
   if (!section)
     return 0;
 
-  if (bfd_section_size (abfd, section) != header_size)
+  if (bfd_section_size (section) != header_size)
     return 0;
 
   /* Dicos LMs always have a "Dicos_loadModuleInfo" symbol

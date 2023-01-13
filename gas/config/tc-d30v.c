@@ -1,5 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
+   Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -121,7 +121,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 static struct hash_control *d30v_hash;
 
 /* Do a binary search of the pre_defined_registers array to see if
-   NAME is a valid regiter name.  Return the register number from the
+   NAME is a valid register name.  Return the register number from the
    array on success, or -1 on failure.  */
 
 static int
@@ -239,8 +239,8 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\nD30V options:\n\
 -O                      Make adjacent short instructions parallel if possible.\n\
 -n                      Warn about all NOPs inserted by the assembler.\n\
--N			Warn about NOPs inserted after word multiplies.\n\
--c                      Warn about symbols whoes names match register names.\n\
+-N                      Warn about NOPs inserted after word multiplies.\n\
+-c                      Warn about symbols whose names match register names.\n\
 -C                      Opposite of -C.  -c is the default.\n"));
 }
 
@@ -302,7 +302,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 valueT
 md_section_align (asection *seg, valueT addr)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
   return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
@@ -998,7 +998,7 @@ write_2_short (struct d30v_insn *opcode1,
 	}
       else if (prev_left_kills_right_p)
 	{
-	  /* The left instruction kils the right slot, so we
+	  /* The left instruction kills the right slot, so we
 	     must leave it empty.  */
 	  write_1_short (opcode1, insn1, fx->next, FALSE);
 	  return 1;
@@ -1158,7 +1158,7 @@ find_format (struct d30v_opcode *opcode,
 	    {
 	      int flags = d30v_operand_table[fm->operands[j]].flags;
 	      int bits = d30v_operand_table[fm->operands[j]].bits;
-	      int X_op = myops[j].X_op;
+	      operatorT X_op = myops[j].X_op;
 	      int num = myops[j].X_add_number;
 
 	      if (flags & OPERAND_SPECIAL)
@@ -1490,7 +1490,7 @@ d30v_align (int n, char *pfill, symbolS *label)
   if (pfill == NULL)
     {
       if (n > 2
-	  && (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+	  && (bfd_section_flags (now_seg) & SEC_CODE) != 0)
 	{
 	  static char const nop[4] = { 0x00, 0xf0, 0x00, 0x00 };
 
@@ -1918,37 +1918,17 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_8:  /* Check for a bad .byte directive.  */
-      if (fixP->fx_addsy != NULL)
-	as_bad (_("line %d: unable to place address of symbol '%s' into a byte"),
-		fixP->fx_line, S_GET_NAME (fixP->fx_addsy));
-      else if (((unsigned)value) > 0xff)
-	as_bad (_("line %d: unable to place value %lx into a byte"),
-		fixP->fx_line, value);
-      else
-	*(unsigned char *) where = value;
+    case BFD_RELOC_8:
+      *(unsigned char *) where = value;
       break;
 
-    case BFD_RELOC_16:  /* Check for a bad .short directive.  */
-      if (fixP->fx_addsy != NULL)
-	as_bad (_("line %d: unable to place address of symbol '%s' into a short"),
-		fixP->fx_line, S_GET_NAME (fixP->fx_addsy));
-      else if (((unsigned)value) > 0xffff)
-	as_bad (_("line %d: unable to place value %lx into a short"),
-		fixP->fx_line, value);
-      else
-	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+    case BFD_RELOC_16:
+      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       break;
 
-    case BFD_RELOC_64:  /* Check for a bad .quad directive.  */
-      if (fixP->fx_addsy != NULL)
-	as_bad (_("line %d: unable to place address of symbol '%s' into a quad"),
-		fixP->fx_line, S_GET_NAME (fixP->fx_addsy));
-      else
-	{
-	  bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
-	  bfd_putb32 (0, ((unsigned char *) where) + 4);
-	}
+    case BFD_RELOC_64:
+      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (0, ((unsigned char *) where) + 4);
       break;
 
     case BFD_RELOC_D30V_6:

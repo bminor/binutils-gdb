@@ -1,5 +1,5 @@
 /* Disassemble AVR instructions.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -22,9 +22,10 @@
 
 #include "sysdep.h"
 #include <assert.h>
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opintl.h"
 #include "libiberty.h"
+#include "bfd_stdint.h"
 
 struct avr_opcodes_s
 {
@@ -184,17 +185,25 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
       break;
 
     case 'i':
-      sprintf (buf, "0x%04X", insn2);
+      {
+        unsigned int val = insn2 | 0x800000;
+        *sym = 1;
+        *sym_addr = val;
+        sprintf (buf, "0x%04X", insn2);
+        strcpy (comment, comment_start);
+      }
       break;
 
     case 'j':
       {
         unsigned int val = ((insn & 0xf) | ((insn & 0x600) >> 5)
                                          | ((insn & 0x100) >> 2));
-        if (val > 0 && !(insn & 0x100))
-          val |= 0x80;
+	if ((insn & 0x100) == 0)
+	  val |= 0x80;
+        *sym = 1;
+        *sym_addr = val | 0x800000;
         sprintf (buf, "0x%02x", val);
-        sprintf (buf, "%d", val);
+        strcpy (comment, comment_start);
       }
       break;
 
@@ -205,7 +214,8 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 
     case 'n':
       sprintf (buf, "??");
-      fprintf (stderr, _("Internal disassembler error"));
+      /* xgettext:c-format */
+      opcodes_error_handler (_("internal disassembler error"));
       ok = 0;
       break;
 
@@ -258,15 +268,19 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 
     default:
       sprintf (buf, "??");
-      fprintf (stderr, _("unknown constraint `%c'"), constraint);
+      /* xgettext:c-format */
+      opcodes_error_handler (_("unknown constraint `%c'"), constraint);
       ok = 0;
     }
 
     return ok;
 }
 
-static unsigned short
-avrdis_opcode (bfd_vma addr, disassemble_info *info)
+/* Read the opcode from ADDR.  Return 0 in success and save opcode
+   in *INSN, otherwise, return -1.  */
+
+static int
+avrdis_opcode (bfd_vma addr, disassemble_info *info, uint16_t *insn)
 {
   bfd_byte buffer[2];
   int status;
@@ -274,7 +288,10 @@ avrdis_opcode (bfd_vma addr, disassemble_info *info)
   status = info->read_memory_func (addr, buffer, 2, info);
 
   if (status == 0)
-    return bfd_getl16 (buffer);
+    {
+      *insn = bfd_getl16 (buffer);
+      return 0;
+    }
 
   info->memory_error_func (status, addr, info);
   return -1;
@@ -284,7 +301,7 @@ avrdis_opcode (bfd_vma addr, disassemble_info *info)
 int
 print_insn_avr (bfd_vma addr, disassemble_info *info)
 {
-  unsigned int insn, insn2;
+  uint16_t insn, insn2;
   const struct avr_opcodes_s *opcode;
   static unsigned int *maskptr;
   void *stream = info->stream;
@@ -335,7 +352,8 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
       initialized = 1;
     }
 
-  insn = avrdis_opcode (addr, info);
+  if (avrdis_opcode (addr, info, &insn)  != 0)
+    return -1;
 
   for (opcode = avr_opcodes, maskptr = avr_bin_masks;
        opcode->name;
@@ -368,7 +386,8 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
 
       if (opcode->insn_size > 1)
 	{
-	  insn2 = avrdis_opcode (addr + 2, info);
+	  if (avrdis_opcode (addr + 2, info, &insn2) != 0)
+	    return -1;
 	  cmd_len = 4;
 	}
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@ extern void init_w32_command_list (void);
 
 extern void windows_xfer_shared_library (const char* so_name,
 					 CORE_ADDR load_addr,
+					 CORE_ADDR *text_offset_cached,
 					 struct gdbarch *gdbarch,
 					 struct obstack *obstack);
 

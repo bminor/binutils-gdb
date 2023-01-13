@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,11 +25,11 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
-extern int global_auto_load;
+extern bool global_auto_load;
 
-extern int auto_load_local_gdbinit;
+extern bool auto_load_local_gdbinit;
 extern char *auto_load_local_gdbinit_pathname;
-extern int auto_load_local_gdbinit_loaded;
+extern bool auto_load_local_gdbinit_loaded;
 
 extern struct auto_load_pspace_info *
   get_auto_load_pspace_data_for_loading (struct program_space *pspace);
@@ -37,7 +37,7 @@ extern void auto_load_objfile_script (struct objfile *objfile,
 				      const struct extension_language_defn *);
 extern void load_auto_scripts_for_objfile (struct objfile *objfile);
 extern char auto_load_info_scripts_pattern_nl[];
-extern void auto_load_info_scripts (char *pattern, int from_tty,
+extern void auto_load_info_scripts (const char *pattern, int from_tty,
 				    const struct extension_language_defn *);
 
 extern struct cmd_list_element **auto_load_set_cmdlist_get (void);

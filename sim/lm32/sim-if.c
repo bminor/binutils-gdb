@@ -1,7 +1,7 @@
 /* Main simulator entry points specific to Lattice Mico32.
    Contributed by Jon Beniston <jon@beniston.com>
    
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,48 +50,33 @@ find_base (bfd *prog_bfd)
   found = 0;
   for (s = prog_bfd->sections; s; s = s->next)
     {
-      if ((strcmp (bfd_get_section_name (prog_bfd, s), ".boot") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".text") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".data") == 0)
-	  || (strcmp (bfd_get_section_name (prog_bfd, s), ".bss") == 0))
+      if ((strcmp (bfd_section_name (s), ".boot") == 0)
+	  || (strcmp (bfd_section_name (s), ".text") == 0)
+	  || (strcmp (bfd_section_name (s), ".data") == 0)
+	  || (strcmp (bfd_section_name (s), ".bss") == 0))
 	{
 	  if (!found)
 	    {
-	      base = bfd_get_section_vma (prog_bfd, s);
+	      base = bfd_section_vma (s);
 	      found = 1;
 	    }
 	  else
-	    base =
-	      bfd_get_section_vma (prog_bfd,
-				   s) < base ? bfd_get_section_vma (prog_bfd,
-								    s) : base;
+	    base = bfd_section_vma (s) < base ? bfd_section_vma (s) : base;
 	}
     }
   return base & ~(0xffffUL);
 }
 
 static unsigned long
-find_limit (bfd *prog_bfd)
+find_limit (SIM_DESC sd)
 {
-  struct bfd_symbol **asymbols;
-  long symsize;
-  long symbol_count;
-  long s;
+  bfd_vma addr;
 
-  symsize = bfd_get_symtab_upper_bound (prog_bfd);
-  if (symsize < 0)
-    return 0;
-  asymbols = (asymbol **) xmalloc (symsize);
-  symbol_count = bfd_canonicalize_symtab (prog_bfd, asymbols);
-  if (symbol_count < 0)
+  addr = trace_sym_value (sd, "_fstack");
+  if (addr == -1)
     return 0;
 
-  for (s = 0; s < symbol_count; s++)
-    {
-      if (!strcmp (asymbols[s]->name, "_fstack"))
-	return (asymbols[s]->value + 65536) & ~(0xffffUL);
-    }
-  return 0;
+  return (addr + 65536) & ~(0xffffUL);
 }
 
 /* Create an instance of the simulator.  */
@@ -159,7 +144,7 @@ sim_open (kind, callback, abfd, argv)
 	{
 	  /* It doesn't, so we should try to allocate enough memory to hold program.  */
 	  base = find_base (STATE_PROG_BFD (sd));
-	  limit = find_limit (STATE_PROG_BFD (sd));
+	  limit = find_limit (sd);
 	  if (limit == 0)
 	    {
 	      sim_io_eprintf (sd,

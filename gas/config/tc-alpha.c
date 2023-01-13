@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2020 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -49,7 +49,6 @@
 
 #include "as.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "ecoff.h"
 
 #include "opcode/alpha.h"
@@ -706,7 +705,7 @@ alpha_adjust_relocs (bfd *abfd ATTRIBUTE_UNUSED,
      present.  Not implemented.
 
      Also suppress the optimization if the !literals/!lituses are spread
-     in different segments.  This can happen with "intersting" uses of
+     in different segments.  This can happen with "interesting" uses of
      inline assembly; examples are present in the Linux kernel semaphores.  */
 
   for (fixp = seginfo->fix_root; fixp; fixp = next)
@@ -1005,6 +1004,7 @@ tokenize_arguments (char *str,
 	    /* ... then fall through to plain expression.  */
 	    input_line_pointer = hold;
 	  }
+	  /* Fall through.  */
 
 	default:
 	  if (saw_arg && !saw_comma)
@@ -1205,10 +1205,9 @@ create_literal_section (const char *name,
 
   *secp = new_sec = subseg_new (name, 0);
   subseg_set (current_section, current_subsec);
-  bfd_set_section_alignment (stdoutput, new_sec, 4);
-  bfd_set_section_flags (stdoutput, new_sec,
-			 SEC_RELOC | SEC_ALLOC | SEC_LOAD | SEC_READONLY
-			 | SEC_DATA);
+  bfd_set_section_alignment (new_sec, 4);
+  bfd_set_section_flags (new_sec, (SEC_RELOC | SEC_ALLOC | SEC_LOAD
+				   | SEC_READONLY | SEC_DATA));
 
   S_CLEAR_EXTERNAL (*symp = section_symbol (new_sec));
 }
@@ -1384,7 +1383,7 @@ load_expression (int targreg,
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
-		    ensymname = (char *) xmalloc (ptr2 - ptr1 + 5);
+		    ensymname = XNEWVEC (char, ptr2 - ptr1 + 5);
 		    memcpy (ensymname, ptr1, ptr2 - ptr1);
 		    memcpy (ensymname + (ptr2 - ptr1), "..en", 5);
 
@@ -1417,9 +1416,7 @@ load_expression (int targreg,
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
-		    psymname = (char *) xmalloc (ptr2 - ptr1 + 1);
-		    memcpy (psymname, ptr1, ptr2 - ptr1);
-		    psymname [ptr2 - ptr1] = 0;
+		    psymname = xmemdup0 (ptr1, ptr2 - ptr1);
 
 		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_LDA;
@@ -2883,7 +2880,7 @@ emit_jsrjmp (const expressionS *tok,
       char *ensymname;
 
       /* Build the entry name as 'NAME..en'.  */
-      ensymname = (char *) xmalloc (symlen + 5);
+      ensymname = XNEWVEC (char, symlen + 5);
       memcpy (ensymname, symname, symlen);
       memcpy (ensymname + symlen, "..en", 5);
 
@@ -3370,7 +3367,7 @@ assemble_tokens (const char *opname,
 #ifdef OBJ_EVAX
 
 /* Add sym+addend to link pool.
-   Return offset from curent procedure value (pv) to entry in link pool.
+   Return offset from current procedure value (pv) to entry in link pool.
 
    Add new fixup only if offset isn't 16bit.  */
 
@@ -3401,7 +3398,9 @@ add_to_link_pool (symbolS *sym, offsetT addend)
 	    && fixp->fx_offset == (valueT)addend
 	    && fixp->tc_fix_data.info
 	    && fixp->tc_fix_data.info->sym
-	    && fixp->tc_fix_data.info->sym->sy_value.X_op_symbol == basesym)
+	    && symbol_symbolS (fixp->tc_fix_data.info->sym)
+	    && (symbol_get_value_expression (fixp->tc_fix_data.info->sym)
+		->X_op_symbol == basesym))
 	  return fixp->tc_fix_data.info->sym;
       }
 
@@ -3629,7 +3628,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
     }
 
 #ifndef OBJ_EVAX
-  know (symbolP->sy_frag == &zero_address_frag);
+  know (symbol_get_frag (symbolP) == &zero_address_frag);
 #endif
   demand_empty_rest_of_line ();
 }
@@ -3735,8 +3734,7 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
 	  sym = symbol_find_or_make (name);
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 
-	  cur_frame_data = (struct alpha_elf_frame_data *)
-              calloc (1, sizeof (*cur_frame_data));
+	  cur_frame_data = XCNEW (struct alpha_elf_frame_data);
 	  cur_frame_data->func_sym = sym;
 
 	  /* Provide sensible defaults.  */
@@ -3791,7 +3789,7 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
 	  if (sym && cur_frame_data)
 	    {
 	      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
-	      expressionS *exp = (expressionS *) xmalloc (sizeof (expressionS));
+	      expressionS *exp = XNEW (expressionS);
 
 	      obj->size = exp;
 	      exp->X_op = O_subtract;
@@ -3959,9 +3957,7 @@ s_alpha_file (int ignore ATTRIBUTE_UNUSED)
       discard_rest_of_line ();
 
       len = input_line_pointer - start;
-      first_file_directive = (char *) xmalloc (len + 1);
-      memcpy (first_file_directive, start, len);
-      first_file_directive[len] = '\0';
+      first_file_directive = xmemdup0 (start, len);
 
       input_line_pointer = start;
     }
@@ -3988,8 +3984,8 @@ s_alpha_stab (int n)
   if (alpha_flag_mdebug < 0)
     {
       segT sec = subseg_new (".mdebug", 0);
-      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS | SEC_READONLY);
-      bfd_set_section_alignment (stdoutput, sec, 3);
+      bfd_set_section_flags (sec, SEC_HAS_CONTENTS | SEC_READONLY);
+      bfd_set_section_alignment (sec, 3);
 
       ecoff_read_begin_hook ();
 
@@ -4214,9 +4210,7 @@ s_alpha_section_name (void)
 	  return NULL;
 	}
 
-      name = xmalloc (end - input_line_pointer + 1);
-      memcpy (name, input_line_pointer, end - input_line_pointer);
-      name[end - input_line_pointer] = '\0';
+      name = xmemdup0 (input_line_pointer, end - input_line_pointer);
       input_line_pointer = end;
     }
   SKIP_WHITESPACE ();
@@ -4718,8 +4712,7 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
 	  (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
 
       /* Create a linkage element.  */
-      linkage_fixup = (struct alpha_linkage_fixups *)
-	xmalloc (sizeof (struct alpha_linkage_fixups));
+      linkage_fixup = XNEW (struct alpha_linkage_fixups);
       linkage_fixup->fixp = fixp;
       linkage_fixup->next = NULL;
       linkage_fixup->label = alpha_insn_label;
@@ -4889,7 +4882,7 @@ s_alpha_gprel32 (int ignore ATTRIBUTE_UNUSED)
 }
 
 /* Handle floating point allocation pseudo-ops.  This is like the
-   generic vresion, but it makes sure the current label, if any, is
+   generic version, but it makes sure the current label, if any, is
    correctly aligned.  */
 
 static void
@@ -5307,7 +5300,7 @@ maybe_set_gp (asection *sec)
 
   if (!sec)
     return;
-  vma = bfd_get_section_vma (sec->owner, sec);
+  vma = bfd_section_vma (sec);
   if (vma && vma < alpha_gp_value)
     alpha_gp_value = vma;
 }
@@ -5445,7 +5438,7 @@ md_begin (void)
 
       if ((slash = strchr (name, '/')) != NULL)
 	{
-	  char *p = (char *) xmalloc (strlen (name));
+	  char *p = XNEWVEC (char, strlen (name));
 
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
@@ -5521,8 +5514,8 @@ md_begin (void)
   if (ECOFF_DEBUGGING)
     {
       segT sec = subseg_new (".mdebug", (subsegT) 0);
-      bfd_set_section_flags (stdoutput, sec, SEC_HAS_CONTENTS | SEC_READONLY);
-      bfd_set_section_alignment (stdoutput, sec, 3);
+      bfd_set_section_flags (sec, SEC_HAS_CONTENTS | SEC_READONLY);
+      bfd_set_section_alignment (sec, 3);
     }
 #endif
 
@@ -5569,7 +5562,7 @@ md_assemble (char *str)
 valueT
 md_section_align (segT seg, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
   valueT mask = ((valueT) 1 << align) - 1;
 
   return (size + mask) & ~mask;
@@ -5591,6 +5584,7 @@ md_atof (int type, char *litP, int *sizeP)
     case 'G':
       /* vax_md_atof() doesn't like "G" for some reason.  */
       type = 'g';
+      /* Fall through.  */
     case 'F':
     case 'D':
       return vax_md_atof (type, litP, sizeP);
@@ -5775,6 +5769,12 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       md_number_to_chars (fixpos, value, 2);
       break;
 
+    case BFD_RELOC_8:
+      if (fixP->fx_pcrel)
+	fixP->fx_r_type = BFD_RELOC_8_PCREL;
+      size = 1;
+      goto do_reloc_xx;
+
     case BFD_RELOC_16:
       if (fixP->fx_pcrel)
 	fixP->fx_r_type = BFD_RELOC_16_PCREL;
@@ -5877,7 +5877,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value) >> 2) & ~0xfffff)
+      if (value + (1u << 22) >= (1u << 23))
 	goto done;
       else
 	{
@@ -5896,7 +5896,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value)) & ~0x7fff)
+      if (value + (1u << 15) >= (1u << 16))
 	goto done;
       else
 	{
@@ -5916,7 +5916,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value) >> 2) & ~0xfffff)
+      if (value + (1u << 22) >= (1u << 23))
 	{
 	  /* Out of range.  */
 	  if (fixP->fx_r_type == BFD_RELOC_ALPHA_BOH)
@@ -6226,8 +6226,8 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (* reloc));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -6283,10 +6283,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
       if (pname_len > 4 && strcmp (pname + pname_len - 4, "..en") == 0)
 	{
 	  symbolS *sym;
-	  char *my_pname = (char *) xmalloc (pname_len - 4 + 1);
-
-	  memcpy (my_pname, pname, pname_len - 4);
-	  my_pname [pname_len - 4] = 0;
+	  char *my_pname = xmemdup0 (pname, pname_len - 4);
 	  sym = symbol_find (my_pname);
 	  free (my_pname);
 	  if (sym == NULL)
@@ -6305,8 +6302,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 	  pname = symbol_get_bfdsym (sym)->name;
 	}
 
-      udata = (struct evax_private_udata_struct *)
-	xmalloc (sizeof (struct evax_private_udata_struct));
+      udata = XNEW (struct evax_private_udata_struct);
       udata->enbsym = symbol_get_bfdsym (fixp->fx_addsy);
       udata->bsym = symbol_get_bfdsym (fixp->tc_fix_data.info->psym);
       udata->origname = (char *)pname;

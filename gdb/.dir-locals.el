@@ -1,5 +1,5 @@
 ;; Emacs settings.
-;; Copyright (C) 2012-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,5 +20,18 @@
 	      (indent-tabs-mode . t)))
  (nil . ((bug-reference-url-format . "http://sourceware.org/bugzilla/show_bug.cgi?id=%s")))
  (c-mode . ((c-file-style . "GNU")
-	    (indent-tabs-mode . t)))
+	    (mode . c++)
+	    (indent-tabs-mode . t)
+	    (tab-width . 8)
+	    (c-basic-offset . 2)
+	    (eval . (c-set-offset 'innamespace 0))
+	    ))
+ (c++-mode . ((eval . (when (fboundp 'c-toggle-comment-style)
+			(c-toggle-comment-style 1)))
+	      (indent-tabs-mode . t)
+	      (tab-width . 8)
+	      (c-file-style . "GNU")
+	      (c-basic-offset . 2)
+	      (eval . (c-set-offset 'innamespace 0))
+	      ))
 )

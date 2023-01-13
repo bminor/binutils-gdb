@@ -1,5 +1,5 @@
 /* GDB stub for Itanium OpenVMS
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    Contributed by Tristan Gingold, AdaCore.
 
@@ -56,7 +56,6 @@
 #include <builtins.h>
 #include <prtdef.h>
 #include <psldef.h>
-#include <ssdef.h>
 #include <chfdef.h>
 
 #include <lib_c/imcbdef.h>
@@ -1925,7 +1924,7 @@ sock_write (const unsigned char *buf, int len)
     }
 }
 
-/* Compute the cheksum and send the packet.  */
+/* Compute the checksum and send the packet.  */
 
 static void
 send_pkt (void)
@@ -2252,7 +2251,7 @@ excp_handler (struct chf$signal_array *sig,
   /* Self protection.  FIXME: Should be per thread ?  */
   static int in_handler = 0;
 
-  /* Completly ignore some conditions (signaled indirectly by this stub).  */
+  /* Completely ignore some conditions (signaled indirectly by this stub).  */
   switch (code)
     {
     case LIB$_KEYNOTFOU & STS$M_COND_ID:

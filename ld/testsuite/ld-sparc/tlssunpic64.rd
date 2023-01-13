@@ -21,9 +21,9 @@ Section Headers:
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+102060 0+2060 0+130 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+102190 0+2190 0+98 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .plt +.*
- +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
+ +\[[ 0-9]+\] .shstrtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -55,7 +55,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 [0-9a-f ]+R_SPARC_TLS_DTPOFF64 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+4 +sg2 \+ 0
 
-Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entry:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_SPARC_JMP_SLOT +0+ +__tls_get_addr \+ 0
 
@@ -63,7 +63,6 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION +LOCAL +DEFAULT +6 *
-.* SECTION +LOCAL +DEFAULT +7 *
 .* SECTION +LOCAL +DEFAULT +10 *
 .* TLS +GLOBAL +DEFAULT +7 sg8
 .* TLS +GLOBAL +DEFAULT +7 sg3
@@ -72,12 +71,9 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +7 sg1
 .* FUNC +GLOBAL +DEFAULT +6 fn1
-.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
 .* TLS +GLOBAL +DEFAULT +7 sg2
 .* TLS +GLOBAL +DEFAULT +7 sg6
 .* TLS +GLOBAL +DEFAULT +7 sg7
-.* NOTYPE +GLOBAL +DEFAULT +11 _edata
-.* NOTYPE +GLOBAL +DEFAULT +11 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -129,9 +125,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +7 sg1
 .* FUNC +GLOBAL +DEFAULT +6 fn1
-.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
 .* TLS +GLOBAL +DEFAULT +7 sg2
 .* TLS +GLOBAL +DEFAULT +7 sg6
 .* TLS +GLOBAL +DEFAULT +7 sg7
-.* NOTYPE +GLOBAL +DEFAULT +11 _edata
-.* NOTYPE +GLOBAL +DEFAULT +11 _end

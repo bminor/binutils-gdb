@@ -1,5 +1,5 @@
 /* Definitions for SH opcodes.
-   Copyright (C) 1993-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -19,6 +19,10 @@
    MA 02110-1301, USA.  */
 
 #include "bfd.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum
   {
@@ -201,10 +205,7 @@ typedef enum
 sh_dsp_reg_nums;
 
 /* Return a mask with bits LO to HI (inclusive) set.  */
-#define MASK(LO,HI)  (  LO < 1   ? ((1U << (HI + 1)) - 1) \
-		      : HI > 30  ? (-1U << LO)	 \
-		      : LO == HI ? (1U << LO) \
-		      :            (((1U << (HI + 1)) - 1) & (-1U << LO)))
+#define MASK(LO,HI) ((1U << (HI) << 1) - (1U << (LO)))
 
 #define arch_sh1_base	    (1 << 0)
 #define arch_sh2_base	    (1 << 1)
@@ -230,7 +231,7 @@ sh_dsp_reg_nums;
 #define arch_sh_no_co	   (1 << 28)  /* Neither FPU nor DSP co-processor.  */
 #define arch_sh_sp_fpu	   (1 << 29)  /* Single precision FPU.  */
 #define arch_sh_dp_fpu	   (1 << 30)  /* Double precision FPU.  */
-#define arch_sh_has_dsp	   (1 << 31)
+#define arch_sh_has_dsp	   (1u << 31)
 #define arch_sh_co_mask    MASK (28, 31)
 
 
@@ -281,7 +282,6 @@ sh_dsp_reg_nums;
 unsigned int sh_get_arch_from_bfd_mach (unsigned long mach);
 unsigned int sh_get_arch_up_from_bfd_mach (unsigned long mach);
 unsigned long sh_get_bfd_mach_from_arch_set (unsigned int arch_set);
-bfd_boolean sh_merge_bfd_arch (bfd *ibfd, bfd *obfd);
 
 /* Below are the 'architecture sets'.
    They describe the following inheritance graph:
@@ -1196,5 +1196,9 @@ const sh_opcode_info sh_table[] =
 
 { 0, {0}, {0}, 0 }
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

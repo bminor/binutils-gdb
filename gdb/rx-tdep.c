@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RX for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -33,9 +33,14 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "dwarf2-frame.h"
+#include "remote.h"
+#include "target-descriptions.h"
 
 #include "elf/rx.h"
 #include "elf-bfd.h"
+#include <algorithm>
+
+#include "features/rx.c"
 
 /* Certain important register numbers.  */
 enum
@@ -113,63 +118,17 @@ struct rx_prologue
   int reg_offset[RX_NUM_REGS];
 };
 
-/* Implement the "register_name" gdbarch method.  */
-static const char *
-rx_register_name (struct gdbarch *gdbarch, int regnr)
-{
-  static const char *const reg_names[] = {
-    "r0",
-    "r1",
-    "r2",
-    "r3",
-    "r4",
-    "r5",
-    "r6",
-    "r7",
-    "r8",
-    "r9",
-    "r10",
-    "r11",
-    "r12",
-    "r13",
-    "r14",
-    "r15",
-    "usp",
-    "isp",
-    "psw",
-    "pc",
-    "intb",
-    "bpsw",
-    "bpc",
-    "fintv",
-    "fpsw",
-    "acc"
-  };
-
-  return reg_names[regnr];
-}
-
-/* Implement the "register_type" gdbarch method.  */
-static struct type *
-rx_register_type (struct gdbarch *gdbarch, int reg_nr)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  if (reg_nr == RX_PC_REGNUM)
-    return builtin_type (gdbarch)->builtin_func_ptr;
-  else if (reg_nr == RX_PSW_REGNUM || reg_nr == RX_BPSW_REGNUM)
-    return tdep->rx_psw_type;
-  else if (reg_nr == RX_FPSW_REGNUM)
-    return tdep->rx_fpsw_type;
-  else if (reg_nr == RX_ACC_REGNUM)
-    return builtin_type (gdbarch)->builtin_unsigned_long_long;
-  else
-    return builtin_type (gdbarch)->builtin_unsigned_long;
-}
+/* RX register names */
+static const char *const rx_register_names[] = {
+  "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
+  "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+  "usp", "isp", "psw", "pc",  "intb", "bpsw","bpc","fintv",
+  "fpsw", "acc",
+};
 
 
 /* Function for finding saved registers in a 'struct pv_area'; this
-   function is passed to pv_area_scan.
+   function is passed to pv_area::scan.
 
    If VALUE is a saved register, ADDR says it was saved at a constant
    offset from the frame base, and SIZE indicates that the whole
@@ -226,8 +185,6 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t reg[RX_NUM_REGS];
-  struct pv_area *stack;
-  struct cleanup *back_to;
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
@@ -240,8 +197,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
-  back_to = make_cleanup_free_pv_area (stack);
+  pv_area stack (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
 
   if (frame_type == RX_FRAME_TYPE_FAST_INTERRUPT)
     {
@@ -257,13 +213,13 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       if (frame_type == RX_FRAME_TYPE_EXCEPTION)
 	{
 	  reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	  pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[RX_PSW_REGNUM]);
+	  stack.store (reg[RX_SP_REGNUM], 4, reg[RX_PSW_REGNUM]);
 	}
 
       /* The call instruction (or an exception/interrupt) has saved the return
           address on the stack.  */
       reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-      pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[RX_PC_REGNUM]);
+      stack.store (reg[RX_SP_REGNUM], 4, reg[RX_PC_REGNUM]);
 
     }
 
@@ -292,7 +248,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  for (r = r2; r >= r1; r--)
 	    {
 	      reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	      pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[r]);
+	      stack.store (reg[RX_SP_REGNUM], 4, reg[r]);
 	    }
 	  after_last_frame_setup_insn = next_pc;
 	}
@@ -319,7 +275,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 
 	  rsrc = opc.op[1].reg;
 	  reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
-	  pv_area_store (stack, reg[RX_SP_REGNUM], 4, reg[rsrc]);
+	  stack.store (reg[RX_SP_REGNUM], 4, reg[rsrc]);
 	  after_last_frame_setup_insn = next_pc;
 	}
       else if (opc.id == RXO_add	/* add #const, rsrc, rdst */
@@ -395,11 +351,9 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     }
 
   /* Record where all the registers were saved.  */
-  pv_area_scan (stack, check_for_saved, (void *) result);
+  stack.scan (check_for_saved, (void *) result);
 
   result->prologue_end = after_last_frame_setup_insn;
-
-  do_cleanups (back_to);
 }
 
 
@@ -697,40 +651,12 @@ static const struct frame_unwind rx_exception_unwind = {
   rx_exception_sniffer
 };
 
-/* Implement the "unwind_pc" gdbarch method.  */
-static CORE_ADDR
-rx_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  ULONGEST pc;
-
-  pc = frame_unwind_register_unsigned (this_frame, RX_PC_REGNUM);
-  return pc;
-}
-
-/* Implement the "unwind_sp" gdbarch method.  */
-static CORE_ADDR
-rx_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  ULONGEST sp;
-
-  sp = frame_unwind_register_unsigned (this_frame, RX_SP_REGNUM);
-  return sp;
-}
-
-/* Implement the "dummy_id" gdbarch method.  */
-static struct frame_id
-rx_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return
-    frame_id_build (get_frame_register_unsigned (this_frame, RX_SP_REGNUM),
-		    get_frame_pc (this_frame));
-}
-
 /* Implement the "push_dummy_call" gdbarch method.  */
 static CORE_ADDR
 rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		    struct value **args, CORE_ADDR sp, int struct_return,
+		    struct value **args, CORE_ADDR sp,
+		    function_call_return_method return_method,
 		    CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -776,7 +702,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	sp = align_down (sp - sp_off, 4);
       sp_off = 0;
 
-      if (struct_return)
+      if (return_method == return_method_struct)
 	{
 	  struct type *return_type = TYPE_TARGET_TYPE (func_type);
 
@@ -800,7 +726,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct type *arg_type = check_typedef (value_type (arg));
 	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
 
-	  if (i == 0 && struct_addr != 0 && !struct_return
+	  if (i == 0 && struct_addr != 0
+	      && return_method != return_method_struct
 	      && TYPE_CODE (arg_type) == TYPE_CODE_PTR
 	      && extract_unsigned_integer (arg_bits, 4,
 					   byte_order) == struct_addr)
@@ -897,7 +824,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      && arg_size <= 4 * (RX_R4_REGNUM - arg_reg + 1)
 		      && arg_size % 4 == 0)
 		    {
-		      int len = min (arg_size, 4);
+		      int len = std::min (arg_size, (ULONGEST) 4);
 
 		      if (write_pass)
 			regcache_cooked_write_unsigned (regcache, arg_reg,
@@ -960,7 +887,7 @@ rx_return_value (struct gdbarch *gdbarch,
 
       while (valtype_len > 0)
 	{
-	  int len = min (valtype_len, 4);
+	  int len = std::min (valtype_len, (ULONGEST) 4);
 
 	  regcache_cooked_read_unsigned (regcache, argreg, &u);
 	  store_unsigned_integer (readbuf + offset, len, byte_order, u);
@@ -978,7 +905,7 @@ rx_return_value (struct gdbarch *gdbarch,
 
       while (valtype_len > 0)
 	{
-	  int len = min (valtype_len, 4);
+	  int len = std::min (valtype_len, (ULONGEST) 4);
 
 	  u = extract_unsigned_integer (writebuf + offset, len, byte_order);
 	  regcache_cooked_write_unsigned (regcache, argreg, u);
@@ -991,14 +918,9 @@ rx_return_value (struct gdbarch *gdbarch,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-/* Implement the "breakpoint_from_pc" gdbarch method.  */
-static const gdb_byte *
-rx_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
-{
-  static gdb_byte breakpoint[] = { 0x00 };
-  *lenptr = sizeof breakpoint;
-  return breakpoint;
-}
+constexpr gdb_byte rx_break_insn[] = { 0x00 };
+
+typedef BP_MANIPULATION (rx_break_insn) rx_breakpoint;
 
 /* Implement the dwarf_reg_to_regnum" gdbarch method.  */
 
@@ -1022,6 +944,8 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
+  struct tdesc_arch_data *tdesc_data = NULL;
+  const struct target_desc *tdesc = info.target_desc;
 
   /* Extract the elf_flags if available.  */
   if (info.abfd != NULL
@@ -1043,66 +967,49 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  /* None found, create a new architecture from the information
-     provided.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  if (tdesc == NULL)
+      tdesc = tdesc_rx;
+
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (tdesc))
+    {
+      const struct tdesc_feature *feature;
+      bool valid_p = true;
+
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.rx.core");
+
+      if (feature != NULL)
+	{
+	  tdesc_data = tdesc_data_alloc ();
+	  for (int i = 0; i < RX_NUM_REGS; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+                                            rx_register_names[i]);
+	}
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+    }
+
+  gdb_assert(tdesc_data != NULL);
+
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 
-  /* Initialize the flags type for PSW and BPSW.  */
-
-  tdep->rx_psw_type = arch_flags_type (gdbarch, "rx_psw_type", 4);
-  append_flags_type_flag (tdep->rx_psw_type, 0, "C");
-  append_flags_type_flag (tdep->rx_psw_type, 1, "Z");
-  append_flags_type_flag (tdep->rx_psw_type, 2, "S");
-  append_flags_type_flag (tdep->rx_psw_type, 3, "O");
-  append_flags_type_flag (tdep->rx_psw_type, 16, "I");
-  append_flags_type_flag (tdep->rx_psw_type, 17, "U");
-  append_flags_type_flag (tdep->rx_psw_type, 20, "PM");
-  append_flags_type_flag (tdep->rx_psw_type, 24, "IPL0");
-  append_flags_type_flag (tdep->rx_psw_type, 25, "IPL1");
-  append_flags_type_flag (tdep->rx_psw_type, 26, "IPL2");
-  append_flags_type_flag (tdep->rx_psw_type, 27, "IPL3");
-
-  /* Initialize flags type for FPSW.  */
-
-  tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 4);
-  append_flags_type_flag (tdep->rx_fpsw_type, 0, "RM0");
-  append_flags_type_flag (tdep->rx_fpsw_type, 1, "RM1");
-  append_flags_type_flag (tdep->rx_fpsw_type, 2, "CV");
-  append_flags_type_flag (tdep->rx_fpsw_type, 3, "CO");
-  append_flags_type_flag (tdep->rx_fpsw_type, 4, "CZ");
-  append_flags_type_flag (tdep->rx_fpsw_type, 5, "CU");
-  append_flags_type_flag (tdep->rx_fpsw_type, 6, "CX");
-  append_flags_type_flag (tdep->rx_fpsw_type, 7, "CE");
-  append_flags_type_flag (tdep->rx_fpsw_type, 8, "DN");
-  append_flags_type_flag (tdep->rx_fpsw_type, 10, "EV");
-  append_flags_type_flag (tdep->rx_fpsw_type, 11, "EO");
-  append_flags_type_flag (tdep->rx_fpsw_type, 12, "EZ");
-  append_flags_type_flag (tdep->rx_fpsw_type, 13, "EU");
-  append_flags_type_flag (tdep->rx_fpsw_type, 14, "EX");
-  append_flags_type_flag (tdep->rx_fpsw_type, 26, "FV");
-  append_flags_type_flag (tdep->rx_fpsw_type, 27, "FO");
-  append_flags_type_flag (tdep->rx_fpsw_type, 28, "FZ");
-  append_flags_type_flag (tdep->rx_fpsw_type, 29, "FU");
-  append_flags_type_flag (tdep->rx_fpsw_type, 30, "FX");
-  append_flags_type_flag (tdep->rx_fpsw_type, 31, "FS");
-
   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);
+  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
-  set_gdbarch_register_name (gdbarch, rx_register_name);
-  set_gdbarch_register_type (gdbarch, rx_register_type);
   set_gdbarch_pc_regnum (gdbarch, RX_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, RX_SP_REGNUM);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
-  set_gdbarch_breakpoint_from_pc (gdbarch, rx_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, rx_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, rx_breakpoint::bp_from_kind);
   set_gdbarch_skip_prologue (gdbarch, rx_skip_prologue);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_rx);
-
-  set_gdbarch_unwind_pc (gdbarch, rx_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, rx_unwind_sp);
 
   /* Target builtin data types.  */
   set_gdbarch_char_signed (gdbarch, 0);
@@ -1113,6 +1020,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 32);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+
   if (elf_flags & E_FLAG_RX_64BIT_DOUBLES)
     {
       set_gdbarch_double_bit (gdbarch, 64);
@@ -1136,10 +1044,8 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &rx_frame_unwind);
 
-  /* Methods for saving / extracting a dummy frame's ID.
-     The ID's stack address must match the SP value returned by
-     PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
-  set_gdbarch_dummy_id (gdbarch, rx_dummy_id);
+  /* Methods setting up a dummy call, and extracting the return value from
+     a call.  */
   set_gdbarch_push_dummy_call (gdbarch, rx_push_dummy_call);
   set_gdbarch_return_value (gdbarch, rx_return_value);
 
@@ -1149,13 +1055,12 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_rx_tdep;
-
 /* Register the above initialization routine.  */
 
+void _initialize_rx_tdep ();
 void
-_initialize_rx_tdep (void)
+_initialize_rx_tdep ()
 {
   register_gdbarch_init (bfd_arch_rx, rx_gdbarch_init);
+  initialize_tdesc_rx ();
 }

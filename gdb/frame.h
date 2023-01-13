@@ -1,6 +1,6 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,12 +21,12 @@
 #define FRAME_H 1
 
 /* The following is the intended naming schema for frame functions.
-   It isn't 100% consistent, but it is aproaching that.  Frame naming
+   It isn't 100% consistent, but it is approaching that.  Frame naming
    schema:
 
    Prefixes:
 
-   get_frame_WHAT...(): Get WHAT from the THIS frame (functionaly
+   get_frame_WHAT...(): Get WHAT from the THIS frame (functionally
    equivalent to THIS->next->unwind->what)
 
    frame_unwind_WHAT...(): Unwind THIS frame's WHAT from the NEXT
@@ -70,6 +70,7 @@
    */
 
 #include "language.h"
+#include "cli/cli-option.h"
 
 struct symtab_and_line;
 struct frame_unwind;
@@ -77,6 +78,8 @@ struct frame_base;
 struct block;
 struct gdbarch;
 struct ui_file;
+struct ui_out;
+struct frame_print_options;
 
 /* Status of a given frame's stack.  */
 
@@ -88,6 +91,9 @@ enum frame_id_stack_status
 
   /* Stack address is valid, and is found in the stack_addr field.  */
   FID_STACK_VALID = 1,
+
+  /* Sentinel frame.  */
+  FID_STACK_SENTINEL = 2,
 
   /* Stack address is unavailable.  I.e., there's a valid stack, but
      we don't know where it is (because memory or registers we'd
@@ -149,7 +155,7 @@ struct frame_id
   CORE_ADDR special_addr;
 
   /* Flags to indicate the above fields have valid contents.  */
-  ENUM_BITFIELD(frame_id_stack_status) stack_status : 2;
+  ENUM_BITFIELD(frame_id_stack_status) stack_status : 3;
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
 
@@ -160,10 +166,32 @@ struct frame_id
   int artificial_depth;
 };
 
+/* Save and restore the currently selected frame.  */
+
+class scoped_restore_selected_frame
+{
+public:
+  /* Save the currently selected frame.  */
+  scoped_restore_selected_frame ();
+
+  /* Restore the currently selected frame.  */
+  ~scoped_restore_selected_frame ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_selected_frame);
+
+private:
+
+  /* The ID of the previously selected frame.  */
+  struct frame_id m_fid;
+};
+
 /* Methods for constructing and comparing Frame IDs.  */
 
 /* For convenience.  All fields are zero.  This means "there is no frame".  */
 extern const struct frame_id null_frame_id;
+
+/* Sentinel frame.  */
+extern const struct frame_id sentinel_frame_id;
 
 /* This means "there is no frame ID, but there is a frame".  It should be
    replaced by best-effort frame IDs for the outermost frame, somehow.
@@ -309,6 +337,10 @@ extern void select_frame (struct frame_info *);
 extern struct frame_info *get_prev_frame (struct frame_info *);
 extern struct frame_info *get_next_frame (struct frame_info *);
 
+/* Like get_next_frame(), but allows return of the sentinel frame.  NULL
+   is never returned.  */
+extern struct frame_info *get_next_frame_sentinel_okay (struct frame_info *);
+
 /* Return a "struct frame_info" corresponding to the frame that called
    THIS_FRAME.  Returns NULL if there is no such frame.
 
@@ -319,6 +351,10 @@ extern struct frame_info *get_prev_frame_always (struct frame_info *);
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
+
+/* Given a frame's ID, find the previous frame's ID.  Returns null_frame_id
+   if the frame is not found.  */
+extern struct frame_id get_prev_frame_id_by_id (struct frame_id id);
 
 /* Base attributes of a frame: */
 
@@ -393,8 +429,7 @@ extern int get_frame_func_if_available (struct frame_info *fi, CORE_ADDR *);
    find_frame_symtab(), find_frame_function().  Each will need to be
    carefully considered to determine if the real intent was for it to
    apply to the PC or the adjusted PC.  */
-extern void find_frame_sal (struct frame_info *frame,
-			    struct symtab_and_line *sal);
+extern symtab_and_line find_frame_sal (frame_info *frame);
 
 /* Set the current source and line to the location given by frame
    FRAME, if possible.  */
@@ -480,8 +515,10 @@ extern struct program_space *get_frame_program_space (struct frame_info *);
 /* Unwind THIS frame's program space from the NEXT frame.  */
 extern struct program_space *frame_unwind_program_space (struct frame_info *);
 
+class address_space;
+
 /* Return the frame's address space.  */
-extern struct address_space *get_frame_address_space (struct frame_info *);
+extern const address_space *get_frame_address_space (struct frame_info *);
 
 /* For frames where we can not unwind further, describe why.  */
 
@@ -524,7 +561,7 @@ const char *frame_stop_reason_string (struct frame_info *);
    (up, older) frame is returned.  If VALUEP is NULL, don't
    fetch/compute the value.  Instead just return the location of the
    value.  */
-extern void frame_register_unwind (struct frame_info *frame, int regnum,
+extern void frame_register_unwind (frame_info *frame, int regnum,
 				   int *optimizedp, int *unavailablep,
 				   enum lval_type *lvalp,
 				   CORE_ADDR *addrp, int *realnump,
@@ -536,22 +573,22 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
    fetch fails.  The value methods never return NULL, but usually
    do return a lazy value.  */
 
-extern void frame_unwind_register (struct frame_info *frame,
+extern void frame_unwind_register (frame_info *next_frame,
 				   int regnum, gdb_byte *buf);
 extern void get_frame_register (struct frame_info *frame,
 				int regnum, gdb_byte *buf);
 
-struct value *frame_unwind_register_value (struct frame_info *frame,
+struct value *frame_unwind_register_value (frame_info *next_frame,
 					   int regnum);
 struct value *get_frame_register_value (struct frame_info *frame,
 					int regnum);
 
-extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
+extern LONGEST frame_unwind_register_signed (frame_info *next_frame,
 					     int regnum);
 extern LONGEST get_frame_register_signed (struct frame_info *frame,
 					  int regnum);
-extern ULONGEST frame_unwind_register_unsigned (struct frame_info *frame,
-					       int regnum);
+extern ULONGEST frame_unwind_register_unsigned (frame_info *frame,
+						int regnum);
 extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 					     int regnum);
 
@@ -634,24 +671,34 @@ extern int safe_frame_unwind_memory (struct frame_info *this_frame,
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);
 
 /* Return the previous frame's architecture.  */
-extern struct gdbarch *frame_unwind_arch (struct frame_info *frame);
+extern struct gdbarch *frame_unwind_arch (frame_info *next_frame);
 
 /* Return the previous frame's architecture, skipping inline functions.  */
 extern struct gdbarch *frame_unwind_caller_arch (struct frame_info *frame);
 
 
-/* Values for the source flag to be used in print_frame_info_base().  */
+/* Values for the source flag to be used in print_frame_info ().
+   For all the cases below, the address is never printed if
+   'set print address' is off.  When 'set print address' is on,
+   the address is printed if the program counter is not at the
+   beginning of the source line of the frame
+   and PRINT_WHAT is != LOC_AND_ADDRESS.  */
 enum print_what
-  { 
-    /* Print only the source line, like in stepi.  */
-    SRC_LINE = -1, 
-    /* Print only the location, i.e. level, address (sometimes)
-       function, args, file, line, line num.  */
+  {
+    /* Print only the address, source line, like in stepi.  */
+    SRC_LINE = -1,
+    /* Print only the location, i.e. level, address,
+       function, args (as controlled by 'set print frame-arguments'),
+       file, line, line num.  */
     LOCATION,
     /* Print both of the above.  */
-    SRC_AND_LOC, 
-    /* Print location only, but always include the address.  */
-    LOC_AND_ADDRESS 
+    SRC_AND_LOC,
+    /* Print location only, print the address even if the program counter
+       is at the beginning of the source line.  */
+    LOC_AND_ADDRESS,
+    /* Print only level and function,
+       i.e. location only, without address, file, line, line num.  */
+    SHORT_LOCATION
   };
 
 /* Allocate zero initialized memory from the frame cache obstack.
@@ -664,8 +711,10 @@ extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) \
   ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
+class readonly_detached_regcache;
 /* Create a regcache, and copy the frame's registers into it.  */
-struct regcache *frame_save_as_regcache (struct frame_info *this_frame);
+std::unique_ptr<readonly_detached_regcache> frame_save_as_regcache
+    (struct frame_info *this_frame);
 
 extern const struct block *get_frame_block (struct frame_info *,
 					    CORE_ADDR *addr_in_block);
@@ -704,11 +753,20 @@ extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
+/* Wrapper over print_stack_frame modifying current_uiout with UIOUT for
+   the function call.  */
+
+extern void print_stack_frame_to_uiout (struct ui_out *uiout,
+					struct frame_info *, int print_level,
+					enum print_what print_what,
+					int set_current_sal);
+
 extern void print_stack_frame (struct frame_info *, int print_level,
 			       enum print_what print_what,
 			       int set_current_sal);
 
-extern void print_frame_info (struct frame_info *, int print_level,
+extern void print_frame_info (const frame_print_options &fp_opts,
+			      struct frame_info *, int print_level,
 			      enum print_what print_what, int args,
 			      int set_current_sal);
 
@@ -719,6 +777,20 @@ extern int deprecated_frame_register_read (struct frame_info *frame, int regnum,
 
 /* From stack.c.  */
 
+/* The possible choices of "set print frame-arguments".  */
+extern const char print_frame_arguments_all[];
+extern const char print_frame_arguments_scalars[];
+extern const char print_frame_arguments_none[];
+
+/* The possible choices of "set print frame-info".  */
+extern const char print_frame_info_auto[];
+extern const char print_frame_info_source_line[];
+extern const char print_frame_info_location[];
+extern const char print_frame_info_source_and_location[];
+extern const char print_frame_info_location_and_address[];
+extern const char print_frame_info_short_location[];
+
+/* The possible choices of "set print entry-values".  */
 extern const char print_entry_values_no[];
 extern const char print_entry_values_only[];
 extern const char print_entry_values_preferred[];
@@ -726,22 +798,38 @@ extern const char print_entry_values_if_needed[];
 extern const char print_entry_values_both[];
 extern const char print_entry_values_compact[];
 extern const char print_entry_values_default[];
-extern const char *print_entry_values;
+
+/* Data for the frame-printing "set print" settings exposed as command
+   options.  */
+
+struct frame_print_options
+{
+  const char *print_frame_arguments = print_frame_arguments_scalars;
+  const char *print_frame_info = print_frame_info_auto;
+  const char *print_entry_values = print_entry_values_default;
+
+  /* If true, don't invoke pretty-printers for frame
+     arguments.  */
+  bool print_raw_frame_arguments;
+};
+
+/* The values behind the global "set print ..." settings.  */
+extern frame_print_options user_frame_print_options;
 
 /* Inferior function parameter value read in from a frame.  */
 
 struct frame_arg
 {
   /* Symbol for this parameter used for example for its name.  */
-  struct symbol *sym;
+  struct symbol *sym = nullptr;
 
   /* Value of the parameter.  It is NULL if ERROR is not NULL; if both VAL and
      ERROR are NULL this parameter's value should not be printed.  */
-  struct value *val;
+  struct value *val = nullptr;
 
   /* String containing the error message, it is more usually NULL indicating no
      error occured reading this parameter.  */
-  char *error;
+  gdb::unique_xmalloc_ptr<char> error;
 
   /* One of the print_entry_values_* entries as appropriate specifically for
      this frame_arg.  It will be different from print_entry_values.  With
@@ -752,27 +840,33 @@ struct frame_arg
      value - print_entry_values_compact is not permitted fi ui_out_is_mi_like_p
      (in such case print_entry_values_no and print_entry_values_only is used
      for each parameter kind specifically.  */
-  const char *entry_kind;
+  const char *entry_kind = nullptr;
 };
 
-extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
+extern void read_frame_arg (const frame_print_options &fp_opts,
+			    symbol *sym, frame_info *frame,
 			    struct frame_arg *argp,
 			    struct frame_arg *entryargp);
 extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
 			      struct frame_arg *argp);
 
-extern void args_info (char *, int);
+extern void info_args_command (const char *, int);
 
-extern void locals_info (char *, int);
+extern void info_locals_command (const char *, int);
 
-extern void return_command (char *, int);
+extern void return_command (const char *, int);
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
-   Return a cleanup which should be called if unwinding fails, and
-   discarded if it succeeds.  */
+   If sniffing fails, the caller should be sure to call
+   frame_cleanup_after_sniffer.  */
 
-struct cleanup *frame_prepare_for_sniffer (struct frame_info *frame,
-					   const struct frame_unwind *unwind);
+extern void frame_prepare_for_sniffer (struct frame_info *frame,
+				       const struct frame_unwind *unwind);
+
+/* Clean up after a failed (wrong unwinder) attempt to unwind past
+   FRAME.  */
+
+extern void frame_cleanup_after_sniffer (struct frame_info *frame);
 
 /* Notes (cagney/2002-11-27, drow/2003-09-06):
 
@@ -825,5 +919,43 @@ extern enum language get_frame_language (struct frame_info *frame);
    chain.  */
 
 extern struct frame_info *skip_tailcall_frames (struct frame_info *frame);
+
+/* Return the first frame above FRAME or FRAME of which the code is
+   writable.  */
+
+extern struct frame_info *skip_unwritable_frames (struct frame_info *frame);
+
+/* Data for the "set backtrace" settings.  */
+
+struct set_backtrace_options
+{
+  /* Flag to indicate whether backtraces should continue past
+     main.  */
+  bool backtrace_past_main = false;
+
+  /* Flag to indicate whether backtraces should continue past
+     entry.  */
+  bool backtrace_past_entry = false;
+
+  /* Upper bound on the number of backtrace levels.  Note this is not
+     exposed as a command option, because "backtrace" and "frame
+     apply" already have other means to set a frame count limit.  */
+  unsigned int backtrace_limit = UINT_MAX;
+};
+
+/* The corresponding option definitions.  */
+extern const gdb::option::option_def set_backtrace_option_defs[2];
+
+/* The values behind the global "set backtrace ..." settings.  */
+extern set_backtrace_options user_set_backtrace_options;
+
+/* Mark that the PC value is masked for the previous frame.  */
+
+extern void set_frame_previous_pc_masked (struct frame_info *frame);
+
+/* Get whether the PC value is masked for the given frame.  */
+
+extern bool get_frame_pc_masked (const struct frame_info *frame);
+
 
 #endif /* !defined (FRAME_H)  */

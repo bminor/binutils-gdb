@@ -1,4 +1,4 @@
-# Copyright 2010-2016 Free Software Foundation, Inc.
+# Copyright 2010-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,8 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-# are we on a target board
-if {[is_remote target] || [skip_shlib_tests]} {
+if [skip_shlib_tests] {
+    return
+}
+
+# The testcase assumes the target can access the OBJDIR.
+if [is_remote target] {
+    return
+}
+
+# We need to be able to influence the target's environment and working
+# directory.  Can't do that if when we connect the inferior is already
+# running.
+if [use_gdb_stub] {
     return
 }
 
@@ -36,15 +47,16 @@ if { [get_compiler_info]
      || [gdb_gnu_strip_debug $binlibfile]
      || [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != ""
      || [gdb_compile "${objfile} ${binlibfile}" "${binfile}" executable {}] != "" } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
 clean_restart $executable
-gdb_load_shlibs ${binlibfile}
+gdb_load_shlib ${binlibfile}
 
 gdb_test_no_output "set env LD_LIBRARY_PATH=:"
-gdb_test "cd ${binlibfiledir}" "Working directory [string_to_regexp ${binlibfiledir}]\\." "cd OBJDIR/${subdir}"
+gdb_test_no_output "set cwd ${binlibfiledir}" \
+    "set cwd OBJDIR/${subdir}"
 
 set test "library loaded"
 if [runto_main] {

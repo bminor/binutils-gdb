@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright (C) 1996-2016 Free Software Foundation, Inc.
+   Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,13 +35,13 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
-#include "objfiles.h"
-
 #include "m32r-tdep.h"
+#include <algorithm>
+
+/* The size of the argument registers (r0 - r3) in bytes.  */
+#define M32R_ARG_REGISTER_SIZE 4
 
 /* Local functions */
-
-extern void _initialize_m32r_tdep (void);
 
 static CORE_ADDR
 m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
@@ -91,7 +91,7 @@ m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
     return val;			/* return error */
 
   memcpy (bp_tgt->shadow_contents, contents_cache, 4);
-  bp_tgt->placed_size = bp_tgt->shadow_len = 4;
+  bp_tgt->shadow_len = 4;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -165,9 +165,21 @@ m32r_memory_remove_breakpoint (struct gdbarch *gdbarch,
   return val;
 }
 
+/* Implement the breakpoint_kind_from_pc gdbarch method.  */
+
+static int
+m32r_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+{
+  if ((*pcptr & 3) == 0)
+    return 4;
+  else
+    return 2;
+}
+
+/* Implement the sw_breakpoint_from_kind gdbarch method.  */
+
 static const gdb_byte *
-m32r_breakpoint_from_pc (struct gdbarch *gdbarch,
-			 CORE_ADDR *pcptr, int *lenptr)
+m32r_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
   static gdb_byte be_bp_entry[] = {
     0x10, 0xf1, 0x70, 0x00
@@ -175,41 +187,22 @@ m32r_breakpoint_from_pc (struct gdbarch *gdbarch,
   static gdb_byte le_bp_entry[] = {
     0x00, 0x70, 0xf1, 0x10
   };	/* dpt -> nop */
-  gdb_byte *bp;
+
+  *size = kind;
 
   /* Determine appropriate breakpoint.  */
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    {
-      if ((*pcptr & 3) == 0)
-	{
-	  bp = be_bp_entry;
-	  *lenptr = 4;
-	}
-      else
-	{
-	  bp = be_bp_entry;
-	  *lenptr = 2;
-	}
-    }
+    return be_bp_entry;
   else
     {
-      if ((*pcptr & 3) == 0)
-	{
-	  bp = le_bp_entry;
-	  *lenptr = 4;
-	}
+      if (kind == 4)
+	return le_bp_entry;
       else
-	{
-	  bp = le_bp_entry + 2;
-	  *lenptr = 2;
-	}
+	return le_bp_entry + 2;
     }
-
-  return bp;
 }
 
-
-char *m32r_register_names[] = {
+static const char *m32r_register_names[] = {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "fp", "lr", "sp",
   "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",
@@ -251,7 +244,7 @@ static void
 m32r_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
@@ -355,9 +348,7 @@ decode_prologue (struct gdbarch *gdbarch,
 
       if ((insn & 0xf0ff) == 0x207f)
 	{			/* st reg, @-sp */
-	  int regno;
 	  framesize += 4;
-	  regno = ((insn >> 8) & 0xf);
 	  after_prologue = 0;
 	  continue;
 	}
@@ -486,7 +477,7 @@ m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	   the end of the function.  In this case, there probably isn't a
 	   prologue.  */
 	{
-	  func_end = min (func_end, func_addr + DEFAULT_SEARCH_LIMIT);
+	  func_end = std::min (func_end, func_addr + DEFAULT_SEARCH_LIMIT);
 	}
     }
   else
@@ -658,24 +649,10 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static CORE_ADDR
-m32r_read_pc (struct regcache *regcache)
-{
-  ULONGEST pc;
-  regcache_cooked_read_unsigned (regcache, M32R_PC_REGNUM, &pc);
-  return pc;
-}
-
-static CORE_ADDR
-m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, M32R_SP_REGNUM);
-}
-
-
-static CORE_ADDR
 m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		      struct value **args, CORE_ADDR sp, int struct_return,
+		      struct value **args, CORE_ADDR sp,
+		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -686,7 +663,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   enum type_code typecode;
   CORE_ADDR regval;
   gdb_byte *val;
-  gdb_byte valbuf[MAX_REGISTER_SIZE];
+  gdb_byte valbuf[M32R_ARG_REGISTER_SIZE];
   int len;
 
   /* First force sp to a 4-byte alignment.  */
@@ -699,7 +676,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
      Both adjust the register count and store that value.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
@@ -778,7 +755,7 @@ static void
 m32r_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *dst)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;
@@ -812,14 +789,6 @@ m32r_return_value (struct gdbarch *gdbarch, struct value *function,
 	m32r_store_return_value (valtype, regcache, writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-}
-
-
-
-static CORE_ADDR
-m32r_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, M32R_PC_REGNUM);
 }
 
 /* Given a GDB frame, determine the address of the calling function's
@@ -888,18 +857,6 @@ static const struct frame_base m32r_frame_base = {
   m32r_frame_base_address
 };
 
-/* Assuming THIS_FRAME is a dummy, return the frame ID of that dummy
-   frame.  The frame ID's base needs to match the TOS value saved by
-   save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
-
-static struct frame_id
-m32r_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, M32R_SP_REGNUM);
-  return frame_id_build (sp, get_frame_pc (this_frame));
-}
-
-
 static gdbarch_init_ftype m32r_gdbarch_init;
 
 static struct gdbarch *
@@ -914,11 +871,11 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XNEW (struct gdbarch_tdep);
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  set_gdbarch_read_pc (gdbarch, m32r_read_pc);
-  set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
+  set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
 
   set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);
   set_gdbarch_pc_regnum (gdbarch, M32R_PC_REGNUM);
@@ -931,7 +888,8 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, m32r_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, m32r_breakpoint_kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, m32r_sw_breakpoint_from_kind);
   set_gdbarch_memory_insert_breakpoint (gdbarch,
 					m32r_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch,
@@ -940,16 +898,6 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, m32r_frame_align);
 
   frame_base_set_default (gdbarch, &m32r_frame_base);
-
-  /* Methods for saving / extracting a dummy frame's ID.  The ID's
-     stack address must match the SP value returned by
-     PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
-  set_gdbarch_dummy_id (gdbarch, m32r_dummy_id);
-
-  /* Return the unwound PC value.  */
-  set_gdbarch_unwind_pc (gdbarch, m32r_unwind_pc);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_m32r);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -963,8 +911,9 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+void _initialize_m32r_tdep ();
 void
-_initialize_m32r_tdep (void)
+_initialize_m32r_tdep ()
 {
   register_gdbarch_init (bfd_arch_m32r, m32r_gdbarch_init);
 }

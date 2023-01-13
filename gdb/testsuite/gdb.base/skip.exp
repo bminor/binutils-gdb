@@ -1,4 +1,4 @@
-#   Copyright 2011-2016 Free Software Foundation, Inc.
+#   Copyright 2011-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,9 +16,13 @@
 # This file was written by Justin Lebar. (justin.lebar@gmail.com)
 # And further hacked on by Doug Evans. (dje@google.com)
 
-if { [prepare_for_testing skip.exp "skip" \
-                          {skip.c skip1.c } \
-                          {debug nowarnings}] } {
+load_lib completion-support.exp
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" "skip" \
+			  {skip.c skip1.c } \
+			  {debug nowarnings}] } {
     return -1
 }
 
@@ -46,7 +50,7 @@ gdb_test "skip -x" "Invalid skip option: -x"
 gdb_test "skip -rfu foo.* xyzzy" "Invalid argument: xyzzy"
 
 if ![runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 
@@ -69,9 +73,9 @@ gdb_test "skip function baz" "Function baz will be skipped when stepping\."
 gdb_test "skip enable 999" "No skiplist entries found with number 999."
 gdb_test "skip disable 999" "No skiplist entries found with number 999."
 gdb_test "skip delete 999" "No skiplist entries found with number 999."
-gdb_test "skip enable a" "Args must be numbers or '\\$' variables."
-gdb_test "skip disable a" "Args must be numbers or '\\$' variables."
-gdb_test "skip delete a" "Args must be numbers or '\\$' variables."
+gdb_test "skip enable a" "Arguments must be numbers or '\\$' variables."
+gdb_test "skip disable a" "Arguments must be numbers or '\\$' variables."
+gdb_test "skip delete a" "Arguments must be numbers or '\\$' variables."
 
 # Ask for info on a skiplist entry which doesn't exist.
 
@@ -91,7 +95,7 @@ gdb_test "info skip" \
 # right over it and go to the second line of main().
 
 if ![runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 
@@ -112,7 +116,7 @@ with_test_prefix "step after deleting 1" {
 	"info skip (delete 1)"
 
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -132,14 +136,17 @@ with_test_prefix "step after disabling 3" {
 	"info skip shows entry as disabled"
 
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
     gdb_test "step" "bar \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from foo()
-    gdb_test "step" "foo \\(\\) at.*" "step 3"
-    gdb_test "step" ".*" "step 4"; # Return from bar()
+    gdb_test "step" ".*" "step 2"; # Return from bar()
+    # With gcc 9.2.0 we jump once back to main before entering foo here.
+    # If that happens try to step a second time.
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
+    gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
 
@@ -153,7 +160,7 @@ with_test_prefix "step after enable 3" {
 	"info skip shows entry as enabled"
 
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -200,8 +207,7 @@ with_test_prefix "admin" {
     gdb_test "info skip 2-3" \
 	"Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*
 2\\s+y\\s+n\\s+<none>\\s+n\\s+main\\s*
-3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
-	"info skip 2-3"
+3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*"
 
     gdb_test "skip delete 2 3"
     gdb_test "info skip" \
@@ -224,7 +230,7 @@ gdb_test "skip -rfu ^b.z$" "Function\\(s\\) \\^b\\.z\\$ will be skipped when ste
 
 with_test_prefix "step using -fi" {
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -237,7 +243,7 @@ with_test_prefix "step using -fi" {
 
 with_test_prefix "step using -gfi" {
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -250,7 +256,7 @@ with_test_prefix "step using -gfi" {
 
 with_test_prefix "step using -fu for baz" {
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -258,14 +264,17 @@ with_test_prefix "step using -fu for baz" {
     gdb_test_no_output "skip enable 7"
     gdb_test "step" "bar \\(\\) at.*" "step 1"
     gdb_test "step" ".*" "step 2"; # Return from bar()
-    gdb_test "step" "foo \\(\\) at.*" "step 3"
+    # With gcc 9.2.0 we jump once back to main before entering foo here.
+    # If that happens try to step a second time.
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
     gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
 
 with_test_prefix "step using -rfu for baz" {
     if ![runto_main] {
-	fail "Can't run to main"
+	fail "can't run to main"
 	return
     }
 
@@ -273,7 +282,10 @@ with_test_prefix "step using -rfu for baz" {
     gdb_test_no_output "skip enable 8"
     gdb_test "step" "bar \\(\\) at.*" "step 1"
     gdb_test "step" ".*" "step 2"; # Return from bar()
-    gdb_test "step" "foo \\(\\) at.*" "step 3"
+    # With gcc 9.2.0 we jump once back to main before entering foo here.
+    # If that happens try to step a second time.
+    gdb_test "step" "foo \\(\\) at.*" "step 3" \
+	"main \\(\\) at .*\r\n$gdb_prompt " "step"
     gdb_test "step" ".*" "step 4"; # Return from foo()
     gdb_test "step" "main \\(\\) at.*" "step 5"
 }
@@ -284,7 +296,7 @@ with_test_prefix "step using -fi + -fu" {
     gdb_test_no_output "skip delete"
 
     if ![runto test_skip_file_and_function no-message] {
-	fail "Can't run to test_skip_file_and_function"
+	fail "can't run to test_skip_file_and_function"
 	return
     }
 
@@ -297,3 +309,35 @@ with_test_prefix "step using -fi + -fu" {
     gdb_test "step" ".*" "step 4"; # Skip over test_skip()
     gdb_test "step" "test_skip_file_and_function \\(\\) at.*" "step 5"; # Return from skip1_test_skip_file_and_function()
 }
+
+with_test_prefix "skip delete completion" {
+    global binfile
+    clean_restart "${binfile}"
+    if ![runto_main] {
+	fail "can't run to main"
+	return
+    }
+
+    # Create a bunch of skips, don't care what they are.
+    for {set i 0} {$i < 12} {incr i} {
+	gdb_test "skip" ".*" "add skip $i"
+    }
+
+    set all_numbers { "1" "10" "11" "12" "2" "3" "4" "5" "6" "7" "8" "9" }
+
+    # Test completing single numbers.
+    test_gdb_complete_multiple "skip delete " "" "" $all_numbers
+    test_gdb_complete_multiple "skip delete " "1" "" { "1" "10" "11" "12" }
+    test_gdb_complete_multiple "skip delete 2 " "" "" $all_numbers
+    test_gdb_complete_unique "skip delete 11" "skip delete 11"
+
+    # Test completing ranges.
+    test_gdb_complete_multiple "skip delete 2-" "" "" $all_numbers
+    test_gdb_complete_unique "skip delete 2-5" "skip delete 2-5"
+
+    # Test cases with no completion.
+    test_gdb_complete_none "skip delete 123"
+    test_gdb_complete_none "skip delete a1"
+    test_gdb_complete_none "skip delete 2-33"
+}
+

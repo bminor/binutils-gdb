@@ -1,7 +1,7 @@
 # Linker script for PE.
 #
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
-# 
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -21,13 +21,13 @@ if test "${RELOCATING}"; then
   R_TEXT='*(SORT(.text$*))'
   if test "x$LD_FLAG" = "xauto_import" ; then
     R_DATA='*(SORT(.data$*))
-            *(.rdata)
+	    *(.rdata)
 	    *(SORT(.rdata$*))'
     R_RDATA=''
   else
     R_DATA='*(SORT(.data$*))'
     R_RDATA='*(.rdata)
-             *(SORT(.rdata$*))'
+	     *(SORT(.rdata$*))'
   fi
   R_IDATA234='
     KEEP (SORT(*)(.idata$2))
@@ -60,12 +60,17 @@ else
   R_IDATA234=
   R_IDATA5=
   R_IDATA67=
-  R_CRT=
+  R_CRT_XC=
+  R_CRT_XI=
+  R_CRT_XL=
+  R_CRT_XP=
+  R_CRT_XT=
+  R_TLS='*(.tls)'
   R_RSRC='*(.rsrc)'
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -85,28 +90,55 @@ SECTIONS
   ${RELOCATING+. = ALIGN(__section_alignment__);}
   .text ${RELOCATING+ __image_base__ + ( __section_alignment__ < ${TARGET_PAGE_SIZE} ? . : __section_alignment__ )} :
   {
-    ${RELOCATING+ KEEP(*(.init))}
+    ${RELOCATING+KEEP (*(SORT_NONE(.init)))}
     *(.text)
     ${R_TEXT}
     ${RELOCATING+ *(.text.*)}
     ${RELOCATING+ *(.gnu.linkonce.t.*)}
-    *(.glue_7t)
-    *(.glue_7)
+    ${RELOCATING+*(.glue_7t)}
+    ${RELOCATING+*(.glue_7)}
     ${CONSTRUCTING+. = ALIGN(8);}
-    ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.ctors));
-			KEEP (*(.ctor));
-			KEEP (*(SORT(.ctors.*)));
-			LONG (0); LONG (0); }
-    ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
-			LONG (-1); LONG (-1);
-			KEEP (*(.dtors));
-			KEEP (*(.dtor));
-			KEEP (*(SORT(.dtors.*)));
-			LONG (0); LONG (0); }
-    ${RELOCATING+ KEEP (*(.fini))}
-    /* ??? Why is .gcc_exc here?  */
+    ${CONSTRUCTING+
+       /* Note: we always define __CTOR_LIST__ and ___CTOR_LIST__ here,
+          we do not PROVIDE them.  This is because the ctors.o startup
+	  code in libgcc defines them as common symbols, with the 
+          expectation that they will be overridden by the definitions
+	  here.  If we PROVIDE the symbols then they will not be
+	  overridden and global constructors will not be run.
+	  See PR 22762 for more details.
+	  
+	  This does mean that it is not possible for a user to define
+	  their own __CTOR_LIST__ and __DTOR_LIST__ symbols; if they do,
+	  the content from those variables are included but the symbols
+	  defined here silently take precedence.  If they truly need to
+	  be redefined, a custom linker script will have to be used.
+	  (The custom script can just be a copy of this script with the
+	  PROVIDE() qualifiers added).
+
+	  In particular this means that ld -Ur does not work, because
+	  the proper __CTOR_LIST__ set by ld -Ur is overridden by a
+	  bogus __CTOR_LIST__ set by the final link.  See PR 46.  */
+       ___CTOR_LIST__ = .;
+       __CTOR_LIST__ = .;
+       LONG (-1); LONG (-1);
+       KEEP (*(.ctors));
+       KEEP (*(.ctor));
+       KEEP (*(SORT_BY_NAME(.ctors.*)));
+       LONG (0); LONG (0);
+     }
+    ${CONSTRUCTING+
+       /* See comment about __CTOR_LIST__ above.  The same reasoning
+    	  applies here too.  */
+       ___DTOR_LIST__ = .;
+       __DTOR_LIST__ = .;
+       LONG (-1); LONG (-1);
+       KEEP (*(.dtors));
+       KEEP (*(.dtor));
+       KEEP (*(SORT_BY_NAME(.dtors.*)));
+       LONG (0); LONG (0);
+     }
+    ${RELOCATING+KEEP (*(SORT_NONE(.fini)))}
+    ${RELOCATING+/* ??? Why is .gcc_exc here?  */}
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+PROVIDE (etext = .);}
     ${RELOCATING+ KEEP (*(.gcc_except_table))}
@@ -122,7 +154,7 @@ SECTIONS
   {
     ${RELOCATING+__data_start__ = . ;}
     *(.data)
-    *(.data2)
+    ${RELOCATING+*(.data2)}
     ${R_DATA}
     KEEP(*(.jcr))
     ${RELOCATING+__data_end__ = . ;}
@@ -132,8 +164,9 @@ SECTIONS
   .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${R_RDATA}
+    . = ALIGN(4);
     ${RELOCATING+__rt_psrelocs_start = .;}
-    KEEP(*(.rdata_runtime_pseudo_reloc))
+    ${RELOCATING+KEEP(*(.rdata_runtime_pseudo_reloc))}
     ${RELOCATING+__rt_psrelocs_end = .;}
   }
   ${RELOCATING+__rt_psrelocs_size = __rt_psrelocs_end - __rt_psrelocs_start;}
@@ -144,17 +177,17 @@ SECTIONS
 
   .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP (*(.eh_frame*))
+    KEEP (*(.eh_frame${RELOCATING+*}))
   }
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP(*(.pdata*))
+    KEEP(*(.pdata${RELOCATING+*}))
   }
 
   .xdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    KEEP(*(.xdata*))
+    KEEP(*(.xdata${RELOCATING+*}))
   }
 
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :
@@ -191,7 +224,7 @@ SECTIONS
     ${R_IDATA67}
   }
   .CRT ${RELOCATING+BLOCK(__section_alignment__)} :
-  { 					
+  {
     ${RELOCATING+___crt_xc_start__ = . ;}
     ${R_CRT_XC}
     ${RELOCATING+___crt_xc_end__ = . ;}
@@ -214,7 +247,7 @@ SECTIONS
      be at the beginning of the section to enable SECREL32 relocations with TLS
      data.  */
   .tls ${RELOCATING+BLOCK(__section_alignment__)} :
-  { 					
+  {
     ${RELOCATING+___tls_start__ = . ;}
     ${R_TLS}
     ${RELOCATING+___tls_end__ = . ;}
@@ -409,6 +442,16 @@ SECTIONS
   .zdebug_types ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
     *(.zdebug_types${RELOCATING+ .zdebug.gnu.linkonce.wt.*})
+  }
+
+  /* For Go and Rust.  */
+  .debug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_gdb_scripts)
+  }
+  .zdebug_gdb_scripts ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.zdebug_gdb_scripts)
   }
 }
 EOF

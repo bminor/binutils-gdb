@@ -1,6 +1,6 @@
 /* Target-dependent code for Cygwin running on i386's, for GDB.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -110,14 +110,14 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   if (!startswith (sect->name, ".module"))
     return;
 
-  buf = (gdb_byte *) xmalloc (bfd_get_section_size (sect) + 1);
+  buf = (gdb_byte *) xmalloc (bfd_section_size (sect) + 1);
   if (!buf)
     {
       printf_unfiltered ("memory allocation failed for %s\n", sect->name);
       goto out;
     }
   if (!bfd_get_section_contents (abfd, sect,
-				 buf, 0, bfd_get_section_size (sect)))
+				 buf, 0, bfd_section_size (sect)))
     goto out;
 
 
@@ -130,14 +130,14 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   module_name_size =
     extract_unsigned_integer (buf + 8, 4, byte_order);
 
-  if (12 + module_name_size > bfd_get_section_size (sect))
+  if (12 + module_name_size > bfd_section_size (sect))
     goto out;
   module_name = (char *) buf + 12;
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
     windows_xfer_shared_library (module_name, base_addr,
-				 data->gdbarch, data->obstack);
+				 NULL, data->gdbarch, data->obstack);
   data->module_count++;
 
 out:
@@ -178,16 +178,11 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 
 /* This is how we want PTIDs from core files to be printed.  */
 
-static char *
+static std::string
 i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
-  static char buf[80];
-
-  if (ptid_get_lwp (ptid) != 0)
-    {
-      snprintf (buf, sizeof (buf), "Thread 0x%lx", ptid_get_lwp (ptid));
-      return buf;
-    }
+  if (ptid.lwp () != 0)
+    return string_printf ("Thread 0x%lx", ptid.lwp ());
 
   return normal_pid_to_str (ptid);
 }
@@ -234,7 +229,7 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static enum gdb_osabi
 i386_cygwin_osabi_sniffer (bfd *abfd)
 {
-  char *target_name = bfd_get_target (abfd);
+  const char *target_name = bfd_get_target (abfd);
 
   if (strcmp (target_name, "pei-i386") == 0)
     return GDB_OSABI_CYGWIN;
@@ -245,18 +240,16 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
     {
       asection *section = bfd_get_section_by_name (abfd, ".reg");
       if (section
-	  && bfd_section_size (abfd, section) == I386_WINDOWS_SIZEOF_GREGSET)
+	  && bfd_section_size (section) == I386_WINDOWS_SIZEOF_GREGSET)
 	return GDB_OSABI_CYGWIN;
     }
 
   return GDB_OSABI_UNKNOWN;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_cygwin_tdep (void);
-
+void _initialize_i386_cygwin_tdep ();
 void
-_initialize_i386_cygwin_tdep (void)
+_initialize_i386_cygwin_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
                                   i386_cygwin_osabi_sniffer);

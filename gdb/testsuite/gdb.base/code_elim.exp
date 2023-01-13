@@ -1,4 +1,4 @@
-# Copyright 2002-2016 Free Software Foundation, Inc.
+# Copyright 2002-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,38 +28,22 @@ lappend opts "additional_flags=-fdata-sections"
 lappend opts "additional_flags=-Wl,-gc-sections"
 lappend opts "additional_flags=-Wl,-e,main"
 
+# Place variables in .data instead of .sdata.
+if {[istarget "riscv*-*-*"]} {
+   lappend opts "additional_flags=-msmall-data-limit=0"
+}
+
 remote_exec build "rm -f ${binfile1}"
 remote_exec build "rm -f ${binfile2}"
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable $opts] != "" } {
-     untested code_elim.exp
+     untested "failed to compile"
      return -1
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $opts] != "" } {
-     untested code_elim.exp
+     untested "failed to compile"
      return -1
-}
-
-proc get_var_address { var } {
-    global gdb_prompt hex
-
-    # Match output like:
-    # $1 = (int *) 0x0
-    # $5 = (int (*)()) 0
-    # $6 = (int (*)()) 0x24 <function_bar>
-
-    gdb_test_multiple "print &${var}" "get address of ${var}" {
-	-re "\\\$\[0-9\]+ = \\(.*\\) (0|$hex)( <${var}>)?\[\r\n\]+${gdb_prompt} $" {
-	    pass "get address of ${var}"
-	    if { $expect_out(1,string) == "0" } {
-		return "0x0"
-	    } else {
-		return $expect_out(1,string)
-	    }
-	}
-    }
-    return ""
 }
 
 proc not_null_var_address { var } {
@@ -96,7 +80,7 @@ gdb_exit
 gdb_start
 
 gdb_test "symbol-file ${binfile1}" \
-	"Reading symbols from .*${testfile1}\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
+	"Reading symbols from .*${testfile1}\\.\\.\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
 	"symbol-file ${testfile1}"
 
 with_test_prefix "single psymtabs" {
@@ -130,13 +114,13 @@ gdb_start
 
 with_test_prefix "order1" {
     gdb_test "add-symbol-file ${binfile1} 0x100000 -s .bss 0x120000" \
-	    "Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
+	    "Reading symbols from .*${testfile1}\\.\\.\\." \
 	    "add-symbol-file ${testfile1} 0x100000" \
 	    "add symbol table from file \".*${testfile1}\" at.*\\(y or n\\) " \
 	    "y"
 
     gdb_test "add-symbol-file ${binfile2} 0x200000 -s .data 0x210000 -s .bss 0x220000" \
-	    "Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
+	    "Reading symbols from .*${testfile2}\\.\\.\\." \
 	    "add-symbol-file ${testfile2} 0x200000" \
 	    "add symbol table from file \".*${testfile2}\" at.*\\(y or n\\) " \
 	    "y"
@@ -154,13 +138,13 @@ gdb_start
 
 with_test_prefix "order2" {
     gdb_test "add-symbol-file ${binfile2} 0x200000 -s .data 0x210000 -s .bss 0x220000" \
-	    "Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
+	    "Reading symbols from .*${testfile2}\\.\\.\\." \
 	    "add-symbol-file ${testfile2} 0x200000" \
 	    "add symbol table from file \".*${testfile2}\" at.*\\(y or n\\) " \
 	    "y"
 
     gdb_test "add-symbol-file ${binfile1} 0x100000 -s .bss 0x120000" \
-	    "Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
+	    "Reading symbols from .*${testfile1}\\.\\.\\." \
 	    "add-symbol-file ${testfile1} 0x100000" \
 	    "add symbol table from file \".*${testfile1}\" at.*\\(y or n\\) " \
 	    "y"

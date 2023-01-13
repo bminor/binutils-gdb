@@ -1,5 +1,5 @@
 /* tc-moxie.c -- Assemble code for moxie
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -73,8 +73,6 @@ md_begin (void)
 
   for (count = 0, opcode = moxie_form3_opc_info; count++ < 10; opcode++)
     hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
-
-  target_big_endian = TARGET_BYTES_BIG_ENDIAN;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
 }
@@ -535,11 +533,19 @@ md_assemble (char *str)
 		     BFD_RELOC_MOXIE_10_PCREL);
       }
       break;
+    case MOXIE_BAD:
+      iword = 0;
+      while (ISSPACE (*op_end))
+	op_end++;
+      if (*op_end != 0)
+	as_warn (_("extra stuff on line ignored"));
+      break;
     default:
       abort ();
     }
 
   md_number_to_chars (p, iword, 2);
+  dwarf2_emit_insn (2);
 
   while (ISSPACE (*op_end))
     op_end++;

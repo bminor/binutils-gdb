@@ -13,14 +13,14 @@ There are two ways to run the testsuite and pass additional parameters
 to DejaGnu.  The first is to do `make check' in the main build
 directory and specifying the makefile variable `RUNTESTFLAGS':
 
-	 make check RUNTESTFLAGS='TRANSCRIPT=y gdb.base/a2-run.exp'
+	 make check RUNTESTFLAGS='GDB=/usr/bin/gdb gdb.base/a2-run.exp'
 
 The second is to cd to the testsuite directory and invoke the DejaGnu
 `runtest' command directly.
 
 	cd testsuite
 	make site.exp
-	runtest TRANSCRIPT=y
+	runtest GDB=/usr/bin/gdb
 
 (The `site.exp' file contains a handful of useful variables like host
 and target triplets, and pathnames.)
@@ -95,6 +95,27 @@ example:
 
 The script will output its analysis report to the standard output.
 
+Re-running Tests Outside The Testsuite
+**************************************
+
+When running a test, the arguments used to run GDB are saved to gdb.cmd and
+all commands sent to GDB are saved to gdb.in.  As well as being a reference
+of the commands run, they can be used to manually re-run a test by using
+the gdb.in file as a batch file to a GDB launched with the arguments in the
+gdb.cmd file, for example:
+	$(cat outputs/gdb.base/store/gdb.cmd) -x outputs/gdb.base/store/gdb.in
+
+Tests that run GDB multiple times will append .1, .2, .3 etc to the end
+of each .cmd and .in file.
+
+When gdbserver is launched as part of a test, a gdbserver.cmd will be created.
+To re-run these tests, run the contents of gdbserver.cmd in a separate
+terminal before running gdb, for example:
+	$(cat outputs/gdb.base/store/gdbserver.cmd)
+Alternatively, if the test is run with GDBSERVER_DEBUG="replay", then this
+will create a gdbserver.replay file which can be used with the gdbreplay tool,
+instead of launching gdbserver.
+
 Running the Performance Tests
 *****************************
 
@@ -123,25 +144,6 @@ Testsuite Parameters
 
 The following parameters are DejaGNU variables that you can set to
 affect the testsuite run globally.
-
-TRANSCRIPT
-
-You may find it useful to have a transcript of the commands that the
-testsuite sends to GDB, for instance if GDB crashes during the run,
-and you want to reconstruct the sequence of commands.
-
-If the DejaGNU variable TRANSCRIPT is set (to any value), each
-invocation of GDB during the test run will get a transcript file
-written into the DejaGNU output directory.  The file will have the
-name transcript.<n>, where <n> is an integer.  The first line of the
-file shows the invocation command with all the options passed to it,
-while subsequent lines are the GDB commands.  A `make check' might
-look like this:
-
-      make check RUNTESTFLAGS=TRANSCRIPT=y
-
-The transcript may not be complete, as for instance tests of command
-completion may show only partial command lines.
 
 GDB
 
@@ -208,6 +210,12 @@ FORCE_PARALLEL
 Setting FORCE_PARALLEL to any non-empty value forces parallel testing
 mode even if RUNTESTFLAGS is not empty.
 
+FORCE_SEPARATE_MI_TTY
+
+Setting FORCE_MI_SEPARATE_UI to 1 forces all MI testing to start GDB
+in console mode, with MI running on a separate TTY, on a secondary UI
+started with "new-ui".
+
 GDB_INOTIFY
 
 For debugging parallel mode, it is handy to be able to see when a test
@@ -253,6 +261,62 @@ This make (not runtest) variable is used to specify whether the
 testsuite preloads the read1.so library into expect.  Any non-empty
 value means true.  See "Race detection" below.
 
+GDB_TEST_SOCKETHOST
+
+This variable can provide the hostname/address that should be used
+when performing GDBserver-related tests.  This is useful in some
+situations, e.g., when you want to test the IPv6 connectivity of GDB
+and GDBserver, or when using a different hostname/address is needed.
+For example, to make GDB and GDBserver use IPv6-only connections, you
+can do:
+
+	make check TESTS="gdb.server/*.exp" RUNTESTFLAGS='GDB_TEST_SOCKETHOST=tcp6:[::1]'
+
+Note that only a hostname/address can be provided, without a port
+number.
+
+TS
+
+This variable turns on the timestamp printing for each line of "make
+check".  Note that the timestamp will be printed on stdout output
+only.  In other words, there will be no timestamp output on either
+gdb.sum and gdb.log files.  If you would like to enable timestamp
+printing, you can do:
+
+	make check TS=1
+
+TS_FORMAT
+
+You can provide a custom format for timestamp printing with this
+variable.  The format must be a string compatible with "strftime".
+This variable is only useful when the TS variable is also provided.
+If you would like to change the output format of the timestamp, you
+can do:
+
+	make check TS=1 TS_FORMAT='[%b %H:%S]'
+
+GDB_DEBUG
+
+When set gdb debug is sent to the file gdb.debug in the test output
+directory.  It should be set to a comma separated list of gdb debug
+components.
+For example, to turn on debugging for infrun and target, you can do:
+
+	make check GDB_DEBUG="infrun,target"
+
+GDBSERVER_DEBUG
+
+When set gdbserver debug is sent to the a file in the test output directory.
+It should be set to a comma separated list of the following options:
+	debug  - write gdbserver debug to gdbserver.debug.
+	remote - write gdbserver remote debug to gdbserver.debug.
+	replay - write a replay log to the file gdbserver.replay for use
+		 with gdbreplay.
+Alternatively, it can be set to "all" to turn on all the above
+For example, to turn on gdbserver debugging, you can do:
+
+	make check GDBSERVER_DEBUG="debug,replay"
+
 Race detection
 **************
 
@@ -287,6 +351,13 @@ Examples:
 
 	make -j10 check-read1 TESTS="*/paginate-*.exp"
 	make -j10 check READ1="1"
+
+Note: While the intention is to detect races and make otherwise passing tests
+fail, it can also have the effect of making otherwise failing tests pass.
+This happens f.i. if the test is trying to match a gdb prompt using an end of
+input marker "${gdb_prompt} $" and there is output after the gdb prompt.  This
+may either pass or fail in normal operation, but using check-read1 will ensure
+that it passes.
 
 Testsuite Configuration
 ***********************
@@ -442,6 +513,33 @@ gdb,no_thread_names
 
   The target doesn't support thread names.
 
+gdb,pie_flag
+
+  The flag required to force the compiler to produce position-independent
+  executables.
+
+gdb,pie_ldflag
+
+  The flag required to force the linker to produce position-independent
+  executables.
+
+gdb,nopie_flag
+
+  The flag required to force the compiler to produce non-position-independent
+  executables.
+
+gdb,debug
+
+  When set gdb debug is sent to the file gdb.debug in the test output
+  directory.  It should be set to a comma separated list of gdb debug
+  components. For example, to turn on debugging for infrun and target, set to
+  "infrun,target".
+
+gdbserver,debug
+
+  When set gdbserver debug is sent to the file gdbserver.debug in the test
+  output directory.  For valid values see the entry for GDBSERVER_DEBUG.
+
 Testsuite Organization
 **********************
 
@@ -478,7 +576,7 @@ ANSI/ISO C, and C++.
 gdb.<lang>
 
 Language-specific tests for any language besides C.  Examples are
-gdb.cp for C++ and gdb.java for Java.
+gdb.cp for C++ and gdb.rust for Rust.
 
 gdb.<platform>
 
@@ -573,3 +671,48 @@ Note that it is also acceptable, and often preferable, to avoid
 running the test at all.  This is the better option if the limitation
 is intrinsic to the environment, rather than a bug expected to be
 fixed in the near future.
+
+Local vs Remote vs Native
+*************************
+
+It's unfortunately easy to get confused in the testsuite about what's
+native and what's not, what's remote and what's not.  The confusion is
+caused by the overlap in vocabulary between DejaGnu and GDB.
+
+From a DejaGnu point of view:
+
+ - native: the host or target board is considered native if the its
+   triplet is the same as the build system's triplet,
+
+ - remote: the host or target board is considered remote if it's
+   running on a different machine, and thus require ssh, for example,
+   to run commands, versus simply running commands directly.
+
+Note that they are not mutually exclusive, as you can have a remote
+machine that has the same triplet as the build machine.
+
+From a GDB point of view:
+
+ - native: when GDB uses system calls such as ptrace to interact
+   directly with processes on the same system its running on,
+
+ - remote: when GDB speaks the RSP (Remote Serial Protocol) with
+   another program doing the ptrace stuff.
+
+Note that they are mutually exclusive.  An inferior can only be either
+debugged with the native target, or with the remote target a specific
+time.
+
+That means that there are cases where the target is not remote for
+DejaGnu, but is remote for GDB (e.g. running GDBserver on the same
+machine).
+
+You can also have a remote target for DejaGnu, but native for GDB
+(e.g.  building on x86 a GDB that runs on ARM and running the
+testsuite with a remote host).
+
+Therefore, care must be taken to check for the right kind of remote.
+Use [is_remote target] to check whether the DejaGnu target board is
+remote.  When what you really want to know is whether GDB is using the
+remote protocol, because feature X is only available when GDB debugs
+natively, check gdb_protocol instead.

@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +30,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 /* Transliterated from <asm-mn10300/elf.h>...  */
 #define MN10300_ELF_NGREG 28
@@ -86,7 +87,6 @@ am33_supply_gregset_method (const struct regset *regset,
 			    struct regcache *regcache, 
 			    int regnum, const void *gregs, size_t len)
 {
-  char zerobuf[MAX_REGISTER_SIZE];
   const mn10300_elf_greg_t *regp = (const mn10300_elf_greg_t *) gregs;
   int i;
 
@@ -94,123 +94,119 @@ am33_supply_gregset_method (const struct regset *regset,
 
   switch (regnum) {
   case E_D0_REGNUM:
-    regcache_raw_supply (regcache, E_D0_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D0));
+    regcache->raw_supply (E_D0_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D0));
     break;
   case E_D1_REGNUM:
-    regcache_raw_supply (regcache, E_D1_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D1));
+    regcache->raw_supply (E_D1_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D1));
     break;
   case E_D2_REGNUM:
-    regcache_raw_supply (regcache, E_D2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D2));
+    regcache->raw_supply (E_D2_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D2));
     break;
   case E_D3_REGNUM:
-    regcache_raw_supply (regcache, E_D3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D3));
+    regcache->raw_supply (E_D3_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D3));
     break;
   case E_A0_REGNUM:
-    regcache_raw_supply (regcache, E_A0_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A0));
+    regcache->raw_supply (E_A0_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A0));
     break;
   case E_A1_REGNUM:
-    regcache_raw_supply (regcache, E_A1_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A1));
+    regcache->raw_supply (E_A1_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A1));
     break;
   case E_A2_REGNUM:
-    regcache_raw_supply (regcache, E_A2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A2));
+    regcache->raw_supply (E_A2_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A2));
     break;
   case E_A3_REGNUM:
-    regcache_raw_supply (regcache, E_A3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A3));
+    regcache->raw_supply (E_A3_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A3));
     break;
   case E_SP_REGNUM:
-    regcache_raw_supply (regcache, E_SP_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_SP));
+    regcache->raw_supply (E_SP_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_SP));
     break;
   case E_PC_REGNUM:
-    regcache_raw_supply (regcache, E_PC_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_PC));
+    regcache->raw_supply (E_PC_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_PC));
     break;
   case E_MDR_REGNUM:
-    regcache_raw_supply (regcache, E_MDR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDR));
+    regcache->raw_supply (E_MDR_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDR));
     break;
   case E_PSW_REGNUM:
-    regcache_raw_supply (regcache, E_PSW_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_EPSW));
+    regcache->raw_supply (E_PSW_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_EPSW));
     break;
   case E_LIR_REGNUM:
-    regcache_raw_supply (regcache, E_LIR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LIR));
+    regcache->raw_supply (E_LIR_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LIR));
     break;
   case E_LAR_REGNUM:
-    regcache_raw_supply (regcache, E_LAR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LAR));
+    regcache->raw_supply (E_LAR_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LAR));
     break;
   case E_MDRQ_REGNUM:
-    regcache_raw_supply (regcache, E_MDRQ_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDRQ));
+    regcache->raw_supply (E_MDRQ_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDRQ));
     break;
   case E_E0_REGNUM:
-    regcache_raw_supply (regcache, E_E0_REGNUM,   
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E0));
+    regcache->raw_supply (E_E0_REGNUM,   
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E0));
     break;
   case E_E1_REGNUM:
-    regcache_raw_supply (regcache, E_E1_REGNUM,
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E1));
+    regcache->raw_supply (E_E1_REGNUM,
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E1));
     break;
   case E_E2_REGNUM:
-    regcache_raw_supply (regcache, E_E2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E2));
+    regcache->raw_supply (E_E2_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E2));
     break;
   case E_E3_REGNUM:
-    regcache_raw_supply (regcache, E_E3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E3));
+    regcache->raw_supply (E_E3_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E3));
     break;
   case E_E4_REGNUM:
-    regcache_raw_supply (regcache, E_E4_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E4));
+    regcache->raw_supply (E_E4_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E4));
     break;
   case E_E5_REGNUM:
-    regcache_raw_supply (regcache, E_E5_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E5));
+    regcache->raw_supply (E_E5_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E5));
     break;
   case E_E6_REGNUM:
-    regcache_raw_supply (regcache, E_E6_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E6));
+    regcache->raw_supply (E_E6_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E6));
     break;
   case E_E7_REGNUM:
-    regcache_raw_supply (regcache, E_E7_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E7));
+    regcache->raw_supply (E_E7_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E7));
     break;
 
     /* ssp, msp, and usp are inaccessible.  */
   case E_E8_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E8_REGNUM, zerobuf);
+    regcache->raw_supply_zeroed (E_E8_REGNUM);
     break;
   case E_E9_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E9_REGNUM, zerobuf);
+    regcache->raw_supply_zeroed (E_E9_REGNUM);
     break;
   case E_E10_REGNUM:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_E10_REGNUM, zerobuf);
-
+    regcache->raw_supply_zeroed (E_E10_REGNUM);
     break;
   case E_MCRH_REGNUM:
-    regcache_raw_supply (regcache, E_MCRH_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRH));
+    regcache->raw_supply (E_MCRH_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRH));
     break;
   case E_MCRL_REGNUM:
-    regcache_raw_supply (regcache, E_MCRL_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRL));
+    regcache->raw_supply (E_MCRL_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRL));
     break;
   case E_MCVF_REGNUM:
-    regcache_raw_supply (regcache, E_MCVF_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCVF));
+    regcache->raw_supply (E_MCVF_REGNUM, 
+			  (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCVF));
     break;
   case E_FPCR_REGNUM:
     /* FPCR is numbered among the GP regs, but handled as an FP reg.
@@ -218,12 +214,10 @@ am33_supply_gregset_method (const struct regset *regset,
     break;
   case E_FPCR_REGNUM + 1:
     /* The two unused registers beyond fpcr are inaccessible.  */
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_FPCR_REGNUM + 1, zerobuf);
+    regcache->raw_supply_zeroed (E_FPCR_REGNUM + 1);
     break;
   case E_FPCR_REGNUM + 2:
-    memset (zerobuf, 0, MAX_REGISTER_SIZE);
-    regcache_raw_supply (regcache, E_FPCR_REGNUM + 2, zerobuf);
+    regcache->raw_supply_zeroed (E_FPCR_REGNUM + 2);
     break;
   default:	/* An error, obviously, but should we error out?  */
     break;
@@ -259,12 +253,10 @@ am33_supply_fpregset_method (const struct regset *regset,
 				   E_FPCR_REGNUM, fpregs, len);
     }
   else if (regnum == E_FPCR_REGNUM)
-    regcache_raw_supply (regcache, E_FPCR_REGNUM, 
-			 &fpregset->fpcr);
+    regcache->raw_supply (E_FPCR_REGNUM, &fpregset->fpcr);
   else if (E_FS0_REGNUM <= regnum
 	   && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
-    regcache_raw_supply (regcache, regnum, 
-			 &fpregset->fpregs[regnum - E_FS0_REGNUM]);
+    regcache->raw_supply (regnum, &fpregset->fpregs[regnum - E_FS0_REGNUM]);
 
   return;
 }
@@ -283,96 +275,96 @@ am33_collect_gregset_method (const struct regset *regset,
 
   switch (regnum) {
   case E_D0_REGNUM:
-    regcache_raw_collect (regcache, E_D0_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D0));
+    regcache->raw_collect (E_D0_REGNUM,
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D0));
     break;
   case E_D1_REGNUM:
-    regcache_raw_collect (regcache, E_D1_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D1));
+    regcache->raw_collect (E_D1_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D1));
     break;
   case E_D2_REGNUM:
-    regcache_raw_collect (regcache, E_D2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D2));
+    regcache->raw_collect (E_D2_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D2));
     break;
   case E_D3_REGNUM:
-    regcache_raw_collect (regcache, E_D3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D3));
+    regcache->raw_collect (E_D3_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_D3));
     break;
   case E_A0_REGNUM:
-    regcache_raw_collect (regcache, E_A0_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A0));
+    regcache->raw_collect (E_A0_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A0));
     break;
   case E_A1_REGNUM:
-    regcache_raw_collect (regcache, E_A1_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A1));
+    regcache->raw_collect (E_A1_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A1));
     break;
   case E_A2_REGNUM:
-    regcache_raw_collect (regcache, E_A2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A2));
+    regcache->raw_collect (E_A2_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A2));
     break;
   case E_A3_REGNUM:
-    regcache_raw_collect (regcache, E_A3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A3));
+    regcache->raw_collect (E_A3_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_A3));
     break;
   case E_SP_REGNUM:
-    regcache_raw_collect (regcache, E_SP_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_SP));
+    regcache->raw_collect (E_SP_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_SP));
     break;
   case E_PC_REGNUM:
-    regcache_raw_collect (regcache, E_PC_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_PC));
+    regcache->raw_collect (E_PC_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_PC));
     break;
   case E_MDR_REGNUM:
-    regcache_raw_collect (regcache, E_MDR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDR));
+    regcache->raw_collect (E_MDR_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDR));
     break;
   case E_PSW_REGNUM:
-    regcache_raw_collect (regcache, E_PSW_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_EPSW));
+    regcache->raw_collect (E_PSW_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_EPSW));
     break;
   case E_LIR_REGNUM:
-    regcache_raw_collect (regcache, E_LIR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LIR));
+    regcache->raw_collect (E_LIR_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LIR));
     break;
   case E_LAR_REGNUM:
-    regcache_raw_collect (regcache, E_LAR_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LAR));
+    regcache->raw_collect (E_LAR_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_LAR));
     break;
   case E_MDRQ_REGNUM:
-    regcache_raw_collect (regcache, E_MDRQ_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDRQ));
+    regcache->raw_collect (E_MDRQ_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MDRQ));
     break;
   case E_E0_REGNUM:
-    regcache_raw_collect (regcache, E_E0_REGNUM,   
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E0));
+    regcache->raw_collect (E_E0_REGNUM,   
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E0));
     break;
   case E_E1_REGNUM:
-    regcache_raw_collect (regcache, E_E1_REGNUM,
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E1));
+    regcache->raw_collect (E_E1_REGNUM,
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E1));
     break;
   case E_E2_REGNUM:
-    regcache_raw_collect (regcache, E_E2_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E2));
+    regcache->raw_collect (E_E2_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E2));
     break;
   case E_E3_REGNUM:
-    regcache_raw_collect (regcache, E_E3_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E3));
+    regcache->raw_collect (E_E3_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E3));
     break;
   case E_E4_REGNUM:
-    regcache_raw_collect (regcache, E_E4_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E4));
+    regcache->raw_collect (E_E4_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E4));
     break;
   case E_E5_REGNUM:
-    regcache_raw_collect (regcache, E_E5_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E5));
+    regcache->raw_collect (E_E5_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E5));
     break;
   case E_E6_REGNUM:
-    regcache_raw_collect (regcache, E_E6_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E6));
+    regcache->raw_collect (E_E6_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E6));
     break;
   case E_E7_REGNUM:
-    regcache_raw_collect (regcache, E_E7_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E7));
+    regcache->raw_collect (E_E7_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_E7));
     break;
 
     /* ssp, msp, and usp are inaccessible.  */
@@ -386,16 +378,16 @@ am33_collect_gregset_method (const struct regset *regset,
     /* The gregset struct has noplace to put this: do nothing.  */
     break;
   case E_MCRH_REGNUM:
-    regcache_raw_collect (regcache, E_MCRH_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRH));
+    regcache->raw_collect (E_MCRH_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRH));
     break;
   case E_MCRL_REGNUM:
-    regcache_raw_collect (regcache, E_MCRL_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRL));
+    regcache->raw_collect (E_MCRL_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCRL));
     break;
   case E_MCVF_REGNUM:
-    regcache_raw_collect (regcache, E_MCVF_REGNUM, 
-			 (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCVF));
+    regcache->raw_collect (E_MCVF_REGNUM, 
+			   (regp + MN10300_ELF_GREGSET_T_REG_INDEX_MCVF));
     break;
   case E_FPCR_REGNUM:
     /* FPCR is numbered among the GP regs, but handled as an FP reg.
@@ -438,12 +430,10 @@ am33_collect_fpregset_method (const struct regset *regset,
 				    E_FPCR_REGNUM, fpregs, len);
     }
   else if (regnum == E_FPCR_REGNUM)
-    regcache_raw_collect (regcache, E_FPCR_REGNUM, 
-			  &fpregset->fpcr);
+    regcache->raw_collect (E_FPCR_REGNUM, &fpregset->fpcr);
   else if (E_FS0_REGNUM <= regnum
            && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
-    regcache_raw_collect (regcache, regnum, 
-			  &fpregset->fpregs[regnum - E_FS0_REGNUM]);
+    regcache->raw_collect (regnum, &fpregset->fpregs[regnum - E_FS0_REGNUM]);
 
   return;
 }
@@ -466,10 +456,10 @@ am33_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				   void *cb_data,
 				   const struct regcache *regcache)
 {
-  cb (".reg", sizeof (mn10300_elf_gregset_t), &am33_gregset,
-      NULL, cb_data);
-  cb (".reg2", sizeof(mn10300_elf_fpregset_t), &am33_fpregset,
-      NULL, cb_data);
+  cb (".reg", sizeof (mn10300_elf_gregset_t), sizeof (mn10300_elf_gregset_t),
+      &am33_gregset, NULL, cb_data);
+  cb (".reg2", sizeof (mn10300_elf_fpregset_t), sizeof (mn10300_elf_fpregset_t),
+      &am33_fpregset, NULL, cb_data);
 }
 
 static void
@@ -483,13 +473,13 @@ static const struct tramp_frame am33_linux_sigframe = {
   1,
   {
     /* mov     119,d0 */
-    { 0x2c, -1 },
-    { 0x77, -1 },
-    { 0x00, -1 },
+    { 0x2c, ULONGEST_MAX },
+    { 0x77, ULONGEST_MAX },
+    { 0x00, ULONGEST_MAX },
     /* syscall 0 */
-    { 0xf0, -1 },
-    { 0xe0, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0xf0, ULONGEST_MAX },
+    { 0xe0, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   am33_linux_sigframe_cache_init
 };
@@ -499,13 +489,13 @@ static const struct tramp_frame am33_linux_rt_sigframe = {
   1,
   {
     /* mov     173,d0 */
-    { 0x2c, -1 },
-    { 0xad, -1 },
-    { 0x00, -1 },
+    { 0x2c, ULONGEST_MAX },
+    { 0xad, ULONGEST_MAX },
+    { 0x00, ULONGEST_MAX },
     /* syscall 0 */
-    { 0xf0, -1 },
-    { 0xe0, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0xf0, ULONGEST_MAX },
+    { 0xe0, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   am33_linux_sigframe_cache_init
 };
@@ -725,11 +715,9 @@ am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &am33_linux_rt_sigframe);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_mn10300_linux_tdep;
-
+void _initialize_mn10300_linux_tdep ();
 void
-_initialize_mn10300_linux_tdep (void)
+_initialize_mn10300_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_mn10300, 0,
 			  GDB_OSABI_LINUX, am33_linux_init_osabi);

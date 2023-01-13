@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on Tilera TILE-Gx processors.
 
-   Copyright (C) 2012-2016 Free Software Foundation, Inc.
+   Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "tramp-frame.h"
 #include "trad-frame.h"
 #include "tilegx-tdep.h"
+#include "gdbarch.h"
 
 /* Signal trampoline support.  */
 
@@ -37,7 +38,6 @@ tilegx_linux_sigframe_init (const struct tramp_frame *self,
 			    struct trad_frame_cache *this_cache,
 			    CORE_ADDR func)
 {
-  CORE_ADDR pc = get_frame_register_unsigned (this_frame, 64);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, 54);
 
   /* Base address of register save area.  */
@@ -66,9 +66,9 @@ static const struct tramp_frame tilegx_linux_rt_sigframe =
   SIGTRAMP_FRAME,
   8,
   {
-    { 0x00045fe551483000ULL, -1 }, /* { moveli r10, 139 } */
-    { 0x286b180051485000ULL, -1 }, /* { swint1 } */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x00045fe551483000ULL, ULONGEST_MAX }, /* { moveli r10, 139 } */
+    { 0x286b180051485000ULL, ULONGEST_MAX }, /* { swint1 } */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   tilegx_linux_sigframe_init
 };
@@ -100,8 +100,8 @@ tilegx_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				     void *cb_data,
 				     const struct regcache *regcache)
 {
-  cb (".reg", TILEGX_LINUX_SIZEOF_GREGSET, &tilegx_linux_regset,
-      NULL, cb_data);
+  cb (".reg", TILEGX_LINUX_SIZEOF_GREGSET, TILEGX_LINUX_SIZEOF_GREGSET,
+      &tilegx_linux_regset, NULL, cb_data);
 }
 
 /* OS specific initialization of gdbarch.  */
@@ -135,11 +135,9 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_tilegx_linux_tdep;
-
+void _initialize_tilegx_linux_tdep ();
 void
-_initialize_tilegx_linux_tdep (void)
+_initialize_tilegx_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_tilegx, bfd_mach_tilegx, GDB_OSABI_LINUX,
 			  tilegx_linux_init_abi);

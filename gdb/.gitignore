@@ -1,3 +1,8 @@
+/Makefile
+/build-gnulib
+/gdb-gdb.gdb
+/nm.h
+
 /version.c
 /xml-builtin.c
 
@@ -5,6 +10,7 @@
 /ada-lex.c
 /c-exp.c
 /cp-name-parser.c
+/d-exp.c
 /f-exp.c
 /gdb
 /gdbtui
@@ -15,6 +21,6 @@
 /jv-exp.c
 /m2-exp.c
 /objc-exp.c
-/observer.h
 /observer.inc
 /p-exp.c
+/rust-exp.c

@@ -19,6 +19,7 @@ fi
 INITIAL_READONLY_SECTIONS="${INITIAL_READONLY_SECTIONS}
   .MIPS.abiflags ${RELOCATING-0} : { *(.MIPS.abiflags) }
   .reginfo       ${RELOCATING-0} : { *(.reginfo) }
+  .MIPS.xhash    ${RELOCATING-0} : { *(.MIPS.xhash) }
 "
 OTHER_TEXT_SECTIONS='*(.mips16.fn.*) *(.mips16.call.*)'
 # Unlike most targets, the MIPS backend puts all dynamic relocations
@@ -29,13 +30,9 @@ OTHER_GOT_RELOC_SECTIONS="
   .rel.dyn      ${RELOCATING-0} : { *(.rel.dyn) }
 "
 # If the output has a GOT section, there must be exactly 0x7ff0 bytes
-# between .got and _gp.  The ". = ." below stops the orphan code from
-# inserting other sections between the assignment to _gp and the start
-# of .got.
-OTHER_GOT_SYMBOLS='
-  . = .;
-  HIDDEN (_gp = ALIGN (16) + 0x7ff0);
-'
+# between .got and _gp.
+OTHER_GOT_SYMBOLS='HIDDEN (_gp = ALIGN (16) + 0x7ff0);'
+
 # .got.plt is only used for the PLT psABI extension.  It should not be
 # included in the .sdata block with .got, as there is no need to access
 # the section from _gp.  Note that the traditional:
@@ -59,12 +56,12 @@ OTHER_SDATA_SECTIONS="
   .lit8         ${RELOCATING-0} : { *(.lit8) }
   .lit4         ${RELOCATING-0} : { *(.lit4) }
 "
-TEXT_START_SYMBOLS='_ftext = . ;'
-DATA_START_SYMBOLS='_fdata = . ;'
-OTHER_BSS_SYMBOLS='_fbss = .;'
-OTHER_SECTIONS='
-  .gptab.sdata : { *(.gptab.data) *(.gptab.sdata) }
-  .gptab.sbss : { *(.gptab.bss) *(.gptab.sbss) }
+TEXT_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_ftext = .${CREATE_SHLIB+)};"
+DATA_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_fdata = .${CREATE_SHLIB+)};"
+OTHER_BSS_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_fbss = .${CREATE_SHLIB+)};"
+OTHER_SECTIONS="
+  .gptab.sdata : {${RELOCATING+ *(.gptab.data)} *(.gptab.sdata) }
+  .gptab.sbss : {${RELOCATING+ *(.gptab.bss)} *(.gptab.sbss) }
   .mdebug.abi32 0 : { KEEP(*(.mdebug.abi32)) }
   .mdebug.abiN32 0 : { KEEP(*(.mdebug.abiN32)) }
   .mdebug.abi64 0 : { KEEP(*(.mdebug.abi64)) }
@@ -73,10 +70,10 @@ OTHER_SECTIONS='
   .mdebug.eabi64 0 : { KEEP(*(.mdebug.eabi64)) }
   .gcc_compiled_long32 0 : { KEEP(*(.gcc_compiled_long32)) }
   .gcc_compiled_long64 0 : { KEEP(*(.gcc_compiled_long64)) }
-'
+"
 ARCH=mips
 MACHINE=
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 EXTRA_EM_FILE=mipself
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes

@@ -1,5 +1,5 @@
 /* Header file for GDB CLI command implementation library.
-   Copyright (C) 2000-2016 Free Software Foundation, Inc.
+   Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,8 +14,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (CLI_CMDS_H)
-#define CLI_CMDS_H 1
+#ifndef CLI_CLI_CMDS_H
+#define CLI_CLI_CMDS_H
+
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/gdb_optional.h"
+#include "completer.h"
 
 /* Chain containing all defined commands.  */
 
@@ -97,32 +101,63 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
+/* Limit the call depth of user-defined commands */
+
+extern unsigned int max_user_call_depth;
+
 /* Exported to gdb/top.c */
 
 void init_cmd_lists (void);
-
-void init_cli_cmds (void);
 
 int is_complete_command (struct cmd_list_element *cmd);
 
 /* Exported to gdb/main.c */
 
-extern void cd_command (char *, int);
+extern void cd_command (const char *, int);
 
 /* Exported to gdb/top.c and gdb/main.c */
 
-extern void quit_command (char *, int);
+extern void quit_command (const char *, int);
 
 extern void source_script (const char *, int);
 
 /* Exported to objfiles.c.  */
 
-extern int find_and_open_script (const char *file, int search_path,
-				 FILE **streamp, char **full_path);
+/* The script that was opened.  */
+struct open_script
+{
+  gdb_file_up stream;
+  gdb::unique_xmalloc_ptr<char> full_path;
+
+  open_script (gdb_file_up &&stream_,
+	       gdb::unique_xmalloc_ptr<char> &&full_path_)
+    : stream (std::move (stream_)),
+      full_path (std::move (full_path_))
+  {
+  }
+};
+
+extern gdb::optional<open_script>
+    find_and_open_script (const char *file, int search_path);
 
 /* Command tracing state.  */
 
 extern int source_verbose;
-extern int trace_commands;
+extern bool trace_commands;
 
-#endif /* !defined (CLI_CMDS_H) */
+/* Common code for the "with" and "maintenance with" commands.
+   SET_CMD_PREFIX is the spelling of the corresponding "set" command
+   prefix: i.e., "set " or "maintenance set ".  SETLIST is the command
+   element for the same "set" command prefix.  */
+extern void with_command_1 (const char *set_cmd_prefix,
+			    cmd_list_element *setlist,
+			    const char *args, int from_tty);
+
+/* Common code for the completers of the "with" and "maintenance with"
+   commands.  SET_CMD_PREFIX is the spelling of the corresponding
+   "set" command prefix: i.e., "set " or "maintenance set ".  */
+extern void with_command_completer_1 (const char *set_cmd_prefix,
+				      completion_tracker &tracker,
+				      const char *text);
+
+#endif /* CLI_CLI_CMDS_H */

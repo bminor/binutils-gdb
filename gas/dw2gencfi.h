@@ -1,5 +1,5 @@
 /* dw2gencfi.h - Support for generating Dwarf2 CFI information.
-   Copyright (C) 2003-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2020 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -41,6 +41,7 @@ extern void cfi_add_advance_loc (struct symbol *);
 extern void cfi_add_label (const char *);
 
 extern void cfi_add_CFA_offset (unsigned, offsetT);
+extern void cfi_add_CFA_val_offset (unsigned, offsetT);
 extern void cfi_add_CFA_def_cfa (unsigned, offsetT);
 extern void cfi_add_CFA_register (unsigned, unsigned);
 extern void cfi_add_CFA_def_cfa_register (unsigned);
@@ -134,6 +135,22 @@ enum {
   EH_COMPACT_HAS_LSDA
 };
 
+/* Stack of old CFI data, for save/restore.  */
+struct cfa_save_data
+{
+  struct cfa_save_data *next;
+  offsetT cfa_offset;
+};
+
+/* Current open FDE entry.  */
+struct frch_cfi_data
+{
+  struct fde_entry *cur_fde_data;
+  symbolS *last_address;
+  offsetT cur_cfa_offset;
+  struct cfa_save_data *cfa_save_stack;
+};
+
 struct fde_entry
 {
   struct fde_entry *next;
@@ -161,6 +178,9 @@ struct fde_entry
   /* For out of line tables and FDEs.  */
   symbolS *eh_loc;
   int sections;
+#ifdef tc_fde_entry_extras
+  tc_fde_entry_extras
+#endif
 };
 
 /* The list of all FDEs that have been collected.  */

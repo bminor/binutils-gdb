@@ -1,6 +1,6 @@
 /* Linux-dependent part of branch trace support for GDB, and GDBserver.
 
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2020 Free Software Foundation, Inc.
 
    Contributed by Intel Corp. <markus.t.metzger@intel.com>
 
@@ -19,18 +19,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
+#include "gdbsupport/common-defs.h"
 #include "linux-btrace.h"
-#include "common-regcache.h"
-#include "gdb_wait.h"
+#include "gdbsupport/common-regcache.h"
+#include "gdbsupport/gdb_wait.h"
 #include "x86-cpuid.h"
-#include "filestuff.h"
+#include "gdbsupport/filestuff.h"
+#include "gdbsupport/scoped_fd.h"
+#include "gdbsupport/scoped_mmap.h"
 
 #include <inttypes.h>
 
-#ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
-#endif
 
 #if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
 #include <unistd.h>
@@ -103,11 +103,6 @@ perf_event_new_data (const struct perf_event_buffer *pev)
   return *pev->data_head != pev->last_head;
 }
 
-/* Try to determine the size of a pointer in bits for the OS.
-
-   This is the same as the size of a pointer for the inferior process
-   except when a 32-bit inferior is running on a 64-bit OS.  */
-
 /* Copy the last SIZE bytes from PEV ending at DATA_HEAD and return a pointer
    to the memory holding the copy.
    The caller is responsible for freeing the memory.  */
@@ -124,10 +119,24 @@ perf_event_read (const struct perf_event_buffer *pev, __u64 data_head,
   if (size == 0)
     return NULL;
 
+  /* We should never ask for more data than the buffer can hold.  */
+  buffer_size = pev->size;
+  gdb_assert (size <= buffer_size);
+
+  /* If we ask for more data than we seem to have, we wrap around and read
+     data from the end of the buffer.  This is already handled by the %
+     BUFFER_SIZE operation, below.  Here, we just need to make sure that we
+     don't underflow.
+
+     Note that this is perfectly OK for perf event buffers where data_head
+     doesn'grow indefinitely and instead wraps around to remain within the
+     buffer's boundaries.  */
+  if (data_head < size)
+    data_head += buffer_size;
+
   gdb_assert (size <= data_head);
   data_tail = data_head - size;
 
-  buffer_size = pev->size;
   begin = pev->mem;
   start = begin + data_tail % buffer_size;
   stop = begin + data_head % buffer_size;
@@ -158,37 +167,12 @@ perf_event_read_all (struct perf_event_buffer *pev, gdb_byte **data,
   __u64 data_head;
 
   data_head = *pev->data_head;
-
   size = pev->size;
-  if (data_head < size)
-    size = (size_t) data_head;
 
   *data = perf_event_read (pev, data_head, size);
   *psize = size;
 
   pev->last_head = data_head;
-}
-
-/* Determine the event type.
-   Returns zero on success and fills in TYPE; returns -1 otherwise.  */
-
-static int
-perf_event_pt_event_type (int *type)
-{
-  FILE *file;
-  int found;
-
-  file = fopen ("/sys/bus/event_source/devices/intel_pt/type", "r");
-  if (file == NULL)
-    return -1;
-
-  found = fscanf (file, "%d", type);
-
-  fclose (file);
-
-  if (found == 1)
-    return 0;
-  return -1;
 }
 
 /* Try to determine the start address of the Linux kernel.  */
@@ -198,24 +182,23 @@ linux_determine_kernel_start (void)
 {
   static uint64_t kernel_start;
   static int cached;
-  FILE *file;
 
   if (cached != 0)
     return kernel_start;
 
   cached = 1;
 
-  file = gdb_fopen_cloexec ("/proc/kallsyms", "r");
+  gdb_file_up file = gdb_fopen_cloexec ("/proc/kallsyms", "r");
   if (file == NULL)
     return kernel_start;
 
-  while (!feof (file))
+  while (!feof (file.get ()))
     {
       char buffer[1024], symbol[8], *line;
       uint64_t addr;
       int match;
 
-      line = fgets (buffer, sizeof (buffer), file);
+      line = fgets (buffer, sizeof (buffer), file.get ());
       if (line == NULL)
 	break;
 
@@ -229,8 +212,6 @@ linux_determine_kernel_start (void)
 	  break;
 	}
     }
-
-  fclose (file);
 
   return kernel_start;
 }
@@ -290,11 +271,11 @@ perf_event_sample_ok (const struct perf_event_sample *sample)
    In case the buffer overflows during sampling, one sample may have its lower
    part at the end and its upper part at the beginning of the buffer.  */
 
-static VEC (btrace_block_s) *
+static std::vector<btrace_block> *
 perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 		     const uint8_t *end, const uint8_t *start, size_t size)
 {
-  VEC (btrace_block_s) *btrace = NULL;
+  std::vector<btrace_block> *btrace = new std::vector<btrace_block>;
   struct perf_event_sample sample;
   size_t read = 0;
   struct btrace_block block = { 0, 0 };
@@ -362,7 +343,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
       /* We found a valid sample, so we can complete the current block.  */
       block.begin = psample->bts.to;
 
-      VEC_safe_push (btrace_block_s, btrace, &block);
+      btrace->push_back (block);
 
       /* Start the next block.  */
       block.end = psample->bts.from;
@@ -373,179 +354,9 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
      reading delta trace, we can fill in the start address later on.
      Otherwise we will prune it.  */
   block.begin = 0;
-  VEC_safe_push (btrace_block_s, btrace, &block);
+  btrace->push_back (block);
 
   return btrace;
-}
-
-/* Check whether the kernel supports BTS.  */
-
-static int
-kernel_supports_bts (void)
-{
-  struct perf_event_attr attr;
-  pid_t child, pid;
-  int status, file;
-
-  errno = 0;
-  child = fork ();
-  switch (child)
-    {
-    case -1:
-      warning (_("test bts: cannot fork: %s."), safe_strerror (errno));
-      return 0;
-
-    case 0:
-      status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
-      if (status != 0)
-	{
-	  warning (_("test bts: cannot PTRACE_TRACEME: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      status = raise (SIGTRAP);
-      if (status != 0)
-	{
-	  warning (_("test bts: cannot raise SIGTRAP: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      _exit (1);
-
-    default:
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  return 0;
-	}
-
-      if (!WIFSTOPPED (status))
-	{
-	  warning (_("test bts: expected stop. status: %d."),
-		   status);
-	  return 0;
-	}
-
-      memset (&attr, 0, sizeof (attr));
-
-      attr.type = PERF_TYPE_HARDWARE;
-      attr.config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS;
-      attr.sample_period = 1;
-      attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR;
-      attr.exclude_kernel = 1;
-      attr.exclude_hv = 1;
-      attr.exclude_idle = 1;
-
-      file = syscall (SYS_perf_event_open, &attr, child, -1, -1, 0);
-      if (file >= 0)
-	close (file);
-
-      kill (child, SIGKILL);
-      ptrace (PTRACE_KILL, child, NULL, NULL);
-
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test bts: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  if (!WIFSIGNALED (status))
-	    warning (_("test bts: expected killed. status: %d."),
-		     status);
-	}
-
-      return (file >= 0);
-    }
-}
-
-/* Check whether the kernel supports Intel Processor Trace.  */
-
-static int
-kernel_supports_pt (void)
-{
-  struct perf_event_attr attr;
-  pid_t child, pid;
-  int status, file, type;
-
-  errno = 0;
-  child = fork ();
-  switch (child)
-    {
-    case -1:
-      warning (_("test pt: cannot fork: %s."), safe_strerror (errno));
-      return 0;
-
-    case 0:
-      status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
-      if (status != 0)
-	{
-	  warning (_("test pt: cannot PTRACE_TRACEME: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      status = raise (SIGTRAP);
-      if (status != 0)
-	{
-	  warning (_("test pt: cannot raise SIGTRAP: %s."),
-		   safe_strerror (errno));
-	  _exit (1);
-	}
-
-      _exit (1);
-
-    default:
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  return 0;
-	}
-
-      if (!WIFSTOPPED (status))
-	{
-	  warning (_("test pt: expected stop. status: %d."),
-		   status);
-	  return 0;
-	}
-
-      status = perf_event_pt_event_type (&type);
-      if (status != 0)
-	file = -1;
-      else
-	{
-	  memset (&attr, 0, sizeof (attr));
-
-	  attr.size = sizeof (attr);
-	  attr.type = type;
-	  attr.exclude_kernel = 1;
-	  attr.exclude_hv = 1;
-	  attr.exclude_idle = 1;
-
-	  file = syscall (SYS_perf_event_open, &attr, child, -1, -1, 0);
-	  if (file >= 0)
-	    close (file);
-	}
-
-      kill (child, SIGKILL);
-      ptrace (PTRACE_KILL, child, NULL, NULL);
-
-      pid = waitpid (child, &status, 0);
-      if (pid != child)
-	{
-	  warning (_("test pt: bad pid %ld, error: %s."),
-		   (long) pid, safe_strerror (errno));
-	  if (!WIFSIGNALED (status))
-	    warning (_("test pt: expected killed. status: %d."),
-		     status);
-	}
-
-      return (file >= 0);
-    }
 }
 
 /* Check whether an Intel cpu supports BTS.  */
@@ -598,62 +409,32 @@ cpu_supports_bts (void)
     }
 }
 
-/* Check whether the linux target supports BTS.  */
+/* The perf_event_open syscall failed.  Try to print a helpful error
+   message.  */
 
-static int
-linux_supports_bts (void)
+static void
+diagnose_perf_event_open_fail ()
 {
-  static int cached;
-
-  if (cached == 0)
+  switch (errno)
     {
-      if (!kernel_supports_bts ())
-	cached = -1;
-      else if (!cpu_supports_bts ())
-	cached = -1;
-      else
-	cached = 1;
+    case EPERM:
+    case EACCES:
+      {
+	static const char filename[] = "/proc/sys/kernel/perf_event_paranoid";
+	gdb_file_up file = gdb_fopen_cloexec (filename, "r");
+	if (file.get () == nullptr)
+	  break;
+
+	int level, found = fscanf (file.get (), "%d", &level);
+	if (found == 1 && level > 2)
+	  error (_("You do not have permission to record the process.  "
+		   "Try setting %s to 2 or less."), filename);
+      }
+
+      break;
     }
 
-  return cached > 0;
-}
-
-/* Check whether the linux target supports Intel Processor Trace.  */
-
-static int
-linux_supports_pt (void)
-{
-  static int cached;
-
-  if (cached == 0)
-    {
-      if (!kernel_supports_pt ())
-	cached = -1;
-      else
-	cached = 1;
-    }
-
-  return cached > 0;
-}
-
-/* See linux-btrace.h.  */
-
-int
-linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
-{
-  switch (format)
-    {
-    case BTRACE_FORMAT_NONE:
-      return 0;
-
-    case BTRACE_FORMAT_BTS:
-      return linux_supports_bts ();
-
-    case BTRACE_FORMAT_PT:
-      return linux_supports_pt ();
-    }
-
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
+  error (_("Failed to start recording: %s"), safe_strerror (errno));
 }
 
 /* Enable branch tracing in BTS format.  */
@@ -661,14 +442,16 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 static struct btrace_target_info *
 linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 {
-  struct perf_event_mmap_page *header;
-  struct btrace_target_info *tinfo;
   struct btrace_tinfo_bts *bts;
   size_t size, pages;
   __u64 data_offset;
   int pid, pg;
 
-  tinfo = XCNEW (struct btrace_target_info);
+  if (!cpu_supports_bts ())
+    error (_("BTS support has been disabled for the target cpu."));
+
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
+    (XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
@@ -686,14 +469,14 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   bts->attr.exclude_hv = 1;
   bts->attr.exclude_idle = 1;
 
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
 
   errno = 0;
-  bts->file = syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0);
-  if (bts->file < 0)
-    goto err_out;
+  scoped_fd fd (syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0));
+  if (fd.get () < 0)
+    diagnose_perf_event_open_fail ();
 
   /* Convert the requested size in bytes to pages (rounding up).  */
   pages = ((size_t) conf->size / PAGE_SIZE
@@ -710,6 +493,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
+  scoped_mmap data;
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
@@ -728,16 +512,18 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
       if ((__u64) length != data_size + PAGE_SIZE)
 	continue;
 
+      errno = 0;
       /* The number of pages we request needs to be a power of two.  */
-      header = ((struct perf_event_mmap_page *)
-		mmap (NULL, length, PROT_READ, MAP_SHARED, bts->file, 0));
-      if (header != MAP_FAILED)
+      data.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (), 0);
+      if (data.get () != MAP_FAILED)
 	break;
     }
 
   if (pages == 0)
-    goto err_file;
+    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
 
+  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
+    data.get ();
   data_offset = PAGE_SIZE;
 
 #if defined (PERF_ATTR_SIZE_VER5)
@@ -752,79 +538,82 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
       /* Check for overflows.  */
       if ((__u64) size != data_size)
-	{
-	  munmap ((void *) header, size + PAGE_SIZE);
-	  goto err_file;
-	}
+	error (_("Failed to determine trace buffer size."));
     }
 #endif /* defined (PERF_ATTR_SIZE_VER5) */
 
-  bts->header = header;
-  bts->bts.mem = ((const uint8_t *) header) + data_offset;
   bts->bts.size = size;
   bts->bts.data_head = &header->data_head;
+  bts->bts.mem = (const uint8_t *) data.release () + data_offset;
   bts->bts.last_head = 0ull;
+  bts->header = header;
+  bts->file = fd.release ();
 
   tinfo->conf.bts.size = (unsigned int) size;
-  return tinfo;
-
- err_file:
-  /* We were not able to allocate any buffer.  */
-  close (bts->file);
-
- err_out:
-  xfree (tinfo);
-  return NULL;
+  return tinfo.release ();
 }
 
 #if defined (PERF_ATTR_SIZE_VER5)
+
+/* Determine the event type.  */
+
+static int
+perf_event_pt_event_type ()
+{
+  static const char filename[] = "/sys/bus/event_source/devices/intel_pt/type";
+
+  errno = 0;
+  gdb_file_up file = gdb_fopen_cloexec (filename, "r");
+  if (file.get () == nullptr)
+    error (_("Failed to open %s: %s."), filename, safe_strerror (errno));
+
+  int type, found = fscanf (file.get (), "%d", &type);
+  if (found != 1)
+    error (_("Failed to read the PT event type from %s."), filename);
+
+  return type;
+}
 
 /* Enable branch tracing in Intel Processor Trace format.  */
 
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
-  struct perf_event_mmap_page *header;
-  struct btrace_target_info *tinfo;
   struct btrace_tinfo_pt *pt;
-  size_t pages, size;
-  int pid, pg, errcode, type;
+  size_t pages;
+  int pid, pg;
 
-  if (conf->size == 0)
-    return NULL;
-
-  errcode = perf_event_pt_event_type (&type);
-  if (errcode != 0)
-    return NULL;
-
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
 
-  tinfo = XCNEW (struct btrace_target_info);
+  gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
+    (XCNEW (btrace_target_info));
   tinfo->ptid = ptid;
 
   tinfo->conf.format = BTRACE_FORMAT_PT;
   pt = &tinfo->variant.pt;
 
   pt->attr.size = sizeof (pt->attr);
-  pt->attr.type = type;
+  pt->attr.type = perf_event_pt_event_type ();
 
   pt->attr.exclude_kernel = 1;
   pt->attr.exclude_hv = 1;
   pt->attr.exclude_idle = 1;
 
   errno = 0;
-  pt->file = syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0);
-  if (pt->file < 0)
-    goto err;
+  scoped_fd fd (syscall (SYS_perf_event_open, &pt->attr, pid, -1, -1, 0));
+  if (fd.get () < 0)
+    diagnose_perf_event_open_fail ();
 
   /* Allocate the configuration page. */
-  header = ((struct perf_event_mmap_page *)
-	    mmap (NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
-		  pt->file, 0));
-  if (header == MAP_FAILED)
-    goto err_file;
+  scoped_mmap data (nullptr, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+		    fd.get (), 0);
+  if (data.get () == MAP_FAILED)
+    error (_("Failed to map trace user page: %s."), safe_strerror (errno));
+
+  struct perf_event_mmap_page *header = (struct perf_event_mmap_page *)
+    data.get ();
 
   header->aux_offset = header->data_offset + header->data_size;
 
@@ -843,6 +632,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 
   /* We try to allocate the requested size.
      If that fails, try to get as much as we can.  */
+  scoped_mmap aux;
   for (; pages > 0; pages >>= 1)
     {
       size_t length;
@@ -854,41 +644,33 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
       if ((__u64) UINT_MAX < data_size)
 	continue;
 
-      size = (size_t) data_size;
+      length = (size_t) data_size;
 
       /* Check for overflows.  */
-      if ((__u64) size != data_size)
+      if ((__u64) length != data_size)
 	continue;
 
       header->aux_size = data_size;
-      length = size;
 
-      pt->pt.mem = ((const uint8_t *)
-		    mmap (NULL, length, PROT_READ, MAP_SHARED, pt->file,
-			  header->aux_offset));
-      if (pt->pt.mem != MAP_FAILED)
+      errno = 0;
+      aux.reset (nullptr, length, PROT_READ, MAP_SHARED, fd.get (),
+		 header->aux_offset);
+      if (aux.get () != MAP_FAILED)
 	break;
     }
 
   if (pages == 0)
-    goto err_conf;
+    error (_("Failed to map trace buffer: %s."), safe_strerror (errno));
 
-  pt->header = header;
-  pt->pt.size = size;
+  pt->pt.size = aux.size ();
+  pt->pt.mem = (const uint8_t *) aux.release ();
   pt->pt.data_head = &header->aux_head;
+  pt->header = (struct perf_event_mmap_page *) data.release ();
+  gdb_assert (pt->header == header);
+  pt->file = fd.release ();
 
-  tinfo->conf.pt.size = (unsigned int) size;
-  return tinfo;
-
- err_conf:
-  munmap((void *) header, PAGE_SIZE);
-
- err_file:
-  close (pt->file);
-
- err:
-  xfree (tinfo);
-  return NULL;
+  tinfo->conf.pt.size = (unsigned int) pt->pt.size;
+  return tinfo.release ();
 }
 
 #else /* !defined (PERF_ATTR_SIZE_VER5) */
@@ -896,8 +678,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 static struct btrace_target_info *
 linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 {
-  errno = EOPNOTSUPP;
-  return NULL;
+  error (_("Intel Processor Trace support was disabled at compile time."));
 }
 
 #endif /* !defined (PERF_ATTR_SIZE_VER5) */
@@ -907,24 +688,20 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 struct btrace_target_info *
 linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
-  struct btrace_target_info *tinfo;
-
-  tinfo = NULL;
   switch (conf->format)
     {
     case BTRACE_FORMAT_NONE:
-      break;
+      error (_("Bad branch trace format."));
+
+    default:
+      error (_("Unknown branch trace format."));
 
     case BTRACE_FORMAT_BTS:
-      tinfo = linux_enable_bts (ptid, &conf->bts);
-      break;
+      return linux_enable_bts (ptid, &conf->bts);
 
     case BTRACE_FORMAT_PT:
-      tinfo = linux_enable_pt (ptid, &conf->pt);
-      break;
+      return linux_enable_pt (ptid, &conf->pt);
     }
-
-  return tinfo;
 }
 
 /* Disable BTS tracing.  */
@@ -1008,7 +785,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
       data_head = *pevent->data_head;
 
       /* Delete any leftover trace from the previous iteration.  */
-      VEC_free (btrace_block_s, btrace->blocks);
+      delete btrace->blocks;
+      btrace->blocks = nullptr;
 
       if (type == BTRACE_READ_DELTA)
 	{
@@ -1066,9 +844,8 @@ linux_read_bts (struct btrace_data_bts *btrace,
   /* Prune the incomplete last block (i.e. the first one of inferior execution)
      if we're not doing a delta read.  There is no way of filling in its zeroed
      BEGIN element.  */
-  if (!VEC_empty (btrace_block_s, btrace->blocks)
-      && type != BTRACE_READ_DELTA)
-    VEC_pop (btrace_block_s, btrace->blocks);
+  if (!btrace->blocks->empty () && type != BTRACE_READ_DELTA)
+    btrace->blocks->pop_back ();
 
   return BTRACE_ERR_NONE;
 }
@@ -1112,7 +889,7 @@ linux_read_pt (struct btrace_data_pt *btrace,
       return BTRACE_ERR_NONE;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unkown btrace read type."));
+  internal_error (__FILE__, __LINE__, _("Unknown btrace read type."));
 }
 
 /* See linux-btrace.h.  */
@@ -1155,14 +932,6 @@ linux_btrace_conf (const struct btrace_target_info *tinfo)
 }
 
 #else /* !HAVE_LINUX_PERF_EVENT_H */
-
-/* See linux-btrace.h.  */
-
-int
-linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
-{
-  return 0;
-}
 
 /* See linux-btrace.h.  */
 

@@ -1,5 +1,5 @@
 /* bfin-defs.h ADI Blackfin gas header file
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -79,7 +79,7 @@ typedef enum
 #define T_REG_A       0x40
 
 /* All registers above this value don't
-   belong to a usuable register group.  */
+   belong to a usable register group.  */
 #define T_NOGROUP     0xa0
 
 /* Flags.  */
@@ -325,7 +325,6 @@ Expr_Node *Expr_Node_Create (Expr_Node_Type type,
 INSTR_T Expr_Node_Gen_Reloc (Expr_Node *head, int parent_reloc);
 
 #define MKREF(x)	mkexpr (0,x)
-#define ALLOCATE(x)	malloc (x)
 
 #define NULL_CODE ((INSTR_T) 0)
 

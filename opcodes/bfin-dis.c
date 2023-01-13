@@ -1,5 +1,5 @@
 /* Disassemble ADI Blackfin Instructions.
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of libopcodes.
 
@@ -33,12 +33,11 @@
 
 typedef long TIword;
 
-#define HOST_LONG_WORD_SIZE (sizeof (long) * 8)
-#define XFIELD(w,p,s)       (((w) & ((1 << (s)) - 1) << (p)) >> (p))
-#define SIGNEXTEND(v, n)    ((v << (HOST_LONG_WORD_SIZE - (n))) >> (HOST_LONG_WORD_SIZE - (n)))
-#define MASKBITS(val, bits) (val & ((1 << bits) - 1))
+#define SIGNBIT(bits)       (1ul << ((bits) - 1))
+#define MASKBITS(val, bits) ((val) & ((1ul << (bits)) - 1))
+#define SIGNEXTEND(v, n)    ((MASKBITS (v, n) ^ SIGNBIT (n)) - SIGNBIT (n))
 
-#include "dis-asm.h"
+#include "disassemble.h"
 
 typedef unsigned int bu32;
 
@@ -125,8 +124,12 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
 
   if (constant_formats[cf].reloc)
     {
-      bfd_vma ea = (((constant_formats[cf].pcrel ? SIGNEXTEND (x, constant_formats[cf].nbits)
-		      : x) + constant_formats[cf].offset) << constant_formats[cf].scale);
+      bfd_vma ea;
+
+      if (constant_formats[cf].pcrel)
+	x = SIGNEXTEND (x, constant_formats[cf].nbits);
+      ea = x + constant_formats[cf].offset;
+      ea = ea << constant_formats[cf].scale;
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
@@ -150,17 +153,14 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
     {
       int nb = constant_formats[cf].nbits + 1;
 
-      x = x | (1 << constant_formats[cf].nbits);
+      x = x | (1ul << constant_formats[cf].nbits);
       x = SIGNEXTEND (x, nb);
     }
-  else
-    x = constant_formats[cf].issigned ? SIGNEXTEND (x, constant_formats[cf].nbits) : x;
+  else if (constant_formats[cf].issigned)
+    x = SIGNEXTEND (x, constant_formats[cf].nbits);
 
-  if (constant_formats[cf].offset)
-    x += constant_formats[cf].offset;
-
-  if (constant_formats[cf].scale)
-    x <<= constant_formats[cf].scale;
+  x += constant_formats[cf].offset;
+  x = (unsigned long) x << constant_formats[cf].scale;
 
   if (constant_formats[cf].decimal)
     sprintf (buf, "%*li", constant_formats[cf].leading, x);
@@ -180,10 +180,12 @@ fmtconst_val (const_forms_t cf, unsigned int x, unsigned int pc)
 {
   if (0 && constant_formats[cf].reloc)
     {
-      bu32 ea = (((constant_formats[cf].pcrel
-		   ? SIGNEXTEND (x, constant_formats[cf].nbits)
-		   : x) + constant_formats[cf].offset)
-		 << constant_formats[cf].scale);
+      bu32 ea;
+
+      if (constant_formats[cf].pcrel)
+	x = SIGNEXTEND (x, constant_formats[cf].nbits);
+      ea = x + constant_formats[cf].offset;
+      ea = ea << constant_formats[cf].scale;
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
@@ -194,7 +196,7 @@ fmtconst_val (const_forms_t cf, unsigned int x, unsigned int pc)
   if (constant_formats[cf].negative)
     {
       int nb = constant_formats[cf].nbits + 1;
-      x = x | (1 << constant_formats[cf].nbits);
+      x = x | (1ul << constant_formats[cf].nbits);
       x = SIGNEXTEND (x, nb);
     }
   else if (constant_formats[cf].issigned)
@@ -350,7 +352,7 @@ static const enum machine_registers decode_gregs[] =
   REG_P0, REG_P1, REG_P2, REG_P3, REG_P4, REG_P5, REG_SP, REG_FP,
 };
 
-#define gregs(x, i) REGNAME (decode_gregs[((i) << 3) | (x)])
+#define gregs(x, i) REGNAME (decode_gregs[(((i) << 3) | (x)) & 15])
 
 /* [dregs pregs (iregs mregs) (bregs lregs)].  */
 static const enum machine_registers decode_regs[] =
@@ -361,7 +363,7 @@ static const enum machine_registers decode_regs[] =
   REG_B0, REG_B1, REG_B2, REG_B3, REG_L0, REG_L1, REG_L2, REG_L3,
 };
 
-#define regs(x, i) REGNAME (decode_regs[((i) << 3) | (x)])
+#define regs(x, i) REGNAME (decode_regs[(((i) << 3) | (x)) & 31])
 
 /* [dregs pregs (iregs mregs) (bregs lregs) Low Half].  */
 static const enum machine_registers decode_regs_lo[] =
@@ -372,7 +374,7 @@ static const enum machine_registers decode_regs_lo[] =
   REG_BL0, REG_BL1, REG_BL2, REG_BL3, REG_LL0, REG_LL1, REG_LL2, REG_LL3,
 };
 
-#define regs_lo(x, i) REGNAME (decode_regs_lo[((i) << 3) | (x)])
+#define regs_lo(x, i) REGNAME (decode_regs_lo[(((i) << 3) | (x)) & 31])
 
 /* [dregs pregs (iregs mregs) (bregs lregs) High Half].  */
 static const enum machine_registers decode_regs_hi[] =
@@ -383,7 +385,7 @@ static const enum machine_registers decode_regs_hi[] =
   REG_BH0, REG_BH1, REG_BH2, REG_BH3, REG_LH0, REG_LH1, REG_LH2, REG_LH3,
 };
 
-#define regs_hi(x, i) REGNAME (decode_regs_hi[((i) << 3) | (x)])
+#define regs_hi(x, i) REGNAME (decode_regs_hi[(((i) << 3) | (x)) & 31])
 
 static const enum machine_registers decode_statbits[] =
 {

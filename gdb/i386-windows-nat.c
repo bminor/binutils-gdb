@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,11 +79,9 @@ i386_windows_segment_register_p (int regnum)
   return regnum >= I386_CS_REGNUM && regnum <= I386_GS_REGNUM;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_i386_windows_nat;
-
+void _initialize_i386_windows_nat ();
 void
-_initialize_i386_windows_nat (void)
+_initialize_i386_windows_nat ()
 {
   windows_set_context_register_offsets (mappings);
   windows_set_segment_register_p (i386_windows_segment_register_p);

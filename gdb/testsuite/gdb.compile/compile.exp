@@ -1,4 +1,4 @@
-# Copyright 2014-2016 Free Software Foundation, Inc.
+# Copyright 2014-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,15 +42,15 @@ clean_restart ${testfile}
 #
 gdb_test "compile code int i=2;" \
     "The program must be running for the compile command to work.*" \
-    "Test compile code command without running inferior"
+    "test compile code command without running inferior"
 
 gdb_test "compile int i=2;" \
     "The program must be running for the compile command to work.*" \
-    "Test compile command without running inferior"
+    "test compile command without running inferior"
 
 gdb_test "compile file -r ${srcdir}/${subdir}/${testfile}-mod.c" \
     "The program must be running for the compile command to work.*" \
-    "Test compile file command without running inferior"
+    "test compile file command without running inferior"
 
 if ![runto_main] {
     return -1
@@ -66,20 +66,20 @@ if {[skip_compile_feature_tests]} {
 #
 
 gdb_test_no_output "compile -- f = 10" \
-    "Test abbreviations and code delimiter"
+    "test abbreviations and code delimiter"
 
 gdb_test "compile f = 10;" ".*= 10;: No such file.*" \
     "Test abbreviations and code collision"
 
 gdb_test_no_output "compile -r -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -r"
+    "test delimiter with -r"
 
 gdb_test_no_output "compile -raw -- void _gdb_expr(){int i = 5;}" \
-    "Test delimiter with -raw"
+    "test delimiter with -raw"
 
 gdb_test "compile -- -r  void _gdb_expr(){int i = 5;}" \
     ".* error: 'r' undeclared \\(first use in this function\\).*" \
-    "Test delimiter with -r after it"
+    "test delimiter with -r after it"
 
 gdb_test "p globalvar" " = 10" "expect 10"
 
@@ -139,8 +139,11 @@ gdb_test "compile code func_doesnotexist ();" "warning: Could not find symbol \"
 gdb_test "compile code *(volatile int *) 0 = 0;" \
     "The program being debugged was signaled while in a function called from GDB\\.\r\nGDB remains in the frame where the signal was received\\.\r\n.*" \
     "compile code segfault first"
-gdb_test "bt" \
-    "\r\n#0  \[^\r\n\]* in _gdb_expr \[^\r\n\]*\r\n#1  <function called from gdb>\r\n.*"
+gdb_test "bt" [multi_line \
+		   "#0  ($hex in )?_gdb_expr .*" \
+		   "#1  <function called from gdb>" \
+		   "#2  .*" \
+		  ]
 
 set test "p/x \$pc"
 set infcall_pc 0
@@ -253,7 +256,7 @@ gdb_test "print union_object.intfield" " = 7"
 # LOC_UNRESOLVED tests.
 
 gdb_test "print unresolved" " = 20"
-gdb_test "compile code globalvar = unresolved;"
+gdb_test_no_output "compile code globalvar = unresolved;"
 gdb_test "print globalvar" " = 20" "print unresolved value"
 
 # Test shadowing with global and static variables.
@@ -296,12 +299,14 @@ gdb_test "p globalvar" " = 77" "expect 77"
 
 # Test reference to minimal_symbol, not (full) symbol.
 
-gdb_test_no_output "compile code globalvar = func_nodebug (75);" \
+gdb_test "compile code globalvar = func_nodebug (75);" \
+    "warning: function has unknown return type; assuming int" \
     "call func_nodebug"
 gdb_test "p globalvar" " = -75" "expect -75"
-gdb_test_no_output \
-  "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
-  "call func_nodebug indirectly"
+gdb_test \
+    "compile code int (*funcp) (int) = func_nodebug; globalvar = funcp (76);" \
+    "warning: function has unknown return type; assuming int" \
+    "call func_nodebug indirectly"
 gdb_test "p globalvar" " = -76" "expect -76"
 
 
@@ -320,11 +325,11 @@ gdb_test_no_output "set debug compile off"
 gdb_test "show debug compile" "Compile debugging is .*"
 gdb_test "show compile-args" \
     "Compile command command-line arguments are .*"
-gdb_test "compile code -z" "Unknown argument.*"
+gdb_test "compile code -z" "Unrecognized option at: -z"
 
-gdb_test "set lang java" \
+gdb_test "set lang rust" \
     "Warning: the current language does not match this frame."
-gdb_test "compile code globalvar" "No compiler support for language java\\."
+gdb_test "compile code globalvar" "No compiler support for language rust\\."
 gdb_test_no_output "set lang auto"
 
 gdb_test_no_output "compile code union union_type newdecl_u"
@@ -335,12 +340,17 @@ gdb_test "compile file" \
     "You must provide a filename for this command.*" \
     "Test compile file without a filename"
 gdb_test "compile file -r" \
-    "You must provide a filename with the raw option set.*" \
+    "You must provide a filename for this command.*" \
     "Test compile file and raw option without a filename"
 gdb_test "compile file -z" \
-    "Unknown argument.*" \
-    "Test compile file with unknown argument"
-
+    "Unrecognized option at: -z" \
+    "test compile file with unknown option"
+gdb_test "compile file -z --" \
+    "Unrecognized option at: -z --" \
+    "test compile file with unknown option plus --"
+gdb_test "compile file -raw -- -raw" \
+    "/-raw: No such file or directory.*" \
+    "test compile file \"-raw\" file"
 
 # LOC_CONST tests.
 
@@ -348,7 +358,7 @@ if { $srcfile3 != "" } {
     gdb_test "p constvar" " = 3"
     gdb_test "info addr constvar" {Symbol "constvar" is constant\.}
 
-    gdb_test "compile code globalvar = constvar;"
+    gdb_test_no_output "compile code globalvar = constvar;"
     gdb_test "print globalvar" " = 3" "print constvar value"
 } else {
     untested "print constvar value"
@@ -371,7 +381,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} $libbin {debug}] != ""
 }
 
 clean_restart $binfile
-gdb_load_shlibs $libbin
+gdb_load_shlib $libbin
 
 if ![runto_main] {
     return -1

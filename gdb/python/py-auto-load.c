@@ -1,6 +1,6 @@
 /* GDB routines for supporting auto-loaded scripts.
 
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,7 @@
    set auto-load python-scripts on|off
    This is true if we should auto-load associated Python scripts when an
    objfile is opened, false otherwise.  */
-static int auto_load_python_scripts = 1;
+static bool auto_load_python_scripts = true;
 
 /* "show" command for the auto_load_python_scripts configuration variable.  */
 
@@ -52,7 +52,7 @@ gdbpy_auto_load_enabled (const struct extension_language_defn *extlang)
 /* Wrapper for "info auto-load python-scripts".  */
 
 static void
-info_auto_load_python_scripts (char *pattern, int from_tty)
+info_auto_load_python_scripts (const char *pattern, int from_tty)
 {
   auto_load_info_scripts (pattern, from_tty, &extension_language_python);
 }

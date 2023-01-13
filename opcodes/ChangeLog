@@ -1,259 +1,355 @@
-2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
-	* arc-nps400-tbl.h: Add schd, sync, and hwschd instructions.
-	* arc-opc.c (arc_flag_operands): Add new flags.
-	(arc_flag_classes): Add new classes.
+	PR 25469
+	* z80-dis.c: Add support for GBZ80 opcodes.
 
-2016-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-02-04  Alan Modra  <amodra@gmail.com>
 
-	* arc-opc.c (arc_opcodes): Extend comment to discus table layout.
+	* d30v-dis.c (print_insn): Make "val" and "opnum" unsigned.
 
-2016-04-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-02-03  Alan Modra  <amodra@gmail.com>
 
-	* arc-nps400-tbl.h: Add movbi, decode1, fbset, fbclear, encode0,
-	encode1, rflt, crc16, and crc32 instructions.
-	* arc-opc.c (arc_flag_operands): Add F_NPS_R.
-	(arc_flag_classes): Add C_NPS_R.
-	(insert_nps_bitop_size_2b): New function.
-	(extract_nps_bitop_size_2b): Likewise.
-	(insert_nps_bitop_uimm8): Likewise.
-	(extract_nps_bitop_uimm8): Likewise.
-	(arc_operands): Add new operand entries.
-
-2016-04-05  Claudiu Zissulescu  <claziss@synopsys.com>
-
-        * arc-regs.h: Add a new subclass field.  Add double assist
-        accumulator register values.
-        * arc-tbl.h: Use DPA subclass to mark the double assist
-        instructions.  Use DPX/SPX subclas to mark the FPX instructions.
-        * arc-opc.c (RSP): Define instead of SP.
-        (arc_aux_regs): Add the subclass field.
-
-2016-04-05  Jiong Wang  <jiong.wang@arm.com>
-
-	* arm-dis.c: Support FP16 vmul, vmla, vmls (by scalar).
-
-2016-03-31  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-opc.c (arc_operands): Fix operand flags for NPS_R_DST, and
-	NPS_R_SRC1.
-
-2016-03-30  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-nps400-tbl.h: Add a header comment, and fix some whitespace
-	issues.  No functional changes.
-
-2016-03-30  Claudiu Zissulescu  <claziss@synopsys.com>
-
-        * arc-regs.h (IC_RAM_ADDRESS, IC_TAG, IC_WP, IC_DATA, CONTROL0)
-        (AX2, AY2, MX2, MY2, AY0, AY1, DC_RAM_ADDR, DC_TAG, CONTROL1)
-        (RTT): Remove duplicate.
-        (LCDINSTR, LCDDATA, LCDSTAT, CC_*, PCT_COUNT*, PCT_SNAP*)
-        (PCT_CONFIG*): Remove.
-        (D1L, D1H, D2H, D2L): Define.
-
-2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
-
-        * arc-ext-tbl.h (dsp_fp_i2flt): Fix typo.
-
-2016-03-29  Claudiu Zissulescu  <claziss@synopsys.com>
-
-        * arc-tbl.h (invld07): Remove.
-        * arc-ext-tbl.h: New file.
-        * arc-dis.c (FIELDA, FIELDB, FIELDC): Remove.
-        * arc-opc.c (arc_opcodes): Add ext-tbl include.
-
-2016-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
-
-	Fix -Wstack-usage warnings.
-	* aarch64-dis.c (print_operands): Substitute size.
-	* aarch64-opc.c (print_register_offset_address): Substitute tblen.
-
-2016-03-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
-
-	* sparc-opc.c (sparc_opcodes): Reorder entries for `rd' in order
-	to get a proper diagnostic when an invalid ASR register is used.
-
-2016-03-22  Nick Clifton  <nickc@redhat.com>
-
-	* configure: Regenerate.
-
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-nps400-tbl.h: New file.
-	* arc-opc.c: Add top level comment.
-	(insert_nps_3bit_dst): New function.
-	(extract_nps_3bit_dst): New function.
-	(insert_nps_3bit_src2): New function.
-	(extract_nps_3bit_src2): New function.
-	(insert_nps_bitop_size): New function.
-	(extract_nps_bitop_size): New function.
-	(arc_flag_operands): Add nps400 entries.
-	(arc_flag_classes): Add nps400 entries.
-	(arc_operands): Add nps400 entries.
-	(arc_opcodes): Add nps400 include.
-
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-opc.c (arc_flag_classes): Convert all flag classes to use
-	the new class enum values.
-
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-dis.c (print_insn_arc): Handle nps400.
-
-2016-03-21  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* arc-opc.c (BASE): Delete.
-
-2016-03-18  Nick Clifton  <nickc@redhat.com>
-
-	PR target/19721
-	* aarch64-tbl.h (aarch64_opcode_table): Fix type of second operand
-	of MOV insn that aliases an ORR insn.
-
-2016-03-16  Jiong Wang  <jiong.wang@arm.com>
-
-	* arm-dis.c (neon_opcodes): Support new FP16 instructions.
-
-2016-03-07  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
-
-	* mcore-opc.h: Add const qualifiers.
-	* microblaze-opc.h (struct op_code_struct): Likewise.
-	* sh-opc.h: Likewise.
-	* tic4x-dis.c (tic4x_print_indirect): Likewise.
-	(tic4x_print_op): Likewise.
-
-2016-03-02  Alan Modra  <amodra@gmail.com>
-
-	* or1k-desc.h: Regenerate.
-	* fr30-ibld.c: Regenerate.
-	* rl78-decode.c: Regenerate.
-
-2016-03-01  Nick Clifton  <nickc@redhat.com>
-
-	PR target/19747
-	* rl78-dis.c (print_insn_rl78_common): Fix typo.
-
-2016-02-24  Renlin Li  <renlin.li@arm.com>
-
-	* arm-dis.c (coprocessor_opcodes): Add fp16 instruction entries.
-	(print_insn_coprocessor): Support fp16 instructions.
-
-2016-02-24  Renlin Li  <renlin.li@arm.com>
-
-	* arm-dis.c (print_insn_coprocessor): Fix mask for vsel, vmaxnm,
-	vminnm, vrint(mpna).
-
-2016-02-24  Renlin Li  <renlin.li@arm.com>
-
-	* arm-dis.c (print_insn_coprocessor): Check co-processor number for
-	cpd/cpd2, mcr/mcr2, mrc/mrc2, ldc/ldc2, stc/stc2.
-
-2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* i386-dis.c (print_insn): Parenthesize expression to prevent
-	truncated addresses.
-	(OP_J): Likewise.
-
-2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
-	    Janek van Oirschot  <jvanoirs@synopsys.com>
-
-        * arc-opc.c (arc_relax_opcodes, arc_num_relax_opcodes): New
-        variable.
-
-2016-02-04  Nick Clifton  <nickc@redhat.com>
-
-	PR target/19561
-	* msp430-dis.c (print_insn_msp430): Add a special case for
-	decoding an RRC instruction with the ZC bit set in the extension
-	word.
-
-2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* cgen-ibld.in (insert_normal): Rework calculation of shift.
-	* epiphany-ibld.c: Regenerate.
-	* fr30-ibld.c: Regenerate.
-	* frv-ibld.c: Regenerate.
-	* ip2k-ibld.c: Regenerate.
-	* iq2000-ibld.c: Regenerate.
-	* lm32-ibld.c: Regenerate.
 	* m32c-ibld.c: Regenerate.
-	* m32r-ibld.c: Regenerate.
-	* mep-ibld.c: Regenerate.
-	* mt-ibld.c: Regenerate.
-	* or1k-ibld.c: Regenerate.
-	* xc16x-ibld.c: Regenerate.
-	* xstormy16-ibld.c: Regenerate.
 
-2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-02-01  Alan Modra  <amodra@gmail.com>
 
-	* epiphany-dis.c: Regenerated from latest cpu files.
+	* frv-ibld.c: Regenerate.
 
-2016-02-01  Michael McConville  <mmcco@mykolab.com>
+2020-01-31  Jan Beulich  <jbeulich@suse.com>
 
-	* cgen-dis.c (count_decodable_bits): Use unsigned value for mask
-	test bit.
+	* i386-dis.c (EXxmm_mdq, xmm_mdq_mode): Delete.
+	(intel_operand_size, OP_EX): Drop xmm_mdq_mode case label.
+	(OP_E_memory): Replace xmm_mdq_mode case label by
+	vex_scalar_w_dq_mode one.
+	* i386-dis-evex-prefix.h: Replace EXxmm_mdq by EXVexWdqScalar.
 
-2016-01-25  Renlin Li  <renlin.li@arm.com>
+2020-01-31  Jan Beulich  <jbeulich@suse.com>
 
-	* arm-dis.c (mapping_symbol_for_insn): New function.
-	(find_ifthen_state): Call mapping_symbol_for_insn().
+	* i386-dis.c (EXVexWdq, vex_w_dq_mode): Delete.
+	(vex_vsib_d_w_dq_mode, vex_vsib_q_w_dq_mode,
+	vex_scalar_w_dq_mode): Don't refer to vex_w_dq_mode in comments.
+	(intel_operand_size): Drop vex_w_dq_mode case label.
 
-2016-01-20  Matthew Wahab  <matthew.wahab@arm.com>
+2020-01-31  Richard Sandiford  <richard.sandiford@arm.com>
 
-	* aarch64-opc.c (operand_general_constraint_met_p): Check validity
-	of MSR UAO immediate operand.
+	* aarch64-tbl.h (aarch64_opcode): Set C_MAX_ELEM for SVE bfcvt.
+	Remove C_SCAN_MOVPRFX for SVE bfcvtnt.
 
-2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+2020-01-30  Alan Modra  <amodra@gmail.com>
 
-	* mips-dis.c (print_insn_micromips): Remove 48-bit microMIPS
-	instruction support.
+	* m32c-ibld.c: Regenerate.
 
-2016-01-17  Alan Modra  <amodra@gmail.com>
+2020-01-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf-opc.c: Regenerate.
+
+2020-01-30  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (X86_64_C2, X86_64_C3): New enumerators.
+	(dis386): Use them to replace C2/C3 table entries.
+	(x86_64_table): Add X86_64_C2 and X86_64_C3 entries.
+	* i386-opc.tbl (ret): Split Cpu64 entries into AMD64 and Intel64
+	ones. Use Size64 instead of DefaultSize on Intel64 ones.
+	* i386-tbl.h: Re-generate.
+
+2020-01-30  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (call): Drop DefaultSize from Intel64 JumpDword
+	forms.
+	(fldenv, fnstenv, fstenv, fnsave, fsave, frstor): Drop
+	DefaultSize.
+	* i386-tbl.h: Re-generate.
+
+2020-01-30  Alan Modra  <amodra@gmail.com>
+
+	* tic4x-dis.c (tic4x_dp): Make unsigned.
+
+2020-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	PR binutils/25445
+	* i386-dis.c (MOVSXD_Fixup): New function.
+	(movsxd_mode): New enum.
+	(x86_64_table): Use MOVSXD_Fixup and movsxd_mode on movsxd.
+	(intel_operand_size): Handle movsxd_mode.
+	(OP_E_register): Likewise.
+	(OP_G): Likewise.
+	* i386-opc.tbl: Remove Rex64 and allow 32-bit destination
+	register on movsxd.  Add movsxd with 16-bit destination register
+	for AMD64 and Intel64 ISAs.
+	* i386-tbl.h: Regenerated.
+
+2020-01-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 25403
+	* aarch64-tbl.h (struct aarch64_opcode): Re-order cfinv.
+	* aarch64-asm-2.c: Regenerate
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (sysret): Drop DefaultSize.
+	* i386-tbl.h: Re-generate.
+
+2020-01-21  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (vcvtneps2bf16x): Add Broadcast, Xmmword, and
+	Dword.
+	(vcvtneps2bf16y): Add Broadcast, Ymmword, and Dword.
+	* i386-tbl.h: Re-generate.
+
+2020-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
+	* hppa-dis.c (fput_const): Remove useless cast.
+
+2020-01-20  Alan Modra  <amodra@gmail.com>
+
+	* arm-dis.c (print_insn_arm): Wrap 'T' value.
+
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
 
-2016-01-14  Nick Clifton  <nickc@redhat.com>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-	* rl78-decode.opc (rl78_decode_opcode): Add 's' operand to movw
-	instructions that can support stack pointer operations.
-	* rl78-decode.c: Regenerate.
-	* rl78-dis.c: Fix display of stack pointer in MOVW based
-	instructions.
+	Binutils 2.34 branch created.
 
-2016-01-14  Matthew Wahab  <matthew.wahab@arm.com>
+2020-01-17  Christian Biesinger  <cbiesinger@google.com>
 
-	* aarch64-opc.c (aarch64_sys_reg_supported_p): Merge conditionals
-	testing for RAS support.  Add checks for erxfr_el1, erxctlr_el1,
-	erxtatus_el1 and erxaddr_el1.
+	* opintl.h: Fix spelling error (seperate).
 
-2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+2020-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* arm-dis.c (arm_opcodes): Add "esb".
-	(thumb_opcodes): Likewise.
+	* i386-opc.tbl: Add {vex} pseudo prefix.
+	* i386-tbl.h: Regenerated.
 
-2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
-	* ppc-opc.c <xscmpnedp>: Delete.
-	<xvcmpnedp>: Likewise.
-	<xvcmpnedp.>: Likewise.
-	<xvcmpnesp>: Likewise.
-	<xvcmpnesp.>: Likewise.
+	PR 25376
+	* opcodes/arm-dis.c (coprocessor_opcodes): Use CORE_HIGH for MVE bits.
+	(neon_opcodes): Likewise.
+	(select_arm_features): Make sure we enable MVE bits when selecting
+	armv8.1-m.main.  Make sure we do not enable MVE bits when not selecting
+	any architecture.
 
-2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
+2020-01-16  Jan Beulich  <jbeulich@suse.com>
 
-	PR gas/13050
-	* m68k-opc.c (moveb, movew): For ISA_B/C only allow #,d(An) in
-	addition to ISA_A.
+	* i386-opc.tbl: Drop stale comment from XOP section.
 
-2016-01-01  Alan Modra  <amodra@gmail.com>
+2020-01-16  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (movq): Add VexWIG to SSE2AVX XMM->XMM forms.
+	(extractps): Add VexWIG to SSE2AVX forms.
+	* i386-tbl.h: Re-generate.
+
+2020-01-16  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (pextrq, pinsrq): Drop IgnoreSize and Qword. Drop
+	Size64 from and use VexW1 on SSE2AVX forms.
+	(vpextrq, vpinsrq): Drop IgnoreSize and Qword. Drop Size64 from
+	VEX-encoded forms. Add Cpu64 to EVEX-encoded forms. Use VexW1.
+	* i386-tbl.h: Re-generate.
+
+2020-01-15  Alan Modra  <amodra@gmail.com>
+
+	* tic4x-dis.c (tic4x_version): Make unsigned long.
+	(optab, optab_special, registernames): New file scope vars.
+	(tic4x_print_register): Set up registernames rather than
+	malloc'd registertable.
+	(tic4x_disassemble): Delete optable and optable_special.  Use
+	optab and optab_special instead.  Throw away old optab,
+	optab_special and registernames when info->mach changes.
+
+2020-01-14  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25377
+	* z80-dis.c (suffix): Use .db instruction to generate double
+	prefix.
+
+2020-01-14  Alan Modra  <amodra@gmail.com>
+
+	* z8k-dis.c (unpack_instr): Formatting.  Cast unsigned short
+	values to unsigned before shifting.
+
+2020-01-13  Thomas Troeger  <tstroege@gmx.de>
+
+	* arm-dis.c (print_insn_arm): Fill in insn info fields for control
+	flow instructions.
+	(print_insn_thumb16, print_insn_thumb32): Likewise.
+	(print_insn): Initialize the insn info.
+	* i386-dis.c (print_insn): Initialize the insn info fields, and
+	detect jumps.
+
+2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+
+	* arc-opc.c (C_NE): Make it required.
+
+2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+
+        * opcode/arc-dis.c (regnames): Correct ACCL/ACCH naming, fix typo
+	reserved register name.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* ns32k-dis.c (Is_gen): Use strchr, add 'f'.
+	(print_insn_ns32k): Adjust ioffset for 'f' index_offset.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* wasm32-dis.c (print_insn_wasm32): Localise variables.  Store
+	result of wasm_read_leb128 in a uint64_t and check that bits
+	are not lost when copying to other locals.  Use uint32_t for
+	most locals.  Use PRId64 when printing int64_t.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* score-dis.c: Formatting.
+	* score7-dis.c: Formatting.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* score-dis.c (print_insn_score48): Use unsigned variables for
+	unsigned values.  Don't left shift negative values.
+	(print_insn_score32): Likewise.
+	* score7-dis.c (print_insn_score32, print_insn_score16): Likewise.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* tic4x-dis.c (tic4x_print_register): Remove dead code.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* fr30-ibld.c: Regenerate.
+
+2020-01-13  Alan Modra  <amodra@gmail.com>
+
+	* xgate-dis.c (print_insn): Don't left shift signed value.
+	(ripBits): Formatting, use 1u.
+
+2020-01-10  Alan Modra  <amodra@gmail.com>
+
+	* tilepro-opc.c (parse_insn_tilepro): Make opval unsigned.
+	* tilegx-opc.c (parse_insn_tilegx): Likewise.  Delete raw_opval.
+
+2020-01-10  Alan Modra  <amodra@gmail.com>
+
+	* m10300-dis.c (disassemble): Move extraction of DREG, AREG, RREG,
+	and XRREG value earlier to avoid a shift with negative exponent.
+	* m10200-dis.c (disassemble): Similarly.
+
+2020-01-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 25224
+	* z80-dis.c (ld_ii_ii): Use correct cast.
+
+2020-01-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25224
+	* z80-dis.c (ld_ii_ii): Use character constant when checking
+	opcode byte value.
+
+2020-01-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (SEP_Fixup): New.
+	(SEP): Define.
+	(dis386_twobyte): Use it for sysenter/sysexit.
+	(enum x86_64_isa): Change amd64 enumerator to value 1.
+	(OP_J): Compare isa64 against intel64 instead of amd64.
+	* i386-opc.tbl (sysenter, sysexit): Split into AMD64 and Intel64
+	forms.
+	* i386-tbl.h: Re-generate.
+
+2020-01-08  Alan Modra  <amodra@gmail.com>
+
+	* z8k-dis.c: Include libiberty.h
+	(instr_data_s): Make max_fetched unsigned.
+	(z8k_lookup_instr): Make nibl_index and tabl_index unsigned.
+	Don't exceed byte_info bounds.
+	(output_instr): Make num_bytes unsigned.
+	(unpack_instr): Likewise for nibl_count and loop.
+	* z8kgen.c (gas <opcode_entry_type>): Make noperands, length and
+	idx unsigned.
+	* z8k-opc.h: Regenerate.
+
+2020-01-07  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-tbl.h (llock): Use 'LLOCK' as class.
+	(llockd): Likewise.
+	(scond): Use 'SCOND' as class.
+	(scondd): Likewise.
+	(llockd): Set data_size_mode to 'C_ZZ_D' which is 64-bit.
+	(scondd): Likewise.
+
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
+	* m32c-ibld.c: Regenerate.
+
+2020-01-06  Alan Modra  <amodra@gmail.com>
+
+	PR 25344
+	* z80-dis.c (suffix): Don't use a local struct buffer copy.
+	Peek at next byte to prevent recursion on repeated prefix bytes.
+	Ensure uninitialised "mybuf" is not accessed.
+	(print_insn_z80): Don't zero n_fetch and n_used here,..
+	(print_insn_z80_buf): ..do it here instead.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
+	* m32r-ibld.c: Regenerate.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
+	* cr16-dis.c (cr16_match_opcode): Avoid shift left of signed value.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
+	* crx-dis.c (match_opcode): Avoid shift left of signed value.
+
+2020-01-04  Alan Modra  <amodra@gmail.com>
+
+	* d30v-dis.c (print_insn): Avoid signed overflow in left shift.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Use
+	SVE_ADDR_RX_LSL{1,2,3} for LD1RO{H,W,D}.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Correct SIMD
+	forms of SUDOT and USDOT.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Drop 'i' from
+	uzip{1,2}.
+	* opcodes/aarch64-dis-2.c: Re-generate.
+
+2020-01-03  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
+	FMMLA encoding.
+	* opcodes/aarch64-dis-2.c: Re-generate.
+
+2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* z80-dis.c: Add support for eZ80 and Z80 instructions.
+
+2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
 
-For older changes see ChangeLog-2015
+For older changes see ChangeLog-2019
 
-Copyright (C) 2016 Free Software Foundation, Inc.
+Copyright (C) 2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

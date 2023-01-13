@@ -1,5 +1,5 @@
 /* tc-arc.h - Macros and type defines for the ARC.
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -20,13 +20,14 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include "opcode/arc.h"
-
+#ifndef TC_ARC
 /* By convention, you should define this macro in the `.h' file.  For
    example, `tc-m68k.h' defines `TC_M68K'.  You might have to use this
    if it is necessary to add CPU specific code to the object format
    file.  */
 #define TC_ARC
+
+#include "opcode/arc.h"
 
 /* We want local label support.  */
 #define LOCAL_LABELS_FB 1
@@ -163,13 +164,14 @@ extern long md_pcrel_from_section (struct fix *, segT);
 
 /* The symbol is a ZOL's end loop label.  */
 #define ARC_FLAG_ZOL      (1 << 0)
+/* The symbol is an AUX register.  */
+#define ARC_FLAG_AUX      (1 << 1)
 
 /* We use this hook to check the validity of the last to instructions
    of a ZOL.  */
 #define tc_frob_label(S)  arc_frob_label (S)
 
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
-#define DYNAMIC_STRUCT_NAME "_DYNAMIC"
 
 /* We need to take care of not having section relative fixups for the
    fixups with respect to Position Independent Code.  */
@@ -185,6 +187,21 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* Adjust non PC-rel values at relaxation time.  */
 #define TC_PCREL_ADJUST(F) arc_pcrel_adjust (F)
 
+/* Adjust symbol table.  */
+#define obj_adjust_symtab() arc_adjust_symtab ()
+
+/* Object attribute hooks.  */
+#define md_end arc_md_end
+#define CONVERT_SYMBOLIC_ATTRIBUTE(name) arc_convert_symbolic_attribute (name)
+#ifndef TC_COPY_SYMBOL_ATTRIBUTES
+#define TC_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \
+  (arc_copy_symbol_attributes (DEST, SRC))
+#endif
+
+extern void arc_copy_symbol_attributes (symbolS *, symbolS *);
+extern int arc_convert_symbolic_attribute (const char *);
+extern void arc_md_end (void);
+extern void arc_adjust_symtab (void);
 extern int arc_pcrel_adjust (fragS *);
 extern bfd_boolean arc_parse_name (const char *, struct expressionS *);
 extern int tc_arc_fix_adjustable (struct fix *);
@@ -218,8 +235,8 @@ struct arc_flags
   /* Name of the parsed flag.  */
   char name[MAX_FLAG_NAME_LENGTH + 1];
 
-  /* The code of the parsed flag.  Valid when is not zero.  */
-  unsigned char code;
+  /* Pointer to arc flags.  */
+  const struct arc_flag_operand *flgp;
 };
 
 extern const relax_typeS md_relax_table[];
@@ -251,3 +268,5 @@ struct arc_relax_type
   /* Number of flags.  Used for re-assembling in md_convert_frag.  */
   int nflg;
 };
+
+#endif

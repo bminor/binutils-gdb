@@ -1,7 +1,7 @@
 #objdump: -drz --show-raw-insn
 #name: microMIPS for MIPS32r2 (insn32 mode)
 #as: -mips32r2 -32 -mfp64 -minsn32 -EB --defsym insn32=1
-#stderr: micromips-warn.l
+#warning_output: micromips-warn.l
 #source: micromips.s
 
 .*: +file format .*mips.*
@@ -683,6 +683,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b402 fffe 	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
 [ 0-9a-f]+:	0000 0000 	nop
@@ -1191,7 +1192,7 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test2
+[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test4
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	41a2 0000 	lui	v0,0x0
 [ 	]*[0-9a-f]+: R_MICROMIPS_HI16	test
@@ -5068,6 +5069,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	03ff 937c 	wait	0x3ff
 [ 0-9a-f]+:	03ff 8b7c 	syscall	0x3ff
 [ 0-9a-f]+:	03ff fffa 	cop2	0x7fffff
+[ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <fp_test>:
 [ 0-9a-f]+:	5400 01a0 	prefx	0x0,zero\(zero\)
@@ -7616,7 +7618,7 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
+[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot_ext
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 0f3c 	jalr	v0
 [ 0-9a-f]+:	0000 0000 	nop

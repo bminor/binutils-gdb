@@ -1,4 +1,4 @@
-# Copyright 2003-2016 Free Software Foundation, Inc.
+# Copyright 2003-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ proc selftest_setup { executable function } {
     }
 
     if { $gdb_file_cmd_debug_info != "debug" } then {
-	untested "No debug information, skipping testcase."
+	untested "no debug information, skipping testcase."
 	return -1
     }
 
@@ -88,10 +88,10 @@ proc selftest_setup { executable function } {
 
     set description "run until breakpoint at $function"
     gdb_test_multiple "run $INTERNAL_GDBFLAGS" "$description" {
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function .data.* at .*main.c:.*$gdb_prompt $" {
+        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).* at .*main.c:.*$gdb_prompt $" {
             pass "$description"
         }
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function .data.*$gdb_prompt $" {
+        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).*$gdb_prompt $" {
             xfail "$description (line numbers scrambled?)"
         }
         -re "vfork: No more processes.*$gdb_prompt $" {
@@ -119,8 +119,23 @@ proc selftest_setup { executable function } {
 proc do_self_tests {function body} {
     global GDB tool
 
-    # Are we on a target board.
-    if { [is_remote target] || ![isnative] } then {
+    # Are we testing with a remote board?  In that case, the target
+    # won't have access to the GDB's auxilliary data files
+    # (data-directory, etc.).  It's simpler to just skip.
+    if [is_remote target] {
+	return
+    }
+
+    # ... or seemingly testing with a cross debugger?  Likely GDB
+    # wouldn't be able to debug itself then...
+    if ![isnative] {
+	return
+    }
+
+    # ... or with a stub-like server?  I.e., gdbserver + "target
+    # remote"?  In that case we won't be able to pass command line
+    # arguments to GDB, and selftest_setup wants to do exactly that.
+    if [use_gdb_stub] {
 	return
     }
 

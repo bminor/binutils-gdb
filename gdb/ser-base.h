@@ -1,6 +1,6 @@
 /* Generic serial interface functions.
 
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,8 @@
 #ifndef SER_BASE_H
 #define SER_BASE_H
 
+#include "serial.h"  /* For serial_ttystate.  */
+
 struct serial;
 struct ui_file;
 
@@ -38,9 +40,6 @@ extern int ser_base_set_tty_state (struct serial *scb,
 extern void ser_base_print_tty_state (struct serial *scb,
 				      serial_ttystate ttystate,
 				      struct ui_file *stream);
-extern int ser_base_noflush_set_tty_state (struct serial *scb,
-					   serial_ttystate new_ttystate,
-					   serial_ttystate old_ttystate);
 extern int ser_base_setbaudrate (struct serial *scb, int rate);
 extern int ser_base_setstopbits (struct serial *scb, int num);
 extern int ser_base_setparity (struct serial *scb, int parity);

@@ -1,0 +1,39 @@
+2020-01-24  Christian Biesinger  <cbiesinger@google.com>
+
+	* thread-pool.c (set_thread_name): Add an overload for the NetBSD
+	version of pthread_setname_np.
+
+2020-01-17   Pedro Alves  <palves@redhat.com>
+
+	* Makefile.am: Append CXX_DIALECT to CXX.
+	* Makefile.in: Regenerate.
+
+2020-01-17  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac: Generate config.h instead of support-config.h.
+	* common-defs.h: Include <gdbsupport/config.h> instead of
+	<gdbsupport/support-config.h>.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.am (check-defines): New target.
+	* check-defines.el: New file.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* configure, Makefile.in, aclocal.m4, common.m4, config.in:
+	Rebuild.
+	* common.m4 (GDB_AC_COMMON): Move many checks from
+	gdb/configure.ac.
+	* acinclude.m4: Include bfd.m4, ptrace.m4.
+
+2020-01-14  Tom Tromey  <tom@tromey.com>
+
+	* common-defs.h: Add GDBSERVER case.  Update includes.
+	* acinclude.m4, aclocal.m4, config.in, configure, configure.ac,
+	Makefile.am, Makefile.in, README: New files.
+	* Moved from ../gdb/gdbsupport/
+

@@ -1,6 +1,6 @@
 /* Target-dependent code for the i386.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,9 @@
 
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
+
+#include "gdbarch.h"
+#include "infrun.h"
 
 struct frame_info;
 struct gdbarch;
@@ -189,6 +192,19 @@ struct gdbarch_tdep
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
   const char **ymm_avx512_register_names;
 
+  /* Number of PKEYS registers.  */
+  int num_pkeys_regs;
+
+  /* Register number for PKRU register.  */
+  int pkru_regnum;
+
+  /* PKEYS register names.  */
+  const char **pkeys_register_names;
+
+  /* Register number for %fsbase.  Set this to -1 to indicate the
+     absence of segment base registers.  */
+  int fsbase_regnum;
+
   /* Target description.  */
   const struct target_desc *tdesc;
 
@@ -244,7 +260,7 @@ struct gdbarch_tdep
 
 /* Floating-point registers.  */
 
-/* All FPU control regusters (except for FIOFF and FOOFF) are 16-bit
+/* All FPU control registers (except for FIOFF and FOOFF) are 16-bit
    (at most) in the FPU, but are zero-extended to 32 bits in GDB's
    register cache.  */
 
@@ -284,7 +300,10 @@ enum i386_regnum
   I386_K0_REGNUM,		/* %k0 */
   I386_K7_REGNUM = I386_K0_REGNUM + 7,
   I386_ZMM0H_REGNUM,		/* %zmm0h */
-  I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7
+  I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7,
+  I386_PKRU_REGNUM,
+  I386_FSBASE_REGNUM,
+  I386_GSBASE_REGNUM
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -324,11 +343,11 @@ enum record_i386_regnum
 #define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
 #define I386_MPX_NUM_REGS	(I386_BNDSTATUS_REGNUM + 1)
 #define I386_AVX512_NUM_REGS	(I386_ZMM7H_REGNUM + 1)
+#define I386_PKEYS_NUM_REGS	(I386_PKRU_REGNUM + 1)
+#define I386_NUM_REGS		(I386_GSBASE_REGNUM + 1)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	64
-
-extern struct target_desc *tdesc_i386;
 
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
@@ -345,6 +364,7 @@ extern int i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_k_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_zmm_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_zmmh_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern bool i386_pkru_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);
@@ -352,7 +372,7 @@ extern struct type *i386_pseudo_register_type (struct gdbarch *gdbarch,
 					       int regnum);
 
 extern void i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
-						  struct regcache *regcache,
+						  readable_regcache *regcache,
 						  int regnum,
 						  struct value *result);
 
@@ -406,6 +426,8 @@ extern void
 				     void *cb_data,
 				     const struct regcache *regcache);
 
+typedef buf_displaced_step_closure i386_displaced_step_closure;
+
 extern struct displaced_step_closure *i386_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
    struct regcache *regs);
@@ -420,15 +442,20 @@ extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 /* Initialize a SVR4 architecture variant.  */
 extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 
+/* Convert SVR4 register number REG to the appropriate register number
+   used by GDB.  */
+extern int i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg);
+
 extern int i386_process_record (struct gdbarch *gdbarch,
                                 struct regcache *regcache, CORE_ADDR addr);
-extern const struct target_desc *i386_target_description (uint64_t xcr0);
+extern const struct target_desc *i386_target_description (uint64_t xcr0,
+							  bool segments);
 
 /* Return true iff the current target is MPX enabled.  */
 extern int i386_mpx_enabled (void);
 
 
-/* Functions and variables exported from i386bsd-tdep.c.  */
+/* Functions and variables exported from i386-bsd-tdep.c.  */
 
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 extern CORE_ADDR i386fbsd_sigtramp_start_addr;

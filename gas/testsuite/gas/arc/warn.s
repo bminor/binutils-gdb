@@ -1,6 +1,6 @@
 ; Test ARC specific assembler warnings
 ;
-; { dg-do assemble { target arc-*-* } }
+; { dg-do assemble { target arc*-*-* } }
 
 	b.d foo
 	mov r0,256	

@@ -1,6 +1,6 @@
 /* Reverse execution and reverse debugging.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,24 +30,15 @@
 /* User interface:
    reverse-step, reverse-next etc.  */
 
-static void
-exec_direction_default (void *notused)
-{
-  /* Return execution direction to default state.  */
-  execution_direction = EXEC_FORWARD;
-}
-
 /* exec_reverse_once -- accepts an arbitrary gdb command (string), 
    and executes it with exec-direction set to 'reverse'.
 
    Used to implement reverse-next etc. commands.  */
 
 static void
-exec_reverse_once (char *cmd, char *args, int from_tty)
+exec_reverse_once (const char *cmd, const char *args, int from_tty)
 {
-  char *reverse_command;
   enum exec_direction_kind dir = execution_direction;
-  struct cleanup *old_chain;
 
   if (dir == EXEC_REVERSE)
     error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
@@ -56,46 +47,44 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
-  reverse_command = xstrprintf ("%s %s", cmd, args ? args : "");
-  old_chain = make_cleanup (exec_direction_default, NULL);
-  make_cleanup (xfree, reverse_command);
-  execution_direction = EXEC_REVERSE;
-  execute_command (reverse_command, from_tty);
-  do_cleanups (old_chain);
+  std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
+  scoped_restore restore_exec_dir
+    = make_scoped_restore (&execution_direction, EXEC_REVERSE);
+  execute_command (reverse_command.c_str (), from_tty);
 }
 
 static void
-reverse_step (char *args, int from_tty)
+reverse_step (const char *args, int from_tty)
 {
   exec_reverse_once ("step", args, from_tty);
 }
 
 static void
-reverse_stepi (char *args, int from_tty)
+reverse_stepi (const char *args, int from_tty)
 {
   exec_reverse_once ("stepi", args, from_tty);
 }
 
 static void
-reverse_next (char *args, int from_tty)
+reverse_next (const char *args, int from_tty)
 {
   exec_reverse_once ("next", args, from_tty);
 }
 
 static void
-reverse_nexti (char *args, int from_tty)
+reverse_nexti (const char *args, int from_tty)
 {
   exec_reverse_once ("nexti", args, from_tty);
 }
 
 static void
-reverse_continue (char *args, int from_tty)
+reverse_continue (const char *args, int from_tty)
 {
   exec_reverse_once ("continue", args, from_tty);
 }
 
 static void
-reverse_finish (char *args, int from_tty)
+reverse_finish (const char *args, int from_tty)
 {
   exec_reverse_once ("finish", args, from_tty);
 }
@@ -128,12 +117,11 @@ static int bookmark_count;
    Up to us to free it as required.  */
 
 static void
-save_bookmark_command (char *args, int from_tty)
+save_bookmark_command (const char *args, int from_tty)
 {
   /* Get target's idea of a bookmark.  */
   gdb_byte *bookmark_id = target_get_bookmark (args, from_tty);
-  struct bookmark *b, *b1;
-  struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
 
   /* CR should not cause another identical bookmark.  */
   dont_repeat ();
@@ -142,9 +130,8 @@ save_bookmark_command (char *args, int from_tty)
     error (_("target_get_bookmark failed."));
 
   /* Set up a bookmark struct.  */
-  b = XCNEW (struct bookmark);
+  bookmark *b = new bookmark ();
   b->number = ++bookmark_count;
-  init_sal (&b->sal);
   b->pc = regcache_read_pc (get_current_regcache ());
   b->sal = find_pc_line (b->pc, 0);
   b->sal.pspace = get_frame_program_space (get_current_frame ());
@@ -154,7 +141,7 @@ save_bookmark_command (char *args, int from_tty)
   /* Add this bookmark to the end of the chain, so that a list
      of bookmarks will come out in order of increasing numbers.  */
 
-  b1 = bookmark_chain;
+  bookmark *b1 = bookmark_chain;
   if (b1 == 0)
     bookmark_chain = b;
   else
@@ -194,7 +181,7 @@ delete_one_bookmark (int num)
 	    break;
 	  }
       xfree (b->opaque_data);
-      xfree (b);
+      delete b;
       return 1;		/* success */
     }
   return 0;		/* failure */
@@ -214,11 +201,8 @@ delete_all_bookmarks (void)
 }
 
 static void
-delete_bookmark_command (char *args, int from_tty)
+delete_bookmark_command (const char *args, int from_tty)
 {
-  int num;
-  struct get_number_or_range_state state;
-
   if (bookmark_chain == NULL)
     {
       warning (_("No bookmarks."));
@@ -233,10 +217,10 @@ delete_bookmark_command (char *args, int from_tty)
       return;
     }
 
-  init_number_or_range (&state, args);
-  while (!state.finished)
+  number_or_range_parser parser (args);
+  while (!parser.finished ())
     {
-      num = get_number_or_range (&state);
+      int num = parser.get_number ();
       if (!delete_one_bookmark (num))
 	/* Not found.  */
 	warning (_("No bookmark #%d."), num);
@@ -246,11 +230,11 @@ delete_bookmark_command (char *args, int from_tty)
 /* Implement "goto-bookmark" command.  */
 
 static void
-goto_bookmark_command (char *args, int from_tty)
+goto_bookmark_command (const char *args, int from_tty)
 {
   struct bookmark *b;
   unsigned long num;
-  char *p = args;
+  const char *p = args;
 
   if (args == NULL || args[0] == '\0')
     error (_("Command requires an argument."));
@@ -296,7 +280,7 @@ goto_bookmark_command (char *args, int from_tty)
 static int
 bookmark_1 (int bnum)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+  struct gdbarch *gdbarch = get_current_regcache ()->arch ();
   struct bookmark *b;
   int matched = 0;
 
@@ -321,33 +305,26 @@ bookmark_1 (int bnum)
 /* Implement "info bookmarks" command.  */
 
 static void
-bookmarks_info (char *args, int from_tty)
+info_bookmarks_command (const char *args, int from_tty)
 {
-  int bnum = -1;
-
   if (!bookmark_chain)
     printf_filtered (_("No bookmarks.\n"));
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);
   else
     {
-      struct get_number_or_range_state state;
-
-      init_number_or_range (&state, args);
-      while (!state.finished)
+      number_or_range_parser parser (args);
+      while (!parser.finished ())
 	{
-	  bnum = get_number_or_range (&state);
+	  int bnum = parser.get_number ();
 	  bookmark_1 (bnum);
 	}
     }
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_reverse;
-
+void _initialize_reverse ();
 void
-_initialize_reverse (void)
+_initialize_reverse ()
 {
   add_com ("reverse-step", class_run, reverse_step, _("\
 Step program backward until it reaches the beginning of another source line.\n\
@@ -389,7 +366,7 @@ Execute backward until just before selected stack frame is called."));
 Set a bookmark in the program's execution history.\n\
 A bookmark represents a point in the execution history \n\
 that can be returned to at a later point in the debug session."));
-  add_info ("bookmarks", bookmarks_info, _("\
+  add_info ("bookmarks", info_bookmarks_command, _("\
 Status of user-settable bookmarks.\n\
 Bookmarks are user-settable markers representing a point in the \n\
 execution history that can be returned to later in the same debug \n\
@@ -397,12 +374,12 @@ session."));
   add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _("\
 Delete a bookmark from the bookmark list.\n\
 Argument is a bookmark number or numbers,\n\
- or no argument to delete all bookmarks.\n"),
+ or no argument to delete all bookmarks."),
 	   &deletelist);
   add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _("\
 Go to an earlier-bookmarked point in the program's execution history.\n\
 Argument is the bookmark number of a bookmark saved earlier by using \n\
 the 'bookmark' command, or the special arguments:\n\
   start (beginning of recording)\n\
-  end   (end of recording)\n"));
+  end   (end of recording)"));
 }

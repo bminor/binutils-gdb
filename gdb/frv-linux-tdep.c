@@ -1,7 +1,7 @@
 /* Target-dependent code for GNU/Linux running on the Fujitsu FR-V,
    for GDB.
 
-   Copyright (C) 2004-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,7 @@
 #include "frame-unwind.h"
 #include "regset.h"
 #include "linux-tdep.h"
+#include "gdbarch.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */
 static const int frv_instr_size = 4;
@@ -261,7 +262,6 @@ frv_linux_sigtramp_frame_cache (struct frame_info *this_frame,
 				void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR addr;
@@ -414,17 +414,14 @@ frv_linux_supply_gregset (const struct regset *regset,
 			  int regnum, const void *gregs, size_t len)
 {
   int regi;
-  char zerobuf[MAX_REGISTER_SIZE];
-
-  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   /* gr0 always contains 0.  Also, the kernel passes the TBR value in
      this slot.  */
-  regcache_raw_supply (regcache, first_gpr_regnum, zerobuf);
+  regcache->raw_supply_zeroed (first_gpr_regnum);
 
   /* Fill gr32, ..., gr63 with zeros. */
   for (regi = first_gpr_regnum + 32; regi <= last_gpr_regnum; regi++)
-    regcache_raw_supply (regcache, regi, zerobuf);
+    regcache->raw_supply_zeroed (regi);
 
   regcache_supply_regset (regset, regcache, regnum, gregs, len);
 }
@@ -449,10 +446,10 @@ frv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					void *cb_data,
 					const struct regcache *regcache)
 {
-  cb (".reg", sizeof (frv_elf_gregset_t), &frv_linux_gregset,
-      NULL, cb_data);
-  cb (".reg2", sizeof (frv_elf_fpregset_t), &frv_linux_fpregset,
-      NULL, cb_data);
+  cb (".reg", sizeof (frv_elf_gregset_t), sizeof (frv_elf_gregset_t),
+      &frv_linux_gregset, NULL, cb_data);
+  cb (".reg2", sizeof (frv_elf_fpregset_t), sizeof (frv_elf_fpregset_t),
+      &frv_linux_fpregset, NULL, cb_data);
 }
 
 
@@ -484,11 +481,9 @@ frv_linux_elf_osabi_sniffer (bfd *abfd)
     return GDB_OSABI_UNKNOWN;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_frv_linux_tdep (void);
-
+void _initialize_frv_linux_tdep ();
 void
-_initialize_frv_linux_tdep (void)
+_initialize_frv_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_frv, 0, GDB_OSABI_LINUX,
 			  frv_linux_init_abi);

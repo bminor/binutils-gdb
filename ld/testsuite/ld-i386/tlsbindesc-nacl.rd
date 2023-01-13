@@ -21,9 +21,9 @@ Section Headers:
  +\[[ 0-9]+\] \.dynamic +DYNAMIC +0*10031060 .*
  +\[[ 0-9]+\] \.got +PROGBITS +0*100310e0 .*
  +\[[ 0-9]+\] \.got\.plt +PROGBITS +0*10031104 .*
- +\[[ 0-9]+\] \.shstrtab +.*
  +\[[ 0-9]+\] \.symtab +.*
  +\[[ 0-9]+\] \.strtab +.*
+ +\[[ 0-9]+\] \.shstrtab +.*
 Key to Flags:
 #...
 
@@ -60,9 +60,9 @@ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 9 entries:
 0*100310ec +00000425 R_386_TLS_TPOFF32 0+ +sG2
 0*100310f0 +00000525 R_386_TLS_TPOFF32 0+ +sG4
 0*100310f4 +0000050e R_386_TLS_TPOFF +0+ +sG4
-0*100310f8 +00000725 R_386_TLS_TPOFF32 0+ +sG6
-0*100310fc +00000825 R_386_TLS_TPOFF32 0+ +sG1
-0*10031100 +00000b0e R_386_TLS_TPOFF +0+ +sG8
+0*100310f8 +00000625 R_386_TLS_TPOFF32 0+ +sG6
+0*100310fc +00000725 R_386_TLS_TPOFF32 0+ +sG1
+0*10031100 +0000080e R_386_TLS_TPOFF +0+ +sG8
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx Name
@@ -72,11 +72,8 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG7
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG2
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG4
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 __bss_start
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG6
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG1
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _edata
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _end
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG8
 
 Symbol table '\.symtab' contains [0-9]+ entries:

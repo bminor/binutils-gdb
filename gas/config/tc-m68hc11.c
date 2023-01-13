@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
    XGATE and S12X added by James Murray (jsm@jsm-net.demon.co.uk)
 
@@ -241,7 +241,7 @@ static void s_m68hc11_mark_symbol (int);
     dbcc -> db!cc +3
             jmp L
 
-  Setting the flag forbidds this.  */
+  Setting the flag forbids this.  */
 static short flag_fixed_branches = 0;
 
 /* Force to use long jumps (absolute) instead of relative branches.  */
@@ -329,11 +329,11 @@ struct option md_longopts[] =
 {
 #define OPTION_FORCE_LONG_BRANCH (OPTION_MD_BASE)
   {"force-long-branches", no_argument, NULL, OPTION_FORCE_LONG_BRANCH},
-  {"force-long-branchs", no_argument, NULL, OPTION_FORCE_LONG_BRANCH}, /* Misspelt version kept for backwards compatibility.  */
+  {"force-long-branchs", no_argument, NULL, OPTION_FORCE_LONG_BRANCH}, /* Misspelled version kept for backwards compatibility.  */
 
 #define OPTION_SHORT_BRANCHES     (OPTION_MD_BASE + 1)
   {"short-branches", no_argument, NULL, OPTION_SHORT_BRANCHES},
-  {"short-branchs", no_argument, NULL, OPTION_SHORT_BRANCHES}, /* Misspelt version kept for backwards compatibility.  */
+  {"short-branchs", no_argument, NULL, OPTION_SHORT_BRANCHES}, /* Misspelled version kept for backwards compatibility.  */
 
 #define OPTION_STRICT_DIRECT_MODE  (OPTION_MD_BASE + 2)
   {"strict-direct-mode", no_argument, NULL, OPTION_STRICT_DIRECT_MODE},
@@ -555,7 +555,7 @@ md_parse_option (int c, const char *arg)
 	current_architecture = cpu6812 | cpu6812s | cpu9s12x;
      else if ((strcasecmp (arg, "m9s12xg") == 0)
           || (strcasecmp (arg, "xgate") == 0))
-	/* xgate for backwards compatability */
+	/* xgate for backwards compatibility */
 	current_architecture = cpuxgate;
       else
 	as_bad (_("Option `%s' is not recognized."), arg);
@@ -583,7 +583,7 @@ md_atof (int type, char *litP, int *sizeP)
 valueT
 md_section_align (asection *seg, valueT addr)
 {
-  int align = bfd_get_section_alignment (stdoutput, seg);
+  int align = bfd_section_alignment (seg);
   return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
@@ -613,9 +613,7 @@ md_begin (void)
   m68hc11_hash = hash_new ();
 
   /* Get a writable copy of the opcode table and sort it on the names.  */
-  opcodes = (struct m68hc11_opcode *) xmalloc (m68hc11_num_opcodes *
-					       sizeof (struct
-						       m68hc11_opcode));
+  opcodes = XNEWVEC (struct m68hc11_opcode, m68hc11_num_opcodes);
   m68hc11_sorted_opcodes = opcodes;
   num_opcodes = 0;
   for (i = 0; i < m68hc11_num_opcodes; i++)
@@ -644,8 +642,7 @@ md_begin (void)
   qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode),
          (int (*) (const void*, const void*)) cmp_opcode);
 
-  opc = (struct m68hc11_opcode_def *)
-    xmalloc (num_opcodes * sizeof (struct m68hc11_opcode_def));
+  opc = XNEWVEC (struct m68hc11_opcode_def, num_opcodes);
   m68hc11_opcode_defs = opc--;
 
   /* Insert unique names into hash table.  The M6811 instruction set
@@ -1607,7 +1604,7 @@ fixup8 (expressionS *oper, int mode, int opmode)
       else
 	{
 	  fixS *fixp;
-          int reloc;
+          bfd_reloc_code_real_type reloc;
 
 	  /* Now create an 8-bit fixup.  If there was some %hi, %lo
 	     or %page modifier, generate the reloc accordingly.  */
@@ -1654,7 +1651,7 @@ fixup16 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
   else if (oper->X_op != O_register)
     {
       fixS *fixp;
-      int reloc;
+      bfd_reloc_code_real_type reloc;
 
       if ((opmode & M6811_OP_CALL_ADDR) && (mode & M6811_OP_IMM16))
         reloc = BFD_RELOC_M68HC11_LO16;
@@ -1713,7 +1710,7 @@ fixup24 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
 }
 
 /* XGATE Put a 1 byte expression described by 'oper'.  If this expression
-   containts unresolved symbols, generate an 8-bit fixup.  */
+   contains unresolved symbols, generate an 8-bit fixup.  */
 static void
 fixup8_xg (expressionS *oper, int mode, int opmode)
 {
@@ -1724,7 +1721,7 @@ fixup8_xg (expressionS *oper, int mode, int opmode)
   if (oper->X_op == O_constant)
     {
       fixS *fixp;
-      int reloc;
+      bfd_reloc_code_real_type reloc;
 
       if ((opmode & M6811_OP_HIGH_ADDR) || (opmode & M6811_OP_LOW_ADDR))
         {
@@ -1765,7 +1762,7 @@ fixup8_xg (expressionS *oper, int mode, int opmode)
       else
         {
           fixS *fixp;
-          int reloc;
+          bfd_reloc_code_real_type reloc;
 
           /* Now create an 8-bit fixup.  If there was some %hi, %lo
              modifier, generate the reloc accordingly.  */
@@ -2290,6 +2287,7 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
 
 	    default:
 	      as_bad (_("Invalid accumulator register."));
+	      /* Fall through.  */
 
 	    case REG_D:
 	      byte = 0xE6;
@@ -3831,8 +3829,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = XNEW (arelent);
+  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   if (fixp->fx_r_type == 0)
@@ -3877,7 +3875,7 @@ m68hc11_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS *fragP,
   const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
 
   /* We only have to cope with frags as prepared by
-     md_estimate_size_before_relax.  The STATE_BITS16 case may geet here
+     md_estimate_size_before_relax.  The STATE_BITS16 case may get here
      because of the different reasons that it's not relaxable.  */
   switch (fragP->fr_subtype)
     {

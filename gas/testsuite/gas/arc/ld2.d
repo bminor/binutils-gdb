@@ -16,4 +16,4 @@ Disassembly of section .text:
   20:	14fe 8103           	ld[hw]+	r3,\[r4,-2\]
   24:	212a 0080           	lr	r1,\[r2\]
   28:	216a 0500           	lr	r1,\[0x14\]
-  2c:	206a 0000           	lr	r0,\[0\]
+  2c:	206a 0000           	lr	r0,\[status\]

@@ -1,6 +1,6 @@
 /* Simulator pseudo baseclass.
 
-   Copyright 1997-2016 Free Software Foundation, Inc.
+   Copyright 1997-2020 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -55,6 +55,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_BASE_H
 #define SIM_BASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Pre-declare certain types. */
 
 /* typedef <target-dependant> sim_cia; */
@@ -78,6 +82,7 @@ typedef struct _sim_cpu sim_cpu;
 
 #include "sim-module.h"
 
+#include "sim-arange.h"
 #include "sim-trace.h"
 #include "sim-core.h"
 #include "sim-events.h"
@@ -88,6 +93,7 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-watch.h"
 #include "sim-memopt.h"
 #include "sim-cpu.h"
+#include "sim-assert.h"
 
 
 /* We require all sims to dynamically allocate cpus.  See comment up top about
@@ -160,6 +166,10 @@ typedef struct {
   struct bfd_symbol **prog_syms;
 #define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
 
+  /* Number of prog_syms symbols.  */
+  long prog_syms_count;
+#define STATE_PROG_SYMS_COUNT(sd) ((sd)->base.prog_syms_count)
+
   /* The program's text section.  */
   struct bfd_section *text_section;
   /* Starting and ending text section addresses from the bfd.  */
@@ -219,5 +229,9 @@ typedef struct {
 /* Functions for allocating/freeing a sim_state.  */
 SIM_DESC sim_state_alloc (SIM_OPEN_KIND kind, host_callback *callback);
 void sim_state_free (SIM_DESC);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SIM_BASE_H */

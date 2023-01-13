@@ -1,6 +1,6 @@
 /* CLI Definitions for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,23 +18,105 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "cli-interp.h"
 #include "interps.h"
 #include "event-top.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
 #include "infrun.h"
-#include "observer.h"
+#include "observable.h"
+#include "gdbthread.h"
+#include "thread-fsm.h"
+#include "inferior.h"
 
-/* These are the ui_out and the interpreter for the console
-   interpreter.  */
-struct ui_out *cli_uiout;
-static struct interp *cli_interp;
+cli_interp_base::cli_interp_base (const char *name)
+  : interp (name)
+{}
+
+cli_interp_base::~cli_interp_base ()
+{}
+
+/* The console interpreter.  */
+
+class cli_interp final : public cli_interp_base
+{
+ public:
+  explicit cli_interp (const char *name);
+  ~cli_interp ();
+
+  void init (bool top_level) override;
+  void resume () override;
+  void suspend () override;
+  gdb_exception exec (const char *command_str) override;
+  ui_out *interp_ui_out () override;
+
+  /* The ui_out for the console interpreter.  */
+  cli_ui_out *cli_uiout;
+};
+
+cli_interp::cli_interp (const char *name)
+  : cli_interp_base (name)
+{
+  /* Create a default uiout builder for the CLI.  */
+  this->cli_uiout = cli_out_new (gdb_stdout);
+}
+
+cli_interp::~cli_interp ()
+{
+  delete cli_uiout;
+}
+
+/* Suppress notification struct.  */
+struct cli_suppress_notification cli_suppress_notification =
+  {
+    0   /* user_selected_context_changed */
+  };
+
+/* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
+   and returns NULL otherwise.  */
+
+static struct cli_interp *
+as_cli_interp (struct interp *interp)
+{
+  return dynamic_cast<cli_interp *> (interp);
+}
 
 /* Longjmp-safe wrapper for "execute_command".  */
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
-						  char *command, 
+						  const char *command, 
 						  int from_tty);
+
+/* See cli-interp.h.
+
+   Breakpoint hits should always be mirrored to a console.  Deciding
+   what to mirror to a console wrt to breakpoints and random stops
+   gets messy real fast.  E.g., say "s" trips on a breakpoint.  We'd
+   clearly want to mirror the event to the console in this case.  But
+   what about more complicated cases like "s&; thread n; s&", and one
+   of those steps spawning a new thread, and that thread hitting a
+   breakpoint?  It's impossible in general to track whether the thread
+   had any relation to the commands that had been executed.  So we
+   just simplify and always mirror breakpoints and random events to
+   all consoles.
+
+   OTOH, we should print the source line to the console when stepping
+   or other similar commands, iff the step was started by that console
+   (or in MI's case, by a console command), but not if it was started
+   with MI's -exec-step or similar.  */
+
+int
+should_print_stop_to_console (struct interp *console_interp,
+			      struct thread_info *tp)
+{
+  if ((bpstat_what (tp->control.stop_bpstat).main_action
+       == BPSTAT_WHAT_STOP_NOISY)
+      || tp->thread_fsm == NULL
+      || tp->thread_fsm->command_interp == console_interp
+      || !tp->thread_fsm->finished_p ())
+    return 1;
+  return 0;
+}
 
 /* Observers for several run control events.  If the interpreter is
    quiet (i.e., another interpreter is being run with
@@ -45,10 +127,21 @@ static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 static void
 cli_on_normal_stop (struct bpstats *bs, int print_frame)
 {
-  if (!interp_quiet_p (cli_interp))
+  if (!print_frame)
+    return;
+
+  SWITCH_THRU_ALL_UIS ()
     {
-      if (print_frame)
-	print_stop_event (cli_uiout);
+      struct interp *interp = top_level_interpreter ();
+      struct cli_interp *cli = as_cli_interp (interp);
+      struct thread_info *thread;
+
+      if (cli == NULL)
+	continue;
+
+      thread = inferior_thread ();
+      if (should_print_stop_to_console (interp, thread))
+	print_stop_event (cli->cli_uiout);
     }
 }
 
@@ -57,8 +150,15 @@ cli_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 cli_on_signal_received (enum gdb_signal siggnal)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_signal_received_reason (cli_uiout, siggnal);
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_signal_received_reason (cli->cli_uiout, siggnal);
+    }
 }
 
 /* Observer for the end_stepping_range notification.  */
@@ -66,8 +166,15 @@ cli_on_signal_received (enum gdb_signal siggnal)
 static void
 cli_on_end_stepping_range (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_end_stepping_range_reason (cli_uiout);
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_end_stepping_range_reason (cli->cli_uiout);
+    }
 }
 
 /* Observer for the signalled notification.  */
@@ -75,8 +182,15 @@ cli_on_end_stepping_range (void)
 static void
 cli_on_signal_exited (enum gdb_signal siggnal)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_signal_exited_reason (cli_uiout, siggnal);
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_signal_exited_reason (cli->cli_uiout, siggnal);
+    }
 }
 
 /* Observer for the exited notification.  */
@@ -84,8 +198,15 @@ cli_on_signal_exited (enum gdb_signal siggnal)
 static void
 cli_on_exited (int exitstatus)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_exited_reason (cli_uiout, exitstatus);
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_exited_reason (cli->cli_uiout, exitstatus);
+    }
 }
 
 /* Observer for the no_history notification.  */
@@ -93,8 +214,15 @@ cli_on_exited (int exitstatus)
 static void
 cli_on_no_history (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    print_no_history_reason (cli_uiout);
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      print_no_history_reason (cli->cli_uiout);
+    }
 }
 
 /* Observer for the sync_execution_done notification.  */
@@ -102,8 +230,12 @@ cli_on_no_history (void)
 static void
 cli_on_sync_execution_done (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    display_gdb_prompt (NULL);
+  struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+  if (cli == NULL)
+    return;
+
+  display_gdb_prompt (NULL);
 }
 
 /* Observer for the command_error notification.  */
@@ -111,31 +243,61 @@ cli_on_sync_execution_done (void)
 static void
 cli_on_command_error (void)
 {
-  if (!interp_quiet_p (cli_interp))
-    display_gdb_prompt (NULL);
+  struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+  if (cli == NULL)
+    return;
+
+  display_gdb_prompt (NULL);
+}
+
+/* Observer for the user_selected_context_changed notification.  */
+
+static void
+cli_on_user_selected_context_changed (user_selected_what selection)
+{
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.user_selected_context)
+    return;
+
+  thread_info *tp = inferior_ptid != null_ptid ? inferior_thread () : NULL;
+
+  SWITCH_THRU_ALL_UIS ()
+    {
+      struct cli_interp *cli = as_cli_interp (top_level_interpreter ());
+
+      if (cli == NULL)
+	continue;
+
+      if (selection & USER_SELECTED_INFERIOR)
+	print_selected_inferior (cli->cli_uiout);
+
+      if (tp != NULL
+	  && ((selection & (USER_SELECTED_THREAD | USER_SELECTED_FRAME))))
+	print_selected_thread_frame (cli->cli_uiout, selection);
+    }
+}
+
+/* pre_command_loop implementation.  */
+
+void
+cli_interp_base::pre_command_loop ()
+{
+  display_gdb_prompt (0);
 }
 
 /* These implement the cli out interpreter: */
 
-static void *
-cli_interpreter_init (struct interp *self, int top_level)
+void
+cli_interp::init (bool top_level)
 {
-  /* If changing this, remember to update tui-interp.c as well.  */
-  observer_attach_normal_stop (cli_on_normal_stop);
-  observer_attach_end_stepping_range (cli_on_end_stepping_range);
-  observer_attach_signal_received (cli_on_signal_received);
-  observer_attach_signal_exited (cli_on_signal_exited);
-  observer_attach_exited (cli_on_exited);
-  observer_attach_no_history (cli_on_no_history);
-  observer_attach_sync_execution_done (cli_on_sync_execution_done);
-  observer_attach_command_error (cli_on_command_error);
-
-  return NULL;
 }
 
-static int
-cli_interpreter_resume (void *data)
+void
+cli_interp::resume ()
 {
+  struct ui *ui = current_ui;
+  struct cli_interp *cli = this;
   struct ui_file *stream;
 
   /*sync_execution = 1; */
@@ -144,38 +306,33 @@ cli_interpreter_resume (void *data)
      previously writing to gdb_stdout, then set it to the new
      gdb_stdout afterwards.  */
 
-  stream = cli_out_set_stream (cli_uiout, gdb_stdout);
+  stream = cli->cli_uiout->set_stream (gdb_stdout);
   if (stream != gdb_stdout)
     {
-      cli_out_set_stream (cli_uiout, stream);
+      cli->cli_uiout->set_stream (stream);
       stream = NULL;
     }
 
-  gdb_setup_readline ();
+  gdb_setup_readline (1);
+
+  ui->input_handler = command_line_handler;
 
   if (stream != NULL)
-    cli_out_set_stream (cli_uiout, gdb_stdout);
-
-  return 1;
+    cli->cli_uiout->set_stream (gdb_stdout);
 }
 
-static int
-cli_interpreter_suspend (void *data)
+void
+cli_interp::suspend ()
 {
   gdb_disable_readline ();
-  return 1;
 }
 
-static struct gdb_exception
-cli_interpreter_exec (void *data, const char *command_str)
+gdb_exception
+cli_interp::exec (const char *command_str)
 {
+  struct cli_interp *cli = this;
   struct ui_file *old_stream;
   struct gdb_exception result;
-
-  /* FIXME: cagney/2003-02-01: Need to const char *propogate
-     safe_execute_command.  */
-  char *str = (char *) alloca (strlen (command_str) + 1);
-  strcpy (str, command_str);
 
   /* gdb_stdout could change between the time cli_uiout was
      initialized and now.  Since we're probably using a different
@@ -184,34 +341,36 @@ cli_interpreter_exec (void *data, const char *command_str)
 
      It is important that it gets reset everytime, since the user
      could set gdb to use a different interpreter.  */
-  old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
-  result = safe_execute_command (cli_uiout, str, 1);
-  cli_out_set_stream (cli_uiout, old_stream);
+  old_stream = cli->cli_uiout->set_stream (gdb_stdout);
+  result = safe_execute_command (cli->cli_uiout, command_str, 1);
+  cli->cli_uiout->set_stream (old_stream);
   return result;
 }
 
-static struct gdb_exception
-safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
+bool
+cli_interp_base::supports_command_editing ()
 {
-  struct gdb_exception e = exception_none;
-  struct ui_out *saved_uiout;
+  return true;
+}
+
+static struct gdb_exception
+safe_execute_command (struct ui_out *command_uiout, const char *command,
+		      int from_tty)
+{
+  struct gdb_exception e;
 
   /* Save and override the global ``struct ui_out'' builder.  */
-  saved_uiout = current_uiout;
-  current_uiout = command_uiout;
+  scoped_restore saved_uiout = make_scoped_restore (&current_uiout,
+						    command_uiout);
 
-  TRY
+  try
     {
       execute_command (command, from_tty);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (gdb_exception &exception)
     {
-      e = exception;
+      e = std::move (exception);
     }
-  END_CATCH
-
-  /* Restore the global builder.  */
-  current_uiout = saved_uiout;
 
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */
@@ -219,31 +378,110 @@ safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
   return e;
 }
 
-static struct ui_out *
-cli_ui_out (struct interp *self)
+ui_out *
+cli_interp::interp_ui_out ()
 {
-  return cli_uiout;
+  struct cli_interp *cli = (struct cli_interp *) this;
+
+  return cli->cli_uiout;
+}
+
+/* These hold the pushed copies of the gdb output files.
+   If NULL then nothing has yet been pushed.  */
+struct saved_output_files
+{
+  ui_file *out;
+  ui_file *err;
+  ui_file *log;
+  ui_file *targ;
+  ui_file *targerr;
+  ui_file *file_to_delete;
+};
+static saved_output_files saved_output;
+
+/* See cli-interp.h.  */
+
+void
+cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
+			      bool debug_redirect)
+{
+  if (logfile != nullptr)
+    {
+      saved_output.out = gdb_stdout;
+      saved_output.err = gdb_stderr;
+      saved_output.log = gdb_stdlog;
+      saved_output.targ = gdb_stdtarg;
+      saved_output.targerr = gdb_stdtargerr;
+
+      /* If something is being redirected, then grab logfile.  */
+      ui_file *logfile_p = nullptr;
+      if (logging_redirect || debug_redirect)
+	{
+	  logfile_p = logfile.get ();
+	  saved_output.file_to_delete = logfile_p;
+	}
+
+      /* If something is not being redirected, then a tee containing both the
+	 logfile and stdout.  */
+      ui_file *tee = nullptr;
+      if (!logging_redirect || !debug_redirect)
+	{
+	  tee = new tee_file (gdb_stdout, std::move (logfile));
+	  saved_output.file_to_delete = tee;
+	}
+
+      gdb_stdout = logging_redirect ? logfile_p : tee;
+      gdb_stdlog = debug_redirect ? logfile_p : tee;
+      gdb_stderr = logging_redirect ? logfile_p : tee;
+      gdb_stdtarg = logging_redirect ? logfile_p : tee;
+      gdb_stdtargerr = logging_redirect ? logfile_p : tee;
+    }
+  else
+    {
+      /* Delete the correct file.  If it's the tee then the logfile will also
+	 be deleted.  */
+      delete saved_output.file_to_delete;
+
+      gdb_stdout = saved_output.out;
+      gdb_stderr = saved_output.err;
+      gdb_stdlog = saved_output.log;
+      gdb_stdtarg = saved_output.targ;
+      gdb_stdtargerr = saved_output.targerr;
+
+      saved_output.out = nullptr;
+      saved_output.err = nullptr;
+      saved_output.log = nullptr;
+      saved_output.targ = nullptr;
+      saved_output.targerr = nullptr;
+      saved_output.file_to_delete = nullptr;
+    }
+}
+
+/* Factory for CLI interpreters.  */
+
+static struct interp *
+cli_interp_factory (const char *name)
+{
+  return new cli_interp (name);
 }
 
 /* Standard gdb initialization hook.  */
-extern initialize_file_ftype _initialize_cli_interp; /* -Wmissing-prototypes */
 
+void _initialize_cli_interp ();
 void
-_initialize_cli_interp (void)
+_initialize_cli_interp ()
 {
-  static const struct interp_procs procs = {
-    cli_interpreter_init,	/* init_proc */
-    cli_interpreter_resume,	/* resume_proc */
-    cli_interpreter_suspend,	/* suspend_proc */
-    cli_interpreter_exec,	/* exec_proc */
-    cli_ui_out,			/* ui_out_proc */
-    NULL,                       /* set_logging_proc */
-    cli_command_loop            /* command_loop_proc */
-  };
+  interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
-  /* Create a default uiout builder for the CLI.  */
-  cli_uiout = cli_out_new (gdb_stdout);
-  cli_interp = interp_new (INTERP_CONSOLE, &procs);
-
-  interp_add (cli_interp);
+  /* If changing this, remember to update tui-interp.c as well.  */
+  gdb::observers::normal_stop.attach (cli_on_normal_stop);
+  gdb::observers::end_stepping_range.attach (cli_on_end_stepping_range);
+  gdb::observers::signal_received.attach (cli_on_signal_received);
+  gdb::observers::signal_exited.attach (cli_on_signal_exited);
+  gdb::observers::exited.attach (cli_on_exited);
+  gdb::observers::no_history.attach (cli_on_no_history);
+  gdb::observers::sync_execution_done.attach (cli_on_sync_execution_done);
+  gdb::observers::command_error.attach (cli_on_command_error);
+  gdb::observers::user_selected_context_changed.attach
+    (cli_on_user_selected_context_changed);
 }

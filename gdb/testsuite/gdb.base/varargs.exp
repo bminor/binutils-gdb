@@ -1,4 +1,4 @@
-# Copyright 1997-2016 Free Software Foundation, Inc.
+# Copyright 1997-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ if [get_compiler_info] {
     return -1
 }
 
+set skip_float_test [gdb_skip_float_test]
+
 set additional_flags {debug}
 if [support_complex_tests] {
     lappend additional_flags "additional_flags=-DTEST_COMPLEX"
@@ -45,7 +47,7 @@ if [support_complex_tests] {
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	   executable ${additional_flags}] != "" } {
-     untested varargs.exp
+     untested "failed to compile"
      return -1
 }
 
@@ -79,15 +81,14 @@ gdb_test_stdio "print find_max1(1,3)" \
 
 gdb_test_stdio "print find_max1(10,1,2,3,4,5,6,7,8,29,0)" \
     "find_max\\(10, 1, 2, 3, 4, 5, 6, 7, 8, 29, 0\\) returns 29\[ \r\n\]+" \
-    ".\[0-9\]+ = 29" \
-    "print find_max1(10,1,2,3,4,5,6,7,8,29,0)"
+    ".\[0-9\]+ = 29"
 
 gdb_test_stdio "print find_max2(3,1,2,3)" \
     "find_max\\(3, 1, 2, 3\\) returns 3\[ \r\n\]+" \
     ".\[0-9\]+ = 3" \
     "print find_max2(3,1,2,3)"
 
-if {![target_info exists gdb,skip_float_tests]} {
+if {!$skip_float_test} {
     gdb_test_stdio "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)" \
 	"find_max\\(.*\\) returns 17\\.000000\[ \r\n\]+" \
 	".\[0-9\]+ = 17" \
@@ -100,12 +101,12 @@ if [support_complex_tests] {
     global gdb_prompt
 
     set test "print find_max_float_real(4, fc1, fc2, fc3, fc4)"
-    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+    gdb_test $test ".*= 4 \\+ 4 \\* I"
 
     set test "print find_max_double_real(4, dc1, dc2, dc3, dc4)"
-    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+    gdb_test $test ".*= 4 \\+ 4 \\* I"
 
     set test "print find_max_long_double_real(4, ldc1, ldc2, ldc3, ldc4)"
-    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+    gdb_test $test ".*= 4 \\+ 4 \\* I"
 
 }

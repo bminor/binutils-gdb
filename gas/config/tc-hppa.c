@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989-2016 Free Software Foundation, Inc.
+   Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1365,15 +1365,15 @@ tc_gen_reloc (asection *section, fixS *fixp)
   /* ??? It might be better to hide this +8 stuff in tc_cfi_emit_pcrel_expr,
      undefine DIFF_EXPR_OK, and let these sorts of complex expressions fail
      when R_HPPA_COMPLEX == R_PARISC_UNIMPLEMENTED.  */
-  if (fixp->fx_r_type == (bfd_reloc_code_real_type) R_HPPA_COMPLEX
+  if (fixp->fx_r_type == (int) R_HPPA_COMPLEX
       && fixp->fx_pcrel)
     {
-      fixp->fx_r_type = R_HPPA_PCREL_CALL;
+      fixp->fx_r_type = (int) R_HPPA_PCREL_CALL;
       fixp->fx_offset += 8;
     }
 
   codes = hppa_gen_reloc_type (stdoutput,
-			       fixp->fx_r_type,
+			       (int) fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field,
 			       fixp->fx_subsy != NULL,
@@ -1440,7 +1440,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  /* Facilitate hand-crafted unwind info.  */
 	  if (strcmp (section->name, UNWIND_SECTION_NAME) == 0)
 	    code = R_PARISC_SEGREL32;
-	  /* Fall thru */
+	  /* Fallthru */
 
 	default:
 	  reloc->addend = fixp->fx_offset;
@@ -1608,7 +1608,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 valueT
 md_section_align (asection *segment, valueT size)
 {
-  int align = bfd_get_section_alignment (stdoutput, segment);
+  int align = bfd_section_alignment (segment);
   int align2 = (1 << align) - 1;
 
   return (size + align2) & ~align2;
@@ -3505,8 +3505,9 @@ pa_ip (char *str)
 			/* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
-		    else if (*args == 'e')
+		    else
 		      {
+			gas_assert (*args == 'e');
 			/* Stash the ma/mb flag temporarily in the
 			   instruction.  We will use (and remove it)
 			   later when handling 'J', 'K', '<' & '>'.  */
@@ -5215,9 +5216,7 @@ pa_ip (char *str)
 	      s = expr_end;
 	      CHECK_FIELD (num, 63, 0, strict);
 	      if (num & 0x20)
-		;
-	      else
-		opcode |= (1 << 13);
+		opcode &= ~(1 << 13);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 21);
 
 	    /* Handle a 5 bit immediate at 10.  */
@@ -5431,6 +5430,7 @@ pa_ip (char *str)
 		{
 		case SGL:
 		  opcode |= 0x20;
+		  /* Fall through.  */
 		case DBL:
 		  the_insn.fpof1 = flag;
 		  continue;
@@ -5685,7 +5685,7 @@ pa_ip (char *str)
       /* If this instruction is specific to a particular architecture,
 	 then set a new architecture.  This automatic promotion crud is
 	 for compatibility with HP's old assemblers only.  */
-      if (match == TRUE
+      if (match
 	  && bfd_get_mach (stdoutput) < insn->arch
 	  && !bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
 	{
@@ -5787,7 +5787,7 @@ md_assemble (char *str)
   if (the_insn.reloc != R_HPPA_NONE)
     fix_new_hppa (frag_now, (to - frag_now->fr_literal), 4, NULL,
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
-		  the_insn.reloc, the_insn.field_selector,
+		  (int) the_insn.reloc, the_insn.field_selector,
 		  the_insn.format, the_insn.arg_reloc, 0);
 
 #ifdef OBJ_ELF
@@ -5962,7 +5962,7 @@ pa_build_unwind_subspace (struct call_info *call_info)
   char *name, *p;
   symbolS *symbolP;
 
-  if ((bfd_get_section_flags (stdoutput, now_seg)
+  if ((bfd_section_flags (now_seg)
        & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       != (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
     return;
@@ -5974,11 +5974,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
   /* Replace the start symbol with a local symbol that will be reduced
      to a section offset.  This avoids problems with weak functions with
      multiple definitions, etc.  */
-  name = xmalloc (strlen ("L$\001start_")
-		  + strlen (S_GET_NAME (call_info->start_symbol))
-		  + 1);
-  strcpy (name, "L$\001start_");
-  strcat (name, S_GET_NAME (call_info->start_symbol));
+  name = concat ("L$\001start_", S_GET_NAME (call_info->start_symbol),
+		 (char *) NULL);
 
   /* If we have a .procend preceded by a .exit, then the symbol will have
      already been defined.  In that case, we don't want another unwind
@@ -5992,7 +5989,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
   else
     {
       symbolP = symbol_new (name, now_seg,
-			    S_GET_VALUE (call_info->start_symbol), frag_now);
+			    S_GET_VALUE (call_info->start_symbol),
+			    symbol_get_frag (call_info->start_symbol));
       gas_assert (symbolP);
       S_CLEAR_EXTERNAL (symbolP);
       symbol_table_insert (symbolP);
@@ -6008,10 +6006,9 @@ pa_build_unwind_subspace (struct call_info *call_info)
   if (seg == ASEC_NULL)
     {
       seg = subseg_new (UNWIND_SECTION_NAME, 0);
-      bfd_set_section_flags (stdoutput, seg,
-			     SEC_READONLY | SEC_HAS_CONTENTS
-			     | SEC_LOAD | SEC_RELOC | SEC_ALLOC | SEC_DATA);
-      bfd_set_section_alignment (stdoutput, seg, 2);
+      bfd_set_section_flags (seg, (SEC_READONLY | SEC_HAS_CONTENTS | SEC_LOAD
+				   | SEC_RELOC | SEC_ALLOC | SEC_DATA));
+      bfd_set_section_alignment (seg, 2);
     }
 
   subseg_set (seg, 0);
@@ -6414,6 +6411,7 @@ hppa_elf_mark_end_of_function (void)
   /* ELF does not have EXIT relocations.  All we do is create a
      temporary symbol marking the end of the function.  */
   char *name;
+  symbolS *symbolP;
 
   if (last_call_info == NULL || last_call_info->start_symbol == NULL)
     {
@@ -6422,48 +6420,37 @@ hppa_elf_mark_end_of_function (void)
       return;
     }
 
-  name = xmalloc (strlen ("L$\001end_")
-		  + strlen (S_GET_NAME (last_call_info->start_symbol))
-		  + 1);
-  if (name)
+  name = concat ("L$\001end_", S_GET_NAME (last_call_info->start_symbol),
+		 (char *) NULL);
+
+  /* If we have a .exit followed by a .procend, then the
+     symbol will have already been defined.  */
+  symbolP = symbol_find (name);
+  if (symbolP)
     {
-      symbolS *symbolP;
+      /* The symbol has already been defined!  This can
+	 happen if we have a .exit followed by a .procend.
 
-      strcpy (name, "L$\001end_");
-      strcat (name, S_GET_NAME (last_call_info->start_symbol));
-
-      /* If we have a .exit followed by a .procend, then the
-	 symbol will have already been defined.  */
-      symbolP = symbol_find (name);
-      if (symbolP)
-	{
-	  /* The symbol has already been defined!  This can
-	     happen if we have a .exit followed by a .procend.
-
-	     This is *not* an error.  All we want to do is free
-	     the memory we just allocated for the name and continue.  */
-	  xfree (name);
-	}
-      else
-	{
-	  /* symbol value should be the offset of the
-	     last instruction of the function */
-	  symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
-				frag_now);
-
-	  gas_assert (symbolP);
-	  S_CLEAR_EXTERNAL (symbolP);
-	  symbol_table_insert (symbolP);
-	}
-
-      if (symbolP)
-	last_call_info->end_symbol = symbolP;
-      else
-	as_bad (_("Symbol '%s' could not be created."), name);
-
+	 This is *not* an error.  All we want to do is free
+	 the memory we just allocated for the name and continue.  */
+      xfree (name);
     }
   else
-    as_bad (_("No memory for symbol name."));
+    {
+      /* symbol value should be the offset of the
+	 last instruction of the function */
+      symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
+			    frag_now);
+
+      gas_assert (symbolP);
+      S_CLEAR_EXTERNAL (symbolP);
+      symbol_table_insert (symbolP);
+    }
+
+  if (symbolP)
+    last_call_info->end_symbol = symbolP;
+  else
+    as_bad (_("Symbol '%s' could not be created."), name);
 }
 #endif
 
@@ -7036,7 +7023,7 @@ pa_procend (int unused ATTRIBUTE_UNUSED)
 
 #ifdef OBJ_ELF
   /* ELF needs to mark the end of each function so that it can compute
-     the size of the function (apparently its needed in the symbol table).  */
+     the size of the function (apparently it's needed in the symbol table).  */
   hppa_elf_mark_end_of_function ();
 #endif
 
@@ -7545,14 +7532,13 @@ pa_subspace (int create_new)
 	seg_info (section)->bss = 1;
 
       /* Now set the flags.  */
-      bfd_set_section_flags (stdoutput, section, applicable);
+      bfd_set_section_flags (section, applicable);
 
       /* Record any alignment request for this section.  */
       record_alignment (section, exact_log2 (alignment));
 
       /* Set the starting offset for this section.  */
-      bfd_set_section_vma (stdoutput, section,
-			   pa_subspace_start (space, quadrant));
+      bfd_set_section_vma (section, pa_subspace_start (space, quadrant));
 
       /* Now that all the flags are set, update an existing subspace,
 	 or create a new one.  */
@@ -7626,7 +7612,7 @@ pa_spaces_begin (void)
 	{
 	  text_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC | SEC_CODE
 					       | SEC_READONLY
@@ -7636,7 +7622,7 @@ pa_spaces_begin (void)
 	{
 	  data_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_HAS_CONTENTS));
@@ -7646,13 +7632,13 @@ pa_spaces_begin (void)
 	{
 	  bss_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & SEC_ALLOC);
 	}
       else if (!strcmp (pa_def_subspaces[i].name, "$LIT$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY
@@ -7661,7 +7647,7 @@ pa_spaces_begin (void)
       else if (!strcmp (pa_def_subspaces[i].name, "$MILLICODE$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY
@@ -7670,7 +7656,7 @@ pa_spaces_begin (void)
       else if (!strcmp (pa_def_subspaces[i].name, "$UNWIND$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
-	  bfd_set_section_flags (stdoutput, segment,
+	  bfd_set_section_flags (segment,
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_READONLY
@@ -8331,7 +8317,8 @@ hppa_fix_adjustable (fixS *fixp)
   /* LR/RR selectors are implicitly used for a number of different relocation
      types.  We must ensure that none of these types are adjusted (see below)
      even if they occur with a different selector.  */
-  code = elf_hppa_reloc_final_type (stdoutput, fixp->fx_r_type,
+  code = elf_hppa_reloc_final_type (stdoutput,
+				    (int) fixp->fx_r_type,
 		  		    hppa_fix->fx_r_format,
 				    hppa_fix->fx_r_field);
 
@@ -8541,7 +8528,7 @@ pa_vtable_entry (int ignore ATTRIBUTE_UNUSED)
 {
   struct fix *new_fix;
 
-  new_fix = obj_elf_vtable_entry (0);
+  new_fix = obj_elf_get_vtable_entry ();
 
   if (new_fix)
     {
@@ -8562,7 +8549,7 @@ pa_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
 {
   struct fix *new_fix;
 
-  new_fix = obj_elf_vtable_inherit (0);
+  new_fix = obj_elf_get_vtable_inherit ();
 
   if (new_fix)
     {

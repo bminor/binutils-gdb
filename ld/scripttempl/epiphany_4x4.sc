@@ -1,5 +1,5 @@
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
-# 
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -45,16 +45,15 @@
 #	NO_RELA_RELOCS - Don't include .rela.* sections in script
 #	NON_ALLOC_DYN - Place dynamic sections after data segment.
 #	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
-#	EMBEDDED - whether this is for an embedded system. 
+#	EMBEDDED - whether this is for an embedded system.
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 #		start address of shared library.
 #	INPUT_FILES - INPUT command of files to always include
 #	WRITABLE_RODATA - if set, the .rodata section should be writable
 #	INIT_START, INIT_END -  statements just before and just after
-# 	combination of .init sections.
+#	combination of .init sections.
 #	FINI_START, FINI_END - statements just before and just after
-# 	combination of .fini sections.
-#	STACK_ADDR - start of a .stack section.
+#	combination of .fini sections.
 #	OTHER_SYMBOLS - symbols to place right at the end of the script.
 #	ETEXT_NAME - name of a symbol for the end of the text section,
 #		normally etext.
@@ -124,7 +123,7 @@ fi
 test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
 if test -z "$GOT"; then
   if test -z "$SEPARATE_GOTPLT"; then
-    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
+    GOT=".got          ${RELOCATING-0} : {${RELOCATING+ *(.got.plt)} *(.got) }"
   else
     GOT=".got          ${RELOCATING-0} : { *(.got) }"
     GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
@@ -139,19 +138,19 @@ if test -z "${NO_SMALL_DATA}"; then
   {
     ${RELOCATING+${SBSS_START_SYMBOLS}}
     ${CREATE_SHLIB+*(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)}
-    *(.dynsbss)
+    ${RELOCATING+*(.dynsbss)}
     *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
-    *(.scommon)
+    ${RELOCATING+*(.scommon)}
     ${RELOCATING+${SBSS_END_SYMBOLS}}
   }"
   SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
   SDATA="/* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata        ${RELOCATING-0} : 
+  .sdata        ${RELOCATING-0} :
   {
     ${RELOCATING+${SDATA_START_SYMBOLS}}
-    ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
+    ${RELOCATING+${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}}
     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
   }"
   SDATA2=".sdata2       ${RELOCATING-0} :
@@ -192,9 +191,9 @@ test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
   ${OTHER_BSS_SECTIONS}
   .lbss ${RELOCATING-0} :
   {
-    *(.dynlbss)
+    ${RELOCATING+*(.dynlbss)}
     *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
-    *(LARGE_COMMON)
+    ${RELOCATING+*(LARGE_COMMON)}
   }"
 test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
   .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
@@ -206,7 +205,7 @@ test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
     ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }"
-CTOR=".ctors    ADDR(.text) + SIZEOF(.text)      ${CONSTRUCTING-0} : 
+CTOR=".ctors    ADDR(.text) + SIZEOF(.text)      ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -231,7 +230,7 @@ CTOR=".ctors    ADDR(.text) + SIZEOF(.text)      ${CONSTRUCTING-0} :
     KEEP (*(SORT(.ctors.*)))
     KEEP (*(.ctors))
     ${CONSTRUCTING+${CTOR_END}}
-  }  /*> INTERNAL_RAM*/" 
+  }  /*> INTERNAL_RAM*/"
 DTOR=".dtors     ADDR(.ctors) + SIZEOF(.ctors)    ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${DTOR_START}}
@@ -242,11 +241,6 @@ DTOR=".dtors     ADDR(.ctors) + SIZEOF(.ctors)    ${CONSTRUCTING-0} :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }   /*> INTERNAL_RAM*/ "
-STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
-  {
-    ${RELOCATING+___stack = .;}
-    *(.stack)
-  }"
 
 # If this is for an embedded system, don't add SIZEOF_HEADERS.
 if [ -z "$EMBEDDED" ]; then
@@ -256,7 +250,7 @@ else
 fi
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -265,16 +259,13 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
 OUTPUT_ARCH(${OUTPUT_ARCH})
-${RELOCATING+ENTRY(${ENTRY})}
+EOF
 
-${RELOCATING+${EXECUTABLE_SYMBOLS}}
-${RELOCATING+${INPUT_FILES}}
-${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-  if gld -r is used and the intermediate file has sections starting
-  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-  bug.  But for now assigning the zero vmas works.  */}
+test -n "${RELOCATING}" && cat <<EOF
+ENTRY(${ENTRY})
 
-
+${EXECUTABLE_SYMBOLS}
+${INPUT_FILES}
 
 /* BSP specific*/
 __PROG_SIZE_FOR_CORE__ = 1M;
@@ -290,33 +281,33 @@ __FIRST_CORE_COL_ = 0x24;
 
 PROVIDE (__CORE_ROW_ = __FIRST_CORE_ROW_);
 PROVIDE (__CORE_COL_ = __FIRST_CORE_COL_);
-/* generic don't touch */
-/* used to calculated the slice address in the external memory*/
+/* generic do not touch */
+/* used to calculated the slice address in the external memory */
 __CORE_NUM_ =  (__CORE_ROW_ -  __FIRST_CORE_ROW_ )* __MAX_NUM_CORES_IN_COLS__ + (__CORE_COL_ - __FIRST_CORE_COL_ ) ;
 
 
 MEMORY
  {
- 	EXTERNAL_DRAM_0 (WXAI) :     ORIGIN = 0x80000000,      LENGTH = 0x1000000  /*.text, data, rodata, bss and .stack*/
+	EXTERNAL_DRAM_0 (WXAI) :     ORIGIN = 0x80000000,      LENGTH = 0x1000000  /*.text, data, rodata, bss and .stack*/
     EXTERNAL_DRAM_1 (WXAI) :        ORIGIN = 0x81000000,      LENGTH = 0x1000000 /*.heap */
-    
+
     EXTERNAL_SRAM (WXAI) :       ORIGIN = 0x92000000,      LENGTH =   8K /* small external RAM, used for testing*/
-    
+
     /* run time lib and crt0*/
     RESERVED_CRT0_RAM (WXAI) :    ORIGIN = 0,      LENGTH = 0x400
-    
+
     /* user program, per bank usage */
     BANK0_SRAM (WXAI) : ORIGIN = LENGTH(RESERVED_CRT0_RAM),   LENGTH = 8K - LENGTH(RESERVED_CRT0_RAM)
     BANK1_SRAM (WXAI) : ORIGIN = 0x2000, LENGTH = 8K
     BANK2_SRAM (WXAI) : ORIGIN = 0x4000, LENGTH = 8K
     BANK3_SRAM (WXAI) : ORIGIN = 0x6000, LENGTH = 8K
-    
+
     /* user program, continious placement */
     INTERNAL_RAM        (WXAI) :     ORIGIN = LENGTH(RESERVED_CRT0_RAM),  LENGTH = 32K - LENGTH(RESERVED_CRT0_RAM)
-    
-    MMR (WAI) 	      : ORIGIN = 0xF000, LENGTH = 32K
-       
-    /* multi cores space */   
+
+    MMR (WAI)	      : ORIGIN = 0xF000, LENGTH = 32K
+
+    /* multi cores space */
 	CORE_0x20_0x24_INTERNAL_RAM :      ORIGIN = 0x82400000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
 	CORE_0x20_0x25_INTERNAL_RAM :      ORIGIN = 0x82500000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
 	CORE_0x20_0x26_INTERNAL_RAM :      ORIGIN = 0x82600000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
@@ -334,52 +325,57 @@ MEMORY
 	CORE_0x23_0x26_INTERNAL_RAM :      ORIGIN = 0x8e600000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
 	CORE_0x23_0x27_INTERNAL_RAM :      ORIGIN = 0x8e700000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
 	CORE_0x24_0x24_INTERNAL_RAM :      ORIGIN = 0x82000000+LENGTH(RESERVED_CRT0_RAM),      LENGTH = 32K- LENGTH(RESERVED_CRT0_RAM)
-   
+
  }
 
+EOF
 
+cat <<EOF
 SECTIONS
 {
+EOF
 
+test -n "${RELOCATING}" && cat <<EOF
    IVT 0 : {*.o(IVT)  } > RESERVED_CRT0_RAM
    RESERVED_CRT0 : {*.o(RESERVED_CRT0)  } > RESERVED_CRT0_RAM
    RESERVED_CRT0 : {*.o(reserved_crt0)  } > RESERVED_CRT0_RAM
-   
+
    CORE_RAM_0 :   {*.o(core_ram_0)  }  > BANK0_SRAM
    CORE_RAM_1 :   {*.o(core_ram_1)  }  > BANK1_SRAM
    CORE_RAM_2 :   {*.o(core_ram_2)  }  > BANK2_SRAM
    CORE_RAM_3 :   {*.o(core_ram_3)  }  > BANK3_SRAM
-   
+
    SRAM_SOUTH :  {*.o(sram)  }  > EXTERNAL_SRAM
    DRAM_WEST :  {*.o(dram)  }  > EXTERNAL_DRAM_1
-   
+
    CORE_INTERNAL :  {*.o(core_ram_internal)  }    /*> INTERNAL_RAM*/
-   
+
    /* the newlib  (libc and libm)  library is maped to the dedicated section */
-   
+
    __new_lib_start_external_ =  ( ORIGIN(EXTERNAL_DRAM_0) + __PROG_SIZE_FOR_CORE__ *__CORE_NUM_ );
    __new_lib_start_ = DEFINED(__USE_INTERNAL_MEM_FOR_NEW_LIB_) ? ORIGIN(BANK1_SRAM) :  __new_lib_start_external_ ;
-   
-   NEW_LIB_RO ${RELOCATING+__new_lib_start_} : { lib_a-*.o(.text  .rodata )  *.o(libgloss_epiphany)  }  /*  > INTERNAL_RAM*/
-   GNU_C_BUILTIN_LIB_RO     ADDR(NEW_LIB_RO) + SIZEOF(NEW_LIB_RO) : {  
-   								*mulsi3.o(.text  .rodata)  *modsi3.o(.text  .rodata)
-   								*divsi3.o(.text  .rodata)  	*udivsi3.o(.text  .rodata)
-   							    *umodsi3.o(.text  .rodata)   _*.o(.text  .rodata) 
-   } 
- 					 								
-   NEW_LIB_WR   ADDR(GNU_C_BUILTIN_LIB_RO) + SIZEOF(GNU_C_BUILTIN_LIB_RO)  : { lib_a-*.o(.data ) }    /* >  INTERNAL_RAM*/ 
-   
-   
-   __init_start = DEFINED(__USE_INTERNAL_MEM_) ? ORIGIN(BANK1_SRAM) :  (ADDR(NEW_LIB_WR) + SIZEOF(NEW_LIB_WR) ) ; 
-   __init_start = DEFINED(__USE_INTERNAL_MEM_FOR_NEW_LIB_) ? ADDR(NEW_LIB_WR) + SIZEOF(NEW_LIB_WR)  : __init_start;
-   
 
+   NEW_LIB_RO __new_lib_start_ : { lib_a-*.o(.text .rodata) *.o(libgloss_epiphany) } /* > INTERNAL_RAM */
+   GNU_C_BUILTIN_LIB_RO     ADDR(NEW_LIB_RO) + SIZEOF(NEW_LIB_RO) : {
+								*mulsi3.o(.text  .rodata)  *modsi3.o(.text  .rodata)
+								*divsi3.o(.text  .rodata)	*udivsi3.o(.text  .rodata)
+							    *umodsi3.o(.text  .rodata)   _*.o(.text  .rodata)
+   }
+
+   NEW_LIB_WR   ADDR(GNU_C_BUILTIN_LIB_RO) + SIZEOF(GNU_C_BUILTIN_LIB_RO)  : { lib_a-*.o(.data ) }    /* >  INTERNAL_RAM*/
+
+
+   __init_start = DEFINED(__USE_INTERNAL_MEM_) ? ORIGIN(BANK1_SRAM) :  (ADDR(NEW_LIB_WR) + SIZEOF(NEW_LIB_WR) ) ;
+   __init_start = DEFINED(__USE_INTERNAL_MEM_FOR_NEW_LIB_) ? ADDR(NEW_LIB_WR) + SIZEOF(NEW_LIB_WR)  : __init_start;
+EOF
+
+cat <<EOF
   /* Read-only sections, merged into text segment: */
   /*${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}*/
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${INITIAL_READONLY_SECTIONS}
-  .note.gnu.build-id : { *(.note.gnu.build-id) }
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 
 test -n "${RELOCATING+0}" || unset NON_ALLOC_DYN
@@ -439,13 +435,13 @@ cat >> ldscripts/dyntmp.$$ <<EOF
   .rel.dyn      ${RELOCATING-0} :
     {
 EOF
-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+sed -e '/^[	 ]*[{}][	 ]*$/d;/:[	 ]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
   .rela.dyn     ${RELOCATING-0} :
     {
 EOF
-sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
+sed -e '/^[	 ]*[{}][	 ]*$/d;/:[	 ]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
 EOF
@@ -462,54 +458,54 @@ if test -z "${NON_ALLOC_DYN}"; then
     cat ldscripts/dyntmp.$$
   else
     if test -z "${NO_REL_RELOCS}"; then
-      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d' -e '/^[ 	]*\.rela\./d' ldscripts/dyntmp.$$
+      sed -e '/^[	 ]*\.rela\.[^}]*$/,/}/d' -e '/^[	 ]*\.rela\./d' ldscripts/dyntmp.$$
     fi
     if test -z "${NO_RELA_RELOCS}"; then
-      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d' -e '/^[ 	]*\.rel\./d' ldscripts/dyntmp.$$
+      sed -e '/^[	 ]*\.rel\.[^}]*$/,/}/d' -e '/^[	 ]*\.rel\./d' ldscripts/dyntmp.$$
     fi
   fi
   rm -f ldscripts/dyntmp.$$
 fi
 
 cat <<EOF
- 
-  .init  __init_start  : 
-  {   
+
+  .init  ${RELOCATING-0}${RELOCATING+__init_start}  :
+  {
     ${RELOCATING+${INIT_START}}
-    KEEP (*(.init))
+    KEEP (*(SORT_NONE(.init)))
     ${RELOCATING+${INIT_END}}
-  }     /*> INTERNAL_RAM*/ =${NOP-0}
+  } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
 
   ${TEXT_PLT+${PLT}}
   ${TINY_READONLY_SECTION}
-  
-  .fini ${RELOCATING+ADDR(.init)+SIZEOF(.init)} ${RELOCATING-0} :
+
+  .fini ${RELOCATING-0}${RELOCATING+ADDR(.init)+SIZEOF(.init)} :
   {
     ${RELOCATING+${FINI_START}}
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     ${RELOCATING+${FINI_END}}
-  }    /*> INTERNAL_RAM*/ =${NOP-0}
-  
-  .text ${RELOCATING+ADDR(.fini)+SIZEOF(.fini)} ${RELOCATING-0} :
+  } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
+
+  .text ${RELOCATING-0}${RELOCATING+ADDR(.fini)+SIZEOF(.fini)} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
-    /* .gnu.warning sections are handled specially by elf32.em.  */
+    /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
-  }    /*> INTERNAL_RAM */ =${NOP-0}
+  } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
 
   ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
   ${WRITABLE_RODATA-${RODATA}}
-  .rodata1      ${RELOCATING-0} : { *(.rodata1) } 
+  .rodata1      ${RELOCATING-0} : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
-  .eh_frame_hdr : { *(.eh_frame_hdr) }
+  .eh_frame_hdr ${RELOCATING-0} : { *(.eh_frame_hdr) }
   .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -519,7 +515,7 @@ cat <<EOF
 
   /* Exception handling  */
   .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
   /* Thread Local Storage sections  */
   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
@@ -530,21 +526,21 @@ cat <<EOF
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_start = .);}}
     KEEP (*(.preinit_array))
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_end = .);}}
-  } 
+  }
   .init_array   ${RELOCATING-0} :
   {
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_start = .);}}
-     KEEP (*(SORT(.init_array.*)))
+     ${RELOCATING+KEEP (*(SORT(.init_array.*)))}
      KEEP (*(.init_array))
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_end = .);}}
-  }  
+  }
   .fini_array   ${RELOCATING-0} :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_start = .);}}
     KEEP (*(.fini_array))
-    KEEP (*(SORT(.fini_array.*)))
+    ${RELOCATING+KEEP (*(SORT(.fini_array.*)))}
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_end = .);}}
-  } 
+  }
   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
@@ -561,13 +557,13 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  .data ${RELOCATING+ADDR(.dtors)+SIZEOF(.dtors)} ${RELOCATING-0} :
+  .data ${RELOCATING-0}${RELOCATING+ADDR(.dtors)+SIZEOF(.dtors)} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
-  }  /*> INTERNAL_RAM*/
-  .data1        ${RELOCATING-0} : { *(.data1) }  
+  } /* ${RELOCATING+ > INTERNAL_RAM} */
+  .data1        ${RELOCATING-0} : { *(.data1) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
@@ -587,18 +583,18 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  .bss ${RELOCATING+ADDR(.rodata)+SIZEOF(.rodata)} ${RELOCATING-0} :
+  .bss ${RELOCATING-0}${RELOCATING+ADDR(.rodata)+SIZEOF(.rodata)} :
   {
-   *(.dynbss)
+   ${RELOCATING+*(.dynbss)}
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-   *(COMMON)
+   ${RELOCATING+*(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.
-      FIXME: Why do we need it? When there is no .bss section, we don't
+      FIXME: Why do we need it? When there is no .bss section, we do not
       pad the .data section.  */
-   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
-  }  /*> INTERNAL_RAM*/
+   . = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
+  } /* ${RELOCATING+ > INTERNAL_RAM} */
   ${OTHER_BSS_SECTIONS}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
@@ -608,6 +604,12 @@ cat <<EOF
   ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}
   ${RELOCATING+${DATA_SEGMENT_END}}
+
+  ${RELOCATING+PROVIDE ( __stack_start_ = ORIGIN(EXTERNAL_DRAM_0) + __PROG_SIZE_FOR_CORE__ * __CORE_NUM_ + __PROG_SIZE_FOR_CORE__  - 0x10) ;}
+  .stack ${RELOCATING-0}${RELOCATING+__stack_start_} :  {    ${RELOCATING+___stack = .;}    *(.stack)  }
+
+  ${RELOCATING+PROVIDE (  ___heap_start = ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_ );}
+  ${RELOCATING+PROVIDE (  ___heap_end =   ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_  + __HEAP_SIZE_FOR_CORE__ - 4 );}
 EOF
 
 if test -n "${NON_ALLOC_DYN}"; then
@@ -615,10 +617,10 @@ if test -n "${NON_ALLOC_DYN}"; then
     cat ldscripts/dyntmp.$$
   else
     if test -z "${NO_REL_RELOCS}"; then
-      sed -e '/^[ 	]*\.rela\.[^}]*$/,/}/d' -e '/^[ 	]*\.rela\./d' ldscripts/dyntmp.$$
+      sed -e '/^[	 ]*\.rela\.[^}]*$/,/}/d' -e '/^[	 ]*\.rela\./d' ldscripts/dyntmp.$$
     fi
     if test -z "${NO_RELA_RELOCS}"; then
-      sed -e '/^[ 	]*\.rel\.[^}]*$/,/}/d' -e '/^[ 	]*\.rel\./d' ldscripts/dyntmp.$$
+      sed -e '/^[	 ]*\.rel\.[^}]*$/,/}/d' -e '/^[	 ]*\.rel\./d' ldscripts/dyntmp.$$
     fi
   fi
   rm -f ldscripts/dyntmp.$$
@@ -640,23 +642,6 @@ EOF
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-  ${TINY_DATA_SECTION}
-  ${TINY_BSS_SECTION}
-
-  /*${STACK_ADDR+${STACK}}*/
-  
-  PROVIDE ( __stack_start_ = ORIGIN(EXTERNAL_DRAM_0) + __PROG_SIZE_FOR_CORE__ * __CORE_NUM_ + __PROG_SIZE_FOR_CORE__  - 0x10) ;
-  .stack ${RELOCATING+__stack_start_} :  {    ___stack = .;    *(.stack)  }
-
-  PROVIDE (  ___heap_start = ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_ );
-  /*.heap_start      __heap_start_    :  {    _heap_start_ = .;    *(.heap_start)  }*/
-
-  PROVIDE (  ___heap_end =   ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_  + __HEAP_SIZE_FOR_CORE__ - 4 );
-  
-  
- /* .heap_end      __heap_end_    :  {    _heap_end_ = .;    *(.heap_end)  }*/
-
-
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}

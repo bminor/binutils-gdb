@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "queue.h"
+#include "ser-event.h"
 
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)
@@ -31,9 +31,10 @@
 #endif
 
 #include <sys/types.h>
-#include "gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #include "gdb_select.h"
-#include "observer.h"
+#include "observable.h"
+#include "top.h"
 
 /* Tell create_file_handler what events we are interested in.
    This is used by the select version of the event loop.  */
@@ -210,7 +211,7 @@ gdb_notifier;
    first occasion after WHEN.  */
 struct gdb_timer
   {
-    struct timeval when;
+    std::chrono::steady_clock::time_point when;
     int timer_id;
     struct gdb_timer *next;
     timer_handler_func *proc;	    /* Function to call to do the work.  */
@@ -261,6 +262,28 @@ static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
 
+
+/* This event is signalled whenever an asynchronous handler needs to
+   defer an action to the event loop.  */
+static struct serial_event *async_signal_handlers_serial_event;
+
+/* Callback registered with ASYNC_SIGNAL_HANDLERS_SERIAL_EVENT.  */
+
+static void
+async_signals_handler (int error, gdb_client_data client_data)
+{
+  /* Do nothing.  Handlers are run by invoke_async_signal_handlers
+     from instead.  */
+}
+
+void
+initialize_async_signal_handlers (void)
+{
+  async_signal_handlers_serial_event = make_serial_event ();
+
+  add_file_handler (serial_event_fd (async_signal_handlers_serial_event),
+		    async_signals_handler, NULL);
+}
 
 /* Process one high level event.  If nothing is ready at this time,
    wait for something to happen (via gdb_wait_for_event), then process
@@ -342,22 +365,26 @@ start_event_loop (void)
     {
       int result = 0;
 
-      TRY
+      try
 	{
 	  result = gdb_do_one_event ();
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 
 	  /* If any exception escaped to here, we better enable
 	     stdin.  Otherwise, any command that calls async_disable_stdin,
 	     and then throws, will leave stdin inoperable.  */
-	  async_enable_stdin ();
+	  SWITCH_THRU_ALL_UIS ()
+	    {
+	      async_enable_stdin ();
+	    }
 	  /* If we long-jumped out of do_one_event, we probably didn't
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */
-	  observer_notify_command_error ();
+	  current_ui->prompt_state = PROMPT_NEEDED;
+	  gdb::observers::command_error.notify ();
 	  /* This call looks bizarre, but it is required.  If the user
 	     entered a command that caused an error,
 	     after_char_processing_hook won't be called from
@@ -369,7 +396,6 @@ start_event_loop (void)
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not.  */
 	}
-      END_CATCH
 
       if (result < 0)
 	break;
@@ -724,8 +750,8 @@ gdb_wait_for_event (int block)
   int num_found = 0;
 
   /* Make sure all output is done before getting another event.  */
-  gdb_flush (gdb_stdout);
-  gdb_flush (gdb_stderr);
+  ui_file_flush (gdb_stdout);
+  ui_file_flush (gdb_stderr);
 
   if (gdb_notifier.num_fds == 0)
     return -1;
@@ -888,15 +914,6 @@ create_async_signal_handler (sig_handler_func * proc,
   return async_handler_ptr;
 }
 
-/* Call the handler from HANDLER immediately.  This function runs
-   signal handlers when returning to the event loop would be too
-   slow.  */
-void
-call_async_signal_handler (struct async_signal_handler *handler)
-{
-  (*handler->proc) (handler->client_data);
-}
-
 /* Mark the handler (ASYNC_HANDLER_PTR) as ready.  This information
    will be used when the handlers are invoked, after we have waited
    for some event.  The caller of this function is the interrupt
@@ -905,6 +922,7 @@ void
 mark_async_signal_handler (async_signal_handler * async_handler_ptr)
 {
   async_handler_ptr->ready = 1;
+  serial_event_set (async_signal_handlers_serial_event);
 }
 
 /* See event-loop.h.  */
@@ -925,13 +943,19 @@ async_signal_handler_is_marked (async_signal_handler *async_handler_ptr)
 
 /* Call all the handlers that are ready.  Returns true if any was
    indeed ready.  */
+
 static int
 invoke_async_signal_handlers (void)
 {
   async_signal_handler *async_handler_ptr;
   int any_ready = 0;
 
-  /* Invoke ready handlers.  */
+  /* We're going to handle all pending signals, so no need to wake up
+     the event loop again the next time around.  Note this must be
+     cleared _before_ calling the callbacks, to avoid races.  */
+  serial_event_clear (async_signal_handlers_serial_event);
+
+  /* Invoke all ready handlers.  */
 
   while (1)
     {
@@ -946,6 +970,9 @@ invoke_async_signal_handlers (void)
 	break;
       any_ready = 1;
       async_handler_ptr->ready = 0;
+      /* Async signal handlers have no connection to whichever was the
+	 current UI, and thus always run on the main one.  */
+      current_ui = main_ui;
       (*async_handler_ptr->proc) (async_handler_ptr->client_data);
     }
 
@@ -1071,33 +1098,22 @@ delete_async_event_handler (async_event_handler **async_handler_ptr)
   *async_handler_ptr = NULL;
 }
 
-/* Create a timer that will expire in MILLISECONDS from now.  When the
-   timer is ready, PROC will be executed.  At creation, the timer is
-   aded to the timers queue.  This queue is kept sorted in order of
-   increasing timers.  Return a handle to the timer struct.  */
+/* Create a timer that will expire in MS milliseconds from now.  When
+   the timer is ready, PROC will be executed.  At creation, the timer
+   is added to the timers queue.  This queue is kept sorted in order
+   of increasing timers.  Return a handle to the timer struct.  */
+
 int
-create_timer (int milliseconds, timer_handler_func * proc, 
+create_timer (int ms, timer_handler_func *proc,
 	      gdb_client_data client_data)
 {
+  using namespace std::chrono;
   struct gdb_timer *timer_ptr, *timer_index, *prev_timer;
-  struct timeval time_now, delta;
 
-  /* Compute seconds.  */
-  delta.tv_sec = milliseconds / 1000;
-  /* Compute microseconds.  */
-  delta.tv_usec = (milliseconds % 1000) * 1000;
+  steady_clock::time_point time_now = steady_clock::now ();
 
-  gettimeofday (&time_now, NULL);
-
-  timer_ptr = XNEW (struct gdb_timer);
-  timer_ptr->when.tv_sec = time_now.tv_sec + delta.tv_sec;
-  timer_ptr->when.tv_usec = time_now.tv_usec + delta.tv_usec;
-  /* Carry?  */
-  if (timer_ptr->when.tv_usec >= 1000000)
-    {
-      timer_ptr->when.tv_sec += 1;
-      timer_ptr->when.tv_usec -= 1000000;
-    }
+  timer_ptr = new gdb_timer ();
+  timer_ptr->when = time_now + milliseconds (ms);
   timer_ptr->proc = proc;
   timer_ptr->client_data = client_data;
   timer_list.num_timers++;
@@ -1110,11 +1126,7 @@ create_timer (int milliseconds, timer_handler_func * proc,
        timer_index != NULL;
        timer_index = timer_index->next)
     {
-      /* If the seconds field is greater or if it is the same, but the
-         microsecond field is greater.  */
-      if ((timer_index->when.tv_sec > timer_ptr->when.tv_sec)
-	  || ((timer_index->when.tv_sec == timer_ptr->when.tv_sec)
-	      && (timer_index->when.tv_usec > timer_ptr->when.tv_usec)))
+      if (timer_index->when > timer_ptr->when)
 	break;
     }
 
@@ -1168,9 +1180,25 @@ delete_timer (int id)
 	;
       prev_timer->next = timer_ptr->next;
     }
-  xfree (timer_ptr);
+  delete timer_ptr;
 
   gdb_notifier.timeout_valid = 0;
+}
+
+/* Convert a std::chrono duration to a struct timeval.  */
+
+template<typename Duration>
+static struct timeval
+duration_cast_timeval (const Duration &d)
+{
+  using namespace std::chrono;
+  seconds sec = duration_cast<seconds> (d);
+  microseconds msec = duration_cast<microseconds> (d - sec);
+
+  struct timeval tv;
+  tv.tv_sec = sec.count ();
+  tv.tv_usec = msec.count ();
+  return tv;
 }
 
 /* Update the timeout for the select() or poll().  Returns true if the
@@ -1179,36 +1207,29 @@ delete_timer (int id)
 static int
 update_wait_timeout (void)
 {
-  struct timeval time_now, delta;
-
   if (timer_list.first_timer != NULL)
     {
-      gettimeofday (&time_now, NULL);
-      delta.tv_sec = timer_list.first_timer->when.tv_sec - time_now.tv_sec;
-      delta.tv_usec = timer_list.first_timer->when.tv_usec - time_now.tv_usec;
-      /* Borrow?  */
-      if (delta.tv_usec < 0)
-	{
-	  delta.tv_sec -= 1;
-	  delta.tv_usec += 1000000;
-	}
+      using namespace std::chrono;
+      steady_clock::time_point time_now = steady_clock::now ();
+      struct timeval timeout;
 
-      /* Cannot simply test if delta.tv_sec is negative because time_t
-         might be unsigned.  */
-      if (timer_list.first_timer->when.tv_sec < time_now.tv_sec
-	  || (timer_list.first_timer->when.tv_sec == time_now.tv_sec
-	      && timer_list.first_timer->when.tv_usec < time_now.tv_usec))
+      if (timer_list.first_timer->when < time_now)
 	{
 	  /* It expired already.  */
-	  delta.tv_sec = 0;
-	  delta.tv_usec = 0;
+	  timeout.tv_sec = 0;
+	  timeout.tv_usec = 0;
+	}
+      else
+	{
+	  steady_clock::duration d = timer_list.first_timer->when - time_now;
+	  timeout = duration_cast_timeval (d);
 	}
 
       /* Update the timeout for select/ poll.  */
       if (use_poll)
 	{
 #ifdef HAVE_POLL
-	  gdb_notifier.poll_timeout = delta.tv_sec * 1000;
+	  gdb_notifier.poll_timeout = timeout.tv_sec * 1000;
 #else
 	  internal_error (__FILE__, __LINE__,
 			  _("use_poll without HAVE_POLL"));
@@ -1216,12 +1237,12 @@ update_wait_timeout (void)
 	}
       else
 	{
-	  gdb_notifier.select_timeout.tv_sec = delta.tv_sec;
-	  gdb_notifier.select_timeout.tv_usec = delta.tv_usec;
+	  gdb_notifier.select_timeout.tv_sec = timeout.tv_sec;
+	  gdb_notifier.select_timeout.tv_usec = timeout.tv_usec;
 	}
       gdb_notifier.timeout_valid = 1;
 
-      if (delta.tv_sec == 0 && delta.tv_usec == 0)
+      if (timer_list.first_timer->when < time_now)
 	return 1;
     }
   else
@@ -1250,7 +1271,7 @@ poll_timers (void)
       /* Delete the timer before calling the callback, not after, in
 	 case the callback itself decides to try deleting the timer
 	 too.  */
-      xfree (timer_ptr);
+      delete timer_ptr;
 
       /* Call the procedure associated with that timer.  */
       (proc) (client_data);

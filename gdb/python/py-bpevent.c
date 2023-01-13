@@ -1,6 +1,6 @@
 /* Python interface to inferior breakpoint stop events.
 
-   Copyright (C) 2009-2016 Free Software Foundation, Inc.
+   Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,39 +20,26 @@
 #include "defs.h"
 #include "py-stopevent.h"
 
-extern PyTypeObject breakpoint_event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-
 /* Create and initialize a BreakpointEvent object.  This acquires new
    references to BREAKPOINT_LIST and FIRST_BP.  */
 
-PyObject *
+gdbpy_ref<>
 create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)
 {
-  PyObject *breakpoint_event_obj =
-      create_stop_event_object (&breakpoint_event_object_type);
+  gdbpy_ref<> breakpoint_event_obj
+    = create_stop_event_object (&breakpoint_event_object_type);
 
-  if (!breakpoint_event_obj)
-    goto fail;
+  if (breakpoint_event_obj == NULL)
+    return NULL;
 
-  if (evpy_add_attribute (breakpoint_event_obj,
+  if (evpy_add_attribute (breakpoint_event_obj.get (),
                           "breakpoint",
                           first_bp) < 0)
-    goto fail;
-  if (evpy_add_attribute (breakpoint_event_obj,
+    return NULL;
+  if (evpy_add_attribute (breakpoint_event_obj.get (),
                           "breakpoints",
                           breakpoint_list) < 0)
-    goto fail;
+    return NULL;
 
   return breakpoint_event_obj;
-
- fail:
-  Py_XDECREF (breakpoint_event_obj);
-  return NULL;
 }
-
-GDBPY_NEW_EVENT_TYPE (breakpoint,
-                      "gdb.BreakpointEvent",
-                      "BreakpointEvent",
-                      "GDB breakpoint stop event object",
-                      stop_event_object_type);

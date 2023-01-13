@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2020 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -234,7 +234,7 @@ static struct
     struct hash_control *const_hash;	/* constant hash table */
     struct hash_control *entry_hash;    /* code entry hint hash table */
 
-    /* If X_op is != O_absent, the registername for the instruction's
+    /* If X_op is != O_absent, the register name for the instruction's
        qualifying predicate.  If NULL, p0 is assumed for instructions
        that are predictable.  */
     expressionS qp;
@@ -1152,14 +1152,14 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
 
   record_alignment (now_seg, log_align);
 
-  cur_size = bfd_section_size (stdoutput, now_seg);
+  cur_size = bfd_section_size (now_seg);
   if ((int) size > cur_size)
     {
       char *pfrag
         = frag_var (rs_fill, 1, 1, (relax_substateT)0, NULL,
                     (valueT)size - (valueT)cur_size, NULL);
       *pfrag = 0;
-      bfd_section_size (stdoutput, now_seg) = size;
+      bfd_set_section_size (now_seg, size);
     }
 
   /* Switch back to current segment.  */
@@ -1741,7 +1741,7 @@ static unw_rec_list *
 alloc_record (unw_record_type t)
 {
   unw_rec_list *ptr;
-  ptr = xmalloc (sizeof (*ptr));
+  ptr = XNEW (unw_rec_list);
   memset (ptr, 0, sizeof (*ptr));
   ptr->slot_number = SLOT_NUM_NOT_SET;
   ptr->r.type = t;
@@ -2650,8 +2650,7 @@ set_imask (unw_rec_list *region,
   if (!imask)
     {
       imask_size = (region->r.record.r.rlen * 2 + 7) / 8 + 1;
-      imask = xmalloc (imask_size);
-      memset (imask, 0, imask_size);
+      imask = XCNEWVEC (unsigned char, imask_size);
 
       region->r.record.r.imask_size = imask_size;
       region->r.record.r.mask.i = imask;
@@ -2739,6 +2738,7 @@ slot_index (unsigned long slot_addr,
 		as_fatal (_("Only constant offsets are supported"));
 		break;
 	      }
+	    /* Fall through.  */
 	  case rs_fill:
 	    s_index += 3 * (first_frag->fr_offset >> 4);
 	    break;
@@ -2801,7 +2801,7 @@ fixup_unw_records (unw_rec_list *list, int before_relax)
   for (ptr = list; ptr; ptr = ptr->next)
     {
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
-	as_bad (_(" Insn slot not set in unwind record."));
+	as_bad (_("Insn slot not set in unwind record."));
       t = slot_index (ptr->slot_number, ptr->slot_frag,
 		      first_addr, first_frag, before_relax);
       switch (ptr->r.type)
@@ -3373,7 +3373,7 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
     e2.X_op = O_absent;
 
   reg1 = e1.X_add_number;
-  /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
+  /* Make sure it's a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op != O_register)
     {
       as_bad (_("First operand to .save not a register"));
@@ -3606,8 +3606,7 @@ start_unwind_section (const segT text_seg, int sec_index)
   else
     {
       set_section (sec_name);
-      bfd_set_section_flags (stdoutput, now_seg,
-			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+      bfd_set_section_flags (now_seg, SEC_LOAD | SEC_ALLOC | SEC_READONLY);
     }
 
   elf_linked_to_section (now_seg) = text_seg;
@@ -3765,7 +3764,7 @@ dot_savemem (int psprel)
   reg1 = e1.X_add_number;
   val = e2.X_add_number;
 
-  /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
+  /* Make sure it's a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op != O_register)
     {
       as_bad (_("First operand to .%s not a register"), po);
@@ -4110,7 +4109,7 @@ save_prologue_count (unsigned long lbl, unsigned int count)
     lpc->prologue_count = count;
   else
     {
-      label_prologue_count *new_lpc = xmalloc (sizeof (* new_lpc));
+      label_prologue_count *new_lpc = XNEW (label_prologue_count);
 
       new_lpc->next = unwind.saved_prologue_counts;
       new_lpc->label_number = lbl;
@@ -4120,7 +4119,7 @@ save_prologue_count (unsigned long lbl, unsigned int count)
 }
 
 static void
-free_saved_prologue_counts ()
+free_saved_prologue_counts (void)
 {
   label_prologue_count *lpc = unwind.saved_prologue_counts;
   label_prologue_count *next;
@@ -4262,7 +4261,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
 	    }
 	  else
 	    {
-	      pending = xmalloc (sizeof (*pending));
+	      pending = XNEW (proc_pending);
 	      pending->sym = sym;
 	      last_pending = last_pending->next = pending;
 	    }
@@ -4484,8 +4483,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 		    S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
 		  else
 		    {
-		      symbol_get_obj (sym)->size =
-			(expressionS *) xmalloc (sizeof (expressionS));
+		      symbol_get_obj (sym)->size = XNEW (expressionS);
 		      symbol_get_obj (sym)->size->X_op = O_subtract;
 		      symbol_get_obj (sym)->size->X_add_symbol
 			= symbol_new (FAKE_LABEL_NAME, now_seg,
@@ -4670,11 +4668,11 @@ dot_rot (int type)
 
       if (!*drpp)
 	{
-	  *drpp = obstack_alloc (&notes, sizeof (*dr));
+	  *drpp = XOBNEW (&notes, struct dynreg);
 	  memset (*drpp, 0, sizeof (*dr));
 	}
 
-      name = obstack_alloc (&notes, len + 1);
+      name = XOBNEWVEC (&notes, char, len + 1);
       memcpy (name, start, len);
       name[len] = '\0';
 
@@ -5637,6 +5635,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
       /* SOR must be an integer multiple of 8 */
       if (e->X_op == O_constant && e->X_add_number & 0x7)
 	return OPERAND_OUT_OF_RANGE;
+      /* Fall through.  */
     case IA64_OPND_SOF:
     case IA64_OPND_SOL:
       if (e->X_op == O_constant)
@@ -5792,6 +5791,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
     case IA64_OPND_IMM14:
     case IA64_OPND_IMM22:
       relocatable = 1;
+      /* Fall through.  */
     case IA64_OPND_IMM1:
     case IA64_OPND_IMM8:
     case IA64_OPND_IMM8U4:
@@ -5839,9 +5839,8 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
-	      && ((val & ((bfd_vma) 1 << 31)) != 0))
-	    val = ((val << 32) >> 32);
+	  if ((val & (~(bfd_vma) 0 << 32)) == 0)
+	    val = (val ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 
 	  /* Check for 0x100000000.  This is valid because
 	     0x100000000-1 is the same as ((uint32_t) -1).  */
@@ -5879,9 +5878,8 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
-	      && ((val & ((bfd_vma) 1 << 31)) != 0))
-	    val = ((val << 32) >> 32);
+	  if ((val & (~(bfd_vma) 0 << 32)) == 0)
+	    val = (val ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 	}
       else
 	val = e->X_add_number;
@@ -5931,6 +5929,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	  ++CURR_SLOT.num_fixups;
 	  return OPERAND_MATCH;
 	}
+      /* Fall through.  */
     case IA64_OPND_TAG13:
     case IA64_OPND_TAG13b:
       switch (e->X_op)
@@ -7248,7 +7247,7 @@ md_begin (void)
   md.auto_align = 1;
   md.explicit_mode = md.default_explicit_mode;
 
-  bfd_set_section_alignment (stdoutput, text_section, 4);
+  bfd_set_section_alignment (text_section, 4);
 
   /* Make sure function pointers get initialized.  */
   target_big_endian = -1;
@@ -7767,7 +7766,7 @@ ia64_frob_label (struct symbol *sym)
      labels.  */
   if (defining_tag)
     {
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
       fix->dw2_mark_labels = FALSE;
@@ -7776,10 +7775,10 @@ ia64_frob_label (struct symbol *sym)
       return;
     }
 
-  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+  if (bfd_section_flags (now_seg) & SEC_CODE)
     {
       md.last_text_seg = now_seg;
-      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.label_fixups;
       fix->dw2_mark_labels = dwarf2_loc_mark_labels;
@@ -7789,9 +7788,8 @@ ia64_frob_label (struct symbol *sym)
       if (md.path == md.maxpaths)
 	{
 	  md.maxpaths += 20;
-	  md.entry_labels = (const char **)
-	    xrealloc ((void *) md.entry_labels,
-		      md.maxpaths * sizeof (char *));
+	  md.entry_labels = XRESIZEVEC (const char *, md.entry_labels,
+					md.maxpaths);
 	}
       md.entry_labels[md.path++] = S_GET_NAME (sym);
     }
@@ -7817,7 +7815,7 @@ void
 ia64_flush_pending_output (void)
 {
   if (!md.keep_pending_output
-      && bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+      && bfd_section_flags (now_seg) & SEC_CODE)
     {
       /* ??? This causes many unnecessary stop bits to be emitted.
 	 Unfortunately, it isn't clear if it is safe to remove this.  */
@@ -9284,6 +9282,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		    {
 		      specs[count++] = tmpl;
 		    }
+		  /* Fall through.  */
 		case AR_RSC:
 		  if (!rsrc_write &&
 		      (regno == AR_BSPSTORE
@@ -9732,9 +9731,7 @@ add_qp_imply (int p1, int p2)
   if (qp_implieslen == qp_impliestotlen)
     {
       qp_impliestotlen += 20;
-      qp_implies = (struct qp_imply *)
-	xrealloc ((void *) qp_implies,
-		  qp_impliestotlen * sizeof (struct qp_imply));
+      qp_implies = XRESIZEVEC (struct qp_imply, qp_implies, qp_impliestotlen);
     }
   if (md.debug_dv)
     fprintf (stderr, "  Registering PR%d implies PR%d\n", p1, p2);
@@ -9777,9 +9774,7 @@ add_qp_mutex (valueT mask)
   if (qp_mutexeslen == qp_mutexestotlen)
     {
       qp_mutexestotlen += 20;
-      qp_mutexes = (struct qpmutex *)
-	xrealloc ((void *) qp_mutexes,
-		  qp_mutexestotlen * sizeof (struct qpmutex));
+      qp_mutexes = XRESIZEVEC (struct qpmutex, qp_mutexes, qp_mutexestotlen);
     }
   if (md.debug_dv)
     {
@@ -10193,9 +10188,7 @@ mark_resource (struct ia64_opcode *idesc ATTRIBUTE_UNUSED,
   if (regdepslen == regdepstotlen)
     {
       regdepstotlen += 20;
-      regdeps = (struct rsrc *)
-	xrealloc ((void *) regdeps,
-		  regdepstotlen * sizeof (struct rsrc));
+      regdeps = XRESIZEVEC (struct rsrc, regdeps, regdepstotlen);
     }
 
   regdeps[regdepslen] = *spec;
@@ -10272,7 +10265,7 @@ remove_marked_resource (struct rsrc *rs)
     case IA64_DVS_SPECIFIC:
       if (md.debug_dv)
 	fprintf (stderr, "Implementation-specific, assume worst case...\n");
-      /* ...fall through...  */
+      /* Fall through.  */
     case IA64_DVS_INSTR:
       if (md.debug_dv)
 	fprintf (stderr, "Inserting instr serialization\n");
@@ -10993,7 +10986,7 @@ ia64_pcrel_from_section (fixS *fix, segT sec)
 {
   unsigned long off = fix->fx_frag->fr_address + fix->fx_where;
 
-  if (bfd_get_section_flags (stdoutput, sec) & SEC_CODE)
+  if (bfd_section_flags (sec) & SEC_CODE)
     off &= ~0xfUL;
 
   return off;
@@ -11574,8 +11567,6 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixp)
    of LITTLENUMS emitted is stored in *SIZE.  An error message is
    returned, or NULL on OK.  */
 
-#define MAX_LITTLENUMS 5
-
 const char *
 md_atof (int type, char *lit, int *size)
 {
@@ -11837,7 +11828,7 @@ dot_alias (int section)
       goto out;
     }
 
-  h = (struct alias *) xmalloc (sizeof (struct alias));
+  h = XNEW (struct alias);
   h->file = as_where (&h->line);
   h->name = name;
 
@@ -11952,9 +11943,7 @@ ia64_vms_note (void)
   /* Create the .note section.  */
 
   secp = subseg_new (".note", 0);
-  bfd_set_section_flags (stdoutput,
-			 secp,
-			 SEC_HAS_CONTENTS | SEC_READONLY);
+  bfd_set_section_flags (secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
   /* Module header note (MHD).  */
   bname = xstrdup (lbasename (out_file_name));
@@ -11999,9 +11988,7 @@ ia64_vms_note (void)
   frag_align (3, 0, 0);
 
   secp = subseg_new (".vms_display_name_info", 0);
-  bfd_set_section_flags (stdoutput,
-			 secp,
-			 SEC_HAS_CONTENTS | SEC_READONLY);
+  bfd_set_section_flags (secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
   /* This symbol should be passed on the command line and be variable
      according to language.  */

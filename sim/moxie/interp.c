@@ -1,5 +1,5 @@
 /* Simulator for the moxie processor
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
    Contributed by Anthony Green
 
 This file is part of GDB, the GNU debugger.
@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-options.h"
+#include "sim-io.h"
 
 typedef int word;
 typedef unsigned int uword;
@@ -343,7 +344,7 @@ sim_engine_run (SIM_DESC sd,
 		default:
 		  {
 		    MOXIE_TRACE_INSN ("SIGILL3");
-		    sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
+		    sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL);
 		    break;
 		  }
 		}
@@ -394,7 +395,7 @@ sim_engine_run (SIM_DESC sd,
 		  break;
 		default:
 		  MOXIE_TRACE_INSN ("SIGILL2");
-		  sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
+		  sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL);
 		  break;
 		}
 	    }
@@ -408,7 +409,7 @@ sim_engine_run (SIM_DESC sd,
 	    case 0x00: /* bad */
 	      opc = opcode;
 	      MOXIE_TRACE_INSN ("SIGILL0");
-	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
+	      sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    case 0x01: /* ldi.l (immediate) */
 	      {
@@ -666,7 +667,7 @@ sim_engine_run (SIM_DESC sd,
 	      {
 		opc = opcode;
 		MOXIE_TRACE_INSN ("SIGILL0");
-		sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
+		sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL);
 		break;
 	      }
 	    case 0x19: /* jsr */
@@ -933,7 +934,7 @@ sim_engine_run (SIM_DESC sd,
 		  {
 		  case 0x1: /* SYS_exit */
 		    {
-		      sim_engine_halt (sd, NULL, NULL, pc, sim_exited,
+		      sim_engine_halt (sd, scpu, NULL, pc, sim_exited,
 				       cpu.asregs.regs[2]);
 		      break;
 		    }
@@ -942,9 +943,10 @@ sim_engine_run (SIM_DESC sd,
 		      char fname[1024];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
 		      int perm = (int) cpu.asregs.regs[4];
-		      int fd = open (fname, mode, perm);
+		      int fd;
 		      sim_core_read_buffer (sd, scpu, read_map, fname,
 					    cpu.asregs.regs[2], 1024);
+		      fd = sim_io_open (sd, fname, mode);
 		      /* FIXME - set errno */
 		      cpu.asregs.regs[2] = fd;
 		      break;
@@ -954,7 +956,7 @@ sim_engine_run (SIM_DESC sd,
 		      int fd = cpu.asregs.regs[2];
 		      unsigned len = (unsigned) cpu.asregs.regs[4];
 		      char *buf = malloc (len);
-		      cpu.asregs.regs[2] = read (fd, buf, len);
+		      cpu.asregs.regs[2] = sim_io_read (sd, fd, buf, len);
 		      sim_core_write_buffer (sd, scpu, write_map, buf,
 					     cpu.asregs.regs[3], len);
 		      free (buf);
@@ -968,9 +970,20 @@ sim_engine_run (SIM_DESC sd,
 		      str = malloc (len);
 		      sim_core_read_buffer (sd, scpu, read_map, str,
 					    cpu.asregs.regs[3], len);
-		      count = write (cpu.asregs.regs[2], str, len);
+		      count = sim_io_write (sd, cpu.asregs.regs[2], str, len);
 		      free (str);
 		      cpu.asregs.regs[2] = count;
+		      break;
+		    }
+		  case 0x7: /* SYS_unlink */
+		    {
+		      char fname[1024];
+		      int fd;
+		      sim_core_read_buffer (sd, scpu, read_map, fname,
+					    cpu.asregs.regs[2], 1024);
+		      fd = sim_io_unlink (sd, fname);
+		      /* FIXME - set errno */
+		      cpu.asregs.regs[2] = fd;
 		      break;
 		    }
 		  case 0xffffffff: /* Linux System Call */
@@ -1046,7 +1059,7 @@ sim_engine_run (SIM_DESC sd,
 	      break;
 	    case 0x35: /* brk */
 	      MOXIE_TRACE_INSN ("brk");
-	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGTRAP);
+	      sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
 	      pc -= 2; /* Adjust pc */
 	      break;
 	    case 0x36: /* ldo.b */
@@ -1100,7 +1113,7 @@ sim_engine_run (SIM_DESC sd,
 	    default:
 	      opc = opcode;
 	      MOXIE_TRACE_INSN ("SIGILL1");
-	      sim_engine_halt (sd, NULL, NULL, pc, sim_stopped, SIM_SIGILL);
+	      sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL);
 	      break;
 	    }
 	}
@@ -1108,6 +1121,10 @@ sim_engine_run (SIM_DESC sd,
       cpu.asregs.insts++;
       pc += 2;
       cpu.asregs.regs[PC_REGNO] = pc;
+
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+
     } while (1);
 }
 

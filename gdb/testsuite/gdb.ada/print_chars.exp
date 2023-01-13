@@ -1,4 +1,4 @@
-# Copyright 2007-2016 Free Software Foundation, Inc.
+# Copyright 2007-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,15 +28,12 @@ runto "foo.adb:$bp_location"
 
 
 gdb_test "print C" \
-         "= 97 'a'"  \
-         "print C"
+         "= 97 'a'"
 
 gdb_test "print WC" \
-         "= 98 'b'"  \
-         "print WC"
+         "= 98 'b'"
 
 gdb_test "print WWC" \
-         "= 99 'c'"  \
-         "print WWC"
+         "= 99 'c'"
 
-
+gdb_test "print MC" " = 77 'M'"

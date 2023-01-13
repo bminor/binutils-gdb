@@ -1,6 +1,6 @@
 /* Target-dependent code for AMD64 Solaris.
 
-   Copyright (C) 2001-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    Contributed by Joseph Myers, CodeSourcery, LLC.
 
@@ -28,6 +28,7 @@
 
 #include "sol2-tdep.h"
 #include "amd64-tdep.h"
+#include "gdbsupport/x86-xstate.h"
 #include "solib-svr4.h"
 
 /* Mapping between the general-purpose registers in gregset_t format
@@ -73,7 +74,8 @@ amd64_sol2_sigtramp_p (struct frame_info *this_frame)
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && (strcmp ("sigacthandler", name) == 0
-		   || strcmp (name, "ucbsigvechandler") == 0));
+		   || strcmp (name, "ucbsigvechandler") == 0
+		   || strcmp (name, "__sighndlr") == 0));
 }
 
 /* Solaris doesn't have a 'struct sigcontext', but it does have a
@@ -99,7 +101,8 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_sol2_gregset_reg_offset);
   tdep->sizeof_gregset = 28 * 8;
 
-  amd64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch,
+		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
 
   tdep->sigtramp_p = amd64_sol2_sigtramp_p;
   tdep->sigcontext_addr = amd64_sol2_mcontext_addr;
@@ -114,13 +117,10 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* How to print LWP PTIDs from core files.  */
   set_gdbarch_core_pid_to_str (gdbarch, sol2_core_pid_to_str);
 }
-
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_amd64_sol2_tdep (void);
-
+void _initialize_amd64_sol2_tdep ();
 void
-_initialize_amd64_sol2_tdep (void)
+_initialize_amd64_sol2_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_SOLARIS, amd64_sol2_init_abi);

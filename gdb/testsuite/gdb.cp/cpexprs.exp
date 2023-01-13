@@ -1,6 +1,6 @@
 # cpexprs.exp - C++ expressions tests
 #
-# Copyright 2008-2016 Free Software Foundation, Inc.
+# Copyright 2008-2020 Free Software Foundation, Inc.
 #
 # Contributed by Red Hat, originally written by Keith Seitz.
 #
@@ -144,7 +144,7 @@ add {base2::a_function} \
 # On targets using the ARM EABI, the constructor is expected to return
 # "this".
 proc ctor_ret { type } {
-    if { [istarget arm*-*eabi*] } {
+    if { [istarget arm*-*eabi*] || [is_aarch32_target] } {
 	return "$type *"
     } else {
 	return "void "
@@ -195,7 +195,7 @@ add {base::base(int)} \
 # GCC returns void * instead of $type *; RealView appears to do
 # the same.
 proc dtor { type } {
-    if { [istarget arm*-*eabi*] } {
+    if { [istarget arm*-*eabi*] || [is_aarch32_target] } {
 	set ret "void *"
     } else {
 	set ret "void "
@@ -405,6 +405,10 @@ add {base::operator fluff**} \
     -
 add {base::operator int} \
     {int (const base * const)} \
+    - \
+    -
+add {base::operator fluff const* const*} \
+    {const fluff * const *(const base * const)} \
     - \
     -
 
@@ -677,11 +681,6 @@ add {policyd5::function} \
 # Start the test
 if {[skip_cplus_tests]} { continue }
 
-# On SPU this test fails because the executable exceeds local storage size.
-if { [istarget "spu*-*-*"] } {
-        return 0
-}
-
 #
 # test running programs
 #
@@ -692,7 +691,7 @@ if {[get_compiler_info "c++"]} {
     return -1
 }
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
@@ -706,12 +705,12 @@ gdb_test "set listsize 1"
 
 # "print METHOD"
 foreach name [get_functions print] {
-    gdb_test "print $name" [get $name print] "print $name"
+    gdb_test "print $name" [get $name print]
 }
 
 # "list METHOD"
 foreach name [get_functions list] {
-    gdb_test "list $name" [get $name list] "list $name"
+    gdb_test "list $name" [get $name list]
 }
 
 # Running to breakpoint -- use any function we can "list"
@@ -745,6 +744,18 @@ gdb_test "p CV_f(CV::i)" " = 43"
 
 gdb_test "p CV_f('cpexprs.cc'::CV::t)" \
     { = {int \(int\)} 0x[0-9a-f]+ <CV_f\(int\)>}
+
+# Make sure conversion operator names are canonicalized and properly
+# "spelled."
+gdb_test "p base::operator const fluff * const *" \
+    [get "base::operator fluff const* const*" print] \
+    "canonicalized conversion operator name 1"
+gdb_test "p base::operator const fluff* const*" \
+    [get "base::operator fluff const* const*" print] \
+    "canonicalized conversion operator name 2"
+gdb_test "p base::operator derived*" \
+    "There is no field named operator derived\\*" \
+    "undefined conversion operator"
 
 gdb_exit
 return 0

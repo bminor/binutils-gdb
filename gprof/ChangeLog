@@ -1,18 +1,31 @@
-2016-03-22  Nick Clifton  <nickc@redhat.com>
+2020-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Esperanto translation.
+	* po/fi.po: Updated Finish translation.
+
+2020-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
+	* po/ru.po: Updated Russian translation.
+	* po/tr.po: Updated Turkish translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
 
-2016-01-17  Alan Modra  <amodra@gmail.com>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-	* configure: Regenerate.
+	Binutils 2.34 branch created.
 
-2016-01-01  Alan Modra  <amodra@gmail.com>
+2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
 
-For older changes see ChangeLog-2015
+For older changes see ChangeLog-2019
 
-Copyright (C) 2016 Free Software Foundation, Inc.
+Copyright (C) 2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

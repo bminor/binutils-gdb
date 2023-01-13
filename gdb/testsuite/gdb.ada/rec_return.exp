@@ -1,4 +1,4 @@
-# Copyright 2010-2016 Free Software Foundation, Inc.
+# Copyright 2010-2020 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,6 +30,4 @@ if ![runto "foo.adb:$bp_location" ] then {
 }
 
 gdb_test "print bar" \
-         "= \\(x => 42, s => \"ABCDEFGH\"\\)" \
-         "print bar"
-
+         "= \\(x => 42, s => \"ABCDEFGH\"\\)"

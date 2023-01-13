@@ -1,4 +1,4 @@
-# Copyright 2013-2016 Free Software Foundation, Inc.
+# Copyright 2013-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
 
 standard_testfile main.c
 
-if { [prepare_for_testing "${testfile}.exp" "${testfile}" \
+if { [prepare_for_testing "failed to prepare" "${testfile}" \
 	  [list ${srcfile}]] } {
     return -1
 }
@@ -34,8 +34,13 @@ if { [prepare_for_testing "${testfile}.exp" "${testfile}" \
 
 proc add_gdb_index { program } {
     set index_file ${program}.gdb-index
+    set dir [file dirname ${program}]
+    set filename [file tail ${program}]
+    set dwz $dir/.tmp/${filename}.dwz
+    set dwz_index_file $program.dwz.gdb-index
     verbose -log "index_file: ${index_file}"
     remote_file host delete ${index_file}
+    remote_file host delete ${dwz_index_file}
     gdb_test_no_output "save gdb-index [file dirname ${index_file}]" \
 	"save gdb-index for file [file tail ${program}]"
 
@@ -55,16 +60,33 @@ proc add_gdb_index { program } {
     if {[run_on_host "objcopy" [gdb_find_objcopy] "--remove-section .gdb_index --add-section .gdb_index=$index_file --set-section-flags .gdb_index=readonly ${program} ${program_with_index}"]} {
 	return ""
     }
+
+    with_test_prefix "modify dwz file" {
+	if { [remote_file host exists ${dwz_index_file}] } {
+	    # We're modifying $dwz in place, otherwise we'd have to update
+	    # .gnu_debugaltlink in $program.
+	    set args [join [list "--remove-section .gdb_index" \
+				" --add-section .gdb_index=$dwz_index_file" \
+				" --set-section-flags .gdb_index=readonly $dwz"]]
+	    if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
+		return ""
+	    }
+	}
+    }
+
     return ${program_with_index}
 }
 
-# Build a copy of the program with .gdb_index.
+# Build a copy of the program with an index (.gdb_index/.debug_names).
 # But only if the toolchain didn't already create one: gdb doesn't support
 # building an index from a program already using one.
 
 set test "check if index present"
 gdb_test_multiple "mt print objfiles ${testfile}" $test {
     -re "gdb_index.*${gdb_prompt} $" {
+	set binfile_with_index $binfile
+    }
+    -re "debug_names.*${gdb_prompt} $" {
 	set binfile_with_index $binfile
     }
     -re "Psymtabs.*${gdb_prompt} $" {
@@ -75,16 +97,16 @@ gdb_test_multiple "mt print objfiles ${testfile}" $test {
     }
 }
 
-# Ok, we have a copy of $binfile with .gdb_index.
+# Ok, we have a copy of $binfile with an index.
 # Restart gdb and verify the index was used.
 
 clean_restart ${binfile_with_index}
 gdb_test "mt print objfiles ${testfile}" \
-    "gdb_index.*" \
-    ".gdb_index used"
+    "(gdb_index|debug_names).*" \
+    "index used"
 
-# Make gdb re-read symbols and see if .gdb_index still gets used.
-# symtab/15885
+# Make gdb re-read symbols and see if .gdb_index/.debug_names still
+# gets used.  symtab/15885
 
 # There is gdb_touch_execfile, but it doesn't handle remote hosts.
 # Is touch portable enough?
@@ -98,5 +120,5 @@ if ![runto_main] {
     return -1
 }
 gdb_test "mt print objfiles ${testfile}" \
-    "gdb_index.*" \
-    ".gdb_index used after symbol reloading"
+    "(gdb_index|debug_names).*" \
+    "index used after symbol reloading"

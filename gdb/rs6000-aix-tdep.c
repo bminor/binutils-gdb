@@ -1,6 +1,6 @@
 /* Native support code for PPC AIX, for GDB the GNU debugger.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    Free Software Foundation, Inc.
 
@@ -36,7 +36,10 @@
 #include "xcoffread.h"
 #include "solib.h"
 #include "solib-aix.h"
-#include "xml-utils.h"
+#include "target-float.h"
+#include "gdbsupport/xml-utils.h"
+#include "trad-frame.h"
+#include "frame-unwind.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -44,11 +47,122 @@
    the signal handler doesn't save this register, so we have to
    access the sigcontext structure via an offset from the signal handler
    frame.
-   The following constants were determined by experimentation on AIX 3.2.  */
+   The following constants were determined by experimentation on AIX 3.2.
+
+   sigcontext structure have the mstsave saved under the
+   sc_jmpbuf.jmp_context. STKMIN(minimum stack size) is 56 for 32-bit
+   processes, and iar offset under sc_jmpbuf.jmp_context is 40.
+   ie offsetof(struct sigcontext, sc_jmpbuf.jmp_context.iar).
+   so PC offset in this case is STKMIN+iar offset, which is 96. */
+
 #define SIG_FRAME_PC_OFFSET 96
 #define SIG_FRAME_LR_OFFSET 108
+/* STKMIN+grp1 offset, which is 56+228=284 */
 #define SIG_FRAME_FP_OFFSET 284
 
+/* 64 bit process.
+   STKMIN64  is 112 and iar offset is 312. So 112+312=424 */
+#define SIG_FRAME_LR_OFFSET64 424
+/* STKMIN64+grp1 offset. 112+56=168 */
+#define SIG_FRAME_FP_OFFSET64 168
+
+static struct trad_frame_cache *
+aix_sighandle_frame_cache (struct frame_info *this_frame,
+			   void **this_cache)
+{
+  LONGEST backchain;
+  CORE_ADDR base, base_orig, func;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct trad_frame_cache *this_trad_cache;
+
+  if ((*this_cache) != NULL)
+    return (struct trad_frame_cache *) (*this_cache);
+
+  this_trad_cache = trad_frame_cache_zalloc (this_frame);
+  (*this_cache) = this_trad_cache;
+
+  base = get_frame_register_unsigned (this_frame,
+                                      gdbarch_sp_regnum (gdbarch));
+  base_orig = base;
+
+  if (tdep->wordsize == 4)
+    {
+      func = read_memory_unsigned_integer (base_orig +
+					   SIG_FRAME_PC_OFFSET + 8,
+					   tdep->wordsize, byte_order);
+      safe_read_memory_integer (base_orig + SIG_FRAME_FP_OFFSET + 8,
+				tdep->wordsize, byte_order, &backchain);
+      base = (CORE_ADDR)backchain;
+    }
+  else
+    {
+      func = read_memory_unsigned_integer (base_orig +
+					   SIG_FRAME_LR_OFFSET64,
+					   tdep->wordsize, byte_order);
+      safe_read_memory_integer (base_orig + SIG_FRAME_FP_OFFSET64,
+				tdep->wordsize, byte_order, &backchain);
+      base = (CORE_ADDR)backchain;
+    }
+
+  trad_frame_set_reg_value (this_trad_cache, gdbarch_pc_regnum (gdbarch), func);
+  trad_frame_set_reg_value (this_trad_cache, gdbarch_sp_regnum (gdbarch), base);
+
+  if (tdep->wordsize == 4)
+    trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
+                             base_orig + 0x38 + 52 + 8);
+  else
+    trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
+                             base_orig + 0x70 + 320);
+
+  trad_frame_set_id (this_trad_cache, frame_id_build (base, func));
+  trad_frame_set_this_base (this_trad_cache, base);
+
+  return this_trad_cache;
+}
+
+static void
+aix_sighandle_frame_this_id (struct frame_info *this_frame,
+			     void **this_prologue_cache,
+			     struct frame_id *this_id)
+{
+  struct trad_frame_cache *this_trad_cache
+    = aix_sighandle_frame_cache (this_frame, this_prologue_cache);
+  trad_frame_get_id (this_trad_cache, this_id);
+}
+
+static struct value *
+aix_sighandle_frame_prev_register (struct frame_info *this_frame,
+				   void **this_prologue_cache, int regnum)
+{
+  struct trad_frame_cache *this_trad_cache
+    = aix_sighandle_frame_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_register (this_trad_cache, this_frame, regnum);
+}
+
+static int
+aix_sighandle_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_prologue_cache)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  if (pc && pc < AIX_TEXT_SEGMENT_BASE)
+    return 1;
+
+  return 0;
+}
+
+/* AIX signal handler frame unwinder */
+
+static const struct frame_unwind aix_sighandle_frame_unwind = {
+  SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
+  aix_sighandle_frame_this_id,
+  aix_sighandle_frame_prev_register,
+  NULL,
+  aix_sighandle_frame_sniffer
+};
 
 /* Core file support.  */
 
@@ -69,12 +183,7 @@ static struct ppc_reg_offsets rs6000_aix32_reg_offsets =
   /* Floating-point registers.  */
   336, /* f0_offset */
   56, /* fpscr_offset */
-  4,  /* fpscr_size */
-
-  /* AltiVec registers.  */
-  -1, /* vr0_offset */
-  -1, /* vscr_offset */
-  -1 /* vrsave_offset */
+  4  /* fpscr_size */
 };
 
 static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
@@ -94,12 +203,7 @@ static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
   /* Floating-point registers.  */
   312, /* f0_offset */
   296, /* fpscr_offset */
-  4,  /* fpscr_size */
-
-  /* AltiVec registers.  */
-  -1, /* vr0_offset */
-  -1, /* vscr_offset */
-  -1 /* vrsave_offset */
+  4  /* fpscr_size */
 };
 
 
@@ -155,9 +259,9 @@ rs6000_aix_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 const struct regcache *regcache)
 {
   if (gdbarch_tdep (gdbarch)->wordsize == 4)
-    cb (".reg", 592, &rs6000_aix32_regset, NULL, cb_data);
+    cb (".reg", 592, 592, &rs6000_aix32_regset, NULL, cb_data);
   else
-    cb (".reg", 576, &rs6000_aix64_regset, NULL, cb_data);
+    cb (".reg", 576, 576, &rs6000_aix64_regset, NULL, cb_data);
 }
 
 
@@ -181,7 +285,8 @@ static CORE_ADDR
 rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+			function_call_return_method return_method,
+			CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -212,7 +317,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      (which will be passed in r3) is used for struct return address.
      In that case we should advance one word and start from r4
      register to copy parameters.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_raw_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 				   struct_addr);
@@ -253,14 +358,13 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     Always store the floating point value using the register's
 	     floating-point format.  */
 	  const int fp_regnum = tdep->ppc_fp0_regnum + 1 + f_argno;
-	  gdb_byte reg_val[MAX_REGISTER_SIZE];
+	  gdb_byte reg_val[PPC_MAX_REGISTER_SIZE];
 	  struct type *reg_type = register_type (gdbarch, fp_regnum);
 
 	  gdb_assert (len <= 8);
 
-	  convert_typed_floating (value_contents (arg), type,
-				  reg_val, reg_type);
-	  regcache_cooked_write (regcache, fp_regnum, reg_val);
+	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
+	  regcache->cooked_write (fp_regnum, reg_val);
 	  ++f_argno;
 	}
 
@@ -270,15 +374,13 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      gdb_byte word[MAX_REGISTER_SIZE];
+	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
-	      regcache_cooked_write (regcache,
-	                            tdep->ppc_gp0_regnum + 3 + ii,
-				    word);
+	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	      ++ii, argbytes += reg_size;
 
 	      if (ii >= 8)
@@ -290,13 +392,11 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Argument can fit in one register.  No problem.  */
-	  int adj = gdbarch_byte_order (gdbarch)
-		    == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  gdb_byte word[MAX_REGISTER_SIZE];
+	  gdb_byte word[PPC_MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg), len);
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3 +ii, word);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 +ii, word);
 	}
       ++argno;
     }
@@ -378,9 +478,8 @@ ran_out_of_registers_for_arguments:
 
 	      gdb_assert (len <= 8);
 
-	      regcache_cooked_write (regcache,
-				     tdep->ppc_fp0_regnum + 1 + f_argno,
-				     value_contents (arg));
+	      regcache->cooked_write (tdep->ppc_fp0_regnum + 1 + f_argno,
+				      value_contents (arg));
 	      ++f_argno;
 	    }
 
@@ -432,9 +531,9 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
       && TYPE_LENGTH (valtype) == 16)
     {
       if (readbuf)
-	regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
+	regcache->cooked_read (tdep->ppc_vr0_regnum + 2, readbuf);
       if (writebuf)
-	regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
+	regcache->cooked_write (tdep->ppc_vr0_regnum + 2, writebuf);
 
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -464,13 +563,13 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 
       if (readbuf)
 	{
-	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
-	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	  regcache->cooked_read (tdep->ppc_fp0_regnum + 1, regval);
+	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       if (writebuf)
 	{
-	  convert_typed_floating (writebuf, valtype, regval, regtype);
-	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	  target_float_convert (writebuf, valtype, regval, regtype);
+	  regcache->cooked_write (tdep->ppc_fp0_regnum + 1, regval);
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -516,16 +615,14 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  gdb_byte regval[8];
 
-	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, regval);
-	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
-				regval + 4);
+	  regcache->cooked_read (tdep->ppc_gp0_regnum + 3, regval);
+	  regcache->cooked_read (tdep->ppc_gp0_regnum + 4, regval + 4);
 	  memcpy (readbuf, regval, 8);
 	}
       if (writebuf)
 	{
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
-				 writebuf + 4);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3, writebuf);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 4, writebuf + 4);
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -573,18 +670,17 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
       CORE_ADDR pc = 0;
       struct obj_section *pc_section;
 
-      TRY
+      try
         {
           pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
         }
-      CATCH (e, RETURN_MASK_ERROR)
+      catch (const gdb_exception_error &e)
         {
           /* An error occured during reading.  Probably a memory error
              due to the section not being loaded yet.  This address
              cannot be a function descriptor.  */
           return addr;
         }
-      END_CATCH
 
       pc_section = find_pc_section (pc);
 
@@ -599,10 +695,10 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
-branch_dest (struct frame_info *frame, int opcode, int instr,
+branch_dest (struct regcache *regcache, int opcode, int instr,
 	     CORE_ADDR pc, CORE_ADDR safety)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR dest;
@@ -635,29 +731,33 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 
       if (ext_op == 16)		/* br conditional register */
 	{
-          dest = get_frame_register_unsigned (frame, tdep->ppc_lr_regnum) & ~3;
+          dest = regcache_raw_get_unsigned (regcache, tdep->ppc_lr_regnum) & ~3;
 
 	  /* If we are about to return from a signal handler, dest is
 	     something like 0x3c90.  The current frame is a signal handler
 	     caller frame, upon completion of the sigreturn system call
 	     execution will return to the saved PC in the frame.  */
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
-	    dest = read_memory_unsigned_integer
-		     (get_frame_base (frame) + SIG_FRAME_PC_OFFSET,
-		      tdep->wordsize, byte_order);
+	    {
+	      struct frame_info *frame = get_current_frame ();
+
+	      dest = read_memory_unsigned_integer
+		(get_frame_base (frame) + SIG_FRAME_PC_OFFSET,
+		 tdep->wordsize, byte_order);
+	    }
 	}
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-          dest = get_frame_register_unsigned (frame,
-					      tdep->ppc_ctr_regnum) & ~3;
+          dest = regcache_raw_get_unsigned (regcache,
+					    tdep->ppc_ctr_regnum) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
-            dest = get_frame_register_unsigned (frame,
-						tdep->ppc_lr_regnum) & ~3;
+            dest = regcache_raw_get_unsigned (regcache,
+					      tdep->ppc_lr_regnum) & ~3;
 	}
       else
 	return -1;
@@ -671,27 +771,27 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 
 /* AIX does not support PT_STEP.  Simulate it.  */
 
-static int
-rs6000_software_single_step (struct frame_info *frame)
+static std::vector<CORE_ADDR>
+rs6000_software_single_step (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
   int opcode;
 
-  loc = get_frame_pc (frame);
+  loc = regcache_read_pc (regcache);
 
   insn = read_memory_integer (loc, 4, byte_order);
 
-  if (ppc_deal_with_atomic_sequence (frame))
-    return 1;
+  std::vector<CORE_ADDR> next_pcs = ppc_deal_with_atomic_sequence (regcache);
+  if (!next_pcs.empty ())
+    return next_pcs;
   
   breaks[0] = loc + PPC_INSN_SIZE;
   opcode = insn >> 26;
-  breaks[1] = branch_dest (frame, opcode, insn, loc, breaks[0]);
+  breaks[1] = branch_dest (regcache, opcode, insn, loc, breaks[0]);
 
   /* Don't put two breakpoints on the same address.  */
   if (breaks[1] == breaks[0])
@@ -702,12 +802,13 @@ rs6000_software_single_step (struct frame_info *frame)
       /* ignore invalid breakpoint.  */
       if (breaks[ii] == -1)
 	continue;
-      insert_single_step_breakpoint (gdbarch, aspace, breaks[ii]);
+
+      next_pcs.push_back (breaks[ii]);
     }
 
   errno = 0;			/* FIXME, don't ignore errors!  */
   /* What errors?  {read,write}_memory call error().  */
-  return 1;
+  return next_pcs;
 }
 
 /* Implement the "auto_wide_charset" gdbarch method for this platform.  */
@@ -905,20 +1006,16 @@ static void
 rs6000_aix_shared_library_to_xml (struct ld_info *ldi,
 				  struct obstack *obstack)
 {
-  char *p;
-
   obstack_grow_str (obstack, "<library name=\"");
-  p = xml_escape_text (ldi->filename);
-  obstack_grow_str (obstack, p);
-  xfree (p);
+  std::string p = xml_escape_text (ldi->filename);
+  obstack_grow_str (obstack, p.c_str ());
   obstack_grow_str (obstack, "\"");
 
   if (ldi->member_name[0] != '\0')
     {
       obstack_grow_str (obstack, " member=\"");
       p = xml_escape_text (ldi->member_name);
-      obstack_grow_str (obstack, p);
-      xfree (p);
+      obstack_grow_str (obstack, p.c_str ());
       obstack_grow_str (obstack, "\"");
     }
 
@@ -1008,29 +1105,22 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 {
   struct bfd_section *ldinfo_sec;
   int ldinfo_size;
-  gdb_byte *ldinfo_buf;
-  struct cleanup *cleanup;
-  LONGEST result;
 
   ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
   if (ldinfo_sec == NULL)
     error (_("cannot find .ldinfo section from core file: %s"),
 	   bfd_errmsg (bfd_get_error ()));
-  ldinfo_size = bfd_get_section_size (ldinfo_sec);
+  ldinfo_size = bfd_section_size (ldinfo_sec);
 
-  ldinfo_buf = (gdb_byte *) xmalloc (ldinfo_size);
-  cleanup = make_cleanup (xfree, ldinfo_buf);
+  gdb::byte_vector ldinfo_buf (ldinfo_size);
 
   if (! bfd_get_section_contents (core_bfd, ldinfo_sec,
-				  ldinfo_buf, 0, ldinfo_size))
+				  ldinfo_buf.data (), 0, ldinfo_size))
     error (_("unable to read .ldinfo section from core file: %s"),
 	  bfd_errmsg (bfd_get_error ()));
 
-  result = rs6000_aix_ld_info_to_xml (gdbarch, ldinfo_buf, readbuf,
-				      offset, len, 0);
-
-  do_cleanups (cleanup);
-  return result;
+  return rs6000_aix_ld_info_to_xml (gdbarch, ldinfo_buf.data (), readbuf,
+				    offset, len, 0);
 }
 
 static void
@@ -1045,7 +1135,6 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
      software single-stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch, NULL);
   set_gdbarch_displaced_step_fixup (gdbarch, NULL);
-  set_gdbarch_displaced_step_free_closure (gdbarch, NULL);
   set_gdbarch_displaced_step_location (gdbarch, NULL);
 
   set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
@@ -1077,16 +1166,20 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   else
     set_gdbarch_frame_red_zone_size (gdbarch, 0);
 
+  if (tdep->wordsize == 8)
+    set_gdbarch_wchar_bit (gdbarch, 32);
+  else
+    set_gdbarch_wchar_bit (gdbarch, 16);
+  set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
 
   set_solib_ops (gdbarch, &solib_aix_so_ops);
+  frame_unwind_append_unwinder (gdbarch, &aix_sighandle_frame_unwind);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_rs6000_aix_tdep;
-
+void _initialize_rs6000_aix_tdep ();
 void
-_initialize_rs6000_aix_tdep (void)
+_initialize_rs6000_aix_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_rs6000,
                                   bfd_target_xcoff_flavour,

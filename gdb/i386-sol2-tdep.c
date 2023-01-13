@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris x86.
 
-   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,7 +57,8 @@ i386_sol2_sigtramp_p (struct frame_info *this_frame)
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && (strcmp ("sigacthandler", name) == 0
-		   || strcmp (name, "ucbsigvechandler") == 0));
+		   || strcmp (name, "ucbsigvechandler") == 0
+		   || strcmp (name, "__sighndlr") == 0));
 }
 
 /* Solaris doesn't have a `struct sigcontext', but it does have a
@@ -150,11 +151,9 @@ i386_sol2_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_sol2_tdep (void);
-
+void _initialize_i386_sol2_tdep ();
 void
-_initialize_i386_sol2_tdep (void)
+_initialize_i386_sol2_tdep ()
 {
   /* Register an ELF OS ABI sniffer for Solaris 2 binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,

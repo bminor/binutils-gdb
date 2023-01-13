@@ -4,14 +4,14 @@ OUTPUT_FORMAT="elf32-littlearm"
 BIG_OUTPUT_FORMAT="elf32-bigarm"
 LITTLE_OUTPUT_FORMAT="elf32-littlearm"
 TEXT_START_ADDR=0x00100000
-TEMPLATE_NAME=elf32
+TEMPLATE_NAME=elf
 EXTRA_EM_FILE=armelf
 OTHER_TEXT_SECTIONS='*(.glue_7t) *(.glue_7) *(.vfp11_veneer) *(.v4_bx)'
-OTHER_BSS_SYMBOLS='__bss_start__ = .;'
-OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ;'
-OTHER_END_SYMBOLS='__end__ = . ;'
+OTHER_BSS_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__bss_start__ = .${CREATE_SHLIB+)};"
+OTHER_BSS_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_bss_end__ = .${CREATE_SHLIB+)}; ${CREATE_SHLIB+PROVIDE (}__bss_end__ = .${CREATE_SHLIB+)};"
+OTHER_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__end__ = .${CREATE_SHLIB+)};"
 
-DATA_START_SYMBOLS='__data_start = . ;';
+DATA_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__data_start = .${CREATE_SHLIB+)};"
 
 GENERATE_SHLIB_SCRIPT=yes
 

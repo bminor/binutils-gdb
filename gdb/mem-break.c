@@ -1,6 +1,6 @@
 /* Simulate breakpoints by patching locations in the target system, for GDB.
 
-   Copyright (C) 1990-2016 Free Software Foundation, Inc.
+   Copyright (C) 1990-2020 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -24,6 +24,8 @@
 #include "breakpoint.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdbarch.h"
+
 /* Insert a breakpoint on targets that don't have any better
    breakpoint support.  We read the contents of the target location
    and stash it, then overwrite it with a breakpoint instruction.
@@ -37,19 +39,14 @@ int
 default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->reqstd_address;
+  CORE_ADDR addr = bp_tgt->placed_address;
   const unsigned char *bp;
   gdb_byte *readbuf;
   int bplen;
   int val;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
-  if (bp == NULL)
-    error (_("Software breakpoints not implemented for this target."));
-
-  bp_tgt->placed_address = addr;
-  bp_tgt->placed_size = bplen;
+  bp = gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->kind, &bplen);
 
   /* Save the memory contents in the shadow_contents buffer and then
      write the breakpoint instruction.  */
@@ -79,8 +76,12 @@ int
 default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
+  int bplen;
+
+  gdbarch_sw_breakpoint_from_kind (gdbarch, bp_tgt->kind, &bplen);
+
   return target_write_raw_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
-				  bp_tgt->placed_size);
+				  bplen);
 }
 
 
@@ -93,7 +94,8 @@ memory_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 
 int
 memory_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+			  struct bp_target_info *bp_tgt,
+			  enum remove_bp_reason reason)
 {
   return gdbarch_memory_remove_breakpoint (gdbarch, bp_tgt);
 }
@@ -107,25 +109,21 @@ memory_validate_breakpoint (struct gdbarch *gdbarch,
   int val;
   int bplen;
   gdb_byte cur_contents[BREAKPOINT_MAX];
-  struct cleanup *cleanup;
-  int ret;
 
   /* Determine appropriate breakpoint contents and size for this
      address.  */
   bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
 
-  if (bp == NULL || bp_tgt->placed_size != bplen)
+  if (bp == NULL)
     return 0;
 
   /* Make sure we see the memory breakpoints.  */
-  cleanup = make_show_memory_breakpoints_cleanup (1);
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (1);
   val = target_read_memory (addr, cur_contents, bplen);
 
   /* If our breakpoint is no longer at the address, this means that
      the program modified the code on us, so it is wrong to put back
      the old value.  */
-  ret = (val == 0 && memcmp (bp, cur_contents, bplen) == 0);
-
-  do_cleanups (cleanup);
-  return ret;
+  return (val == 0 && memcmp (bp, cur_contents, bplen) == 0);
 }

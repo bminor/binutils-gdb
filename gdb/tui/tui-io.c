@@ -1,6 +1,6 @@
 /* TUI support I/O functions.
 
-   Copyright (C) 1998-2016 Free Software Foundation, Inc.
+   Copyright (C) 1998-2020 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -32,35 +32,34 @@
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
+#include "tui/tui-out.h"
 #include "ui-out.h"
 #include "cli-out.h"
 #include <fcntl.h>
 #include <signal.h>
-#include "filestuff.h"
+#ifdef __MINGW32__
+#include <windows.h>
+#endif
+#include "gdbsupport/filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
+#include <map>
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
    "gdb_curses.h".  */
 #include "readline/readline.h"
 
-int
+#ifdef __MINGW32__
+static SHORT ncurses_norm_attr;
+#endif
+
+static int tui_getc (FILE *fp);
+
+static int
 key_is_start_sequence (int ch)
 {
   return (ch == 27);
-}
-
-int
-key_is_end_sequence (int ch)
-{
-  return (ch == 126);
-}
-
-int
-key_is_backspace (int ch)
-{
-  return (ch == 8);
 }
 
 /* Use definition from readline 4.3.  */
@@ -91,7 +90,7 @@ key_is_backspace (int ch)
    be garbled.  This is implemented with a pipe that TUI reads and
    readline writes to.  A gdb input handler is created so that reading
    the pipe is handled automatically.  This will probably not work on
-   non-Unix platforms.  The best fix is to make readline clean enougth
+   non-Unix platforms.  The best fix is to make readline clean enough
    so that is never write on stdout.
 
    Note SCz/2002-09-01: we now use more readline hooks and it seems
@@ -114,7 +113,7 @@ struct ui_out *tui_out;
 /* GDB output files in non-curses mode.  */
 static struct ui_file *tui_old_stdout;
 static struct ui_file *tui_old_stderr;
-struct ui_out *tui_old_uiout;
+cli_ui_out *tui_old_uiout;
 
 /* Readline previous hooks.  */
 static rl_getc_func_t *tui_old_rl_getc_function;
@@ -132,62 +131,379 @@ static FILE *tui_old_rl_outstream;
 static int tui_readline_pipe[2];
 #endif
 
-/* The last gdb prompt that was registered in readline.
-   This may be the main gdb prompt or a secondary prompt.  */
-static char *tui_rl_saved_prompt;
+/* Print a character in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
+static void
+do_tui_putc (WINDOW *w, char c)
+{
+  static int tui_skip_line = -1;
+
+  /* Catch annotation and discard them.  We need two \032 and discard
+     until a \n is seen.  */
+  if (c == '\032')
+    {
+      tui_skip_line++;
+    }
+  else if (tui_skip_line != 1)
+    {
+      tui_skip_line = -1;
+      /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+      if (c == '\t')
+	{
+	  int col;
+
+	  col = getcurx (w);
+	  do
+	    {
+	      waddch (w, ' ');
+	      col++;
+	    }
+	  while ((col % 8) != 0);
+	}
+      else
+	waddch (w, c);
+    }
+  else if (c == '\n')
+    tui_skip_line = -1;
+}
+
+/* Update the cached value of the command window's start line based on
+   the window's current Y coordinate.  */
+
+static void
+update_cmdwin_start_line ()
+{
+  TUI_CMD_WIN->start_line = getcury (TUI_CMD_WIN->handle.get ());
+}
+
+/* Print a character in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
 
 static void
 tui_putc (char c)
 {
-  char buf[2];
-
-  buf[0] = c;
-  buf[1] = 0;
-  tui_puts (buf);
+  do_tui_putc (TUI_CMD_WIN->handle.get (), c);
+  update_cmdwin_start_line ();
 }
 
-/* Print the string in the curses command window.
-   The output is buffered.  It is up to the caller to refresh the screen
+/* This maps colors to their corresponding color index.  */
+
+static std::map<ui_file_style::color, int> color_map;
+
+/* This holds a pair of colors and is used to track the mapping
+   between a color pair index and the actual colors.  */
+
+struct color_pair
+{
+  int fg;
+  int bg;
+
+  bool operator< (const color_pair &o) const
+  {
+    return fg < o.fg || (fg == o.fg && bg < o.bg);
+  }
+};
+
+/* This maps pairs of colors to their corresponding color pair
+   index.  */
+
+static std::map<color_pair, int> color_pair_map;
+
+/* This is indexed by ANSI color offset from the base color, and holds
+   the corresponding curses color constant.  */
+
+static const int curses_colors[] = {
+  COLOR_BLACK,
+  COLOR_RED,
+  COLOR_GREEN,
+  COLOR_YELLOW,
+  COLOR_BLUE,
+  COLOR_MAGENTA,
+  COLOR_CYAN,
+  COLOR_WHITE
+};
+
+/* Given a color, find its index.  */
+
+static bool
+get_color (const ui_file_style::color &color, int *result)
+{
+  if (color.is_none ())
+    *result = -1;
+  else if (color.is_basic ())
+    *result = curses_colors[color.get_value ()];
+  else
+    {
+      auto it = color_map.find (color);
+      if (it == color_map.end ())
+	{
+	  /* The first 8 colors are standard.  */
+	  int next = color_map.size () + 8;
+	  if (next >= COLORS)
+	    return false;
+	  uint8_t rgb[3];
+	  color.get_rgb (rgb);
+	  /* We store RGB as 0..255, but curses wants 0..1000.  */
+	  if (init_color (next, rgb[0] * 1000 / 255, rgb[1] * 1000 / 255,
+			  rgb[2] * 1000 / 255) == ERR)
+	    return false;
+	  color_map[color] = next;
+	  *result = next;
+	}
+      else
+	*result = it->second;
+    }
+  return true;
+}
+
+/* The most recently emitted color pair.  */
+
+static int last_color_pair = -1;
+
+/* The most recently applied style.  */
+
+static ui_file_style last_style;
+
+/* If true, we're highlighting the current source line in reverse
+   video mode.  */
+static bool reverse_mode_p = false;
+
+/* The background/foreground colors before we entered reverse
+   mode.  */
+static ui_file_style::color reverse_save_bg (ui_file_style::NONE);
+static ui_file_style::color reverse_save_fg (ui_file_style::NONE);
+
+/* Given two colors, return their color pair index; making a new one
    if necessary.  */
 
-void
-tui_puts (const char *string)
+static int
+get_color_pair (int fg, int bg)
 {
-  static int tui_skip_line = -1;
-  char c;
-  WINDOW *w;
+  color_pair c = { fg, bg };
+  auto it = color_pair_map.find (c);
+  if (it == color_pair_map.end ())
+    {
+      /* Color pair 0 is our default color, so new colors start at
+	 1.  */
+      int next = color_pair_map.size () + 1;
+      /* Curses has a limited number of available color pairs.  Fall
+	 back to the default if we've used too many.  */
+      if (next >= COLOR_PAIRS)
+	return 0;
+      init_pair (next, fg, bg);
+      color_pair_map[c] = next;
+      return next;
+    }
+  return it->second;
+}
 
-  w = TUI_CMD_WIN->generic.handle;
+/* Apply STYLE to W.  */
+
+void
+tui_apply_style (WINDOW *w, ui_file_style style)
+{
+  /* Reset.  */
+  wattron (w, A_NORMAL);
+  wattroff (w, A_BOLD);
+  wattroff (w, A_DIM);
+  wattroff (w, A_REVERSE);
+  if (last_color_pair != -1)
+    wattroff (w, COLOR_PAIR (last_color_pair));
+  wattron (w, COLOR_PAIR (0));
+
+  const ui_file_style::color &fg = style.get_foreground ();
+  const ui_file_style::color &bg = style.get_background ();
+  if (!fg.is_none () || !bg.is_none ())
+    {
+      int fgi, bgi;
+      if (get_color (fg, &fgi) && get_color (bg, &bgi))
+	{
+#ifdef __MINGW32__
+	  /* MS-Windows port of ncurses doesn't support implicit
+	     default foreground and background colors, so we must
+	     specify them explicitly when needed, using the colors we
+	     saw at startup.  */
+	  if (fgi == -1)
+	    fgi = ncurses_norm_attr & 15;
+	  if (bgi == -1)
+	    bgi = (ncurses_norm_attr >> 4) & 15;
+#endif
+	  int pair = get_color_pair (fgi, bgi);
+	  if (last_color_pair != -1)
+	    wattroff (w, COLOR_PAIR (last_color_pair));
+	  wattron (w, COLOR_PAIR (pair));
+	  last_color_pair = pair;
+	}
+    }
+
+  switch (style.get_intensity ())
+    {
+    case ui_file_style::NORMAL:
+      break;
+
+    case ui_file_style::BOLD:
+      wattron (w, A_BOLD);
+      break;
+
+    case ui_file_style::DIM:
+      wattron (w, A_DIM);
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid intensity");
+    }
+
+  if (style.is_reverse ())
+    wattron (w, A_REVERSE);
+
+  last_style = style;
+}
+
+/* Apply an ANSI escape sequence from BUF to W.  BUF must start with
+   the ESC character.  If BUF does not start with an ANSI escape,
+   return 0.  Otherwise, apply the sequence if it is recognized, or
+   simply ignore it if not.  In this case, the number of bytes read
+   from BUF is returned.  */
+
+static size_t
+apply_ansi_escape (WINDOW *w, const char *buf)
+{
+  ui_file_style style = last_style;
+  size_t n_read;
+
+  if (!style.parse (buf, &n_read))
+    return n_read;
+
+  if (reverse_mode_p)
+    {
+      /* We want to reverse _only_ the default foreground/background
+	 colors.  If the foreground color is not the default (because
+	 the text was styled), we want to leave it as is.  If e.g.,
+	 the terminal is fg=BLACK, and bg=WHITE, and the style wants
+	 to print text in RED, we want to reverse the background color
+	 (print in BLACK), but still print the text in RED.  To do
+	 that, we enable the A_REVERSE attribute, and re-reverse the
+	 parsed-style's fb/bg colors.
+
+	 Notes on the approach:
+
+	  - there's no portable way to know which colors the default
+	    fb/bg colors map to.
+
+	  - this approach does the right thing even if you change the
+	    terminal colors while GDB is running -- the reversed
+	    colors automatically adapt.
+      */
+      if (!style.is_default ())
+	{
+	  ui_file_style::color bg = style.get_background ();
+	  ui_file_style::color fg = style.get_foreground ();
+	  style.set_fg (bg);
+	  style.set_bg (fg);
+	}
+
+      /* Enable A_REVERSE.  */
+      style.set_reverse (true);
+    }
+
+  tui_apply_style (w, style);
+  return n_read;
+}
+
+/* See tui.io.h.  */
+
+void
+tui_set_reverse_mode (WINDOW *w, bool reverse)
+{
+  ui_file_style style = last_style;
+
+  reverse_mode_p = reverse;
+  style.set_reverse (reverse);
+
+  if (reverse)
+    {
+      reverse_save_bg = style.get_background ();
+      reverse_save_fg = style.get_foreground ();
+    }
+  else
+    {
+      style.set_bg (reverse_save_bg);
+      style.set_fg (reverse_save_fg);
+    }
+
+  tui_apply_style (w, style);
+}
+
+/* Print LENGTH characters from the buffer pointed to by BUF to the
+   curses command window.  The output is buffered.  It is up to the
+   caller to refresh the screen if necessary.  */
+
+void
+tui_write (const char *buf, size_t length)
+{
+  /* We need this to be \0-terminated for the regexp matching.  */
+  std::string copy (buf, length);
+  tui_puts (copy.c_str ());
+}
+
+static void
+tui_puts_internal (WINDOW *w, const char *string, int *height)
+{
+  char c;
+  int prev_col = 0;
+  bool saw_nl = false;
+
   while ((c = *string++) != 0)
     {
-      /* Catch annotation and discard them.  We need two \032 and
-         discard until a \n is seen.  */
-      if (c == '\032')
-        {
-          tui_skip_line++;
-        }
-      else if (tui_skip_line != 1)
-        {
-          tui_skip_line = -1;
-	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-	  if (c == '\t')
-	    {
-	      int line, col;
+      if (c == '\n')
+	saw_nl = true;
 
-	      getyx (w, line, col);
-	      do
+      if (c == '\1' || c == '\2')
+	{
+	  /* Ignore these, they are readline escape-marking
+	     sequences.  */
+	}
+      else
+	{
+	  if (c == '\033')
+	    {
+	      size_t bytes_read = apply_ansi_escape (w, string - 1);
+	      if (bytes_read > 0)
 		{
-		  waddch (w, ' ');
-		  col++;
-		} while ((col % 8) != 0);
+		  string = string + bytes_read - 1;
+		  continue;
+		}
 	    }
-	  else
-	    waddch (w, c);
-        }
-      else if (c == '\n')
-        tui_skip_line = -1;
+	  do_tui_putc (w, c);
+
+	  if (height != nullptr)
+	    {
+	      int col = getcurx (w);
+	      if (col <= prev_col)
+		++*height;
+	      prev_col = col;
+	    }
+	}
     }
-  TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
+  if (TUI_CMD_WIN != nullptr && w == TUI_CMD_WIN->handle.get ())
+    update_cmdwin_start_line ();
+  if (saw_nl)
+    wrefresh (w);
+}
+
+/* Print a string in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
+void
+tui_puts (const char *string, WINDOW *w)
+{
+  if (w == nullptr)
+    w = TUI_CMD_WIN->handle.get ();
+  tui_puts_internal (w, string, nullptr);
 }
 
 /* Readline callback.
@@ -198,7 +514,7 @@ tui_redisplay_readline (void)
 {
   int prev_col;
   int height;
-  int col, line;
+  int col;
   int c_pos;
   int c_line;
   int in;
@@ -212,29 +528,25 @@ tui_redisplay_readline (void)
      The command could call prompt_for_continue and we must not
      restore SingleKey so that the prompt and normal keymap are used.  */
   if (tui_current_key_mode == TUI_ONE_COMMAND_MODE && rl_end == 0
-      && immediate_quit == 0)
+      && !gdb_in_secondary_prompt_p (current_ui))
     tui_set_key_mode (TUI_SINGLE_KEY_MODE);
 
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)
     prompt = "";
   else
-    prompt = tui_rl_saved_prompt;
+    prompt = rl_display_prompt;
   
   c_pos = -1;
   c_line = -1;
-  w = TUI_CMD_WIN->generic.handle;
-  start_line = TUI_CMD_WIN->detail.command_info.start_line;
+  w = TUI_CMD_WIN->handle.get ();
+  start_line = TUI_CMD_WIN->start_line;
   wmove (w, start_line, 0);
   prev_col = 0;
   height = 1;
-  for (in = 0; prompt && prompt[in]; in++)
-    {
-      waddch (w, prompt[in]);
-      getyx (w, line, col);
-      if (col <= prev_col)
-        height++;
-      prev_col = col;
-    }
+  if (prompt != nullptr)
+    tui_puts_internal (w, prompt, &height);
+
+  prev_col = getcurx (w);
   for (in = 0; in <= rl_end; in++)
     {
       unsigned char c;
@@ -256,7 +568,7 @@ tui_redisplay_readline (void)
       else if (c == '\t')
 	{
 	  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-	  getyx (w, line, col);
+	  col = getcurx (w);
 	  do
 	    {
 	      waddch (w, ' ');
@@ -268,17 +580,17 @@ tui_redisplay_readline (void)
           waddch (w, c);
 	}
       if (c == '\n')
-	TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
-      getyx (w, line, col);
+	TUI_CMD_WIN->start_line = getcury (w);
+      col = getcurx (w);
       if (col < prev_col)
         height++;
       prev_col = col;
     }
   wclrtobot (w);
-  TUI_CMD_WIN->detail.command_info.start_line = getcury (w);
+  TUI_CMD_WIN->start_line = getcury (w);
   if (c_line >= 0)
     wmove (w, c_line, c_pos);
-  TUI_CMD_WIN->detail.command_info.start_line -= height - 1;
+  TUI_CMD_WIN->start_line -= height - 1;
 
   wrefresh (w);
   fflush(stdout);
@@ -290,11 +602,6 @@ tui_redisplay_readline (void)
 static void
 tui_prep_terminal (int notused1)
 {
-  /* Save the prompt registered in readline to correctly display it.
-     (we can't use gdb_prompt() due to secondary prompts and can't use
-     rl_prompt because it points to an alloca buffer).  */
-  xfree (tui_rl_saved_prompt);
-  tui_rl_saved_prompt = rl_prompt != NULL ? xstrdup (rl_prompt) : NULL;
 }
 
 /* Readline callback to restore the terminal.  It is called once each
@@ -351,7 +658,7 @@ tui_mld_puts (const struct match_list_displayer *displayer, const char *s)
 static void
 tui_mld_flush (const struct match_list_displayer *displayer)
 {
-  wrefresh (TUI_CMD_WIN->generic.handle);
+  wrefresh (TUI_CMD_WIN->handle.get ());
 }
 
 /* TUI version of displayer.erase_entire_line.  */
@@ -359,7 +666,7 @@ tui_mld_flush (const struct match_list_displayer *displayer)
 static void
 tui_mld_erase_entire_line (const struct match_list_displayer *displayer)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
   int cur_y = getcury (w);
 
   wmove (w, cur_y, 0);
@@ -375,6 +682,21 @@ tui_mld_beep (const struct match_list_displayer *displayer)
   beep ();
 }
 
+/* A wrapper for wgetch that enters nonl mode.  We We normally want
+  curses' "nl" mode, but when reading from the user, we'd like to
+  differentiate between C-j and C-m, because some users bind these
+  keys differently in their .inputrc.  So, put curses into nonl mode
+  just when reading from the user.  See PR tui/20819.  */
+
+static int
+gdb_wgetch (WINDOW *win)
+{
+  nonl ();
+  int r = wgetch (win);
+  nl ();
+  return r;
+}
+
 /* Helper function for tui_mld_read_key.
    This temporarily replaces tui_getc for use during tab-completion
    match list display.  */
@@ -382,8 +704,8 @@ tui_mld_beep (const struct match_list_displayer *displayer)
 static int
 tui_mld_getc (FILE *fp)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
-  int c = wgetch (w);
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
+  int c = gdb_wgetch (w);
 
   return c;
 }
@@ -459,7 +781,8 @@ tui_setup_io (int mode)
       /* Keep track of previous gdb output.  */
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
-      tui_old_uiout = current_uiout;
+      tui_old_uiout = dynamic_cast<cli_ui_out *> (current_uiout);
+      gdb_assert (tui_old_uiout != nullptr);
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;
@@ -494,6 +817,12 @@ tui_setup_io (int mode)
 
       /* Save tty for SIGCONT.  */
       savetty ();
+
+      /* Clean up color information.  */
+      last_color_pair = -1;
+      last_style = ui_file_style ();
+      color_map.clear ();
+      color_pair_map.clear ();
     }
 }
 
@@ -510,8 +839,6 @@ tui_cont_sig (int sig)
 
       /* Force a refresh of the screen.  */
       tui_refresh_all_win ();
-
-      wrefresh (TUI_CMD_WIN->generic.handle);
     }
   signal (sig, tui_cont_sig);
 }
@@ -526,8 +853,8 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = tui_fileopen (stdout);
-  tui_stderr = tui_fileopen (stderr);
+  tui_stdout = new tui_file (stdout);
+  tui_stderr = new tui_file (stderr);
   tui_out = tui_out_new (tui_stdout);
 
   /* Create the default UI.  */
@@ -544,7 +871,7 @@ tui_initialize_io (void)
   if (tui_rl_outstream == 0)
     error (_("Cannot redirect readline output"));
 
-  setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
+  setvbuf (tui_rl_outstream, NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);
@@ -557,35 +884,101 @@ tui_initialize_io (void)
 #else
   tui_rl_outstream = stdout;
 #endif
+
+#ifdef __MINGW32__
+  /* MS-Windows port of ncurses doesn't support default foreground and
+     background colors, so we must record the default colors at startup.  */
+  HANDLE hstdout = (HANDLE)_get_osfhandle (fileno (stdout));
+  DWORD cmode;
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+  if (hstdout != INVALID_HANDLE_VALUE
+      && GetConsoleMode (hstdout, &cmode) != 0
+      && GetConsoleScreenBufferInfo (hstdout, &csbi))
+    ncurses_norm_attr = csbi.wAttributes;
+#endif
 }
 
-/* Get a character from the command window.  This is called from the
-   readline package.  */
-int
-tui_getc (FILE *fp)
+/* Dispatch the correct tui function based upon the control
+   character.  */
+static unsigned int
+tui_dispatch_ctrl_char (unsigned int ch)
+{
+  struct tui_win_info *win_info = tui_win_with_focus ();
+
+  /* Handle the CTRL-L refresh for each window.  */
+  if (ch == '\f')
+    tui_refresh_all_win ();
+
+  /* If no window has the focus, or if the focus window can't scroll,
+     just pass the character through.  */
+  if (win_info == NULL || !win_info->can_scroll ())
+    return ch;
+
+  switch (ch)
+    {
+    case KEY_NPAGE:
+      win_info->forward_scroll (0);
+      break;
+    case KEY_PPAGE:
+      win_info->backward_scroll (0);
+      break;
+    case KEY_DOWN:
+    case KEY_SF:
+      win_info->forward_scroll (1);
+      break;
+    case KEY_UP:
+    case KEY_SR:
+      win_info->backward_scroll (1);
+      break;
+    case KEY_RIGHT:
+      win_info->left_scroll (1);
+      break;
+    case KEY_LEFT:
+      win_info->right_scroll (1);
+      break;
+    case '\f':
+      break;
+    default:
+      /* We didn't recognize the character as a control character, so pass it
+         through.  */
+      return ch;
+    }
+
+  /* We intercepted the control character, so return 0 (which readline
+     will interpret as a no-op).  */
+  return 0;
+}
+
+/* Main worker for tui_getc.  Get a character from the command window.
+   This is called from the readline package, but wrapped in a
+   try/catch by tui_getc.  */
+
+static int
+tui_getc_1 (FILE *fp)
 {
   int ch;
   WINDOW *w;
 
-  w = TUI_CMD_WIN->generic.handle;
+  w = TUI_CMD_WIN->handle.get ();
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Flush readline output.  */
   tui_readline_output (0, 0);
 #endif
 
-  ch = wgetch (w);
+  ch = gdb_wgetch (w);
 
   /* The \n must be echoed because it will not be printed by
      readline.  */
-  if (ch == '\n')
+  if (ch == '\n' || ch == '\r')
     {
       /* When hitting return with an empty input, gdb executes the last
          command.  If we emit a newline, this fills up the command window
          with empty lines with gdb prompt at beginning.  Instead of that,
          stay on the same line but provide a visual effect to show the
          user we recognized the command.  */
-      if (rl_end == 0 && !gdb_in_secondary_prompt_p ())
+      if (rl_end == 0 && !gdb_in_secondary_prompt_p (current_ui))
         {
 	  wmove (w, getcury (w), 0);
 
@@ -603,8 +996,8 @@ tui_getc (FILE *fp)
 	  int px, py;
 	  getyx (w, py, px);
 	  px += rl_end - rl_point;
-	  py += px / TUI_CMD_WIN->generic.width;
-	  px %= TUI_CMD_WIN->generic.width;
+	  py += px / TUI_CMD_WIN->width;
+	  px %= TUI_CMD_WIN->width;
 	  wmove (w, py, px);
 	  tui_putc ('\n');
         }
@@ -616,12 +1009,12 @@ tui_getc (FILE *fp)
   if (ch == KEY_BACKSPACE)
     return '\b';
 
-  if (async_command_editing_p && key_is_start_sequence (ch))
+  if (current_ui->command_editing && key_is_start_sequence (ch))
     {
       int ch_pending;
 
       nodelay (w, TRUE);
-      ch_pending = wgetch (w);
+      ch_pending = gdb_wgetch (w);
       nodelay (w, FALSE);
 
       /* If we have pending input following a start sequence, call the stdin
@@ -645,19 +1038,40 @@ tui_getc (FILE *fp)
   return ch;
 }
 
-/* Utility function to expand TABs in a STRING into spaces.  STRING
-   will be displayed starting at column COL, and is assumed to include
-   no newlines.  The returned expanded string is malloc'ed.  */
+/* Get a character from the command window.  This is called from the
+   readline package.  */
 
-char *
-tui_expand_tabs (const char *string, int col)
+static int
+tui_getc (FILE *fp)
+{
+  try
+    {
+      return tui_getc_1 (fp);
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* Just in case, don't ever let an exception escape to readline.
+	 This shouldn't ever happen, but if it does, print the
+	 exception instead of just crashing GDB.  */
+      exception_print (gdb_stderr, ex);
+
+      /* If we threw an exception, it's because we recognized the
+	 character.  */
+      return 0;
+    }
+}
+
+/* See tui-io.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+tui_expand_tabs (const char *string)
 {
   int n_adjust, ncol;
   const char *s;
   char *ret, *q;
 
   /* 1. How many additional characters do we need?  */
-  for (ncol = col, n_adjust = 0, s = string; s; )
+  for (ncol = 0, n_adjust = 0, s = string; s; )
     {
       s = strpbrk (s, "\t");
       if (s)
@@ -674,7 +1088,7 @@ tui_expand_tabs (const char *string, int col)
   ret = q = (char *) xmalloc (strlen (string) + n_adjust + 1);
 
   /* 2. Copy the original string while replacing TABs with spaces.  */
-  for (ncol = col, s = string; s; )
+  for (ncol = 0, s = string; s; )
     {
       const char *s1 = strpbrk (s, "\t");
       if (s1)
@@ -696,5 +1110,5 @@ tui_expand_tabs (const char *string, int col)
       s = s1;
     }
 
-  return ret;
+  return gdb::unique_xmalloc_ptr<char> (ret);
 }

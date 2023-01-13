@@ -1,7 +1,7 @@
 # Adapted from mips.sc
 #
-# Copyright (C) 2014-2016 Free Software Foundation, Inc.
-# 
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+#
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
@@ -13,7 +13,7 @@ test -z "$ENTRY" && ENTRY=_start
 
 #test -z "$TEXT_START_ADDR" && TEXT_START_ADDR="0x0"
 
-CTOR=".ctors ${CONSTRUCTING-0} : 
+CTOR=".ctors ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -50,7 +50,7 @@ DTOR=" .dtors       ${CONSTRUCTING-0} :
   }"
 
 cat <<EOF
-/* Copyright (C) 2014-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    Copying and distribution of this script, with or without modification,
    are permitted in any medium without royalty provided the copyright
@@ -63,9 +63,9 @@ ${RELOCATING+${LIB_SEARCH_DIRS}}
 
 ${RELOCATING+ENTRY (${ENTRY})}
 
-_TEXT_START_ADDR = DEFINED(_TEXT_START_ADDR) ? _TEXT_START_ADDR : 0x50;		
+${RELOCATING+_TEXT_START_ADDR = DEFINED(_TEXT_START_ADDR) ? _TEXT_START_ADDR : 0x50;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x0;
-_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x400;
+_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x400;}
 
 SECTIONS
 {
@@ -79,14 +79,14 @@ SECTIONS
 
   ${RELOCATING+ _ftext  =  .;}
   .text : {
-    ${RELOCATING+*(.text)}
+    *(.text)
     ${RELOCATING+*(.text.*)}
     ${RELOCATING+*(.gnu.linkonce.t.*)}
   }
   ${RELOCATING+ _etext  =  .;}
 
-  .init : { KEEP (*(.init))	} =0
-  .fini : { KEEP (*(.fini))	} =0
+  .init : { KEEP (*(SORT_NONE(.init)))	} =0
+  .fini : { KEEP (*(SORT_NONE(.fini)))	} =0
 
   ${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
   ${RELOCATING+PROVIDE (___CTOR_LIST__ = .);}
@@ -103,10 +103,10 @@ SECTIONS
   ${RELOCATING+ . = ALIGN(4);}
    ${RELOCATING+ _frodata = . ;}
   .rodata : {
-    ${RELOCATING+*(.rodata)}
+    *(.rodata)
     ${RELOCATING+*(.rodata.*)}
     ${RELOCATING+*(.gnu.linkonce.r.*)}
-    ${CONSTRUCTING+CONSTRUCTORS}; /* Is this needed? */
+    ${CONSTRUCTING+CONSTRUCTORS;} /* Is this needed? */
   }
   ${RELOCATING+ _erodata = .;}
 
@@ -115,14 +115,14 @@ SECTIONS
   ${RELOCATING+. = ALIGN(8);}
   ${RELOCATING+ _ssrw = .;}
   .sdata2 : {
-    ${RELOCATING+*(.sdata2)}
+    *(.sdata2)
     ${RELOCATING+*(.sdata2.*)}
     ${RELOCATING+*(.gnu.linkonce.s2.*)}
   }
   ${RELOCATING+. = ALIGN(4);}
   .sbss2 : {
-    ${RELOCATING+PROVIDE (__sbss2_start = .);}	
-    ${RELOCATING+*(.sbss2)}
+    ${RELOCATING+PROVIDE (__sbss2_start = .);}
+    *(.sbss2)
     ${RELOCATING+*(.sbss2.*)}
     ${RELOCATING+*(.gnu.linkonce.sb2.*)}
     ${RELOCATING+PROVIDE (__sbss2_end = .);}
@@ -135,36 +135,36 @@ SECTIONS
   ${RELOCATING+ . = ALIGN(4);}
   ${RELOCATING+ _fdata = .;}
   .data : {
-    ${RELOCATING+*(.data)}
+    *(.data)
     ${RELOCATING+*(.gnu.linkonce.d.*)}
-    ${CONSTRUCTING+CONSTRUCTORS}; /* Is this needed? */
+    ${CONSTRUCTING+CONSTRUCTORS;} /* Is this needed? */
   }
   ${RELOCATING+ _edata = . ;}
-  
+
    /* Added to handle pic code */
-  .got : {  
-    ${RELOCATING+*(.got)}
+  .got : {
+    *(.got)
   }
 
-  .got1 : {  
-    ${RELOCATING+*(.got1)}
+  .got1 : {
+    *(.got1)
   }
 
-  .got2 : {  
-    ${RELOCATING+*(.got2)}
+  .got2 : {
+    *(.got2)
   }
 
   /* Added by Sathya to handle C++ exceptions */
-  .eh_frame : {  
-    ${RELOCATING+*(.eh_frame)}
-  }
-  
-  .jcr : {  
-    ${RELOCATING+*(.jcr)}
+  .eh_frame : {
+    *(.eh_frame)
   }
 
-  .gcc_except_table : {  
-    ${RELOCATING+*(.gcc_except_table)}
+  .jcr : {
+    *(.jcr)
+  }
+
+  .gcc_except_table : {
+    *(.gcc_except_table)
   }
 
   /* Alignments by 8 to ensure that _SDA_BASE_ on a word boundary */
@@ -172,14 +172,14 @@ SECTIONS
   ${RELOCATING+. = ALIGN(8);}
   ${RELOCATING+ _ssro = .;}
   .sdata : {
-    ${RELOCATING+*(.sdata)}
+    *(.sdata)
     ${RELOCATING+*(.sdata.*)}
     ${RELOCATING+*(.gnu.linkonce.s.*)}
   }
   ${RELOCATING+. = ALIGN(4);}
   .sbss : {
-    ${RELOCATING+PROVIDE (__sbss_start = .);}	
-    ${RELOCATING+*(.sbss)}
+    ${RELOCATING+PROVIDE (__sbss_start = .);}
+    *(.sbss)
     ${RELOCATING+*(.sbss.*)}
     ${RELOCATING+*(.gnu.linkonce.sb.*)}
     ${RELOCATING+PROVIDE (__sbss_end = .);}
@@ -192,15 +192,14 @@ SECTIONS
   ${RELOCATING+ . = ALIGN(4);}
   ${RELOCATING+ _fbss = .;}
   .bss : {
-    ${RELOCATING+PROVIDE (__bss_start = .);}	
-    ${RELOCATING+*(.bss)}
+    ${RELOCATING+PROVIDE (__bss_start = .);}
+    *(.bss)
     ${RELOCATING+*(.bss.*)}
     ${RELOCATING+*(.gnu.linkonce.b.*)}
     ${RELOCATING+*(COMMON)}
     ${RELOCATING+. = ALIGN(. != 0 ? 4 : 1);}
-    
-    ${RELOCATING+PROVIDE (__bss_end = .);}
 
+    ${RELOCATING+PROVIDE (__bss_end = .);}
   }
 
   ${RELOCATING+ . = ALIGN(4);}
@@ -210,7 +209,7 @@ SECTIONS
     ${RELOCATING+ _heap_start = .;}
     ${RELOCATING+ . += _HEAP_SIZE;}
     ${RELOCATING+ _heap_end = .;}
-  } 
+  }
 
   ${RELOCATING+ . = ALIGN(4);}
 
@@ -222,13 +221,13 @@ SECTIONS
     ${RELOCATING+ _end = .;}
   }
 
-  .tdata : {  
-    ${RELOCATING+*(.tdata)}
+  .tdata : {
+    *(.tdata)
     ${RELOCATING+*(.tdata.*)}
     ${RELOCATING+*(.gnu.linkonce.td.*)}
   }
-  .tbss : {  
-    ${RELOCATING+*(.tbss)}
+  .tbss : {
+    *(.tbss)
     ${RELOCATING+*(.tbss.*)}
     ${RELOCATING+*(.gnu.linkonce.tb.*)}
   }

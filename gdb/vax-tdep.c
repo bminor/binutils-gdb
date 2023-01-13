@@ -1,6 +1,6 @@
 /* Target-dependent code for the VAX.
 
-   Copyright (C) 1986-2016 Free Software Foundation, Inc.
+   Copyright (C) 1986-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -39,7 +38,7 @@
 static const char *
 vax_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static char *register_names[] =
+  static const char *register_names[] =
   {
     "r0", "r1", "r2",  "r3",  "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "ap", "fp", "sp", "pc",
@@ -77,7 +76,7 @@ vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
   for (i = 0; i < VAX_NUM_REGS; i++)
     {
       if (regnum == i || regnum == -1)
-	regcache_raw_supply (regcache, i, regs + i * 4);
+	regcache->raw_supply (i, regs + i * 4);
     }
 }
 
@@ -97,7 +96,7 @@ vax_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				  void *cb_data,
 				  const struct regcache *regcache)
 {
-  cb (".reg", VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
+  cb (".reg", VAX_NUM_REGS * 4, VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
 }
 
 /* The VAX UNIX calling convention uses R1 to pass a structure return
@@ -108,7 +107,7 @@ static CORE_ADDR
 vax_store_arguments (struct regcache *regcache, int nargs,
 		     struct value **args, CORE_ADDR sp)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int count = 0;
@@ -134,7 +133,7 @@ vax_store_arguments (struct regcache *regcache, int nargs,
 
   /* Update the argument pointer.  */
   store_unsigned_integer (buf, 4, byte_order, sp);
-  regcache_cooked_write (regcache, VAX_AP_REGNUM, buf);
+  regcache->cooked_write (VAX_AP_REGNUM, buf);
 
   return sp;
 }
@@ -142,7 +141,8 @@ vax_store_arguments (struct regcache *regcache, int nargs,
 static CORE_ADDR
 vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		     struct value **args, CORE_ADDR sp, int struct_return,
+		     struct value **args, CORE_ADDR sp,
+		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -153,7 +153,7 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   sp = vax_store_arguments (regcache, nargs, args, sp);
 
   /* Store return value address.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, VAX_R1_REGNUM, struct_addr);
 
   /* Store return address in the PC slot.  */
@@ -181,8 +181,8 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Update the stack pointer and frame pointer.  */
   store_unsigned_integer (buf, 4, byte_order, sp);
-  regcache_cooked_write (regcache, VAX_SP_REGNUM, buf);
-  regcache_cooked_write (regcache, VAX_FP_REGNUM, buf);
+  regcache->cooked_write (VAX_SP_REGNUM, buf);
+  regcache->cooked_write (VAX_FP_REGNUM, buf);
 
   /* Return the saved (fake) frame pointer.  */
   return fp;
@@ -228,18 +228,18 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
   if (readbuf)
     {
       /* Read the contents of R0 and (if necessary) R1.  */
-      regcache_cooked_read (regcache, VAX_R0_REGNUM, buf);
+      regcache->cooked_read (VAX_R0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_read (regcache, VAX_R1_REGNUM, buf + 4);
+	regcache->cooked_read (VAX_R1_REGNUM, buf + 4);
       memcpy (readbuf, buf, len);
     }
   if (writebuf)
     {
       /* Read the contents to R0 and (if necessary) R1.  */
       memcpy (buf, writebuf, len);
-      regcache_cooked_write (regcache, VAX_R0_REGNUM, buf);
+      regcache->cooked_write (VAX_R0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_write (regcache, VAX_R1_REGNUM, buf + 4);
+	regcache->cooked_write (VAX_R1_REGNUM, buf + 4);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;
@@ -251,15 +251,10 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
    encode a breakpoint instruction, store the length of the string in
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
-   
-static const gdb_byte *
-vax_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
-{
-  static gdb_byte break_insn[] = { 3 };
 
-  *len = sizeof (break_insn);
-  return break_insn;
-}
+constexpr gdb_byte vax_break_insn[] = { 3 };
+
+typedef BP_MANIPULATION (vax_break_insn) vax_breakpoint;
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
@@ -442,11 +437,6 @@ vax_frame_num_args (struct frame_info *frame)
   return get_frame_memory_unsigned (frame, args, 1);
 }
 
-static CORE_ADDR
-vax_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, VAX_PC_REGNUM);
-}
 
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
@@ -500,15 +490,12 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dummy_id (gdbarch, vax_dummy_id);
 
   /* Breakpoint info */
-  set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
+  set_gdbarch_breakpoint_kind_from_pc (gdbarch, vax_breakpoint::kind_from_pc);
+  set_gdbarch_sw_breakpoint_from_kind (gdbarch, vax_breakpoint::bp_from_kind);
 
   /* Misc info */
   set_gdbarch_deprecated_function_start_offset (gdbarch, 2);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_vax);
-
-  set_gdbarch_unwind_pc (gdbarch, vax_unwind_pc);
 
   frame_base_set_default (gdbarch, &vax_frame_base);
 
@@ -520,11 +507,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return (gdbarch);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_vax_tdep (void);
-
+void _initialize_vax_tdep ();
 void
-_initialize_vax_tdep (void)
+_initialize_vax_tdep ()
 {
   gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
 }

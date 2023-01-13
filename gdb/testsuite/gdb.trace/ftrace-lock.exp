@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Free Software Foundation, Inc.
+# Copyright 2015-2020 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -13,6 +13,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 load_lib "trace-support.exp"
+
+if {[skip_shlib_tests]} {
+    return 0
+}
 
 standard_testfile
 set executable $testfile
@@ -29,15 +33,19 @@ set options [list debug [gdb_target_symbol_prefix_flags] \
 	     additional_flags=-DNUM_THREADS=$NUM_THREADS]
 
 # Check that the target supports trace.
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
-    untested "Couldn't compile test program"
+    untested "failed to compile"
     return -1
 }
 
 clean_restart ${testfile}
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -48,29 +56,29 @@ if ![gdb_target_supports_trace] {
 
 # Compile the test case with the in-process agent library.
 set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
+set remote_libipa [gdb_load_shlib $libipa]
 
 lappend options shlib=$libipa
 
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
-    untested "Couldn't compile test program with in-process agent library"
+    untested "failed to compile with in-process agent library"
     return -1
 }
 
 clean_restart ${executable}
 
 if ![runto_main] {
-    fail "Can't run to main to check for trace support"
+    fail "can't run to main to check for trace support"
     return -1
 }
 
-if { [gdb_test "info sharedlibrary" ".*[file tail ${libipa}].*" "IPA loaded"] != 0 } {
-    untested "Could not find IPA lib loaded"
+if { [gdb_test "info sharedlibrary" ".*${remote_libipa}.*" "IPA loaded"] != 0 } {
+    untested "could not find IPA lib loaded"
     return 1
 }
 
-gdb_test "break end" ""
-gdb_test "break fail" ""
+gdb_breakpoint "end" qualified
+gdb_breakpoint "fail" qualified
 
 gdb_test "ftrace set_point" "Fast tracepoint .*" \
     "fast tracepoint at a long insn"

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+#   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 #   Contributed by:
 #   Brain.lin (brain.lin@sunplusct.com)
 #   Mei Ligang (ligang@sunnorth.com.cn)
@@ -23,7 +23,7 @@
 # MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra score-elf
+# This file is sourced from elf.em, and defines extra score-elf
 # specific routines.
 #
 fragment <<EOF
@@ -31,7 +31,7 @@ fragment <<EOF
 #include "elf32-score.h"
 
 static void
-gld${EMULATION_NAME}_before_parse ()
+gld${EMULATION_NAME}_before_parse (void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
@@ -39,6 +39,8 @@ gld${EMULATION_NAME}_before_parse ()
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+  link_info.check_relocs_after_open_input = TRUE;
+  link_info.relro = DEFAULT_LD_Z_RELRO;
 }
 
 static void
@@ -50,7 +52,8 @@ score_elf_after_open (void)
 	 These will only be created if the output format is an score format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo ("%F%X%P: error: cannot change output format whilst linking S+core binaries\n");
+      einfo (_("%F%P: error: cannot change output format "
+	       "whilst linking %s binaries\n"), "S+core");
       return;
     }
 

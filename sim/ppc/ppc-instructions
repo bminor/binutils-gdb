@@ -734,7 +734,7 @@ void::model-function::ppc_insn_to_spr:itable_index index, model_data *model_ptr,
 	busy_ptr->nr_writebacks = 1;
 	TRACE(trace_model,("Making register %s busy.\n", spr_name(nSPR)));
 
-# Schedule a MFCR instruction that moves the CR into an integer regsiter
+# Schedule a MFCR instruction that moves the CR into an integer register
 void::model-function::ppc_insn_mfcr:itable_index index, model_data *model_ptr, unsigned32 int_mask
 	const unsigned32 cr_mask = 0xff;
 	model_busy *busy_ptr;
@@ -908,7 +908,7 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	  tail->suffix_singular = "";
 	}
 
-	for (j = 0; j < (sizeof(ppc_branch_conditional_name) / sizeof(ppc_branch_conditional_name[0])) ; j++) {
+	for (j = 0; j < ARRAY_SIZE (ppc_branch_conditional_name); j++) {
 	  if (model_ptr->nr_branch_conditional[j]) {
 	    tail->next = ZALLOC(model_print);
 	    tail = tail->next;

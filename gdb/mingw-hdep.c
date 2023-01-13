@@ -1,6 +1,6 @@
 /* Host support routines for MinGW, for GDB, the GNU debugger.
 
-   Copyright (C) 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,17 +23,8 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include "readline/readline.h"
 
 #include <windows.h>
-
-/* This event is signalled whenever an asynchronous SIGINT handler
-   needs to perform an action in the main thread.  */
-static HANDLE sigint_event;
-
-/* When SIGINT_EVENT is signalled, gdb_select will call this
-   function.  */
-struct async_signal_handler *sigint_handler;
 
 /* Return an absolute file name of the running GDB, if possible, or
    ARGV0 if not.  The return value is in malloc'ed storage.  */
@@ -72,6 +63,17 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   int fd;
   int num_ready;
   size_t indx;
+
+  if (n == 0)
+    {
+      /* The MS API says that the first argument to
+	 WaitForMultipleObjects cannot be zero.  That's why we just
+	 use a regular Sleep here.  */
+      if (timeout != NULL)
+	Sleep (timeout->tv_sec * 1000 + timeout->tv_usec / 1000);
+
+      return 0;
+    }
 
   num_ready = 0;
   num_handles = 0;
@@ -120,8 +122,7 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	}
     }
 
-  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
-  handles[num_handles++] = sigint_event;
+  gdb_assert (num_handles <= MAXIMUM_WAIT_OBJECTS);
 
   event = WaitForMultipleObjects (num_handles,
 				  handles,
@@ -176,54 +177,197 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	}
     }
 
-  /* With multi-threaded SIGINT handling, there is a race between the
-     readline signal handler and GDB.  It may still be in
-     rl_prep_terminal in another thread.  Do not return until it is
-     done; we can check the state here because we never longjmp from
-     signal handlers on Windows.  */
-  while (RL_ISSTATE (RL_STATE_SIGHANDLER))
-    Sleep (1);
-
-  if (h == sigint_event
-      || WaitForSingleObject (sigint_event, 0) == WAIT_OBJECT_0)
-    {
-      if (sigint_handler != NULL)
-	call_async_signal_handler (sigint_handler);
-
-      if (num_ready == 0)
-	{
-	  errno = EINTR;
-	  return -1;
-	}
-    }
-
   return num_ready;
 }
 
-/* Wrapper for the body of signal handlers.  On Windows systems, a
-   SIGINT handler runs in its own thread.  We can't longjmp from
-   there, and we shouldn't even prompt the user.  Delay HANDLER
-   until the main thread is next in gdb_select.  */
-
-void
-gdb_call_async_signal_handler (struct async_signal_handler *handler,
-			       int immediate_p)
+/* Map COLOR's RGB triplet, with 8 bits per component, into 16 Windows
+   console colors, where each component has just 1 bit, plus a single
+   intensity bit which affects all 3 components.  */
+static int
+rgb_to_16colors (const ui_file_style::color &color)
 {
-  if (immediate_p)
-    sigint_handler = handler;
-  else
+  uint8_t rgb[3];
+  color.get_rgb (rgb);
+
+  int retval = 0;
+  for (int i = 0; i < 3; i++)
     {
-      mark_async_signal_handler (handler);
-      sigint_handler = NULL;
+      /* Subdivide 256 possible values of each RGB component into 3
+	 regions: no color, normal color, bright color.  256 / 3 = 85,
+	 but ui-style.c follows xterm and uses 92 for R and G
+	 components of the bright-blue color, so we bias the divisor a
+	 bit to have the bright colors between 9 and 15 identical to
+	 what ui-style.c expects.  */
+      int bits = rgb[i] / 93;
+      retval |= ((bits > 0) << (2 - i)) | ((bits > 1) << 3);
     }
-  SetEvent (sigint_event);
+
+  return retval;
 }
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_mingw_hdep;
+/* Zero if not yet initialized, 1 if stdout is a console device, else -1.  */
+static int mingw_console_initialized;
 
-void
-_initialize_mingw_hdep (void)
+/* Handle to stdout . */
+static HANDLE hstdout = INVALID_HANDLE_VALUE;
+
+/* Text attribute to use for normal text (the "none" pseudo-color).  */
+static SHORT  norm_attr;
+
+/* The most recently applied style.  */
+static ui_file_style last_style;
+
+/* Alternative for the libc 'fputs' which handles embedded SGR
+   sequences in support of styling.  */
+
+int
+gdb_console_fputs (const char *linebuf, FILE *fstream)
 {
-  sigint_event = CreateEvent (0, FALSE, FALSE, 0);
+  if (!mingw_console_initialized)
+    {
+      hstdout = (HANDLE)_get_osfhandle (fileno (fstream));
+      DWORD cmode;
+      CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+      if (hstdout != INVALID_HANDLE_VALUE
+	  && GetConsoleMode (hstdout, &cmode) != 0
+	  && GetConsoleScreenBufferInfo (hstdout, &csbi))
+	{
+	  norm_attr = csbi.wAttributes;
+	  mingw_console_initialized = 1;
+	}
+      else if (hstdout != INVALID_HANDLE_VALUE)
+	mingw_console_initialized = -1; /* valid, but not a console device */
+    }
+  /* If our stdout is not a console device, let the default 'fputs'
+     handle the task. */
+  if (mingw_console_initialized <= 0)
+    return 0;
+
+  /* Mapping between 8 ANSI colors and Windows console attributes.  */
+  static int fg_color[] = {
+    0,					/* black */
+    FOREGROUND_RED,			/* red */
+    FOREGROUND_GREEN,			/* green */
+    FOREGROUND_GREEN | FOREGROUND_RED,	/* yellow */
+    FOREGROUND_BLUE,			/* blue */
+    FOREGROUND_BLUE | FOREGROUND_RED,	/* magenta */
+    FOREGROUND_BLUE | FOREGROUND_GREEN, /* cyan */
+    FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE /* gray */
+  };
+  static int bg_color[] = {
+    0,					/* black */
+    BACKGROUND_RED,			/* red */
+    BACKGROUND_GREEN,			/* green */
+    BACKGROUND_GREEN | BACKGROUND_RED,	/* yellow */
+    BACKGROUND_BLUE,			/* blue */
+    BACKGROUND_BLUE | BACKGROUND_RED,	/* magenta */
+    BACKGROUND_BLUE | BACKGROUND_GREEN, /* cyan */
+    BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE /* gray */
+  };
+
+  ui_file_style style = last_style;
+  unsigned char c;
+  size_t n_read;
+
+  for ( ; (c = *linebuf) != 0; linebuf += n_read)
+    {
+      if (c == '\033')
+	{
+	  fflush (fstream);
+	  bool parsed = style.parse (linebuf, &n_read);
+	  if (n_read <= 0)	/* should never happen */
+	    n_read = 1;
+	  if (!parsed)
+	    {
+	      /* This means we silently swallow SGR sequences we
+		 cannot parse.  */
+	      continue;
+	    }
+	  /* Colors.  */
+	  const ui_file_style::color &fg = style.get_foreground ();
+	  const ui_file_style::color &bg = style.get_background ();
+	  int fgcolor, bgcolor, bright, inverse;
+	  if (fg.is_none ())
+	    fgcolor = norm_attr & 15;
+	  else if (fg.is_basic ())
+	    fgcolor = fg_color[fg.get_value () & 15];
+	  else
+	    fgcolor = rgb_to_16colors (fg);
+	  if (bg.is_none ())
+	    bgcolor = norm_attr & (15 << 4);
+	  else if (bg.is_basic ())
+	    bgcolor = bg_color[bg.get_value () & 15];
+	  else
+	    bgcolor = rgb_to_16colors (bg) << 4;
+
+	  /* Intensity.  */
+	  switch (style.get_intensity ())
+	    {
+	    case ui_file_style::NORMAL:
+	    case ui_file_style::DIM:
+	      bright = 0;
+	      break;
+	    case ui_file_style::BOLD:
+	      bright = 1;
+	      break;
+	    default:
+	      gdb_assert_not_reached ("invalid intensity");
+	    }
+
+	  /* Inverse video.  */
+	  if (style.is_reverse ())
+	    inverse = 1;
+	  else
+	    inverse = 0;
+
+	  /* Construct the attribute.  */
+	  if (inverse)
+	    {
+	      int t = fgcolor;
+	      fgcolor = (bgcolor >> 4);
+	      bgcolor = (t << 4);
+	    }
+	  if (bright)
+	    fgcolor |= FOREGROUND_INTENSITY;
+
+	  SHORT attr = (bgcolor & (15 << 4)) | (fgcolor & 15);
+
+	  /* Apply the attribute.  */
+	  SetConsoleTextAttribute (hstdout, attr);
+	}
+      else
+	{
+	  /* When we are about to write newline, we need to clear to
+	     EOL with the normal attribute, to avoid spilling the
+	     colors to the next screen line.  We assume here that no
+	     non-default attribute extends beyond the newline.  */
+	  if (c == '\n')
+	    {
+	      DWORD nchars;
+	      COORD start_pos;
+	      DWORD written;
+	      CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	      fflush (fstream);
+	      GetConsoleScreenBufferInfo (hstdout, &csbi);
+
+	      if (csbi.wAttributes != norm_attr)
+		{
+		  start_pos = csbi.dwCursorPosition;
+		  nchars = csbi.dwSize.X - start_pos.X;
+
+		  FillConsoleOutputAttribute (hstdout, norm_attr, nchars,
+					      start_pos, &written);
+		  FillConsoleOutputCharacter (hstdout, ' ', nchars,
+					      start_pos, &written);
+		}
+	    }
+	  fputc (c, fstream);
+	  n_read = 1;
+	}
+    }
+
+  last_style = style;
+  return 1;
 }

@@ -1,7 +1,7 @@
 /* illegal.s Test file for AArch64 instructions that should be rejected
    by the assembler.
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.  Contributed by ARM Ltd.
+   Copyright (C) 2011-2020 Free Software Foundation, Inc.  Contributed by ARM Ltd.
 
    This file is part of GAS.
 
@@ -567,3 +567,31 @@ one_label:
 	mrs	x7, S1_1_C16_C6_6
 	mrs	x8, S2_2_C15_C16_7
 	mrs	x9, S3_3_C14_C15_8
+
+	fmov	s0, #-0.0
+	fmov	s0, #0x40000000 // OK
+	fmov	s0, #0x80000000
+	fmov	s0, #0xc0000000 // OK
+	fmov	d0, #-0.0
+	fmov	d0, #0x4000000000000000 // OK
+	fmov	d0, #0x8000000000000000
+	fmov	d0, #0xc000000000000000 // OK
+
+	fcmgt	v0.4s, v0.4s, #0.0 // OK
+	fcmgt	v0.4s, v0.4s, #0 // OK
+	fcmgt	v0.4s, v0.4s, #-0.0
+	fcmgt	v0.2d, v0.2d, #0.0 // OK
+	fcmgt	v0.2d, v0.2d, #0 // OK
+	fcmgt	v0.2d, v0.2d, #-0.0
+
+	# PR 20319: FMOV instructions changing the size from 32 bits
+	# to 64 bits and vice versa are illegal.
+	fmov 	s9, x0
+	fmov	d7, w1
+
+	st1 {v0.16b}[0],[x0]
+	st2 {v0.16b-v1.16b}[1],[x0]
+	st3 {v0.16b-v2.16b}[2],[x0]
+	st4 {v0.8b-v3.8b}[4],[x0]
+
+	// End (for errors during literal pool generation)

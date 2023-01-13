@@ -1,8 +1,8 @@
 #name: MIPS rel64 n64
 #source: rel64.s
-#as: -march=from-abi -KPIC -EB -64
+#as: -KPIC
 #readelf: -x .text -r
-#ld: -shared -melf64btsmip
+#ld: -shared
 
 Relocation section '.rel.dyn' at offset .* contains 2 entries:
   Offset          Info           Type           Sym. Value    Sym. Name
@@ -14,6 +14,6 @@ Relocation section '.rel.dyn' at offset .* contains 2 entries:
  +Type3: R_MIPS_NONE      
 
 Hex dump of section '.text':
-  0x00000450 00000000 00000000 00000000 00000000 ................
-  0x00000460 00000000 00000460 00000000 00000000 ................
-  0x00000470 00000000 00000000 00000000 00000000 ................
+  0x00000380 00000000 00000000 00000000 00000000 .*
+  0x00000390 00000000 00000390 00000000 00000000 .*
+  0x000003a0 00000000 00000000 00000000 00000000 .*

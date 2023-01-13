@@ -1,6 +1,6 @@
 /* Debug printing functions.
 
-   Copyright (C) 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
 
 #include "defs.h"
 
-/* See common/common-debug.h.  */
+/* See gdbsupport/common-debug.h.  */
 
 void
 debug_vprintf (const char *fmt, va_list ap)

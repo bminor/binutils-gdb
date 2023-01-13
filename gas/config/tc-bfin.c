@@ -1,5 +1,5 @@
 /* tc-bfin.c -- Assembler for the ADI Blackfin.
-   Copyright (C) 2005-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,14 +19,12 @@
    02110-1301, USA.  */
 
 #include "as.h"
-#include "struc-symbol.h"
 #include "bfin-defs.h"
 #include "obstack.h"
 #include "safe-ctype.h"
 #ifdef OBJ_ELF
 #include "dwarf2dbg.h"
 #endif
-#include "libbfd.h"
 #include "elf/common.h"
 #include "elf/bfin.h"
 
@@ -324,8 +322,6 @@ struct bfin_cpu bfin_cpus[] =
 
   {"bf592", BFIN_CPU_BF592, 0x0001, AC_05000074},
   {"bf592", BFIN_CPU_BF592, 0x0000, AC_05000074},
-
-  {NULL, 0, 0, 0}
 };
 
 /* Define bfin-specific command-line options (there are none). */
@@ -357,23 +353,22 @@ md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_MCPU:
       {
-	const char *p, *q;
-	int i;
+	const char *q;
+	unsigned int i;
 
-	i = 0;
-	while ((p = bfin_cpus[i].name) != NULL)
+	for (i = 0; i < ARRAY_SIZE (bfin_cpus); i++)
 	  {
+	    const char *p = bfin_cpus[i].name;
 	    if (strncmp (arg, p, strlen (p)) == 0)
 	      break;
-	    i++;
 	  }
 
-	if (p == NULL)
+	if (i == ARRAY_SIZE (bfin_cpus))
 	  as_fatal ("-mcpu=%s is not valid", arg);
 
 	bfin_cpu_type = bfin_cpus[i].type;
 
-	q = arg + strlen (p);
+	q = arg + strlen (bfin_cpus[i].name);
 
 	if (*q == '\0')
 	  {
@@ -385,7 +380,8 @@ md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
       	else if (strcmp (q, "-any") == 0)
 	  {
 	    bfin_si_revision = 0xffff;
-	    while (bfin_cpus[i].type == bfin_cpu_type)
+	    while (i < ARRAY_SIZE (bfin_cpus)
+		   && bfin_cpus[i].type == bfin_cpu_type)
 	      {
 		bfin_anomaly_checks |= bfin_cpus[i].anomaly_checks;
 		i++;
@@ -408,11 +404,13 @@ md_parse_option (int c ATTRIBUTE_UNUSED, const char *arg ATTRIBUTE_UNUSED)
 
 	    bfin_si_revision = (si_major << 8) | si_minor;
 
-	    while (bfin_cpus[i].type == bfin_cpu_type
+	    while (i < ARRAY_SIZE (bfin_cpus)
+		   && bfin_cpus[i].type == bfin_cpu_type
 		   && bfin_cpus[i].si_revision != bfin_si_revision)
 	      i++;
 
-	    if (bfin_cpus[i].type != bfin_cpu_type)
+	    if (i == ARRAY_SIZE (bfin_cpus)
+	       	|| bfin_cpus[i].type != bfin_cpu_type)
 	      goto invalid_silicon_revision;
 
 	    bfin_anomaly_checks |= bfin_cpus[i].anomaly_checks;
@@ -446,7 +444,7 @@ md_show_usage (FILE * stream)
 
 /* Perform machine-specific initializations.  */
 void
-md_begin ()
+md_begin (void)
 {
   /* Set the ELF flags if desired. */
   if (bfin_flags)
@@ -791,7 +789,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  int boundary = bfd_get_section_alignment (stdoutput, segment);
+  int boundary = bfd_section_alignment (segment);
   return ((size + (1 << boundary) - 1) & -(1 << boundary));
 }
 
@@ -811,8 +809,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc		      = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc		      = XNEW (arelent);
+  reloc->sym_ptr_ptr  = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -969,13 +967,13 @@ INSTR_T Expr_Node_Gen_Reloc (Expr_Node *head, int parent_reloc);
 INSTR_T
 Expr_Node_Gen_Reloc (Expr_Node * head, int parent_reloc)
 {
-  /* Top level reloction expression generator VDSP style.
+  /* Top level relocation expression generator VDSP style.
    If the relocation is just by itself, generate one item
    else generate this convoluted expression.  */
 
   INSTR_T note = NULL_CODE;
   INSTR_T note1 = NULL_CODE;
-  int pcrel = 1;  /* Is the parent reloc pcrelative?
+  int pcrel = 1;  /* Is the parent reloc pc-relative?
 		  This calculation here and HOWTO should match.  */
 
   if (parent_reloc)
@@ -1931,7 +1929,7 @@ bfin_loop_beginend (Expr_Node *exp, int begin)
   /* LOOP_END follows the last instruction in the loop.
      Adjust label address.  */
   if (!begin)
-    ((struct local_symbol *) linelabel)->lsy_value -= last_insn_size;
+    *symbol_X_add_number (linelabel) -= last_insn_size;
 }
 
 bfd_boolean

@@ -1,6 +1,6 @@
 // ehframe.cc -- handle exception frame sections for gold
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1141,6 +1141,33 @@ Eh_frame::add_ehframe_for_plt(Output_data* plt, const unsigned char* cie_data,
 
   if (this->mappings_are_done_)
     this->final_data_size_ += align_address(fde_length + 8, this->addralign());
+}
+
+// Remove all post-map unwind information for a PLT.
+
+void
+Eh_frame::remove_ehframe_for_plt(Output_data* plt,
+				 const unsigned char* cie_data,
+				 size_t cie_length)
+{
+  if (!this->mappings_are_done_)
+    return;
+
+  Cie cie(NULL, 0, 0, elfcpp::DW_EH_PE_pcrel | elfcpp::DW_EH_PE_sdata4, "",
+	  cie_data, cie_length);
+  Cie_offsets::iterator find_cie = this->cie_offsets_.find(&cie);
+  gold_assert (find_cie != this->cie_offsets_.end());
+  Cie* pcie = *find_cie;
+
+  while (pcie->fde_count() != 0)
+    {
+      const Fde* fde = pcie->last_fde();
+      if (!fde->post_map(plt))
+	break;
+      size_t length = fde->length();
+      this->final_data_size_ -= align_address(length + 8, this->addralign());
+      pcie->remove_fde();
+    }
 }
 
 // Return the number of FDEs.

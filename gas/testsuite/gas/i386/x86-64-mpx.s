@@ -209,3 +209,22 @@ start:
 	bnd ret
 
 foo:	bnd ret
+
+bad:
+	# bndldx (%eax),(bad)
+	.byte 0x0f
+	.byte 0x1a
+	.byte 0x30
+
+	# bndmov (bad),%bnd0
+	.byte 0x66
+	.byte 0x0f
+	.byte 0x1a
+	.byte 0xc4
+
+	# bndmk (bad),%bnd0
+	.byte 0xf3
+	.byte 0x0f
+	.byte 0x1b
+	.byte 0x05
+	.long 0x90909090

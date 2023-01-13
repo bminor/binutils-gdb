@@ -1,6 +1,6 @@
 // two_file_test_1.cc -- a two file test case for gold, file 1 of 2
 
-// Copyright (C) 2006-2016 Free Software Foundation, Inc.
+// Copyright (C) 2006-2020 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -19,6 +19,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
+
+// For incremental linking tests, this file needs to be compiled with
+// -fno-exceptions -fno-asynchronous-unwind-tables.
 
 // This tests references between files.  This is file 1, and
 // two_file_test_2.cc is file 2.  We test in several different ways:

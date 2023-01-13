@@ -1,25 +1,14 @@
-2016-03-18  Vladimir Radosavljevic  <vladimir.radosavljevic@imgtec.com>
+2020-01-18  Nick Clifton  <nickc@redhat.com>
 
-	* mips.h (abi_64): Remove.
+	Binutils 2.34 branch created.
 
-2016-01-12  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* elfcpp_internal.h (Mips64_rel_data, Mips64_rela_data): Remove
-	'typename'.
-
-2016-01-11  Cary Coutant  <ccoutant@gmail.com>
-
-	* elfcpp.h (Mips64_rel, Mips64_rel_write): New classes.
-	(Mips64_rela, Mips64_rela_write): New classes.
-	* elfcpp_internal.h (Mips64_rel_data, Mips64_rela_data): New structs.
-
-2016-01-01  Alan Modra  <amodra@gmail.com>
+2020-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
 
-For older changes see ChangeLog-0815
+For older changes see ChangeLog-2019
 
-Copyright (C) 2016 Free Software Foundation, Inc.
+Copyright (C) 2020 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright

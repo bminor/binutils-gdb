@@ -7,7 +7,7 @@ else
 fi
 fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright (C) 1995-2016 Free Software Foundation, Inc.
+   Copyright (C) 1995-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -37,6 +37,7 @@ fragment <<EOF
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"
+#include "ctf-api.h"
 #include "getopt.h"
 #include "libiberty.h"
 #include "filenames.h"
@@ -81,8 +82,8 @@ gld_${EMULATION_NAME}_before_parse (void)
 #define OPTION_MINOR_OS_VERSION		(OPTION_MINOR_IMAGE_VERSION + 1)
 #define OPTION_MINOR_SUBSYSTEM_VERSION	(OPTION_MINOR_OS_VERSION + 1)
 #define OPTION_SECTION_ALIGNMENT	(OPTION_MINOR_SUBSYSTEM_VERSION + 1)
-#define OPTION_STACK                    (OPTION_SECTION_ALIGNMENT + 1)
-#define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
+#define OPTION_STACK			(OPTION_SECTION_ALIGNMENT + 1)
+#define OPTION_SUBSYSTEM		(OPTION_STACK + 1)
 #define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
 
 static void
@@ -209,7 +210,7 @@ set_pe_subsystem (void)
 	set_pe_name ("__minor_subsystem_version__",
 		     strtoul (end + 1, &end, 0));
       if (*end != '\0')
-	einfo ("%P: warning: bad version number in -subsystem option\n");
+	einfo (_("%P: warning: bad version number in -subsystem option\n"));
     }
 
   for (i = 0; v[i].name; i++)
@@ -226,7 +227,7 @@ set_pe_subsystem (void)
 	  return;
 	}
     }
-  einfo ("%P%F: invalid subsystem type %s\n", optarg);
+  einfo (_("%F%P: invalid subsystem type %s\n"), optarg);
 }
 
 
@@ -237,7 +238,7 @@ set_pe_value (char *name)
   set_pe_name (name,  strtoul (optarg, &end, 0));
   if (end == optarg)
     {
-      einfo ("%P%F: invalid hex number for PE parameter '%s'\n", optarg);
+      einfo (_("%F%P: invalid hex number for PE parameter '%s'\n"), optarg);
     }
 
   optarg = end;
@@ -254,7 +255,7 @@ set_pe_stack_heap (char *resname, char *comname)
     }
   else if (*optarg)
     {
-      einfo ("%P%F: strange hex info for PE parameter '%s'\n", optarg);
+      einfo (_("%F%P: strange hex info for PE parameter '%s'\n"), optarg);
     }
 }
 
@@ -366,7 +367,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
   if (pe.FileAlignment >
       pe.SectionAlignment)
     {
-      einfo ("%P: warning, file alignment > section alignment.\n");
+      einfo (_("%P: warning, file alignment > section alignment\n"));
     }
 }
 
@@ -380,7 +381,7 @@ gld_${EMULATION_NAME}_after_open (void)
      including an internal BFD header.  */
   if (!coff_data(link_info.output_bfd)->pe)
     {
-      einfo ("%F%P: PE operations on non PE file.\n");
+      einfo (_("%F%P: PE operations on non PE file\n"));
     }
 
   pe_data(link_info.output_bfd)->pe_opthdr = pe;
@@ -393,17 +394,18 @@ gld_${EMULATION_NAME}_after_open (void)
 static int
 sort_by_file_name (const void *a, const void *b)
 {
-  const lang_statement_union_type *const *ra = a;
-  const lang_statement_union_type *const *rb = b;
+  const lang_input_section_type *const *ra = a;
+  const lang_input_section_type *const *rb = b;
+  asection *sa = (*ra)->section;
+  asection *sb = (*rb)->section;
   int i, a_sec, b_sec;
 
-  i = filename_cmp ((*ra)->input_section.section->owner->my_archive->filename,
-		    (*rb)->input_section.section->owner->my_archive->filename);
+  i = filename_cmp (sa->owner->my_archive->filename,
+		    sb->owner->my_archive->filename);
   if (i != 0)
     return i;
 
-  i = filename_cmp ((*ra)->input_section.section->owner->filename,
-		    (*rb)->input_section.section->owner->filename);
+  i = filename_cmp (sa->owner->filename, sb->owner->filename);
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an
@@ -412,55 +414,55 @@ sort_by_file_name (const void *a, const void *b)
      and HNT properly. if no reloc this one is import by ordinal
      so we have to sort by section contents */
 
-  if ( ((*ra)->input_section.section->reloc_count + (*rb)->input_section.section->reloc_count) )
+  if (sa->reloc_count + sb->reloc_count != 0)
     {
-       i =  (((*ra)->input_section.section->reloc_count >
-		 (*rb)->input_section.section->reloc_count) ? -1 : 0);
-       if ( i != 0)
-         return i;
+      i = sa->reloc_count > sb->reloc_count ? -1 : 0;
+      if (i != 0)
+	return i;
 
-        return  (((*ra)->input_section.section->reloc_count >
-		 (*rb)->input_section.section->reloc_count) ? 0 : 1);
+      return sa->reloc_count > sb->reloc_count ? 0 : 1;
     }
   else
     {
-       if ( (strcmp( (*ra)->input_section.section->name, ".idata$6") == 0) )
-          return 0; /* don't sort .idata$6 or .idata$7 FIXME dlltool eliminate .idata$7 */
+      /* don't sort .idata$6 or .idata$7 FIXME dlltool eliminate .idata$7 */
+      if ((strcmp (sa->name, ".idata$6") == 0))
+	return 0;
 
-       if (! bfd_get_section_contents ((*ra)->input_section.section->owner,
-         (*ra)->input_section.section, &a_sec, (file_ptr) 0, (bfd_size_type)sizeof(a_sec)))
-            einfo ("%F%B: Can't read contents of section .idata: %E\n",
-                 (*ra)->input_section.section->owner);
+      if (!bfd_get_section_contents (sa->owner, sa, &a_sec, (file_ptr) 0,
+				     (bfd_size_type) sizeof (a_sec)))
+	einfo (_("%F%P: %pB: can't read contents of section .idata: %E\n"),
+	       sa->owner);
 
-       if (! bfd_get_section_contents ((*rb)->input_section.section->owner,
-        (*rb)->input_section.section, &b_sec, (file_ptr) 0, (bfd_size_type)sizeof(b_sec) ))
-           einfo ("%F%B: Can't read contents of section .idata: %E\n",
-                (*rb)->input_section.section->owner);
+      if (!bfd_get_section_contents (sb->owner, sb, &b_sec, (file_ptr) 0,
+				     (bfd_size_type) sizeof (b_sec)))
+	einfo (_("%F%P: %pB: can't read contents of section .idata: %E\n"),
+	       sb->owner);
 
-      i =  ((a_sec < b_sec) ? -1 : 0);
-      if ( i != 0)
-        return i;
-      return  ((a_sec < b_sec) ? 0 : 1);
-   }
-return 0;
+      i = a_sec < b_sec ? -1 : 0;
+      if (i != 0)
+	return i;
+      return a_sec < b_sec ? 0 : 1;
+    }
+  return 0;
 }
 
 static int
 sort_by_section_name (const void *a, const void *b)
 {
-  const lang_statement_union_type *const *ra = a;
-  const lang_statement_union_type *const *rb = b;
+  const lang_input_section_type *const *ra = a;
+  const lang_input_section_type *const *rb = b;
+  const char *sna = (*ra)->section->name;
+  const char *snb = (*rb)->section->name;
   int i;
-  i = strcmp ((*ra)->input_section.section->name,
-	      (*rb)->input_section.section->name);
+  i = strcmp (sna, snb);
   /* This is a hack to make .stab and .stabstr last, so we don't have
      to fix strip/objcopy for .reloc sections.
      FIXME stripping images with a .rsrc section still needs to be fixed.  */
   if (i != 0)
     {
-      if ((CONST_STRNEQ ((*ra)->input_section.section->name, ".stab"))
-           && (! CONST_STRNEQ ((*rb)->input_section.section->name, ".stab")))
-         return 1;
+      if ((CONST_STRNEQ (sna, ".stab"))
+	  && (!CONST_STRNEQ (snb, ".stab")))
+	return 1;
     }
   return i;
 }
@@ -609,12 +611,13 @@ gld_${EMULATION_NAME}_before_allocation (void)
   /* Here we rummage through the found bfds to collect toc information */
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	if (!ppc_process_before_allocation(is->the_bfd, &link_info))
-	  {
-	    einfo("Errors encountered processing file %s\n", is->filename);
-	  }
-      }
+    {
+      if (!ppc_process_before_allocation(is->the_bfd, &link_info))
+	{
+	  einfo (_("%P: errors encountered processing file %s\n"),
+		 is->filename);
+	}
+    }
   }
 
   /* We have seen it all. Allocate it, and carry on */
@@ -629,12 +632,13 @@ gld_${EMULATION_NAME}_before_allocation (void)
      option?  krk@cygnus.com */
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	if (!arm_process_before_allocation (is->the_bfd, & link_info))
-	  {
-	    einfo ("Errors encountered processing file %s", is->filename);
-	  }
-      }
+    {
+      if (!arm_process_before_allocation (is->the_bfd, & link_info))
+	{
+	  einfo (_("%P: errors encountered processing file %s\n"),
+		 is->filename);
+	}
+    }
   }
 
   /* We have seen it all. Allocate it, and carry on */
@@ -680,7 +684,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   /* Everything from the '\$' on gets deleted so don't allow '\$' as the
      first character.  */
   if (*secname == '\$')
-    einfo ("%P%F: section %s has '\$' as first character\n", secname);
+    einfo (_("%F%P: section %s has '\$' as first character\n"), secname);
   if (strchr (secname + 1, '\$') == NULL)
     return NULL;
 
@@ -712,7 +716,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       }
   ps[0] = 0;
   if (l == NULL)
-    einfo ("%P%F: *(%s\$) missing from linker script\n", output_secname);
+    einfo (_("%F%P: *(%s\$) missing from linker script\n"), output_secname);
 
   /* Link the input section in and we're done for now.
      The sections still have to be sorted, but that has to wait until
@@ -758,6 +762,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   hll_default,
   after_parse_default,
   gld_${EMULATION_NAME}_after_open,
+  after_check_relocs_default,
+  before_place_orphans_default,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
@@ -778,6 +784,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* recognized file */
   NULL,	/* find_potential_libraries */
   NULL,	/* new_vers_pattern */
-  NULL	/* extra_map_file_text */
+  NULL,	/* extra_map_file_text */
+  ${LDEMUL_EMIT_CTF_EARLY-NULL},
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
 };
 EOF

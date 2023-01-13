@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -15,12 +15,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_LINUX_PTRACE_H
-#define COMMON_LINUX_PTRACE_H
+#ifndef NAT_LINUX_PTRACE_H
+#define NAT_LINUX_PTRACE_H
 
 struct buffer;
 
 #include "nat/gdb_ptrace.h"
+#include "gdbsupport/gdb_wait.h"
 
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
@@ -140,8 +141,8 @@ struct buffer;
    in SPU code on a Cell/B.E.  However, SI_KERNEL is never seen
    on a SIGTRAP for any other reason.
 
-   The MIPS kernel uses SI_KERNEL for all kernel generated traps.
-   Since:
+   The MIPS kernel up until 4.5 used SI_KERNEL for all kernel
+   generated traps.  Since:
 
      - MIPS doesn't do hardware single-step.
      - We don't need to care about exec SIGTRAPs --- we assume
@@ -152,6 +153,9 @@ struct buffer;
    software breakpoints and hardware watchpoints, which can be done by
    peeking the debug registers.
 
+   Beginning with Linux 4.6, the MIPS port reports proper TRAP_BRKPT and
+   TRAP_HWBKPT codes, so we also match them.
+
    The generic Linux target code should use GDB_ARCH_IS_TRAP_* instead
    of TRAP_* to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
@@ -161,8 +165,8 @@ struct buffer;
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
 #elif defined __mips__
-# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
-# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL)
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
+# define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == SI_KERNEL || (X) == TRAP_HWBKPT)
 #else
 # define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
 # define GDB_ARCH_IS_TRAP_HWBKPT(X) ((X) == TRAP_HWBKPT)
@@ -172,14 +176,12 @@ struct buffer;
 # define TRAP_HWBKPT 4
 #endif
 
-extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
+extern std::string linux_ptrace_attach_fail_reason (pid_t pid);
 
 /* Find all possible reasons we could have failed to attach to PTID
    and return them as a string.  ERR is the error PTRACE_ATTACH failed
-   with (an errno).  The result is stored in a static buffer.  This
-   string should be copied into a buffer by the client if the string
-   will not be immediately used, or if it must persist.  */
-extern char *linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
+   with (an errno).  */
+extern std::string linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
 
 extern void linux_ptrace_init_warnings (void);
 extern void linux_check_ptrace_features (void);
@@ -194,4 +196,4 @@ extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
 extern int linux_wstatus_maybe_breakpoint (int wstat);
 
-#endif /* COMMON_LINUX_PTRACE_H */
+#endif /* NAT_LINUX_PTRACE_H */

@@ -12,9 +12,9 @@ Section Headers:
   \[ 2\] \.data             PROGBITS        00000000 000034 000000 00  WA  0   0  1
   \[ 3\] \.bss              NOBITS          00000000 000034 000000 00  WA  0   0  1
   \[ 4\] \.c6xabi\.attribute C6000_ATTRIBUTE 00000000 000034 000013 00      0   0  1
-  \[ 5\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 00003f 00      0   0  1
-  \[ 6\] \.symtab           SYMTAB          00000000 [0-9a-f]+ 0000d0 10      7   5  4
-  \[ 7\] \.strtab           STRTAB          00000000 [0-9a-f]+ 00001d 00      0   0  1
+  \[ 5\] \.symtab           SYMTAB          00000000 [0-9a-f]+ 0000d0 10      6   5  4
+  \[ 6\] \.strtab           STRTAB          00000000 [0-9a-f]+ 00001d 00      0   0  1
+  \[ 7\] \.shstrtab         STRTAB          00000000 [0-9a-f]+ 00003f 00      0   0  1
 Key to Flags:
 #...
 

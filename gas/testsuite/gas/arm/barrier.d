@@ -1,8 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: Barrier Instruction Operands
 #as: -mcpu=cortex-a8
-# This test is only valid on ELF based ports.
-#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd
 
 # Test Barrier Instruction Operands
 
@@ -58,7 +56,7 @@ Disassembly of section .text:
 000000b8 <[^>]*> f57ff046 	dsb	(nshst|unst|#6)
 000000bc <[^>]*> f57ff043 	dsb	(osh|#3)
 000000c0 <[^>]*> f57ff06f 	isb	(sy|#15)
-000000c4 <[^>]*> f57ff040 	dsb	#0
+000000c4 <[^>]*> f57ff040 	ssbb
 000000c8 <[^>]*> f57ff04f 	dsb	(sy|#15)
 000000cc <[^>]*> f57ff050 	dmb	#0
 000000d0 <[^>]*> f57ff05f 	dmb	(sy|#15)

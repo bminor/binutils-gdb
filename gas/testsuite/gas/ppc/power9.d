@@ -140,6 +140,8 @@ Disassembly of section \.text:
 .*:	(f0 80 2a 94|94 2a 80 f0) 	xxextractuw vs4,vs5,0
 .*:	(f1 0f 92 97|97 92 0f f1) 	xxextractuw vs40,vs50,15
 .*:	(f0 80 02 d0|d0 02 80 f0) 	xxspltib vs4,0
+.*:	(f0 84 02 d0|d0 02 84 f0) 	xxspltib vs4,128
+.*:	(f1 27 fa d1|d1 fa 27 f1) 	xxspltib vs41,255
 .*:	(f1 27 fa d1|d1 fa 27 f1) 	xxspltib vs41,255
 .*:	(f0 a0 32 d4|d4 32 a0 f0) 	xxinsertw vs5,vs6,0
 .*:	(f2 4f e2 d7|d7 e2 4f f2) 	xxinsertw vs50,vs60,15
@@ -272,8 +274,8 @@ Disassembly of section \.text:
 .*:	(f3 89 ef 6f|6f ef 89 f3) 	xvxsigsp vs60,vs61
 .*:	(7c 06 39 c0|c0 39 06 7c) 	cmpeqb  cr0,r6,r7
 .*:	(7f 86 39 c0|c0 39 86 7f) 	cmpeqb  cr7,r6,r7
-.*:	(7c 08 49 80|80 49 08 7c) 	cmprb   cr0,r8,r9
-.*:	(7f 88 49 80|80 49 88 7f) 	cmprb   cr7,r8,r9
+.*:	(7c 08 49 80|80 49 08 7c) 	cmprb   cr0,0,r8,r9
+.*:	(7f 88 49 80|80 49 88 7f) 	cmprb   cr7,0,r8,r9
 .*:	(7c 28 49 80|80 49 28 7c) 	cmprb   cr0,1,r8,r9
 .*:	(7f a8 49 80|80 49 a8 7f) 	cmprb   cr7,1,r8,r9
 .*:	(7d e0 01 00|00 01 e0 7d) 	setb    r15,cr0
@@ -310,8 +312,9 @@ Disassembly of section \.text:
 .*:	(f1 31 9d 6f|6f 9d 31 f1) 	xscvdphp vs41,vs51
 .*:	(f1 58 a7 6f|6f a7 58 f1) 	xvcvhpsp vs42,vs52
 .*:	(f1 79 af 6f|6f af 79 f1) 	xvcvsphp vs43,vs53
-.*:	(4c 60 00 04|04 00 60 4c) 	addpcis r3,0
-.*:	(4c 60 00 04|04 00 60 4c) 	addpcis r3,0
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
+.*:	(4c 60 00 04|04 00 60 4c) 	lnia    r3
 .*:	(4c 80 00 05|05 00 80 4c) 	addpcis r4,1
 .*:	(4c 80 00 05|05 00 80 4c) 	addpcis r4,1
 .*:	(4c bf ff c4|c4 ff bf 4c) 	addpcis r5,-2
@@ -321,6 +324,7 @@ Disassembly of section \.text:
 .*:	(4c e0 80 04|04 80 e0 4c) 	addpcis r7,-32768
 .*:	(4c e0 80 04|04 80 e0 4c) 	addpcis r7,-32768
 .*:	(7c 00 02 a4|a4 02 00 7c) 	slbsync
+.*:	(7d 40 06 a4|a4 06 40 7d) 	slbiag  r10
 .*:	(7d 40 5b a4|a4 5b 40 7d) 	slbieg  r10,r11
 .*:	(7c 60 27 26|26 27 60 7c) 	slbmfee r3,r4
 .*:	(7c 60 27 26|26 27 60 7c) 	slbmfee r3,r4
@@ -334,14 +338,9 @@ Disassembly of section \.text:
 .*:	(7c 00 1a 24|24 1a 00 7c) 	tlbiel  r3
 .*:	(7c 00 1a 24|24 1a 00 7c) 	tlbiel  r3
 .*:	(7c 8f 1a 24|24 1a 8f 7c) 	tlbiel  r3,r4,3,1,1
-.*:	(7c 0c 6e 0c|0c 6e 0c 7c) 	copy    r12,r13
-.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy_first r12,r13
-.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy_first r12,r13
-.*:	(7c 0a 5f 0c|0c 5f 0a 7c) 	paste   r10,r11
-.*:	(7c 0a 5f 0c|0c 5f 0a 7c) 	paste   r10,r11
-.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste_last r10,r11
-.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste_last r10,r11
-.*:	(7c 00 06 8c|8c 06 00 7c) 	cp_abort
+.*:	(7c 2c 6e 0c|0c 6e 2c 7c) 	copy    r12,r13
+.*:	(7c 2a 5f 0d|0d 5f 2a 7c) 	paste\.  r10,r11
+.*:	(7c 00 06 8c|8c 06 00 7c) 	cpabort
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
 .*:	(7c 00 04 ac|ac 04 00 7c) 	hwsync
@@ -349,8 +348,6 @@ Disassembly of section \.text:
 .*:	(7c 20 04 ac|ac 04 20 7c) 	lwsync
 .*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
 .*:	(7c 40 04 ac|ac 04 40 7c) 	ptesync
-.*:	(7c 07 04 ac|ac 04 07 7c) 	sync    0,7
-.*:	(7c 28 04 ac|ac 04 28 7c) 	sync    1,8
 .*:	(7e 80 04 cc|cc 04 80 7e) 	ldat    r20,0,0
 .*:	(7e 8a e4 cc|cc e4 8a 7e) 	ldat    r20,r10,28
 .*:	(7e a0 04 8c|8c 04 a0 7e) 	lwat    r21,0,0
@@ -361,11 +358,9 @@ Disassembly of section \.text:
 .*:	(7e ed e5 8c|8c e5 ed 7e) 	stwat   r23,r13,28
 .*:	(4c 00 02 64|64 02 00 4c) 	urfid
 .*:	(7c 00 f6 e4|e4 f6 00 7c) 	rmieg   r30
-.*:	(7d 40 7a 6a|6a 7a 40 7d) 	ldmx    r10,0,r15
-.*:	(7d 43 7a 6a|6a 7a 43 7d) 	ldmx    r10,r3,r15
 .*:	(4c 00 02 e4|e4 02 00 4c) 	stop
-.*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
-.*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
+.*:	(7c 00 00 3c|3c 00 00 7c) 	wait
+.*:	(7c 00 00 3c|3c 00 00 7c) 	wait
 .*:	(7c 60 05 e6|e6 05 60 7c) 	darn    r3,0
 .*:	(7c 61 05 e6|e6 05 61 7c) 	darn    r3,1
 .*:	(7c 62 05 e6|e6 05 62 7c) 	darn    r3,2
@@ -381,4 +376,21 @@ Disassembly of section \.text:
 .*:	(f0 6d bc 07|07 bc 6d f0) 	xsmaxcdp vs35,vs45,vs55
 .*:	(f0 8e c4 c7|c7 c4 8e f0) 	xsminjdp vs36,vs46,vs56
 .*:	(f0 af cc 87|87 cc af f0) 	xsmaxjdp vs37,vs47,vs57
+.*:	(12 95 b5 e3|e3 b5 95 12) 	vmsumudm v20,v21,v22,v23
+.*:	(7d 6c 69 54|54 69 6c 7d) 	addex   r11,r12,r13,0
+.*:	(7d 6c 6b 54|54 6b 6c 7d) 	addex   r11,r12,r13,1
+.*:	(7d 6c 6d 54|54 6d 6c 7d) 	addex   r11,r12,r13,2
+.*:	(ff 20 04 8e|8e 04 20 ff) 	mffs    f25
+.*:	(ff 20 04 8f|8f 04 20 ff) 	mffs\.   f25
+.*:	(ff 41 04 8e|8e 04 41 ff) 	mffsce  f26
+.*:	(ff 74 a4 8e|8e a4 74 ff) 	mffscdrn f27,f20
+.*:	(ff 95 04 8e|8e 04 95 ff) 	mffscdrni f28,0
+.*:	(ff 95 3c 8e|8e 3c 95 ff) 	mffscdrni f28,7
+.*:	(ff b6 ac 8e|8e ac b6 ff) 	mffscrn f29,f21
+.*:	(ff d7 04 8e|8e 04 d7 ff) 	mffscrni f30,0
+.*:	(ff d7 1c 8e|8e 1c d7 ff) 	mffscrni f30,3
+.*:	(ff f8 04 8e|8e 04 f8 ff) 	mffsl   f31
+.*:	(01 00 00 44|44 00 00 01) 	scv     0
+.*:	(e1 0f 00 44|44 00 0f e1) 	scv     127
+.*:	(a4 00 00 4c|4c 00 00 a4) 	rfscv
 #pass

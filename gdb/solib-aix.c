@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2013-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,73 +24,46 @@
 #include "objfiles.h"
 #include "symtab.h"
 #include "xcoffread.h"
-#include "observer.h"
+#include "observable.h"
 #include "gdbcmd.h"
+#include "gdbsupport/scope-exit.h"
 
 /* Variable controlling the output of the debugging traces for
    this module.  */
-static int solib_aix_debug;
+static bool solib_aix_debug;
 
 /* Our private data in struct so_list.  */
 
-struct lm_info
+struct lm_info_aix : public lm_info_base
 {
   /* The name of the file mapped by the loader.  Apart from the entry
      for the main executable, this is usually a shared library (which,
      on AIX, is an archive library file, created using the "ar"
      command).  */
-  char *filename;
+  std::string filename;
 
   /* The name of the shared object file with the actual dynamic
-     loading dependency.  This may be NULL (Eg. main executable).  */
-  char *member_name;
+     loading dependency.  This may be empty (Eg. main executable).  */
+  std::string member_name;
 
   /* The address in inferior memory where the text section got mapped.  */
-  CORE_ADDR text_addr;
+  CORE_ADDR text_addr = 0;
 
   /* The size of the text section, obtained via the loader data.  */
-  ULONGEST text_size;
+  ULONGEST text_size = 0;
 
   /* The address in inferior memory where the data section got mapped.  */
-  CORE_ADDR data_addr;
+  CORE_ADDR data_addr = 0;
 
   /* The size of the data section, obtained via the loader data.  */
-  ULONGEST data_size;
+  ULONGEST data_size = 0;
 };
-
-typedef struct lm_info *lm_info_p;
-DEF_VEC_P(lm_info_p);
-
-/* Return a deep copy of the given struct lm_info object.  */
-
-static struct lm_info *
-solib_aix_new_lm_info (struct lm_info *info)
-{
-  struct lm_info *result = XNEW (struct lm_info);
-
-  memcpy (result, info, sizeof (struct lm_info));
-  result->filename = xstrdup (info->filename);
-  if (info->member_name != NULL)
-    result->member_name = xstrdup (info->member_name);
-
-  return result;
-}
-
-/* Free the memory allocated for the given lm_info.  */
-
-static void
-solib_aix_xfree_lm_info (struct lm_info *info)
-{
-  xfree (info->filename);
-  xfree (info->member_name);
-  xfree (info);
-}
 
 /* This module's per-inferior data.  */
 
 struct solib_aix_inferior_data
 {
-  /* The list of shared libraries.  NULL if not computed yet.
+  /* The list of shared libraries.
 
      Note that the first element of this list is always the main
      executable, which is not technically a shared library.  But
@@ -98,11 +71,11 @@ struct solib_aix_inferior_data
      the same principles applied to shared libraries also apply
      to the main executable.  So it's simpler to keep it as part
      of this list.  */
-  VEC (lm_info_p) *library_list;
+  gdb::optional<std::vector<lm_info_aix>> library_list;
 };
 
 /* Key to our per-inferior data.  */
-static const struct inferior_data *solib_aix_inferior_data_handle;
+static inferior_key<solib_aix_inferior_data> solib_aix_inferior_data_handle;
 
 /* Return this module's data for the given inferior.
    If none is found, add a zero'ed one now.  */
@@ -112,13 +85,9 @@ get_solib_aix_inferior_data (struct inferior *inf)
 {
   struct solib_aix_inferior_data *data;
 
-  data = ((struct solib_aix_inferior_data *)
-	  inferior_data (inf, solib_aix_inferior_data_handle));
+  data = solib_aix_inferior_data_handle.get (inf);
   if (data == NULL)
-    {
-      data = XCNEW (struct solib_aix_inferior_data);
-      set_inferior_data (inf, solib_aix_inferior_data_handle, data);
-    }
+    data = solib_aix_inferior_data_handle.emplace (inf);
 
   return data;
 }
@@ -127,7 +96,7 @@ get_solib_aix_inferior_data (struct inferior *inf)
 
 /* Dummy implementation if XML support is not compiled in.  */
 
-static VEC (lm_info_p) *
+static gdb::optional<std::vector<lm_info_aix>>
 solib_aix_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -139,14 +108,7 @@ solib_aix_parse_libraries (const char *library)
                  "at compile time"));
     }
 
-  return NULL;
-}
-
-/* Dummy implementation if XML support is not compiled in.  */
-
-static void
-solib_aix_free_library_list (void *p)
-{
+  return {};
 }
 
 #else /* HAVE_LIBEXPAT */
@@ -159,32 +121,32 @@ static void
 library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data,
-			    VEC (gdb_xml_value_s) *attributes)
+			    std::vector<gdb_xml_value> &attributes)
 {
-  VEC (lm_info_p) **list = (VEC (lm_info_p) **) user_data;
-  struct lm_info *item = XCNEW (struct lm_info);
+  std::vector<lm_info_aix> *list = (std::vector<lm_info_aix> *) user_data;
+  lm_info_aix item;
   struct gdb_xml_value *attr;
 
   attr = xml_find_attribute (attributes, "name");
-  item->filename = xstrdup ((const char *) attr->value);
+  item.filename = (const char *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "member");
   if (attr != NULL)
-    item->member_name = xstrdup ((const char *) attr->value);
+    item.member_name = (const char *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "text_addr");
-  item->text_addr = * (ULONGEST *) attr->value;
+  item.text_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "text_size");
-  item->text_size = * (ULONGEST *) attr->value;
+  item.text_size = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_addr");
-  item->data_addr = * (ULONGEST *) attr->value;
+  item.data_addr = * (ULONGEST *) attr->value.get ();
 
   attr = xml_find_attribute (attributes, "data_size");
-  item->data_size = * (ULONGEST *) attr->value;
+  item.data_size = * (ULONGEST *) attr->value.get ();
 
-  VEC_safe_push (lm_info_p, *list, item);
+  list->push_back (std::move (item));
 }
 
 /* Handle the start of a <library-list-aix> element.  */
@@ -192,32 +154,16 @@ library_list_start_library (struct gdb_xml_parser *parser,
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
                          const struct gdb_xml_element *element,
-                         void *user_data, VEC (gdb_xml_value_s) *attributes)
+                         void *user_data,
+			 std::vector<gdb_xml_value> &attributes)
 {
-  char *version = (char *) xml_find_attribute (attributes, "version")->value;
+  char *version
+    = (char *) xml_find_attribute (attributes, "version")->value.get ();
 
   if (strcmp (version, "1.0") != 0)
     gdb_xml_error (parser,
                    _("Library list has unsupported version \"%s\""),
                    version);
-}
-
-/* Discard the constructed library list.  */
-
-static void
-solib_aix_free_library_list (void *p)
-{
-  VEC (lm_info_p) **result = (VEC (lm_info_p) **) p;
-  struct lm_info *info;
-  int ix;
-
-  if (solib_aix_debug)
-    fprintf_unfiltered (gdb_stdlog, "DEBUG: solib_aix_free_library_list\n");
-
-  for (ix = 0; VEC_iterate (lm_info_p, *result, ix, info); ix++)
-    solib_aix_xfree_lm_info (info);
-  VEC_free (lm_info_p, *result);
-  *result = NULL;
 }
 
 /* The allowed elements and attributes for an AIX library list
@@ -256,33 +202,26 @@ static const struct gdb_xml_element library_list_elements[] =
 };
 
 /* Parse LIBRARY, a string containing the loader info in XML format,
-   and return an lm_info_p vector.
+   and return a vector of lm_info_aix objects.
 
-   Return NULL if the parsing failed.  */
+   Return an empty option if the parsing failed.  */
 
-static VEC (lm_info_p) *
+static gdb::optional<std::vector<lm_info_aix>>
 solib_aix_parse_libraries (const char *library)
 {
-  VEC (lm_info_p) *result = NULL;
-  struct cleanup *back_to = make_cleanup (solib_aix_free_library_list,
-                                          &result);
+  std::vector<lm_info_aix> result;
 
   if (gdb_xml_parse_quick (_("aix library list"), "library-list-aix.dtd",
-                           library_list_elements, library, &result) == 0)
-    {
-      /* Parsed successfully, keep the result.  */
-      discard_cleanups (back_to);
-      return result;
-    }
+			   library_list_elements, library, &result) == 0)
+    return result;
 
-  do_cleanups (back_to);
-  return NULL;
+  return {};
 }
 
 #endif /* HAVE_LIBEXPAT */
 
-/* Return the loader info for the given inferior (INF), or NULL if
-   the list could not be computed.
+/* Return the loader info for the given inferior (INF), or an empty
+   option if the list could not be computed.
 
    Cache the result in per-inferior data, so as to avoid recomputing it
    each time this function is called.
@@ -291,43 +230,35 @@ solib_aix_parse_libraries (const char *library)
    is not NULL, then print a warning including WARNING_MSG and
    a description of the error.  */
 
-static VEC (lm_info_p) *
+static gdb::optional<std::vector<lm_info_aix>> &
 solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
 {
   struct solib_aix_inferior_data *data;
-  char *library_document;
-  struct cleanup *cleanup;
 
   /* If already computed, return the cached value.  */
   data = get_solib_aix_inferior_data (inf);
-  if (data->library_list != NULL)
+  if (data->library_list.has_value ())
     return data->library_list;
 
-  library_document = target_read_stralloc (&current_target,
-                                           TARGET_OBJECT_LIBRARIES_AIX,
-                                           NULL);
-  if (library_document == NULL && warning_msg != NULL)
+  gdb::optional<gdb::char_vector> library_document
+    = target_read_stralloc (current_top_target (), TARGET_OBJECT_LIBRARIES_AIX,
+			    NULL);
+  if (!library_document && warning_msg != NULL)
     {
       warning (_("%s (failed to read TARGET_OBJECT_LIBRARIES_AIX)"),
 	       warning_msg);
-      return NULL;
+      return data->library_list;
     }
-  cleanup = make_cleanup (xfree, library_document);
 
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"DEBUG: TARGET_OBJECT_LIBRARIES_AIX = \n%s\n",
-			library_document);
+			library_document->data ());
 
-  data->library_list = solib_aix_parse_libraries (library_document);
-  if (data->library_list == NULL && warning_msg != NULL)
-    {
-      warning (_("%s (missing XML support?)"), warning_msg);
-      do_cleanups (cleanup);
-      return NULL;
-    }
+  data->library_list = solib_aix_parse_libraries (library_document->data ());
+  if (!data->library_list.has_value () && warning_msg != NULL)
+    warning (_("%s (missing XML support?)"), warning_msg);
 
-  do_cleanups (cleanup);
   return data->library_list;
 }
 
@@ -372,15 +303,13 @@ solib_aix_bss_data_overlap (bfd *abfd)
      section after the .data section (the problem has only been
      observed when using the GNU linker, and the default linker
      script always places the .data and .bss sections in that order).  */
-  if (bfd_section_vma (abfd, bss_sect)
-      < bfd_section_vma (abfd, data_sect))
+  if (bfd_section_vma (bss_sect) < bfd_section_vma (data_sect))
     return 0;
 
-  if (bfd_section_vma (abfd, bss_sect)
-      < bfd_section_vma (abfd, data_sect) + bfd_get_section_size (data_sect))
-    return ((bfd_section_vma (abfd, data_sect)
-	     + bfd_get_section_size (data_sect))
-	    - bfd_section_vma (abfd, bss_sect));
+  if (bfd_section_vma (bss_sect)
+      < bfd_section_vma (data_sect) + bfd_section_size (data_sect))
+    return (bfd_section_vma (data_sect) + bfd_section_size (data_sect)
+	    - bfd_section_vma (bss_sect));
 
   return 0;
 }
@@ -393,8 +322,8 @@ solib_aix_relocate_section_addresses (struct so_list *so,
 {
   struct bfd_section *bfd_sect = sec->the_bfd_section;
   bfd *abfd = bfd_sect->owner;
-  const char *section_name = bfd_section_name (abfd, bfd_sect);
-  struct lm_info *info = so->lm_info;
+  const char *section_name = bfd_section_name (bfd_sect);
+  lm_info_aix *info = (lm_info_aix *) so->lm_info;
 
   if (strcmp (section_name, ".text") == 0)
     {
@@ -424,17 +353,17 @@ solib_aix_relocate_section_addresses (struct so_list *so,
       CORE_ADDR data_offset = 0;
 
       if (data_sect != NULL)
-	data_offset = info->data_addr - bfd_section_vma (abfd, data_sect);
+	data_offset = info->data_addr - bfd_section_vma (data_sect);
 
-      sec->addr = bfd_section_vma (abfd, bfd_sect) + data_offset;
+      sec->addr = bfd_section_vma (bfd_sect) + data_offset;
       sec->addr += solib_aix_bss_data_overlap (abfd);
-      sec->endaddr = sec->addr + bfd_section_size (abfd, bfd_sect);
+      sec->endaddr = sec->addr + bfd_section_size (bfd_sect);
     }
   else
     {
       /* All other sections should not be relocated.  */
-      sec->addr = bfd_section_vma (abfd, bfd_sect);
-      sec->endaddr = sec->addr + bfd_section_size (abfd, bfd_sect);
+      sec->addr = bfd_section_vma (bfd_sect);
+      sec->endaddr = sec->addr + bfd_section_size (bfd_sect);
     }
 }
 
@@ -443,10 +372,13 @@ solib_aix_relocate_section_addresses (struct so_list *so,
 static void
 solib_aix_free_so (struct so_list *so)
 {
+  lm_info_aix *li = (lm_info_aix *) so->lm_info;
+
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog, "DEBUG: solib_aix_free_so (%s)\n",
 			so->so_name);
-  solib_aix_xfree_lm_info (so->lm_info);
+
+  delete li;
 }
 
 /* Implement the "clear_solib" target_so_ops method.  */
@@ -458,20 +390,15 @@ solib_aix_clear_solib (void)
 }
 
 /* Compute and return the OBJFILE's section_offset array, using
-   the associated loader info (INFO).
+   the associated loader info (INFO).  */
 
-   The resulting array is computed on the heap and must be
-   deallocated after use.  */
-
-static struct section_offsets *
+static section_offsets
 solib_aix_get_section_offsets (struct objfile *objfile,
-			       struct lm_info *info)
+			       lm_info_aix *info)
 {
-  struct section_offsets *offsets;
   bfd *abfd = objfile->obfd;
-  int i;
 
-  offsets = XCNEWVEC (struct section_offsets, objfile->num_sections);
+  section_offsets offsets (objfile->section_offsets.size ());
 
   /* .text */
 
@@ -480,8 +407,8 @@ solib_aix_get_section_offsets (struct objfile *objfile,
       struct bfd_section *sect
 	= objfile->sections[objfile->sect_index_text].the_bfd_section;
 
-      offsets->offsets[objfile->sect_index_text]
-	= info->text_addr + sect->filepos - bfd_section_vma (abfd, sect);
+      offsets[objfile->sect_index_text]
+	= info->text_addr + sect->filepos - bfd_section_vma (sect);
     }
 
   /* .data */
@@ -491,8 +418,8 @@ solib_aix_get_section_offsets (struct objfile *objfile,
       struct bfd_section *sect
 	= objfile->sections[objfile->sect_index_data].the_bfd_section;
 
-      offsets->offsets[objfile->sect_index_data]
-	= info->data_addr - bfd_section_vma (abfd, sect);
+      offsets[objfile->sect_index_data]
+	= info->data_addr - bfd_section_vma (sect);
     }
 
   /* .bss
@@ -504,8 +431,8 @@ solib_aix_get_section_offsets (struct objfile *objfile,
   if (objfile->sect_index_bss != -1
       && objfile->sect_index_data != -1)
     {
-      offsets->offsets[objfile->sect_index_bss]
-	= (offsets->offsets[objfile->sect_index_data]
+      offsets[objfile->sect_index_bss]
+	= (offsets[objfile->sect_index_data]
 	   + solib_aix_bss_data_overlap (abfd));
     }
 
@@ -520,41 +447,28 @@ static void
 solib_aix_solib_create_inferior_hook (int from_tty)
 {
   const char *warning_msg = "unable to relocate main executable";
-  VEC (lm_info_p) *library_list;
-  struct lm_info *exec_info;
 
   /* We need to relocate the main executable...  */
 
-  library_list = solib_aix_get_library_list (current_inferior (),
-					     warning_msg);
-  if (library_list == NULL)
+  gdb::optional<std::vector<lm_info_aix>> &library_list
+    = solib_aix_get_library_list (current_inferior (), warning_msg);
+  if (!library_list.has_value ())
     return;  /* Warning already printed.  */
 
-  if (VEC_length (lm_info_p, library_list) < 1)
+  if (library_list->empty ())
     {
       warning (_("unable to relocate main executable (no info from loader)"));
       return;
     }
 
-  exec_info = VEC_index (lm_info_p, library_list, 0);
-
+  lm_info_aix &exec_info = (*library_list)[0];
   if (symfile_objfile != NULL)
     {
-      struct section_offsets *offsets
-	= solib_aix_get_section_offsets (symfile_objfile, exec_info);
-      struct cleanup *cleanup = make_cleanup (xfree, offsets);
+      section_offsets offsets
+	= solib_aix_get_section_offsets (symfile_objfile, &exec_info);
 
       objfile_relocate (symfile_objfile, offsets);
-      do_cleanups (cleanup);
     }
-}
-
-/* Implement the "special_symbol_handling" target_so_ops method.  */
-
-static void
-solib_aix_special_symbol_handling (void)
-{
-  /* Nothing needed.  */
 }
 
 /* Implement the "current_sos" target_so_ops method.  */
@@ -563,29 +477,29 @@ static struct so_list *
 solib_aix_current_sos (void)
 {
   struct so_list *start = NULL, *last = NULL;
-  VEC (lm_info_p) *library_list;
-  struct lm_info *info;
   int ix;
 
-  library_list = solib_aix_get_library_list (current_inferior (), NULL);
-  if (library_list == NULL)
+  gdb::optional<std::vector<lm_info_aix>> &library_list
+    = solib_aix_get_library_list (current_inferior (), NULL);
+  if (!library_list.has_value ())
     return NULL;
 
   /* Build a struct so_list for each entry on the list.
      We skip the first entry, since this is the entry corresponding
      to the main executable, not a shared library.  */
-  for (ix = 1; VEC_iterate (lm_info_p, library_list, ix, info); ix++)
+  for (ix = 1; ix < library_list->size (); ix++)
     {
       struct so_list *new_solib = XCNEW (struct so_list);
-      char *so_name;
+      std::string so_name;
 
-      if (info->member_name == NULL)
+      lm_info_aix &info = (*library_list)[ix];
+      if (info.member_name.empty ())
 	{
-	 /* INFO->FILENAME is probably not an archive, but rather
+	 /* INFO.FILENAME is probably not an archive, but rather
 	    a shared object.  Unusual, but it should be possible
 	    to link a program against a shared object directory,
 	    without having to put it in an archive first.  */
-	 so_name = xstrdup (info->filename);
+	 so_name = info.filename;
 	}
       else
 	{
@@ -593,14 +507,15 @@ solib_aix_current_sos (void)
 	    is a member of an archive.  Create a synthetic so_name
 	    that follows the same convention as AIX's ldd tool
 	    (Eg: "/lib/libc.a(shr.o)").  */
-	 so_name = xstrprintf ("%s(%s)", info->filename, info->member_name);
+	 so_name = string_printf ("%s(%s)", info.filename.c_str (),
+				  info.member_name.c_str ());
 	}
-      strncpy (new_solib->so_original_name, so_name,
+      strncpy (new_solib->so_original_name, so_name.c_str (),
 	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       memcpy (new_solib->so_name, new_solib->so_original_name,
 	      SO_NAME_MAX_PATH_SIZE);
-      new_solib->lm_info = solib_aix_new_lm_info (info);
+      new_solib->lm_info = new lm_info_aix (info);
 
       /* Add it to the list.  */
       if (!start)
@@ -618,7 +533,7 @@ solib_aix_current_sos (void)
 /* Implement the "open_symbol_file_object" target_so_ops method.  */
 
 static int
-solib_aix_open_symbol_file_object (void *from_ttyp)
+solib_aix_open_symbol_file_object (int from_tty)
 {
   return 0;
 }
@@ -633,8 +548,8 @@ solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
 
 /* Implement the "bfd_open" target_so_ops method.  */
 
-static bfd *
-solib_aix_bfd_open (char *pathname)
+static gdb_bfd_ref_ptr
+solib_aix_bfd_open (const char *pathname)
 {
   /* The pathname is actually a synthetic filename with the following
      form: "/path/to/sharedlib(member.o)" (double-quotes excluded).
@@ -643,12 +558,9 @@ solib_aix_bfd_open (char *pathname)
      FIXME: This is a little hacky.  Perhaps we should provide access
      to the solib's lm_info here?  */
   const int path_len = strlen (pathname);
-  char *sep;
-  char *filename;
+  const char *sep;
   int filename_len;
-  char *member_name;
-  bfd *archive_bfd, *object_bfd;
-  struct cleanup *cleanup;
+  int found_file;
 
   if (pathname[path_len - 1] != ')')
     return solib_bfd_open (pathname);
@@ -665,75 +577,71 @@ solib_aix_bfd_open (char *pathname)
     }
   filename_len = sep - pathname;
 
-  filename = xstrprintf ("%.*s", filename_len, pathname);
-  cleanup = make_cleanup (xfree, filename);
-  member_name = xstrprintf ("%.*s", path_len - filename_len - 2, sep + 1);
-  make_cleanup (xfree, member_name);
+  std::string filename (string_printf ("%.*s", filename_len, pathname));
+  std::string member_name (string_printf ("%.*s", path_len - filename_len - 2,
+					  sep + 1));
 
-  archive_bfd = gdb_bfd_open (filename, gnutarget, -1);
+  /* Calling solib_find makes certain that sysroot path is set properly
+     if program has a dependency on .a archive and sysroot is set via
+     set sysroot command.  */
+  gdb::unique_xmalloc_ptr<char> found_pathname
+    = solib_find (filename.c_str (), &found_file);
+  if (found_pathname == NULL)
+      perror_with_name (pathname);
+  gdb_bfd_ref_ptr archive_bfd (solib_bfd_fopen (found_pathname.get (),
+						found_file));
   if (archive_bfd == NULL)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
-	       filename, bfd_errmsg (bfd_get_error ()));
-      do_cleanups (cleanup);
+	       filename.c_str (), bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
 
-  if (bfd_check_format (archive_bfd, bfd_object))
-    {
-      do_cleanups (cleanup);
-      return archive_bfd;
-    }
+  if (bfd_check_format (archive_bfd.get (), bfd_object))
+    return archive_bfd;
 
-  if (! bfd_check_format (archive_bfd, bfd_archive))
+  if (! bfd_check_format (archive_bfd.get (), bfd_archive))
     {
       warning (_("\"%s\": not in executable format: %s."),
-	       filename, bfd_errmsg (bfd_get_error ()));
-      gdb_bfd_unref (archive_bfd);
-      do_cleanups (cleanup);
+	       filename.c_str (), bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
 
-  object_bfd = gdb_bfd_openr_next_archived_file (archive_bfd, NULL);
+  gdb_bfd_ref_ptr object_bfd
+    (gdb_bfd_openr_next_archived_file (archive_bfd.get (), NULL));
   while (object_bfd != NULL)
     {
-      bfd *next;
-
-      if (strcmp (member_name, object_bfd->filename) == 0)
+      if (member_name == object_bfd->filename)
 	break;
 
-      next = gdb_bfd_openr_next_archived_file (archive_bfd, object_bfd);
-      gdb_bfd_unref (object_bfd);
-      object_bfd = next;
+      object_bfd = gdb_bfd_openr_next_archived_file (archive_bfd.get (),
+						     object_bfd.get ());
     }
 
   if (object_bfd == NULL)
     {
-      warning (_("\"%s\": member \"%s\" missing."), filename, member_name);
-      gdb_bfd_unref (archive_bfd);
-      do_cleanups (cleanup);
+      warning (_("\"%s\": member \"%s\" missing."), filename.c_str (),
+	       member_name.c_str ());
       return NULL;
     }
 
-  if (! bfd_check_format (object_bfd, bfd_object))
+  if (! bfd_check_format (object_bfd.get (), bfd_object))
     {
       warning (_("%s(%s): not in object format: %s."),
-	       filename, member_name, bfd_errmsg (bfd_get_error ()));
-      gdb_bfd_unref (archive_bfd);
-      gdb_bfd_unref (object_bfd);
-      do_cleanups (cleanup);
+	       filename.c_str (), member_name.c_str (),
+	       bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
 
-  /* Override the returned bfd's name with our synthetic name in order
-     to allow commands listing all shared libraries to display that
-     synthetic name.  Otherwise, we would only be displaying the name
-     of the archive member object.  */
-  xfree (bfd_get_filename (object_bfd));
-  object_bfd->filename = xstrdup (pathname);
+  /* Override the returned bfd's name with the name returned from solib_find
+     along with appended parenthesized member name in order to allow commands
+     listing all shared libraries to display.  Otherwise, we would only be
+     displaying the name of the archive member object.  */
+  bfd_set_filename (object_bfd.get (),
+		    xstrprintf ("%s%s",
+				bfd_get_filename (archive_bfd.get ()),
+				sep));
 
-  gdb_bfd_unref (archive_bfd);
-  do_cleanups (cleanup);
   return object_bfd;
 }
 
@@ -747,8 +655,7 @@ data_obj_section_from_objfile (struct objfile *objfile)
   struct obj_section *osect;
 
   ALL_OBJFILE_OSECTIONS (objfile, osect)
-    if (strcmp (bfd_section_name (objfile->obfd, osect->the_bfd_section),
-		".data") == 0)
+    if (strcmp (bfd_section_name (osect->the_bfd_section), ".data") == 0)
       return osect;
 
   return NULL;
@@ -797,7 +704,7 @@ solib_aix_normal_stop_observer (struct bpstats *unused_1, int unused_2)
   /* The inferior execution has been resumed, and it just stopped
      again.  This means that the list of shared libraries may have
      evolved.  Reset our cached value.  */
-  solib_aix_free_library_list (&data->library_list);
+  data->library_list.reset ();
 }
 
 /* Implements the "show debug aix-solib" command.  */
@@ -812,11 +719,9 @@ show_solib_aix_debug (struct ui_file *file, int from_tty,
 /* The target_so_ops for AIX targets.  */
 struct target_so_ops solib_aix_so_ops;
 
-/* -Wmissing-prototypes */
-extern initialize_file_ftype _initialize_solib_aix;
-
+void _initialize_solib_aix ();
 void
-_initialize_solib_aix (void)
+_initialize_solib_aix ()
 {
   solib_aix_so_ops.relocate_section_addresses
     = solib_aix_relocate_section_addresses;
@@ -824,8 +729,6 @@ _initialize_solib_aix (void)
   solib_aix_so_ops.clear_solib = solib_aix_clear_solib;
   solib_aix_so_ops.solib_create_inferior_hook
     = solib_aix_solib_create_inferior_hook;
-  solib_aix_so_ops.special_symbol_handling
-    = solib_aix_special_symbol_handling;
   solib_aix_so_ops.current_sos = solib_aix_current_sos;
   solib_aix_so_ops.open_symbol_file_object
     = solib_aix_open_symbol_file_object;
@@ -833,9 +736,7 @@ _initialize_solib_aix (void)
     = solib_aix_in_dynsym_resolve_code;
   solib_aix_so_ops.bfd_open = solib_aix_bfd_open;
 
-  solib_aix_inferior_data_handle = register_inferior_data ();
-
-  observer_attach_normal_stop (solib_aix_normal_stop_observer);
+  gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer);
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aix-solib", class_maintenance,

@@ -1,5 +1,5 @@
 /* Serial interface for a pipe to a separate program
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -27,16 +27,14 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "gdb_sys_time.h"
+#include "gdbsupport/gdb_sys_time.h"
 #include <fcntl.h>
-#include "filestuff.h"
+#include "gdbsupport/filestuff.h"
 
 #include <signal.h>
 
 static int pipe_open (struct serial *scb, const char *name);
 static void pipe_close (struct serial *scb);
-
-extern void _initialize_ser_pipe (void);
 
 struct pipe_state
   {
@@ -221,7 +219,6 @@ static const struct serial_ops pipe_ops =
   ser_base_copy_tty_state,
   ser_base_set_tty_state,
   ser_base_print_tty_state,
-  ser_base_noflush_set_tty_state,
   ser_base_setbaudrate,
   ser_base_setstopbits,
   ser_base_setparity,
@@ -231,8 +228,9 @@ static const struct serial_ops pipe_ops =
   ser_unix_write_prim
 };
 
+void _initialize_ser_pipe ();
 void
-_initialize_ser_pipe (void)
+_initialize_ser_pipe ()
 {
   serial_add_interface (&pipe_ops);
 }

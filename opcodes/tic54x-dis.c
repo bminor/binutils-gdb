@@ -1,5 +1,5 @@
 /* Disassembly routines for TMS320C54X architecture
-   Copyright (C) 1999-2016 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of the GNU opcodes library.
@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
-#include "dis-asm.h"
+#include "disassemble.h"
 #include "opcode/tic54x.h"
 #include "coff/tic54x.h"
 
@@ -394,8 +394,7 @@ print_instruction (disassemble_info *info,
             break;
           }
         case OP_k5:
-          sprintf (operand[i], "#%d",
-                   (int) (((signed char) opcode & 0x1F) << 3) >> 3);
+          sprintf (operand[i], "#%d", ((opcode & 0x1F) ^ 0x10) - 0x10);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_k8u:
@@ -530,7 +529,7 @@ sprint_mmr (disassemble_info *info ATTRIBUTE_UNUSED,
 	    char buf[],
 	    int mmr)
 {
-  symbol *reg = (symbol *) mmregs;
+  tic54x_symbol *reg = (tic54x_symbol *) mmregs;
   while (reg->name != NULL)
     {
       if (mmr == reg->value)

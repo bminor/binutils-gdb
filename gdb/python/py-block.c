@@ -1,6 +1,6 @@
 /* Python interface to blocks.
 
-   Copyright (C) 2008-2016 Free Software Foundation, Inc.
+   Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,6 @@
 #include "symtab.h"
 #include "python-internal.h"
 #include "objfiles.h"
-#include "symtab.h"
 
 typedef struct blpy_block_object {
   PyObject_HEAD
@@ -110,7 +109,7 @@ blpy_get_start (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return gdb_py_object_from_ulongest (BLOCK_START (block));
+  return gdb_py_object_from_ulongest (BLOCK_START (block)).release ();
 }
 
 static PyObject *
@@ -120,7 +119,7 @@ blpy_get_end (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return gdb_py_object_from_ulongest (BLOCK_END (block));
+  return gdb_py_object_from_ulongest (BLOCK_END (block)).release ();
 }
 
 static PyObject *
@@ -225,6 +224,43 @@ blpy_is_static (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Given a string, returns the gdb.Symbol representing that symbol in this
+   block.  If such a symbol does not exist, returns NULL with a Python
+   exception.  */
+
+static PyObject *
+blpy_getitem (PyObject *self, PyObject *key)
+{
+  const struct block *block;
+
+  BLPY_REQUIRE_VALID (self, block);
+
+  gdb::unique_xmalloc_ptr<char> name = python_string_to_host_string (key);
+  if (name == nullptr)
+    return nullptr;
+
+  lookup_name_info lookup_name (name.get(), symbol_name_match_type::FULL);
+
+  /* We use ALL_BLOCK_SYMBOLS_WITH_NAME instead of block_lookup_symbol so
+     that we can look up symbols irrespective of the domain, matching the
+     iterator. It would be confusing if the iterator returns symbols you
+     can't find via getitem.  */
+  struct block_iterator iter;
+  struct symbol *sym = nullptr;
+  ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
+    {
+      /* Just stop at the first match */
+      break;
+    }
+
+  if (sym == nullptr)
+    {
+      PyErr_SetObject (PyExc_KeyError, key);
+      return nullptr;
+    }
+  return symbol_to_symbol_object (sym);
+}
+
 static void
 blpy_dealloc (PyObject *obj)
 {
@@ -240,6 +276,7 @@ blpy_dealloc (PyObject *obj)
   if (block->next)
     block->next->prev = block->prev;
   block->block = NULL;
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Given a block, and a block_object that has previously been
@@ -334,6 +371,7 @@ blpy_block_syms_dealloc (PyObject *obj)
   block_syms_iterator_object *iter_obj = (block_syms_iterator_object *) obj;
 
   Py_XDECREF (iter_obj->source);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Implementation of gdb.Block.is_valid (self) -> Boolean.
@@ -364,44 +402,6 @@ blpy_iter_is_valid (PyObject *self, PyObject *args)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
-}
-
-/* Return the innermost lexical block containing the specified pc value,
-   or 0 if there is none.  */
-PyObject *
-gdbpy_block_for_pc (PyObject *self, PyObject *args)
-{
-  gdb_py_ulongest pc;
-  const struct block *block = NULL;
-  struct compunit_symtab *cust = NULL;
-
-  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
-    return NULL;
-
-  TRY
-    {
-      cust = find_pc_compunit_symtab (pc);
-
-      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
-	block = block_for_pc (pc);
-    }
-  CATCH (except, RETURN_MASK_ALL)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
-  END_CATCH
-
-  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("Cannot locate object file for block."));
-      return NULL;
-    }
-
-  if (block)
-    return block_to_block_object (block, COMPUNIT_OBJFILE (cust));
-
-  Py_RETURN_NONE;
 }
 
 /* This function is called when an objfile is about to be freed.
@@ -461,7 +461,7 @@ Return true if this block is valid, false if not." },
   {NULL}  /* Sentinel */
 };
 
-static PyGetSetDef block_object_getset[] = {
+static gdb_PyGetSetDef block_object_getset[] = {
   { "start", blpy_get_start, NULL, "Start address of the block.", NULL },
   { "end", blpy_get_end, NULL, "End address of the block.", NULL },
   { "function", blpy_get_function, NULL,
@@ -479,6 +479,12 @@ static PyGetSetDef block_object_getset[] = {
   { NULL }  /* Sentinel */
 };
 
+static PyMappingMethods block_object_as_mapping = {
+  NULL,
+  blpy_getitem,
+  NULL
+};
+
 PyTypeObject block_object_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Block",			  /*tp_name*/
@@ -492,7 +498,7 @@ PyTypeObject block_object_type = {
   0,				  /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
+  &block_object_as_mapping,	  /*tp_as_mapping*/
   0,				  /*tp_hash */
   0,				  /*tp_call*/
   0,				  /*tp_str*/

@@ -1,8 +1,7 @@
 #name: ARM V8-M baseline instructions
 #source: archv8m.s
 #as: -march=armv8-m.base
-#objdump: -dr --prefix-addresses --show-raw-insn
-#skip: *-*-pe *-wince-* *-*-coff
+#objdump: -dr --prefix-addresses --show-raw-insn -M force-thumb
 
 .*: +file format .*arm.*
 
@@ -16,6 +15,8 @@ Disassembly of section .text:
 0+.* <[^>]*> e841 f040 	ttt	r0, r1
 0+.* <[^>]*> e849 f840 	ttt	r8, r9
 0+.* <[^>]*> f24f 1023 	movw	r0, #61731	; 0xf123
+0+.* <[^>]*> f24f 1823 	movw	r8, #61731	; 0xf123
+0+.* <[^>]*> f24f 1823 	movw	r8, #61731	; 0xf123
 0+.* <[^>]*> f24f 1823 	movw	r8, #61731	; 0xf123
 0+.* <[^>]*> f2cf 1023 	movt	r0, #61731	; 0xf123
 0+.* <[^>]*> f2cf 1823 	movt	r8, #61731	; 0xf123
@@ -46,3 +47,4 @@ Disassembly of section .text:
 0+.* <[^>]*> e8c2 1fe0 	stlex	r0, r1, \[r2\]
 0+.* <[^>]*> e8c2 1fc0 	stlexb	r0, r1, \[r2\]
 0+.* <[^>]*> e8c2 1fd0 	stlexh	r0, r1, \[r2\]
+#...

@@ -1,8 +1,9 @@
+/* DO NOT EDIT!  -*- buffer-read-only: t -*- vi:set ro:  */
 /* Semantic operand instances for m32r.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996-2016 Free Software Foundation, Inc.
+Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -751,8 +752,7 @@ static const CGEN_OPINST *m32r_cgen_opinst_table[MAX_INSNS] = {
 /* Function to call before using the operand instance table.  */
 
 void
-m32r_cgen_init_opinst_table (cd)
-     CGEN_CPU_DESC cd;
+m32r_cgen_init_opinst_table (CGEN_CPU_DESC cd)
 {
   int i;
   const CGEN_OPINST **oi = & m32r_cgen_opinst_table[0];

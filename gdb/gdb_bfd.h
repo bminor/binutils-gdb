@@ -1,6 +1,6 @@
 /* Definitions for BFD wrappers used by GDB.
 
-   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,7 @@
 #define GDB_BFD_H
 
 #include "registry.h"
+#include "gdbsupport/gdb_ref_ptr.h"
 
 DECLARE_REGISTRY (bfd);
 
@@ -39,20 +40,6 @@ int is_target_filename (const char *name);
 
 int gdb_bfd_has_target_filename (struct bfd *abfd);
 
-/* Open a read-only (FOPEN_RB) BFD given arguments like bfd_fopen.
-   If NAME starts with TARGET_SYSROOT_PREFIX then the BFD will be
-   opened using target fileio operations if necessary.  Returns NULL
-   on error.  On success, returns a new reference to the BFD, which
-   must be freed with gdb_bfd_unref.  BFDs returned by this call are
-   shared among all callers opening the same file.  If FD is not -1,
-   then after this call it is owned by BFD.  If the BFD was not
-   accessed using target fileio operations then the filename
-   associated with the BFD and accessible with bfd_get_filename will
-   not be exactly NAME but rather NAME with TARGET_SYSROOT_PREFIX
-   stripped.  */
-
-struct bfd *gdb_bfd_open (const char *name, const char *target, int fd);
-
 /* Increment the reference count of ABFD.  It is fine for ABFD to be
    NULL; in this case the function does nothing.  */
 
@@ -63,6 +50,36 @@ void gdb_bfd_ref (struct bfd *abfd);
    nothing.  */
 
 void gdb_bfd_unref (struct bfd *abfd);
+
+/* A policy class for gdb::ref_ptr for BFD reference counting.  */
+struct gdb_bfd_ref_policy
+{
+  static void incref (struct bfd *abfd)
+  {
+    gdb_bfd_ref (abfd);
+  }
+
+  static void decref (struct bfd *abfd)
+  {
+    gdb_bfd_unref (abfd);
+  }
+};
+
+/* A gdb::ref_ptr that has been specialized for BFD objects.  */
+typedef gdb::ref_ptr<struct bfd, gdb_bfd_ref_policy> gdb_bfd_ref_ptr;
+
+/* Open a read-only (FOPEN_RB) BFD given arguments like bfd_fopen.
+   If NAME starts with TARGET_SYSROOT_PREFIX then the BFD will be
+   opened using target fileio operations if necessary.  Returns NULL
+   on error.  On success, returns a new reference to the BFD.  BFDs
+   returned by this call are shared among all callers opening the same
+   file.  If FD is not -1, then after this call it is owned by BFD.
+   If the BFD was not accessed using target fileio operations then the
+   filename associated with the BFD and accessible with
+   bfd_get_filename will not be exactly NAME but rather NAME with
+   TARGET_SYSROOT_PREFIX stripped.  */
+
+gdb_bfd_ref_ptr gdb_bfd_open (const char *name, const char *target, int fd);
 
 /* Mark the CHILD BFD as being a member of PARENT.  Also, increment
    the reference count of CHILD.  Calling this function ensures that
@@ -87,15 +104,14 @@ void gdb_bfd_mark_parent (bfd *child, bfd *parent);
 
 void gdb_bfd_record_inclusion (bfd *includer, bfd *includee);
 
-/* Try to read or map the contents of the section SECT.  If
-   successful, the section data is returned and *SIZE is set to the
-   size of the section data; this may not be the same as the size
-   according to bfd_get_section_size if the section was compressed.
-   The returned section data is associated with the BFD and will be
-   destroyed when the BFD is destroyed.  There is no other way to free
-   it; for temporary uses of section data, see
-   bfd_malloc_and_get_section.  SECT may not have relocations.  This
-   function will throw on error.  */
+/* Try to read or map the contents of the section SECT.  If successful, the
+   section data is returned and *SIZE is set to the size of the section data;
+   this may not be the same as the size according to bfd_section_size if the
+   section was compressed.  The returned section data is associated with the BFD
+   and will be destroyed when the BFD is destroyed.  There is no other way to
+   free it; for temporary uses of section data, see bfd_malloc_and_get_section.
+   SECT may not have relocations.  If there is an error reading the section,
+   this issues a warning, sets *SIZE to 0, and returns NULL.  */
 
 const gdb_byte *gdb_bfd_map_section (asection *section, bfd_size_type *size);
 
@@ -110,45 +126,41 @@ int gdb_bfd_crc (struct bfd *abfd, unsigned long *crc_out);
 /* A wrapper for bfd_fopen that initializes the gdb-specific reference
    count.  */
 
-bfd *gdb_bfd_fopen (const char *, const char *, const char *, int);
+gdb_bfd_ref_ptr gdb_bfd_fopen (const char *, const char *, const char *, int);
 
 /* A wrapper for bfd_openr that initializes the gdb-specific reference
    count.  */
 
-bfd *gdb_bfd_openr (const char *, const char *);
+gdb_bfd_ref_ptr gdb_bfd_openr (const char *, const char *);
 
 /* A wrapper for bfd_openw that initializes the gdb-specific reference
    count.  */
 
-bfd *gdb_bfd_openw (const char *, const char *);
+gdb_bfd_ref_ptr gdb_bfd_openw (const char *, const char *);
 
 /* A wrapper for bfd_openr_iovec that initializes the gdb-specific
    reference count.  */
 
-bfd *gdb_bfd_openr_iovec (const char *filename, const char *target,
-			  void *(*open_func) (struct bfd *nbfd,
-					      void *open_closure),
-			  void *open_closure,
-			  file_ptr (*pread_func) (struct bfd *nbfd,
-						  void *stream,
-						  void *buf,
-						  file_ptr nbytes,
-						  file_ptr offset),
-			  int (*close_func) (struct bfd *nbfd,
-					     void *stream),
-			  int (*stat_func) (struct bfd *abfd,
-					    void *stream,
-					    struct stat *sb));
+gdb_bfd_ref_ptr gdb_bfd_openr_iovec (const char *filename, const char *target,
+				     void *(*open_func) (struct bfd *nbfd,
+							 void *open_closure),
+				     void *open_closure,
+				     file_ptr (*pread_func) (struct bfd *nbfd,
+							     void *stream,
+							     void *buf,
+							     file_ptr nbytes,
+							     file_ptr offset),
+				     int (*close_func) (struct bfd *nbfd,
+							void *stream),
+				     int (*stat_func) (struct bfd *abfd,
+						       void *stream,
+						       struct stat *sb));
 
 /* A wrapper for bfd_openr_next_archived_file that initializes the
    gdb-specific reference count.  */
 
-bfd *gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous);
+gdb_bfd_ref_ptr gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous);
 
-/* A wrapper for bfd_fdopenr that initializes the gdb-specific
-   reference count.  */
-
-bfd *gdb_bfd_fdopenr (const char *filename, const char *target, int fd);
 
 
 
