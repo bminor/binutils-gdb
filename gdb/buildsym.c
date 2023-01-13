@@ -245,6 +245,7 @@ buildsym_compunit::finish_block_internal
       struct type *ftype = symbol->type ();
       struct mdict_iterator miter;
       symbol->set_value_block (block);
+      symbol->set_section_index (SECT_OFF_TEXT (m_objfile));
       block->set_function (symbol);
 
       if (ftype->num_fields () <= 0)
