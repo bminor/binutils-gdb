@@ -281,73 +281,62 @@ coff_aarch64_secrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   return bfd_reloc_ok;
 }
 
-/* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
-#define MINUS_ONE (~ (bfd_vma) 0)
+#define coff_aarch64_NULL NULL
+#define HOW(type, right, size, bits, pcrel, left, ovf, func, mask, pcrel_off) \
+  HOWTO (type, right, size, bits, pcrel, left, complain_overflow_##ovf, \
+	 coff_aarch64_##func, #type, false, mask, mask, pcrel_off)
 
-static const reloc_howto_type arm64_reloc_howto_abs = HOWTO(IMAGE_REL_ARM64_ABSOLUTE, 0, 1, 0, false, 0,
-	 complain_overflow_dont,
-	 NULL, "IMAGE_REL_ARM64_ABSOLUTE",
-	 false, 0, 0, false);
+static const reloc_howto_type arm64_reloc_howto_abs
+= HOW (IMAGE_REL_ARM64_ABSOLUTE,
+       0, 1, 0, false, 0, dont, NULL, 0, false);
 
-static const reloc_howto_type arm64_reloc_howto_64 = HOWTO(IMAGE_REL_ARM64_ADDR64, 0, 8, 64, false, 0,
-	 complain_overflow_bitfield,
-	 coff_aarch64_addr64_reloc, "IMAGE_REL_ARM64_ADDR64",
-	 false, MINUS_ONE, MINUS_ONE, false);
+static const reloc_howto_type arm64_reloc_howto_64
+= HOW (IMAGE_REL_ARM64_ADDR64,
+       0, 8, 64, false, 0, bitfield, addr64_reloc, UINT64_C (-1), false);
 
-static const reloc_howto_type arm64_reloc_howto_32 = HOWTO (IMAGE_REL_ARM64_ADDR32, 0, 4, 32, false, 0,
-	 complain_overflow_bitfield,
-	 coff_aarch64_addr32_reloc, "IMAGE_REL_ARM64_ADDR32",
-	 false, 0xffffffff, 0xffffffff, false);
+static const reloc_howto_type arm64_reloc_howto_32
+= HOW (IMAGE_REL_ARM64_ADDR32,
+       0, 4, 32, false, 0, bitfield, addr32_reloc, 0xffffffff, false);
 
-static const reloc_howto_type arm64_reloc_howto_32_pcrel = HOWTO (IMAGE_REL_ARM64_REL32, 0, 4, 32, true, 0,
-	 complain_overflow_bitfield,
-	 NULL, "IMAGE_REL_ARM64_REL32",
-	 false, 0xffffffff, 0xffffffff, true);
+static const reloc_howto_type arm64_reloc_howto_32_pcrel
+= HOW (IMAGE_REL_ARM64_REL32,
+       0, 4, 32, true, 0, bitfield, NULL, 0xffffffff, true);
 
-static const reloc_howto_type arm64_reloc_howto_branch26 = HOWTO (IMAGE_REL_ARM64_BRANCH26, 0, 4, 26, true, 0,
-	 complain_overflow_bitfield,
-	 coff_aarch64_branch26_reloc, "IMAGE_REL_ARM64_BRANCH26",
-	 false, 0x03ffffff, 0x03ffffff, true);
+static const reloc_howto_type arm64_reloc_howto_branch26
+= HOW (IMAGE_REL_ARM64_BRANCH26,
+       0, 4, 26, true, 0, bitfield, branch26_reloc, 0x03ffffff, true);
 
-static const reloc_howto_type arm64_reloc_howto_page21 = HOWTO (IMAGE_REL_ARM64_PAGEBASE_REL21, 12, 4, 21, true, 0,
-	 complain_overflow_signed,
-	 coff_aarch64_rel21_reloc, "IMAGE_REL_ARM64_PAGEBASE_REL21",
-	 false, 0x1fffff, 0x1fffff, false);
+static const reloc_howto_type arm64_reloc_howto_page21
+= HOW (IMAGE_REL_ARM64_PAGEBASE_REL21,
+       12, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff, false);
 
-static const reloc_howto_type arm64_reloc_howto_lo21 = HOWTO (IMAGE_REL_ARM64_REL21, 0, 4, 21, true, 0,
-	 complain_overflow_signed,
-	 coff_aarch64_rel21_reloc, "IMAGE_REL_ARM64_REL21",
-	 false, 0x1fffff, 0x1fffff, true);
+static const reloc_howto_type arm64_reloc_howto_lo21
+= HOW (IMAGE_REL_ARM64_REL21,
+       0, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff, true);
 
-static const reloc_howto_type arm64_reloc_howto_pgoff12l = HOWTO (IMAGE_REL_ARM64_PAGEOFFSET_12L, 1, 4, 12, true, 0,
-	 complain_overflow_signed,
-	 coff_aarch64_po12l_reloc, "IMAGE_REL_ARM64_PAGEOFFSET_12L",
-	 false, 0xffe, 0xffe, true);
+static const reloc_howto_type arm64_reloc_howto_pgoff12l
+= HOW (IMAGE_REL_ARM64_PAGEOFFSET_12L,
+       1, 4, 12, true, 0, signed, po12l_reloc, 0xffe, true);
 
-static const reloc_howto_type arm64_reloc_howto_branch19 = HOWTO (IMAGE_REL_ARM64_BRANCH19, 2, 4, 19, true, 0,
-	 complain_overflow_signed,
-	 coff_aarch64_branch19_reloc, "IMAGE_REL_ARM64_BRANCH19",
-	 false, 0x7ffff, 0x7ffff, true);
+static const reloc_howto_type arm64_reloc_howto_branch19
+= HOW (IMAGE_REL_ARM64_BRANCH19,
+       2, 4, 19, true, 0, signed, branch19_reloc, 0x7ffff, true);
 
-static const reloc_howto_type arm64_reloc_howto_branch14 = HOWTO (IMAGE_REL_ARM64_BRANCH14, 2, 4, 14, true, 0,
-	 complain_overflow_signed,
-	 coff_aarch64_branch14_reloc, "IMAGE_REL_ARM64_BRANCH14",
-	 false, 0x3fff, 0x3fff, true);
+static const reloc_howto_type arm64_reloc_howto_branch14
+= HOW (IMAGE_REL_ARM64_BRANCH14,
+       2, 4, 14, true, 0, signed, branch14_reloc, 0x3fff, true);
 
-static const reloc_howto_type arm64_reloc_howto_pgoff12a = HOWTO (IMAGE_REL_ARM64_PAGEOFFSET_12A, 2, 4, 12, true, 10,
-	 complain_overflow_dont,
-	 coff_aarch64_po12a_reloc, "IMAGE_REL_ARM64_PAGEOFFSET_12A",
-	 false, 0x3ffc00, 0x3ffc00, false);
+static const reloc_howto_type arm64_reloc_howto_pgoff12a
+= HOW (IMAGE_REL_ARM64_PAGEOFFSET_12A,
+       2, 4, 12, true, 10, dont, po12a_reloc, 0x3ffc00, false);
 
-static const reloc_howto_type arm64_reloc_howto_32nb = HOWTO (IMAGE_REL_ARM64_ADDR32NB, 0, 4, 32, false, 0,
-	 complain_overflow_bitfield,
-	 coff_aarch64_addr32nb_reloc, "IMAGE_REL_ARM64_ADDR32NB",
-	 false, 0xffffffff, 0xffffffff, false);
+static const reloc_howto_type arm64_reloc_howto_32nb
+= HOW (IMAGE_REL_ARM64_ADDR32NB,
+       0, 4, 32, false, 0, bitfield, addr32nb_reloc, 0xffffffff, false);
 
-static const reloc_howto_type arm64_reloc_howto_secrel = HOWTO (IMAGE_REL_ARM64_SECREL, 0, 4, 32, false, 0,
-	 complain_overflow_bitfield,
-	 coff_aarch64_secrel_reloc, "IMAGE_REL_ARM64_SECREL",
-	 false, 0xffffffff, 0xffffffff, false);
+static const reloc_howto_type arm64_reloc_howto_secrel
+= HOW (IMAGE_REL_ARM64_SECREL,
+       0, 4, 32, false, 0, bitfield, secrel_reloc, 0xffffffff, false);
 
 static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_abs,
