@@ -11395,7 +11395,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   for (child_die = die->child; child_die; child_die = sibling_die (child_die))
     {
       if (child_die->tag == DW_TAG_template_type_param
-	  || child_die->tag == DW_TAG_template_value_param)
+	  || child_die->tag == DW_TAG_template_value_param
+	  || child_die->tag == DW_TAG_GNU_template_parameter_pack)
 	{
 	  templ_func = allocate_template_symbol (objfile);
 	  templ_func->base.is_cplus_template_function = 1;
@@ -11437,6 +11438,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	      if (arg != NULL)
 		VEC_safe_push (symbolp, template_args, arg);
+	    }
+	  else if (child_die->tag == DW_TAG_GNU_template_parameter_pack)
+	    {
+	      struct die_info *pack_die;
+	      for (pack_die = child_die->child; pack_die; pack_die = sibling_die(pack_die))
+		{
+		  struct symbol *arg = new_symbol (pack_die, NULL, cu);
+
+		  if (arg != NULL)
+		    VEC_safe_push (symbolp, template_args, arg);
+		}
+	    }
+	  else if (child_die->tag == DW_TAG_GNU_formal_parameter_pack)
+	    {
+	      struct die_info *pack_die;
+	      for (pack_die = child_die->child; pack_die; pack_die = sibling_die(pack_die))
+		process_die (pack_die, cu);
 	    }
 	  else
 	    process_die (child_die, cu);
@@ -14599,6 +14617,11 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  if (child_die->tag == DW_TAG_formal_parameter)
 	    nparams++;
+	  else if (child_die->tag == DW_TAG_GNU_formal_parameter_pack)
+	    {
+	      child_die = child_die->child;
+	      continue;
+	    }
 	  else if (child_die->tag == DW_TAG_unspecified_parameters)
 	    TYPE_VARARGS (ftype) = 1;
 	  child_die = sibling_die (child_die);
@@ -14683,6 +14706,11 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 
 	      TYPE_FIELD_TYPE (ftype, iparams) = arg_type;
 	      iparams++;
+	    }
+	  else if (child_die->tag == DW_TAG_GNU_formal_parameter_pack)
+	    {
+	      child_die = child_die->child;
+	      continue;
 	    }
 	  child_die = sibling_die (child_die);
 	}
@@ -18334,6 +18362,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   if (name)
     {
       const char *linkagename;
+      struct die_info *line_file_die = die;
       int suppress_add = 0;
 
       if (space)
@@ -18363,7 +18392,9 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	SYMBOL_TYPE (sym) = type;
       else
 	SYMBOL_TYPE (sym) = die_type (die, cu);
-      attr = dwarf2_attr (die,
+      if (die->tag == DW_TAG_formal_parameter && die->parent && die->parent->tag == DW_TAG_GNU_formal_parameter_pack)
+	line_file_die = die->parent;
+      attr = dwarf2_attr (line_file_die,
 			  inlined_func ? DW_AT_call_line : DW_AT_decl_line,
 			  cu);
       if (attr)
@@ -18371,7 +18402,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_LINE (sym) = DW_UNSND (attr);
 	}
 
-      attr = dwarf2_attr (die,
+      attr = dwarf2_attr (line_file_die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
 			  cu);
       if (attr)
@@ -18577,6 +18608,8 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    }
 
 	  list_to_add = cu->list_in_scope;
+	  break;
+	case DW_TAG_GNU_formal_parameter_pack:
 	  break;
 	case DW_TAG_unspecified_parameters:
 	  /* From varargs functions; gdb doesn't seem to have any
@@ -19537,8 +19570,11 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   if ((!attr || !DW_STRING (attr))
       && die->tag != DW_TAG_namespace
       && die->tag != DW_TAG_class_type
+      && die->tag != DW_TAG_formal_parameter
       && die->tag != DW_TAG_interface_type
       && die->tag != DW_TAG_structure_type
+      && die->tag != DW_TAG_template_type_param
+      && die->tag != DW_TAG_template_value_param
       && die->tag != DW_TAG_union_type)
     return NULL;
 
@@ -19553,6 +19589,33 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       /* These tags always have simple identifiers already; no need
 	 to canonicalize them.  */
       return DW_STRING (attr);
+
+    case DW_TAG_formal_parameter:
+    case DW_TAG_template_type_param:
+    case DW_TAG_template_value_param:
+      if (!attr
+	  && die->parent
+	  && (die->parent->tag == DW_TAG_GNU_formal_parameter_pack
+	      || die->parent->tag == DW_TAG_GNU_template_parameter_pack))
+	{
+	  const char *parent_name;
+	  int ordinal = 0;
+	  struct die_info *child_die;
+	  size_t size;
+	  char *name;
+	  parent_name = dwarf2_name(die->parent, cu);
+	  if (!parent_name)
+	    return NULL;
+	  for (child_die = die->parent->child; child_die != die; child_die = sibling_die (child_die))
+	    ++ordinal;
+	  size = snprintf(NULL, 0, "%s#%d", parent_name, ordinal) + 1;
+	  name = ((char *) obstack_alloc (&cu->objfile->per_bfd->storage_obstack, size));
+	  snprintf(name, size, "%s#%d", parent_name, ordinal);
+	  return name;
+	}
+      if (!attr || !DW_STRING (attr))
+	return NULL;
+      break;
 
     case DW_TAG_namespace:
       if (attr != NULL && DW_STRING (attr) != NULL)
