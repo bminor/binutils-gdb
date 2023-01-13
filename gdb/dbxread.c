@@ -2414,6 +2414,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
      source file.  Used to detect the SunPRO solaris compiler.  */
   static int n_opt_found;
 
+  /* The section index for this symbol.  */
+  int section_index = -1;
+
   /* Something is wrong if we see real data before seeing a source
      file name.  */
 
@@ -2477,6 +2480,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       sline_found_in_function = 0;
 
       /* Relocate for dynamic loading.  */
+      section_index = SECT_OFF_TEXT (objfile);
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       valu = gdbarch_addr_bits_remove (gdbarch, valu);
       last_function_start = valu;
@@ -2565,6 +2569,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
     case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.
 	 Relocate for dynamic loading.  */
+      section_index = SECT_OFF_TEXT (objfile);
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       break;
 
@@ -2573,6 +2578,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	 source file.  Finish the symbol table of the previous source
 	 file (if any) and start accumulating a new symbol table.
 	 Relocate for dynamic loading.  */
+      section_index = SECT_OFF_TEXT (objfile);
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
 
       n_opt_found = 0;
@@ -2609,6 +2615,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	 sub-source-file, one whose contents were copied or included
 	 in the compilation of the main source file (whose name was
 	 given in the N_SO symbol).  Relocate for dynamic loading.  */
+      section_index = SECT_OFF_TEXT (objfile);
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       start_subfile (name);
       break;
@@ -2709,6 +2716,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		   symbol_file_add as addr (this is known to affect
 		   SunOS 4, and I suspect ELF too).  Since there is no
 		   Ttext.text symbol, we can get addr from the text offset.  */
+		section_index = SECT_OFF_TEXT (objfile);
 		valu += section_offsets[SECT_OFF_TEXT (objfile)];
 		goto define_a_symbol;
 	      }
@@ -2730,21 +2738,25 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case_N_STSYM:		/* Static symbol in data segment.  */
     case N_DSLINE:		/* Source line number, data segment.  */
+      section_index = SECT_OFF_DATA (objfile);
       valu += section_offsets[SECT_OFF_DATA (objfile)];
       goto define_a_symbol;
 
     case_N_LCSYM:		/* Static symbol in BSS segment.  */
     case N_BSLINE:		/* Source line number, BSS segment.  */
       /* N_BROWS: overlaps with N_BSLINE.  */
+      section_index = SECT_OFF_BSS (objfile);
       valu += section_offsets[SECT_OFF_BSS (objfile)];
       goto define_a_symbol;
 
     case_N_ROSYM:		/* Static symbol in read-only data segment.  */
+      section_index = SECT_OFF_RODATA (objfile);
       valu += section_offsets[SECT_OFF_RODATA (objfile)];
       goto define_a_symbol;
 
     case N_ENTRY:		/* Alternate entry point.  */
       /* Relocate for dynamic loading.  */
+      section_index = SECT_OFF_TEXT (objfile);
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       goto define_a_symbol;
 
@@ -2836,10 +2848,17 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
 	      newobj = push_context (0, valu);
 	      newobj->name = define_symbol (valu, name, desc, type, objfile);
+	      if (newobj->name != nullptr)
+		newobj->name->set_section_index (section_index);
 	      break;
 
 	    default:
-	      define_symbol (valu, name, desc, type, objfile);
+	      {
+		struct symbol *sym = define_symbol (valu, name, desc, type,
+						    objfile);
+		if (sym != nullptr)
+		  sym->set_section_index (section_index);
+	      }
 	      break;
 	    }
 	}

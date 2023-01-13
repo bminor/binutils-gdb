@@ -107,8 +107,6 @@ static void
 patch_block_stabs (struct pending *, struct pending_stabs *,
 		   struct objfile *);
 
-static void fix_common_block (struct symbol *, CORE_ADDR);
-
 static int read_type_number (const char **, int *);
 
 static struct type *read_type (const char **, struct objfile *);
@@ -4305,7 +4303,7 @@ common_block_end (struct objfile *objfile)
    the common block name).  */
 
 static void
-fix_common_block (struct symbol *sym, CORE_ADDR valu)
+fix_common_block (struct symbol *sym, CORE_ADDR valu, int section_index)
 {
   struct pending *next = (struct pending *) sym->type ();
 
@@ -4314,8 +4312,11 @@ fix_common_block (struct symbol *sym, CORE_ADDR valu)
       int j;
 
       for (j = next->nsyms - 1; j >= 0; j--)
-	next->symbol[j]->set_value_address
-	  (next->symbol[j]->value_address () + valu);
+	{
+	  next->symbol[j]->set_value_address
+	    (next->symbol[j]->value_address () + valu);
+	  next->symbol[j]->set_section_index (section_index);
+	}
     }
 }
 
@@ -4585,7 +4586,8 @@ scan_file_globals (struct objfile *objfile)
 		    {
 		      if (sym->aclass () == LOC_BLOCK)
 			fix_common_block
-			  (sym, msymbol->value_address (resolve_objfile));
+			  (sym, msymbol->value_address (resolve_objfile),
+			   msymbol->section_index ());
 		      else
 			sym->set_value_address
 			  (msymbol->value_address (resolve_objfile));
