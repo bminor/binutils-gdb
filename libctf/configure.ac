@@ -184,7 +184,7 @@ changequote(,)
     # We require texinfo to be 6.3 or later, for a working synindex
     # and validatemenus: otherwise we fall back to /bin/true.
     if ${MAKEINFO} --version \
-       | egrep 'texinfo[^0-9]*(6\.[3-9]|[7-9][0-9])' >/dev/null 2>&1; then
+       | egrep 'texinfo[^0-9]*(6\.[3-9]|[7-9]|[1-6][0-9])' >/dev/null 2>&1; then
       build_info=yes
     else
         build_info=
