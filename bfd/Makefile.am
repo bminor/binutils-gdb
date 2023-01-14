@@ -33,7 +33,7 @@ bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libbfd.la
 bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-		     bfd_stdint.h $(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
+		     $(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
 else !INSTALL_LIBBFD
 # Empty these so that the respective installation directories will not be created.
 bfdlibdir =
@@ -675,7 +675,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
 	aout-target.h aoutx.h arc-got.h arc-plt.h \
 	coff-arm.h coff-bfd.h coffcode.h coffswap.h \
-	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h \
+	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h cpu-riscv.h \
 	ecoff-bfd.h ecoffswap.h \
 	elf32-arm.h elf32-avr.h elf32-bfin.h elf32-cr16.h elf32-csky.h \
 	elf32-dlx.h elf32-hppa.h elf32-m68hc1x.h elf32-m68k.h \
@@ -700,7 +700,7 @@ SOURCE_HFILES = \
 
 ## ... and .h files which are in the build tree, minus config.h and bfd.h
 BUILD_HFILES = \
-	bfdver.h elf32-target.h elf64-target.h targmatch.h bfd_stdint.h
+	bfdver.h elf32-target.h elf64-target.h targmatch.h
 
 # Ensure they are built early:
 BUILT_SOURCES = $(BUILD_HFILES)
@@ -863,7 +863,7 @@ pex64igen.c: peXXigen.c
 	$(SED) -e s/XX/pex64/g < $< >> $@
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
-LOCAL_H_DEPS= libbfd.h sysdep.h config.h bfd_stdint.h
+LOCAL_H_DEPS= libbfd.h sysdep.h config.h
 $(BFD32_LIBS) \
  $(BFD64_LIBS) \
  $(ALL_MACHINES) \

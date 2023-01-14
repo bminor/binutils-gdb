@@ -186,7 +186,7 @@ print_unpacked_pointer (struct type *type,
 			const struct value_print_options *options,
 			struct ui_file *stream)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
   int want_space = 0;
 
@@ -228,7 +228,7 @@ print_variable_at_address (struct type *type,
 			   int recurse,
 			   const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   CORE_ADDR addr = unpack_pointer (type, valaddr);
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
 

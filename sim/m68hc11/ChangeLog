@@ -1,3 +1,57 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode.o): New rule.
+	(gencode): Call LINK_FOR_BUILD.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-m68hc11tim.c (cycle_to_string): Change llu to PRIi64.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* m68hc11_sim.c (cpu_set_sp): Add static markings.
+	(cpu_get_reg, cpu_get_src_reg, cpu_set_dst_reg,
+	cpu_get_indexed_operand_addr, cpu_get_indexed_operand8): Likewise.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_get_info, sim_board_reset): Pass %s to sim_hw_parse.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-m68hc11.c, m68hc11_sim.c: Include stdlib.h.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Inline variables.
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

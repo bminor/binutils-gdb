@@ -280,7 +280,8 @@ dsbt_get_initial_loadmaps (void)
 {
   struct dsbt_info *info = get_dsbt_info ();
   gdb::optional<gdb::byte_vector> buf
-    = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
+    = target_read_alloc (current_inferior ()->top_target (),
+			 TARGET_OBJECT_FDPIC, "exec");
 
   if (!buf || buf->empty ())
     {
@@ -291,7 +292,8 @@ dsbt_get_initial_loadmaps (void)
   if (solib_dsbt_debug)
     dsbt_print_loadmap (info->exec_loadmap);
 
-  buf = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
+  buf = target_read_alloc (current_inferior ()->top_target (),
+			   TARGET_OBJECT_FDPIC, "exec");
   if (!buf || buf->empty ())
     {
       info->interp_loadmap = NULL;
@@ -424,7 +426,8 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
     return 0;
 
   bool found = false;
-  for (target_section &target_section : current_program_space->target_sections)
+  for (const target_section &target_section
+	 : current_program_space->target_sections ())
     if (sect == target_section.the_bfd_section)
       {
 	dyn_addr = target_section.addr;

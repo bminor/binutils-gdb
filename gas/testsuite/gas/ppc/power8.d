@@ -34,8 +34,8 @@ Disassembly of section \.text:
 .*:	(4c c7 04 61|61 04 c7 4c) 	bnstarl- cr1
 .*:	(4d ec 04 60|60 04 ec 4d) 	blttar\+ cr3
 .*:	(4c e2 04 61|61 04 e2 4c) 	bnetarl\+
-.*:	(4c 88 0c 60|60 0c 88 4c) 	bctar   4,4\*cr2\+lt,1
-.*:	(4c 87 14 61|61 14 87 4c) 	bctarl  4,4\*cr1\+so,2
+.*:	(4c 88 0c 60|60 0c 88 4c) 	bgetar  cr2,1
+.*:	(4c 87 14 61|61 14 87 4c) 	bnstarl cr1,2
 .*:	(7c 00 00 3c|3c 00 00 7c) 	waitasec
 .*:	(7c 00 41 1c|1c 41 00 7c) 	msgsndp r8
 .*:	(7c 20 01 26|26 01 20 7c) 	mtsle   1
@@ -306,10 +306,10 @@ Disassembly of section \.text:
 .*:	(4d ea 04 61|61 04 ea 4d) 	beqtarl\+ cr2
 .*:	(4d 89 04 60|60 04 89 4d) 	bgttar  cr2
 .*:	(4d 89 04 60|60 04 89 4d) 	bgttar  cr2
-.*:	(4d 89 1c 60|60 1c 89 4d) 	bctar   12,4\*cr2\+gt,3
+.*:	(4d 89 1c 60|60 1c 89 4d) 	bgttar  cr2,3
 .*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
 .*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
-.*:	(4d 89 1c 61|61 1c 89 4d) 	bctarl  12,4\*cr2\+gt,3
+.*:	(4d 89 1c 61|61 1c 89 4d) 	bgttarl cr2,3
 .*:	(7f 5a d3 78|78 d3 5a 7f) 	miso
 .*:	(7f 5a d3 78|78 d3 5a 7f) 	miso
 #pass

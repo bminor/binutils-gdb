@@ -42,9 +42,9 @@
   }
 
 const bfd_arch_info_type bfd_ia64_elf32_arch =
-  N (32, bfd_mach_ia64_elf32, "ia64-elf32", FALSE, NULL);
+  N (32, bfd_mach_ia64_elf32, "ia64-elf32", false, NULL);
 
 const bfd_arch_info_type bfd_ia64_arch =
-  N (64, bfd_mach_ia64_elf64, "ia64-elf64", TRUE, &bfd_ia64_elf32_arch);
+  N (64, bfd_mach_ia64_elf64, "ia64-elf64", true, &bfd_ia64_elf32_arch);
 
 #include "cpu-ia64-opc.c"

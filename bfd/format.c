@@ -55,7 +55,7 @@ FUNCTION
 	bfd_check_format
 
 SYNOPSIS
-	bfd_boolean bfd_check_format (bfd *abfd, bfd_format format);
+	bool bfd_check_format (bfd *abfd, bfd_format format);
 
 DESCRIPTION
 	Verify if the file attached to the BFD @var{abfd} is compatible
@@ -88,7 +88,7 @@ DESCRIPTION
 	more than one backend recognised the file format.
 */
 
-bfd_boolean
+bool
 bfd_check_format (bfd *abfd, bfd_format format)
 {
   return bfd_check_format_matches (abfd, format, NULL);
@@ -118,7 +118,7 @@ struct bfd_preserve
    subset of the bfd state works in practice.  This function stores
    the subset.  */
 
-static bfd_boolean
+static bool
 bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
 		   bfd_cleanup cleanup)
 {
@@ -134,7 +134,7 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
   preserve->build_id = abfd->build_id;
   preserve->cleanup = cleanup;
   if (preserve->marker == NULL)
-    return FALSE;
+    return false;
 
   return bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc,
 			      sizeof (struct section_hash_entry));
@@ -206,7 +206,7 @@ FUNCTION
 	bfd_check_format_matches
 
 SYNOPSIS
-	bfd_boolean bfd_check_format_matches
+	bool bfd_check_format_matches
 	  (bfd *abfd, bfd_format format, char ***matching);
 
 DESCRIPTION
@@ -221,7 +221,7 @@ DESCRIPTION
 	should free it.
 */
 
-bfd_boolean
+bool
 bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 {
   extern const bfd_target binary_vec;
@@ -244,7 +244,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
+      return false;
     }
 
   if (abfd->format != bfd_unknown)
@@ -257,7 +257,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       amt = sizeof (*matching_vector) * 2 * _bfd_target_vector_entries;
       matching_vector = (const bfd_target **) bfd_malloc (amt);
       if (!matching_vector)
-	return FALSE;
+	return false;
     }
 
   /* Presume the answer is yes.  */
@@ -498,7 +498,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	 We can not set this flag until after checking the format,
 	 because it will interfere with creation of BFD sections.  */
       if (abfd->direction == both_direction)
-	abfd->output_has_begun = TRUE;
+	abfd->output_has_begun = true;
 
       free (matching_vector);
       if (preserve_match.marker != NULL)
@@ -506,7 +506,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       bfd_preserve_finish (abfd, &preserve);
 
       /* File position has moved, BTW.  */
-      return TRUE;
+      return true;
     }
 
   if (match_count == 0)
@@ -522,7 +522,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (preserve_match.marker != NULL)
 	bfd_preserve_finish (abfd, &preserve_match);
       bfd_preserve_restore (abfd, &preserve);
-      return FALSE;
+      return false;
     }
 
   /* Restore original target type and format.  */
@@ -549,7 +549,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (preserve_match.marker != NULL)
     bfd_preserve_finish (abfd, &preserve_match);
   bfd_preserve_restore (abfd, &preserve);
-  return FALSE;
+  return false;
 }
 
 /*
@@ -557,7 +557,7 @@ FUNCTION
 	bfd_set_format
 
 SYNOPSIS
-	bfd_boolean bfd_set_format (bfd *abfd, bfd_format format);
+	bool bfd_set_format (bfd *abfd, bfd_format format);
 
 DESCRIPTION
 	This function sets the file format of the BFD @var{abfd} to the
@@ -566,14 +566,14 @@ DESCRIPTION
 	is not open for writing, then an error occurs.
 */
 
-bfd_boolean
+bool
 bfd_set_format (bfd *abfd, bfd_format format)
 {
   if (bfd_read_p (abfd)
       || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
+      return false;
     }
 
   if (abfd->format != bfd_unknown)
@@ -585,10 +585,10 @@ bfd_set_format (bfd *abfd, bfd_format format)
   if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd)))
     {
       abfd->format = bfd_unknown;
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /*

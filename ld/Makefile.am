@@ -184,7 +184,6 @@ ALL_EMULATION_SOURCES = \
 	earmelfb_nbsd.c \
 	earmnto.c \
 	earmpe.c \
-	earmsymbian.c \
 	eavr1.c \
 	eavr2.c \
 	eavr25.c \
@@ -263,12 +262,6 @@ ALL_EMULATION_SOURCES = \
 	eelf32ppcsim.c \
 	eelf32ppcvxworks.c \
 	eelf32ppcwindiss.c \
-	eelf32lriscv.c \
-	eelf32lriscv_ilp32f.c \
-	eelf32lriscv_ilp32.c \
-	eelf32briscv.c \
-	eelf32briscv_ilp32f.c \
-	eelf32briscv_ilp32.c \
 	eelf32rl78.c \
 	eelf32rx.c \
 	eelf32rx_linux.c \
@@ -417,6 +410,12 @@ ALL_64_EMULATION_SOURCES = \
 	eelf32ltsmipn32.c \
 	eelf32ltsmipn32_fbsd.c \
 	eelf32mipswindiss.c \
+	eelf32lriscv.c \
+	eelf32lriscv_ilp32f.c \
+	eelf32lriscv_ilp32.c \
+	eelf32briscv.c \
+	eelf32briscv_ilp32f.c \
+	eelf32briscv_ilp32.c \
 	eelf64_aix.c \
 	eelf64bpf.c \
 	eelf64_ia64.c \
@@ -675,7 +674,6 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelfb_nbsd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmnto.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmpe.Pc@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmsymbian.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eavr1.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eavr2.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eavr25.Pc@am__quote@
@@ -968,6 +966,7 @@ TESTBFDLIB = @TESTBFDLIB@
 TESTCTFLIB = @TESTCTFLIB@
 
 check-DEJAGNU: site.exp
+	(cd .libs; test -e ldscripts || test ! -e ld-new || $(LN_S) ../ldscripts .)
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \

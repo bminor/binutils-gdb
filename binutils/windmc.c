@@ -50,7 +50,7 @@ typedef struct mc_msg_item
   struct bin_messagetable_item *res;
 } mc_msg_item;
 
-int target_is_bigendian = 0;
+bool target_is_bigendian = 0;
 const char *def_target_arch;
 
 /* Globals and static variable definitions. */
@@ -941,12 +941,10 @@ main (int argc, char **argv)
   char *target, *input_filename;
   int verbose;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

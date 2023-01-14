@@ -34,59 +34,59 @@ static reloc_howto_type xc16x_elf_howto_table [] =
 	 0,			/* rightshift */
 	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XC16X_NONE",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* An 8 bit absolute relocation.  */
   HOWTO (R_XC16X_ABS_8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 8,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XC16X_ABS_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 16 bit absolute relocation.  */
   HOWTO (R_XC16X_ABS_16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XC16X_ABS_16",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_XC16X_ABS_32,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XC16X_ABS_32",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
 
   /* A PC relative 8 bit relocation.  */
@@ -94,30 +94,30 @@ static reloc_howto_type xc16x_elf_howto_table [] =
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 8,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_XC16X_8_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 TRUE),		/* pcrel_offset */
+	 true),		/* pcrel_offset */
 
   /* Relocation regarding page number.  */
     HOWTO (R_XC16X_PAG,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_XC16X_PAG",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
 
   /* Relocation regarding page number.  */
@@ -125,15 +125,15 @@ static reloc_howto_type xc16x_elf_howto_table [] =
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos  */
 	 complain_overflow_signed, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc, /* special_function  */
 	 "R_XC16X_POF",	/* name  */
-	 TRUE,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0x00000000,		/* src_mask  */
 	 0x0000ffff,		/* dst_mask  */
-	 FALSE),		/* pcrel_offset  */
+	 false),		/* pcrel_offset  */
 
 
   /* Relocation regarding segment number.   */
@@ -141,30 +141,30 @@ static reloc_howto_type xc16x_elf_howto_table [] =
 	 0,			/* rightshift  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
 	 16,			/* bitsize  */
-	 FALSE,			/* pc_relative  */
+	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
 	 complain_overflow_signed, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc, /* special_function  */
 	 "R_XC16X_SEG",	/* name  */
-	 TRUE,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0x00000000,		/* src_mask  */
 	 0x0000ffff,		/* dst_mask  */
-	 FALSE),		/* pcrel_offset  */
+	 false),		/* pcrel_offset  */
 
   /* Relocation regarding segment offset.  */
       HOWTO (R_XC16X_SOF,	/* type  */
 	 0,			/* rightshift  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
 	 16,			/* bitsize  */
-	 FALSE,			/* pc_relative  */
+	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
 	 complain_overflow_signed, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc, /* special_function  */
 	 "R_XC16X_SOF",	/* name */
-	 TRUE,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0x00000000,		/* src_mask  */
 	 0x0000ffff,		/* dst_mask  */
-	 FALSE)			/* pcrel_offset  */
+	 false)			/* pcrel_offset  */
 };
 
 
@@ -232,7 +232,7 @@ elf32_xc16x_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED, unsigned r_type)
 /* For a particular operand this function is
    called to finalise the type of relocation.  */
 
-static bfd_boolean
+static bool
 elf32_xc16x_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 			   Elf_Internal_Rela *elf_reloc)
 {
@@ -244,12 +244,12 @@ elf32_xc16x_info_to_howto (bfd *abfd, arelent *bfd_reloc,
     if (xc16x_elf_howto_table[i].type == r)
       {
 	bfd_reloc->howto = &xc16x_elf_howto_table[i];
-	return TRUE;
+	return true;
       }
   /* xgettext:c-format */
   _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r);
   bfd_set_error (bfd_error_bad_value);
-  return FALSE;
+  return false;
 }
 
 static bfd_reloc_status_type
@@ -341,7 +341,7 @@ elf32_xc16x_final_link_relocate (unsigned long r_type,
     }
 }
 
-static bfd_boolean
+static int
 elf32_xc16x_relocate_section (bfd *output_bfd,
 			      struct bfd_link_info *info,
 			      bfd *input_bfd,
@@ -383,7 +383,7 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned, ignored;
+	  bool unresolved_reloc, warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -412,11 +412,11 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
 				       info, sec, h == NULL);
     }
 
-  return TRUE;
+  return true;
 }
 
 
-static bfd_boolean
+static bool
 elf32_xc16x_final_write_processing (bfd *abfd)
 {
   unsigned long val;
@@ -459,12 +459,12 @@ elf32_xc16x_mach (flagword flags)
 }
 
 
-static bfd_boolean
+static bool
 elf32_xc16x_object_p (bfd *abfd)
 {
   bfd_default_set_arch_mach (abfd, bfd_arch_xc16x,
 			     elf32_xc16x_mach (elf_elfheader (abfd)->e_flags));
-  return TRUE;
+  return true;
 }
 
 

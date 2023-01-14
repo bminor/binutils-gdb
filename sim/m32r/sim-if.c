@@ -44,31 +44,19 @@ free_state (SIM_DESC sd)
 /* Create an instance of the simulator.  */
 
 SIM_DESC
-sim_open (kind, callback, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *callback;
-     struct bfd *abfd;
-     char * const *argv;
+sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
+	  char * const *argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, callback);
   char c;
   int i;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, cgen_cpu_max_extra_bytes ()) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
     }
-
-#if 0 /* FIXME: pc is in mach-specific struct */
-  /* FIXME: watchpoints code shouldn't need this */
-  {
-    SIM_CPU *current_cpu = STATE_CPU (sd, 0);
-    STATE_WATCHPOINTS (sd)->pc = &(PC);
-    STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
-  }
-#endif
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
@@ -151,11 +139,8 @@ sim_open (kind, callback, abfd, argv)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, envp)
-     SIM_DESC sd;
-     struct bfd *abfd;
-     char * const *argv;
-     char * const *envp;
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
+		     char * const *envp)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;

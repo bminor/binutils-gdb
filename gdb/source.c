@@ -342,8 +342,7 @@ select_source_symtab (struct symtab *s)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if (objfile->sf)
-	s = objfile->sf->qf->find_last_source_symtab (objfile);
+      s = objfile->find_last_source_symtab ();
       if (s)
 	new_symtab = s;
     }
@@ -417,8 +416,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 	}
     }
 
-  if (objfile->sf)
-    objfile->sf->qf->forget_cached_source_info (objfile);
+  objfile->forget_cached_source_info ();
 }
 
 /* See source.h.  */
@@ -572,6 +570,8 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	    break;
 	}
 
+      if (name[0] == '\0')
+        goto skip_dup;
       if (name[0] == '~')
 	new_name_holder.reset (tilde_expand (name));
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM

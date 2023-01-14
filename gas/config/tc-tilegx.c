@@ -891,7 +891,7 @@ tilegx_flush_bundle (void)
 	  /* Make sure all instructions can be bundled with other
 	     instructions.  */
 	  const struct tilegx_opcode *cannot_bundle = NULL;
-	  bfd_boolean seen_non_nop = FALSE;
+	  bool seen_non_nop = false;
 
 	  for (j = 0; j < current_bundle_index; j++)
 	    {
@@ -902,7 +902,7 @@ tilegx_flush_bundle (void)
 	      else if (op->mnemonic != TILEGX_OPC_NOP
 		       && op->mnemonic != TILEGX_OPC_INFO
 		       && op->mnemonic != TILEGX_OPC_INFOL)
-		seen_non_nop = TRUE;
+		seen_non_nop = true;
 	    }
 
 	  if (cannot_bundle != NULL && seen_non_nop)

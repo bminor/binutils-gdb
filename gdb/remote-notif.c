@@ -108,8 +108,10 @@ remote_notif_process (struct remote_notif_state *state,
 static void
 remote_async_get_pending_events_handler (gdb_client_data data)
 {
+  remote_notif_state *notif_state = (remote_notif_state *) data;
+  clear_async_event_handler (notif_state->get_pending_events_token);
   gdb_assert (target_is_non_stop_p ());
-  remote_notif_process ((struct remote_notif_state *) data, NULL);
+  remote_notif_process (notif_state, NULL);
 }
 
 /* Remote notification handler.  Parse BUF, queue notification and

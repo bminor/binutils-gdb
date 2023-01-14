@@ -165,9 +165,9 @@ convert_func (compile_c_instance *context, struct type *type)
   if (target_type == NULL)
     {
       if (type->is_objfile_owned ())
-	target_type = objfile_type (type->objfile ())->builtin_int;
+	target_type = objfile_type (type->objfile_owner ())->builtin_int;
       else
-	target_type = builtin_type (type->arch ())->builtin_int;
+	target_type = builtin_type (type->arch_owner ())->builtin_int;
       warning (_("function has unknown return type; assuming int"));
     }
 
@@ -324,9 +324,9 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 	   built-in parser used to do, but at least warn.  */
 	struct type *fallback;
 	if (type->is_objfile_owned ())
-	  fallback = objfile_type (type->objfile ())->builtin_int;
+	  fallback = objfile_type (type->objfile_owner ())->builtin_int;
 	else
-	  fallback = builtin_type (type->arch ())->builtin_int;
+	  fallback = builtin_type (type->arch_owner ())->builtin_int;
 	warning (_("variable has unknown type; assuming int"));
 	return convert_int (context, fallback);
       }

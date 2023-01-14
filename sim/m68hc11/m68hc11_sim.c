@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-module.h"
 #include "sim-options.h"
 
+#include <stdlib.h>
+
 enum {
   OPTION_CPU_RESET = OPTION_START,
   OPTION_EMUL_OS,
@@ -113,7 +115,7 @@ cpu_set_sp (sim_cpu *cpu, uint16 val)
   cpu->cpu_regs.sp = val;
 }
 
-uint16
+static uint16
 cpu_get_reg (sim_cpu *cpu, uint8 reg)
 {
   switch (reg)
@@ -135,7 +137,7 @@ cpu_get_reg (sim_cpu *cpu, uint8 reg)
     }
 }
 
-uint16
+static uint16
 cpu_get_src_reg (sim_cpu *cpu, uint8 reg)
 {
   switch (reg)
@@ -169,7 +171,7 @@ cpu_get_src_reg (sim_cpu *cpu, uint8 reg)
     }
 }
 
-void
+static void
 cpu_set_dst_reg (sim_cpu *cpu, uint8 reg, uint16 val)
 {
   switch (reg)
@@ -211,7 +213,7 @@ cpu_set_dst_reg (sim_cpu *cpu, uint8 reg, uint16 val)
     }
 }
 
-void
+static void
 cpu_set_reg (sim_cpu *cpu, uint8 reg, uint16 val)
 {
   switch (reg)
@@ -344,7 +346,7 @@ cpu_get_indexed_operand_addr (sim_cpu *cpu, int restricted)
   return addr;
 }
 
-uint8
+static uint8
 cpu_get_indexed_operand8 (sim_cpu *cpu, int restricted)
 {
   uint16 addr;
@@ -353,7 +355,7 @@ cpu_get_indexed_operand8 (sim_cpu *cpu, int restricted)
   return memory_read8 (cpu, addr);
 }
 
-uint16
+static uint16
 cpu_get_indexed_operand16 (sim_cpu *cpu, int restricted)
 {
   uint16 addr;

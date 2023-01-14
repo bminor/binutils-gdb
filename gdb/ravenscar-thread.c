@@ -620,7 +620,7 @@ ravenscar_thread_target::mourn_inferior ()
 {
   m_base_ptid = null_ptid;
   target_ops *beneath = this->beneath ();
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
   beneath->mourn_inferior ();
 }
 
@@ -674,7 +674,7 @@ ravenscar_inferior_created (inferior *inf)
     }
 
   ravenscar_thread_target *rtarget = new ravenscar_thread_target ();
-  push_target (target_ops_up (rtarget));
+  inf->push_target (target_ops_up (rtarget));
   thread_info *thr = rtarget->add_active_thread ();
   if (thr != nullptr)
     switch_to_thread (thr);

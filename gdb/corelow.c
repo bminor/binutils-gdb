@@ -49,6 +49,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "gdbcmd.h"
+#include "xml-tdesc.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -457,7 +458,7 @@ core_target_open (const char *arg, int from_tty)
   if (!current_program_space->exec_bfd ())
     set_gdbarch_from_file (core_bfd);
 
-  push_target (std::move (target_holder));
+  current_inferior ()->push_target (std::move (target_holder));
 
   switch_to_no_thread ();
 
@@ -579,7 +580,7 @@ core_target::detach (inferior *inf, int from_tty)
   /* Note that 'this' is dangling after this call.  unpush_target
      closes the target, and our close implementation deletes
      'this'.  */
-  unpush_target (this);
+  inf->unpush_target (this);
 
   /* Clear the register cache and the frame cache.  */
   registers_changed ();
@@ -1000,6 +1001,29 @@ core_target::thread_alive (ptid_t ptid)
 const struct target_desc *
 core_target::read_description ()
 {
+  /* If the core file contains a target description note then we will use
+     that in preference to anything else.  */
+  bfd_size_type tdesc_note_size = 0;
+  struct bfd_section *tdesc_note_section
+    = bfd_get_section_by_name (core_bfd, ".gdb-tdesc");
+  if (tdesc_note_section != nullptr)
+    tdesc_note_size = bfd_section_size (tdesc_note_section);
+  if (tdesc_note_size > 0)
+    {
+      gdb::char_vector contents (tdesc_note_size + 1);
+      if (bfd_get_section_contents (core_bfd, tdesc_note_section,
+				    contents.data (), (file_ptr) 0,
+				    tdesc_note_size))
+	{
+	  /* Ensure we have a null terminator.  */
+	  contents[tdesc_note_size] = '\0';
+	  const struct target_desc *result
+	    = string_read_description_xml (contents.data ());
+	  if (result != nullptr)
+	    return result;
+	}
+    }
+
   if (m_core_gdbarch && gdbarch_core_read_description_p (m_core_gdbarch))
     {
       const struct target_desc *result;

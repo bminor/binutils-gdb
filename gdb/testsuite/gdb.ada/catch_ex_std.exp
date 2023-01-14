@@ -36,8 +36,7 @@ if {[gdb_compile_shlib $srcfile2 $sofile {ada debug}] != ""} {
 # Set linkarg such that the executable can find the shared library.
 if {[istarget "*-*-mingw*"]
     || [istarget *-*-cygwin*]
-    || [istarget *-*-pe*]
-    || [istarget arm*-*-symbianelf*]} {
+    || [istarget *-*-pe*]} {
     # Do not need anything.
     set linkarg ""
 } elseif {[istarget *-*-freebsd*] || [istarget *-*-openbsd*]} {

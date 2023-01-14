@@ -40,13 +40,19 @@
 
 #include "gdb_proc_service.h"
 #include "arch/aarch64.h"
+#include "arch/aarch64-mte-linux.h"
 #include "linux-aarch32-tdesc.h"
 #include "linux-aarch64-tdesc.h"
+#include "nat/aarch64-mte-linux-ptrace.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
 #include "tdesc.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
+#endif
+
+#ifdef HAVE_GETAUXVAL
+#include <sys/auxv.h>
 #endif
 
 /* Linux target op definitions for the AArch64 architecture.  */
@@ -80,6 +86,14 @@ public:
   int get_min_fast_tracepoint_insn_len () override;
 
   struct emit_ops *emit_ops () override;
+
+  bool supports_memory_tagging () override;
+
+  bool fetch_memtags (CORE_ADDR address, size_t len,
+		      gdb::byte_vector &tags, int type) override;
+
+  bool store_memtags (CORE_ADDR address, size_t len,
+		      const gdb::byte_vector &tags, int type) override;
 
 protected:
 
@@ -258,6 +272,29 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 		   &pauth_regset[0]);
   supply_register (regcache, AARCH64_PAUTH_CMASK_REGNUM (pauth_base),
 		   &pauth_regset[1]);
+}
+
+/* Fill BUF with the MTE registers from the regcache.  */
+
+static void
+aarch64_fill_mteregset (struct regcache *regcache, void *buf)
+{
+  uint64_t *mte_regset = (uint64_t *) buf;
+  int mte_base = find_regno (regcache->tdesc, "tag_ctl");
+
+  collect_register (regcache, mte_base, mte_regset);
+}
+
+/* Store the MTE registers to regcache.  */
+
+static void
+aarch64_store_mteregset (struct regcache *regcache, const void *buf)
+{
+  uint64_t *mte_regset = (uint64_t *) buf;
+  int mte_base = find_regno (regcache->tdesc, "tag_ctl");
+
+  /* Tag Control register */
+  supply_register (regcache, mte_base, mte_regset);
 }
 
 bool
@@ -663,9 +700,13 @@ aarch64_target::low_arch_setup ()
     {
       uint64_t vq = aarch64_sve_get_vq (tid);
       unsigned long hwcap = linux_get_hwcap (8);
+      unsigned long hwcap2 = linux_get_hwcap2 (8);
       bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+      /* MTE is AArch64-only.  */
+      bool mte_p = hwcap2 & HWCAP2_MTE;
 
-      current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p);
+      current_process ()->tdesc
+	= aarch64_linux_read_description (vq, pauth_p, mte_p);
     }
   else
     current_process ()->tdesc = aarch32_linux_read_description ();
@@ -701,6 +742,9 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK,
     AARCH64_PAUTH_REGS_SIZE, OPTIONAL_REGS,
     NULL, aarch64_store_pauthregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
+    AARCH64_LINUX_SIZEOF_MTE, OPTIONAL_REGS, aarch64_fill_mteregset,
+    aarch64_store_mteregset },
   NULL_REGSET
 };
 
@@ -730,6 +774,9 @@ static struct regset_info aarch64_sve_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK,
     AARCH64_PAUTH_REGS_SIZE, OPTIONAL_REGS,
     NULL, aarch64_store_pauthregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
+    AARCH64_LINUX_SIZEOF_MTE, OPTIONAL_REGS, aarch64_fill_mteregset,
+    aarch64_store_mteregset },
   NULL_REGSET
 };
 
@@ -3187,6 +3234,54 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return aarch64_breakpoint_len;
   else
     return arm_breakpoint_kind_from_current_state (pcptr);
+}
+
+/* Returns true if memory tagging is supported.  */
+bool
+aarch64_target::supports_memory_tagging ()
+{
+  if (current_thread == NULL)
+    {
+      /* We don't have any processes running, so don't attempt to
+	 use linux_get_hwcap2 as it will try to fetch the current
+	 thread id.  Instead, just fetch the auxv from the self
+	 PID.  */
+#ifdef HAVE_GETAUXVAL
+      return (getauxval (AT_HWCAP2) & HWCAP2_MTE) != 0;
+#else
+      return true;
+#endif
+    }
+
+  return (linux_get_hwcap2 (8) & HWCAP2_MTE) != 0;
+}
+
+bool
+aarch64_target::fetch_memtags (CORE_ADDR address, size_t len,
+			       gdb::byte_vector &tags, int type)
+{
+  /* Allocation tags are per-process, so any tid is fine.  */
+  int tid = lwpid_of (current_thread);
+
+  /* Allocation tag?  */
+  if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))
+    return aarch64_mte_fetch_memtags (tid, address, len, tags);
+
+  return false;
+}
+
+bool
+aarch64_target::store_memtags (CORE_ADDR address, size_t len,
+			       const gdb::byte_vector &tags, int type)
+{
+  /* Allocation tags are per-process, so any tid is fine.  */
+  int tid = lwpid_of (current_thread);
+
+  /* Allocation tag?  */
+  if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))
+    return aarch64_mte_store_memtags (tid, address, len, tags);
+
+  return false;
 }
 
 /* The linux target ops object.  */

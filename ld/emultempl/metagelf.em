@@ -76,11 +76,11 @@ struct hook_stub_info
 
 /* Traverse the linker tree to find the spot where the stub goes.  */
 
-static bfd_boolean
+static bool
 hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 {
   lang_statement_union_type *l;
-  bfd_boolean ret;
+  bool ret;
 
   for (; (l = *lp) != NULL; lp = &l->header.next)
     {
@@ -118,7 +118,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 		 before its associated input section.  */
 	      *lp = info->add.head;
 	      *(info->add.tail) = l;
-	      return TRUE;
+	      return true;
 	    }
 	  break;
 
@@ -139,7 +139,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 	  break;
 	}
     }
-  return FALSE;
+  return false;
 }
 
 
@@ -191,7 +191,7 @@ metagelf_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  ldelf_map_segments (TRUE);
+  ldelf_map_segments (true);
   need_laying_out = -1;
 }
 

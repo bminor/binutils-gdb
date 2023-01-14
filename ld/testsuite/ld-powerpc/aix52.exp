@@ -266,3 +266,30 @@ run_dump_test "aix-glink-3-32"
 run_dump_test "aix-glink-3-64"
 run_dump_test "aix-weak-3-32"
 run_dump_test "aix-weak-3-64"
+
+
+# Tests added for features in AIX 7+.
+
+set aix7tests {
+    {"Large TOC test 1" "-shared -bE:aix-largetoc-1.ex"
+	"" {aix-largetoc-1.s}
+	{{objdump -dr aix-largetoc-1-SIZE.d}}
+	"aix-largetoc-1.so"}
+
+    {"TLS relocations" "-shared -bE:aix-tls-reloc.ex"
+	"" {aix-tls-reloc.s}
+	{{objdump -dr aix-tls-reloc-SIZE.d}}
+	"aix-tls-reloc.so"}
+
+    {"TLS section" "-shared -bE:aix-tls-section.ex"
+	"" {aix-tls-section.s}
+	{{objdump -hw aix-tls-section-SIZE.d}}
+	"aix-tls-section.so"}
+}
+
+foreach test $aix7tests {
+    foreach { name ldopts asopts sources tools output } $test {
+	run_aix_test 32 $name $ldopts $asopts $sources $tools $output
+	run_aix_test 64 $name $ldopts $asopts $sources $tools $output
+    }
+}

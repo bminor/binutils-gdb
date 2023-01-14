@@ -1,9 +1,6 @@
 # M32R simulator testsuite.
 
 if [istarget m32r*-*-*] {
-    # load support procs
-    # load_lib cgen.exp
-
     # all machines
     set all_machs "m32r"
 

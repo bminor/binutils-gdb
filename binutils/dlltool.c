@@ -355,7 +355,7 @@ static char *exp_name;
 static char *imp_name;
 static char *delayimp_name;
 static char *identify_imp_name;
-static bfd_boolean identify_strict;
+static bool identify_strict;
 
 /* Types used to implement a linked list of dllnames associated
    with the specified import lib. Used by the identify_* code.
@@ -376,14 +376,14 @@ typedef struct dll_name_list_t
 /* Types used to pass data to iterator functions.  */
 typedef struct symname_search_data_t
 {
-  const char * symname;
-  bfd_boolean  found;
+  const char *symname;
+  bool found;
 } symname_search_data_type;
 
 typedef struct identify_data_t
 {
-   dll_name_list_type * list;
-   bfd_boolean          ms_style_implib;
+   dll_name_list_type *list;
+   bool ms_style_implib;
 } identify_data_type;
 
 
@@ -403,23 +403,23 @@ static int dontdeltemps = 0;
 
 /* TRUE if we should export all symbols.  Otherwise, we only export
    symbols listed in .drectve sections or in the def file.  */
-static bfd_boolean export_all_symbols;
+static bool export_all_symbols;
 
 /* TRUE if we should exclude the symbols in DEFAULT_EXCLUDES when
    exporting all symbols.  */
-static bfd_boolean do_default_excludes = TRUE;
+static bool do_default_excludes = true;
 
-static bfd_boolean use_nul_prefixed_import_tables = FALSE;
+static bool use_nul_prefixed_import_tables = false;
 
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
 
 /* TRUE if we should add __imp_<SYMBOL> to import libraries for backward
    compatibility to old Cygwin releases.  */
-static bfd_boolean create_compat_implib;
+static bool create_compat_implib;
 
 /* TRUE if we have to write PE+ import libraries.  */
-static bfd_boolean create_for_pep;
+static bool create_for_pep;
 
 static char *def_file;
 
@@ -611,7 +611,7 @@ struct mac
   int how_dljtab_roff1; /* Offset for the ind 32 reloc into idata 5.  */
   int how_dljtab_roff2; /* Offset for the ind 32 reloc into idata 5.  */
   int how_dljtab_roff3; /* Offset for the ind 32 reloc into idata 5.  */
-  bfd_boolean how_seh;
+  bool how_seh;
   const char *trampoline;
 };
 
@@ -625,7 +625,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
     "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -634,7 +634,7 @@ mtable[] =
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-i386",bfd_arch_i386,
     i386_jtab, sizeof (i386_jtab), 2,
-    i386_dljtab, sizeof (i386_dljtab), 2, 7, 12, FALSE, i386_trampoline
+    i386_dljtab, sizeof (i386_dljtab), 2, 7, 12, false, i386_trampoline
   }
   ,
   {
@@ -644,7 +644,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
     "pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
 #define MARM_INTERWORK 3
@@ -654,7 +654,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
     "pe-arm-little", bfd_arch_arm,
     arm_interwork_jtab, sizeof (arm_interwork_jtab), 12,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -664,7 +664,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "",
     "pe-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -674,7 +674,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "pe-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -684,7 +684,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "",
     "elf32-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -694,7 +694,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "elf32-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -704,7 +704,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
     "pe-arm-wince-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8,
-    0, 0, 0, 0, 0, FALSE, 0
+    0, 0, 0, 0, 0, false, 0
   }
   ,
   {
@@ -713,7 +713,7 @@ mtable[] =
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-x86-64",bfd_arch_i386,
     i386_jtab, sizeof (i386_jtab), 2,
-    i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, TRUE, i386_x64_trampoline
+    i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, true, i386_x64_trampoline
   }
   ,
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -762,7 +762,7 @@ static void run (const char *, char *);
 static void scan_drectve_symbols (bfd *);
 static void scan_filtered_symbols (bfd *, void *, long, unsigned int);
 static void add_excludes (const char *);
-static bfd_boolean match_exclude (const char *);
+static bool match_exclude (const char *);
 static void set_default_excludes (void);
 static long filter_symbols (bfd *, void *, long, unsigned int);
 static void scan_all_symbols (bfd *);
@@ -793,7 +793,7 @@ static void identify_dll_for_implib (void);
 static void identify_search_archive
   (bfd *, void (*) (bfd *, bfd *, void *),  void *);
 static void identify_search_member (bfd *, bfd *, void *);
-static bfd_boolean identify_process_section_p (asection *, bfd_boolean);
+static bool identify_process_section_p (asection *, bool);
 static void identify_search_section (bfd *, asection *, void *);
 static void identify_member_contains_symname (bfd *, bfd  *, void *);
 
@@ -1367,7 +1367,7 @@ scan_drectve_symbols (bfd *abfd)
   while (p < e)
     {
       if (p[0] == '-'
-	  && CONST_STRNEQ (p, "-export:"))
+	  && startswith (p, "-export:"))
 	{
 	  char * name;
 	  char * c;
@@ -1399,7 +1399,7 @@ scan_drectve_symbols (bfd *abfd)
 	      char *tag_start = ++p;
 	      while (p < e && *p != ' ' && *p != '-')
 		p++;
-	      if (CONST_STRNEQ (tag_start, "data"))
+	      if (startswith (tag_start, "data"))
 		flags &= ~BSF_FUNCTION;
 	    }
 
@@ -1445,7 +1445,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
       asymbol *sym;
       const char *symbol_name;
 
-      sym = bfd_minisymbol_to_symbol (abfd, FALSE, from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, false, from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -1504,15 +1504,15 @@ add_excludes (const char *new_excludes)
 
 /* See if STRING is on the list of symbols to exclude.  */
 
-static bfd_boolean
+static bool
 match_exclude (const char *string)
 {
   struct string_list *excl_item;
 
   for (excl_item = excludes; excl_item; excl_item = excl_item->next)
     if (strcmp (string, excl_item->string) == 0)
-      return TRUE;
-  return FALSE;
+      return true;
+  return false;
 }
 
 /* Add the default list of symbols to exclude.  */
@@ -1544,7 +1544,7 @@ filter_symbols (bfd *abfd, void *minisyms, long symcount, unsigned int size)
       int keep = 0;
       asymbol *sym;
 
-      sym = bfd_minisymbol_to_symbol (abfd, FALSE, (const void *) from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, false, (const void *) from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -1589,7 +1589,7 @@ scan_all_symbols (bfd *abfd)
       return;
     }
 
-  symcount = bfd_read_minisymbols (abfd, FALSE, &minisyms, &size);
+  symcount = bfd_read_minisymbols (abfd, false, &minisyms, &size);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
 
@@ -3195,7 +3195,7 @@ identify_member_contains_symname (bfd  * abfd,
                    search_data->symname,
                    strlen (search_data->symname)) == 0)
 	{
-	  search_data->found = TRUE;
+	  search_data->found = true;
 	  break;
 	}
     }
@@ -3229,11 +3229,11 @@ identify_dll_for_implib (void)
 
   /* Initialize identify_data.  */
   identify_data.list = dll_name_list_create ();
-  identify_data.ms_style_implib = FALSE;
+  identify_data.ms_style_implib = false;
 
   /* Initialize search_data.  */
   search_data.symname = "__NULL_IMPORT_DESCRIPTOR";
-  search_data.found = FALSE;
+  search_data.found = false;
 
   if (bfd_init () != BFD_INIT_MAGIC)
     fatal (_("fatal error: libbfd ABI mismatch"));
@@ -3257,7 +3257,7 @@ identify_dll_for_implib (void)
 			   identify_member_contains_symname,
 			   (void *)(& search_data));
   if (search_data.found)
-    identify_data.ms_style_implib = TRUE;
+    identify_data.ms_style_implib = true;
 
   /* Rewind the bfd.  */
   if (! bfd_close (abfd))
@@ -3372,8 +3372,8 @@ identify_search_member (bfd  *abfd,
    By default, this is .idata$7 (.idata$6 if the import library is
    ms-style).  */
 
-static bfd_boolean
-identify_process_section_p (asection * section, bfd_boolean ms_style_implib)
+static bool
+identify_process_section_p (asection * section, bool ms_style_implib)
 {
   static const char * SECTION_NAME = ".idata$7";
   static const char * MS_SECTION_NAME = ".idata$6";
@@ -3382,8 +3382,8 @@ identify_process_section_p (asection * section, bfd_boolean ms_style_implib)
     (ms_style_implib ? MS_SECTION_NAME : SECTION_NAME);
 
   if (strcmp (section_name, section->name) == 0)
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 /* If *section has contents and its name is .idata$7 (.idata$6 if
@@ -3396,7 +3396,7 @@ identify_search_section (bfd * abfd, asection * section, void * obj)
   bfd_byte *data = 0;
   bfd_size_type datasize;
   identify_data_type * identify_data = (identify_data_type *)obj;
-  bfd_boolean ms_style = identify_data->ms_style_implib;
+  bool ms_style = identify_data->ms_style_implib;
 
   if ((section->flags & SEC_HAS_CONTENTS) == 0)
     return;
@@ -3779,12 +3779,10 @@ main (int ac, char **av)
   program_name = av[0];
   oav = av;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
@@ -3803,19 +3801,19 @@ main (int ac, char **av)
       switch (c)
 	{
 	case OPTION_EXPORT_ALL_SYMS:
-	  export_all_symbols = TRUE;
+	  export_all_symbols = true;
 	  break;
 	case OPTION_NO_EXPORT_ALL_SYMS:
-	  export_all_symbols = FALSE;
+	  export_all_symbols = false;
 	  break;
 	case OPTION_EXCLUDE_SYMS:
 	  add_excludes (optarg);
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
-	  do_default_excludes = FALSE;
+	  do_default_excludes = false;
 	  break;
 	case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
-	  use_nul_prefixed_import_tables = TRUE;
+	  use_nul_prefixed_import_tables = true;
 	  break;
 	case OPTION_ADD_STDCALL_UNDERSCORE:
 	  add_stdcall_underscore = 1;
@@ -3957,7 +3955,7 @@ main (int ac, char **av)
       bfd_get_target_info (mtable[machine].how_bfd_target, NULL,
                            NULL, &u, NULL);
     if (u != -1)
-      leading_underscore = (u != 0 ? TRUE : FALSE);
+      leading_underscore = u != 0;
   }
 
   if (!dll_name && exp_name)
@@ -3980,7 +3978,7 @@ main (int ac, char **av)
      symbols in the .drectve section.  The default excludes are meant
      to avoid exporting DLL entry point and Cygwin32 impure_ptr.  */
   if (! export_all_symbols)
-    do_default_excludes = FALSE;
+    do_default_excludes = false;
 
   if (do_default_excludes)
     set_default_excludes ();

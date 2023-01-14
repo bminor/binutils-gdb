@@ -42,6 +42,7 @@
 #include "count-one-bits.h"
 #include "c-lang.h"
 #include "cp-abi.h"
+#include "inferior.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -110,6 +111,7 @@ struct value_print_options user_print_options =
   10,				/* repeat_count_threshold */
   0,				/* output_format */
   0,				/* format */
+  1,				/* memory_tag_violations */
   0,				/* stop_print_at_null */
   0,				/* print_array_indexes */
   0,				/* deref_ref */
@@ -200,6 +202,17 @@ show_repeat_count_threshold (struct ui_file *file, int from_tty,
 			     struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Threshold for repeated print elements is %s.\n"),
+		    value);
+}
+
+/* If nonzero, prints memory tag violations for pointers.  */
+
+static void
+show_memory_tag_violations (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Printing of memory tag violations is %s.\n"),
 		    value);
 }
 
@@ -408,7 +421,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 			CORE_ADDR address, struct ui_file *stream,
 			const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   if (elttype->code () == TYPE_CODE_FUNC)
     {
@@ -483,7 +496,7 @@ static void
 print_ref_address (struct type *type, const gdb_byte *address_buffer,
 		  int embedded_offset, struct ui_file *stream)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   if (address_buffer != NULL)
     {
@@ -603,7 +616,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
       fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
 		    stream);
     }
-  else if (TYPE_FLAG_ENUM (type))
+  else if (type->is_flag_enum ())
     {
       int first = 1;
 
@@ -673,7 +686,7 @@ generic_val_print_enum (struct type *type,
 			const struct value_print_options *options)
 {
   LONGEST val;
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
   gdb_assert (!options->format);
@@ -694,7 +707,7 @@ generic_val_print_func (struct type *type,
 			struct value *original_value,
 			const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   gdb_assert (!options->format);
 
@@ -1182,7 +1195,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
   int field, nfields = type->num_fields ();
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 
   fputs_filtered ("[", stream);
@@ -1836,9 +1849,8 @@ print_function_pointer_address (const struct value_print_options *options,
 				CORE_ADDR address,
 				struct ui_file *stream)
 {
-  CORE_ADDR func_addr
-    = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-					  current_top_target ());
+  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, address, current_inferior ()->top_target ());
 
   /* If the function pointer is represented by a description, print
      the address of the description.  */
@@ -2713,7 +2725,7 @@ val_print_string (struct type *elttype, const char *encoding,
   unsigned int fetchlimit;	/* Maximum number of chars to print.  */
   int bytes_read;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;	/* Dynamically growable fetch buffer.  */
-  struct gdbarch *gdbarch = get_type_arch (elttype);
+  struct gdbarch *gdbarch = elttype->arch ();
   enum bfd_endian byte_order = type_byte_order (elttype);
   int width = TYPE_LENGTH (elttype);
 
@@ -3021,6 +3033,17 @@ static const gdb::option::option_def value_print_option_defs[] = {
     N_("When structures, unions, or arrays are nested beyond this depth then they\n\
 will be replaced with either '{...}' or '(...)' depending on the language.\n\
 Use \"unlimited\" to print the complete structure.")
+  },
+
+  boolean_option_def {
+    "memory-tag-violations",
+    [] (value_print_options *opt) { return &opt->memory_tag_violations; },
+    show_memory_tag_violations, /* show_cmd_cb */
+    N_("Set printing of memory tag violations for pointers."),
+    N_("Show printing of memory tag violations for pointers."),
+    N_("Issue a warning when the printed value is a pointer\n\
+whose logical tag doesn't match the allocation tag of the memory\n\
+location it points to."),
   },
 
   boolean_option_def {

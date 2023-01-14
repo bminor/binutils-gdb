@@ -19,6 +19,7 @@
 
 #include <ctf-impl.h>
 #include <string.h>
+#include <assert.h>
 
 /* Convert an encoded CTF string name into a pointer to a C string, using an
   explicit internal strtab rather than the fp-based one.  */
@@ -103,7 +104,7 @@ ctf_str_create_atoms (ctf_dict_t *fp)
 {
   fp->ctf_str_atoms = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 					  free, ctf_str_free_atom);
-  if (fp->ctf_str_atoms == NULL)
+  if (!fp->ctf_str_atoms)
     return -ENOMEM;
 
   if (!fp->ctf_prov_strtab)
@@ -112,6 +113,13 @@ ctf_str_create_atoms (ctf_dict_t *fp)
 					      NULL, NULL);
   if (!fp->ctf_prov_strtab)
     goto oom_prov_strtab;
+
+  if (!fp->ctf_str_pending_ref)
+    fp->ctf_str_pending_ref = ctf_dynset_create (htab_hash_pointer,
+						 htab_eq_pointer,
+						 NULL);
+  if (!fp->ctf_str_pending_ref)
+    goto oom_str_pending_ref;
 
   errno = 0;
   ctf_str_add (fp, "");
@@ -123,6 +131,9 @@ ctf_str_create_atoms (ctf_dict_t *fp)
  oom_str_add:
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
   fp->ctf_prov_strtab = NULL;
+ oom_str_pending_ref:
+  ctf_dynset_destroy (fp->ctf_str_pending_ref);
+  fp->ctf_str_pending_ref = NULL;
  oom_prov_strtab:
   ctf_dynhash_destroy (fp->ctf_str_atoms);
   fp->ctf_str_atoms = NULL;
@@ -135,7 +146,12 @@ ctf_str_free_atoms (ctf_dict_t *fp)
 {
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
   ctf_dynhash_destroy (fp->ctf_str_atoms);
+  ctf_dynset_destroy (fp->ctf_str_pending_ref);
 }
+
+#define CTF_STR_ADD_REF 0x1
+#define CTF_STR_MAKE_PROVISIONAL 0x2
+#define CTF_STR_PENDING_REF 0x4
 
 /* Add a string to the atoms table, copying the passed-in string.  Return the
    atom added. Return NULL only when out of memory (and do not touch the
@@ -144,7 +160,7 @@ ctf_str_free_atoms (ctf_dict_t *fp)
    provisional strtab.   */
 static ctf_str_atom_t *
 ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
-			  int add_ref, int make_provisional, uint32_t *ref)
+			  int flags, uint32_t *ref)
 {
   char *newstr = NULL;
   ctf_str_atom_t *atom = NULL;
@@ -152,7 +168,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 
   atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
 
-  if (add_ref)
+  if (flags & CTF_STR_ADD_REF)
     {
       if ((aref = malloc (sizeof (struct ctf_str_atom_ref))) == NULL)
 	return NULL;
@@ -161,8 +177,9 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 
   if (atom)
     {
-      if (add_ref)
+      if (flags & CTF_STR_ADD_REF)
 	{
+	  ctf_dynset_remove (fp->ctf_str_pending_ref, (void *) ref);
 	  ctf_list_append (&atom->csa_refs, aref);
 	  fp->ctf_str_num_refs++;
 	}
@@ -182,7 +199,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   atom->csa_str = newstr;
   atom->csa_snapshot_id = fp->ctf_snapshots;
 
-  if (make_provisional)
+  if (flags & CTF_STR_MAKE_PROVISIONAL)
     {
       atom->csa_offset = fp->ctf_str_prov_offset;
 
@@ -193,8 +210,14 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
       fp->ctf_str_prov_offset += strlen (atom->csa_str) + 1;
     }
 
-  if (add_ref)
+  if (flags & CTF_STR_PENDING_REF)
     {
+      if (ctf_dynset_insert (fp->ctf_str_pending_ref, (void *) ref) < 0)
+	goto oom;
+    }
+  else if (flags & CTF_STR_ADD_REF)
+    {
+      ctf_dynset_remove (fp->ctf_str_pending_ref, (void *) ref);
       ctf_list_append (&atom->csa_refs, aref);
       fp->ctf_str_num_refs++;
     }
@@ -206,6 +229,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   free (atom);
   free (aref);
   free (newstr);
+  ctf_set_errno (fp, ENOMEM);
   return NULL;
 }
 
@@ -218,10 +242,11 @@ uint32_t
 ctf_str_add (ctf_dict_t *fp, const char *str)
 {
   ctf_str_atom_t *atom;
-  if (!str)
-    return 0;
 
-  atom = ctf_str_add_ref_internal (fp, str, FALSE, TRUE, 0);
+  if (!str)
+    str = "";
+
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_MAKE_PROVISIONAL, 0);
   if (!atom)
     return 0;
 
@@ -235,14 +260,49 @@ uint32_t
 ctf_str_add_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 {
   ctf_str_atom_t *atom;
-  if (!str)
-    return 0;
 
-  atom = ctf_str_add_ref_internal (fp, str, TRUE, TRUE, ref);
+  if (!str)
+    str = "";
+
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_ADD_REF
+				   | CTF_STR_MAKE_PROVISIONAL, ref);
   if (!atom)
     return 0;
 
   return atom->csa_offset;
+}
+
+/* Like ctf_str_add_ref(), but notes that this memory location must be added as
+   a ref by a later serialization phase, rather than adding it itself.  */
+uint32_t
+ctf_str_add_pending (ctf_dict_t *fp, const char *str, uint32_t *ref)
+{
+  ctf_str_atom_t *atom;
+
+  if (!str)
+    str = "";
+
+  atom = ctf_str_add_ref_internal (fp, str, CTF_STR_PENDING_REF
+				   | CTF_STR_MAKE_PROVISIONAL, ref);
+  if (!atom)
+    return 0;
+
+  return atom->csa_offset;
+}
+
+/* Note that a pending ref now located at NEW_REF has moved by BYTES bytes.  */
+int
+ctf_str_move_pending (ctf_dict_t *fp, uint32_t *new_ref, ptrdiff_t bytes)
+{
+  if (bytes == 0)
+    return 0;
+
+  if (ctf_dynset_insert (fp->ctf_str_pending_ref, (void *) new_ref) < 0)
+    return (ctf_set_errno (fp, ENOMEM));
+
+  ctf_dynset_remove (fp->ctf_str_pending_ref,
+		     (void *) ((signed char *) new_ref - bytes));
+  return 0;
 }
 
 /* Add an external strtab reference at OFFSET.  Returns zero if the addition
@@ -251,10 +311,11 @@ int
 ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
 {
   ctf_str_atom_t *atom;
-  if (!str)
-    return 0;
 
-  atom = ctf_str_add_ref_internal (fp, str, FALSE, FALSE, 0);
+  if (!str)
+    str = "";
+
+  atom = ctf_str_add_ref_internal (fp, str, 0, 0);
   if (!atom)
     return 0;
 
@@ -304,6 +365,8 @@ ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 	  free (aref);
 	}
     }
+
+  ctf_dynset_remove (fp->ctf_str_pending_ref, (void *) ref);
 }
 
 /* A ctf_dynhash_iter_remove() callback that removes atoms later than a given

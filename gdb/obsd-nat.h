@@ -30,7 +30,7 @@ class obsd_nat_target : public inf_ptrace_target
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
 #ifdef PT_GET_PROCESS_STATE
-  bool follow_fork (bool, bool) override;
+  void follow_fork (bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
 

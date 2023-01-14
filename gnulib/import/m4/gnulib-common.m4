@@ -1,5 +1,5 @@
-# gnulib-common.m4 serial 50
-dnl Copyright (C) 2007-2020 Free Software Foundation, Inc.
+# gnulib-common.m4 serial 63
+dnl Copyright (C) 2007-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -45,7 +45,7 @@ AC_DEFUN([gl_COMMON_BODY], [
                 ? 6000000 <= __apple_build_version__ \
                 : 3 < __clang_major__ + (5 <= __clang_minor__))))
    /* _Noreturn works as-is.  */
-# elif _GL_GNUC_PREREQ (2, 8) || 0x5110 <= __SUNPRO_C
+# elif _GL_GNUC_PREREQ (2, 8) || defined __clang__ || 0x5110 <= __SUNPRO_C
 #  define _Noreturn __attribute__ ((__noreturn__))
 # elif 1200 <= (defined _MSC_VER ? _MSC_VER : 0)
 #  define _Noreturn __declspec (noreturn)
@@ -76,6 +76,7 @@ AC_DEFUN([gl_COMMON_BODY], [
 # define _GL_ATTR_cold _GL_GNUC_PREREQ (4, 3)
 # define _GL_ATTR_const _GL_GNUC_PREREQ (2, 95)
 # define _GL_ATTR_deprecated _GL_GNUC_PREREQ (3, 1)
+# define _GL_ATTR_diagnose_if 0
 # define _GL_ATTR_error _GL_GNUC_PREREQ (4, 3)
 # define _GL_ATTR_externally_visible _GL_GNUC_PREREQ (4, 1)
 # define _GL_ATTR_fallthrough _GL_GNUC_PREREQ (7, 0)
@@ -120,9 +121,14 @@ AC_DEFUN([gl_COMMON_BODY], [
 #endif
 
 /* Avoid __attribute__ ((cold)) on MinGW; see thread starting at
-   <https://lists.gnu.org/r/emacs-devel/2019-04/msg01152.html>. */
+   <https://lists.gnu.org/r/emacs-devel/2019-04/msg01152.html>.
+   Also, Oracle Studio 12.6 requires 'cold' not '__cold__'.  */
 #if _GL_HAS_ATTRIBUTE (cold) && !defined __MINGW32__
-# define _GL_ATTRIBUTE_COLD __attribute__ ((__cold__))
+# ifndef __SUNPRO_C
+#  define _GL_ATTRIBUTE_COLD __attribute__ ((__cold__))
+# else
+#  define _GL_ATTRIBUTE_COLD __attribute__ ((cold))
+# endif
 #else
 # define _GL_ATTRIBUTE_COLD
 #endif
@@ -144,6 +150,9 @@ AC_DEFUN([gl_COMMON_BODY], [
 #if _GL_HAS_ATTRIBUTE (error)
 # define _GL_ATTRIBUTE_ERROR(msg) __attribute__ ((__error__ (msg)))
 # define _GL_ATTRIBUTE_WARNING(msg) __attribute__ ((__warning__ (msg)))
+#elif _GL_HAS_ATTRIBUTE (diagnose_if)
+# define _GL_ATTRIBUTE_ERROR(msg) __attribute__ ((__diagnose_if__ (1, msg, "error")))
+# define _GL_ATTRIBUTE_WARNING(msg) __attribute__ ((__diagnose_if__ (1, msg, "warning")))
 #else
 # define _GL_ATTRIBUTE_ERROR(msg)
 # define _GL_ATTRIBUTE_WARNING(msg)
@@ -176,7 +185,8 @@ AC_DEFUN([gl_COMMON_BODY], [
 # define _GL_ATTRIBUTE_LEAF
 #endif
 
-#if _GL_HAS_ATTRIBUTE (may_alias)
+/* Oracle Studio 12.6 mishandles may_alias despite __has_attribute OK.  */
+#if _GL_HAS_ATTRIBUTE (may_alias) && !defined __SUNPRO_C
 # define _GL_ATTRIBUTE_MAY_ALIAS __attribute__ ((__may_alias__))
 #else
 # define _GL_ATTRIBUTE_MAY_ALIAS
@@ -292,6 +302,22 @@ AC_DEFUN([gl_COMMON_BODY], [
        that may clobber errno, it needs to save and restore the value of
        errno.  */
 #define _GL_ASYNC_SAFE
+])
+  AH_VERBATIM([micro_optimizations],
+[/* _GL_CMP (n1, n2) performs a three-valued comparison on n1 vs. n2, where
+   n1 and n2 are expressions without side effects, that evaluate to real
+   numbers (excluding NaN).
+   It returns
+     1  if n1 > n2
+     0  if n1 == n2
+     -1 if n1 < n2
+   The naïve code   (n1 > n2 ? 1 : n1 < n2 ? -1 : 0)  produces a conditional
+   jump with nearly all GCC versions up to GCC 10.
+   This variant     (n1 < n2 ? -1 : n1 > n2)  produces a conditional with many
+   GCC versions up to GCC 9.
+   The better code  (n1 > n2) - (n1 < n2)  from Hacker's Delight § 2-9
+   avoids conditional jumps in all GCC versions >= 3.4.  */
+#define _GL_CMP(n1, n2) (((n1) > (n2)) - ((n1) < (n2)))
 ])
   dnl Hint which direction to take regarding cross-compilation guesses:
   dnl When a user installs a program on a platform they are not intimately
@@ -454,34 +480,20 @@ AC_DEFUN([gl_FEATURES_H],
   AC_SUBST([HAVE_FEATURES_H])
 ])
 
-# AS_VAR_IF(VAR, VALUE, [IF-MATCH], [IF-NOT-MATCH])
-# ----------------------------------------------------
-# Backport of autoconf-2.63b's macro.
-# Remove this macro when we can assume autoconf >= 2.64.
-m4_ifndef([AS_VAR_IF],
-[m4_define([AS_VAR_IF],
-[AS_IF([test x"AS_VAR_GET([$1])" = x""$2], [$3], [$4])])])
-
 # gl_PROG_CC_C99
 # Modifies the value of the shell variable CC in an attempt to make $CC
 # understand ISO C99 source code.
-# This is like AC_PROG_CC_C99, except that
-# - AC_PROG_CC_C99 does not mix well with AC_PROG_CC_STDC
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00367.html>,
-#   but many more packages use AC_PROG_CC_STDC than AC_PROG_CC_C99
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00441.html>.
-# Remaining problems:
-# - When AC_PROG_CC_STDC is invoked twice, it adds the C99 enabling options
-#   to CC twice
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00431.html>.
-# - AC_PROG_CC_STDC is likely to change now that C11 is an ISO standard.
 AC_DEFUN([gl_PROG_CC_C99],
 [
-  dnl Change that version number to the minimum Autoconf version that supports
-  dnl mixing AC_PROG_CC_C99 calls with AC_PROG_CC_STDC calls.
-  m4_version_prereq([9.0],
-    [AC_REQUIRE([AC_PROG_CC_C99])],
-    [AC_REQUIRE([AC_PROG_CC_STDC])])
+  dnl Just use AC_PROG_CC_C99.
+  dnl When AC_PROG_CC_C99 and AC_PROG_CC_STDC are used together, the substituted
+  dnl value of CC will contain the C99 enabling options twice. But this is only
+  dnl a cosmetic problem.
+  dnl With Autoconf >= 2.70, use AC_PROG_CC since it implies AC_PROG_CC_C99;
+  dnl this avoids a "warning: The macro `AC_PROG_CC_C99' is obsolete."
+  m4_version_prereq([2.70],
+    [AC_REQUIRE([AC_PROG_CC])],
+    [AC_REQUIRE([AC_PROG_CC_C99])])
 ])
 
 # gl_PROG_AR_RANLIB
@@ -555,16 +567,16 @@ Amsterdam
 ])
 
 # AC_C_RESTRICT
-# This definition is copied from post-2.69 Autoconf and overrides the
-# AC_C_RESTRICT macro from autoconf 2.60..2.69.  It can be removed
-# once autoconf >= 2.70 can be assumed.  It's painful to check version
-# numbers, and in practice this macro is more up-to-date than Autoconf
-# is, so override Autoconf unconditionally.
+# This definition is copied from post-2.70 Autoconf and overrides the
+# AC_C_RESTRICT macro from autoconf 2.60..2.70.
+m4_version_prereq([2.70.1], [], [
 AC_DEFUN([AC_C_RESTRICT],
 [AC_CACHE_CHECK([for C/C++ restrict keyword], [ac_cv_c_restrict],
   [ac_cv_c_restrict=no
-   # The order here caters to the fact that C++ does not require restrict.
-   for ac_kw in __restrict __restrict__ _Restrict restrict; do
+   # Put '__restrict__' first, to avoid problems with glibc and non-GCC; see:
+   # https://lists.gnu.org/archive/html/bug-autoconf/2016-02/msg00006.html
+   # Put 'restrict' last, because C++ lacks it.
+   for ac_kw in __restrict__ __restrict _Restrict restrict; do
      AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
          [[typedef int *int_ptr;
@@ -584,7 +596,7 @@ AC_DEFUN([AC_C_RESTRICT],
  AH_VERBATIM([restrict],
 [/* Define to the equivalent of the C99 'restrict' keyword, or to
    nothing if this is not supported.  Do not define if restrict is
-   supported directly.  */
+   supported only directly.  */
 #undef restrict
 /* Work around a bug in older versions of Sun C++, which did not
    #define __restrict__ or support _Restrict or __restrict__
@@ -602,6 +614,7 @@ AC_DEFUN([AC_C_RESTRICT],
    *)  AC_DEFINE_UNQUOTED([restrict], [$ac_cv_c_restrict]) ;;
  esac
 ])# AC_C_RESTRICT
+])
 
 # gl_BIGENDIAN
 # is like AC_C_BIGENDIAN, except that it can be AC_REQUIREd.
@@ -612,6 +625,22 @@ AC_DEFUN([gl_BIGENDIAN],
   AC_C_BIGENDIAN
 ])
 
+# A temporary file descriptor.
+# Must be less than 10, because dash 0.5.8 does not support redirections
+# with multi-digit file descriptors.
+m4_define([GL_TMP_FD], 9)
+
+# gl_SILENT(command)
+# executes command, but without the normal configure output.
+# This is useful when you want to invoke AC_CACHE_CHECK (or AC_CHECK_FUNC etc.)
+# inside another AC_CACHE_CHECK.
+AC_DEFUN([gl_SILENT],
+[
+  exec GL_TMP_FD>&AS_MESSAGE_FD AS_MESSAGE_FD>/dev/null
+  $1
+  exec AS_MESSAGE_FD>&GL_TMP_FD GL_TMP_FD>&-
+])
+
 # gl_CACHE_VAL_SILENT(cache-id, command-to-set-it)
 # is like AC_CACHE_VAL(cache-id, command-to-set-it), except that it does not
 # output a spurious "(cached)" mark in the midst of other configure output.
@@ -619,12 +648,77 @@ AC_DEFUN([gl_BIGENDIAN],
 # by an AC_MSG_CHECKING/AC_MSG_RESULT pair.
 AC_DEFUN([gl_CACHE_VAL_SILENT],
 [
-  saved_as_echo_n="$as_echo_n"
-  as_echo_n=':'
-  AC_CACHE_VAL([$1], [$2])
-  as_echo_n="$saved_as_echo_n"
+  gl_SILENT([
+    AC_CACHE_VAL([$1], [$2])
+  ])
 ])
 
-# AS_VAR_COPY was added in autoconf 2.63b
-m4_define_default([AS_VAR_COPY],
-[AS_LITERAL_IF([$1[]$2], [$1=$$2], [eval $1=\$$2])])
+dnl Expands to some code for use in .c programs that, on native Windows, defines
+dnl the Microsoft deprecated alias function names to the underscore-prefixed
+dnl actual function names. With this macro, these function names are available
+dnl without linking with '-loldnames' and without generating warnings.
+dnl Usage: Use it after all system header files are included.
+dnl          #include <...>
+dnl          #include <...>
+dnl          ]GL_MDA_DEFINES[
+dnl          ...
+AC_DEFUN([GL_MDA_DEFINES],[
+AC_REQUIRE([_GL_MDA_DEFINES])
+[$gl_mda_defines]
+])
+AC_DEFUN([_GL_MDA_DEFINES],
+[gl_mda_defines='
+#if defined _WIN32 && !defined __CYGWIN__
+#define access    _access
+#define chdir     _chdir
+#define chmod     _chmod
+#define close     _close
+#define creat     _creat
+#define dup       _dup
+#define dup2      _dup2
+#define ecvt      _ecvt
+#define execl     _execl
+#define execle    _execle
+#define execlp    _execlp
+#define execv     _execv
+#define execve    _execve
+#define execvp    _execvp
+#define execvpe   _execvpe
+#define fcloseall _fcloseall
+#define fcvt      _fcvt
+#define fdopen    _fdopen
+#define fileno    _fileno
+#define gcvt      _gcvt
+#define getcwd    _getcwd
+#define getpid    _getpid
+#define getw      _getw
+#define isatty    _isatty
+#define j0        _j0
+#define j1        _j1
+#define jn        _jn
+#define lfind     _lfind
+#define lsearch   _lsearch
+#define lseek     _lseek
+#define memccpy   _memccpy
+#define mkdir     _mkdir
+#define mktemp    _mktemp
+#define open      _open
+#define putenv    _putenv
+#define putw      _putw
+#define read      _read
+#define rmdir     _rmdir
+#define strdup    _strdup
+#define swab      _swab
+#define tempnam   _tempnam
+#define tzset     _tzset
+#define umask     _umask
+#define unlink    _unlink
+#define utime     _utime
+#define wcsdup    _wcsdup
+#define write     _write
+#define y0        _y0
+#define y1        _y1
+#define yn        _yn
+#endif
+'
+])

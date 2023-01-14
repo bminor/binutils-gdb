@@ -1,5 +1,5 @@
 #...
-.*debuglink.o: Found separate debug info file:.*linkdebug.debug
+.*linkdebug.debug:.*
 #...
 Contents of the .debug_str section \(loaded from .*linkdebug.debug\):
 

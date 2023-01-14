@@ -210,9 +210,9 @@ obj_aout_type (int ignore ATTRIBUTE_UNUSED)
       if (*input_line_pointer == '@')
 	{
 	  ++input_line_pointer;
-	  if (strncmp (input_line_pointer, "object", 6) == 0)
+	  if (startswith (input_line_pointer, "object"))
 	    S_SET_OTHER (sym, 1);
-	  else if (strncmp (input_line_pointer, "function", 8) == 0)
+	  else if (startswith (input_line_pointer, "function"))
 	    S_SET_OTHER (sym, 2);
 	}
     }

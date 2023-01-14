@@ -207,9 +207,9 @@ md_assemble (char *str)
   unsigned int b;
   int f;
   expressionS arg;
-  bfd_boolean fixed = FALSE;
+  bool fixed = false;
   unsigned int sc;
-  bfd_boolean can_sc;
+  bool can_sc;
 
   /* Drop leading whitespace.  */
   while (*str == ' ')
@@ -313,7 +313,7 @@ md_assemble (char *str)
 		{
 		  b |= 0x400 << FT32_FLD_RIMM_BIT;
 		  op_end = parse_exp_save_ilp (op_end, &arg);
-		  fixed = TRUE;
+		  fixed = true;
 		  fix_new_exp (frag_now,
 			       (output - frag_now->fr_literal),
 			       2,
@@ -327,7 +327,7 @@ md_assemble (char *str)
 	      break;
 	    case  FT32_FLD_K20:
 	      op_end = parse_exp_save_ilp (op_end, &arg);
-	      fixed = TRUE;
+	      fixed = true;
 	      fix_new_exp (frag_now,
 			   (output - frag_now->fr_literal),
 			   3,
@@ -337,7 +337,7 @@ md_assemble (char *str)
 	      break;
 	    case  FT32_FLD_PA:
 	      op_end = parse_exp_save_ilp (op_end, &arg);
-	      fixed = TRUE;
+	      fixed = true;
 	      fix_new_exp (frag_now,
 			   (output - frag_now->fr_literal),
 			   3,
@@ -347,7 +347,7 @@ md_assemble (char *str)
 	      break;
 	    case  FT32_FLD_AA:
 	      op_end = parse_exp_save_ilp (op_end, &arg);
-	      fixed = TRUE;
+	      fixed = true;
 	      fix_new_exp (frag_now,
 			   (output - frag_now->fr_literal),
 			   3,
@@ -357,7 +357,7 @@ md_assemble (char *str)
 	      break;
 	    case  FT32_FLD_K16:
 	      op_end = parse_exp_save_ilp (op_end, &arg);
-	      fixed = TRUE;
+	      fixed = true;
 	      fix_new_exp (frag_now,
 			   (output - frag_now->fr_literal),
 			   2,
@@ -369,7 +369,7 @@ md_assemble (char *str)
 	      op_end = parse_exp_save_ilp (op_end, &arg);
 	      if (arg.X_add_number & 0x80)
 		arg.X_add_number ^= 0x7f00;
-	      fixed = TRUE;
+	      fixed = true;
 	      fix_new_exp (frag_now,
 			   (output - frag_now->fr_literal),
 			   2,
@@ -716,7 +716,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
 /* TC_FORCE_RELOCATION hook */
 
-static bfd_boolean
+static bool
 relaxable_section (asection *sec)
 {
   return ((sec->flags & SEC_DEBUGGING) == 0
@@ -769,24 +769,24 @@ ft32_force_relocation (fixS *fix)
   return generic_force_reloc (fix);
 }
 
-bfd_boolean
+bool
 ft32_allow_local_subtract (expressionS * left,
 			   expressionS * right,
 			   segT section)
 {
   /* If we are not in relaxation mode, subtraction is OK.  */
   if (!linkrelax)
-    return TRUE;
+    return true;
 
   /* If the symbols are not in a code section then they are OK.  */
   if ((section->flags & SEC_CODE) == 0)
-    return TRUE;
+    return true;
 
   if (left->X_add_symbol == right->X_add_symbol)
-    return TRUE;
+    return true;
 
   /* We have to assume that there may be instructions between the
      two symbols and that relaxation may increase the distance between
      them.  */
-  return FALSE;
+  return false;
 }

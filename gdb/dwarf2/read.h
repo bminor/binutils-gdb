@@ -250,12 +250,15 @@ public:
     abstract_to_concrete;
 
   /* CUs that are queued to be read.  */
-  std::queue<dwarf2_queue_item> queue;
+  gdb::optional<std::queue<dwarf2_queue_item>> queue;
 
   /* We keep a separate reference to the partial symtabs, in case we
      are sharing them between objfiles.  This is only set after
      partial symbols have been read the first time.  */
   std::shared_ptr<psymtab_storage> partial_symtabs;
+
+  /* The address map that is used by the DWARF index code.  */
+  struct addrmap *index_addrmap = nullptr;
 
 private:
 
@@ -403,9 +406,11 @@ dwarf2_per_objfile *get_dwarf2_per_objfile (struct objfile *objfile);
 /* A partial symtab specialized for DWARF.  */
 struct dwarf2_psymtab : public partial_symtab
 {
-  dwarf2_psymtab (const char *filename, struct objfile *objfile,
+  dwarf2_psymtab (const char *filename,
+		  psymtab_storage *partial_symtabs,
+		  objfile_per_bfd_storage *objfile_per_bfd,
 		  dwarf2_per_cu_data *per_cu)
-    : partial_symtab (filename, objfile, 0),
+    : partial_symtab (filename, partial_symtabs, objfile_per_bfd, 0),
       per_cu_data (per_cu)
   {
   }
@@ -633,12 +638,6 @@ struct signatured_type
   struct dwo_unit *dwo_unit;
 };
 
-/* Open the separate '.dwz' debug file, if needed.  Return NULL if
-   there is no .gnu_debugaltlink section in the file.  Error if there
-   is such a section but the file cannot be found.  */
-
-extern dwz_file *dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd);
-
 /* Return the type of the DIE at DIE_OFFSET in the CU named by
    PER_CU.  */
 
@@ -693,5 +692,16 @@ struct type *dwarf2_fetch_die_type_sect_off
 
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;
+
+/* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
+enum dwarf2_section_enum {
+  DWARF2_DEBUG_FRAME,
+  DWARF2_EH_FRAME
+};
+
+extern void dwarf2_get_section_info (struct objfile *,
+                                     enum dwarf2_section_enum,
+				     asection **, const gdb_byte **,
+				     bfd_size_type *);
 
 #endif /* DWARF2READ_H */

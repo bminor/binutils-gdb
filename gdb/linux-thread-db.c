@@ -161,8 +161,6 @@ static thread_db_target the_thread_db_target;
 /* Non-zero if we have determined the signals used by the threads
    library.  */
 static int thread_signals;
-static sigset_t thread_stop_set;
-static sigset_t thread_print_set;
 
 struct thread_db_info
 {
@@ -946,7 +944,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   /* The thread library was detected.  Activate the thread_db target
      for this process.  */
-  push_target (&the_thread_db_target);
+  current_inferior ()->push_target (&the_thread_db_target);
   return true;
 }
 
@@ -1225,23 +1223,14 @@ check_thread_signals (void)
 {
   if (!thread_signals)
     {
-      sigset_t mask;
       int i;
 
-      lin_thread_get_thread_signals (&mask);
-      sigemptyset (&thread_stop_set);
-      sigemptyset (&thread_print_set);
-
-      for (i = 1; i < NSIG; i++)
+      for (i = 0; i < lin_thread_get_thread_signal_num (); i++)
 	{
-	  if (sigismember (&mask, i))
-	    {
-	      if (signal_stop_update (gdb_signal_from_host (i), 0))
-		sigaddset (&thread_stop_set, i);
-	      if (signal_print_update (gdb_signal_from_host (i), 0))
-		sigaddset (&thread_print_set, i);
-	      thread_signals = 1;
-	    }
+	  int sig = lin_thread_get_thread_signal (i);
+	  signal_stop_update (gdb_signal_from_host (sig), 0);
+	  signal_print_update (gdb_signal_from_host (sig), 0);
+	  thread_signals = 1;
 	}
     }
 }
@@ -1375,7 +1364,7 @@ thread_db_target::detach (inferior *inf, int from_tty)
   /* NOTE: From this point on, inferior_ptid is null_ptid.  */
 
   /* Detach the thread_db target from this inferior.  */
-  unpush_target (this);
+  inf->unpush_target (this);
 }
 
 ptid_t
@@ -1409,7 +1398,7 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       /* New image, it may or may not end up using thread_db.  Assume
 	 not unless we find otherwise.  */
       delete_thread_db_info (beneath, ptid.pid ());
-      unpush_target (this);
+      current_inferior ()->unpush_target (this);
 
       return ptid;
     }
@@ -1431,7 +1420,7 @@ thread_db_target::mourn_inferior ()
   target_beneath->mourn_inferior ();
 
   /* Detach the thread_db target from this inferior.  */
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 }
 
 struct callback_data

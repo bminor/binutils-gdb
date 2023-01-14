@@ -1,3 +1,11 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp (arch): Delete.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp: Define arch.
+
 2021-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* s21.s: Delete accidental copyright line.

@@ -61,7 +61,7 @@ struct arc_disassemble_info
   unsigned insn_len;
 
   /* TRUE if we have limm.  */
-  bfd_boolean limm_p;
+  bool limm_p;
 
   /* LIMM value, if exists.  */
   unsigned limm;
@@ -123,7 +123,7 @@ static linkclass decodelist = NULL;
 static unsigned enforced_isa_mask = ARC_OPCODE_NONE;
 
 /* True if we want to print using only hex numbers.  */
-static bfd_boolean print_hex = FALSE;
+static bool print_hex = false;
 
 /* Macros section.  */
 
@@ -143,17 +143,17 @@ static bfd_boolean print_hex = FALSE;
 /* Functions implementation.  */
 
 /* Initialize private data.  */
-static bfd_boolean
+static bool
 init_arc_disasm_info (struct disassemble_info *info)
 {
   struct arc_disassemble_info *arc_infop
     = calloc (sizeof (*arc_infop), 1);
 
   if (arc_infop == NULL)
-    return FALSE;
+    return false;
 
   info->private_data = arc_infop;
-  return TRUE;
+  return true;
 }
 
 /* Add a new element to the decode list.  */
@@ -173,7 +173,7 @@ add_to_decodelist (insn_class_t     insn_class,
 /* Return TRUE if we need to skip the opcode from being
    disassembled.  */
 
-static bfd_boolean
+static bool
 skip_this_opcode (const struct arc_opcode *opcode)
 {
   linkclass t = decodelist;
@@ -183,7 +183,7 @@ skip_this_opcode (const struct arc_opcode *opcode)
       && (OPCODE_32BIT_INSN (opcode->opcode) != 0x06
 	  /* Can be an APEX extensions.  */
 	  && OPCODE_32BIT_INSN (opcode->opcode) != 0x07))
-    return FALSE;
+    return false;
 
   /* or not a known truble class.  */
   switch (opcode->insn_class)
@@ -194,18 +194,18 @@ skip_this_opcode (const struct arc_opcode *opcode)
     case MPY:
       break;
     default:
-      return FALSE;
+      return false;
     }
 
   while (t != NULL)
     {
       if ((t->insn_class == opcode->insn_class)
 	  && (t->subclass == opcode->subclass))
-	return FALSE;
+	return false;
       t = t->nxt;
     }
 
-  return TRUE;
+  return true;
 }
 
 static bfd_vma
@@ -218,7 +218,7 @@ bfd_getm32 (unsigned int data)
   return value;
 }
 
-static bfd_boolean
+static bool
 special_flag_p (const char *opname,
 		const char *flgname)
 {
@@ -240,10 +240,10 @@ special_flag_p (const char *opname,
 	    break; /* End of the array.  */
 
 	  if (strcmp (flgname, arc_flag_operands[flgidx].name) == 0)
-	    return TRUE;
+	    return true;
 	}
     }
-  return FALSE;
+  return false;
 }
 
 /* Find opcode from ARC_TABLE given the instruction described by INSN and
@@ -255,19 +255,19 @@ find_format_from_table (struct disassemble_info *info,
                         unsigned long long insn,
 			unsigned int insn_len,
                         unsigned isa_mask,
-			bfd_boolean *has_limm,
-			bfd_boolean overlaps)
+			bool *has_limm,
+			bool overlaps)
 {
   unsigned int i = 0;
   const struct arc_opcode *opcode = NULL;
   const struct arc_opcode *t_op = NULL;
   const unsigned char *opidx;
   const unsigned char *flgidx;
-  bfd_boolean warn_p = FALSE;
+  bool warn_p = false;
 
   do
     {
-      bfd_boolean invalid = FALSE;
+      bool invalid = false;
 
       opcode = &arc_table[i++];
 
@@ -280,7 +280,7 @@ find_format_from_table (struct disassemble_info *info,
       if ((insn & opcode->mask) != opcode->opcode)
 	continue;
 
-      *has_limm = FALSE;
+      *has_limm = false;
 
       /* Possible candidate, check the operands.  */
       for (opidx = opcode->operands; *opidx; opidx++)
@@ -305,14 +305,14 @@ find_format_from_table (struct disassemble_info *info,
 	      if ((value == 0x3E && insn_len == 4)
 		  || (value == limmind && insn_len == 2))
 		{
-		  invalid = TRUE;
+		  invalid = true;
 		  break;
 		}
 	    }
 
 	  if (operand->flags & ARC_OPERAND_LIMM
 	      && !(operand->flags & ARC_OPERAND_DUPLICATE))
-	    *has_limm = TRUE;
+	    *has_limm = true;
 	}
 
       /* Check the flags.  */
@@ -351,7 +351,7 @@ find_format_from_table (struct disassemble_info *info,
 
 	  if (!foundA && foundB)
 	    {
-	      invalid = TRUE;
+	      invalid = true;
 	      break;
 	    }
 	}
@@ -362,7 +362,7 @@ find_format_from_table (struct disassemble_info *info,
       if (insn_len == 4
 	  && overlaps)
 	{
-	  warn_p = TRUE;
+	  warn_p = true;
 	  t_op = opcode;
 	  if (skip_this_opcode (opcode))
 	    continue;
@@ -410,7 +410,7 @@ find_format_from_table (struct disassemble_info *info,
    that calls to OPERAND_ITERATOR_NEXT will iterate over the opcode's
    operands.  */
 
-static bfd_boolean
+static bool
 find_format (bfd_vma                       memaddr,
 	     unsigned long long            insn,
 	     unsigned int *                insn_len,
@@ -420,7 +420,7 @@ find_format (bfd_vma                       memaddr,
              struct arc_operand_iterator * iter)
 {
   const struct arc_opcode *opcode = NULL;
-  bfd_boolean needs_limm = FALSE;
+  bool needs_limm = false;
   const extInstruction_t *einsn, *i;
   unsigned limm = 0;
   struct arc_disassemble_info *arc_infop = info->private_data;
@@ -440,18 +440,18 @@ find_format (bfd_vma                       memaddr,
 				     _("An error occurred while generating the "
 				       "extension instruction operations"));
 	      *opcode_result = NULL;
-	      return FALSE;
+	      return false;
 	    }
 
 	  opcode = find_format_from_table (info, opcode, insn, *insn_len,
-					   isa_mask, &needs_limm, FALSE);
+					   isa_mask, &needs_limm, false);
 	}
     }
 
   /* Then, try finding the first match in the opcode table.  */
   if (opcode == NULL)
     opcode = find_format_from_table (info, arc_opcodes, insn, *insn_len,
-				     isa_mask, &needs_limm, TRUE);
+				     isa_mask, &needs_limm, true);
 
   if (opcode != NULL && needs_limm)
     {
@@ -486,7 +486,7 @@ find_format (bfd_vma                       memaddr,
   arc_infop->limm = limm;
   arc_infop->limm_p = needs_limm;
 
-  return TRUE;
+  return true;
 }
 
 static void
@@ -694,7 +694,7 @@ extract_operand_value (const struct arc_operand *operand,
   else
     {
       if (operand->extract)
-        value = (*operand->extract) (insn, (int *) NULL);
+	value = (*operand->extract) (insn, (bool *) NULL);
       else
         {
           if (operand->flags & ARC_OPERAND_ALIGNED32)
@@ -724,7 +724,7 @@ extract_operand_value (const struct arc_operand *operand,
    into VALUE.  If there is no operand returned then OPERAND and VALUE are
    unchanged.  */
 
-static bfd_boolean
+static bool
 operand_iterator_next (struct arc_operand_iterator *iter,
                        const struct arc_operand **operand,
                        int *value)
@@ -732,14 +732,14 @@ operand_iterator_next (struct arc_operand_iterator *iter,
   if (*iter->opidx == 0)
     {
       *operand = NULL;
-      return FALSE;
+      return false;
     }
 
   *operand = &arc_operands[*iter->opidx];
   *value = extract_operand_value (*operand, iter->insn, iter->limm);
   iter->opidx++;
 
-  return TRUE;
+  return true;
 }
 
 /* Helper for parsing the options.  */
@@ -795,8 +795,8 @@ parse_option (const char *option)
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);
     }
-  else if (CONST_STRNEQ (option, "hex"))
-    print_hex = TRUE;
+  else if (startswith (option, "hex"))
+    print_hex = true;
   else
     /* xgettext:c-format */
     opcodes_error_handler (_("unrecognised disassembler option: %s"), option);
@@ -941,14 +941,14 @@ print_insn_arc (bfd_vma memaddr,
   unsigned long long insn = 0;
   unsigned isa_mask = ARC_OPCODE_NONE;
   const struct arc_opcode *opcode;
-  bfd_boolean need_comma;
-  bfd_boolean open_braket;
+  bool need_comma;
+  bool open_braket;
   int size;
   const struct arc_operand *operand;
   int value, vpcl;
   struct arc_operand_iterator iter;
   struct arc_disassemble_info *arc_infop;
-  bfd_boolean rpcl = FALSE, rset = FALSE;
+  bool rpcl = false, rset = false;
 
   if (info->disassembler_options)
     {
@@ -1146,7 +1146,7 @@ print_insn_arc (bfd_vma memaddr,
   info->target2		   = 0;
 
   /* FIXME to be moved in dissasemble_init_for_target.  */
-  info->disassembler_needs_relocs = TRUE;
+  info->disassembler_needs_relocs = true;
 
   /* Find the first match in the opcode table.  */
   if (!find_format (memaddr, insn, &insn_len, isa_mask, info, &opcode, &iter))
@@ -1201,8 +1201,8 @@ print_insn_arc (bfd_vma memaddr,
   if (opcode->operands[0] != 0)
     (*info->fprintf_func) (info->stream, "\t");
 
-  need_comma = FALSE;
-  open_braket = FALSE;
+  need_comma = false;
+  open_braket = false;
   arc_infop->operands_count = 0;
 
   /* Now extract and print the operands.  */
@@ -1213,7 +1213,7 @@ print_insn_arc (bfd_vma memaddr,
       if (open_braket && (operand->flags & ARC_OPERAND_BRAKET))
 	{
 	  (*info->fprintf_func) (info->stream, "]");
-	  open_braket = FALSE;
+	  open_braket = false;
 	  continue;
 	}
 
@@ -1238,25 +1238,25 @@ print_insn_arc (bfd_vma memaddr,
       if (!open_braket && (operand->flags & ARC_OPERAND_BRAKET))
 	{
 	  (*info->fprintf_func) (info->stream, "[");
-	  open_braket = TRUE;
-	  need_comma = FALSE;
+	  open_braket = true;
+	  need_comma = false;
 	  continue;
 	}
 
-      need_comma = TRUE;
+      need_comma = true;
 
       if (operand->flags & ARC_OPERAND_PCREL)
 	{
-	  rpcl = TRUE;
+	  rpcl = true;
 	  vpcl = value;
-	  rset = TRUE;
+	  rset = true;
 
 	  info->target = (bfd_vma) (memaddr & ~3) + value;
 	}
       else if (!(operand->flags & ARC_OPERAND_IR))
 	{
 	  vpcl = value;
-	  rset = TRUE;
+	  rset = true;
 	}
 
       /* Print the operand as directed by the flags.  */
@@ -1285,9 +1285,9 @@ print_insn_arc (bfd_vma memaddr,
 	      (*info->fprintf_func) (info->stream, "%s", rname);
 	    }
 	  if (value == 63)
-	    rpcl = TRUE;
+	    rpcl = true;
 	  else
-	    rpcl = FALSE;
+	    rpcl = false;
 	}
       else if (operand->flags & ARC_OPERAND_LIMM)
 	{
@@ -1321,7 +1321,7 @@ print_insn_arc (bfd_vma memaddr,
 	  const char *addrtype = get_addrtype (value);
 	  (*info->fprintf_func) (info->stream, "%s", addrtype);
 	  /* A colon follow an address type.  */
-	  need_comma = FALSE;
+	  need_comma = false;
 	}
       else
 	{
@@ -1334,7 +1334,7 @@ print_insn_arc (bfd_vma memaddr,
 	      switch (value)
 		{
 		case 0:
-		  need_comma = FALSE;
+		  need_comma = false;
 		  break;
 		case 1:
 		  (*info->fprintf_func) (info->stream, "r13");
@@ -1344,8 +1344,8 @@ print_insn_arc (bfd_vma memaddr,
 					 regnames[13 + value - 1]);
 		  break;
 		}
-	      rpcl = FALSE;
-	      rset = FALSE;
+	      rpcl = false;
+	      rset = false;
 	    }
 	  else
 	    {
@@ -1463,7 +1463,7 @@ void arc_insn_decode (bfd_vma addr,
   /* There was an error when disassembling, for example memory read error.  */
   if (disasm_func (addr, info) < 0)
     {
-      insn->valid = FALSE;
+      insn->valid = false;
       return;
     }
 
@@ -1476,11 +1476,11 @@ void arc_insn_decode (bfd_vma addr,
   /* Quick exit if memory at this address is not an instruction.  */
   if (info->insn_type == dis_noninsn)
     {
-      insn->valid = FALSE;
+      insn->valid = false;
       return;
     }
 
-  insn->valid = TRUE;
+  insn->valid = true;
 
   opcode = (const struct arc_opcode *) arc_infop->opcode;
   insn->insn_class = opcode->insn_class;

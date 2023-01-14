@@ -40,6 +40,7 @@
 #include "progspace.h"
 #include "objfiles.h"
 #include "cli/cli-style.h"
+#include "tui/tui-location.h"
 
 #include "gdb_curses.h"
 
@@ -60,7 +61,7 @@ len_without_escapes (const std::string &str)
   const char *ptr = str.c_str ();
   char c;
 
-  while ((c = *ptr++) != '\0')
+  while ((c = *ptr) != '\0')
     {
       if (c == '\033')
 	{
@@ -76,7 +77,10 @@ len_without_escapes (const std::string &str)
 	    }
 	}
       else
-	++len;
+	{
+	  ++len;
+	  ++ptr;
+	}
     }
   return len;
 }
@@ -320,7 +324,6 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   int i;
   int max_lines;
   CORE_ADDR cur_pc;
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_tab_width;
   int insn_pos;
 
@@ -331,7 +334,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
   m_gdbarch = arch;
   m_start_line_or_addr.loa = LOA_ADDRESS;
   m_start_line_or_addr.u.addr = pc;
-  cur_pc = locator->addr;
+  cur_pc = tui_location.addr ();
 
   /* Window size, excluding highlight box.  */
   max_lines = height - 2;
@@ -384,13 +387,10 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 void
 tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
-  struct tui_locator_window *locator;
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr = 0;
 
-  locator = tui_locator_win_info_ptr ();
-
-  if (locator->addr == 0)
+  if (tui_location.addr () == 0)
     {
       if (have_full_symbols () || have_partial_symbols ())
 	{
@@ -411,8 +411,8 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
     }
   else				/* The target is executing.  */
     {
-      gdbarch = locator->gdbarch;
-      addr = locator->addr;
+      gdbarch = tui_location.gdbarch ();
+      addr = tui_location.addr ();
     }
 
   *gdbarch_p = gdbarch;

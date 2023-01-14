@@ -636,7 +636,7 @@ case "$ac_cv_search_dlopen" in
 esac
 AC_SUBST(DLOPEN_LIBS)
 
-AC_CHECK_FUNCS(mallinfo posix_fallocate fallocate readv sysconf times mkdtemp)
+AC_CHECK_FUNCS(mallinfo mallinfo2 posix_fallocate fallocate readv sysconf times mkdtemp)
 AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp, strndup, memmem])
 
 # Use of ::std::tr1::unordered_map::rehash causes undefined symbols

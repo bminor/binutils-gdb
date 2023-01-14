@@ -31,7 +31,7 @@ if ![istarget sh*-*-*] {
 set testsimple "SH simple relaxing"
 
 if { ![is_elf_format] } {
-    unresolved $testsimple
+    unsupported $testsimple
 } elseif { ![ld_assemble $as "-relax $srcdir/$subdir/sh1.s" tmpdir/sh1.o] } {
     fail $testsimple
 } elseif { ![ld_link $ld tmpdir/sh1 "-relax tmpdir/sh1.o"] } {
@@ -56,7 +56,7 @@ if { ![is_elf_format] } {
 set testsrec "SH relaxing to S-records"
 
 if { ![remote_file host exists tmpdir/sh1] } {
-    unresolved $testsrec
+    unsupported $testsrec
 } else {
     if { [istarget sh*-linux-*] || [istarget sh-*-vxworks] } {
 	# On these "non-embedded" targets, the default ELF and srec start
@@ -79,7 +79,7 @@ if { ![remote_file host exists tmpdir/sh1] } {
 	if ![string match "" $exec_output] {
 	    send_log "$exec_output\n"
 	    verbose "$exec_output"
-	    unresolved $testsrec
+	    fail $testsrec
 	} else {
 	    send_log "$objcopy -O srec tmpdir/sh1 tmpdir/sh1.s1\n"
 	    verbose "$objcopy -O srec tmpdir/sh1 tmpdir/sh1.s1"
@@ -87,7 +87,7 @@ if { ![remote_file host exists tmpdir/sh1] } {
 	    if ![string match "" $exec_output] {
 		send_log "$exec_output\n"
 		verbose "$exec_output"
-		unresolved $testsrec
+		fail $testsrec
 	    } else {
 		send_log "cmp tmpdir/sh1.s1 tmpdir/sh1.s2\n"
 		verbose "cmp tmpdir/sh1.s1 tmpdir/sh1.s2"
@@ -107,7 +107,7 @@ if { ![remote_file host exists tmpdir/sh1] } {
 
 set testadjsw8 "SH switch8 adjustment after relax"
 if { ![is_elf_format] } {
-    unresolved $testadjsw8
+    unsupported $testadjsw8
 } elseif { ![ld_assemble $as "-relax $srcdir/$subdir/adjsw8.s" tmpdir/adjsw8.o] } {
     fail $testadjsw8
 } elseif { ![ld_link $ld tmpdir/adjsw8 "-relax tmpdir/adjsw8.o"] } {
@@ -145,16 +145,16 @@ if [istarget sh*-*linux*] {
 
 if {![ld_assemble $as "-relax tmpdir/start.s" tmpdir/start.o] \
     || ![ld_compile $CC "-O -mrelax -foptimize-sibling-calls $srcdir/$subdir/sh2.c" tmpdir/sh2.o]} {
-    unresolved $testlink
-    unresolved $testjsr
-    unresolved $testrun
+    unsupported $testlink
+    unsupported $testjsr
+    unsupported $testrun
     return
 }
 
 if ![ld_link $ld tmpdir/sh2 "-relax tmpdir/start.o tmpdir/sh2.o"] {
     fail $testlink
-    unresolved $testjsr
-    unresolved $testrun
+    unsupported $testjsr
+    unsupported $testrun
     return
 }
 

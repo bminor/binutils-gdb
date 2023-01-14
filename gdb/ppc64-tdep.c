@@ -561,7 +561,7 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 					struct target_ops *targ)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct target_section *s = target_section_by_addr (targ, addr);
+  const struct target_section *s = target_section_by_addr (targ, addr);
 
   /* Check if ADDR points to a function descriptor.  */
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)

@@ -145,18 +145,4 @@ private:
   gdb::optional<auto_obstack> m_obstack;
 };
 
-
-extern const struct quick_symbol_functions psym_functions;
-
-extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
-extern const struct quick_symbol_functions dwarf2_debug_names_functions;
-
-/* Ensure that the partial symbols for OBJFILE have been loaded.  If
-   VERBOSE is true, then this will print a message when symbols
-   are loaded.  This function returns a range adapter suitable for
-   iterating over the psymtabs of OBJFILE.  */
-
-extern psymtab_storage::partial_symtab_range require_partial_symbols
-    (struct objfile *objfile, bool verbose);
-
 #endif /* PSYMTAB_H */

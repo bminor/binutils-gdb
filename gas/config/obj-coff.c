@@ -33,7 +33,6 @@
 #endif
 
 #define streq(a,b)     (strcmp ((a), (b)) == 0)
-#define strneq(a,b,n)  (strncmp ((a), (b), (n)) == 0)
 
 /* I think this is probably always correct.  */
 #ifndef KEEP_RELOC_INFO
@@ -374,7 +373,7 @@ coff_obj_symbol_new_hook (symbolS *symbolP)
 
   memset (s, 0, sz);
   coffsymbol (symbol_get_bfdsym (symbolP))->native = (combined_entry_type *) s;
-  coffsymbol (symbol_get_bfdsym (symbolP))->native->is_sym = TRUE;
+  coffsymbol (symbol_get_bfdsym (symbolP))->native->is_sym = true;
 
   S_SET_DATA_TYPE (symbolP, T_NULL);
   S_SET_STORAGE_CLASS (symbolP, 0);
@@ -1058,7 +1057,7 @@ obj_coff_val (int ignore ATTRIBUTE_UNUSED)
 static int
 weak_is_altname (const char * name)
 {
-  return strneq (name, weak_altprefix, sizeof (weak_altprefix) - 1);
+  return startswith (name, weak_altprefix);
 }
 
 /* Return the name of the alternate symbol
@@ -1527,7 +1526,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
   unsigned int exp;
   flagword flags, oldflags;
   asection *sec;
-  bfd_boolean is_bss = FALSE;
+  bool is_bss = false;
 
   if (flag_mri)
     {
@@ -1577,7 +1576,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 		  /* Uninitialised data section.  */
 		  flags |= SEC_ALLOC;
 		  flags &=~ SEC_LOAD;
-		  is_bss = TRUE;
+		  is_bss = true;
 		  break;
 
 		case 'n':
@@ -1667,7 +1666,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
       /* Add SEC_LINK_ONCE and SEC_LINK_DUPLICATES_DISCARD to .gnu.linkonce
          sections so adjust_reloc_syms in write.c will correctly handle
          relocs which refer to non-local symbols in these sections.  */
-      if (strneq (name, ".gnu.linkonce", sizeof (".gnu.linkonce") - 1))
+      if (startswith (name, ".gnu.linkonce"))
 	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
@@ -1800,7 +1799,7 @@ obj_coff_init_stab_section (segT seg)
   memset (p, 0, 12);
   file = as_where ((unsigned int *) NULL);
   stabstr_name = concat (seg->name, "str", (char *) NULL);
-  stroff = get_stab_string_offset (file, stabstr_name, TRUE);
+  stroff = get_stab_string_offset (file, stabstr_name, true);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
 }

@@ -65,10 +65,7 @@ extern int era;
 #endif
 
 int
-run_sim(sregs, icount, dis)
-    struct pstate  *sregs;
-    uint64          icount;
-    int             dis;
+run_sim(struct pstate *sregs, uint64 icount, int dis)
 {
     int             irq, mexc, deb;
 
@@ -140,9 +137,7 @@ run_sim(sregs, icount, dis)
 }
 
 int
-main(argc, argv)
-    int             argc;
-    char          **argv;
+main(int argc, char **argv)
 {
 
     int             cont = 1;

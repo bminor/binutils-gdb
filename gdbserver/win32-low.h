@@ -142,10 +142,6 @@ public:
 
   CORE_ADDR stopped_data_address () override;
 
-#ifdef _WIN32_WCE
-  void hostio_last_error (char *buf) override;
-#endif
-
   bool supports_qxfer_siginfo () override;
 
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,

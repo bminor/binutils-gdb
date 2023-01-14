@@ -425,6 +425,7 @@ _start:
 	comisd (%ecx),%xmm4
 	cvtdq2pd %xmm4,%xmm6
 	cvtdq2pd (%ecx),%xmm4
+	cvtpi2pd (%ecx),%xmm4
 	cvtps2pd %xmm4,%xmm6
 	cvtps2pd (%ecx),%xmm4
 	movddup %xmm4,%xmm6
@@ -1086,6 +1087,7 @@ _start:
 	comisd xmm4,QWORD PTR [ecx]
 	cvtdq2pd xmm6,xmm4
 	cvtdq2pd xmm4,QWORD PTR [ecx]
+	cvtpi2pd xmm4,QWORD PTR [ecx]
 	cvtps2pd xmm6,xmm4
 	cvtps2pd xmm4,QWORD PTR [ecx]
 	movddup xmm6,xmm4

@@ -1,5 +1,5 @@
 /* Declaration for error-reporting function
-   Copyright (C) 1995-1997, 2003, 2006, 2008-2020 Free Software Foundation,
+   Copyright (C) 1995-1997, 2003, 2006, 2008-2021 Free Software Foundation,
    Inc.
    This file is part of the GNU C Library.
 
@@ -19,15 +19,8 @@
 #ifndef _ERROR_H
 #define _ERROR_H 1
 
-/* On mingw, the flavor of printf depends on whether the extensions module
- * is in use; the check for <stdio.h> determines the witness macro.  */
-#ifndef _GL_ATTRIBUTE_SPEC_PRINTF
-# if GNULIB_PRINTF_ATTRIBUTE_FLAVOR_GNU
-#  define _GL_ATTRIBUTE_SPEC_PRINTF __gnu_printf__
-# else
-#  define _GL_ATTRIBUTE_SPEC_PRINTF __printf__
-# endif
-#endif
+/* Get _GL_ATTRIBUTE_SPEC_PRINTF_STANDARD, _GL_ATTRIBUTE_SPEC_PRINTF_SYSTEM.  */
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,11 +31,21 @@ extern "C" {
    If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
 
 extern void error (int __status, int __errnum, const char *__format, ...)
-     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF, 3, 4));
+#if GNULIB_VFPRINTF_POSIX
+     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF_STANDARD, 3, 4))
+#else
+     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF_SYSTEM, 3, 4))
+#endif
+     ;
 
 extern void error_at_line (int __status, int __errnum, const char *__fname,
                            unsigned int __lineno, const char *__format, ...)
-     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF, 5, 6));
+#if GNULIB_VFPRINTF_POSIX
+     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF_STANDARD, 5, 6))
+#else
+     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF_SYSTEM, 5, 6))
+#endif
+     ;
 
 /* If NULL, error will flush stdout, then print on stderr the program
    name, a colon and a space.  Otherwise, error will call this

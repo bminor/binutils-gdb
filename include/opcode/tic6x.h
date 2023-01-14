@@ -697,26 +697,26 @@ typedef struct
   unsigned int header;
 
   /* Whether each word uses compact instructions.  */
-  bfd_boolean word_compact[7];
+  bool word_compact[7];
 
   /* Whether loads are protected.  */
-  bfd_boolean prot;
+  bool prot;
 
   /* Whether instructions use the high register set.  */
-  bfd_boolean rs;
+  bool rs;
 
   /* Data size.  */
   unsigned int dsz;
 
   /* Whether compact instructions in the S unit are decoded as
      branches.  */
-  bfd_boolean br;
+  bool br;
 
   /* Whether compact instructions saturate.  */
-  bfd_boolean sat;
+  bool sat;
 
   /* P-bits.  */
-  bfd_boolean p_bits[14];
+  bool p_bits[14];
 } tic6x_fetch_packet_header;
 
 #ifdef __cplusplus

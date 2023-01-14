@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "load.h"
+#include "trace.h"
 
 static int
 sim_dis_read (bfd_vma memaddr, bfd_byte * ptr, unsigned int length,
@@ -139,8 +140,10 @@ load_file_and_line (const char *filename, int lineno)
       break;
   if (!f)
     {
+      FILE *file;
       int i;
       struct stat s;
+      size_t ret;
       const char *found_filename, *slash;
 
       found_filename = filename;
@@ -159,9 +162,9 @@ load_file_and_line (const char *filename, int lineno)
       files = f;
       f->filename = strdup (filename);
       f->data = (char *) malloc (s.st_size + 2);
-      FILE *file = fopen (found_filename, "rb");
-      fread (f->data, 1, s.st_size, file);
-      f->data[s.st_size] = 0;
+      file = fopen (found_filename, "rb");
+      ret = fread (f->data, 1, s.st_size, file);
+      f->data[ret] = 0;
       fclose (file);
 
       f->nlines = 1;

@@ -92,7 +92,7 @@ gdb_test_multiple "python print (str (basic_type_class1_ref_obj))" $test {
 # test nested typedef stripping
 gdb_test_no_output "python typedef_const_typedef_class1_obj = gdb.parse_and_eval ('typedef_const_typedef_class1_obj')"
 gdb_test_no_output "python basic_type_typedef_const_typedef_class1_obj = gdb.types.get_basic_type (typedef_const_typedef_class1_obj.type)"
-gdb_test "python print (str (typedef_class1_obj.type))" "typedef_class1"
+gdb_test "python print (str (typedef_const_typedef_class1_obj.type))" "typedef_class1"
 set test "nested typedef stripping"
 gdb_test_multiple "python print (str (basic_type_typedef_const_typedef_class1_obj))" $test {
     -re "\[\r\n\]+class1\[\r\n\]+$gdb_prompt $" {

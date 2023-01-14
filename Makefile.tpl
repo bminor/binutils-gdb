@@ -440,8 +440,12 @@ PGO_BUILD_TRAINING_CFLAGS:= \
 PGO_BUILD_TRAINING_CXXFLAGS:= \
 	$(filter-out -specs=%,$(PGO_BUILD_TRAINING_CXXFLAGS))
 PGO_BUILD_TRAINING_FLAGS_TO_PASS = \
+	PGO_BUILD_TRAINING=yes \
 	CFLAGS_FOR_TARGET="$(PGO_BUILD_TRAINING_CFLAGS)" \
 	CXXFLAGS_FOR_TARGET="$(PGO_BUILD_TRAINING_CXXFLAGS)"
+
+# Ignore "make check" errors in PGO training runs.
+PGO_BUILD_TRAINING_MFLAGS = -i
 
 # Additional PGO and LTO compiler options to use profiling data for the
 # PGO build.
@@ -784,6 +788,7 @@ all:
 		$(PGO_BUILD_GEN_FLAGS_TO_PASS) all-host all-target \
 @if pgo-build
 	&& $(MAKE) $(RECURSE_FLAGS_TO_PASS) \
+		$(PGO_BUILD_TRAINING_MFLAGS) \
 		$(PGO_BUILD_TRAINING_FLAGS_TO_PASS) \
 		$(PGO_BUILD_TRAINING) \
 	&& $(MAKE) $(RECURSE_FLAGS_TO_PASS) clean \

@@ -189,7 +189,7 @@ ULONGEST
 sparc_fetch_wcookie (struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct target_ops *ops = current_top_target ();
+  struct target_ops *ops = current_inferior ()->top_target ();
   gdb_byte buf[8];
   int len;
 
@@ -1948,6 +1948,9 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
   gdb_byte buf[8];
   int i;
 
+  /* This function calls functions that depend on the global current thread.  */
+  gdb_assert (regcache->ptid () == inferior_ptid);
+
   if (sp & 1)
     {
       /* Registers are 64-bit.  */
@@ -2021,6 +2024,9 @@ sparc_collect_rwindow (const struct regcache *regcache,
   int offset = 0;
   gdb_byte buf[8];
   int i;
+
+  /* This function calls functions that depend on the global current thread.  */
+  gdb_assert (regcache->ptid () == inferior_ptid);
 
   if (sp & 1)
     {

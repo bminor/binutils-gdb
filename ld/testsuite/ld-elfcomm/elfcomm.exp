@@ -54,7 +54,7 @@ proc test_sort_common {} {
     }
     
     if { ![ld_assemble $as $srcdir/$subdir/sort-common.s tmpdir/sort-common.o] } {
-	unresolved "$test"
+	unsupported "$test"
 	return 0
     }
 
@@ -147,7 +147,7 @@ proc stt_common_test { options testname } {
     set options "$options tmpdir/common1c.o"
 
     if { ! [ld_link $ld tmpdir/common.exe $options] } {
-      unresolved $testname
+      fail $testname
       return 0
     }
 
@@ -172,15 +172,14 @@ if [istarget nios2*-*-*] {
 if {   ![ld_compile "$CC $CFLAGS -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1a.c tmpdir/common1a.o]
     || ![ld_compile "$CC $CFLAGS -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1b.c tmpdir/common1b.o]
     || ![ld_compile "$CC $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -Wa,--elf-stt-common=yes -fcommon" $srcdir/$subdir/common1b.c tmpdir/common1c.o] } {
-    unresolved $test1
-    unresolved $test1
+    unsupported $test1
     return
 }
 
 set options "-r tmpdir/common1a.o tmpdir/common1b.o"
 
 if { [ld_link $ld tmpdir/common1.o $options] } {
-    unresolved $test1w1
+    fail $test1w1
     return
 }
 
@@ -208,7 +207,7 @@ if { [dump_common1 $test1c1] } {
 set options "-r tmpdir/common1b.o tmpdir/common1a.o"
 
 if { [ld_link $ld tmpdir/common1.o $options] } {
-    unresolved $test1w2
+    fail $test1w2
     return
 }
 

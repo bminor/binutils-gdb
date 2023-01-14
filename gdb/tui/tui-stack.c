@@ -36,6 +36,7 @@
 #include "tui/tui-source.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-file.h"
+#include "tui/tui-location.h"
 
 #include "gdb_curses.h"
 
@@ -54,17 +55,7 @@
 #define MAX_TARGET_WIDTH  10
 #define MAX_PID_WIDTH     19
 
-static struct tui_locator_window _locator;
-
 
-
-/* Accessor for the locator win info.  Answers a pointer to the static
-   locator win info struct.  */
-struct tui_locator_window *
-tui_locator_win_info_ptr (void)
-{
-  return &_locator;
-}
 
 std::string
 tui_locator_window::make_status_line () const
@@ -86,7 +77,7 @@ tui_locator_window::make_status_line () const
       pid_name = pid_name_holder.c_str ();
     }
 
-  target_width = strlen (target_shortname);
+  target_width = strlen (target_shortname ());
   if (target_width > MAX_TARGET_WIDTH)
     target_width = MAX_TARGET_WIDTH;
 
@@ -97,6 +88,7 @@ tui_locator_window::make_status_line () const
   status_size = width;
 
   /* Translate line number and obtain its size.  */
+  int line_no = tui_location.line_no ();
   if (line_no > 0)
     xsnprintf (line_buf, sizeof (line_buf), "%d", line_no);
   else
@@ -106,6 +98,8 @@ tui_locator_window::make_status_line () const
     line_width = MIN_LINE_WIDTH;
 
   /* Translate PC address.  */
+  struct gdbarch *gdbarch = tui_location.gdbarch ();
+  CORE_ADDR addr = tui_location.addr ();
   std::string pc_out (gdbarch
 		      ? paddress (gdbarch, addr)
 		      : "??");
@@ -155,7 +149,7 @@ tui_locator_window::make_status_line () const
   string_file string;
 
   if (target_width > 0)
-    string.printf ("%*.*s ", -target_width, target_width, target_shortname);
+    string.printf ("%*.*s ", -target_width, target_width, target_shortname ());
   if (pid_width > 0)
     string.printf ("%*.*s ", -pid_width, pid_width, pid_name);
 
@@ -169,6 +163,7 @@ tui_locator_window::make_status_line () const
   /* Procedure/class name.  */
   if (proc_width > 0)
     {
+      const std::string &proc_name = tui_location.proc_name ();
       if (proc_name.size () > proc_width)
 	string.printf ("%s%*.*s* ", PROC_PREFIX,
 		       1 - proc_width, proc_width - 1, proc_name.c_str ());
@@ -229,76 +224,22 @@ tui_get_function_from_frame (struct frame_info *fi)
 void
 tui_locator_window::rerender ()
 {
-  if (handle != NULL)
-    {
-      std::string string = make_status_line ();
-      scrollok (handle.get (), FALSE);
-      wmove (handle.get (), 0, 0);
-      /* We ignore the return value from wstandout and wstandend, casting
-	 them to void in order to avoid a compiler warning.  The warning
-	 itself was introduced by a patch to ncurses 5.7 dated 2009-08-29,
-	 changing these macro to expand to code that causes the compiler
-	 to generate an unused-value warning.  */
-      (void) wstandout (handle.get ());
-      waddstr (handle.get (), string.c_str ());
-      wclrtoeol (handle.get ());
-      (void) wstandend (handle.get ());
-      refresh_window ();
-      wmove (handle.get (), 0, 0);
-    }
-}
+  gdb_assert (handle != NULL);
 
-/* See tui-stack.h.  */
-
-void
-tui_locator_window::set_locator_fullname (const char *fullname)
-{
-  full_name = fullname;
-  rerender ();
-}
-
-/* See tui-stack.h.  */
-
-bool
-tui_locator_window::set_locator_info (struct gdbarch *gdbarch_in,
-				      const struct symtab_and_line &sal,
-				      const char *procname)
-{
-  bool locator_changed_p = false;
-
-  gdb_assert (procname != NULL);
-
-  const char *fullname = (sal.symtab == nullptr
-			  ? "??"
-			  : symtab_to_fullname (sal.symtab));
-
-  locator_changed_p |= proc_name != procname;
-  locator_changed_p |= sal.line != line_no;
-  locator_changed_p |= sal.pc != addr;
-  locator_changed_p |= gdbarch_in != gdbarch;
-  locator_changed_p |= full_name != fullname;
-
-  proc_name = procname;
-  line_no = sal.line;
-  addr = sal.pc;
-  gdbarch = gdbarch_in;
-  set_locator_fullname (fullname);
-
-  return locator_changed_p;
-}
-
-/* Update only the full_name portion of the locator.  */
-void
-tui_update_locator_fullname (struct symtab *symtab)
-{
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-
-  const char *fullname;
-  if (symtab != nullptr)
-    fullname = symtab_to_fullname (symtab);
-  else
-    fullname = "??";
-  locator->set_locator_fullname (fullname);
+  std::string string = make_status_line ();
+  scrollok (handle.get (), FALSE);
+  wmove (handle.get (), 0, 0);
+  /* We ignore the return value from wstandout and wstandend, casting them
+     to void in order to avoid a compiler warning.  The warning itself was
+     introduced by a patch to ncurses 5.7 dated 2009-08-29, changing these
+     macro to expand to code that causes the compiler to generate an
+     unused-value warning.  */
+  (void) wstandout (handle.get ());
+  waddstr (handle.get (), string.c_str ());
+  wclrtoeol (handle.get ());
+  (void) wstandend (handle.get ());
+  refresh_window ();
+  wmove (handle.get (), 0, 0);
 }
 
 /* Function to print the frame information for the TUI.  The windows are
@@ -311,9 +252,8 @@ bool
 tui_show_frame_info (struct frame_info *fi)
 {
   bool locator_changed_p;
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
 
-  if (fi)
+  if (fi != nullptr)
     {
       symtab_and_line sal = find_frame_sal (fi);
 
@@ -325,8 +265,8 @@ tui_show_frame_info (struct frame_info *fi)
       else
 	func_name = _("<unavailable>");
 
-      locator_changed_p = locator->set_locator_info (get_frame_arch (fi),
-						     sal, func_name);
+      locator_changed_p
+	= tui_location.set_location (get_frame_arch (fi), sal, func_name);
 
       /* If the locator information has not changed, then frame information has
 	 not changed.  If frame information has not changed, then the windows'
@@ -344,7 +284,7 @@ tui_show_frame_info (struct frame_info *fi)
     {
       symtab_and_line sal {};
 
-      locator_changed_p = locator->set_locator_info (NULL, sal, "");
+      locator_changed_p = tui_location.set_location (NULL, sal, "");
 
       if (!locator_changed_p)
 	return false;
@@ -359,8 +299,8 @@ tui_show_frame_info (struct frame_info *fi)
 void
 tui_show_locator_content ()
 {
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-  locator->rerender ();
+  if (tui_is_window_visible (STATUS_WIN))
+    TUI_STATUS_WIN->rerender ();
 }
 
 /* Command to update the display with the current execution point.  */

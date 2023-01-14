@@ -37,6 +37,58 @@ if { [is_remote host] } {
 }
 gdb_test "python print (gdb.parameter ('directories'))" $directories
 
+# Check we can correctly read the data-directory parameter.  First,
+# grab the value as read directly from the GDB CLI.
+set dd ""
+gdb_test_multiple "show data-directory" \
+    "find the initial data-directory value" {
+	-re -wrap "GDB's data directory is \"(\[^\r\n\]+)\"\\." {
+	    set dd $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+# Now print the data-directory from Python.
+gdb_test "python print (gdb.parameter ('data-directory'))" $dd
+
+# Next change the data-directory to a relative path.  Internally GDB
+# will resolve this to an absolute path, which Python should then see.
+#
+# GDB is currently running in '...../build/gdb/testsuite/' and the
+# test output is being written to:
+#   ...../build/gdb/testsuite/outputs/gdb.python/py-parameter/
+#
+# So create the relative path './outputs/gdb.python/py-parameter/' and
+# set the data-directory to that, we should then see the absolute path.
+
+set abs_path_to_output_dir [standard_output_file ""]
+set abs_path_to_cwd $objdir
+set rel_path_to_output_dir \
+    [file join "." [string replace ${abs_path_to_output_dir} 0 \
+			[string length ${abs_path_to_cwd}] ""]]
+gdb_test_no_output "set data-directory ${rel_path_to_output_dir}"
+
+gdb_test "python print (gdb.parameter ('data-directory'))" \
+    ${abs_path_to_output_dir} \
+    "python sees absolute version of data-directory path"
+
+# While we're here, check we see the correct path at GDB's CLI.
+gdb_test "show data-directory" \
+    "GDB's data directory is \"${abs_path_to_output_dir}\"\\." \
+    "check modified data-directory at the CLI"
+
+# Now lets set the data-directory back to what it was initially.
+gdb_test_no_output "set data-directory ${dd}" \
+    "set data-directory back to its original value"
+
+# And check we see the restored value at CLI and from Python.
+gdb_test "show data-directory" \
+    "GDB's data directory is \"${dd}\"\\." \
+    "check original data-directory was restored at the CLI"
+
+gdb_test "python print (gdb.parameter ('data-directory'))" ${dd} \
+    "python sees restored data-directory value"
+
 # Test a simple boolean parameter.
 with_test_prefix "boolean parameter" {
     gdb_test_multiline "Simple gdb booleanparameter" \

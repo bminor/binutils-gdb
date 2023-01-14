@@ -19,10 +19,10 @@
    MA 02110-1301, USA.  */
 
 /* ARM Note section processing.  */
-extern bfd_boolean bfd_arm_merge_machines
+extern bool bfd_arm_merge_machines
   (bfd *, bfd *);
 
-extern bfd_boolean bfd_arm_update_notes
+extern bool bfd_arm_update_notes
   (bfd *, const char *);
 
 extern unsigned int bfd_arm_get_mach_from_notes
@@ -34,6 +34,6 @@ extern unsigned int bfd_arm_get_mach_from_notes
 #define BFD_ARM_SPECIAL_SYM_TYPE_OTHER	(1 << 2)
 #define BFD_ARM_SPECIAL_SYM_TYPE_ANY	(~0)
 
-extern bfd_boolean bfd_is_arm_special_symbol_name
+extern bool bfd_is_arm_special_symbol_name
   (const char *, int);
 

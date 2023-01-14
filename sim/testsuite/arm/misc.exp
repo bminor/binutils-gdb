@@ -1,9 +1,6 @@
 # Miscellaneous ARM simulator testcases
 
 if { [istarget arm*-*-*] } {
-    # load support procs
-    # load_lib cgen.exp
-
     # all machines
     set all_machs "arm7tdmi"
 

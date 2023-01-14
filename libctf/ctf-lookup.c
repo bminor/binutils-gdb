@@ -51,7 +51,6 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
     {
       ctf_id_t type = LCTF_INDEX_TO_TYPE (fp, i, 1);
       ctf_id_t reffed_type;
-      int updated;
 
       if (ctf_type_kind (fp, type) != CTF_K_POINTER)
 	continue;
@@ -65,29 +64,6 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 	  /* Guard against references to invalid types.  No need to consider
 	     the CTF dict corrupt in this case: this pointer just can't be a
 	     pointer to any type we know about.  */
-	  if (idx <= pfp->ctf_typemax)
-	    {
-	      if (idx >= fp->ctf_pptrtab_len
-		  && grow_pptrtab (fp, pfp->ctf_ptrtab_len) < 0)
-		return -1;			/* errno is set for us.  */
-
-	      fp->ctf_pptrtab[idx] = i;
-	      updated = 1;
-	    }
-	}
-      if (!updated)
-	continue;
-
-      /* If we updated the ptrtab entry for this type's referent, and it's an
-	 anonymous typedef node, we also want to chase down its referent and
-	 change that as well.  */
-
-      if ((ctf_type_kind (fp, reffed_type) == CTF_K_TYPEDEF)
-	  && strcmp (ctf_type_name_raw (fp, reffed_type), "") == 0)
-	{
-	  uint32_t idx;
-	  idx = LCTF_TYPE_TO_INDEX (pfp, ctf_type_reference (fp, reffed_type));
-
 	  if (idx <= pfp->ctf_typemax)
 	    {
 	      if (idx >= fp->ctf_pptrtab_len
@@ -135,10 +111,14 @@ isqualifier (const char *s, size_t len)
   };
 
   int h = s[len - 1] + (int) len - 105;
-  const struct qual *qp = &qhash[h];
+  const struct qual *qp;
 
-  return (h >= 0 && (size_t) h < sizeof (qhash) / sizeof (qhash[0])
-	  && (size_t) len == qp->q_len &&
+  if (h < 0 || (size_t) h >= sizeof (qhash) / sizeof (qhash[0]))
+    return 0;
+
+  qp = &qhash[h];
+
+  return ((size_t) len == qp->q_len &&
 	  strncmp (qp->q_name, s, qp->q_len) == 0);
 }
 
@@ -483,7 +463,7 @@ ctf_symidx_sort (ctf_dict_t *fp, uint32_t *idx, size_t *nidx,
 /* Given a symbol index, return the name of that symbol from the table provided
    by ctf_link_shuffle_syms, or failing that from the secondary string table, or
    the null string.  */
-const char *
+static const char *
 ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
 {
   const ctf_sect_t *sp = &fp->ctf_symtab;
@@ -536,12 +516,128 @@ ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
 
  try_parent:
   if (fp->ctf_parent)
-    return ctf_lookup_symbol_name (fp->ctf_parent, symidx);
+    {
+      const char *ret;
+      ret = ctf_lookup_symbol_name (fp->ctf_parent, symidx);
+      if (ret == NULL)
+	ctf_set_errno (fp, ctf_errno (fp->ctf_parent));
+      return ret;
+    }
   else
     {
       ctf_set_errno (fp, err);
       return _CTF_NULLSTR;
     }
+}
+
+/* Given a symbol name, return the index of that symbol, or -1 on error or if
+   not found.  */
+static unsigned long
+ctf_lookup_symbol_idx (ctf_dict_t *fp, const char *symname)
+{
+  const ctf_sect_t *sp = &fp->ctf_symtab;
+  ctf_link_sym_t sym;
+  void *known_idx;
+  int err;
+  ctf_dict_t *cache = fp;
+
+  if (fp->ctf_dynsyms)
+    {
+      err = EINVAL;
+
+      ctf_link_sym_t *symp;
+
+      if ((symp = ctf_dynhash_lookup (fp->ctf_dynsyms, symname)) == NULL)
+	goto try_parent;
+
+      return symp->st_symidx;
+    }
+
+  err = ECTF_NOSYMTAB;
+  if (sp->cts_data == NULL)
+    goto try_parent;
+
+  /* First, try a hash lookup to see if we have already spotted this symbol
+     during a past iteration: create the hash first if need be.  The lifespan
+     of the strings is equal to the lifespan of the cts_data, so we don't
+     need to strdup them.  If this dict was opened as part of an archive,
+     and this archive has designed a crossdict_cache to cache results that
+     are the same across all dicts in an archive, use it.  */
+
+  if (fp->ctf_archive && fp->ctf_archive->ctfi_crossdict_cache)
+    cache = fp->ctf_archive->ctfi_crossdict_cache;
+
+  if (!cache->ctf_symhash)
+    if ((cache->ctf_symhash = ctf_dynhash_create (ctf_hash_string,
+						  ctf_hash_eq_string,
+						  NULL, NULL)) == NULL)
+      goto oom;
+
+  if (ctf_dynhash_lookup_kv (cache->ctf_symhash, symname, NULL, &known_idx))
+    return (unsigned long) (uintptr_t) known_idx;
+
+  /* Hash lookup unsuccessful: linear search, populating the hashtab for later
+     lookups as we go.  */
+
+  for (; cache->ctf_symhash_latest < sp->cts_size / sp->cts_entsize;
+       cache->ctf_symhash_latest++)
+    {
+      switch (sp->cts_entsize)
+	{
+	case sizeof (Elf64_Sym):
+	  {
+	    Elf64_Sym *symp = (Elf64_Sym *) sp->cts_data;
+	    ctf_elf64_to_link_sym (fp, &sym, &symp[cache->ctf_symhash_latest],
+				   cache->ctf_symhash_latest);
+	    if (!ctf_dynhash_lookup_kv (cache->ctf_symhash, sym.st_name,
+					NULL, NULL))
+	      if (ctf_dynhash_cinsert (cache->ctf_symhash, sym.st_name,
+				       (const void *) (uintptr_t)
+				       cache->ctf_symhash_latest) < 0)
+		goto oom;
+	    if (strcmp (sym.st_name, symname) == 0)
+	      return cache->ctf_symhash_latest++;
+	  }
+	  break;
+	case sizeof (Elf32_Sym):
+	  {
+	    Elf32_Sym *symp = (Elf32_Sym *) sp->cts_data;
+	    ctf_elf32_to_link_sym (fp, &sym, &symp[cache->ctf_symhash_latest],
+				   cache->ctf_symhash_latest);
+	    if (!ctf_dynhash_lookup_kv (cache->ctf_symhash, sym.st_name,
+					NULL, NULL))
+	      if (ctf_dynhash_cinsert (cache->ctf_symhash, sym.st_name,
+				       (const void *) (uintptr_t)
+				       cache->ctf_symhash_latest) < 0)
+		goto oom;
+	    if (strcmp (sym.st_name, symname) == 0)
+	      return cache->ctf_symhash_latest++;
+	  }
+	  break;
+	default:
+	  ctf_set_errno (fp, ECTF_SYMTAB);
+	  return (unsigned long) -1;
+	}
+    }
+
+  /* Searched everything, still not found.  */
+
+  return (unsigned long) -1;
+
+ try_parent:
+  if (fp->ctf_parent)
+    return ctf_lookup_symbol_idx (fp->ctf_parent, symname);
+  else
+    {
+      ctf_set_errno (fp, err);
+      return (unsigned long) -1;
+    }
+oom:
+  ctf_set_errno (fp, ENOMEM);
+  ctf_err_warn (fp, 0, ENOMEM, _("cannot allocate memory for symbol "
+				 "lookup hashtab"));
+  return (unsigned long) -1;
+
 }
 
 /* Iterate over all symbols with types: if FUNC, function symbols, otherwise,
@@ -631,7 +727,8 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
 	  *name = ctf_strptr (fp, idx[i->ctn_n]);
 	  sym = tab[i->ctn_n++];
-	} while (sym == -1u || sym == 0);
+	}
+      while (sym == -1u || sym == 0);
     }
   else
     {
@@ -688,20 +785,24 @@ ctf_lookup_idx_name (const void *key_, const void *idx_)
   return (strcmp (key->clik_name, ctf_strptr (key->clik_fp, key->clik_names[*idx])));
 }
 
-/* Given a symbol number, look up that symbol in the function or object
-   index table (which must exist).  Return 0 if not found there (or pad).  */
+/* Given a symbol name or (failing that) number, look up that symbol in the
+   function or object index table (which must exist).  Return 0 if not found
+   there (or pad).  */
 
 static ctf_id_t
-ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx, int is_function)
+ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
+			const char *symname, int is_function)
 {
-  const char *symname = ctf_lookup_symbol_name (fp, symidx);
   struct ctf_header *hp = fp->ctf_header;
   uint32_t *symtypetab;
   uint32_t *names;
   uint32_t *sxlate;
   size_t nidx;
 
-  ctf_dprintf ("Looking up type of object with symtab idx %lx (%s) in "
+  if (symname == NULL)
+    symname = ctf_lookup_symbol_name (fp, symidx);
+
+  ctf_dprintf ("Looking up type of object with symtab idx %lx or name %s in "
 	       "indexed symtypetab\n", symidx, symname);
 
   if (symname[0] == '\0')
@@ -769,13 +870,15 @@ ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx, int is_function)
   return symtypetab[*idx];
 }
 
-/* Given a symbol table index, return the type of the function or data object
-   described by the corresponding entry in the symbol table.  We can only return
-   symbols in read-only dicts and in dicts for which ctf_link_shuffle_syms has
-   been called to assign symbol indexes to symbol names.  */
+/* Given a symbol name or (if NULL) symbol index, return the type of the
+   function or data object described by the corresponding entry in the symbol
+   table.  We can only return symbols in read-only dicts and in dicts for which
+   ctf_link_shuffle_syms has been called to assign symbol indexes to symbol
+   names.  */
 
-ctf_id_t
-ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
+static ctf_id_t
+ctf_lookup_by_sym_or_name (ctf_dict_t *fp, unsigned long symidx,
+			   const char *symname)
 {
   const ctf_sect_t *sp = &fp->ctf_symtab;
   ctf_id_t type = 0;
@@ -786,35 +889,59 @@ ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
     {
       const ctf_link_sym_t *sym;
 
-      ctf_dprintf ("Looking up type of object with symtab idx %lx in "
-		   "writable dict symtypetab\n", symidx);
+      if (symname)
+	ctf_dprintf ("Looking up type of object with symname %s in "
+		     "writable dict symtypetab\n", symname);
+      else
+	ctf_dprintf ("Looking up type of object with symtab idx %lx in "
+		     "writable dict symtypetab\n", symidx);
 
       /* The dict must be dynamic.  */
       if (!ctf_assert (fp, fp->ctf_flags & LCTF_RDWR))
 	return CTF_ERR;
 
-      err = EINVAL;
-      if (symidx > fp->ctf_dynsymmax)
-	goto try_parent;
+      /* No name? Need to look it up.  */
+      if (!symname)
+	{
+	  err = EINVAL;
+	  if (symidx > fp->ctf_dynsymmax)
+	    goto try_parent;
 
-      sym = fp->ctf_dynsymidx[symidx];
-      err = ECTF_NOTYPEDAT;
-      if (!sym || (sym->st_shndx != STT_OBJECT && sym->st_shndx != STT_FUNC))
-	goto try_parent;
+	  sym = fp->ctf_dynsymidx[symidx];
+	  err = ECTF_NOTYPEDAT;
+	  if (!sym || (sym->st_shndx != STT_OBJECT && sym->st_shndx != STT_FUNC))
+	    goto try_parent;
 
-      if (!ctf_assert (fp, !sym->st_nameidx_set))
-	return CTF_ERR;
+	  if (!ctf_assert (fp, !sym->st_nameidx_set))
+	    return CTF_ERR;
+	  symname = sym->st_name;
+     }
 
       if (fp->ctf_objthash == NULL
 	  || ((type = (ctf_id_t) (uintptr_t)
-	       ctf_dynhash_lookup (fp->ctf_objthash, sym->st_name)) == 0))
+	       ctf_dynhash_lookup (fp->ctf_objthash, symname)) == 0))
 	{
 	  if (fp->ctf_funchash == NULL
 	      || ((type = (ctf_id_t) (uintptr_t)
-		   ctf_dynhash_lookup (fp->ctf_funchash, sym->st_name)) == 0))
+		   ctf_dynhash_lookup (fp->ctf_funchash, symname)) == 0))
 	    goto try_parent;
 	}
 
+      return type;
+    }
+
+  /* Lookup by name in a dynamic dict: just do it directly.  */
+  if (symname && fp->ctf_flags & LCTF_RDWR)
+    {
+      if (fp->ctf_objthash == NULL
+	  || ((type = (ctf_id_t) (uintptr_t)
+	       ctf_dynhash_lookup (fp->ctf_objthash, symname)) == 0))
+	{
+	  if (fp->ctf_funchash == NULL
+	      || ((type = (ctf_id_t) (uintptr_t)
+		   ctf_dynhash_lookup (fp->ctf_funchash, symname)) == 0))
+	    goto try_parent;
+	}
       return type;
     }
 
@@ -825,17 +952,17 @@ ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
   /* This covers both out-of-range lookups and a dynamic dict which hasn't been
      shuffled yet.  */
   err = EINVAL;
-  if (symidx >= fp->ctf_nsyms)
+  if (symname == NULL && symidx >= fp->ctf_nsyms)
     goto try_parent;
 
   if (fp->ctf_objtidx_names)
     {
-      if ((type = ctf_try_lookup_indexed (fp, symidx, 0)) == CTF_ERR)
+      if ((type = ctf_try_lookup_indexed (fp, symidx, symname, 0)) == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
     }
   if (type == 0 && fp->ctf_funcidx_names)
     {
-      if ((type = ctf_try_lookup_indexed (fp, symidx, 1)) == CTF_ERR)
+      if ((type = ctf_try_lookup_indexed (fp, symidx, symname, 1)) == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
     }
   if (type != 0)
@@ -849,6 +976,10 @@ ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
 
   ctf_dprintf ("Looking up object type %lx in 1:1 dict symtypetab\n", symidx);
 
+  if (symname != NULL)
+    if ((symidx = ctf_lookup_symbol_idx (fp, symname)) == (unsigned long) -1)
+      goto try_parent;
+
   if (fp->ctf_sxlate[symidx] == -1u)
     goto try_parent;
 
@@ -860,9 +991,31 @@ ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
   return type;
  try_parent:
   if (fp->ctf_parent)
-    return ctf_lookup_by_symbol (fp->ctf_parent, symidx);
+    {
+      ctf_id_t ret = ctf_lookup_by_sym_or_name (fp->ctf_parent, symidx,
+						symname);
+      if (ret == CTF_ERR)
+	ctf_set_errno (fp, ctf_errno (fp->ctf_parent));
+      return ret;
+    }
   else
     return (ctf_set_errno (fp, err));
+}
+
+/* Given a symbol table index, return the type of the function or data object
+   described by the corresponding entry in the symbol table.  */
+ctf_id_t
+ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
+{
+  return ctf_lookup_by_sym_or_name (fp, symidx, NULL);
+}
+
+/* Given a symbol name, return the type of the function or data object described
+   by the corresponding entry in the symbol table.  */
+ctf_id_t
+ctf_lookup_by_symbol_name (ctf_dict_t *fp, const char *symname)
+{
+  return ctf_lookup_by_sym_or_name (fp, 0, symname);
 }
 
 /* Given a symbol table index, return the info for the function described

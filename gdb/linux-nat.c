@@ -446,7 +446,7 @@ typedef std::unique_ptr<struct lwp_info, lwp_deleter> lwp_info_up;
    ptid of the followed inferior.  At return, inferior_ptid will be
    unchanged.  */
 
-bool
+void
 linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
 {
   if (!follow_child)
@@ -611,8 +611,6 @@ linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
       /* Let the thread_db layer learn about this new process.  */
       check_for_thread_db ();
     }
-
-  return false;
 }
 
 
@@ -1455,6 +1453,11 @@ linux_nat_target::detach (inferior *inf, int from_tty)
   /* ... and wait until all of them have reported back that
      they're no longer running.  */
   iterate_over_lwps (ptid_t (pid), stop_wait_callback);
+
+  /* We can now safely remove breakpoints.  We don't this in earlier
+     in common code because this target doesn't currently support
+     writing memory while the inferior is running.  */
+  remove_breakpoints_inf (current_inferior ());
 
   iterate_over_lwps (ptid_t (pid), detach_callback);
 
@@ -2817,9 +2820,10 @@ resumed_callback (struct lwp_info *lp)
 }
 
 /* Check if we should go on and pass this event to common code.
-   Return the affected lwp if we should, or NULL otherwise.  */
 
-static struct lwp_info *
+   If so, save the status to the lwp_info structure associated to LWPID.  */
+
+static void
 linux_nat_filter_event (int lwpid, int status)
 {
   struct lwp_info *lp;
@@ -2857,7 +2861,7 @@ linux_nat_filter_event (int lwpid, int status)
       linux_nat_debug_printf ("saving LWP %ld status %s in stopped_pids list",
 			      (long) lwpid, status_to_str (status));
       add_to_pid_list (&stopped_pids, lwpid, status);
-      return NULL;
+      return;
     }
 
   /* Make sure we don't report an event for the exit of an LWP not in
@@ -2865,7 +2869,7 @@ linux_nat_filter_event (int lwpid, int status)
      if we detach from a program we originally forked and then it
      exits.  */
   if (!WIFSTOPPED (status) && !lp)
-    return NULL;
+    return;
 
   /* This LWP is stopped now.  (And if dead, this prevents it from
      ever being continued.)  */
@@ -2889,7 +2893,7 @@ linux_nat_filter_event (int lwpid, int status)
 	 on.  */
       status = W_STOPCODE (SIGTRAP);
       if (linux_handle_syscall_trap (lp, 0))
-	return NULL;
+	return;
     }
   else
     {
@@ -2905,7 +2909,7 @@ linux_nat_filter_event (int lwpid, int status)
       linux_nat_debug_printf ("Handling extended status 0x%06x", status);
 
       if (linux_handle_extended_wait (lp, status))
-	return NULL;
+	return;
     }
 
   /* Check if the thread has exited.  */
@@ -2921,7 +2925,7 @@ linux_nat_filter_event (int lwpid, int status)
 	     was not the end of the debugged application and should be
 	     ignored.  */
 	  exit_lwp (lp);
-	  return NULL;
+	  return;
 	}
 
       /* Note that even if the leader was ptrace-stopped, it can still
@@ -2937,7 +2941,7 @@ linux_nat_filter_event (int lwpid, int status)
       /* Store the pending event in the waitstatus, because
 	 W_EXITCODE(0,0) == 0.  */
       store_waitstatus (&lp->waitstatus, status);
-      return lp;
+      return;
     }
 
   /* Make sure we don't report a SIGSTOP that we sent ourselves in
@@ -2963,7 +2967,7 @@ linux_nat_filter_event (int lwpid, int status)
 
 	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  gdb_assert (lp->resumed);
-	  return NULL;
+	  return;
 	}
     }
 
@@ -2985,7 +2989,7 @@ linux_nat_filter_event (int lwpid, int status)
       gdb_assert (lp->resumed);
 
       /* Discard the event.  */
-      return NULL;
+      return;
     }
 
   /* Don't report signals that GDB isn't interested in, such as
@@ -3034,7 +3038,7 @@ linux_nat_filter_event (int lwpid, int status)
 	     target_pid_to_str (lp->ptid).c_str (),
 	     (signo != GDB_SIGNAL_0
 	      ? strsignal (gdb_signal_to_host (signo)) : "0"));
-	  return NULL;
+	  return;
 	}
     }
 
@@ -3042,7 +3046,6 @@ linux_nat_filter_event (int lwpid, int status)
   gdb_assert (lp);
   lp->status = status;
   save_stop_reason (lp);
-  return lp;
 }
 
 /* Detect zombie thread group leaders, and "exit" them.  We can't reap
@@ -4406,16 +4409,24 @@ Enables printf debugging output."),
    the GNU/Linux Threads library and therefore doesn't really belong
    here.  */
 
-/* Return the set of signals used by the threads library in *SET.  */
+/* NPTL reserves the first two RT signals, but does not provide any
+   way for the debugger to query the signal numbers - fortunately
+   they don't change.  */
+static int lin_thread_signals[] = { __SIGRTMIN, __SIGRTMIN + 1 };
 
-void
-lin_thread_get_thread_signals (sigset_t *set)
+/* See linux-nat.h.  */
+
+unsigned int
+lin_thread_get_thread_signal_num (void)
 {
-  sigemptyset (set);
+  return sizeof (lin_thread_signals) / sizeof (lin_thread_signals[0]);
+}
 
-  /* NPTL reserves the first two RT signals, but does not provide any
-     way for the debugger to query the signal numbers - fortunately
-     they don't change.  */
-  sigaddset (set, __SIGRTMIN);
-  sigaddset (set, __SIGRTMIN + 1);
+/* See linux-nat.h.  */
+
+int
+lin_thread_get_thread_signal (unsigned int i)
+{
+  gdb_assert (i < lin_thread_get_thread_signal_num ());
+  return lin_thread_signals[i];
 }

@@ -280,6 +280,7 @@ _start:
 	por %xmm14,%xmm6
 	por (%rcx),%xmm6
 	psadbw %xmm4,%xmm6
+	psadbw %xmm14,%xmm6
 	psadbw (%rcx),%xmm6
 	pshufb %xmm4,%xmm6
 	pshufb (%rcx),%xmm6
@@ -489,6 +490,7 @@ _start:
 	comisd (%rcx),%xmm4
 	cvtdq2pd %xmm4,%xmm6
 	cvtdq2pd (%rcx),%xmm4
+	cvtpi2pd (%rcx),%xmm4
 	cvtps2pd %xmm4,%xmm6
 	cvtps2pd (%rcx),%xmm4
 	movddup %xmm4,%xmm6
@@ -1260,6 +1262,7 @@ _start:
 	comisd xmm4,QWORD PTR [rcx]
 	cvtdq2pd xmm6,xmm4
 	cvtdq2pd xmm4,QWORD PTR [rcx]
+	cvtpi2pd xmm4,QWORD PTR [rcx]
 	cvtps2pd xmm6,xmm4
 	cvtps2pd xmm4,QWORD PTR [rcx]
 	movddup xmm6,xmm4

@@ -31,7 +31,7 @@ gdb_breakpoint [gdb_get_line_number "Break here"]
 gdb_continue_to_breakpoint "Break here"
 
 gdb_test "p a.geta()" ".* = 12345" "a.geta()"
-gdb_test "p a_ptr->geta()" ".* = 12345" "a.geta()"
+gdb_test "p a_ptr->geta()" ".* = 12345" "a_ptr->geta()"
 
 gdb_test "p false ? a.geta() : 123" ".* = 123" "ternop 1"
 gdb_test "p false ? a_ptr->geta() : 123" ".* = 123" "ternop 2"

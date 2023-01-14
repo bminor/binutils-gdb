@@ -195,15 +195,13 @@ sim_open (SIM_OPEN_KIND    kind,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     return 0;
 
   /* for compatibility */
   simulator = sd;
 
   /* FIXME: should be better way of setting up interrupts */
-  STATE_WATCHPOINTS (sd)->pc = &(PC);
-  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = do_interrupt;
   STATE_WATCHPOINTS (sd)->interrupt_names = interrupt_names;
 

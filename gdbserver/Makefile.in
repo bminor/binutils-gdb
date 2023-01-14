@@ -186,7 +186,6 @@ SFILES = \
 	$(srcdir)/dll.cc \
 	$(srcdir)/gdbreplay.cc \
 	$(srcdir)/hostio.cc \
-	$(srcdir)/hostio-errno.cc \
 	$(srcdir)/i387-fp.cc \
 	$(srcdir)/inferiors.cc \
 	$(srcdir)/linux-aarch64-low.cc \
@@ -229,6 +228,7 @@ SFILES = \
 	$(srcdir)/../gdb/arch/arm-linux.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
 	$(srcdir)/../gdb/arch/riscv.c \
+	$(srcdir)/../gdb/nat/aarch64-mte-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/linux-btrace.c \
 	$(srcdir)/../gdb/nat/linux-namespaces.c \
@@ -490,7 +490,7 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 # Undo gnulib replacements for the IPA shared library build.
 # The gnulib headers are still needed, but gnulib is not linked
 # into the IPA lib so replacement apis don't work.
-UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r
+UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r -Drpl_free=free
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.

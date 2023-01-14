@@ -974,7 +974,7 @@ pd_enable (void)
     return;
 
   /* Prepare for thread debugging.  */
-  push_target (&aix_thread_ops);
+  current_inferior ()->push_target (&aix_thread_ops);
   pd_able = 1;
 
   /* If we're debugging a core file or an attached inferior, the
@@ -993,7 +993,7 @@ pd_disable (void)
   if (pd_active)
     pd_deactivate ();
   pd_able = 0;
-  unpush_target (&aix_thread_ops);
+  current_inferior ()->unpush_target (&aix_thread_ops);
 }
 
 /* new_objfile observer callback.

@@ -21,11 +21,11 @@
    to run this testcase for other file formats.  */
 
 	.section .bss
-a:
+aaa:
 	.zero	0x2
 
 	.section .data
-c:
+ccc:
 	.zero	0x201
 
 	.section .text

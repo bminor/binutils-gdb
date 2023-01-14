@@ -43,6 +43,10 @@ DEF_ENUM_FLAGS_TYPE (enum linux_siginfo_extra_field_values,
 struct type *linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 						 linux_siginfo_extra_fields);
 
+/* Return true if ADDRESS is within the boundaries of a page mapped with
+   memory tagging protection.  */
+bool linux_address_in_memtag_page (CORE_ADDR address);
+
 typedef char *(*linux_collect_thread_registers_ftype) (const struct regcache *,
 						       ptid_t,
 						       bfd *, char *, int *,

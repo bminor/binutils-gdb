@@ -720,7 +720,7 @@ md_atof (int type, char *litP, int *sizeP)
 	return str_to_double (litP, sizeP);
       break;
     }
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 valueT
@@ -842,7 +842,7 @@ is_indir (const char *s)
 }
 
 /* Check whether a symbol involves a register.  */
-static bfd_boolean
+static bool
 contains_register (symbolS *sym)
 {
   if (sym)
@@ -852,17 +852,17 @@ contains_register (symbolS *sym)
       switch (ex->X_op)
 	{
 	case O_register:
-	  return TRUE;
+	  return true;
 
 	case O_add:
 	case O_subtract:
 	  if (ex->X_op_symbol && contains_register (ex->X_op_symbol))
-	    return TRUE;
+	    return true;
 	  /* Fall through.  */
 	case O_uminus:
 	case O_symbol:
 	  if (ex->X_add_symbol && contains_register (ex->X_add_symbol))
-	    return TRUE;
+	    return true;
 	  break;
 
 	default:
@@ -870,7 +870,7 @@ contains_register (symbolS *sym)
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Parse general expression, not looking for indexed addressing.  */
@@ -1153,7 +1153,7 @@ emit_data_val (expressionS * val, int size)
 
   if (size <= 2 && val->X_op_symbol)
     {
-      bfd_boolean simplify = TRUE;
+      bool simplify = true;
       int shift = symbol_get_value_expression (val->X_op_symbol)->X_add_number;
       if (val->X_op == O_bit_and && shift == (1 << (size*8))-1)
 	shift = 0;
@@ -1168,7 +1168,7 @@ emit_data_val (expressionS * val, int size)
 	    case 8: r_type = BFD_RELOC_Z80_BYTE1; break;
 	    case 16: r_type = BFD_RELOC_Z80_BYTE2; break;
 	    case 24: r_type = BFD_RELOC_Z80_BYTE3; break;
-	    default: simplify = FALSE;
+	    default: simplify = false;
 	    }
 	}
       else /* if (size == 2) */
@@ -1177,7 +1177,7 @@ emit_data_val (expressionS * val, int size)
 	    {
 	    case 0: r_type = BFD_RELOC_Z80_WORD0; break;
 	    case 16: r_type = BFD_RELOC_Z80_WORD1; break;
-	    default: simplify = FALSE;
+	    default: simplify = false;
 	    }
 	}
 
@@ -1189,7 +1189,7 @@ emit_data_val (expressionS * val, int size)
 	}
     }
 
-  fix_new_exp (frag_now, p - frag_now->fr_literal, size, val, FALSE, r_type);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, size, val, false, r_type);
 }
 
 static void
@@ -1226,7 +1226,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     {
       /* For symbols only, constants are stored at begin of function.  */
       fix_new_exp (frag_now, p - frag_now->fr_literal, 1, val,
-		   (r_type == BFD_RELOC_8_PCREL) ? TRUE : FALSE, r_type);
+		   r_type == BFD_RELOC_8_PCREL, r_type);
     }
 }
 
@@ -1636,7 +1636,7 @@ emit_push (char prefix, char opcode, const char * args)
   *q = 0x8A;
 
   q = frag_more (2);
-  fix_new_exp (frag_now, q - frag_now->fr_literal, 2, &arg, FALSE,
+  fix_new_exp (frag_now, q - frag_now->fr_literal, 2, &arg, false,
                BFD_RELOC_Z80_16_BE);
 
   return p;
@@ -3867,10 +3867,10 @@ z80_tc_label_is_local (const char *name)
 #define EXP_MIN -0x10000
 #define EXP_MAX 0x10000
 static int
-str_to_broken_float (bfd_boolean *signP, bfd_uint64_t *mantissaP, int *expP)
+str_to_broken_float (bool *signP, bfd_uint64_t *mantissaP, int *expP)
 {
   char *p;
-  bfd_boolean sign;
+  bool sign;
   bfd_uint64_t mantissa = 0;
   int exponent = 0;
   int i;
@@ -3987,7 +3987,7 @@ static const char *
 str_to_zeda32(char *litP, int *sizeP)
 {
   bfd_uint64_t mantissa;
-  bfd_boolean sign;
+  bool sign;
   int exponent;
   unsigned i;
 
@@ -4046,7 +4046,7 @@ static const char *
 str_to_float48(char *litP, int *sizeP)
 {
   bfd_uint64_t mantissa;
-  bfd_boolean sign;
+  bool sign;
   int exponent;
   unsigned i;
 
@@ -4083,19 +4083,19 @@ str_to_float48(char *litP, int *sizeP)
 static const char *
 str_to_ieee754_h(char *litP, int *sizeP)
 {
-  return ieee_md_atof ('h', litP, sizeP, FALSE);
+  return ieee_md_atof ('h', litP, sizeP, false);
 }
 
 static const char *
 str_to_ieee754_s(char *litP, int *sizeP)
 {
-  return ieee_md_atof ('s', litP, sizeP, FALSE);
+  return ieee_md_atof ('s', litP, sizeP, false);
 }
 
 static const char *
 str_to_ieee754_d(char *litP, int *sizeP)
 {
-  return ieee_md_atof ('d', litP, sizeP, FALSE);
+  return ieee_md_atof ('d', litP, sizeP, false);
 }
 
 #ifdef TARGET_USE_CFIPOP

@@ -91,3 +91,14 @@ struct external_reloc
 #define RELOC struct external_reloc
 #define RELSZ 10
 
+/* i386 Relocations.  */
+
+#define R_DIR32		 6
+#define R_IMAGEBASE	 7
+#define R_SECREL32	11
+#define R_RELBYTE	15
+#define R_RELWORD	16
+#define R_RELLONG	17
+#define R_PCRBYTE	18
+#define R_PCRWORD	19
+#define R_PCRLONG	20

@@ -195,7 +195,7 @@ proc symbol_table { } {
     set testname "ar symbol table"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -244,7 +244,7 @@ proc thin_archive { bfdtests } {
     set testname "ar thin archive"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -302,7 +302,7 @@ proc thin_archive_with_nested { bfdtests } {
     set testname "ar thin archive with nested archive"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -375,7 +375,7 @@ proc argument_parsing { } {
     set testname "ar argument parsing"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -412,7 +412,7 @@ proc deterministic_archive { } {
     set testname "ar deterministic archive"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -461,7 +461,7 @@ proc unique_symbol { } {
     set testname "ar unique symbol in archive"
 
     if ![binutils_assemble $srcdir/$subdir/unique.s tmpdir/unique.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -503,7 +503,7 @@ proc delete_an_element { } {
     set testname "ar deleting an element"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -545,7 +545,7 @@ proc move_an_element { } {
     set testname "ar moving an element"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -626,7 +626,7 @@ proc extract_an_element { } {
     set testname "ar extracting an element"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 
@@ -686,7 +686,7 @@ proc many_files { } {
 
 	set ofile "tmpdir/d-$i.${obj}"
 	if ![binutils_assemble $sfile $ofile] {
-	    unresolved $testname
+	    unsupported $testname
 	    return
 	}
 
@@ -725,7 +725,7 @@ proc test_add_dependencies { } {
     set testname "ar adding library dependencies"
 
     if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}] {
-	unresolved $testname
+	unsupported $testname
 	return
     }
 

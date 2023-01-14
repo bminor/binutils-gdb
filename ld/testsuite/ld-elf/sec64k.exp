@@ -135,7 +135,7 @@ if { ![istarget "m32r-*-*"] } then {
 	puts $ofd "#as: -ez80-adl"
     }
     puts $ofd "#ld: -r"
-    puts $ofd "#readelf: -W -Ss"
+    puts $ofd "#readelf: -W -wN -Ss"
     puts $ofd "There are 680.. section headers.*:"
     puts $ofd "#..."
     puts $ofd "  \\\[ 0\\\] .* 680\[0-9\]\[0-9\]\[ \]+0\[ \]+0"
@@ -190,7 +190,7 @@ if { ![istarget "d10v-*-*"]
     if { [istarget "z80-*-*"] } then {
 	puts $ofd "#as: -ez80-adl"
     }
-    puts $ofd "#readelf: -W -Ss"
+    puts $ofd "#readelf: -W -wN -Ss"
     puts $ofd "There are 660.. section headers.*:"
     puts $ofd "#..."
     puts $ofd "  \\\[ 0\\\] .* 660..\[ \]+0\[ \]+0"

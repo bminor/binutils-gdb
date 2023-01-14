@@ -1,9 +1,6 @@
 # Miscellaneous M32R simulator testcases
 
 if [istarget m32r*-*-*] {
-    # load support procs
-    # load_lib cgen.exp
-
     # all machines
     set all_machs "m32r"
 

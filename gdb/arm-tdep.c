@@ -8535,7 +8535,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
   const char *opt;
 
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
-    if (CONST_STRNEQ (opt, "reg-names-"))
+    if (startswith (opt, "reg-names-"))
       {
 	style = &opt[strlen ("reg-names-")];
 	len = strcspn (style, ",");
@@ -9575,14 +9575,14 @@ _initialize_arm_tdep ()
     = &disassembler_options_arm ()->options;
   int num_disassembly_styles = 0;
   for (i = 0; disasm_options->name[i] != NULL; i++)
-    if (CONST_STRNEQ (disasm_options->name[i], "reg-names-"))
+    if (startswith (disasm_options->name[i], "reg-names-"))
       num_disassembly_styles++;
 
   /* Initialize the array that will be passed to add_setshow_enum_cmd().  */
   valid_disassembly_styles = XNEWVEC (const char *,
 				      num_disassembly_styles + 1);
   for (i = j = 0; disasm_options->name[i] != NULL; i++)
-    if (CONST_STRNEQ (disasm_options->name[i], "reg-names-"))
+    if (startswith (disasm_options->name[i], "reg-names-"))
       {
 	size_t offset = strlen ("reg-names-");
 	const char *style = disasm_options->name[i];

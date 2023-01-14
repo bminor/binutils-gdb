@@ -39,7 +39,7 @@
 #define OPTION_EL (OPTION_MD_BASE + 1)
 
 void microblaze_generate_symbol (char *sym);
-static bfd_boolean check_spl_reg (unsigned *);
+static bool check_spl_reg (unsigned *);
 
 /* Several places in this file insert raw instructions into the
    object. They should generate the instruction
@@ -740,7 +740,7 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
 
   new_pointer = parse_exp (s, e);
 
-  if (!GOT_symbol && ! strncmp (s, GOT_SYMBOL_NAME, 20))
+  if (!GOT_symbol && startswith (s, GOT_SYMBOL_NAME))
     {
       GOT_symbol = symbol_find_or_make (GOT_SYMBOL_NAME);
     }
@@ -785,17 +785,17 @@ check_got (int * got_type, int * got_len)
     if (is_end_of_line[(unsigned char) *atp])
       return NULL;
 
-  if (strncmp (atp + 1, "GOTOFF", 5) == 0)
+  if (startswith (atp + 1, "GOTOFF"))
     {
       *got_len = 6;
       *got_type = IMM_GOTOFF;
     }
-  else if (strncmp (atp + 1, "GOT", 3) == 0)
+  else if (startswith (atp + 1, "GOT"))
     {
       *got_len = 3;
       *got_type = IMM_GOT;
     }
-  else if (strncmp (atp + 1, "PLT", 3) == 0)
+  else if (startswith (atp + 1, "PLT"))
     {
       *got_len = 3;
       *got_type = IMM_PLT;
@@ -858,7 +858,7 @@ parse_cons_expression_microblaze (expressionS *exp, int size)
 static const char * str_microblaze_ro_anchor = "RO";
 static const char * str_microblaze_rw_anchor = "RW";
 
-static bfd_boolean
+static bool
 check_spl_reg (unsigned * reg)
 {
   if ((*reg == REG_MSR)   || (*reg == REG_PC)
@@ -869,9 +869,9 @@ check_spl_reg (unsigned * reg)
       || (*reg == REG_TLBHI) || (*reg == REG_TLBSX)
       || (*reg == REG_SHR)   || (*reg == REG_SLR)
       || (*reg >= REG_PVR+MIN_PVR_REGNUM && *reg <= REG_PVR+MAX_PVR_REGNUM))
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Here we decide which fixups can be adjusted to make them relative to
@@ -1894,65 +1894,65 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
     {
     case UNDEFINED_PC_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, TRUE, BFD_RELOC_64_PCREL);
+	       fragP->fr_offset, true, BFD_RELOC_64_PCREL);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case DEFINED_ABS_SEGMENT:
       if (fragP->fr_symbol == GOT_symbol)
         fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	         fragP->fr_offset, TRUE, BFD_RELOC_MICROBLAZE_64_GOTPC);
+	         fragP->fr_offset, true, BFD_RELOC_MICROBLAZE_64_GOTPC);
       else
         fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	         fragP->fr_offset, FALSE, BFD_RELOC_64);
+	         fragP->fr_offset, false, BFD_RELOC_64);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case DEFINED_RO_SEGMENT:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_32_ROSDA);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_32_ROSDA);
       fragP->fr_fix += INST_WORD_SIZE;
       fragP->fr_var = 0;
       break;
     case DEFINED_RW_SEGMENT:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_32_RWSDA);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_32_RWSDA);
       fragP->fr_fix += INST_WORD_SIZE;
       fragP->fr_var = 0;
       break;
     case DEFINED_PC_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE, fragP->fr_symbol,
-	       fragP->fr_offset, TRUE, BFD_RELOC_MICROBLAZE_32_LO_PCREL);
+	       fragP->fr_offset, true, BFD_RELOC_MICROBLAZE_32_LO_PCREL);
       fragP->fr_fix += INST_WORD_SIZE;
       fragP->fr_var = 0;
       break;
     case LARGE_DEFINED_PC_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, TRUE, BFD_RELOC_64_PCREL);
+	       fragP->fr_offset, true, BFD_RELOC_64_PCREL);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case GOT_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_GOT);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_GOT);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case TEXT_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TEXTREL);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_TEXTREL);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case TEXT_PC_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TEXTPCREL);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_TEXTPCREL);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case PLT_OFFSET:
       fixP = fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	              fragP->fr_offset, TRUE, BFD_RELOC_MICROBLAZE_64_PLT);
+	              fragP->fr_offset, true, BFD_RELOC_MICROBLAZE_64_PLT);
       /* fixP->fx_plt = 1; */
       (void) fixP;
       fragP->fr_fix += INST_WORD_SIZE * 2;
@@ -1960,25 +1960,25 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
       break;
     case GOTOFF_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_GOTOFF);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_GOTOFF);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case TLSGD_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSGD);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_TLSGD);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case TLSLD_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSLD);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_TLSLD);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
     case TLSDTPREL_OFFSET:
       fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
-	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSDTPREL);
+	       fragP->fr_offset, false, BFD_RELOC_MICROBLAZE_64_TLSDTPREL);
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
@@ -2025,9 +2025,8 @@ md_apply_fix (fixS *   fixP,
 	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
 	      && (((bfd_section_flags (S_GET_SEGMENT (fixP->fx_addsy))
 		    & SEC_LINK_ONCE) != 0)
-		  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-			       ".gnu.linkonce",
-			       sizeof (".gnu.linkonce") - 1))))
+		  || startswith (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+				 ".gnu.linkonce"))))
 	{
 	  val -= S_GET_VALUE (fixP->fx_addsy);
 	  if (val != 0 && ! fixP->fx_pcrel)

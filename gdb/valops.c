@@ -415,8 +415,25 @@ value_cast (struct type *type, struct value *arg2)
 
   int convert_to_boolean = 0;
 
-  if (value_type (arg2) == type)
-    return arg2;
+  /* TYPE might be equal in meaning to the existing type of ARG2, but for
+     many reasons, might be a different type object (e.g. TYPE might be a
+     gdbarch owned type, while VALUE_TYPE (ARG2) could be an objfile owned
+     type).
+
+     In this case we want to preserve the LVAL of ARG2 as this allows the
+     resulting value to be used in more places.  We do this by calling
+     VALUE_COPY if appropriate.  */
+  if (types_deeply_equal (value_type (arg2), type))
+    {
+      /* If the types are exactly equal then we can avoid creating a new
+	 value completely.  */
+      if (value_type (arg2) != type)
+	{
+	  arg2 = value_copy (arg2);
+	  deprecated_set_value_type (arg2, type);
+	}
+      return arg2;
+    }
 
   if (is_fixed_point_type (type))
     return value_cast_to_fixed_point (type, arg2);
@@ -590,7 +607,7 @@ value_cast (struct type *type, struct value *arg2)
 	 otherwise occur when dealing with a target having two byte
 	 pointers and four byte addresses.  */
 
-      int addr_bit = gdbarch_addr_bit (get_type_arch (type2));
+      int addr_bit = gdbarch_addr_bit (type2->arch ());
       LONGEST longest = value_as_long (arg2);
 
       if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
@@ -1040,7 +1057,7 @@ read_value_memory (struct value *val, LONGEST bit_offset,
       enum target_xfer_status status;
       ULONGEST xfered_partial;
 
-      status = target_xfer_partial (current_top_target (),
+      status = target_xfer_partial (current_inferior ()->top_target (),
 				    object, NULL,
 				    buffer + xfered_total * unit_size, NULL,
 				    memaddr + xfered_total,
@@ -1100,7 +1117,7 @@ value_assign (struct value *toval, struct value *fromval)
     {
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-      return value_of_internalvar (get_type_arch (type),
+      return value_of_internalvar (type->arch (),
 				   VALUE_INTERNALVAR (toval));
 
     case lval_internalvar_component:
@@ -1286,7 +1303,8 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
     case lval_computed:
 
-      gdb::observers::target_changed.notify (current_top_target ());
+      gdb::observers::target_changed.notify
+	(current_inferior ()->top_target ());
 
       /* Having destroyed the frame cache, restore the selected
 	 frame.  */
@@ -3312,7 +3330,7 @@ enum_constant_from_type (struct type *type, const char *name)
   int name_len = strlen (name);
 
   gdb_assert (type->code () == TYPE_CODE_ENUM
-	      && TYPE_DECLARED_CLASS (type));
+	      && type->is_declared_class ());
 
   for (i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {

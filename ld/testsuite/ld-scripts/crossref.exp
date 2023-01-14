@@ -65,8 +65,8 @@ if [istarget tic6x*-*-*] {
 
 if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
-    unresolved $test1
-    unresolved $test2
+    unsupported $test1
+    unsupported $test2
     set CFLAGS "$old_CFLAGS"
     set CC "$old_CC"
     return
@@ -76,7 +76,11 @@ set flags [big_or_little_endian]
 
 # arc-elf32 requires the symbol __SDATA_BEGIN__ to always be present.
 if [istarget arc*-*-elf32] {
-    set flags "$flags --defsym=__SDATA_BEGIN__=0"
+    append flags " --defsym __SDATA_BEGIN__=0"
+}
+
+if [is_pecoff_format] {
+    append flags " --image-base 0"
 }
 
 set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"]
@@ -99,7 +103,7 @@ if [string match "" $exec_output] then {
 # Check cross references within a single object.
 
 if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
-    unresolved $test2
+    unsupported $test2
     set CFLAGS "$old_CFLAGS"
     set CC "$old_CC"
     return
@@ -124,14 +128,14 @@ if [string match "" $exec_output] then {
 # Check cross references for ld -r
 
 if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
-    unresolved $test3
+    unsupported $test3
     set CFLAGS "$old_CFLAGS"
     set CC "$old_CC"
     return
 }
 
 if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] {
-    unresolved $test3
+    fail $test3
     set CFLAGS "$old_CFLAGS"
     set CC "$old_CC"
     return

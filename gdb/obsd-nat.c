@@ -193,7 +193,7 @@ obsd_nat_target::post_startup_inferior (ptid_t pid)
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
    the ptid of the followed inferior.  */
 
-bool
+void
 obsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
 {
   if (!follow_child)
@@ -207,8 +207,6 @@ obsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
       if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
     }
-
-  return false;
 }
 
 int

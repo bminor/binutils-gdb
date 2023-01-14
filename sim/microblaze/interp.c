@@ -126,7 +126,7 @@ sim_engine_run (SIM_DESC sd,
   int cycs;
   word WLhash;
   ubyte carry;
-  int imm_unsigned;
+  bool imm_unsigned;
   short ra, rb, rd;
   long immword;
   uword oldpc, newpc;
@@ -393,7 +393,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

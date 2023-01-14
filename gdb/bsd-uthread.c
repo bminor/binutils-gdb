@@ -231,7 +231,7 @@ bsd_uthread_activate (struct objfile *objfile)
   bsd_uthread_thread_ctx_offset =
     bsd_uthread_lookup_offset ("_thread_ctx_offset", objfile);
 
-  push_target (&bsd_uthread_ops);
+  current_inferior ()->push_target (&bsd_uthread_ops);
   bsd_uthread_active = 1;
   return 1;
 }
@@ -259,7 +259,7 @@ bsd_uthread_deactivate (void)
   if (!bsd_uthread_active)
     return;
 
-  unpush_target (&bsd_uthread_ops);
+  current_inferior ()->unpush_target (&bsd_uthread_ops);
 }
 
 static void

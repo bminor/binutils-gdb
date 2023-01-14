@@ -1,5 +1,5 @@
 /* Open a descriptor to a file.
-   Copyright (C) 2007-2020 Free Software Foundation, Inc.
+   Copyright (C) 2007-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,11 @@
 static int
 orig_open (const char *filename, int flags, mode_t mode)
 {
+#if defined _WIN32 && !defined __CYGWIN__
+  return _open (filename, flags, mode);
+#else
   return open (filename, flags, mode);
+#endif
 }
 
 /* Specification.  */

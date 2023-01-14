@@ -18,9 +18,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-extern bfd_boolean elf32_csky_build_stubs
+extern bool elf32_csky_build_stubs
   (struct bfd_link_info *);
-extern bfd_boolean elf32_csky_size_stubs
+extern bool elf32_csky_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
    struct bfd_section *(*) (const char*, struct bfd_section*),
    void (*) (void));

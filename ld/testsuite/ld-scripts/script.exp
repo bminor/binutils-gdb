@@ -22,7 +22,7 @@
 set testname "script"
 
 if ![ld_assemble $as $srcdir/$subdir/script.s tmpdir/script.o] { 
-    unresolved $testname
+    unsupported $testname
     return
 }
 

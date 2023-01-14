@@ -37,6 +37,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
+#include "tui/tui-location.h"
 #include "gdb_curses.h"
 
 /* Function to display source in the source window.  */
@@ -62,8 +63,6 @@ tui_source_window::set_contents (struct gdbarch *arch,
     return false;
 
   int cur_line_no, cur_line;
-  struct tui_locator_window *locator
-    = tui_locator_win_info_ptr ();
   const char *s_filename = symtab_to_filename_for_display (s);
 
   title = s_filename;
@@ -104,9 +103,9 @@ tui_source_window::set_contents (struct gdbarch *arch,
       element->line_or_addr.loa = LOA_LINE;
       element->line_or_addr.u.line_no = cur_line_no;
       element->is_exec_point
-	= (filename_cmp (locator->full_name.c_str (),
+	= (filename_cmp (tui_location.full_name ().c_str (),
 			 symtab_to_fullname (s)) == 0
-	   && cur_line_no == locator->line_no);
+	   && cur_line_no == tui_location.line_no ());
 
       m_content[cur_line].line = std::move (text);
 
@@ -124,7 +123,7 @@ bool
 tui_source_window::showing_source_p (const char *fullname) const
 {
   return (!m_content.empty ()
-	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name.c_str (),
+	  && (filename_cmp (tui_location.full_name ().c_str (),
 			    fullname) == 0));
 }
 

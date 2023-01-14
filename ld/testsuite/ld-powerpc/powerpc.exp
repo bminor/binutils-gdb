@@ -344,6 +344,15 @@ set ppc64elftests {
     {"group3" "-melf64ppc -e foo" "" "-a64" {group3.s group2.s group1.s}
 	{{objdump {-d} group2.d}
 	 {readelf {-s} group3.sym}} "group3"}
+    {"weak1" "-melf64ppc --hash-style=both" ""
+	"-a64 -mpower10" {weak1.s}
+	{{objdump -d weak1.d} {readelf {-srW} weak1.r}} "weak1"}
+    {"weak1.so" "-shared -melf64ppc --hash-style=both" ""
+	"-a64 -mpower10" {weak1.s}
+	{{objdump -d weak1so.d} {readelf {-srW} weak1so.r}} "weak1.so"}
+    {"startstop" "-shared -melf64ppc --hash-style=sysv --gc-sections -z start-stop-gc" ""
+	"-a64 -mpower10" {startstop.s}
+	{{objdump -d startstop.d} {readelf {-rW} startstop.r}} "startstop.so"}
 }
 
 set ppceabitests {

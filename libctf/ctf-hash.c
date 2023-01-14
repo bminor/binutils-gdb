@@ -672,6 +672,12 @@ ctf_dynset_lookup (ctf_dynset_t *hp, const void *key)
   return NULL;
 }
 
+size_t
+ctf_dynset_elements (ctf_dynset_t *hp)
+{
+  return htab_elements ((struct htab *) hp);
+}
+
 /* TRUE/FALSE return.  */
 int
 ctf_dynset_exists (ctf_dynset_t *hp, const void *key, const void **orig_key)

@@ -1,3 +1,52 @@
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* emul_unix.c: Include time.h.
+
+2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Set ASAN_OPTIONS when running igen.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (install): Install as run-ppc when not the primary arch.
+	(install-strip): Likewise.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (BUILD_LDFLAGS): Rename to ...
+	(LDFLAGS_FOR_BUILD): ... this.
+	(LINK_FOR_BUILD): Change BUILD_LDFLAGS to LDFLAGS_FOR_BUILD.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	Change $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) to
+	$(LINK_FOR_BUILD).  Change $(CC_FOR_BUILD) $(BUILD_CFLAGS) to
+	$(COMPILE_FOR_BUILD).
+
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gentmap, dgen, igen, tmp-filter, tmp-ld-decode,
+	tmp-ld-cache, tmp-ld-insn): Delete $(BUILD_LIBS).
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (check): Define.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (STD_CFLAGS): Delete $(HDEFINES) $(TDEFINES).
+	(NOWARN_CFLAGS): Likewise.
+	(HDEFINES, TDEFINES): Delete.
+	* configure.ac: Delete AC_SUBST(HDEFINES) and bfd/configure.host
+	sourcing.
+	* configure: Regenerate.
+
 2021-01-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (version.c): Simplifiy args and call move-if-change.
@@ -4315,4 +4364,3 @@ Wed May 29 22:57:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
 	* ChangeLog.00, ChangeLog: ChangeLog from gdb-4.16 becomes
 	ChangeLog.00
-

@@ -195,7 +195,7 @@ extern const aarch64_operand aarch64_operands[];
 
 enum err_type
 verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
-		    bfd_boolean, aarch64_operand_error *, aarch64_instr_sequence*);
+		    bool, aarch64_operand_error *, aarch64_instr_sequence*);
 
 /* Operand flags.  */
 
@@ -242,40 +242,40 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define HINT_FLAG(val) (val >> 8)
 #define HINT_VAL(val) (val & 0xff)
 
-static inline bfd_boolean
+static inline bool
 operand_has_inserter (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_HAS_INSERTER) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_HAS_INSERTER) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 operand_has_extractor (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_HAS_EXTRACTOR) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_HAS_EXTRACTOR) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 operand_need_sign_extension (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SEXT) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SEXT) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 operand_need_shift_by_two (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SHIFT_BY_2) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SHIFT_BY_2) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 operand_need_shift_by_four (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SHIFT_BY_4) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SHIFT_BY_4) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 operand_maybe_stack_pointer (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_MAYBE_SP) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_MAYBE_SP) != 0;
 }
 
 /* Return the value of the operand-specific data field (OPD_F_OD_MASK).  */
@@ -484,11 +484,11 @@ int aarch64_select_operand_for_sizeq_field_coding (const aarch64_opcode *);
 
 aarch64_insn aarch64_get_operand_modifier_value (enum aarch64_modifier_kind);
 enum aarch64_modifier_kind
-aarch64_get_operand_modifier_from_value (aarch64_insn, bfd_boolean);
+aarch64_get_operand_modifier_from_value (aarch64_insn, bool);
 
 
-bfd_boolean aarch64_wide_constant_p (uint64_t, int, unsigned int *);
-bfd_boolean aarch64_logical_immediate_p (uint64_t, int, aarch64_insn *);
+bool aarch64_wide_constant_p (uint64_t, int, unsigned int *);
+bool aarch64_logical_immediate_p (uint64_t, int, aarch64_insn *);
 int aarch64_shrink_expanded_imm8 (uint64_t);
 
 /* Copy the content of INST->OPERANDS[SRC] to INST->OPERANDS[DST].  */

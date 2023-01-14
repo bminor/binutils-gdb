@@ -688,7 +688,7 @@ rx_signal_to_gdb_signal (int rx)
 
 /* Take a step return code RC and set up the variables consulted by
    sim_stop_reason appropriately.  */
-void
+static void
 handle_step (int rc)
 {
   if (execution_error_get_last_error () != SIM_ERR_NONE)
@@ -804,13 +804,13 @@ sim_do_command (SIM_DESC sd, const char *cmd)
     p++;
 
   /* Find the extent of the command word.  */
-  for (p = cmd; *p; p++)
+  for (; *p != '\0'; p++)
     if (isspace (*p))
       break;
 
   /* Null-terminate the command word, and record the start of any
      further arguments.  */
-  if (*p)
+  if (*p != '\0')
     {
       *p = '\0';
       args = p + 1;
@@ -851,6 +851,14 @@ sim_do_command (SIM_DESC sd, const char *cmd)
 
 char **
 sim_complete_command (SIM_DESC sd, const char *text, const char *word)
+{
+  return NULL;
+}
+
+/* Stub this out for now.  */
+
+char *
+sim_memory_map (SIM_DESC sd)
 {
   return NULL;
 }

@@ -40,7 +40,6 @@
 #maintenance print unwind -- Print unwind table entry at given address
 #
 #
-#maintenance info sections -- List the BFD sections of the exec and core files
 #maintenance info breakpoints -- Status of all breakpoints
 #
 
@@ -116,23 +115,6 @@ gdb_load ${binfile}
 
 if ![runto_main] then {
         perror "tests suppressed"
-}
-
-# Check that 'maint info sections' output looks correct.  When
-# checking the lines for each section we reject section names starting
-# with a '*' character, the internal *COM*, *UND*, *ABS*, and *IND*
-# sections should not be displayed in this output.
-set test "check maint info sections output"
-gdb_test_multiple "maint info sections" $test {
-    -re "Exec file:\r\n\[\t ]+`\[^'\]+', file type \[^.\]+\.\r\n" {
-	exp_continue
-    }
-    -re "^ \\\[\[0-9\]+\\\]\[\t \]+$hex->$hex at $hex: \[^*\r\]+\r\n" {
-	exp_continue
-    }
-    -re "^$gdb_prompt $" {
-	pass $test
-    }
 }
 
 # If we're using .gdb_index or .debug_names there will be no psymtabs.
@@ -211,7 +193,7 @@ if [istarget "*-*-cygwin*"] {
 
 send_gdb "maint print statistics\n"
 gdb_expect  {
-    -re "Statistics for\[^\n\r\]*maint\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for string cache: $decimal\r\n" {
+    -re "Statistics for\[^\n\r\]*maint\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?  Total memory used for psymbol cache: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for string cache: $decimal\r\n" {
 	gdb_expect {
 	    -re "$gdb_prompt $" {
 		pass "maint print statistics"
@@ -416,75 +398,6 @@ if [istarget "hppa*-*-11*"] {
 
 set oldtimeout $timeout
 set timeout [expr $timeout + 300]
-
-# It'd be nice to check for every possible section.  However, that's
-# problematic, since the relative ordering wanders from release to
-# release of the compilers.  Instead, we'll just check for two
-# sections which appear to always come out in the same relative
-# order.  (If that changes, then we should just check for one
-# section.)
-#
-# And by the way: This testpoint will break for PA64, where a.out's
-# are ELF files.
-
-# Standard GNU names.
-set text_section ".text"
-set data_section ".data"
-
-gdb_test_multiple "maint info sections" "maint info sections" {
-    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*ER_RO.*$gdb_prompt $" {
-	# Looks like RealView which uses different section names.
-	set text_section ER_RO
-	set data_section ER_RW
-	pass "maint info sections"
-    }
-    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*neardata.*$gdb_prompt $" {
-	# c6x doesn't have .data section.  It has .neardata and .fardata section.
-	set data_section ".neardata"
-	pass "maint info sections"
-    }
-    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*$gdb_prompt $" {
-	pass "maint info sections"
-    }
-}
-
-# Test for new option: maint info sections <section name>
-# If you don't have a .text section, this will require tweaking.
-
-gdb_test_multiple "maint info sections $text_section" \
-    "maint info sections .text" {
-	-re ".* \\.bss .*$gdb_prompt $" {
-	    fail "maint info sections .text"
-	}
-	-re ".* $data_section .*$gdb_prompt $" {
-	    fail "maint info sections .text"
-	}
-	-re ".* $text_section .*$gdb_prompt $" {
-	    pass "maint info sections .text"
-	}
-    }
-
-# Test for new option: CODE section flag
-# If your data section is tagged CODE, xfail this test.
-
-gdb_test_multiple "maint info sections CODE" "maint info sections CODE" {
-    -re ".* $data_section .*$gdb_prompt $" { fail "maint info sections CODE" }
-    -re ".* $text_section .*$gdb_prompt $" { pass "maint info sections CODE" }
-}
-
-# Test for new option: DATA section flag
-# If your text section is tagged DATA, xfail this test.
-#
-# The "maint info sections DATA" test is marked for XFAIL on Windows,
-# because Windows has text sections marked DATA.
-setup_xfail "*-*-*cygwin*"
-setup_xfail "*-*-*mingw*"
-
-gdb_test_multiple "maint info sections DATA" "maint info sections DATA" {
-    -re ".* $text_section .*$gdb_prompt $" { fail "maint info sections DATA" }
-    -re ".* $data_section .*$gdb_prompt $" { pass "maint info sections DATA" }
-    -re ".* .rodata .*$gdb_prompt $" { pass "maint info sections DATA" }
-}
 
 set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 

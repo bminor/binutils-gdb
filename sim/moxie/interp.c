@@ -1197,14 +1197,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
     }
-
-  STATE_WATCHPOINTS (sd)->pc = &cpu.asregs.regs[PC_REGNO];
-  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (word);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
@@ -1296,7 +1293,7 @@ SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
 		     char * const *argv, char * const *env)
 {
-  char ** avp;
+  char * const *avp;
   int l, argc, i, tp;
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
 

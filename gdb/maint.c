@@ -40,6 +40,7 @@
 #include "top.h"
 #include "maint.h"
 #include "gdbsupport/selftest.h"
+#include "inferior.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -131,10 +132,10 @@ maintenance_space_display (const char *args, int from_tty)
 
 /* Mini tokenizing lexer for 'maint info sections' command.  */
 
-static int
+static bool
 match_substring (const char *string, const char *substr)
 {
-  int substr_len = strlen(substr);
+  int substr_len = strlen (substr);
   const char *tok;
 
   while ((tok = strstr (string, substr)) != NULL)
@@ -150,90 +151,82 @@ match_substring (const char *string, const char *substr)
 	    || tok[substr_len] == '\0')
 	{
 	  /* Token is delimited at the rear.  Got a whole-word match.  */
-	  return 1;
+	  return true;
 	}
       }
       /* Token didn't match as a whole word.  Advance and try again.  */
       string = tok + 1;
     }
-  return 0;
+  return false;
 }
 
-static int 
+/* Structure holding information about a single bfd section flag.  This is
+   used by the "maintenance info sections" command to print the sections,
+   and for filtering which sections are printed.  */
+
+struct single_bfd_flag_info
+{
+  /* The name of the section.  This is what is printed for the flag, and
+     what the user enter in order to filter by flag.  */
+  const char *name;
+
+  /* The bfd defined SEC_* flagword value for this flag.  */
+  flagword value;
+};
+
+/* Vector of all the known bfd flags.  */
+
+static const single_bfd_flag_info bfd_flag_info[] =
+  {
+    { "ALLOC", SEC_ALLOC },
+    { "LOAD", SEC_LOAD },
+    { "RELOC", SEC_RELOC },
+    { "READONLY", SEC_READONLY },
+    { "CODE", SEC_CODE },
+    { "DATA", SEC_DATA },
+    { "ROM", SEC_ROM },
+    { "CONSTRUCTOR", SEC_CONSTRUCTOR },
+    { "HAS_CONTENTS", SEC_HAS_CONTENTS },
+    { "NEVER_LOAD", SEC_NEVER_LOAD },
+    { "COFF_SHARED_LIBRARY", SEC_COFF_SHARED_LIBRARY },
+    { "IS_COMMON", SEC_IS_COMMON }
+  };
+
+/* For each flag in the global BFD_FLAG_INFO list, if FLAGS has a flag's
+   flagword value set, and STRING contains the flag's name then return
+   true, otherwise return false.  STRING is never nullptr.  */
+
+static bool
 match_bfd_flags (const char *string, flagword flags)
 {
-  if (flags & SEC_ALLOC)
-    if (match_substring (string, "ALLOC"))
-      return 1;
-  if (flags & SEC_LOAD)
-    if (match_substring (string, "LOAD"))
-      return 1;
-  if (flags & SEC_RELOC)
-    if (match_substring (string, "RELOC"))
-      return 1;
-  if (flags & SEC_READONLY)
-    if (match_substring (string, "READONLY"))
-      return 1;
-  if (flags & SEC_CODE)
-    if (match_substring (string, "CODE"))
-      return 1;
-  if (flags & SEC_DATA)
-    if (match_substring (string, "DATA"))
-      return 1;
-  if (flags & SEC_ROM)
-    if (match_substring (string, "ROM"))
-      return 1;
-  if (flags & SEC_CONSTRUCTOR)
-    if (match_substring (string, "CONSTRUCTOR"))
-      return 1;
-  if (flags & SEC_HAS_CONTENTS)
-    if (match_substring (string, "HAS_CONTENTS"))
-      return 1;
-  if (flags & SEC_NEVER_LOAD)
-    if (match_substring (string, "NEVER_LOAD"))
-      return 1;
-  if (flags & SEC_COFF_SHARED_LIBRARY)
-    if (match_substring (string, "COFF_SHARED_LIBRARY"))
-      return 1;
-  if (flags & SEC_IS_COMMON)
-    if (match_substring (string, "IS_COMMON"))
-      return 1;
+  gdb_assert (string != nullptr);
 
-  return 0;
+  for (const auto &f : bfd_flag_info)
+    {
+      if (flags & f.value
+	  && match_substring (string, f.name))
+	return true;
+    }
+
+  return false;
 }
+
+/* Print the names of all flags set in FLAGS.  The names are taken from the
+   BFD_FLAG_INFO global.  */
 
 static void
 print_bfd_flags (flagword flags)
 {
-  if (flags & SEC_ALLOC)
-    printf_filtered (" ALLOC");
-  if (flags & SEC_LOAD)
-    printf_filtered (" LOAD");
-  if (flags & SEC_RELOC)
-    printf_filtered (" RELOC");
-  if (flags & SEC_READONLY)
-    printf_filtered (" READONLY");
-  if (flags & SEC_CODE)
-    printf_filtered (" CODE");
-  if (flags & SEC_DATA)
-    printf_filtered (" DATA");
-  if (flags & SEC_ROM)
-    printf_filtered (" ROM");
-  if (flags & SEC_CONSTRUCTOR)
-    printf_filtered (" CONSTRUCTOR");
-  if (flags & SEC_HAS_CONTENTS)
-    printf_filtered (" HAS_CONTENTS");
-  if (flags & SEC_NEVER_LOAD)
-    printf_filtered (" NEVER_LOAD");
-  if (flags & SEC_COFF_SHARED_LIBRARY)
-    printf_filtered (" COFF_SHARED_LIBRARY");
-  if (flags & SEC_IS_COMMON)
-    printf_filtered (" IS_COMMON");
+  for (const auto &f : bfd_flag_info)
+    {
+      if (flags & f.value)
+	printf_filtered (" %s", f.name);
+    }
 }
 
 static void
-maint_print_section_info (const char *name, flagword flags, 
-			  CORE_ADDR addr, CORE_ADDR endaddr, 
+maint_print_section_info (const char *name, flagword flags,
+			  CORE_ADDR addr, CORE_ADDR endaddr,
 			  unsigned long filepos, int addr_size)
 {
   printf_filtered ("    %s", hex_string_custom (addr, addr_size));
@@ -354,25 +347,99 @@ maint_obj_section_from_bfd_section (bfd *abfd,
   return osect;
 }
 
-/* Print information about ASECT from ABFD.  Where possible the information for
-   ASECT will print the relocated addresses of the section.
+/* Print information about all sections from ABFD, which is the bfd
+   corresponding to OBJFILE.  It is fine for OBJFILE to be nullptr, but
+   ABFD must never be nullptr.  If OBJFILE is provided then the sections of
+   ABFD will (potentially) be displayed relocated (i.e. the object file was
+   loaded with add-symbol-file and custom offsets were provided).
 
-   ARG is the argument string passed by the user to the top level maintenance
-   info sections command.  Used for filtering which sections are printed.  */
+   HEADER is a string that describes this file, e.g. 'Exec file: ', or
+   'Core file: '.
+
+   ARG is a string used for filtering which sections are printed, this can
+   be nullptr for no filtering.  See the top level 'maint info sections'
+   for a fuller description of the possible filtering strings.  */
 
 static void
-print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
-					objfile *objfile, const char *arg,
-					int index_digits)
+maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
+			  const char *arg)
 {
-  gdb_assert (objfile->sections != NULL);
-  obj_section *osect
-    = maint_obj_section_from_bfd_section (abfd, asect, objfile);
+  puts_filtered (header);
+  wrap_here ("        ");
+  printf_filtered ("`%s', ", bfd_get_filename (abfd));
+  wrap_here ("        ");
+  printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
 
-  if (osect->the_bfd_section == NULL)
-    print_bfd_section_info (abfd, asect, arg, index_digits);
-  else
-    print_objfile_section_info (abfd, osect, arg, index_digits);
+  int section_count = gdb_bfd_count_sections (abfd);
+  int digits = index_digits (section_count);
+
+  for (asection *sect : gdb_bfd_sections (abfd))
+    {
+      obj_section *osect = nullptr;
+
+      if (objfile != nullptr)
+	{
+	  gdb_assert (objfile->sections != nullptr);
+	  osect
+	    = maint_obj_section_from_bfd_section (abfd, sect, objfile);
+	  if (osect->the_bfd_section == nullptr)
+	    osect = nullptr;
+	}
+
+      if (osect == nullptr)
+	print_bfd_section_info (abfd, sect, arg, digits);
+      else
+	print_objfile_section_info (abfd, osect, arg, digits);
+    }
+}
+
+/* The options for the "maintenance info sections" command.  */
+
+struct maint_info_sections_opts
+{
+  /* For "-all-objects".  */
+  bool all_objects = false;
+};
+
+static const gdb::option::option_def maint_info_sections_option_defs[] = {
+
+  gdb::option::flag_option_def<maint_info_sections_opts> {
+    "all-objects",
+    [] (maint_info_sections_opts *opts) { return &opts->all_objects; },
+    N_("Display information from all loaded object files."),
+  },
+};
+
+/* Create an option_def_group for the "maintenance info sections" options,
+   with CC_OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_maint_info_sections_options_def_group (maint_info_sections_opts *cc_opts)
+{
+  return {{maint_info_sections_option_defs}, cc_opts};
+}
+
+/* Completion for the "maintenance info sections" command.  */
+
+static void
+maint_info_sections_completer (struct cmd_list_element *cmd,
+			       completion_tracker &tracker,
+			       const char *text, const char * /* word */)
+{
+  /* Complete command options.  */
+  const auto group = make_maint_info_sections_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
+    return;
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+
+  /* Offer completion for section flags, but not section names.  This is
+     only a maintenance command after all, no point going over the top.  */
+  std::vector<const char *> flags;
+  for (const auto &f : bfd_flag_info)
+    flags.push_back (f.name);
+  flags.push_back (nullptr);
+  complete_on_enum (tracker, flags.data (), text, word);
 }
 
 /* Implement the "maintenance info sections" command.  */
@@ -380,55 +447,71 @@ print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
 static void
 maintenance_info_sections (const char *arg, int from_tty)
 {
-  if (current_program_space->exec_bfd ())
+  /* Check if the "-all-objects" flag was passed.  */
+  maint_info_sections_opts opts;
+  const auto group = make_maint_info_sections_options_def_group (&opts);
+  gdb::option::process_options
+    (&arg, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
+
+  for (objfile *ofile : current_program_space->objfiles ())
     {
-      bool allobj = false;
-
-      printf_filtered (_("Exec file:\n"));
-      printf_filtered ("    `%s', ",
-		       bfd_get_filename (current_program_space->exec_bfd ()));
-      wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"),
-		       bfd_get_target (current_program_space->exec_bfd ()));
-
-      /* Only this function cares about the 'ALLOBJ' argument;
-	 if 'ALLOBJ' is the only argument, discard it rather than
-	 passing it down to print_objfile_section_info (which
-	 wouldn't know how to handle it).  */
-      if (arg && strcmp (arg, "ALLOBJ") == 0)
-	{
-	  arg = NULL;
-	  allobj = true;
-	}
-
-      for (objfile *ofile : current_program_space->objfiles ())
-	{
-	  if (allobj)
-	    printf_filtered (_("  Object file: %s\n"),
-			     bfd_get_filename (ofile->obfd));
-	  else if (ofile->obfd != current_program_space->exec_bfd ())
-	    continue;
-
-	  int section_count = gdb_bfd_count_sections (ofile->obfd);
-
-	  for (asection *sect : gdb_bfd_sections (ofile->obfd))
-	    print_bfd_section_info_maybe_relocated
-	      (ofile->obfd, sect, ofile, arg, index_digits (section_count));
-	}
+      if (ofile->obfd == current_program_space->exec_bfd ())
+	maint_print_all_sections (_("Exec file: "), ofile->obfd, ofile, arg);
+      else if (opts.all_objects)
+	maint_print_all_sections (_("Object file: "), ofile->obfd, ofile, arg);
     }
 
   if (core_bfd)
+    maint_print_all_sections (_("Core file: "), core_bfd, nullptr, arg);
+}
+
+/* Implement the "maintenance info target-sections" command.  */
+
+static void
+maintenance_info_target_sections (const char *arg, int from_tty)
+{
+  bfd *abfd = nullptr;
+  int digits = 0;
+  const target_section_table *table
+    = target_get_section_table (current_inferior ()->top_target ());
+  if (table == nullptr)
+    return;
+
+  for (const target_section &sec : *table)
     {
-      printf_filtered (_("Core file:\n"));
-      printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
-      wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
+      if (abfd == nullptr || sec.the_bfd_section->owner != abfd)
+	{
+	  abfd = sec.the_bfd_section->owner;
+	  digits = std::max (index_digits (gdb_bfd_count_sections (abfd)),
+			     digits);
+	}
+    }
 
-      int section_count = gdb_bfd_count_sections (core_bfd);
+  struct gdbarch *gdbarch = nullptr;
+  int addr_size = 0;
+  abfd = nullptr;
+  for (const target_section &sec : *table)
+   {
+      if (sec.the_bfd_section->owner != abfd)
+	{
+	  abfd = sec.the_bfd_section->owner;
+	  gdbarch = gdbarch_from_bfd (abfd);
+	  addr_size = gdbarch_addr_bit (gdbarch) / 8;
 
-      for (asection *sect : gdb_bfd_sections (core_bfd))
-	print_bfd_section_info (core_bfd, sect, arg,
-				index_digits (section_count));
+	  printf_filtered (_("From '%s', file type %s:\n"),
+			   bfd_get_filename (abfd), bfd_get_target (abfd));
+	}
+      print_bfd_section_info (abfd,
+			      sec.the_bfd_section,
+			      nullptr,
+			      digits);
+      /* The magic '8 + digits' here ensures that the 'Start' is aligned
+	 with the output of print_bfd_section_info.  */
+      printf_filtered ("%*sStart: %s, End: %s, Owner token: %p\n",
+		       (8 + digits), "",
+		       hex_string_custom (sec.addr, addr_size),
+		       hex_string_custom (sec.endaddr, addr_size),
+		       sec.owner);
     }
 }
 
@@ -436,7 +519,6 @@ static void
 maintenance_print_statistics (const char *args, int from_tty)
 {
   print_objfile_statistics ();
-  print_symbol_bcache_statistics ();
 }
 
 static void
@@ -509,7 +591,7 @@ maintenance_translate_address (const char *arg, int from_tty)
       const char *symbol_offset
 	= pulongest (address - BMSYMBOL_VALUE_ADDRESS (sym));
 
-      sect = MSYMBOL_OBJ_SECTION(sym.objfile, sym.minsym);
+      sect = sym.obj_section ();
       if (sect != NULL)
 	{
 	  const char *section_name;
@@ -1066,16 +1148,37 @@ Commands for showing internal info about the program being debugged."),
 			&maintenancelist);
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
-  add_cmd ("sections", class_maintenance, maintenance_info_sections, _("\
+  const auto opts = make_maint_info_sections_options_def_group (nullptr);
+  static std::string maint_info_sections_command_help
+    = gdb::option::build_help (_("\
 List the BFD sections of the exec and core files.\n\
-Arguments may be any combination of:\n\
-	[one or more section names]\n\
-	ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
-	HAS_CONTENTS NEVER_LOAD COFF_SHARED_LIBRARY IS_COMMON\n\
-Sections matching any argument will be listed (no argument\n\
-implies all sections).  In addition, the special argument\n\
-	ALLOBJ\n\
-lists all sections from all object files, including shared libraries."),
+\n\
+Usage: maintenance info sections [-all-objects] [FILTERS]\n\
+\n\
+FILTERS is a list of words, each word is either:\n\
+  + A section name - any section with this name will be printed, or\n\
+  + A section flag - any section with this flag will be printed.  The\n\
+        known flags are:\n\
+	  ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
+	  HAS_CONTENTS NEVER_LOAD COFF_SHARED_LIBRARY IS_COMMON\n\
+\n\
+Sections matching any of the FILTERS will be listed (no FILTERS implies\n\
+all sections should be printed).\n\
+\n\
+Options:\n\
+%OPTIONS%"), opts);
+  cmd = add_cmd ("sections", class_maintenance, maintenance_info_sections,
+		 maint_info_sections_command_help.c_str (),
+		 &maintenanceinfolist);
+  set_cmd_completer_handle_brkchars (cmd, maint_info_sections_completer);
+
+  add_cmd ("target-sections", class_maintenance,
+	   maintenance_info_target_sections, _("\
+List GDB's internal section table.\n\
+\n\
+Print the current targets section list.  This is a sub-set of all\n\
+sections, from all objects currently loaded.  Usually the ALLOC\n\
+sectoins."),
 	   &maintenanceinfolist);
 
   add_basic_prefix_cmd ("print", class_maintenance,

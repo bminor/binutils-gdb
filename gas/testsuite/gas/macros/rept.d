@@ -1,7 +1,7 @@
 #objdump: -r
 #name: macro rept
 #darwin (mach-o) reverses relocs.
-#notarget: *-*-darwin* nds32*-*-*
+#xfail: *-*-darwin* nds32*-*-*
 
 .*: +file format .*
 

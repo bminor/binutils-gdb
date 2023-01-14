@@ -238,8 +238,8 @@ proc visibility_run {visibility} {
     # Compile the main program.  Make sure that PLT is used since PLT
     # is expected.
     if ![ld_compile "$CC -g $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
-	unresolved "visibility ($visibility) (non PIC)"
-	unresolved "visibility ($visibility)"
+	unsupported "visibility ($visibility) (non PIC)"
+	unsupported "visibility ($visibility)"
     } else {
 	# The shared library is composed of two files.  First compile them
 	# without using -fpic.  That should work on an ELF system,
@@ -249,7 +249,7 @@ proc visibility_run {visibility} {
 	# results.  Make sure that PLT is used since PLT is expected.
 	if { ![ld_compile "$CC -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
 	     || ![ld_compile "$CC -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
-	    unresolved "visibility ($visibility) (non PIC)"
+	    unsupported "visibility ($visibility) (non PIC)"
 	} else {
 	    # SunOS non PIC shared libraries don't permit some cases of
 	    # overriding.
@@ -338,7 +338,7 @@ proc visibility_run {visibility} {
 
 	if { ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
 	    || ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
-	    unresolved "visibility ($visibility)"
+	    unsupported "visibility ($visibility)"
 	} else {
 	    if { [ string match $visibility "protected" ]
 		 || [ string match $visibility "protected_undef_def" ] } {
@@ -355,8 +355,8 @@ proc visibility_run {visibility} {
     } else {
     # Now do the same tests again, but this time compile main.c PIC.
     if ![ld_compile "$CC -g $CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
-	unresolved "visibility ($visibility) (PIC main, non PIC so)"
-	unresolved "visibility ($visibility) (PIC main)"
+	unsupported "visibility ($visibility) (PIC main, non PIC so)"
+	unsupported "visibility ($visibility) (PIC main)"
     } else {
 	if { [ remote_file host exists $tmpdir/sh1np.o ]
 	     && [ remote_file host exists $tmpdir/sh2np.o ] } {
@@ -395,7 +395,7 @@ proc visibility_run {visibility} {
 
 	    visibility_test $visibility vmpnp "visibility ($visibility) (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o elfvsb
 	} else {
-	    unresolved "visibility (PIC main, non PIC so)"
+	    unsupported "visibility (PIC main, non PIC so)"
 	}
 
 	if { [ remote_file host exists $tmpdir/sh1p.o ]
@@ -408,7 +408,7 @@ proc visibility_run {visibility} {
 	    }
 	    visibility_test $visibility vmpp "visibility ($visibility) (PIC main)" mainp.o sh1p.o sh2p.o elfvsb
 	} else {
-	    unresolved "visibility ($visibility) (PIC main)"
+	    unsupported "visibility ($visibility) (PIC main)"
 	}
     }}
 }
@@ -447,7 +447,7 @@ visibility_run protected_weak
 visibility_run normal
 
 if { ![ld_compile "$CC -g $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common.c tmpdir/common.o] } {
-    unresolved "common hidden symbol"
+    unsupported "common hidden symbol"
 } else {
     if ![ld_link $ld tmpdir/common "tmpdir/common.o"] {
 	fail "common hidden symbol"
@@ -457,10 +457,10 @@ if { ![ld_compile "$CC -g $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$sub
 }
 
 if { ![ld_compile "$CC -g $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/test.c tmpdir/test.o] } {
-    unresolved "weak hidden symbol"
+    unsupported "weak hidden symbol"
 } else {
    if { ![ld_compile "$CC -g $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh3.c tmpdir/sh3.o] } {
-	unresolved "weak hidden symbol"
+	unsupported "weak hidden symbol"
     } else {
 	if ![ld_link $ld tmpdir/sh3.so "-shared tmpdir/sh3.o"] {
 	    fail "weak hidden symbol"

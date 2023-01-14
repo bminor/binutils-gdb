@@ -30,7 +30,9 @@
 #include "symtab.h"
 #include "tramp-frame.h"
 #include "trad-frame.h"
+#include "target.h"
 #include "target/target.h"
+#include "expop.h"
 
 #include "regcache.h"
 #include "regset.h"
@@ -43,6 +45,13 @@
 
 #include "record-full.h"
 #include "linux-record.h"
+
+#include "arch/aarch64-mte-linux.h"
+
+#include "arch-utils.h"
+#include "value.h"
+
+#include "gdbsupport/selftest.h"
 
 /* Signal frame handling.
 
@@ -719,6 +728,26 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  AARCH64_LINUX_SIZEOF_PAUTH, &aarch64_linux_pauth_regset,
 	  "pauth registers", cb_data);
     }
+
+  /* Handle MTE registers.  */
+  if (tdep->has_mte ())
+    {
+      /* Create this on the fly in order to handle the variable location.  */
+      const struct regcache_map_entry mte_regmap[] =
+	{
+	  { 1, tdep->mte_reg_base, 4},
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_mte_regset =
+	{
+	  mte_regmap, regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-mte", AARCH64_LINUX_SIZEOF_MTE_REGSET,
+	  AARCH64_LINUX_SIZEOF_MTE_REGSET, &aarch64_linux_mte_regset,
+	  "MTE registers", cb_data);
+    }
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
@@ -728,9 +757,12 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
   CORE_ADDR hwcap = linux_get_hwcap (target);
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
 
+  bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+  bool mte_p = hwcap2 & HWCAP2_MTE;
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   hwcap & AARCH64_HWCAP_PACA);
+				   pauth_p, mte_p);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -753,7 +785,7 @@ aarch64_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
    It returns one if the special token has been parsed successfully,
    or zero if the current token is not considered special.  */
 
-static int
+static expr::operation_up
 aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 				  struct stap_parse_info *p)
 {
@@ -764,11 +796,9 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
       char *endp;
       /* Used to save the register name.  */
       const char *start;
-      char *regname;
       int len;
       int got_minus = 0;
       long displacement;
-      struct stoken str;
 
       ++tmp;
       start = tmp;
@@ -778,17 +808,14 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	++tmp;
 
       if (*tmp != ',')
-	return 0;
+	return {};
 
       len = tmp - start;
-      regname = (char *) alloca (len + 2);
+      std::string regname (start, len);
 
-      strncpy (regname, start, len);
-      regname[len] = '\0';
-
-      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, regname.c_str (), len) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
-	       regname, p->saved_arg);
+	       regname.c_str (), p->saved_arg);
 
       ++tmp;
       tmp = skip_spaces (tmp);
@@ -806,45 +833,39 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	++tmp;
 
       if (!isdigit (*tmp))
-	return 0;
+	return {};
 
       displacement = strtol (tmp, &endp, 10);
       tmp = endp;
 
       /* Skipping last `]'.  */
       if (*tmp++ != ']')
-	return 0;
+	return {};
+      p->arg = tmp;
+
+      using namespace expr;
 
       /* The displacement.  */
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
-      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (&p->pstate, displacement);
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
       if (got_minus)
-	write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	displacement = -displacement;
+      operation_up disp = make_operation<long_const_operation> (long_type,
+								displacement);
 
       /* The register name.  */
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      str.ptr = regname;
-      str.length = len;
-      write_exp_string (&p->pstate, str);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
+      operation_up reg
+	= make_operation<register_operation> (std::move (regname));
 
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
+      operation_up sum
+	= make_operation<add_operation> (std::move (reg), std::move (disp));
 
       /* Casting to the expected type.  */
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate, lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_IND);
-
-      p->arg = tmp;
+      struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
+      sum = make_operation<unop_cast_operation> (std::move (sum),
+						 arg_ptr_type);
+      return make_operation<unop_ind_operation> (std::move (sum));
     }
-  else
-    return 0;
-
-  return 1;
+  return {};
 }
 
 /* AArch64 process record-replay constructs: syscall, signal etc.  */
@@ -1508,6 +1529,249 @@ aarch64_linux_gcc_target_options (struct gdbarch *gdbarch)
   return {};
 }
 
+/* Helper to get the allocation tag from a 64-bit ADDRESS.
+
+   Return the allocation tag if successful and nullopt otherwise.  */
+
+static gdb::optional<CORE_ADDR>
+aarch64_mte_get_atag (CORE_ADDR address)
+{
+  gdb::byte_vector tags;
+
+  /* Attempt to fetch the allocation tag.  */
+  if (!target_fetch_memtags (address, 1, tags,
+			     static_cast<int> (memtag_type::allocation)))
+    return {};
+
+  /* Only one tag should've been returned.  Make sure we got exactly that.  */
+  if (tags.size () != 1)
+    error (_("Target returned an unexpected number of tags."));
+
+  /* Although our tags are 4 bits in size, they are stored in a
+     byte.  */
+  return tags[0];
+}
+
+/* Implement the tagged_address_p gdbarch method.  */
+
+static bool
+aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
+{
+  gdb_assert (address != nullptr);
+
+  CORE_ADDR addr = value_as_address (address);
+
+  /* Remove the top byte for the memory range check.  */
+  addr = address_significant (gdbarch, addr);
+
+  /* Check if the page that contains ADDRESS is mapped with PROT_MTE.  */
+  if (!linux_address_in_memtag_page (addr))
+    return false;
+
+  /* We have a valid tag in the top byte of the 64-bit address.  */
+  return true;
+}
+
+/* Implement the memtag_matches_p gdbarch method.  */
+
+static bool
+aarch64_linux_memtag_matches_p (struct gdbarch *gdbarch,
+				struct value *address)
+{
+  gdb_assert (address != nullptr);
+
+  /* Make sure we are dealing with a tagged address to begin with.  */
+  if (!aarch64_linux_tagged_address_p (gdbarch, address))
+    return true;
+
+  CORE_ADDR addr = value_as_address (address);
+
+  /* Fetch the allocation tag for ADDRESS.  */
+  gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
+
+  if (!atag.has_value ())
+    return true;
+
+  /* Fetch the logical tag for ADDRESS.  */
+  gdb_byte ltag = aarch64_mte_get_ltag (addr);
+
+  /* Are the tags the same?  */
+  return ltag == *atag;
+}
+
+/* Implement the set_memtags gdbarch method.  */
+
+static bool
+aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
+			   size_t length, const gdb::byte_vector &tags,
+			   memtag_type tag_type)
+{
+  gdb_assert (!tags.empty ());
+  gdb_assert (address != nullptr);
+
+  CORE_ADDR addr = value_as_address (address);
+
+  /* Set the logical tag or the allocation tag.  */
+  if (tag_type == memtag_type::logical)
+    {
+      /* When setting logical tags, we don't care about the length, since
+	 we are only setting a single logical tag.  */
+      addr = aarch64_mte_set_ltag (addr, tags[0]);
+
+      /* Update the value's content with the tag.  */
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      gdb_byte *srcbuf = value_contents_raw (address);
+      store_unsigned_integer (srcbuf, sizeof (addr), byte_order, addr);
+    }
+  else
+    {
+      /* Make sure we are dealing with a tagged address to begin with.  */
+      if (!aarch64_linux_tagged_address_p (gdbarch, address))
+	return false;
+
+      /* With G being the number of tag granules and N the number of tags
+	 passed in, we can have the following cases:
+
+	 1 - G == N: Store all the N tags to memory.
+
+	 2 - G < N : Warn about having more tags than granules, but write G
+		     tags.
+
+	 3 - G > N : This is a "fill tags" operation.  We should use the tags
+		     as a pattern to fill the granules repeatedly until we have
+		     written G tags to memory.
+      */
+
+      size_t g = aarch64_mte_get_tag_granules (addr, length,
+					       AARCH64_MTE_GRANULE_SIZE);
+      size_t n = tags.size ();
+
+      if (g < n)
+	warning (_("Got more tags than memory granules.  Tags will be "
+		   "truncated."));
+      else if (g > n)
+	warning (_("Using tag pattern to fill memory range."));
+
+      if (!target_store_memtags (addr, length, tags,
+				 static_cast<int> (memtag_type::allocation)))
+	return false;
+    }
+  return true;
+}
+
+/* Implement the get_memtag gdbarch method.  */
+
+static struct value *
+aarch64_linux_get_memtag (struct gdbarch *gdbarch, struct value *address,
+			  memtag_type tag_type)
+{
+  gdb_assert (address != nullptr);
+
+  CORE_ADDR addr = value_as_address (address);
+  CORE_ADDR tag = 0;
+
+  /* Get the logical tag or the allocation tag.  */
+  if (tag_type == memtag_type::logical)
+    tag = aarch64_mte_get_ltag (addr);
+  else
+    {
+      /* Make sure we are dealing with a tagged address to begin with.  */
+      if (!aarch64_linux_tagged_address_p (gdbarch, address))
+	return nullptr;
+
+      gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
+
+      if (!atag.has_value ())
+	return nullptr;
+
+      tag = *atag;
+    }
+
+  /* Convert the tag to a value.  */
+  return value_from_ulongest (builtin_type (gdbarch)->builtin_unsigned_int,
+			      tag);
+}
+
+/* Implement the memtag_to_string gdbarch method.  */
+
+static std::string
+aarch64_linux_memtag_to_string (struct gdbarch *gdbarch, struct value *tag_value)
+{
+  if (tag_value == nullptr)
+    return "";
+
+  CORE_ADDR tag = value_as_address (tag_value);
+
+  return string_printf ("0x%s", phex_nz (tag, sizeof (tag)));
+}
+
+/* AArch64 Linux implementation of the report_signal_info gdbarch
+   hook.  Displays information about possible memory tag violations.  */
+
+static void
+aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
+				  struct ui_out *uiout,
+				  enum gdb_signal siggnal)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->has_mte () || siggnal != GDB_SIGNAL_SEGV)
+    return;
+
+  CORE_ADDR fault_addr = 0;
+  long si_code = 0;
+
+  try
+    {
+      /* Sigcode tells us if the segfault is actually a memory tag
+	 violation.  */
+      si_code = parse_and_eval_long ("$_siginfo.si_code");
+
+      fault_addr
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+    }
+  catch (const gdb_exception_error &exception)
+    {
+      exception_print (gdb_stderr, exception);
+      return;
+    }
+
+  /* If this is not a memory tag violation, just return.  */
+  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR)
+    return;
+
+  uiout->text ("\n");
+
+  uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
+
+  /* For synchronous faults, show additional information.  */
+  if (si_code == SEGV_MTESERR)
+    {
+      uiout->text (_(" while accessing address "));
+      uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+      uiout->text ("\n");
+
+      gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (fault_addr);
+      gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
+
+      if (!atag.has_value ())
+	uiout->text (_("Allocation tag unavailable"));
+      else
+	{
+	  uiout->text (_("Allocation tag "));
+	  uiout->field_string ("allocation-tag", hex_string (*atag));
+	  uiout->text ("\n");
+	  uiout->text (_("Logical tag "));
+	  uiout->field_string ("logical-tag", hex_string (ltag));
+	}
+    }
+  else
+    {
+      uiout->text ("\n");
+      uiout->text (_("Fault address unavailable"));
+    }
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1564,6 +1828,34 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      is ignored by the kernel and can be regarded as additional
      data associated with the address.  */
   set_gdbarch_significant_addr_bit (gdbarch, 56);
+
+  /* MTE-specific settings and hooks.  */
+  if (tdep->has_mte ())
+    {
+      /* Register a hook for checking if an address is tagged or not.  */
+      set_gdbarch_tagged_address_p (gdbarch, aarch64_linux_tagged_address_p);
+
+      /* Register a hook for checking if there is a memory tag match.  */
+      set_gdbarch_memtag_matches_p (gdbarch,
+				    aarch64_linux_memtag_matches_p);
+
+      /* Register a hook for setting the logical/allocation tags for
+	 a range of addresses.  */
+      set_gdbarch_set_memtags (gdbarch, aarch64_linux_set_memtags);
+
+      /* Register a hook for extracting the logical/allocation tag from an
+	 address.  */
+      set_gdbarch_get_memtag (gdbarch, aarch64_linux_get_memtag);
+
+      /* Set the allocation tag granule size to 16 bytes.  */
+      set_gdbarch_memtag_granule_size (gdbarch, AARCH64_MTE_GRANULE_SIZE);
+
+      /* Register a hook for converting a memory tag to a string.  */
+      set_gdbarch_memtag_to_string (gdbarch, aarch64_linux_memtag_to_string);
+
+      set_gdbarch_report_signal_info (gdbarch,
+				      aarch64_linux_report_signal_info);
+    }
 
   /* Initialize the aarch64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
@@ -1740,10 +2032,39 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gcc_target_options (gdbarch, aarch64_linux_gcc_target_options);
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* Verify functions to read and write logical tags.  */
+
+static void
+aarch64_linux_ltag_tests (void)
+{
+  /* We have 4 bits of tags, but we test writing all the bits of the top
+     byte of address.  */
+  for (int i = 0; i < 1 << 8; i++)
+    {
+      CORE_ADDR addr = ((CORE_ADDR) i << 56) | 0xdeadbeef;
+      SELF_CHECK (aarch64_mte_get_ltag (addr) == (i & 0xf));
+
+      addr = aarch64_mte_set_ltag (0xdeadbeef, i);
+      SELF_CHECK (addr = ((CORE_ADDR) (i & 0xf) << 56) | 0xdeadbeef);
+    }
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void _initialize_aarch64_linux_tdep ();
 void
 _initialize_aarch64_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_aarch64, 0, GDB_OSABI_LINUX,
 			  aarch64_linux_init_abi);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("aarch64-linux-tagged-address",
+			    selftests::aarch64_linux_ltag_tests);
+#endif
 }

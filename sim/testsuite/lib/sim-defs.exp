@@ -48,6 +48,22 @@ proc sim_compile { source dest type options } {
     return $result
 }
 
+# Find the path to the simulator for executing.
+proc sim_tool_path {} {
+    global sim_path
+    set sim "$sim_path"
+    if [string equal "" $sim] {
+	global objdir
+	global subdir
+	set arch "$subdir"
+	while { [file dirname $arch] != "." } {
+	    set arch [file dirname $arch]
+	}
+	return "$objdir/$arch/run"
+    }
+    return "$sim"
+}
+
 # Run a program on the simulator.
 # Required by dejagnu (at least ${tool}_run used to be).
 #
@@ -98,16 +114,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	
     verbose "testcase timeout is set to $testcase_timeout" 1
 
-    set sim [board_info target sim]
-    if [string equal "" $sim] {
-	# Special case the simulator.  These tests are designed to
-	# be run inside of the simulator, not on the native host.
-	# So if the sim target isn't set, default to the target run.
-	# These global variables come from generated site.exp.
-	global objdir
-	global arch
-	set sim "$objdir/../$arch/run"
-    }
+    set sim [sim_tool_path]
 
     if [is_remote host] {
 	set prog [remote_download host $prog]
@@ -197,6 +204,11 @@ proc run_sim_test { name requested_machs } {
     global global_ld_options
     global global_cc_options
     global global_sim_options
+
+    if ![file exists [sim_tool_path]] {
+	unsupported "$name: missing simulator [sim_tool_path]"
+	return
+    }
 
     if [string match "*/*" $name] {
 	set file $name
@@ -378,12 +390,21 @@ proc run_sim_test { name requested_machs } {
 	    set options "$options timeout=$opts(timeout)"
 	}
 
+	if [string match "example" "$mach"] {
+	    set objcopy [find_binutils_prog objcopy]
+	    set comp_output [remote_exec host $objcopy "-O binary -j .text ${name}.x ${name}.bin"]
+	    file rename -force "${name}.bin" "${name}.x"
+	    append opts(sim,$mach) " --target binary"
+	}
+
 	set result [sim_run ${name}.x "$opts(sim,$mach) $global_sim_options" "$opts(progopts)" "" "$options"]
 	set return_code [lindex $result 0]
 	set output [lindex $result 1]
 
 	set status fail
-	if { $return_code == $opts(status) } {
+	if { $return_code == 77 } {
+	    set status unsupported
+	} elseif { $return_code == $opts(status) } {
 	    set status pass
 	}
 

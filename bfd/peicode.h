@@ -56,7 +56,7 @@
 
 #include "libpei.h"
 
-static bfd_boolean (*pe_saved_coff_bfd_print_private_bfd_data) (bfd *, void *) =
+static bool (*pe_saved_coff_bfd_print_private_bfd_data) (bfd *, void *) =
 #ifndef coff_bfd_print_private_bfd_data
      NULL;
 #else
@@ -64,10 +64,10 @@ static bfd_boolean (*pe_saved_coff_bfd_print_private_bfd_data) (bfd *, void *) =
 #undef coff_bfd_print_private_bfd_data
 #endif
 
-static bfd_boolean			pe_print_private_bfd_data (bfd *, void *);
+static bool pe_print_private_bfd_data (bfd *, void *);
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 
-static bfd_boolean (*pe_saved_coff_bfd_copy_private_bfd_data) (bfd *, bfd *) =
+static bool (*pe_saved_coff_bfd_copy_private_bfd_data) (bfd *, bfd *) =
 #ifndef coff_bfd_copy_private_bfd_data
      NULL;
 #else
@@ -75,7 +75,7 @@ static bfd_boolean (*pe_saved_coff_bfd_copy_private_bfd_data) (bfd *, bfd *) =
 #undef coff_bfd_copy_private_bfd_data
 #endif
 
-static bfd_boolean		       pe_bfd_copy_private_bfd_data (bfd *, bfd *);
+static bool pe_bfd_copy_private_bfd_data (bfd *, bfd *);
 #define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
 
 #define coff_mkobject	   pe_mkobject
@@ -253,7 +253,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 #endif
 }
 
-static bfd_boolean
+static bool
 pe_mkobject (bfd * abfd)
 {
   pe_data_type *pe;
@@ -262,7 +262,7 @@ pe_mkobject (bfd * abfd)
   abfd->tdata.pe_obj_data = (struct pe_tdata *) bfd_zalloc (abfd, amt);
 
   if (abfd->tdata.pe_obj_data == 0)
-    return FALSE;
+    return false;
 
   pe = pe_data (abfd);
 
@@ -290,7 +290,7 @@ pe_mkobject (bfd * abfd)
   pe->dos_message[15] = 0x0;
 
   memset (& pe->pe_opthdr, 0, sizeof pe->pe_opthdr);
-  return TRUE;
+  return true;
 }
 
 /* Create the COFF backend specific information.  */
@@ -349,16 +349,16 @@ pe_mkobject_hook (bfd * abfd,
   return (void *) pe;
 }
 
-static bfd_boolean
+static bool
 pe_print_private_bfd_data (bfd *abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
 
   if (!_bfd_XX_print_private_bfd_data_common (abfd, vfile))
-    return FALSE;
+    return false;
 
   if (pe_saved_coff_bfd_print_private_bfd_data == NULL)
-    return TRUE;
+    return true;
 
   fputc ('\n', file);
 
@@ -368,7 +368,7 @@ pe_print_private_bfd_data (bfd *abfd, void * vfile)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-static bfd_boolean
+static bool
 pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   /* PR binutils/716: Copy the large address aware flag.
@@ -380,12 +380,12 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
     pe_data (obfd)->real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 
   if (!_bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd))
-    return FALSE;
+    return false;
 
   if (pe_saved_coff_bfd_copy_private_bfd_data)
     return pe_saved_coff_bfd_copy_private_bfd_data (ibfd, obfd);
 
-  return TRUE;
+  return true;
 }
 
 #define coff_bfd_copy_private_section_data \
@@ -520,7 +520,7 @@ pe_ILF_save_relocs (pe_ILF_vars * vars,
     abort ();
 
   coff_section_data (vars->abfd, sec)->relocs = vars->int_reltab;
-  coff_section_data (vars->abfd, sec)->keep_relocs = TRUE;
+  coff_section_data (vars->abfd, sec)->keep_relocs = true;
 
   sec->relocation  = vars->reltab;
   sec->reloc_count = vars->relcount;
@@ -589,7 +589,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   ent->u.syment.n_sclass	  = sclass;
   ent->u.syment.n_scnum		  = section->target_index;
   ent->u.syment._n._n_n._n_offset = (bfd_hostptr_t) sym;
-  ent->is_sym = TRUE;
+  ent->is_sym = true;
 
   sym->symbol.the_bfd = vars->abfd;
   sym->symbol.name    = vars->string_ptr;
@@ -762,7 +762,7 @@ static const jump_table jtab[] =
 
 /* Build a full BFD from the information supplied in a ILF object.  */
 
-static bfd_boolean
+static bool
 pe_ILF_build_a_bfd (bfd *	    abfd,
 		    unsigned int    magic,
 		    char *	    symbol_name,
@@ -795,13 +795,13 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unhandled import type; %x"),
 			  abfd, import_type);
-      return FALSE;
+      return false;
 
     default:
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unrecognized import type; %x"),
 			  abfd, import_type);
-      return FALSE;
+      return false;
     }
 
   switch (import_name_type)
@@ -816,7 +816,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unrecognized import name type; %x"),
 			  abfd, import_name_type);
-      return FALSE;
+      return false;
     }
 
   /* Initialise local variables.
@@ -829,7 +829,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   vars.bim
     = (struct bfd_in_memory *) bfd_malloc ((bfd_size_type) sizeof (*vars.bim));
   if (vars.bim == NULL)
-    return FALSE;
+    return false;
 
   ptr = (bfd_byte *) bfd_zmalloc ((bfd_size_type) ILF_DATA_SIZE);
   vars.bim->buffer = ptr;
@@ -1114,22 +1114,22 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   obj_raw_syment_count (abfd) = vars.sym_index;
 
   obj_coff_external_syms (abfd) = (void *) vars.esym_table;
-  obj_coff_keep_syms (abfd) = TRUE;
+  obj_coff_keep_syms (abfd) = true;
 
   obj_convert (abfd) = vars.sym_table;
   obj_conv_table_size (abfd) = vars.sym_index;
 
   obj_coff_strings (abfd) = vars.string_table;
-  obj_coff_keep_strings (abfd) = TRUE;
+  obj_coff_keep_strings (abfd) = true;
 
   abfd->flags |= HAS_SYMS;
 
-  return TRUE;
+  return true;
 
  error_return:
   free (vars.bim->buffer);
   free (vars.bim);
-  return FALSE;
+  return false;
 }
 
 /* We have detected a Image Library Format archive element.

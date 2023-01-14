@@ -8,10 +8,8 @@ _start:
 	enqcmds (%rcx),%rax
 	enqcmds (%ecx),%eax
 	enqcmd foo(%rip),%rcx
-	enqcmd foo(%rip),%ecx
 	enqcmd foo(%eip),%ecx
 	enqcmds foo(%rip),%rcx
-	enqcmds foo(%rip),%ecx
 	enqcmds foo(%eip),%ecx
 	enqcmd foo, %ecx
 	enqcmd 0x12345678, %ecx
@@ -24,10 +22,8 @@ _start:
 	enqcmds rax,[rcx]
 	enqcmds eax,[ecx]
 	enqcmd rcx,[rip+foo]
-	enqcmd ecx,[rip+foo]
 	enqcmd ecx,[eip+foo]
 	enqcmds rcx,[rip+foo]
-	enqcmds ecx,[rip+foo]
 	enqcmds ecx,[eip+foo]
 	enqcmd ecx,ds:foo
 	enqcmd ecx,ds:0x12345678

@@ -988,7 +988,7 @@ substitute_args (growable_macro_buffer *dest,
 					&keep_going))
     {
       bool token_is_vaopt = (tok.len == 10
-			     && strncmp (tok.text, "__VA_OPT__", 10) == 0);
+			     && startswith (tok.text, "__VA_OPT__"));
 
       if (vaopt_state > 0)
 	{

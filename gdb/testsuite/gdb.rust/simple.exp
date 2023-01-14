@@ -88,7 +88,7 @@ gdb_test "print w\[2\] @ 2" " = \\\[3, 4\\\]"
 gdb_test "print w_ptr\[2\]" " = 3"
 gdb_test "print fromslice" " = 3"
 gdb_test "print slice\[0\]" " = 3"
-gdb_test "print slice as &\[i32\]\[0\]" " = 3"
+gdb_test "print (slice as &\[i32\])\[0\]" " = 3"
 
 gdb_test_sequence "ptype slice" "" {
     " = struct &\\\[i32\\\] \\{"
@@ -165,7 +165,7 @@ gdb_test "print simple::HiBob(0xff, 5)" \
     "Type simple::HiBob is not a tuple struct"
 gdb_test "print sizeof(simple::HiBob)" " = \[0-9\]+"
 gdb_test "print simple::HiBob + 5" \
-    "Found type 'simple::HiBob', which can't be evaluated in this context"
+    "Attempt to use a type name as an expression"
 gdb_test "print nosuchsymbol" \
     "No symbol 'nosuchsymbol' in current context"
 

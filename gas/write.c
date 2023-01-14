@@ -235,7 +235,7 @@ fix_new (fragS *frag,			/* Which frag?  */
 	 RELOC_ENUM r_type		/* Relocation type.  */)
 {
   return fix_new_internal (frag, where, size, add_symbol,
-			   (symbolS *) NULL, offset, pcrel, r_type, FALSE);
+			   (symbolS *) NULL, offset, pcrel, r_type, false);
 }
 
 /* Create a fixup for an expression.  Currently we only support fixups
@@ -304,7 +304,7 @@ fix_new_exp (fragS *frag,		/* Which frag?  */
     }
 
   return fix_new_internal (frag, where, size, add, sub, off, pcrel,
-			   r_type, FALSE);
+			   r_type, false);
 }
 
 /* Create a fixup at the beginning of FRAG.  The arguments are the same
@@ -315,7 +315,7 @@ fix_at_start (fragS *frag, unsigned long size, symbolS *add_symbol,
 	      offsetT offset, int pcrel, RELOC_ENUM r_type)
 {
   return fix_new_internal (frag, 0, size, add_symbol,
-			   (symbolS *) NULL, offset, pcrel, r_type, TRUE);
+			   (symbolS *) NULL, offset, pcrel, r_type, true);
 }
 
 /* Generic function to determine whether a fixup requires a relocation.  */
@@ -880,8 +880,7 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 		    /* The GNU toolchain uses an extension for ELF: a
 		       section beginning with the magic string
 		       .gnu.linkonce is a linkonce section.  */
-		    && strncmp (segment_name (symsec), ".gnu.linkonce",
-				sizeof ".gnu.linkonce" - 1) == 0))
+		    && startswith (segment_name (symsec), ".gnu.linkonce")))
 	      continue;
 	  }
 
@@ -923,7 +922,6 @@ fixup_segment (fixS *fixP, segT this_segment)
 {
   valueT add_number;
   fragS *fragP;
-  segT add_symbol_segment = absolute_section;
 
   if (fixP != NULL && abs_section_sym == NULL)
     abs_section_sym = section_symbol (absolute_section);
@@ -954,6 +952,8 @@ fixup_segment (fixS *fixP, segT this_segment)
 
   for (; fixP; fixP = fixP->fx_next)
     {
+      segT add_symbol_segment = absolute_section;
+
 #ifdef DEBUG5
       fprintf (stderr, "\nprocessing fixup:\n");
       print_fixup (fixP);
@@ -1450,7 +1450,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   section_name = bfd_section_name (sec);
-  if (strncmp (section_name, ".debug_", 7) != 0)
+  if (!startswith (section_name, ".debug_"))
     return;
 
   strm = compress_init ();
@@ -1750,7 +1750,7 @@ set_symtab (void)
   int nsyms;
   asymbol **asympp;
   symbolS *symp;
-  bfd_boolean result;
+  bool result;
 
   /* Count symbols.  We can't rely on a count made by the loop in
      write_object_file, because *_frob_file may add a new symbol or
@@ -1986,7 +1986,7 @@ maybe_generate_build_notes (void)
     return;
 
   /* Create a GNU Build Attribute section.  */
-  sec = subseg_new (GNU_BUILD_ATTRS_SECTION_NAME, FALSE);
+  sec = subseg_new (GNU_BUILD_ATTRS_SECTION_NAME, false);
   elf_section_type (sec) = SHT_NOTE;
   bfd_set_section_flags (sec, (SEC_READONLY | SEC_HAS_CONTENTS | SEC_DATA
 			       | SEC_OCTETS));
@@ -2039,7 +2039,7 @@ maybe_generate_build_notes (void)
 	/* Skip linkonce sections - we cannot use these section symbols as they may disappear.  */
 	&& (bsym->section->flags & (SEC_CODE | SEC_LINK_ONCE)) == SEC_CODE
 	/* Not all linkonce sections are flagged...  */
-	&& strncmp (S_GET_NAME (sym), ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) != 0)
+	&& !startswith (S_GET_NAME (sym), ".gnu.linkonce"))
       {
 	/* Create a version note.  */
 	frag_now_fix ();
@@ -2331,7 +2331,7 @@ write_object_file (void)
   if (symbol_rootP)
     {
       symbolS *symp;
-      bfd_boolean skip_next_symbol = FALSE;
+      bool skip_next_symbol = false;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
@@ -2343,7 +2343,7 @@ write_object_file (void)
 	      /* Don't do anything besides moving the value of the
 		 symbol from the GAS value-field to the BFD value-field.  */
 	      symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
-	      skip_next_symbol = FALSE;
+	      skip_next_symbol = false;
 	      continue;
 	    }
 
@@ -2447,7 +2447,7 @@ write_object_file (void)
 	     symbol warned about.  Don't let anything object-format or
 	     target-specific muck with it; it's ready for output.  */
 	  if (symbol_get_bfdsym (symp)->flags & BSF_WARNING)
-	    skip_next_symbol = TRUE;
+	    skip_next_symbol = true;
 	}
     }
 

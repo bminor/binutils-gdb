@@ -21,7 +21,7 @@
 #include "sis.h"
 
 void
-usage()
+usage(void)
 {
 
     printf("usage: sis [-uart1 uart_device1] [-uart2 uart_device2]\n");
@@ -30,7 +30,7 @@ usage()
 }
 
 void
-gen_help()
+gen_help(void)
 {
 
   printf("\n batch <file>          execute a batch file of SIS commands\n");

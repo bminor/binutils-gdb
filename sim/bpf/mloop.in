@@ -137,7 +137,7 @@ cat <<EOF
       insn = (((UDI) imm32) << 32) | (((UDI) off16) << 16) | (insn & 0xffff);
     }
 
-  extract (current_cpu, vpc, insn, sc, FAST_P);
+  extract (current_cpu, vpc, insn, SEM_ARGBUF (sc), FAST_P);
 
   //XXX  SEM_SKIP_COMPILE (current_cpu, sc, 1);
 }

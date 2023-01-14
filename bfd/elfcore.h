@@ -36,7 +36,7 @@ elf_core_file_pid (bfd *abfd)
   return elf_tdata (abfd)->core->pid;
 }
 
-bfd_boolean
+bool
 elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 {
   char* corename;
@@ -46,7 +46,7 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
   if (core_bfd->xvec != exec_bfd->xvec)
     {
       bfd_set_error (bfd_error_system_call);
-      return FALSE;
+      return false;
     }
 
   /* If both BFDs have identical build-ids, then they match.  */
@@ -55,7 +55,7 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
       && core_bfd->build_id->size == exec_bfd->build_id->size
       && memcmp (core_bfd->build_id->data, exec_bfd->build_id->data,
 		 core_bfd->build_id->size) == 0)
-    return TRUE;
+    return true;
 
   /* See if the name in the corefile matches the executable name.  */
   corename = elf_tdata (core_bfd)->core->program;
@@ -66,10 +66,10 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
       execname = execname ? execname + 1 : bfd_get_filename (exec_bfd);
 
       if (strcmp (execname, corename) != 0)
-	return FALSE;
+	return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /*  Core files are simply standard ELF formatted files that partition
@@ -326,7 +326,7 @@ elf_core_file_p (bfd *abfd)
    OFFSET is the file offset to a PT_LOAD segment that may contain
    the build-id note.  Returns TRUE upon success, FALSE otherwise.  */
 
-bfd_boolean
+bool
 NAME(_bfd_elf, core_find_build_id)
   (bfd *abfd,
    bfd_vma offset)
@@ -410,8 +410,15 @@ NAME(_bfd_elf, core_find_build_id)
 	{
 	  elf_read_notes (abfd, offset + i_phdr->p_offset,
 			  i_phdr->p_filesz, i_phdr->p_align);
+
+	  /* Make sure ABFD returns to processing the program headers.  */
+	  if (bfd_seek (abfd, (file_ptr) (offset + i_ehdr.e_phoff
+					  + (i + 1) * sizeof (x_phdr)),
+			SEEK_SET) != 0)
+	    goto fail;
+
 	  if (abfd->build_id != NULL)
-	    return TRUE;
+	    return true;
 	}
     }
 
@@ -422,5 +429,5 @@ NAME(_bfd_elf, core_find_build_id)
  wrong:
   bfd_set_error (bfd_error_wrong_format);
  fail:
-  return FALSE;
+  return false;
 }

@@ -51,10 +51,7 @@
 #include "elf/ia64.h"
 #include "bfdver.h"
 #include <time.h>
-
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #define NELEMS(a)	((int) (sizeof (a)/sizeof ((a)[0])))
 
@@ -164,7 +161,7 @@ struct label_fix
 {
   struct label_fix *next;
   struct symbol *sym;
-  bfd_boolean dw2_mark_labels;
+  bool dw2_mark_labels;
 };
 
 #ifdef TE_VMS
@@ -947,7 +944,7 @@ ia64_flush_insns (void)
   segT saved_seg;
   subsegT saved_subseg;
   unw_rec_list *ptr;
-  bfd_boolean mark;
+  bool mark;
 
   if (!md.last_text_seg)
     return;
@@ -962,7 +959,7 @@ ia64_flush_insns (void)
 
   /* In case there are labels following the last instruction, resolve
      those now.  */
-  mark = FALSE;
+  mark = false;
   for (lfix = CURR_SLOT.label_fixups; lfix; lfix = lfix->next)
     {
       symbol_set_value_now (lfix->sym);
@@ -3560,7 +3557,7 @@ start_unwind_section (const segT text_seg, int sec_index)
 
   sec_text_name = segment_name (text_seg);
   text_name = sec_text_name;
-  if (strncmp (text_name, "_info", 5) == 0)
+  if (startswith (text_name, "_info"))
     {
       as_bad (_("Illegal section name `%s' (causes unwind section name clash)"),
 	      text_name);
@@ -3573,8 +3570,7 @@ start_unwind_section (const segT text_seg, int sec_index)
   /* Build the unwind section name by appending the (possibly stripped)
      text section name to the unwind prefix.  */
   suffix = text_name;
-  if (strncmp (text_name, ".gnu.linkonce.t.",
-	       sizeof (".gnu.linkonce.t.") - 1) == 0)
+  if (startswith (text_name, ".gnu.linkonce.t."))
     {
       prefix = special_linkonce_name [sec_index - SPECIAL_SECTION_UNWIND];
       suffix += sizeof (".gnu.linkonce.t.") - 1;
@@ -6520,7 +6516,7 @@ emit_one_bundle (void)
   int n, i, j, first, curr, last_slot;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
-  bfd_boolean mark_label;
+  bool mark_label;
   struct insn_fix *ifix;
   char mnemonic[16];
   fixS *fix;
@@ -6847,7 +6843,7 @@ emit_one_bundle (void)
 	continue;		/* Try next slot.  */
 
       /* Now is a good time to fix up the labels for this insn.  */
-      mark_label = FALSE;
+      mark_label = false;
       for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
 	{
 	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
@@ -7004,7 +7000,7 @@ md_parse_option (int c, const char *arg)
 	  md.flags |= EF_IA_64_BE;
 	  default_big_endian = 1;
 	}
-      else if (strncmp (arg, "unwind-check=", 13) == 0)
+      else if (startswith (arg, "unwind-check="))
 	{
 	  arg += 13;
 	  if (strcmp (arg, "warning") == 0)
@@ -7014,7 +7010,7 @@ md_parse_option (int c, const char *arg)
 	  else
 	    return 0;
 	}
-      else if (strncmp (arg, "hint.b=", 7) == 0)
+      else if (startswith (arg, "hint.b="))
 	{
 	  arg += 7;
 	  if (strcmp (arg, "ok") == 0)
@@ -7026,7 +7022,7 @@ md_parse_option (int c, const char *arg)
 	  else
 	    return 0;
 	}
-      else if (strncmp (arg, "tune=", 5) == 0)
+      else if (startswith (arg, "tune="))
 	{
 	  arg += 5;
 	  if (strcmp (arg, "itanium1") == 0)
@@ -7074,7 +7070,7 @@ md_parse_option (int c, const char *arg)
 			exit:	branch out from the current context (default)
 			labels:	all labels in context may be branch targets
        */
-      if (strncmp (arg, "indirect=", 9) != 0)
+      if (!startswith (arg, "indirect="))
         return 0;
       break;
 
@@ -7755,7 +7751,7 @@ ia64_frob_label (struct symbol *sym)
       fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
-      fix->dw2_mark_labels = FALSE;
+      fix->dw2_mark_labels = false;
       CURR_SLOT.tag_fixups = fix;
 
       return;
@@ -8106,7 +8102,7 @@ static int
 is_taken_branch (struct ia64_opcode *idesc)
 {
   return ((is_conditional_branch (idesc) && CURR_SLOT.qp_regno == 0)
-	  || strncmp (idesc->name, "br.ia", 5) == 0);
+	  || startswith (idesc->name, "br.ia"));
 }
 
 /* Return whether the given opcode is an interruption or rfi.  If there's any
@@ -9498,7 +9494,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
       /* FIXME we can identify some individual RSE written resources, but RSE
 	 read resources have not yet been completely identified, so for now
 	 treat RSE as a single resource */
-      if (strncmp (idesc->name, "mov", 3) == 0)
+      if (startswith (idesc->name, "mov"))
 	{
 	  if (rsrc_write)
 	    {
@@ -9864,8 +9860,8 @@ note_register_values (struct ia64_opcode *idesc)
     }
   /* After a call, all register values are undefined, except those marked
      as "safe".  */
-  else if (strncmp (idesc->name, "br.call", 6) == 0
-	   || strncmp (idesc->name, "brl.call", 7) == 0)
+  else if (startswith (idesc->name, "br.call")
+	   || startswith (idesc->name, "brl.call"))
     {
       /* FIXME keep GR values which are marked as "safe_across_calls"  */
       clear_register_values ();
@@ -11843,7 +11839,7 @@ do_alias (void **slot, void *arg ATTRIBUTE_UNUSED)
       /* Uses .alias extensively to alias CRTL functions to same with
 	 decc$ prefix. Sometimes function gets optimized away and a
 	 warning results, which should be suppressed.  */
-      if (strncmp (tuple->key, "decc$", 5) != 0)
+      if (!startswith (tuple->key, "decc$"))
 #endif
 	as_warn_where (h->file, h->line,
 		       _("symbol `%s' aliased to `%s' is not used"),

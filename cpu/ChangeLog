@@ -1,3 +1,14 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* frv.opc: Replace bfd_boolean with bool, FALSE with false, and
+	TRUE with true throughout.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* frv.opc (frv_is_branch_major, frv_is_float_major),
+	(frv_is_media_major, frv_is_branch_insn, frv_is_float_insn),
+	(frv_is_media_insn, spr_valid): Correct prototypes.
+
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* 2.36 release branch crated.

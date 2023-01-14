@@ -720,7 +720,7 @@ static struct coff_ofile *
 doit (void)
 {
   unsigned int i;
-  bfd_boolean infile = FALSE;
+  bool infile = false;
   struct coff_ofile *head =
     (struct coff_ofile *) xmalloc (sizeof (struct coff_ofile));
 
@@ -753,7 +753,7 @@ doit (void)
 	    if (infile)
 	      pop_scope ();
 	    else
-	      infile = TRUE;
+	      infile = true;
 
 	    push_scope (1);
 	    file_scope = n->scope = top_scope;

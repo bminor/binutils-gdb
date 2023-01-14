@@ -671,7 +671,7 @@ gdbscm_value_subscript (SCM self, SCM index_scm)
       struct value *index
 	= vlscm_convert_value_from_scheme (FUNC_NAME, SCM_ARG2, index_scm,
 					   &except_scm,
-					   get_type_arch (type),
+					   type->arch (),
 					   current_language);
       if (index == NULL)
 	return except_scm;

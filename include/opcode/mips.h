@@ -519,7 +519,7 @@ struct mips_int_operand
   unsigned int shift;
 
   /* True if the operand should be printed as hex rather than decimal.  */
-  bfd_boolean print_hex;
+  bool print_hex;
 };
 
 /* Uses a lookup table to describe a small integer operand.  */
@@ -531,7 +531,7 @@ struct mips_mapped_int_operand
   const int *int_map;
 
   /* True if the operand should be printed as hex rather than decimal.  */
-  bfd_boolean print_hex;
+  bool print_hex;
 };
 
 /* An operand that encodes the most significant bit position of a bitfield.
@@ -551,7 +551,7 @@ struct mips_msb_operand
 
   /* True if the operand encodes MSB directly, false if it encodes
      MSB - LSB.  */
-  bfd_boolean add_lsb;
+  bool add_lsb;
 
   /* The maximum value of MSB + 1.  */
   unsigned int opsize;
@@ -576,10 +576,10 @@ struct mips_check_prev_operand
 {
   struct mips_operand root;
 
-  bfd_boolean greater_than_ok;
-  bfd_boolean less_than_ok;
-  bfd_boolean equal_ok;
-  bfd_boolean zero_ok;
+  bool greater_than_ok;
+  bool less_than_ok;
+  bool equal_ok;
+  bool zero_ok;
 };
 
 /* Describes an operand that encodes a pair of registers.  */
@@ -619,7 +619,7 @@ struct mips_pcrel_operand
 
 /* Return true if the assembly syntax allows OPERAND to be omitted.  */
 
-static inline bfd_boolean
+static inline bool
 mips_optional_operand_p (const struct mips_operand *operand)
 {
   return (operand->type == OP_OPTIONAL_REG
@@ -758,7 +758,7 @@ struct mips_opcode
 
 /* Return true if MO is an instruction that requires 32-bit encoding.  */
 
-static inline bfd_boolean
+static inline bool
 mips_opcode_32bit_p (const struct mips_opcode *mo)
 {
   return mo->mask >> 16 != 0;
@@ -1387,7 +1387,7 @@ static const unsigned int mips_isa_table[] = {
 
 /* Return true if the given CPU is included in INSN_* mask MASK.  */
 
-static inline bfd_boolean
+static inline bool
 cpu_is_member (int cpu, unsigned int mask)
 {
   switch (cpu)
@@ -1462,7 +1462,7 @@ cpu_is_member (int cpu, unsigned int mask)
 	     || ((mask & INSN_ISA_MASK) == INSN_ISA64R6);
 
     default:
-      return FALSE;
+      return false;
     }
 }
 
@@ -1472,7 +1472,7 @@ cpu_is_member (int cpu, unsigned int mask)
    test, or zero if no CPU specific ISA test is desired.  Return true
    if instruction INSN is available to the given ISA and CPU. */
 
-static inline bfd_boolean
+static inline bool
 opcode_is_member (const struct mips_opcode *insn, int isa, int ase, int cpu)
 {
   if (!cpu_is_member (cpu, insn->exclusions))
@@ -1482,17 +1482,17 @@ opcode_is_member (const struct mips_opcode *insn, int isa, int ase, int cpu)
 	  && (insn->membership & INSN_ISA_MASK) != 0
 	  && ((mips_isa_table[(isa & INSN_ISA_MASK) - 1]
 	       >> ((insn->membership & INSN_ISA_MASK) - 1)) & 1) != 0)
-	return TRUE;
+	return true;
 
       /* Test for ASE compatibility.  */
       if ((ase & insn->ase) != 0)
-	return TRUE;
+	return true;
 
       /* Test for processor-specific extensions.  */
       if (cpu_is_member (cpu, insn->membership))
-	return TRUE;
+	return true;
     }
-  return FALSE;
+  return false;
 }
 
 /* This is a list of macro expanded instructions.
@@ -1941,7 +1941,7 @@ extern int bfd_mips_num_opcodes;
    FP_D (never used)
    */
 
-extern const struct mips_operand *decode_mips16_operand (char, bfd_boolean);
+extern const struct mips_operand *decode_mips16_operand (char, bool);
 extern const struct mips_opcode mips16_opcodes[];
 extern const int bfd_mips16_num_opcodes;
 

@@ -48,7 +48,7 @@
 
 int verbose = 0;
 
-int target_is_bigendian = 0;
+bool target_is_bigendian = 0;
 const char *def_target_arch;
 
 static void set_endianness (bfd *, const char *);
@@ -703,19 +703,44 @@ quot (const char *string)
   const char *src;
   char *dest;
 
-  if ((buflen < slen * 2 + 2) || ! buf)
+  if ((buflen < slen * 2 + 3) || ! buf)
     {
-      buflen = slen * 2 + 2;
+      buflen = slen * 2 + 3;
       free (buf);
       buf = (char *) xmalloc (buflen);
     }
 
-  for (src=string, dest=buf; *src; src++, dest++)
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  /* For Windows shells, quote "like this".   */
+  {
+    bool quoted = false;
+
+    dest = buf;
+    if (strchr (string, ' '))
+      {
+	quoted = true;
+	*dest++ = '"';
+      }
+
+    for (src = string; *src; src++, dest++)
+      {
+	/* Escape-protect embedded double quotes.  */
+	if (quoted && *src == '"')
+	  *dest++ = '\\';
+	*dest = *src;
+      }
+
+    if (quoted)
+      *dest++ = '"';
+  }
+#else
+  for (src = string, dest = buf; *src; src++, dest++)
     {
       if (*src == '(' || *src == ')' || *src == ' ')
 	*dest++ = '\\';
       *dest = *src;
     }
+#endif
   *dest = 0;
   return buf;
 }
@@ -798,12 +823,10 @@ main (int argc, char **argv)
   rc_res_directory *resources;
   int use_temp_file;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

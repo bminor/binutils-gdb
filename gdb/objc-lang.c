@@ -43,6 +43,7 @@
 #include "infcall.h"
 #include "valprint.h"
 #include "cli/cli-utils.h"
+#include "c-exp.h"
 
 #include <ctype.h>
 #include <algorithm>
@@ -215,110 +216,6 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   return nsstringValue;
 }
 
-/* Objective-C name demangling.  */
-
-char *
-objc_demangle (const char *mangled, int options)
-{
-  char *demangled, *cp;
-
-  if (mangled[0] == '_' &&
-     (mangled[1] == 'i' || mangled[1] == 'c') &&
-      mangled[2] == '_')
-    {
-      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
-
-      if (mangled[1] == 'i')
-	*cp++ = '-';		/* for instance method */
-      else
-	*cp++ = '+';		/* for class    method */
-
-      *cp++ = '[';		/* opening left brace  */
-      strcpy(cp, mangled+3);	/* Tack on the rest of the mangled name.  */
-
-      while (*cp && *cp == '_')
-	cp++;			/* Skip any initial underbars in class
-				   name.  */
-
-      cp = strchr(cp, '_');
-      if (!cp)	                /* Find first non-initial underbar.  */
-	{
-	  xfree(demangled);	/* not mangled name */
-	  return NULL;
-	}
-      if (cp[1] == '_')		/* Easy case: no category name.    */
-	{
-	  *cp++ = ' ';		/* Replace two '_' with one ' '.   */
-	  strcpy(cp, mangled + (cp - demangled) + 2);
-	}
-      else
-	{
-	  *cp++ = '(';		/* Less easy case: category name.  */
-	  cp = strchr(cp, '_');
-	  if (!cp)
-	    {
-	      xfree(demangled);	/* not mangled name */
-	      return NULL;
-	    }
-	  *cp++ = ')';
-	  *cp++ = ' ';		/* Overwriting 1st char of method name...  */
-	  strcpy(cp, mangled + (cp - demangled));	/* Get it back.  */
-	}
-
-      while (*cp && *cp == '_')
-	cp++;			/* Skip any initial underbars in
-				   method name.  */
-
-      for (; *cp; cp++)
-	if (*cp == '_')
-	  *cp = ':';		/* Replace remaining '_' with ':'.  */
-
-      *cp++ = ']';		/* closing right brace */
-      *cp++ = 0;		/* string terminator */
-      return demangled;
-    }
-  else
-    return NULL;	/* Not an objc mangled name.  */
-}
-
-
-/* Table mapping opcodes into strings for printing operators
-   and precedences of the operators.  */
-
-static const struct op_print objc_op_print_tab[] =
-  {
-    {",",  BINOP_COMMA, PREC_COMMA, 0},
-    {"=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
-    {"||", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-    {"&&", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-    {"|",  BINOP_BITWISE_IOR, PREC_BITWISE_IOR, 0},
-    {"^",  BINOP_BITWISE_XOR, PREC_BITWISE_XOR, 0},
-    {"&",  BINOP_BITWISE_AND, PREC_BITWISE_AND, 0},
-    {"==", BINOP_EQUAL, PREC_EQUAL, 0},
-    {"!=", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-    {"<=", BINOP_LEQ, PREC_ORDER, 0},
-    {">=", BINOP_GEQ, PREC_ORDER, 0},
-    {">",  BINOP_GTR, PREC_ORDER, 0},
-    {"<",  BINOP_LESS, PREC_ORDER, 0},
-    {">>", BINOP_RSH, PREC_SHIFT, 0},
-    {"<<", BINOP_LSH, PREC_SHIFT, 0},
-    {"+",  BINOP_ADD, PREC_ADD, 0},
-    {"-",  BINOP_SUB, PREC_ADD, 0},
-    {"*",  BINOP_MUL, PREC_MUL, 0},
-    {"/",  BINOP_DIV, PREC_MUL, 0},
-    {"%",  BINOP_REM, PREC_MUL, 0},
-    {"@",  BINOP_REPEAT, PREC_REPEAT, 0},
-    {"-",  UNOP_NEG, PREC_PREFIX, 0},
-    {"!",  UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-    {"~",  UNOP_COMPLEMENT, PREC_PREFIX, 0},
-    {"*",  UNOP_IND, PREC_PREFIX, 0},
-    {"&",  UNOP_ADDR, PREC_PREFIX, 0},
-    {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
-    {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
-    {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-    {NULL, OP_NULL, PREC_NULL, 0}
-};
-
 /* Class representing the Objective-C language.  */
 
 class objc_language : public language_defn
@@ -357,16 +254,13 @@ public:
   bool sniff_from_mangled_name (const char *mangled,
 				char **demangled) const override
   {
-    *demangled = objc_demangle (mangled, 0);
+    *demangled = demangle_symbol (mangled, 0);
     return *demangled != NULL;
   }
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
-  {
-    return objc_demangle (mangled, options);
-  }
+  char *demangle_symbol (const char *mangled, int options) const override;
 
   /* See language.h.  */
 
@@ -420,12 +314,73 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return objc_op_print_tab; }
 };
+
+/* See declaration of objc_language::demangle_symbol above.  */
+
+char *
+objc_language::demangle_symbol (const char *mangled, int options) const
+{
+  char *demangled, *cp;
+
+  if (mangled[0] == '_'
+      && (mangled[1] == 'i' || mangled[1] == 'c')
+      && mangled[2] == '_')
+    {
+      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
+
+      if (mangled[1] == 'i')
+	*cp++ = '-';		/* for instance method */
+      else
+	*cp++ = '+';		/* for class    method */
+
+      *cp++ = '[';		/* opening left brace  */
+      strcpy(cp, mangled+3);	/* Tack on the rest of the mangled name.  */
+
+      while (*cp != '\0' && *cp == '_')
+	cp++;			/* Skip any initial underbars in class
+				   name.  */
+
+      cp = strchr(cp, '_');
+      if (cp == nullptr)	/* Find first non-initial underbar.  */
+	{
+	  xfree(demangled);	/* not mangled name */
+	  return nullptr;
+	}
+      if (cp[1] == '_')		/* Easy case: no category name.    */
+	{
+	  *cp++ = ' ';		/* Replace two '_' with one ' '.   */
+	  strcpy(cp, mangled + (cp - demangled) + 2);
+	}
+      else
+	{
+	  *cp++ = '(';		/* Less easy case: category name.  */
+	  cp = strchr(cp, '_');
+	  if (cp == nullptr)
+	    {
+	      xfree(demangled);	/* not mangled name */
+	      return nullptr;
+	    }
+	  *cp++ = ')';
+	  *cp++ = ' ';		/* Overwriting 1st char of method name...  */
+	  strcpy(cp, mangled + (cp - demangled));	/* Get it back.  */
+	}
+
+      while (*cp != '\0' && *cp == '_')
+	cp++;			/* Skip any initial underbars in
+				   method name.  */
+
+      for (; *cp != '\0'; cp++)
+	if (*cp == '_')
+	  *cp = ':';		/* Replace remaining '_' with ':'.  */
+
+      *cp++ = ']';		/* closing right brace */
+      *cp++ = 0;		/* string terminator */
+      return demangled;
+    }
+  else
+    return nullptr;	/* Not an objc mangled name.  */
+}
 
 /* Single instance of the class representing the Objective-C language.  */
 
@@ -507,15 +462,20 @@ end_msglist (struct parser_state *ps)
   char *p = msglist_sel;
   CORE_ADDR selid;
 
+  std::vector<expr::operation_up> args = ps->pop_vector (val);
+  expr::operation_up target = ps->pop ();
+
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;
   msglist_sel = sel->msglist_sel;
   selid = lookup_child_selector (ps->gdbarch (), p);
   if (!selid)
     error (_("Can't find selector \"%s\""), p);
-  write_exp_elt_longcst (ps, selid);
+
+  ps->push_new<expr::objc_msgcall_operation> (selid, std::move (target),
+					      std::move (args));
+
   xfree(p);
-  write_exp_elt_longcst (ps, val);	/* Number of args */
   xfree(sel);
 
   return val;

@@ -43,7 +43,9 @@ set first_line [Term::get_line 1]
 # instruction in the program.
 Term::command "+ 13"
 Term::check_box_contents "check asm box contents again" 0 0 80 15 \
-    "^ *$hex\[^\n\]+\n +\n"
+    [multi_line \
+	 "^ *$hex\[^\r\n\]+" \
+	 "\\s+"]
 
 # Now scroll backward again, we should return to the start of the
 # program.

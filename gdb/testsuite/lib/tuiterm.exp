@@ -367,16 +367,15 @@ namespace eval Term {
 	    variable _chars
 
 	    set y $_cur_row
-	    set next_y [expr {$y + 1}]
-	    while {$count > 0 && $next_y < $_rows} {
+	    set next_y [expr {$y + $count}]
+	    while {$next_y < $_rows} {
 		for {set x 0} {$x < $_cols} {incr x} {
 		    set _chars($x,$y) $_chars($x,$next_y)
 		}
 		incr y
 		incr next_y
-		incr count -1
 	    }
-	    _clear_lines $next_y $_rows
+	    _clear_lines $y $_rows
 	}
     }
 
@@ -789,6 +788,33 @@ namespace eval Term {
 	}
     }
 
+    # Check that the region of the screen described by X, Y, WIDTH,
+    # and HEIGHT match REGEXP.  This is like check_contents except
+    # only part of the screen is checked.  This can be used to check
+    # the contents within a box (though check_box_contents is a better
+    # choice for boxes with a border).
+    proc check_region_contents { test_name x y width height regexp } {
+	variable _chars
+
+	# Now grab the contents of the box, join each line together
+	# with a '\r\n' sequence and match against REGEXP.
+	set result ""
+	for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
+	    if {$yy > $y} {
+		# Add the end of line sequence only if this isn't the
+		# first line.
+		append result "\r\n"
+	    }
+	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
+		append result [lindex $_chars($xx,$yy) 0]
+	    }
+	}
+
+	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
+	    dump_screen
+	}
+    }
+
     # Check the contents of a box on the screen.  This is a little
     # like check_contents, but doens't check the whole screen
     # contents, only the contents of a single box.  This procedure
@@ -805,19 +831,8 @@ namespace eval Term {
 	    return
 	}
 
-	# Now grab the contents of the box, join each line together
-	# with a newline character and match against REGEXP.
-	set result ""
-	for {set yy [expr {$y + 1}]} {$yy < [expr {$y + $height - 1}]} {incr yy} {
-	    for {set xx [expr {$x + 1}]} {$xx < [expr {$x + $width - 1}]} {incr xx} {
-		append result [lindex $_chars($xx,$yy) 0]
-	    }
-	    append result "\n"
-	}
-
-	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
-	    dump_screen
-	}
+	check_region_contents $test_name [expr {$x + 1}] [expr {$y + 1}] \
+	    [expr {$width - 2}] [expr {$height - 2}] $regexp
     }
 
     # A debugging function to dump the current screen, with line

@@ -42,13 +42,13 @@ table.c: gencode simops.h
 	./gencode >$@
 
 gencode.o: gencode.c $(INCLUDE)
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(WARN_CFLAGS) -c $(srcdir)/gencode.c
+	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/gencode.c
 
 cr16-opc.o: $(srcdir)/../../opcodes/cr16-opc.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/cr16-opc.c
+	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/cr16-opc.c
 
 gencode: gencode.o cr16-opc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o gencode gencode.o cr16-opc.o $(BUILD_LIB)
+	$(LINK_FOR_BUILD) gencode.o cr16-opc.o
 
 clean-extra:
 	rm -f table.c simops.h gencode

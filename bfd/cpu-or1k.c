@@ -41,7 +41,7 @@
 
 
 const bfd_arch_info_type bfd_or1knd_arch =
-  N (bfd_mach_or1knd, "or1knd", FALSE, NULL);
+  N (bfd_mach_or1knd, "or1knd", false, NULL);
 
 const bfd_arch_info_type bfd_or1k_arch =
-  N (bfd_mach_or1k, "or1k", TRUE, &bfd_or1knd_arch);
+  N (bfd_mach_or1k, "or1k", true, &bfd_or1knd_arch);

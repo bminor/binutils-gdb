@@ -15,7 +15,7 @@ PARSE_AND_LIST_OPTIONS_LAM='
 '
 PARSE_AND_LIST_ARGS_CASE_Z_LAM='
       else if (strcmp (optarg, "lam-u48") == 0)
-	params.lam_u48 = TRUE;
+	params.lam_u48 = true;
       else if (strncmp (optarg, "lam-u48-report=", 15) == 0)
 	{
 	  if (strcmp (optarg + 15, "none") == 0)
@@ -29,7 +29,7 @@ PARSE_AND_LIST_ARGS_CASE_Z_LAM='
 		   optarg + 15);
 	}
       else if (strcmp (optarg, "lam-u57") == 0)
-	params.lam_u57 = TRUE;
+	params.lam_u57 = true;
       else if (strncmp (optarg, "lam-u57-report=", 15) == 0)
 	{
 	  if (strcmp (optarg + 15, "none") == 0)

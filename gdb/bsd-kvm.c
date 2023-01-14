@@ -132,9 +132,9 @@ bsd_kvm_target_open (const char *arg, int from_tty)
     error (("%s"), errbuf);
 
   bsd_kvm_corefile = filename;
-  unpush_target (&bsd_kvm_ops);
+  current_inferior ()->unpush_target (&bsd_kvm_ops);
   core_kd = temp_kd;
-  push_target (&bsd_kvm_ops);
+  current_inferior ()->push_target (&bsd_kvm_ops);
 
   thread_info *thr = add_thread_silent (&bsd_kvm_ops, bsd_kvm_ptid);
   switch_to_thread (thr);

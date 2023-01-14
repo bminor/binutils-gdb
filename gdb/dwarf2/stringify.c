@@ -112,3 +112,16 @@ dwarf_type_encoding_name (unsigned enc)
 
   return name;
 }
+
+/* See stringify.h.  */
+
+const char *
+dwarf_unit_type_name (int unit_type)
+{
+  const char *name = get_DW_UT_name (unit_type);
+
+  if (name == nullptr)
+    return dwarf_unknown ("UT", unit_type);
+
+  return name;
+}

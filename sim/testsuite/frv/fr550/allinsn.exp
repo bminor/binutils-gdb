@@ -1,8 +1,6 @@
 # FRV simulator testsuite.
 
 if [istarget frv*-*] {
-    # load support procs (none yet)
-    # load_lib cgen.exp
     # all machines
     set all_machs "fr550"
     set cpu_option -mcpu

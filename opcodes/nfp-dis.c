@@ -33,7 +33,7 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #define _NFP_ERR_STOP -1
 #define _NFP_ERR_CONT -8
@@ -929,13 +929,13 @@ nfp_me_print_invalid (uint64_t instr, struct disassemble_info *dinfo)
   return _NFP_ERR_CONT;
 }
 
-static bfd_boolean
+static bool
 nfp_me_is_imm_opnd10 (unsigned int opnd)
 {
   return _BF (opnd, 9, 8) == 0x3;
 }
 
-static bfd_boolean
+static bool
 nfp_me_is_imm_opnd8 (unsigned int opnd)
 {
   return _BTST (opnd, 5);
@@ -957,7 +957,7 @@ nfp_me_imm_opnd8 (unsigned int opnd, unsigned int imm8_msb)
 
 /* Print an unrestricted/10-bit operand.
    This can mostly be generic across NFP families at the moment.  */
-static bfd_boolean
+static bool
 nfp_me_print_opnd10 (unsigned int opnd, char bank, int num_ctx, int lmem_ext,
 		     struct disassemble_info *dinfo)
 {
@@ -1021,16 +1021,16 @@ nfp_me_print_opnd10 (unsigned int opnd, char bank, int num_ctx, int lmem_ext,
   else
     {
       dinfo->fprintf_func (dinfo->stream, "<opnd:0x%x>", opnd);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Print a restricted/8-bit operand.
    This can mostly be generic across NFP families at the moment.  */
 
-static bfd_boolean
+static bool
 nfp_me_print_opnd8 (unsigned int opnd, char bank, int num_ctx, int lmem_ext,
 		    unsigned int imm8_msb, struct disassemble_info *dinfo)
 {
@@ -1088,10 +1088,10 @@ nfp_me_print_opnd8 (unsigned int opnd, char bank, int num_ctx, int lmem_ext,
   else
     {
       dinfo->fprintf_func (dinfo->stream, "<opnd:0x%x>", opnd);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 static int
@@ -1110,7 +1110,7 @@ nfp_me27_28_print_alu_shf (uint64_t instr, unsigned int pred_cc,
   unsigned int shift = _BF (instr, 32, 28);
   char dst_bank = 'A' + _BTST (instr, 36);
   unsigned int nocc = _BTST (instr, 40);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (swap)
     {
@@ -1232,7 +1232,7 @@ nfp_me27_28_print_alu (uint64_t instr, unsigned int pred_cc,
   char dst_bank = 'A' + _BTST (instr, 36);
   unsigned int nocc = _BTST (instr, 40);
   int do_close_bracket = 1;
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (swap)
     {
@@ -1329,7 +1329,7 @@ nfp_me27_28_print_alu (uint64_t instr, unsigned int pred_cc,
       if (!nfp_me27_28_crc_op[_BF (srcA, 7, 5)])
 	{
 	  dinfo->fprintf_func (dinfo->stream, _(", <invalid CRC operator>, "));
-	  err = TRUE;
+	  err = true;
 	}
       else
 	{
@@ -1380,7 +1380,7 @@ nfp_me27_28_print_alu (uint64_t instr, unsigned int pred_cc,
       if (!nfp_me27_28_alu_op[op])
 	{
 	  dinfo->fprintf_func (dinfo->stream, ", <operator:0x%x>, ", op);
-	  err = TRUE;
+	  err = true;
 	}
       else
 	{
@@ -1422,7 +1422,7 @@ nfp_me27_28_print_immed (uint64_t instr, unsigned int pred_cc,
   unsigned int wd = _BTST (instr, 30);
   unsigned int inv = _BTST (instr, 31);
   unsigned int byte_shift = _BF (instr, 34, 33);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (nfp_me_is_imm_opnd10 (srcB))
     {
@@ -1494,7 +1494,7 @@ nfp_me27_28_print_ld_field (uint64_t instr, unsigned int pred_cc,
   unsigned int src = _BF (instr, 17, 10);
   unsigned int sc = _BF (instr, 9, 8);
   unsigned int dst = _BF (instr, 7, 0);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (swap)
     {
@@ -1611,7 +1611,7 @@ nfp_me27_28_print_local_csr (uint64_t instr,
   unsigned int csr_num = _BF (instr, 32, 22);
   unsigned int src = srcA;
   char src_bank = 'A';
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (nfp_me_is_imm_opnd10 (srcA) && !nfp_me_is_imm_opnd10 (srcB))
     {
@@ -1728,7 +1728,7 @@ nfp_me27_28_print_br_byte (uint64_t instr,
   unsigned int eq = _BTST (instr, 19);
   unsigned int defer = _BF (instr, 21, 20);
   unsigned int br_addr = _BFS (instr, 40, 40, 13) | _BF (instr, 34, 22);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (eq)
     dinfo->fprintf_func (dinfo->stream, "br=byte[");
@@ -1770,7 +1770,7 @@ nfp_me27_28_print_br_bit (uint64_t instr, unsigned int src_lmext,
   unsigned int b = _BTST (instr, 18);
   unsigned int defer = _BF (instr, 21, 20);
   unsigned int br_addr = _BFS (instr, 40, 40, 13) | _BF (instr, 34, 22);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (b)
     dinfo->fprintf_func (dinfo->stream, "br_bset[");
@@ -1808,7 +1808,7 @@ nfp_me27_28_print_br_alu (uint64_t instr, unsigned int src_lmext,
   unsigned int srcB = _BF (instr, 19, 10);
   unsigned int defer = _BF (instr, 21, 20);
   unsigned int imm = _BF (instr, 30, 22);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (nfp_me_is_imm_opnd10 (srcA))
     imm = (imm << 8) | nfp_me_imm_opnd10 (srcA);
@@ -1851,7 +1851,7 @@ nfp_me27_28_print_mult (uint64_t instr, unsigned int pred_cc,
   unsigned int swap = _BTST (instr, 30);
   unsigned int mtype = _BF (instr, 32, 31);
   unsigned int nocc = _BTST (instr, 40);
-  bfd_boolean err = FALSE;
+  bool err = false;
 
   if (swap)
     {
@@ -1884,7 +1884,7 @@ nfp_me27_28_print_mult (uint64_t instr, unsigned int pred_cc,
       if (!s)
 	{
 	  s = "<invalid mul_step>";
-	  err = TRUE;
+	  err = true;
 	}
       dinfo->fprintf_func (dinfo->stream, "_%s", s);
     }
@@ -1964,7 +1964,7 @@ nfp_me27_print_cmd (uint64_t instr, int third_party_32bit,
   unsigned int indref = _BTST (instr, 41);
   unsigned int mode = _BF (instr, 44, 42);
 
-  bfd_boolean err = FALSE;
+  bool err = false;
   int cpp_target = -1;
   int cpp_action = -1;
   const char *mnemonic = NULL;
@@ -2243,7 +2243,7 @@ nfp_me28_print_cmd (uint64_t instr, int third_party_32bit,
   unsigned int indref = _BTST (instr, 41);
   unsigned int mode = _BF (instr, 44, 42);
 
-  bfd_boolean err = FALSE;
+  bool err = false;
   int cpp_target = -1;
   int cpp_action = -1;
   const char *mnemonic = NULL;
@@ -2523,7 +2523,7 @@ nfp_me28_print_mult (uint64_t instr, int num_ctx,
 				 gpr_wrboth, num_ctx, dinfo);
 }
 
-static bfd_boolean
+static bool
 init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 {
   Elf_Internal_Shdr *sec = NULL;
@@ -2536,7 +2536,7 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 
   if (!dinfo->section)
     /* No section info, will use default values.  */
-    return TRUE;
+    return true;
 
   sec_cnt = elf_numsections (dinfo->section->owner);
 
@@ -2553,7 +2553,7 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
   if (sec_idx == sec_cnt)
     {
       dinfo->fprintf_func (dinfo->stream, _("File has no ME-Config section."));
-      return FALSE;
+      return false;
     }
 
   for (roff = 0; (bfd_size_type) roff < sec->sh_size;
@@ -2567,14 +2567,14 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 	{
 	  dinfo->fprintf_func (dinfo->stream,
 			       _("File has invalid ME-Config section."));
-	  return FALSE;
+	  return false;
 	}
 
       mecfg = &priv->mecfgs[isl][menum][1];
 
       if (!bfd_get_section_contents (dinfo->section->owner, sec->bfd_section,
 				     buffer, roff, sizeof (buffer)))
-	return FALSE;
+	return false;
 
       mecfg_ent.ctx_enables = bfd_getl32 (buffer + offsetof (Elf_Nfp_MeConfig,
 							     ctx_enables));
@@ -2586,10 +2586,10 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
       mecfg->scs_cnt = _BTST (mecfg_ent.misc_control, 2);
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
 			int is_for_text, struct disassemble_info *dinfo)
 {
@@ -2599,7 +2599,7 @@ init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
   size_t isl, menum;
 
   if (sec->sh_entsize != sizeof (ireg))
-    return FALSE;
+    return false;
 
   isl = SHI_NFP_IREG_ISLAND (sec->sh_info);
 
@@ -2622,7 +2622,7 @@ init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
 
       if (!bfd_get_section_contents (dinfo->section->owner, sec->bfd_section,
 				     buffer, ireg_off, sizeof (buffer)))
-	return FALSE;
+	return false;
 
       ireg.cpp_offset_lo = bfd_getl32 (buffer
 	+ offsetof (Elf_Nfp_InitRegEntry, cpp_offset_lo));
@@ -2656,10 +2656,10 @@ init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 init_nfp6000_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 {
   int mecfg_orders[64][2];
@@ -2672,7 +2672,7 @@ init_nfp6000_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 
   if (!dinfo->section)
     /* No section info, will use default values.  */
-    return TRUE;
+    return true;
 
   sec_cnt = elf_numsections (dinfo->section->owner);
 
@@ -2709,11 +2709,11 @@ init_nfp6000_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 	{
 	  dinfo->fprintf_func (dinfo->stream,
 			       _("Error processing section %u "), sec_idx);
-	  return FALSE;
+	  return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 static int
@@ -2752,7 +2752,7 @@ static nfp_priv_data *
 init_nfp_priv (struct disassemble_info *dinfo)
 {
   nfp_priv_data *priv;
-  int ret = FALSE;
+  int ret = false;
 
   if (dinfo->private_data)
     return (nfp_priv_data *) dinfo->private_data;

@@ -264,7 +264,9 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 exec_continue (char **argv, int argc)
 {
-  prepare_execution_command (current_top_target (), mi_async_p ());
+  prepare_execution_command (current_inferior ()->top_target (), mi_async_p ());
+
+  scoped_disable_commit_resumed disable_commit_resumed ("mi continue");
 
   if (non_stop)
     {
@@ -311,6 +313,8 @@ exec_continue (char **argv, int argc)
 	  continue_1 (1);
 	}
     }
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 static void
@@ -322,7 +326,7 @@ exec_reverse_continue (char **argv, int argc)
     error (_("Already in reverse mode."));
 
   if (!target_can_execute_reverse ())
-    error (_("Target %s does not support this command."), target_shortname);
+    error (_("Target %s does not support this command."), target_shortname ());
 
   scoped_restore save_exec_dir = make_scoped_restore (&execution_direction,
 						      EXEC_REVERSE);
@@ -1328,7 +1332,8 @@ mi_cmd_data_read_memory (const char *command, char **argv, int argc)
 
   gdb::byte_vector mbuf (total_bytes);
 
-  nr_bytes = target_read (current_top_target (), TARGET_OBJECT_MEMORY, NULL,
+  nr_bytes = target_read (current_inferior ()->top_target (),
+			  TARGET_OBJECT_MEMORY, NULL,
 			  mbuf.data (), addr, total_bytes);
   if (nr_bytes <= 0)
     error (_("Unable to read memory."));
@@ -1448,7 +1453,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
   length = atol (argv[1]);
 
   std::vector<memory_read_result> result
-    = read_memory_robust (current_top_target (), addr, length);
+    = read_memory_robust (current_inferior ()->top_target (), addr, length);
 
   if (result.size () == 0)
     error (_("Unable to read memory."));
@@ -1881,8 +1886,8 @@ command_notifies_uscc_observer (struct mi_parse *command)
   if (command->op == CLI_COMMAND)
     {
       /* CLI commands "thread" and "inferior" already send it.  */
-      return (strncmp (command->command, "thread ", 7) == 0
-	      || strncmp (command->command, "inferior ", 9) == 0);
+      return (startswith (command->command, "thread ")
+	      || startswith (command->command, "inferior "));
     }
   else /* MI_COMMAND */
     {
@@ -1890,8 +1895,8 @@ command_notifies_uscc_observer (struct mi_parse *command)
 	  && command->argc > 1)
 	{
 	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
-	  return (strncmp (command->argv[1], "thread ", 7) == 0
-		  || strncmp (command->argv[1], "inferior ", 9) == 0);
+	  return (startswith (command->argv[1], "thread ")
+		  || startswith (command->argv[1], "inferior "));
 	}
 
       else

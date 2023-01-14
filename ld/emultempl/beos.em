@@ -260,13 +260,13 @@ set_pe_stack_heap (char *resname, char *comname)
 }
 
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
@@ -315,7 +315,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       set_pe_value ("__image_base__");
       break;
     }
-  return TRUE;
+  return true;
 }
 
 /* Assign values to the special symbols before the linker script is
@@ -349,7 +349,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
     {
       long val = init[j].value;
       lang_add_assignment (exp_assign (init[j].symbol, exp_intop (val),
-				       FALSE));
+				       false));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))
@@ -461,8 +461,8 @@ sort_by_section_name (const void *a, const void *b)
      FIXME stripping images with a .rsrc section still needs to be fixed.  */
   if (i != 0)
     {
-      if ((CONST_STRNEQ (sna, ".stab"))
-	  && (!CONST_STRNEQ (snb, ".stab")))
+      if ((startswith (sna, ".stab"))
+	  && (!startswith (snb, ".stab")))
 	return 1;
     }
   return i;
@@ -536,7 +536,7 @@ sort_sections (lang_statement_union_type *s)
 	    {
 	      /* Is this the .idata section?  */
 	      if (sec->spec.name != NULL
-		  && CONST_STRNEQ (sec->spec.name, ".idata"))
+		  && startswith (sec->spec.name, ".idata"))
 		{
 		  /* Sort the children.  We want to sort any objects in
 		     the same archive.  In order to handle the case of
@@ -678,7 +678,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   output_secname = xstrdup (secname);
   ps = strchr (output_secname + 1, '\$');
   *ps = 0;
-  os = lang_output_section_statement_lookup (output_secname, constraint, TRUE);
+  os = lang_output_section_statement_lookup (output_secname, constraint, true);
 
   /* Find the '\$' wild statement for this section.  We currently require the
      linker script to explicitly mention "*(.foo\$)".  */
@@ -712,7 +712,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 static char *
 gld_${EMULATION_NAME}_get_script (int *isfile)
 EOF
+
+if test x"$COMPILE_IN" = xyes
+then
 # Scripts compiled in.
+
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
@@ -733,6 +737,27 @@ sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
 echo '  ; else return'                                 >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
 echo '; }'                                             >> e${EMULATION_NAME}.c
+
+else
+# Scripts read from the filesystem.
+
+fragment <<EOF
+{
+  *isfile = 1;
+
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
+    return "ldscripts/${EMULATION_NAME}.xu";
+  else if (bfd_link_relocatable (&link_info))
+    return "ldscripts/${EMULATION_NAME}.xr";
+  else if (!config.text_read_only)
+    return "ldscripts/${EMULATION_NAME}.xbn";
+  else if (!config.magic_demand_paged)
+    return "ldscripts/${EMULATION_NAME}.xn";
+  else
+    return "ldscripts/${EMULATION_NAME}.x";
+}
+EOF
+fi
 
 fragment <<EOF
 

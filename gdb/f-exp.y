@@ -55,6 +55,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include "type-stack.h"
+#include "f-exp.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 #define parse_f_type(ps) builtin_f_type (ps->gdbarch ())
@@ -89,6 +90,7 @@ static void push_kind_type (LONGEST val, struct type *type);
 
 static struct type *convert_to_kind_type (struct type *basetype, int kind);
 
+using namespace expr;
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -178,6 +180,7 @@ static int parse_number (struct parser_state *, const char *, int,
 
 %token <opcode> ASSIGN_MODIFY
 %token <opcode> UNOP_INTRINSIC BINOP_INTRINSIC
+%token <opcode> UNOP_OR_BINOP_INTRINSIC
 
 %left ','
 %left ABOVE_COMMA
@@ -208,9 +211,7 @@ start   :	exp
 	;
 
 type_exp:	type
-			{ write_exp_elt_opcode (pstate, OP_TYPE);
-			  write_exp_elt_type (pstate, $1);
-			  write_exp_elt_opcode (pstate, OP_TYPE); }
+			{ pstate->push_new<type_operation> ($1); }
 	;
 
 exp     :       '(' exp ')'
@@ -219,31 +220,79 @@ exp     :       '(' exp ')'
 
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_IND); }
+			{ pstate->wrap<unop_ind_operation> (); }
 	;
 
 exp	:	'&' exp    %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_ADDR); }
+			{ pstate->wrap<unop_addr_operation> (); }
 	;
 
 exp	:	'-' exp    %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_NEG); }
+			{ pstate->wrap<unary_neg_operation> (); }
 	;
 
 exp	:	BOOL_NOT exp    %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT); }
+			{ pstate->wrap<unary_logical_not_operation> (); }
 	;
 
 exp	:	'~' exp    %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_COMPLEMENT); }
+			{ pstate->wrap<unary_complement_operation> (); }
 	;
 
 exp	:	SIZEOF exp       %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
+			{ pstate->wrap<unop_sizeof_operation> (); }
 	;
 
 exp	:	KIND '(' exp ')'       %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_FORTRAN_KIND); }
+			{ pstate->wrap<fortran_kind_operation> (); }
+	;
+
+exp	:	UNOP_OR_BINOP_INTRINSIC '('
+			{ pstate->start_arglist (); }
+		one_or_two_args ')'
+			{
+			  int n = pstate->end_arglist ();
+			  gdb_assert (n == 1 || n == 2);
+			  if ($1 == FORTRAN_ASSOCIATED)
+			    {
+			      if (n == 1)
+				pstate->wrap<fortran_associated_1arg> ();
+			      else
+				pstate->wrap2<fortran_associated_2arg> ();
+			    }
+			  else if ($1 == FORTRAN_ARRAY_SIZE)
+			    {
+			      if (n == 1)
+				pstate->wrap<fortran_array_size_1arg> ();
+			      else
+				pstate->wrap2<fortran_array_size_2arg> ();
+			    }
+			  else
+			    {
+			      std::vector<operation_up> args
+				= pstate->pop_vector (n);
+			      gdb_assert ($1 == FORTRAN_LBOUND
+					  || $1 == FORTRAN_UBOUND);
+			      operation_up op;
+			      if (n == 1)
+				op.reset
+				  (new fortran_bound_1arg ($1,
+							   std::move (args[0])));
+			      else
+				op.reset
+				  (new fortran_bound_2arg ($1,
+							   std::move (args[0]),
+							   std::move (args[1])));
+			      pstate->push (std::move (op));
+			    }
+			}
+	;
+
+one_or_two_args
+	:	exp
+			{ pstate->arglist_len = 1; }
+	|	exp ',' exp
+			{ pstate->arglist_len = 2; }
 	;
 
 /* No more explicit array operators, we treat everything in F77 as 
@@ -254,20 +303,62 @@ exp	:	KIND '(' exp ')'       %prec UNARY
 exp	:	exp '(' 
 			{ pstate->start_arglist (); }
 		arglist ')'	
-			{ write_exp_elt_opcode (pstate,
-						OP_F77_UNDETERMINED_ARGLIST);
-			  write_exp_elt_longcst (pstate,
-						 pstate->end_arglist ());
-			  write_exp_elt_opcode (pstate,
-					      OP_F77_UNDETERMINED_ARGLIST); }
+			{
+			  std::vector<operation_up> args
+			    = pstate->pop_vector (pstate->end_arglist ());
+			  pstate->push_new<fortran_undetermined>
+			    (pstate->pop (), std::move (args));
+			}
 	;
 
 exp	:	UNOP_INTRINSIC '(' exp ')'
-			{ write_exp_elt_opcode (pstate, $1); }
+			{
+			  switch ($1)
+			    {
+			    case UNOP_ABS:
+			      pstate->wrap<fortran_abs_operation> ();
+			      break;
+			    case UNOP_FORTRAN_FLOOR:
+			      pstate->wrap<fortran_floor_operation> ();
+			      break;
+			    case UNOP_FORTRAN_CEILING:
+			      pstate->wrap<fortran_ceil_operation> ();
+			      break;
+			    case UNOP_FORTRAN_ALLOCATED:
+			      pstate->wrap<fortran_allocated_operation> ();
+			      break;
+			    case UNOP_FORTRAN_RANK:
+			      pstate->wrap<fortran_rank_operation> ();
+			      break;
+			    case UNOP_FORTRAN_SHAPE:
+			      pstate->wrap<fortran_array_shape_operation> ();
+			      break;
+			    case UNOP_FORTRAN_LOC:
+			      pstate->wrap<fortran_loc_operation> ();
+			      break;
+			    default:
+			      gdb_assert_not_reached ("unhandled intrinsic");
+			    }
+			}
 	;
 
 exp	:	BINOP_INTRINSIC '(' exp ',' exp ')'
-			{ write_exp_elt_opcode (pstate, $1); }
+			{
+			  switch ($1)
+			    {
+			    case BINOP_MOD:
+			      pstate->wrap2<fortran_mod_operation> ();
+			      break;
+			    case BINOP_FORTRAN_MODULO:
+			      pstate->wrap2<fortran_modulo_operation> ();
+			      break;
+			    case BINOP_FORTRAN_CMPLX:
+			      pstate->wrap2<fortran_cmplx_operation> ();
+			      break;
+			    default:
+			      gdb_assert_not_reached ("unhandled intrinsic");
+			    }
+			}
 	;
 
 arglist	:
@@ -292,63 +383,90 @@ arglist	:	arglist ',' subrange   %prec ABOVE_COMMA
 /* There are four sorts of subrange types in F90.  */
 
 subrange:	exp ':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate, RANGE_STANDARD);
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up high = pstate->pop ();
+			  operation_up low = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_STANDARD, std::move (low),
+			     std::move (high), operation_up ());
+			}
 	;
 
 subrange:	exp ':'	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 RANGE_HIGH_BOUND_DEFAULT);
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up low = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_HIGH_BOUND_DEFAULT, std::move (low),
+			     operation_up (), operation_up ());
+			}
 	;
 
 subrange:	':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 RANGE_LOW_BOUND_DEFAULT);
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up high = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_LOW_BOUND_DEFAULT, operation_up (),
+			     std::move (high), operation_up ());
+			}
 	;
 
 subrange:	':'	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 (RANGE_LOW_BOUND_DEFAULT
-						  | RANGE_HIGH_BOUND_DEFAULT));
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_LOW_BOUND_DEFAULT
+			     | RANGE_HIGH_BOUND_DEFAULT,
+			     operation_up (), operation_up (),
+			     operation_up ());
+			}
 	;
 
 /* And each of the four subrange types can also have a stride.  */
 subrange:	exp ':' exp ':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate, RANGE_HAS_STRIDE);
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up stride = pstate->pop ();
+			  operation_up high = pstate->pop ();
+			  operation_up low = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_STANDARD | RANGE_HAS_STRIDE,
+			     std::move (low), std::move (high),
+			     std::move (stride));
+			}
 	;
 
 subrange:	exp ':' ':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 (RANGE_HIGH_BOUND_DEFAULT
-						  | RANGE_HAS_STRIDE));
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up stride = pstate->pop ();
+			  operation_up low = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_HIGH_BOUND_DEFAULT
+			     | RANGE_HAS_STRIDE,
+			     std::move (low), operation_up (),
+			     std::move (stride));
+			}
 	;
 
 subrange:	':' exp ':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 (RANGE_LOW_BOUND_DEFAULT
-						  | RANGE_HAS_STRIDE));
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up stride = pstate->pop ();
+			  operation_up high = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_LOW_BOUND_DEFAULT
+			     | RANGE_HAS_STRIDE,
+			     operation_up (), std::move (high),
+			     std::move (stride));
+			}
 	;
 
 subrange:	':' ':' exp	%prec ABOVE_COMMA
-			{ write_exp_elt_opcode (pstate, OP_RANGE);
-			  write_exp_elt_longcst (pstate,
-						 (RANGE_LOW_BOUND_DEFAULT
-						  | RANGE_HIGH_BOUND_DEFAULT
-						  | RANGE_HAS_STRIDE));
-			  write_exp_elt_opcode (pstate, OP_RANGE); }
+			{
+			  operation_up stride = pstate->pop ();
+			  pstate->push_new<fortran_range_operation>
+			    (RANGE_LOW_BOUND_DEFAULT
+			     | RANGE_HIGH_BOUND_DEFAULT
+			     | RANGE_HAS_STRIDE,
+			     operation_up (), operation_up (),
+			     std::move (stride));
+			}
 	;
 
 complexnum:     exp ',' exp 
@@ -356,216 +474,198 @@ complexnum:     exp ',' exp
 	;
 
 exp	:	'(' complexnum ')'
-			{ write_exp_elt_opcode (pstate, OP_COMPLEX);
-			  write_exp_elt_type (pstate,
-					      parse_f_type (pstate)
-					      ->builtin_complex_s16);
-			  write_exp_elt_opcode (pstate, OP_COMPLEX); }
+			{
+			  operation_up rhs = pstate->pop ();
+			  operation_up lhs = pstate->pop ();
+			  pstate->push_new<complex_operation>
+			    (std::move (lhs), std::move (rhs),
+			     parse_f_type (pstate)->builtin_complex_s16);
+			}
 	;
 
 exp	:	'(' type ')' exp  %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_CAST);
-			  write_exp_elt_type (pstate, $2);
-			  write_exp_elt_opcode (pstate, UNOP_CAST); }
+			{
+			  pstate->push_new<unop_cast_operation>
+			    (pstate->pop (), $2);
+			}
 	;
 
 exp     :       exp '%' name
-			{ write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
-			  write_exp_string (pstate, $3);
-			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
+			{
+			  pstate->push_new<fortran_structop_operation>
+			    (pstate->pop (), copy_name ($3));
+			}
 	;
 
 exp     :       exp '%' name COMPLETE
-			{ pstate->mark_struct_expression ();
-			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
-			  write_exp_string (pstate, $3);
-			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
+			{
+			  structop_base_operation *op
+			    = new fortran_structop_operation (pstate->pop (),
+							      copy_name ($3));
+			  pstate->mark_struct_expression (op);
+			  pstate->push (operation_up (op));
+			}
 	;
 
 exp     :       exp '%' COMPLETE
-			{ struct stoken s;
-			  pstate->mark_struct_expression ();
-			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
-			  s.ptr = "";
-			  s.length = 0;
-			  write_exp_string (pstate, s);
-			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
+			{
+			  structop_base_operation *op
+			    = new fortran_structop_operation (pstate->pop (),
+							      "");
+			  pstate->mark_struct_expression (op);
+			  pstate->push (operation_up (op));
+			}
+	;
 
 /* Binary operators in order of decreasing precedence.  */
 
 exp	:	exp '@' exp
-			{ write_exp_elt_opcode (pstate, BINOP_REPEAT); }
+			{ pstate->wrap2<repeat_operation> (); }
 	;
 
 exp	:	exp STARSTAR exp
-			{ write_exp_elt_opcode (pstate, BINOP_EXP); }
+			{ pstate->wrap2<exp_operation> (); }
 	;
 
 exp	:	exp '*' exp
-			{ write_exp_elt_opcode (pstate, BINOP_MUL); }
+			{ pstate->wrap2<mul_operation> (); }
 	;
 
 exp	:	exp '/' exp
-			{ write_exp_elt_opcode (pstate, BINOP_DIV); }
+			{ pstate->wrap2<div_operation> (); }
 	;
 
 exp	:	exp '+' exp
-			{ write_exp_elt_opcode (pstate, BINOP_ADD); }
+			{ pstate->wrap2<add_operation> (); }
 	;
 
 exp	:	exp '-' exp
-			{ write_exp_elt_opcode (pstate, BINOP_SUB); }
+			{ pstate->wrap2<sub_operation> (); }
 	;
 
 exp	:	exp LSH exp
-			{ write_exp_elt_opcode (pstate, BINOP_LSH); }
+			{ pstate->wrap2<lsh_operation> (); }
 	;
 
 exp	:	exp RSH exp
-			{ write_exp_elt_opcode (pstate, BINOP_RSH); }
+			{ pstate->wrap2<rsh_operation> (); }
 	;
 
 exp	:	exp EQUAL exp
-			{ write_exp_elt_opcode (pstate, BINOP_EQUAL); }
+			{ pstate->wrap2<equal_operation> (); }
 	;
 
 exp	:	exp NOTEQUAL exp
-			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
+			{ pstate->wrap2<notequal_operation> (); }
 	;
 
 exp	:	exp LEQ exp
-			{ write_exp_elt_opcode (pstate, BINOP_LEQ); }
+			{ pstate->wrap2<leq_operation> (); }
 	;
 
 exp	:	exp GEQ exp
-			{ write_exp_elt_opcode (pstate, BINOP_GEQ); }
+			{ pstate->wrap2<geq_operation> (); }
 	;
 
 exp	:	exp LESSTHAN exp
-			{ write_exp_elt_opcode (pstate, BINOP_LESS); }
+			{ pstate->wrap2<less_operation> (); }
 	;
 
 exp	:	exp GREATERTHAN exp
-			{ write_exp_elt_opcode (pstate, BINOP_GTR); }
+			{ pstate->wrap2<gtr_operation> (); }
 	;
 
 exp	:	exp '&' exp
-			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_AND); }
+			{ pstate->wrap2<bitwise_and_operation> (); }
 	;
 
 exp	:	exp '^' exp
-			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_XOR); }
+			{ pstate->wrap2<bitwise_xor_operation> (); }
 	;
 
 exp	:	exp '|' exp
-			{ write_exp_elt_opcode (pstate, BINOP_BITWISE_IOR); }
+			{ pstate->wrap2<bitwise_ior_operation> (); }
 	;
 
 exp     :       exp BOOL_AND exp
-			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_AND); }
+			{ pstate->wrap2<logical_and_operation> (); }
 	;
 
 
 exp	:	exp BOOL_OR exp
-			{ write_exp_elt_opcode (pstate, BINOP_LOGICAL_OR); }
+			{ pstate->wrap2<logical_or_operation> (); }
 	;
 
 exp	:	exp '=' exp
-			{ write_exp_elt_opcode (pstate, BINOP_ASSIGN); }
+			{ pstate->wrap2<assign_operation> (); }
 	;
 
 exp	:	exp ASSIGN_MODIFY exp
-			{ write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
-			  write_exp_elt_opcode (pstate, $2);
-			  write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY); }
+			{
+			  operation_up rhs = pstate->pop ();
+			  operation_up lhs = pstate->pop ();
+			  pstate->push_new<assign_modify_operation>
+			    ($2, std::move (lhs), std::move (rhs));
+			}
 	;
 
 exp	:	INT
-			{ write_exp_elt_opcode (pstate, OP_LONG);
-			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_longcst (pstate, (LONGEST) ($1.val));
-			  write_exp_elt_opcode (pstate, OP_LONG); }
+			{
+			  pstate->push_new<long_const_operation>
+			    ($1.type, $1.val);
+			}
 	;
 
 exp	:	NAME_OR_INT
 			{ YYSTYPE val;
 			  parse_number (pstate, $1.stoken.ptr,
 					$1.stoken.length, 0, &val);
-			  write_exp_elt_opcode (pstate, OP_LONG);
-			  write_exp_elt_type (pstate, val.typed_val.type);
-			  write_exp_elt_longcst (pstate,
-						 (LONGEST)val.typed_val.val);
-			  write_exp_elt_opcode (pstate, OP_LONG); }
+			  pstate->push_new<long_const_operation>
+			    (val.typed_val.type,
+			     val.typed_val.val);
+			}
 	;
 
 exp	:	FLOAT
-			{ write_exp_elt_opcode (pstate, OP_FLOAT);
-			  write_exp_elt_type (pstate, $1.type);
-			  write_exp_elt_floatcst (pstate, $1.val);
-			  write_exp_elt_opcode (pstate, OP_FLOAT); }
+			{
+			  float_data data;
+			  std::copy (std::begin ($1.val), std::end ($1.val),
+				     std::begin (data));
+			  pstate->push_new<float_const_operation> ($1.type, data);
+			}
 	;
 
 exp	:	variable
 	;
 
 exp	:	DOLLAR_VARIABLE
-			{ write_dollar_variable (pstate, $1); }
+			{ pstate->push_dollar ($1); }
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
-			{ write_exp_elt_opcode (pstate, OP_LONG);
-			  write_exp_elt_type (pstate,
-					      parse_f_type (pstate)
-					      ->builtin_integer);
+			{
 			  $3 = check_typedef ($3);
-			  write_exp_elt_longcst (pstate,
-						 (LONGEST) TYPE_LENGTH ($3));
-			  write_exp_elt_opcode (pstate, OP_LONG); }
+			  pstate->push_new<long_const_operation>
+			    (parse_f_type (pstate)->builtin_integer,
+			     TYPE_LENGTH ($3));
+			}
 	;
 
 exp     :       BOOLEAN_LITERAL
-			{ write_exp_elt_opcode (pstate, OP_BOOL);
-			  write_exp_elt_longcst (pstate, (LONGEST) $1);
-			  write_exp_elt_opcode (pstate, OP_BOOL);
-			}
+			{ pstate->push_new<bool_operation> ($1); }
 	;
 
 exp	:	STRING_LITERAL
 			{
-			  write_exp_elt_opcode (pstate, OP_STRING);
-			  write_exp_string (pstate, $1);
-			  write_exp_elt_opcode (pstate, OP_STRING);
+			  pstate->push_new<string_operation>
+			    (copy_name ($1));
 			}
 	;
 
 variable:	name_not_typename
 			{ struct block_symbol sym = $1.sym;
-
-			  if (sym.symbol)
-			    {
-			      if (symbol_read_needs_frame (sym.symbol))
-				pstate->block_tracker->update (sym);
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      write_exp_elt_block (pstate, sym.block);
-			      write_exp_elt_sym (pstate, sym.symbol);
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      break;
-			    }
-			  else
-			    {
-			      struct bound_minimal_symbol msymbol;
-			      std::string arg = copy_name ($1.stoken);
-
-			      msymbol =
-				lookup_bound_minimal_symbol (arg.c_str ());
-			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (pstate, msymbol);
-			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error (_("No symbol table is loaded.  Use the \"file\" command."));
-			      else
-				error (_("No symbol \"%s\" in current context."),
-				       arg.c_str ());
-			    }
+			  std::string name = copy_name ($1.stoken);
+			  pstate->push_symbol (name.c_str (), sym);
 			}
 	;
 
@@ -983,23 +1083,24 @@ struct token
 
 static const struct token fortran_operators[] =
 {
-  { ".and.", BOOL_AND, BINOP_END, false },
-  { ".or.", BOOL_OR, BINOP_END, false },
-  { ".not.", BOOL_NOT, BINOP_END, false },
-  { ".eq.", EQUAL, BINOP_END, false },
-  { ".eqv.", EQUAL, BINOP_END, false },
-  { ".neqv.", NOTEQUAL, BINOP_END, false },
-  { "==", EQUAL, BINOP_END, false },
-  { ".ne.", NOTEQUAL, BINOP_END, false },
-  { "/=", NOTEQUAL, BINOP_END, false },
-  { ".le.", LEQ, BINOP_END, false },
-  { "<=", LEQ, BINOP_END, false },
-  { ".ge.", GEQ, BINOP_END, false },
-  { ">=", GEQ, BINOP_END, false },
-  { ".gt.", GREATERTHAN, BINOP_END, false },
-  { ">", GREATERTHAN, BINOP_END, false },
-  { ".lt.", LESSTHAN, BINOP_END, false },
-  { "<", LESSTHAN, BINOP_END, false },
+  { ".and.", BOOL_AND, OP_NULL, false },
+  { ".or.", BOOL_OR, OP_NULL, false },
+  { ".not.", BOOL_NOT, OP_NULL, false },
+  { ".eq.", EQUAL, OP_NULL, false },
+  { ".eqv.", EQUAL, OP_NULL, false },
+  { ".neqv.", NOTEQUAL, OP_NULL, false },
+  { ".xor.", NOTEQUAL, OP_NULL, false },
+  { "==", EQUAL, OP_NULL, false },
+  { ".ne.", NOTEQUAL, OP_NULL, false },
+  { "/=", NOTEQUAL, OP_NULL, false },
+  { ".le.", LEQ, OP_NULL, false },
+  { "<=", LEQ, OP_NULL, false },
+  { ".ge.", GEQ, OP_NULL, false },
+  { ">=", GEQ, OP_NULL, false },
+  { ".gt.", GREATERTHAN, OP_NULL, false },
+  { ">", GREATERTHAN, OP_NULL, false },
+  { ".lt.", LESSTHAN, OP_NULL, false },
+  { "<", LESSTHAN, OP_NULL, false },
   { "**", STARSTAR, BINOP_EXP, false },
 };
 
@@ -1024,33 +1125,41 @@ static const struct f77_boolean_val boolean_values[]  =
 static const struct token f77_keywords[] =
 {
   /* Historically these have always been lowercase only in GDB.  */
-  { "complex_16", COMPLEX_S16_KEYWORD, BINOP_END, true },
-  { "complex_32", COMPLEX_S32_KEYWORD, BINOP_END, true },
-  { "character", CHARACTER, BINOP_END, true },
-  { "integer_2", INT_S2_KEYWORD, BINOP_END, true },
-  { "logical_1", LOGICAL_S1_KEYWORD, BINOP_END, true },
-  { "logical_2", LOGICAL_S2_KEYWORD, BINOP_END, true },
-  { "logical_8", LOGICAL_S8_KEYWORD, BINOP_END, true },
-  { "complex_8", COMPLEX_S8_KEYWORD, BINOP_END, true },
-  { "integer", INT_KEYWORD, BINOP_END, true },
-  { "logical", LOGICAL_KEYWORD, BINOP_END, true },
-  { "real_16", REAL_S16_KEYWORD, BINOP_END, true },
-  { "complex", COMPLEX_KEYWORD, BINOP_END, true },
-  { "sizeof", SIZEOF, BINOP_END, true },
-  { "real_8", REAL_S8_KEYWORD, BINOP_END, true },
-  { "real", REAL_KEYWORD, BINOP_END, true },
-  { "single", SINGLE, BINOP_END, true },
-  { "double", DOUBLE, BINOP_END, true },
-  { "precision", PRECISION, BINOP_END, true },
+  { "complex_16", COMPLEX_S16_KEYWORD, OP_NULL, true },
+  { "complex_32", COMPLEX_S32_KEYWORD, OP_NULL, true },
+  { "character", CHARACTER, OP_NULL, true },
+  { "integer_2", INT_S2_KEYWORD, OP_NULL, true },
+  { "logical_1", LOGICAL_S1_KEYWORD, OP_NULL, true },
+  { "logical_2", LOGICAL_S2_KEYWORD, OP_NULL, true },
+  { "logical_8", LOGICAL_S8_KEYWORD, OP_NULL, true },
+  { "complex_8", COMPLEX_S8_KEYWORD, OP_NULL, true },
+  { "integer", INT_KEYWORD, OP_NULL, true },
+  { "logical", LOGICAL_KEYWORD, OP_NULL, true },
+  { "real_16", REAL_S16_KEYWORD, OP_NULL, true },
+  { "complex", COMPLEX_KEYWORD, OP_NULL, true },
+  { "sizeof", SIZEOF, OP_NULL, true },
+  { "real_8", REAL_S8_KEYWORD, OP_NULL, true },
+  { "real", REAL_KEYWORD, OP_NULL, true },
+  { "single", SINGLE, OP_NULL, true },
+  { "double", DOUBLE, OP_NULL, true },
+  { "precision", PRECISION, OP_NULL, true },
   /* The following correspond to actual functions in Fortran and are case
      insensitive.  */
-  { "kind", KIND, BINOP_END, false },
+  { "kind", KIND, OP_NULL, false },
   { "abs", UNOP_INTRINSIC, UNOP_ABS, false },
   { "mod", BINOP_INTRINSIC, BINOP_MOD, false },
   { "floor", UNOP_INTRINSIC, UNOP_FORTRAN_FLOOR, false },
   { "ceiling", UNOP_INTRINSIC, UNOP_FORTRAN_CEILING, false },
   { "modulo", BINOP_INTRINSIC, BINOP_FORTRAN_MODULO, false },
   { "cmplx", BINOP_INTRINSIC, BINOP_FORTRAN_CMPLX, false },
+  { "lbound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_LBOUND, false },
+  { "ubound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_UBOUND, false },
+  { "allocated", UNOP_INTRINSIC, UNOP_FORTRAN_ALLOCATED, false },
+  { "associated", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ASSOCIATED, false },
+  { "rank", UNOP_INTRINSIC, UNOP_FORTRAN_RANK, false },
+  { "size", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ARRAY_SIZE, false },
+  { "shape", UNOP_INTRINSIC, UNOP_FORTRAN_SHAPE, false },
+  { "loc", UNOP_INTRINSIC, UNOP_FORTRAN_LOC, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input
@@ -1438,7 +1547,10 @@ f_language::parser (struct parser_state *par_state) const
   scoped_restore restore_type_stack = make_scoped_restore (&type_stack,
 							   &stack);
 
-  return yyparse ();
+  int result = yyparse ();
+  if (!result)
+    pstate->set_operation (pstate->pop ());
+  return result;
 }
 
 static void

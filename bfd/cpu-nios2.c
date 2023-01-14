@@ -67,9 +67,9 @@ nios2_compatible (const bfd_arch_info_type *a,
 
 static const bfd_arch_info_type arch_info_struct[2] =
 {
-  N (bfd_mach_nios2r1, "nios2:r1", FALSE, NIOS2R2_NEXT),
-  N (bfd_mach_nios2r2, "nios2:r2", FALSE, NULL),
+  N (bfd_mach_nios2r1, "nios2:r1", false, NIOS2R2_NEXT),
+  N (bfd_mach_nios2r2, "nios2:r2", false, NULL),
 };
 
 const bfd_arch_info_type bfd_nios2_arch =
-  N (bfd_mach_nios2, "nios2", TRUE, NIOS2R1_NEXT);
+  N (bfd_mach_nios2, "nios2", true, NIOS2R1_NEXT);

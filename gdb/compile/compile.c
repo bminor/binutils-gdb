@@ -600,8 +600,14 @@ static gdb_argv
 get_args (const compile_instance *compiler, struct gdbarch *gdbarch)
 {
   const char *cs_producer_options;
+  gdb_argv result;
 
-  gdb_argv result (gdbarch_gcc_target_options (gdbarch).c_str ());
+  std::string gcc_options = gdbarch_gcc_target_options (gdbarch);
+
+  /* Make sure we have a non-empty set of options, otherwise GCC will
+     error out trying to look for a filename that is an empty string.  */
+  if (!gcc_options.empty ())
+    result = gdb_argv (gcc_options.c_str ());
 
   cs_producer_options = get_selected_pc_producer_options ();
   if (cs_producer_options != NULL)
@@ -649,8 +655,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   expr_pc = get_frame_address_in_block (get_selected_frame (NULL));
 
   /* Set up instance and context for the compiler.  */
-  std::unique_ptr <compile_instance> compiler
-			(current_language->get_compile_instance ());
+  std::unique_ptr<compile_instance> compiler
+    = current_language->get_compile_instance ();
   if (compiler == nullptr)
     error (_("No compiler support for language %s."),
 	   current_language->name ());

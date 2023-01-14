@@ -1819,6 +1819,9 @@ case $host_os in
 esac
 AC_DEFINE_UNQUOTED(GDBINIT,"$gdbinit",[The .gdbinit filename.])
 
+dnl Set the host's .gdbearlyinit filename
+AC_DEFINE_UNQUOTED(GDBEARLYINIT,".gdbearlyinit",[The .gdbearlyinit filename.])
+
 dnl Handle optional features that can be enabled.
 
 # Support for --with-sysroot is a copy of GDB_AC_WITH_DIR,
@@ -1882,7 +1885,8 @@ WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
 GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
                  [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
 if test "$gdb_cv_var_elf" = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o \
+		gcore-elf.o elf-none-tdep.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.

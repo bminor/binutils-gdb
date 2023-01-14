@@ -124,7 +124,6 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/plugins.m4 \
 	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
-	$(top_srcdir)/../config/stdint.m4 \
 	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
@@ -249,7 +248,7 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__bfdinclude_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
-	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bfd_stdint.h \
+	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
 	$(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
 HEADERS = $(bfdinclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -470,7 +469,7 @@ libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 @INSTALL_LIBBFD_FALSE@bfdinclude_HEADERS = $(am__append_2)
 @INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-@INSTALL_LIBBFD_TRUE@	bfd_stdint.h $(INCDIR)/diagnostics.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/diagnostics.h \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h $(am__append_2)
 @INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libbfd.la
@@ -1099,7 +1098,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
 	aout-target.h aoutx.h arc-got.h arc-plt.h \
 	coff-arm.h coff-bfd.h coffcode.h coffswap.h \
-	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h \
+	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h cpu-riscv.h \
 	ecoff-bfd.h ecoffswap.h \
 	elf32-arm.h elf32-avr.h elf32-bfin.h elf32-cr16.h elf32-csky.h \
 	elf32-dlx.h elf32-hppa.h elf32-m68hc1x.h elf32-m68k.h \
@@ -1123,7 +1122,7 @@ SOURCE_HFILES = \
 	xcofflink.h xsym.h
 
 BUILD_HFILES = \
-	bfdver.h elf32-target.h elf64-target.h targmatch.h bfd_stdint.h
+	bfdver.h elf32-target.h elf64-target.h targmatch.h
 
 
 # Ensure they are built early:
@@ -1155,7 +1154,7 @@ libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB)
 noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES = 
 BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
-LOCAL_H_DEPS = libbfd.h sysdep.h config.h bfd_stdint.h
+LOCAL_H_DEPS = libbfd.h sysdep.h config.h
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
 	bfdio.c bfdwin.c section.c archures.c reloc.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \

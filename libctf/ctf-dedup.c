@@ -572,7 +572,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   char hashbuf[CTF_SHA1_SIZE];
   const char *hval = NULL;
   const char *whaterr;
-  int err;
+  int err = 0;
 
   const char *citer = NULL;
   ctf_dynset_t *citers = NULL;
@@ -589,7 +589,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  goto oom;							\
       if (ctf_dynset_cinsert (citers, hval) < 0)			\
 	goto oom;							\
-    } while (0)
+    }									\
+  while (0)
 
   /* If this is a named struct or union or a forward to one, and this is a child
      traversal, treat this type as if it were a forward -- do not recurse to
@@ -696,7 +697,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_type_encoding (input, type, &ep) < 0)
 	  {
 	    whaterr = N_("error getting encoding");
-	    goto err;
+	    goto input_err;
 	  }
 	ctf_dedup_sha1_add (&hash, &ep, sizeof (ctf_encoding_t), "encoding",
 			    depth);
@@ -751,7 +752,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	citer = hval;
 
 	if ((dtd = ctf_dynamic_type (input, type)) != NULL)
-	  slice = &dtd->dtd_u.dtu_slice;
+	  slice = (ctf_slice_t *) dtd->dtd_vlen;
 	else
 	  slice = (ctf_slice_t *) ((uintptr_t) tp + increment);
 
@@ -769,7 +770,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_array_info (input, type, &ar) < 0)
 	  {
 	    whaterr = N_("error getting array info");
-	    goto err;
+	    goto input_err;
 	  }
 
 	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
@@ -807,7 +808,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_func_type_info (input, type, &fi) < 0)
 	  {
 	    whaterr = N_("error getting func type info");
-	    goto err;
+	    goto input_err;
 	  }
 
 	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
@@ -827,6 +828,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
 	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
 	  {
+	    err = ENOMEM;
 	    whaterr = N_("error doing memory allocation");
 	    goto err;
 	  }
@@ -835,7 +837,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  {
 	    free (args);
 	    whaterr = N_("error getting func arg type");
-	    goto err;
+	    goto input_err;
 	  }
 	for (j = 0; j < fi.ctc_argc; j++)
 	  {
@@ -870,7 +872,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
 	    whaterr = N_("error doing enum member iteration");
-	    goto err;
+	    goto input_err;
 	  }
 	break;
       }
@@ -915,7 +917,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
 	    whaterr = N_("error doing struct/union member iteration");
-	    goto err;
+	    goto input_err;
 	  }
 	break;
       }
@@ -970,10 +972,12 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
  iterr:
   ctf_next_destroy (i);
+ input_err:
+  err = ctf_errno (input);
  err:
   ctf_sha1_fini (&hash, NULL);
-  ctf_err_warn (fp, 0, 0, _("%s (%i): %s: during type hashing for type %lx, "
-			    "kind %i"), ctf_link_input_name (input),
+  ctf_err_warn (fp, 0, err, _("%s (%i): %s: during type hashing for type %lx, "
+			      "kind %i"), ctf_link_input_name (input),
 		input_num, gettext (whaterr), type, kind);
   return NULL;
  oom:
@@ -1642,6 +1646,12 @@ ctf_dedup_init (ctf_dict_t *fp)
     goto oom;
 #endif
 
+  if ((d->cd_input_nums
+       = ctf_dynhash_create (ctf_hash_integer,
+			     ctf_hash_eq_integer,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_emission_struct_members
        = ctf_dynhash_create (ctf_hash_integer,
 			     ctf_hash_eq_integer,
@@ -1661,6 +1671,8 @@ ctf_dedup_init (ctf_dict_t *fp)
   return ctf_set_errno (fp, ENOMEM);
 }
 
+/* No ctf_dedup calls are allowed after this call other than starting a new
+   deduplication via ctf_dedup (not even ctf_dedup_type_mapping lookups).  */
 void
 ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 {
@@ -1682,6 +1694,7 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
   ctf_dynhash_destroy (d->cd_output_mapping_guard);
 #endif
+  ctf_dynhash_destroy (d->cd_input_nums);
   ctf_dynhash_destroy (d->cd_emission_struct_members);
   ctf_dynset_destroy (d->cd_conflicting_types);
 
@@ -1776,7 +1789,7 @@ ctf_dedup_multiple_input_dicts (ctf_dict_t *output, ctf_dict_t **inputs,
   name = ctf_type_name_raw (input_fp, input_id);
 
   if ((fwdkind == CTF_K_STRUCT || fwdkind == CTF_K_UNION)
-      && name && name[0] != '\0')
+      && name[0] != '\0')
     {
       const void *origin;
 
@@ -1876,11 +1889,21 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   size_t i;
   ctf_next_t *it = NULL;
 
-  for (i = 0; i < ninputs; i++)
-    ctf_dprintf ("Input %i: %s\n", (int) i, ctf_link_input_name (inputs[i]));
-
   if (ctf_dedup_init (output) < 0)
     return -1; 					/* errno is set for us.  */
+
+  for (i = 0; i < ninputs; i++)
+    {
+      ctf_dprintf ("Input %i: %s\n", (int) i, ctf_link_input_name (inputs[i]));
+      if (ctf_dynhash_insert (d->cd_input_nums, inputs[i],
+			      (void *) (uintptr_t) i) < 0)
+	{
+	  ctf_set_errno (output, errno);
+	  ctf_err_warn (output, 0, errno, _("ctf_dedup: cannot initialize: %s\n"),
+			ctf_errmsg (errno));
+	  goto err;
+	}
+    }
 
   /* Some flags do not apply when CU-mapping: this is not a duplicated link,
      because there is only one output and we really don't want to end up marking
@@ -1905,15 +1928,17 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
       while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
 	{
-	  ctf_dedup_hash_type (output, inputs[i], inputs, parents,
-			       i, id, 0, 0, ctf_dedup_populate_mappings);
+	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
+				   parents, i, id, 0, 0,
+				   ctf_dedup_populate_mappings) == NULL)
+	    goto err;				/* errno is set for us.  */
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"computing type hashes"));
-	  return -1;
+	  goto err;
 	}
     }
 
@@ -1924,7 +1949,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
   ctf_dprintf ("Detecting type name ambiguity\n");
   if (ctf_dedup_detect_name_ambiguity (output, inputs) < 0)
-    return -1;					/* errno is set for us.  */
+      goto err;					/* errno is set for us.  */
 
   /* If the link mode is CTF_LINK_SHARE_DUPLICATED, we change any unconflicting
      types whose output mapping references only one input dict into a
@@ -1934,9 +1959,13 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
     {
       ctf_dprintf ("Conflictifying unshared types\n");
       if (ctf_dedup_conflictify_unshared (output, inputs) < 0)
-	return -1;				/* errno is set for us.  */
+	goto err;				/* errno is set for us.  */
     }
   return 0;
+
+ err:
+  ctf_dedup_fini (output, NULL, 0);
+  return -1;
 }
 
 static int
@@ -2004,42 +2033,44 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
      times, which is worse.  */
 
 #define CTF_TYPE_WALK(type, errlabel, errmsg)				\
-  do {									\
-    void *type_id;							\
-    const char *hashval;						\
-    int cited_type_input_num = input_num;				\
+  do									\
+    {									\
+      void *type_id;							\
+      const char *hashval;						\
+      int cited_type_input_num = input_num;				\
 									\
-    if ((fp->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (fp, type))) \
-      cited_type_input_num = parents[input_num];			\
+      if ((fp->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (fp, type))) \
+	cited_type_input_num = parents[input_num];			\
 									\
-    type_id = CTF_DEDUP_GID (output, cited_type_input_num, type);	\
+      type_id = CTF_DEDUP_GID (output, cited_type_input_num, type);	\
 									\
-    if (type == 0)							\
-      {									\
-	ctf_dprintf ("Walking: unimplemented type\n");			\
-	break;								\
-      }									\
+      if (type == 0)							\
+	{								\
+	  ctf_dprintf ("Walking: unimplemented type\n");		\
+	  break;							\
+	}								\
 									\
-    ctf_dprintf ("Looking up ID %i/%lx in type hashes\n",		\
-		 cited_type_input_num, type);				\
-    hashval = ctf_dynhash_lookup (d->cd_type_hashes, type_id);		\
-    if (!ctf_assert (output, hashval))					\
-      {									\
-	whaterr = N_("error looking up ID in type hashes");		\
-	goto errlabel;							\
-      }									\
-    ctf_dprintf ("ID %i/%lx has hash %s\n", cited_type_input_num, type,	\
-		 hashval);						\
+      ctf_dprintf ("Looking up ID %i/%lx in type hashes\n",		\
+		   cited_type_input_num, type);				\
+      hashval = ctf_dynhash_lookup (d->cd_type_hashes, type_id);	\
+      if (!ctf_assert (output, hashval))				\
+	{								\
+	  whaterr = N_("error looking up ID in type hashes");		\
+	  goto errlabel;						\
+	}								\
+      ctf_dprintf ("ID %i/%lx has hash %s\n", cited_type_input_num, type, \
+		   hashval);						\
 									\
-    ret = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents, \
-					  already_visited, hashval,	\
-					  visit_fun, arg, depth);	\
-    if (ret < 0)							\
-      {									\
-	whaterr = errmsg;						\
-	goto errlabel;							\
-      }									\
-  } while (0)
+      ret = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents, \
+					    already_visited, hashval,	\
+					    visit_fun, arg, depth);	\
+      if (ret < 0)							\
+	{								\
+	  whaterr = errmsg;						\
+	  goto errlabel;						\
+	}								\
+    }									\
+  while (0)
 
   switch (ctf_type_kind_unsliced (fp, type))
     {
@@ -2375,20 +2406,19 @@ ctf_dedup_maybe_synthesize_forward (ctf_dict_t *output, ctf_dict_t *target,
   ctf_dedup_t *td = &target->ctf_dedup;
   int kind;
   int fwdkind;
-  const char *name;
+  const char *name = ctf_type_name_raw (input, id);
   const char *decorated;
   void *v;
   ctf_id_t emitted_forward;
 
   if (!ctf_dynset_exists (od->cd_conflicting_types, hval, NULL)
       || target->ctf_flags & LCTF_CHILD
-      || !ctf_type_name_raw (input, id)
+      || name[0] == '\0'
       || (((kind = ctf_type_kind_unsliced (input, id)) != CTF_K_STRUCT
 	   && kind != CTF_K_UNION && kind != CTF_K_FORWARD)))
     return 0;
 
   fwdkind = ctf_type_kind_forwarded (input, id);
-  name = ctf_type_name_raw (input, id);
 
   ctf_dprintf ("Using synthetic forward for conflicted struct/union with "
 	       "hval %s\n", hval);
@@ -2860,7 +2890,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		     id, out_id);
 	/* Record the need to emit the members of this structure later.  */
 	if (ctf_dynhash_insert (d->cd_emission_struct_members, id, out_id) < 0)
-	  goto err_target;
+	  {
+	    ctf_set_errno (target, errno);
+	    goto err_target;
+	  }
 	break;
       }
     default:
@@ -3004,100 +3037,6 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   return ctf_set_errno (output, err);
 }
 
-/* Populate the type mapping used by the types in one FP (which must be an input
-   dict containing a non-null cd_output resulting from a ctf_dedup_emit_type
-   walk).  */
-static int
-ctf_dedup_populate_type_mapping (ctf_dict_t *shared, ctf_dict_t *fp,
-				 ctf_dict_t **inputs)
-{
-  ctf_dedup_t *d = &shared->ctf_dedup;
-  ctf_dict_t *output = fp->ctf_dedup.cd_output;
-  const void *k, *v;
-  ctf_next_t *i = NULL;
-  int err;
-
-  /* The shared dict (the output) stores its types in the fp itself, not in a
-     separate cd_output dict.  */
-  if (shared == fp)
-    output = fp;
-
-  /* There may be no types to emit at all, or all the types in this TU may be
-     shared.  */
-  if (!output || !output->ctf_dedup.cd_output_emission_hashes)
-    return 0;
-
-  while ((err = ctf_dynhash_cnext (output->ctf_dedup.cd_output_emission_hashes,
-				  &i, &k, &v)) == 0)
-    {
-      const char *hval = (const char *) k;
-      ctf_id_t id_out = (ctf_id_t) (uintptr_t) v;
-      ctf_next_t *j = NULL;
-      ctf_dynset_t *type_ids;
-      const void *id;
-
-      type_ids = ctf_dynhash_lookup (d->cd_output_mapping, hval);
-      if (!ctf_assert (shared, type_ids))
-	return -1;
-#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-      ctf_dprintf ("Traversing emission hash: hval %s\n", hval);
-#endif
-
-      while ((err = ctf_dynset_cnext (type_ids, &j, &id)) == 0)
-	{
-	  ctf_dict_t *input = inputs[CTF_DEDUP_GID_TO_INPUT (id)];
-	  ctf_id_t id_in = CTF_DEDUP_GID_TO_TYPE (id);
-
-#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-	  ctf_dprintf ("Adding mapping from %i/%lx to %lx\n",
-		       CTF_DEDUP_GID_TO_INPUT (id), id_in, id_out);
-#endif
-	  ctf_add_type_mapping (input, id_in, output, id_out);
-	}
-      if (err != ECTF_NEXT_END)
-	{
-	  ctf_next_destroy (i);
-	  goto err;
-	}
-    }
-  if (err != ECTF_NEXT_END)
-    goto err;
-
-  return 0;
-
- err:
-  ctf_err_warn (shared, 0, err, _("iteration error populating the type mapping"));
-  return ctf_set_errno (shared, err);
-}
-
-/* Populate the type mapping machinery used by the rest of the linker,
-   by ctf_add_type, etc.  */
-static int
-ctf_dedup_populate_type_mappings (ctf_dict_t *output, ctf_dict_t **inputs,
-				  uint32_t ninputs)
-{
-  size_t i;
-
-  if (ctf_dedup_populate_type_mapping (output, output, inputs) < 0)
-    {
-      ctf_err_warn (output, 0, 0, _("cannot populate type mappings for shared "
-				    "CTF dict"));
-      return -1;				/* errno is set for us.  */
-    }
-
-  for (i = 0; i < ninputs; i++)
-    {
-      if (ctf_dedup_populate_type_mapping (output, inputs[i], inputs) < 0)
-	{
-	  ctf_err_warn (output, 0, ctf_errno (inputs[i]),
-			_("cannot populate type mappings for per-CU CTF dict"));
-	  return ctf_set_errno (output, ctf_errno (inputs[i]));
-	}
-    }
-
-  return 0;
-}
-
 /* Emit deduplicated types into the outputs.  The shared type repository is
    OUTPUT, on which the ctf_dedup function must have already been called.  The
    PARENTS array contains the INPUTS index of the parent dict for every child
@@ -3126,9 +3065,6 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
   ctf_dprintf ("Populating struct members.\n");
   if (ctf_dedup_emit_struct_members (output, inputs, ninputs, parents) < 0)
-    return NULL;				/* errno is set for us.  */
-
-  if (ctf_dedup_populate_type_mappings (output, inputs, ninputs) < 0)
     return NULL;				/* errno is set for us.  */
 
   for (i = 0; i < ninputs; i++)
@@ -3164,6 +3100,76 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 	}
     }
 
-  ctf_dedup_fini (output, outputs, num_outputs);
   return outputs;
+}
+
+/* Determine what type SRC_FP / SRC_TYPE was emitted as in the FP, which
+   must be the shared dict or have it as a parent: return 0 if none.  The SRC_FP
+   must be a past input to ctf_dedup.  */
+
+ctf_id_t
+ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp, ctf_id_t src_type)
+{
+  ctf_dict_t *output = NULL;
+  ctf_dedup_t *d;
+  int input_num;
+  void *num_ptr;
+  void *type_ptr;
+  int found;
+  const char *hval;
+
+  /* It is an error (an internal error in the caller, in ctf-link.c) to call
+     this with an FP that is not a per-CU output or shared output dict, or with
+     a SRC_FP that was not passed to ctf_dedup as an input; it is an internal
+     error in ctf-dedup for the type passed not to have been hashed, though if
+     the src_fp is a child dict and the type is not a child type, it will have
+     been hashed under the GID corresponding to the parent.  */
+
+  if (fp->ctf_dedup.cd_type_hashes != NULL)
+    output = fp;
+  else if (fp->ctf_parent && fp->ctf_parent->ctf_dedup.cd_type_hashes != NULL)
+    output = fp->ctf_parent;
+  else
+    {
+      ctf_set_errno (fp, ECTF_INTERNAL);
+      ctf_err_warn (fp, 0, ECTF_INTERNAL,
+		    _("dict %p passed to ctf_dedup_type_mapping is not a "
+		      "deduplicated output"), (void *) fp);
+      return CTF_ERR;
+    }
+
+  if (src_fp->ctf_parent && ctf_type_isparent (src_fp, src_type))
+    src_fp = src_fp->ctf_parent;
+
+  d = &output->ctf_dedup;
+
+  found = ctf_dynhash_lookup_kv (d->cd_input_nums, src_fp, NULL, &num_ptr);
+  if (!ctf_assert (output, found != 0))
+    return CTF_ERR;				/* errno is set for us.  */
+  input_num = (uintptr_t) num_ptr;
+
+  hval = ctf_dynhash_lookup (d->cd_type_hashes,
+			     CTF_DEDUP_GID (output, input_num, src_type));
+
+  if (!ctf_assert (output, hval != NULL))
+    return CTF_ERR;				/* errno is set for us.  */
+
+  /* The emission hashes may be unset if this dict was created after
+     deduplication to house variables or other things that would conflict if
+     stored in the shared dict.  */
+  if (fp->ctf_dedup.cd_output_emission_hashes)
+    if (ctf_dynhash_lookup_kv (fp->ctf_dedup.cd_output_emission_hashes, hval,
+			       NULL, &type_ptr))
+      return (ctf_id_t) (uintptr_t) type_ptr;
+
+  if (fp->ctf_parent)
+    {
+      ctf_dict_t *pfp = fp->ctf_parent;
+      if (pfp->ctf_dedup.cd_output_emission_hashes)
+	if (ctf_dynhash_lookup_kv (pfp->ctf_dedup.cd_output_emission_hashes,
+				   hval, NULL, &type_ptr))
+	  return (ctf_id_t) (uintptr_t) type_ptr;
+    }
+
+  return 0;
 }

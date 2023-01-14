@@ -29,24 +29,30 @@
 
 #include "hashtab.h"
 
+struct attr_abbrev
+{
+  ENUM_BITFIELD(dwarf_attribute) name : 16;
+  ENUM_BITFIELD(dwarf_form) form : 16;
+
+  /* It is valid only if FORM is DW_FORM_implicit_const.  */
+  LONGEST implicit_const;
+};
+
 /* This data structure holds the information of an abbrev.  */
 struct abbrev_info
-  {
-    unsigned int number;	/* number identifying abbrev */
-    enum dwarf_tag tag;		/* dwarf tag */
-    unsigned short has_children;		/* boolean */
-    unsigned short num_attrs;	/* number of attributes */
-    struct attr_abbrev *attrs;	/* an array of attribute descriptions */
-  };
-
-struct attr_abbrev
-  {
-    ENUM_BITFIELD(dwarf_attribute) name : 16;
-    ENUM_BITFIELD(dwarf_form) form : 16;
-
-    /* It is valid only if FORM is DW_FORM_implicit_const.  */
-    LONGEST implicit_const;
-  };
+{
+  /* Number identifying abbrev.  */
+  unsigned int number;
+  /* DWARF tag.  */
+  enum dwarf_tag tag;
+  /* True if the DIE has children.  */
+  unsigned short has_children;
+  /* Number of attributes.  */
+  unsigned short num_attrs;
+  /* An array of attribute descriptions, allocated using the struct
+     hack.  */
+  struct attr_abbrev attrs[1];
+};
 
 struct abbrev_table;
 typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
@@ -65,7 +71,7 @@ struct abbrev_table
   /* Look up an abbrev in the table.
      Returns NULL if the abbrev is not found.  */
 
-  struct abbrev_info *lookup_abbrev (unsigned int abbrev_number)
+  const struct abbrev_info *lookup_abbrev (unsigned int abbrev_number) const
   {
     struct abbrev_info search;
     search.number = abbrev_number;
@@ -84,10 +90,6 @@ private:
   explicit abbrev_table (sect_offset off);
 
   DISABLE_COPY_AND_ASSIGN (abbrev_table);
-
-  /* Allocate space for a struct abbrev_info object in
-     ABBREV_TABLE.  */
-  struct abbrev_info *alloc_abbrev ();
 
   /* Add an abbreviation to the table.  */
   void add_abbrev (struct abbrev_info *abbrev);

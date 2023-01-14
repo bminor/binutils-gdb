@@ -1898,12 +1898,12 @@ update_watchpoint (struct watchpoint *b, int reparse)
     }
   else if (within_current_scope && b->exp)
     {
-      int pc = 0;
       std::vector<value_ref_ptr> val_chain;
       struct value *v, *result;
       struct program_space *frame_pspace;
 
-      fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, false);
+      fetch_subexp_value (b->exp.get (), b->exp->op.get (), &v, &result,
+			  &val_chain, false);
 
       /* Avoid setting b->val if it's already set.  The meaning of
 	 b->val is 'the last value' user saw, and we should update
@@ -1982,7 +1982,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
-		  loc->gdbarch = get_type_arch (value_type (v));
+		  loc->gdbarch = value_type (v)->arch ();
 
 		  loc->pspace = frame_pspace;
 		  loc->address = address_significant (loc->gdbarch, addr);
@@ -3327,6 +3327,110 @@ create_overlay_event_breakpoint (void)
     }
 }
 
+/* Install a master longjmp breakpoint for OBJFILE using a probe.  Return
+   true if a breakpoint was installed.  */
+
+static bool
+create_longjmp_master_breakpoint_probe (objfile *objfile)
+{
+  struct gdbarch *gdbarch = objfile->arch ();
+  struct breakpoint_objfile_data *bp_objfile_data
+    = get_breakpoint_objfile_data (objfile);
+
+  if (!bp_objfile_data->longjmp_searched)
+    {
+      std::vector<probe *> ret
+	= find_probes_in_objfile (objfile, "libc", "longjmp");
+
+      if (!ret.empty ())
+	{
+	  /* We are only interested in checking one element.  */
+	  probe *p = ret[0];
+
+	  if (!p->can_evaluate_arguments ())
+	    {
+	      /* We cannot use the probe interface here,
+		 because it does not know how to evaluate
+		 arguments.  */
+	      ret.clear ();
+	    }
+	}
+      bp_objfile_data->longjmp_probes = ret;
+      bp_objfile_data->longjmp_searched = 1;
+    }
+
+  if (bp_objfile_data->longjmp_probes.empty ())
+    return false;
+
+  for (probe *p : bp_objfile_data->longjmp_probes)
+    {
+      struct breakpoint *b;
+
+      b = create_internal_breakpoint (gdbarch,
+				      p->get_relocated_address (objfile),
+				      bp_longjmp_master,
+				      &internal_breakpoint_ops);
+      b->location = new_probe_location ("-probe-stap libc:longjmp");
+      b->enable_state = bp_disabled;
+    }
+
+  return true;
+}
+
+/* Install master longjmp breakpoints for OBJFILE using longjmp_names.
+   Return true if at least one breakpoint was installed.  */
+
+static bool
+create_longjmp_master_breakpoint_names (objfile *objfile)
+{
+  struct gdbarch *gdbarch = objfile->arch ();
+  if (!gdbarch_get_longjmp_target_p (gdbarch))
+    return false;
+
+  struct breakpoint_objfile_data *bp_objfile_data
+    = get_breakpoint_objfile_data (objfile);
+  unsigned int installed_bp = 0;
+
+  for (int i = 0; i < NUM_LONGJMP_NAMES; i++)
+    {
+      struct breakpoint *b;
+      const char *func_name;
+      CORE_ADDR addr;
+      struct explicit_location explicit_loc;
+
+      if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
+	continue;
+
+      func_name = longjmp_names[i];
+      if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
+	{
+	  struct bound_minimal_symbol m;
+
+	  m = lookup_minimal_symbol_text (func_name, objfile);
+	  if (m.minsym == NULL)
+	    {
+	      /* Prevent future lookups in this objfile.  */
+	      bp_objfile_data->longjmp_msym[i].minsym = &msym_not_found;
+	      continue;
+	    }
+	  bp_objfile_data->longjmp_msym[i] = m;
+	}
+
+      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
+      b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
+				      &internal_breakpoint_ops);
+      initialize_explicit_location (&explicit_loc);
+      explicit_loc.function_name = ASTRDUP (func_name);
+      b->location = new_explicit_location (&explicit_loc);
+      b->enable_state = bp_disabled;
+      installed_bp++;
+    }
+
+  return installed_bp > 0;
+}
+
+/* Create a master longjmp breakpoint.  */
+
 static void
 create_longjmp_master_breakpoint (void)
 {
@@ -3336,91 +3440,21 @@ create_longjmp_master_breakpoint (void)
     {
       set_current_program_space (pspace);
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile *obj : current_program_space->objfiles ())
 	{
-	  int i;
-	  struct gdbarch *gdbarch;
-	  struct breakpoint_objfile_data *bp_objfile_data;
-
-	  gdbarch = objfile->arch ();
-
-	  bp_objfile_data = get_breakpoint_objfile_data (objfile);
-
-	  if (!bp_objfile_data->longjmp_searched)
-	    {
-	      std::vector<probe *> ret
-		= find_probes_in_objfile (objfile, "libc", "longjmp");
-
-	      if (!ret.empty ())
-		{
-		  /* We are only interested in checking one element.  */
-		  probe *p = ret[0];
-
-		  if (!p->can_evaluate_arguments ())
-		    {
-		      /* We cannot use the probe interface here,
-			 because it does not know how to evaluate
-			 arguments.  */
-		      ret.clear ();
-		    }
-		}
-	      bp_objfile_data->longjmp_probes = ret;
-	      bp_objfile_data->longjmp_searched = 1;
-	    }
-
-	  if (!bp_objfile_data->longjmp_probes.empty ())
-	    {
-	      for (probe *p : bp_objfile_data->longjmp_probes)
-		{
-		  struct breakpoint *b;
-
-		  b = create_internal_breakpoint (gdbarch,
-						  p->get_relocated_address (objfile),
-						  bp_longjmp_master,
-						  &internal_breakpoint_ops);
-		  b->location = new_probe_location ("-probe-stap libc:longjmp");
-		  b->enable_state = bp_disabled;
-		}
-
-	      continue;
-	    }
-
-	  if (!gdbarch_get_longjmp_target_p (gdbarch))
+	  /* Skip separate debug object, it's handled in the loop below.  */
+	  if (obj->separate_debug_objfile_backlink != nullptr)
 	    continue;
 
-	  for (i = 0; i < NUM_LONGJMP_NAMES; i++)
-	    {
-	      struct breakpoint *b;
-	      const char *func_name;
-	      CORE_ADDR addr;
-	      struct explicit_location explicit_loc;
+	  /* Try a probe kind breakpoint on main objfile.  */
+	  if (create_longjmp_master_breakpoint_probe (obj))
+	    continue;
 
-	      if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
-		continue;
-
-	      func_name = longjmp_names[i];
-	      if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
-		{
-		  struct bound_minimal_symbol m;
-
-		  m = lookup_minimal_symbol_text (func_name, objfile);
-		  if (m.minsym == NULL)
-		    {
-		      /* Prevent future lookups in this objfile.  */
-		      bp_objfile_data->longjmp_msym[i].minsym = &msym_not_found;
-		      continue;
-		    }
-		  bp_objfile_data->longjmp_msym[i] = m;
-		}
-
-	      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
-	      b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
-					      &internal_breakpoint_ops);
-	      initialize_explicit_location (&explicit_loc);
-	      explicit_loc.function_name = ASTRDUP (func_name);
-	      b->location = new_explicit_location (&explicit_loc);
-	      b->enable_state = bp_disabled;
-	    }
+	  /* Try longjmp_names kind breakpoints on main and separate_debug
+	     objfiles.  */
+	  for (objfile *debug_objfile : obj->separate_debug_objfiles ())
+	    if (create_longjmp_master_breakpoint_names (debug_objfile))
+	      break;
 	}
     }
 }
@@ -3564,8 +3598,8 @@ create_exception_master_breakpoint_hook (objfile *objfile)
     }
 
   addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
-  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-					     current_top_target ());
+  addr = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, addr, current_inferior ()->top_target ());
   b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
 				  &internal_breakpoint_ops);
   initialize_explicit_location (&explicit_loc);
@@ -3591,11 +3625,10 @@ create_exception_master_breakpoint (void)
       if (create_exception_master_breakpoint_probe (obj))
 	continue;
 
-      /* Iterate over separate debug objects and try an _Unwind_DebugHook
-	 kind breakpoint.  */
-      for (objfile *sepdebug = obj->separate_debug_objfile;
-	   sepdebug != nullptr; sepdebug = sepdebug->separate_debug_objfile)
-	if (create_exception_master_breakpoint_hook (sepdebug))
+      /* Iterate over main and separate debug objects and try an
+	 _Unwind_DebugHook kind breakpoint.  */
+      for (objfile *debug_objfile : obj->separate_debug_objfiles ())
+	if (create_exception_master_breakpoint_hook (debug_objfile))
 	  break;
     }
 }
@@ -4836,7 +4869,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
       return 0;
     }
 
-  if (!target_stopped_data_address (current_top_target (), &addr))
+  if (!target_stopped_data_address (current_inferior ()->top_target (), &addr))
     {
       /* We were stopped by a watchpoint, but we don't know where.
 	 Mark all watchpoints as unknown.  */
@@ -4876,9 +4909,9 @@ watchpoints_triggered (struct target_waitstatus *ws)
 		  }
 	      }
 	    /* Exact match not required.  Within range is sufficient.  */
-	    else if (target_watchpoint_addr_within_range (current_top_target (),
-							 addr, loc->address,
-							 loc->length))
+	    else if (target_watchpoint_addr_within_range
+		       (current_inferior ()->top_target (), addr, loc->address,
+			loc->length))
 	      {
 		w->watchpoint_triggered = watch_triggered_yes;
 		break;
@@ -4978,7 +5011,6 @@ watchpoint_check (bpstat bs)
 	 free_all_values.  We can't call free_all_values because we
 	 might be in the middle of evaluating a function call.  */
 
-      int pc = 0;
       struct value *mark;
       struct value *new_val;
 
@@ -4989,7 +5021,8 @@ watchpoint_check (bpstat bs)
 	return WP_VALUE_CHANGED;
 
       mark = value_mark ();
-      fetch_subexp_value (b->exp.get (), &pc, &new_val, NULL, NULL, false);
+      fetch_subexp_value (b->exp.get (), b->exp->op.get (), &new_val,
+			  NULL, NULL, false);
 
       if (b->val_bitsize != 0)
 	new_val = extract_bitfield_from_watchpoint_value (b, new_val);
@@ -9644,8 +9677,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, SYMTAB_OBJFILE (sal->symtab));
-	      sal->section = SYMBOL_OBJ_SECTION (SYMTAB_OBJFILE (sal->symtab),
-						 sym);
+	      sal->section = sym->obj_section (SYMTAB_OBJFILE (sal->symtab));
 	    }
 	  else
 	    {
@@ -9659,7 +9691,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
 	      bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym.minsym)
-		sal->section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
+		sal->section = msym.obj_section ();
 	    }
 	}
     }
@@ -10090,109 +10122,7 @@ break_range_command (const char *arg, int from_tty)
 static bool
 watchpoint_exp_is_const (const struct expression *exp)
 {
-  int i = exp->nelts;
-
-  while (i > 0)
-    {
-      int oplenp, argsp;
-
-      /* We are only interested in the descriptor of each element.  */
-      operator_length (exp, i, &oplenp, &argsp);
-      i -= oplenp;
-
-      switch (exp->elts[i].opcode)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_REM:
-	case BINOP_MOD:
-	case BINOP_LSH:
-	case BINOP_RSH:
-	case BINOP_LOGICAL_AND:
-	case BINOP_LOGICAL_OR:
-	case BINOP_BITWISE_AND:
-	case BINOP_BITWISE_IOR:
-	case BINOP_BITWISE_XOR:
-	case BINOP_EQUAL:
-	case BINOP_NOTEQUAL:
-	case BINOP_LESS:
-	case BINOP_GTR:
-	case BINOP_LEQ:
-	case BINOP_GEQ:
-	case BINOP_REPEAT:
-	case BINOP_COMMA:
-	case BINOP_EXP:
-	case BINOP_MIN:
-	case BINOP_MAX:
-	case BINOP_INTDIV:
-	case BINOP_CONCAT:
-	case TERNOP_COND:
-	case TERNOP_SLICE:
-
-	case OP_LONG:
-	case OP_FLOAT:
-	case OP_LAST:
-	case OP_COMPLEX:
-	case OP_STRING:
-	case OP_ARRAY:
-	case OP_TYPE:
-	case OP_TYPEOF:
-	case OP_DECLTYPE:
-	case OP_TYPEID:
-	case OP_NAME:
-	case OP_OBJC_NSSTRING:
-
-	case UNOP_NEG:
-	case UNOP_LOGICAL_NOT:
-	case UNOP_COMPLEMENT:
-	case UNOP_ADDR:
-	case UNOP_HIGH:
-	case UNOP_CAST:
-
-	case UNOP_CAST_TYPE:
-	case UNOP_REINTERPRET_CAST:
-	case UNOP_DYNAMIC_CAST:
-	  /* Unary, binary and ternary operators: We have to check
-	     their operands.  If they are constant, then so is the
-	     result of that operation.  For instance, if A and B are
-	     determined to be constants, then so is "A + B".
-
-	     UNOP_IND is one exception to the rule above, because the
-	     value of *ADDR is not necessarily a constant, even when
-	     ADDR is.  */
-	  break;
-
-	case OP_VAR_VALUE:
-	  /* Check whether the associated symbol is a constant.
-
-	     We use SYMBOL_CLASS rather than TYPE_CONST because it's
-	     possible that a buggy compiler could mark a variable as
-	     constant even when it is not, and TYPE_CONST would return
-	     true in this case, while SYMBOL_CLASS wouldn't.
-
-	     We also have to check for function symbols because they
-	     are always constant.  */
-	  {
-	    struct symbol *s = exp->elts[i + 2].symbol;
-
-	    if (SYMBOL_CLASS (s) != LOC_BLOCK
-		&& SYMBOL_CLASS (s) != LOC_CONST
-		&& SYMBOL_CLASS (s) != LOC_CONST_BYTES)
-	      return false;
-	    break;
-	  }
-
-	/* The default action is to return 0 because we are using
-	   the optimistic approach here: If we don't know something,
-	   then it is not a constant.  */
-	default:
-	  return false;
-	}
-    }
-
-  return true;
+  return exp->op->constant_p ();
 }
 
 /* Watchpoint destructor.  */
@@ -10693,7 +10623,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   const char *cond_end = NULL;
   enum bptype bp_type;
   int thread = -1;
-  int pc = 0;
   /* Flag to indicate whether we are going to use masks for
      the hardware watchpoint.  */
   bool use_mask = false;
@@ -10810,7 +10739,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   exp_valid_block = tracker.block ();
   struct value *mark = value_mark ();
   struct value *val_as_value = nullptr;
-  fetch_subexp_value (exp.get (), &pc, &val_as_value, &result, NULL,
+  fetch_subexp_value (exp.get (), exp->op.get (), &val_as_value, &result, NULL,
 		      just_location);
 
   if (val_as_value != NULL && just_location)

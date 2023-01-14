@@ -47,7 +47,9 @@ bool ignore_first_breakpoint = false;
 
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
-#define DEBUG_EVENTS(x)	if (debug_events) debug_printf x
+#define DEBUG_EVENTS(fmt, ...) \
+  debug_prefixed_printf_cond (debug_events, "windows events", fmt, \
+			      ## __VA_ARGS__)
 
 windows_thread_info::~windows_thread_info ()
 {
@@ -115,11 +117,6 @@ get_image_name (HANDLE h, void *address, int unicode)
   if (address == NULL)
     return NULL;
 
-#ifdef _WIN32_WCE
-  /* Windows CE reports the address of the image name,
-     instead of an address of a pointer into the image name.  */
-  address_ptr = address;
-#else
   /* See if we could read the address of a string, and that the
      address isn't null.  */
   if (!ReadProcessMemory (h, address,  &address_ptr,
@@ -127,7 +124,6 @@ get_image_name (HANDLE h, void *address, int unicode)
       || done != sizeof (address_ptr)
       || !address_ptr)
     return NULL;
-#endif
 
   /* Find the length of the string.  */
   while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
@@ -260,11 +256,6 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
     case STATUS_WX86_BREAKPOINT:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
-#ifdef _WIN32_WCE
-      /* Remove the initial breakpoint.  */
-      check_breakpoints ((CORE_ADDR) (long) current_event
-			 .u.Exception.ExceptionRecord.ExceptionAddress);
-#endif
       break;
     case DBG_CONTROL_C:
       DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_C");
@@ -334,9 +325,8 @@ matching_pending_stop (bool debug_events)
       if (desired_stop_thread_id == -1
 	  || desired_stop_thread_id == item.thread_id)
 	{
-	  DEBUG_EVENTS (("windows_continue - pending stop anticipated, "
-			 "desired=0x%x, item=0x%x\n",
-			 desired_stop_thread_id, item.thread_id));
+	  DEBUG_EVENTS ("pending stop anticipated, desired=0x%x, item=0x%x",
+			desired_stop_thread_id, item.thread_id);
 	  return true;
 	}
     }
@@ -360,9 +350,8 @@ fetch_pending_stop (bool debug_events)
 	  result = *iter;
 	  current_event = iter->event;
 
-	  DEBUG_EVENTS (("get_windows_debug_event - "
-			 "pending stop found in 0x%x (desired=0x%x)\n",
-			 iter->thread_id, desired_stop_thread_id));
+	  DEBUG_EVENTS ("pending stop found in 0x%x (desired=0x%x)",
+			iter->thread_id, desired_stop_thread_id);
 
 	  pending_stops.erase (iter);
 	  break;
@@ -377,11 +366,11 @@ fetch_pending_stop (bool debug_events)
 BOOL
 continue_last_debug_event (DWORD continue_status, bool debug_events)
 {
-  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
-		  (unsigned) last_wait_event.dwProcessId,
-		  (unsigned) last_wait_event.dwThreadId,
-		  continue_status == DBG_CONTINUE ?
-		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
+  DEBUG_EVENTS ("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s)",
+		(unsigned) last_wait_event.dwProcessId,
+		(unsigned) last_wait_event.dwThreadId,
+		continue_status == DBG_CONTINUE ?
+		"DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED");
 
   return ContinueDebugEvent (last_wait_event.dwProcessId,
 			     last_wait_event.dwThreadId,

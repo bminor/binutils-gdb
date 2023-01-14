@@ -3279,7 +3279,7 @@ vax_cons (expressionS *exp, int size)
   save = input_line_pointer;
   if (input_line_pointer[0] == '%')
     {
-      if (strncmp (input_line_pointer + 1, "pcrel", 5) == 0)
+      if (startswith (input_line_pointer + 1, "pcrel"))
 	{
 	  input_line_pointer += 6;
 	  vax_cons_special_reloc = "pcrel";

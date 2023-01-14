@@ -27,7 +27,7 @@
 
 /* Return the COFF syment for a symbol.  */
 
-bfd_boolean
+bool
 bfd_coff_get_syment (bfd *abfd,
 		     asymbol *symbol,
 		     struct internal_syment *psyment)
@@ -39,7 +39,7 @@ bfd_coff_get_syment (bfd *abfd,
       || ! csym->native->is_sym)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
+      return false;
     }
 
   *psyment = csym->native->u.syment;
@@ -50,12 +50,12 @@ bfd_coff_get_syment (bfd *abfd,
 
   /* FIXME: We should handle fix_line here.  */
 
-  return TRUE;
+  return true;
 }
 
 /* Return the COFF auxent for a symbol.  */
 
-bfd_boolean
+bool
 bfd_coff_get_auxent (bfd *abfd,
 		     asymbol *symbol,
 		     int indx,
@@ -72,7 +72,7 @@ bfd_coff_get_auxent (bfd *abfd,
       || indx >= csym->native->u.syment.n_numaux)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
+      return false;
     }
 
   ent = csym->native + indx + 1;
@@ -95,5 +95,5 @@ bfd_coff_get_auxent (bfd *abfd,
       ((combined_entry_type *) pauxent->x_csect.x_scnlen.p
        - obj_raw_syments (abfd));
 
-  return TRUE;
+  return true;
 }

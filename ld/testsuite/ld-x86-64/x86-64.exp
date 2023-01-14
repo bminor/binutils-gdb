@@ -221,6 +221,16 @@ set x86_64tests {
      "-melf_x86_64 -pie -z notext tmpdir/pr20550a.o tmpdir/pr20550b.so"
      ""
      "--64" { dummy.s } {} "pr20550"}
+    {"Build pr27587"
+     "-melf_x86_64 -e main"
+     "" ""
+     { pr27587a.obj.bz2 pr27587b.obj.bz2 }
+     {{ld "pr27587.err"}} "pr27587"}
+    {"Build pr27590.o"
+     "-r -melf_x86_64"
+     "" ""
+     { pr27590a.obj.bz2 pr27590b.obj.bz2 }
+     {{readelf -SW pr27590.rd}} "pr27590.o"}
 }
 
 run_ld_link_tests $x86_64tests
@@ -1583,69 +1593,6 @@ if { [isnative] && [check_compiler_available] } {
 	    "-Wa,-mx86-used-note=yes" \
 	    {pass.c property-stack.S} \
 	    "property-3-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 3" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S} \
-	    "property-3" "pass.out" \
-	] \
-	[list \
-	    "Run property 3 (PIE)" \
-	    "-pie" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-1.S property-stack.S} \
-	    "property-3-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 3 (static)" \
-	    "-static" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-1.S pass.c property-stack.S} \
-	    "property-3-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 4" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    "property-4" "pass.out" \
-	] \
-	[list \
-	    "Run property 4 (PIE)" \
-	    "-pie" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    "property-4-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 4 (static)" \
-	    "-static" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    "property-4-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 5" \
-	    "-Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    "property-5" "pass.out" \
-	] \
-	[list \
-	    "Run property 5 (PIE)" \
-	    "-pie -Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    "property-5-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 5 (static)" \
-	    "-static -Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    "property-5-static" "pass.out" \
 	] \
 	[list \
 	    "Run pr22001-1a (PIC 1)" \

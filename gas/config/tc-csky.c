@@ -146,35 +146,35 @@
 #define LRW_DISP16_LEN    4   /* lrw32.  */
 
 /* Declare worker functions.  */
-bfd_boolean v1_work_lrw (void);
-bfd_boolean v1_work_jbsr (void);
-bfd_boolean v1_work_fpu_fo (void);
-bfd_boolean v1_work_fpu_fo_fc (void);
-bfd_boolean v1_work_fpu_write (void);
-bfd_boolean v1_work_fpu_read (void);
-bfd_boolean v1_work_fpu_writed (void);
-bfd_boolean v1_work_fpu_readd (void);
-bfd_boolean v2_work_istack (void);
-bfd_boolean v2_work_btsti (void);
-bfd_boolean v2_work_addi (void);
-bfd_boolean v2_work_subi (void);
-bfd_boolean v2_work_add_sub (void);
-bfd_boolean v2_work_rotlc (void);
-bfd_boolean v2_work_bgeni (void);
-bfd_boolean v2_work_not (void);
-bfd_boolean v2_work_jbtf (void);
-bfd_boolean v2_work_jbr (void);
-bfd_boolean v2_work_lrw (void);
-bfd_boolean v2_work_lrsrsw (void);
-bfd_boolean v2_work_jbsr (void);
-bfd_boolean v2_work_jsri (void);
-bfd_boolean v2_work_movih (void);
-bfd_boolean v2_work_ori (void);
-bfd_boolean float_work_fmovi (void);
-bfd_boolean dsp_work_bloop (void);
-bfd_boolean float_work_fpuv3_fmovi (void);
-bfd_boolean float_work_fpuv3_fstore (void);
-bfd_boolean v2_work_addc (void);
+bool v1_work_lrw (void);
+bool v1_work_jbsr (void);
+bool v1_work_fpu_fo (void);
+bool v1_work_fpu_fo_fc (void);
+bool v1_work_fpu_write (void);
+bool v1_work_fpu_read (void);
+bool v1_work_fpu_writed (void);
+bool v1_work_fpu_readd (void);
+bool v2_work_istack (void);
+bool v2_work_btsti (void);
+bool v2_work_addi (void);
+bool v2_work_subi (void);
+bool v2_work_add_sub (void);
+bool v2_work_rotlc (void);
+bool v2_work_bgeni (void);
+bool v2_work_not (void);
+bool v2_work_jbtf (void);
+bool v2_work_jbr (void);
+bool v2_work_lrw (void);
+bool v2_work_lrsrsw (void);
+bool v2_work_jbsr (void);
+bool v2_work_jsri (void);
+bool v2_work_movih (void);
+bool v2_work_ori (void);
+bool float_work_fmovi (void);
+bool dsp_work_bloop (void);
+bool float_work_fpuv3_fmovi (void);
+bool float_work_fpuv3_fstore (void);
+bool v2_work_addc (void);
 
 /* csky-opc.h must be included after workers are declared.  */
 #include "opcodes/csky-opc.h"
@@ -501,8 +501,8 @@ static int do_noliteraldump = 0;
 static symbolS * poolsym;
 static char poolname[8];
 
-static bfd_boolean mov_r1_before;
-static bfd_boolean mov_r1_after;
+static bool mov_r1_before;
+static bool mov_r1_after;
 
 const relax_typeS csky_relax_table [] =
 {
@@ -1249,7 +1249,7 @@ static const struct csky_option_value_table csky_float_abis[] =
   {NULL,	0}
 };
 
-static bfd_boolean
+static bool
 parse_float_abi (const char *str)
 {
   const struct csky_option_value_table * opt;
@@ -1258,11 +1258,11 @@ parse_float_abi (const char *str)
     if (strcasecmp (opt->name, str) == 0)
       {
 	float_abi = opt->value;
-	return TRUE;
+	return true;
       }
 
   as_bad (_("unknown floating point abi `%s'\n"), str);
-  return FALSE;
+  return false;
 }
 
 #ifdef OBJ_ELF
@@ -2506,7 +2506,7 @@ parse_rtf (char *s, int ispcrel, expressionS *ep)
   return s;
 }
 
-static bfd_boolean
+static bool
 parse_type_ctrlreg (char** oper)
 {
   int i = -1;
@@ -2546,21 +2546,21 @@ parse_type_ctrlreg (char** oper)
 	  if (*s != '<')
 	    {
 	      SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
-	      return FALSE;
+	      return false;
 	    }
 	  s++;
 	  crx = strtol(s, &s, 10);
 	  if (crx < 0 || crx > 31 || *s != ',')
 	    {
 	      SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
-	      return FALSE;
+	      return false;
 	    }
 	  s++;
 	  sel = strtol(s, &s, 10);
 	  if (sel < 0 || sel > 31 || *s != '>')
 	    {
 	      SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
-	      return FALSE;
+	      return false;
 	    }
 	  s++;
 	}
@@ -2570,7 +2570,7 @@ parse_type_ctrlreg (char** oper)
 	  if (crx < 0)
 	    {
 	      SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
-	      return FALSE;
+	      return false;
 	    }
 	}
 	i = (sel << 5) | crx;
@@ -2581,12 +2581,12 @@ parse_type_ctrlreg (char** oper)
       if (i < 0)
 	{
 	  SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
-	  return FALSE;
+	  return false;
 	}
     }
   *oper = s;
   csky_insn.val[csky_insn.idx++] = i;
-  return TRUE;
+  return true;
 }
 
 static int
@@ -2599,7 +2599,7 @@ csky_get_reg_val (char *str, int *len)
   return regno;
 }
 
-static bfd_boolean
+static bool
 is_reg_sp_with_bracket (char **oper)
 {
   int reg;
@@ -2612,7 +2612,7 @@ is_reg_sp_with_bracket (char **oper)
     sp_idx = 14;
 
   if (**oper != '(')
-      return FALSE;
+      return false;
   *oper += 1;
   reg = csky_get_reg_val (*oper, &len);
   *oper += len;
@@ -2622,19 +2622,19 @@ is_reg_sp_with_bracket (char **oper)
         {
           SET_ERROR_STRING (ERROR_UNDEFINE,
 			    "Operand format is error. '(sp)' expected");
-          return FALSE;
+          return false;
         }
       *oper += 1;
       csky_insn.val[csky_insn.idx++] = sp_idx;
-      return TRUE;
+      return true;
     }
 
   SET_ERROR_STRING (ERROR_UNDEFINE,
 		    "Operand format is error. '(sp)' expected");
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
+static bool
 is_reg_sp (char **oper)
 {
   char sp_name[16];
@@ -2650,7 +2650,7 @@ is_reg_sp (char **oper)
     {
       *oper += 2;
       csky_insn.val[csky_insn.idx++] = sp_idx;
-      return TRUE;
+      return true;
     }
 
   len = sprintf (sp_name, "r%d", sp_idx);
@@ -2658,10 +2658,10 @@ is_reg_sp (char **oper)
     {
       *oper += len;
       csky_insn.val[csky_insn.idx++] = sp_idx;
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 static int
@@ -2688,7 +2688,7 @@ csky_get_freg_val (char *str, int *len)
   return reg;
 }
 
-static bfd_boolean
+static bool
 is_reglist_legal (char **oper)
 {
   int reg1 = -1;
@@ -2701,14 +2701,14 @@ is_reglist_legal (char **oper)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The first reg must not be r0/r15");
-      return FALSE;
+      return false;
     }
 
   if (**oper != '-')
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The operand format must be rx-ry");
-      return FALSE;
+      return false;
     }
   *oper += 1;
 
@@ -2719,7 +2719,7 @@ is_reglist_legal (char **oper)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The operand format must be r15 in C-SKY V1");
-      return FALSE;
+      return false;
     }
   if (IS_CSKY_V2 (mach_flag))
     {
@@ -2727,17 +2727,17 @@ is_reglist_legal (char **oper)
 	{
 	  SET_ERROR_STRING (ERROR_REG_FORMAT,
 			    "The operand format must be rx-ry (rx < ry)");
-	  return FALSE;
+	  return false;
 	}
       reg2 = reg2 - reg1;
       reg1 <<= 5;
       reg1 |= reg2;
     }
   csky_insn.val[csky_insn.idx++] = reg1;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_freglist_legal (char **oper)
 {
   int reg1 = -1;
@@ -2751,14 +2751,14 @@ is_freglist_legal (char **oper)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The fpu register format is not recognized.");
-      return FALSE;
+      return false;
     }
 
   if (**oper != '-')
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The operand format must be vrx-vry/frx-fry.");
-      return FALSE;
+      return false;
     }
   *oper += 1;
 
@@ -2769,20 +2769,20 @@ is_freglist_legal (char **oper)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The fpu register format is not recognized.");
-      return FALSE;
+      return false;
     }
   if (reg2 < reg1)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			"The operand format must be rx-ry(rx < ry)");
-      return FALSE;
+      return false;
     }
 
   reg2 = reg2 - reg1;
   /* The fldm/fstm in CSKY_ISA_FLOAT_7E60 has 5 bits frz(reg1).  */
   shift = 4;
-  if (strncmp (csky_insn.opcode->mnemonic, "fstm", 4) == 0
-      || strncmp (csky_insn.opcode->mnemonic, "fldm", 4) == 0)
+  if (startswith (csky_insn.opcode->mnemonic, "fstm")
+      || startswith (csky_insn.opcode->mnemonic, "fldm"))
     {
       if ((!(isa_flag & CSKY_ISA_FLOAT_7E60)
 	   && (reg2 > (int)15 || reg1 > 15))
@@ -2792,7 +2792,7 @@ is_freglist_legal (char **oper)
 	  /* ISA_FLOAT_E1 fstm/fldm fry-frx is within 15.
 	     ISA_FLOAT_7E60 fstm(u)/fldm(u) frx-fry is within 31.  */
 	  SET_ERROR_STRING(ERROR_REG_FORMAT, (void *)"frx-fry is over range");
-	  return FALSE;
+	  return false;
 	}
       if ((mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_860)
 	{
@@ -2803,16 +2803,16 @@ is_freglist_legal (char **oper)
     {
       if (reg2 > (int)0x3) {
         SET_ERROR_STRING(ERROR_REG_FORMAT, (void *)"vry-vrx is over range");
-        return FALSE;
+        return false;
       }
     }
   reg2 <<= shift;
   reg1 |= reg2;
   csky_insn.val[csky_insn.idx++] = reg1;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_reglist_dash_comma_legal (char **oper, struct operand *oprnd)
 {
   int reg1 = -1;
@@ -2827,7 +2827,7 @@ is_reglist_dash_comma_legal (char **oper, struct operand *oprnd)
       if (reg1 == -1)
 	{
 	  SET_ERROR_STRING (ERROR_REG_LIST, NULL);
-	  return FALSE;
+	  return false;
 	}
       flag |= (1 << reg1);
       *oper += len;
@@ -2838,13 +2838,13 @@ is_reglist_dash_comma_legal (char **oper, struct operand *oprnd)
 	  if (reg2 == -1)
 	    {
 	      SET_ERROR_STRING (ERROR_REG_LIST, NULL);
-	      return FALSE;
+	      return false;
 	    }
 	  *oper += len;
 	  if (reg1 > reg2)
 	    {
 	      SET_ERROR_STRING (ERROR_REG_LIST, NULL);
-	      return FALSE;
+	      return false;
 	    }
 	  while (reg2 >= reg1)
 	    {
@@ -2860,7 +2860,7 @@ is_reglist_dash_comma_legal (char **oper, struct operand *oprnd)
   if (flag & ~(REGLIST_BITS))
     {
       SET_ERROR_STRING (ERROR_REG_LIST, NULL);
-      return FALSE;
+      return false;
     }
   /* Check r4-r11.  */
   int i = 4;
@@ -2893,13 +2893,13 @@ is_reglist_dash_comma_legal (char **oper, struct operand *oprnd)
   if (oprnd->mask == OPRND_MASK_0_4 && (list & ~OPRND_MASK_0_4))
     {
       SET_ERROR_STRING (ERROR_REG_LIST, NULL);
-      return FALSE;
+      return false;
     }
   csky_insn.val[csky_insn.idx++] = list;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_reg_lshift_illegal (char **oper, int is_float)
 {
   int value;
@@ -2909,7 +2909,7 @@ is_reg_lshift_illegal (char **oper, int is_float)
   if (reg == -1)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT, "The register must be r0-r31.");
-      return FALSE;
+      return false;
     }
 
   *oper += len;
@@ -2917,7 +2917,7 @@ is_reg_lshift_illegal (char **oper, int is_float)
     {
       SET_ERROR_STRING (ERROR_UNDEFINE,
 			"Operand format error; should be (rx, ry << n)");
-      return FALSE;
+      return false;
     }
   *oper += 2;
 
@@ -2930,13 +2930,13 @@ is_reg_lshift_illegal (char **oper, int is_float)
       if (e.X_add_number < 0 || e.X_add_number > 3)
 	{
 	  SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   else
     {
       SET_ERROR_STRING (ERROR_EXP_CONSTANT, NULL);
-      return FALSE;
+      return false;
     }
   if (is_float)
     value = (reg << 2) | e.X_add_number;
@@ -2944,22 +2944,22 @@ is_reg_lshift_illegal (char **oper, int is_float)
     value = (reg << 5) | (1 << e.X_add_number);
   csky_insn.val[csky_insn.idx++] = value;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_imm_within_range (char **oper, int min, int max)
 {
   expressionS e;
-  bfd_boolean ret = FALSE;
+  bool ret = false;
   char *new_oper = parse_exp (*oper, &e);
   if (e.X_op == O_constant)
     {
-      ret = TRUE;
+      ret = true;
       *oper = new_oper;
       if (e.X_add_number < min || e.X_add_number > max)
 	{
-	  ret = FALSE;
+	  ret = false;
 	  SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
 	}
       if (!e.X_unsigned)
@@ -2972,20 +2972,20 @@ is_imm_within_range (char **oper, int min, int max)
   return ret;
 }
 
-static bfd_boolean
+static bool
 is_imm_within_range_ext (char **oper, int min, int max, int ext)
 {
   expressionS e;
-  bfd_boolean ret = FALSE;
+  bool ret = false;
   char *new_oper = parse_exp (*oper, &e);
   if (e.X_op == O_constant)
     {
-      ret = TRUE;
+      ret = true;
       *oper = new_oper;
       if ((int)e.X_add_number != ext
 	  && (e.X_add_number < min || e.X_add_number > max))
 	{
-	  ret = FALSE;
+	  ret = false;
 	  SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
 	}
       csky_insn.val[csky_insn.idx++] = e.X_add_number;
@@ -2997,19 +2997,19 @@ is_imm_within_range_ext (char **oper, int min, int max, int ext)
   return ret;
 }
 
-static bfd_boolean
+static bool
 is_oimm_within_range (char **oper, int min, int max)
 {
   expressionS e;
-  bfd_boolean ret = FALSE;
+  bool ret = false;
   char *new_oper = parse_exp (*oper, &e);
   if (e.X_op == O_constant)
     {
-      ret = TRUE;
+      ret = true;
       *oper = new_oper;
       if (e.X_add_number < min || e.X_add_number > max)
 	{
-	  ret = FALSE;
+	  ret = false;
 	  SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
 	}
       csky_insn.val[csky_insn.idx++] = e.X_add_number - 1;
@@ -3020,7 +3020,7 @@ is_oimm_within_range (char **oper, int min, int max)
   return ret;
 }
 
-static bfd_boolean
+static bool
 is_psr_bit (char **oper)
 {
   const struct psrbit *bits;
@@ -3042,15 +3042,15 @@ is_psr_bit (char **oper)
 	{
 	  *oper += strlen (bits[i].name);
 	  csky_insn.val[csky_insn.idx] |= bits[i].value;
-	  return TRUE;
+	  return true;
 	}
       i++;
     }
   SET_ERROR_STRING (ERROR_OPCODE_PSRBIT, NULL);
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
+static bool
 parse_type_cpidx (char** oper)
 {
   char *s = *oper;
@@ -3068,7 +3068,7 @@ parse_type_cpidx (char** oper)
 	  *oper += 3;
 	}
       else
-	return FALSE;
+	return false;
     }
   else
     {
@@ -3077,17 +3077,17 @@ parse_type_cpidx (char** oper)
       if (e.X_op != O_constant)
 	{
 	  /* Can not recognize the operand.  */
-	  return FALSE;
+	  return false;
 	}
       idx = e.X_add_number;
     }
 
   csky_insn.val[csky_insn.idx++] = idx;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 parse_type_cpreg (char** oper)
 {
   expressionS e;
@@ -3095,7 +3095,7 @@ parse_type_cpreg (char** oper)
   if (strncasecmp (*oper, "cpr", 3) != 0)
     {
       SET_ERROR_STRING(ERROR_CPREG_ILLEGAL, *oper);
-      return FALSE;
+      return false;
     }
 
   *oper += 3;
@@ -3104,15 +3104,15 @@ parse_type_cpreg (char** oper)
   if (e.X_op != O_constant)
     {
       SET_ERROR_STRING(ERROR_CPREG_ILLEGAL, *oper);
-      return FALSE;
+      return false;
     }
 
   csky_insn.val[csky_insn.idx++] = e.X_add_number;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 parse_type_cpcreg (char** oper)
 {
   expressionS e;
@@ -3120,7 +3120,7 @@ parse_type_cpcreg (char** oper)
   if (strncasecmp (*oper, "cpcr", 4) != 0)
     {
       SET_ERROR_STRING(ERROR_CPREG_ILLEGAL, *oper);
-      return FALSE;
+      return false;
     }
 
   *oper += 4;
@@ -3129,15 +3129,15 @@ parse_type_cpcreg (char** oper)
   if (e.X_op != O_constant)
     {
       SET_ERROR_STRING(ERROR_CPREG_ILLEGAL, *oper);
-      return FALSE;
+      return false;
     }
 
   csky_insn.val[csky_insn.idx++] = e.X_add_number;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 parse_type_areg (char** oper)
 {
   int i = 0;
@@ -3146,15 +3146,15 @@ parse_type_areg (char** oper)
   if (i == -1)
     {
       SET_ERROR_STRING (ERROR_GREG_ILLEGAL, NULL);
-      return FALSE;
+      return false;
     }
   *oper += len;
   csky_insn.val[csky_insn.idx++] = i;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 parse_type_freg (char** oper, int even)
 {
   int reg;
@@ -3164,14 +3164,14 @@ parse_type_freg (char** oper, int even)
     {
       SET_ERROR_STRING (ERROR_REG_FORMAT,
 			(void *)"The fpu register format is not recognized.");
-      return FALSE;
+      return false;
     }
   *oper += len;
   csky_insn.opcode_end = *oper;
   if (even && reg & 0x1)
     {
       SET_ERROR_STRING (ERROR_EXP_EVEN_FREG, NULL);
-      return FALSE;
+      return false;
     }
 
   if (IS_CSKY_V2 (mach_flag)
@@ -3187,7 +3187,7 @@ parse_type_freg (char** oper, int even)
 	{
 	  SET_ERROR_INTEGER (ERROR_FREG_OVER_RANGE, reg);
 	}
-      return FALSE;
+      return false;
     }
   /* TODO: recognize vreg or freg.  */
   if (reg > 31)
@@ -3195,10 +3195,10 @@ parse_type_freg (char** oper, int even)
       SET_ERROR_INTEGER (ERROR_VREG_OVER_RANGE, reg);
     }
   csky_insn.val[csky_insn.idx++] = reg;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 parse_ldst_imm (char **oper, struct csky_opcode_info *op ATTRIBUTE_UNUSED,
 		struct operand *oprnd)
 {
@@ -3219,7 +3219,7 @@ parse_ldst_imm (char **oper, struct csky_opcode_info *op ATTRIBUTE_UNUSED,
   if (**oper == '\0' || **oper == ')')
     {
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     }
 
   expressionS e;
@@ -3228,24 +3228,24 @@ parse_ldst_imm (char **oper, struct csky_opcode_info *op ATTRIBUTE_UNUSED,
     {
     /* Not a constant.  */
       SET_ERROR_STRING(ERROR_UNDEFINE, (void *)"Operand format is error. eg. \"ld rz, (rx, n)\"");
-    return FALSE;
+    return false;
     }
   else if (e.X_add_number < 0 || e.X_add_number >= max)
     {
       /* Out of range.  */
       SET_ERROR_STRING(ERROR_IMM_OVERFLOW, NULL);
-      return FALSE;
+      return false;
     }
   if ((e.X_add_number % (1 << shift)) != 0)
     {
       /* Not aligned.  */
       SET_ERROR_INTEGER (ERROR_OFFSET_UNALIGNED, ((unsigned long)1 << shift));
-      return FALSE;
+      return false;
     }
 
   csky_insn.val[csky_insn.idx++] = e.X_add_number >> shift;
 
-  return TRUE;
+  return true;
 
 }
 
@@ -3289,14 +3289,14 @@ csky_count_operands (char *str)
 /* Parse the opcode part of an instruction.  Fill in the csky_insn
    state and return true on success, false otherwise.  */
 
-static bfd_boolean
+static bool
 parse_opcode (char *str)
 {
 #define IS_OPCODE32F(a) (*(a - 2) == '3' && *(a - 1) == '2')
 #define IS_OPCODE16F(a) (*(a - 2) == '1' && *(a - 1) == '6')
 
   /* TRUE if this opcode has a suffix, like 'lrw.h'.  */
-  unsigned int has_suffix = FALSE;
+  unsigned int has_suffix = false;
   unsigned int nlen = 0;
   char *opcode_end;
   char name[OPCODE_MAX_LEN + 1];
@@ -3314,9 +3314,9 @@ parse_opcode (char *str)
     {
       /* Is csky force 32 or 16 instruction?  */
       if (IS_CSKY_V2 (mach_flag)
-	  && *opcode_end == '.' && has_suffix == FALSE)
+	  && *opcode_end == '.' && !has_suffix)
 	{
-	  has_suffix = TRUE;
+	  has_suffix = true;
 	  if (IS_OPCODE32F (opcode_end))
 	    {
 	      csky_insn.flag_force = INSN_OPCODE32F;
@@ -3334,7 +3334,7 @@ parse_opcode (char *str)
     }
 
   /* Is csky force 32 or 16 instruction?  */
-  if (has_suffix == FALSE)
+  if (!has_suffix)
     {
       if (IS_CSKY_V2 (mach_flag) && IS_OPCODE32F (opcode_end))
 	{
@@ -3350,7 +3350,7 @@ parse_opcode (char *str)
   name[nlen] = '\0';
 
   /* Generate macro_name for finding hash in macro hash_table.  */
-  if (has_suffix == TRUE)
+  if (has_suffix)
     nlen += 2;
   strncpy (macro_name, str, nlen);
   macro_name[nlen] = '\0';
@@ -3370,14 +3370,14 @@ parse_opcode (char *str)
 							   name);
 
   if (csky_insn.macro == NULL && csky_insn.opcode == NULL)
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 /* Main dispatch routine to parse operand OPRND for opcode OP from string
    *OPER.  */
 
-static bfd_boolean
+static bool
 get_operand_value (struct csky_opcode_info *op,
 		   char **oper, struct operand *oprnd)
 {
@@ -3415,7 +3415,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  SET_ERROR_STRING ((oprnd->type == OPRND_TYPE_BRACKET
 			     ? ERROR_MISSING_LBRACKET
 			     : ERROR_MISSING_LANGLE_BRACKETS), NULL);
-	  return FALSE;
+	  return false;
 	}
 
       /* If the oprnd2 is an immediate, it can not be parsed
@@ -3436,31 +3436,31 @@ get_operand_value (struct csky_opcode_info *op,
 	  SET_ERROR_STRING ((oprnd->type == OPRND_TYPE_BRACKET
 			     ? ERROR_MISSING_RBRACKET
 			     : ERROR_MISSING_RANGLE_BRACKETS), NULL);
-	  return FALSE;
+	  return false;
 	}
 
-      if (get_operand_value (op, oper, &soprnd->subs[0]) == FALSE)
+      if (!get_operand_value (op, oper, &soprnd->subs[0]))
 	{
 	  *s = rc;
-	  return FALSE;
+	  return false;
 	}
       if (**oper == ',')
 	*oper += 1;
       else if (**oper != '\0')
 	{
 	  SET_ERROR_STRING (ERROR_MISSING_COMMA, NULL);
-	  return FALSE;
+	  return false;
 	}
 
-      if (get_operand_value (op, oper, &soprnd->subs[1]) == FALSE)
+      if (!get_operand_value (op, oper, &soprnd->subs[1]))
 	{
 	  *s = rc;
-	  return FALSE;
+	  return false;
 	}
 
       *s = rc;
       *oper += 1;
-      return TRUE;
+      return true;
     }
 
   switch (oprnd->type)
@@ -3495,17 +3495,17 @@ get_operand_value (struct csky_opcode_info *op,
 	if (reg == -1)
 	  {
 	    SET_ERROR_STRING (ERROR_GREG_ILLEGAL, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	else if ((oprnd->type == OPRND_TYPE_GREG0_7 && reg > 7)
 		 || (oprnd->type == OPRND_TYPE_GREG0_15 && reg > 15))
 	  {
 	    SET_ERROR_INTEGER (ERROR_REG_OVER_RANGE, reg);
-	    return FALSE;
+	    return false;
 	  }
 	*oper += len;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_REGnsplr:
       {
@@ -3518,11 +3518,11 @@ get_operand_value (struct csky_opcode_info *op,
 		&& (reg == V1_REG_SP || reg == V1_REG_LR)))
 	  {
 	    SET_ERROR_STRING (ERROR_REG_OVER_RANGE, reg);
-	    return FALSE;
+	    return false;
 	  }
 	csky_insn.val[csky_insn.idx++] = reg;
 	*oper += len;
-	return TRUE;;
+	return true;;
       }
     case OPRND_TYPE_REGnr4_r7:
       {
@@ -3532,24 +3532,24 @@ get_operand_value (struct csky_opcode_info *op,
 	  *oper += 1;
 	reg = csky_get_reg_val (*oper, &len);
 	if (reg == -1 || (reg <= 7 && reg >= 4))
-	  return FALSE;
+	  return false;
 
 	csky_insn.val[csky_insn.idx++] = reg;
 	*oper += len;
 
 	if (**oper == ')')
 	  *oper += 1;
-	return TRUE;;
+	return true;;
       }
     case OPRND_TYPE_REGr4_r7:
       if (memcmp (*oper, "r4-r7", sizeof ("r4-r7") - 1) == 0)
 	{
 	  *oper += sizeof ("r4-r7") - 1;
 	  csky_insn.val[csky_insn.idx++] = 0;
-	  return TRUE;
+	  return true;
 	}
       SET_ERROR_STRING (ERROR_OPCODE_ILLEGAL, NULL);
-      return FALSE;
+      return false;
     case OPRND_TYPE_IMM_LDST:
       return parse_ldst_imm (oper, op, oprnd);
     case OPRND_TYPE_IMM_FLDST:
@@ -3564,7 +3564,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  && (op->opcode & 0xffff0000) != 0)
 	{
 	  SET_ERROR_STRING (ERROR_OPCODE_ILLEGAL, NULL);
-	  return FALSE;
+	  return false;
 	}
       *oper = parse_exp (*oper, &csky_insn.e1);
       if (csky_insn.e1.X_op == O_constant)
@@ -3573,12 +3573,12 @@ get_operand_value (struct csky_opcode_info *op,
 	  if (csky_insn.e1.X_add_number & 0x7)
 	    {
 	      SET_ERROR_STRING (ERROR_JMPIX_OVER_RANGE, NULL);
-	      return FALSE;
+	      return false;
 	    }
 	  csky_insn.val[csky_insn.idx++]
 	    = (csky_insn.e1.X_add_number >> 3) - 2;
 	}
-      return TRUE;
+      return true;
     case OPRND_TYPE_IMM4b:
       return is_imm_within_range (oper, 0, 15);
     case OPRND_TYPE_IMM5b:
@@ -3596,10 +3596,10 @@ get_operand_value (struct csky_opcode_info *op,
 		str_hash_find (csky_opcodes_hash, name);
 	      csky_insn.val[csky_insn.idx - 1] = 1 << val;
 	    }
-	  return TRUE;
+	  return true;
 	}
       else
-	return FALSE;
+	return false;
 
     case OPRND_TYPE_IMM5b_1_31:
       return is_imm_within_range (oper, 1, 31);
@@ -3610,10 +3610,10 @@ get_operand_value (struct csky_opcode_info *op,
 	  int val = csky_insn.val[csky_insn.idx - 1];
 	  log = csky_log_2 (val);
 	  csky_insn.val[csky_insn.idx - 1] = log;
-	  return (log == -1 ? FALSE : TRUE);
+	  return log != -1;
 	}
       else
-	return FALSE;
+	return false;
 
       /* This type for "mgeni" in csky v1 ISA.  */
       case OPRND_TYPE_IMM5b_7_31_POWER:
@@ -3632,10 +3632,10 @@ get_operand_value (struct csky_opcode_info *op,
 	      }
 	    else
 	      csky_insn.val[csky_insn.idx - 1] = log;
-	    return (log == -1 ? FALSE : TRUE);
+	    return log != -1;
 	  }
 	else
-	  return FALSE;
+	  return false;
 
     case OPRND_TYPE_IMM5b_LS:
       return is_imm_within_range (oper,
@@ -3649,10 +3649,10 @@ get_operand_value (struct csky_opcode_info *op,
 	  {
 	    int i = csky_insn.idx - 1;
 	    csky_insn.val[i] = 32 - csky_insn.val[i];
-	    return TRUE;
+	    return true;
 	  }
 	else
-	  return FALSE;
+	  return false;
       }
 
     case OPRND_TYPE_IMM5b_BMASKI:
@@ -3667,12 +3667,12 @@ get_operand_value (struct csky_opcode_info *op,
 	      csky_insn.opcode = (struct csky_opcode *)
 		str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
-		return FALSE;
+		return false;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << mask_val) - 1;
-	      return TRUE;
+	      return true;
 	    }
 	}
-      return TRUE;
+      return true;
 
     case OPRND_TYPE_IMM5b_VSH:
     /* For vshri.T and vshli.T.  */
@@ -3682,18 +3682,18 @@ get_operand_value (struct csky_opcode_info *op,
 	  val =  (val << 1) | (val >> 4);
 	  val &= 0x1f;
 	  csky_insn.val[csky_insn.idx - 1] = val;
-	  return TRUE;
+	  return true;
 	}
-      return FALSE;
+      return false;
       case OPRND_TYPE_IMM8b_BMASKI:
       /* For csky v2 bmask, which will transfer to 16bits movi.  */
 	if (is_imm_within_range (oper, 1, 8))
 	  {
 	    unsigned int mask_val = csky_insn.val[csky_insn.idx - 1];
 	    csky_insn.val[csky_insn.idx - 1] = (1 << mask_val) - 1;
-	    return TRUE;
+	    return true;
 	  }
-	return FALSE;
+	return false;
     case OPRND_TYPE_OIMM4b:
       return is_oimm_within_range (oper, 1, 16);
     case OPRND_TYPE_OIMM5b:
@@ -3710,10 +3710,10 @@ get_operand_value (struct csky_opcode_info *op,
 	    }
 	  else imm--;
 	  csky_insn.val[csky_insn.idx - 1] = imm;
-	  return TRUE;
+	  return true;
 	}
       else
-	return FALSE;
+	return false;
 
       /* For csky v2 bmask inst.  */
     case OPRND_TYPE_OIMM5b_BMASKI:
@@ -3721,19 +3721,19 @@ get_operand_value (struct csky_opcode_info *op,
 	{
 	  int mask_val = csky_insn.val[csky_insn.idx - 1];
 	  if (mask_val + 1 == 0)
-	    return TRUE;
+	    return true;
 	  if (mask_val > 0 && mask_val < 16)
 	    {
 	      const char *op_movi = "movi";
 	      csky_insn.opcode = (struct csky_opcode *)
 		str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
-		return FALSE;
+		return false;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << (mask_val + 1)) - 1;
-	      return TRUE;
+	      return true;
 	    }
 	}
-      return TRUE;
+      return true;
     case OPRND_TYPE_IMM7b:
       return is_imm_within_range (oper, 0, 127);
     case OPRND_TYPE_IMM8b:
@@ -3756,9 +3756,9 @@ get_operand_value (struct csky_opcode_info *op,
 	  {
 	    *oper = new_oper;
 	    csky_insn.val[csky_insn.idx++] = e.X_add_number;
-	    return TRUE;
+	    return true;
 	  }
-	return FALSE;
+	return false;
       }
     case OPRND_TYPE_IMM16b_MOVIH:
     case OPRND_TYPE_IMM16b_ORI:
@@ -3784,31 +3784,31 @@ get_operand_value (struct csky_opcode_info *op,
 	  }
 	input_line_pointer = save;
 	*oper = parse_exp (curr, &csky_insn.e1);
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_PSR_BITS_LIST:
       {
-	int ret = TRUE;
+	int ret = true;
 	if (csky_insn.number == 0)
-	  ret = FALSE;
+	  ret = false;
 	else
 	  {
 	    csky_insn.val[csky_insn.idx] = 0;
-	    if (is_psr_bit (oper) != FALSE)
+	    if (is_psr_bit (oper))
 	      while (**oper == ',')
 		{
 		  *oper += 1;
-		  if (is_psr_bit (oper) == FALSE)
+		  if (!is_psr_bit (oper))
 		    {
-		      ret = FALSE;
+		      ret = false;
 		      break;
 		    }
 		}
 	    else
-	      ret = FALSE;
-	    if (ret == TRUE && IS_CSKY_V1 (mach_flag)
+	      ret = false;
+	    if (ret && IS_CSKY_V1 (mach_flag)
 		&& csky_insn.val[csky_insn.idx] > 8)
-	      ret = FALSE;
+	      ret = false;
 	  }
 	if (!ret)
 	  SET_ERROR_STRING (ERROR_OPERANDS_ILLEGAL, csky_insn.opcode_end);
@@ -3831,9 +3831,9 @@ get_operand_value (struct csky_opcode_info *op,
 	    {
 	      *oper += strlen (round_mode[i]);
 	      csky_insn.val[csky_insn.idx++] = i;
-	      return TRUE;
+	      return true;
 	    }
-	return FALSE;
+	return false;
       }
 
     case OPRND_TYPE_REGLIST_COMMA:
@@ -3852,24 +3852,24 @@ get_operand_value (struct csky_opcode_info *op,
 	if (**oper != '(')
 	  {
 	    SET_ERROR_STRING (ERROR_MISSING_LBRACKET, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	*oper += 1;
 	reg = csky_get_reg_val (*oper, &len);
 	if (reg == -1)
 	  {
 	    SET_ERROR_STRING (ERROR_EXP_GREG, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	*oper += len;
 	if (**oper != ')')
 	  {
 	    SET_ERROR_STRING (ERROR_MISSING_RBRACKET, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	*oper += 1;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_REGsp:
       return is_reg_sp (oper);
@@ -3880,7 +3880,7 @@ get_operand_value (struct csky_opcode_info *op,
     case OPRND_TYPE_OFF16b:
       *oper = parse_rt (*oper, 1, &csky_insn.e1, -1);
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     case OPRND_TYPE_LABEL_WITH_BRACKET:
     case OPRND_TYPE_CONSTANT:
     case OPRND_TYPE_ELRW_CONSTANT:
@@ -3889,10 +3889,10 @@ get_operand_value (struct csky_opcode_info *op,
       else
 	csky_insn.val[csky_insn.idx++] = NEED_OUTPUT_LITERAL;
       *oper = parse_rt (*oper, 0, &csky_insn.e1, -1);
-      return TRUE;
+      return true;
     case OPRND_TYPE_FCONSTANT:
       *oper = parse_rtf (*oper, 0, &csky_insn.e1);
-      return TRUE;
+      return true;
 
     case OPRND_TYPE_SFLOAT:
     case OPRND_TYPE_DFLOAT:
@@ -3904,7 +3904,7 @@ get_operand_value (struct csky_opcode_info *op,
 
 	*oper = parse_fexp (*oper, &csky_insn.e1, 1, &dbnum);
 	if (csky_insn.e1.X_op == O_absent)
-	  return FALSE;
+	  return false;
 
 	/* Convert the representation from IEEE double to the 13-bit
 	   encoding used internally for fmovis and fmovid.  */
@@ -3913,7 +3913,7 @@ get_operand_value (struct csky_opcode_info *op,
 	if ((dbnum & 0x00000fffffffffffULL) || imm4 < 0 || imm4 > 15)
 	  {
 	    csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	imm8 = (dbnum & 0x000ff00000000000ULL) >> 44;
 	csky_insn.e1.X_add_number
@@ -3921,7 +3921,7 @@ get_operand_value (struct csky_opcode_info *op,
 	     | ((imm8 & 0xf0) << 17)
 	     | ((imm4 & 0xf) << 16)
 	     | ((dbnum & 0x8000000000000000ULL) >> 43));
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_HFLOAT_FMOVI:
     case OPRND_TYPE_SFLOAT_FMOVI:
@@ -3934,7 +3934,7 @@ get_operand_value (struct csky_opcode_info *op,
 
 	*oper = parse_fexp (*oper, &csky_insn.e1, 1, &dbnum);
 	if (csky_insn.e1.X_op == O_absent)
-	  return FALSE;
+	  return false;
 
 	/* Convert the representation from IEEE double to the 13-bit
 	   encoding used internally for fmovis and fmovid.  */
@@ -3943,7 +3943,7 @@ get_operand_value (struct csky_opcode_info *op,
 	if ((dbnum & 0x00000fffffffffffULL) || imm4 < 0 || imm4 > 15)
 	  {
 	    csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
-	    return TRUE;
+	    return true;
 	  }
 	imm8 = (dbnum & 0x000ff00000000000ULL) >> 44;
 	sign = (dbnum & 0x8000000000000000ULL) >> 58;
@@ -3952,22 +3952,22 @@ get_operand_value (struct csky_opcode_info *op,
 	     | ((imm8 & 0xfc) << 18)
 	     | ((imm4 & 0xf) << 16)
 	     | sign);
-	return TRUE;
+	return true;
       }
       /* For grs v2.  */
     case OPRND_TYPE_IMM_OFF18b:
       *oper = parse_exp (*oper, &csky_insn.e1);
-      return TRUE;
+      return true;
 
     case OPRND_TYPE_BLOOP_OFF4b:
       *oper = parse_exp (*oper, &csky_insn.e2);
       if (csky_insn.e2.X_op == O_symbol)
 	{
 	  csky_insn.opcode_end = *oper;
-	  return TRUE;
+	  return true;
 	}
       else
-	return FALSE;
+	return false;
 
     case OPRND_TYPE_BLOOP_OFF12b:
     case OPRND_TYPE_OFF10b:
@@ -3978,10 +3978,10 @@ get_operand_value (struct csky_opcode_info *op,
       if (csky_insn.e1.X_op == O_symbol)
 	{
 	  csky_insn.opcode_end = *oper;
-	  return TRUE;
+	  return true;
 	}
       else
-	return FALSE;
+	return false;
       /* For xtrb0(1)(2)(3) and div in csky v1 ISA.  */
     case OPRND_TYPE_REG_r1a:
       {
@@ -3992,14 +3992,14 @@ get_operand_value (struct csky_opcode_info *op,
 	  {
 	    SET_ERROR_STRING (ERROR_REG_FORMAT,
 			      "The first operand must be register r1.");
-	    return FALSE;
+	    return false;
 	  }
 	if (reg != 1)
-	  mov_r1_after = TRUE;
+	  mov_r1_after = true;
 	*oper += len;
 	csky_insn.opcode_end = *oper;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_REG_r1b:
       {
@@ -4010,13 +4010,13 @@ get_operand_value (struct csky_opcode_info *op,
 	  {
 	    SET_ERROR_STRING (ERROR_REG_FORMAT,
 			      "The second operand must be register r1.");
-	    return FALSE;
+	    return false;
 	  }
 	if (reg != 1)
 	  {
 	    unsigned int mov_insn = CSKYV1_INST_MOV_R1_RX;
 	    mov_insn |= reg << 4;
-	    mov_r1_before = TRUE;
+	    mov_r1_before = true;
 	    csky_insn.output = frag_more (2);
 	    dwarf2_emit_insn (0);
 	    md_number_to_chars (csky_insn.output, mov_insn, 2);
@@ -4024,7 +4024,7 @@ get_operand_value (struct csky_opcode_info *op,
 	*oper += len;
 	csky_insn.opcode_end = *oper;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_DUMMY_REG:
       {
@@ -4034,18 +4034,18 @@ get_operand_value (struct csky_opcode_info *op,
 	if (reg == -1)
 	  {
 	    SET_ERROR_STRING (ERROR_GREG_ILLEGAL, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	if (reg != csky_insn.val[0])
 	  {
 	    SET_ERROR_STRING (ERROR_REG_FORMAT,
 			      "The second register must be the same as the first.");
-	    return FALSE;
+	    return false;
 	  }
 	*oper += len;
 	csky_insn.opcode_end = *oper;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_2IN1_DUMMY:
       {
@@ -4057,7 +4057,7 @@ get_operand_value (struct csky_opcode_info *op,
 	if (reg == -1)
 	  {
 	    SET_ERROR_STRING (ERROR_GREG_ILLEGAL, NULL);
-	    return FALSE;
+	    return false;
 	  }
 	/* dummy reg's real type should be same with first operand.  */
 	if (op->oprnd.oprnds[0].type == OPRND_TYPE_GREG0_15)
@@ -4065,9 +4065,9 @@ get_operand_value (struct csky_opcode_info *op,
 	else if (op->oprnd.oprnds[0].type == OPRND_TYPE_GREG0_7)
 	  max = 7;
 	else
-	  return FALSE;
+	  return false;
 	if (reg < min || reg > max)
-	  return FALSE;
+	  return false;
 	csky_insn.val[csky_insn.idx++] = reg;
 	/* if it is the last operands.  */
 	if (csky_insn.idx > 2)
@@ -4079,11 +4079,11 @@ get_operand_value (struct csky_opcode_info *op,
 	    else if (csky_insn.val[0] ==  csky_insn.val[2])
 	      csky_insn.val[2] = 0;
 	    else
-	      return FALSE;
+	      return false;
 	  }
 	*oper += len;
 	csky_insn.opcode_end = *oper;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_DUP_GREG0_7:
     case OPRND_TYPE_DUP_GREG0_15:
@@ -4117,18 +4117,18 @@ get_operand_value (struct csky_opcode_info *op,
 	    else
 	      SET_ERROR_STRING (ERROR_REG_FORMAT,
 				"The register must be r0-r15");
-	    return FALSE;
+	    return false;
 	  }
 	if (reg > max_reg)
 	  {
 	    SET_ERROR_STRING (ERROR_REG_OVER_RANGE, reg);
-	    return FALSE;
+	    return false;
 	  }
 	reg |= reg << shift_num;
 	*oper += len;
 	csky_insn.opcode_end = *oper;
 	csky_insn.val[csky_insn.idx++] = reg;
-	return TRUE;
+	return true;
       }
     case OPRND_TYPE_CONST1:
       *oper = parse_exp (*oper, &csky_insn.e1);
@@ -4136,28 +4136,28 @@ get_operand_value (struct csky_opcode_info *op,
 	{
 	  csky_insn.opcode_end = *oper;
 	  if (csky_insn.e1.X_add_number != 1)
-	    return FALSE;
+	    return false;
 	  csky_insn.val[csky_insn.idx++] = 1;
-	  return TRUE;
+	  return true;
 	}
-      return FALSE;
+      return false;
     case OPRND_TYPE_UNCOND10b:
     case OPRND_TYPE_UNCOND16b:
       *oper = parse_exp (*oper, &csky_insn.e1);
       if (csky_insn.e1.X_op == O_constant)
-	return FALSE;
+	return false;
       input_line_pointer = *oper;
       csky_insn.opcode_end = *oper;
       csky_insn.relax.max = UNCD_DISP16_LEN;
       csky_insn.relax.var = UNCD_DISP10_LEN;
       csky_insn.relax.subtype = UNCD_DISP10;
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     case OPRND_TYPE_COND10b:
     case OPRND_TYPE_COND16b:
       *oper = parse_exp (*oper, &csky_insn.e1);
       if (csky_insn.e1.X_op == O_constant)
-	return FALSE;
+	return false;
       input_line_pointer = *oper;
       csky_insn.opcode_end = *oper;
       /* CK801 doesn't have 32-bit bt/bf insns; relax to a short
@@ -4175,11 +4175,11 @@ get_operand_value (struct csky_opcode_info *op,
 	  csky_insn.relax.subtype = COND_DISP10;
 	}
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     case OPRND_TYPE_JCOMPZ:
       *oper = parse_exp (*oper, &csky_insn.e1);
       if (csky_insn.e1.X_op == O_constant)
-	return FALSE;
+	return false;
       input_line_pointer = *oper;
       csky_insn.opcode_end = *oper;
       csky_insn.relax.max = JCOMPZ_DISP32_LEN;
@@ -4187,7 +4187,7 @@ get_operand_value (struct csky_opcode_info *op,
       csky_insn.relax.subtype = JCOMPZ_DISP16;
       csky_insn.max = JCOMPZ_DISP32_LEN;
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     case OPRND_TYPE_JBTF:
       *oper = parse_exp (*oper, &csky_insn.e1);
       input_line_pointer = *oper;
@@ -4197,7 +4197,7 @@ get_operand_value (struct csky_opcode_info *op,
       csky_insn.relax.subtype = C (COND_JUMP_S, 0);
       csky_insn.val[csky_insn.idx++] = 0;
       csky_insn.max = C32_LEN_S + 2;
-      return TRUE;
+      return true;
     case OPRND_TYPE_JBR:
       *oper = parse_exp (*oper, &csky_insn.e1);
       input_line_pointer = *oper;
@@ -4207,7 +4207,7 @@ get_operand_value (struct csky_opcode_info *op,
       csky_insn.relax.subtype = C (UNCD_JUMP_S, 0);
       csky_insn.val[csky_insn.idx++] = 0;
       csky_insn.max = U32_LEN_S + 2;
-      return TRUE;
+      return true;
     case OPRND_TYPE_JBSR:
       if (do_force2bsr)
 	*oper = parse_exp (*oper, &csky_insn.e1);
@@ -4216,7 +4216,7 @@ get_operand_value (struct csky_opcode_info *op,
       input_line_pointer = *oper;
       csky_insn.opcode_end = *oper;
       csky_insn.val[csky_insn.idx++] = 0;
-      return TRUE;
+      return true;
     case OPRND_TYPE_REGLIST_DASH_COMMA:
       return is_reglist_dash_comma_legal (oper, oprnd);
 
@@ -4231,7 +4231,7 @@ get_operand_value (struct csky_opcode_info *op,
 	    if (e.X_add_number > 31)
 	      {
 		SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
-		return FALSE;
+		return false;
 	      }
 	    csky_insn.val[csky_insn.idx++] = e.X_add_number;
 	    if (oprnd->type == OPRND_TYPE_LSB2SIZE)
@@ -4239,13 +4239,13 @@ get_operand_value (struct csky_opcode_info *op,
 		if (csky_insn.val[csky_insn.idx - 1] > csky_insn.val[csky_insn.idx - 2])
 		  {
 		    SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
-		    return FALSE;
+		    return false;
 		  }
 		csky_insn.val[csky_insn.idx - 2] -= e.X_add_number;
 	      }
-	    return TRUE;
+	    return true;
 	  }
-	return FALSE;
+	return false;
       }
     case OPRND_TYPE_AREG_WITH_LSHIFT:
       return is_reg_lshift_illegal (oper, 0);
@@ -4266,7 +4266,7 @@ get_operand_value (struct csky_opcode_info *op,
 		      unsigned int val = csky_insn.val[idx];
 		      (*oper)++;
 		      csky_insn.val[idx - 1] |= val << 4;
-		      return TRUE;
+		      return true;
 		    }
 		  else
 		    SET_ERROR_STRING (ERROR_MISSING_RSQUARE_BRACKETS, NULL);
@@ -4275,18 +4275,18 @@ get_operand_value (struct csky_opcode_info *op,
 	  else
 	    SET_ERROR_STRING (ERROR_MISSING_LSQUARE_BRACKETS, NULL);
 	}
-      return FALSE;
+      return false;
 
     default:
       break;
       /* error code.  */
     }
-  return FALSE;
+  return false;
 }
 
 /* Subroutine of parse_operands.  */
 
-static bfd_boolean
+static bool
 parse_operands_op (char *str, struct csky_opcode_info *op)
 {
   int i;
@@ -4296,7 +4296,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 
   for (i = 0; i < OP_TABLE_NUM && op[i].operand_num != -2; i++)
     {
-      flag_pass = TRUE;
+      flag_pass = true;
       csky_insn.idx = 0;
       oper = str;
       /* if operand_num = -1, it is a insn with a REGLIST type operand.i.  */
@@ -4305,7 +4305,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	{
 	  /* The smaller err_num is more serious.  */
 	  SET_ERROR_INTEGER (ERROR_OPERANDS_NUMBER, op[i].operand_num);
-	  flag_pass = FALSE;
+	  flag_pass = false;
 	  continue;
 	}
 
@@ -4315,7 +4315,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	    oper++;
 	  flag_pass = get_operand_value (&op[i], &oper,
 					 &op[i].oprnd.oprnds[j]);
-	  if (flag_pass == FALSE)
+	  if (!flag_pass)
 	    break;
 	  while (ISSPACE (*oper))
 	    oper++;
@@ -4327,14 +4327,14 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	      else
 		{
 		  SET_ERROR_STRING (ERROR_MISSING_COMMA, NULL);
-		  flag_pass = FALSE;
+		  flag_pass = false;
 		  break;
 		}
 	    }
 	  else if (!is_end_of_line[(unsigned char) *oper])
 	    {
 	      SET_ERROR_STRING (ERROR_BAD_END, NULL);
-	      flag_pass = FALSE;
+	      flag_pass = false;
 	      break;
 	    }
 	  else
@@ -4342,22 +4342,22 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	}
       /* Parse operands in one table end.  */
 
-      if (flag_pass == TRUE)
+      if (flag_pass)
 	{
 	  /* Parse operands success, set opcode_idx.  */
 	  csky_insn.opcode_idx = i;
-	  return TRUE;
+	  return true;
 	}
       else
 	error_state.opnum = j + 1;
     }
   /* Parse operands in ALL tables end.  */
-  return FALSE;
+  return false;
 }
 
 /* Parse the operands according to operand type.  */
 
-static bfd_boolean
+static bool
 parse_operands (char *str)
 {
   char *oper = str;
@@ -4366,42 +4366,42 @@ parse_operands (char *str)
   if (csky_insn.flag_force == INSN_OPCODE16F
       && (csky_insn.opcode->isa_flag16 & isa_flag) != 0)
     {
-      if (parse_operands_op (oper, csky_insn.opcode->op16) == TRUE)
+      if (parse_operands_op (oper, csky_insn.opcode->op16))
 	{
 	  csky_insn.isize = 2;
-	  return TRUE;
+	  return true;
 	}
-      return FALSE;
+      return false;
     }
   else if (csky_insn.flag_force == INSN_OPCODE32F
 	   && (csky_insn.opcode->isa_flag32 & isa_flag) != 0)
     {
-      if (parse_operands_op (oper, csky_insn.opcode->op32) == TRUE)
+      if (parse_operands_op (oper, csky_insn.opcode->op32))
 	{
 	  csky_insn.isize = 4;
-	  return TRUE;
+	  return true;
 	}
-      return FALSE;
+      return false;
     }
   else
     {
       if ((csky_insn.opcode->isa_flag16 & isa_flag) != 0
-	  && parse_operands_op (oper, csky_insn.opcode->op16) == TRUE)
+	  && parse_operands_op (oper, csky_insn.opcode->op16))
 	{
 	  csky_insn.isize = 2;
-	  return TRUE;
+	  return true;
 	}
       if ((csky_insn.opcode->isa_flag32 & isa_flag) != 0
-	  && parse_operands_op (oper, csky_insn.opcode->op32) == TRUE)
+	  && parse_operands_op (oper, csky_insn.opcode->op32))
 	{
 	  csky_insn.isize = 4;
-	  return TRUE;
+	  return true;
 	}
-      return FALSE;
+      return false;
     }
 }
 
-static bfd_boolean
+static bool
 csky_generate_frags (void)
 {
   /* frag more relax reloc.  */
@@ -4463,7 +4463,7 @@ csky_generate_frags (void)
 		       csky_insn.opcode->reloc32);
 	}
     }
-  return TRUE;
+  return true;
 }
 
 /* Return the bits of VAL shifted according to MASK.  The bits of MASK
@@ -4511,7 +4511,7 @@ generate_masked_operand (struct operand *oprnd, int *oprnd_idx)
   return 0;
 }
 
-static bfd_boolean
+static bool
 csky_generate_insn (void)
 {
   int i = 0;
@@ -4540,7 +4540,7 @@ csky_generate_insn (void)
 void
 md_assemble (char *str)
 {
-  bfd_boolean must_check_literals = TRUE;
+  bool must_check_literals = true;
   csky_insn.isize = 0;
   csky_insn.idx = 0;
   csky_insn.max = 0;
@@ -4550,8 +4550,8 @@ md_assemble (char *str)
   memset (csky_insn.val, 0, sizeof (int) * MAX_OPRND_NUM);
   /* Initialize err_num.  */
   error_state.err_num = ERROR_NONE;
-  mov_r1_before = FALSE;
-  mov_r1_after = FALSE;
+  mov_r1_before = false;
+  mov_r1_after = false;
 
   mapping_state (MAP_TEXT);
   /* Tie dwarf2 debug info to every insn if set option --gdwarf2.  */
@@ -4559,7 +4559,7 @@ md_assemble (char *str)
   while (ISSPACE (* str))
     str++;
   /* Get opcode from str.  */
-  if (parse_opcode (str) == FALSE)
+  if (!parse_opcode (str))
     {
       csky_show_error (ERROR_OPCODE_ILLEGAL, 0, NULL, NULL);
       return;
@@ -4586,7 +4586,7 @@ md_assemble (char *str)
     }
 
   /* Parse the operands according to operand type.  */
-  if (parse_operands (csky_insn.opcode_end) == FALSE)
+  if (!parse_operands (csky_insn.opcode_end))
     {
       csky_show_error (error_state.err_num, error_state.opnum,
 		       (void *)error_state.arg1, (void *)error_state.arg1);
@@ -4608,17 +4608,17 @@ md_assemble (char *str)
     }
 
   /* Adjust for xtrb0/xtrb1/xtrb2/xtrb3/divs/divu in csky v1 ISA.  */
-  if (mov_r1_after == TRUE)
+  if (mov_r1_after)
     {
       unsigned int mov_insn = CSKYV1_INST_MOV_RX_R1;
       mov_insn |= csky_insn.val[0];
-      mov_r1_before = TRUE;
+      mov_r1_before = true;
       csky_insn.output = frag_more (2);
       dwarf2_emit_insn (0);
       md_number_to_chars (csky_insn.output, mov_insn, 2);
       csky_insn.isize += 2;
     }
-  if (mov_r1_before == TRUE)
+  if (mov_r1_before)
     csky_insn.isize += 2;
 
   /* Check literal.  */
@@ -5319,7 +5319,7 @@ csky_force_relocation (fixS * fix)
 /* Return true if the fix can be handled by GAS, false if it must
    be passed through to the linker.  */
 
-bfd_boolean
+bool
 csky_fix_adjustable (fixS * fixP)
 {
   if (fixP->fx_addsy == NULL)
@@ -5964,7 +5964,7 @@ csky_movtf (void)
   return;
 }
 
-static bfd_boolean
+static bool
 get_macro_reg_vals (int *reg1, int *reg2, int *reg3)
 {
   int nlen;
@@ -5975,7 +5975,7 @@ get_macro_reg_vals (int *reg1, int *reg2, int *reg3)
   if (*s != ',')
     {
       csky_show_error (ERROR_MISSING_COMMA, 0, NULL, NULL);
-      return FALSE;
+      return false;
     }
   s++;
   *reg2 = csky_get_reg_val (s, &nlen);
@@ -5983,7 +5983,7 @@ get_macro_reg_vals (int *reg1, int *reg2, int *reg3)
   if (*s != ',')
     {
       csky_show_error (ERROR_MISSING_COMMA, 0, NULL, NULL);
-      return FALSE;
+      return false;
     }
   s++;
   *reg3 = csky_get_reg_val (s, &nlen);
@@ -5991,24 +5991,24 @@ get_macro_reg_vals (int *reg1, int *reg2, int *reg3)
   if (*s != '\0')
     {
       csky_show_error (ERROR_BAD_END, 0, s, NULL);
-      return FALSE;
+      return false;
     }
   if (*reg1 == -1 || *reg2 == -1 || *reg3 == -1)
     {
       as_bad (_("register number out of range"));
-      return FALSE;
+      return false;
     }
   if (*reg1 != *reg2)
     {
       as_bad (_("dest and source1 must be the same register"));
-      return FALSE;
+      return false;
     }
   if (*reg1 >= 15 || *reg3 >= 15)
     {
       as_bad (_("64-bit operator src/dst register must be less than 15"));
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 /* addc64 rx, rx, ry -> cmplt rx, rx, addc  rx, ry, addc  rx+1, ry+1.  */
@@ -6234,7 +6234,7 @@ csky_lrw (void)
 
 /* The following are worker functions for C-SKY v1.  */
 
-bfd_boolean
+bool
 v1_work_lrw (void)
 {
   int reg;
@@ -6276,10 +6276,10 @@ v1_work_lrw (void)
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_fo (void)
 {
   int i = 0;
@@ -6308,10 +6308,10 @@ v1_work_fpu_fo (void)
   md_assemble (buff);
   sprintf (buff, "cpwir r%d", greg);
   md_assemble (buff);
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_fo_fc (void)
 {
   int i = 0;
@@ -6343,10 +6343,10 @@ v1_work_fpu_fo_fc (void)
   sprintf (buff, "cprc");
   md_assemble (buff);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_write (void)
 {
   int greg;
@@ -6360,10 +6360,10 @@ v1_work_fpu_write (void)
   sprintf (buff, "cpwgr r%d,cpr%d", greg, freg);
   md_assemble (buff);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_read (void)
 {
   int greg;
@@ -6376,10 +6376,10 @@ v1_work_fpu_read (void)
   sprintf (buff, "cprgr r%d,cpr%d", greg, freg);
   md_assemble (buff);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_writed (void)
 {
   int greg;
@@ -6392,7 +6392,7 @@ v1_work_fpu_writed (void)
   if (greg & 0x1)
     {
       as_bad (_("even register number required"));
-      return FALSE;
+      return false;
     }
   /* Now get greg and freg, we can write instruction to floating unit.  */
   if (target_big_endian)
@@ -6405,10 +6405,10 @@ v1_work_fpu_writed (void)
   else
     sprintf (buff, "cpwgr r%d,cpr%d", greg+1, freg + 1);
   md_assemble (buff);
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 v1_work_fpu_readd (void)
 {
   int greg;
@@ -6421,7 +6421,7 @@ v1_work_fpu_readd (void)
   if (greg & 0x1)
     {
       as_bad (_("even register number required"));
-      return FALSE;
+      return false;
     }
   /* Now get greg and freg, we can write instruction to floating unit.  */
   if (target_big_endian)
@@ -6435,12 +6435,12 @@ v1_work_fpu_readd (void)
     sprintf (buff, "cprgr r%d,cpr%d", greg+1, freg + 1);
   md_assemble (buff);
 
-  return FALSE;
+  return false;
 }
 
 /* The following are for csky pseudo handling.  */
 
-bfd_boolean
+bool
 v1_work_jbsr (void)
 {
   csky_insn.output = frag_more (2);
@@ -6478,28 +6478,28 @@ v1_work_jbsr (void)
 
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
 /* The following are worker functions for csky v2 instruction handling.  */
 
 /* For nie/nir/ipush/ipop.  */
 
-bfd_boolean
+bool
 v2_work_istack (void)
 {
   if (!do_intr_stack)
     {
       csky_show_error (ERROR_OPCODE_ILLEGAL, 0, NULL, NULL);
-      return FALSE;
+      return false;
     }
   csky_insn.output = frag_more (csky_insn.isize);
   csky_insn.inst = csky_insn.opcode->op16[0].opcode;
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_btsti (void)
 {
   if (!do_extend_lrw
@@ -6507,7 +6507,7 @@ v2_work_btsti (void)
 	  || IS_CSKY_ARCH_801 (mach_flag)))
     {
       csky_show_error (ERROR_OPCODE_ILLEGAL, 0, NULL, NULL);
-      return FALSE;
+      return false;
     }
   if (!do_extend_lrw && csky_insn.isize == 2)
     csky_insn.isize = 4;
@@ -6517,10 +6517,10 @@ v2_work_btsti (void)
   csky_generate_insn ();
   /* Write inst to frag.  */
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_addi (void)
 {
   csky_insn.isize = 2;
@@ -6558,7 +6558,7 @@ v2_work_addi (void)
 	{
 	  csky_show_error (ERROR_OPERANDS_ILLEGAL, 0,
 			   csky_insn.opcode_end, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   else if (csky_insn.number == 3)
@@ -6632,15 +6632,15 @@ v2_work_addi (void)
 	{
 	  csky_show_error (ERROR_OPERANDS_ILLEGAL, 0,
 			   (char *)csky_insn.opcode_end, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_subi (void)
 {
   csky_insn.isize = 2;
@@ -6674,7 +6674,7 @@ v2_work_subi (void)
 	{
 	  csky_show_error (ERROR_OPERANDS_ILLEGAL, 0,
 			   (char *)csky_insn.opcode_end, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   else if (csky_insn.number == 3)
@@ -6719,16 +6719,16 @@ v2_work_subi (void)
 	{
 	  csky_show_error (ERROR_OPERANDS_ILLEGAL, 0,
 			   (char *)csky_insn.opcode_end, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   csky_insn.output = frag_more (csky_insn.isize);
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_add_sub (void)
 {
   if (csky_insn.number == 3
@@ -6784,7 +6784,7 @@ v2_work_add_sub (void)
 	      csky_show_error (ERROR_REG_OVER_RANGE, 2, NULL, NULL);
 	    }
 	}
-      return FALSE;
+      return false;
     }
   /* sub rz, rx.  */
   /* Generate relax or reloc if necessary.  */
@@ -6793,10 +6793,10 @@ v2_work_add_sub (void)
   csky_generate_insn ();
   /* Write inst to frag.  */
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_rotlc (void)
 {
   const char *name = "addc";
@@ -6822,10 +6822,10 @@ v2_work_rotlc (void)
   csky_generate_insn ();
   /* Write inst to frag.  */
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_bgeni (void)
 {
   const char *name = NULL;
@@ -6849,10 +6849,10 @@ v2_work_bgeni (void)
   csky_generate_insn ();
   /* Write inst to frag.  */
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_not (void)
 {
   const char *name = "nor";
@@ -6898,16 +6898,16 @@ v2_work_not (void)
   csky_generate_insn ();
   /* Write inst to frag.  */
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_jbtf (void)
 {
   if (csky_insn.e1.X_add_symbol == NULL || csky_insn.e1.X_op == O_constant)
     {
       csky_show_error (ERROR_UNDEFINE, 0, (void *)"operand is invalid", NULL);
-      return FALSE;
+      return false;
     }
 
   if (IS_CSKY_ARCH_801 (mach_flag))
@@ -6958,16 +6958,16 @@ v2_work_jbtf (void)
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_jbr (void)
 {
   if (csky_insn.e1.X_add_symbol == NULL || csky_insn.e1.X_op == O_constant)
     {
       csky_show_error (ERROR_UNDEFINE, 0, (void *)"operand is invalid", NULL);
-      return FALSE;
+      return false;
     }
 
   if (do_long_jump
@@ -7002,14 +7002,14 @@ v2_work_jbr (void)
 
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
 #define SIZE_V2_MOVI16(x)         ((addressT)x <= 0xff)
 #define SIZE_V2_MOVI32(x)         ((addressT)x <= 0xffff)
 #define SIZE_V2_MOVIH(x)          ((addressT)x <= 0xffffffff && (((addressT)x & 0xffff) == 0))
 
-bfd_boolean
+bool
 v2_work_lrw (void)
 {
   int reg = csky_insn.val[0];
@@ -7055,7 +7055,7 @@ v2_work_lrw (void)
   if (is_done)
     {
       csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-      return TRUE;
+      return true;
     }
 
   if (output_literal)
@@ -7074,7 +7074,7 @@ v2_work_lrw (void)
 	{
 	  csky_show_error (ERROR_UNDEFINE, 0,
 			   (void *)"The register is out of range.", NULL);
-	  return FALSE;
+	  return false;
 	}
       csky_insn.isize = 2;
       csky_insn.output = frag_more (2);
@@ -7160,10 +7160,10 @@ v2_work_lrw (void)
     }
 
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_lrsrsw (void)
 {
   int reg = csky_insn.val[0];
@@ -7187,10 +7187,10 @@ v2_work_lrsrsw (void)
 	break;
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_jbsr (void)
 {
   if (do_force2bsr
@@ -7232,10 +7232,10 @@ v2_work_jbsr (void)
     }
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_jsri (void)
 {
   /* dump literal.  */
@@ -7267,10 +7267,10 @@ v2_work_jsri (void)
       csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
       csky_insn.max = 8;
     }
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_movih (void)
 {
   int rz = csky_insn.val[0];
@@ -7281,12 +7281,12 @@ v2_work_movih (void)
       if (csky_insn.e1.X_unsigned == 1 && csky_insn.e1.X_add_number > 0xffff)
 	{
 	  csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
-	  return FALSE;
+	  return false;
 	}
       else if (csky_insn.e1.X_unsigned == 0 && csky_insn.e1.X_add_number < 0)
 	{
 	  csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
-	  return FALSE;
+	  return false;
 	}
       else
 	csky_insn.inst |= (csky_insn.e1.X_add_number & 0xffff);
@@ -7317,16 +7317,16 @@ v2_work_movih (void)
 	{
 	  void *arg = (void *)"the second operand must be \"SYMBOL >> 16\"";
 	  csky_show_error (ERROR_UNDEFINE, 0, arg, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   csky_insn.isize = 4;
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_ori (void)
 {
   int rz = csky_insn.val[0];
@@ -7341,7 +7341,7 @@ v2_work_ori (void)
       else
 	{
 	  csky_show_error (ERROR_IMM_OVERFLOW, 3, NULL, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   else if (csky_insn.e1.X_op == O_bit_and)
@@ -7368,12 +7368,12 @@ v2_work_ori (void)
 	{
 	  void *arg = (void *)"the third operand must be \"SYMBOL & 0xffff\"";
 	  csky_show_error (ERROR_UNDEFINE, 0, arg, NULL);
-	  return FALSE;
+	  return false;
 	}
     }
   csky_insn.isize = 4;
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
 /* Helper function to encode a single/double floating point constant
@@ -7384,7 +7384,7 @@ v2_work_ori (void)
    rounding when converting to the smaller format, just an error if there
    is excess precision or the number is too small/large to be represented.  */
 
-bfd_boolean
+bool
 float_work_fmovi (void)
 {
   int rx = csky_insn.val[0];
@@ -7397,13 +7397,13 @@ float_work_fmovi (void)
   csky_insn.output = frag_more (4);
   csky_insn.isize = 4;
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
 /* Like float_work_fmovi, but for FPUV3 fmovi.16, fmovi.32 and fmovi.64
    instructions.  */
 
-bfd_boolean
+bool
 float_work_fpuv3_fmovi (void)
 {
   int rx = csky_insn.val[0];
@@ -7428,7 +7428,7 @@ float_work_fpuv3_fmovi (void)
       if (imm8 > 255)
 	{
 	  csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
-	  return FALSE;
+	  return false;
 	}
 
       /* imm8 store at bit [25:20] and [9:8].  */
@@ -7448,10 +7448,10 @@ float_work_fpuv3_fmovi (void)
   csky_insn.output = frag_more(4);
   csky_insn.isize = 4;
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 dsp_work_bloop (void)
 {
   int reg = csky_insn.val[0];
@@ -7489,10 +7489,10 @@ dsp_work_bloop (void)
     }
 
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 float_work_fpuv3_fstore(void)
 {
   /* Generate relax or reloc if necessary.  */
@@ -7505,10 +7505,10 @@ float_work_fpuv3_fstore(void)
                    csky_insn.isize);
 
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 v2_work_addc (void)
 {
   int reg1;
@@ -7568,7 +7568,7 @@ v2_work_addc (void)
 		   csky_insn.inst,
 		   csky_insn.isize);
 
-  return TRUE;
+  return true;
 }
 
 /* The following are for assembler directive handling.  */
@@ -7758,7 +7758,7 @@ csky_s_section (int ignore)
   while (*ilp != 0 && ISSPACE (*ilp))
     ++ ilp;
 
-  if (strncmp (ilp, ".line", 5) == 0
+  if (startswith (ilp, ".line")
       && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
     ;
   else

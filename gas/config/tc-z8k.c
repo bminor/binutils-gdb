@@ -993,24 +993,34 @@ apply_fix (unsigned char *ptr, bfd_reloc_code_real_type type,
   /* size is in nibbles.  */
 
   newfix ((ptr - buffer) / 2, type, size + 1, operand);
-  switch (size)
+
+  if (type == BFD_RELOC_Z8K_DISP7)
     {
-    case 8:			/* 8 nibbles == 32 bits.  */
-      *ptr++ = n >> 28;
-      *ptr++ = n >> 24;
-      *ptr++ = n >> 20;
-      *ptr++ = n >> 16;
-      /* Fall through.  */
-    case 4:			/* 4 nibbles == 16 bits.  */
-      *ptr++ = n >> 12;
-      *ptr++ = n >> 8;
-      /* Fall through.  */
-    case 2:
-      *ptr++ = n >> 4;
-      /* Fall through.  */
-    case 1:
+      /* 2 nibbles, but most significant bit is part of the opcode == 7 bits.  */
+      *ptr++ = (n >> 4) & 7;
       *ptr++ = n >> 0;
-      break;
+    }
+  else
+    {
+      switch (size)
+        {
+        case 8:			/* 8 nibbles == 32 bits.  */
+          *ptr++ = n >> 28;
+          *ptr++ = n >> 24;
+          *ptr++ = n >> 20;
+          *ptr++ = n >> 16;
+          /* Fall through.  */
+        case 4:			/* 4 nibbles == 16 bits.  */
+          *ptr++ = n >> 12;
+          *ptr++ = n >> 8;
+          /* Fall through.  */
+        case 2:
+          *ptr++ = n >> 4;
+          /* Fall through.  */
+        case 1:
+          *ptr++ = n >> 0;
+          break;
+        }
     }
   return ptr;
 }
@@ -1296,7 +1306,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 const char *md_shortopts = "z:";

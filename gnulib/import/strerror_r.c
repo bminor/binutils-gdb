@@ -1,6 +1,6 @@
 /* strerror_r.c --- POSIX compatible system error routine
 
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
+   Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -120,6 +120,7 @@ local_snprintf (char *buf, size_t buflen, const char *format, ...)
     buf[buflen - 1] = '\0';
   return result;
 }
+# undef snprintf
 # define snprintf local_snprintf
 #endif
 

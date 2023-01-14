@@ -19,7 +19,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 AC_INIT(Makefile.in)
-sinclude(../common/acinclude.m4)
+AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 

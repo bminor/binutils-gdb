@@ -25,11 +25,9 @@ if ![check_plugin_api_available] {
 
 # And a compiler to be available.
 set can_compile 1
-set failure_kind "unresolved"
 if { ![check_compiler_available] } {
   # Don't fail immediately, 
   set can_compile 0
-  set failure_kind "unsupported"
 }
 
 pass "plugin API enabled"
@@ -286,11 +284,11 @@ set plugin_extra_elf_tests [list \
 
 if { !$can_compile || $failed_compile } {
     foreach testitem $plugin_tests {
-	$failure_kind [lindex $testitem 0]
+	unsupported [lindex $testitem 0]
     }
     if { [is_elf_format] } {
 	foreach testitem $plugin_extra_elf_tests {
-	    $failure_kind [lindex $testitem 0]
+	    unsupported [lindex $testitem 0]
 	}
     }
     set CFLAGS "$old_CFLAGS"
@@ -309,7 +307,7 @@ if { [is_elf_format] \
 if {![ar_simple_create $ar "" "tmpdir/libtext.a" "tmpdir/text.o"] || \
     ![ar_simple_create $ar "" "tmpdir/libempty.a" ""]} {
     foreach testitem $plugin_lib_tests {
-	unresolved [lindex $testitem 0]
+	unsupported [lindex $testitem 0]
     }
 } else {
     run_ld_link_tests $plugin_lib_tests
@@ -373,7 +371,7 @@ if [ar_simple_create $ar "--plugin $plugin2_path" "tmpdir/libfunc.a" \
     }
 } else {
     foreach testitem $plugin_src_tests {
-	unresolved [lindex $testitem 0]
+	unsupported [lindex $testitem 0]
     }
 }
 
@@ -393,7 +391,7 @@ if [ar_simple_create $ar "--plugin $plugin4_path" "tmpdir/libpr20070.a" \
 	] \
     ]
 } else {
-    unresolved "PR ld/20070"
+    unsupported "PR ld/20070"
 }
 
 set CFLAGS "$old_CFLAGS"

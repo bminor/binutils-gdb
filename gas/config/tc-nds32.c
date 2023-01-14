@@ -54,7 +54,7 @@ const char FLT_CHARS[] = "dDfF";
 static int enable_16bit = 1;
 /* Save for md_assemble to distinguish if this instruction is
    expanded from the pseudo instruction.  */
-static bfd_boolean pseudo_opcode = FALSE;
+static bool pseudo_opcode = false;
 static struct nds32_relocs_pattern *relocs_list = NULL;
 /* Save instruction relation to inserting relaxation relocation.  */
 struct nds32_relocs_pattern
@@ -99,7 +99,7 @@ static int label_exist = 0;
 static int in_omit_fp = 0;
 extern struct nds32_keyword keyword_gpr[];
 /* Tag there is relax relocation having to link.  */
-static bfd_boolean relaxing = FALSE;
+static bool relaxing = false;
 /* ICT model.  */
 enum ict_option {
   ICT_NONE = 0,
@@ -119,7 +119,7 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S16M,
     .cond_field =
       {
-	{0, 0, 0, FALSE}
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -194,8 +194,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -203,8 +203,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -220,8 +220,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -237,8 +237,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -255,8 +255,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -277,8 +277,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -301,8 +301,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -310,8 +310,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -327,8 +327,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -344,8 +344,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -362,8 +362,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -384,8 +384,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -408,7 +408,7 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S16M,
     .cond_field =
       {
-	{0, 0, 0, FALSE}
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -483,7 +483,7 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 0, 0, FALSE}
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -558,8 +558,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     /* We do not use beqz38 and beqzs8 here directly because we
        don't want to check register number for specail condition.  */
@@ -569,8 +569,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -587,8 +587,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -604,8 +604,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -622,8 +622,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -650,8 +650,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -675,8 +675,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -684,8 +684,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -701,8 +701,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -718,8 +718,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -736,8 +736,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -757,8 +757,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -781,8 +781,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -790,8 +790,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -808,8 +808,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -825,8 +825,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -843,8 +843,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -867,8 +867,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -892,8 +892,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -901,8 +901,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -918,8 +918,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -935,8 +935,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -953,8 +953,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -975,8 +975,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -999,8 +999,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1008,8 +1008,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -1025,8 +1025,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1042,8 +1042,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1060,8 +1060,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1082,8 +1082,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1106,8 +1106,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S64K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1115,8 +1115,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -1132,8 +1132,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1149,8 +1149,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1167,8 +1167,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1189,8 +1189,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false},
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1213,9 +1213,9 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S16K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1223,9 +1223,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -1242,9 +1242,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1261,9 +1261,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1284,9 +1284,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1309,9 +1309,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1335,9 +1335,9 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S16K,
     .cond_field =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1345,9 +1345,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -1364,9 +1364,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1383,9 +1383,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1406,9 +1406,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1431,9 +1431,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 15, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 15, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1457,8 +1457,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1466,8 +1466,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 2,
     .relax_branch_isize[BR_RANGE_S256] = 2,
@@ -1483,8 +1483,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1500,8 +1500,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1518,8 +1518,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1542,8 +1542,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1567,8 +1567,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1576,8 +1576,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 2,
     .relax_branch_isize[BR_RANGE_S256] = 2,
@@ -1593,8 +1593,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1610,8 +1610,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 4,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1628,8 +1628,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1652,8 +1652,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1677,7 +1677,7 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 0, 0, FALSE}
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1761,7 +1761,7 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 0, 0, FALSE}
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1845,8 +1845,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1854,8 +1854,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 2,
     .relax_branch_isize[BR_RANGE_S256] = 2,
@@ -1871,8 +1871,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -1889,8 +1889,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -1911,8 +1911,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -1935,8 +1935,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -1960,8 +1960,8 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -1969,8 +1969,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 2,
     .relax_branch_isize[BR_RANGE_S256] = 2,
@@ -1986,8 +1986,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 4,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -2004,8 +2004,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -2026,8 +2026,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -2050,8 +2050,8 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -2075,9 +2075,9 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7FF, TRUE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, true},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -2085,9 +2085,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -2104,9 +2104,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 0, 0xFFFFF, FALSE},
-	{4, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 0, 0xFFFFF, false},
+	{4, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 8,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -2125,9 +2125,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -2145,9 +2145,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -2167,9 +2167,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -2187,9 +2187,9 @@ static relax_info_t relax_table[] =
     .br_range = BR_RANGE_S256,
     .cond_field =
       {
-	{0, 8, 0x7FF, TRUE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, true},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_seq[BR_RANGE_S256] =
       {
@@ -2197,9 +2197,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S256] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S256] = 4,
     .relax_branch_isize[BR_RANGE_S256] = 4,
@@ -2216,9 +2216,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16K] =
       {
-	{0, 0, 0xFFFFF, FALSE},
-	{4, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 0, 0xFFFFF, false},
+	{4, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16K] = 8,
     .relax_branch_isize[BR_RANGE_S16K] = 4,
@@ -2237,9 +2237,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S64K] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S64K] = 8,
     .relax_branch_isize[BR_RANGE_S64K] = 4,
@@ -2257,9 +2257,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_S16M] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_S16M] = 8,
     .relax_branch_isize[BR_RANGE_S16M] = 4,
@@ -2279,9 +2279,9 @@ static relax_info_t relax_table[] =
       },
     .relax_code_condition[BR_RANGE_U4G] =
       {
-	{0, 8, 0x7FF, FALSE},
-	{0, 20, 0x1F, FALSE},
-	{0, 0, 0, FALSE}
+	{0, 8, 0x7FF, false},
+	{0, 20, 0x1F, false},
+	{0, 0, 0, false}
       },
     .relax_code_size[BR_RANGE_U4G] = 16,
     .relax_branch_isize[BR_RANGE_U4G] = 4,
@@ -2632,7 +2632,7 @@ do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[],
 	     unsigned int pv ATTRIBUTE_UNUSED)
 {
   char *arg_label = argv[0];
-  relaxing = TRUE;
+  relaxing = true;
   /* b   label */
   if (nds32_pic)
     {
@@ -2645,7 +2645,7 @@ do_pseudo_b (int argc ATTRIBUTE_UNUSED, char *argv[],
     {
       md_assemblef ("j %s", arg_label);
     }
-  relaxing = FALSE;
+  relaxing = false;
 }
 
 static void
@@ -2653,7 +2653,7 @@ do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[],
 	       unsigned int pv ATTRIBUTE_UNUSED)
 {
   char *arg_label = argv[0];
-  relaxing = TRUE;
+  relaxing = true;
   /* bal|call  label */
   if (nds32_pic)
     {
@@ -2666,7 +2666,7 @@ do_pseudo_bal (int argc ATTRIBUTE_UNUSED, char *argv[],
     {
       md_assemblef ("jal %s", arg_label);
     }
-  relaxing = FALSE;
+  relaxing = false;
 }
 
 static void
@@ -2771,7 +2771,7 @@ do_pseudo_la_internal (const char *arg_reg, char *arg_label,
       return;
     }
 
-  relaxing = TRUE;
+  relaxing = true;
   /* rt, label */
   if (!nds32_pic && !strstr (arg_label, "@"))
     {
@@ -2821,7 +2821,7 @@ do_pseudo_la_internal (const char *arg_reg, char *arg_label,
     }
    else
       as_bad (_("need PIC qualifier with symbol. '%s'"), line);
-  relaxing = FALSE;
+  relaxing = false;
 }
 
 static void
@@ -2892,7 +2892,7 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[],
     }
   else if (!nds32_pic)
     {
-      relaxing = TRUE;
+      relaxing = true;
       if (strstr (argv[1], "@TPOFF"))
 	{
 	  /* ls.w $rt, sym@TPOFF  */
@@ -2913,11 +2913,11 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[],
 	  md_assemblef ("sethi $ta,hi20(%s)", argv[1]);
 	  md_assemblef ("%c%c%si %s,[$ta+lo12(%s)]", ls, size, sign, argv[0], argv[1]);
 	}
-      relaxing = FALSE;
+      relaxing = false;
     }
   else
     {
-      relaxing = TRUE;
+      relaxing = true;
       /* PIC code.  */
       if (strstr (argv[1], "@GOTOFF"))
 	{
@@ -2948,7 +2948,7 @@ do_pseudo_ls_bhw (int argc ATTRIBUTE_UNUSED, char *argv[],
 	{
 	  as_bad (_("needs @GOT or @GOTOFF. %s"), argv[argc]);
 	}
-      relaxing = FALSE;
+      relaxing = false;
     }
 }
 
@@ -3712,7 +3712,7 @@ nds32_parse_option (int c, const char *arg)
 	  int disable = 0;
 
 	  /* Filter out the Disable option first.  */
-	  if (strncmp (arg, "no-", 3) == 0)
+	  if (startswith (arg, "no-"))
 	    {
 	      disable = 1;
 	      arg += 3;
@@ -3913,7 +3913,7 @@ nds32_adjust_label (int n)
   if (label != NULL)
     {
       symbolS *sym;
-      int label_seen = FALSE;
+      int label_seen = false;
       struct frag *old_frag;
       valueT old_value, new_value;
 
@@ -3933,7 +3933,7 @@ nds32_adjust_label (int n)
 	      && S_GET_VALUE (sym) == old_value)
 	    {
 	      /* Warning HERE! */
-	      label_seen = TRUE;
+	      label_seen = true;
 	      symbol_set_frag (sym, frag_now);
 	      S_SET_VALUE (sym, new_value);
 	    }
@@ -4320,7 +4320,7 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
 	group = group->next;
       group->next = new;
     }
-  relaxing = TRUE;
+  relaxing = true;
 }
 
 /* Decide the size of vector entries, only accepts 4 or 16 now.  */
@@ -4945,7 +4945,7 @@ static void
 nds32_elf_build_relax_relation (fixS *fixP, expressionS *pexp, char* out,
 				struct nds32_asm_insn *insn, fragS *fragP,
 				const struct nds32_field *fld,
-				bfd_boolean pseudo_hint)
+				bool pseudo_hint)
 {
   struct nds32_relocs_pattern *reloc_ptr;
   struct nds32_relocs_group *group;
@@ -5008,7 +5008,7 @@ nds32_elf_build_relax_relation (fixS *fixP, expressionS *pexp, char* out,
 
   /* Set relaxing false only for relax_hint trigger it.  */
   if (!pseudo_opcode)
-    relaxing = FALSE;
+    relaxing = false;
 }
 
 #define N32_MEM_EXT(insn) ((N32_OP6_MEM << 25) | insn)
@@ -5662,7 +5662,7 @@ static struct nds32_hint_map hint_map [] =
 
 /* Find the relaxation pattern according to instructions.  */
 
-static bfd_boolean
+static bool
 nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
 			struct nds32_relax_hint_table *hint_info)
 {
@@ -5742,7 +5742,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
 	    default:
 	      as_warn (_("relax hint unrecognized instruction: line %d."),
 		       pattern->frag->fr_line);
-	      return FALSE;
+	      return false;
 	    }
 	}
       else
@@ -5797,7 +5797,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
       if (!nds32_pic)
 	as_warn (_("Can not find match relax hint.  Line: %d"),
 		 relocs_pattern->frag->fr_line);
-      return FALSE;
+      return false;
     }
 
   /* Get the match table.  */
@@ -5806,7 +5806,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
       /* Branch relax pattern.  */
       relax_info = str_hash_find (nds32_relax_info_hash, opc);
       if (!relax_info)
-	return FALSE;
+	return false;
       fixup_info = relax_info->relax_fixup[range];
       code_seq = relax_info->relax_code_seq[range];
       seq_size = relax_info->relax_code_size[range];
@@ -5827,10 +5827,10 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
 	  table_ptr++;
 	}
       if (table_ptr->main_type == 0)
-	return FALSE;
+	return false;
     }
   else
-    return FALSE;
+    return false;
 
   hint_fixup = hint_info->relax_fixup;
   hint_code = hint_info->relax_code_seq;
@@ -5849,7 +5849,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
   memset (hint_fixup, 0, sizeof (nds32_relax_fixup_info_t));
   /* Copy code sequence.  */
   memcpy (hint_code, code_seq, seq_size);
-  return TRUE;
+  return true;
 }
 
 /* Because there are a lot of variant of load-store, check
@@ -5858,7 +5858,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
 #define CLEAN_REG(insn) ((insn) & 0xfe0003ff)
 #define GET_OPCODE(insn) ((insn) & 0xfe000000)
 
-static bfd_boolean
+static bool
 nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 {
   const char *check_insn[] =
@@ -5868,7 +5868,7 @@ nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 
   insn = CLEAN_REG (opcode->value);
   if (insn == seq)
-    return TRUE;
+    return true;
 
   switch (seq)
     {
@@ -5880,52 +5880,52 @@ nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 	  || insn == OP6 (LWI) || insn == OP6 (SWI)
 	  || insn == OP6 (LWC) || insn == OP6 (SWC)
 	  || insn == OP6 (LDC) || insn == OP6 (SDC))
-	return TRUE;
+	return true;
       break;
     case OP6 (BR2):
       /* This is for LONGCALL5 and LONGCALL6.  */
       if (insn == OP6 (BR2))
-	return TRUE;
+	return true;
       break;
     case OP6 (BR1):
       /* This is for LONGJUMP5 and LONGJUMP6.  */
       if (opcode->isize == 4
 	  && (insn == OP6 (BR1) || insn == OP6 (BR2) || insn == OP6 (BR3)))
-	return TRUE;
+	return true;
       else if (opcode->isize == 2)
 	{
 	  for (i = 0; i < ARRAY_SIZE (check_insn); i++)
 	    if (strcmp (opcode->opcode, check_insn[i]) == 0)
-	      return TRUE;
+	      return true;
 	}
       break;
     case OP6 (MOVI):
       /* This is for LONGJUMP7.  */
       if (opcode->isize == 2 && strcmp (opcode->opcode, "movi55") == 0)
-	return TRUE;
+	return true;
       break;
     case OP6 (MEM):
       if (OP6 (MEM) == GET_OPCODE (insn))
-	return TRUE;
+	return true;
       break;
     case OP6 (JREG):
       /* bit 24: N32_JI_JAL  */ /* feed me!  */
       if ((insn & ~(N32_BIT (24))) == JREG (JRAL))
-	return TRUE;
+	return true;
       break;
     default:
       if (opcode->isize == 2)
 	{
 	  for (i = 0; i < ARRAY_SIZE (check_insn); i++)
 	    if (strcmp (opcode->opcode, check_insn[i]) == 0)
-	      return TRUE;
+	      return true;
 
 	  if ((strcmp (opcode->opcode, "add5.pc") == 0) ||
 	      (strcmp (opcode->opcode, "add45") == 0))
-	    return TRUE;
+	    return true;
 	}
     }
-  return FALSE;
+  return false;
 }
 
 /* Append relax relocation for link time relaxing.  */
@@ -6290,7 +6290,7 @@ nds32_str_tolower (const char *src, char *dest)
 
 /* Check instruction if it can be used for the baseline.  */
 
-static bfd_boolean
+static bool
 nds32_check_insn_available (struct nds32_asm_insn insn, const char *str)
 {
   int attr = insn.attr & ATTR_ALL;
@@ -6308,19 +6308,19 @@ nds32_check_insn_available (struct nds32_asm_insn insn, const char *str)
 	  || (insn.attr & NASM_ATTR_ZOL)))
     {
       as_bad (_("Not support instruction %s in verbatim."), str);
-      return FALSE;
+      return false;
     }
   free (s);
 
   if (!enable_16bit && insn.opcode->isize == 2)
     {
       as_bad (_("16-bit instruction is disabled: %s."), str);
-      return FALSE;
+      return false;
     }
 
   /* No isa setting or all isa can use.  */
   if (attr == 0 || attr == ATTR_ALL)
-    return TRUE;
+    return true;
 
   if (baseline_isa == 0)
     {
@@ -6342,9 +6342,9 @@ nds32_check_insn_available (struct nds32_asm_insn insn, const char *str)
   if  ((baseline_isa & attr) == 0)
     {
       as_bad (_("Instruction %s not supported in the baseline."), str);
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 /* Stub of machine dependent.  */
@@ -6362,7 +6362,7 @@ md_assemble (char *str)
   struct nds32_relocs_group *group_temp;
   fragS *fragP;
   int label = label_exist;
-  static bfd_boolean pseudo_hint = FALSE;
+  static bool pseudo_hint = false;
 
   popcode = nds32_lookup_pseudo_opcode (str);
   /* Note that we need to check 'verbatim' and
@@ -6373,11 +6373,11 @@ md_assemble (char *str)
     {
       /* Pseudo instruction is with relax_hint.  */
       if (relaxing)
-	pseudo_hint = TRUE;
-      pseudo_opcode = TRUE;
+	pseudo_hint = true;
+      pseudo_opcode = true;
       nds32_pseudo_opcode_wrapper (str, popcode);
-      pseudo_opcode = FALSE;
-      pseudo_hint = FALSE;
+      pseudo_opcode = false;
+      pseudo_hint = false;
       nds32_elf_append_relax_relocs (NULL, relocs_list);
 
       /* Free relax_hint group list.  */
@@ -6876,7 +6876,7 @@ nds32_get_align (addressT address, int align)
 
 /* Check the prev_frag is legal.  */
 static void
-invalid_prev_frag (fragS * fragP, fragS **prev_frag, bfd_boolean relax)
+invalid_prev_frag (fragS * fragP, fragS **prev_frag, bool relax)
 {
   addressT address;
   fragS *frag_start = *prev_frag;
@@ -6949,7 +6949,7 @@ nds32_relax_frag (segT segment, fragS *fragP, long stretch ATTRIBUTE_UNUSED)
   static fragS *prev_frag = NULL;
   int adjust = 0;
 
-  invalid_prev_frag (fragP, &prev_frag, TRUE);
+  invalid_prev_frag (fragP, &prev_frag, true);
 
   if (fragP->tc_frag_data.flag & NDS32_FRAG_BRANCH)
     adjust = nds32_relax_branch_instructions (segment, fragP, stretch, 0);
@@ -6986,7 +6986,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   static fragS *prev_frag = NULL;
   int adjust = 0;
 
-  invalid_prev_frag (fragP, &prev_frag, FALSE);
+  invalid_prev_frag (fragP, &prev_frag, false);
 
   if (fragP->tc_frag_data.flag & NDS32_FRAG_BRANCH)
     adjust = nds32_relax_branch_instructions (segment, fragP, 0, 1);
@@ -7236,7 +7236,7 @@ nds32_frob_file_before_fix (void)
 {
 }
 
-static bfd_boolean
+static bool
 nds32_relaxable_section (asection *sec)
 {
   return ((sec->flags & SEC_DEBUGGING) == 0
@@ -7529,13 +7529,13 @@ md_end (void)
 
 /* Implement md_allow_local_subtract.  */
 
-bfd_boolean
+bool
 nds32_allow_local_subtract (expressionS *expr_l ATTRIBUTE_UNUSED,
 			    expressionS *expr_r ATTRIBUTE_UNUSED,
 			    segT sec ATTRIBUTE_UNUSED)
 {
   /* Don't allow any subtraction, because relax may change the code.  */
-  return FALSE;
+  return false;
 }
 
 /* Sort relocation by address.
@@ -7604,7 +7604,7 @@ nds32_post_relax_hook (void)
    Return whether this symbol (fixup) can be replaced with
    section symbols.  */
 
-bfd_boolean
+bool
 nds32_fix_adjustable (fixS *fixP)
 {
   switch (fixP->fx_r_type)

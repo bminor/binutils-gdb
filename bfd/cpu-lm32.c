@@ -33,7 +33,7 @@ const bfd_arch_info_type bfd_lm32_arch =
   "lm32",		  /* Architecture name.  */
   "lm32",		  /* Printable name.  */
   4,			  /* Alignment.  */
-  TRUE,			  /* Is this the default machine for the target.  */
+  true,			  /* Is this the default machine for the target.  */
   bfd_default_compatible, /* Function callback to test if two files have compatible machines.  */
   bfd_default_scan,
   bfd_arch_default_fill,

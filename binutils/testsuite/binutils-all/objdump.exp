@@ -503,7 +503,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
-    setup_xfail "msp430-*-*" "nds32*-*-*"
+    setup_xfail "msp430-*-*"
     if { [regexp_diff objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
 	fail "objdump -W for debug_ranges"
     } else {
@@ -606,7 +606,7 @@ if { [is_elf_format] } then {
 	set testfile tmpdir/debuglink.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk $testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk -WN $testfile" "" "/dev/null" "objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -Wk (reason: unexpected output)"
@@ -615,7 +615,7 @@ if { [is_elf_format] } then {
     }
 
     if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Wk] } then {
-	fail "objdump -Wk"
+	fail "objdump -Wk (reason: output does not match expectations)"
     } else {
 	pass "objdump -Wk"
     }
@@ -671,8 +671,8 @@ proc test_follow_debuglink { options dumpfile } {
 }
 
 if {[is_elf_format]} then {
-    test_follow_debuglink "--dwarf=follow-links --dwarf=info --dwarf=str" objdump.WK2
-    test_follow_debuglink "--dwarf=follow-links --headers --wide" objdump.WK3
+    test_follow_debuglink "--process-links --dwarf=info --dwarf=str" objdump.WK2
+    test_follow_debuglink "--process-links --headers --wide" objdump.WK3
 }
 
 # Test objdump output with start and stop address limits for the specified

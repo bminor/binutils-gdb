@@ -69,7 +69,7 @@ get_callbacks (void)
 int argp, stackp;
 
 static int
-arg ()
+arg (void)
 {
   int rv = 0;
   argp++;
@@ -160,6 +160,7 @@ rx_syscall (int id)
 
     case SYS_open:
       {
+	int oflags, cflags;
 	int path = arg ();
 	/* The open function is defined as taking a variable number of arguments
 	   because the third parameter to it is optional:
@@ -167,8 +168,8 @@ rx_syscall (int id)
 	   Hence the oflags and cflags arguments will be on the stack and we need
 	   to skip the (empty) argument registers r3 and r4.  */
 	argp = 4;
-	int oflags = arg ();
-	int cflags = arg ();
+	oflags = arg ();
+	cflags = arg ();
 
 	read_target (buf, path, 256, 1);
 	if (trace)

@@ -49,32 +49,31 @@ if ![runto_main] then {
 
 set test "first-hit"
 gdb_test_multiple "step" $test {
-    -re " first-hit .*\r\n$gdb_prompt $" {
-	pass $test
+    -re -wrap " first-hit .*" {
+	pass $gdb_test_name
     }
-    -re " first-retry .*\r\n$gdb_prompt $" {
-	gdb_test "step" " first-hit .*" "first-hit (optimized)"
+    -re -wrap " first-retry .*" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re -wrap "get_pc_thunk.*" {
+	send_gdb "step\n"
+	exp_continue
     }
 }
 
 set test "second-hit"
 gdb_test_multiple "step" $test {
-    -re " second-hit .*\r\n$gdb_prompt $" {
-	pass $test
+    -re -wrap " second-hit .*" {
+	pass $gdb_test_name
     }
-    -re " first-retry .*\r\n$gdb_prompt $" {
-	set test "second-hit (optimized 1)"
-	gdb_test_multiple "step" $test {
-	    -re " second-hit .*\r\n$gdb_prompt $" {
-		pass $test
-	    }
-	    -re " first-hit .*\r\n$gdb_prompt $" {
-		gdb_test "step" " second-hit .*" "second-hit (optimized 2)"
-	    }
-	}
+    -re -wrap " second-retry .*" {
+	send_gdb "step\n"
+	exp_continue
     }
-    -re " second-retry .*\r\n$gdb_prompt $" {
-	gdb_test "step" " second-hit .*" "second-hit (optimized 3)"
+    -re -wrap "get_pc_thunk.*" {
+	send_gdb "step\n"
+	exp_continue
     }
 }
 

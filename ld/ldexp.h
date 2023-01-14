@@ -26,7 +26,7 @@ typedef struct {
   bfd_vma value;
   char *str;
   asection *section;
-  bfd_boolean valid_p;
+  bool valid_p;
 } etree_value_type;
 
 enum node_tree_enum {
@@ -66,7 +66,7 @@ typedef union etree_union {
     node_type type;
     const char *dst;
     union etree_union *src;
-    bfd_boolean hidden;
+    bool hidden;
   } assign;
   struct {
     node_type type;
@@ -149,14 +149,14 @@ struct ldexp_control {
   lang_phase_type phase;
 
   /* Principally used for diagnostics.  */
-  bfd_boolean assigning_to_dot;
+  bool assigning_to_dot;
 
   /* Set if the current expression used "dot", SEGMENT_START or
      ORIGIN, but not ABSOLUTE or combined symbols in a way that forces
      an absolute result.  Used in tracking symbols assigned from dot
      outside of output section statements, in order to later convert
      them from absolute.  */
-  bfd_boolean rel_from_abs;
+  bool rel_from_abs;
 
   /* If evaluating an assignment, the destination.  Cleared if an
      etree_name NAME matches this, to signal a self-assignment.
@@ -193,7 +193,7 @@ typedef struct segment_struct {
   bfd_vma value;
   /* True if a SEGMENT_START directive corresponding to this segment
      has been seen.  */
-  bfd_boolean used;
+  bool used;
 } segment_type;
 
 /* The segments specified by the user on the command-line.  */
@@ -220,11 +220,11 @@ etree_type *exp_unop
 etree_type *exp_nameop
   (int, const char *);
 etree_type *exp_assign
-  (const char *, etree_type *, bfd_boolean);
+  (const char *, etree_type *, bool);
 etree_type *exp_defsym
   (const char *, etree_type *);
 etree_type *exp_provide
-  (const char *, etree_type *, bfd_boolean);
+  (const char *, etree_type *, bool);
 etree_type *exp_assert
   (etree_type *, const char *);
 void exp_print_tree
@@ -239,6 +239,7 @@ bfd_vma exp_get_abs_int
   (etree_type *, int, char *);
 void ldexp_init (void);
 void ldexp_finalize_syms (void);
+bool ldexp_is_final_sym_absolute (const struct bfd_link_hash_entry *);
 void ldexp_finish (void);
 
 #endif

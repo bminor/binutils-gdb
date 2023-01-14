@@ -46,7 +46,7 @@ main ()
 {
   derived1 d1 (42);
   derived2 d2 (24);
-  g = d1.meth (); // set breakpoint here
-  g = d2.meth (); // set breakpoint here (second)
+  g = d1.meth (); // First breakpoint
+  g = d2.meth (); // Second breakpoint
   return 0;
 }

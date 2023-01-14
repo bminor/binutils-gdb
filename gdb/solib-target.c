@@ -25,6 +25,7 @@
 #include "target.h"
 #include "solib-target.h"
 #include <vector>
+#include "inferior.h"
 
 /* Private data for each loaded library.  */
 struct lm_info_target : public lm_info_base
@@ -233,8 +234,8 @@ solib_target_current_sos (void)
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> library_document
-    = target_read_stralloc (current_top_target (), TARGET_OBJECT_LIBRARIES,
-			    NULL);
+    = target_read_stralloc (current_inferior ()->top_target (),
+			    TARGET_OBJECT_LIBRARIES, NULL);
   if (!library_document)
     return NULL;
 

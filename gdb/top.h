@@ -291,4 +291,9 @@ extern char *handle_line_of_input (struct buffer *cmd_line_buffer,
 				   const char *rl, int repeat,
 				   const char *annotation_suffix);
 
+/* Call at startup to see if the user has requested that gdb start up
+   quietly.  */
+
+extern bool check_quiet_mode ();
+
 #endif

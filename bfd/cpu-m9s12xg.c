@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_m9s12xg_arch =
   "m9s12xg",
   "m9s12xg",
   4,    /* Section alignment power.  */
-  TRUE,
+  true,
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

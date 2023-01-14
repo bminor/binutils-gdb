@@ -1,3 +1,900 @@
+2021-04-16  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Change error text.
+	* gdb.rust/expr.exp: Change error text.
+
+2021-04-16  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Add parens to 'as' test.
+
+2021-04-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* boards/simavr.exp: Set debug_flags.
+
+2021-04-16  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.dwarf2/dw2-bfloat16.exp: New file.
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-parameter.exp: Give a test a proper name to avoid
+	including a path in the test name.
+
+2021-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.threads/fork-plus-threads.exp: Use foreach_with_prefix.
+
+2021-04-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.dwarf2/arr-stride.exp: Add test.
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/startup-file.exp: Add more tests.
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/25956
+	* gdb.base/early-init-file.c: New file.
+	* gdb.base/early-init-file.exp: New file.
+	* lib/gdb-utils.exp (style): Handle style 'none'.
+
+2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.exp: Use
+	@DW_INL_declared_inlined for the inline attribute.
+
+2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.opt/inline-locals.c (scoped): New function.
+	(main): Call 'scoped'.
+	* gdb.opt/inline-locals.exp: Update with "info locals" tests
+	for scoped variables.
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.c: New file.
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.exp: New file.
+
+2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* lib/dwarf.exp (_location): Recognize DW_OP_fbreg as an op.
+
+2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-vsx-regs.exp: Initialize vs* doublewords.
+
+2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-plxv-nonrel.s:  Testcase using
+	non-relative plxv instructions.
+	* gdb.arch/powerpc-plxv-nonrel.exp: Testcase harness.
+
+2021-03-31  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	PR gdb/27525
+	* gdb/testsuite/gdb.arch/powerpc-addpcis.exp:  Testcase harness to
+	exercise single-stepping over subpcis,lnia,addpcis instructions
+	with displacement.
+	* gdb/testsuite/gdb.arch/powerpc-addpcis.s: Testcase with stream
+	of addpcis/lnia/subpcis instructions.
+	* gdb/testsuite/gdb.arch/powerpc-lnia.exp: Testcase harness to
+	exercise single-stepping over lnia instructions with displacement.
+	* gdb/testsuite/gdb.arch/powerpc-lnia.s: Testcase with stream of
+	lnia instructions.
+
+2021-03-31  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power10.s: New test for instructions.
+	* gdb.arch/powerpc-power10.exp: Harness to run the test.
+
+2021-4-12  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/vsx-vsr-float128.c: New test file.
+	* gdb.arch/vsx-vsr-float128.exp: New expect file.
+
+2021-04-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/reconnect.exp: Relax expected stepi output.
+
+2021-04-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.base/ctf-ptype.c: Add struct link containing a forward
+	reference type.
+	* gdb.base/ctf-ptype.exp: Add "ptype struct link".
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/dynamic-ptype-whatis.exp: New file.
+	* gdb.fortran/dynamic-ptype-whatis.f90: New file.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/rvalue-ref-params.cc (f3): New function.
+	(f4): New function.
+	(global_int): New global variable.
+	(global_float): Likeiwse.
+	(main): Call both new functions.
+	* gdb.cp/rvalue-ref-params.exp: Add new tests.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/fission-relative-dwo.c: New file.
+	* gdb.dwarf2/fission-relative-dwo.exp: New file.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/fission-absolute-dwo.c: New file.
+	* gdb.dwarf2/fission-absolute-dwo.exp: New file.
+	* gdb.dwarf2/fission-base.exp: Use build_executable_and_dwo_files
+	instead of build_executable_from_fission_assembler.
+	* gdb.dwarf2/fission-loclists-pie.exp: Likewise.
+	* gdb.dwarf2/fission-loclists.exp: Likewise.
+
+	* gdb.dwarf2/fission-multi-cu.S: Delete file.
+	* gdb.dwarf2/fission-multi-cu.c: New file based on old
+	fission-multi-cu1.c and fission-multi-cu2.c files.
+	* gdb.dwarf2/fission-multi-cu1.c: Delete file.
+	* gdb.dwarf2/fission-multi-cu2.c: Delete file.
+	* gdb.dwarf2/fission-multi-cu.exp: Rewrite to use Dwarf assembler.
+	* gdb.dwarf2/fission-reread.exp: Likewise.
+	* lib/dwarf.exp (extract_dwo_information): New proc.
+	(strip_dwo_information): New proc.
+	(build_executable_and_dwo_files): New proc.
+	(build_executable_from_fission_assembler): Delete.
+	(Dwarf::_debug_addr_index): New variable.
+	(Dwarf::_cu_is_fission): New variable.
+	(Dwarf::_handle_DW_FORM): Handle DW_OP_GNU_addr_index.
+	(Dwarf::_default_form): Supply a default for DW_AT_GNU_addr_base.
+	(Dwarf::_handle_macro_at_range): Use form DW_FORM_GNU_addr_index
+	if this is a fission CU.
+	(Dwarf::_location): Handle DW_OP_GNU_addr_index.
+	(Dwarf::debug_addr_label): New proc.
+	(Dwarf::cu): Initialise _cu_is_fission.
+	(Dwarf::tu): Likewise.
+	(Dwarf::assemble): Initialise _debug_addr_index.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-using-debug-str.exp: Add an additional test.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-parameter.exp: Add test for reading data-directory
+	using gdb.parameter API.
+
+2021-04-06  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoints/25884
+	* gdb.opt/inline-cmds.exp: Remove kfail.
+
+2021-04-06  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27691
+	* gdb.threads/gcore-thread.exp: Don't call gdb_core_cmd with core
+	file "".
+
+2021-04-01  Egeyar Bagcioglu  <egeyar@gmail.com>
+
+	* lib/pdtrace.in: Fix obvious typo.
+
+2021-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* lib/dwarf.exp (Dwarf::_get_args): New proc.
+	(Dwarf::_location): Use it.
+
+2021-03-31  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27667
+	* lib/gdb.exp (default_gdb_init): Unset DEBUGINFOD_URLS.
+
+2021-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27541
+	* gdb.base/index-cache-load-twice.exp: Remove.
+	* gdb.base/index-cache-load-twice.c: Remove.
+	* gdb.dwarf2/per-bfd-sharing.exp: New.
+	* gdb.dwarf2/per-bfd-sharing.c: New.
+
+2021-03-30  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27604
+	* gdb.dwarf2/dw2-cu-size.S: Add missing .debug_abbrev terminator.
+
+2021-03-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.mi/user-selected-context-sync.exp: Spin on a variable in
+	the infinite loop to avoid a Clang bug.
+
+2021-03-26  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-disassembler-options.exp: Extend some test
+	names for uniqueness.
+	* gdb.arch/powerpc-fpscr-gcore.exp: Add more test names for
+	uniqueness.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-prettyprint.c (struct container): Add 'is_array_p'
+	member.
+	(make_container): Initialise is_array_p.
+	* gdb.python/py-prettyprint.exp: Add new tests.
+	* gdb.python/py-prettyprint.py (ContainerPrinter.display_hint):
+	Check is_array_p and possibly return 'array'.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/breakpoint.exp: Extend test names to make them unique.
+	* gdb.cp/casts.exp: Give tests unique names.
+	* gdb.cp/filename.exp: Likewise.
+	* gdb.cp/gdb2495.exp: Likewise.
+	* gdb.cp/mb-ctor.exp: Extend test names to make them unique.
+	* gdb.cp/misc.exp: Rename test to make it unique.
+	* gdb.cp/nsnested.exp: Give tests unique names.
+	* gdb.cp/ovldbreak.exp: Likewise.
+	* gdb.cp/pr17494.exp: Rename test to reflect what is actually
+	being tested.  This also removes the duplicate test name.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.cp/temargs.exp: Likewise.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/cplusfuncs.exp (test_paddr_operator_functions): Escape
+	square brackets in test.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/maint.exp (test_first_component): Run more tests with a
+	variable number of spaces, this removes the duplicate testing of
+	'operator ->' which existed before.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/gdb2384.cc (main): Change comments used for breakpoints.
+	* gdb.cp/gdb2384.exp: Change and extend test names to avoid
+	duplicates, and also to avoid having a string inside parentheses
+	at the end of test names.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/nsusing.exp: Rewrite test, remove a duplicate test block.
+	Avoid repeated uses of 'runto', and instread just progress once
+	through the test stopping at different breakpoints.  Give comments
+	a capital letter and full stop.  Give duplicate tests unique names.
+
+2021-03-25  Pedro Alves  <pedro@palves.net>
+
+	* gdb.server/stop-reply-no-thread-multi.exp (run_test): Add
+	"target_non_stop" parameter and use it.
+	(top level): Add "maint set target-non-stop on/off" testing axis.
+
+2021-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/ada.exp (gnat_runtime_has_debug_info): Use -wrap with
+	gdb_test_multiple.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.arch/aarch64-mte.c: New file.
+	* gdb.arch/aarch64-mte.exp: New test.
+	* gdb.base/memtag.c: New file.
+	* gdb.base/memtag.exp: New test.
+	* lib/gdb.exp (supports_memtag): New function.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/options.exp: Adjust for new print options.
+	* gdb.base/with.exp: Likewise.
+
+2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-missing-cu-tag.c: New file.
+	* gdb.dwarf2/dw2-missing-cu-tag.exp: New file.
+
+2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-using-debug-str.c: New file.
+	* gdb.dwarf2/dw2-using-debug-str.exp: New file.
+	* lib/dwarf.exp (Dwarf::DW_FORM_strp): Create .debug_str section,
+	not .debug_string.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/maint.exp: Update "maint print statistics" output.
+
+2021-03-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdbserver-support.exp (gdbserver_exit): Use the
+	"-nowait" flag when waiting for gdbserver to exit.
+
+2021-03-19  Sourabh Singh Tomar  <SourabhSingh.Tomar@amd.com>
+
+	* gdb.base/info-macros.exp: Append -fdebug-macro to
+	  additional_flags for clang.
+	* gdb.base/macscp.exp: Likewise.
+	* gdb.base/style.exp: Likewise.
+	* gdb.linespec/macro-relative.exp: Likewise.
+
+2021-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <pedro@palves.net>
+
+	* gdb.base/run-attach-while-running.exp: New.
+	* gdb.base/run-attach-while-running.c: New.
+
+2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-framefilter-addr.c: New file.
+	* gdb.python/py-framefilter-addr.exp: New file.
+	* gdb.python/py-framefilter-addr.py: New file.
+
+2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.threads/execl.exp: Remove duplicate 'info threads' test.
+	Make use of $gdb_test_name instead of creating a separate $test
+	variable.
+	* gdb.threads/print-threads.exp: Add a with_test_prefix instead of
+	adding a '($name)' at the end of each test.  This also catches the
+	one place where '($name)' was missing, and so caused a duplicate
+	test name.
+	* gdb.threads/queue-signal.exp: Give tests unique names to avoid
+	duplicate test names based on the command being tested.
+	* gdb.threads/signal-command-multiple-signals-pending.exp:
+	Likewise.
+	* lib/gdb.exp (gdb_compile_shlib_pthreads): Tweak test name to
+	avoid duplicate testnames when a test script uses this proc and
+	also gdb_compile_pthreads.
+	* lib/prelink-support.exp (build_executable_own_libs): Use
+	with_test_prefix to avoid duplicate test names when we call
+	build_executable twice.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/fixed_points.exp: Add tests of unary + and -.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/varsize_limit.exp: Add new test.
+	* gdb.ada/varsize_limit/vsizelim.adb: Update.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/operator_call/twovecs.ads: New file.
+	* gdb.ada/operator_call/twovecs.adb: New file.
+	* gdb.ada/operator_call/opcall.adb: New file.
+	* gdb.ada/operator_call.exp: New file.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/enums_overload/enums_overload_main.adb: New file.
+	* gdb.ada/enums_overload/enums_overload.ads: New file.
+	* gdb.ada/enums_overload/enums_overload.adb: New file.
+	* gdb.ada/enums_overload.exp: New file.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/assign_arr/target_wrapper.ads (IArray, Put, Do_Nothing):
+	Declare.
+	* gdb.ada/assign_arr/target_wrapper.adb: New file.
+	* gdb.ada/assign_arr/main_p324_051.adb (IValue): New variable.
+	Call Put.
+	* gdb.ada/assign_arr.exp: Update.
+
+2021-03-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-auto-load-chaining-f1.c: New file.
+	* gdb.python/py-auto-load-chaining-f1.o-gdb.py: New file.
+	* gdb.python/py-auto-load-chaining-f2.c: New file.
+	* gdb.python/py-auto-load-chaining-f2.o-gdb.py: New file.
+	* gdb.python/py-auto-load-chaining.c: New file.
+	* gdb.python/py-auto-load-chaining.exp: New file.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-bad-printers.exp: Extend test names to make them
+	unique.
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.python/py-finish-breakpoint2.exp: Likewise.
+	* gdb.python/py-frame-inline.exp: Likewise.
+	* gdb.python/py-frame.exp: Likewise.
+	* gdb.python/py-infthread.exp: Likewise.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-value-cc.exp: Remove a duplicate test.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/lib-types.exp: Update the test to check the correct
+	python variable.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-explore-cc.exp: Extend test names to make them
+	unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-lookup-type.exp: Remove duplicate test.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-symtab.exp: Extend test names to make them
+	unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-prompt.exp: Add with_test_prefix to make test
+	names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-block.exp: Give tests unique names.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-pp-maint.exp: Extend test names to make them
+	unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-explore.exp: Add with_test_prefix to make test
+	names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-finish-breakpoint.exp: Make test names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-strfns.exp: Use with_test_prefix to make test
+	names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-format-string.exp: Use proc_with_prefix to make
+	test names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-mi.exp: Use with_test_prefix to make test names
+	unique.
+
+2021-03-09  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/cast-call.exp: New file.
+	* gdb.base/cast-call.c: New file.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.gdb/python-helper.exp: New file.
+
+2020-03-04  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+        * gdb.fortran/intrinsics.exp: Add LOC tests.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/shape.exp: New file.
+	* gdb.fortran/shape.f90: New file.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/size.exp: New file.
+	* gdb.fortran/size.f90: New file.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/rank.exp: New file.
+	* gdb.fortran/rank.f90: New file.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.fortran/debug-expr.exp: Update tests.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/debug-expr.exp: Update expected dump output.
+
+2021-03-06  Tom Tromey  <tom@tromey.com>
+
+	* lib/dwarf.exp (_handle_DW_FORM): Treat DW_FORM_GNU_ref_alt and
+	DW_FORM_GNU_strp_alt like DW_FORM_sec_offset.
+	* gdb.dwarf2/dwznolink.exp: New file.
+
+2021-03-05  Mark Wielaard  <mark@klomp.org>
+
+	* lib/valgrind.exp (vgdb_start): Add --wait=1 to vgdbcmd.
+
+2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.base/ctf-ptype.exp: Add function tests and fix typos.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/rn-dl-bind.exp: Add ldflags=-Wl,-z,lazy.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/non-stop.exp: Adjust expected source lines.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/stepi.exp: Add {} options to prepare_for_testing.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/exception.cc (main): Update test source.
+	* gdb.btrace/exception.exp: Update patterns.
+	* gdb.btrace/function_call_history.exp: Likewise.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/unknown_functions.exp: Move -Wl,-x to ldflags.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/rn-dl-bind.exp: Replace reverse-step with
+	reverse-continue to breakpoint.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/delta.exp: Remove instruction-history and
+	function-call-history checks.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* README (Note): Add nopie_ldflag.
+	* lib/gdb.exp (gdb_compile): Extend nopie handling.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/fixed_points.exp: Remove most special cases for minimal
+	encodings.
+
+2021-02-27  Lancelot Six  <lsix@lancelotix.com>
+
+	PR gdb/27393
+	* gdb.base/source-dir.exp: Test that empty dirnames are skipped.
+
+
+2021-02-26  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdb.exp (skip_ctf_tests): Use expr on result.
+
+2021-02-26  Jan Vrany  <jan.vrany@labware.com>
+
+	* gdb.trace/mi-tsv-changed.exp (test_create_delete_modify_tsv):
+	Remove trailing \n from expected output.
+
+2021-02-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (use_gdb_stub): Extend comment.
+
+2021-02-25  Jan Matyas  <jmatyas@codasip.com>
+
+	PR gdb/26819
+	* gdb.server/stop-reply-no-thread.exp: Add two test
+	scenarios that cover remote targets which do not have
+	the concept of threads.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/associated.exp: Add missing '-wrap' argument.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR fortran/26155
+	* gdb.fortran/call-no-debug-func.f90: New file.
+	* gdb.fortran/call-no-debug-prog.f90: New file.
+	* gdb.fortran/call-no-debug.exp: New file.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/associated.exp: New file.
+	* gdb.fortran/associated.f90: New file.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/dot-ops.exp (dot_operations): Test ".xor.".
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/sect-cmd.exp: Update expected results.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/sect-cmd.exp: Rewrite using modern testsuite
+	techniques.  Enable the test for all targets.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint-info-sections.exp: Add new tests.
+	(check_maint_info_target_sections_output): New proc.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-default-tdesc.exp: New file.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/pointer-to-pointer.exp: Additional tests.
+
+2021-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/i386-biarch-core.exp: Add target check.
+
+2021-02-16  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* gdb.dwarf2/pr13961.S: Corrected invalid DIE references.
+
+2021-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/allocated.exp: New file.
+	* gdb.fortran/allocated.f90: New file.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/lbound-ubound.exp: Remove old comment.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint-info-sections.exp: Update expected output, and
+	add additional tests. Again.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint-info-sections.exp: Update expected output, and
+	add additional tests.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint-info-sections.exp: New file, content is moved
+	from gdb.base/maint.exp and cleaned up to use latest testsuite
+	techniques.
+	* gdb.base/maint.exp: Tests moved out to
+	gdb.base/maint-info-sections.exp.
+
+2021-02-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.multi/multi-target.exp.tcl (setup): Add "set sysroot" to
+	GDBFLAGS.
+
+2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/lbound-ubound.F90: New file.
+	* gdb.fortran/lbound-ubound.exp: New file.
+
+2021-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_load_no_complaints): Remove unnecessary
+	"Restore saved setting of complaints".
+
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27341
+	* lib/gdb.exp (with_complaints): New proc, factored out of ...
+	(gdb_load_no_complaints): ... here.
+	* gdb.fortran/function-calls.exp: Add test-case.
+
+2021-02-09  Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.threads/signal-command-handle-nopass.exp: Call
+	'standard_testfile' before using 'testfile'.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: Likewise.
+	* gdb.threads/signal-delivered-right-thread.exp: Likewise
+	* gdb.threads/signal-sigtrap.exp: Likewise
+
+2021-02-08  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/gnu-ifunc.exp (build): Pass -Wl,z,lazy.
+
+2021-02-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/enqueued-cu-base-addr.exp: Fix inter-CU reference.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/tui-window-disabled.c: New file.
+	* gdb.python/tui-window-disabled.exp: New file.
+	* gdb.python/tui-window-disabled.py: New file.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/tui-window.exp: Add new tests.
+	* gdb.python/tui-window.py (TestWindow) <__init__>: Store
+	TestWindow object into global the_window.
+	<remote_title>: New method.
+	(delete_window_title): New function.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.tui/winheight.exp: Add more tests.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-framefilter.exp: Update expected results.
+	* gdb.python/python.exp: Update expected results.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.tui/scroll.exp: Tighten expected results.  Remove comment
+	about bug in GDB, update expected results, and add more tests.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.tui/scroll.exp: New file.
+	* gdb.tui/tui-layout-asm-short-prog.exp: Update expected results.
+	* lib/tuiterm.exp (Term::_csi_M): Delete count lines, scroll
+	remaining lines up.
+	(Term::check_region_contents): New proc.
+	(Term::check_box_contents): Use check_region_contents.
+
+2021-02-06  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26922
+	* gdb.tui/tui-layout-asm.exp: Ignore whitespace mismatches when
+	scrolling.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoints/27313
+	* gdb.base/catch-syscall.exp: Check that "catch syscall -1" is
+	rejected.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/main-subprogram.exp: Add KFAIL for PR symtab/24549.
+	* gdb.fortran/mixed-lang-stack.exp: Same.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
+	PR exp/27265
+	* gdb.base/complex-parts.exp: Add tests.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27307
+	* gdb.dwarf2/clang-debug-names.exp: Check file command warnings.
+
+2021-02-04  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.xml/tdesc-regs.exp: Use correct core-regs for ARC.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* gdb.threads/detach-step-over.c: New file.
+	* gdb.threads/detach-step-over.exp: New file.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* gdb.threads/attach-non-stop.c: New file.
+	* gdb.threads/attach-non-stop.exp: New file.
+
+2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb.base/inferior-noarg.c: New test.
+	* gdb.base/inferior-noarg.exp: New test.
+
+2021-02-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/scope.exp: Use proc_with_prefix.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/dwarf.exp (rnglists): Add -no-offset-array option to
+	table proc.
+	* gdb.dwarf2/rnglists-sec-offset.exp: Add test for
+	.debug_rnglists table without offset array.
+	* gdb.dwarf2/loclists-sec-offset.exp: Add test for
+	.debug_loclists table without offset array.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.dwarf2/rnglists-sec-offset.exp: Add test for DW_AT_ranges
+	of DW_FORM_sec_offset form plus DW_AT_rnglists_base attribute.
+	* gdb.dwarf2/loclists-sec-offset.exp: Add test for
+	DW_AT_location of DW_FORM_sec_offset plus DW_AT_loclists_base
+	attribute
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/26813
+	* lib/dwarf.exp (_handle_DW_FORM): Handle DW_FORM_loclistx.
+	(loclists): New proc.
+	* gdb.dwarf2/loclists-multiple-cus.c: New.
+	* gdb.dwarf2/loclists-multiple-cus.exp: New.
+	* gdb.dwarf2/loclists-sec-offset.c: New.
+	* gdb.dwarf2/loclists-sec-offset.exp: New.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/dwarf.exp (_location): Add parameters.
+	(_handle_DW_FORM): Adjust.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/26813
+	* lib/dwarf.exp (_handle_DW_FORM): Handle DW_FORM_rnglistx.
+	(cu): Generate header for DWARF 5.
+	(rnglists): New proc.
+	* gdb.dwarf2/rnglists-multiple-cus.exp: New.
+	* gdb.dwarf2/rnglists-sec-offset.exp: New.
+
+2021-02-02  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/24620
+	* gdb.dwarf2/fission-reread.exp: Add test-case.
+
+2021-02-01  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/fission-base.S: Pass -DDWO=$dwo.
+	* gdb.dwarf2/fission-loclists-pie.S: Same.
+	* gdb.dwarf2/fission-loclists.S: Same.
+	* gdb.dwarf2/fission-multi-cu.S: Same.
+	* gdb.dwarf2/fission-reread.S: Same.
+	* gdb.dwarf2/fission-base.exp: Use DWO.
+	* gdb.dwarf2/fission-loclists-pie.exp: Same.
+	* gdb.dwarf2/fission-loclists.exp: Same.
+	* gdb.dwarf2/fission-multi-cu.exp: Same.
+	* gdb.dwarf2/fission-reread.exp: Same.
+
+2021-01-29  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoints/26063
+	* gdb.dwarf2/dw2-step-out-of-function-no-stmt.c: New test.
+	* gdb.dwarf2/dw2-step-out-of-function-no-stmt.exp: New file.
+
+2021-01-29  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.opt/solib-intra-step.exp: Remove state tracking logic.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.arch/i386-gnu-cfi.exp: Capture the position of function gate
+	in the backtrace, and use that in the rest of the test instead of
+	hardcoded constant 3.  Use "frame" instead of "up" for robustness.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.arch/i386-sse-stack-align.S: Rename g[0-4] to test_g[0-4].
+	* gdb.arch/i386-sse-stack-align.c: Same.
+	* gdb.arch/i386-sse-stack-align.exp: Same.
+
+2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (default_gdb_init): Unset XDG_CONFIG_HOME.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/out_of_line_in_inlined.exp: Use gdb_breakpoint.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-out-of-range-end-of-seq.exp: Add regexp to
+	"maint info line-table".  Make PASS pattern more specific.  Make
+	FAIL pattern work for -m32.
+
+2021-01-27  Lancelot SIX  <lsix@lancelotsix.com>
+
+	PR gdb/27133
+	* gdb.base/ui-redirect.exp: Add test case that ensures that
+	redirecting both logging and debug does not cause gdb to crash.
+
+
+2021-01-27  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* gdb.arch/insn-reloc.c: Add tests for BR and BLR.
+
+2021-01-26  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.threads/killed-outside.exp: Allow regular output.
+
+2021-01-26  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.opt/solib-intra-step.exp: Handle stepping into thunk.
+
+2021-01-25  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-ranges-psym.exp (gdb_load_no_complaints): New proc.
+	* lib/gdb.exp: Use gdb_load_no_complaints.
+
 2021-01-25  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/fixed_points.exp: Add regression test.

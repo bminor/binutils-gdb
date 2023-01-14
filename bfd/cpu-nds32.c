@@ -35,11 +35,11 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_n1h, "n1h", FALSE, NDS32V2_NEXT),
-  N (bfd_mach_n1h_v2, "n1h_v2", FALSE, NDS32V3_NEXT),
-  N (bfd_mach_n1h_v3, "n1h_v3", FALSE, NDS32V3M_NEXT),
-  N (bfd_mach_n1h_v3m, "n1h_v3m", FALSE, NULL),
+  N (bfd_mach_n1h, "n1h", false, NDS32V2_NEXT),
+  N (bfd_mach_n1h_v2, "n1h_v2", false, NDS32V3_NEXT),
+  N (bfd_mach_n1h_v3, "n1h_v3", false, NDS32V3M_NEXT),
+  N (bfd_mach_n1h_v3m, "n1h_v3m", false, NULL),
 };
 
 const bfd_arch_info_type bfd_nds32_arch =
-  N (bfd_mach_n1, "n1h", TRUE, NEXT);
+  N (bfd_mach_n1, "n1h", true, NEXT);

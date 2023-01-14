@@ -216,16 +216,15 @@ struct bfd_link_hash_table
    follows bfd_link_hash_indirect and bfd_link_hash_warning links to
    the real symbol.  */
 extern struct bfd_link_hash_entry *bfd_link_hash_lookup
-  (struct bfd_link_hash_table *, const char *, bfd_boolean create,
-   bfd_boolean copy, bfd_boolean follow);
+  (struct bfd_link_hash_table *, const char *, bool create,
+   bool copy, bool follow);
 
 /* Look up an entry in the main linker hash table if the symbol might
    be wrapped.  This should only be used for references to an
    undefined symbol, not for definitions of a symbol.  */
 
 extern struct bfd_link_hash_entry *bfd_wrapped_link_hash_lookup
-  (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
-   bfd_boolean, bfd_boolean);
+  (bfd *, struct bfd_link_info *, const char *, bool, bool, bool);
 
 /* If H is a wrapped symbol, ie. the symbol name starts with "__wrap_"
    and the remainder is found in wrap_hash, return the real symbol.  */
@@ -236,7 +235,7 @@ extern struct bfd_link_hash_entry *unwrap_hash_lookup
 /* Traverse a link hash table.  */
 extern void bfd_link_hash_traverse
   (struct bfd_link_hash_table *,
-    bfd_boolean (*) (struct bfd_link_hash_entry *, void *),
+    bool (*) (struct bfd_link_hash_entry *, void *),
     void *);
 
 /* Add an entry to the undefs list.  */
@@ -248,12 +247,12 @@ extern void bfd_link_repair_undef_list
   (struct bfd_link_hash_table *table);
 
 /* Read symbols and cache symbol pointer array in outsymbols.  */
-extern bfd_boolean bfd_generic_link_read_symbols (bfd *);
+extern bool bfd_generic_link_read_symbols (bfd *);
 
 /* Check the relocs in the BFD.  Called after all the input
    files have been loaded, and garbage collection has tagged
    any unneeded sections.  */
-extern bfd_boolean bfd_link_check_relocs (bfd *,struct bfd_link_info *);
+extern bool bfd_link_check_relocs (bfd *,struct bfd_link_info *);
 
 struct bfd_sym_chain
 {
@@ -292,7 +291,7 @@ struct flag_info_list
 {
   flag_type with;
   const char *name;
-  bfd_boolean valid;
+  bool valid;
   struct flag_info_list *next;
 };
 
@@ -302,7 +301,7 @@ struct flag_info
   flagword only_with_flags;
   flagword not_with_flags;
   struct flag_info_list *flag_list;
-  bfd_boolean flags_initialized;
+  bool flags_initialized;
 };
 
 struct bfd_elf_dynamic_list;
@@ -465,11 +464,15 @@ struct bfd_link_info
      statics.  */
   unsigned int task_link: 1;
 
-  /* TRUE if ok to have multiple definition.  */
+  /* TRUE if ok to have multiple definitions, without warning.  */
   unsigned int allow_multiple_definition: 1;
 
-  /* TRUE if ok to have prohibit multiple definition of absolute symbols.  */
+  /* TRUE if multiple definition of absolute symbols (eg. from -R) should
+     be reported.  */
   unsigned int prohibit_multiple_definition_absolute: 1;
+
+  /* TRUE if multiple definitions should only warn.  */
+  unsigned int warn_multiple_definition: 1;
 
   /* TRUE if ok to have version with no definition.  */
   unsigned int allow_undefined_version: 1;
@@ -658,6 +661,10 @@ struct bfd_link_info
   /* May be used to set DT_GNU_FLAGS_1 for ELF. */
   bfd_vma gnu_flags_1;
 
+  /* TRUE if references to __start_/__stop_ synthesized symbols do not
+     specially retain C identifier named sections.  */
+  int start_stop_gc;
+
   /* May be used to set ELF visibility for __start_* / __stop_.  */
   unsigned int start_stop_visibility;
 
@@ -694,7 +701,7 @@ struct bfd_link_callbacks
      BFD from which symbols should in fact be added in place of the
      original BFD's symbols.  Returns TRUE if the object should be
      added, FALSE if it should be skipped.  */
-  bfd_boolean (*add_archive_element)
+  bool (*add_archive_element)
     (struct bfd_link_info *, bfd *abfd, const char *name, bfd **subsbfd);
   /* A function which is called when a symbol is found with multiple
      definitions.  H is the symbol which is defined multiple times.
@@ -728,7 +735,7 @@ struct bfd_link_callbacks
      relocatable file.  NAME is the name of the symbol found.  ABFD,
      SECTION and VALUE are the value of the symbol.  */
   void (*constructor)
-    (struct bfd_link_info *, bfd_boolean constructor, const char *name,
+    (struct bfd_link_info *, bool constructor, const char *name,
      bfd *abfd, asection *sec, bfd_vma value);
   /* A function which is called to issue a linker warning.  For
      example, this is called when there is a reference to a warning
@@ -747,7 +754,7 @@ struct bfd_link_callbacks
      a fatal error or not. In some cases SECTION may be NULL.  */
   void (*undefined_symbol)
     (struct bfd_link_info *, const char *name, bfd *abfd,
-     asection *section, bfd_vma address, bfd_boolean is_fatal);
+     asection *section, bfd_vma address, bool is_fatal);
   /* A function which is called when a reloc overflow occurs. ENTRY is
      the link hash table entry for the symbol the reloc is against.
      NAME is the name of the local symbol or section the reloc is
@@ -783,7 +790,7 @@ struct bfd_link_callbacks
      if applicable.  ABFD, SECTION and ADDRESS are the (new) value of
      the symbol.  If SECTION is bfd_und_section, this is a reference.
      FLAGS are the symbol BSF_* flags.  */
-  bfd_boolean (*notice)
+  bool (*notice)
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
      struct bfd_link_hash_entry *inh,
      bfd *abfd, asection *section, bfd_vma address, flagword flags);
@@ -799,10 +806,10 @@ struct bfd_link_callbacks
   /* This callback provides a chance for users of the BFD library to
      override its decision about whether to place two adjacent sections
      into the same segment.  */
-  bfd_boolean (*override_segment_assignment)
+  bool (*override_segment_assignment)
     (struct bfd_link_info *, bfd * abfd,
      asection * current_section, asection * previous_section,
-     bfd_boolean new_segment);
+     bool new_segment);
   /* This callback provides a chance for callers of the BFD to examine the
      ELF (dynamic) string table once it is complete.  */
   void (*examine_strtab)
@@ -922,9 +929,9 @@ extern struct bfd_link_order *bfd_new_link_order (bfd *, asection *);
 
 struct bfd_section_already_linked;
 
-extern bfd_boolean bfd_section_already_linked_table_init (void);
+extern bool bfd_section_already_linked_table_init (void);
 extern void bfd_section_already_linked_table_free (void);
-extern bfd_boolean _bfd_handle_already_linked
+extern bool _bfd_handle_already_linked
   (struct bfd_section *, struct bfd_section_already_linked *,
    struct bfd_link_info *);
 

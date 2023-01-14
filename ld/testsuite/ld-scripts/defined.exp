@@ -23,7 +23,7 @@ set testname "DEFINED"
 set prms_id 5699
 
 if ![ld_assemble $as $srcdir/$subdir/defined.s tmpdir/def.o] {
-    unresolved $testname
+    unsupported $testname
     return
 }
 

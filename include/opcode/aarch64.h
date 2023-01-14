@@ -23,7 +23,7 @@
 #define OPCODE_AARCH64_H
 
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -753,14 +753,14 @@ typedef aarch64_opnd_qualifier_t	\
 	  aarch64_opnd_qualifier_seq_t [AARCH64_MAX_OPND_NUM];
 
 /* FIXME: improve the efficiency.  */
-static inline bfd_boolean
+static inline bool
 empty_qualifier_sequence_p (const aarch64_opnd_qualifier_t *qualifiers)
 {
   int i;
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     if (qualifiers[i] != AARCH64_OPND_QLF_NIL)
-      return FALSE;
-  return TRUE;
+      return false;
+  return true;
 }
 
 /*  Forward declare error reporting type.  */
@@ -819,7 +819,7 @@ struct aarch64_opcode
 
   /* If non-NULL, a function to verify that a given instruction is valid.  */
   enum err_type (* verifier) (const struct aarch64_inst *, const aarch64_insn,
-			      bfd_vma, bfd_boolean, aarch64_operand_error *,
+			      bfd_vma, bool, aarch64_operand_error *,
 			      struct aarch64_instr_sequence *);
 };
 
@@ -897,16 +897,16 @@ extern aarch64_opcode aarch64_opcode_table[];
 #define C_MAX_ELEM (1U << 1)
 /* Next bit is 2.  */
 
-static inline bfd_boolean
+static inline bool
 alias_opcode_p (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_ALIAS) ? TRUE : FALSE;
+  return (opcode->flags & F_ALIAS) != 0;
 }
 
-static inline bfd_boolean
+static inline bool
 opcode_has_alias (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_HAS_ALIAS) ? TRUE : FALSE;
+  return (opcode->flags & F_HAS_ALIAS) != 0;
 }
 
 /* Priority for disassembling preference.  */
@@ -916,17 +916,16 @@ opcode_priority (const aarch64_opcode *opcode)
   return (opcode->flags >> 2) & 0x3;
 }
 
-static inline bfd_boolean
+static inline bool
 pseudo_opcode_p (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_PSEUDO) != 0lu ? TRUE : FALSE;
+  return (opcode->flags & F_PSEUDO) != 0lu;
 }
 
-static inline bfd_boolean
+static inline bool
 optional_operand_p (const aarch64_opcode *opcode, unsigned int idx)
 {
-  return (((opcode->flags >> 12) & 0x7) == idx + 1)
-    ? TRUE : FALSE;
+  return ((opcode->flags >> 12) & 0x7) == idx + 1;
 }
 
 static inline aarch64_insn
@@ -941,12 +940,11 @@ get_opcode_dependent_value (const aarch64_opcode *opcode)
   return (opcode->flags >> 24) & 0x7;
 }
 
-static inline bfd_boolean
+static inline bool
 opcode_has_special_coder (const aarch64_opcode *opcode)
 {
   return (opcode->flags & (F_SF | F_LSE_SZ | F_SIZEQ | F_FPTYPE | F_SSIZE | F_T
-	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND)) ? TRUE
-    : FALSE;
+	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND)) != 0;
 }
 
 struct aarch64_name_value_pair
@@ -976,9 +974,9 @@ typedef struct
 
 extern const aarch64_sys_reg aarch64_sys_regs [];
 extern const aarch64_sys_reg aarch64_pstatefields [];
-extern bfd_boolean aarch64_sys_reg_deprecated_p (const uint32_t);
-extern bfd_boolean aarch64_pstatefield_supported_p (const aarch64_feature_set,
-						    const aarch64_sys_reg *);
+extern bool aarch64_sys_reg_deprecated_p (const uint32_t);
+extern bool aarch64_pstatefield_supported_p (const aarch64_feature_set,
+					     const aarch64_sys_reg *);
 
 typedef struct
 {
@@ -987,8 +985,8 @@ typedef struct
   uint32_t flags ;
 } aarch64_sys_ins_reg;
 
-extern bfd_boolean aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
-extern bfd_boolean
+extern bool aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
+extern bool
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set,
 				 const char *reg_name, aarch64_insn,
                                  uint32_t, aarch64_feature_set);
@@ -1021,7 +1019,7 @@ enum aarch64_modifier_kind
   AARCH64_MOD_MUL_VL,
 };
 
-bfd_boolean
+bool
 aarch64_extend_operator_p (enum aarch64_modifier_kind);
 
 enum aarch64_modifier_kind
@@ -1244,7 +1242,7 @@ struct aarch64_operand_error
   int index;
   const char *error;
   int data[3];	/* Some data for extra information.  */
-  bfd_boolean non_fatal;
+  bool non_fatal;
 };
 
 /* AArch64 sequence structure used to track instructions with F_SCAN
@@ -1264,7 +1262,7 @@ struct aarch64_instr_sequence
 
 /* Encoding entrypoint.  */
 
-extern int
+extern bool
 aarch64_opcode_encode (const aarch64_opcode *, const aarch64_inst *,
 		       aarch64_insn *, aarch64_opnd_qualifier_t *,
 		       aarch64_operand_error *, aarch64_instr_sequence *);
@@ -1295,7 +1293,7 @@ extern aarch64_opnd_qualifier_t
 aarch64_get_expected_qualifier (const aarch64_opnd_qualifier_seq_t *, int,
 				const aarch64_opnd_qualifier_t, int);
 
-extern bfd_boolean
+extern bool
 aarch64_is_destructive_by_operands (const aarch64_opcode *);
 
 extern int
@@ -1308,7 +1306,7 @@ extern int
 aarch64_zero_register_p (const aarch64_opnd_info *);
 
 extern enum err_type
-aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean,
+aarch64_decode_insn (aarch64_insn, aarch64_inst *, bool,
 		     aarch64_operand_error *);
 
 extern void
@@ -1328,7 +1326,7 @@ aarch64_get_operand_name (enum aarch64_opnd);
 extern const char *
 aarch64_get_operand_desc (enum aarch64_opnd);
 
-extern bfd_boolean
+extern bool
 aarch64_sve_dupm_mov_immediate_p (uint64_t, int);
 
 #ifdef DEBUG_AARCH64

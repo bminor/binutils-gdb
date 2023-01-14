@@ -430,6 +430,14 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
 	  saved_output.file_to_delete = tee;
 	}
 
+      /* Make sure that the call to logfile's dtor does not delete the
+         underlying pointer if we still keep a reference to it.  If
+         logfile_p is not referenced as the file_to_delete, then either
+         the logfile is not used (no redirection) and it should be
+         deleted, or a tee took ownership of the pointer. */
+      if (logfile_p != nullptr && saved_output.file_to_delete == logfile_p)
+	logfile.release ();
+
       gdb_stdout = logging_redirect ? logfile_p : tee;
       gdb_stdlog = debug_redirect ? logfile_p : tee;
       gdb_stderr = logging_redirect ? logfile_p : tee;

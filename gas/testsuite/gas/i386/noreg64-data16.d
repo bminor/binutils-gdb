@@ -150,6 +150,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 81 28 89 00       	subw   \$0x89,\(%rax\)
  *[a-f0-9]+:	66 81 28 34 12       	subw   \$0x1234,\(%rax\)
  *[a-f0-9]+:	66 81 28 78 56       	subw   \$0x5678,\(%rax\)
+ *[a-f0-9]+:	66 0f 35             	data16 sysexitl *
  *[a-f0-9]+:	66 0f 07             	data16 sysretl *
  *[a-f0-9]+:	66 f7 00 89 00       	testw  \$0x89,\(%rax\)
  *[a-f0-9]+:	66 f7 00 34 12       	testw  \$0x1234,\(%rax\)

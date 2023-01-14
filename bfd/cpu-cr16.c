@@ -25,18 +25,18 @@
 
 const bfd_arch_info_type bfd_cr16_arch =
 {
- 16,		      /* Bits in a word.  */
- 32,		      /* Bits in an address.  */
- 8,		      /* Bits in a byte.  */
- bfd_arch_cr16,       /* Architecture number.  */
- bfd_mach_cr16,
- "cr16",	      /* Arch name.  */
- "cr16",	      /* Printable name.  */
- 1,		      /* Section alignment power.  */
- TRUE,	      	      /* The one and only.  */
- bfd_default_compatible,
- bfd_default_scan,
- bfd_arch_default_fill,
- NULL,
- 0 /* Maximum offset of a reloc from the start of an insn.  */
+  16,			/* Bits in a word.  */
+  32,			/* Bits in an address.  */
+  8,			/* Bits in a byte.  */
+  bfd_arch_cr16,	/* Architecture number.  */
+  bfd_mach_cr16,
+  "cr16",		/* Arch name.  */
+  "cr16",		/* Printable name.  */
+  1,			/* Section alignment power.  */
+  true,			/* The one and only.  */
+  bfd_default_compatible,
+  bfd_default_scan,
+  bfd_arch_default_fill,
+  NULL,
+  0 /* Maximum offset of a reloc from the start of an insn.  */
 };

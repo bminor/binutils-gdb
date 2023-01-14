@@ -1,0 +1,9 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac, interp.c, Makefile.in, README, README.arch-spec,
+	sim-main.c, sim-main.h: New files for example simulator.
+	* aclocal.m4, config.in, configure: Regenerated.

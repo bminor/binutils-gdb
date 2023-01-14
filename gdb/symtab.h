@@ -539,7 +539,27 @@ struct general_symbol_info
      section_offsets for this objfile.  Negative means that the symbol
      does not get relocated relative to a section.  */
 
-  short section;
+  short m_section;
+
+  /* Set the index into the obj_section list (within the containing
+     objfile) for the section that contains this symbol.  See M_SECTION
+     for more details.  */
+
+  void set_section_index (short idx)
+  { m_section = idx; }
+
+  /* Return the index into the obj_section list (within the containing
+     objfile) for the section that contains this symbol.  See M_SECTION
+     for more details.  */
+
+  short section_index () const
+  { return m_section; }
+
+  /* Return the obj_section from OBJFILE for this symbol.  The symbol
+     returned is based on the SECTION member variable, and can be nullptr
+     if SECTION is negative.  */
+
+  struct obj_section *obj_section (const struct objfile *objfile) const;
 };
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
@@ -564,11 +584,6 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
 #define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->value.common_block
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
-#define SYMBOL_SECTION(symbol)		(symbol)->section
-#define SYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->section]))	\
-   : NULL)
 
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
@@ -753,7 +768,7 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 #define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
   (((symbol)->maybe_copied) ? get_msymbol_address (objfile, symbol)	\
    : ((symbol)->value.address						\
-      + (objfile)->section_offsets[(symbol)->section]))
+      + (objfile)->section_offsets[(symbol)->section_index ()]))
 /* For a bound minsym, we can easily compute the address directly.  */
 #define BMSYMBOL_VALUE_ADDRESS(symbol) \
   MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
@@ -762,11 +777,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 #define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
 #define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
-#define MSYMBOL_SECTION(symbol)		(symbol)->section
-#define MSYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->section]))	\
-   : NULL)
 
 #include "minsyms.h"
 
@@ -1120,7 +1130,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       language_specific.obstack = nullptr;
       m_language = language_unknown;
       ada_mangled = 0;
-      section = -1;
+      m_section = -1;
       /* GCC 4.8.5 (on CentOS 7) does not correctly compile class-
 	 initialization of unions, so we initialize it manually here.  */
       owner.symtab = nullptr;

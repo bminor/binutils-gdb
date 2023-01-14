@@ -1,3 +1,51 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in: (tmp-igen) Only pass mn10300.igen to igen.
+	* mn10300.igen: Include am33-2.igen.
+
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Set ASAN_OPTIONS when running igen.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (../igen/igen): Delete rule.
+	(tmp-igen): Delete ../igen make.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete call to STATE_WATCHPOINTS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete STATE_WATCHPOINTS (sd)->sizeof_pc.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
@@ -1565,4 +1613,3 @@ Mon Nov 25 12:46:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in, config.in, configure, configure.in: New files.
 	* gencode.c, interp.c, mn10300_sim.h, simops.c: New files.
-

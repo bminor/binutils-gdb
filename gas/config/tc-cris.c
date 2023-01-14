@@ -166,23 +166,23 @@ static htab_t op_hash = NULL;
    we default to no underscore and required register-prefixes.  The
    difference is in the default values.  */
 #ifdef TE_LINUX
-#define DEFAULT_CRIS_AXIS_LINUX_GNU TRUE
+#define DEFAULT_CRIS_AXIS_LINUX_GNU true
 #else
-#define DEFAULT_CRIS_AXIS_LINUX_GNU FALSE
+#define DEFAULT_CRIS_AXIS_LINUX_GNU false
 #endif
 
 /* Whether we demand that registers have a `$' prefix.  Default here.  */
-static bfd_boolean demand_register_prefix = DEFAULT_CRIS_AXIS_LINUX_GNU;
+static bool demand_register_prefix = DEFAULT_CRIS_AXIS_LINUX_GNU;
 
 /* Whether global user symbols have a leading underscore.  Default here.  */
-static bfd_boolean symbols_have_leading_underscore
+static bool symbols_have_leading_underscore
   = !DEFAULT_CRIS_AXIS_LINUX_GNU;
 
 /* Whether or not we allow PIC, and expand to PIC-friendly constructs.  */
-static bfd_boolean pic = FALSE;
+static bool pic = false;
 
 /* Whether or not we allow TLS suffixes.  For the moment, we always do.  */
-static const bfd_boolean tls = TRUE;
+static const bool tls = true;
 
 /* If we're configured for "cris", default to allow all v0..v10
    instructions and register names.  */
@@ -3491,14 +3491,14 @@ cris_get_reloc_suffix (char **cPP, bfd_reloc_code_real_type *relocp,
     const char *const suffix;
     unsigned int len;
     bfd_reloc_code_real_type reloc;
-    bfd_boolean pic_p;
-    bfd_boolean tls_p;
+    bool pic_p;
+    bool tls_p;
   } pic_suffixes[] =
     {
 #undef PICMAP
-#define PICMAP(s, r) {s, sizeof (s) - 1, r, TRUE, FALSE}
-#define PICTLSMAP(s, r) {s, sizeof (s) - 1, r, TRUE, TRUE}
-#define TLSMAP(s, r) {s, sizeof (s) - 1, r, FALSE, TRUE}
+#define PICMAP(s, r) {s, sizeof (s) - 1, r, true, false}
+#define PICTLSMAP(s, r) {s, sizeof (s) - 1, r, true, true}
+#define TLSMAP(s, r) {s, sizeof (s) - 1, r, false, true}
       /* Keep this in order with longest unambiguous prefix first.  */
       PICMAP ("GOTPLT16", BFD_RELOC_CRIS_16_GOTPLT),
       PICMAP ("GOTPLT", BFD_RELOC_CRIS_32_GOTPLT),
@@ -3811,23 +3811,23 @@ md_parse_option (int arg, const char *argp ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_NO_US:
-      demand_register_prefix = TRUE;
+      demand_register_prefix = true;
 
       if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
 	as_bad (_("--no-underscore is invalid with a.out format"));
       else
-	symbols_have_leading_underscore = FALSE;
+	symbols_have_leading_underscore = false;
       break;
 
     case OPTION_US:
-      demand_register_prefix = FALSE;
-      symbols_have_leading_underscore = TRUE;
+      demand_register_prefix = false;
+      symbols_have_leading_underscore = true;
       break;
 
     case OPTION_PIC:
       if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
 	as_bad (_("--pic is invalid for this object format"));
-      pic = TRUE;
+      pic = true;
       if (cris_arch != arch_crisv32)
 	md_long_jump_size = cris_any_v0_v10_long_jump_size_pic;
       else
@@ -4133,7 +4133,7 @@ tc_cris_check_adjusted_broken_word (offsetT new_offset, struct broken_word *brok
 static void
 cris_force_reg_prefix (void)
 {
-  demand_register_prefix = TRUE;
+  demand_register_prefix = true;
 }
 
 /* Do not demand a leading REGISTER_PREFIX_CHAR for all registers.  */
@@ -4141,7 +4141,7 @@ cris_force_reg_prefix (void)
 static void
 cris_relax_reg_prefix (void)
 {
-  demand_register_prefix = FALSE;
+  demand_register_prefix = false;
 }
 
 /* Adjust for having a leading '_' on all user symbols.  */
@@ -4244,7 +4244,7 @@ s_cris_dtpoff (int bytes)
 
   p = frag_more (bytes);
   md_number_to_chars (p, 0, bytes);
-  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE,
+  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, false,
 	       BFD_RELOC_CRIS_32_DTPREL);
 
   demand_empty_rest_of_line ();

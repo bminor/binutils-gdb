@@ -27,7 +27,7 @@
 #include "symcat.h"
 #include "libiberty.h"
 #include "opintl.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "hashtab.h"
 #include "nds32-asm.h"
 #include "opcode/nds32.h"
@@ -982,8 +982,8 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
   int n;
   int last_symbol_index = -1;
   bfd_vma addr;
-  int is_data = FALSE;
-  bfd_boolean found = FALSE;
+  int is_data = false;
+  bool found = false;
   struct nds32_private_data *private_data;
   unsigned int size;
   enum map_type mapping_type = MAP_CODE;
@@ -1025,7 +1025,7 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
 	      if (get_mapping_symbol_type (info, n, &mapping_type))
 		{
 		  last_symbol_index = n;
-		  found = TRUE;
+		  found = true;
 		}
 	    }
 
@@ -1189,21 +1189,21 @@ print_insn_nds32 (bfd_vma pc, disassemble_info *info)
 
 /* Ignore disassembling unnecessary name.  */
 
-static bfd_boolean
+static bool
 nds32_symbol_is_valid (asymbol *sym,
 		       struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
   const char *name;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   name = bfd_asymbol_name (sym);
 
   /* Mapping symbol is invalid.  */
   if (name[0] == '$')
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 static void
@@ -1286,35 +1286,35 @@ is_mapping_symbol (struct disassemble_info *info, int n,
   if (name[1] == 'c')
     {
       *map_type = MAP_CODE;
-      return TRUE;
+      return true;
     }
   else if (name[1] == 'd' && name[2] == '0')
     {
       *map_type = MAP_DATA0;
-      return TRUE;
+      return true;
     }
   else if (name[1] == 'd' && name[2] == '1')
     {
       *map_type = MAP_DATA1;
-      return TRUE;
+      return true;
     }
   else if (name[1] == 'd' && name[2] == '2')
     {
       *map_type = MAP_DATA2;
-      return TRUE;
+      return true;
     }
   else if (name[1] == 'd' && name[2] == '3')
     {
       *map_type = MAP_DATA3;
-      return TRUE;
+      return true;
     }
   else if (name[1] == 'd' && name[2] == '4')
     {
       *map_type = MAP_DATA4;
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 static int
@@ -1324,7 +1324,7 @@ get_mapping_symbol_type (struct disassemble_info *info, int n,
   /* If the symbol is in a different section, ignore it.  */
   if (info->section != NULL
       && info->section != info->symtab[n]->section)
-    return FALSE;
+    return false;
 
   return is_mapping_symbol (info, n, map_type);
 }

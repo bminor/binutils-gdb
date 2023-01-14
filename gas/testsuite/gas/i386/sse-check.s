@@ -9,6 +9,10 @@ _start:
 # SSE2 instruction
 	addpd %xmm2,%xmm1
 
+# special case SSE2 instruction
+	cvtpi2pd %mm2,%xmm1
+	cvtpi2pd (%edx),%xmm1
+
 # SSE3 instruction
 	addsubpd %xmm2,%xmm1
 

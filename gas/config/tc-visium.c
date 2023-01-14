@@ -532,7 +532,7 @@ visium_pcrel_from_section (fixS *fixP, segT sec)
 /* Indicate whether a fixup against a locally defined
    symbol should be adjusted to be against the section
    symbol.  */
-bfd_boolean
+bool
 visium_fix_adjustable (fixS *fix)
 {
   /* We need the symbol name for the VTABLE entries.  */

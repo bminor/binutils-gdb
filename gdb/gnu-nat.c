@@ -2109,12 +2109,13 @@ gnu_nat_target::create_inferior (const char *exec_file,
 				 int from_tty)
 {
   struct inf *inf = cur_inf ();
+  inferior *inferior = current_inferior ();
   int pid;
 
   inf_debug (inf, "creating inferior");
 
-  if (!target_is_pushed (this))
-    push_target (this);
+  if (!inf->target_is_pushed (this))
+    inf->push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
 		       NULL, NULL, NULL, NULL);
@@ -2190,9 +2191,9 @@ gnu_nat_target::attach (const char *args, int from_tty)
 
   inf_attach (inf, pid);
 
-  push_target (this);
-
   inferior = current_inferior ();
+  inferior->push_target (this);
+
   inferior_appeared (inferior, pid);
   inferior->attach_flag = 1;
 

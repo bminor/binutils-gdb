@@ -115,7 +115,7 @@ proc good_combination {arglist flags args} {
 	set cmdret [lindex $cmdret 0]
 	if {$cmdret != 0 \
 	    || ![regexp "Flags: *(\[^\n\r\]*)" $output full gotflags]} {
-	    unresolved $testname
+	    fail $testname
 	} else {
 	    set failed 0
 

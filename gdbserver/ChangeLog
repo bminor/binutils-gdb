@@ -1,3 +1,190 @@
+2021-04-14  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (windows_nat::handle_load_dll): Don't check
+	_WIN32_WCE.
+
+2021-04-13  Pedro Alves  <pedro@palves.net>
+
+	* gdbreplay.c [__MINGW32CE__] (COUNTOF, errno, strerror): Remove.
+
+2021-04-13  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (winapi_CreateToolhelp32Snapshot)
+	(winapi_Module32First, winapi_Module32Next): Remove typedefs.
+
+2021-04-13  Pedro Alves  <pedro@palves.net>
+
+	* Makefile.in (SFILES): Remove hostio-errno.cc.
+	* configure: Regenerate.
+	* configure.ac (GDBSERVER_DEPFILES): No longer add
+	$srv_hostio_err_objs.
+	* configure.srv (srv_hostio_err_objs): Delete.
+	* hostio-errno.cc: Delete.
+	* hostio.cc (hostio_error): Inline hostio_last_error_from_errno
+	here.
+	* hostio.h (hostio_last_error_from_errno): Delete.
+	* target.cc (process_stratum_target::hostio_last_error): Delete.
+	* target.h (class process_stratum_target) <hostio_last_error>:
+	Delete.
+
+2021-04-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* win32-low.cc: Remove all code guarded by _WIN32_WCE.
+	* win32-low.h: Likewise.
+
+2021-04-12  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (class process_stratum_target) <pid_to_exec_file>:
+	Constify the return type.  Update the definition/references below.
+	* target.cc (process_stratum_target::pid_to_exec_file)
+	* linux-low.h (class linux_process_target) <pid_to_exec_file>
+	* linux-low.cc (linux_process_target::pid_to_exec_file)
+	* netbsd-low.h (class netbsd_process_target) <pid_to_exec_file>
+	* netbsd-low.cc (netbsd_process_target::pid_to_exec_file)
+	* server.cc (handle_qxfer_exec_file)
+
+2021-04-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* win32-low.cc (win32_add_dll): New function, with body almost
+	identical to what win32_add_all_dlls did.  Accepts one argument;
+	if that is non-NULL, returns the file name of the DLL that is
+	loaded at the base address equal to that argument, or NULL if not
+	found.  If the argument is NULL, add all the DLLs loaded by the
+	inferior to the list of solibs and return NULL.
+	(win32_add_all_dlls): Now a thin wrapper around win32_add_dll.
+	(windows_nat::handle_load_dll) [!_WIN32_WCE]: If get_image_name
+	failed to glean the file name of the DLL, call win32_add_dll to
+	try harder using the lpBaseOfDll member of the load-DLL event.
+
+2021-03-30  Luis Machado  <luis.machado@linaro.org>
+
+	* server.cc (handle_general_set, handle_query): Update variable
+	to bool and fix verification logic.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* Makefile.in (SFILES): Add /../gdb/nat/aarch64-mte-linux-ptrace.c.
+	* configure.srv (aarch64*-*-linux*): Add arch/aarch64-mte-linux.o and
+	nat/aarch64-mte-linux-ptrace.o.
+	* linux-aarch64-low.cc: Include nat/aarch64-mte-linux-ptrace.h.
+	(class aarch64_target) <supports_memory_tagging>
+	<fetch_memtags, store_memtags>: New method overrides.
+	(aarch64_target::supports_memory_tagging)
+	(aarch64_target::fetch_memtags)
+	(aarch64_target::store_memtags): New methods.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-low.cc (aarch64_fill_mteregset): New function.
+	(aarch64_store_mteregset): New function.
+	(aarch64_regsets): Add MTE register set entry.
+	(aarch64_sve_regsets): Add MTE register set entry.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-ipa.cc (get_ipa_tdesc): Update call to
+	aarch64_linux_read_description.
+	(initialize_low_tracepoint): Likewise.
+	* linux-aarch64-low.cc (aarch64_target::low_arch_setup): Take MTE flag
+	into account.
+	* linux-aarch64-tdesc.cc (tdesc_aarch64_list): Add one more dimension
+	for MTE.
+	(aarch64_linux_read_description): Add mte_p parameter and update to
+	use it.
+	* linux-aarch64-tdesc.h (aarch64_linux_read_description): Add mte_p
+	parameter.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-low.cc: Include arch/aarch64-mte-linux.h.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* server.cc (test_memory_tagging_functions): New function.
+	(captured_main): Register test_memory_tagging_functions.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* remote-utils.cc (decode_m_packet_params): Renamed from ...
+	(decode_m_packet): ... this, which now calls decode_m_packet_params.
+	Make char * param/return const char *.
+	(decode_M_packet): Use decode_m_packet_params and make char * param
+	const char *.
+	* remote-utils.h (decode_m_packet_params): New prototype.
+	(decode_m_packet): Constify char pointers.
+	(decode_M_packet): Likewise.
+	* server.cc (create_fetch_memtags_reply)
+	(parse_store_memtags_request): New
+	functions.
+	(handle_general_set): Handle the QMemTags packet.
+	(parse_fetch_memtags_request): New function.
+	(handle_query): Handle the qMemTags packet and advertise memory
+	tagging support.
+	(captured_main): Initialize memory tagging flag.
+	* server.h (struct client_state): Initialize memory tagging flag.
+	* target.cc (process_stratum_target::supports_memory_tagging)
+	(process_stratum_target::fetch_memtags)
+	(process_stratum_target::store_memtags): New methods.
+	* target.h: Include gdbsupport/byte-vector.h.
+	(class process_stratum_target) <supports_memory_tagging>
+	<fetch_memtags, store_memtags>: New class virtual methods.
+	(target_supports_memory_tagging): Define.
+
+2021-03-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* inferiors.h (struct process_info) <all_dlls, dlls_changed>: New
+	fields.
+	* dll.h (loaded_dll)
+	(unloaded_dll): Declare an overloaded version that takes a proc
+	parameter.
+	* dll.cc (loaded_dll)
+	(unloaded_dll): Implement the overloaded versions.
+	(clear_dlls): Clear all process' dll lists.
+	(all_dlls, dlls_changed): Remove the global variables.
+	* remote-utils.cc (prepare_resume_reply): Update to consider a dll
+	list per proc.
+	* server.cc (handle_qxfer_libraries): Ditto.
+	(handle_v_attach): Ditto.
+	(captured_main): Ditto.
+
+2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.cc (linux_process_target::filter_event): Return
+	void.
+	* linux-low.h (class linux_process_target) <filter_event>:
+	Return void.
+
+2021-02-12  Tom Tromey  <tromey@adacore.com>
+
+	* gdbreplay.cc (remote_desc): Remove.
+	(remote_desc_in, remote_desc_out): New globals.
+	(remote_close): Update.
+	(remote_open): Handle "-".
+	(remote_open): Update.
+	(logchar): Log to stderr.
+	(expect, play): Update.
+
+2021-02-12  Tom Tromey  <tromey@adacore.com>
+
+	* gdbreplay.cc (remote_open): Constify.
+
+2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
+
+	* Makefile.in (UNDO_GNULIB_CFLAGS): Disable
+	gnulib free replacement too.
+	* common-defs.h [USE_WIN32API](read, write): Undefine
+	gnulib versions before defining these macros.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* linux-low.cc (linux_process_target::complete_ongoing_step_over):
+	Discard step SIGTRAP, unless GDB wanted the thread to step.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* server.cc (discard_queued_stop_replies): Don't ever discard the
+	notification at the head of the list.
+
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ax.cc (bytecode_address_table): Make static.

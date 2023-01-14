@@ -102,6 +102,10 @@ static int remote_desc = -1;
 static int listen_desc = -1;
 
 #ifdef USE_WIN32API
+/* gnulib wraps these as macros, undo them.  */
+# undef read
+# undef write
+
 # define read(fd, buf, len) recv (fd, (char *) buf, len, 0)
 # define write(fd, buf, len) send (fd, (char *) buf, len, 0)
 #endif
@@ -1266,11 +1270,11 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	      }
 	  }
 
-	if (dlls_changed)
+	if (current_process ()->dlls_changed)
 	  {
 	    strcpy (buf, "library:;");
 	    buf += strlen (buf);
-	    dlls_changed = 0;
+	    current_process ()->dlls_changed = false;
 	  }
 
 	current_thread = saved_thread;
@@ -1304,31 +1308,11 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     }
 }
 
-void
-decode_m_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr)
-{
-  int i = 0, j = 0;
-  char ch;
-  *mem_addr_ptr = *len_ptr = 0;
+/* See remote-utils.h.  */
 
-  while ((ch = from[i++]) != ',')
-    {
-      *mem_addr_ptr = *mem_addr_ptr << 4;
-      *mem_addr_ptr |= fromhex (ch) & 0x0f;
-    }
-
-  for (j = 0; j < 4; j++)
-    {
-      if ((ch = from[i++]) == 0)
-	break;
-      *len_ptr = *len_ptr << 4;
-      *len_ptr |= fromhex (ch) & 0x0f;
-    }
-}
-
-void
-decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
-		 unsigned char **to_p)
+const char *
+decode_m_packet_params (const char *from, CORE_ADDR *mem_addr_ptr,
+			unsigned int *len_ptr, const char end_marker)
 {
   int i = 0;
   char ch;
@@ -1340,16 +1324,32 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
       *mem_addr_ptr |= fromhex (ch) & 0x0f;
     }
 
-  while ((ch = from[i++]) != ':')
+  while ((ch = from[i++]) != end_marker)
     {
       *len_ptr = *len_ptr << 4;
       *len_ptr |= fromhex (ch) & 0x0f;
     }
 
+  return from + i;
+}
+
+void
+decode_m_packet (const char *from, CORE_ADDR *mem_addr_ptr,
+		 unsigned int *len_ptr)
+{
+  decode_m_packet_params (from, mem_addr_ptr, len_ptr, '\0');
+}
+
+void
+decode_M_packet (const char *from, CORE_ADDR *mem_addr_ptr,
+		 unsigned int *len_ptr, unsigned char **to_p)
+{
+  from = decode_m_packet_params (from, mem_addr_ptr, len_ptr, ':');
+
   if (*to_p == NULL)
     *to_p = (unsigned char *) xmalloc (*len_ptr);
 
-  hex2bin (&from[i++], *to_p, *len_ptr);
+  hex2bin (from, *to_p, *len_ptr);
 }
 
 int

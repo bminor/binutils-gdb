@@ -807,7 +807,7 @@ sim_open (SIM_OPEN_KIND kind,
   SIM_DESC sd = sim_state_alloc (kind, cb);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

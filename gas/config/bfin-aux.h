@@ -64,5 +64,5 @@ INSTR_T bfin_gen_linkage (int, int);
 INSTR_T bfin_gen_pseudodbg (int, int, int);
 INSTR_T bfin_gen_pseudodbg_assert (int, REG_T, int);
 INSTR_T bfin_gen_pseudochr (int);
-bfd_boolean bfin_resource_conflict (INSTR_T, INSTR_T, INSTR_T);
+bool bfin_resource_conflict (INSTR_T, INSTR_T, INSTR_T);
 INSTR_T bfin_gen_multi_instr (INSTR_T, INSTR_T, INSTR_T);

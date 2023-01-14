@@ -1,3 +1,47 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* iq2000.c: Include stdlib.h.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* sim-if.c (sim_open, sim_create_inferior): Use new-style
+	declaration.
+	* iq2000.c (fetch_str): Use new-style declaration.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete call to STATE_WATCHPOINTS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete STATE_WATCHPOINTS (sd)->sizeof_pc.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.

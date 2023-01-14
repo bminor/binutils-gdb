@@ -369,14 +369,12 @@ static const struct sym_fns ecoff_sym_fns =
   mipscoff_new_init,		/* init anything gbl to entire symtab */
   mipscoff_symfile_init,	/* read initial info, setup for sym_read() */
   mipscoff_symfile_read,	/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
   mipscoff_symfile_finish,	/* finished with file, cleanup */
   default_symfile_offsets,	/* dummy FIXME til implem sym reloc */
   default_symfile_segments,	/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
   NULL,				/* sym_probe_fns */
-  &psym_functions
 };
 
 void _initialize_mipsread ();

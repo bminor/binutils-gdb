@@ -33,7 +33,7 @@ if [get_compiler_info] {
 # running init0().  To prevent cascading of errors, we report the
 # first one and quit.  If all pass, then we print the pass results.
 
-proc test_at_main {} {
+proc_with_prefix test_at_main {} {
     global gdb_prompt
     global decimal
     global det_file
@@ -95,7 +95,7 @@ proc test_at_main {} {
     gdb_test "print 'scope1.c'::bar::funclocal" "\\\$$decimal = 4" "print 'scope1.c'::bar::funclocal"  "No symbol \"scope1.c\" in current context.*" "print '$srcdir/$subdir/scope1.c'::bar::funclocal"
 }
 
-proc test_at_foo {} {
+proc_with_prefix test_at_foo {} {
     global gdb_prompt
     global decimal
     global det_file
@@ -180,7 +180,7 @@ proc test_at_foo {} {
 
 }
 
-proc test_at_bar {} {
+proc_with_prefix test_at_bar {} {
     global gdb_prompt
     global decimal
     global det_file
@@ -253,7 +253,7 @@ proc test_at_bar {} {
 # This test has little to do with local scopes, but it is in scope.exp anyway.
 # That's life.
 
-proc test_at_autovars {} {
+proc_with_prefix test_at_autovars {} {
     global gdb_prompt
     global decimal
     global hex
@@ -278,7 +278,7 @@ proc test_at_autovars {} {
     gdb_test "frame" "#.*autovars \\(bcd=5, abc=6\\).*" "args in correct order"
 }
 
-proc test_at_localscopes {} {
+proc_with_prefix test_at_localscopes {} {
     global gdb_prompt
     global decimal
     global hex

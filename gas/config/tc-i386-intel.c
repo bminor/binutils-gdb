@@ -314,9 +314,15 @@ i386_intel_simplify_register (expressionS *e)
     intel_state.base = i386_regtab + reg_num;
   else if (!intel_state.index)
     {
+      const insn_template *t = current_templates->start;
+
       if (intel_state.in_scale
-	  || current_templates->start->base_opcode == 0xf30f1b /* bndmk */
-	  || (current_templates->start->base_opcode & ~1) == 0x0f1a /* bnd{ld,st}x */
+	  || (t->opcode_modifier.opcodeprefix == PREFIX_0XF3
+	      && t->opcode_modifier.opcodespace == SPACE_0F
+	      && t->base_opcode == 0x1b /* bndmk */)
+	  || (t->opcode_modifier.opcodeprefix == PREFIX_NONE
+	      && t->opcode_modifier.opcodespace == SPACE_0F
+	      && (t->base_opcode & ~1) == 0x1a /* bnd{ld,st}x */)
 	  || i386_regtab[reg_num].reg_type.bitfield.baseindex)
 	intel_state.index = i386_regtab + reg_num;
       else
@@ -329,7 +335,7 @@ i386_intel_simplify_register (expressionS *e)
   else
     {
       /* esp is invalid as index */
-      intel_state.index = i386_regtab + REGNAM_EAX + ESP_REG_NUM;
+      intel_state.index = reg_eax + ESP_REG_NUM;
     }
   return 2;
 }
@@ -494,7 +500,7 @@ static int i386_intel_simplify (expressionS *e)
 		break;
 	      default:
 		/* esp is invalid as index */
-		intel_state.index = i386_regtab + REGNAM_EAX + ESP_REG_NUM;
+		intel_state.index = reg_eax + ESP_REG_NUM;
 		break;
 	      }
 
@@ -638,7 +644,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
     return 0;
 
   if (intel_state.op_modifier != O_absent
-      && current_templates->start->base_opcode != 0x8d /* lea */)
+      && (current_templates->start->opcode_modifier.opcodespace != SPACE_BASE
+          || current_templates->start->base_opcode != 0x8d /* lea */))
     {
       i.types[this_operand].bitfield.unspecified = 0;
 
@@ -662,7 +669,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  if ((current_templates->start->name[0] == 'l'
 	       && current_templates->start->name[2] == 's'
 	       && current_templates->start->name[3] == 0)
-	      || current_templates->start->base_opcode == 0x62 /* bound */)
+	      || (current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
+		  && current_templates->start->base_opcode == 0x62 /* bound */))
 	    suffix = WORD_MNEM_SUFFIX;
 	  else if (flag_code != CODE_32BIT
 		   && (current_templates->start->opcode_modifier.jump == JUMP
@@ -692,7 +700,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_qword_ptr: /* O_mmword_ptr */
 	  i.types[this_operand].bitfield.qword = 1;
-	  if (current_templates->start->base_opcode == 0x62 /* bound */
+	  if ((current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
+	       && current_templates->start->base_opcode == 0x62 /* bound */)
 	      || got_a_float == 1)	/* "f..." */
 	    suffix = LONG_MNEM_SUFFIX;
 	  else
@@ -758,19 +767,19 @@ i386_intel_operand (char *operand_string, int got_a_float)
       || current_templates->start->opcode_modifier.jump == JUMP_DWORD
       || current_templates->start->opcode_modifier.jump == JUMP_INTERSEGMENT)
     {
-      bfd_boolean jumpabsolute = FALSE;
+      bool jumpabsolute = false;
 
       if (i.op[this_operand].regs
 	  || intel_state.base
 	  || intel_state.index
 	  || intel_state.is_mem > 1)
-	jumpabsolute = TRUE;
+	jumpabsolute = true;
       else
 	switch (intel_state.op_modifier)
 	  {
 	  case O_near_ptr:
 	    if (intel_state.seg)
-	      jumpabsolute = TRUE;
+	      jumpabsolute = true;
 	    else
 	      intel_state.is_mem = 1;
 	    break;
@@ -782,14 +791,14 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		if (intel_state.op_modifier == O_absent)
 		  {
 		    if (intel_state.is_indirect == 1)
-		      jumpabsolute = TRUE;
+		      jumpabsolute = true;
 		    break;
 		  }
 		as_bad (_("cannot infer the segment part of the operand"));
 		return 0;
 	      }
 	    else if (S_GET_SEGMENT (intel_state.seg) == reg_section)
-	      jumpabsolute = TRUE;
+	      jumpabsolute = true;
 	    else
 	      {
 		i386_operand_type types;
@@ -823,12 +832,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      }
 	    break;
 	  default:
-	    jumpabsolute = TRUE;
+	    jumpabsolute = true;
 	    break;
 	  }
       if (jumpabsolute)
 	{
-	  i.jumpabsolute = TRUE;
+	  i.jumpabsolute = true;
 	  intel_state.is_mem |= 1;
 	}
     }
@@ -1019,16 +1028,10 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      as_warn (_("redundant segment overrides"));
 	      break;
 	    }
-	  switch (i386_regtab[expP->X_add_number].reg_num)
-	    {
-	    case 0: i.seg[i.mem_operands] = &es; break;
-	    case 1: i.seg[i.mem_operands] = &cs; break;
-	    case 2: i.seg[i.mem_operands] = &ss; break;
-	    case 3: i.seg[i.mem_operands] = &ds; break;
-	    case 4: i.seg[i.mem_operands] = &fs; break;
-	    case 5: i.seg[i.mem_operands] = &gs; break;
-	    case RegFlat: i.seg[i.mem_operands] = NULL; break;
-	    }
+	  if (i386_regtab[expP->X_add_number].reg_num == RegFlat)
+	    i.seg[i.mem_operands] = NULL;
+	  else
+	    i.seg[i.mem_operands] = &i386_regtab[expP->X_add_number];
 	}
 
       if (!i386_index_check (operand_string))

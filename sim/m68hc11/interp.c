@@ -100,7 +100,7 @@ sim_get_info (SIM_DESC sd, char *cmd)
 	  sim_io_eprintf (sd, "Valid devices: cpu timer sio eeprom\n");
 	  return;
 	}
-      hw_dev = sim_hw_parse (sd, dev_list[i].device);
+      hw_dev = sim_hw_parse (sd, "%s", dev_list[i].device);
       if (hw_dev == 0)
 	{
 	  sim_io_eprintf (sd, "Device '%s' not found\n", dev_list[i].device);
@@ -138,7 +138,7 @@ sim_board_reset (SIM_DESC sd)
       cpu_type = "/m68hc12";
     }
   
-  hw_cpu = sim_hw_parse (sd, cpu_type);
+  hw_cpu = sim_hw_parse (sd, "%s", cpu_type);
   if (hw_cpu == 0)
     {
       sim_io_eprintf (sd, "%s cpu not found in device tree.", cpu_type);
@@ -404,7 +404,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

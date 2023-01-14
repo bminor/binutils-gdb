@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 #include "libiberty.h"
 
+#include <stdlib.h>
+
 CGEN_ATTR_VALUE_ENUM_TYPE frv_current_fm_slot;
 
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */
@@ -740,7 +742,7 @@ frvbf_check_acc_range (SIM_CPU *current_cpu, SI regno)
   /* Only applicable to fr550 */
   SIM_DESC sd = CPU_STATE (current_cpu);
   if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
-    return;
+    return 0;
 
   /* On the fr550, media insns in slots 0 and 2 can only access
      accumulators acc0-acc3. Insns in slots 1 and 3 can only access

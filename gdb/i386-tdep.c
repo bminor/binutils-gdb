@@ -48,6 +48,7 @@
 #include "i387-tdep.h"
 #include "gdbsupport/x86-xstate.h"
 #include "x86-tdep.h"
+#include "expop.h"
 
 #include "record.h"
 #include "record-full.h"
@@ -1846,13 +1847,14 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       /* LLVM backend (Clang/Flang) always emits a line note before the
-	 prologue and another one after.  We trust clang to emit usable
-	 line notes.  */
+	 prologue and another one after.  We trust clang and newer Intel
+	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
-	return std::max (start_pc, post_prologue_pc);
+	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
+	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+        return std::max (start_pc, post_prologue_pc);
     }
  
   cache.locals = -1;
@@ -4069,7 +4071,7 @@ i386_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
    Return true if the operand was parsed successfully, false
    otherwise.  */
 
-static bool
+static expr::operation_up
 i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 				       struct stap_parse_info *p)
 {
@@ -4081,9 +4083,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       int i;
       long displacements[3];
       const char *start;
-      char *regname;
       int len;
-      struct stoken str;
       char *endp;
 
       got_minus[0] = false;
@@ -4096,7 +4096,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return false;
+	return {};
 
       displacements[0] = strtol (s, &endp, 10);
       s = endp;
@@ -4104,7 +4104,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s != '+' && *s != '-')
 	{
 	  /* We are not dealing with a triplet.  */
-	  return false;
+	  return {};
 	}
 
       got_minus[1] = false;
@@ -4117,7 +4117,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return false;
+	return {};
 
       displacements[1] = strtol (s, &endp, 10);
       s = endp;
@@ -4125,7 +4125,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       if (*s != '+' && *s != '-')
 	{
 	  /* We are not dealing with a triplet.  */
-	  return false;
+	  return {};
 	}
 
       got_minus[2] = false;
@@ -4138,13 +4138,13 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	}
 
       if (!isdigit ((unsigned char) *s))
-	return false;
+	return {};
 
       displacements[2] = strtol (s, &endp, 10);
       s = endp;
 
       if (*s != '(' || s[1] != '%')
-	return false;
+	return {};
 
       s += 2;
       start = s;
@@ -4153,57 +4153,46 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	++s;
 
       if (*s++ != ')')
-	return false;
+	return {};
 
       len = s - start - 1;
-      regname = (char *) alloca (len + 1);
+      std::string regname (start, len);
 
-      strncpy (regname, start, len);
-      regname[len] = '\0';
-
-      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, regname.c_str (), len) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
-	       regname, p->saved_arg);
+	       regname.c_str (), p->saved_arg);
 
+      LONGEST value = 0;
       for (i = 0; i < 3; i++)
 	{
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
-	  write_exp_elt_type
-	    (&p->pstate, builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (&p->pstate, displacements[i]);
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
+	  LONGEST this_val = displacements[i];
 	  if (got_minus[i])
-	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	    this_val = -this_val;
+	  value += this_val;
 	}
-
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      str.ptr = regname;
-      str.length = len;
-      write_exp_string (&p->pstate, str);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate,
-			  builtin_type (gdbarch)->builtin_data_ptr);
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate,
-			  lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_IND);
 
       p->arg = s;
 
-      return true;
+      using namespace expr;
+
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
+      operation_up offset
+	= make_operation<long_const_operation> (long_type, value);
+
+      operation_up reg
+	= make_operation<register_operation> (std::move (regname));
+      struct type *void_ptr = builtin_type (gdbarch)->builtin_data_ptr;
+      reg = make_operation<unop_cast_operation> (std::move (reg), void_ptr);
+
+      operation_up sum
+	= make_operation<add_operation> (std::move (reg), std::move (offset));
+      struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
+      sum = make_operation<unop_cast_operation> (std::move (sum),
+						 arg_ptr_type);
+      return make_operation<unop_ind_operation> (std::move (sum));
     }
 
-  return false;
+  return {};
 }
 
 /* Helper function for i386_stap_parse_special_token.
@@ -4215,7 +4204,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
    Return true if the operand was parsed successfully, false
    otherwise.  */
 
-static bool
+static expr::operation_up
 i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 					      struct stap_parse_info *p)
 {
@@ -4228,11 +4217,8 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       bool size_minus = false;
       long size = 0;
       const char *start;
-      char *base;
       int len_base;
-      char *index;
       int len_index;
-      struct stoken base_token, index_token;
 
       if (*s == '+')
 	++s;
@@ -4243,7 +4229,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	}
 
       if (offset_minus && !isdigit (*s))
-	return false;
+	return {};
 
       if (isdigit (*s))
 	{
@@ -4254,7 +4240,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	}
 
       if (*s != '(' || s[1] != '%')
-	return false;
+	return {};
 
       s += 2;
       start = s;
@@ -4263,16 +4249,14 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       if (*s != ',' || s[1] != '%')
-	return false;
+	return {};
 
       len_base = s - start;
-      base = (char *) alloca (len_base + 1);
-      strncpy (base, start, len_base);
-      base[len_base] = '\0';
+      std::string base (start, len_base);
 
-      if (user_reg_map_name_to_regnum (gdbarch, base, len_base) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, base.c_str (), len_base) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
-	       base, p->saved_arg);
+	       base.c_str (), p->saved_arg);
 
       s += 2;
       start = s;
@@ -4281,16 +4265,15 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       len_index = s - start;
-      index = (char *) alloca (len_index + 1);
-      strncpy (index, start, len_index);
-      index[len_index] = '\0';
+      std::string index (start, len_index);
 
-      if (user_reg_map_name_to_regnum (gdbarch, index, len_index) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, index.c_str (),
+				       len_index) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
-	       index, p->saved_arg);
+	       index.c_str (), p->saved_arg);
 
       if (*s != ',' && *s != ')')
-	return false;
+	return {};
 
       if (*s == ',')
 	{
@@ -4309,85 +4292,60 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	  s = endp;
 
 	  if (*s != ')')
-	    return false;
+	    return {};
 	}
 
       ++s;
-
-      if (offset)
-	{
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
-	  write_exp_elt_type (&p->pstate,
-			      builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (&p->pstate, offset);
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
-	  if (offset_minus)
-	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
-	}
-
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      base_token.ptr = base;
-      base_token.length = len_base;
-      write_exp_string (&p->pstate, base_token);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-
-      if (offset)
-	write_exp_elt_opcode (&p->pstate, BINOP_ADD);
-
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      index_token.ptr = index;
-      index_token.length = len_index;
-      write_exp_string (&p->pstate, index_token);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-
-      if (size)
-	{
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
-	  write_exp_elt_type (&p->pstate,
-			      builtin_type (gdbarch)->builtin_long);
-	  write_exp_elt_longcst (&p->pstate, size);
-	  write_exp_elt_opcode (&p->pstate, OP_LONG);
-	  if (size_minus)
-	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
-	  write_exp_elt_opcode (&p->pstate, BINOP_MUL);
-	}
-
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate,
-			  lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_IND);
-
       p->arg = s;
 
-      return true;
+      using namespace expr;
+
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
+      operation_up reg = make_operation<register_operation> (std::move (base));
+
+      if (offset != 0)
+	{
+	  if (offset_minus)
+	    offset = -offset;
+	  operation_up value
+	    = make_operation<long_const_operation> (long_type, offset);
+	  reg = make_operation<add_operation> (std::move (reg),
+					       std::move (value));
+	}
+
+      operation_up ind_reg
+	= make_operation<register_operation> (std::move (index));
+
+      if (size != 0)
+	{
+	  if (size_minus)
+	    size = -size;
+	  operation_up value
+	    = make_operation<long_const_operation> (long_type, size);
+	  ind_reg = make_operation<mul_operation> (std::move (ind_reg),
+						   std::move (value));
+	}
+
+      operation_up sum
+	= make_operation<add_operation> (std::move (reg),
+					 std::move (ind_reg));
+
+      struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
+      sum = make_operation<unop_cast_operation> (std::move (sum),
+						 arg_ptr_type);
+      return make_operation<unop_ind_operation> (std::move (sum));
     }
 
-  return false;
+  return {};
 }
 
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
    gdbarch.h.  */
 
-int
+expr::operation_up
 i386_stap_parse_special_token (struct gdbarch *gdbarch,
 			       struct stap_parse_info *p)
 {
-  /* In order to parse special tokens, we use a state-machine that go
-     through every known token and try to get a match.  */
-  enum
-    {
-      TRIPLET,
-      THREE_ARG_DISPLACEMENT,
-      DONE
-    };
-  int current_state;
-
-  current_state = TRIPLET;
-
   /* The special tokens to be parsed here are:
 
      - `register base + (register index * size) + offset', as represented
@@ -4396,26 +4354,13 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
      - Operands of the form `-8+3+1(%rbp)', which must be interpreted as
      `*(-8 + 3 - 1 + (void *) $eax)'.  */
 
-  while (current_state != DONE)
-    {
-      switch (current_state)
-	{
-	case TRIPLET:
-	  if (i386_stap_parse_special_token_triplet (gdbarch, p))
-	    return 1;
-	  break;
+  expr::operation_up result
+    = i386_stap_parse_special_token_triplet (gdbarch, p);
 
-	case THREE_ARG_DISPLACEMENT:
-	  if (i386_stap_parse_special_token_three_arg_disp (gdbarch, p))
-	    return 1;
-	  break;
-	}
+  if (result == nullptr)
+    result = i386_stap_parse_special_token_three_arg_disp (gdbarch, p);
 
-      /* Advancing to the next state.  */
-      ++current_state;
-    }
-
-  return 0;
+  return result;
 }
 
 /* Implementation of 'gdbarch_stap_adjust_register', as defined in
@@ -8218,9 +8163,12 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
 	|| strcmp (name, "_Float128") == 0
 	|| strcmp (name, "complex _Float128") == 0
 	|| strcmp (name, "complex(kind=16)") == 0
+	|| strcmp (name, "complex*32") == 0
+	|| strcmp (name, "COMPLEX*32") == 0
 	|| strcmp (name, "quad complex") == 0
 	|| strcmp (name, "real(kind=16)") == 0
-	|| strcmp (name, "real*16") == 0)
+	|| strcmp (name, "real*16") == 0
+	|| strcmp (name, "REAL*16") == 0)
       return floatformats_ia64_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);

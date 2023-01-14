@@ -41,7 +41,7 @@ void rx_dump_symtab (bfd *, void *, void *);
 
 #define RXREL(n,sz,bit,shift,complain,pcrel)				     \
   HOWTO (R_RX_##n, shift, sz, bit, pcrel, 0, complain_overflow_ ## complain, \
-	 bfd_elf_generic_reloc, "R_RX_" #n, FALSE, 0, ~0, FALSE)
+	 bfd_elf_generic_reloc, "R_RX_" #n, false, 0, ~0, false)
 
 /* Note that the relocations around 0x7f are internal to this file;
    feel free to move them as needed to avoid conflicts with published
@@ -49,25 +49,25 @@ void rx_dump_symtab (bfd *, void *, void *);
 
 static reloc_howto_type rx_elf_howto_table [] =
 {
-  RXREL (NONE,	       3,  0, 0, dont,	   FALSE),
-  RXREL (DIR32,	       2, 32, 0, signed,   FALSE),
-  RXREL (DIR24S,       2, 24, 0, signed,   FALSE),
-  RXREL (DIR16,	       1, 16, 0, dont,	   FALSE),
-  RXREL (DIR16U,       1, 16, 0, unsigned, FALSE),
-  RXREL (DIR16S,       1, 16, 0, signed,   FALSE),
-  RXREL (DIR8,	       0,  8, 0, dont,	   FALSE),
-  RXREL (DIR8U,	       0,  8, 0, unsigned, FALSE),
-  RXREL (DIR8S,	       0,  8, 0, signed,   FALSE),
-  RXREL (DIR24S_PCREL, 2, 24, 0, signed,   TRUE),
-  RXREL (DIR16S_PCREL, 1, 16, 0, signed,   TRUE),
-  RXREL (DIR8S_PCREL,  0,  8, 0, signed,   TRUE),
-  RXREL (DIR16UL,      1, 16, 2, unsigned, FALSE),
-  RXREL (DIR16UW,      1, 16, 1, unsigned, FALSE),
-  RXREL (DIR8UL,       0,  8, 2, unsigned, FALSE),
-  RXREL (DIR8UW,       0,  8, 1, unsigned, FALSE),
-  RXREL (DIR32_REV,    1, 16, 0, dont,	   FALSE),
-  RXREL (DIR16_REV,    1, 16, 0, dont,	   FALSE),
-  RXREL (DIR3U_PCREL,  0,  3, 0, dont,	   TRUE),
+  RXREL (NONE,	       3,  0, 0, dont,	   false),
+  RXREL (DIR32,	       2, 32, 0, signed,   false),
+  RXREL (DIR24S,       2, 24, 0, signed,   false),
+  RXREL (DIR16,	       1, 16, 0, dont,	   false),
+  RXREL (DIR16U,       1, 16, 0, unsigned, false),
+  RXREL (DIR16S,       1, 16, 0, signed,   false),
+  RXREL (DIR8,	       0,  8, 0, dont,	   false),
+  RXREL (DIR8U,	       0,  8, 0, unsigned, false),
+  RXREL (DIR8S,	       0,  8, 0, signed,   false),
+  RXREL (DIR24S_PCREL, 2, 24, 0, signed,   true),
+  RXREL (DIR16S_PCREL, 1, 16, 0, signed,   true),
+  RXREL (DIR8S_PCREL,  0,  8, 0, signed,   true),
+  RXREL (DIR16UL,      1, 16, 2, unsigned, false),
+  RXREL (DIR16UW,      1, 16, 1, unsigned, false),
+  RXREL (DIR8UL,       0,  8, 2, unsigned, false),
+  RXREL (DIR8UW,       0,  8, 1, unsigned, false),
+  RXREL (DIR32_REV,    1, 16, 0, dont,	   false),
+  RXREL (DIR16_REV,    1, 16, 0, dont,	   false),
+  RXREL (DIR3U_PCREL,  0,  3, 0, dont,	   true),
 
   EMPTY_HOWTO (0x13),
   EMPTY_HOWTO (0x14),
@@ -83,20 +83,20 @@ static reloc_howto_type rx_elf_howto_table [] =
   EMPTY_HOWTO (0x1e),
   EMPTY_HOWTO (0x1f),
 
-  RXREL (RH_3_PCREL, 0,	 3, 0, signed,	 TRUE),
-  RXREL (RH_16_OP,   1, 16, 0, signed,	 FALSE),
-  RXREL (RH_24_OP,   2, 24, 0, signed,	 FALSE),
-  RXREL (RH_32_OP,   2, 32, 0, signed,	 FALSE),
-  RXREL (RH_24_UNS,  2, 24, 0, unsigned, FALSE),
-  RXREL (RH_8_NEG,   0,	 8, 0, signed,	 FALSE),
-  RXREL (RH_16_NEG,  1, 16, 0, signed,	 FALSE),
-  RXREL (RH_24_NEG,  2, 24, 0, signed,	 FALSE),
-  RXREL (RH_32_NEG,  2, 32, 0, signed,	 FALSE),
-  RXREL (RH_DIFF,    2, 32, 0, signed,	 FALSE),
-  RXREL (RH_GPRELB,  1, 16, 0, unsigned, FALSE),
-  RXREL (RH_GPRELW,  1, 16, 0, unsigned, FALSE),
-  RXREL (RH_GPRELL,  1, 16, 0, unsigned, FALSE),
-  RXREL (RH_RELAX,   0,	 0, 0, dont,	 FALSE),
+  RXREL (RH_3_PCREL, 0,	 3, 0, signed,	 true),
+  RXREL (RH_16_OP,   1, 16, 0, signed,	 false),
+  RXREL (RH_24_OP,   2, 24, 0, signed,	 false),
+  RXREL (RH_32_OP,   2, 32, 0, signed,	 false),
+  RXREL (RH_24_UNS,  2, 24, 0, unsigned, false),
+  RXREL (RH_8_NEG,   0,	 8, 0, signed,	 false),
+  RXREL (RH_16_NEG,  1, 16, 0, signed,	 false),
+  RXREL (RH_24_NEG,  2, 24, 0, signed,	 false),
+  RXREL (RH_32_NEG,  2, 32, 0, signed,	 false),
+  RXREL (RH_DIFF,    2, 32, 0, signed,	 false),
+  RXREL (RH_GPRELB,  1, 16, 0, unsigned, false),
+  RXREL (RH_GPRELW,  1, 16, 0, unsigned, false),
+  RXREL (RH_GPRELL,  1, 16, 0, unsigned, false),
+  RXREL (RH_RELAX,   0,	 0, 0, dont,	 false),
 
   EMPTY_HOWTO (0x2e),
   EMPTY_HOWTO (0x2f),
@@ -118,23 +118,23 @@ static reloc_howto_type rx_elf_howto_table [] =
   EMPTY_HOWTO (0x3f),
   EMPTY_HOWTO (0x40),
 
-  RXREL (ABS32,	       2, 32, 0, dont,	   FALSE),
-  RXREL (ABS24S,       2, 24, 0, signed,   FALSE),
-  RXREL (ABS16,	       1, 16, 0, dont,	   FALSE),
-  RXREL (ABS16U,       1, 16, 0, unsigned, FALSE),
-  RXREL (ABS16S,       1, 16, 0, signed,   FALSE),
-  RXREL (ABS8,	       0,  8, 0, dont,	   FALSE),
-  RXREL (ABS8U,	       0,  8, 0, unsigned, FALSE),
-  RXREL (ABS8S,	       0,  8, 0, signed,   FALSE),
-  RXREL (ABS24S_PCREL, 2, 24, 0, signed,   TRUE),
-  RXREL (ABS16S_PCREL, 1, 16, 0, signed,   TRUE),
-  RXREL (ABS8S_PCREL,  0,  8, 0, signed,   TRUE),
-  RXREL (ABS16UL,      1, 16, 0, unsigned, FALSE),
-  RXREL (ABS16UW,      1, 16, 0, unsigned, FALSE),
-  RXREL (ABS8UL,       0,  8, 0, unsigned, FALSE),
-  RXREL (ABS8UW,       0,  8, 0, unsigned, FALSE),
-  RXREL (ABS32_REV,    2, 32, 0, dont,	   FALSE),
-  RXREL (ABS16_REV,    1, 16, 0, dont,	   FALSE),
+  RXREL (ABS32,	       2, 32, 0, dont,	   false),
+  RXREL (ABS24S,       2, 24, 0, signed,   false),
+  RXREL (ABS16,	       1, 16, 0, dont,	   false),
+  RXREL (ABS16U,       1, 16, 0, unsigned, false),
+  RXREL (ABS16S,       1, 16, 0, signed,   false),
+  RXREL (ABS8,	       0,  8, 0, dont,	   false),
+  RXREL (ABS8U,	       0,  8, 0, unsigned, false),
+  RXREL (ABS8S,	       0,  8, 0, signed,   false),
+  RXREL (ABS24S_PCREL, 2, 24, 0, signed,   true),
+  RXREL (ABS16S_PCREL, 1, 16, 0, signed,   true),
+  RXREL (ABS8S_PCREL,  0,  8, 0, signed,   true),
+  RXREL (ABS16UL,      1, 16, 0, unsigned, false),
+  RXREL (ABS16UW,      1, 16, 0, unsigned, false),
+  RXREL (ABS8UL,       0,  8, 0, unsigned, false),
+  RXREL (ABS8UW,       0,  8, 0, unsigned, false),
+  RXREL (ABS32_REV,    2, 32, 0, dont,	   false),
+  RXREL (ABS16_REV,    1, 16, 0, dont,	   false),
 
 #define STACK_REL_P(x) ((x) <= R_RX_ABS16_REV && (x) >= R_RX_ABS32)
 
@@ -181,44 +181,44 @@ static reloc_howto_type rx_elf_howto_table [] =
   /* A 5-bit unsigned displacement to a B/W/L address, at bit position 8/12.  */
   /* ---- ----   4--- 3210.  */
 #define R_RX_RH_ABS5p8B 0x78
-  RXREL (RH_ABS5p8B,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p8B,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p8W 0x79
-  RXREL (RH_ABS5p8W,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p8W,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p8L 0x7a
-  RXREL (RH_ABS5p8L,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p8L,   0,  0, 0, dont,	   false),
   /* A 5-bit unsigned displacement to a B/W/L address, at bit position 5/12.  */
   /* ---- -432   1--- 0---.  */
 #define R_RX_RH_ABS5p5B 0x7b
-  RXREL (RH_ABS5p5B,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p5B,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p5W 0x7c
-  RXREL (RH_ABS5p5W,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p5W,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p5L 0x7d
-  RXREL (RH_ABS5p5L,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_ABS5p5L,   0,  0, 0, dont,	   false),
   /* A 4-bit unsigned immediate at bit position 8.  */
 #define R_RX_RH_UIMM4p8 0x7e
-  RXREL (RH_UIMM4p8,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_UIMM4p8,   0,  0, 0, dont,	   false),
   /* A 4-bit negative unsigned immediate at bit position 8.  */
 #define R_RX_RH_UNEG4p8 0x7f
-  RXREL (RH_UNEG4p8,   0,  0, 0, dont,	   FALSE),
+  RXREL (RH_UNEG4p8,   0,  0, 0, dont,	   false),
   /* End of internal relocs.  */
 
-  RXREL (SYM,	    2, 32, 0, dont, FALSE),
-  RXREL (OPneg,	    2, 32, 0, dont, FALSE),
-  RXREL (OPadd,	    2, 32, 0, dont, FALSE),
-  RXREL (OPsub,	    2, 32, 0, dont, FALSE),
-  RXREL (OPmul,	    2, 32, 0, dont, FALSE),
-  RXREL (OPdiv,	    2, 32, 0, dont, FALSE),
-  RXREL (OPshla,    2, 32, 0, dont, FALSE),
-  RXREL (OPshra,    2, 32, 0, dont, FALSE),
-  RXREL (OPsctsize, 2, 32, 0, dont, FALSE),
-  RXREL (OPscttop,  2, 32, 0, dont, FALSE),
-  RXREL (OPand,	    2, 32, 0, dont, FALSE),
-  RXREL (OPor,	    2, 32, 0, dont, FALSE),
-  RXREL (OPxor,	    2, 32, 0, dont, FALSE),
-  RXREL (OPnot,	    2, 32, 0, dont, FALSE),
-  RXREL (OPmod,	    2, 32, 0, dont, FALSE),
-  RXREL (OPromtop,  2, 32, 0, dont, FALSE),
-  RXREL (OPramtop,  2, 32, 0, dont, FALSE)
+  RXREL (SYM,	    2, 32, 0, dont, false),
+  RXREL (OPneg,	    2, 32, 0, dont, false),
+  RXREL (OPadd,	    2, 32, 0, dont, false),
+  RXREL (OPsub,	    2, 32, 0, dont, false),
+  RXREL (OPmul,	    2, 32, 0, dont, false),
+  RXREL (OPdiv,	    2, 32, 0, dont, false),
+  RXREL (OPshla,    2, 32, 0, dont, false),
+  RXREL (OPshra,    2, 32, 0, dont, false),
+  RXREL (OPsctsize, 2, 32, 0, dont, false),
+  RXREL (OPscttop,  2, 32, 0, dont, false),
+  RXREL (OPand,	    2, 32, 0, dont, false),
+  RXREL (OPor,	    2, 32, 0, dont, false),
+  RXREL (OPxor,	    2, 32, 0, dont, false),
+  RXREL (OPnot,	    2, 32, 0, dont, false),
+  RXREL (OPmod,	    2, 32, 0, dont, false),
+  RXREL (OPromtop,  2, 32, 0, dont, false),
+  RXREL (OPramtop,  2, 32, 0, dont, false)
 };
 
 /* Map BFD reloc types to RX ELF reloc types.  */
@@ -299,7 +299,7 @@ rx_reloc_name_lookup (bfd * abfd ATTRIBUTE_UNUSED, const char * r_name)
 
 /* Set the howto pointer for an RX ELF reloc.  */
 
-static bfd_boolean
+static bool
 rx_info_to_howto_rela (bfd *		   abfd,
 		       arelent *	   cache_ptr,
 		       Elf_Internal_Rela * dst)
@@ -313,7 +313,7 @@ rx_info_to_howto_rela (bfd *		   abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
   cache_ptr->howto = rx_elf_howto_table + r_type;
   if (cache_ptr->howto->name == NULL)
@@ -322,9 +322,9 @@ rx_info_to_howto_rela (bfd *		   abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 static bfd_vma
@@ -337,13 +337,13 @@ get_symbol_value (const char *		  name,
   bfd_vma value = 0;
   struct bfd_link_hash_entry * h;
 
-  h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->hash, name, false, false, true);
 
   if (h == NULL
       || (h->type != bfd_link_hash_defined
 	  && h->type != bfd_link_hash_defweak))
     (*info->callbacks->undefined_symbol)
-      (info, name, input_bfd, input_section, offset, TRUE);
+      (info, name, input_bfd, input_section, offset, true);
   else
     value = (h->u.def.value
 	     + h->u.def.section->output_section->vma
@@ -359,7 +359,7 @@ get_symbol_value_maybe (const char *		name,
   bfd_vma value = 0;
   struct bfd_link_hash_entry * h;
 
-  h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->hash, name, false, false, true);
 
   if (h == NULL
       || (h->type != bfd_link_hash_defined
@@ -379,13 +379,13 @@ get_gp (struct bfd_link_info *	info,
 	asection *		sec,
 	int			offset)
 {
-  static bfd_boolean cached = FALSE;
-  static bfd_vma     cached_value = 0;
+  static bool cached = false;
+  static bfd_vma cached_value = 0;
 
   if (!cached)
     {
       cached_value = get_symbol_value ("__gp", info, abfd, sec, offset);
-      cached = TRUE;
+      cached = true;
     }
   return cached_value;
 }
@@ -396,13 +396,13 @@ get_romstart (struct bfd_link_info *  info,
 	      asection *	      sec,
 	      int		      offset)
 {
-  static bfd_boolean cached = FALSE;
-  static bfd_vma     cached_value = 0;
+  static bool cached = false;
+  static bfd_vma cached_value = 0;
 
   if (!cached)
     {
       cached_value = get_symbol_value ("_start", info, abfd, sec, offset);
-      cached = TRUE;
+      cached = true;
     }
   return cached_value;
 }
@@ -413,13 +413,13 @@ get_ramstart (struct bfd_link_info *  info,
 	      asection *	      sec,
 	      int		      offset)
 {
-  static bfd_boolean cached = FALSE;
-  static bfd_vma     cached_value = 0;
+  static bool cached = false;
+  static bfd_vma cached_value = 0;
 
   if (!cached)
     {
       cached_value = get_symbol_value ("__datastart", info, abfd, sec, offset);
-      cached = TRUE;
+      cached = true;
     }
   return cached_value;
 }
@@ -481,7 +481,7 @@ static unsigned int rx_stack_top;
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 rx_elf_relocate_section
     (bfd *		     output_bfd,
      struct bfd_link_info *  info,
@@ -492,36 +492,36 @@ rx_elf_relocate_section
      Elf_Internal_Sym *	     local_syms,
      asection **	     local_sections)
 {
-  Elf_Internal_Shdr *		symtab_hdr;
-  struct elf_link_hash_entry ** sym_hashes;
-  Elf_Internal_Rela *		rel;
-  Elf_Internal_Rela *		relend;
-  bfd_boolean			pid_mode;
-  bfd_boolean			saw_subtract = FALSE;
-  const char *			table_default_cache = NULL;
-  bfd_vma			table_start_cache = 0;
-  bfd_vma			table_end_cache = 0;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
+  bool pid_mode;
+  bool saw_subtract = false;
+  const char *table_default_cache = NULL;
+  bfd_vma table_start_cache = 0;
+  bfd_vma table_end_cache = 0;
 
   if (elf_elfheader (output_bfd)->e_flags & E_FLAG_RX_PID)
-    pid_mode = TRUE;
+    pid_mode = true;
   else
-    pid_mode = FALSE;
+    pid_mode = false;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
   for (rel = relocs; rel < relend; rel ++)
     {
-      reloc_howto_type *	   howto;
-      unsigned long		   r_symndx;
-      Elf_Internal_Sym *	   sym;
-      asection *		   sec;
-      struct elf_link_hash_entry * h;
-      bfd_vma			   relocation;
-      bfd_reloc_status_type	   r;
-      const char *		   name = NULL;
-      bfd_boolean		   unresolved_reloc = TRUE;
-      int			   r_type;
+      reloc_howto_type *howto;
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      struct elf_link_hash_entry *h;
+      bfd_vma relocation;
+      bfd_reloc_status_type r;
+      const char * name = NULL;
+      bool unresolved_reloc = true;
+      int r_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -533,7 +533,7 @@ rx_elf_relocate_section
       relocation = 0;
 
       if (rx_stack_top == 0)
-	saw_subtract = FALSE;
+	saw_subtract = false;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -547,7 +547,7 @@ rx_elf_relocate_section
 	}
       else
 	{
-	  bfd_boolean warned, ignored;
+	  bool warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes, h,
@@ -557,7 +557,7 @@ rx_elf_relocate_section
 	  name = h->root.root.string;
 	}
 
-      if (strncmp (name, "$tableentry$default$", 20) == 0)
+      if (startswith (name, "$tableentry$default$"))
 	{
 	  bfd_vma entry_vma;
 	  int idx;
@@ -578,7 +578,7 @@ rx_elf_relocate_section
 
 	      buf = (char *) bfd_malloc (13 + strlen (name + 20));
 	      if (buf == NULL)
-		return FALSE;
+		return false;
 
 	      sprintf (buf, "$tablestart$%s", name + 20);
 	      table_start_cache = get_symbol_value (buf,
@@ -622,11 +622,11 @@ rx_elf_relocate_section
 	      /* This will look like $tableentry$<N>$<name> */
 	      buf = (char *) bfd_malloc (12 + 20 + strlen (name + 20));
 	      if (buf == NULL)
-		return FALSE;
+		return false;
 
 	      sprintf (buf, "$tableentry$%d$%s", idx, name + 20);
 
-	      h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, buf, FALSE, FALSE, TRUE);
+	      h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, buf, false, false, true);
 
 	      if (h)
 		{
@@ -1298,7 +1298,7 @@ rx_elf_relocate_section
 	  {
 	    int32_t tmp;
 
-	    saw_subtract = TRUE;
+	    saw_subtract = true;
 	    RX_STACK_POP (tmp);
 	    tmp = - tmp;
 	    RX_STACK_PUSH (tmp);
@@ -1320,7 +1320,7 @@ rx_elf_relocate_section
 	  {
 	    int32_t tmp1, tmp2;
 
-	    saw_subtract = TRUE;
+	    saw_subtract = true;
 	    RX_STACK_POP (tmp1);
 	    RX_STACK_POP (tmp2);
 	    tmp2 -= tmp1;
@@ -1467,7 +1467,7 @@ rx_elf_relocate_section
 
 	    case bfd_reloc_undefined:
 	      (*info->callbacks->undefined_symbol)
-		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
 
 	    case bfd_reloc_other:
@@ -1501,7 +1501,7 @@ rx_elf_relocate_section
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Relaxation Support.  */
@@ -1559,7 +1559,7 @@ next_smaller_reloc (int r)
 
 /* Delete some bytes from a section while relaxing.  */
 
-static bfd_boolean
+static bool
 elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
 			     Elf_Internal_Rela *alignment_rel, int force_snip,
 			     Elf_Internal_Rela *irelstart)
@@ -1676,7 +1676,7 @@ elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Used to sort relocs by address.  If relocs have the same address,
@@ -1687,34 +1687,34 @@ static void
 reloc_bubblesort (Elf_Internal_Rela * r, int count)
 {
   int i;
-  bfd_boolean again;
-  bfd_boolean swappit;
+  bool again;
+  bool swappit;
 
   /* This is almost a classic bubblesort.  It's the slowest sort, but
      we're taking advantage of the fact that the relocations are
      mostly in order already (the assembler emits them that way) and
      we need relocs with the same address to remain in the same
      relative order.  */
-  again = TRUE;
+  again = true;
   while (again)
     {
-      again = FALSE;
+      again = false;
       for (i = 0; i < count - 1; i ++)
 	{
 	  if (r[i].r_offset > r[i + 1].r_offset)
-	    swappit = TRUE;
+	    swappit = true;
 	  else if (r[i].r_offset < r[i + 1].r_offset)
-	    swappit = FALSE;
+	    swappit = false;
 	  else if (ELF32_R_TYPE (r[i + 1].r_info) == R_RX_RH_RELAX
 		   && (r[i + 1].r_addend & RX_RELAXA_ALIGN))
-	    swappit = TRUE;
+	    swappit = true;
 	  else if (ELF32_R_TYPE (r[i + 1].r_info) == R_RX_RH_RELAX
 		   && (r[i + 1].r_addend & RX_RELAXA_ELIGN)
 		   && !(ELF32_R_TYPE (r[i].r_info) == R_RX_RH_RELAX
 			&& (r[i].r_addend & RX_RELAXA_ALIGN)))
-	    swappit = TRUE;
+	    swappit = true;
 	  else
-	    swappit = FALSE;
+	    swappit = false;
 
 	  if (swappit)
 	    {
@@ -1728,7 +1728,7 @@ reloc_bubblesort (Elf_Internal_Rela * r, int count)
 		 most of the O(n^2) behavior for our cases.  */
 	      if (i > 0)
 		i -= 2;
-	      again = TRUE;
+	      again = true;
 	    }
 	}
     }
@@ -1991,26 +1991,26 @@ move_reloc (Elf_Internal_Rela * irel, Elf_Internal_Rela * srel, int delta)
 
 /* Relax one section.  */
 
-static bfd_boolean
-elf32_rx_relax_section (bfd *		       abfd,
-			asection *	       sec,
-			struct bfd_link_info * link_info,
-			bfd_boolean *	       again,
-			bfd_boolean	       allow_pcrel3)
+static bool
+elf32_rx_relax_section (bfd *abfd,
+			asection *sec,
+			struct bfd_link_info *link_info,
+			bool *again,
+			bool allow_pcrel3)
 {
-  Elf_Internal_Shdr * symtab_hdr;
-  Elf_Internal_Shdr * shndx_hdr;
-  Elf_Internal_Rela * internal_relocs;
-  Elf_Internal_Rela * irel;
-  Elf_Internal_Rela * srel;
-  Elf_Internal_Rela * irelend;
-  Elf_Internal_Rela * next_alignment;
-  Elf_Internal_Rela * prev_alignment;
-  bfd_byte *	      contents = NULL;
-  bfd_byte *	      free_contents = NULL;
-  Elf_Internal_Sym *  intsyms = NULL;
-  Elf_Internal_Sym *  free_intsyms = NULL;
-  bfd_byte *	      shndx_buf = NULL;
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *irel;
+  Elf_Internal_Rela *srel;
+  Elf_Internal_Rela *irelend;
+  Elf_Internal_Rela *next_alignment;
+  Elf_Internal_Rela *prev_alignment;
+  bfd_byte *contents = NULL;
+  bfd_byte *free_contents = NULL;
+  Elf_Internal_Sym *intsyms = NULL;
+  Elf_Internal_Sym *free_intsyms = NULL;
+  bfd_byte *shndx_buf = NULL;
   bfd_vma pc;
   bfd_vma sec_start;
   bfd_vma symval = 0;
@@ -2021,7 +2021,7 @@ elf32_rx_relax_section (bfd *		       abfd,
   int scale;
 
   /* Assume nothing changes.  */
-  *again = FALSE;
+  *again = false;
 
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
@@ -2030,7 +2030,7 @@ elf32_rx_relax_section (bfd *		       abfd,
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
-    return TRUE;
+    return true;
 
   symtab_hdr = & elf_symtab_hdr (abfd);
   if (elf_symtab_shndx_list (abfd))
@@ -2086,7 +2086,7 @@ elf32_rx_relax_section (bfd *		       abfd,
      as bytes are deleted from the section, and with this relaxation
      function itself being called multiple times on the same section...  */
   internal_relocs = _bfd_elf_link_read_relocs
-    (abfd, sec, NULL, (Elf_Internal_Rela *) NULL, TRUE);
+    (abfd, sec, NULL, (Elf_Internal_Rela *) NULL, true);
   if (internal_relocs == NULL)
     goto error_return;
 
@@ -2179,7 +2179,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 
 	  elf32_rx_relax_delete_bytes (abfd, sec, erel->r_offset-nbytes, nbytes, next_alignment,
 				       erel->r_offset == sec->size, internal_relocs);
-	  *again = TRUE;
+	  *again = true;
 
 	  continue;
 	}
@@ -2249,7 +2249,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (3, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2257,7 +2257,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	    {
 	      insn[0] &= 0xfc;
 	      SNIP (2, 1, R_RX_NONE);
-	      *again = TRUE;
+	      *again = true;
 	    }
 
 	  /* Special case DSP:5 format: MOV.bwl dsp:5[Rsrc],Rdst.  */
@@ -2354,7 +2354,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (offset+1, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2362,7 +2362,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	    {
 	      insn[0] &= 0xf3;
 	      SNIP (offset, 1, R_RX_NONE);
-	      *again = TRUE;
+	      *again = true;
 	    }
 	  /* Special case DSP:5 format: MOV.bwl Rsrc,dsp:5[Rdst] */
 	  else if (code == 1 && symval/scale <= 31
@@ -2423,14 +2423,14 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (offset, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 	  else if (code == 1 && symval == 0)
 	    {
 	      insn[1] &= 0xfc;
 	      SNIP (offset, 1, R_RX_NONE);
-	      *again = TRUE;
+	      *again = true;
 	    }
 	}
 
@@ -2462,7 +2462,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (2, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2476,7 +2476,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (2, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2501,7 +2501,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		newrel = R_RX_DIR8U;
 
 	      SNIP (2, 1, newrel);
-	      *again = TRUE;
+	      *again = true;
 	    }
 
 	  else if (code == 2 && ssymval <= 127 && ssymval >= -128)
@@ -2514,7 +2514,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (2, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2536,7 +2536,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      move_reloc (irel, srel, -1);
 
 	      SNIP (2, 1, R_RX_RH_UIMM4p8);
-	      *again = TRUE;
+	      *again = true;
 	    }
 
 	  /* Special case UIMM4 format: ADD -> ADD/SUB.  */
@@ -2570,7 +2570,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      move_reloc (irel, srel, -1);
 
 	      SNIP (2, 1, newrel);
-	      *again = TRUE;
+	      *again = true;
 	    }
 	}
 
@@ -2609,7 +2609,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (offset, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2623,7 +2623,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE (srel->r_info))
 		{
 		  SNIP (offset, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2648,7 +2648,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		newrel = R_RX_DIR8U;
 
 	      SNIP (2, 1, newrel);
-	      *again = TRUE;
+	      *again = true;
 	    }
 
 	  else if (code == 2 && ssymval <= 127 && ssymval >= -128)
@@ -2661,7 +2661,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      if (newrel != ELF32_R_TYPE(srel->r_info))
 		{
 		  SNIP (offset, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	    }
 
@@ -2681,7 +2681,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      move_reloc (irel, srel, -1);
 
 	      SNIP (2, 1, R_RX_RH_UIMM4p8);
-	      *again = TRUE;
+	      *again = true;
 	    }
 	}
 
@@ -2724,7 +2724,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		{
 		  insn[0] = 0x38;
 		  SNIP (3, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2734,7 +2734,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		{
 		  insn[0] = 0x2e;
 		  SNIP (2, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2751,7 +2751,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		  insn[0] = 0x08;
 		  SNIP (1, 1, newrel);
 		  move_reloc (irel, srel, -1);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2761,7 +2761,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		{
 		  insn[0] = 0x39;
 		  SNIP (1, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2772,7 +2772,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		{
 		  insn[0] = 0x20 | (insn[0] & 1);
 		  SNIP (1, 1, newrel);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2785,7 +2785,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		  insn[0] = 0x10 | ((insn[0] & 1) << 3);
 		  SNIP (1, 1, newrel);
 		  move_reloc (irel, srel, -1);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 
@@ -2803,7 +2803,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		     will get moved too, and too much.  */
 		  SNIP (3, 2, newrel);
 		  move_reloc (irel, srel, -1);
-		  *again = TRUE;
+		  *again = true;
 		}
 	      break;
 	    }
@@ -2820,7 +2820,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 	      insn[1] = 0x05;
 	      insn[2] = 0x38;
 	      SNIP (5, 1, newrel);
-	      *again = TRUE;
+	      *again = true;
 	    }
 
 	  /* Special case - synthetic conditional branches, pcrel16 */
@@ -2838,7 +2838,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		 delete_bytes move it also.  */
 	      move_reloc (irel, srel, -2);
 	      SNIP (2, 3, newrel);
-	      *again = TRUE;
+	      *again = true;
 	    }
 	}
 
@@ -3015,7 +3015,7 @@ elf32_rx_relax_section (bfd *		       abfd,
 		}
 
 	      SNIPNR (3, ilen - 3);
-	      *again = TRUE;
+	      *again = true;
 
 	      /* We can't relax this new opcode.  */
 	      irel->r_addend = 0;
@@ -3029,12 +3029,12 @@ elf32_rx_relax_section (bfd *		       abfd,
      don't request a pass after that one!  */
   if (!*again && !allow_pcrel3)
     {
-      bfd_boolean ignored;
+      bool ignored;
 
-      elf32_rx_relax_section (abfd, sec, link_info, &ignored, TRUE);
+      elf32_rx_relax_section (abfd, sec, link_info, &ignored, true);
     }
 
-  return TRUE;
+  return true;
 
  error_return:
   free (free_contents);
@@ -3047,36 +3047,36 @@ elf32_rx_relax_section (bfd *		       abfd,
 
   free (free_intsyms);
 
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
-elf32_rx_relax_section_wrapper (bfd *		       abfd,
-				asection *	       sec,
-				struct bfd_link_info * link_info,
-				bfd_boolean *	       again)
+static bool
+elf32_rx_relax_section_wrapper (bfd *abfd,
+				asection *sec,
+				struct bfd_link_info *link_info,
+				bool *again)
 {
-  return elf32_rx_relax_section (abfd, sec, link_info, again, FALSE);
+  return elf32_rx_relax_section (abfd, sec, link_info, again, false);
 }
 
 /* Function to set the ELF flag bits.  */
 
-static bfd_boolean
+static bool
 rx_elf_set_private_flags (bfd * abfd, flagword flags)
 {
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = TRUE;
-  return TRUE;
+  elf_flags_init (abfd) = true;
+  return true;
 }
 
-static bfd_boolean no_warn_mismatch = FALSE;
-static bfd_boolean ignore_lma = TRUE;
+static bool no_warn_mismatch = false;
+static bool ignore_lma = true;
 
-void bfd_elf32_rx_set_target_flags (bfd_boolean, bfd_boolean);
+void bfd_elf32_rx_set_target_flags (bool, bool);
 
 void
-bfd_elf32_rx_set_target_flags (bfd_boolean user_no_warn_mismatch,
-			       bfd_boolean user_ignore_lma)
+bfd_elf32_rx_set_target_flags (bool user_no_warn_mismatch,
+			       bool user_ignore_lma)
 {
   no_warn_mismatch = user_no_warn_mismatch;
   ignore_lma = user_ignore_lma;
@@ -3119,13 +3119,13 @@ describe_flags (flagword flags, char *buf)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static bfd_boolean
+static bool
 rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
   flagword old_flags;
   flagword new_flags;
-  bfd_boolean error = FALSE;
+  bool error = false;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
@@ -3133,7 +3133,7 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
   if (!elf_flags_init (obfd))
     {
       /* First call, no flags set.  */
-      elf_flags_init (obfd) = TRUE;
+      elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
     }
   else if (old_flags != new_flags)
@@ -3177,7 +3177,7 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 				  describe_flags (new_flags, buf));
 	      _bfd_error_handler (_("  the output file's flags: %s"),
 				  describe_flags (old_flags, buf));
-	      error = TRUE;
+	      error = true;
 	    }
 	}
       else
@@ -3190,7 +3190,7 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
   return !error;
 }
 
-static bfd_boolean
+static bool
 rx_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 {
   FILE * file = (FILE *) ptr;
@@ -3206,7 +3206,7 @@ rx_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   fprintf (file, _("private flags = 0x%lx:"), (long) flags);
 
   fprintf (file, "%s", describe_flags (flags, buf));
-  return TRUE;
+  return true;
 }
 
 /* Return the MACH for an e_flags value.  */
@@ -3229,7 +3229,7 @@ elf32_rx_machine (bfd * abfd ATTRIBUTE_UNUSED)
   return 0;
 }
 
-static bfd_boolean
+static bool
 rx_elf_object_p (bfd * abfd)
 {
   int i;
@@ -3238,7 +3238,7 @@ rx_elf_object_p (bfd * abfd)
   Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
   int nphdrs = ehdr->e_phnum;
   sec_ptr bsec;
-  static int saw_be = FALSE;
+  static int saw_be = false;
   bfd_vma end_phdroff;
 
   /* We never want to automatically choose the non-swapping big-endian
@@ -3246,16 +3246,16 @@ rx_elf_object_p (bfd * abfd)
      and objcopy.  */
   if (abfd->xvec == &rx_elf32_be_ns_vec
       && abfd->target_defaulted)
-    return FALSE;
+    return false;
 
   /* BFD->target_defaulted is not set to TRUE when a target is chosen
      as a fallback, so we check for "scanning" to know when to stop
      using the non-swapping target.  */
   if (abfd->xvec == &rx_elf32_be_ns_vec
       && saw_be)
-    return FALSE;
+    return false;
   if (abfd->xvec == &rx_elf32_be_vec)
-    saw_be = TRUE;
+    saw_be = true;
 
   bfd_default_set_arch_mach (abfd, bfd_arch_rx,
 			     elf32_rx_machine (abfd));
@@ -3319,14 +3319,14 @@ rx_elf_object_p (bfd * abfd)
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 rx_linux_object_p (bfd * abfd)
 {
   bfd_default_set_arch_mach (abfd, bfd_arch_rx, elf32_rx_machine (abfd));
-  return TRUE;
+  return true;
 }
  
 
@@ -3418,7 +3418,7 @@ rx_get_reloc (long reloc)
    have code sections stored with 32-bit words swapped relative to
    what you'd get by default.  */
 
-static bfd_boolean
+static bool
 rx_get_section_contents (bfd *	       abfd,
 			 sec_ptr       section,
 			 void *	       location,
@@ -3427,7 +3427,7 @@ rx_get_section_contents (bfd *	       abfd,
 {
   int exec = (abfd->flags & EXEC_P) ? 1 : 0;
   int s_code = (section->flags & SEC_CODE) ? 1 : 0;
-  bfd_boolean rv;
+  bool rv;
 
 #ifdef DJDEBUG
   fprintf (stderr, "dj: get %ld %ld from %s  %s e%d sc%d  %08lx:%08lx\n",
@@ -3442,7 +3442,7 @@ rx_get_section_contents (bfd *	       abfd,
       char * cloc = (char *) location;
       bfd_size_type cnt, end_cnt;
 
-      rv = TRUE;
+      rv = true;
 
       /* Fetch and swap unaligned bytes at the beginning.  */
       if (offset % 4)
@@ -3452,7 +3452,7 @@ rx_get_section_contents (bfd *	       abfd,
 	  rv = _bfd_generic_get_section_contents (abfd, section, buf,
 						  (offset & -4), 4);
 	  if (!rv)
-	    return FALSE;
+	    return false;
 
 	  bfd_putb32 (bfd_getl32 (buf), buf);
 
@@ -3475,7 +3475,7 @@ rx_get_section_contents (bfd *	       abfd,
 	  rv = _bfd_generic_get_section_contents (abfd, section, cloc, offset,
 						  count - end_cnt);
 	  if (!rv)
-	    return FALSE;
+	    return false;
 
 	  for (cnt = count; cnt >= 4; cnt -= 4, cloc += 4)
 	    bfd_putb32 (bfd_getl32 (cloc), cloc);
@@ -3490,7 +3490,7 @@ rx_get_section_contents (bfd *	       abfd,
 	  rv = _bfd_generic_get_section_contents (abfd, section, buf,
 						  offset + count - end_cnt, 4);
 	  if (!rv)
-	    return FALSE;
+	    return false;
 
 	  bfd_putb32 (bfd_getl32 (buf), buf);
 	  memcpy (cloc, buf, end_cnt);
@@ -3503,7 +3503,7 @@ rx_get_section_contents (bfd *	       abfd,
 }
 
 #ifdef DJDEBUG
-static bfd_boolean
+static bool
 rx2_set_section_contents (bfd *	       abfd,
 			 sec_ptr       section,
 			 const void *  location,
@@ -3534,16 +3534,16 @@ rx2_set_section_contents (bfd *	       abfd,
 #define _bfd_elf_set_section_contents rx2_set_section_contents
 #endif
 
-static bfd_boolean
+static bool
 rx_set_section_contents (bfd *	       abfd,
 			 sec_ptr       section,
 			 const void *  location,
 			 file_ptr      offset,
 			 bfd_size_type count)
 {
-  bfd_boolean exec = (abfd->flags & EXEC_P) ? TRUE : FALSE;
-  bfd_boolean s_code = (section->flags & SEC_CODE) ? TRUE : FALSE;
-  bfd_boolean rv;
+  bool exec = (abfd->flags & EXEC_P) != 0;
+  bool s_code = (section->flags & SEC_CODE) != 0;
+  bool rv;
   char * swapped_data = NULL;
   bfd_size_type i;
   bfd_vma caddr = section->vma + offset;
@@ -3607,7 +3607,7 @@ rx_set_section_contents (bfd *	       abfd,
 
       swapped_data = (char *) bfd_alloc (abfd, count);
       if (swapped_data == NULL)
-	return FALSE;
+	return false;
 
       for (i = 0; i < count; i += 4)
 	{
@@ -3648,10 +3648,10 @@ rx_set_section_contents (bfd *	       abfd,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 rx_final_link (bfd * abfd, struct bfd_link_info * info)
 {
   asection * o;
@@ -3676,7 +3676,7 @@ rx_final_link (bfd * abfd, struct bfd_link_info * info)
   return bfd_elf_final_link (abfd, info);
 }
 
-static bfd_boolean
+static bool
 elf32_rx_modify_headers (bfd *abfd, struct bfd_link_info *info)
 {
   const struct elf_backend_data * bed;
@@ -3735,7 +3735,7 @@ typedef struct {
   FILE *mapfile;
 } RX_Table_Info;
 
-static bfd_boolean
+static bool
 rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
 {
   RX_Table_Info *info = (RX_Table_Info *)vinfo;
@@ -3753,14 +3753,14 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
      $tablestart$<NAME>.  */
   if (ent->type != bfd_link_hash_defined
       && ent->type != bfd_link_hash_defweak)
-    return TRUE;
+    return true;
 
   name = ent->root.string;
   sec = ent->u.def.section;
   abfd = sec->owner;
 
-  if (strncmp (name, "$tablestart$", 12))
-    return TRUE;
+  if (!startswith (name, "$tablestart$"))
+    return true;
 
   sec->flags |= SEC_KEEP;
 
@@ -3774,17 +3774,17 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
 
   buf = (char *) bfd_malloc (12 + 10 + strlen (tname));
   if (buf == NULL)
-    return FALSE;
+    return false;
 
   sprintf (buf, "$tableend$%s", tname);
-  h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->info->hash, buf, false, false, true);
   if (!h || (h->type != bfd_link_hash_defined
 	     && h->type != bfd_link_hash_defweak))
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB:%pA: table %s missing corresponding %s"),
 			  abfd, sec, name, buf);
-      return TRUE;
+      return true;
     }
 
   if (h->u.def.section != ent->u.def.section)
@@ -3793,13 +3793,13 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
       _bfd_error_handler (_("%pB:%pA: %s and %s must be in the same input section"),
 			  h->u.def.section->owner, h->u.def.section,
 			  name, buf);
-      return TRUE;
+      return true;
     }
 
   end_addr = h->u.def.value;
 
   sprintf (buf, "$tableentry$default$%s", tname);
-  h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->info->hash, buf, false, false, true);
   if (h && (h->type == bfd_link_hash_defined
 	    || h->type == bfd_link_hash_defweak))
     {
@@ -3809,7 +3809,7 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
   for (idx = 0; idx < (int) (end_addr - start_addr) / 4; idx ++)
     {
       sprintf (buf, "$tableentry$%d$%s", idx, tname);
-      h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
+      h = bfd_link_hash_lookup (info->info->hash, buf, false, false, true);
       if (h && (h->type == bfd_link_hash_defined
 		|| h->type == bfd_link_hash_defweak))
 	{
@@ -3818,13 +3818,13 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
     }
 
   /* Return TRUE to keep scanning, FALSE to end the traversal.  */
-  return TRUE;
+  return true;
 }
 
 /* We need to check for table entry symbols and build the tables, and
    we need to do it before the linker does garbage collection.  This function is
    called once per input object file.  */
-static bfd_boolean
+static bool
 rx_check_directives
     (bfd *		       abfd ATTRIBUTE_UNUSED,
      struct bfd_link_info *    info ATTRIBUTE_UNUSED)
@@ -3835,11 +3835,11 @@ rx_check_directives
   stuff.info = info;
   bfd_hash_traverse (&(info->hash->table), rx_table_find, &stuff);
 
-  return TRUE;
+  return true;
 }
 
 
-static bfd_boolean
+static bool
 rx_table_map_2 (struct bfd_hash_entry *vent, void *vinfo)
 {
   RX_Table_Info *info = (RX_Table_Info *)vinfo;
@@ -3853,12 +3853,12 @@ rx_table_map_2 (struct bfd_hash_entry *vent, void *vinfo)
 
   if (ent->type != bfd_link_hash_defined
       && ent->type != bfd_link_hash_defweak)
-    return TRUE;
+    return true;
 
   name = ent->root.string;
 
   if (name[0] == '$' || name[0] == '.' || name[0] < ' ')
-    return TRUE;
+    return true;
 
   addr = (ent->u.def.value
 	  + ent->u.def.section->output_section->vma
@@ -3871,10 +3871,10 @@ rx_table_map_2 (struct bfd_hash_entry *vent, void *vinfo)
   if (addr == info->table_default_handler)
     info->table_default_entry = ent;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 {
   RX_Table_Info *info = (RX_Table_Info *)vinfo;
@@ -3891,12 +3891,12 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
      $tablestart$<NAME>.  */
   if (ent->type != bfd_link_hash_defined
       && ent->type != bfd_link_hash_defweak)
-    return TRUE;
+    return true;
 
   name = ent->root.string;
 
-  if (strncmp (name, "$tablestart$", 12))
-    return TRUE;
+  if (!startswith (name, "$tablestart$"))
+    return true;
 
   tname = name + 12;
   start_addr = (ent->u.def.value
@@ -3905,13 +3905,13 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 
   buf = (char *) bfd_malloc (12 + 10 + strlen (tname));
   if (buf == NULL)
-    return FALSE;
+    return false;
 
   sprintf (buf, "$tableend$%s", tname);
   end_addr = get_symbol_value_maybe (buf, info->info);
 
   sprintf (buf, "$tableentry$default$%s", tname);
-  h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
+  h = bfd_link_hash_lookup (info->info->hash, buf, false, false, true);
   if (h)
     {
       info->table_default_handler = (h->u.def.value
@@ -3930,7 +3930,7 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
   if (info->table_handlers == NULL)
     {
       free (buf);
-      return FALSE;
+      return false;
     }
   info->table_entries = (struct bfd_link_hash_entry **)
     bfd_malloc (info->table_size * sizeof (struct bfd_link_hash_entry));
@@ -3938,13 +3938,13 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
     {
       free (info->table_handlers);
       free (buf);
-      return FALSE;
+      return false;
     }
 
   for (idx = 0; idx < (int) (end_addr - start_addr) / 4; idx ++)
     {
       sprintf (buf, "$tableentry$%d$%s", idx, tname);
-      h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
+      h = bfd_link_hash_lookup (info->info->hash, buf, false, false, true);
       if (h && (h->type == bfd_link_hash_defined
 		|| h->type == bfd_link_hash_defweak))
 	{
@@ -4012,7 +4012,7 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
   if (need_elipses)
     fprintf (info->mapfile, "  . . .\n");
 
-  return TRUE;
+  return true;
 }
 
 void

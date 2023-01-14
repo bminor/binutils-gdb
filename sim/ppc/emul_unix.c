@@ -124,6 +124,7 @@ int getrusage();
 #endif
 
 #include <stdlib.h>
+#include <time.h>
 
 #if defined(BSD) && !defined(errno) && (BSD < 199306)	/* here BSD as just a bug */
 extern int errno;

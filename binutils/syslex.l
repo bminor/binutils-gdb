@@ -22,14 +22,7 @@
 
 /* Note: config.h is #included via syslex_wrap.c.  */
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
 #include "sysinfo.h"
 
 #ifndef YY_NO_UNPUT

@@ -47,6 +47,9 @@ struct gdbpy_tui_window
 
   /* The TUI window, or nullptr if the window has been deleted.  */
   tui_py_window *window;
+
+  /* Return true if this object is valid.  */
+  bool is_valid () const;
 };
 
 extern PyTypeObject gdbpy_tui_window_object_type
@@ -136,6 +139,14 @@ private:
   /* The Python wrapper for this object.  */
   gdbpy_ref<gdbpy_tui_window> m_wrapper;
 };
+
+/* See gdbpy_tui_window declaration above.  */
+
+bool
+gdbpy_tui_window::is_valid () const
+{
+  return window != nullptr && tui_active;
+}
 
 tui_py_window::~tui_py_window ()
 {
@@ -344,9 +355,21 @@ gdbpy_register_tui_window (PyObject *self, PyObject *args, PyObject *kw)
 
 #define REQUIRE_WINDOW(Window)					\
     do {							\
-      if ((Window)->window == nullptr)				\
+      if (!(Window)->is_valid ())				\
 	return PyErr_Format (PyExc_RuntimeError,		\
 			     _("TUI window is invalid."));	\
+    } while (0)
+
+/* Require that "Window" be a valid window.  */
+
+#define REQUIRE_WINDOW_FOR_SETTER(Window)			\
+    do {							\
+      if (!(Window)->is_valid ())				\
+	{							\
+	  PyErr_Format (PyExc_RuntimeError,			\
+			_("TUI window is invalid."));		\
+	  return -1;						\
+	}							\
     } while (0)
 
 /* Python function which checks the validity of a TUI window
@@ -356,7 +379,7 @@ gdbpy_tui_is_valid (PyObject *self, PyObject *args)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
 
-  if (win->window != nullptr)
+  if (win->is_valid ())
     Py_RETURN_TRUE;
   Py_RETURN_FALSE;
 }
@@ -428,13 +451,9 @@ gdbpy_tui_set_title (PyObject *self, PyObject *newvalue, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
 
-  if (win->window == nullptr)
-    {
-      PyErr_Format (PyExc_RuntimeError, _("TUI window is invalid."));
-      return -1;
-    }
+  REQUIRE_WINDOW_FOR_SETTER (win);
 
-  if (win->window == nullptr)
+  if (newvalue == nullptr)
     {
       PyErr_Format (PyExc_TypeError, _("Cannot delete \"title\" attribute."));
       return -1;

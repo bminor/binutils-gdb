@@ -41,8 +41,8 @@
   }
 
 const bfd_arch_info_type bfd_m68hc12s_arch =
-  N (bfd_mach_m6812s, "m68hc12:HCS12", FALSE, NULL);
+  N (bfd_mach_m6812s, "m68hc12:HCS12", false, NULL);
 
 const bfd_arch_info_type bfd_m68hc12_arch =
-  N (bfd_mach_m6812_default, "m68hc12", TRUE, &bfd_m68hc12s_arch);
+  N (bfd_mach_m6812_default, "m68hc12", true, &bfd_m68hc12s_arch);
 

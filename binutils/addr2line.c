@@ -38,12 +38,12 @@
 #include "bucomm.h"
 #include "elf-bfd.h"
 
-static bfd_boolean unwind_inlines;	/* -i, unwind inlined functions. */
-static bfd_boolean with_addresses;	/* -a, show addresses.  */
-static bfd_boolean with_functions;	/* -f, show function names.  */
-static bfd_boolean do_demangle;		/* -C, demangle names.  */
-static bfd_boolean pretty_print;	/* -p, print on one line.  */
-static bfd_boolean base_names;		/* -s, strip directory names.  */
+static bool unwind_inlines;	/* -i, unwind inlined functions. */
+static bool with_addresses;	/* -a, show addresses.  */
+static bool with_functions;	/* -f, show function names.  */
+static bool do_demangle;	/* -C, demangle names.  */
+static bool pretty_print;	/* -p, print on one line.  */
+static bool base_names;		/* -s, strip directory names.  */
 
 /* Flags passed to the name demangler.  */
 static int demangle_flags = DMGL_PARAMS | DMGL_ANSI;
@@ -117,7 +117,7 @@ slurp_symtab (bfd *abfd)
 {
   long storage;
   long symcount;
-  bfd_boolean dynamic = FALSE;
+  bool dynamic = false;
 
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
@@ -126,7 +126,7 @@ slurp_symtab (bfd *abfd)
   if (storage == 0)
     {
       storage = bfd_get_dynamic_symtab_upper_bound (abfd);
-      dynamic = TRUE;
+      dynamic = true;
     }
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
@@ -167,7 +167,7 @@ static const char *filename;
 static const char *functionname;
 static unsigned int line;
 static unsigned int discriminator;
-static bfd_boolean found;
+static bool found;
 
 /* Look for an address in a section.  This is called via
    bfd_map_over_sections.  */
@@ -267,7 +267,7 @@ translate_addresses (bfd *abfd, asection *section)
             printf ("\n");
         }
 
-      found = FALSE;
+      found = false;
       if (section)
 	find_offset_in_section (abfd, section);
       else
@@ -337,7 +337,7 @@ translate_addresses (bfd *abfd, asection *section)
 	      else
 		printf ("?\n");
               if (!unwind_inlines)
-                found = FALSE;
+                found = false;
               else
                 found = bfd_find_inliner_info (abfd, &filename, &functionname,
 					       &line);
@@ -425,12 +425,10 @@ main (int argc, char **argv)
   char *target;
   int c;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
@@ -455,13 +453,13 @@ main (int argc, char **argv)
 	case 0:
 	  break;		/* We've been given a long option.  */
 	case 'a':
-	  with_addresses = TRUE;
+	  with_addresses = true;
 	  break;
 	case 'b':
 	  target = optarg;
 	  break;
 	case 'C':
-	  do_demangle = TRUE;
+	  do_demangle = true;
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
@@ -484,13 +482,13 @@ main (int argc, char **argv)
 	  file_name = optarg;
 	  break;
 	case 's':
-	  base_names = TRUE;
+	  base_names = true;
 	  break;
 	case 'f':
-	  with_functions = TRUE;
+	  with_functions = true;
 	  break;
         case 'p':
-          pretty_print = TRUE;
+          pretty_print = true;
           break;
 	case 'v':
 	case 'V':
@@ -501,7 +499,7 @@ main (int argc, char **argv)
 	  usage (stdout, 0);
 	  break;
 	case 'i':
-	  unwind_inlines = TRUE;
+	  unwind_inlines = true;
 	  break;
 	case 'j':
 	  section_name = optarg;

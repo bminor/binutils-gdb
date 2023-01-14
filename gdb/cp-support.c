@@ -1452,10 +1452,7 @@ add_symbol_overload_list_qualified (const char *func_name,
      matching FUNC_NAME.  Make sure we read that symbol table in.  */
 
   for (objfile *objf : current_program_space->objfiles ())
-    {
-      if (objf->sf)
-	objf->sf->qf->expand_symtabs_for_function (objf, func_name);
-    }
+    objf->expand_symtabs_for_function (func_name);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
@@ -1615,11 +1612,10 @@ gdb_demangle (const char *name, int options)
   int crash_signal = 0;
 
 #ifdef HAVE_WORKING_FORK
-  scoped_restore restore_segv
-    = make_scoped_restore (&thread_local_segv_handler,
-			   catch_demangler_crashes
-			   ? gdb_demangle_signal_handler
-			   : nullptr);
+  scoped_segv_handler_restore restore_segv
+    (catch_demangler_crashes
+     ? gdb_demangle_signal_handler
+     : nullptr);
 
   bool core_dump_allowed = gdb_demangle_attempt_core_dump;
   SIGJMP_BUF jmp_buf;

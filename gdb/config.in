@@ -43,6 +43,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* The .gdbearlyinit filename. */
+#undef GDBEARLYINIT
+
 /* The .gdbinit filename. */
 #undef GDBINIT
 

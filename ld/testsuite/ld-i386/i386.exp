@@ -245,11 +245,16 @@ set i386tests {
      "-melf_i386 -shared -Bsymbolic -z notext" ""
      "--32 -mx86-used-note=yes"
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
-    {"Build pr27193.so"
+    {"Build pr27193a.so"
      "-melf_i386 -shared" ""
      "--32"
      { pr27193a.o.bz2 pr27193b.s }
-     {{objdump {-dw} pr27193.dd}} "pr27193.so"}
+     {{objdump {-dw} pr27193.dd}} "pr27193a.so"}
+    {"Build pr27193b.so"
+     "-melf_i386 -shared --reduce-memory-overheads" ""
+     "--32"
+     { pr27193a.o.bz2 pr27193b.s }
+     {{objdump {-dw} pr27193.dd}} "pr27193b.so"}
 }
 
 proc iamcu_tests {} {
@@ -1105,69 +1110,6 @@ if { [isnative]
 	    "-Wa,-mx86-used-note=yes" \
 	    {pass.c property-stack.S} \
 	    "property-3-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 3" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S} \
-	    "property-3" "pass.out" \
-	] \
-	[list \
-	    "Run property 3 (PIE)" \
-	    "-pie" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-1.S property-stack.S} \
-	    "property-3-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 3 (static)" \
-	    "-static" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-1.S pass.c property-stack.S} \
-	    "property-3-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 4" \
-	    "" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    "property-4" "pass.out" \
-	] \
-	[list \
-	    "Run property 4 (PIE)" \
-	    "-pie" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    "property-4-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 4 (static)" \
-	    "-static" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    "property-4-static" "pass.out" \
-	] \
-	[list \
-	    "Run property 5" \
-	    "-Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-stack.S property-x86-1.S property-x86-2.S} \
-	    "property-5" "pass.out" \
-	] \
-	[list \
-	    "Run property 5 (PIE)" \
-	    "-pie -Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {pass.c property-x86-2.S property-x86-1.S property-stack.S} \
-	    "property-5-pie" "pass.out" "-fPIE" \
-	] \
-	[list \
-	    "Run property 5 (static)" \
-	    "-static -Wl,-z,stack-size=0x900000" \
-	    "-Wa,-mx86-used-note=yes" \
-	    {property-x86-2.S property-x86-1.S pass.c property-stack.S} \
-	    "property-5-static" "pass.out" \
 	] \
     ]
 

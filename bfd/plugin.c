@@ -130,7 +130,7 @@ struct plugin_list_entry
   ld_plugin_claim_file_handler claim_file;
   ld_plugin_all_symbols_read_handler all_symbols_read;
   ld_plugin_all_symbols_read_handler cleanup_handler;
-  bfd_boolean has_symbol_type;
+  bool has_symbol_type;
 
   struct plugin_list_entry *next;
 
@@ -184,7 +184,7 @@ static enum ld_plugin_status
 add_symbols_v2 (void *handle, int nsyms,
 		const struct ld_plugin_symbol *syms)
 {
-  current_plugin->has_symbol_type = TRUE;
+  current_plugin->has_symbol_type = true;
   return add_symbols (handle, nsyms, syms);
 }
 
@@ -249,18 +249,18 @@ try_claim (bfd *abfd)
   return claimed;
 }
 
-static bfd_boolean
-try_load_plugin (const char *                pname,
-		 struct plugin_list_entry *  plugin_list_iter,
-		 bfd *                       abfd,
-		 bfd_boolean                 build_list_p)
+static bool
+try_load_plugin (const char *pname,
+		 struct plugin_list_entry *plugin_list_iter,
+		 bfd *abfd,
+		 bool build_list_p)
 {
   void *plugin_handle;
   struct ld_plugin_tv tv[5];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
-  bfd_boolean result = FALSE;
+  bool result = false;
 
   /* NB: Each object is independent.  Reuse the previous plugin from
      the last run will lead to wrong result.  */
@@ -280,7 +280,7 @@ try_load_plugin (const char *                pname,
       if (! build_list_p)
 	_bfd_error_handler ("Failed to load plugin '%s', reason: %s\n",
 			    pname, dlerror ());
-      return FALSE;
+      return false;
     }
 
   if (plugin_list_iter == NULL)
@@ -348,7 +348,7 @@ try_load_plugin (const char *                pname,
     goto short_circuit;
 
   abfd->plugin_format = bfd_plugin_yes;
-  result = TRUE;
+  result = true;
 
  short_circuit:
   dlclose (plugin_handle);
@@ -370,7 +370,7 @@ bfd_plugin_set_plugin (const char *p)
 
 /* Return TRUE if a plugin library is used.  */
 
-bfd_boolean
+bool
 bfd_plugin_specified_p (void)
 {
   return plugin_list != NULL;
@@ -378,19 +378,19 @@ bfd_plugin_specified_p (void)
 
 /* Return TRUE if ABFD can be claimed by linker LTO plugin.  */
 
-bfd_boolean
+bool
 bfd_link_plugin_object_p (bfd *abfd)
 {
   if (ld_plugin_object_p)
     return ld_plugin_object_p (abfd) != NULL;
-  return FALSE;
+  return false;
 }
 
 extern const bfd_target plugin_vec;
 
 /* Return TRUE if TARGET is a pointer to plugin_vec.  */
 
-bfd_boolean
+bool
 bfd_plugin_target_p (const bfd_target *target)
 {
   return target == &plugin_vec;
@@ -452,7 +452,7 @@ build_plugin_list (bfd *abfd)
 
 		  full_name = concat (plugin_dir, "/", ent->d_name, NULL);
 		  if (stat (full_name, &st) == 0 && S_ISREG (st.st_mode))
-		    (void) try_load_plugin (full_name, NULL, abfd, TRUE);
+		    (void) try_load_plugin (full_name, NULL, abfd, true);
 		  free (full_name);
 		}
 	      closedir (d);
@@ -464,26 +464,26 @@ build_plugin_list (bfd *abfd)
   has_plugin_list = plugin_list != NULL;
 }
 
-static bfd_boolean
+static bool
 load_plugin (bfd *abfd)
 {
   struct plugin_list_entry *plugin_list_iter;
 
   if (plugin_name)
-    return try_load_plugin (plugin_name, plugin_list, abfd, FALSE);
+    return try_load_plugin (plugin_name, plugin_list, abfd, false);
 
   if (plugin_program_name == NULL)
-    return FALSE;
+    return false;
 
   build_plugin_list (abfd);
 
   for (plugin_list_iter = plugin_list;
        plugin_list_iter;
        plugin_list_iter = plugin_list_iter->next)
-    if (try_load_plugin (NULL, plugin_list_iter, abfd,FALSE))
-      return TRUE;
+    if (try_load_plugin (NULL, plugin_list_iter, abfd, false))
+      return true;
 
-  return FALSE;
+  return false;
 }
 
 
@@ -502,45 +502,45 @@ bfd_plugin_object_p (bfd *abfd)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-static bfd_boolean
+static bool
 bfd_plugin_bfd_copy_private_bfd_data (bfd *ibfd ATTRIBUTE_UNUSED,
 				      bfd *obfd ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
-  return TRUE;
+  return true;
 }
 
 /* Copy any private info we understand from the input section
    to the output section.  */
 
-static bfd_boolean
+static bool
 bfd_plugin_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
 					  asection *isection ATTRIBUTE_UNUSED,
 					  bfd *obfd ATTRIBUTE_UNUSED,
 					  asection *osection ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
-  return TRUE;
+  return true;
 }
 
 /* Copy any private info we understand from the input symbol
    to the output symbol.  */
 
-static bfd_boolean
+static bool
 bfd_plugin_bfd_copy_private_symbol_data (bfd *ibfd ATTRIBUTE_UNUSED,
 					 asymbol *isymbol ATTRIBUTE_UNUSED,
 					 bfd *obfd ATTRIBUTE_UNUSED,
 					 asymbol *osymbol ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 bfd_plugin_bfd_print_private_bfd_data (bfd *abfd ATTRIBUTE_UNUSED, PTR ptr ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
-  return TRUE;
+  return true;
 }
 
 static char *

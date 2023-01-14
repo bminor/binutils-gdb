@@ -273,6 +273,8 @@ if { [is_elf_format] } then {
     run_dump_test "section25"
     run_dump_test "section26"
     run_dump_test "section27"
+    run_dump_test "section28"
+    run_dump_test "section29"
     run_dump_test "sh-link-zero"
     run_dump_test "dwarf2-1" $dump_opts
     run_dump_test "dwarf2-2" $dump_opts
@@ -304,6 +306,7 @@ if { [is_elf_format] } then {
     run_dump_test "bad-section-flag"
     run_dump_test "bad-size"
     run_dump_test "bad-group"
+    run_dump_test "pr27355"
 
     run_dump_test "syms"
 

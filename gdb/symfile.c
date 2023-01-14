@@ -69,8 +69,6 @@
 #include <chrono>
 #include <algorithm>
 
-#include "psymtab.h"
-
 int (*deprecated_ui_load_progress_hook) (const char *section,
 					 unsigned long num);
 void (*deprecated_show_load_progress) (const char *section,
@@ -775,7 +773,7 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 
   /* find_separate_debug_file_in_section should be called only if there is
      single binary with no existing separate debug info file.  */
-  if (!objfile_has_partial_symbols (objfile)
+  if (!objfile->has_partial_symbols ()
       && objfile->separate_debug_objfile == NULL
       && objfile->separate_debug_objfile_backlink == NULL)
     {
@@ -793,7 +791,7 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 	}
     }
   if ((add_flags & SYMFILE_NO_READ) == 0)
-    require_partial_symbols (objfile, false);
+    objfile->require_partial_symbols (false);
 }
 
 /* Initialize entry point information for this objfile.  */
@@ -840,10 +838,8 @@ init_entry_point_info (struct objfile *objfile)
 
       /* Make certain that the address points at real code, and not a
 	 function descriptor.  */
-      entry_point
-	= gdbarch_convert_from_func_ptr_addr (objfile->arch (),
-					      entry_point,
-					      current_top_target ());
+      entry_point = gdbarch_convert_from_func_ptr_addr
+	(objfile->arch (), entry_point, current_inferior ()->top_target ());
 
       /* Remove any ISA markers, so that this matches entries in the
 	 symbol table.  */
@@ -904,6 +900,7 @@ syms_from_objfile_1 (struct objfile *objfile,
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
   objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
+  objfile->qf.clear ();
 
   if (objfile->sf == NULL)
     {
@@ -1100,8 +1097,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 	printf_filtered (_("Expanding full symbols from %ps...\n"),
 			 styled_string (file_name_style.style (), name));
 
-      if (objfile->sf)
-	objfile->sf->qf->expand_all_symtabs (objfile);
+      objfile->expand_all_symtabs ();
     }
 
   /* Note that we only print a message if we have no symbols and have
@@ -2522,8 +2518,6 @@ reread_symbols (void)
 	    error (_("Can't read symbols from %s: %s."), objfile_name (objfile),
 		   bfd_errmsg (bfd_get_error ()));
 
-	  objfile->reset_psymtabs ();
-
 	  /* NB: after this call to obstack_free, objfiles_changed
 	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile->objfile_obstack, 0);
@@ -2555,6 +2549,7 @@ reread_symbols (void)
 	     based on whether .gdb_index is present, and we need it to
 	     start over.  PR symtab/15885  */
 	  objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
+	  objfile->qf.clear ();
 
 	  build_objfile_section_table (objfile);
 
@@ -2775,16 +2770,15 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
     {
       /* Be a bit clever with debugging messages, and don't print objfile
 	 every time, only when it changes.  */
-      static char *last_objfile_name = NULL;
+      static std::string last_objfile_name;
+      const char *this_objfile_name = objfile_name (objfile);
 
-      if (last_objfile_name == NULL
-	  || strcmp (last_objfile_name, objfile_name (objfile)) != 0)
+      if (last_objfile_name.empty () || last_objfile_name != this_objfile_name)
 	{
-	  xfree (last_objfile_name);
-	  last_objfile_name = xstrdup (objfile_name (objfile));
+	  last_objfile_name = this_objfile_name;
 	  fprintf_filtered (gdb_stdlog,
 			    "Creating one or more symtabs for objfile %s ...\n",
-			    last_objfile_name);
+			    this_objfile_name);
 	}
       fprintf_filtered (gdb_stdlog,
 			"Created symtab %s for module %s.\n",
@@ -3722,22 +3716,25 @@ symfile_free_objfile (struct objfile *objfile)
    Expand all symtabs that match the specified criteria.
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
-void
+bool
 expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   block_search_flags search_flags,
    enum search_domain kind)
 {
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->sf)
-	objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
-						  &lookup_name,
-						  symbol_matcher,
-						  expansion_notify, kind);
-    }
+    if (!objfile->expand_symtabs_matching (file_matcher,
+					   &lookup_name,
+					   symbol_matcher,
+					   expansion_notify,
+					   search_flags,
+					   UNDEF_DOMAIN,
+					   kind))
+      return false;
+  return true;
 }
 
 /* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
@@ -3745,15 +3742,11 @@ expand_symtabs_matching
    See quick_symbol_functions.map_symbol_filenames for details.  */
 
 void
-map_symbol_filenames (symbol_filename_ftype *fun, void *data,
-		      int need_fullname)
+map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+		      bool need_fullname)
 {
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->sf)
-	objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
-					       need_fullname);
-    }
+    objfile->map_symbol_filenames (fun, need_fullname);
 }
 
 #if GDB_SELF_TEST

@@ -30,18 +30,7 @@
 
 #include "as.h"
 #include "safe-ctype.h"
-
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#else
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifndef INT_MAX
-#define INT_MAX (int) (((unsigned) (-1)) >> 1)
-#endif
-#endif
-
 #include "dwarf2dbg.h"
 #include <filenames.h>
 
@@ -228,16 +217,16 @@ static unsigned int  dirs_allocated = 0;
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  Will be reset by
    dwarf2_consume_line_info.  */
-bfd_boolean dwarf2_loc_directive_seen;
+bool dwarf2_loc_directive_seen;
 
 /* TRUE when we've seen any .loc directive at any time during parsing.
    Indicates the user wants us to generate a .debug_line section.
    Used in dwarf2_finish as sanity check.  */
-static bfd_boolean dwarf2_any_loc_directive_seen;
+static bool dwarf2_any_loc_directive_seen;
 
 /* TRUE when we're supposed to set the basic block mark whenever a
    label is seen.  */
-bfd_boolean dwarf2_loc_mark_labels;
+bool dwarf2_loc_mark_labels;
 
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current =
@@ -279,7 +268,7 @@ generic_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 /* Find or create (if CREATE_P) an entry for SEG+SUBSEG in ALL_SEGS.  */
 
 static struct line_subseg *
-get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
+get_line_subseg (segT seg, subsegT subseg, bool create_p)
 {
   struct line_seg *s = seg_info (seg)->dwarf2_line_seg;
   struct line_subseg **pss, *lss;
@@ -525,7 +514,7 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
   e->label = label;
   e->loc = *loc;
 
-  lss = get_line_subseg (now_seg, now_subseg, TRUE);
+  lss = get_line_subseg (now_seg, now_subseg, true);
 
   /* Subseg heads are chained to previous subsegs in
      dwarf2_finish.  */
@@ -602,9 +591,9 @@ get_basename (const char * pathname)
 }
 
 static unsigned int
-get_directory_table_entry (const char *  dirname,
-			   size_t        dirlen,
-			   bfd_boolean   can_use_zero)
+get_directory_table_entry (const char *dirname,
+			   size_t dirlen,
+			   bool can_use_zero)
 {
   unsigned int d;
 
@@ -652,7 +641,7 @@ get_directory_table_entry (const char *  dirname,
   return d;  
 }
 
-static bfd_boolean
+static bool
 assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
@@ -664,7 +653,7 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
       if (files_allocated <= old)
 	{
 	  as_bad (_("file number %lu is too big"), (unsigned long) i);
-	  return FALSE;
+	  return false;
 	}
 
       files = XRESIZEVEC (struct file_entry, files, files_allocated);
@@ -678,7 +667,7 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
   if (files_in_use < i + 1)
     files_in_use = i + 1;
 
-  return TRUE;
+  return true;
 }
 
 /* Get a .debug_line file number for PATHNAME.  If there is a
@@ -722,7 +711,7 @@ allocate_filenum (const char * pathname)
   file = get_basename (pathname);
   dir_len = file - pathname;
 
-  dir = get_directory_table_entry (pathname, dir_len, FALSE);
+  dir = get_directory_table_entry (pathname, dir_len, false);
 
   /* Do not use slot-0.  That is specifically reserved for use by
      the '.file 0 "name"' directive.  */
@@ -753,11 +742,11 @@ allocate_filenum (const char * pathname)
    if WITH_MD5 is TRUE then there is a md5 value in generic_bignum.
    Returns TRUE if allocation succeeded, FALSE otherwise.  */
 
-static bfd_boolean
-allocate_filename_to_slot (const char *  dirname,
-			   const char *  filename,
-			   unsigned int  num,
-			   bfd_boolean   with_md5)
+static bool
+allocate_filename_to_slot (const char *dirname,
+			   const char *filename,
+			   unsigned int num,
+			   bool with_md5)
 {
   const char *file;
   size_t dirlen;
@@ -769,7 +758,7 @@ allocate_filename_to_slot (const char *  dirname,
     {
       const char * dir = NULL;
 
-      if (dirs)
+      if (dirs != NULL)
 	dir = dirs[files[num].dir];
 
       if (with_md5
@@ -787,9 +776,17 @@ allocate_filename_to_slot (const char *  dirname,
 	  /* If the filenames match, but the directory table entry was
 	     empty, then fill it with the provided directory name.  */
 	  if (dir == NULL)
-	    dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	    {
+	      if (dirs == NULL)
+		{
+		  dirs_allocated = files[num].dir + 32;
+		  dirs = XCNEWVEC (char *, dirs_allocated);
+		}
+	      
+	      dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	    }
 	    
-	  return TRUE;
+	  return true;
 	}
       else if (dir != NULL) 
 	{
@@ -797,18 +794,26 @@ allocate_filename_to_slot (const char *  dirname,
 	  if (filename_ncmp (filename, dir, dirlen) == 0
 	      && IS_DIR_SEPARATOR (filename [dirlen])
 	      && filename_cmp (filename + dirlen + 1, files[num].filename) == 0)
-	    return TRUE;
+	    return true;
 	}
       else /* dir == NULL  */
 	{
 	  file = get_basename (filename);
 	  if (filename_cmp (file, files[num].filename) == 0)
 	    {
+	      /* The filenames match, but the directory table entry is empty.
+		 Fill it with the provided directory name.  */
 	      if (file > filename)
-		/* The filenames match, but the directory table entry is empty.
-		   Fill it with the provided directory name.  */
-		dirs[files[num].dir] = xmemdup0 (filename, file - filename);
-	      return TRUE;
+		{
+		  if (dirs == NULL)
+		    {
+		      dirs_allocated = files[num].dir + 32;
+		      dirs = XCNEWVEC (char *, dirs_allocated);
+		    }
+
+		  dirs[files[num].dir] = xmemdup0 (filename, file - filename);
+		}
+	      return true;
 	    }
 	}
 
@@ -821,7 +826,7 @@ allocate_filename_to_slot (const char *  dirname,
 	      dirname == NULL ? "" : dirname,
 	      dirname == NULL ? "" : "/",
 	      filename);
-      return FALSE;
+      return false;
     }
 
   if (dirname == NULL)
@@ -840,7 +845,7 @@ allocate_filename_to_slot (const char *  dirname,
   i = num;
 
   if (! assign_file_to_slot (i, file, d))
-    return FALSE;
+    return false;
 
   if (with_md5)
     {
@@ -892,7 +897,7 @@ allocate_filename_to_slot (const char *  dirname,
   else
     memset (files[i].md5, 0, NUM_MD5_BYTES);
 
-  return TRUE;
+  return true;
 }
 
 /* Returns the current source information.  If .file directives have
@@ -965,7 +970,7 @@ dwarf2_move_insn (int delta)
   if (delta == 0)
     return;
 
-  lss = get_line_subseg (now_seg, now_subseg, FALSE);
+  lss = get_line_subseg (now_seg, now_subseg, false);
   if (!lss)
     return;
 
@@ -988,7 +993,7 @@ dwarf2_consume_line_info (void)
 {
   /* Unless we generate DWARF2 debugging information for each
      assembler line, we only emit one line symbol for one LOC.  */
-  dwarf2_loc_directive_seen = FALSE;
+  dwarf2_loc_directive_seen = false;
 
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
@@ -1031,7 +1036,7 @@ dwarf2_emit_label (symbolS *label)
 char *
 dwarf2_directive_filename (void)
 {
-  bfd_boolean with_md5 = FALSE;
+  bool with_md5 = false;
   valueT num;
   char *filename;
   const char * dirname = NULL;
@@ -1081,7 +1086,7 @@ dwarf2_directive_filename (void)
 	  SKIP_WHITESPACE ();
 	}
 
-      if (strncmp (input_line_pointer, "md5", 3) == 0)
+      if (startswith (input_line_pointer, "md5"))
 	{
 	  input_line_pointer += 3;
 	  SKIP_WHITESPACE ();
@@ -1091,7 +1096,7 @@ dwarf2_directive_filename (void)
 	  if (exp.X_op != O_big)
 	    as_bad (_("md5 value too small or not a constant"));
 	  else
-	    with_md5 = TRUE;
+	    with_md5 = true;
 	}
     }
 
@@ -1270,7 +1275,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  if (ISDIGIT (*input_line_pointer)
 	      || *input_line_pointer == '-')
 	    {
-	      bfd_boolean force_reset = *input_line_pointer == '-';
+	      bool force_reset = *input_line_pointer == '-';
 
 	      value = get_absolute_expression ();
 	      if (value != 0)
@@ -1322,7 +1327,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  dwarf2_any_loc_directive_seen = dwarf2_loc_directive_seen = TRUE;
+  dwarf2_any_loc_directive_seen = dwarf2_loc_directive_seen = true;
   debug_type = DEBUG_NONE;
 
   /* If we were given a view id, emit the row right away.  */
@@ -1893,13 +1898,13 @@ process_entries (segT seg, struct line_entry *e)
       if (strcmp (sec_name, ".text") != 0)
 	{
 	  name = concat (".debug_line", sec_name, (char *) NULL);
-	  subseg_set (subseg_get (name, FALSE), 0);
+	  subseg_set (subseg_get (name, false), 0);
 	}
       else
 	/* Don't create a .debug_line.text section -
 	   that is redundant.  Instead just switch back to the
 	   normal .debug_line section.  */
-	subseg_set (subseg_get (".debug_line", FALSE), 0);
+	subseg_set (subseg_get (".debug_line", false), 0);
     }
 
   do
@@ -2035,9 +2040,9 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
   const char *dir;
   char *cp;
   unsigned int i;
-  bfd_boolean emit_md5 = FALSE;
-  bfd_boolean emit_timestamps = TRUE;
-  bfd_boolean emit_filesize = TRUE;
+  bool emit_md5 = false;
+  bool emit_timestamps = true;
+  bool emit_filesize = true;
   segT line_str_seg = NULL;
   symbolS *line_strp;
 
@@ -2114,13 +2119,13 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 
       if (((unsigned long) DWARF2_FILE_TIME_NAME ("", "")) == -1UL)
 	{
-	  emit_timestamps = FALSE;
+	  emit_timestamps = false;
 	  -- columns;
 	}
 
       if (DWARF2_FILE_SIZE_NAME ("", "") == -1)
 	{
-	  emit_filesize = FALSE;
+	  emit_filesize = false;
 	  -- columns;
 	}
 
@@ -2129,7 +2134,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	  break;
       if (i < files_in_use)
 	{
-	  emit_md5 = TRUE;
+	  emit_md5 = true;
 	  ++ columns;
 	}
       
@@ -2381,7 +2386,7 @@ out_debug_line (segT line_seg)
        This section contains the line_end symbol which is used to
        compute the size of the linked .debug_line section, as seen
        in the DWARF Line Number header.  */
-    subseg_set (subseg_get (".debug_line_end", FALSE), 0);
+    subseg_set (subseg_get (".debug_line_end", false), 0);
 
   symbol_set_value_now (line_end);
 }

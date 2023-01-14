@@ -1650,10 +1650,10 @@ set_flags_for_add32 (sim_cpu *cpu, int32_t value1, int32_t value2)
   if (result & (1 << 31))
     flags |= N;
 
-  if (uresult != (uint32_t)result)
+  if (uresult != (uint32_t)uresult)
     flags |= C;
 
-  if (sresult != result)
+  if (sresult != (int32_t)sresult)
     flags |= V;
 
   aarch64_set_CPSR (cpu, flags);

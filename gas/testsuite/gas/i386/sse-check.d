@@ -9,6 +9,8 @@ Disassembly of section .text:
 0+ <_start>:
 [ 	]*[a-f0-9]+:	0f 58 ca             	addps  %xmm2,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 58 ca          	addpd  %xmm2,%xmm1
+[ 	]*[a-f0-9]+:	66 0f 2a ca          	cvtpi2pd %mm2,%xmm1
+[ 	]*[a-f0-9]+:	(67 )?66 0f 2a 0a(   )?       	cvtpi2pd \(%edx\),%xmm1
 [ 	]*[a-f0-9]+:	66 0f d0 ca          	addsubpd %xmm2,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 01 ca       	phaddw %xmm2,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd %xmm0,%xmm1,%xmm0

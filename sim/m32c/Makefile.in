@@ -46,20 +46,26 @@ LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
 
 arch = m32c
 
+# opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
+OPC2C = ASAN_OPTIONS=detect_leaks=0 ./opc2c
+
 r8c.c : r8c.opc opc2c
-	./opc2c -l r8c.out $(srcdir)/r8c.opc > r8c.c
+	$(OPC2C) -l r8c.out $(srcdir)/r8c.opc > r8c.c.tmp
+	mv r8c.c.tmp r8c.c
 
 m32c.c : m32c.opc opc2c
-	./opc2c -l m32c.out $(srcdir)/m32c.opc > m32c.c
+	$(OPC2C) -l m32c.out $(srcdir)/m32c.opc > m32c.c.tmp
+	mv m32c.c.tmp m32c.c
 
 opc2c : opc2c.o safe-fgets.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) $^ -o $@ $(BUILD_LIBS)
+	$(LINK_FOR_BUILD) $^
 
 encodings:
 	grep '/\* [01]' $(srcdir)/r8c.opc | sort
 
 opc2c.o : opc2c.c safe-fgets.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/opc2c.c
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
 
 safe-fgets.o : safe-fgets.c safe-fgets.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/safe-fgets.c
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/safe-fgets.c

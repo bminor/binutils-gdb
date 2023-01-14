@@ -36,3 +36,17 @@ Term::check_box "smaller source box" 0 0 80 10
 
 Term::command "winheight cmd -5"
 Term::check_box "larger source box" 0 0 80 15
+
+Term::command "winheight src -5"
+Term::check_box "smaller source box again" 0 0 80 10
+
+Term::command "winheight src +5"
+Term::check_box "larger source box again" 0 0 80 15
+
+# At one point we had a bug where adjusting the winheight would result
+# in GDB keeping hold of duplicate window pointers, which it might
+# then try to delete when the layout was changed.  Running this test
+# under valgrind would expose that bug.
+Term::command "layout asm"
+Term::check_box "check for asm window" 0 0 80 15
+

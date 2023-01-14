@@ -101,7 +101,7 @@ md_begin (void)
   cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 }
 
-static bfd_boolean skipping_fptr = FALSE;
+static bool skipping_fptr = false;
 
 void
 md_assemble (char * str)
@@ -111,7 +111,7 @@ md_assemble (char * str)
 
   /* Make sure that if we had an erroneous input line which triggered
      the skipping_fptr boolean that it does not affect following lines.  */
-  skipping_fptr = FALSE;
+  skipping_fptr = false;
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
@@ -136,7 +136,7 @@ md_operand (expressionS * e)
   if (*input_line_pointer != '@')
     return;
 
-  if (strncmp (input_line_pointer + 1, "fptr", 4) == 0)
+  if (startswith (input_line_pointer + 1, "fptr"))
     {
       input_line_pointer += 5;
       SKIP_WHITESPACE ();
@@ -174,9 +174,9 @@ md_operand (expressionS * e)
 	  example) might be local symbols and we want the expression
 	  to be evaluated now.  This kind of thing can happen when
 	  gcc is generating computed gotos.  */
-	skipping_fptr = TRUE;
+	skipping_fptr = true;
       else if (skipping_fptr)
-	skipping_fptr = FALSE;
+	skipping_fptr = false;
       else
         e->X_op = O_fptr_symbol;
     }
@@ -417,18 +417,18 @@ xstormy16_force_relocation (fixS * fix)
 /* Return true if a relocation against a symbol may be replaced with
    a relocation against section+offset.  */
 
-bfd_boolean
+bool
 xstormy16_fix_adjustable (fixS * fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return FALSE;
+    return false;
 
   if (fixP->fx_r_type == BFD_RELOC_XSTORMY16_FPTR16)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* This is a copy of gas_cgen_md_apply_fix, with some enhancements to
@@ -602,5 +602,5 @@ md_number_to_chars (char * buf, valueT val, int n)
 const char *
 md_atof (int type, char * litP, int * sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }

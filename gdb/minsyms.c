@@ -54,6 +54,7 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/parallel-for.h"
+#include "inferior.h"
 
 #if CXX_STD_THREAD
 #include <mutex>
@@ -78,9 +79,8 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
     case mst_data_gnu_ifunc:
       {
 	struct gdbarch *gdbarch = objfile->arch ();
-	CORE_ADDR pc
-	  = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
-						current_top_target ());
+	CORE_ADDR pc = gdbarch_convert_from_func_ptr_addr
+	  (gdbarch, msym_addr, current_inferior ()->top_target ());
 	if (pc != msym_addr)
 	  {
 	    if (func_address_p != NULL)
@@ -800,9 +800,9 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		      /* Some types of debug info, such as COFF,
 			 don't fill the bfd_section member, so don't
 			 throw away symbols on those platforms.  */
-		      && MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi]) != NULL
+		      && msymbol[hi].obj_section (objfile) != nullptr
 		      && (!matching_obj_sections
-			  (MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi]),
+			  (msymbol[hi].obj_section (objfile),
 			   section)))
 		    {
 		      hi--;
@@ -820,8 +820,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
 		      && (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
 			  == MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi - 1]))
-		      && (MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi])
-			  == MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi - 1])))
+		      && (msymbol[hi].obj_section (objfile)
+			  == msymbol[hi - 1].obj_section (objfile)))
 		    {
 		      hi--;
 		      continue;
@@ -1157,7 +1157,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
     msymbol->m_name = name.data ();
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
-  MSYMBOL_SECTION (msymbol) = section;
+  msymbol->set_section_index (section);
 
   MSYMBOL_TYPE (msymbol) = ms_type;
 
@@ -1246,7 +1246,8 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	{
 	  if (MSYMBOL_VALUE_RAW_ADDRESS (copyfrom)
 	      == MSYMBOL_VALUE_RAW_ADDRESS ((copyfrom + 1))
-	      && MSYMBOL_SECTION (copyfrom) == MSYMBOL_SECTION (copyfrom + 1)
+	      && (copyfrom->section_index ()
+		  == (copyfrom + 1)->section_index ())
 	      && strcmp (copyfrom->linkage_name (),
 			 (copyfrom + 1)->linkage_name ()) == 0)
 	    {
@@ -1551,16 +1552,16 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
     = (minsym.objfile->per_bfd->msymbols.get ()
        + minsym.objfile->per_bfd->minimal_symbol_count);
   msymbol = minsym.minsym;
-  section = MSYMBOL_SECTION (msymbol);
+  section = msymbol->section_index ();
   for (iter = msymbol + 1; iter != past_the_end; ++iter)
     {
       if ((MSYMBOL_VALUE_RAW_ADDRESS (iter)
 	   != MSYMBOL_VALUE_RAW_ADDRESS (msymbol))
-	  && MSYMBOL_SECTION (iter) == section)
+	  && iter->section_index () == section)
 	break;
     }
 
-  obj_section = MSYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym);
+  obj_section = minsym.obj_section ();
   if (iter != past_the_end
       && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter)
 	  < obj_section_endaddr (obj_section)))

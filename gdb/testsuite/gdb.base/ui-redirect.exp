@@ -140,3 +140,11 @@ with_test_prefix "redirect debugging" {
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
 }
+
+with_test_prefix "redirect logging and debuging" {
+    gdb_test_no_output "set logging redirect on"
+    gdb_test_no_output "set logging debugredirect on"
+    gdb_test "set logging on" \
+    "Redirecting output to /dev/null.*Redirecting debug output to /dev/null\\."
+    gdb_test "set logging off" "Done logging to /dev/null\\."
+}

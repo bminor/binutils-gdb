@@ -240,6 +240,6 @@ extern void reset_pipeline_stats (void);
 extern void halt_pipeline_stats (void);
 extern void pipeline_stats (void);
 
-extern void trace_register_changes ();
+extern void trace_register_changes (void);
 extern void generate_access_exception (void);
 extern jmp_buf decode_jmp_buf;

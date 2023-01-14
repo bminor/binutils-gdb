@@ -304,6 +304,21 @@ set lto_link_elf_tests [list \
   [list "PR ld/13244" \
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib" "-O2 -fno-early-inlining -flto" \
    {pr13244.c} {{"readelf" {-s --wide} "pr13244.d"}} "pr13244.so" "c"] \
+  [list "Build libpr15146a.a" \
+   "$plug_opt" "-flto -O2" \
+   {pr15146a.c} {} "lib15146a.a"] \
+  [list "Build pr15146b.so" \
+   "-shared" "-O2 -fpic" \
+   {pr15146b.c} {} "pr15146b.so" "c"] \
+  [list "Build pr15146c.so" \
+   "-shared -Wl,--no-as-needed tmpdir/pr15146b.so" "-O2 -fpic $no_lto" \
+   {pr15146c.c} {} "pr15146c.so" "c"] \
+  [list "PR ld/15146 (1)" \
+   "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146a.o tmpdir/pr15146c.so" "" \
+   {dummy.c} {{"readelf" {-d} "pr15146.d"}} "pr15146a.exe"] \
+  [list "Build libpr15146d.a" \
+   "$plug_opt" "-flto -O2" \
+   {pr15146d.c} {} "lib15146d.a"] \
   [list "Build libpr16746a.a" \
    "" "" \
    {pr16746a.c pr16746b.c} {} "lib15146a.a"] \
@@ -415,6 +430,36 @@ set lto_link_elf_tests [list \
   [list {pr26806.so} \
    {-shared} {-fpic -O2 -flto} \
    {pr26806.c} {{nm {-D} pr26806.d}} {pr26806.so}] \
+  [list {pr27311a.so} \
+   {-shared -Wl,--version-script=pr27311.ver} {-fPIC} \
+   {pr27311a.c} {} {pr27311a.so}] \
+  [list {pr27311b.so} \
+   {-shared -Wl,--no-as-needed tmpdir/pr27311a.so} {-fPIC} \
+   {pr27311b.c} {} {pr27311b.so}] \
+  [list {pr27311c.o} \
+   {} {-flto} \
+   {pr27311c.c} {} {} {c}] \
+  [list {pr27311d.o} \
+   {} {-flto} \
+   {pr27311d.c} {} {} {c}] \
+  [list {pr27311-1} \
+   {tmpdir/pr27311c.o -Wl,--no-as-needed,--rpath-link=. tmpdir/pr27311b.so} {} \
+   {dummy.c} {{readelf {--dyn-syms --wide} pr27311.d}} {pr27311-1}] \
+  [list {pr27311-2} \
+   {tmpdir/pr27311d.o -Wl,--no-as-needed,--rpath-link=. tmpdir/pr27311b.so} {} \
+   {dummy.c} {{readelf {--dyn-syms --wide} pr27311.d}} {pr27311-2}] \
+  [list {pr27441a.so} \
+   {-shared} {-fPIC} \
+   {pr27441a.c} {} {pr27441a.so}] \
+  [list {pr27441b.so} \
+   {-shared} {-fPIC} \
+   {pr27441b.c} {} {pr27441b.so}] \
+  [list {pr27441c.o} \
+   {} {-fPIC -flto} \
+   {pr27441c.c} {} {}] \
+  [list {pr27441c.so} \
+   {-shared -fPIC -Wl,--as-needed tmpdir/pr27441c.o tmpdir/pr27441b.so tmpdir/pr27441a.so} {-fPIC} \
+   {dummy.c} {{readelf {-dW} pr27441c.d}} {pr27441c.so}] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -423,11 +468,10 @@ set lto_link_elf_tests [list \
 # __aeabi_unwind_cpp_pr0@@GCC_3.5 which is provided by libgcc_s.so.1, so the
 # test fails.  Hence this code to skip the test.
 if { ! [istarget "arm*-*-*"] } {
-    lappend lto_link_elf_tests [list \
+    lappend lto_link_elf_tests \
   [list "PR ld/14918" \
    "-flto" "-flto" \
-   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
-  ]
+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"]
 }
 
 # PR 12982 checks that an executable stack is not created by default
@@ -435,11 +479,10 @@ if { ! [istarget "arm*-*-*"] } {
 # executable stack for syscall restarts and signal returns, so we
 # skip this test for that target.
 if { ! [istarget "hppa*-*-*"] } {
-    lappend lto_link_elf_tests [list \
+    lappend lto_link_elf_tests \
   [list "PR ld/12982" \
    "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
-   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"] \
-  ]
+   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"]
 }
 
 # Check final symbols in executables.
@@ -621,6 +664,13 @@ run_cc_link_tests $lto_compile_elf_tests
 # Restrict these to ELF targets that support shared libs and PIC.
 if { [is_elf_format] && [check_lto_shared_available] } {
     run_cc_link_tests $lto_link_elf_tests
+    set testname "PR ld/15146 (2)"
+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
+    if { [ regexp "undefined reference to symbol '\\.?xxx'" $exec_output ] } {
+	pass $testname
+    } {
+	fail $testname
+    }
     set testname "PR ld/16746 (3)"
     set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin tmpdir/pr16746b.o tmpdir/pr16746d.o"]
     if { [ regexp "warning: \\.?foobar" $exec_output ] && ![ regexp "symbol from plugin" $exec_output ] } {
@@ -641,7 +691,7 @@ set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
 set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
 if {![string match "" $catch_output]} {
-    unresolved $testname
+    fail $testname
     restore_notify
     return
 }

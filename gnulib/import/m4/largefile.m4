@@ -1,7 +1,7 @@
 # Enable large files on systems where this is not the default.
 # Enable support for files on Linux file systems with 64-bit inode numbers.
 
-# Copyright 1992-1996, 1998-2020 Free Software Foundation, Inc.
+# Copyright 1992-1996, 1998-2021 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -25,17 +25,17 @@ AC_DEFUN([gl_SET_LARGEFILE_SOURCE],
 # The following implementation works around a problem in autoconf <= 2.69;
 # AC_SYS_LARGEFILE does not configure for large inodes on Mac OS X 10.5,
 # or configures them incorrectly in some cases.
-m4_version_prereq([2.70], [] ,[
+m4_version_prereq([2.70], [], [
 
 # _AC_SYS_LARGEFILE_TEST_INCLUDES
 # -------------------------------
 m4_define([_AC_SYS_LARGEFILE_TEST_INCLUDES],
-[@%:@include <sys/types.h>
+[#include <sys/types.h>
  /* Check that off_t can represent 2**63 - 1 correctly.
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-@%:@define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T (((off_t) 1 << 31 << 31) - 1 + ((off_t) 1 << 31 << 31))
   int off_t_is_large[[(LARGE_OFF_T % 2147483629 == 721
                        && LARGE_OFF_T % 2147483647 == 1)
                       ? 1 : -1]];[]dnl
@@ -54,7 +54,7 @@ m4_define([_AC_SYS_LARGEFILE_MACRO_VALUE],
     [AC_LANG_PROGRAM([$5], [$6])],
     [$3=no; break])
   m4_ifval([$6], [AC_LINK_IFELSE], [AC_COMPILE_IFELSE])(
-    [AC_LANG_PROGRAM([@%:@define $1 $2
+    [AC_LANG_PROGRAM([#define $1 $2
 $5], [$6])],
     [$3=$2; break])
   $3=unknown

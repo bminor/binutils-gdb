@@ -96,7 +96,7 @@ extern void exec_set_section_address (const char *, int, CORE_ADDR);
    special cased --- it's filename is omitted; if it is the executable
    file, its entry point is printed.  */
 
-extern void print_section_info (target_section_table *table,
+extern void print_section_info (const target_section_table *table,
 				bfd *abfd);
 
 /* Helper function that attempts to open the symbol file at EXEC_FILE_HOST.

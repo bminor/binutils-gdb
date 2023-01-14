@@ -48,8 +48,11 @@ m68hc11int.c: gencode
 m68hc12int.c: gencode
 	./gencode -m6812 > $@
 
-gencode:	gencode.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode $(srcdir)/gencode.c
+gencode.o: gencode.c
+	$(COMPILE_FOR_BUILD) -c $< -o $@
+
+gencode: gencode.o
+	$(LINK_FOR_BUILD) $^
 
 interp.o: interp.c $(INCLUDE)
 

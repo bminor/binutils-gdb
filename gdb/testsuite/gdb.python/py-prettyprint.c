@@ -176,6 +176,7 @@ struct container
   int len;
   int *elements;
   int is_map_p;
+  int is_array_p;
 };
 
 typedef struct container zzz_type;
@@ -197,6 +198,7 @@ make_container (const char *s)
   result.len = 0;
   result.elements = 0;
   result.is_map_p = 0;
+  result.is_array_p = 0;
 
   return result;
 }

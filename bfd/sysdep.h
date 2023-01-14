@@ -27,53 +27,22 @@
 #endif
 
 #include "config.h"
-
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
 #include <stdio.h>
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
-#include <errno.h>
-#if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))
-extern int errno;
 #endif
 
-#ifdef STRING_WITH_STRINGS
-#include <string.h>
-#include <strings.h>
-#else
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#else
-extern char *strchr ();
-extern char *strrchr ();
-#endif
-#endif
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef TIME_WITH_SYS_TIME
-#include <sys/time.h>
-#include <time.h>
-#else
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-#endif
+#include <stddef.h>
+#include <string.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#include <errno.h>
+#include <time.h>
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -123,28 +92,8 @@ extern char *strrchr ();
 extern int ffs (int);
 #endif
 
-#if !HAVE_DECL_FREE
-extern void free ();
-#endif
-
-#if !HAVE_DECL_GETENV
-extern char *getenv ();
-#endif
-
-#if !HAVE_DECL_MALLOC
-extern PTR malloc ();
-#endif
-
-#if !HAVE_DECL_REALLOC
-extern PTR realloc ();
-#endif
-
 #if !HAVE_DECL_STPCPY
 extern char *stpcpy (char *__dest, const char *__src);
-#endif
-
-#if !HAVE_DECL_STRSTR
-extern char *strstr ();
 #endif
 
 #ifdef HAVE_FTELLO
@@ -169,10 +118,6 @@ extern int fseeko (FILE *stream, off_t offset, int whence);
 #if !HAVE_DECL_FSEEKO64
 extern int fseeko64 (FILE *stream, off64_t offset, int whence);
 #endif
-#endif
-
-#if !HAVE_DECL_STRNLEN
-size_t strnlen (const char *, size_t);
 #endif
 
 /* Define offsetof for those systems which lack it */
@@ -230,5 +175,7 @@ size_t strnlen (const char *, size_t);
 #ifndef HAVE_GETGID
 #define getgid() 0
 #endif
+
+#define POISON_BFD_BOOLEAN 1
 
 #endif /* ! defined (BFD_SYSDEP_H) */

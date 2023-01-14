@@ -2665,14 +2665,14 @@ static void
 s7_gen_insn_frag (struct s7_score_it *part_1, struct s7_score_it *part_2)
 {
   char *p;
-  bfd_boolean pce_p = FALSE;
+  bool pce_p = false;
   int relaxable_p = s7_g_opt;
   int relax_size = 0;
   struct s7_score_it *inst1 = part_1;
   struct s7_score_it *inst2 = part_2;
   struct s7_score_it backup_inst1;
 
-  pce_p = (inst2) ? TRUE : FALSE;
+  pce_p = inst2 != NULL;
   memcpy (&backup_inst1, inst1, sizeof (struct s7_score_it));
 
   /* Adjust instruction opcode and to be relaxed instruction opcode.  */
@@ -2770,7 +2770,7 @@ s7_gen_insn_frag (struct s7_score_it *part_1, struct s7_score_it *part_2)
 }
 
 static void
-s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
+s7_parse_16_32_inst (char *insnstr, bool gen_frag_p)
 {
   char c;
   char *p;
@@ -2820,7 +2820,7 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
 }
 
 static int
-s7_append_insn (char *str, bfd_boolean gen_frag_p)
+s7_append_insn (char *str, bool gen_frag_p)
 {
   int retval = s7_SUCCESS;
 
@@ -2872,7 +2872,7 @@ s7_do16_mv_rdrs (char *str)
               char append_str[s7_MAX_LITERAL_POOL_SIZE];
 
               sprintf (append_str, "mlfh! %s", backupstr);
-              if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+              if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		return;
               /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
               s7_inst.bwarn = -1;
@@ -2891,7 +2891,7 @@ s7_do16_mv_rdrs (char *str)
               char append_str[s7_MAX_LITERAL_POOL_SIZE];
 
               sprintf (append_str, "mhfl! %s", backupstr);
-              if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+              if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		return;
 
               /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -4201,7 +4201,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15 or BFD_RELOC_SCORE_CALL15)  */
       sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       if (reg_rd == s7_PIC_CALL_REG)
@@ -4215,7 +4215,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       s7_inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
       sprintf (tmp, "addi_s_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&var_insts[1], &s7_inst, sizeof (struct s7_score_it));
@@ -4225,7 +4225,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
     {
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
       sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, true) == (int) s7_FAIL)
 	return;
 
       /* Insn 2  */
@@ -4234,7 +4234,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       /* Fix part
          For an external symbol: addi rD, <constant> */
       sprintf (tmp, "addi r%d, %d", reg_rd, (int) add_number);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&fix_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4243,7 +4243,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
  	 For a local symbol: addi rD, <sym>+<constant>    (BFD_RELOC_GOT_LO16)  */
       sprintf (tmp, "addi_s_pic r%d, %s + %d", reg_rd,
 	       S_GET_NAME (add_symbol), (int) add_number);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4256,7 +4256,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
       sprintf (tmp, "lw_pic r%d, %s", reg_rd, S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, true) == (int) s7_FAIL)
 	return;
 
       /* Insn 2  */
@@ -4265,7 +4265,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       /* Fix part
 	 For an external symbol: ldis r1, HI%<constant>  */
       sprintf (tmp, "ldis r1, %d", hi);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&fix_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4278,7 +4278,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 	  hi += 1;
 	}
       sprintf (tmp, "ldis_pic r1, %d", hi);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4290,7 +4290,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       /* Fix part
 	 For an external symbol: ori r1, LO%<constant>  */
       sprintf (tmp, "ori r1, %d", lo);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&fix_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4298,7 +4298,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
       /* Var part
   	 For a local symbol: addi r1, <sym>+LO%<constant>    (BFD_RELOC_GOT_LO16)  */
       sprintf (tmp, "addi_u_pic r1, %s + %d", S_GET_NAME (add_symbol), lo);
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
 	return;
 
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4306,7 +4306,7 @@ s7_build_la_pic (int reg_rd, expressionS exp)
 
       /* Insn 4: add rD, rD, r1  */
       sprintf (tmp, "add r%d, r%d, r1", reg_rd, reg_rd);
-      if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, true) == (int) s7_FAIL)
 	return;
 
      /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -4371,11 +4371,11 @@ s7_do_macro_la_rdi32 (char *str)
               if ((s7_score_pic == s7_NO_PIC) || (!s7_inst.reloc.exp.X_add_symbol))
                 {
                   sprintf (append_str, "ld_i32hi r%d, %s", reg_rd, keep_data);
-                  if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+                  if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		    return;
 
                   sprintf (append_str, "ld_i32lo r%d, %s", reg_rd, keep_data);
-                  if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+                  if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		    return;
 		}
 	      else
@@ -4451,12 +4451,12 @@ s7_do_macro_li_rdi32 (char *str)
             {
               sprintf (append_str, "ld_i32hi r%d, %s", reg_rd, keep_data);
 
-              if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+              if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		return;
               else
                 {
                   sprintf (append_str, "ld_i32lo r%d, %s", reg_rd, keep_data);
-                  if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+                  if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 		    return;
 
                   /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -4535,11 +4535,11 @@ s7_do_macro_mul_rdrsrs (char *str)
             }
 
           /* Output mul/mulu or div/divu or rem/remu.  */
-          if (s7_append_insn (append_str, TRUE) == (int) s7_FAIL)
+          if (s7_append_insn (append_str, true) == (int) s7_FAIL)
 	    return;
 
           /* Output mfcel or mfceh.  */
-          if (s7_append_insn (append_str1, TRUE) == (int) s7_FAIL)
+          if (s7_append_insn (append_str1, true) == (int) s7_FAIL)
 	    return;
 
           /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -4574,7 +4574,7 @@ s7_exp_macro_ldst_abs (char *str)
 
   backupstr = tmp;
   sprintf (append_str, "li r1  %s", backupstr);
-  s7_append_insn (append_str, TRUE);
+  s7_append_insn (append_str, true);
 
   memcpy (&s7_inst, &inst_backup, sizeof (struct s7_score_it));
   sprintf (append_str, " r%d, [r1,0]", reg_rd);
@@ -4626,8 +4626,8 @@ s7_nopic_need_relax (symbolS * sym, int before_relaxing)
       segname = segment_name (S_GET_SEGMENT (sym));
       return (strcmp (segname, ".sdata") != 0
 	      && strcmp (segname, ".sbss") != 0
-	      && strncmp (segname, ".sdata.", 7) != 0
-	      && strncmp (segname, ".gnu.linkonce.s.", 16) != 0);
+	      && !startswith (segname, ".sdata.")
+	      && !startswith (segname, ".gnu.linkonce.s."));
     }
   /* We are not optimizing for the $gp register.  */
   else
@@ -4663,7 +4663,7 @@ s7_build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15)  */
       sprintf (tmp, "lw_pic r1, %s", S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
         return;
 
       memcpy (&fix_insts[0], &s7_inst, sizeof (struct s7_score_it));
@@ -4675,7 +4675,7 @@ s7_build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
       s7_inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &s7_inst, sizeof (struct s7_score_it));
       sprintf (tmp, "addi_s_pic r1, %s", S_GET_NAME (add_symbol));
-      if (s7_append_insn (tmp, FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, false) == (int) s7_FAIL)
         return;
 
       memcpy (&var_insts[1], &s7_inst, sizeof (struct s7_score_it));
@@ -4683,7 +4683,7 @@ s7_build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
 
       /* Insn 2 or Insn 3: lw/st rD, [r1, constant]  */
       sprintf (tmp, "%s r%d, [r1, %d]", insn_name, reg_rd, add_number);
-      if (s7_append_insn (tmp, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (tmp, true) == (int) s7_FAIL)
         return;
 
       /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -4827,7 +4827,7 @@ s7_do_macro_ldst_label (char *str)
      ld/st rd, [r1, 0]  */
   for (i = 0; i < 3; i++)
     {
-      if (s7_append_insn (append_str[i], FALSE) == (int) s7_FAIL)
+      if (s7_append_insn (append_str[i], false) == (int) s7_FAIL)
 	return;
 
       memcpy (&inst_expand[i], &s7_inst, sizeof (struct s7_score_it));
@@ -5164,11 +5164,11 @@ s7_md_chars_to_number (char *buf, int n)
 
 /* Return true if the given symbol should be considered local for s7_PIC.  */
 
-static bfd_boolean
+static bool
 s7_pic_need_relax (symbolS *sym, asection *segtype)
 {
   asection *symsec;
-  bfd_boolean linkonce;
+  bool linkonce;
 
   /* Handle the case of a symbol equated to another symbol.  */
   while (symbol_equated_reloc_p (sym))
@@ -5186,18 +5186,17 @@ s7_pic_need_relax (symbolS *sym, asection *segtype)
   symsec = S_GET_SEGMENT (sym);
 
   /* Duplicate the test for LINK_ONCE sections as in adjust_reloc_syms */
-  linkonce = FALSE;
+  linkonce = false;
   if (symsec != segtype && ! S_IS_LOCAL (sym))
     {
       if ((bfd_section_flags (symsec) & SEC_LINK_ONCE) != 0)
-	linkonce = TRUE;
+	linkonce = true;
 
       /* The GNU toolchain uses an extension for ELF: a section
 	  beginning with the magic string .gnu.linkonce is a linkonce
 	  section.  */
-      if (strncmp (segment_name (symsec), ".gnu.linkonce",
-		   sizeof ".gnu.linkonce" - 1) == 0)
-	linkonce = TRUE;
+      if (startswith (segment_name (symsec), ".gnu.linkonce"))
+	linkonce = true;
     }
 
   /* This must duplicate the test in adjust_reloc_syms.  */
@@ -5313,7 +5312,7 @@ s7_parse_pce_inst (char *insnstr)
   p += 2;
   strcpy (second, p);
 
-  s7_parse_16_32_inst (first, FALSE);
+  s7_parse_16_32_inst (first, false);
   if (s7_inst.error)
     return;
 
@@ -5326,7 +5325,7 @@ s7_parse_pce_inst (char *insnstr)
       q++;
     }
 
-  s7_parse_16_32_inst (second, FALSE);
+  s7_parse_16_32_inst (second, false);
   if (s7_inst.error)
     return;
 
@@ -5779,15 +5778,15 @@ s7_s_score_cpload (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 
   sprintf (insn_str, "ld_i32hi r%d, %s", s7_GP, GP_DISP_LABEL);
-  if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+  if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
     return;
 
   sprintf (insn_str, "ld_i32lo r%d, %s", s7_GP, GP_DISP_LABEL);
-  if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+  if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
     return;
 
   sprintf (insn_str, "add r%d, r%d, r%d", s7_GP, s7_GP, reg);
-  if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+  if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
     return;
 }
 
@@ -5820,7 +5819,7 @@ s7_s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
   if (cprestore_offset <= 0x3fff)
     {
       sprintf (insn_str, "sw r%d, [r%d, %d]", s7_GP, reg, cprestore_offset);
-      if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
         return;
     }
   else
@@ -5831,15 +5830,15 @@ s7_s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
       s7_nor1 = 0;
 
       sprintf (insn_str, "li r1, %d", cprestore_offset);
-      if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
         return;
 
       sprintf (insn_str, "add r1, r1, r%d", reg);
-      if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
         return;
 
       sprintf (insn_str, "sw r%d, [r1]", s7_GP);
-      if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+      if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
         return;
 
       s7_nor1 = r1_bak;
@@ -5871,7 +5870,7 @@ s7_s_score_gpword (int ignore ATTRIBUTE_UNUSED)
     }
   p = frag_more (4);
   s7_number_to_chars (p, (valueT) 0, 4);
-  fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, FALSE, BFD_RELOC_GPREL32);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, false, BFD_RELOC_GPREL32);
   demand_empty_rest_of_line ();
 }
 
@@ -5899,7 +5898,7 @@ s7_s_score_cpadd (int ignore ATTRIBUTE_UNUSED)
 
   /* Add $gp to the register named as an argument.  */
   sprintf (insn_str, "add r%d, r%d, r%d", reg, reg, s7_GP);
-  if (s7_append_insn (insn_str, TRUE) == (int) s7_FAIL)
+  if (s7_append_insn (insn_str, true) == (int) s7_FAIL)
     return;
 }
 
@@ -6147,7 +6146,7 @@ s7_assemble (char *str)
   if (s7_INSN_IS_PCE_P (str))
     s7_parse_pce_inst (str);
   else
-    s7_parse_16_32_inst (str, TRUE);
+    s7_parse_16_32_inst (str, true);
 
   if (s7_inst.error)
     as_bad (_("%s -- `%s'"), s7_inst.error, s7_inst.str);
@@ -6276,7 +6275,7 @@ s7_force_relocation (struct fix *fixp)
   return retval;
 }
 
-static bfd_boolean
+static bool
 s7_fix_adjustable (fixS * fixP)
 {
   if (fixP->fx_addsy == NULL)
@@ -6342,7 +6341,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
   int insn_size;
   int do_relax_p = 0;           /* Indicate doing relaxation for this frag.  */
   int relaxable_p = 0;
-  bfd_boolean word_align_p = FALSE;
+  bool word_align_p = false;
   fragS *next_fragp;
 
   /* If the instruction address is odd, make it half word align first.  */
@@ -6355,7 +6354,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
 	}
     }
 
-  word_align_p = ((fragp->fr_address + fragp->insn_addr) % 4 == 0) ? TRUE : FALSE;
+  word_align_p = (fragp->fr_address + fragp->insn_addr) % 4 == 0;
 
   /* Get instruction size and relax size after the last relaxation.  */
   if (fragp->fr_opcode)

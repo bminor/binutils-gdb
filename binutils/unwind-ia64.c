@@ -156,6 +156,10 @@ unw_print_xyreg (char *cp, unsigned int x, unsigned int ytreg)
     case 2: /* br */
       sprintf (cp, "b%u", (ytreg & 0x1f));
       break;
+
+    default:
+      strcpy (cp, "invalid");
+      break;
     }
 }
 

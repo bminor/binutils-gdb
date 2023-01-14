@@ -442,7 +442,7 @@ addr_mode (char *operand,
     case 'e':
       if (str[strl - 1] != ']')
 	{
-	  if ((!strncmp (str, "ext(", 4)) && strl > 7)
+	  if ((startswith (str, "ext(")) && strl > 7)
 	    {				/* external */
 	      addrmodeP->disp[0] = str + 4;
 	      i = 0;
@@ -496,7 +496,7 @@ addr_mode (char *operand,
       /* Fall through.  */
 
     case 3:
-      if (!strncmp (str, "tos", 3))
+      if (startswith (str, "tos"))
 	{
 	  addrmodeP->mode = 23;	/* TopOfStack */
 	  return -1;
@@ -513,11 +513,11 @@ addr_mode (char *operand,
 	{
 	  if (str[strl - 2] == ')')
 	    {
-	      if (!strncmp (&str[strl - 5], "(fp", 3))
+	      if (startswith (&str[strl - 5], "(fp"))
 		mode = 16;		/* Memory Relative.  */
-	      else if (!strncmp (&str[strl - 5], "(sp", 3))
+	      else if (startswith (&str[strl - 5], "(sp"))
 		mode = 17;
-	      else if (!strncmp (&str[strl - 5], "(sb", 3))
+	      else if (startswith (&str[strl - 5], "(sb"))
 		mode = 18;
 
 	      if (mode != DEFAULT)
@@ -568,13 +568,13 @@ addr_mode (char *operand,
 	      /* Fall through.  */
 
 	    default:
-	      if (!strncmp (&str[strl - 4], "(fp", 3))
+	      if (startswith (&str[strl - 4], "(fp"))
 		mode = 24;
-	      else if (!strncmp (&str[strl - 4], "(sp", 3))
+	      else if (startswith (&str[strl - 4], "(sp"))
 		mode = 25;
-	      else if (!strncmp (&str[strl - 4], "(sb", 3))
+	      else if (startswith (&str[strl - 4], "(sb"))
 		mode = 26;
-	      else if (!strncmp (&str[strl - 4], "(pc", 3))
+	      else if (startswith (&str[strl - 4], "(pc"))
 		mode = 27;
 
 	      if (mode != DEFAULT)
@@ -1917,7 +1917,7 @@ md_begin (void)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 int

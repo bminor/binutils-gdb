@@ -47,7 +47,7 @@
 
 /* Set the machine type correctly.  */
 
-static bfd_boolean
+static bool
 i386aout_write_object_contents (bfd *abfd)
 {
   struct external_exec exec_bytes;
@@ -59,7 +59,7 @@ i386aout_write_object_contents (bfd *abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return TRUE;
+  return true;
 }
 
 #define MY_write_object_contents  i386aout_write_object_contents

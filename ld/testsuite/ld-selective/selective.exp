@@ -111,7 +111,7 @@ foreach testitem $seltests {
     # tests.  It might have been a buglet originally; now I think better
     # leave as is.
     if { ![ld_compile "$compiler $testflags" $srcdir/$subdir/$testfile $objfile] } {
-	unresolved $testname
+	unsupported $testname
 	continue
     }
 

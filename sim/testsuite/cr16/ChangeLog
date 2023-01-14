@@ -1,3 +1,12 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp (arch): Delete.
+	* misc.exp: Likewise.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp, misc.exp: Define arch.
+
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* allinsn.exp: Append --load-vma to global_sim_options.

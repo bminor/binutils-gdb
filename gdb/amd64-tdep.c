@@ -2527,13 +2527,14 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       /* LLVM backend (Clang/Flang) always emits a line note before the
-	 prologue and another one after.  We trust clang to emit usable
-	 line notes.  */
+	 prologue and another one after.  We trust clang and newer Intel
+	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
-	return std::max (start_pc, post_prologue_pc);
+	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
+	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+        return std::max (start_pc, post_prologue_pc);
     }
 
   amd64_init_frame_cache (&cache);

@@ -160,4 +160,7 @@ extern void riscv_supply_regset (const struct regset *regset,
 				  struct regcache *regcache, int regnum,
 				  const void *regs, size_t len);
 
+/* The names of the RISC-V target description features.  */
+extern const char *riscv_feature_name_csr;
+
 #endif /* RISCV_TDEP_H */

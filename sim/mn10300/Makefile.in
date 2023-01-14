@@ -65,15 +65,12 @@ clean-igen:
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f tmp-igen tmp-insns
 
-../igen/igen:
-	cd ../igen && $(MAKE)
-
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
-IGEN_INSN=$(srcdir)/mn10300.igen $(srcdir)/am33.igen $(srcdir)/am33-2.igen
+IGEN_INSN=$(srcdir)/mn10300.igen
+IGEN_INSN_INC=$(srcdir)/am33.igen $(srcdir)/am33-2.igen
 IGEN_DC=$(srcdir)/mn10300.dc
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
-	cd ../igen && $(MAKE)
-	../igen/igen \
+tmp-igen: $(IGEN_INSN) $(IGEN_INSN_INC) $(IGEN_DC) ../igen/igen
+	$(IGEN) \
 		$(IGEN_TRACE) \
 		-G gen-direct-access \
                 -M mn10300,am33 -G gen-multi-sim=am33 \

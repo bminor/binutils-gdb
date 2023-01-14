@@ -44,6 +44,8 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/array-view.h"
 #include "cli/cli-style.h"
+#include "expop.h"
+#include "inferior.h"
 
 /* Definition of a user function.  */
 struct internal_function
@@ -363,7 +365,7 @@ struct value
 struct gdbarch *
 get_value_arch (const struct value *value)
 {
-  return get_type_arch (value_type (value));
+  return value_type (value)->arch ();
 }
 
 int
@@ -1304,7 +1306,7 @@ value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
    It is assumed the contents of DST in the [DST_OFFSET,
    DST_OFFSET+LENGTH) range are wholly available.  */
 
-void
+static void
 value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 			 struct value *src, LONGEST src_offset, LONGEST length)
 {
@@ -2006,7 +2008,7 @@ static struct internalvar *internalvars;
 static void
 init_if_undefined_command (const char* args, int from_tty)
 {
-  struct internalvar* intvar;
+  struct internalvar *intvar = nullptr;
 
   /* Parse the expression - this is taken from set_command().  */
   expression_up expr = parse_expression (args);
@@ -2014,15 +2016,24 @@ init_if_undefined_command (const char* args, int from_tty)
   /* Validate the expression.
      Was the expression an assignment?
      Or even an expression at all?  */
-  if (expr->nelts == 0 || expr->first_opcode () != BINOP_ASSIGN)
+  if (expr->first_opcode () != BINOP_ASSIGN)
     error (_("Init-if-undefined requires an assignment expression."));
 
-  /* Extract the variable from the parsed expression.
-     In the case of an assign the lvalue will be in elts[1] and elts[2].  */
-  if (expr->elts[1].opcode != OP_INTERNALVAR)
+  /* Extract the variable from the parsed expression.  */
+  expr::assign_operation *assign
+    = dynamic_cast<expr::assign_operation *> (expr->op.get ());
+  if (assign != nullptr)
+    {
+      expr::operation *lhs = assign->get_lhs ();
+      expr::internalvar_operation *ivarop
+	= dynamic_cast<expr::internalvar_operation *> (lhs);
+      if (ivarop != nullptr)
+	intvar = ivarop->get_internalvar ();
+    }
+
+  if (intvar == nullptr)
     error (_("The first parameter to init-if-undefined "
 	     "should be a GDB variable."));
-  intvar = expr->elts[2].internalvar;
 
   /* Only evaluate the expression if the lvalue is void.
      This may still fail if the expression is invalid.  */
@@ -2514,10 +2525,10 @@ void
 preserve_one_value (struct value *value, struct objfile *objfile,
 		    htab_t copied_types)
 {
-  if (value->type->objfile () == objfile)
+  if (value->type->objfile_owner () == objfile)
     value->type = copy_type_recursive (objfile, value->type, copied_types);
 
-  if (value->enclosing_type->objfile () == objfile)
+  if (value->enclosing_type->objfile_owner () == objfile)
     value->enclosing_type = copy_type_recursive (objfile,
 						 value->enclosing_type,
 						 copied_types);
@@ -2532,7 +2543,8 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
   switch (var->kind)
     {
     case INTERNALVAR_INTEGER:
-      if (var->u.integer.type && var->u.integer.type->objfile () == objfile)
+      if (var->u.integer.type
+	  && var->u.integer.type->objfile_owner () == objfile)
 	var->u.integer.type
 	  = copy_type_recursive (objfile, var->u.integer.type, copied_types);
       break;
@@ -2673,7 +2685,7 @@ value_as_long (struct value *val)
 CORE_ADDR
 value_as_address (struct value *val)
 {
-  struct gdbarch *gdbarch = get_type_arch (value_type (val));
+  struct gdbarch *gdbarch = value_type (val)->arch ();
 
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -3148,7 +3160,8 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym), current_top_target ()));
+	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym),
+	    current_inferior ()->top_target ()));
     }
 
   if (arg1p)

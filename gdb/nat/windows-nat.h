@@ -67,11 +67,6 @@ struct windows_thread_info
      was not.  */
   int suspended = 0;
 
-#ifdef _WIN32_WCE
-  /* The context as retrieved right after suspending the thread. */
-  CONTEXT base_context {};
-#endif
-
   /* The context of the thread, including any manipulations.  */
   union
   {

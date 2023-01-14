@@ -73,11 +73,11 @@ static packing_type etype = PACK_UNSPEC; /* Used by d10v_cleanup.  */
 
 /* TRUE if instruction swapping warnings should be inhibited.
    --nowarnswap.  */
-static bfd_boolean flag_warn_suppress_instructionswap;
+static bool flag_warn_suppress_instructionswap;
 
 /* TRUE if instruction packing should be performed when --gstabs is specified.
    --gstabs-packing, --no-gstabs-packing.  */
-static bfd_boolean flag_allow_gstabs_packing = 1;
+static bool flag_allow_gstabs_packing = 1;
 
 /* Local functions.  */
 
@@ -254,7 +254,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 void
@@ -581,8 +581,7 @@ build_insn (struct d10v_opcode *opcode,
 
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = opcode->operands[i];
-	  fixups->fix[fixups->fc].pcrel =
-	    (flags & OPERAND_ADDR) ? TRUE : FALSE;
+	  fixups->fix[fixups->fc].pcrel = (flags & OPERAND_ADDR) != 0;
 	  (fixups->fc)++;
 	}
 
@@ -1217,14 +1216,14 @@ find_opcode (struct d10v_opcode *opcode, expressionS myops[])
 		  unsigned long current_position;
 		  unsigned long symbol_position;
 		  unsigned long value;
-		  bfd_boolean found_symbol;
+		  bool found_symbol;
 
 		  /* Calculate the address of the current instruction
 		     and the address of the symbol.  Do this by summing
 		     the offsets of previous frags until we reach the
 		     frag containing the symbol, and the current frag.  */
 		  sym_frag = symbol_get_frag (myops[opnum].X_add_symbol);
-		  found_symbol = FALSE;
+		  found_symbol = false;
 
 		  current_position = frag_now_fix_octets ();
 		  symbol_position = S_GET_VALUE (myops[opnum].X_add_symbol);
@@ -1234,7 +1233,7 @@ find_opcode (struct d10v_opcode *opcode, expressionS myops[])
 		      current_position += f->fr_fix + f->fr_offset;
 
 		      if (f == sym_frag)
-			found_symbol = TRUE;
+			found_symbol = true;
 
 		      if (! found_symbol)
 			symbol_position += f->fr_fix + f->fr_offset;
@@ -1699,7 +1698,7 @@ md_operand (expressionS *expressionP)
     }
 }
 
-bfd_boolean
+bool
 d10v_fix_adjustable (fixS *fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */

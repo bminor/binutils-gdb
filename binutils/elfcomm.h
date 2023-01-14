@@ -47,8 +47,6 @@ extern void byte_get_64 (const unsigned char *, elf_vma *, elf_vma *);
 
 /* This is just a bit of syntatic sugar.  */
 #define streq(a,b)	  (strcmp ((a), (b)) == 0)
-#define strneq(a,b,n)	  (strncmp ((a), (b), (n)) == 0)
-#define const_strneq(a,b) (strncmp ((a), (b), sizeof (b) - 1) == 0)
 
 /* Structure to hold information about an archive file.  */
 

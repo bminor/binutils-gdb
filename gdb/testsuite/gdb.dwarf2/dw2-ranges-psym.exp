@@ -120,10 +120,13 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
+if { [build_executable "failed to prepare" ${testfile} \
 	  [list $srcfile $srcfile2 $asm_file] {nodebug}] } {
     return -1
 }
+
+clean_restart
+gdb_load_no_complaints $binfile
 
 if ![runto_main] {
     return -1

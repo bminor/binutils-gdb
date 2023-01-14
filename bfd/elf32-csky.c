@@ -86,60 +86,60 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 0,                           /* rightshift */
 	 0,                           /* size */
 	 0,                           /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_NONE",             /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0,                           /* src_mask */
 	 0,                           /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 1.  */
   HOWTO (R_CKCORE_ADDR32,             /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_ADDR32",           /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0,                           /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 2: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_IMM8BY4,      /* type */
 	 2,                           /* rightshift */
 	 1,                           /* size */
 	 8,                           /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_PCREL_IMM8BY4",    /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0xff,                        /* src_mask */
 	 0xff,                        /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 3: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_IMM11BY2,     /* type */
 	 1,                           /* rightshift */
 	 1,                           /* size */
 	 11,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_IMM11BY2",   /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x7ff,                       /* src_mask */
 	 0x7ff,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 4: DELETED.  */
   HOWTO (R_CKCORE_PCREL_IMM4BY2,0,0,0,0,0,0,0,"R_CKCORE_PCREL_IMM4BY2",0,0,0,0),
@@ -149,75 +149,75 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL32",          /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 6: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_JSR_IMM11BY2, /* type */
 	 1,                           /* rightshift */
 	 1,                           /* size */
 	 11,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_JSR_IMM11BY2", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x7ff,                       /* src_mask */
 	 0x7ff,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 7: GNU extension to record C++ vtable member usage.  */
   HOWTO (R_CKCORE_GNU_VTENTRY,        /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 0,                           /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 _bfd_elf_rel_vtable_reloc_fn, /* special_function */
 	 "R_CKCORE_GNU_VTENTRY",      /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x0,                         /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 8: GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_CKCORE_GNU_VTINHERIT,      /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 0,                           /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_GNU_VTINHERIT",    /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x0,                         /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 9.  */
   HOWTO (R_CKCORE_RELATIVE,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_RELATIVE",         /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 10: None.  */
   /* FIXME:  It is a bug that copy relocations are not implemented.  */
@@ -225,15 +225,15 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_COPY",             /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0xffffffff,                  /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 11: None.  */
   HOWTO (R_CKCORE_GLOB_DAT,0,0,0,0,0,0,0,"R_CKCORE_GLOB_DAT",0,0,0,0),
@@ -246,60 +246,60 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTOFF",           /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffffl,                 /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 14.  */
   HOWTO (R_CKCORE_GOTPC,              /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTPC",            /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 15.  */
   HOWTO (R_CKCORE_GOT32,              /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOT32",            /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 16.  */
   HOWTO (R_CKCORE_PLT32,              /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PLT32",            /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 17: None.  */
   HOWTO (R_CKCORE_ADDRGOT,0,0,0,0,0,0,0,"R_CKCORE_ADDRGOT",0,0,0,0),
@@ -312,255 +312,255 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 1,                           /* rightshift */
 	 2,                           /* size */
 	 26,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_IMM26BY2",   /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ffffff,                   /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 20: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY2,     /* type */
-	 1,                           /* rightshift */
-	 2,                           /* size */
-	 16,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_signed,    /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM16BY2",   /* name */
-	 FALSE,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0xffff,                      /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+         1,                           /* rightshift */
+         2,                           /* size */
+         16,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_signed,    /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM16BY2",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0xffff,                      /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 21: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY4,     /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 16,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM16BY4",   /* name */
-	 FALSE,                       /* partial_inplace */
-	 0xffff0000,                  /* src_mask */
-	 0xffff,                      /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         16,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM16BY4",   /* name */
+         false,                       /* partial_inplace */
+         0xffff0000,                  /* src_mask */
+         0xffff,                      /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 22: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY2,     /* type */
 	 1,                           /* rightshift */
 	 1,                           /* size */
 	 10,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_IMM10BY2",   /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ff,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 23: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY4,     /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 10,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM10BY4",   /* name */
-	 FALSE,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0x3ff,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         10,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM10BY4",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0x3ff,                       /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 24: Only for csky v2.  */
   HOWTO (R_CKCORE_ADDR_HI16,          /* type */
 	 16,                          /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_ADDR_HI16",        /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 25.  */
   HOWTO (R_CKCORE_ADDR_LO16,          /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_ADDR_LO16",        /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 26.  */
   HOWTO (R_CKCORE_GOTPC_HI16,         /* type */
 	 16,                          /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTPC_HI16",       /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 27.  */
   HOWTO (R_CKCORE_GOTPC_LO16,         /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTPC_LO16",       /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 28.  */
   HOWTO (R_CKCORE_GOTOFF_HI16,        /* type */
 	 16,                          /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTOFF_HI16",      /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 29.  */
   HOWTO (R_CKCORE_GOTOFF_LO16,        /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTOFF_LO16",      /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 30.  */
   HOWTO (R_CKCORE_GOT12,              /* type */
 	 2,                           /* rightshift */
 	 2,                           /* size */
 	 12,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOT12",            /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xfff,                       /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 31.  */
   HOWTO (R_CKCORE_GOT_HI16,           /* type */
 	 16,                          /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOT_HI16",         /* name */
-	 TRUE,                       /* partial_inplace */
+	 true,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 32.  */
   HOWTO (R_CKCORE_GOT_LO16,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOT_LO16",         /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 33.  */
   HOWTO (R_CKCORE_PLT12,              /* type */
 	 2,                           /* rightshift */
 	 2,                           /* size */
 	 12,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PLT12",            /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xfff,                       /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 34.  */
   HOWTO (R_CKCORE_PLT_HI16,           /* type */
 	 16,                          /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PLT_HI16",         /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 35.  */
   HOWTO (R_CKCORE_PLT_LO16,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PLT_LO16",         /* name */
-	 TRUE,                       /* partial_inplace */
+	 true,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 36: None.  */
   HOWTO (R_CKCORE_ADDRGOT_HI16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
@@ -579,240 +579,240 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 1,                           /* rightshift */
 	 2,                           /* size */
 	 26,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_JSR_IMM26BY2", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ffffff,                   /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 41.  */
   HOWTO (R_CKCORE_TOFFSET_LO16,       /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_unsigned,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_TOFFSET_LO16",     /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 42.  */
   HOWTO (R_CKCORE_DOFFSET_LO16,       /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 16,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_unsigned,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_DOFFSET_LO16",     /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 43.  */
   HOWTO (R_CKCORE_PCREL_IMM18BY2,     /* type */
-	 1,                           /* rightshift */
-	 2,                           /* size */
-	 18,                          /* bitsize */
-	 TRUE,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_signed,    /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM18BY2",   /* name */
-	 FALSE,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0x3ffff,                     /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+         1,                           /* rightshift */
+         2,                           /* size */
+         18,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_signed,    /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM18BY2",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0x3ffff,                     /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 44.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18,      /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_unsigned,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_DOFFSET_IMM18",    /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 45.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18BY2,   /* type */
 	 1,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_unsigned,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_DOFFSET_IMM18BY2", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 46.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18BY4,   /* type */
 	 2,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_unsigned,  /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_DOFFSET_IMM18BY4", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 47.  */
   HOWTO (R_CKCORE_GOTOFF_IMM18,       /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOTOFF_IMM18",     /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0xfffc,                      /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 48.  */
   HOWTO (R_CKCORE_GOT_IMM18BY4,       /* type */
 	 2,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_GOT_IMM18BY4",     /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0xfffc,                      /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 49.  */
   HOWTO (R_CKCORE_PLT_IMM18BY4,       /* type */
 	 2,                           /* rightshift */
 	 2,                           /* size */
 	 18,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PLT_IMM18BY4",     /* name */
-	 TRUE,                        /* partial_inplace */
+	 true,                        /* partial_inplace */
 	 0xfffc,                      /* src_mask */
 	 0x3ffff,                     /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 50: for lrw16.  */
   HOWTO (R_CKCORE_PCREL_IMM7BY4,      /* type */
 	 2,                           /* rightshift */
 	 1,                           /* size */
 	 7,                           /* bitsize */
-	 TRUE,                        /* pc_relative */
+	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_bitfield,  /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_IMM7BY4",    /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0xec1f,                      /* src_mask */
 	 0x31f,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 51: for static nptl.  */
   HOWTO (R_CKCORE_TLS_LE32,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_TLS_LE32",         /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 52: for static nptl.  */
   HOWTO (R_CKCORE_TLS_IE32,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_TLS_IE32",         /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 53: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_GD32,           /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_TLS_GD32",         /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 54: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_LDM32,          /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_TLS_LDM32",        /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 55: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_LDO32,          /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_TLS_LDO32",        /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xffffffff,                  /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 56: for linker.  */
   HOWTO (R_CKCORE_TLS_DTPMOD32,0,0,0,0,0,0,0,"R_CKCORE_TLS_DTPMOD32",0,0,0,0),
@@ -825,48 +825,48 @@ static reloc_howto_type csky_elf_howto_table[] =
 
   /* 59: for ck807f.  */
   HOWTO (R_CKCORE_PCREL_FLRW_IMM8BY4, /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 8,                           /* bitsize */
-	 TRUE,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_FLRW_IMM8BY4", /* name */
-	 FALSE,                       /* partial_inplace */
-	 0xfe1fff0f,                  /* src_mask */
-	 0x1e000f0,                   /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         8,                           /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_FLRW_IMM8BY4",/* name */
+         false,                       /* partial_inplace */
+         0xfe1fff0f,                  /* src_mask */
+         0x1e000f0,                   /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 60: for 810 not to generate jsri.  */
   HOWTO (R_CKCORE_NOJSRI,             /* type */
 	 0,                           /* rightshift */
 	 2,                           /* size */
 	 32,                          /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_NOJSRI",           /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0xffff,                      /* src_mask */
 	 0xffff,                      /* dst_mask */
-	 FALSE),                      /* pcrel_offset */
+	 false),                      /* pcrel_offset */
 
   /* 61: for callgraph.  */
   HOWTO (R_CKCORE_CALLGRAPH,          /* type */
 	 0,                           /* rightshift */
 	 0,                           /* size */
 	 0,                           /* bitsize */
-	 FALSE,                       /* pc_relative */
+	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
 	 NULL,                        /* special_function */
 	 "R_CKCORE_CALLGRAPH",        /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0x0,                         /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
   /* 62: IRELATIVE*/
   HOWTO (R_CKCORE_IRELATIVE,0,0,0,0,0,0,0,"R_CKCORE_IRELATIVE",0,0,0,0),
@@ -881,10 +881,10 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_BLOOP_IMM4BY4", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xf,                         /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
   /* 64: for bloop instruction */
   HOWTO (R_CKCORE_PCREL_BLOOP_IMM12BY4, /* type */
 	 1,                           /* rightshift */
@@ -895,10 +895,10 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 complain_overflow_signed,    /* complain_on_overflow */
 	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL_BLOOP_IMM12BY4", /* name */
-	 FALSE,                       /* partial_inplace */
+	 false,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
 	 0xfff,                       /* dst_mask */
-	 TRUE),                       /* pcrel_offset */
+	 true),                       /* pcrel_offset */
 
 
 };
@@ -976,7 +976,7 @@ elf32_csky_howto_from_type (unsigned int r_type)
     return NULL;
 }
 
-static bfd_boolean
+static bool
 csky_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			arelent *cache_ptr,
 			Elf_Internal_Rela *dst)
@@ -991,9 +991,9 @@ csky_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 /* The Global Offset Table max size.  */
@@ -1037,7 +1037,7 @@ enum stub_insn_type
   DATA_TYPE
 };
 
-bfd_boolean use_branch_stub = TRUE;
+bool use_branch_stub = true;
 typedef struct
 {
   bfd_vma data;
@@ -1178,10 +1178,10 @@ struct csky_elf_link_hash_entry
 };
 
 /* Traverse an C-SKY ELF linker hash table.  */
-#define csky_elf_link_hash_traverse(table, func, info)                     \
-  (elf_link_hash_traverse                                                  \
-   (&(table)->root,                                                        \
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
+#define csky_elf_link_hash_traverse(table, func, info)			\
+  (elf_link_hash_traverse						\
+   (&(table)->root,							\
+    (bool (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func),	\
     (info)))
 
 /* Get the C-SKY ELF linker hash table from a link_info structure.  */
@@ -1519,7 +1519,7 @@ csky_elf_link_hash_table_create (bfd *abfd)
   return &ret->elf.root;
 }
 
-static bfd_boolean
+static bool
 csky_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct csky_elf_obj_tdata),
@@ -1532,7 +1532,7 @@ csky_elf_mkobject (bfd *abfd)
    change the definition to something the rest of the link can
    understand.  */
 
-static bfd_boolean
+static bool
 csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
@@ -1542,11 +1542,11 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   asection *s;
   eh = (struct csky_elf_link_hash_entry *)h;
   if (eh == NULL)
-    return FALSE;
+    return false;
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Clear jsri2bsr_refcount, if creating shared library files.  */
   if (bfd_link_pic (info) && eh->jsri2bsr_refcount > 0)
@@ -1580,7 +1580,7 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->got.refcount -= eh->plt_refcount;
 	  eh->plt_refcount = 0;
 	}
-      return TRUE;
+      return true;
     }
   else
     /* It's possible that we incorrectly decided a .plt reloc was
@@ -1599,13 +1599,13 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       BFD_ASSERT (def->root.type == bfd_link_hash_defined);
       h->root.u.def.section = def->root.u.def.section;
       h->root.u.def.value = def->root.u.def.value;
-      return TRUE;
+      return true;
     }
 
   /* If there are no non-GOT references, we do not need a copy
      relocation.  */
   if (!h->non_got_ref)
-    return TRUE;
+    return true;
 
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
@@ -1615,7 +1615,7 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (bfd_link_pic (info) || htab->elf.is_relocatable_executable)
-    return TRUE;
+    return true;
 
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
@@ -1652,13 +1652,13 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   h->non_got_ref = 0;
-  return TRUE;
+  return true;
 }
 
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
-static bfd_boolean
+static bool
 csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 {
   struct bfd_link_info *info;
@@ -1668,7 +1668,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 
   /* For indirect case, such as _ZdlPv to _ZdlPv@@GLIBCXX_3.4.  */
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -1677,7 +1677,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   info = (struct bfd_link_info *) inf;
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
   /*TODO: how to deal with weak symbol relocs.  */
   if ((htab->elf.dynamic_sections_created || h->type == STT_GNU_IFUNC)
       && h->plt.refcount > 0)
@@ -1687,7 +1687,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       if (h->dynindx == -1 && !h->forced_local
 	  && h->root.type == bfd_link_hash_undefweak
 	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
+	return false;
       if (bfd_link_pic (info) || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *splt = htab->elf.splt;
@@ -1741,7 +1741,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   if (h->got.refcount > 0)
     {
       asection *sgot;
-      bfd_boolean dyn;
+      bool dyn;
       int indx;
 
       int tls_type = csky_elf_hash_entry (h)->tls_type;
@@ -1750,7 +1750,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       if (h->dynindx == -1 && !h->forced_local
 	  && h->root.type == bfd_link_hash_undefweak
 	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
+	return false;
 
       sgot = htab->elf.sgot;
       h->got.offset = sgot->size;
@@ -1799,7 +1799,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 
   eh = (struct csky_elf_link_hash_entry *) h;
   if (h->dyn_relocs == NULL)
-    return TRUE;
+    return true;
 
   /* In the shared -Bsymbolic case, discard space allocated for
      dynamic pc-relative relocs against symbols which turn out to be
@@ -1843,7 +1843,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	  else if (h->dynindx == -1
 		   && !h->forced_local
 		   && !bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
+	    return false;
 	}
 
     }
@@ -1866,7 +1866,7 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	      && h->root.type == bfd_link_hash_undefweak)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
+		return false;
 	    }
 
 	  /* If that succeeded, we know we'll be keeping all the
@@ -1887,27 +1887,27 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       srelgot->size += p->count * sizeof (Elf32_External_Rela);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Set the sizes of the dynamic sections.  */
 
-static bfd_boolean
+static bool
 csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				struct bfd_link_info *info)
 {
   struct csky_elf_link_hash_table *htab;
   bfd *dynobj;
   asection *s;
-  bfd_boolean relocs;
+  bool relocs;
   bfd *ibfd;
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
-    return FALSE;
+    return false;
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -2017,15 +2017,15 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       && htab->elf.sgot->size + htab->elf.sgotplt->size > GOT_MAX_SIZE)
     {
       _bfd_error_handler (_("GOT table size out of range")); /*  */
-      return FALSE;
+      return false;
     }
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
-  relocs = FALSE;
+  relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
-      bfd_boolean strip_section = TRUE;
+      bool strip_section = true;
 
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
@@ -2043,12 +2043,12 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     It's too late to tell BFD to get rid of the symbols.  */
 
 	  if (htab->elf.hplt != NULL)
-	    strip_section = FALSE;
+	    strip_section = false;
 	}
-      else if (CONST_STRNEQ (bfd_section_name (s), ".rel") )
+      else if (startswith (bfd_section_name (s), ".rel") )
 	{
 	  if (s->size != 0 )
-	    relocs = TRUE;
+	    relocs = true;
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
@@ -2086,7 +2086,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of garbage.  */
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
-	return FALSE;
+	return false;
     }
 
   if (htab->elf.dynamic_sections_created)
@@ -2097,7 +2097,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 
-static bfd_boolean
+static bool
 csky_elf_finish_dynamic_symbol (bfd *output_bfd,
 				struct bfd_link_info *info,
 				struct elf_link_hash_entry *h,
@@ -2107,7 +2107,7 @@ csky_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Sanity check to make sure no unexpected symbol reaches here.
      This matches the test in csky_elf_relocate_section handling
@@ -2268,12 +2268,12 @@ csky_elf_finish_dynamic_symbol (bfd *output_bfd,
       || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
     sym->st_shndx = SHN_ABS;
 
-  return TRUE;
+  return true;
 }
 
 /* Finish up the dynamic sections.  */
 
-static bfd_boolean
+static bool
 csky_elf_finish_dynamic_sections (bfd *output_bfd,
 				  struct bfd_link_info *info)
 {
@@ -2284,7 +2284,7 @@ csky_elf_finish_dynamic_sections (bfd *output_bfd,
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->elf.dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
@@ -2300,7 +2300,7 @@ csky_elf_finish_dynamic_sections (bfd *output_bfd,
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
-	  bfd_boolean size = FALSE;
+	  bool size = false;
 	  const char *name = NULL;
 
 	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
@@ -2310,15 +2310,15 @@ csky_elf_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 	    case DT_RELA:
 	      name = ".rela.dyn";
-	      size = FALSE;
+	      size = false;
 	      break;
 	    case DT_RELASZ:
 	      name = ".rela.dyn";
-	      size = TRUE;
+	      size = true;
 	      break;
 	    case DT_PLTRELSZ:
 	      name = ".rela.plt";
-	      size = TRUE;
+	      size = true;
 	      break;
 	    case DT_PLTGOT:
 	      dyn.d_un.d_ptr = htab->elf.sgot->output_section->vma;
@@ -2362,7 +2362,7 @@ csky_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
       elf_section_data (got_sec->output_section)->this_hdr.sh_entsize = 4;
     }
-  return TRUE;
+  return true;
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -2436,7 +2436,7 @@ csky_elf_gc_mark_hook (asection *sec,
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
 
-static bfd_boolean
+static bool
 csky_elf_check_relocs (bfd * abfd,
 		       struct bfd_link_info * info,
 		       asection * sec,
@@ -2451,11 +2451,11 @@ csky_elf_check_relocs (bfd * abfd,
 
   /* if output type is relocatable, return.  */
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2477,7 +2477,7 @@ csky_elf_check_relocs (bfd * abfd,
 	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
-	    return FALSE;
+	    return false;
 	  h = NULL;
 	}
       else
@@ -2546,10 +2546,10 @@ csky_elf_check_relocs (bfd * abfd,
 		    htab->elf.dynobj = abfd;
 
 		  sreloc = _bfd_elf_make_dynamic_reloc_section
-		    (sec, htab->elf.dynobj, 2, abfd, TRUE);
+		    (sec, htab->elf.dynobj, 2, abfd, true);
 
 		  if (sreloc == NULL)
-		    return FALSE;
+		    return false;
 		}
 
 	      if (h == NULL && !use_branch_stub
@@ -2584,7 +2584,7 @@ csky_elf_check_relocs (bfd * abfd,
 		  loc_isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						    abfd, r_symndx);
 		  if (loc_isym == NULL)
-		    return FALSE;
+		    return false;
 		  s = bfd_section_from_elf_index (abfd, loc_isym->st_shndx);
 		  if (s == NULL)
 		    s = sec;
@@ -2599,7 +2599,7 @@ csky_elf_check_relocs (bfd * abfd,
 		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
-		    return FALSE;
+		    return false;
 		  p->next = *head;
 		  *head = p;
 		  p->sec = sec;
@@ -2699,7 +2699,7 @@ csky_elf_check_relocs (bfd * abfd,
 		    local_got_refcounts = ((bfd_signed_vma *)
 					   bfd_zalloc (abfd, size));
 		    if (local_got_refcounts == NULL)
-		      return FALSE;
+		      return false;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
 		    csky_elf_local_got_tls_type (abfd)
 		      = (char *) (local_got_refcounts + symtab_hdr->sh_info);
@@ -2743,7 +2743,7 @@ csky_elf_check_relocs (bfd * abfd,
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_got_section (htab->elf.dynobj, info))
-		return FALSE;
+		return false;
 	    }
 	  break;
 
@@ -2751,19 +2751,19 @@ csky_elf_check_relocs (bfd * abfd,
 	     Reconstruct it for later use during GC.  */
 	case R_CKCORE_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    return false;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_CKCORE_GNU_VTENTRY:
 	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    return false;
 	  break;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 static const struct bfd_elf_special_section csky_elf_special_sections[]=
@@ -2775,15 +2775,15 @@ static const struct bfd_elf_special_section csky_elf_special_sections[]=
 
 /* Function to keep CSKY specific flags in the ELF header.  */
 
-static bfd_boolean
+static bool
 csky_elf_set_private_flags (bfd * abfd, flagword flags)
 {
   BFD_ASSERT (! elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = TRUE;
-  return TRUE;
+  elf_flags_init (abfd) = true;
+  return true;
 }
 
 static csky_arch_for_merge *
@@ -2826,7 +2826,7 @@ csky_find_arch_with_name (const char *name)
   return csky_arch;
 }
 
-static bfd_boolean
+static bool
 elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
@@ -2836,7 +2836,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   csky_arch_for_merge *old_arch = NULL;
   csky_arch_for_merge *new_arch = NULL;
   int i;
-  bfd_boolean result = TRUE;
+  bool result = true;
   const char *msg = NULL;
 
   const char *sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
@@ -2845,14 +2845,14 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
      of accepting unknown attributes in the first input file - but
      is that a bug?  */
   if (ibfd->flags & BFD_LINKER_CREATED)
-    return TRUE;
+    return true;
 
   /* Skip any input that hasn't attribute section.
      This enables to link object files without attribute section with
      any others.  */
   if (bfd_get_section_by_name (ibfd, sec_name) == NULL)
     {
-      return TRUE;
+      return true;
     }
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
@@ -2896,7 +2896,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		  msg = _("%pB: machine flag conflict with target");
 		  (*_bfd_error_handler) (msg, ibfd);
 		  bfd_set_error (bfd_error_wrong_format);
-		  return FALSE;
+		  return false;
 		}
 	      else if (new_arch->class_level != old_arch->class_level)
 		{
@@ -2936,7 +2936,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		(_("Error: %pB and %pB has different VDSP version"), ibfd, obfd);
-	      result = FALSE;
+	      result = false;
 	    }
 	  break;
 
@@ -2953,7 +2953,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 		(_("Error: %pB and %pB has different DSP version"), ibfd, obfd);
-	      result = FALSE;
+	      result = false;
 	    }
 	  break;
 
@@ -2971,7 +2971,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    {
 	      _bfd_error_handler
 	       (_("Error: %pB and %pB has different FPU ABI"), ibfd, obfd);
-	       result = FALSE;
+	       result = false;
 	    }
 	  break;
 
@@ -2988,7 +2988,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   if (!_bfd_elf_merge_object_attributes (ibfd, info))
-    return FALSE;
+    return false;
 
   /* Check for any attributes not known on CSKY.  */
   result &= _bfd_elf_merge_unknown_attribute_list (ibfd, obfd);
@@ -2999,7 +2999,7 @@ elf32_csky_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static bfd_boolean
+static bool
 csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
@@ -3013,20 +3013,20 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, info))
-    return FALSE;
+    return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
+    return true;
 
   /* Merge ".csky.attribute" section.  */
   if (!elf32_csky_merge_attributes (ibfd, info))
-    return FALSE;
+    return false;
 
   if (! elf_flags_init (obfd))
     {
       /* First call, no flags set.  */
-      elf_flags_init (obfd) = TRUE;
+      elf_flags_init (obfd) = true;
     }
 
   /* Try to merge e_flag.  */
@@ -3053,7 +3053,7 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 		/* xgettext:c-format */
 		(_("%pB: machine flag conflict with target"), ibfd);
 	      bfd_set_error (bfd_error_wrong_format);
-	      return FALSE;
+	      return false;
 	    }
 	  else if (new_arch->class_level != old_arch->class_level)
 	    {
@@ -3092,23 +3092,23 @@ csky_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   elf_elfheader (obfd)->e_flags = newest_flag;
 
-  return TRUE;
+  return true;
 }
 
 /* Ignore the discarded relocs in special sections in link time.  */
 
-static bfd_boolean
+static bool
 csky_elf_ignore_discarded_relocs (asection *sec)
 {
   if (strcmp (sec->name, ".csky_stack_size") == 0)
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 /* .csky_stack_size are not referenced directly.  This pass marks all of
    them as required.  */
 
-static bfd_boolean
+static bool
 elf32_csky_gc_mark_extra_sections (struct bfd_link_info *info,
 				   elf_gc_mark_hook_fn gc_mark_hook ATTRIBUTE_UNUSED)
 {
@@ -3125,7 +3125,7 @@ elf32_csky_gc_mark_extra_sections (struct bfd_link_info *info,
 	  o->gc_mark = 1;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* The linker repeatedly calls this function for each input section,
@@ -3166,7 +3166,7 @@ elf32_csky_next_input_section (struct bfd_link_info *info,
 static void
 group_sections (struct csky_elf_link_hash_table *htab,
 		bfd_size_type stub_group_size,
-		bfd_boolean stubs_always_after_branch)
+		bool stubs_always_after_branch)
 {
   asection **list = htab->input_list;
 
@@ -3260,16 +3260,16 @@ group_sections (struct csky_elf_link_hash_table *htab,
    or it is a weak symbol and we aim to create shared object file,
    we must create a stub for this bsr.  */
 
-static bfd_boolean
+static bool
 sym_must_create_stub (struct elf_link_hash_entry *h,
 		      struct bfd_link_info *info)
 {
   if (h != NULL
       && ((h->def_dynamic && !h->def_regular)
 	  || (bfd_link_pic (info) && h->root.type == bfd_link_hash_defweak)))
-    return TRUE;
+    return true;
   else
-    return FALSE;
+    return false;
 }
 
 /* Calculate the template, template size and instruction size for a stub.
@@ -3304,7 +3304,7 @@ find_stub_size_and_template (enum elf32_csky_stub_type stub_type,
 
       default:
 	BFD_FAIL ();
-	return FALSE;
+	return false;
       }
     }
 
@@ -3319,7 +3319,7 @@ find_stub_size_and_template (enum elf32_csky_stub_type stub_type,
 /* As above, but don't actually build the stub.  Just bump offset so
    we know stub section sizes.  */
 
-static bfd_boolean
+static bool
 csky_size_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg ATTRIBUTE_UNUSED)
 {
@@ -3341,7 +3341,7 @@ csky_size_one_stub (struct bfd_hash_entry *gen_entry,
 
   size = (size + 7) & ~7;
   stub_entry->stub_sec->size += size;
-  return TRUE;
+  return true;
 }
 
 /* Add a new stub entry to the stub hash.  Not all fields of the new
@@ -3362,7 +3362,7 @@ elf32_csky_add_stub (const char *stub_name,
 
   /* Enter this entry into the linker stub hash table.  */
   stub_entry = csky_stub_hash_lookup (&htab->stub_hash_table, stub_name,
-				      TRUE, FALSE);
+				      true, false);
   if (stub_entry == NULL)
     {
       _bfd_error_handler (_("%pB: cannot create stub entry %s"),
@@ -3382,7 +3382,7 @@ elf32_csky_add_stub (const char *stub_name,
    PC-relative calls to a target that is unreachable with a "bsr"
    instruction.  */
 
-bfd_boolean
+bool
 elf32_csky_size_stubs (bfd *output_bfd,
 		       bfd *stub_bfd,
 		       struct bfd_link_info *info,
@@ -3391,11 +3391,11 @@ elf32_csky_size_stubs (bfd *output_bfd,
 		       void (*layout_sections_again) (void))
 {
   bfd_size_type stub_group_size;
-  bfd_boolean stubs_always_after_branch;
+  bool stubs_always_after_branch;
   struct csky_elf_link_hash_table *htab = csky_elf_hash_table (info);
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Propagate mach to stub bfd, because it may not have been
      finalized when we created stub_bfd.  */
@@ -3429,7 +3429,7 @@ elf32_csky_size_stubs (bfd *output_bfd,
       bfd *input_bfd;
       unsigned int bfd_indx;
       asection *stub_sec;
-      bfd_boolean stub_changed = FALSE;
+      bool stub_changed = false;
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
@@ -3612,7 +3612,7 @@ elf32_csky_size_stubs (bfd *output_bfd,
 		      stub_entry
 			= csky_stub_hash_lookup	(&htab->stub_hash_table,
 						 stub_name,
-						 FALSE, FALSE);
+						 false, false);
 		      if (stub_entry != NULL)
 			{
 			  /* The proper stub has already been created.  */
@@ -3646,7 +3646,7 @@ elf32_csky_size_stubs (bfd *output_bfd,
 			}
 		      sprintf (stub_entry->output_name, STUB_ENTRY_NAME,
 			       sym_name);
-		      stub_changed = TRUE;
+		      stub_changed = true;
 		    }
 		  while (0);
 		}
@@ -3673,12 +3673,12 @@ elf32_csky_size_stubs (bfd *output_bfd,
       (*htab->layout_sections_again) ();
     }
 
-  return TRUE;
+  return true;
  error_ret_free_local:
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
+static bool
 csky_build_one_stub (struct bfd_hash_entry *gen_entry,
 		     void * in_arg)
 {
@@ -3713,7 +3713,7 @@ csky_build_one_stub (struct bfd_hash_entry *gen_entry,
 
   globals = csky_elf_hash_table (info);
   if (globals == NULL)
-    return FALSE;
+    return false;
   stub_sec = stub_entry->stub_sec;
 
   /* Make a note of the offset within the stubs for this entry.  */
@@ -3761,7 +3761,7 @@ csky_build_one_stub (struct bfd_hash_entry *gen_entry,
 	break;
       default:
 	BFD_FAIL ();
-	return FALSE;
+	return false;
       }
   stub_sec->size += size;
 
@@ -3800,7 +3800,7 @@ csky_build_one_stub (struct bfd_hash_entry *gen_entry,
 				template_sequence[stub_reloc_idx[i]].reloc_addend);
     }
 
-  return TRUE;
+  return true;
 #undef MAXRELOCS
 }
 
@@ -3810,7 +3810,7 @@ csky_build_one_stub (struct bfd_hash_entry *gen_entry,
    functions here.  This function is called via arm_elf_finish in the
    linker.  */
 
-bfd_boolean
+bool
 elf32_csky_build_stubs (struct bfd_link_info *info)
 {
   asection *stub_sec;
@@ -3820,7 +3820,7 @@ elf32_csky_build_stubs (struct bfd_link_info *info)
   htab = csky_elf_hash_table (info);
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL;
@@ -3836,7 +3836,7 @@ elf32_csky_build_stubs (struct bfd_link_info *info)
       size = stub_sec->size;
       stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
-	return FALSE;
+	return false;
       stub_sec->size = 0;
     }
 
@@ -3844,7 +3844,7 @@ elf32_csky_build_stubs (struct bfd_link_info *info)
   table = &htab->stub_hash_table;
   bfd_hash_traverse (table, csky_build_one_stub, info);
 
-  return TRUE;
+  return true;
 }
 
 /* Set up various things so that we can make a list of input sections
@@ -3864,8 +3864,6 @@ elf32_csky_setup_section_lists (bfd *output_bfd,
   struct csky_elf_link_hash_table *htab = csky_elf_hash_table (info);
 
   if (!htab)
-    return 0;
-  if (! is_elf_hash_table (htab))
     return 0;
 
   /* Count the number of input BFDs and find the top input section id.  */
@@ -4170,7 +4168,7 @@ elf32_csky_get_stub_entry (const asection *input_section,
       if (stub_name == NULL)
 	return NULL;
       stub_entry = csky_stub_hash_lookup (&htab->stub_hash_table,
-					  stub_name, FALSE, FALSE);
+					  stub_name, false, false);
       if (h != NULL)
 	h->stub_cache = stub_entry;
       free (stub_name);
@@ -4254,7 +4252,7 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 
 /* Relocate a csky section.  */
 
-static bfd_boolean
+static int
 csky_elf_relocate_section (bfd *                  output_bfd,
 			   struct bfd_link_info * info,
 			   bfd *                  input_bfd,
@@ -4269,13 +4267,13 @@ csky_elf_relocate_section (bfd *                  output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   const char *name;
-  bfd_boolean ret = TRUE;
+  bool ret = true;
   struct csky_elf_link_hash_table * htab;
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
 
   htab = csky_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   symtab_hdr = & elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -4284,20 +4282,20 @@ csky_elf_relocate_section (bfd *                  output_bfd,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
     {
-      enum elf_csky_reloc_type     r_type
+      enum elf_csky_reloc_type r_type
 	= (enum elf_csky_reloc_type) ELF32_R_TYPE (rel->r_info);
-      unsigned long                r_symndx;
-      reloc_howto_type *           howto;
-      Elf_Internal_Sym *           sym;
-      asection *                   sec;
-      bfd_vma                      relocation;
-      bfd_vma                      off;
+      unsigned long r_symndx;
+      reloc_howto_type *howto;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      bfd_vma relocation;
+      bfd_vma off;
       struct elf_link_hash_entry * h;
-      bfd_vma                      addend = (bfd_vma)rel->r_addend;
-      bfd_reloc_status_type        r = bfd_reloc_ok;
-      bfd_boolean                  unresolved_reloc = FALSE;
-      int                          do_final_relocate = TRUE;
-      bfd_boolean                  relative_reloc = FALSE;
+      bfd_vma addend = (bfd_vma)rel->r_addend;
+      bfd_reloc_status_type r = bfd_reloc_ok;
+      bool unresolved_reloc = false;
+      int do_final_relocate = true;
+      bool relative_reloc = false;
       bfd_signed_vma disp;
 
       /* Ignore these relocation types:
@@ -4312,7 +4310,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  _bfd_error_handler (_("%pB: unsupported relocation type: %#x"),
 			      input_bfd, r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  ret = FALSE;
+	  ret = false;
 	  continue;
 	}
 
@@ -4322,7 +4320,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
       h = NULL;
       sym = NULL;
       sec = NULL;
-      unresolved_reloc = FALSE;
+      unresolved_reloc = false;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -4334,7 +4332,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	}
       else
 	{
-	  bfd_boolean warned, ignored;
+	  bool warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -4412,7 +4410,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  if (h != NULL)
 	    {
 	      /* Global symbol is defined by other modules.  */
-	      bfd_boolean dyn;
+	      bool dyn;
 	      off = h->got.offset;
 	      dyn = htab->elf.dynamic_sections_created;
 	      if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
@@ -4455,11 +4453,11 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 		      if (GENERATE_RELATIVE_RELOC_P (info, h))
 			/* If this symbol isn't dynamic
 			   in PIC, generate R_CKCORE_RELATIVE here.  */
-			relative_reloc = TRUE;
+			relative_reloc = true;
 		    }
 		}
 	      else
-		unresolved_reloc = FALSE;
+		unresolved_reloc = false;
 	    } /* End if h != NULL.  */
 	  else
 	    {
@@ -4477,7 +4475,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			      htab->elf.sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 		  if (bfd_link_pic (info))
-		    relative_reloc = TRUE;
+		    relative_reloc = true;
 		}
 	    }
 	  if (relative_reloc)
@@ -4522,7 +4520,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  /* Use global offset table as symbol value.  */
 	  relocation = htab->elf.sgot->output_section->vma;
 	  addend = -addend;
-	  unresolved_reloc = FALSE;
+	  unresolved_reloc = false;
 	  break;
 
 	case R_CKCORE_DOFFSET_IMM18:
@@ -4566,7 +4564,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 		 using -Bsymbolic.  */
 	      if (h->got.offset != (bfd_vma) -1)
 		{
-		  bfd_boolean dyn;
+		  bool dyn;
 
 		  off = h->got.offset;
 		  dyn = htab->elf.dynamic_sections_created;
@@ -4596,7 +4594,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			{
 			  h->got.offset |= 1;
 			  if (GENERATE_RELATIVE_RELOC_P (info, h))
-			    relative_reloc = TRUE;
+			    relative_reloc = true;
 			}
 		    }
 		  bfd_put_32 (output_bfd, relocation,
@@ -4631,7 +4629,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	    relocation = (h->plt.offset / PLT_ENTRY_SIZE + 2) * 4;
 	  else
 	    relocation = (h->plt.offset / PLT_ENTRY_SIZE_P + 2) * 4;
-	  unresolved_reloc = FALSE;
+	  unresolved_reloc = false;
 	  break;
 
 	case R_CKCORE_PCREL_IMM26BY2:
@@ -4651,19 +4649,19 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  /* TODO: deal with callgraph.  */
 	  if (h == NULL && r_symndx == 0)
 	    {
-	      do_final_relocate = FALSE;
+	      do_final_relocate = false;
 	      break;
 	    }
 
 	  /* Ignore weak references to undefined symbols.  */
 	  if (h != NULL && h->root.type == bfd_link_hash_undefweak)
 	    {
-	      do_final_relocate = FALSE;
+	      do_final_relocate = false;
 	      break;
 	    }
 
 	  /* Using branch stub.  */
-	  if (use_branch_stub == TRUE
+	  if (use_branch_stub == true
 	      && ELF32_R_TYPE (rel->r_info) == R_CKCORE_PCREL_IMM26BY2)
 	    {
 	      struct elf32_csky_stub_hash_entry *stub_entry = NULL;
@@ -4743,24 +4741,24 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			      || h->root.type == bfd_link_hash_indirect)))))
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_boolean skip, relocate;
+	      bool skip, relocate;
 	      bfd_byte *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at
 		 run time.  */
-	      skip = FALSE;
-	      relocate = FALSE;
+	      skip = false;
+	      relocate = false;
 
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
 	      if (outrel.r_offset == (bfd_vma) -1)
-		skip = TRUE;
+		skip = true;
 	      else if (outrel.r_offset == (bfd_vma) -2)
 		{
-		  skip = TRUE;
-		  relocate = TRUE;
+		  skip = true;
+		  relocate = true;
 		}
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
@@ -4779,7 +4777,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  relocate = TRUE;
+		  relocate = true;
 		  outrel.r_info = ELF32_R_INFO (0, r_type);
 		  outrel.r_addend = relocation + rel->r_addend;
 		}
@@ -4808,7 +4806,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  if (r_symndx == 0
 	      && strcmp (sec->name, ".csky_stack_size") == 0)
 	    {
-	      do_final_relocate = FALSE;
+	      do_final_relocate = false;
 	      break;
 	    }
 	  if (r_symndx >= symtab_hdr->sh_info
@@ -4829,25 +4827,25 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			      || h->root.type == bfd_link_hash_indirect)))))
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_boolean skip, relocate;
+	      bool skip, relocate;
 	      bfd_byte *loc;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at
 		 run time.  */
-	      skip = FALSE;
-	      relocate = FALSE;
+	      skip = false;
+	      relocate = false;
 
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
 
 	      if (outrel.r_offset == (bfd_vma) -1)
-		skip = TRUE;
+		skip = true;
 	      else if (outrel.r_offset == (bfd_vma) -2)
 		{
-		  skip = TRUE;
-		  relocate = TRUE;
+		  skip = true;
+		  relocate = true;
 		}
 
 	      outrel.r_offset += (input_section->output_section->vma
@@ -4941,7 +4939,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 		   "in shared object"),
 		 input_bfd, input_section, (uint64_t)rel->r_offset,
 		 howto->name);
-	      return FALSE;
+	      return false;
 	    }
 	  else
 	    relocation = tpoff (info, relocation);
@@ -4957,14 +4955,14 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	    indx = 0;
 	    if (h != NULL)
 	      {
-		bfd_boolean dyn;
+		bool dyn;
 		dyn = htab->elf.dynamic_sections_created;
 		if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
 						     bfd_link_pic (info), h)
 		    && (!bfd_link_pic (info)
 			|| !SYMBOL_REFERENCES_LOCAL (info, h)))
 		  {
-		    unresolved_reloc = FALSE;
+		    unresolved_reloc = false;
 		    indx = h->dynindx;
 		  }
 		off = h->got.offset;
@@ -4983,7 +4981,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	      off &= ~1;
 	    else
 	      {
-		bfd_boolean need_relocs = FALSE;
+		bool need_relocs = false;
 		Elf_Internal_Rela outrel;
 		bfd_byte *loc = NULL;
 		int cur_off = off;
@@ -4996,7 +4994,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			    && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 			|| h->root.type != bfd_link_hash_undefined))
 		  {
-		    need_relocs = TRUE;
+		    need_relocs = true;
 		    BFD_ASSERT (htab->elf.srelgot != NULL);
 
 		    loc = htab->elf.srelgot->contents;
@@ -5143,7 +5141,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 
       if (r != bfd_reloc_ok)
 	{
-	  ret = FALSE;
+	  ret = false;
 	  switch (r)
 	    {
 	    default:
@@ -5173,7 +5171,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
   return ret;
 }
 
-static bfd_boolean
+static bool
 csky_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
@@ -5182,7 +5180,7 @@ csky_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
   switch (note->descsz)
     {
     default:
-      return FALSE;
+      return false;
       /* Sizeof (struct elf_prstatus) on C-SKY V1 arch.  */
     case 148:
       elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
@@ -5203,13 +5201,13 @@ csky_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 					  size, note->descpos + offset);
 }
 
-static bfd_boolean
+static bool
 csky_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {
     default:
-      return FALSE;
+      return false;
 
       /* Sizeof (struct elf_prpsinfo) on linux csky.  */
     case 124:
@@ -5230,7 +5228,7 @@ csky_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       command[n - 1] = '\0';
   }
 
-  return TRUE;
+  return true;
 }
 
 /* Determine whether an object attribute tag takes an integer, a
@@ -5267,11 +5265,11 @@ elf32_csky_obj_attrs_arg_type (int tag)
 
 /* Attribute numbers >=64 (mod 128) can be safely ignored.  */
 
-static bfd_boolean
+static bool
 elf32_csky_obj_attrs_handle_unknown (bfd *abfd ATTRIBUTE_UNUSED,
 				     int tag ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
 /* End of external entry points for sizing and building linker stubs.  */

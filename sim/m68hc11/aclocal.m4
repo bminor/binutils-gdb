@@ -45,25 +45,6 @@ AC_CONFIG_COMMANDS_PRE(
 Usually this means the macro was only invoked conditionally.]])
 fi])])
 
-# Copyright (C) 2003-2017 Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# Check whether the underlying file-system supports filenames
-# with a leading dot.  For instance MS-DOS doesn't.
-AC_DEFUN([AM_SET_LEADING_DOT],
-[rm -rf .tst 2>/dev/null
-mkdir .tst 2>/dev/null
-if test -d .tst; then
-  am__leading_dot=.
-else
-  am__leading_dot=_
-fi
-rmdir .tst 2>/dev/null
-AC_SUBST([am__leading_dot])])
-
 # Add --enable-maintainer-mode option to configure.         -*- Autoconf -*-
 # From Jim Meyering
 
@@ -117,3 +98,25 @@ AC_DEFUN([_AM_SUBST_NOTMAKE])
 # Public sister of _AM_SUBST_NOTMAKE.
 AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
+m4_include([../m4/sim_ac_common.m4])
+m4_include([../m4/sim_ac_option_alignment.m4])
+m4_include([../m4/sim_ac_option_assert.m4])
+m4_include([../m4/sim_ac_option_endian.m4])
+m4_include([../m4/sim_ac_option_environment.m4])
+m4_include([../m4/sim_ac_option_hardware.m4])
+m4_include([../m4/sim_ac_option_inline.m4])
+m4_include([../m4/sim_ac_option_warnings.m4])
+m4_include([../m4/sim_ac_output.m4])
+m4_include([../m4/sim_ac_toolchain.m4])
+m4_include([../../config/acx.m4])
+m4_include([../../config/depstand.m4])
+m4_include([../../config/gettext-sister.m4])
+m4_include([../../config/lead-dot.m4])
+m4_include([../../config/override.m4])
+m4_include([../../config/plugins.m4])
+m4_include([../../config/zlib.m4])
+m4_include([../../libtool.m4])
+m4_include([../../ltoptions.m4])
+m4_include([../../ltsugar.m4])
+m4_include([../../ltversion.m4])
+m4_include([../../lt~obsolete.m4])

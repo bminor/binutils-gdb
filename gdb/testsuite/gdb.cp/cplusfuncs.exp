@@ -497,7 +497,7 @@ proc test_paddr_operator_functions {} {
 	" = .* $hex <foo::operator new\\\[\\\]\\(.*\\)(| static)>"    
 
     print_addr "foo::operator delete($dm_type_void_star)"
-    print_addr "foo::operator delete[]($dm_type_void_star)"
+    print_addr "foo::operator delete\[\]($dm_type_void_star)"
 
     print_addr "foo::operator int($dm_type_void)"
     print_addr "foo::operator $dm_operator_char_star\($dm_type_void)"

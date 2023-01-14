@@ -717,8 +717,8 @@ nto_procfs_target::attach (const char *args, int from_tty)
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
 
-  if (!target_is_pushed (ops))
-    push_target (ops);
+  if (!inf->target_is_pushed (ops))
+    inf->push_target (ops);
 
   update_thread_list ();
 
@@ -1318,8 +1318,8 @@ nto_procfs_target::create_inferior (const char *exec_file,
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
 	 errn, safe_strerror(errn) ); */
     }
-  if (!target_is_pushed (ops))
-    push_target (ops);
+  if (!inf->target_is_pushed (ops))
+    inf->push_target (ops);
   target_terminal::init ();
 
   if (current_program_space->exec_bfd () != NULL

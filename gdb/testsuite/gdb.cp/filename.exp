@@ -31,14 +31,16 @@ gdb_continue_to_breakpoint "stop inside C"
 
 gdb_test "print includefile\[0\]" " = 23"
 gdb_test "print this->includefile\[0\]" " = 23"
-gdb_test "print 'includefile'::some_global" " = 27"
+gdb_test "print 'includefile'::some_global" " = 27" \
+    "print some_global from within C"
 
 gdb_breakpoint [gdb_get_line_number "stop inside D"]
 gdb_continue_to_breakpoint "stop inside D"
 
 gdb_test "print includefile()" " = 24"
 gdb_test "print this->includefile()" " = 24"
-gdb_test "print 'includefile'::some_global" " = 27"
+gdb_test "print 'includefile'::some_global" " = 27"  \
+    "print some_global from within D"
 
 gdb_breakpoint [gdb_get_line_number "stop outside"]
 gdb_continue_to_breakpoint "stop outside"

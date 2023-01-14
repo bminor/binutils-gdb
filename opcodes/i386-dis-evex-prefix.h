@@ -139,8 +139,8 @@
   /* PREFIX_EVEX_0F7E */
   {
     { Bad_Opcode },
-    { EVEX_LEN_TABLE (EVEX_LEN_0F7E_P_1) },
-    { EVEX_LEN_TABLE (EVEX_LEN_0F7E_P_2) },
+    { VEX_W_TABLE (EVEX_W_0F7E_P_1) },
+    { VEX_LEN_TABLE (VEX_LEN_0F7E_P_2) },
   },
   /* PREFIX_EVEX_0F7F */
   {

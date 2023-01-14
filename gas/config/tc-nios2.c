@@ -103,12 +103,12 @@ static struct
      and macro expansions generate a warning.
      .set at -> noat = 0, assembly code using at warn but macro expansions
      do not generate warnings.  */
-  bfd_boolean noat;
+  bool noat;
 
   /* .set nobreak -> nobreak = 1 allows assembly code to use ba,bt without
 				 warning.
      .set break -> nobreak = 0, assembly code using ba,bt warns.  */
-  bfd_boolean nobreak;
+  bool nobreak;
 
   /* .cmd line option -relax-all allows all branches and calls to be replaced
      with longer versions.
@@ -117,7 +117,7 @@ static struct
      a section.  */
   relax_optionT relax;
 
-} nios2_as_options = {FALSE, FALSE, relax_section};
+} nios2_as_options = {false, false, relax_section};
 
 
 typedef struct nios2_insn_reloc
@@ -300,29 +300,24 @@ md_atof (int type, char *litP, int *sizeP)
   return NULL;
 }
 
-/* Return true if STR starts with PREFIX, which should be a string literal.  */
-#define strprefix(STR, PREFIX) \
-  (strncmp ((STR), PREFIX, strlen (PREFIX)) == 0)
-
-
 /* Return true if STR is prefixed with a special relocation operator.  */
 static int
 nios2_special_relocation_p (const char *str)
 {
-  return (strprefix (str, "%lo")
-	  || strprefix (str, "%hi")
-	  || strprefix (str, "%hiadj")
-	  || strprefix (str, "%gprel")
-	  || strprefix (str, "%got")
-	  || strprefix (str, "%call")
-	  || strprefix (str, "%gotoff_lo")
-	  || strprefix (str, "%gotoff_hiadj")
-	  || strprefix (str, "%tls_gd")
-	  || strprefix (str, "%tls_ldm")
-	  || strprefix (str, "%tls_ldo")
-	  || strprefix (str, "%tls_ie")
-	  || strprefix (str, "%tls_le")
-	  || strprefix (str, "%gotoff"));
+  return (startswith (str, "%lo")
+	  || startswith (str, "%hi")
+	  || startswith (str, "%hiadj")
+	  || startswith (str, "%gprel")
+	  || startswith (str, "%got")
+	  || startswith (str, "%call")
+	  || startswith (str, "%gotoff_lo")
+	  || startswith (str, "%gotoff_hiadj")
+	  || startswith (str, "%tls_gd")
+	  || startswith (str, "%tls_ldm")
+	  || startswith (str, "%tls_ldo")
+	  || startswith (str, "%tls_ie")
+	  || startswith (str, "%tls_le")
+	  || startswith (str, "%gotoff"));
 }
 
 
@@ -391,7 +386,7 @@ nios2_align (int log_size, const char *pfill, symbolS *label)
       if (label != NULL && !switched_seg_p)
 	{
 	  symbolS *sym;
-	  int label_seen = FALSE;
+	  int label_seen = false;
 	  struct frag *old_frag;
 	  valueT old_value;
 	  valueT new_value;
@@ -417,7 +412,7 @@ nios2_align (int log_size, const char *pfill, symbolS *label)
 	    if (symbol_get_frag (sym) == old_frag
 		&& S_GET_VALUE (sym) == old_value)
 	      {
-		label_seen = TRUE;
+		label_seen = true;
 		symbol_set_frag (sym, frag_now);
 		S_SET_VALUE (sym, new_value);
 	      }
@@ -579,17 +574,17 @@ s_nios2_set (int equiv)
   SKIP_WHITESPACE ();
   if (is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      bfd_boolean done = TRUE;
+      bool done = true;
       *endline = 0;
 
       if (!strcmp (directive, "noat"))
-	  nios2_as_options.noat = TRUE;
+	  nios2_as_options.noat = true;
       else if (!strcmp (directive, "at"))
-	  nios2_as_options.noat = FALSE;
+	  nios2_as_options.noat = false;
       else if (!strcmp (directive, "nobreak"))
-	  nios2_as_options.nobreak = TRUE;
+	  nios2_as_options.nobreak = true;
       else if (!strcmp (directive, "break"))
-	  nios2_as_options.nobreak = FALSE;
+	  nios2_as_options.nobreak = false;
       else if (!strcmp (directive, "norelax"))
 	  nios2_as_options.relax = relax_none;
       else if (!strcmp (directive, "relaxsection"))
@@ -597,7 +592,7 @@ s_nios2_set (int equiv)
       else if (!strcmp (directive, "relaxall"))
 	  nios2_as_options.relax = relax_all;
       else
-	done = FALSE;
+	done = false;
 
       if (done)
 	{
@@ -789,7 +784,7 @@ nios2_relax_frag (segT segment, fragS *fragp, long stretch)
       fragS *sym_frag = symbol_get_frag (symbolp);
       offsetT offset;
       int n;
-      bfd_boolean is_cdx = FALSE;
+      bool is_cdx = false;
 
       target += S_GET_VALUE (symbolp);
 
@@ -809,11 +804,11 @@ nios2_relax_frag (segT segment, fragS *fragp, long stretch)
       if (IS_CDXBRANCH (subtype) && IS_UBRANCH (subtype)
 	  && offset >= -1024 && offset < 1024)
 	/* PC-relative CDX branch with 11-bit offset.  */
-	is_cdx = TRUE;
+	is_cdx = true;
       else if (IS_CDXBRANCH (subtype) && IS_CBRANCH (subtype)
 	       && offset >= -128 && offset < 128)
 	/* PC-relative CDX branch with 8-bit offset.  */
-	is_cdx = TRUE;
+	is_cdx = true;
       else if (offset >= -32768 && offset < 32768)
 	/* Fits in PC-relative branch.  */
 	n = 0;
@@ -883,7 +878,7 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT segment ATTRIBUTE_UNUSED,
   unsigned int addend_mask, addi_mask, op;
   offsetT addend, remainder;
   int i;
-  bfd_boolean is_r2 = (bfd_get_mach (stdoutput) == bfd_mach_nios2r2);
+  bool is_r2 = (bfd_get_mach (stdoutput) == bfd_mach_nios2r2);
 
   /* If this is a CDX branch we're not relaxing, just generate the fixup.  */
   if (IS_CDXBRANCH (subtype))
@@ -1100,7 +1095,7 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT segment ATTRIBUTE_UNUSED,
 /** Fixups and overflow checking.  */
 
 /* Check a fixup for overflow. */
-static bfd_boolean
+static bool
 nios2_check_overflow (valueT fixup, reloc_howto_type *howto)
 {
   /* If there is a rightshift, check that the low-order bits are
@@ -1109,7 +1104,7 @@ nios2_check_overflow (valueT fixup, reloc_howto_type *howto)
     {
       if ((~(~((valueT) 0) << howto->rightshift) & fixup)
 	  && howto->complain_on_overflow != complain_overflow_dont)
-	return TRUE;
+	return true;
       fixup = ((signed)fixup) >> howto->rightshift;
     }
 
@@ -1121,31 +1116,31 @@ nios2_check_overflow (valueT fixup, reloc_howto_type *howto)
     case complain_overflow_bitfield:
       if ((fixup >> howto->bitsize) != 0
 	  && ((signed) fixup >> howto->bitsize) != -1)
-	return TRUE;
+	return true;
       break;
     case complain_overflow_signed:
       if ((fixup & 0x80000000) > 0)
 	{
 	  /* Check for negative overflow.  */
 	  if ((signed) fixup < (signed) (~0U << (howto->bitsize - 1)))
-	    return TRUE;
+	    return true;
 	}
       else
 	{
 	  /* Check for positive overflow.  */
 	  if (fixup >= ((unsigned) 1 << (howto->bitsize - 1)))
-	    return TRUE;
+	    return true;
 	}
       break;
     case complain_overflow_unsigned:
       if ((fixup >> howto->bitsize) != 0)
-	return TRUE;
+	return true;
       break;
     default:
       as_bad (_("error checking for overflow - broken assembler"));
       break;
     }
-  return FALSE;
+  return false;
 }
 
 /* Emit diagnostic for fixup overflow.  */
@@ -1678,7 +1673,7 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
   *ret = 0;
 
   /* Check for --.  */
-  if (strncmp (str, "--", 2) == 0)
+  if (startswith (str, "--"))
     {
       str += 2;
       *direction -= 1;
@@ -1705,7 +1700,7 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
     return NULL;
 
   /* Check for ++.  */
-  if (strncmp (str, "++", 2) == 0)
+  if (startswith (str, "++"))
     {
       str += 2;
       *direction += 1;
@@ -1723,12 +1718,12 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
     {
       while (*str == ' ')
 	str++;
-      if (strncmp (str, "writeback", 9) == 0)
+      if (startswith (str, "writeback"))
 	{
 	  *writeback = 1;
 	  str += 9;
 	}
-      else if (strncmp (str, "ret", 3) == 0)
+      else if (startswith (str, "ret"))
 	{
 	  *ret = 1;
 	  str += 3;
@@ -3099,7 +3094,7 @@ nios2_parse_args (nios2_insn_infoS *insn, char *argstr,
   int i;
   p = argstr;
   i = 0;
-  bfd_boolean terminate = FALSE;
+  bool terminate = false;
 
   /* This rest of this function is it too fragile and it mostly works,
      therefore special case this one.  */
@@ -3136,7 +3131,7 @@ nios2_parse_args (nios2_insn_infoS *insn, char *argstr,
 	}
 
       if (*parsestr == '\0' || (p != NULL && *p == '\0'))
-	terminate = TRUE;
+	terminate = true;
       ++i;
     }
 
@@ -3350,7 +3345,7 @@ output_ubranch (nios2_insn_infoS *insn)
       symbolS *symp = reloc->reloc_expression.X_add_symbol;
       offsetT offset = reloc->reloc_expression.X_add_number;
       char *f;
-      bfd_boolean is_cdx = (insn->insn_nios2_opcode->size == 2);
+      bool is_cdx = (insn->insn_nios2_opcode->size == 2);
 
       /* Tag dwarf2 debug info to the address at the start of the insn.
 	 We must do it before frag_var() below closes off the frag.  */
@@ -3382,7 +3377,7 @@ output_cbranch (nios2_insn_infoS *insn)
       symbolS *symp = reloc->reloc_expression.X_add_symbol;
       offsetT offset = reloc->reloc_expression.X_add_number;
       char *f;
-      bfd_boolean is_cdx = (insn->insn_nios2_opcode->size == 2);
+      bool is_cdx = (insn->insn_nios2_opcode->size == 2);
 
       /* Tag dwarf2 debug info to the address at the start of the insn.
 	 We must do it before frag_var() below closes off the frag.  */
@@ -3640,12 +3635,8 @@ md_begin (void)
       as_fatal (_("duplicate %s"), nios2_ps_insn_info_structs[i].pseudo_insn);
 
   /* Assembler option defaults.  */
-  nios2_as_options.noat = FALSE;
-  nios2_as_options.nobreak = FALSE;
-
-  /* Debug information is incompatible with relaxation.  */
-  if (debug_type != DEBUG_UNSPECIFIED)
-    nios2_as_options.relax = relax_none;
+  nios2_as_options.noat = false;
+  nios2_as_options.nobreak = false;
 
   /* Initialize the alignment data.  */
   nios2_current_align_seg = now_seg;
@@ -3664,7 +3655,7 @@ md_assemble (char *op_str)
   unsigned long saved_pinfo = 0;
   nios2_insn_infoS thisinsn;
   nios2_insn_infoS *insn = &thisinsn;
-  bfd_boolean ps_error = FALSE;
+  bool ps_error = false;
 
   /* Make sure we are aligned on an appropriate boundary.  */
   if (nios2_current_align < nios2_min_align)
@@ -3714,7 +3705,7 @@ md_assemble (char *op_str)
 	{
 	  ps_insn = nios2_translate_pseudo_insn (insn);
 	  if (!ps_insn)
-	    ps_error = TRUE;
+	    ps_error = true;
 	}
 
       /* If we found invalid pseudo-instruction syntax, the error's already
@@ -3991,7 +3982,7 @@ nios2_cons (expressionS *exp, int size)
   SKIP_WHITESPACE ();
   if (input_line_pointer[0] == '%')
     {
-      if (strprefix (input_line_pointer + 1, "tls_ldo"))
+      if (startswith (input_line_pointer + 1, "tls_ldo"))
 	{
 	  reloc_name = "%tls_ldo";
 	  if (size != 4)
@@ -4003,7 +3994,7 @@ nios2_cons (expressionS *exp, int size)
 	      explicit_reloc = BFD_RELOC_NIOS2_TLS_DTPREL;
 	    }
 	}
-      else if (strprefix (input_line_pointer + 1, "gotoff"))
+      else if (startswith (input_line_pointer + 1, "gotoff"))
 	{
 	  reloc_name = "%gotoff";
 	  if (size != 4)

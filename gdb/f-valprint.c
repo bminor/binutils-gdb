@@ -218,7 +218,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 			       const struct value_print_options *options) const
 {
   struct type *type = check_typedef (value_type (val));
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   int printed_field = 0; /* Number of fields printed.  */
   struct type *elttype;
   CORE_ADDR addr;

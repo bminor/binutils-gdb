@@ -464,6 +464,26 @@ process_stratum_target::supports_read_offsets ()
   return false;
 }
 
+bool
+process_stratum_target::supports_memory_tagging ()
+{
+  return false;
+}
+
+bool
+process_stratum_target::fetch_memtags (CORE_ADDR address, size_t len,
+				       gdb::byte_vector &tags, int type)
+{
+  gdb_assert_not_reached ("target op fetch_memtags not supported");
+}
+
+bool
+process_stratum_target::store_memtags (CORE_ADDR address, size_t len,
+				       const gdb::byte_vector &tags, int type)
+{
+  gdb_assert_not_reached ("target op store_memtags not supported");
+}
+
 int
 process_stratum_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
 {
@@ -483,12 +503,6 @@ process_stratum_target::get_tls_address (thread_info *thread,
 					 CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tls_address not supported");
-}
-
-void
-process_stratum_target::hostio_last_error (char *buf)
-{
-  hostio_last_error_from_errno (buf);
 }
 
 bool
@@ -763,7 +777,7 @@ process_stratum_target::supports_pid_to_exec_file ()
   return false;
 }
 
-char *
+const char *
 process_stratum_target::pid_to_exec_file (int pid)
 {
   gdb_assert_not_reached ("target op pid_to_exec_file not supported");

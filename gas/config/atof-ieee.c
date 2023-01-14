@@ -755,7 +755,7 @@ const char *
 ieee_md_atof (int type,
 	      char *litP,
 	      int *sizeP,
-	      bfd_boolean big_wordian)
+	      bool big_wordian)
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;

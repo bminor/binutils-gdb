@@ -19,7 +19,6 @@
    51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "alloca-conf.h"
 #include <stdio.h>
 #include "ansidecl.h"
 #include "libiberty.h"

@@ -374,18 +374,14 @@ struct language_defn
   symbol_name_matcher_ftype *get_symbol_name_matcher
 	(const lookup_name_info &lookup_name) const;
 
-  /* If this language allows compilation from the gdb command line, then
-     this method will return an instance of struct gcc_context appropriate
-     to the language.  If compilation for this language is generally
-     supported, but something goes wrong then an exception is thrown.  The
-     returned compiler instance is owned by its caller and must be
-     deallocated by the caller.  If compilation is not supported for this
-     language then this method returns NULL.  */
+  /* If this language allows compilation from the gdb command line,
+     then this method will return an instance of struct gcc_context
+     appropriate to the language.  If compilation for this language is
+     generally supported, but something goes wrong then an exception
+     is thrown.  If compilation is not supported for this language
+     then this method returns NULL.  */
 
-  virtual compile_instance *get_compile_instance () const
-  {
-    return nullptr;
-  }
+  virtual std::unique_ptr<compile_instance> get_compile_instance () const;
 
   /* This method must be overridden if 'get_compile_instance' is
      overridden.
@@ -519,17 +515,6 @@ struct language_defn
 
   virtual int parser (struct parser_state *ps) const;
 
-  /* Given an expression *EXPP created by prefixifying the result of
-     la_parser, perform any remaining processing necessary to complete its
-     translation.  *EXPP may change; la_post_parser is responsible for
-     releasing its previous contents, if necessary.  */
-
-  virtual void post_parser (expression_up *expp, struct parser_state *ps)
-    const
-  {
-    /* By default the post-parser does nothing.  */
-  }
-
   /* Print the character CH (of type CHTYPE) on STREAM as part of the
      contents of a literal string whose delimiter is QUOTER.  */
 
@@ -646,15 +631,6 @@ struct language_defn
 
   virtual const struct lang_varobj_ops *varobj_ops () const;
 
-  /* Definitions related to expression printing, prefixifying, and
-     dumping.  */
-
-  virtual const struct exp_descriptor *expression_ops () const;
-
-  /* Table for printing expressions.  */
-
-  virtual const struct op_print *opcode_print_table () const = 0;
-
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -757,7 +733,10 @@ struct symbol *
 				  (LANG)->la_language == language_cplus || \
 				  (LANG)->la_language == language_objc)
 
-extern void language_info (int);
+/* Print out the current language settings: language, range and
+   type checking.  */
+
+extern void language_info ();
 
 extern enum language set_language (enum language);
 

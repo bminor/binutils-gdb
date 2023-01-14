@@ -540,7 +540,7 @@ process_object (const char *file_name, FILE *file)
 
 static int
 process_archive (const char * file_name, FILE * file,
-		 bfd_boolean is_thin_archive)
+		 bool is_thin_archive)
 {
   struct archive_info arch;
   struct archive_info nested_arch;
@@ -566,7 +566,7 @@ process_archive (const char * file_name, FILE * file,
 
   if (fstat (fileno (file), &statbuf) < 0
       || setup_archive (&arch, file_name, file, statbuf.st_size,
-			is_thin_archive, FALSE) != 0)
+			is_thin_archive, false) != 0)
     {
       ret = 1;
       goto out;
@@ -721,6 +721,20 @@ check_file (const char *file_name, struct stat *statbuf_p)
       return 1;
     }
 
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  else if (statbuf_p->st_size == 0)
+    {
+      /* MS-Windows 'stat' reports the null device as a regular file;
+	 fix that.  */
+      int fd = open (file_name, O_RDONLY | O_BINARY);
+      if (isatty (fd))
+	{
+	  statbuf_p->st_mode &= ~S_IFREG;
+	  statbuf_p->st_mode |= S_IFCHR;
+	}
+    }
+#endif
+
   if (! S_ISREG (statbuf_p->st_mode))
     {
       error (_("'%s' is not an ordinary file\n"), file_name);
@@ -756,9 +770,9 @@ process_file (const char *file_name)
     }
 
   if (memcmp (armag, ARMAG, SARMAG) == 0)
-    ret = process_archive (file_name, file, FALSE);
+    ret = process_archive (file_name, file, false);
   else if (memcmp (armag, ARMAGT, SARMAG) == 0)
-    ret = process_archive (file_name, file, TRUE);
+    ret = process_archive (file_name, file, true);
   else
     {
       rewind (file);
@@ -945,12 +959,10 @@ main (int argc, char ** argv)
 {
   int c, status;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

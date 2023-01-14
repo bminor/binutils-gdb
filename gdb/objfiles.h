@@ -37,6 +37,8 @@
 #include "gdbarch.h"
 #include "gdbsupport/refcounted-object.h"
 #include "jit.h"
+#include "quick-symbol.h"
+#include <forward_list>
 
 struct htab;
 struct objfile_data;
@@ -210,7 +212,6 @@ struct objstats
 #define OBJSTAT(objfile, expr) (objfile -> stats.expr)
 #define OBJSTATS struct objstats stats
 extern void print_objfile_statistics (void);
-extern void print_symbol_bcache_statistics (void);
 
 /* Number of entries in the minimal symbol hash table.  */
 #define MINIMAL_SYMBOL_HASH_SIZE 2039
@@ -263,11 +264,35 @@ private:
 
 struct objfile_per_bfd_storage
 {
-  objfile_per_bfd_storage ()
-    : minsyms_read (false)
+  objfile_per_bfd_storage (bfd *bfd)
+    : minsyms_read (false), m_bfd (bfd)
   {}
 
   ~objfile_per_bfd_storage ();
+
+  /* Intern STRING in this object's string cache and return the unique copy.
+     The copy has the same lifetime as this object.
+
+     STRING must be null-terminated.  */
+
+  const char *intern (const char *str)
+  {
+    return (const char *) string_cache.insert (str, strlen (str) + 1);
+  }
+
+  /* Same as the above, but for an std::string.  */
+
+  const char *intern (const std::string &str)
+  {
+    return (const char *) string_cache.insert (str.c_str (), str.size () + 1);
+  }
+
+  /* Get the BFD this object is associated to.  */
+
+  bfd *get_bfd () const
+  {
+    return m_bfd;
+  }
 
   /* The storage has an obstack of its own.  */
 
@@ -346,6 +371,11 @@ struct objfile_per_bfd_storage
   /* All the different languages of symbols found in the demangled
      hash table.  */
   std::bitset<nr_languages> demangled_hash_languages;
+
+private:
+  /* The BFD this object is associated to.  */
+
+  bfd *m_bfd;
 };
 
 /* An iterator that first returns a parent objfile, and then each
@@ -415,8 +445,8 @@ private:
 
    GDB typically reads symbols twice -- first an initial scan which just
    reads "partial symbols"; these are partial information for the
-   static/global symbols in a symbol file.  When later looking up symbols,
-   objfile->sf->qf->lookup_symbol is used to check if we only have a partial
+   static/global symbols in a symbol file.  When later looking up
+   symbols, lookup_symbol is used to check if we only have a partial
    symbol and if so, read and expand the full compunit.  */
 
 struct objfile
@@ -445,22 +475,6 @@ public:
   void unlink ();
 
   DISABLE_COPY_AND_ASSIGN (objfile);
-
-  /* A range adapter that makes it possible to iterate over all
-     psymtabs in one objfile.  */
-
-  psymtab_storage::partial_symtab_range psymtabs ()
-  {
-    return partial_symtabs->range ();
-  }
-
-  /* Reset the storage for the partial symbol tables.  */
-
-  void reset_psymtabs ()
-  {
-    psymbol_map.clear ();
-    partial_symtabs.reset (new psymtab_storage ());
-  }
 
   typedef next_adapter<struct compunit_symtab> compunits_range;
 
@@ -531,15 +545,14 @@ public:
      lifetime as the per-BFD object.  */
   const char *intern (const char *str)
   {
-    return (const char *) per_bfd->string_cache.insert (str, strlen (str) + 1);
+    return per_bfd->intern (str);
   }
 
   /* Intern STRING and return the unique copy.  The copy has the same
      lifetime as the per-BFD object.  */
   const char *intern (const std::string &str)
   {
-    return (const char *) per_bfd->string_cache.insert (str.c_str (),
-							str.size () + 1);
+    return per_bfd->intern (str);
   }
 
   /* Retrieve the gdbarch associated with this objfile.  */
@@ -547,6 +560,88 @@ public:
   {
     return per_bfd->gdbarch;
   }
+
+  /* Return true if OBJFILE has partial symbols.  */
+
+  bool has_partial_symbols ();
+
+  /* See quick_symbol_functions.  */
+  struct symtab *find_last_source_symtab ();
+
+  /* See quick_symbol_functions.  */
+  void forget_cached_source_info ();
+
+  /* See quick_symbol_functions.  */
+  bool map_symtabs_matching_filename
+    (const char *name, const char *real_path,
+     gdb::function_view<bool (symtab *)> callback);
+
+  /* Check to see if the symbol is defined in a "partial" symbol table
+     of this objfile.  BLOCK_INDEX should be either GLOBAL_BLOCK or
+     STATIC_BLOCK, depending on whether we want to search global
+     symbols or static symbols.  NAME is the name of the symbol to
+     look for.  DOMAIN indicates what sort of symbol to search for.
+
+     Returns the newly-expanded compunit in which the symbol is
+     defined, or NULL if no such symbol table exists.  If OBJFILE
+     contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
+     only TYPE_OPAQUE symbol(s), return at least that compunit.  */
+  struct compunit_symtab *lookup_symbol (block_enum kind, const char *name,
+					 domain_enum domain);
+
+  /* See quick_symbol_functions.  */
+  void print_stats (bool print_bcache);
+
+  /* See quick_symbol_functions.  */
+  void dump ();
+
+  /* See quick_symbol_functions.  */
+  void expand_symtabs_for_function (const char *func_name);
+
+  /* See quick_symbol_functions.  */
+  void expand_all_symtabs ();
+
+  /* See quick_symbol_functions.  */
+  void expand_symtabs_with_fullname (const char *fullname);
+
+  /* See quick_symbol_functions.  */
+  void map_matching_symbols
+    (const lookup_name_info &name, domain_enum domain,
+     int global,
+     gdb::function_view<symbol_found_callback_ftype> callback,
+     symbol_compare_ftype *ordered_compare);
+
+  /* See quick_symbol_functions.  */
+  bool expand_symtabs_matching
+    (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_enum domain,
+     enum search_domain kind);
+
+  /* See quick_symbol_functions.  */
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc,
+     struct obj_section *section,
+     int warn_if_readin);
+
+  /* See quick_symbol_functions.  */
+  void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+			     bool need_fullname);
+
+  /* See quick_symbol_functions.  */
+  struct compunit_symtab *find_compunit_symtab_by_address (CORE_ADDR address);
+
+  /* See quick_symbol_functions.  */
+  enum language lookup_global_symbol_language (const char *name,
+					       domain_enum domain,
+					       bool *symbol_found_p);
+
+  /* See quick_symbol_functions.  */
+  void require_partial_symbols (bool verbose);
 
 
   /* The object file's original name as specified by the user,
@@ -572,10 +667,6 @@ public:
 
   struct compunit_symtab *compunit_symtabs = nullptr;
 
-  /* The partial symbol tables.  */
-
-  std::shared_ptr<psymtab_storage> partial_symtabs;
-
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
 
@@ -596,11 +687,6 @@ public:
 
   struct obstack objfile_obstack {};
 
-  /* Map symbol addresses to the partial symtab that defines the
-     object at that address.  */
-
-  std::vector<std::pair<CORE_ADDR, partial_symtab *>> psymbol_map;
-
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial
      symbols for example.  Note that this structure is in statically
@@ -608,6 +694,10 @@ public:
      object module reader of this type.  */
 
   const struct sym_fns *sf = nullptr;
+
+  /* The "quick" (aka partial) symbol functions for this symbol
+     reader.  */
+  std::forward_list<quick_symbol_functions_up> qf;
 
   /* Per objfile data-pointers required by other GDB modules.  */
 
@@ -737,8 +827,6 @@ extern void free_objfile_separate_debug (struct objfile *);
 
 extern void objfile_relocate (struct objfile *, const section_offsets &);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
-
-extern int objfile_has_partial_symbols (struct objfile *objfile);
 
 extern int objfile_has_full_symbols (struct objfile *objfile);
 

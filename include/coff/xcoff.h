@@ -46,6 +46,8 @@
 #define _TEXT	".text"
 #define _DATA	".data"
 #define _BSS	".bss"
+#define _TDATA	".tdata"
+#define _TBSS	".tbss"
 #define _PAD	".pad"
 #define _LOADER	".loader"
 #define _EXCEPT ".except"
@@ -93,40 +95,50 @@
 #define	RS6K_AOUTHDR_NMAGIC 0x0108 /* new: text r/o, data r/w */
 #define	RS6K_AOUTHDR_ZMAGIC 0x010B /* paged: text r/o, both page-aligned */
 
-/* XCOFF relocation types.  
-   The relocations are described in the function  
+/* Flags for aouthdr o_flags */
+#define RS6K_AOUTHDR_TLS_LE    0x80  /* TLS local-exec code was generated */
+#define RS6K_AOUTHDR_RAS       0x40  /* kernel module is key & recovery safe */
+#define RS6K_AOUTHDR_ALGNTDATA 0xf   /* TLS alignment */
+
+/* Flags for aouthdr o_x64flags */
+#define RS6K_AOUTHDR_SHR_SYMTAB  0x8000
+#define RS6K_AOUTHDR_FORK_POLICY 0x4000
+#define RS6K_AOUTHDR_FORK_COR    0x2000
+
+
+/* XCOFF relocation types.
+   The relocations are described in the function
    xcoff[64]_ppc_relocate_section in coff64-rs6000.c and coff-rs6000.c  */
 
-#define R_POS   (0x00)
-#define R_NEG   (0x01)
-#define R_REL   (0x02)
-#define R_TOC   (0x03)
-#define R_RTB   (0x04)
-#define R_GL    (0x05)
-#define R_TCL   (0x06)
-#define R_BA    (0x08)
-#define R_BR    (0x0a)
-#define R_RL    (0x0c)
-#define R_RLA   (0x0d)
-#define R_REF   (0x0f)
-#define R_TRL   (0x12)
-#define R_TRLA  (0x13)
-#define R_RRTBI (0x14)
-#define R_RRTBA (0x15)
-#define R_CAI   (0x16)
-#define R_CREL  (0x17)
-#define R_RBA   (0x18)
-#define R_RBAC  (0x19)
-#define R_RBR   (0x1a)
-#define R_RBRC  (0x1b)
-#define R_TLS   (0x20)
+#define R_POS    (0x00)
+#define R_NEG    (0x01)
+#define R_REL    (0x02)
+#define R_TOC    (0x03)
+#define R_TRL    (0x04)
+#define R_GL     (0x05)
+#define R_TCL    (0x06)
+#define R_BA     (0x08)
+#define R_BR     (0x0a)
+#define R_RL     (0x0c)
+#define R_RLA    (0x0d)
+#define R_REF    (0x0f)
+#define R_TRLA   (0x13)
+#define R_RRTBI  (0x14)
+#define R_RRTBA  (0x15)
+#define R_CAI    (0x16)
+#define R_CREL   (0x17)
+#define R_RBA    (0x18)
+#define R_RBAC   (0x19)
+#define R_RBR    (0x1a)
+#define R_RBRC   (0x1b)
+#define R_TLS    (0x20)
 #define R_TLS_IE (0x21)
 #define R_TLS_LD (0x22)
 #define R_TLS_LE (0x23)
-#define R_TLSM  (0x24)
-#define R_TLSML (0x25)
-#define R_TOCU  (0x30)
-#define R_TOCL  (0x31)
+#define R_TLSM   (0x24)
+#define R_TLSML  (0x25)
+#define R_TOCU   (0x30)
+#define R_TOCL   (0x31)
 
 /* Storage class #defines, from /usr/include/storclass.h that are not already 
    defined in internal.h */
@@ -172,7 +184,7 @@
 #define	XMC_SV3264 18		/* Read-only 32 or 64 bit supervisor call */
 /*                19   ??? */
 #define XMC_TL     20          /* Read-write initialized TLS data */
-#define XMC_TU     21          /* Read-write uninitialized TLS data */
+#define XMC_UL     21          /* Read-write uninitialized TLS data */
 #define XMC_TE     22          /* Same as XMC_TC but mapped after it */
 
 /* The ldhdr structure.  This appears at the start of the .loader
@@ -394,7 +406,7 @@ struct xcoff_link_hash_entry
 struct xcoff_loader_info
 {
   /* Set if a problem occurred.  */
-  bfd_boolean failed;
+  bool failed;
 
   /* Output BFD.  */
   bfd *output_bfd;

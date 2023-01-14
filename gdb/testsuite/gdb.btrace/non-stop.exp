@@ -111,10 +111,10 @@ gdb_test "thread apply all info rec" ".*"
 gdb_test "info threads" ".*"
 
 with_test_prefix "navigate" {
-    gdb_test "thread apply 1 record goto 2" "$loop_line"
+    gdb_test "thread apply 1 record goto 3" "$loop_line"
     gdb_test "thread apply 2 record goto 4" "$loop_line"
     gdb_test "thread apply 1 info record" \
-        ".*Replay in progress\.  At instruction 2\." "thread 1 at insn 2"
+        ".*Replay in progress\.  At instruction 3\." "thread 1 at insn 3"
     gdb_test "thread apply 2 info record" \
         ".*Replay in progress\.  At instruction 4\." "thread 2 at insn 4"
 

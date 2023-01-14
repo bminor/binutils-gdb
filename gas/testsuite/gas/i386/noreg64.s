@@ -168,6 +168,7 @@ noreg:
 	pfx sub	$0x89, (%rax)
 	pfx sub	$0x1234, (%rax)
 	pfx sub	$0x12345678, (%rax)
+	pfx sysexit
 	pfx sysret
 	pfx test	$0x89, (%rax)
 	pfx test	$0x1234, (%rax)

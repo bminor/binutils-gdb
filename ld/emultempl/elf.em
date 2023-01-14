@@ -78,10 +78,10 @@ static void
 gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
-  input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
-  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
-  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
-  link_info.check_relocs_after_open_input = TRUE;
+  input_flags.dynamic = ${DYNAMIC_LINK-true};
+  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
+  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo true ; else echo false ; fi`;
+  link_info.check_relocs_after_open_input = true;
 EOF
 if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
@@ -106,21 +106,21 @@ EOF
 
 if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
 
-  IS_LINUX_TARGET=FALSE
-  IS_FREEBSD_TARGET=FALSE
+  IS_LINUX_TARGET=false
+  IS_FREEBSD_TARGET=false
   case ${target} in
     *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
-      IS_LINUX_TARGET=TRUE ;;
+      IS_LINUX_TARGET=true ;;
     *-*-freebsd* | *-*-dragonfly*)
-      IS_FREEBSD_TARGET=TRUE ;;
+      IS_FREEBSD_TARGET=true ;;
   esac
-  IS_LIBPATH=FALSE
+  IS_LIBPATH=false
   if test "x${USE_LIBPATH}" = xyes; then
-    IS_LIBPATH=TRUE
+    IS_LIBPATH=true
   fi
-  IS_NATIVE=FALSE
+  IS_NATIVE=false
   if test "x${NATIVE}" = xyes; then
-    IS_NATIVE=TRUE
+    IS_NATIVE=true
   fi
 
 fragment <<EOF
@@ -617,13 +617,13 @@ fragment <<EOF
 
 #define DEFAULT_BUILD_ID_STYLE	"sha1"
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_BUILD_ID:
       free ((char *) ldelf_emit_note_gnu_build_id);
@@ -660,11 +660,11 @@ fragment <<EOF
 	break;
 
     case OPTION_DISABLE_NEW_DTAGS:
-      link_info.new_dtags = FALSE;
+      link_info.new_dtags = false;
       break;
 
     case OPTION_ENABLE_NEW_DTAGS:
-      link_info.new_dtags = TRUE;
+      link_info.new_dtags = true;
       break;
 
     case OPTION_EH_FRAME_HDR:
@@ -687,16 +687,16 @@ fragment <<EOF
       break;
 
     case OPTION_HASH_STYLE:
-      link_info.emit_hash = FALSE;
-      link_info.emit_gnu_hash = FALSE;
+      link_info.emit_hash = false;
+      link_info.emit_gnu_hash = false;
       if (strcmp (optarg, "sysv") == 0)
-	link_info.emit_hash = TRUE;
+	link_info.emit_hash = true;
       else if (strcmp (optarg, "gnu") == 0)
-	link_info.emit_gnu_hash = TRUE;
+	link_info.emit_gnu_hash = true;
       else if (strcmp (optarg, "both") == 0)
 	{
-	  link_info.emit_hash = TRUE;
-	  link_info.emit_gnu_hash = TRUE;
+	  link_info.emit_hash = true;
+	  link_info.emit_gnu_hash = true;
 	}
       else
 	einfo (_("%F%P: invalid hash style \`%s'\n"), optarg);
@@ -711,8 +711,8 @@ fragment <<EOF
       else if (strcmp (optarg, "undefs") == 0)
 	link_info.unresolved_syms_in_objects = RM_IGNORE;
       else if (strcmp (optarg, "muldefs") == 0)
-	link_info.allow_multiple_definition = TRUE;
-      else if (CONST_STRNEQ (optarg, "max-page-size="))
+	link_info.allow_multiple_definition = true;
+      else if (startswith (optarg, "max-page-size="))
 	{
 	  char *end;
 
@@ -722,7 +722,7 @@ fragment <<EOF
 	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
 	}
-      else if (CONST_STRNEQ (optarg, "common-page-size="))
+      else if (startswith (optarg, "common-page-size="))
 	{
 	  char *end;
 	  link_info.commonpagesize = strtoul (optarg + 17, &end, 0);
@@ -731,7 +731,7 @@ fragment <<EOF
 	    einfo (_("%F%P: invalid common page size \`%s'\n"),
 		   optarg + 17);
 	}
-      else if (CONST_STRNEQ (optarg, "stack-size="))
+      else if (startswith (optarg, "stack-size="))
 	{
 	  char *end;
 	  link_info.stacksize = strtoul (optarg + 11, &end, 0);
@@ -744,23 +744,27 @@ fragment <<EOF
 	}
       else if (strcmp (optarg, "execstack") == 0)
 	{
-	  link_info.execstack = TRUE;
-	  link_info.noexecstack = FALSE;
+	  link_info.execstack = true;
+	  link_info.noexecstack = false;
 	}
       else if (strcmp (optarg, "noexecstack") == 0)
 	{
-	  link_info.noexecstack = TRUE;
-	  link_info.execstack = FALSE;
+	  link_info.noexecstack = true;
+	  link_info.execstack = false;
 	}
       else if (strcmp (optarg, "unique-symbol") == 0)
-	link_info.unique_symbol = TRUE;
+	link_info.unique_symbol = true;
       else if (strcmp (optarg, "nounique-symbol") == 0)
-	link_info.unique_symbol = FALSE;
+	link_info.unique_symbol = false;
       else if (strcmp (optarg, "globalaudit") == 0)
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
 	}
-      else if (CONST_STRNEQ (optarg, "start-stop-visibility="))
+      else if (startswith (optarg, "start-stop-gc"))
+	link_info.start_stop_gc = true;
+      else if (startswith (optarg, "nostart-stop-gc"))
+	link_info.start_stop_gc = false;
+      else if (startswith (optarg, "start-stop-visibility="))
 	{
 	  if (strcmp (optarg, "start-stop-visibility=default") == 0)
 	    link_info.start_stop_visibility = STV_DEFAULT;
@@ -815,25 +819,25 @@ fragment <<EOF
       else if (strcmp (optarg, "nounique") == 0)
 	link_info.gnu_flags_1 &= ~(bfd_vma) DF_GNU_1_UNIQUE;
       else if (strcmp (optarg, "combreloc") == 0)
-	link_info.combreloc = TRUE;
+	link_info.combreloc = true;
       else if (strcmp (optarg, "nocombreloc") == 0)
-	link_info.combreloc = FALSE;
+	link_info.combreloc = false;
       else if (strcmp (optarg, "nocopyreloc") == 0)
-	link_info.nocopyreloc = TRUE;
+	link_info.nocopyreloc = true;
 EOF
 if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
       else if (strcmp (optarg, "relro") == 0)
-	link_info.relro = TRUE;
+	link_info.relro = true;
       else if (strcmp (optarg, "norelro") == 0)
-	link_info.relro = FALSE;
+	link_info.relro = false;
 EOF
 fi
 fragment <<EOF
       else if (strcmp (optarg, "separate-code") == 0)
-	link_info.separate_code = TRUE;
+	link_info.separate_code = true;
       else if (strcmp (optarg, "noseparate-code") == 0)
-	link_info.separate_code = FALSE;
+	link_info.separate_code = false;
       else if (strcmp (optarg, "common") == 0)
 	link_info.elf_stt_common = elf_stt_common;
       else if (strcmp (optarg, "nocommon") == 0)
@@ -868,7 +872,7 @@ fi
 fragment <<EOF
     }
 
-  return TRUE;
+  return true;
 }
 
 EOF
@@ -915,7 +919,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
   ${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
-  ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+  ${LDEMUL_SET_OUTPUT_ARCH-ldelf_set_output_arch},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
   ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},

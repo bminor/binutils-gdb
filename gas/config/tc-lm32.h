@@ -42,7 +42,7 @@
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
 
-extern bfd_boolean lm32_fix_adjustable (struct fix *);
+extern bool lm32_fix_adjustable (struct fix *);
 #define tc_fix_adjustable(FIX) lm32_fix_adjustable (FIX)
 
 #endif /* TC_LM32_H */

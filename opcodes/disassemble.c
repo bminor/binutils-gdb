@@ -125,7 +125,7 @@ enum epbf_isa_attr
 
 disassembler_ftype
 disassembler (enum bfd_architecture a,
-	      bfd_boolean big ATTRIBUTE_UNUSED,
+	      bool big ATTRIBUTE_UNUSED,
 	      unsigned long mach ATTRIBUTE_UNUSED,
 	      bfd *abfd ATTRIBUTE_UNUSED)
 {
@@ -606,19 +606,19 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_aarch64
     case bfd_arch_aarch64:
       info->symbol_is_valid = aarch64_symbol_is_valid;
-      info->disassembler_needs_relocs = TRUE;
+      info->disassembler_needs_relocs = true;
       break;
 #endif
 #ifdef ARCH_arm
     case bfd_arch_arm:
       info->symbol_is_valid = arm_symbol_is_valid;
-      info->disassembler_needs_relocs = TRUE;
+      info->disassembler_needs_relocs = true;
       break;
 #endif
 #ifdef ARCH_csky
     case bfd_arch_csky:
       info->symbol_is_valid = csky_symbol_is_valid;
-      info->disassembler_needs_relocs = TRUE;
+      info->disassembler_needs_relocs = true;
       break;
 #endif
 
@@ -640,7 +640,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #ifdef ARCH_metag
     case bfd_arch_metag:
-      info->disassembler_needs_relocs = TRUE;
+      info->disassembler_needs_relocs = true;
       break;
 #endif
 #ifdef ARCH_m32c
@@ -681,7 +681,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #ifdef ARCH_pru
     case bfd_arch_pru:
-      info->disassembler_needs_relocs = TRUE;
+      info->disassembler_needs_relocs = true;
       break;
 #endif
 #ifdef ARCH_powerpc

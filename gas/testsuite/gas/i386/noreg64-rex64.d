@@ -149,6 +149,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 81 28 89 00 00 00 	subq   \$0x89,\(%rax\)
  *[a-f0-9]+:	48 81 28 34 12 00 00 	subq   \$0x1234,\(%rax\)
  *[a-f0-9]+:	48 81 28 78 56 34 12 	subq   \$0x12345678,\(%rax\)
+ *[a-f0-9]+:	48 0f 35             	sysexitq *
  *[a-f0-9]+:	48 0f 07             	sysretq *
  *[a-f0-9]+:	48 f7 00 89 00 00 00 	testq  \$0x89,\(%rax\)
  *[a-f0-9]+:	48 f7 00 34 12 00 00 	testq  \$0x1234,\(%rax\)

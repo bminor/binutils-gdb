@@ -52,6 +52,7 @@
 #include "linux-record.h"
 #include "record-full.h"
 #include "infrun.h"
+#include "expop.h"
 
 #include "stap-probe.h"
 #include "ax.h"
@@ -1674,7 +1675,7 @@ ppc_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
    gdbarch.h.  */
 
-static int
+static expr::operation_up
 ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 			      struct stap_parse_info *p)
 {
@@ -1686,7 +1687,6 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
       const char *s = p->arg;
       char *regname;
       int len;
-      struct stoken str;
 
       while (isdigit (*s))
 	++s;
@@ -1695,7 +1695,7 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	{
 	  /* It is a register displacement indeed.  Returning 0 means we are
 	     deferring the treatment of this case to the generic parser.  */
-	  return 0;
+	  return {};
 	}
 
       len = s - p->arg;
@@ -1710,22 +1710,14 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname, p->saved_arg);
 
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      str.ptr = regname;
-      str.length = len;
-      write_exp_string (&p->pstate, str);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-
       p->arg = s;
-    }
-  else
-    {
-      /* All the other tokens should be handled correctly by the generic
-	 parser.  */
-      return 0;
+
+      return expr::make_operation<expr::register_operation> (regname);
     }
 
-  return 1;
+  /* All the other tokens should be handled correctly by the generic
+     parser.  */
+  return {};
 }
 
 /* Initialize linux_record_tdep if not initialized yet.

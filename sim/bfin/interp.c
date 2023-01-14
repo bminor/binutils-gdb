@@ -723,18 +723,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
     }
-
-  {
-    /* XXX: Only first core gets profiled ?  */
-    SIM_CPU *cpu = STATE_CPU (sd, 0);
-    STATE_WATCHPOINTS (sd)->pc = &PCREG;
-    STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PCREG);
-  }
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {

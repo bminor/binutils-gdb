@@ -28,14 +28,14 @@
 
 /* Support for core dump NOTE sections.  */
 
-static bfd_boolean
+static bool
 tilegx_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t size;
 
   if (note->descsz != TILEGX_PRSTATUS_SIZEOF)
-    return FALSE;
+    return false;
 
   /* pr_cursig */
   elf_tdata (abfd)->core->signal =
@@ -54,11 +54,11 @@ tilegx_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 					  size, note->descpos + offset);
 }
 
-static bfd_boolean
+static bool
 tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   if (note->descsz != TILEGX_PRPSINFO_SIZEOF)
-    return FALSE;
+    return false;
 
   elf_tdata (abfd)->core->program
     = _bfd_elfcore_strndup (abfd, note->descdata + TILEGX_PRPSINFO_OFFSET_PR_FNAME, 16);
@@ -77,7 +77,7 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       command[n - 1] = '\0';
   }
 
-  return TRUE;
+  return true;
 }
 
 

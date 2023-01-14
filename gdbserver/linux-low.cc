@@ -2243,7 +2243,7 @@ linux_low_ptrace_options (int attached)
   return options;
 }
 
-lwp_info *
+void
 linux_process_target::filter_event (int lwpid, int wstat)
 {
   client_state &cs = get_client_state ();
@@ -2292,10 +2292,10 @@ linux_process_target::filter_event (int lwpid, int wstat)
   if (child == NULL && WIFSTOPPED (wstat))
     {
       add_to_pid_list (&stopped_pids, lwpid, wstat);
-      return NULL;
+      return;
     }
   else if (child == NULL)
-    return NULL;
+    return;
 
   thread = get_lwp_thread (child);
 
@@ -2325,12 +2325,12 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	     report this one right now.  Leave the status pending for
 	     the next time we're able to report it.  */
 	  mark_lwp_dead (child, wstat);
-	  return child;
+	  return;
 	}
       else
 	{
 	  delete_lwp (child);
-	  return NULL;
+	  return;
 	}
     }
 
@@ -2358,7 +2358,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 		 the first instruction.  */
 	      child->status_pending_p = 1;
 	      child->status_pending = wstat;
-	      return child;
+	      return;
 	    }
 	}
     }
@@ -2397,7 +2397,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	{
 	  /* The event has been handled, so just return without
 	     reporting it.  */
-	  return NULL;
+	  return;
 	}
     }
 
@@ -2433,7 +2433,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	    debug_printf ("LLW: SIGSTOP caught for %s "
 			  "while stopping threads.\n",
 			  target_pid_to_str (ptid_of (thread)));
-	  return NULL;
+	  return;
 	}
       else
 	{
@@ -2444,13 +2444,13 @@ linux_process_target::filter_event (int lwpid, int wstat)
 			  target_pid_to_str (ptid_of (thread)));
 
 	  resume_one_lwp (child, child->stepping, 0, NULL);
-	  return NULL;
+	  return;
 	}
     }
 
   child->status_pending_p = 1;
   child->status_pending = wstat;
-  return child;
+  return;
 }
 
 bool
@@ -4695,7 +4695,34 @@ linux_process_target::complete_ongoing_step_over ()
 
       lwp = find_lwp_pid (step_over_bkpt);
       if (lwp != NULL)
-	finish_step_over (lwp);
+	{
+	  finish_step_over (lwp);
+
+	  /* If we got our step SIGTRAP, don't leave it pending,
+	     otherwise we would report it to GDB as a spurious
+	     SIGTRAP.  */
+	  gdb_assert (lwp->status_pending_p);
+	  if (WIFSTOPPED (lwp->status_pending)
+	      && WSTOPSIG (lwp->status_pending) == SIGTRAP)
+	    {
+	      thread_info *thread = get_lwp_thread (lwp);
+	      if (thread->last_resume_kind != resume_step)
+		{
+		  if (debug_threads)
+		    debug_printf ("detach: discard step-over SIGTRAP\n");
+
+		  lwp->status_pending_p = 0;
+		  lwp->status_pending = 0;
+		  resume_one_lwp (lwp, lwp->stepping, 0, NULL);
+		}
+	      else
+		{
+		  if (debug_threads)
+		    debug_printf ("detach: resume_step, "
+				  "not discarding step-over SIGTRAP\n");
+		}
+	    }
+	}
       step_over_bkpt = null_ptid;
       unsuspend_all_lwps (lwp);
     }
@@ -6238,7 +6265,7 @@ linux_process_target::supports_pid_to_exec_file ()
   return true;
 }
 
-char *
+const char *
 linux_process_target::pid_to_exec_file (int pid)
 {
   return linux_proc_pid_to_exec_file (pid);

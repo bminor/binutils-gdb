@@ -49,14 +49,14 @@ int elf32_hppa_setup_section_lists
 void elf32_hppa_next_input_section
   (struct bfd_link_info *, asection *);
 
-bfd_boolean elf32_hppa_size_stubs
-  (bfd *, bfd *, struct bfd_link_info *, bfd_boolean, bfd_signed_vma,
+bool elf32_hppa_size_stubs
+  (bfd *, bfd *, struct bfd_link_info *, bool, bfd_signed_vma,
    asection * (*) (const char *, asection *), void (*) (void));
 
-bfd_boolean elf32_hppa_set_gp
+bool elf32_hppa_set_gp
   (bfd *, struct bfd_link_info *);
 
-bfd_boolean elf32_hppa_build_stubs
+bool elf32_hppa_build_stubs
   (struct bfd_link_info *);
 
 elf_hppa_reloc_type elf32_hppa_reloc_final_type

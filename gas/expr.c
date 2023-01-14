@@ -28,25 +28,14 @@
 #include "as.h"
 #include "safe-ctype.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
 
-bfd_boolean literal_prefix_dollar_hex = FALSE;
+bool literal_prefix_dollar_hex = false;
 
-static void floating_constant (expressionS * expressionP);
-static valueT generic_bignum_to_int32 (void);
-#ifdef BFD64
-static valueT generic_bignum_to_int64 (void);
-#endif
-static void integer_constant (int radix, expressionS * expressionP);
-static void mri_char_constant (expressionS *);
 static void clean_up_expression (expressionS * expressionP);
-static segT operand (expressionS *, enum expr_mode);
-static operatorT operatorf (int *);
 
 /* We keep a mapping of expression symbols to file positions, so that
    we can provide better error messages.  */
@@ -220,31 +209,25 @@ floating_constant (expressionS *expressionP)
   expressionP->X_add_number = -1;
 }
 
-static valueT
+uint32_t
 generic_bignum_to_int32 (void)
 {
-  valueT number =
-    ((((valueT) generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-     | ((valueT) generic_bignum[0] & LITTLENUM_MASK));
-  number &= 0xffffffff;
-  return number;
+  return ((((uint32_t) generic_bignum[1] & LITTLENUM_MASK)
+	   << LITTLENUM_NUMBER_OF_BITS)
+	  | ((uint32_t) generic_bignum[0] & LITTLENUM_MASK));
 }
 
-#ifdef BFD64
-static valueT
+uint64_t
 generic_bignum_to_int64 (void)
 {
-  valueT number =
-    ((((((((valueT) generic_bignum[3] & LITTLENUM_MASK)
-	  << LITTLENUM_NUMBER_OF_BITS)
-	 | ((valueT) generic_bignum[2] & LITTLENUM_MASK))
-	<< LITTLENUM_NUMBER_OF_BITS)
-       | ((valueT) generic_bignum[1] & LITTLENUM_MASK))
-      << LITTLENUM_NUMBER_OF_BITS)
-     | ((valueT) generic_bignum[0] & LITTLENUM_MASK));
-  return number;
+  return ((((((((uint64_t) generic_bignum[3] & LITTLENUM_MASK)
+	       << LITTLENUM_NUMBER_OF_BITS)
+	      | ((uint64_t) generic_bignum[2] & LITTLENUM_MASK))
+	     << LITTLENUM_NUMBER_OF_BITS)
+	    | ((uint64_t) generic_bignum[1] & LITTLENUM_MASK))
+	   << LITTLENUM_NUMBER_OF_BITS)
+	  | ((uint64_t) generic_bignum[0] & LITTLENUM_MASK));
 }
-#endif
 
 static void
 integer_constant (int radix, expressionS *expressionP)
@@ -1033,9 +1016,16 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		  expressionP->X_extrabit ^= 1;
 	      }
 	    else if (c == '~' || c == '"')
-	      expressionP->X_add_number = ~ expressionP->X_add_number;
+	      {
+		expressionP->X_add_number = ~ expressionP->X_add_number;
+		expressionP->X_extrabit ^= 1;
+	      }
 	    else if (c == '!')
-	      expressionP->X_add_number = ! expressionP->X_add_number;
+	      {
+		expressionP->X_add_number = ! expressionP->X_add_number;
+		expressionP->X_unsigned = 1;
+		expressionP->X_extrabit = 0;
+	      }
 	  }
 	else if (expressionP->X_op == O_big
 		 && expressionP->X_add_number <= 0
@@ -2366,7 +2356,7 @@ get_symbol_name (char ** ilp_return)
     }
   else if (c == '"')
     {
-      bfd_boolean backslash_seen;
+      bool backslash_seen;
 
       * ilp_return = input_line_pointer;
       do

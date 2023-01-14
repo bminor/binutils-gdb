@@ -1193,10 +1193,10 @@ netbsd_process_target::supports_qxfer_libraries_svr4 ()
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-char *
+const char *
 netbsd_process_target::pid_to_exec_file (pid_t pid)
 {
-  return const_cast<char *> (netbsd_nat::pid_to_exec_file (pid));
+  return netbsd_nat::pid_to_exec_file (pid);
 }
 
 /* Implementation of the target_ops method "supports_pid_to_exec_file".  */

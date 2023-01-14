@@ -1,3 +1,38 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode.o, d10v-opc.o): Call COMPILE_FOR_BUILD.
+	(gencode): Call LINK_FOR_BUILD.
+
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode): Delete $(BUILD_LIB).
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
@@ -1759,4 +1794,3 @@ Thu Aug  1 17:05:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* ChangeLog, Makefile.in, configure, configure.in, d10v_sim.h,
 	gencode.c, interp.c, simops.c: Created.
-

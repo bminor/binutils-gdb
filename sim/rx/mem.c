@@ -161,7 +161,7 @@ mcs (int isput, int bytes)
 }
 
 void
-mem_usage_stats ()
+mem_usage_stats (void)
 {
   int i, j;
   int rstart = 0;
@@ -244,7 +244,7 @@ s (int address, char *dir)
 
 #define S(d) if (trace) s(address, d)
 static void
-e ()
+e (void)
 {
   if (!trace)
     return;
@@ -262,7 +262,7 @@ mtypec (int address)
 
 #define E() if (trace) e()
 
-void
+static void
 mem_put_byte (unsigned int address, unsigned char value)
 {
   unsigned char *m;
@@ -434,13 +434,15 @@ mem_put_si (int address, unsigned long value)
 }
 
 void
-mem_put_blk (int address, void *bufptr, int nbytes)
+mem_put_blk (int address, void *bufptr_void, int nbytes)
 {
+  unsigned char *bufptr = (unsigned char *) bufptr_void;
+
   S ("<=");
   if (enable_counting)
     mem_counters[1][1] += nbytes;
   while (nbytes--)
-    mem_put_byte (address++, *(unsigned char *) bufptr++);
+    mem_put_byte (address++, *bufptr++);
   E ();
 }
 
@@ -567,13 +569,15 @@ mem_get_si (int address)
 }
 
 void
-mem_get_blk (int address, void *bufptr, int nbytes)
+mem_get_blk (int address, void *bufptr_void, int nbytes)
 {
+  char *bufptr = (char *) bufptr_void;
+
   S ("=>");
   if (enable_counting)
     mem_counters[0][1] += nbytes;
   while (nbytes--)
-    *(char *) bufptr++ = mem_get_byte (address++);
+    *bufptr++ = mem_get_byte (address++);
   E ();
 }
 

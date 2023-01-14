@@ -1,3 +1,35 @@
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27482
+	* Makefile.def: Add install-bfd dependencies for install-libctf and
+	install-ld, and install-strip-bfd dependencies for
+	install-strip-libctf and install-strip-ld; move the install-ld
+	dependency on install-libctf to join it.
+	* Makefile.in: Regenerated.
+
+2021-03-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.def: Remove all-sim dependency on configure-gdb.
+	* Makefile.in: Regenerated.
+
+2021-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26766
+	* Makefile.tpl (PGO_BUILD_TRAINING_FLAGS_TO_PASS): Add
+	PGO_BUILD_TRAINING=yes.
+	(PGO_BUILD_TRAINING_MFLAGS): New.
+	(all): Pass $(PGO_BUILD_TRAINING_MFLAGS) to the PGO build.
+
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Delete arm*-*-symbianelf* entry.
+	* configure: Regenerate.
+
+2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.def: Add install-libctf dependency to install-ld.
+	* Makefile.in: Regenerated.
+
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* src-release.sh (do_proto_toplev): Rewrite indentation.

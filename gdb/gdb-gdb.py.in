@@ -142,10 +142,10 @@ class StructMainTypePrettyPrinter:
     def owner_to_string(self):
         """Return an image of component "owner".
         """
-        if self.val['flag_objfile_owned'] != 0:
-            return "%s (objfile)" % self.val['owner']['objfile']
+        if self.val['m_flag_objfile_owned'] != 0:
+            return "%s (objfile)" % self.val['m_owner']['objfile']
         else:
-            return "%s (gdbarch)" % self.val['owner']['gdbarch']
+            return "%s (gdbarch)" % self.val['m_owner']['gdbarch']
 
     def struct_field_location_img(self, field_val):
         """Return an image of the loc component inside the given field

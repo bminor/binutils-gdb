@@ -1907,8 +1907,8 @@ obj_mach_o_is_frame_section (segT sec)
 {
   int l;
   l = strlen (segment_name (sec));
-  if ((l == 9 && strncmp (".eh_frame", segment_name (sec), 9) == 0)
-       || (l == 12 && strncmp (".debug_frame", segment_name (sec), 12) == 0))
+  if ((l == 9 && startswith (segment_name (sec), ".eh_frame"))
+       || (l == 12 && startswith (segment_name (sec), ".debug_frame")))
     return 1;
   return 0;
 }

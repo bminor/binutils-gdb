@@ -1063,7 +1063,7 @@ struct __attribute__ ((__packed__)) bin_toolbar
 };
 #define BIN_TOOLBAR_SIZE 12
 
-extern int target_is_bigendian;
+extern bool target_is_bigendian;
 
 typedef struct windres_bfd
 {

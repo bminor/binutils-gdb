@@ -51,11 +51,7 @@
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
-
-/* Forward declarations.  */
-extern const struct sym_fns elf_sym_fns_gdb_index;
-extern const struct sym_fns elf_sym_fns_debug_names;
-extern const struct sym_fns elf_sym_fns_lazy_psyms;
+#include "dwarf2/public.h"
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -847,8 +843,8 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       if (target_read_memory (pointer_address, buf, ptr_size) != 0)
 	continue;
       addr = extract_typed_address (buf, ptr_type);
-      addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-						 current_top_target ());
+      addr = gdbarch_convert_from_func_ptr_addr
+	(gdbarch, addr, current_inferior ()->top_target ());
       addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
       if (elf_gnu_ifunc_record_cache (name, addr))
@@ -915,12 +911,13 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
      parameter.  FUNCTION is the function entry address.  ADDRESS may be a
      function descriptor.  */
 
-  target_auxv_search (current_top_target (), AT_HWCAP, &hwcap);
+  target_auxv_search (current_inferior ()->top_target (), AT_HWCAP, &hwcap);
   hwcap_val = value_from_longest (builtin_type (gdbarch)
 				  ->builtin_unsigned_long, hwcap);
   address_val = call_function_by_hand (function, NULL, hwcap_val);
   address = value_as_address (address_val);
-  address = gdbarch_convert_from_func_ptr_addr (gdbarch, address, current_top_target ());
+  address = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, address, current_inferior ()->top_target ());
   address = gdbarch_addr_bits_remove (gdbarch, address);
 
   if (name_at_pc)
@@ -1026,9 +1023,8 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   gdbarch_return_value (gdbarch, func_func, value_type, regcache,
 			value_contents_raw (value), NULL);
   resolved_address = value_as_address (value);
-  resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
-						    resolved_address,
-						    current_top_target ());
+  resolved_pc = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, resolved_address, current_inferior ()->top_target ());
   resolved_pc = gdbarch_addr_bits_remove (gdbarch, resolved_pc);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
@@ -1259,47 +1255,20 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     }
 
   if (dwarf2_has_info (objfile, NULL, true))
-    {
-      dw_index_kind index_kind;
-
-      /* elf_sym_fns_gdb_index cannot handle simultaneous non-DWARF
-	 debug information present in OBJFILE.  If there is such debug
-	 info present never use an index.  */
-      if (!objfile_has_partial_symbols (objfile)
-	  && dwarf2_initialize_objfile (objfile, &index_kind))
-	{
-	  switch (index_kind)
-	    {
-	    case dw_index_kind::GDB_INDEX:
-	      objfile_set_sym_fns (objfile, &elf_sym_fns_gdb_index);
-	      break;
-	    case dw_index_kind::DEBUG_NAMES:
-	      objfile_set_sym_fns (objfile, &elf_sym_fns_debug_names);
-	      break;
-	    }
-	}
-      else
-	{
-	  /* It is ok to do this even if the stabs reader made some
-	     partial symbols, because OBJF_PSYMTABS_READ has not been
-	     set, and so our lazy reader function will still be called
-	     when needed.  */
-	  objfile_set_sym_fns (objfile, &elf_sym_fns_lazy_psyms);
-	}
-    }
+    dwarf2_initialize_objfile (objfile);
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
      SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
      `.note.gnu.build-id'.
 
-     .gnu_debugdata is !objfile_has_partial_symbols because it contains only
+     .gnu_debugdata is !objfile::has_partial_symbols because it contains only
      .symtab, not .debug_* section.  But if we already added .gnu_debugdata as
      an objfile via find_separate_debug_file_in_section there was no separate
      debug info available.  Therefore do not attempt to search for another one,
      objfile->separate_debug_objfile->separate_debug_objfile GDB guarantees to
      be NULL and we would possibly violate it.  */
 
-  else if (!objfile_has_partial_symbols (objfile)
+  else if (!objfile->has_partial_symbols ()
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
@@ -1352,15 +1321,6 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     {
       elfctf_build_psymtabs (objfile);
     }
-}
-
-/* Callback to lazily read psymtabs.  */
-
-static void
-read_psyms (struct objfile *objfile)
-{
-  if (dwarf2_has_info (objfile, NULL))
-    dwarf2_build_psymtabs (objfile);
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
@@ -1429,66 +1389,12 @@ static const struct sym_fns elf_sym_fns =
   elf_new_init,			/* init anything gbl to entire symtab */
   elf_symfile_init,		/* read initial info, setup for sym_read() */
   elf_symfile_read,		/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
   elf_symfile_finish,		/* finished with file, cleanup */
   default_symfile_offsets,	/* Translate ext. to int. relocation */
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
   &elf_probe_fns,		/* sym_probe_fns */
-  &psym_functions
-};
-
-/* The same as elf_sym_fns, but not registered and lazily reads
-   psymbols.  */
-
-const struct sym_fns elf_sym_fns_lazy_psyms =
-{
-  elf_new_init,			/* init anything gbl to entire symtab */
-  elf_symfile_init,		/* read initial info, setup for sym_read() */
-  elf_symfile_read,		/* read a symbol file into symtab */
-  read_psyms,			/* sym_read_psymbols */
-  elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocation */
-  elf_symfile_segments,		/* Get segment information from a file.  */
-  NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  &elf_probe_fns,		/* sym_probe_fns */
-  &psym_functions
-};
-
-/* The same as elf_sym_fns, but not registered and uses the
-   DWARF-specific GNU index rather than psymtab.  */
-const struct sym_fns elf_sym_fns_gdb_index =
-{
-  elf_new_init,			/* init anything gbl to entire symab */
-  elf_symfile_init,		/* read initial info, setup for sym_red() */
-  elf_symfile_read,		/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
-  elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocation */
-  elf_symfile_segments,		/* Get segment information from a file.  */
-  NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  &elf_probe_fns,		/* sym_probe_fns */
-  &dwarf2_gdb_index_functions
-};
-
-/* The same as elf_sym_fns, but not registered and uses the
-   DWARF-specific .debug_names index rather than psymtab.  */
-const struct sym_fns elf_sym_fns_debug_names =
-{
-  elf_new_init,			/* init anything gbl to entire symab */
-  elf_symfile_init,		/* read initial info, setup for sym_red() */
-  elf_symfile_read,		/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
-  elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocation */
-  elf_symfile_segments,		/* Get segment information from a file.  */
-  NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  &elf_probe_fns,		/* sym_probe_fns */
-  &dwarf2_debug_names_functions
 };
 
 /* STT_GNU_IFUNC resolver vector to be installed to gnu_ifunc_fns_p.  */

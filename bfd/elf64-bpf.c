@@ -42,204 +42,204 @@ static reloc_howto_type bpf_elf_howto_table [] =
 	 0,			/* rightshift */
 	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_NONE",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 64-immediate in LDDW instruction.  */
   HOWTO (R_BPF_INSN_64,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 32,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_64",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 32-immediate in many instructions.  */
   HOWTO (R_BPF_INSN_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 32,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_32",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 16-bit offsets in instructions.  */
   HOWTO (R_BPF_INSN_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 16,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_16",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 16-bit PC-relative address in jump instructions.  */
   HOWTO (R_BPF_INSN_DISP16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 16,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_DISP16",   /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_8_PCREL,
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_8_PCREL",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xff,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_16_PCREL,
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_16_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_32_PCREL,
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_32_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_8,
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_DATA_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xff,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_16,
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_DATA_16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 32-bit PC-relative address in call instructions.  */
   HOWTO (R_BPF_INSN_DISP32,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 32,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_INSN_DISP32",   /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 32-bit data.  */
   HOWTO (R_BPF_DATA_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_DATA_32",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 64-bit data.  */
   HOWTO (R_BPF_DATA_64,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_DATA_64",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_BPF_DATA_64_PCREL,
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bpf_elf_generic_reloc, /* special_function */
 	 "R_BPF_64_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 };
 #undef AHOW
 
@@ -312,7 +312,7 @@ bpf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for a bpf reloc.  */
 
-static bfd_boolean
+static bool
 bpf_info_to_howto (bfd *abfd, arelent *bfd_reloc,
                     Elf_Internal_Rela *elf_reloc)
 {
@@ -325,11 +325,11 @@ bpf_info_to_howto (bfd *abfd, arelent *bfd_reloc,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
                           abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
   bfd_reloc->howto = &bpf_elf_howto_table [r_type];
-  return TRUE;
+  return true;
 }
 
 /* Relocate an eBPF ELF section.
@@ -364,7 +364,7 @@ bpf_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 
 #define sec_addr(sec) ((sec)->output_section->vma + (sec)->output_offset)
 
-static bfd_boolean
+static int
 bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                           struct bfd_link_info *info,
                           bfd *input_bfd,
@@ -417,9 +417,9 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  bfd_boolean warned ATTRIBUTE_UNUSED;
-	  bfd_boolean unresolved_reloc ATTRIBUTE_UNUSED;
-	  bfd_boolean ignored ATTRIBUTE_UNUSED;
+	  bool warned ATTRIBUTE_UNUSED;
+	  bool unresolved_reloc ATTRIBUTE_UNUSED;
+	  bool ignored ATTRIBUTE_UNUSED;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -545,7 +545,7 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	    case bfd_reloc_undefined:
 	      (*info->callbacks->undefined_symbol)
-		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -572,20 +572,20 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static bfd_boolean
+static bool
 elf64_bpf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, info))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* A generic howto special function for installing BPF relocations.

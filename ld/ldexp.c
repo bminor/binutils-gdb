@@ -161,14 +161,14 @@ make_log2ceil (void)
 {
   bfd_vma value = expld.result.value;
   bfd_vma result = -1;
-  bfd_boolean round_up = FALSE;
+  bool round_up = false;
 
   do
     {
       result++;
       /* If more than one bit is set in the value we will need to round up.  */
       if ((value > 1) && (value & 1))
-	round_up = TRUE;
+	round_up = true;
     }
   while (value >>= 1);
 
@@ -184,13 +184,13 @@ make_abs (void)
   if (expld.result.section != NULL)
     expld.result.value += expld.result.section->vma;
   expld.result.section = bfd_abs_section_ptr;
-  expld.rel_from_abs = FALSE;
+  expld.rel_from_abs = false;
 }
 
 static void
 new_abs (bfd_vma value)
 {
-  expld.result.valid_p = TRUE;
+  expld.result.valid_p = true;
   expld.result.section = bfd_abs_section_ptr;
   expld.result.value = value;
   expld.result.str = NULL;
@@ -240,7 +240,7 @@ exp_relop (asection *section, bfd_vma value)
 static void
 new_number (bfd_vma value)
 {
-  expld.result.valid_p = TRUE;
+  expld.result.valid_p = true;
   expld.result.value = value;
   expld.result.str = NULL;
   expld.result.section = NULL;
@@ -249,7 +249,7 @@ new_number (bfd_vma value)
 static void
 new_rel (bfd_vma value, asection *section)
 {
-  expld.result.valid_p = TRUE;
+  expld.result.valid_p = true;
   expld.result.value = value;
   expld.result.str = NULL;
   expld.result.section = section;
@@ -260,8 +260,8 @@ new_rel_from_abs (bfd_vma value)
 {
   asection *s = expld.section;
 
-  expld.rel_from_abs = TRUE;
-  expld.result.valid_p = TRUE;
+  expld.rel_from_abs = true;
+  expld.result.valid_p = true;
   expld.result.value = value - s->vma;
   expld.result.str = NULL;
   expld.result.section = s;
@@ -297,26 +297,26 @@ static struct definedness_hash_entry *
 symbol_defined (const char *name)
 {
   return ((struct definedness_hash_entry *)
-	  bfd_hash_lookup (&definedness_table, name, FALSE, FALSE));
+	  bfd_hash_lookup (&definedness_table, name, false, false));
 }
 
 /* Update the definedness state of NAME.  Return FALSE if script symbol
    is multiply defining a strong symbol in an object.  */
 
-static bfd_boolean
+static bool
 update_definedness (const char *name, struct bfd_link_hash_entry *h)
 {
-  bfd_boolean ret;
+  bool ret;
   struct definedness_hash_entry *defentry
     = (struct definedness_hash_entry *)
-    bfd_hash_lookup (&definedness_table, name, TRUE, FALSE);
+    bfd_hash_lookup (&definedness_table, name, true, false);
 
   if (defentry == NULL)
     einfo (_("%F%P: bfd_hash_lookup failed creating symbol %s\n"), name);
 
   /* If the symbol was already defined, and not by a script, then it
      must be defined by an object file or by the linker target code.  */
-  ret = TRUE;
+  ret = true;
   if (!h->ldscript_def
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak
@@ -326,7 +326,7 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
       if (h->type == bfd_link_hash_defined
 	  && h->u.def.section->output_section != NULL
 	  && !h->linker_def)
-	ret = FALSE;
+	ret = false;
     }
 
   defentry->iteration = lang_statement_iteration;
@@ -344,7 +344,7 @@ fold_segment_end (seg_align_type *seg)
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
     {
-      expld.result.valid_p = FALSE;
+      expld.result.valid_p = false;
     }
   else if (seg->phase == exp_seg_align_seen
 	   || seg->phase == exp_seg_relro_seen)
@@ -359,7 +359,7 @@ fold_segment_end (seg_align_type *seg)
       /* OK.  */
     }
   else
-    expld.result.valid_p = FALSE;
+    expld.result.valid_p = false;
 }
 
 static void
@@ -374,7 +374,7 @@ fold_unary (etree_type *tree)
 	  if (expld.phase != lang_first_phase_enum)
 	    new_rel_from_abs (align_n (expld.dot, expld.result.value));
 	  else
-	    expld.result.valid_p = FALSE;
+	    expld.result.valid_p = false;
 	  break;
 
 	case ABSOLUTE:
@@ -405,7 +405,7 @@ fold_unary (etree_type *tree)
 	      expld.result.value = align_n (expld.dot, expld.result.value);
 	    }
 	  else
-	    expld.result.valid_p = FALSE;
+	    expld.result.valid_p = false;
 	  break;
 
 	case DATA_SEGMENT_END:
@@ -451,7 +451,7 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
   seg->relro = exp_seg_relro_start;
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
-    expld.result.valid_p = FALSE;
+    expld.result.valid_p = false;
   else
     {
       bfd_vma maxpage = lhs->value;
@@ -482,7 +482,7 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	      seg->relro_end = 0;
 	    }
 	  else
-	    expld.result.valid_p = FALSE;
+	    expld.result.valid_p = false;
 	}
     }
 }
@@ -496,7 +496,7 @@ fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
   seg->relro_offset = expld.result.value;
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
-    expld.result.valid_p = FALSE;
+    expld.result.valid_p = false;
   else if (seg->phase == exp_seg_align_seen
 	   || seg->phase == exp_seg_adjust
 	   || seg->phase == exp_seg_relro_adjust
@@ -520,7 +520,7 @@ fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
 	seg->phase = exp_seg_relro_seen;
     }
   else
-    expld.result.valid_p = FALSE;
+    expld.result.valid_p = false;
 }
 
 static void
@@ -552,7 +552,7 @@ fold_binary (etree_type *tree)
 	      einfo (_("%P: warning: address of `%s' "
 		       "isn't multiple of maximum page size\n"),
 		     segment_name);
-	    seg->used = TRUE;
+	    seg->used = true;
 	    value = seg->value;
 	    break;
 	  }
@@ -710,7 +710,7 @@ fold_name (etree_type *tree)
       h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					&link_info,
 					tree->name.name,
-					FALSE, FALSE, TRUE);
+					false, false, true);
       new_number (h != NULL
 		  && (h->type == bfd_link_hash_defined
 		      || h->type == bfd_link_hash_defweak
@@ -729,7 +729,7 @@ fold_name (etree_type *tree)
 	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 					    &link_info,
 					    tree->name.name,
-					    TRUE, FALSE, TRUE);
+					    true, false, true);
 	  if (!h)
 	    {
 	      if (expld.phase != lang_first_phase_enum)
@@ -872,7 +872,7 @@ fold_name (etree_type *tree)
       {
 	lang_memory_region_type *mem;
 
-	mem = lang_memory_region_lookup (tree->name.name, FALSE);
+	mem = lang_memory_region_lookup (tree->name.name, false);
 	if (mem != NULL)
 	  new_number (mem->length);
 	else
@@ -886,7 +886,7 @@ fold_name (etree_type *tree)
       {
 	lang_memory_region_type *mem;
 
-	mem = lang_memory_region_lookup (tree->name.name, FALSE);
+	mem = lang_memory_region_lookup (tree->name.name, false);
 	if (mem != NULL)
 	  new_rel_from_abs (mem->origin);
 	else
@@ -914,7 +914,7 @@ fold_name (etree_type *tree)
 
 /* Return true if TREE is '.'.  */
 
-static bfd_boolean
+static bool
 is_dot (const etree_type *tree)
 {
   return (tree->type.node_class == etree_name
@@ -925,7 +925,7 @@ is_dot (const etree_type *tree)
 
 /* Return true if TREE is a constant equal to VAL.  */
 
-static bfd_boolean
+static bool
 is_value (const etree_type *tree, bfd_vma val)
 {
   return (tree->type.node_class == etree_value
@@ -935,7 +935,7 @@ is_value (const etree_type *tree, bfd_vma val)
 /* Return true if TREE is an absolute symbol equal to VAL defined in
    a linker script.  */
 
-static bfd_boolean
+static bool
 is_sym_value (const etree_type *tree, bfd_vma val)
 {
   struct bfd_link_hash_entry *h;
@@ -948,7 +948,7 @@ is_sym_value (const etree_type *tree, bfd_vma val)
 	  && (h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
 						&link_info,
 						tree->name.name,
-						FALSE, FALSE, TRUE)) != NULL
+						false, false, true)) != NULL
 	  && h->ldscript_def
 	  && h->type == bfd_link_hash_defined
 	  && h->u.def.section == bfd_abs_section_ptr
@@ -957,7 +957,7 @@ is_sym_value (const etree_type *tree, bfd_vma val)
 
 /* Return true if TREE is ". != 0".  */
 
-static bfd_boolean
+static bool
 is_dot_ne_0 (const etree_type *tree)
 {
   return (tree->type.node_class == etree_binary
@@ -969,7 +969,7 @@ is_dot_ne_0 (const etree_type *tree)
 /* Return true if TREE is ". = . + 0" or ". = . + sym" where sym is an
    absolute constant with value 0 defined in a linker script.  */
 
-static bfd_boolean
+static bool
 is_dot_plus_0 (const etree_type *tree)
 {
   return (tree->type.node_class == etree_binary
@@ -981,7 +981,7 @@ is_dot_plus_0 (const etree_type *tree)
 
 /* Return true if TREE is "ALIGN (. != 0 ? some_expression : 1)".  */
 
-static bfd_boolean
+static bool
 is_align_conditional (const etree_type *tree)
 {
   if (tree->type.node_class == etree_unary
@@ -992,7 +992,7 @@ is_align_conditional (const etree_type *tree)
 	      && is_dot_ne_0 (tree->trinary.cond)
 	      && is_value (tree->trinary.rhs, 1));
     }
-  return FALSE;
+  return false;
 }
 
 static void
@@ -1055,9 +1055,9 @@ exp_fold_tree_1 (etree_type *tree)
 	  if (expld.phase != lang_first_phase_enum)
 	    {
 	      /* Notify the folder that this is an assignment to dot.  */
-	      expld.assigning_to_dot = TRUE;
+	      expld.assigning_to_dot = true;
 	      exp_fold_tree_1 (tree->assign.src);
-	      expld.assigning_to_dot = FALSE;
+	      expld.assigning_to_dot = false;
 
 	      /* If we are assigning to dot inside an output section
 		 arrange to keep the section, except for certain
@@ -1126,7 +1126,7 @@ exp_fold_tree_1 (etree_type *tree)
 	  if (tree->type.node_class == etree_provide)
 	    {
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					FALSE, FALSE, TRUE);
+					false, false, true);
 	      if (h == NULL
 		  || !(h->type == bfd_link_hash_new
 		       || h->type == bfd_link_hash_undefined
@@ -1164,7 +1164,7 @@ exp_fold_tree_1 (etree_type *tree)
 	      if (h == NULL)
 		{
 		  h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					    TRUE, FALSE, TRUE);
+					    true, false, true);
 		  if (h == NULL)
 		    einfo (_("%F%P:%s: hash creation failed\n"),
 			   tree->assign.dst);
@@ -1179,23 +1179,26 @@ exp_fold_tree_1 (etree_type *tree)
                 {
                   expld.result.value = 0;
                   expld.result.section = NULL;
-                  expld.result.valid_p = TRUE;
+                  expld.result.valid_p = true;
                 }
 
 	      if (expld.result.valid_p)
 		{
 		  if (expld.result.section == NULL)
 		    expld.result.section = expld.section;
-		  if (!update_definedness (tree->assign.dst, h) && 0)
+		  if (!update_definedness (tree->assign.dst, h)
+		      && expld.assign_name != NULL)
 		    {
-		      /* Symbol was already defined.  For now this error
-			 is disabled because it causes failures in the ld
-			 testsuite: ld-elf/var1, ld-scripts/defined5, and
-			 ld-scripts/pr14962.  Some of these no doubt
-			 reflect scripts used in the wild.  */
+		      /* Symbol was already defined, and the script isn't
+			 modifying the symbol value for some reason as in
+			 ld-elf/var1 and ld-scripts/pr14962.
+			 For now this is only a warning.  */
+		      unsigned int warn = link_info.warn_multiple_definition;
+		      link_info.warn_multiple_definition = 1;
 		      (*link_info.callbacks->multiple_definition)
 			(&link_info, h, link_info.output_bfd,
 			 expld.result.section, expld.result.value);
+		      link_info.warn_multiple_definition = warn;
 		    }
 		  if (expld.phase == lang_fixed_phase_enum)
 		    {
@@ -1228,7 +1231,7 @@ exp_fold_tree_1 (etree_type *tree)
 			{
 			  bfd_copy_link_hash_symbol_type (link_info.output_bfd,
 							  h, expld.assign_src);
-			  expld.assign_src->non_ir_ref_regular = TRUE;
+			  expld.assign_src->non_ir_ref_regular = true;
 			}
 		    }
 		}
@@ -1252,7 +1255,7 @@ exp_fold_tree_1 (etree_type *tree)
 void
 exp_fold_tree (etree_type *tree, asection *current_section, bfd_vma *dotp)
 {
-  expld.rel_from_abs = FALSE;
+  expld.rel_from_abs = false;
   expld.dot = *dotp;
   expld.dotp = dotp;
   expld.section = current_section;
@@ -1262,7 +1265,7 @@ exp_fold_tree (etree_type *tree, asection *current_section, bfd_vma *dotp)
 void
 exp_fold_tree_no_dot (etree_type *tree)
 {
-  expld.rel_from_abs = FALSE;
+  expld.rel_from_abs = false;
   expld.dot = 0;
   expld.dotp = NULL;
   expld.section = bfd_abs_section_ptr;
@@ -1360,7 +1363,7 @@ static etree_type *
 exp_assop (const char *dst,
 	   etree_type *src,
 	   enum node_tree_enum class,
-	   bfd_boolean hidden)
+	   bool hidden)
 {
   etree_type *n;
 
@@ -1378,7 +1381,7 @@ exp_assop (const char *dst,
 /* Handle linker script assignments and HIDDEN.  */
 
 etree_type *
-exp_assign (const char *dst, etree_type *src, bfd_boolean hidden)
+exp_assign (const char *dst, etree_type *src, bool hidden)
 {
   return exp_assop (dst, src, etree_assign, hidden);
 }
@@ -1388,13 +1391,13 @@ exp_assign (const char *dst, etree_type *src, bfd_boolean hidden)
 etree_type *
 exp_defsym (const char *dst, etree_type *src)
 {
-  return exp_assop (dst, src, etree_assign, FALSE);
+  return exp_assop (dst, src, etree_assign, false);
 }
 
 /* Handle PROVIDE.  */
 
 etree_type *
-exp_provide (const char *dst, etree_type *src, bfd_boolean hidden)
+exp_provide (const char *dst, etree_type *src, bool hidden)
 {
   return exp_assop (dst, src, etree_provide, hidden);
 }
@@ -1419,7 +1422,7 @@ exp_assert (etree_type *exp, const char *message)
 void
 exp_print_tree (etree_type *tree)
 {
-  bfd_boolean function_like;
+  bool function_like;
 
   if (config.map_file == NULL)
     config.map_file = stderr;
@@ -1442,7 +1445,7 @@ exp_print_tree (etree_type *tree)
       return;
     case etree_assign:
       fputs (tree->assign.dst, config.map_file);
-      exp_print_token (tree->type.node_code, TRUE);
+      exp_print_token (tree->type.node_code, true);
       exp_print_tree (tree->assign.src);
       break;
     case etree_provide:
@@ -1452,7 +1455,7 @@ exp_print_tree (etree_type *tree)
       fputc (')', config.map_file);
       break;
     case etree_binary:
-      function_like = FALSE;
+      function_like = false;
       switch (tree->type.node_code)
 	{
 	case MAX_K:
@@ -1460,12 +1463,12 @@ exp_print_tree (etree_type *tree)
 	case ALIGN_K:
 	case DATA_SEGMENT_ALIGN:
 	case DATA_SEGMENT_RELRO_END:
-	  function_like = TRUE;
+	  function_like = true;
 	  break;
 	case SEGMENT_START:
 	  /* Special handling because arguments are in reverse order and
 	     the segment name is quoted.  */
-	  exp_print_token (tree->type.node_code, FALSE);
+	  exp_print_token (tree->type.node_code, false);
 	  fputs (" (\"", config.map_file);
 	  exp_print_tree (tree->binary.rhs);
 	  fputs ("\", ", config.map_file);
@@ -1475,7 +1478,7 @@ exp_print_tree (etree_type *tree)
 	}
       if (function_like)
 	{
-	  exp_print_token (tree->type.node_code, FALSE);
+	  exp_print_token (tree->type.node_code, false);
 	  fputc (' ', config.map_file);
 	}
       fputc ('(', config.map_file);
@@ -1483,7 +1486,7 @@ exp_print_tree (etree_type *tree)
       if (function_like)
 	fprintf (config.map_file, ", ");
       else
-	exp_print_token (tree->type.node_code, TRUE);
+	exp_print_token (tree->type.node_code, true);
       exp_print_tree (tree->binary.rhs);
       fputc (')', config.map_file);
       break;
@@ -1495,7 +1498,7 @@ exp_print_tree (etree_type *tree)
       exp_print_tree (tree->trinary.rhs);
       break;
     case etree_unary:
-      exp_print_token (tree->unary.type.node_code, FALSE);
+      exp_print_token (tree->unary.type.node_code, false);
       if (tree->unary.child)
 	{
 	  fprintf (config.map_file, " (");
@@ -1515,7 +1518,7 @@ exp_print_tree (etree_type *tree)
 	fputs (tree->name.name, config.map_file);
       else
 	{
-	  exp_print_token (tree->type.node_code, FALSE);
+	  exp_print_token (tree->type.node_code, false);
 	  if (tree->name.name)
 	    fprintf (config.map_file, " (%s)", tree->name.name);
 	}
@@ -1670,7 +1673,7 @@ ldexp_init (void)
    SEGMENT_START or ORIGIN) outside of an output section statement,
    to section relative.  */
 
-static bfd_boolean
+static bool
 set_sym_sections (struct bfd_hash_entry *bh, void *inf ATTRIBUTE_UNUSED)
 {
   struct definedness_hash_entry *def = (struct definedness_hash_entry *) bh;
@@ -1678,7 +1681,7 @@ set_sym_sections (struct bfd_hash_entry *bh, void *inf ATTRIBUTE_UNUSED)
     {
       struct bfd_link_hash_entry *h;
       h = bfd_link_hash_lookup (link_info.hash, bh->string,
-				FALSE, FALSE, TRUE);
+				false, false, true);
       if (h != NULL
 	  && h->type == bfd_link_hash_defined
 	  && h->u.def.section == bfd_abs_section_ptr)
@@ -1687,13 +1690,35 @@ set_sym_sections (struct bfd_hash_entry *bh, void *inf ATTRIBUTE_UNUSED)
 	  h->u.def.section = def->final_sec;
 	}
     }
-  return TRUE;
+  return true;
 }
 
 void
 ldexp_finalize_syms (void)
 {
   bfd_hash_traverse (&definedness_table, set_sym_sections, NULL);
+}
+
+/* Determine whether a symbol is going to remain absolute even after
+   ldexp_finalize_syms() has run.  */
+
+bool
+ldexp_is_final_sym_absolute (const struct bfd_link_hash_entry *h)
+{
+  if (h->type == bfd_link_hash_defined
+      && h->u.def.section == bfd_abs_section_ptr)
+    {
+      const struct definedness_hash_entry *def;
+
+      if (!h->ldscript_def)
+	return true;
+
+      def = symbol_defined (h->root.string);
+      if (def != NULL)
+	return def->final_sec == bfd_abs_section_ptr;
+    }
+
+  return false;
 }
 
 void

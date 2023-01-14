@@ -682,7 +682,7 @@ pushpc(int val)
 }
 
 static int
-pop()
+pop (void)
 {
   int rv;
   int rsp = get_reg (sp);
@@ -693,7 +693,7 @@ pop()
 }
 
 static int
-poppc()
+poppc (void)
 {
   int rv;
   int rsp = get_reg (sp);
@@ -931,7 +931,7 @@ op_is_memory (const RX_Opcode_Decoded *rd, int i)
 #define DO_RETURN(x) { longjmp (decode_jmp_buf, x); }
 
 int
-decode_opcode ()
+decode_opcode (void)
 {
   unsigned int uma=0, umb=0;
   int ma=0, mb=0;

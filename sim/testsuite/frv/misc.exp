@@ -1,8 +1,6 @@
 # Miscellaneous FRV simulator testcases.
 
 if [istarget frv*-*] {
-    # load support procs (none yet)
-    # load_lib cgen.exp
     # all machines
     set all_machs "frv fr500 fr550 fr400 fr405 fr450"
     set cpu_option -mcpu

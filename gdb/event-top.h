@@ -70,10 +70,19 @@ extern void gdb_rl_callback_handler_install (const char *prompt);
    currently installed.  */
 extern void gdb_rl_callback_handler_reinstall (void);
 
-/* The SIGSEGV handler for this thread, or NULL if there is none.  GDB
-   always installs a global SIGSEGV handler, and then lets threads
-   indicate their interest in handling the signal by setting this
-   thread-local variable.  */
-extern thread_local void (*thread_local_segv_handler) (int);
+typedef void (*segv_handler_t) (int);
+
+/* On construction, replaces the current thread's SIGSEGV handler with
+   the provided one.  On destruction, restores the handler to the
+   original one.  */
+class scoped_segv_handler_restore
+{
+ public:
+  scoped_segv_handler_restore (segv_handler_t new_handler);
+  ~scoped_segv_handler_restore ();
+
+ private:
+  segv_handler_t m_old_handler;
+};
 
 #endif

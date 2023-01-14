@@ -18,12 +18,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-proc load_common_lib { name } {
-    global srcdir
-    load_file $srcdir/../../binutils/testsuite/lib/$name
-}
-
-load_common_lib binutils-common.exp
+load_file $srcdir/../../binutils/testsuite/lib/binutils-common.exp
 
 # Returns 1 if the gcc for the target is at least version MAJOR.MINOR
 # Returns 0 otherwise.
@@ -108,19 +103,24 @@ proc run_host_cmd { prog command } {
 	set prog $gccexe
     }
     set gccexe [string replace $gccexe 0 [string last "/" $gccexe] ""]
-    if {[string match "*cc*" $gccexe] || [string match "*++*" $gccexe]} then {
+    if {[string match "*cc*" $gccexe] ||
+	[string match "*++*" $gccexe] ||
+	[string match "clang*" $gccexe]} then {
 	set gccflags "$gcc_B_opt $gccflags $ld_L_opt"
 	if {![info exists gcc_ld_B_opt_tested]} {
 	    set gcc_ld_B_opt_tested 1
 	    set ld_version_message [run_host_cmd "$ld" "--version"]
-	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags -Wl,--version"]
+	    set ver "-Wl,--version"
+	    if [check_lto_available] {
+		set ver "-fno-lto $ver"
+	    }
+	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags $ver"]
 	    if {[string first $ld_version_message $gcc_ld_version_message] < 0} {
 		perror "************************************************************************"
 		perror "Your compiler driver ignores -B when choosing ld."
 		perror "You will not be testing the new ld in many of the following tests."
 		set gcc_ld_version [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]
 		if {![string match "" $gcc_ld_version] && ![string match "ld" $gcc_ld_version]} {
-		
 		    perror "It seems you will be testing $gcc_ld_version instead."
 		}
 		perror "************************************************************************"
@@ -175,13 +175,13 @@ proc default_ld_relocate { ld target objects } {
 proc is_endian_output_format { object_flags } {
 
     if {[string match "*-oformat binary*" $object_flags] ||      \
-        [string match "*-oformat ieee*" $object_flags] ||        \
-	[string match "*-oformat ihex*" $object_flags] ||        \
+	[string match "*-oformat ieee*" $object_flags] ||	 \
+	[string match "*-oformat ihex*" $object_flags] ||	 \
 	[string match "*-oformat netbsd-core*" $object_flags] || \
-	[string match "*-oformat srec*" $object_flags] ||        \
+	[string match "*-oformat srec*" $object_flags] ||	 \
 	[string match "*-oformat tekhex*" $object_flags] ||      \
 	[string match "*-oformat trad-core*" $object_flags] } then {
-        return 0
+	return 0
     } else {
 	return 1
     }
@@ -254,7 +254,7 @@ proc default_ld_compile { cc source object } {
     }
 
     if [board_info [target_info name] exists cflags] {
-        append flags " [board_info [target_info name] cflags]"
+	append flags " [board_info [target_info name] cflags]"
     }
 
     if [board_info [target_info name] exists multilib_flags] {
@@ -355,7 +355,7 @@ proc default_ld_nm { nm nmflags object } {
 	while { [gets $file line] != -1 } {
 	    verbose "$line" 2
 	    if [regexp "^(\[0-9a-fA-F\]+) \[a-zA-Z0-9\] \\.*(.+)$" $line whole value name] {
-                set name [string trimleft $name "_"]
+		set name [string trimleft $name "_"]
 		verbose "Setting nm_output($name) to 0x$value" 2
 		set nm_output($name) 0x$value
 	    }
@@ -376,12 +376,12 @@ proc ld_link_defsyms {} {
 
     # ARM targets call __gccmain
     if {[istarget arm*-*-*]} {
-        append flags " --defsym __gccmain=0"
+	append flags " --defsym __gccmain=0"
     }
 
     # Windows targets need __main, some prefixed with underscore.
-    if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
-        append flags " --defsym __main=main --defsym ___main=main"
+    if [is_pecoff_format] {
+	append flags " --defsym __main=main --defsym ___main=main"
     }
 
     # PowerPC EABI code calls __eabi.
@@ -494,7 +494,7 @@ proc run_ld_link_tests { ldtests args } {
 	set binfile tmpdir/[lindex $testitem 6]
 	set cflags [lindex $testitem 7]
 	set objfiles {}
-	set is_unresolved 0
+	set is_unsupported 0
 	set failed 0
 	set maybe_failed 0
 	set ld_output ""
@@ -523,7 +523,7 @@ proc run_ld_link_tests { ldtests args } {
 		catch "$unbzip2" exec_output
 		if ![string match "" $exec_output] then {
 		    send_log "$exec_output\n"
-		    set is_unresolved 1
+		    set is_unsupported 1
 		    break
 		}
 	    } else {
@@ -531,7 +531,7 @@ proc run_ld_link_tests { ldtests args } {
 		if { [file extension $src_file] == ".c" } {
 		    set as_file "tmpdir/$fileroot.s"
 		    if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
-			set is_unresolved 1
+			set is_unsupported 1
 			break
 		    }
 		} else {
@@ -551,8 +551,8 @@ proc run_ld_link_tests { ldtests args } {
 	    continue
 	}
 	# Catch compiler errors.
-	if { $is_unresolved } {
-	    unresolved $testname
+	if { $is_unsupported } {
+	    unsupported $testname
 	    continue
 	}
 
@@ -567,6 +567,7 @@ proc run_ld_link_tests { ldtests args } {
 	    set ld_output "$exec_output"
 	}
 
+	set is_unresolved 0
 	if { !$failed } {
 	    foreach actionlist $actions {
 		set action [lindex $actionlist 0]
@@ -578,13 +579,13 @@ proc run_ld_link_tests { ldtests args } {
 		set dump_prog ""
 		switch -- $action {
 		    objdump
-		        { set dump_prog $objdump }
+			{ set dump_prog $objdump }
 		    nm
-		        { set dump_prog $nm }
+			{ set dump_prog $nm }
 		    readelf
-		        { set dump_prog $READELF }
+			{ set dump_prog $READELF }
 		    ld
-		        { set dump_prog "ld" }
+			{ set dump_prog "ld" }
 		    default
 			{
 			    perror "Unrecognized action $action"
@@ -614,12 +615,12 @@ proc run_ld_link_tests { ldtests args } {
 		    }
 		    set env(LC_ALL) "C"
 		    set cmd "$binary $progopts $binfile"
-    		    set status [remote_exec host [concat sh -c [list "$cmd >dump.out 2>ld.stderr"]] "" "/dev/null"]
+		    set status [remote_exec host [concat sh -c [list "$cmd >dump.out 2>ld.stderr"]] "" "/dev/null"]
 		    send_log "$cmd\n"
-    		    remote_upload host "ld.stderr"
-    		    set comp_output [prune_warnings [file_contents "ld.stderr"]]
-    		    remote_file host delete "ld.stderr"
-    		    remote_file build delete "ld.stderr"
+		    remote_upload host "ld.stderr"
+		    set comp_output [prune_warnings [file_contents "ld.stderr"]]
+		    remote_file host delete "ld.stderr"
+		    remote_file build delete "ld.stderr"
 
 		    if {[info exists old_lc_all]} {
 			set env(LC_ALL) $old_lc_all
@@ -638,8 +639,8 @@ proc run_ld_link_tests { ldtests args } {
 		    if { [regexp_diff "dump.out" "$srcdir/$subdir/$dumpfile"] } then {
 			verbose "output is [file_contents "dump.out"]" 2
 			set failed 1
-		   	remote_file build delete "dump.out"
-		   	remote_file host delete "dump.out"
+			remote_file build delete "dump.out"
+			remote_file host delete "dump.out"
 			break
 		    }
 		    remote_file build delete "dump.out"
@@ -692,7 +693,7 @@ proc run_ld_link_exec_tests { ldtests args } {
     # linker options are included in GCC spec files then we need the -specs
     # option.
     if [board_info [target_info name] exists cflags] {
-        set board_cflags " [board_info [target_info name] cflags]"
+	set board_cflags " [board_info [target_info name] cflags]"
     } else {
 	set board_cflags ""
     }
@@ -751,7 +752,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    }
 	}
 	if { $failed != 0 } {
-	    unresolved $testname
+	    unsupported $testname
 	    continue
 	}
 
@@ -856,7 +857,7 @@ proc run_cc_link_tests { ldtests } {
     global STATIC_LDFLAGS
 
     if [board_info [target_info name] exists cflags] {
-        set board_cflags " [board_info [target_info name] cflags]"
+	set board_cflags " [board_info [target_info name] cflags]"
     } else {
 	set board_cflags ""
     }
@@ -899,28 +900,28 @@ proc run_cc_link_tests { ldtests } {
 
 	    # Find actions related to error/warning processing.
 	    switch -- $action {
-	        error
-	        {
-	            set check_ld(source) "regexp"
-	            set check_ld(regexp) $progopts
-	            set check_ld(terminal) 1
-	        }
-	        warning
-	        {
-	            set check_ld(source) "regexp"
-	            set check_ld(regexp) $progopts
-	        }
-	        error_output
-	        {
-	            set check_ld(source) "file"
-	            set check_ld(file) $progopts
-	            set check_ld(terminal) 1
-	        }
-	        warning_output
-	        {
-	            set check_ld(source) "file"
-	            set check_ld(file) $progopts
-	        }
+		error
+		{
+		    set check_ld(source) "regexp"
+		    set check_ld(regexp) $progopts
+		    set check_ld(terminal) 1
+		}
+		warning
+		{
+		    set check_ld(source) "regexp"
+		    set check_ld(regexp) $progopts
+		}
+		error_output
+		{
+		    set check_ld(source) "file"
+		    set check_ld(file) $progopts
+		    set check_ld(terminal) 1
+		}
+		warning_output
+		{
+		    set check_ld(source) "file"
+		    set check_ld(file) $progopts
+		}
 	    }
 	}
 
@@ -941,7 +942,7 @@ proc run_cc_link_tests { ldtests } {
 	    }
 	}
 	if { $failed != 0 } {
-	    unresolved $testname
+	    unsupported $testname
 	    continue
 	}
 
@@ -987,15 +988,15 @@ proc run_cc_link_tests { ldtests } {
 	    }
 
 	    if { $check_ld(source) != "" } then {
-                if { $ld_output == "" } then {
-                    verbose -log "Linker was expected to give error or warning"
-                    set failed 1
-                }
+		if { $ld_output == "" } then {
+		    verbose -log "Linker was expected to give error or warning"
+		    set failed 1
+		}
 	    } else {
-                if { $ld_output != "" } then {
-                    verbose -log "Unexpected linker warning or error"
-                    set failed 1
-                }
+		if { $ld_output != "" } then {
+		    verbose -log "Unexpected linker warning or error"
+		    set failed 1
+		}
 	    }
 	}
 
@@ -1010,11 +1011,11 @@ proc run_cc_link_tests { ldtests } {
 		set dump_prog ""
 		switch -- $action {
 		    objdump
-		        { set dump_prog $objdump }
+			{ set dump_prog $objdump }
 		    nm
-		        { set dump_prog $nm }
+			{ set dump_prog $nm }
 		    readelf
-		        { set dump_prog $READELF }
+			{ set dump_prog $READELF }
 		    error {}
 		    warning {}
 		    error_output {}
@@ -1081,7 +1082,7 @@ proc check_gc_sections_available { } {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
 	if {   [istarget alpha-*-*]
-            || [istarget bpf-*-*]
+	    || [istarget bpf-*-*]
 	    || [istarget d30v-*-*]
 	    || [istarget dlx-*-*]
 	    || [istarget hppa*64-*-*]
@@ -1199,7 +1200,7 @@ proc check_compiler_available { } {
     global CC
 
     if {![info exists compiler_available_saved]} {
-        if { [which $CC] == 0 } {
+	if { [which $CC] == 0 } {
 	    set compiler_available_saved 0
 	    return 0
 	}
@@ -1265,7 +1266,7 @@ proc check_lto_available { } {
     global CC
 
     if {![info exists lto_available_saved]} {
-        if { ![check_gcc_plugin_enabled] } {
+	if { ![check_gcc_plugin_enabled] } {
 	    set lto_available_saved 0
 	    return 0
 	}
@@ -1308,7 +1309,7 @@ proc check_lto_fat_available { } {
     global CC
 
     if {![info exists lto_fat_available_saved]} {
-        if { ![check_gcc_plugin_enabled] } {
+	if { ![check_gcc_plugin_enabled] } {
 	    set lto_fat_available_saved 0
 	    return 0
 	}
@@ -1351,7 +1352,7 @@ proc check_lto_shared_available { } {
     global CC
 
     if {![info exists lto_shared_available_saved]} {
-        if { ![check_gcc_plugin_enabled] } {
+	if { ![check_gcc_plugin_enabled] } {
 	    set lto_shared_available_saved 0
 	    return 0
 	}
@@ -1417,7 +1418,7 @@ proc check_ifunc_available { } {
     global CC
 
     if {![info exists ifunc_available_saved]} {
-        if { ![check_compiler_available] } {
+	if { ![check_compiler_available] } {
 	    set ifunc_available_saved 0
 	    return 0
 	}
@@ -1466,7 +1467,7 @@ proc check_ifunc_attribute_available { } {
     global CC
 
     if {![info exists ifunc_attribute_available_saved]} {
-        if { ![check_compiler_available] } {
+	if { ![check_compiler_available] } {
 	    set ifunc_attribute_available_saved 0
 	    return 0
 	}
@@ -1513,7 +1514,7 @@ proc check_libdl_available { } {
     global CC
 
     if {![info exists libdl_available_saved]} {
-        if { ![check_compiler_available] } {
+	if { ![check_compiler_available] } {
 	    set libdl_available_saved 0
 	    return 0
 	}
@@ -1549,7 +1550,7 @@ proc check_gnu2_tls_available { } {
     global GNU2_CFLAGS
 
     if {![info exists gnu2_tls_available_saved]} {
-        if { ![check_compiler_available] || "$GNU2_CFLAGS" == "" } {
+	if { ![check_compiler_available] || "$GNU2_CFLAGS" == "" } {
 	    set gnu2_tls_available_saved 0
 	    return 0
 	}

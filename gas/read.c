@@ -64,7 +64,7 @@
 #endif
 
 char *input_line_pointer;	/*->next char of source file to parse.  */
-bfd_boolean input_from_string = FALSE;
+bool input_from_string = false;
 
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
@@ -795,7 +795,7 @@ assemble_one (char *line)
 
 #endif  /* HANDLE_BUNDLE */
 
-static bfd_boolean
+static bool
 in_bss (void)
 {
   flagword flags = bfd_section_flags (now_seg);
@@ -901,7 +901,7 @@ read_a_source_file (const char *name)
 #endif
       while (input_line_pointer < buffer_limit)
 	{
-	  bfd_boolean was_new_line;
+	  bool was_new_line;
 	  /* We have more of this buffer to parse.  */
 
 	  /* We now have input_line_pointer->1st char of next line.
@@ -1322,7 +1322,7 @@ read_a_source_file (const char *name)
 	      char *tmp_buf = 0;
 
 	      s = input_line_pointer;
-	      if (strncmp (s, "APP\n", 4))
+	      if (!startswith (s, "APP\n"))
 		{
 		  /* We ignore it.  */
 		  ignore_rest_of_line ();
@@ -5743,12 +5743,12 @@ demand_copy_C_string (int *len_pointer)
 
       for (len = *len_pointer; len > 0; len--)
 	{
-	  if (*s == 0)
+	  if (s[len - 1] == 0)
 	    {
 	      s = 0;
-	      len = 1;
 	      *len_pointer = 0;
 	      as_bad (_("this string may not contain \'\\0\'"));
+	      break;
 	    }
 	}
     }
@@ -5909,7 +5909,16 @@ s_incbin (int x ATTRIBUTE_UNUSED)
   if (binfile)
     {
       long   file_len;
+      struct stat filestat;
 
+      if (fstat (fileno (binfile), &filestat) != 0
+	  || ! S_ISREG (filestat.st_mode)
+	  || S_ISDIR (filestat.st_mode))
+	{
+	  as_bad (_("unable to include `%s'"), path);
+	  goto done;
+	}
+      
       register_dependency (path);
 
       /* Compute the length of the file.  */
@@ -6365,7 +6374,7 @@ temp_ilp (char *buf)
 
   input_line_pointer = buf;
   buffer_limit = buf + strlen (buf);
-  input_from_string = TRUE;
+  input_from_string = true;
 }
 
 /* Restore a saved input line pointer.  */
@@ -6377,7 +6386,7 @@ restore_ilp (void)
 
   input_line_pointer = saved_ilp;
   buffer_limit = saved_limit;
-  input_from_string = FALSE;
+  input_from_string = false;
 
   saved_ilp = NULL;
 }

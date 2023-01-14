@@ -58,7 +58,7 @@
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
-static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/];
+static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/][2 /* mte */];
 
 /* The standard register names, and all the valid aliases for them.  */
 static const struct
@@ -170,6 +170,12 @@ static const char *const aarch64_pauth_register_names[] =
   "pauth_dmask",
   /* Authentication mask for code pointer.  */
   "pauth_cmask"
+};
+
+static const char *const aarch64_mte_register_names[] =
+{
+  /* Tag Control Register.  */
+  "tag_ctl"
 };
 
 /* AArch64 prologue cache structure.  */
@@ -3099,14 +3105,21 @@ aarch64_displaced_step_others (const uint32_t insn,
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
 
-  aarch64_emit_insn (dsd->insn_buf, insn);
+  uint32_t masked_insn = (insn & CLEAR_Rn_MASK);
+  if (masked_insn == BLR)
+    {
+      /* Emit a BR to the same register and then update LR to the original
+	 address (similar to aarch64_displaced_step_b).  */
+      aarch64_emit_insn (dsd->insn_buf, insn & 0xffdfffff);
+      regcache_cooked_write_unsigned (dsd->regs, AARCH64_LR_REGNUM,
+				      data->insn_addr + 4);
+    }
+  else
+    aarch64_emit_insn (dsd->insn_buf, insn);
   dsd->insn_count = 1;
 
-  if ((insn & 0xfffffc1f) == 0xd65f0000)
-    {
-      /* RET */
-      dsd->dsc->pc_adjust = 0;
-    }
+  if (masked_insn == RET || masked_insn == BR || masked_insn == BLR)
+    dsd->dsc->pc_adjust = 0;
   else
     dsd->dsc->pc_adjust = 4;
 }
@@ -3253,21 +3266,23 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 
 /* Get the correct target description for the given VQ value.
    If VQ is zero then it is assumed SVE is not supported.
-   (It is not possible to set VQ to zero on an SVE system).  */
+   (It is not possible to set VQ to zero on an SVE system).
+
+   MTE_P indicates the presence of the Memory Tagging Extension feature. */
 
 const target_desc *
-aarch64_read_description (uint64_t vq, bool pauth_p)
+aarch64_read_description (uint64_t vq, bool pauth_p, bool mte_p)
 {
   if (vq > AARCH64_MAX_SVE_VQ)
     error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
 	   AARCH64_MAX_SVE_VQ);
 
-  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p];
+  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p][mte_p];
 
   if (tdesc == NULL)
     {
-      tdesc = aarch64_create_target_description (vq, pauth_p);
-      tdesc_aarch64_list[vq][pauth_p] = tdesc;
+      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p);
+      tdesc_aarch64_list[vq][pauth_p][mte_p] = tdesc;
     }
 
   return tdesc;
@@ -3337,6 +3352,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, pauth_ra_state_offset = -1;
+  int first_mte_regnum = -1;
 
   /* Use the vector length passed via the target info.  Here -1 is used for no
      SVE, and 0 is unset.  If unset then use the vector length from the existing
@@ -3367,13 +3383,15 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      value.  */
   const struct target_desc *tdesc = info.target_desc;
   if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc))
-    tdesc = aarch64_read_description (vq, false);
+    tdesc = aarch64_read_description (vq, false, false);
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
   feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
   feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
+  const struct tdesc_feature *feature_mte
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte");
 
   if (feature_core == nullptr)
     return nullptr;
@@ -3444,6 +3462,20 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 1;	/* Count RA_STATE pseudo register.  */
     }
 
+  /* Add the MTE registers.  */
+  if (feature_mte != NULL)
+    {
+      first_mte_regnum = num_regs;
+      /* Validate the descriptor provides the mandatory MTE registers and
+	 allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_mte_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_mte, tdesc_data.get (),
+					    first_mte_regnum + i,
+					    aarch64_mte_register_names[i]);
+
+      num_regs += i;
+    }
+
   if (!valid_p)
     return nullptr;
 
@@ -3461,6 +3493,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
 				: pauth_ra_state_offset + num_regs;
+  tdep->mte_reg_base = first_mte_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

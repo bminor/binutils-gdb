@@ -903,8 +903,6 @@ darwin_suspend_inferior_threads (struct inferior *inf)
 void
 darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  struct target_waitstatus status;
-
   int nsignal;
 
   inferior_debug
@@ -1658,8 +1656,8 @@ darwin_attach_pid (struct inferior *inf)
     }
 
   target_ops *darwin_ops = get_native_target ();
-  if (!target_is_pushed (darwin_ops))
-    push_target (darwin_ops);
+  if (!inf->target_is_pushed (darwin_ops))
+    inf->push_target (darwin_ops);
 }
 
 /* Get the thread_info object corresponding to this darwin_thread_info.  */

@@ -793,22 +793,37 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 
 @smallexample
 @c man begin SYNOPSIS nm
-nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--debug-syms}]
-   [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
-   [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
-   [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
+nm [@option{-A}|@option{-o}|@option{--print-file-name}]
+   [@option{-a}|@option{--debug-syms}]
+   [@option{-B}|@option{--format=bsd}]
+   [@option{-C}|@option{--demangle}[=@var{style}]]
+   [@option{-D}|@option{--dynamic}]
+   [@option{-f}@var{format}|@option{--format=}@var{format}]
+   [@option{-g}|@option{--extern-only}]
+   [@option{-h}|@option{--help}]
    [@option{--ifunc-chars=@var{CHARS}}]
+   [@option{-j}|@option{--format=just-symbols}]
    [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}]
-   [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
-   [@option{-r}|@option{--reverse-sort}] [@option{-S}|@option{--print-size}]
-   [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
-   [@option{-u}|@option{--undefined-only}] [@option{-V}|@option{--version}]
-   [@option{-X 32_64}] [@option{--defined-only}] [@option{--no-demangle}]
-   [@option{--plugin} @var{name}]
+   [@option{-P}|@option{--portability}]
+   [@option{-p}|@option{--no-sort}]
+   [@option{-r}|@option{--reverse-sort}]
+   [@option{-S}|@option{--print-size}]
+   [@option{-s}|@option{--print-armap}]
+   [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
+   [@option{-u}|@option{--undefined-only}]
+   [@option{-V}|@option{--version}]
+   [@option{-X 32_64}]
+   [@option{--defined-only}]
+   [@option{--no-demangle}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
-   [@option{--size-sort}] [@option{--special-syms}]
-   [@option{--synthetic}] [@option{--target=}@var{bfdname}]
+   [@option{--plugin} @var{name}]
+   [@option{--size-sort}]
+   [@option{--special-syms}]
+   [@option{--synthetic}]
+   [@option{--target=}@var{bfdname}]
+   [@option{--with-symbol-versions}]
+   [@option{--without-symbol-versions}]
    [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -1026,7 +1041,7 @@ libraries.
 @cindex @command{nm} format
 @cindex @command{nm} compatibility
 Use the output format @var{format}, which can be @code{bsd},
-@code{sysv}, or @code{posix}.  The default is @code{bsd}.
+@code{sysv}, @code{posix} or @code{just-symbols}.  The default is @code{bsd}.
 Only the first character of @var{format} is significant; it can be
 either upper or lower case.
 
@@ -1047,6 +1062,9 @@ the user to specify a string containing one or two characters. The
 first character will be used for global indirect function symbols and
 the second character, if present, will be used for local indirect
 function symbols.
+
+@item j
+The same as @option{--format=just-symbols}.
 
 @item -l
 @itemx --line-numbers
@@ -1169,6 +1187,16 @@ Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
 
+@item --with-symbol-versions
+@item --without-symbol-versions
+Enables or disables the display of symbol version information.  The
+version string is displayed as a suffix to the symbol name, preceded
+by an @@ character.  For example @samp{foo@@VER_1}.  If the version is
+the default version to be used when resolving unversioned references
+to the symbol then it is displayed as a suffix preceded by two @@
+characters.  For example @samp{foo@@@@VER_2}.  By default, symbol
+version information is displayed.
+
 @item --target=@var{bfdname}
 @cindex object code format
 Specify an object code format other than your system's default format.
@@ -1199,6 +1227,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-g}|@option{--strip-debug}]
         [@option{--strip-unneeded}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
+        [@option{--keep-file-symbols}]
+        [@option{--keep-section-symbols}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
         [@option{--strip-unneeded-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
@@ -1255,7 +1285,6 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-sections=}@var{string}]
         [@option{--prefix-alloc-sections=}@var{string}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
-        [@option{--keep-file-symbols}]
         [@option{--only-keep-debug}]
         [@option{--strip-dwo}]
         [@option{--extract-dwo}]
@@ -1956,6 +1985,11 @@ As long as the debug info file has been installed into one of these
 locations before the debugger is run everything should work
 correctly.
 
+@item --keep-section-symbils
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying section names,
+which would otherwise get stripped.
+
 @item --keep-file-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
 @option{--strip-unneeded}, retain any symbols specifying source file names,
@@ -2187,8 +2221,11 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
-        [@option{-W[lLiaprmfFsoORtUuTgAckK]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
+        [@option{-W[lLiaprmfFsoORtUuTgAck]}|
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
+        [@option{-WK}|@option{--dwarf=follow-links}]
+        [@option{-WN}|@option{--dwarf=no-follow-links}]
+        [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
@@ -2325,7 +2362,7 @@ will stop at the end of the function, otherwise it will stop when the
 next symbol is encountered.  If there are no matches for @var{symbol}
 then nothing will be displayed.
 
-Note if the @option{--dwarf=follow-links} option has also been enabled
+Note if the @option{--dwarf=follow-links} option is enabled
 then any symbol tables in linked debug info files will be read in and
 used when disassembling.
 
@@ -2347,7 +2384,7 @@ If the target is an ARM architecture this switch also has the effect
 of forcing the disassembler to decode pieces of data found in code
 sections as if they were instructions.
 
-Note if the @option{--dwarf=follow-links} option has also been enabled
+Note if the @option{--dwarf=follow-links} option is enabled
 then any symbol tables in linked debug info files will be read in and
 used when disassembling.
 
@@ -2427,6 +2464,13 @@ for specification with @option{-b} or @option{-m}.
 @itemx --section=@var{name}
 @cindex section information
 Display information only for section @var{name}.
+
+@item -L
+@itemx --process-links
+Display the contents of non-debug sections found in separate debuginfo
+files that are linked to the main file.  This option automatically
+implies the @option{-WK} option, and only sections requested by other
+command line options will be displayed.
 
 @item -l
 @itemx --line-numbers
@@ -3308,6 +3352,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{-U}|@option{--disable-deterministic-archives}]
+      [@option{--keep-section-symbols}]
       [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
@@ -3502,6 +3547,11 @@ Remove non-global symbols.
 @itemx --discard-locals
 Remove compiler-generated local symbols.
 (These usually start with @samp{L} or @samp{.}.)
+
+@item --keep-section-symbols
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying section names,
+which would otherwise get stripped.
 
 @item --keep-file-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
@@ -4739,6 +4789,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{--dyn-syms}|@option{--lto-syms}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
+        [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
@@ -4753,8 +4804,11 @@ readelf [@option{-a}|@option{--all}]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
-        [@option{-w[lLiaprmfFsoORtUuTgAckK]}|
-         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
+        [@option{-w[lLiaprmfFsoORtUuTgAck]}|
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
+        [@option{-wK}|@option{--debug-dump=follow-links}]
+        [@option{-wN}|@option{--debug-dump=no-follow-links}]
+        [@option{-P}|@option{--process-links}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{--ctf=}@var{section}]
@@ -4817,6 +4871,10 @@ file.
 @cindex ELF segment information
 Displays the information contained in the file's segment headers, if it
 has any.
+
+@item --quiet
+@cindex quiet
+Suppress "no symbols" diagnostic.
 
 @item -S
 @itemx --sections
@@ -4982,6 +5040,13 @@ command to @command{ar}, but without using the BFD library.  @xref{ar}.
 @item -w[lLiaprmfFsOoRtUuTgAckK]
 @itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
+
+@item -P
+@itemx --process-links
+Display the contents of non-debug sections found in separate debuginfo
+files that are linked to the main file.  This option automatically
+implies the @option{-wK} option, and only sections requested by other
+command line options will be displayed.
 
 @include ctf.options.texi
 @item --ctf-symbols=@var{section}

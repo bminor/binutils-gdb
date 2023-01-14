@@ -280,7 +280,7 @@ struct csky_opcode
   signed int relax;
   /* Worker function to call when this instruction needs special assembler
      handling.  */
-  bfd_boolean (*work)(void);
+  bool (*work) (void);
 };
 
 /* The following are the opcodes used in relax/fix process.  */

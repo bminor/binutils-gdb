@@ -26,9 +26,7 @@
 #include "subsegs.h"
 #include "write.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
@@ -2294,7 +2292,7 @@ S_FORCE_RELOC (symbolS *s, int strict)
 	       || (EXTERN_FORCE_RELOC
 		   && (s->bsym->flags & BSF_GLOBAL) != 0)))
 	  || (s->bsym->flags & BSF_GNU_INDIRECT_FUNCTION) != 0)
-	return TRUE;
+	return true;
       sec = s->bsym->section;
     }
   return bfd_is_und_section (sec) || bfd_is_com_section (sec);

@@ -1,3 +1,43 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (run_sim_test): Set status to unsupported if
+	$return_code is 77.
+
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (run_sim_test): Return if sim_tool_path does not
+	exist.
+
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (sim_tool_path): New function.
+	(sim_run): Set sim to [sim_tool_path].
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (run_sim_test): Convert examples to binaries.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* local.mk: Include %D%/common/local.mk.
+	* common/Makefile.in: Removed.
+	* common/local.mk: New file.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Removed.
+	* lib/sim-defs.exp (sim): Update default path.
+	* local.mk: New file based on Makefile.in.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (arch): Delete.
+	(site.exp): Do not output $arch.
+
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* riscv/: New directory.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (site.exp): Delete tool setting.

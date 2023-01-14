@@ -38,7 +38,7 @@
 
 #define WORKING_DOT_WORD
 
-extern bfd_boolean bfin_start_label (char *);
+extern bool bfin_start_label (char *);
 
 #define md_number_to_chars	number_to_chars_littleendian
 #define md_convert_frag(b,s,f)	as_fatal ("bfin convert_frag\n");
@@ -47,7 +47,7 @@ extern bfd_boolean bfin_start_label (char *);
 #define LEX_BR 6
 
 #define TC_EOL_IN_INSN(PTR) (bfin_eol_in_insn(PTR) ? 1 : 0)
-extern bfd_boolean bfin_eol_in_insn (char *);
+extern bool bfin_eol_in_insn (char *);
 
 /* Almost all instructions of Blackfin contain an = character.  */
 #define TC_EQUAL_IN_INSN(C, NAME) (NAME[0] != '.' || NAME[1] != 0)
@@ -61,7 +61,7 @@ extern bfd_boolean bfin_eol_in_insn (char *);
 #define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)	\
   (NEXT_CHAR == ':' && bfin_start_label (STR))
 #define tc_fix_adjustable(FIX) bfin_fix_adjustable (FIX)
-extern bfd_boolean bfin_fix_adjustable (struct fix *);
+extern bool bfin_fix_adjustable (struct fix *);
 
 #define TC_FORCE_RELOCATION(FIX) bfin_force_relocation (FIX)
 extern int bfin_force_relocation (struct fix *);

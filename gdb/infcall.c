@@ -251,7 +251,7 @@ find_function_addr (struct value *function,
 		    struct type **function_type)
 {
   struct type *ftype = check_typedef (value_type (function));
-  struct gdbarch *gdbarch = get_type_arch (ftype);
+  struct gdbarch *gdbarch = ftype->arch ();
   struct type *value_type = NULL;
   /* Initialize it just to avoid a GCC false warning.  */
   CORE_ADDR funaddr = 0;
@@ -269,8 +269,8 @@ find_function_addr (struct value *function,
       ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
       if (ftype->code () == TYPE_CODE_FUNC
 	  || ftype->code () == TYPE_CODE_METHOD)
-	funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
-						      current_top_target ());
+	funaddr = gdbarch_convert_from_func_ptr_addr
+	  (gdbarch, funaddr, current_inferior ()->top_target());
     }
   if (ftype->code () == TYPE_CODE_FUNC
       || ftype->code () == TYPE_CODE_METHOD)
@@ -321,9 +321,8 @@ find_function_addr (struct value *function,
 
 	      funaddr = value_as_address (value_addr (function));
 	      nfunaddr = funaddr;
-	      funaddr
-		= gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
-						      current_top_target ());
+	      funaddr = gdbarch_convert_from_func_ptr_addr
+		(gdbarch, funaddr, current_inferior ()->top_target ());
 	      if (funaddr != nfunaddr)
 		found_descriptor = 1;
 	    }

@@ -507,7 +507,6 @@ main (int argc, char **argv)
   FILE *in;
   int lineno = 0;
   int i;
-  VaryRef *vlist;
 
   if (argc > 2 && strcmp (argv[1], "-l") == 0)
     {
@@ -654,8 +653,6 @@ main (int argc, char **argv)
     indirect[i].type = T_unused;
 
   qsort (opcodes, n_opcodes, sizeof (opcodes[0]), op_cmp);
-
-  vlist = (VaryRef *) malloc (n_varies * sizeof (VaryRef));
 
   for (i = 0; i < n_opcodes; i++)
     {

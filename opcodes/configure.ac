@@ -22,7 +22,6 @@ AC_INIT([opcodes], BFD_VERSION)
 AC_CONFIG_SRCDIR([z8k-dis.c])
 
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 
@@ -40,6 +39,19 @@ dnl configure option --enable-shared.
 AC_DISABLE_SHARED
 
 LT_INIT
+
+ac_checking=
+. ${srcdir}/../bfd/development.sh
+test "$development" = true && ac_checking=yes
+AC_ARG_ENABLE(checking,
+[  --enable-checking       enable run-time checks],
+[case "${enableval}" in
+  no|none)  ac_checking= ;;
+  *)	    ac_checking=yes ;;
+esac])dnl
+if test x$ac_checking != x ; then
+  AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
+fi
 
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
@@ -83,9 +95,6 @@ BFD_CC_FOR_BUILD
 
 AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
-
-AC_CHECK_HEADERS(string.h strings.h stdlib.h limits.h)
-ACX_HEADER_STRING
 
 AC_CHECK_DECLS([basename, stpcpy])
 
@@ -166,17 +175,23 @@ if test "$enable_shared" = "yes"; then
 # Note that linking against libbfd as we do here, which is itself linked
 # against libiberty, may not satisfy all the libopcodes libiberty references
 # since libbfd may not pull in the entirety of libiberty.
+# Also, jam libintl into the right place in all of this: after libiberty,
+# which uses it, but before -lcygwin, which it uses.
 changequote(,)dnl
   x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
   if test -n "$x"; then
     SHARED_LIBADD="-L`pwd`/../libiberty/pic -liberty"
   fi
+fi
 
+SHARED_LIBADD="$SHARED_LIBADD $LIBINTL"
+
+if test "$enable_shared" = "yes"; then
   case "${host}" in
     *-*-cygwin*)
       SHARED_LDFLAGS="-no-undefined"
-      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty $SHARED_LIBADD"
       ;;
    *-*-darwin*)
      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib ${SHARED_LIBADD}"

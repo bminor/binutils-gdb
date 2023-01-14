@@ -99,7 +99,7 @@ load_libcompile (const char *fe_libcc, const char *fe_context)
 
 template <typename INSTTYPE, typename FUNCTYPE, typename CTXTYPE,
 	  typename BASE_VERSION_TYPE, typename API_VERSION_TYPE>
-compile_instance *
+std::unique_ptr<compile_instance>
 get_compile_context (const char *fe_libcc, const char *fe_context,
 		     BASE_VERSION_TYPE base_version,
 		     API_VERSION_TYPE api_version)
@@ -118,12 +118,12 @@ get_compile_context (const char *fe_libcc, const char *fe_context,
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
 
-  return new INSTTYPE (context);
+  return std::unique_ptr<compile_instance> (new INSTTYPE (context));
 }
 
 /* A C-language implementation of get_compile_context.  */
 
-compile_instance *
+std::unique_ptr<compile_instance>
 c_get_compile_context ()
 {
   return get_compile_context
@@ -135,7 +135,7 @@ c_get_compile_context ()
 
 /* A C++-language implementation of get_compile_context.  */
 
-compile_instance *
+std::unique_ptr<compile_instance>
 cplus_get_compile_context ()
 {
   return get_compile_context

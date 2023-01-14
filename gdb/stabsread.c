@@ -4590,7 +4590,7 @@ scan_file_globals (struct objfile *objfile)
 			    (sym, MSYMBOL_VALUE_ADDRESS (resolve_objfile,
 							 msymbol));
 			}
-		      SYMBOL_SECTION (sym) = MSYMBOL_SECTION (msymbol);
+		      sym->set_section_index (msymbol->section_index ());
 		    }
 
 		  if (prev)

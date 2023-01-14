@@ -23,7 +23,7 @@
 #define _NFP_H_
 
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "elf/nfp.h"
 
 #ifdef __cplusplus

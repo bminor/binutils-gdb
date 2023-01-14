@@ -30,7 +30,7 @@ static void gld${EMULATION_NAME}_before_parse (void);
 static void
 mmix_before_parse (void)
 {
-  link_info.check_relocs_after_open_input = TRUE;
+  link_info.check_relocs_after_open_input = true;
   gld${EMULATION_NAME}_before_parse ();
 }
 

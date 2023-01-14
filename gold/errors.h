@@ -68,6 +68,10 @@ class Errors
   void
   info(const char* format, va_list);
 
+  // Print a trace message and continue.
+  void
+  trace(const char* format, va_list);
+
   // Report an error at a reloc location.
   template<int size, bool big_endian>
   void

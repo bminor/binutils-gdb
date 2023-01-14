@@ -1916,7 +1916,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 {
   /* Error out if debugging something, because we're going to push the
      test target, which would pop any existing target.  */
-  if (current_top_target ()->stratum () >= process_stratum)
+  if (current_inferior ()->top_target ()->stratum () >= process_stratum)
     error (_("target already pushed"));
 
   /* Create a mock environment.  A process_stratum target pushed.  */
@@ -1925,7 +1925,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 
   /* Push the process_stratum target so we can mock accessing
      registers.  */
-  push_target (&mock_target);
+  current_inferior ()->push_target (&mock_target);
 
   /* Pop it again on exit (return/exception).  */
   struct on_exit

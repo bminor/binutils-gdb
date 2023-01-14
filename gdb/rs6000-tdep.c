@@ -841,7 +841,7 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
   rs6000_breakpoint;
 
 /* Instruction masks for displaced stepping.  */
-#define BRANCH_MASK 0xfc000000
+#define OP_MASK 0xfc000000
 #define BP_MASK 0xFC0007FE
 #define B_INSN 0x48000000
 #define BC_INSN 0x40000000
@@ -862,6 +862,17 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 #define STBCX_INSTRUCTION 0x7c00056d
 #define STHCX_INSTRUCTION 0x7c0005ad
 #define STQCX_INSTRUCTION 0x7c00016d
+
+/* Instruction masks for single-stepping of addpcis/lnia.  */
+#define ADDPCIS_INSN            0x4c000004
+#define ADDPCIS_INSN_MASK       0xfc00003e
+#define ADDPCIS_TARGET_REGISTER 0x03F00000
+#define ADDPCIS_INSN_REGSHIFT   21
+
+#define PNOP_MASK 0xfff3ffff
+#define PNOP_INSN 0x07000000
+#define R_MASK 0x00100000
+#define R_ZERO 0x00000000
 
 /* Check if insn is one of the Load And Reserve instructions used for atomic
    sequences.  */
@@ -895,9 +906,35 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
 
-  read_memory (from, buf, len);
+  len = target_read (current_inferior()->top_target(), TARGET_OBJECT_MEMORY, NULL,
+		     buf, from, len);
+  if ((ssize_t) len < PPC_INSN_SIZE)
+    memory_error (TARGET_XFER_E_IO, from);
 
   insn = extract_signed_integer (buf, PPC_INSN_SIZE, byte_order);
+
+  /* Check for PNOP and for prefixed instructions with R=0.  Those
+     instructions are safe to displace.  Prefixed instructions with R=1
+     will read/write data to/from locations relative to the current PC.
+     We would not be able to fixup after an instruction has written data
+    into a displaced location, so decline to displace those instructions.  */
+  if ((insn & OP_MASK) == 1 << 26)
+    {
+      if (((insn & PNOP_MASK) != PNOP_INSN)
+	  && ((insn & R_MASK) != R_ZERO))
+	{
+	  displaced_debug_printf ("Not displacing prefixed instruction %08x at %s",
+				  insn, paddress (gdbarch, from));
+	  return NULL;
+	}
+    }
+  else
+    /* Non-prefixed instructions..  */
+    {
+      /* Set the instruction length to 4 to match the actual instruction
+	 length.  */
+      len = 4;
+    }
 
   /* Assume all atomic sequences start with a Load and Reserve instruction.  */
   if (IS_LOAD_AND_RESERVE_INSN (insn))
@@ -912,7 +949,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   displaced_debug_printf ("copy %s->%s: %s",
 			  paddress (gdbarch, from), paddress (gdbarch, to),
-			  displaced_step_dump_bytes (buf, len).c_str ());;
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_copy_insn_closure_up (closure.release ());
@@ -932,17 +969,44 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
     = (ppc_displaced_step_copy_insn_closure *) closure_;
   ULONGEST insn  = extract_unsigned_integer (closure->buf.data (),
 					     PPC_INSN_SIZE, byte_order);
-  ULONGEST opcode = 0;
+  ULONGEST opcode;
   /* Offset for non PC-relative instructions.  */
-  LONGEST offset = PPC_INSN_SIZE;
+  LONGEST offset;
 
-  opcode = insn & BRANCH_MASK;
+  opcode = insn & OP_MASK;
+
+  /* Set offset to 8 if this is an 8-byte (prefixed) instruction.  */
+  if ((opcode) == 1 << 26)
+    offset = 2 * PPC_INSN_SIZE;
+  else
+    offset = PPC_INSN_SIZE;
 
   displaced_debug_printf ("(ppc) fixup (%s, %s)",
 			  paddress (gdbarch, from), paddress (gdbarch, to));
 
+  /* Handle the addpcis/lnia instruction.  */
+  if ((insn & ADDPCIS_INSN_MASK) == ADDPCIS_INSN)
+    {
+      LONGEST displaced_offset;
+      ULONGEST current_val;
+      /* Measure the displacement.  */
+      displaced_offset = from - to;
+      /* Identify the target register that was updated by the instruction.  */
+      int regnum = (insn & ADDPCIS_TARGET_REGISTER) >> ADDPCIS_INSN_REGSHIFT;
+      /* Read and update the target value.  */
+      regcache_cooked_read_unsigned (regs, regnum , &current_val);
+      displaced_debug_printf ("addpcis target regnum %d was %s now %s",
+			      regnum, paddress (gdbarch, current_val),
+			      paddress (gdbarch, current_val
+					+ displaced_offset));
+      regcache_cooked_write_unsigned (regs, regnum,
+					current_val + displaced_offset);
+      /* point the PC back at the non-displaced instruction.  */
+      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				    from + offset);
+    }
   /* Handle PC-relative branch instructions.  */
-  if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
+  else if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
     {
       ULONGEST current_pc;
 
@@ -1089,13 +1153,16 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
      instructions.  */
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
-      loc += PPC_INSN_SIZE;
+      if ((insn & OP_MASK) == 1 << 26)
+	loc += 2 * PPC_INSN_SIZE;
+      else
+	loc += PPC_INSN_SIZE;
       insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
       /* Assume that there is at most one conditional branch in the atomic
 	 sequence.  If a conditional branch is found, put a breakpoint in 
 	 its destination address.  */
-      if ((insn & BRANCH_MASK) == BC_INSN)
+      if ((insn & OP_MASK) == BC_INSN)
 	{
 	  int immediate = ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 	  int absolute = insn & 2;
@@ -2355,6 +2422,7 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       /* The type we're building is this
 
 	 type = union __ppc_builtin_type_vec128 {
+	     float128_t float128;
 	     uint128_t uint128;
 	     double v2_double[2];
 	     float v4_float[4];
@@ -2364,10 +2432,15 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 	 }
       */
 
+      /* PPC specific type for IEEE 128-bit float field */
+      struct type *t_float128
+	= arch_float_type (gdbarch, 128, "float128_t", floatformats_ia64_quad);
+
       struct type *t;
 
       t = arch_composite_type (gdbarch,
 			       "__ppc_builtin_type_vec128", TYPE_CODE_UNION);
+      append_composite_type_field (t, "float128", t_float128);
       append_composite_type_field (t, "uint128", bt->builtin_uint128);
       append_composite_type_field (t, "v2_double",
 				   init_vector_type (bt->builtin_double, 2));
@@ -5077,7 +5150,8 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
 
     case 1014:		/* Data Cache Block set to Zero */
-      if (target_auxv_search (current_top_target (), AT_DCACHEBSIZE, &at_dcsz) <= 0
+      if (target_auxv_search (current_inferior ()->top_target (),
+			      AT_DCACHEBSIZE, &at_dcsz) <= 0
 	  || at_dcsz == 0)
 	at_dcsz = 128; /* Assume 128-byte cache line size (POWER8)  */
 
@@ -7070,7 +7144,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_restore_all_in_ptid
     (gdbarch, ppc_displaced_step_restore_all_in_ptid);
 
-  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
+  set_gdbarch_max_insn_length (gdbarch, 2 * PPC_INSN_SIZE);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;

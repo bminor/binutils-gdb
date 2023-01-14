@@ -2478,9 +2478,8 @@ inside_main_func (frame_info *this_frame)
 
   /* Convert any function descriptor addresses into the actual function
      code address.  */
-  sym_addr
-    = gdbarch_convert_from_func_ptr_addr (get_frame_arch (this_frame),
-					  sym_addr, current_top_target ());
+  sym_addr = gdbarch_convert_from_func_ptr_addr
+    (get_frame_arch (this_frame), sym_addr, current_inferior ()->top_target ());
 
   return sym_addr == get_frame_func (this_frame);
 }

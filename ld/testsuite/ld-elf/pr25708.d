@@ -1,6 +1,6 @@
 #source: pr13195.s
 #ld: -shared -version-script pr13195.t
-#nm: -D
+#nm: -D --with-symbol-versions
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 #xfail: hppa64-*-* ![check_shared_lib_support] 
 # h8300 doesn't support -shared, and hppa64 creates .foo

@@ -609,7 +609,7 @@ stag_add_field (struct stag *parent,
       sf->next = sfield;
     }
   /* Only create a symbol for this field if the parent has no name.  */
-  if (!strncmp (".fake", parent->name, 5))
+  if (startswith (parent->name, ".fake"))
     {
       symbolS *sym = symbol_new (name, absolute_section, &zero_address_frag,
 				 offset);
@@ -705,7 +705,7 @@ tic54x_endstruct (int is_union)
 {
   int size;
   const char *path =
-    !strncmp (current_stag->name, ".fake", 5) ? "" : current_stag->name;
+    startswith (current_stag->name, ".fake") ? "" : current_stag->name;
 
   if (!current_stag || current_stag->is_union != is_union)
     {
@@ -2007,13 +2007,13 @@ tic54x_label (int ignored ATTRIBUTE_UNUSED)
    absolute local symbols.  */
 
 static void
-tic54x_mmregs (int ignored ATTRIBUTE_UNUSED)
+tic54x_register_mmregs (int ignored ATTRIBUTE_UNUSED)
 {
-  tic54x_symbol *sym;
+  const tic54x_symbol *sym;
 
   ILLEGAL_WITHIN_STRUCT ();
 
-  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
+  for (sym = tic54x_mmregs; sym->name; sym++)
     {
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
 				     &zero_address_frag, sym->value);
@@ -2357,7 +2357,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
       fclose (ftmp);
       free (buf);
       input_scrub_insert_file (fname);
-      unlink (fname);
+      remove (fname);
     }
 }
 
@@ -2421,7 +2421,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "mlib"     , tic54x_mlib              ,          0 },
   { "mlist"    , s_ignore                 ,          0 },
   { "mnolist"  , s_ignore                 ,          0 },
-  { "mmregs"   , tic54x_mmregs            ,          0 },
+  { "mmregs"   , tic54x_register_mmregs   ,          0 },
   { "newblock" , tic54x_clear_local_labels,          0 },
   { "option"   , s_ignore                 ,          0 },
   { "p2align"  , tic54x_p2align           ,          0 },
@@ -2965,10 +2965,10 @@ void
 md_begin (void)
 {
   insn_template *tm;
-  tic54x_symbol *sym;
+  const tic54x_symbol *sym;
   const subsym_proc_entry *subsym_proc;
   const math_proc_entry *math_proc;
-  char **symname;
+  const char **symname;
   char *TIC54X_DIR = getenv ("TIC54X_DIR");
   char *A_DIR = TIC54X_DIR ? TIC54X_DIR : getenv ("A_DIR");
 
@@ -3000,7 +3000,7 @@ md_begin (void)
     str_hash_insert (parop_hash, tm->name, tm, 0);
 
   reg_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) regs; sym->name; sym++)
+  for (sym = tic54x_regs; sym->name; sym++)
     {
       /* Add basic registers to the symbol table.  */
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
@@ -3009,30 +3009,30 @@ md_begin (void)
       symbol_table_insert (symbolP);
       str_hash_insert (reg_hash, sym->name, sym, 0);
     }
-  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
+  for (sym = tic54x_mmregs; sym->name; sym++)
     str_hash_insert (reg_hash, sym->name, sym, 0);
   mmreg_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
+  for (sym = tic54x_mmregs; sym->name; sym++)
     str_hash_insert (mmreg_hash, sym->name, sym, 0);
 
   cc_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) condition_codes; sym->name; sym++)
+  for (sym = tic54x_condition_codes; sym->name; sym++)
     str_hash_insert (cc_hash, sym->name, sym, 0);
 
   cc2_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) cc2_codes; sym->name; sym++)
+  for (sym = tic54x_cc2_codes; sym->name; sym++)
     str_hash_insert (cc2_hash, sym->name, sym, 0);
 
   cc3_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) cc3_codes; sym->name; sym++)
+  for (sym = tic54x_cc3_codes; sym->name; sym++)
     str_hash_insert (cc3_hash, sym->name, sym, 0);
 
   sbit_hash = str_htab_create ();
-  for (sym = (tic54x_symbol *) status_bits; sym->name; sym++)
+  for (sym = tic54x_status_bits; sym->name; sym++)
     str_hash_insert (sbit_hash, sym->name, sym, 0);
 
   misc_symbol_hash = str_htab_create ();
-  for (symname = (char **) misc_symbols; *symname; symname++)
+  for (symname = tic54x_misc_symbols; *symname; symname++)
     str_hash_insert (misc_symbol_hash, *symname, *symname, 0);
 
   /* Only the base substitution table and local label table are initialized;
@@ -3986,7 +3986,7 @@ emit_insn (tic54x_insn *insn)
       if (insn->opcode[i].unresolved)
 	fix_new_exp (frag_now, p - frag_now->fr_literal,
 		     insn->opcode[i].r_nchars, &insn->opcode[i].addr_expr,
-		     FALSE, insn->opcode[i].r_type);
+		     false, insn->opcode[i].r_type);
     }
 }
 
@@ -5037,7 +5037,7 @@ md_atof (int type, char *literalP, int *sizeP)
 {
   /* Target data is little-endian, but floats are stored
      big-"word"ian.  ugh.  */
-  return ieee_md_atof (type, literalP, sizeP, TRUE);
+  return ieee_md_atof (type, literalP, sizeP, true);
 }
 
 arelent *

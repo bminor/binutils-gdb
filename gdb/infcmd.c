@@ -419,6 +419,8 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   dont_repeat ();
 
+  scoped_disable_commit_resumed disable_commit_resumed ("running");
+
   kill_if_already_running (from_tty);
 
   init_wait_for_inferior ();
@@ -538,6 +540,8 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   /* Since there was no error, there's no need to finish the thread
      states here.  */
   finish_state.release ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 static void
@@ -759,7 +763,7 @@ continue_command (const char *args, int from_tty)
       ensure_not_running ();
     }
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
@@ -877,7 +881,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
     = strip_bg_char (count_string, &async_exec);
   count_string = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   count = count_string ? parse_and_eval_long (count_string) : 1;
 
@@ -1009,6 +1013,20 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 				 &tp->control.step_range_start,
 				 &tp->control.step_range_end);
 
+	  /* There's a problem in gcc (PR gcc/98780) that causes missing line
+	     table entries, which results in a too large stepping range.
+	     Use inlined_subroutine info to make the range more narrow.  */
+	  if (inline_skipped_frames (tp) > 0)
+	    {
+	      symbol *sym = inline_skipped_symbol (tp);
+	      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+		{
+		  const block *block = SYMBOL_BLOCK_VALUE (sym);
+		  if (BLOCK_END (block) < tp->control.step_range_end)
+		    tp->control.step_range_end = BLOCK_END (block);
+		}
+	    }
+
 	  tp->control.may_range_step = 1;
 
 	  /* If we have no line info, switch to stepi mode.  */
@@ -1075,7 +1093,7 @@ jump_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (!arg)
     error_no_arg (_("starting address"));
@@ -1110,7 +1128,7 @@ jump_command (const char *arg, int from_tty)
       struct obj_section *section;
 
       fixup_symbol_section (sfn, 0);
-      section = SYMBOL_OBJ_SECTION (symbol_objfile (sfn), sfn);
+      section = sfn->obj_section (symbol_objfile (sfn));
       if (section_is_overlay (section)
 	  && !section_is_mapped (section))
 	{
@@ -1155,7 +1173,7 @@ signal_command (const char *signum_exp, int from_tty)
     = strip_bg_char (signum_exp, &async_exec);
   signum_exp = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (!signum_exp)
     error_no_arg (_("signal number"));
@@ -1400,7 +1418,7 @@ until_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (arg)
     until_break_command (arg, from_tty, 0);
@@ -1425,7 +1443,7 @@ advance_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   until_break_command (arg, from_tty, 1);
 }
@@ -1772,7 +1790,7 @@ finish_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (current_top_target (), async_exec);
+  prepare_execution_command (current_inferior ()->top_target (), async_exec);
 
   if (arg)
     error (_("The \"finish\" command does not take any arguments."));
@@ -2565,6 +2583,8 @@ attach_command (const char *args, int from_tty)
 
   dont_repeat ();		/* Not for the faint of heart */
 
+  scoped_disable_commit_resumed disable_commit_resumed ("attaching");
+
   if (gdbarch_has_global_solist (target_gdbarch ()))
     /* Don't complain if all processes share the same symbol
        space.  */
@@ -2673,6 +2693,8 @@ attach_command (const char *args, int from_tty)
     }
   else
     attach_post_wait (args, from_tty, mode);
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* We had just found out that the target was already attached to an
@@ -2746,9 +2768,21 @@ detach_command (const char *args, int from_tty)
   if (inferior_ptid == null_ptid)
     error (_("The program is not being run."));
 
+  scoped_disable_commit_resumed disable_commit_resumed ("detaching");
+
   query_if_trace_running (from_tty);
 
   disconnect_tracing ();
+
+  /* Hold a strong reference to the target while (maybe)
+     detaching the parent.  Otherwise detaching could close the
+     target.  */
+  auto target_ref
+    = target_ops_ref::new_reference (current_inferior ()->process_target ());
+
+  /* Save this before detaching, since detaching may unpush the
+     process_stratum target.  */
+  bool was_non_stop_p = target_is_non_stop_p ();
 
   target_detach (current_inferior (), from_tty);
 
@@ -2766,6 +2800,11 @@ detach_command (const char *args, int from_tty)
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
+
+  if (!was_non_stop_p)
+    restart_after_all_stop_detach (as_process_stratum_target (target_ref.get ()));
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* Disconnect from the current target without resuming it (leaving it
@@ -2814,6 +2853,8 @@ stop_current_target_threads_ns (ptid_t ptid)
 void
 interrupt_target_1 (bool all_threads)
 {
+  scoped_disable_commit_resumed disable_commit_resumed ("interrupting");
+
   if (non_stop)
     {
       if (all_threads)
@@ -2831,6 +2872,8 @@ interrupt_target_1 (bool all_threads)
     }
   else
     target_interrupt ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* interrupt [-a]

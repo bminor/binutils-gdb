@@ -1,3 +1,726 @@
+2021-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 27725
+	* rename.c (get_stat_atime, get_stat_mtime): Make static.
+	(get_stat_atime_ns, get_stat_mtime_ns): Likewise.
+
+2021-04-15  Pekka Seppänen  <pexu@sourceware.mail.kapsi.fi>
+
+	PR 27725
+	* rename.c (get_stat_atime_ns): Add ATTRIBUTE_UNUSED.
+	(get_stat_mtime_ns): Likewise.
+
+2021-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 27725
+	* configure.ac: Check for sys/time.h and utimensat.  Use standard
+	checks for mkstemp and mkdtemp.  Whitespace.  Check for nanosecond
+	members of struct stat.
+	* rename.c: Prefer sys/time.h for utimes over utime.h for utime.
+	(STAT_TIMESPEC, STAT_TIMESPEC_NS): Define
+	(get_stat_atime_ns, get_stat_mtime_ns): New inline functions.
+	(get_stat_atime, get_stat_mtime): Likewise.
+	(set_times): Choose first available of utimensat, utimes, utime.
+	Use above inline functions to set timespec and timeval values.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Add test of
+	file timestamp when --preserve-dates is used.
+
+2021-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 27456
+	* rename.c (smart_rename): When TO and FROM are equal, just set
+	file timestamp.
+	* objcopy.c (strip_main, copy_main): Always call smart_rename.
+
+2021-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27708
+	* testsuite/binutils-all/x86-64/pr27708.dump: New file.
+	* testsuite/binutils-all/x86-64/pr27708.exe.bz2: Likewise.
+	* testsuite/binutils-all/x86-64/x86-64.exp: Run binutils/27708
+	test.
+
+2021-04-14  Mark Harmstone  <mark@harmstone.com>
+
+	PR 27686
+	* resbin.c (bin_to_res_version): Ignore any trailing bytes at the
+	end of the structure.
+
+2021-04-14  Frederic Cambus  <fred@statdns.com>
+
+	* readelf.c (get_netbsd_elfcore_note_type): Remove unneeded #ifdef
+	checks for NT_NETBSDCORE_AUXV and NT_NETBSDCORE_LWPSTATUS.
+
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27716
+	* objdump.c (show_line): Don't limit paths to PATH_MAX.
+	* readelf.c (struct filedata): Change program_interpreter from
+	a char array to a char pointer.
+	(process_program_headers): Sanity check PT_INTERP p_filesz.
+	Malloc program_interpreter using p_filesz and read directly from
+	file.
+	(process_dynamic_section): Check program_interpreter is non-NULL.
+	(free_filedata): New function, split out from..
+	(process_object): ..here.
+	(close_debug_file): Call free_filedata.
+	* sysdep.h: Don't include sys/param.h.
+	(PATH_MAX): Don't define.
+	* configure.ac: Don't check for sys/param.h.
+	* configure: Regenerate.
+
+2021-04-13  Frederic Cambus  <fred@statdns.com>
+
+	* readelf.c (process_netbsd_elf_note): Remove now unneeded #ifdef
+	check for NT_NETBSD_PAX.
+
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (--enable-checking): Add support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (struct objdump_disasm_info): Delete dynrelbuf and
+	dynrelcount.
+	(find_symbol_for_address): Adjust for dynrelbuf and dynrelcount move.
+	(disassemble_section, disassemble_data): Likewise.
+
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (objdump_symbol_at_address): Return asymbol*.
+
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
+	* NEWS: Mention C99 requirement.
+	* README: Likewise.  Modernise examples and "Reporting bugs".
+
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Assume long long is available.  Don't test for
+	strings.h, stdlib.h, limits.h, locale.h, or wchar.h.  Check
+	inttypes.h, stdint.h, sys/stat.h and sys/types.h. Don't check for
+	strcoll, setlocale, setmode or location of time_t.  Don't check
+	for fprintf, getenv, snprintf, strnlen, strstr or vsnprintf decls.
+	(AC_ISC_POSIX, AXC_HEADER_STRING, AC_FUNC_ALLOCA): Don't invoke.
+	* sysdep.h: Don't include alloca-conf.h, include config.h instead.
+	Test HAVE_SYS_TYPES_H and reorder includes.  Include limits.h,
+	locale.h, string.h and stdlib.h unconditionally.  Remove various
+	fallback declarations.  Assume long long is available.
+	* addr2line.c: Don't test HAVE_SETLOCALE.
+	* ar.c: Likewise.
+	* coffdump.c: Likewise.
+	* dlltool.c: Likewise.
+	* dllwrap.c: Likewise.
+	* elfedit.c: Likewise.
+	* nm.c: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+	* readelf.c: Likewise.
+	* size.c: Likewise.
+	* srconv.c: Likewise.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+	* windmc.c: Likewise.
+	* windres.c: Likewise.
+	* bucomm.c: Don't test HAVE_TIME_T_IN_TIME_H or HAVE_TIME_T_IN_TYPES_H.
+	* dwarf.c: Include limits.h unconditionally.  Assume long long
+	is available.
+	* nm.c: Don't test HAVE_STRCOLL.
+	* readelf.c: Don't test HAVE_WCHAR_H.
+	* strings.c: Assume long long is available.
+	* syslex.l: Include string.h unconditionally.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* elfcomm.h (strneq): Remove strneq and use startswith.
+	* readelf.c (ia64_process_unwind): Likewise.
+	(process_note): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* dllwrap.c: Use startswith function.
+	* objcopy.c (is_dwo_section): Likewise.
+	(handle_remove_section_option): Likewise.
+	(copy_main): Likewise.
+	* objdump.c (is_significant_symbol_name): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* dwarf.c (display_debug_lines_raw): Replace const_strneq with
+	startswith.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_links): Likewise.
+	* elfcomm.c (setup_archive): Likewise.
+	* elfcomm.h (const_strneq): Likewise.
+	* readelf.c (process_section_headers): Likewise.
+	(slurp_ia64_unwind_table): Likewise.
+	(slurp_hppa_unwind_table): Likewise.
+	(decode_arm_unwind): Likewise.
+	(display_debug_section): Likewise.
+	(process_note): Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h (POISON_BFD_BOOLEAN): Define.
+	* addr2line.c, * ar.c, * arsup.c, * bfdtest2.c, * binemul.c,
+	* binemul.h, * bucomm.c, * bucomm.h, * budbg.h, * coffgrok.c,
+	* debug.c, * debug.h, * dlltool.c, * dwarf.c, * dwarf.h,
+	* elfedit.c, * emul_aix.c, * mclex.c, * nm.c, * objcopy.c,
+	* objdump.c, * od-macho.c, * prdbg.c, * rdcoff.c, * rddbg.c,
+	* readelf.c, * rename.c, * stabs.c, * strings.c, * windint.h,
+	* windmc.c, * windmc.h, * windres.c, * winduni.c,
+	* wrstabs.c: Replace bfd_boolean with bool, FALSE with false,
+	and TRUE with true throughout.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* coffdump.c: Include stdint.h in place of bfd_stdint.h.
+	* dwarf.c: Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* prdbg.c (pr_function_type): Replace LITSTTCPY with strcpy.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* dlltool.c (main): Don't use "boolean_condition ? TRUE : FALSE".
+	* dwarf.c (read_and_display_attr_value): Likewise.
+	(display_debug_str_offsets): Likewise.
+	* objdump.c (dump_bfd): Likewise.
+	* readelf.c (dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (process_links): Use type int.
+	* readelf.c (request_dump): Don't increment do_dump, set it.
+	* windint.h (target_is_bigendian): Use type bfd_boolean.
+	* windmc.c (target_is_bigendian): Likewise.
+	* windres.c (target_is_bigendian): Likewise.
+
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* dlltool.c (scan_drectve_symbols): Replace usage of CONST_STRNEQ
+	with startswith.
+	* emul_aix.c (ar_emul_aix_parse_arg): Likewise.
+	* objcopy.c (is_mergeable_note_section): Likewise.
+	* objdump.c (dump_dwarf_section): Likewise.
+	* prdbg.c (pr_method_type): Likewise.
+	(pr_class_baseclass): Likewise.
+	(tg_class_baseclass): Likewise.
+	* readelf.c (process_lto_symbol_tables): Likewise.
+	* stabs.c (ULLHIGH): Likewise.
+	(parse_stab_argtypes): Likewise.
+	(stab_demangle_function_name): Likewise.
+
+2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_machine_name): Add EM_INTELGT.
+
+2021-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 27478
+	* readelf.c (dump_section_as_strings): Mention separate filename.
+	(dump_section_as_bytes): Likewise.
+	(dump_section_as_ctf): Likewise.
+	(initialise_dumkps_byname): Only issue a warning for missing
+	sections if processing the main file.
+	(process_section_contents): Only issue a warning for unsumped
+	section numbers in the main file.
+	(initialise_dump_sects): New function.  Contains code extracted
+	from ...
+	(process_object): ... here.  Also call initialise_dump_sects for
+	separate files.
+
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 27534
+	* readelf.c (display_debug_section): Also retain .debug_addr
+	sections.
+
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 27533
+	* readelf.c (process_section_contents): Only dump debug
+	information for separate files unless process_links is enabled.
+	(process_object): Always call process_section_contents for
+	separate info files.
+
+2021-03-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 27487
+	* nm.c (FORMAT_JUST_SYMBOLS): Define.
+	(struct optput_fns): Add entry for FORMAT_JUST_SYMBOLS.
+	(long_options): Add just-symbols.
+	(set_output_format): Add support for just-symbols.
+	(get_print_format): Likewise.
+	(do_not_print_object_filename): New function.
+	(do_not_print_archive_filename): New function.
+	(do_not_print_archive_member): New function.
+	(do_not_print_symbol_filename): New function.
+	(just_print_symbol_name): New function.
+	(main): Handle --just-symbols.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* od-xcoff.c: Replace RTB by TRL entry.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (get_note_type): Handle NT_RISCV_CSR.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* readelf.c (get_note_type): Handle NT_GDB_TDESC.
+
+2021-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 27387
+	* dwarf.c (display_debug_macro): Handle the displaying of
+	DW_MACRO_define_strp and DW_MACRO_undef_strp in v4
+	.debug_macro.dwo sections.
+
+2021-03-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 27478
+	* objdump.c (process_links): New variable.
+	(usage): Add --process-links.
+	(long_options): Likewise.
+	(dump_bfd): Stop processing once the bfd has been loaded unless
+	this is the main file or process_links has been enabled.
+	(main): Handle the process-links option.
+	* readelf.c (process_links): New variable.
+	(struct filedata): Add is_separate field.
+	(options): Add --process-links.
+	(usage): Likewise.
+	(parse_args): Likewise.
+	(process_file_header): Include the filename when dumping
+	information for separate debuginfo files.
+	(process_program_headers): Likewise.
+	(process_section_headers): Likewise.
+	(process_section_groups): Likewise.
+	(process_relocs): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(display_lto_symtab): Likewise.
+	(process_symbol_table): Likewise.
+	(process_syminfo): Likewise.
+	(initialise_dumps_by_name): Likewise.
+	(process_section_contents): Likewise.
+	(process_notes_at): Likewise.
+	(process_notes): Likewise.
+	(open_file): Add is_separate parameter.  Use to initialise the
+	is_separate field in the filedata structure.
+	(open_deug): Update call to open_file.
+	(process_object): Add processing of the contents of separate
+	debuginfo files, gated by the process_links variable.
+	(process_archive): Update call to open_file.
+	(process_file): Initialise the is_separate field in the filedata
+	structure.
+	* dwarf.c (load_separate_debug_info_file): Only report the
+	loading of a separate file if debug links are being dumped.
+	* objcopy.c (keep_section_symbols): New variable.
+	(enum command_line_switch): Add OPTION_KEEP_SYMBOLS.
+	(strip_options): Add keep-section-symbols.
+	(copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(copy_object): Keep section symbols if requested by command line
+	option.
+	(strip_main): Handle --keep-section-symbols.
+	(copy_main): Likewise.
+	* doc/binutils.texi: Document the new options.
+	* NEWS: Mention the new features.
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink):
+	Update options passed to objdump.  Use diff rather than cmp to
+	compare the dumped data.
+	* testsuite/binutils-all/objdump.WK2: Update regexp.
+	* testsuite/binutils-all/objdump.WK3: Update regexp.
+	* testsuite/binutils-all/objdump.exp: Use --process-links
+	instead of --dwarf=follow-links.
+	* testsuite/binutils-all/readelf.exp (readelf_test): Include
+	readelf's output in the log when the test fails.
+	Add the -P option to the -wKis test.
+	* testsuite/binutils-all/readelf.wKis: Update expected output.
+
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27493
+	* objcopy.c (filter_symbols): Apply --weaken to undefined symbols.
+	* NEWS: Mention feature.
+
+2021-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27486
+	* dwarf.c (load_separate_debug_info): Issue warning only if
+	do_debug_links is set.
+	* testsuite/binutils-all/compress.exp: Run objdump and readelf
+	with missing debug file.
+
+2021-03-01  Alan Modra  <amodra@gmail.com>
+
+	PR 27128
+	* doc/binutils.texi: Add nm --with-symbol-versions and
+	--without-symbol-versions documentation.
+	* nm.c (with_symbol_versions): New variable.
+	(enum long_option_values): Delete OPTION_WITH_SYMBOL_VERSIONS.
+	(long_options): Make --with-symbol-versions entry twiddle the flag.
+	Add --without-symbol-versions.
+	(print_symname): Strip version when !with_symbol_versions.  Add
+	dynamic version info under control of with_symbol_versions.
+	(main): Remove OPTION_WITH_SYMBOL_VERSIONS case.
+
+2021-02-26  Fangrui Song  <maskray@google.com>
+
+	PR 27408
+	* readelf.c (quiet): New option flag.
+	(enum long_option_values): New enum to hold long option value.
+	(long_options): Add --quiet.
+	(usage): Mention --quiet.
+	(display_rel_file): If quiet is enabled, suppress "no symbols".
+	(main): Handle the new option.
+	* NEWS: Mention --quiet.
+	* docs/binutils.texi: Document --quiet.
+
+2021-02-26  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (display_debug_addr): Handle dwarf-5 .debug_addr bits.
+
+2021-02-26  Tom de Vries  <tdevries@suse.de>
+
+	PR 27390
+	* dwarf.c: (skip_attr_bytes): Add support for DW_FORM_str* and
+	DW_FORM_addrx*.
+	(read_and_display_attr_value): Likewise.
+
+2021-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (get_type_abbrev_from_form): Accept but ignore sup
+	forms.
+	(read_and_display_attr_value): Handle sup forms.
+	(display_debug_sup): New function.  Displays the contents of a
+	.debug_sup section.
+	(load_debug_sup_file): New function.  Loads the contents of a file
+	referenced by a .debug_sup section.
+	(check_for_and_load_links): Call load_debug_sup_file.
+	(debug_displays): Add entry for .debug_sup.
+	* dwarf.h (enum dwarf_section_display_enum): Add debug_sup.
+	* readelf.c (process_section_headers): Add support for debug_sup.
+	* doc/debug.options.texi: Note that the =links option will display
+	the contents of .debug_sup sections.
+	* NEWS: Mention the new support.
+
+2021-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR 27456
+	* rename.c (simple_copy): Mark target_stat ATTRIBUTE_UNUSED.
+
+2021-02-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 27285
+	* od-elf32_avr.c (elf32_avr_get_memory_usage): Check for overflows
+	when adding together the section sizes.
+
+2021-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Remove support for v1/v2 GNU
+	build notes.
+	* readelf.c (print_gnu_build_attribute_description): Likewise.
+
+2021-02-24  Alan Modra  <amodra@gmail.com>
+	    Siddhesh Poyarekar  <siddhesh@gotplt.org>
+
+	PR 27456
+	* bucomm.h (smart_rename): Update prototype.
+	* rename.c (smart_rename): Add fromfd and preserve_dates params.
+	Pass fromfd and target_stat to simple_copy.  Call set_times
+	when preserve_dates.
+	(simple_copy): Accept fromfd rather than from filename.  Add
+	target_stat param.  Rewind fromfd rather than opening.  Open
+	"to" file without O_CREAT.  Try to preserve S_ISUID and S_ISGID.
+	* ar.c (write_archive): Rename ofd to tmpfd.  Dup tmpfd before
+	closing output temp file, and pass tmpfd to smart_rename.
+	* arsup.c (temp_fd): Rename from real_fd.
+	(ar_save): Dup temp_fd and pass to smart_rename.
+	* objcopy.c (strip_main, copy_main): Likewise, and pass
+	preserve_dates.
+
+2021-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 27456
+	* rename.c: Tidy throughout.
+	(smart_rename): Always copy.  Remove windows specific code.
+
+2021-02-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp: Whitespace fixes throughout.
+	(run_dump_test): Fail if expecting errors from a file like we do
+	for error strings, if no error is seen.
+
+2021-02-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/readelf.exp (pr26548): Run for 32-bit too.
+
+2021-02-19  Siddhesh Poyarekar  <siddhesh@gotplt.org>
+
+	* ar.c (write_archive): Remove TARGET_STAT.  Adjust call to
+	SMART_RENAME.
+	* arsup.c (ar_save): Likewise.
+	* objcopy (strip_main): Don't copy TMPFD.  Don't set times on
+	temporary file and adjust call to SMART_RENAME.
+	(copy_main): Likewise.
+	* rename.c [!S_ISLNK]: Remove definitions.
+	(try_preserve_permissions): Remove function.
+	(smart_rename): Remove FD, PRESERVE_DATES arguments.  Use
+	rename system call only if TO does not exist.
+	* bucomm.h (smart_rename): Adjust declaration.
+
+2021-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (merge_gnu_build_notes): Handle notes with a start
+	address that is higher than the end address.
+
+2021-02-17  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c: Include limits.h.
+	(CHAR_BIT): Provide backup define.
+	(read_leb128): Use CHAR_BIT to size "result" in bits.  Correct
+	signed overflow checking.
+	* testsuite/binutils-all/pr26548.s,
+	* testsuite/binutils-all/pr26548.d,
+	* testsuite/binutils-all/pr26548e.d: New tests.
+	* testsuite/binutils-all/readelf.exp: Run them.
+	(readelf_test): Drop unused "xfails" parameter.  Update all uses.
+
+2021-02-16  Jan Beulich  <jbeulich@suse.com>
+
+	* dwarf.c (process_debug_info): Initialize "dwo_id".
+
+2021-02-15  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (load_specific_debug_section): Don't call
+	bfd_cache_section_contents.  Rearrange so that
+	bfd_get_full_section_contents is not called on path where
+	bfd_simple_get_relocated_section_contents is called.
+	Don't set section->user_data.
+	(free_debug_section): Always free section->start.  Don't twiddle
+	section flags.
+	* readelf.c (load_specific_debug_section): Don't set user_data.
+	* dwarf.h (struct dwarf_section): Remove use_data field.
+	* dwarf.c (NO_ABBREVS, ABBREV): Adjust to suit.
+
+2021-02-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/compress.exp: Remove nds32 xfails.
+	* testsuite/binutils-all/objdump.exp: Likewise.
+
+2021-02-14  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (slurp_symtab): Don't add an extra entry for NULL
+	to the symbol array.
+	(slurp_dynamic_symtab): Likewise.
+	(dump_bfd): Formatting.  Copy terminating NULL from extra_syms.
+
+2021-02-14  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (follow-debug-links): Add option to enable or
+	disable the following of debug links by default.  Set the
+	default for the option to be 'follow'.
+	* dwarf.c (do_follow_links): Initialise with DEFAULT_FOR_FOLLOW_LINKS.
+	(dwarf_select_sections_by_names): Add no-follow-links option.
+	(dwarf_select_sections_by_letter): Add 'N' option.
+	* objdump.c (usage): Add conditional text describing the
+	follow links option.
+	(slurp_symtab): Ensure that there is a NULL entry at the end
+	of the symbol table.
+	(slurp_dynamic_symtab): Likewise.
+	(dump_bfd): When extending the symbol table, ensure that there
+	is still a NULL entry at the end.
+	* readelf.c (usage): Add conditional text describing the
+	follow links option.
+	* doc/binutils.texi: Update documentation for objcopy and
+	readelf.
+	* doc/debug.options.texi: Update documentation of the
+	follow-links option.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* testsuite/binutils-all/compress.exp: Add the -WN option to
+	objdump command lines that are not expecting to follow links.
+	* testsuite/binutils-all/readelf.exp: Add the
+	--debug-dump=no-follow-links option to tests that are not
+	expecting to follow debug links.
+	* NEWS: Mention the new behaviour.
+
+2021-02-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp: Report "unsupported" when
+	gas or ld fails to build a testcase rather than "unresolved".
+	Report "fail" when readelf returns an error status rather than
+	"unresolved".
+	* testsuite/binutils-all/ar.exp: Likewise.
+	* testsuite/binutils-all/compress.exp: Likewise.
+	* testsuite/binutils-all/readelf.exp: Likewise.
+
+2021-02-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/pr25662.s: Replace "a" with "aaa" and
+	"c" with "ccc" labels.
+
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.h (debug_info): Fix typo in comment.
+
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (display_debug_str_offsets): Handle multiple sets of
+	entries.
+
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (process_debug_info): Print DWO ID.
+
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27290
+	PR 27293
+	PR 27295
+	* od-elf32_avr.c (elf32_avr_get_note_section_contents): Formatting.
+	Use bfd_malloc_and_get_section.
+	(elf32_avr_get_note_desc): Formatting.  Return descsz.  Sanity
+	check namesz.  Return NULL if descsz is too small.  Ensure
+	string table is terminated.
+	(elf32_avr_get_device_info): Formatting.  Add note_size param.
+	Sanity check note.
+	(elf32_avr_dump_mem_usage): Adjust to suit.
+
+2021-02-10  Tom de Vries  <tdevries@suse.de>
+
+	PR binutils/27391
+	* dwarf.c (load_dwo_file): Handle case that name is absolute path.
+
+2021-02-10  Tom de Vries  <tdevries@suse.de>
+
+	PR binutils/27371
+	* dwarf.c (display_debug_ranges): Filter range lists according to
+	section.
+
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
+	PR binutils/27370
+	* dwarf.c (get_type_abbrev_from_form): Handle DW_FORM_ref_sig8.
+
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
+	PR binutils/27386
+	* dwarf.c (process_debug_info): Handling DW_UT_skeleton and
+	DW_UT_split_compile.
+
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Remove
+	symbianelf.
+
+2021-02-07  Alan Modra  <amodra@gmail.com>
+
+	* unwind-ia64.c (unw_print_xyreg): Don't leave output buffer
+	uninitialised on invalid input.
+
+2021-02-06  Alan Modra  <amodra@gmail.com>
+
+	PR 27349
+	* rename.c (smart_rename): Test for existence and type of output
+	file with lstat.
+
+2021-02-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Remove Richard Henderson as the ALPHA maintainer.
+
+2021-02-05  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27252
+	* elfedit.c (check_file):
+	* bucomm.c (get_file_size): Fix typos in comments.
+
+2021-02-05  Alan Modra  <amodra@gmail.com>
+
+	PR 27345
+	* arsup.c (ar_save): Use stat rather than lstat.
+
+2021-02-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27270
+	PR 27284
+	PR 26945
+	* ar.c: Don't include libbfd.h.
+	(write_archive): Replace xmalloc+strcpy with xstrdup.  Use
+	bfd_stat rather than fstat on iostream.  Move stat and fd tests
+	outside of _WIN32 ifdef.  Delete skip_stat variable.
+	* arsup.c (temp_name, real_ofd): New static variables.
+	(ar_open): Use make_tempname and bfd_fdopenw.
+	(ar_save): Adjust to suit ar_open changes.  Move stat output
+	of _WIN32 ifdef.
+	* objcopy.c: Don't include libbfd.h.
+	(copy_file): Use bfd_stat.
+
+2021-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27281
+	* readelf.c (process_section_headers): Add 'R' and 'D' to
+	"Key to Flags:".
+	* testsuite/binutils-all/retain1a.d: Updated.
+
+2021-01-30  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Small updates after the 2.35.2
+	release.
+
+2021-01-28  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 4356
+	* windres.c (quot): Use double quotes to protect strings on
+	Windows platforms.
+
+2021-01-28  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27252
+	* bucomm.c (get_file_size): Add code to handle /dev/null on
+	Windows systems.
+	* elfedit.c (check_file): Likewise.
+
+2021-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_main): Remove conditional control of the calls
+	to free, simplifying the code and making it easier to detect
+	typos.
+
+2021-01-26  Frederic Cambus  <fred@statdns.com>
+
+	* objcopy.c (copy_main): Fix a double free happening when both
+	--localize-symbols and --globalize-symbols options are invoked
+	together.
+
 2021-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Minor updates after the 2.36 release.

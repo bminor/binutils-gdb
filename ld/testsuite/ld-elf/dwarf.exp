@@ -85,7 +85,7 @@ proc strip_test {} {
     set prog $strip
 
     if ![ld_link $ld tmpdir/$test "-shared tmpdir/dwarf1.o"] {
-	unresolved "$test_name"
+	fail "$test_name"
 	return
     }
 
@@ -93,7 +93,7 @@ proc strip_test {} {
     catch "exec $NM -D tmpdir/$test > tmpdir/$test.exp" got
     if ![string match "" $got] then {
 	send_log "$got\n"
-	unresolved "$test_name"
+	fail "$test_name"
 	return
     }
 
@@ -109,7 +109,7 @@ proc strip_test {} {
     catch "exec $NM -D tmpdir/$test > tmpdir/$test.out" got
     if ![string match "" $got] then {
 	send_log "$got\n"
-	unresolved "$test_name"
+	fail "$test_name"
  	return
     }
 

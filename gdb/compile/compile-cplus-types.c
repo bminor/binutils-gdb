@@ -91,7 +91,7 @@ get_method_access_flag (const struct type *type, int fni, int num)
   gdb_assert (type->code () == TYPE_CODE_STRUCT);
 
   /* If this type was not declared a class, everything is public.  */
-  if (!TYPE_DECLARED_CLASS (type))
+  if (!type->is_declared_class ())
     return GCC_CP_ACCESS_PUBLIC;
 
   /* Otherwise, read accessibility from the fn_field.  */
@@ -828,11 +828,11 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
   gcc_decl resuld;
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
+      const char *what = type->is_declared_class () ? "class" : "struct";
 
       resuld = instance->plugin ().build_decl
 	(what, name.get (), (GCC_CP_SYMBOL_CLASS | nested_access
-			     | (TYPE_DECLARED_CLASS (type)
+			     | (type->is_declared_class ()
 				? GCC_CP_FLAG_CLASS_NOFLAG
 				: GCC_CP_FLAG_CLASS_IS_STRUCT)),
 	 0, nullptr, 0, filename, line);
@@ -971,9 +971,9 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
   if (target_type == nullptr)
     {
       if (type->is_objfile_owned ())
-	target_type = objfile_type (type->objfile ())->builtin_int;
+	target_type = objfile_type (type->objfile_owner ())->builtin_int;
       else
-	target_type = builtin_type (type->arch ())->builtin_int;
+	target_type = builtin_type (type->arch_owner ())->builtin_int;
       warning (_("function has unknown return type; assuming int"));
     }
 

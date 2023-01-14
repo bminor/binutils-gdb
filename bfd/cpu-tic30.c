@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_tic30_arch =
   "tic30",
   "tms320c30",
   2,
-  TRUE,				/* The one and only.  */
+  true,				/* The one and only.  */
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

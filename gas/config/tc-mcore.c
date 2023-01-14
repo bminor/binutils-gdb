@@ -361,7 +361,7 @@ mcore_s_section (int ignore)
   while (*ilp != 0 && ISSPACE (*ilp))
     ++ ilp;
 
-  if (strncmp (ilp, ".line", 5) == 0
+  if (startswith (ilp, ".line")
       && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
     ;
   else
@@ -2229,7 +2229,7 @@ mcore_force_relocation (fixS * fix)
 /* Return true if the fix can be handled by GAS, false if it must
    be passed through to the linker.  */
 
-bfd_boolean
+bool
 mcore_fix_adjustable (fixS * fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */

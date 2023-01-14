@@ -461,7 +461,7 @@ sh_elf_cons (int nbytes)
 /* The regular frag_offset_fixed_p doesn't work for rs_align_test
    frags.  */
 
-static bfd_boolean
+static bool
 align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
 				bfd_vma *offset)
 {
@@ -474,7 +474,7 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
   if (frag1 == frag2)
     {
       *offset = off;
-      return TRUE;
+      return true;
     }
 
   /* Maybe frag2 is after frag1.  */
@@ -492,7 +492,7 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
       if (frag == frag2)
 	{
 	  *offset = off;
-	  return TRUE;
+	  return true;
 	}
     }
 
@@ -512,11 +512,11 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
       if (frag == frag1)
 	{
 	  *offset = off;
-	  return TRUE;
+	  return true;
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Optimize a difference of symbols which have rs_align_test frag if
@@ -2526,7 +2526,7 @@ md_assemble (char *str)
       char *name = initial_str;
       int name_length = 0;
       const sh_opcode_info *op;
-      bfd_boolean found = FALSE;
+      bool found = false;
 
       /* Identify opcode in string.  */
       while (ISSPACE (*name))
@@ -2541,7 +2541,7 @@ md_assemble (char *str)
 	  if (strncasecmp (op->name, name, name_length) == 0
 	      && op->name[name_length] == '\0')
 	    {
-	      found = TRUE;
+	      found = true;
 	      break;
 	    }
 	}
@@ -2824,7 +2824,7 @@ md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)
 
 #ifdef OBJ_ELF
     case OPTION_FDPIC:
-      sh_fdpic = TRUE;
+      sh_fdpic = true;
       break;
 #endif /* OBJ_ELF */
 
@@ -3278,7 +3278,7 @@ sh_handle_align (fragS *frag)
 
 /* See whether the relocation should be resolved locally.  */
 
-static bfd_boolean
+static bool
 sh_local_pcrel (fixS *fix)
 {
   return (! sh_relax
@@ -3327,7 +3327,7 @@ sh_force_relocation (fixS *fix)
 }
 
 #ifdef OBJ_ELF
-bfd_boolean
+bool
 sh_fix_adjustable (fixS *fixP)
 {
   if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL

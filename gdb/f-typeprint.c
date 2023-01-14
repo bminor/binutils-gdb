@@ -242,8 +242,8 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	  fprintf_filtered (stream, ") ");
 	fprintf_filtered (stream, "(");
 	if (nfields == 0 && type->is_prototyped ())
-	  print_type (builtin_f_type (get_type_arch (type))->builtin_void,
-			"", stream, -1, 0, 0);
+	  print_type (builtin_f_type (type->arch ())->builtin_void,
+		      "", stream, -1, 0, 0);
 	else
 	  for (i = 0; i < nfields; i++)
 	    {
@@ -342,8 +342,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_VOID:
       {
-	gdbarch *gdbarch = get_type_arch (type);
-	struct type *void_type = builtin_f_type (gdbarch)->builtin_void;
+	struct type *void_type = builtin_f_type (type->arch ())->builtin_void;
 	fprintf_filtered (stream, "%*s%s", level, "", void_type->name ());
       }
       break;

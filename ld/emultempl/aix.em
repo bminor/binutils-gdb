@@ -58,7 +58,7 @@ fragment <<EOF
 #include "libxcoff.h"
 #include "xcofflink.h"
 
-static void gld${EMULATION_NAME}_read_file (const char *, bfd_boolean);
+static void gld${EMULATION_NAME}_read_file (const char *, bool);
 static void gld${EMULATION_NAME}_free (void *);
 static void gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *);
 static void gld${EMULATION_NAME}_find_exp_assignment (etree_type *);
@@ -145,8 +145,8 @@ gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
 
-  input_flags.dynamic = TRUE;
-  config.has_shared = TRUE;
+  input_flags.dynamic = true;
+  config.has_shared = true;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
      Override them here so we can use the link_info.init_function as a
@@ -275,7 +275,7 @@ gld${EMULATION_NAME}_add_options
   memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_parse_args (int argc, char **argv)
 {
   int indx;
@@ -287,7 +287,7 @@ gld${EMULATION_NAME}_parse_args (int argc, char **argv)
   if (indx == 0)
     indx = 1;
 
-  if (indx < argc && CONST_STRNEQ (argv[indx], "-b"))
+  if (indx < argc && startswith (argv[indx], "-b"))
     {
       char *s;
 
@@ -300,7 +300,7 @@ gld${EMULATION_NAME}_parse_args (int argc, char **argv)
 	    }
 	}
     }
-  return FALSE;
+  return false;
 }
 
 /* Helper for option '-f', which specify a list of input files.
@@ -373,7 +373,7 @@ read_file_list (const char *filename)
   fclose (f);
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   bfd_signed_vma val;
@@ -382,7 +382,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case 0:
       /* Long option which just sets a flag.  */
@@ -423,7 +423,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	 ignore the AIX option, because gcc passes it to the linker.  */
       val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
-	return FALSE;
+	return false;
       lang_section_start (".text", exp_intop (val), NULL);
       break;
 
@@ -468,7 +468,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_AUTOIMP:
-      link_info.static_link = FALSE;
+      link_info.static_link = false;
       break;
 
     case OPTION_ERNOTOK:
@@ -492,7 +492,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_EXPORT:
-      gld${EMULATION_NAME}_read_file (optarg, FALSE);
+      gld${EMULATION_NAME}_read_file (optarg, false);
       break;
 
     case OPTION_IMPORT:
@@ -545,7 +545,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_NOAUTOIMP:
-      link_info.static_link = TRUE;
+      link_info.static_link = true;
       break;
 
     case OPTION_NOEXPALL:
@@ -559,7 +559,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_NOSTRCMPCT:
-      link_info.traditional_format = TRUE;
+      link_info.traditional_format = true;
       break;
 
     case OPTION_PD:
@@ -608,11 +608,11 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_STRCMPCT:
-      link_info.traditional_format = FALSE;
+      link_info.traditional_format = false;
       break;
 
     case OPTION_UNIX:
-      unix_ld = TRUE;
+      unix_ld = true;
       break;
 
     case OPTION_32:
@@ -637,24 +637,24 @@ gld${EMULATION_NAME}_handle_option (int optc)
 
     }
 
-  return TRUE;
+  return true;
 }
 
 /* This is called when an input file can not be recognized as a BFD
    object or an archive.  If the file starts with #!, we must treat it
    as an import file.  This is for AIX compatibility.  */
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry)
 {
   FILE *e;
-  bfd_boolean ret;
+  bool ret;
 
   e = fopen (entry->filename, FOPEN_RT);
   if (e == NULL)
-    return FALSE;
+    return false;
 
-  ret = FALSE;
+  ret = false;
 
   if (getc (e) == '#' && getc (e) == '!')
     {
@@ -669,8 +669,8 @@ gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry)
 	flpp = &(*flpp)->next;
       *flpp = n;
 
-      ret = TRUE;
-      entry->flags.loaded = TRUE;
+      ret = true;
+      entry->flags.loaded = true;
     }
 
   fclose (e);
@@ -744,12 +744,12 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
-    gld${EMULATION_NAME}_read_file (fl->name, TRUE);
+    gld${EMULATION_NAME}_read_file (fl->name, true);
   for (el = export_symbols; el != NULL; el = el->next)
     {
       struct bfd_link_hash_entry *h;
 
-      h = bfd_link_hash_lookup (link_info.hash, el->name, FALSE, FALSE, FALSE);
+      h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
       if (h == NULL)
 	einfo (_("%F%P: bfd_link_hash_lookup of export symbol failed: %E\n"));
       if (!bfd_xcoff_export_symbol (link_info.output_bfd, &link_info, h))
@@ -833,10 +833,9 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* Let the XCOFF backend set up the .loader section.  */
   if (!bfd_xcoff_size_dynamic_sections
-      (link_info.output_bfd, &link_info, libpath, entry_symbol.name, file_align,
-       maxstack, maxdata, gc && !unix_ld ? TRUE : FALSE,
-       modtype, textro ? TRUE : FALSE, flags, special_sections,
-       rtld ? TRUE : FALSE))
+      (link_info.output_bfd, &link_info, libpath, entry_symbol.name,
+       file_align, maxstack, maxdata, gc && !unix_ld,
+       modtype, textro, flags, special_sections, rtld))
     einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
 
   /* Look through the special sections, and put them in the right
@@ -848,7 +847,7 @@ gld${EMULATION_NAME}_before_allocation (void)
       lang_statement_union_type **pls;
       lang_input_section_type *is;
       const char *oname;
-      bfd_boolean start;
+      bool start;
 
       sec = special_sections[i];
       if (sec == NULL)
@@ -908,32 +907,32 @@ gld${EMULATION_NAME}_before_allocation (void)
 	case XCOFF_SPECIAL_SECTION_TEXT:
 	  /* _text */
 	  oname = ".text";
-	  start = TRUE;
+	  start = true;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_ETEXT:
 	  /* _etext */
 	  oname = ".text";
-	  start = FALSE;
+	  start = false;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_DATA:
 	  /* _data */
 	  oname = ".data";
-	  start = TRUE;
+	  start = true;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_EDATA:
 	  /* _edata */
 	  oname = ".data";
-	  start = FALSE;
+	  start = false;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_END:
 	case XCOFF_SPECIAL_SECTION_END2:
 	  /* _end and end */
 	  oname = ".bss";
-	  start = FALSE;
+	  start = false;
 	  break;
 	}
 
@@ -968,6 +967,44 @@ gld${EMULATION_NAME}_before_allocation (void)
 	else
 	  sec->flags |= SEC_KEEP;
       }
+
+  /* Make sure .tdata is removed if empty, even with -r flag.
+     .tdata is always being generated because its size is needed
+     to cumpute .data address.  */
+  if (bfd_link_relocatable (&link_info))
+    {
+      static const char *const thread_sections[] = {
+	".tdata",
+	".tbss"
+      };
+
+      /* Run lang_size_sections (if not already done).  */
+      if (expld.phase != lang_mark_phase_enum)
+	{
+	  expld.phase = lang_mark_phase_enum;
+	  expld.dataseg.phase = exp_seg_none;
+	  one_lang_size_sections_pass (NULL, false);
+	  lang_reset_memory_regions ();
+	}
+
+      for (i = 0; i < ARRAY_SIZE (thread_sections); i++)
+	{
+	  asection *sec;
+
+	  sec = bfd_get_section_by_name (link_info.output_bfd,
+					 thread_sections[i]);
+
+	  if (sec != NULL && sec->rawsize == 0
+	      && (sec->flags & SEC_KEEP) == 0
+	      && !bfd_section_removed_from_list (link_info.output_bfd,
+						 sec))
+	    {
+	      sec->flags |= SEC_EXCLUDE;
+	      bfd_section_list_remove (link_info.output_bfd, sec);
+	      link_info.output_bfd->section_count--;
+	    }
+	}
+    }
 
   before_allocation_default ();
 }
@@ -1092,13 +1129,13 @@ is_syscall (char *input, unsigned int *flag)
    this is called by the handle_option emulation routine.  */
 
 static void
-gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
+gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 {
   struct obstack *o;
   FILE *f;
   int lineno;
   int c;
-  bfd_boolean keep;
+  bool keep;
   const char *imppath;
   const char *impfile;
   const char *impmember;
@@ -1114,7 +1151,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
       return;
     }
 
-  keep = FALSE;
+  keep = false;
 
   imppath = NULL;
   impfile = NULL;
@@ -1181,7 +1218,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 	      char *start;
 
 	      (void) obstack_finish (o);
-	      keep = TRUE;
+	      keep = true;
 	      start = s;
 	      while (!ISSPACE (*s) && *s != '(' && *s != '\0')
 		++s;
@@ -1277,7 +1314,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 	    {
 	      struct export_symbol_list *n;
 
-	      ldlang_add_undef (symname, TRUE);
+	      ldlang_add_undef (symname, true);
 	      n = ((struct export_symbol_list *)
 		   xmalloc (sizeof (struct export_symbol_list)));
 	      n->next = export_symbols;
@@ -1286,8 +1323,8 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 	    }
 	  else
 	    {
-	      h = bfd_link_hash_lookup (link_info.hash, symname, FALSE, FALSE,
-					TRUE);
+	      h = bfd_link_hash_lookup (link_info.hash, symname, false, false,
+					true);
 	      if (h == NULL || h->type == bfd_link_hash_new)
 		{
 		  /* We can just ignore attempts to import an unreferenced
@@ -1366,7 +1403,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
     case etree_provide:
     case etree_provided:
       h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
-				FALSE, FALSE, FALSE);
+				false, false, false);
       if (h == NULL)
 	break;
       /* Fall through.  */
@@ -1506,7 +1543,7 @@ gld${EMULATION_NAME}_set_output_arch (void)
   ldfile_output_machine_name = bfd_printable_name (link_info.output_bfd);
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
 					   search_dirs_type *search,
 					   lang_input_statement_type *entry)
@@ -1514,7 +1551,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
   char *path;
 
   if (!entry->flags.maybe_archive)
-    return FALSE;
+    return false;
 
   if (entry->flags.full_name_provided)
     path = concat (search->name, "/", entry->filename,
@@ -1526,16 +1563,16 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
   if (!ldfile_try_open_bfd (path, entry))
     {
       free (path);
-      return FALSE;
+      return false;
     }
   /* Don't include the searched directory in the import path.  */
   bfd_xcoff_set_archive_import_path (&link_info, entry->the_bfd,
 				     path + strlen (search->name) + 1);
   entry->filename = path;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_print_symbol (struct bfd_link_hash_entry *hash_entry,
 				   void *ptr)
 {
@@ -1562,7 +1599,7 @@ gld${EMULATION_NAME}_print_symbol (struct bfd_link_hash_entry *hash_entry,
       minfo ("             %pT\n", hash_entry->root.string);
     }
 
-  return TRUE;
+  return true;
 }
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {

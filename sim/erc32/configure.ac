@@ -15,7 +15,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Makefile.in)
-sinclude(../common/acinclude.m4)
+AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 SIM_AC_OPTION_WARNINGS(no)
@@ -38,10 +38,13 @@ AC_SUBST(TERMCAP)
 # We prefer the in-tree readline.  Top-level dependencies make sure
 # src/readline (if it's there) is configured before src/sim.
 if test -r ../../readline/Makefile; then
-  READLINE=../../readline/libreadline.a
+  READLINE=../../readline/readline/libreadline.a
+  READLINE_CFLAGS='-I$(READLINE_SRC)/..'
 else
   AC_CHECK_LIB(readline, readline, READLINE=-lreadline,
 	       AC_ERROR([the required "readline" library is missing]), $TERMCAP)
+  READLINE_CFLAGS=
 fi
 AC_SUBST(READLINE)
+AC_SUBST(READLINE_CFLAGS)
 SIM_AC_OUTPUT

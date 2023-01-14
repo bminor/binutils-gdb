@@ -16,6 +16,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-bfd_boolean nacl_modify_segment_map (bfd *, struct bfd_link_info *);
-bfd_boolean nacl_modify_headers (bfd *, struct bfd_link_info *);
-bfd_boolean nacl_final_write_processing (bfd *);
+bool nacl_modify_segment_map (bfd *, struct bfd_link_info *);
+bool nacl_modify_headers (bfd *, struct bfd_link_info *);
+bool nacl_final_write_processing (bfd *);

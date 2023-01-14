@@ -28,7 +28,7 @@ static unsigned char ee_actions[SIM_ERR_NUM_ERRORS];
 static enum execution_error last_error;
 
 static void
-ee_overrides ()
+ee_overrides (void)
 {
   /* GCC may initialize a bitfield by reading the uninitialized byte,
      masking in the bitfield, and writing the byte back out.  */
@@ -58,15 +58,6 @@ execution_error_init_debugger (void)
     ee_actions[i] = SIM_ERRACTION_DEBUG;
 
   ee_overrides ();
-}
-
-void
-execution_error_exit_all (void)
-{
-  int i;
-
-  for (i = 0; i < SIM_ERR_NUM_ERRORS; i++)
-    ee_actions[i] = SIM_ERRACTION_EXIT;
 }
 
 void

@@ -27,6 +27,7 @@
 #include "varobj.h"
 #include "c-lang.h"
 #include "gdbarch.h"
+#include "c-exp.h"
 
 /* Returns the corresponding OpenCL vector type from the given type code,
    the length of the element type, the unsigned flag and the amount of
@@ -440,8 +441,10 @@ opencl_component_ref (struct expression *exp, struct value *val,
 
 /* Perform the unary logical not (!) operation.  */
 
-static struct value *
-opencl_logical_not (struct expression *exp, struct value *arg)
+struct value *
+opencl_logical_not (struct type *expect_type, struct expression *exp,
+		    enum noside noside, enum exp_opcode op,
+		    struct value *arg)
 {
   struct type *type = check_typedef (value_type (arg));
   struct type *rettype;
@@ -581,7 +584,7 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
    behaviour of scalar to vector casting.  As far as possibly we're going
    to try and delegate back to the standard value_cast function. */
 
-static struct value *
+struct value *
 opencl_value_cast (struct type *type, struct value *arg)
 {
   if (type != value_type (arg))
@@ -630,9 +633,10 @@ opencl_value_cast (struct type *type, struct value *arg)
 
 /* Perform a relational operation on two operands.  */
 
-static struct value *
-opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
-	      enum exp_opcode op)
+struct value *
+opencl_relop (struct type *expect_type, struct expression *exp,
+	      enum noside noside, enum exp_opcode op,
+	      struct value *arg1, struct value *arg2)
 {
   struct value *val;
   struct type *type1 = check_typedef (value_type (arg1));
@@ -670,287 +674,184 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
   return val;
 }
 
-/* Expression evaluator for the OpenCL.  Most operations are delegated to
-   evaluate_subexp_standard; see that function for a description of the
-   arguments.  */
+/* A helper function for BINOP_ASSIGN.  */
 
-static struct value *
-evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
-		   int *pos, enum noside noside)
+struct value *
+eval_opencl_assign (struct type *expect_type, struct expression *exp,
+		    enum noside noside, enum exp_opcode op,
+		    struct value *arg1, struct value *arg2)
 {
-  enum exp_opcode op = exp->elts[*pos].opcode;
-  struct value *arg1 = NULL;
-  struct value *arg2 = NULL;
-  struct type *type1, *type2;
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
 
-  switch (op)
-    {
-    /* Handle assignment and cast operators to support OpenCL-style
-       scalar-to-vector widening.  */
-    case BINOP_ASSIGN:
-      (*pos)++;
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      type1 = value_type (arg1);
-      arg2 = evaluate_subexp (type1, exp, pos, noside);
+  struct type *type1 = value_type (arg1);
+  if (deprecated_value_modifiable (arg1)
+      && VALUE_LVAL (arg1) != lval_internalvar)
+    arg2 = opencl_value_cast (type1, arg2);
 
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
-
-      if (deprecated_value_modifiable (arg1)
-	  && VALUE_LVAL (arg1) != lval_internalvar)
-	arg2 = opencl_value_cast (type1, arg2);
-
-      return value_assign (arg1, arg2);
-
-    case UNOP_CAST:
-      type1 = exp->elts[*pos + 1].type;
-      (*pos) += 2;
-      arg1 = evaluate_subexp (type1, exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	return value_from_longest (builtin_type (exp->gdbarch)->
-				   builtin_int, 1);
-
-      return opencl_value_cast (type1, arg1);
-
-    case UNOP_CAST_TYPE:
-      (*pos)++;
-      arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      type1 = value_type (arg1);
-      arg1 = evaluate_subexp (type1, exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	return value_from_longest (builtin_type (exp->gdbarch)->
-				   builtin_int, 1);
-
-      return opencl_value_cast (type1, arg1);
-
-    /* Handle binary relational and equality operators that are either not
-       or differently defined for GNU vectors.  */
-    case BINOP_EQUAL:
-    case BINOP_NOTEQUAL:
-    case BINOP_LESS:
-    case BINOP_GTR:
-    case BINOP_GEQ:
-    case BINOP_LEQ:
-      (*pos)++;
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	return value_from_longest (builtin_type (exp->gdbarch)->
-				   builtin_int, 1);
-
-      return opencl_relop (exp, arg1, arg2, op);
-
-    /* Handle the logical unary operator not(!).  */
-    case UNOP_LOGICAL_NOT:
-      (*pos)++;
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	return value_from_longest (builtin_type (exp->gdbarch)->
-				   builtin_int, 1);
-
-      return opencl_logical_not (exp, arg1);
-
-    /* Handle the logical operator and(&&) and or(||).  */
-    case BINOP_LOGICAL_AND:
-    case BINOP_LOGICAL_OR:
-      (*pos)++;
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	{
-	  evaluate_subexp (nullptr, exp, pos, noside);
-
-	  return value_from_longest (builtin_type (exp->gdbarch)->
-				     builtin_int, 1);
-	}
-      else
-	{
-	  /* For scalar operations we need to avoid evaluating operands
-	     unnecessarily.  However, for vector operations we always need to
-	     evaluate both operands.  Unfortunately we only know which of the
-	     two cases apply after we know the type of the second operand.
-	     Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
-	  int oldpos = *pos;
-
-	  arg2 = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-	  *pos = oldpos;
-	  type1 = check_typedef (value_type (arg1));
-	  type2 = check_typedef (value_type (arg2));
-
-	  if ((type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
-	      || (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ()))
-	    {
-	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-
-	      return opencl_relop (exp, arg1, arg2, op);
-	    }
-	  else
-	    {
-	      /* For scalar built-in types, only evaluate the right
-		 hand operand if the left hand operand compares
-		 unequal(&&)/equal(||) to 0.  */
-	      int res;
-	      int tmp = value_logical_not (arg1);
-
-	      if (op == BINOP_LOGICAL_OR)
-		tmp = !tmp;
-
-	      arg2
-		= evaluate_subexp (nullptr, exp, pos, tmp ? EVAL_SKIP : noside);
-	      type1 = language_bool_type (exp->language_defn, exp->gdbarch);
-
-	      if (op == BINOP_LOGICAL_AND)
-		res = !tmp && !value_logical_not (arg2);
-	      else /* BINOP_LOGICAL_OR */
-		res = tmp || !value_logical_not (arg2);
-
-	      return value_from_longest (type1, res);
-	    }
-	}
-
-    /* Handle the ternary selection operator.  */
-    case TERNOP_COND:
-      (*pos)++;
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      type1 = check_typedef (value_type (arg1));
-      if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
-	{
-	  struct value *arg3, *tmp, *ret;
-	  struct type *eltype2, *type3, *eltype3;
-	  int t2_is_vec, t3_is_vec, i;
-	  LONGEST lowb1, lowb2, lowb3, highb1, highb2, highb3;
-
-	  arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-	  arg3 = evaluate_subexp (nullptr, exp, pos, noside);
-	  type2 = check_typedef (value_type (arg2));
-	  type3 = check_typedef (value_type (arg3));
-	  t2_is_vec
-	    = type2->code () == TYPE_CODE_ARRAY && type2->is_vector ();
-	  t3_is_vec
-	    = type3->code () == TYPE_CODE_ARRAY && type3->is_vector ();
-
-	  /* Widen the scalar operand to a vector if necessary.  */
-	  if (t2_is_vec || !t3_is_vec)
-	    {
-	      arg3 = opencl_value_cast (type2, arg3);
-	      type3 = value_type (arg3);
-	    }
-	  else if (!t2_is_vec || t3_is_vec)
-	    {
-	      arg2 = opencl_value_cast (type3, arg2);
-	      type2 = value_type (arg2);
-	    }
-	  else if (!t2_is_vec || !t3_is_vec)
-	    {
-	      /* Throw an error if arg2 or arg3 aren't vectors.  */
-	      error (_("\
-Cannot perform conditional operation on incompatible types"));
-	    }
-
-	  eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
-	  eltype3 = check_typedef (TYPE_TARGET_TYPE (type3));
-
-	  if (!get_array_bounds (type1, &lowb1, &highb1)
-	      || !get_array_bounds (type2, &lowb2, &highb2)
-	      || !get_array_bounds (type3, &lowb3, &highb3))
-	    error (_("Could not determine the vector bounds"));
-
-	  /* Throw an error if the types of arg2 or arg3 are incompatible.  */
-	  if (eltype2->code () != eltype3->code ()
-	      || TYPE_LENGTH (eltype2) != TYPE_LENGTH (eltype3)
-	      || eltype2->is_unsigned () != eltype3->is_unsigned ()
-	      || lowb2 != lowb3 || highb2 != highb3)
-	    error (_("\
-Cannot perform operation on vectors with different types"));
-
-	  /* Throw an error if the sizes of arg1 and arg2/arg3 differ.  */
-	  if (lowb1 != lowb2 || lowb1 != lowb3
-	      || highb1 != highb2 || highb1 != highb3)
-	    error (_("\
-Cannot perform conditional operation on vectors with different sizes"));
-
-	  ret = allocate_value (type2);
-
-	  for (i = 0; i < highb1 - lowb1 + 1; i++)
-	    {
-	      tmp = value_logical_not (value_subscript (arg1, i)) ?
-		    value_subscript (arg3, i) : value_subscript (arg2, i);
-	      memcpy (value_contents_writeable (ret) +
-		      i * TYPE_LENGTH (eltype2), value_contents_all (tmp),
-		      TYPE_LENGTH (eltype2));
-	    }
-
-	  return ret;
-	}
-      else
-	{
-	  if (value_logical_not (arg1))
-	    {
-	      /* Skip the second operand.  */
-	      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
-
-	      return evaluate_subexp (nullptr, exp, pos, noside);
-	    }
-	  else
-	    {
-	      /* Skip the third operand.  */
-	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-	      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
-
-	      return arg2;
-	    }
-	}
-
-    /* Handle STRUCTOP_STRUCT to allow component access on OpenCL vectors.  */
-    case STRUCTOP_STRUCT:
-      {
-	int pc = (*pos)++;
-	int tem = longest_to_int (exp->elts[pc + 1].longconst);
-
-	(*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-	type1 = check_typedef (value_type (arg1));
-
-	if (noside == EVAL_SKIP)
-	  {
-	    return value_from_longest (builtin_type (exp->gdbarch)->
-				       builtin_int, 1);
-	  }
-	else if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
-	  {
-	    return opencl_component_ref (exp, arg1, &exp->elts[pc + 2].string,
-					 noside);
-	  }
-	else
-	  {
-	    struct value *v = value_struct_elt (&arg1, NULL,
-						&exp->elts[pc + 2].string, NULL,
-						"structure");
-
-	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	      v = value_zero (value_type (v), VALUE_LVAL (v));
-	    return v;
-	  }
-      }
-    default:
-      break;
-    }
-
-  return evaluate_subexp_c (expect_type, exp, pos, noside);
+  return value_assign (arg1, arg2);
 }
 
-const struct exp_descriptor exp_descriptor_opencl =
+namespace expr
 {
-  print_subexp_standard,
-  operator_length_standard,
-  operator_check_standard,
-  dump_subexp_body_standard,
-  evaluate_subexp_opencl
-};
+
+value *
+opencl_structop_operation::evaluate (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type1 = check_typedef (value_type (arg1));
+
+  if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+    return opencl_component_ref (exp, arg1, std::get<1> (m_storage).c_str (),
+				 noside);
+  else
+    {
+      struct value *v = value_struct_elt (&arg1, NULL,
+					  std::get<1> (m_storage).c_str (),
+					  NULL, "structure");
+
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	v = value_zero (value_type (v), VALUE_LVAL (v));
+      return v;
+    }
+}
+
+value *
+opencl_logical_binop_operation::evaluate (struct type *expect_type,
+					  struct expression *exp,
+					  enum noside noside)
+{
+  enum exp_opcode op = std::get<0> (m_storage);
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+
+  /* For scalar operations we need to avoid evaluating operands
+     unnecessarily.  However, for vector operations we always need to
+     evaluate both operands.  Unfortunately we only know which of the
+     two cases apply after we know the type of the second operand.
+     Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
+  value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp,
+						   EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type2 = check_typedef (value_type (arg2));
+
+  if ((type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+      || (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ()))
+    {
+      arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+
+      return opencl_relop (nullptr, exp, noside, op, arg1, arg2);
+    }
+  else
+    {
+      /* For scalar built-in types, only evaluate the right
+	 hand operand if the left hand operand compares
+	 unequal(&&)/equal(||) to 0.  */
+      int tmp = value_logical_not (arg1);
+
+      if (op == BINOP_LOGICAL_OR)
+	tmp = !tmp;
+
+      if (!tmp)
+	{
+	  arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+	  tmp = value_logical_not (arg2);
+	  if (op == BINOP_LOGICAL_OR)
+	    tmp = !tmp;
+	}
+
+      type1 = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type1, tmp);
+    }
+}
+
+value *
+opencl_ternop_cond_operation::evaluate (struct type *expect_type,
+					struct expression *exp,
+					enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type1 = check_typedef (value_type (arg1));
+  if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+    {
+      struct value *arg2, *arg3, *tmp, *ret;
+      struct type *eltype2, *type2, *type3, *eltype3;
+      int t2_is_vec, t3_is_vec, i;
+      LONGEST lowb1, lowb2, lowb3, highb1, highb2, highb3;
+
+      arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+      arg3 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+      type2 = check_typedef (value_type (arg2));
+      type3 = check_typedef (value_type (arg3));
+      t2_is_vec
+	= type2->code () == TYPE_CODE_ARRAY && type2->is_vector ();
+      t3_is_vec
+	= type3->code () == TYPE_CODE_ARRAY && type3->is_vector ();
+
+      /* Widen the scalar operand to a vector if necessary.  */
+      if (t2_is_vec || !t3_is_vec)
+	{
+	  arg3 = opencl_value_cast (type2, arg3);
+	  type3 = value_type (arg3);
+	}
+      else if (!t2_is_vec || t3_is_vec)
+	{
+	  arg2 = opencl_value_cast (type3, arg2);
+	  type2 = value_type (arg2);
+	}
+      else if (!t2_is_vec || !t3_is_vec)
+	{
+	  /* Throw an error if arg2 or arg3 aren't vectors.  */
+	  error (_("\
+Cannot perform conditional operation on incompatible types"));
+	}
+
+      eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+      eltype3 = check_typedef (TYPE_TARGET_TYPE (type3));
+
+      if (!get_array_bounds (type1, &lowb1, &highb1)
+	  || !get_array_bounds (type2, &lowb2, &highb2)
+	  || !get_array_bounds (type3, &lowb3, &highb3))
+	error (_("Could not determine the vector bounds"));
+
+      /* Throw an error if the types of arg2 or arg3 are incompatible.  */
+      if (eltype2->code () != eltype3->code ()
+	  || TYPE_LENGTH (eltype2) != TYPE_LENGTH (eltype3)
+	  || eltype2->is_unsigned () != eltype3->is_unsigned ()
+	  || lowb2 != lowb3 || highb2 != highb3)
+	error (_("\
+Cannot perform operation on vectors with different types"));
+
+      /* Throw an error if the sizes of arg1 and arg2/arg3 differ.  */
+      if (lowb1 != lowb2 || lowb1 != lowb3
+	  || highb1 != highb2 || highb1 != highb3)
+	error (_("\
+Cannot perform conditional operation on vectors with different sizes"));
+
+      ret = allocate_value (type2);
+
+      for (i = 0; i < highb1 - lowb1 + 1; i++)
+	{
+	  tmp = value_logical_not (value_subscript (arg1, i)) ?
+	    value_subscript (arg3, i) : value_subscript (arg2, i);
+	  memcpy (value_contents_writeable (ret) +
+		  i * TYPE_LENGTH (eltype2), value_contents_all (tmp),
+		  TYPE_LENGTH (eltype2));
+	}
+
+      return ret;
+    }
+  else
+    {
+      if (value_logical_not (arg1))
+	return std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+      else
+	return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    }
+}
+
+} /* namespace expr */
 
 /* Class representing the OpenCL language.  */
 
@@ -1072,16 +973,6 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_opencl; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return c_op_print_tab; }
 };
 
 /* Single instance of the OpenCL language class.  */

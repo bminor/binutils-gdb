@@ -202,7 +202,7 @@ extern int arc_convert_symbolic_attribute (const char *);
 extern void arc_md_end (void);
 extern void arc_adjust_symtab (void);
 extern int arc_pcrel_adjust (fragS *);
-extern bfd_boolean arc_parse_name (const char *, struct expressionS *);
+extern bool arc_parse_name (const char *, struct expressionS *);
 extern int tc_arc_fix_adjustable (struct fix *);
 extern void arc_handle_align (fragS *);
 extern void arc_cons_fix_new (fragS *, int, int, expressionS *,

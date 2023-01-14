@@ -26,7 +26,7 @@ fragment <<EOF
 #include "ldctor.h"
 #include "elf32-v850.h"
 
-static bfd_boolean
+static bool
 is_v850_target (void)
 {
   extern const bfd_target v850_elf32_vec;

@@ -315,7 +315,7 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
 	  priv.insn_table_entry_count =
 	    xtensa_read_table_entries (abfd, section,
 				       &priv.insn_table_entries,
-				       XTENSA_PROP_SEC_NAME, FALSE);
+				       XTENSA_PROP_SEC_NAME, false);
 	  if (priv.insn_table_entry_count == 0)
 	    {
 	      free (priv.insn_table_entries);
@@ -324,7 +324,7 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
 	      priv.insn_table_entry_count =
 		xtensa_read_table_entries (abfd, section,
 					   &priv.insn_table_entries,
-					   XTENSA_INSN_SEC_NAME, FALSE);
+					   XTENSA_INSN_SEC_NAME, false);
 	    }
 	  priv.insn_table_cur_idx = 0;
 	  xtensa_coalesce_insn_tables (&priv);

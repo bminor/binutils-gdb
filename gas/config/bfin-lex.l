@@ -20,10 +20,8 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 %{
-
-#include "as.h"
 #include "bfin-defs.h"
-#include "bfin-parse.h"
+#include "config/bfin-parse.h"
 
 static long parse_int (char **end);
 static int parse_halfreg (Register *r, int cl, char *hr);

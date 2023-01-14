@@ -94,6 +94,12 @@ static unsigned int riscv_debug_unwinder = 0;
 
 static unsigned int riscv_debug_gdbarch = 0;
 
+/* The names of the RISC-V target description features.  */
+const char *riscv_feature_name_csr = "org.gnu.gdb.riscv.csr";
+static const char *riscv_feature_name_cpu = "org.gnu.gdb.riscv.cpu";
+static const char *riscv_feature_name_fpu = "org.gnu.gdb.riscv.fpu";
+static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
+
 /* Cached information about a frame.  */
 
 struct riscv_unwind_cache
@@ -257,7 +263,7 @@ riscv_register_feature::register_info::check
 struct riscv_xreg_feature : public riscv_register_feature
 {
   riscv_xreg_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.cpu")
+    : riscv_register_feature (riscv_feature_name_cpu)
   {
     m_registers =  {
       { RISCV_ZERO_REGNUM + 0, { "zero", "x0" } },
@@ -354,7 +360,7 @@ static const struct riscv_xreg_feature riscv_xreg_feature;
 struct riscv_freg_feature : public riscv_register_feature
 {
   riscv_freg_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.fpu")
+    : riscv_register_feature (riscv_feature_name_fpu)
   {
     m_registers =  {
       { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" } },
@@ -482,7 +488,7 @@ static const struct riscv_freg_feature riscv_freg_feature;
 struct riscv_virtual_feature : public riscv_register_feature
 {
   riscv_virtual_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.virtual")
+    : riscv_register_feature (riscv_feature_name_virtual)
   {
     m_registers =  {
       { RISCV_PRIV_REGNUM, { "priv" } }
@@ -518,7 +524,7 @@ static const struct riscv_virtual_feature riscv_virtual_feature;
 struct riscv_csr_feature : public riscv_register_feature
 {
   riscv_csr_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.csr")
+    : riscv_register_feature (riscv_feature_name_csr)
   {
     m_registers = {
 #define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER)		\
@@ -700,7 +706,6 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 	     user.  */
 	  if (target_read_code (*pcptr, buf, 1) == -1)
 	    buf[0] = 0;
-	  read_code (*pcptr, buf, 1);
 	}
 
       if (riscv_debug_breakpoints)
@@ -1399,7 +1404,7 @@ private:
   {
     m_opcode = opcode;
     m_rd = m_rs1 = decode_register_index (ival, OP_SH_CRS1S);
-    m_imm.s = EXTRACT_RVC_IMM (ival);
+    m_imm.s = EXTRACT_CITYPE_IMM (ival);
   }
 
   /* Helper for DECODE, decode 32-bit S-type instruction.  */
@@ -1449,14 +1454,14 @@ private:
   {
     m_opcode = opcode;
     m_rd = decode_register_index (ival, OP_SH_RD);
-    m_imm.s = EXTRACT_UJTYPE_IMM (ival);
+    m_imm.s = EXTRACT_JTYPE_IMM (ival);
   }
 
   /* Helper for DECODE, decode 32-bit J-type instruction.  */
   void decode_cj_type_insn (enum opcode opcode, ULONGEST ival)
   {
     m_opcode = opcode;
-    m_imm.s = EXTRACT_RVC_J_IMM (ival);
+    m_imm.s = EXTRACT_CJTYPE_IMM (ival);
   }
 
   void decode_b_type_insn (enum opcode opcode, ULONGEST ival)
@@ -1464,14 +1469,14 @@ private:
     m_opcode = opcode;
     m_rs1 = decode_register_index (ival, OP_SH_RS1);
     m_rs2 = decode_register_index (ival, OP_SH_RS2);
-    m_imm.s = EXTRACT_SBTYPE_IMM (ival);
+    m_imm.s = EXTRACT_BTYPE_IMM (ival);
   }
 
   void decode_cb_type_insn (enum opcode opcode, ULONGEST ival)
   {
     m_opcode = opcode;
     m_rs1 = decode_register_index_short (ival, OP_SH_CRS1S);
-    m_imm.s = EXTRACT_RVC_B_IMM (ival);
+    m_imm.s = EXTRACT_CBTYPE_IMM (ival);
   }
 
   /* Fetch instruction from target memory at ADDR, return the content of
@@ -1629,31 +1634,31 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	{
 	  m_opcode = ADDI;
 	  m_rd = m_rs1 = decode_register_index (ival, OP_SH_RD);
-	  m_imm.s = EXTRACT_RVC_ADDI16SP_IMM (ival);
+	  m_imm.s = EXTRACT_CITYPE_ADDI16SP_IMM (ival);
 	}
       else if (is_c_addi4spn_insn (ival))
 	{
 	  m_opcode = ADDI;
 	  m_rd = decode_register_index_short (ival, OP_SH_CRS2S);
 	  m_rs1 = RISCV_SP_REGNUM;
-	  m_imm.s = EXTRACT_RVC_ADDI4SPN_IMM (ival);
+	  m_imm.s = EXTRACT_CIWTYPE_ADDI4SPN_IMM (ival);
 	}
       else if (is_c_lui_insn (ival))
 	{
 	  m_opcode = LUI;
 	  m_rd = decode_register_index (ival, OP_SH_CRS1S);
-	  m_imm.s = EXTRACT_RVC_LUI_IMM (ival);
+	  m_imm.s = EXTRACT_CITYPE_LUI_IMM (ival);
 	}
       /* C_SD and C_FSW have the same opcode.  C_SD is RV64 and RV128 only,
 	 and C_FSW is RV32 only.  */
       else if (xlen != 4 && is_c_sd_insn (ival))
-	decode_cs_type_insn (SD, ival, EXTRACT_RVC_LD_IMM (ival));
+	decode_cs_type_insn (SD, ival, EXTRACT_CLTYPE_LD_IMM (ival));
       else if (is_c_sw_insn (ival))
-	decode_cs_type_insn (SW, ival, EXTRACT_RVC_LW_IMM (ival));
+	decode_cs_type_insn (SW, ival, EXTRACT_CLTYPE_LW_IMM (ival));
       else if (is_c_swsp_insn (ival))
-	decode_css_type_insn (SW, ival, EXTRACT_RVC_SWSP_IMM (ival));
+	decode_css_type_insn (SW, ival, EXTRACT_CSSTYPE_SWSP_IMM (ival));
       else if (xlen != 4 && is_c_sdsp_insn (ival))
-	decode_css_type_insn (SD, ival, EXTRACT_RVC_SDSP_IMM (ival));
+	decode_css_type_insn (SD, ival, EXTRACT_CSSTYPE_SDSP_IMM (ival));
       /* C_JR and C_MV have the same opcode.  If RS2 is 0, then this is a C_JR.
 	 So must try to match C_JR first as it ahs more bits in mask.  */
       else if (is_c_jr_insn (ival))
@@ -3215,13 +3220,11 @@ static const struct frame_unwind riscv_frame_unwind =
   /*.prev_arch     =*/ NULL,
 };
 
-/* Extract a set of required target features out of INFO, specifically the
-   bfd being executed is examined to see what target features it requires.
-   IF there is no current bfd, or the bfd doesn't indicate any useful
-   features then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
+/* Extract a set of required target features out of ABFD.  If ABFD is
+   nullptr then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
 
 static struct riscv_gdbarch_features
-riscv_features_from_gdbarch_info (const struct gdbarch_info info)
+riscv_features_from_bfd (const bfd *abfd)
 {
   struct riscv_gdbarch_features features;
 
@@ -3231,11 +3234,10 @@ riscv_features_from_gdbarch_info (const struct gdbarch_info info)
      only used at all if the target hasn't given us a description, so this
      is really a last ditched effort to do something sane before giving
      up.  */
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+  if (abfd != nullptr && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      unsigned char eclass = elf_elfheader (info.abfd)->e_ident[EI_CLASS];
-      int e_flags = elf_elfheader (info.abfd)->e_flags;
+      unsigned char eclass = elf_elfheader (abfd)->e_ident[EI_CLASS];
+      int e_flags = elf_elfheader (abfd)->e_flags;
 
       if (eclass == ELFCLASS32)
 	features.xlen = 4;
@@ -3273,13 +3275,14 @@ riscv_find_default_target_description (const struct gdbarch_info info)
 {
   /* Extract desired feature set from INFO.  */
   struct riscv_gdbarch_features features
-    = riscv_features_from_gdbarch_info (info);
+    = riscv_features_from_bfd (info.abfd);
 
-  /* If the XLEN field is still 0 then we got nothing useful from INFO.  In
-     this case we fall back to a minimal useful target, 8-byte x-registers,
-     with no floating point.  */
+  /* If the XLEN field is still 0 then we got nothing useful from INFO.BFD,
+     maybe there was no bfd object.  In this case we fall back to a minimal
+     useful target with no floating point, the x-register size is selected
+     based on the architecture from INFO.  */
   if (features.xlen == 0)
-    features.xlen = 8;
+    features.xlen = info.bfd_arch_info->bits_per_word == 32 ? 4 : 8;
 
   /* Now build a target description based on the feature set.  */
   return riscv_lookup_target_description (features);
@@ -3497,7 +3500,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
      target, then check that this matches with what the target is
      providing.  */
   struct riscv_gdbarch_features abi_features
-    = riscv_features_from_gdbarch_info (info);
+    = riscv_features_from_bfd (info.abfd);
 
   /* If the ABI_FEATURES xlen is 0 then this indicates we got no useful abi
      features from the INFO object.  In this case we just treat the

@@ -386,14 +386,6 @@ go_language::demangle_symbol (const char *mangled_name, int options) const
   return result;
 }
 
-/* See language.h.  */
-
-const struct exp_descriptor *
-go_language::expression_ops () const
-{
-  return &exp_descriptor_c;
-}
-
 /* Given a Go symbol, return its package or NULL if unknown.
    Space for the result is malloc'd, caller must free.  */
 
@@ -451,44 +443,6 @@ go_block_package_name (const struct block *block)
 
   return NULL;
 }
-
-/* See go-lang.h.
-
-   TODO(dje): &^ ?  */
-
-const struct op_print go_language::op_print_tab[] =
-{
-  {",", BINOP_COMMA, PREC_COMMA, 0},
-  {"=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {"||", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {"&&", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {"|", BINOP_BITWISE_IOR, PREC_BITWISE_IOR, 0},
-  {"^", BINOP_BITWISE_XOR, PREC_BITWISE_XOR, 0},
-  {"&", BINOP_BITWISE_AND, PREC_BITWISE_AND, 0},
-  {"==", BINOP_EQUAL, PREC_EQUAL, 0},
-  {"!=", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-  {"<=", BINOP_LEQ, PREC_ORDER, 0},
-  {">=", BINOP_GEQ, PREC_ORDER, 0},
-  {">", BINOP_GTR, PREC_ORDER, 0},
-  {"<", BINOP_LESS, PREC_ORDER, 0},
-  {">>", BINOP_RSH, PREC_SHIFT, 0},
-  {"<<", BINOP_LSH, PREC_SHIFT, 0},
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"%", BINOP_REM, PREC_MUL, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"!", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {"^", UNOP_COMPLEMENT, PREC_PREFIX, 0},
-  {"*", UNOP_IND, PREC_PREFIX, 0},
-  {"&", UNOP_ADDR, PREC_PREFIX, 0},
-  {"unsafe.Sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
-  {"++", UNOP_POSTINCREMENT, PREC_SUFFIX, 0},
-  {"--", UNOP_POSTDECREMENT, PREC_SUFFIX, 0},
-  {NULL, OP_NULL, PREC_SUFFIX, 0}
-};
 
 /* See language.h.  */
 

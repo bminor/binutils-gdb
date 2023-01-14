@@ -117,6 +117,18 @@ enum function_call_return_method
   return_method_struct,
 };
 
+enum class memtag_type
+{
+  /* Logical tag, the tag that is stored in unused bits of a pointer to a
+     virtual address.  */
+  logical = 0,
+
+  /* Allocation tag, the tag that is associated with every granule of memory in
+     the physical address space.  Allocation tags are used to validate memory
+     accesses via pointers containing logical tags.  */
+  allocation,
+};
+
 
 
 /* The following are pre-initialized by GDBARCH.  */
@@ -711,6 +723,48 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 
 extern int gdbarch_significant_addr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch, int significant_addr_bit);
+
+/* Return a string representation of the memory tag TAG. */
+
+typedef std::string (gdbarch_memtag_to_string_ftype) (struct gdbarch *gdbarch, struct value *tag);
+extern std::string gdbarch_memtag_to_string (struct gdbarch *gdbarch, struct value *tag);
+extern void set_gdbarch_memtag_to_string (struct gdbarch *gdbarch, gdbarch_memtag_to_string_ftype *memtag_to_string);
+
+/* Return true if ADDRESS contains a tag and false otherwise. */
+
+typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, struct value *address);
+extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address);
+extern void set_gdbarch_tagged_address_p (struct gdbarch *gdbarch, gdbarch_tagged_address_p_ftype *tagged_address_p);
+
+/* Return true if the tag from ADDRESS matches the memory tag for that
+   particular address.  Return false otherwise. */
+
+typedef bool (gdbarch_memtag_matches_p_ftype) (struct gdbarch *gdbarch, struct value *address);
+extern bool gdbarch_memtag_matches_p (struct gdbarch *gdbarch, struct value *address);
+extern void set_gdbarch_memtag_matches_p (struct gdbarch *gdbarch, gdbarch_memtag_matches_p_ftype *memtag_matches_p);
+
+/* Set the tags of type TAG_TYPE, for the memory address range
+   [ADDRESS, ADDRESS + LENGTH) to TAGS.
+   Return true if successful and false otherwise. */
+
+typedef bool (gdbarch_set_memtags_ftype) (struct gdbarch *gdbarch, struct value *address, size_t length, const gdb::byte_vector &tags, memtag_type tag_type);
+extern bool gdbarch_set_memtags (struct gdbarch *gdbarch, struct value *address, size_t length, const gdb::byte_vector &tags, memtag_type tag_type);
+extern void set_gdbarch_set_memtags (struct gdbarch *gdbarch, gdbarch_set_memtags_ftype *set_memtags);
+
+/* Return the tag of type TAG_TYPE associated with the memory address ADDRESS,
+   assuming ADDRESS is tagged. */
+
+typedef struct value * (gdbarch_get_memtag_ftype) (struct gdbarch *gdbarch, struct value *address, memtag_type tag_type);
+extern struct value * gdbarch_get_memtag (struct gdbarch *gdbarch, struct value *address, memtag_type tag_type);
+extern void set_gdbarch_get_memtag (struct gdbarch *gdbarch, gdbarch_get_memtag_ftype *get_memtag);
+
+/* memtag_granule_size is the size of the allocation tag granule, for
+   architectures that support memory tagging.
+   This is 0 for architectures that do not support memory tagging.
+   For a non-zero value, this represents the number of bytes of memory per tag. */
+
+extern CORE_ADDR gdbarch_memtag_granule_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch, CORE_ADDR memtag_granule_size);
 
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to
@@ -1346,8 +1400,8 @@ extern void set_gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, gdbarch
 
 extern bool gdbarch_stap_parse_special_token_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
-extern int gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
+typedef expr::operation_up (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
+extern expr::operation_up gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
 extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
 
 /* Perform arch-dependent adjustments to a register name.
@@ -1386,8 +1440,8 @@ extern void set_gdbarch_stap_adjust_register (struct gdbarch *gdbarch, gdbarch_s
 
 extern bool gdbarch_dtrace_parse_probe_argument_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_dtrace_parse_probe_argument_ftype) (struct gdbarch *gdbarch, struct expr_builder *builder, int narg);
-extern void gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct expr_builder *builder, int narg);
+typedef expr::operation_up (gdbarch_dtrace_parse_probe_argument_ftype) (struct gdbarch *gdbarch, int narg);
+extern expr::operation_up gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, int narg);
 extern void set_gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, gdbarch_dtrace_parse_probe_argument_ftype *dtrace_parse_probe_argument);
 
 /* True if the given ADDR does not contain the instruction sequence

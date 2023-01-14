@@ -28,7 +28,6 @@ if {![istarget *-*-linux*]
     && ![istarget *-*-gnu*]
     && ![istarget *-*-elf*]
     && ![istarget arm*-*-eabi*]
-    && ![istarget arm*-*-symbianelf*]
     && ![istarget powerpc-*-eabi*]} {
     return 0
 }

@@ -800,7 +800,7 @@ print_insn_cr16 (bfd_vma memaddr, struct disassemble_info *info)
   /* If found, print the instruction's mnemonic and arguments.  */
   if (is_decoded > 0 && (cr16_words[0] != 0 || cr16_words[1] != 0))
     {
-      if (strneq (instruction->mnemonic, "cinv", 4))
+      if (startswith (instruction->mnemonic, "cinv"))
 	info->fprintf_func (info->stream,"%s",
 			    getcinvstring (instruction->mnemonic));
       else

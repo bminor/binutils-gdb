@@ -35,4 +35,7 @@ extern const char *dwarf_bool_name (unsigned mybool);
 /* Convert a DWARF type code into its string name.  */
 extern const char *dwarf_type_encoding_name (unsigned enc);
 
+/* Convert a DWARF unit type into its string name.  */
+extern const char *dwarf_unit_type_name (int unit_type);
+
 #endif /* GDB_DWARF2_STRINGIFY_H */

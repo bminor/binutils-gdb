@@ -482,7 +482,8 @@ check_frame_language_change (void)
     {
       if (language_mode == language_mode_auto && info_verbose)
 	{
-	  language_info (1);	/* Print what changed.  */
+	  /* Print what changed.  */
+	  language_info ();
 	}
       warned = 0;
     }
@@ -516,6 +517,13 @@ wait_sync_command_done (void)
   /* Processing events may change the current UI.  */
   scoped_restore save_ui = make_scoped_restore (&current_ui);
   struct ui *ui = current_ui;
+
+  /* We're about to wait until the target stops after having resumed
+     it so must force-commit resumptions, in case we're being called
+     in some context where a scoped_disable_commit_resumed object is
+     active.  I.e., this function is a commit-resumed sync/flush
+     point.  */
+  scoped_enable_commit_resumed enable ("sync wait");
 
   while (gdb_do_one_event () >= 0)
     if (ui->prompt_state != PROMPT_BLOCKED)
@@ -716,9 +724,7 @@ execute_command_to_ui_file (struct ui_file *file, const char *p, int from_tty)
   }
 }
 
-/* Run execute_command for P and FROM_TTY.  Capture its output into the
-   returned string, do not display it to the screen.  BATCH_FLAG will be
-   temporarily set to true.  */
+/* See gdbcmd.h.  */
 
 std::string
 execute_command_to_string (const char *p, int from_tty,
@@ -2105,7 +2111,10 @@ show_exec_done_display_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* New values of the "data-directory" parameter are staged here.  */
+/* New values of the "data-directory" parameter are staged here.
+   Extension languages, for example Python's gdb.parameter API, will read
+   the value directory from this variable, so we must ensure that this
+   always contains the correct value.  */
 static char *staged_gdb_datadir;
 
 /* "set" command for the gdb_datadir configuration variable.  */
@@ -2114,6 +2123,14 @@ static void
 set_gdb_datadir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_gdb_data_directory (staged_gdb_datadir);
+
+  /* SET_GDB_DATA_DIRECTORY will resolve relative paths in
+     STAGED_GDB_DATADIR, so we now copy the value from GDB_DATADIR
+     back into STAGED_GDB_DATADIR so the extension languages can read the
+     correct value.  */
+  free (staged_gdb_datadir);
+  staged_gdb_datadir = strdup (gdb_datadir.c_str ());
+
   gdb::observers::gdb_datadir_changed.notify ();
 }
 
@@ -2144,6 +2161,28 @@ set_history_filename (const char *args,
       xfree (history_filename);
       history_filename = temp.release ();
     }
+}
+
+/* Whether we're in quiet startup mode.  */
+
+static bool startup_quiet;
+
+/* See top.h.  */
+
+bool
+check_quiet_mode ()
+{
+  return startup_quiet;
+}
+
+/* Show whether GDB should start up in quiet mode.  */
+
+static void
+show_startup_quiet (struct ui_file *file, int from_tty,
+	      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Whether to start up quietly is %s.\n"),
+		    value);
 }
 
 static void
@@ -2284,7 +2323,9 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 When set, GDB uses the specified path to search for data files."),
 			   set_gdb_datadir, show_gdb_datadir,
 			   &setlist,
-			   &showlist);
+			    &showlist);
+  /* Prime the initial value for data-directory.  */
+  staged_gdb_datadir = strdup (gdb_datadir.c_str ());
 
   add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
 				&interactive_mode, _("\
@@ -2299,6 +2340,17 @@ input settings."),
 			NULL,
 			show_interactive_mode,
 			&setlist, &showlist);
+
+  c = add_setshow_boolean_cmd ("startup-quietly", class_support,
+			       &startup_quiet, _("\
+Set whether GDB should start up quietly."), _("		\
+Show whether GDB should start up quietly."), _("\
+This setting will not affect the current session.  Instead this command\n\
+should be added to the .gdbearlyinit file in the users home directory to\n\
+affect future GDB sessions."),
+			       NULL,
+			       show_startup_quiet,
+			       &setlist, &showlist);
 
   c = add_cmd ("new-ui", class_support, new_ui_command, _("\
 Create a new UI.\n\

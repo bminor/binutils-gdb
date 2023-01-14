@@ -1,3 +1,43 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* bpf.c (bpf_def_model_init): Use new-style declaration.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* mloop.in (xextract-scache): Call SEM_ARGBUF.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode-be.c (bpfbf_ebpfbe_decode): Change TRACE_EXTRACT to
+	CGEN_TRACE_EXTRACT.
+	* decode-le.c (bpfbf_ebpfle_decode): Likewise.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.

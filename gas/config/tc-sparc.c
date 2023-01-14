@@ -460,13 +460,13 @@ md_parse_option (int c, const char *arg)
       break;
 
     case OPTION_XARCH:
-      if (!strncmp (arg, "v9", 2))
+      if (startswith (arg, "v9"))
 	md_parse_option (OPTION_64, NULL);
       else
 	{
-	  if (!strncmp (arg, "v8", 2)
-	      || !strncmp (arg, "v7", 2)
-	      || !strncmp (arg, "v6", 2)
+	  if (startswith (arg, "v8")
+	      || startswith (arg, "v7")
+	      || startswith (arg, "v6")
 	      || !strcmp (arg, "sparclet")
 	      || !strcmp (arg, "sparclite")
 	      || !strcmp (arg, "sparc86x"))
@@ -548,12 +548,12 @@ md_parse_option (int c, const char *arg)
 	  {
 	    if (sparc_arch_size == 32)
 	      {
-		if (CONST_STRNEQ (*l, "elf32-sparc"))
+		if (startswith (*l, "elf32-sparc"))
 		  break;
 	      }
 	    else
 	      {
-		if (CONST_STRNEQ (*l, "elf64-sparc"))
+		if (startswith (*l, "elf64-sparc"))
 		  break;
 	      }
 	  }
@@ -1984,7 +1984,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 	    case 'M':
 	    case 'm':
-	      if (strncmp (s, "%asr", 4) == 0)
+	      if (startswith (s, "%asr"))
 		{
 		  s += 4;
 
@@ -2131,8 +2131,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if ((strncmp (s, "%icc", 4) == 0)
-                  || (sparc_arch_size == 32 && strncmp (s, "%ncc", 4) == 0))
+	      if ((startswith (s, "%icc"))
+                  || (sparc_arch_size == 32 && startswith (s, "%ncc")))
 		{
 		  s += 4;
 		  continue;
@@ -2144,8 +2144,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-              if ((strncmp (s, "%xcc", 4) == 0)
-                  || (sparc_arch_size == 64 && strncmp (s, "%ncc", 4) == 0))
+              if ((startswith (s, "%xcc"))
+                  || (sparc_arch_size == 64 && startswith (s, "%ncc")))
 		{
 		  s += 4;
 		  continue;
@@ -2157,7 +2157,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%fcc0", 5) == 0)
+	      if (startswith (s, "%fcc0"))
 		{
 		  s += 5;
 		  continue;
@@ -2169,7 +2169,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%fcc1", 5) == 0)
+	      if (startswith (s, "%fcc1"))
 		{
 		  s += 5;
 		  continue;
@@ -2181,7 +2181,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%fcc2", 5) == 0)
+	      if (startswith (s, "%fcc2"))
 		{
 		  s += 5;
 		  continue;
@@ -2193,7 +2193,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%fcc3", 5) == 0)
+	      if (startswith (s, "%fcc3"))
 		{
 		  s += 5;
 		  continue;
@@ -2201,7 +2201,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'P':
-	      if (strncmp (s, "%pc", 3) == 0)
+	      if (startswith (s, "%pc"))
 		{
 		  s += 3;
 		  continue;
@@ -2209,7 +2209,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'W':
-	      if (strncmp (s, "%tick", 5) == 0)
+	      if (startswith (s, "%tick"))
 		{
 		  s += 5;
 		  continue;
@@ -2316,7 +2316,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'C':		/* Coprocessor state register.  */
-	      if (strncmp (s, "%csr", 4) == 0)
+	      if (startswith (s, "%csr"))
 		{
 		  s += 4;
 		  continue;
@@ -2635,7 +2635,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      }			/* float arg  */
 
 	    case 'F':
-	      if (strncmp (s, "%fsr", 4) == 0)
+	      if (startswith (s, "%fsr"))
 		{
 		  s += 4;
 		  continue;
@@ -2643,7 +2643,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case '(':
-	      if (strncmp (s, "%efsr", 5) == 0)
+	      if (startswith (s, "%efsr"))
 		{
 		  s += 5;
 		  continue;
@@ -2980,7 +2980,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      }			/* Alternate space.  */
 
 	    case 'p':
-	      if (strncmp (s, "%psr", 4) == 0)
+	      if (startswith (s, "%psr"))
 		{
 		  s += 4;
 		  continue;
@@ -2988,7 +2988,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'q':		/* Floating point queue.  */
-	      if (strncmp (s, "%fq", 3) == 0)
+	      if (startswith (s, "%fq"))
 		{
 		  s += 3;
 		  continue;
@@ -2996,7 +2996,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'Q':		/* Coprocessor queue.  */
-	      if (strncmp (s, "%cq", 3) == 0)
+	      if (startswith (s, "%cq"))
 		{
 		  s += 3;
 		  continue;
@@ -3020,7 +3020,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  special_case = SPECIAL_CASE_SETX;
 		  continue;
 		}
-	      else if (strncmp (str, "fdiv", 4) == 0)
+	      else if (startswith (str, "fdiv"))
 		{
 		  special_case = SPECIAL_CASE_FDIV;
 		  continue;
@@ -3028,43 +3028,43 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'o':
-	      if (strncmp (s, "%asi", 4) != 0)
+	      if (!startswith (s, "%asi"))
 		break;
 	      s += 4;
 	      continue;
 
 	    case 's':
-	      if (strncmp (s, "%fprs", 5) != 0)
+	      if (!startswith (s, "%fprs"))
 		break;
 	      s += 5;
 	      continue;
 
 	    case '{':
-	      if (strncmp (s, "%mcdper",7) != 0)
+	      if (!startswith (s, "%mcdper"))
 		break;
 	      s += 7;
 	      continue;
 
             case '&':
-              if (strncmp (s, "%entropy", 8) != 0)
+              if (!startswith (s, "%entropy"))
                 break;
               s += 8;
               continue;
 
 	    case 'E':
-	      if (strncmp (s, "%ccr", 4) != 0)
+	      if (!startswith (s, "%ccr"))
 		break;
 	      s += 4;
 	      continue;
 
 	    case 't':
-	      if (strncmp (s, "%tbr", 4) != 0)
+	      if (!startswith (s, "%tbr"))
 		break;
 	      s += 4;
 	      continue;
 
 	    case 'w':
-	      if (strncmp (s, "%wim", 4) != 0)
+	      if (!startswith (s, "%wim"))
 		break;
 	      s += 4;
 	      continue;
@@ -3112,7 +3112,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      }
 
 	    case 'y':
-	      if (strncmp (s, "%y", 2) != 0)
+	      if (!startswith (s, "%y"))
 		break;
 	      s += 2;
 	      continue;
@@ -4138,8 +4138,8 @@ s_reserve (int ignore ATTRIBUTE_UNUSED)
   symbolP = symbol_find_or_make (name);
   *p = c;
 
-  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
-      && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
+  if (!startswith (input_line_pointer, ",\"bss\"")
+      && !startswith (input_line_pointer, ",\".bss\""))
     {
       as_bad (_("bad .reserve segment -- expected BSS segment"));
       return;
@@ -4352,8 +4352,8 @@ s_common (int ignore ATTRIBUTE_UNUSED)
       if (*input_line_pointer == '.')
 	input_line_pointer++;
       /* @@ Some say data, some say bss.  */
-      if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, "data\"", 5))
+      if (!startswith (input_line_pointer, "bss\"")
+	  && !startswith (input_line_pointer, "data\""))
 	{
 	  while (*--input_line_pointer != '"')
 	    ;
@@ -4400,25 +4400,25 @@ static void
 s_seg (int ignore ATTRIBUTE_UNUSED)
 {
 
-  if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
+  if (startswith (input_line_pointer, "\"text\""))
     {
       input_line_pointer += 6;
       s_text (0);
       return;
     }
-  if (strncmp (input_line_pointer, "\"data\"", 6) == 0)
+  if (startswith (input_line_pointer, "\"data\""))
     {
       input_line_pointer += 6;
       s_data (0);
       return;
     }
-  if (strncmp (input_line_pointer, "\"data1\"", 7) == 0)
+  if (startswith (input_line_pointer, "\"data1\""))
     {
       input_line_pointer += 7;
       s_data1 ();
       return;
     }
-  if (strncmp (input_line_pointer, "\"bss\"", 5) == 0)
+  if (startswith (input_line_pointer, "\"bss\""))
     {
       input_line_pointer += 5;
       /* We only support 2 segments -- text and data -- for now, so
@@ -4728,12 +4728,12 @@ sparc_cons (expressionS *exp, int size)
       && input_line_pointer[1] == 'r'
       && input_line_pointer[2] == '_')
     {
-      if (strncmp (input_line_pointer + 3, "disp", 4) == 0)
+      if (startswith (input_line_pointer + 3, "disp"))
 	{
 	  input_line_pointer += 7;
 	  sparc_cons_special_reloc = "disp";
 	}
-      else if (strncmp (input_line_pointer + 3, "plt", 3) == 0)
+      else if (startswith (input_line_pointer + 3, "plt"))
 	{
 	  if (size != 4 && size != 8)
 	    as_bad (_("Illegal operands: %%r_plt in %d-byte data field"), size);
@@ -4743,7 +4743,7 @@ sparc_cons (expressionS *exp, int size)
 	      sparc_cons_special_reloc = "plt";
 	    }
 	}
-      else if (strncmp (input_line_pointer + 3, "tls_dtpoff", 10) == 0)
+      else if (startswith (input_line_pointer + 3, "tls_dtpoff"))
 	{
 	  if (size != 4 && size != 8)
 	    as_bad (_("Illegal operands: %%r_tls_dtpoff in %d-byte data field"), size);

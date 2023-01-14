@@ -40,7 +40,7 @@ lang_statement_list_type constructor_list;
 /* Whether the constructors should be sorted.  Note that this is
    global for the entire link; we assume that there is only a single
    CONSTRUCTORS command in the linker script.  */
-bfd_boolean constructors_sorted;
+bool constructors_sorted;
 
 /* The sets we have seen.  */
 struct set_info *sets;
@@ -131,7 +131,7 @@ ctor_prio (const char *name)
   while (*name == '_')
     ++name;
 
-  if (!CONST_STRNEQ (name, "GLOBAL_"))
+  if (!startswith (name, "GLOBAL_"))
     return -1;
 
   name += sizeof "GLOBAL_" - 1;
@@ -195,15 +195,15 @@ ctor_cmp (const void *p1, const void *p2)
 void
 ldctor_build_sets (void)
 {
-  static bfd_boolean called;
-  bfd_boolean header_printed;
+  static bool called;
+  bool header_printed;
   struct set_info *p;
 
   /* The emulation code may call us directly, but we only want to do
      this once.  */
   if (called)
     return;
-  called = TRUE;
+  called = true;
 
   if (constructors_sorted)
     {
@@ -246,7 +246,7 @@ ldctor_build_sets (void)
   lang_list_init (&constructor_list);
   push_stat_ptr (&constructor_list);
 
-  header_printed = FALSE;
+  header_printed = false;
   for (p = sets; p != NULL; p = p->next)
     {
       struct set_element *e;
@@ -326,10 +326,10 @@ ldctor_build_sets (void)
       lang_add_assignment (exp_assign (".",
 				       exp_unop (ALIGN_K,
 						 exp_intop (reloc_size)),
-				       FALSE));
+				       false));
       lang_add_assignment (exp_assign (p->h->root.string,
 				       exp_nameop (NAME, "."),
-				       FALSE));
+				       false));
       lang_add_data (size, exp_intop (p->count));
 
       for (e = p->elements; e != NULL; e = e->u.next)
@@ -341,7 +341,7 @@ ldctor_build_sets (void)
 	      if (!header_printed)
 		{
 		  minfo (_("\nSet                 Symbol\n\n"));
-		  header_printed = TRUE;
+		  header_printed = true;
 		}
 
 	      minfo ("%s", p->h->root.string);

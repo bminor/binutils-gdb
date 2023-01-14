@@ -27,12 +27,12 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
-#include "elfxx-riscv.h"
+#include "cpu-riscv.h"
 
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <ctype.h>
 
-static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 struct riscv_private_data
 {
@@ -55,7 +55,7 @@ set_default_riscv_dis_options (void)
   no_aliases = 0;
 }
 
-static bfd_boolean
+static bool
 parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
@@ -66,8 +66,8 @@ parse_riscv_dis_option_without_args (const char *option)
       riscv_fpr_names = riscv_fpr_names_numeric;
     }
   else
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 static void
@@ -99,17 +99,22 @@ parse_riscv_dis_option (const char *option)
   value = equal + 1;
   if (strcmp (option, "priv-spec") == 0)
     {
-      enum riscv_priv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
-      if (!riscv_get_priv_spec_class (value, &priv_spec))
+      enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
+      const char *name = NULL;
+
+      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec);
+      if (priv_spec == PRIV_SPEC_CLASS_NONE)
 	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
 			       option, value);
       else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
 	default_priv_spec = priv_spec;
       else if (default_priv_spec != priv_spec)
-	opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
-				 "the elf privilege attribute is %s"),
-			       option, value,
-			       riscv_get_priv_spec_name (default_priv_spec));
+	{
+	  RISCV_GET_PRIV_SPEC_NAME (name, default_priv_spec);
+	  opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
+				   "the elf privilege attribute is %s"),
+				 option, value, name);
+	}
     }
   else
     {
@@ -199,54 +204,51 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	      print (info->stream, "%s",
 		     riscv_gpr_names[EXTRACT_OPERAND (CRS2, l)]);
 	      break;
-	    case 'i':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_SIMM3 (l));
-	      break;
 	    case 'o':
 	    case 'j':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CITYPE_IMM (l));
 	      break;
 	    case 'k':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_LW_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CLTYPE_LW_IMM (l));
 	      break;
 	    case 'l':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_LD_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CLTYPE_LD_IMM (l));
 	      break;
 	    case 'm':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_LWSP_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CITYPE_LWSP_IMM (l));
 	      break;
 	    case 'n':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_LDSP_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CITYPE_LDSP_IMM (l));
 	      break;
 	    case 'K':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_ADDI4SPN_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CIWTYPE_ADDI4SPN_IMM (l));
 	      break;
 	    case 'L':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_ADDI16SP_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CITYPE_ADDI16SP_IMM (l));
 	      break;
 	    case 'M':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_SWSP_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CSSTYPE_SWSP_IMM (l));
 	      break;
 	    case 'N':
-	      print (info->stream, "%d", (int)EXTRACT_RVC_SDSP_IMM (l));
+	      print (info->stream, "%d", (int)EXTRACT_CSSTYPE_SDSP_IMM (l));
 	      break;
 	    case 'p':
-	      info->target = EXTRACT_RVC_B_IMM (l) + pc;
+	      info->target = EXTRACT_CBTYPE_IMM (l) + pc;
 	      (*info->print_address_func) (info->target, info);
 	      break;
 	    case 'a':
-	      info->target = EXTRACT_RVC_J_IMM (l) + pc;
+	      info->target = EXTRACT_CJTYPE_IMM (l) + pc;
 	      (*info->print_address_func) (info->target, info);
 	      break;
 	    case 'u':
 	      print (info->stream, "0x%x",
-		     (int)(EXTRACT_RVC_IMM (l) & (RISCV_BIGIMM_REACH-1)));
+		     (int)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
 	      break;
 	    case '>':
-	      print (info->stream, "0x%x", (int)EXTRACT_RVC_IMM (l) & 0x3f);
+	      print (info->stream, "0x%x", (int)EXTRACT_CITYPE_IMM (l) & 0x3f);
 	      break;
 	    case '<':
-	      print (info->stream, "0x%x", (int)EXTRACT_RVC_IMM (l) & 0x1f);
+	      print (info->stream, "0x%x", (int)EXTRACT_CITYPE_IMM (l) & 0x1f);
 	      break;
 	    case 'T': /* Floating-point RS2.  */
 	      print (info->stream, "%s",
@@ -321,12 +323,12 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	  break;
 
 	case 'a':
-	  info->target = EXTRACT_UJTYPE_IMM (l) + pc;
+	  info->target = EXTRACT_JTYPE_IMM (l) + pc;
 	  (*info->print_address_func) (info->target, info);
 	  break;
 
 	case 'p':
-	  info->target = EXTRACT_SBTYPE_IMM (l) + pc;
+	  info->target = EXTRACT_BTYPE_IMM (l) + pc;
 	  (*info->print_address_func) (info->target, info);
 	  break;
 
@@ -336,7 +338,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	  else if ((l & MASK_LUI) == MATCH_LUI)
 	    pd->hi_addr[rd] = EXTRACT_UTYPE_IMM (l);
 	  else if ((l & MASK_C_LUI) == MATCH_C_LUI)
-	    pd->hi_addr[rd] = EXTRACT_RVC_LUI_IMM (l);
+	    pd->hi_addr[rd] = EXTRACT_CITYPE_LUI_IMM (l);
 	  print (info->stream, "%s", riscv_gpr_names[rd]);
 	  break;
 
@@ -372,7 +374,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case 'E':
 	  {
 	    static const char *riscv_csr_hash[4096]; /* Total 2^12 CSRs.  */
-	    static bfd_boolean init_csr = FALSE;
+	    static bool init_csr = false;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 
 	    if (!init_csr)
@@ -427,7 +429,7 @@ static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
   const struct riscv_opcode *op;
-  static bfd_boolean init = 0;
+  static bool init = 0;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
@@ -614,14 +616,14 @@ riscv_get_disassembler (bfd *abfd)
 /* Prevent use of the fake labels that are generated as part of the DWARF
    and for relaxable relocations in the assembler.  */
 
-bfd_boolean
+bool
 riscv_symbol_is_valid (asymbol * sym,
                        struct disassemble_info * info ATTRIBUTE_UNUSED)
 {
   const char * name;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   name = bfd_asymbol_name (sym);
 

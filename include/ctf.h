@@ -358,9 +358,9 @@ union
    c.ctt_info = CTF_TYPE_INFO(kind, vlen);
    c.ctt_name = CTF_TYPE_NAME(stid, offset);  */
 
-# define CTF_V1_INFO_KIND(info)		(((info) & 0xf800) >> 11)
-# define CTF_V1_INFO_ISROOT(info)	(((info) & 0x0400) >> 10)
-# define CTF_V1_INFO_VLEN(info)		(((info) & CTF_MAX_VLEN_V1))
+#define CTF_V1_INFO_KIND(info)		(((info) & 0xf800) >> 11)
+#define CTF_V1_INFO_ISROOT(info)	(((info) & 0x0400) >> 10)
+#define CTF_V1_INFO_VLEN(info)		(((info) & CTF_MAX_VLEN_V1))
 
 #define CTF_V2_INFO_KIND(info)		(((info) & 0xfc000000) >> 26)
 #define CTF_V2_INFO_ISROOT(info)	(((info) & 0x2000000) >> 25)
@@ -368,7 +368,7 @@ union
 
 #define CTF_NAME_STID(name)		((name) >> 31)
 #define CTF_NAME_OFFSET(name)		((name) & CTF_MAX_NAME)
-#define CTF_SET_STID(name, stid)	((name) | (stid) << 31)
+#define CTF_SET_STID(name, stid)	((name) | ((unsigned int) stid) << 31)
 
 /* V2 only. */
 #define CTF_TYPE_INFO(kind, isroot, vlen) \
@@ -387,10 +387,10 @@ union
 #define CTF_V2_TYPE_TO_INDEX(id)	((id) & CTF_MAX_PTYPE)
 #define CTF_V2_INDEX_TO_TYPE(id, child) ((child) ? ((id) | (CTF_MAX_PTYPE+1)) : (id))
 
-# define CTF_V1_TYPE_ISPARENT(fp, id)	((id) <= CTF_MAX_PTYPE_V1)
-# define CTF_V1_TYPE_ISCHILD(fp, id)	((id) > CTF_MAX_PTYPE_V1)
-# define CTF_V1_TYPE_TO_INDEX(id)	((id) & CTF_MAX_PTYPE_V1)
-# define CTF_V1_INDEX_TO_TYPE(id, child) ((child) ? ((id) | (CTF_MAX_PTYPE_V1+1)) : (id))
+#define CTF_V1_TYPE_ISPARENT(fp, id)	((id) <= CTF_MAX_PTYPE_V1)
+#define CTF_V1_TYPE_ISCHILD(fp, id)	((id) > CTF_MAX_PTYPE_V1)
+#define CTF_V1_TYPE_TO_INDEX(id)	((id) & CTF_MAX_PTYPE_V1)
+#define CTF_V1_INDEX_TO_TYPE(id, child) ((child) ? ((id) | (CTF_MAX_PTYPE_V1+1)) : (id))
 
 /* Valid for both V1 and V2. */
 #define CTF_TYPE_LSIZE(cttp) \

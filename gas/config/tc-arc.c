@@ -312,7 +312,7 @@ struct arc_fixup
   unsigned char pcrel;
 
   /* TRUE if this fixup is for LIMM operand.  */
-  bfd_boolean islong;
+  bool islong;
 };
 
 struct arc_insn
@@ -321,11 +321,9 @@ struct arc_insn
   int nfixups;
   struct arc_fixup fixups[MAX_INSN_FIXUPS];
   long limm;
-  unsigned int len;       /* Length of instruction in bytes.  */
-  bfd_boolean has_limm;   /* Boolean value: TRUE if limm field is
-			     valid.  */
-  bfd_boolean relax;	  /* Boolean value: TRUE if needs
-			     relaxation.  */
+  unsigned int len;     /* Length of instruction in bytes.  */
+  bool has_limm;	/* Boolean value: TRUE if limm field is valid.  */
+  bool relax;		/* Boolean value: TRUE if needs relaxation.  */
 };
 
 /* Structure to hold any last two instructions.  */
@@ -335,10 +333,10 @@ static struct arc_last_insn
   const struct arc_opcode *opcode;
 
   /* Boolean value: TRUE if current insn is short.  */
-  bfd_boolean has_limm;
+  bool has_limm;
 
   /* Boolean value: TRUE if current insn has delay slot.  */
-  bfd_boolean has_delay_slot;
+  bool has_delay_slot;
 } arc_last_insns[2];
 
 /* Extension instruction suffix classes.  */
@@ -472,7 +470,7 @@ static const struct cpu_type
 static struct cpu_type selected_cpu = { 0, 0, 0, E_ARC_OSABI_CURRENT, 0 };
 
 /* TRUE if current assembly code uses RF16 only registers.  */
-static bfd_boolean rf16_only = TRUE;
+static bool rf16_only = true;
 
 /* MPY option.  */
 static unsigned mpy_option = 0;
@@ -688,10 +686,10 @@ const unsigned arc_num_relaxable_ins = ARRAY_SIZE (arc_relaxable_insns);
 symbolS * GOT_symbol = 0;
 
 /* Set to TRUE when we assemble instructions.  */
-static bfd_boolean assembling_insn = FALSE;
+static bool assembling_insn = false;
 
 /* List with attributes set explicitly.  */
-static bfd_boolean attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
+static bool attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
 
 /* Functions implementation.  */
 
@@ -946,7 +944,7 @@ arc_extra_reloc (int r_type)
 	       0,		/* size: 1, 2, or 4 usually.  */
 	       sym,		/* X_add_symbol.  */
 	       0,		/* X_add_number.  */
-	       FALSE,		/* TRUE if PC-relative relocation.  */
+	       false,		/* TRUE if PC-relative relocation.  */
 	       r_type		/* Relocation type.  */);
   fixP->fx_subsy = lab;
 }
@@ -1201,8 +1199,8 @@ tokenize_arguments (char *str,
 		    int ntok)
 {
   char *old_input_line_pointer;
-  bfd_boolean saw_comma = FALSE;
-  bfd_boolean saw_arg = FALSE;
+  bool saw_comma = false;
+  bool saw_arg = false;
   int brk_lvl = 0;
   int num_args = 0;
 
@@ -1224,7 +1222,7 @@ tokenize_arguments (char *str,
 	  input_line_pointer++;
 	  if (saw_comma || !saw_arg)
 	    goto err;
-	  saw_comma = TRUE;
+	  saw_comma = true;
 	  break;
 
 	case '}':
@@ -1254,7 +1252,7 @@ tokenize_arguments (char *str,
           if (!saw_arg || num_args == ntok)
             goto err;
           tok->X_op = O_colon;
-          saw_arg = FALSE;
+          saw_arg = false;
           ++tok;
           ++num_args;
           break;
@@ -1281,8 +1279,8 @@ tokenize_arguments (char *str,
               || num_args == ntok)
 	    goto err;
 
-	  saw_comma = FALSE;
-	  saw_arg = TRUE;
+	  saw_comma = false;
+	  saw_arg = true;
 	  tok++;
 	  num_args++;
 	  break;
@@ -1313,8 +1311,8 @@ tokenize_arguments (char *str,
               || num_args == ntok)
 	    goto err;
 
-	  saw_comma = FALSE;
-	  saw_arg = TRUE;
+	  saw_comma = false;
+	  saw_arg = true;
 	  tok++;
 	  num_args++;
 	  break;
@@ -1349,8 +1347,8 @@ tokenize_flags (const char *str,
 		int nflg)
 {
   char *old_input_line_pointer;
-  bfd_boolean saw_flg = FALSE;
-  bfd_boolean saw_dot = FALSE;
+  bool saw_flg = false;
+  bool saw_dot = false;
   int num_flags  = 0;
   size_t flgnamelen;
 
@@ -1372,8 +1370,8 @@ tokenize_flags (const char *str,
 	  input_line_pointer++;
 	  if (saw_dot)
 	    goto err;
-	  saw_dot = TRUE;
-	  saw_flg = FALSE;
+	  saw_dot = true;
+	  saw_flg = false;
 	  break;
 
 	default:
@@ -1392,8 +1390,8 @@ tokenize_flags (const char *str,
 
 	  input_line_pointer += flgnamelen;
 	  flags++;
-	  saw_dot = FALSE;
-	  saw_flg = TRUE;
+	  saw_dot = false;
+	  saw_flg = true;
 	  num_flags++;
 	  break;
 	}
@@ -1479,7 +1477,7 @@ offset %d + %d\n",
 /* Actually output an instruction with its fixup.  */
 
 static void
-emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
+emit_insn0 (struct arc_insn *insn, char *where, bool relax)
 {
   char *f = where;
   size_t total_len;
@@ -1550,12 +1548,12 @@ emit_insn (struct arc_insn *insn)
   if (insn->relax)
     emit_insn1 (insn);
   else
-    emit_insn0 (insn, NULL, FALSE);
+    emit_insn0 (insn, NULL, false);
 }
 
 /* Check whether a symbol involves a register.  */
 
-static bfd_boolean
+static bool
 contains_register (symbolS *sym)
 {
   if (sym)
@@ -1567,7 +1565,7 @@ contains_register (symbolS *sym)
 	      && !contains_register (ex->X_op_symbol));
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Returns the register number within a symbol.  */
@@ -1585,11 +1583,11 @@ get_register (symbolS *sym)
 /* Return true if a RELOC is generic.  A generic reloc is PC-rel of a
    simple ME relocation (e.g. RELOC_ARC_32_ME, BFD_RELOC_ARC_PC32.  */
 
-static bfd_boolean
+static bool
 generic_reloc_p (extended_bfd_reloc_code_real_type reloc)
 {
   if (!reloc)
-    return FALSE;
+    return false;
 
   switch (reloc)
     {
@@ -1601,9 +1599,9 @@ generic_reloc_p (extended_bfd_reloc_code_real_type reloc)
     case BFD_RELOC_ARC_SDA16_LD2:
     case BFD_RELOC_ARC_SDA16_ST2:
     case BFD_RELOC_ARC_SDA32_ME:
-      return FALSE;
+      return false;
     default:
-      return TRUE;
+      return true;
     }
 }
 
@@ -1627,25 +1625,25 @@ allocate_tok (expressionS *tok, int ntok, int cidx)
 
 /* Check if an particular ARC feature is enabled.  */
 
-static bfd_boolean
+static bool
 check_cpu_feature (insn_subclass_t sc)
 {
   if (is_code_density_p (sc) && !(selected_cpu.features & CD))
-    return FALSE;
+    return false;
 
   if (is_spfp_p (sc) && !(selected_cpu.features & SPX))
-    return FALSE;
+    return false;
 
   if (is_dpfp_p (sc) && !(selected_cpu.features & DPX))
-    return FALSE;
+    return false;
 
   if (is_fpuda_p (sc) && !(selected_cpu.features & DPA))
-    return FALSE;
+    return false;
 
   if (is_nps400_p (sc) && !(selected_cpu.features & NPS400))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Parse the flags described by FIRST_PFLAG and NFLGS against the flag
@@ -1654,7 +1652,7 @@ check_cpu_feature (insn_subclass_t sc)
    returns FALSE, in which case the FIRST_PFLAG array may have been
    modified.  */
 
-static bfd_boolean
+static bool
 parse_opcode_flags (const struct arc_opcode *opcode,
                     int nflgs,
                     struct arc_flags *first_pflag)
@@ -1692,7 +1690,7 @@ parse_opcode_flags (const struct arc_opcode *opcode,
                   if (!strcmp (pf->name, pflag->name))
                     {
                       if (pflag->flgp != NULL)
-                        return FALSE;
+                        return false;
                       /* Found it.  */
                       cl_matches++;
                       pflag->flgp = pf;
@@ -1716,7 +1714,7 @@ parse_opcode_flags (const struct arc_opcode *opcode,
               if (!strcmp (flg_operand->name, pflag->name))
                 {
                   if (pflag->flgp != NULL)
-                    return FALSE;
+                    return false;
                   cl_matches++;
                   pflag->flgp = flg_operand;
                   lnflg--;
@@ -1726,13 +1724,13 @@ parse_opcode_flags (const struct arc_opcode *opcode,
         }
 
       if ((cl_flags->flag_class & F_CLASS_REQUIRED) && cl_matches == 0)
-        return FALSE;
+        return false;
       if ((cl_flags->flag_class & F_CLASS_OPTIONAL) && cl_matches > 1)
-        return FALSE;
+        return false;
     }
 
   /* Did I check all the parsed flags?  */
-  return lnflg ? FALSE : TRUE;
+  return lnflg == 0;
 }
 
 
@@ -2131,15 +2129,15 @@ swap_operand (expressionS *operand_array,
 /* Check if *op matches *tok type.
    Returns FALSE if they don't match, TRUE if they match.  */
 
-static bfd_boolean
+static bool
 pseudo_operand_match (const expressionS *tok,
 		      const struct arc_operand_operation *op)
 {
   offsetT min, max, val;
-  bfd_boolean ret;
+  bool ret;
   const struct arc_operand *operand_real = &arc_operands[op->operand_idx];
 
-  ret = FALSE;
+  ret = false;
   switch (tok->X_op)
     {
     case O_constant:
@@ -2159,7 +2157,7 @@ pseudo_operand_match (const expressionS *tok,
 	      min = 0;
 	    }
 	  if (min <= val && val <= max)
-	    ret = TRUE;
+	    ret = true;
 	}
       break;
 
@@ -2168,17 +2166,17 @@ pseudo_operand_match (const expressionS *tok,
       if (operand_real->flags & ARC_OPERAND_LIMM
 	  || ((operand_real->flags & ARC_OPERAND_SIGNED)
 	      && operand_real->bits == 9))
-	ret = TRUE;
+	ret = true;
       break;
 
     case O_register:
       if (operand_real->flags & ARC_OPERAND_IR)
-	ret = TRUE;
+	ret = true;
       break;
 
     case O_bracket:
       if (operand_real->flags & ARC_OPERAND_BRAKET)
-	ret = TRUE;
+	ret = true;
       break;
 
     default:
@@ -2433,7 +2431,7 @@ autodetect_attributes (const struct arc_opcode *opcode,
 	case O_register:
 	  if ((tok[i].X_add_number >= 4 && tok[i].X_add_number <= 9)
 	      || (tok[i].X_add_number >= 16 && tok[i].X_add_number <= 25))
-	    rf16_only = FALSE;
+	    rf16_only = false;
 	  break;
 	default:
 	  break;
@@ -2451,7 +2449,7 @@ assemble_tokens (const char *opname,
 		 struct arc_flags *pflags,
 		 int nflgs)
 {
-  bfd_boolean found_something = FALSE;
+  bool found_something = false;
   const struct arc_opcode_hash_entry *entry;
   int cpumatch = 1;
   const char *errmsg = NULL;
@@ -2469,7 +2467,7 @@ assemble_tokens (const char *opname,
 
       pr_debug ("%s:%d: assemble_tokens: %s\n",
 		frag_now->fr_file, frag_now->fr_line, opname);
-      found_something = TRUE;
+      found_something = true;
       opcode = find_opcode_match (entry, tok, &ntok, pflags,
 				  nflgs, &cpumatch, &errmsg);
       if (opcode != NULL)
@@ -2514,7 +2512,7 @@ md_assemble (char *str)
   opname = xmemdup0 (str, opnamelen);
 
   /* Signalize we are assembling the instructions.  */
-  assembling_insn = TRUE;
+  assembling_insn = true;
 
   /* Tokenize the flags.  */
   if ((nflg = tokenize_flags (str + opnamelen, flags, MAX_INSN_FLGS)) == -1)
@@ -2539,7 +2537,7 @@ md_assemble (char *str)
 
   /* Finish it off.  */
   assemble_tokens (opname, tok, ntok, flags, nflg);
-  assembling_insn = FALSE;
+  assembling_insn = false;
 }
 
 /* Callback to insert a register into the hash table.  */
@@ -2957,19 +2955,19 @@ md_apply_fix (fixS *fixP,
 	  value += S_GET_VALUE (fx_addsy);
 	  value -= md_pcrel_from_section (fixP, seg);
 	  fx_addsy = NULL;
-	  fixP->fx_pcrel = FALSE;
+	  fixP->fx_pcrel = false;
 	}
       else if (add_symbol_segment == absolute_section)
 	{
 	  value = fixP->fx_offset;
 	  fx_offset += S_GET_VALUE (fixP->fx_addsy);
 	  fx_addsy = NULL;
-	  fixP->fx_pcrel = FALSE;
+	  fixP->fx_pcrel = false;
 	}
     }
 
   if (!fx_addsy)
-    fixP->fx_done = TRUE;
+    fixP->fx_done = true;
 
   if (fixP->fx_pcrel)
     {
@@ -3316,7 +3314,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
   size = insn.len + (insn.has_limm ? 4 : 0);
   gas_assert (table_entry->rlx_length == size);
-  emit_insn0 (&insn, dest, TRUE);
+  emit_insn0 (&insn, dest, true);
 
   fragP->fr_fix += table_entry->rlx_length;
   fragP->fr_var = 0;
@@ -3383,25 +3381,25 @@ md_operand (expressionS *expressionP)
    the expression with the identified register.  It returns TRUE if
    it is a register and FALSE otherwise.  */
 
-bfd_boolean
+bool
 arc_parse_name (const char *name,
 		struct expressionS *e)
 {
   struct symbol *sym;
 
   if (!assembling_insn)
-    return FALSE;
+    return false;
 
   if (e->X_op == O_symbol
       && e->X_md == O_absent)
-    return FALSE;
+    return false;
 
   sym = str_hash_find (arc_reg_hash, name);
   if (sym)
     {
       e->X_op = O_register;
       e->X_add_number = S_GET_VALUE (sym);
-      return TRUE;
+      return true;
     }
 
   sym = str_hash_find (arc_addrtype_hash, name);
@@ -3409,10 +3407,10 @@ arc_parse_name (const char *name,
     {
       e->X_op = O_addrtype;
       e->X_add_number = S_GET_VALUE (sym);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 /* md_parse_option
@@ -3539,7 +3537,7 @@ arc_show_cpu_list (FILE *stream)
   offset = strlen (space_buf);
   for (i = 0; cpu_types[i].name != NULL; ++i)
     {
-      bfd_boolean last = (cpu_types[i + 1].name == NULL);
+      bool last = (cpu_types[i + 1].name == NULL);
 
       /* If displaying the new cpu name string, and the ', ' (for all
          but the last one) will take us past a target width of 80
@@ -3628,7 +3626,7 @@ find_reloc (const char *name,
 {
   unsigned int i;
   int j;
-  bfd_boolean found_flag, tmp;
+  bool found_flag, tmp;
   extended_bfd_reloc_code_real_type ret = BFD_RELOC_UNUSED;
 
   for (i = 0; i < arc_num_equiv_tab; i++)
@@ -3644,26 +3642,26 @@ find_reloc (const char *name,
 	{
 	  if (!nflg)
 	    continue;
-	  found_flag = FALSE;
+	  found_flag = false;
 	  unsigned * psflg = (unsigned *)r->flags;
 	  do
 	    {
-	      tmp = FALSE;
+	      tmp = false;
 	      for (j = 0; j < nflg; j++)
 		if (!strcmp (pflags[j].name,
 			     arc_flag_operands[*psflg].name))
 		  {
-		    tmp = TRUE;
+		    tmp = true;
 		    break;
 		  }
 	      if (!tmp)
 		{
-		  found_flag = FALSE;
+		  found_flag = false;
 		  break;
 		}
 	      else
 		{
-		  found_flag = TRUE;
+		  found_flag = true;
 		}
 	      ++ psflg;
 	    } while (*psflg);
@@ -3688,7 +3686,7 @@ find_reloc (const char *name,
 /* All the symbol types that are allowed to be used for
    relaxation.  */
 
-static bfd_boolean
+static bool
 may_relax_expr (expressionS tok)
 {
   /* Check if we have unrelaxable relocs.  */
@@ -3697,7 +3695,7 @@ may_relax_expr (expressionS tok)
     default:
       break;
     case O_plt:
-      return FALSE;
+      return false;
     }
 
   switch (tok.X_op)
@@ -3711,14 +3709,14 @@ may_relax_expr (expressionS tok)
       break;
 
     default:
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 /* Checks if flags are in line with relaxable insn.  */
 
-static bfd_boolean
+static bool
 relaxable_flag (const struct arc_relaxable_ins *ins,
 		const struct arc_flags *pflags,
 		int nflgs)
@@ -3754,12 +3752,12 @@ relaxable_flag (const struct arc_relaxable_ins *ins,
     }
 
   /* If counttrue == nflgs, then all flags have been found.  */
-  return (counttrue == nflgs ? TRUE : FALSE);
+  return counttrue == nflgs;
 }
 
 /* Checks if operands are in line with relaxable insn.  */
 
-static bfd_boolean
+static bool
 relaxable_operand (const struct arc_relaxable_ins *ins,
 		   const expressionS *tok,
 		   int ntok)
@@ -3772,7 +3770,7 @@ relaxable_operand (const struct arc_relaxable_ins *ins,
       const expressionS *epr = &tok[i];
 
       if (i != 0 && i >= ntok)
-	return FALSE;
+	return false;
 
       switch (*operand)
 	{
@@ -3783,22 +3781,22 @@ relaxable_operand (const struct arc_relaxable_ins *ins,
 		|| epr->X_op == O_add
 		|| epr->X_op == O_subtract
 		|| epr->X_op == O_symbol))
-	    return FALSE;
+	    return false;
 	  break;
 
 	case REGISTER_DUP:
 	  if ((i <= 0)
 	      || (epr->X_add_number != tok[i - 1].X_add_number))
-	    return FALSE;
+	    return false;
 	  /* Fall through.  */
 	case REGISTER:
 	  if (epr->X_op != O_register)
-	    return FALSE;
+	    return false;
 	  break;
 
 	case REGISTER_S:
 	  if (epr->X_op != O_register)
-	    return FALSE;
+	    return false;
 
 	  switch (epr->X_add_number)
 	    {
@@ -3806,24 +3804,24 @@ relaxable_operand (const struct arc_relaxable_ins *ins,
 	    case 12: case 13: case 14: case 15:
 	      break;
 	    default:
-	      return FALSE;
+	      return false;
 	    }
 	  break;
 
 	case REGISTER_NO_GP:
 	  if ((epr->X_op != O_register)
 	      || (epr->X_add_number == 26)) /* 26 is the gp register.  */
-	    return FALSE;
+	    return false;
 	  break;
 
 	case BRACKET:
 	  if (epr->X_op != O_bracket)
-	    return FALSE;
+	    return false;
 	  break;
 
 	default:
 	  /* Don't understand, bail out.  */
-	  return FALSE;
+	  return false;
 	  break;
 	}
 
@@ -3831,12 +3829,12 @@ relaxable_operand (const struct arc_relaxable_ins *ins,
       operand = &ins->operands[i];
     }
 
-  return (i == ntok ? TRUE : FALSE);
+  return i == ntok;
 }
 
 /* Return TRUE if this OPDCODE is a candidate for relaxation.  */
 
-static bfd_boolean
+static bool
 relax_insn_p (const struct arc_opcode *opcode,
 	      const expressionS *tok,
 	      int ntok,
@@ -3844,7 +3842,7 @@ relax_insn_p (const struct arc_opcode *opcode,
 	      int nflg)
 {
   unsigned i;
-  bfd_boolean rv = FALSE;
+  bool rv = false;
 
   /* Check the relaxation table.  */
   for (i = 0; i < arc_num_relaxable_ins && relaxation_state; ++i)
@@ -3856,7 +3854,7 @@ relax_insn_p (const struct arc_opcode *opcode,
 	  && relaxable_operand (arc_rlx_ins, tok, ntok)
 	  && relaxable_flag (arc_rlx_ins, pflags, nflg))
 	{
-	  rv = TRUE;
+	  rv = true;
 	  frag_now->fr_subtype = arc_relaxable_insns[i].subtype;
 	  memcpy (&frag_now->tc_frag_data.tok, tok,
 		sizeof (expressionS) * ntok);
@@ -3888,8 +3886,8 @@ assemble_insn (const struct arc_opcode *opcode,
   int i;
   int tokidx = 0;
   unsigned char pcrel = 0;
-  bfd_boolean needGOTSymbol;
-  bfd_boolean has_delay_slot = FALSE;
+  bool needGOTSymbol;
+  bool has_delay_slot = false;
   extended_bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
 
   memset (insn, 0, sizeof (*insn));
@@ -3925,7 +3923,7 @@ assemble_insn (const struct arc_opcode *opcode,
       /* Regardless if we have a reloc or not mark the instruction
 	 limm if it is the case.  */
       if (operand->flags & ARC_OPERAND_LIMM)
-	insn->has_limm = TRUE;
+	insn->has_limm = true;
 
       switch (t->X_op)
 	{
@@ -3969,7 +3967,7 @@ assemble_insn (const struct arc_opcode *opcode,
 
 	default:
 	  /* This operand needs a relocation.  */
-	  needGOTSymbol = FALSE;
+	  needGOTSymbol = false;
 
 	  switch (t->X_md)
 	    {
@@ -3977,7 +3975,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      if (opcode->insn_class == JUMP)
 		as_bad (_("Unable to use @plt relocation for insn %s"),
 			opcode->name);
-	      needGOTSymbol = TRUE;
+	      needGOTSymbol = true;
 	      reloc = find_reloc ("plt", opcode->name,
 				  pflags, nflg,
 				  operand->default_reloc);
@@ -3985,7 +3983,7 @@ assemble_insn (const struct arc_opcode *opcode,
 
 	    case O_gotoff:
 	    case O_gotpc:
-	      needGOTSymbol = TRUE;
+	      needGOTSymbol = true;
 	      reloc = ARC_RELOC_TABLE (t->X_md)->reloc;
 	      break;
 	    case O_pcl:
@@ -4012,7 +4010,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      break;
 	    case O_tlsgd:
 	    case O_tlsie:
-	      needGOTSymbol = TRUE;
+	      needGOTSymbol = true;
 	      /* Fall-through.  */
 
 	    case O_tpoff:
@@ -4073,8 +4071,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      pcrel = reloc_howto->pc_relative;
 	    }
 	  fixup->pcrel = pcrel;
-	  fixup->islong = (operand->flags & ARC_OPERAND_LIMM) ?
-	    TRUE : FALSE;
+	  fixup->islong = (operand->flags & ARC_OPERAND_LIMM) != 0;
 	  break;
 	}
     }
@@ -4086,7 +4083,7 @@ assemble_insn (const struct arc_opcode *opcode,
 
       /* Check if the instruction has a delay slot.  */
       if (!strcmp (flg_operand->name, "d"))
-	has_delay_slot = TRUE;
+	has_delay_slot = true;
 
       /* There is an exceptional case when we cannot insert a flag just as
 	 it is.  On ARCv2 the '.t' and '.nt' flags must be handled in
@@ -4137,7 +4134,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      fixup->exp = *reloc_exp;
 	      fixup->reloc = -bitYoperand;
 	      fixup->pcrel = pcrel;
-	      fixup->islong = FALSE;
+	      fixup->islong = false;
 	    }
 	}
       else
@@ -4667,7 +4664,7 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
   create_extinst_section (&einsn);
 }
 
-static bfd_boolean
+static bool
 tokenize_extregister (extRegister_t *ereg, int opertype)
 {
   char *name;
@@ -4675,9 +4672,8 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
   char c;
   char *p;
   int number, imode = 0;
-  bfd_boolean isCore_p = (opertype == EXT_CORE_REGISTER) ? TRUE : FALSE;
-  bfd_boolean isReg_p  = (opertype == EXT_CORE_REGISTER
-			  || opertype == EXT_AUX_REGISTER) ? TRUE : FALSE;
+  bool isCore_p = opertype == EXT_CORE_REGISTER;
+  bool isReg_p = opertype == EXT_CORE_REGISTER || opertype == EXT_AUX_REGISTER;
 
   /* 1st: get register name.  */
   SKIP_WHITESPACE ();
@@ -4695,7 +4691,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
       as_bad (_("expected comma after name"));
       ignore_rest_of_line ();
       free (name);
-      return FALSE;
+      return false;
     }
   input_line_pointer++;
   number = get_absolute_expression ();
@@ -4708,7 +4704,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	      number);
       ignore_rest_of_line ();
       free (name);
-      return FALSE;
+      return false;
     }
 
   if (isReg_p)
@@ -4721,28 +4717,28 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register number"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return FALSE;
+	  return false;
 	}
 
       input_line_pointer++;
       mode = input_line_pointer;
 
-      if (!strncmp (mode, "r|w", 3))
+      if (startswith (mode, "r|w"))
 	{
 	  imode = 0;
 	  input_line_pointer += 3;
 	}
-      else if (!strncmp (mode, "r", 1))
+      else if (startswith (mode, "r"))
 	{
 	  imode = ARC_REGISTER_READONLY;
 	  input_line_pointer += 1;
 	}
-      else if (strncmp (mode, "w", 1))
+      else if (!startswith (mode, "w"))
 	{
 	  as_bad (_("invalid mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return FALSE;
+	  return false;
 	}
       else
 	{
@@ -4760,22 +4756,22 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 	  as_bad (_("expected comma after register mode"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return FALSE;
+	  return false;
 	}
 
       input_line_pointer++;
 
-      if (!strncmp (input_line_pointer, "cannot_shortcut", 15))
+      if (startswith (input_line_pointer, "cannot_shortcut"))
 	{
 	  imode |= ARC_REGISTER_NOSHORT_CUT;
 	  input_line_pointer += 15;
 	}
-      else if (strncmp (input_line_pointer, "can_shortcut", 12))
+      else if (!startswith (input_line_pointer, "can_shortcut"))
 	{
 	  as_bad (_("shortcut designator invalid"));
 	  ignore_rest_of_line ();
 	  free (name);
-	  return FALSE;
+	  return false;
 	}
       else
 	{
@@ -4787,7 +4783,7 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
   ereg->name = name;
   ereg->number = number;
   ereg->imode  = imode;
-  return TRUE;
+  return true;
 }
 
 /* Create an extension register/condition description in the arc
@@ -4918,7 +4914,7 @@ arc_attribute (int ignored ATTRIBUTE_UNUSED)
   int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
 
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
-    attributes_set_explicitly[tag] = TRUE;
+    attributes_set_explicitly[tag] = true;
 }
 
 /* Set an attribute if it has not already been set by the user.  */

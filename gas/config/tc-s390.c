@@ -48,17 +48,17 @@ static unsigned int current_mode_mask = 0;
 
 /* Set to TRUE if the highgprs flag in the ELF header needs to be set
    for the output file.  */
-static bfd_boolean set_highgprs_p = FALSE;
+static bool set_highgprs_p = false;
 
 /* Whether to use user friendly register names. Default is TRUE.  */
 #ifndef TARGET_REG_NAMES_P
-#define TARGET_REG_NAMES_P TRUE
+#define TARGET_REG_NAMES_P true
 #endif
 
-static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
+static bool reg_names_p = TARGET_REG_NAMES_P;
 
 /* Set to TRUE if we want to warn about zero base/index registers.  */
-static bfd_boolean warn_areg_zero = FALSE;
+static bool warn_areg_zero = false;
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -156,7 +156,7 @@ reg_name_search (const char *name)
  *      original state.
  */
 
-static bfd_boolean
+static bool
 register_name (expressionS *expressionP)
 {
   int reg_number;
@@ -169,7 +169,7 @@ register_name (expressionS *expressionP)
   if (name[0] == '%' && ISALPHA (name[1]))
     name = ++input_line_pointer;
   else
-    return FALSE;
+    return false;
 
   c = get_symbol_name (&name);
   reg_number = reg_name_search (name);
@@ -186,12 +186,12 @@ register_name (expressionS *expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      return TRUE;
+      return true;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return FALSE;
+  return false;
 }
 
 /* Local variables.  */
@@ -264,9 +264,9 @@ s390_target_format (void)
    In case of an error, S390_OPCODE_MAXCPU is returned.  */
 
 static unsigned int
-s390_parse_cpu (const char *         arg,
-		unsigned int * ret_flags,
-		bfd_boolean    allow_extensions)
+s390_parse_cpu (const char *arg,
+		unsigned int *ret_flags,
+		bool allow_extensions)
 {
   static struct
   {
@@ -292,25 +292,27 @@ s390_parse_cpu (const char *         arg,
     { STRING_COMMA_LEN ("z14"), STRING_COMMA_LEN ("arch12"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
     { STRING_COMMA_LEN ("z15"), STRING_COMMA_LEN ("arch13"),
+      S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX },
+    { STRING_COMMA_LEN (""), STRING_COMMA_LEN ("arch14"),
       S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
   };
   static struct
   {
-    const char * name;
+    const char *name;
     unsigned int mask;
-    bfd_boolean  on;
+    bool on;
   } cpu_flags[] =
   {
-    { "htm",   S390_INSTR_FLAG_HTM, TRUE },
-    { "nohtm", S390_INSTR_FLAG_HTM, FALSE },
-    { "vx",    S390_INSTR_FLAG_VX, TRUE },
-    { "novx",  S390_INSTR_FLAG_VX, FALSE }
+    { "htm",   S390_INSTR_FLAG_HTM, true },
+    { "nohtm", S390_INSTR_FLAG_HTM, false },
+    { "vx",    S390_INSTR_FLAG_VX, true },
+    { "novx",  S390_INSTR_FLAG_VX, false }
   };
   unsigned int icpu;
   char *ilp_bak;
 
   icpu = S390_OPCODE_MAXCPU;
-  if (strncmp (arg, "all", 3) == 0 && (arg[3] == 0 || arg[3] == '+'))
+  if (startswith (arg, "all") && (arg[3] == 0 || arg[3] == '+'))
     {
       icpu = S390_OPCODE_MAXCPU - 1;
       arg += 3;
@@ -401,13 +403,13 @@ md_parse_option (int c, const char *arg)
       break;
     case 'm':
       if (arg != NULL && strcmp (arg, "regnames") == 0)
-	reg_names_p = TRUE;
+	reg_names_p = true;
 
       else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
-	reg_names_p = FALSE;
+	reg_names_p = false;
 
       else if (arg != NULL && strcmp (arg, "warn-areg-zero") == 0)
-	warn_areg_zero = TRUE;
+	warn_areg_zero = true;
 
       else if (arg != NULL && strcmp (arg, "31") == 0)
 	s390_arch_size = 32;
@@ -421,13 +423,13 @@ md_parse_option (int c, const char *arg)
       else if (arg != NULL && strcmp (arg, "zarch") == 0)
 	{
 	  if (s390_arch_size == 32)
-	    set_highgprs_p = TRUE;
+	    set_highgprs_p = true;
 	  current_mode_mask = 1 << S390_OPCODE_ZARCH;
 	}
 
-      else if (arg != NULL && strncmp (arg, "arch=", 5) == 0)
+      else if (arg != NULL && startswith (arg, "arch="))
 	{
-	  current_cpu = s390_parse_cpu (arg + 5, &current_flags, FALSE);
+	  current_cpu = s390_parse_cpu (arg + 5, &current_flags, false);
 	  if (current_cpu == S390_OPCODE_MAXCPU)
 	    {
 	      as_bad (_("invalid switch -m%s"), arg);
@@ -493,7 +495,7 @@ s390_setup_opcodes (void)
 {
   const struct s390_opcode *op;
   const struct s390_opcode *op_end;
-  bfd_boolean dup_insn = FALSE;
+  bool dup_insn = false;
 
   if (s390_opcode_hash != NULL)
     htab_delete (s390_opcode_hash);
@@ -534,7 +536,7 @@ s390_setup_opcodes (void)
 	  && str_hash_insert (s390_opcode_hash, op->name, op, 0) != NULL)
 	{
 	  as_bad (_("duplicate %s"), op->name);
-	  dup_insn = TRUE;
+	  dup_insn = true;
 	}
 
       while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
@@ -1206,7 +1208,7 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 	      /* To make fixup_segment do the pc relative conversion the
 		 pcrel parameter on the fix_new_exp call needs to be FALSE.  */
 	      fix_new_exp (frag_now, where - frag_now->fr_literal,
-			   size, &exp, FALSE, reloc);
+			   size, &exp, false, reloc);
 	    }
 	  else
 	    as_bad (_("relocation not applicable"));
@@ -1222,20 +1224,20 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 
 /* Return true if all remaining operands in the opcode with
    OPCODE_FLAGS can be skipped.  */
-static bfd_boolean
+static bool
 skip_optargs_p (unsigned int opcode_flags, const unsigned char *opindex_ptr)
 {
   if ((opcode_flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
       && opindex_ptr[0] != '\0'
       && opindex_ptr[1] == '\0')
-    return TRUE;
+    return true;
 
   if ((opcode_flags & S390_INSTR_FLAG_OPTPARM2)
       && opindex_ptr[0] != '\0'
       && opindex_ptr[1] != '\0'
       && opindex_ptr[2] == '\0')
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -1975,7 +1977,7 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
 	    }
 	}
       else
-	new_cpu = s390_parse_cpu (cpu_string, &new_flags, TRUE);
+	new_cpu = s390_parse_cpu (cpu_string, &new_flags, true);
 
       if (new_cpu == S390_OPCODE_MAXCPU)
 	as_bad (_("invalid machine `%s'"), cpu_string);
@@ -2045,7 +2047,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 	  else if (strcmp (mode_string, "zarch") == 0)
 	    {
 	      if (s390_arch_size == 32)
-		set_highgprs_p = TRUE;
+		set_highgprs_p = true;
 	      current_mode_mask = 1 << S390_OPCODE_ZARCH;
 	    }
 	  else if (strcmp (mode_string, "zarch_nohighgprs") == 0)
@@ -2066,7 +2068,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 const char *
 md_atof (int type, char *litp, int *sizep)
 {
-  return ieee_md_atof (type, litp, sizep, TRUE);
+  return ieee_md_atof (type, litp, sizep, true);
 }
 
 /* Align a section (I don't know why this is machine dependent).  */

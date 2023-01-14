@@ -26,6 +26,7 @@
 #include <dis-asm.h>
 #include "sim-config.h"
 #include <inttypes.h>
+#include <sys/time.h>
 
 #define	VAL(x)	strtoul(x,(char **)NULL,0)
 
@@ -70,9 +71,7 @@ static void	disp_ctrl (struct pstate *sregs);
 static void	disp_mem (uint32 addr, uint32 len);
 
 static int 
-batch(sregs, fname)
-    struct pstate  *sregs;
-    char           *fname;
+batch(struct pstate *sregs, char *fname)
 {
     FILE           *fp;
     char           *lbuf = NULL;
@@ -97,10 +96,7 @@ batch(sregs, fname)
 }
 
 void
-set_regi(sregs, reg, rval)
-    struct pstate  *sregs;
-    int32           reg;
-    uint32          rval;
+set_regi(struct pstate *sregs, int32 reg, uint32 rval)
 {
     uint32          cwp;
 
@@ -187,10 +183,7 @@ get_regi(struct pstate * sregs, int32 reg, char *buf)
 
 
 static void
-set_rega(sregs, reg, rval)
-    struct pstate  *sregs;
-    char           *reg;
-    uint32          rval;
+set_rega(struct pstate *sregs, char *reg, uint32 rval)
 {
     uint32          cwp;
     int32           err = 0;
@@ -294,9 +287,7 @@ set_rega(sregs, reg, rval)
 }
 
 static void
-disp_reg(sregs, reg)
-    struct pstate  *sregs;
-    char           *reg;
+disp_reg(struct pstate *sregs, char *reg)
 {
     if (strncmp(reg, "w",1) == 0)
 	disp_regs(sregs, VAL(&reg[1]));
@@ -337,8 +328,7 @@ errinjstart()
 #endif
 
 static uint32
-limcalc (freq)
-    float32		freq;
+limcalc (float32 freq)
 {
     uint32          unit, lim;
     double	    flim;
@@ -603,8 +593,7 @@ exec_cmd(struct pstate *sregs, const char *cmd)
 
 
 void
-reset_stat(sregs)
-    struct pstate  *sregs;
+reset_stat(struct pstate *sregs)
 {
     sregs->tottime = 0.0;
     sregs->pwdtime = 0;
@@ -621,8 +610,7 @@ reset_stat(sregs)
 }
 
 void
-show_stat(sregs)
-    struct pstate  *sregs;
+show_stat(struct pstate *sregs)
 {
     uint32          iinst;
     uint32          stime;
@@ -677,8 +665,7 @@ show_stat(sregs)
 
 
 void
-init_bpt(sregs)
-    struct pstate  *sregs;
+init_bpt(struct pstate *sregs)
 {
     sregs->bptnum = 0;
     sregs->histlen = 0;
@@ -688,8 +675,7 @@ init_bpt(sregs)
 }
 
 static void
-int_handler(sig)
-    int32           sig;
+int_handler(int32 sig)
 {
     if (sig != 2)
 	printf("\n\n Signal handler error  (%d)\n\n", sig);
@@ -697,7 +683,7 @@ int_handler(sig)
 }
 
 void
-init_signals()
+init_signals(void)
 {
     typedef void    (*PFI) ();
     static PFI      int_tab[2];
@@ -714,8 +700,7 @@ struct evcell   evbuf[EVENT_MAX];
 struct irqcell  irqarr[16];
 
 static int
-disp_fpu(sregs)
-    struct pstate  *sregs;
+disp_fpu(struct pstate *sregs)
 {
 
     int         i;
@@ -741,9 +726,7 @@ disp_fpu(sregs)
 }
 
 static void
-disp_regs(sregs,cwp)
-    struct pstate  *sregs;
-    int cwp;
+disp_regs(struct pstate *sregs, int cwp)
 {
 
     int           i;
@@ -770,8 +753,7 @@ static void print_insn_sparc_sis(uint32 addr, struct disassemble_info *info)
 }
 
 static void
-disp_ctrl(sregs)
-    struct pstate  *sregs;
+disp_ctrl(struct pstate *sregs)
 {
 
     uint32           i;
@@ -790,9 +772,7 @@ disp_ctrl(sregs)
 }
 
 static void
-disp_mem(addr, len)
-    uint32          addr;
-    uint32          len;
+disp_mem(uint32 addr, uint32 len)
 {
 
     uint32          i;
@@ -823,10 +803,7 @@ disp_mem(addr, len)
 }
 
 void
-dis_mem(addr, len, info)
-    uint32          addr;
-    uint32          len;
-    struct disassemble_info *info;
+dis_mem(uint32 addr, uint32 len, struct disassemble_info *info)
 {
     uint32          i;
     union {
@@ -846,10 +823,7 @@ dis_mem(addr, len, info)
 /* Add event to event queue */
 
 void
-event(cfunc, arg, delta)
-    void            (*cfunc) ();
-    int32           arg;
-    uint64          delta;
+event(void (*cfunc) (), int32 arg, uint64 delta)
 {
     struct evcell  *ev1, *evins;
 
@@ -885,7 +859,7 @@ stop_event()
 #endif
 
 void
-init_event()
+init_event(void)
 {
     int32           i;
 
@@ -898,10 +872,7 @@ init_event()
 }
 
 void
-set_int(level, callback, arg)
-    int32           level;
-    void            (*callback) ();
-    int32           arg;
+set_int(int32 level, void (*callback) (), int32 arg)
 {
     irqarr[level & 0x0f].callback = callback;
     irqarr[level & 0x0f].arg = arg;
@@ -910,8 +881,7 @@ set_int(level, callback, arg)
 /* Advance simulator time */
 
 void
-advance_time(sregs)
-    struct pstate  *sregs;
+advance_time(struct pstate *sregs)
 {
 
     struct evcell  *evrem;
@@ -942,7 +912,7 @@ advance_time(sregs)
 }
 
 uint32
-now()
+now(void)
 {
     return ebase.simtime;
 }
@@ -951,7 +921,7 @@ now()
 /* Advance time until an external interrupt is seen */
 
 int
-wait_for_irq()
+wait_for_irq(void)
 {
     struct evcell  *evrem;
     void            (*cfunc) ();
@@ -980,8 +950,7 @@ wait_for_irq()
 }
 
 int
-check_bpt(sregs)
-    struct pstate  *sregs;
+check_bpt(struct pstate *sregs)
 {
     int32           i;
 
@@ -995,7 +964,7 @@ check_bpt(sregs)
 }
 
 void
-reset_all()
+reset_all(void)
 {
     init_event();		/* Clear event queue */
     init_regs(&sregs);
@@ -1006,14 +975,14 @@ reset_all()
 }
 
 void
-sys_reset()
+sys_reset(void)
 {
     reset_all();
     sregs.trap = 256;		/* Force fake reset trap */
 }
 
 void
-sys_halt()
+sys_halt(void)
 {
     sregs.trap = 257;           /* Force fake halt trap */
 }

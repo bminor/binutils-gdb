@@ -162,11 +162,11 @@ END_RELOC_NUMBERS (R_MMIX_max)
 #define MMO_SEC_DEBUGGING 0x10000
 
 #ifdef BFD_ARCH_SIZE
-extern bfd_boolean _bfd_mmix_before_linker_allocation
+extern bool _bfd_mmix_before_linker_allocation
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_mmix_after_linker_allocation
+extern bool _bfd_mmix_after_linker_allocation
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_mmix_check_all_relocs
+extern bool _bfd_mmix_check_all_relocs
   (bfd *, struct bfd_link_info *);
 #endif
 

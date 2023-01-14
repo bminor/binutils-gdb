@@ -221,7 +221,7 @@ xtensa_read_table_entries (bfd *abfd,
 			   asection *section,
 			   property_table_entry **table_p,
 			   const char *sec_name,
-			   bfd_boolean output_addr);
+			   bool output_addr);
 extern int
 xtensa_compute_fill_extra_space (property_table_entry *entry);
 

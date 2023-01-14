@@ -218,9 +218,8 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
 extern std::string ada_decode (const char*);
 
-extern int ada_lookup_symbol_list (const char *, const struct block *,
-				   domain_enum,
-				   std::vector<struct block_symbol> *);
+extern std::vector<struct block_symbol> ada_lookup_symbol_list
+     (const char *, const struct block *, domain_enum);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
 					      const struct block *,
@@ -281,13 +280,7 @@ extern struct type *ada_aligned_type (struct type *);
 extern const gdb_byte *ada_aligned_value_addr (struct type *,
 					       const gdb_byte *);
 
-extern int ada_is_gnat_encoded_fixed_point_type (struct type *);
-
 extern int ada_is_system_address_type (struct type *);
-
-extern struct value *gnat_encoded_fixed_point_delta (struct type *);
-
-extern struct value *gnat_encoded_fixed_point_scaling_factor (struct type *);
 
 extern int ada_which_variant_applies (struct type *, struct value *);
 
@@ -385,5 +378,51 @@ extern const char *ada_get_tcb_types_info (void);
 extern void print_ada_task_info (struct ui_out *uiout,
 				 const char *taskno_str,
 				 struct inferior *inf);
+
+/* Look for a symbol for an overloaded operator for the operation OP.
+   PARSE_COMPLETION is true if currently parsing for completion.
+   NARGS and ARGVEC describe the arguments to the call.  Returns a
+   "null" block_symbol if no such operator is found.  */
+
+extern block_symbol ada_find_operator_symbol (enum exp_opcode op,
+					      bool parse_completion,
+					      int nargs, value *argvec[]);
+
+/* Resolve a function call, selecting among possible function symbols.
+   SYM and BLOCK are passed to ada_lookup_symbol_list.  CONTEXT_TYPE
+   describes the calling context.  PARSE_COMPLETION is true if
+   currently parsing for completion.  NARGS and ARGVEC describe the
+   arguments to the call.  This returns the chosen symbol and will
+   update TRACKER accordingly.  */
+
+extern block_symbol ada_resolve_funcall (struct symbol *sym,
+					 const struct block *block,
+					 struct type *context_type,
+					 bool parse_completion,
+					 int nargs, value *argvec[],
+					 innermost_block_tracker *tracker);
+
+/* Resolve a symbol reference, selecting among possible values.  SYM
+   and BLOCK are passed to ada_lookup_symbol_list.  CONTEXT_TYPE
+   describes the calling context.  PARSE_COMPLETION is true if
+   currently parsing for completion.  If DEPROCEDURE_P is nonzero,
+   then a symbol that names a zero-argument function will be passed
+   through ada_resolve_function.  This returns the chosen symbol and
+   will update TRACKER accordingly.  */
+
+extern block_symbol ada_resolve_variable (struct symbol *sym,
+					  const struct block *block,
+					  struct type *context_type,
+					  bool parse_completion,
+					  int deprocedure_p,
+					  innermost_block_tracker *tracker);
+
+/* The type of nth index in arrays of given type (n numbering from 1).
+   Does not examine memory.  Throws an error if N is invalid or TYPE
+   is not an array type.  NAME is the name of the Ada attribute being
+   evaluated ('range, 'first, 'last, or 'length); it is used in building
+   the error message.  */
+extern struct type *ada_index_type (struct type *type, int n,
+				    const char *name);
 
 #endif

@@ -29,14 +29,14 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  R (bfd_mach_v850e3v5, "v850e3v5",	FALSE, & arch_info_struct[1]),
-  R (bfd_mach_v850e3v5, "v850e2v4",	FALSE, & arch_info_struct[2]),
-  R (bfd_mach_v850e2v3, "v850e2v3",	FALSE, & arch_info_struct[3]),
-  R (bfd_mach_v850e2,	"v850e2",	FALSE, & arch_info_struct[4]),
-  R (bfd_mach_v850e1,	"v850e1",	FALSE, & arch_info_struct[5]),
-  R (bfd_mach_v850e,	"v850e",	FALSE, & arch_info_struct[6]),
-  R (bfd_mach_v850,	"v850-rh850",	FALSE, NULL) /* For backwards compatibility.  */
+  R (bfd_mach_v850e3v5, "v850e3v5",	false, & arch_info_struct[1]),
+  R (bfd_mach_v850e3v5, "v850e2v4",	false, & arch_info_struct[2]),
+  R (bfd_mach_v850e2v3, "v850e2v3",	false, & arch_info_struct[3]),
+  R (bfd_mach_v850e2,	"v850e2",	false, & arch_info_struct[4]),
+  R (bfd_mach_v850e1,	"v850e1",	false, & arch_info_struct[5]),
+  R (bfd_mach_v850e,	"v850e",	false, & arch_info_struct[6]),
+  R (bfd_mach_v850,	"v850-rh850",	false, NULL) /* For backwards compatibility.  */
 };
 
 const bfd_arch_info_type bfd_v850_rh850_arch =
-  R (bfd_mach_v850,	"v850:rh850",	TRUE,  & arch_info_struct[0]);
+  R (bfd_mach_v850,	"v850:rh850",	true,  & arch_info_struct[0]);

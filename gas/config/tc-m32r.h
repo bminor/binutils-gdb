@@ -70,7 +70,7 @@ extern void m32r_handle_align (fragS *);
 #define md_apply_fix gas_cgen_md_apply_fix
 
 #define tc_fix_adjustable(FIX) m32r_fix_adjustable (FIX)
-bfd_boolean m32r_fix_adjustable (struct fix *);
+extern bool m32r_fix_adjustable (struct fix *);
 
 /* After creating a fixup for an instruction operand, we need to check for
    HI16 relocs and queue them up for later sorting.  */
@@ -79,12 +79,6 @@ bfd_boolean m32r_fix_adjustable (struct fix *);
 #define TC_HANDLES_FX_DONE
 
 extern int pic_code;
-
-extern bfd_boolean m32r_fix_adjustable (struct fix *);
-
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
 
 #define tc_frob_file_before_fix() m32r_frob_file ()
 extern void m32r_frob_file (void);

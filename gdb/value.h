@@ -739,9 +739,6 @@ extern struct value *allocate_value_lazy (struct type *type);
 extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
 				 struct value *src, LONGEST src_offset,
 				 LONGEST length);
-extern void value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
-				     struct value *src, LONGEST src_offset,
-				     LONGEST length);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 
@@ -917,13 +914,6 @@ extern struct value *evaluate_expression (struct expression *exp,
 
 extern struct value *evaluate_type (struct expression *exp);
 
-extern struct value *evaluate_subexp (struct type *expect_type,
-				      struct expression *exp,
-				      int *pos, enum noside noside);
-
-extern struct value *evaluate_subexpression_type (struct expression *exp,
-						  int subexp);
-
 extern value *evaluate_var_value (enum noside noside, const block *blk,
 				  symbol *var);
 
@@ -931,17 +921,12 @@ extern value *evaluate_var_msym_value (enum noside noside,
 				       struct objfile *objfile,
 				       minimal_symbol *msymbol);
 
-extern value *eval_skip_value (expression *exp);
-
-extern void fetch_subexp_value (struct expression *exp, int *pc,
+namespace expr { class operation; };
+extern void fetch_subexp_value (struct expression *exp,
+				expr::operation *op,
 				struct value **valp, struct value **resultp,
 				std::vector<value_ref_ptr> *val_chain,
 				bool preserve_errors);
-
-extern const char *extract_field_op (struct expression *exp, int *subexp);
-
-extern struct value *evaluate_subexp_with_coercion (struct expression *,
-						    int *, enum noside);
 
 extern struct value *parse_and_eval (const char *exp);
 

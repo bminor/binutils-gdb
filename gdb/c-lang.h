@@ -90,10 +90,7 @@ extern void c_value_print (struct value *, struct ui_file *,
 
 /* These are in c-lang.c: */
 
-extern struct value *evaluate_subexp_c (struct type *expect_type,
-					struct expression *exp,
-					int *pos,
-					enum noside noside);
+extern void c_printchar (int, struct type *, struct ui_file *);
 
 extern void c_printstr (struct ui_file * stream,
 			struct type *elttype,
@@ -106,12 +103,8 @@ extern void c_printstr (struct ui_file * stream,
 extern void c_language_arch_info (struct gdbarch *gdbarch,
 				  struct language_arch_info *lai);
 
-extern const struct exp_descriptor exp_descriptor_c;
-
 extern void c_emit_char (int c, struct type *type,
 			 struct ui_file *stream, int quoter);
-
-extern const struct op_print c_op_print_tab[];
 
 /* These are in c-typeprint.c: */
 
@@ -147,21 +140,19 @@ extern bool c_is_string_type_p (struct type *type);
 
 extern int c_textual_element_type (struct type *, char);
 
-/* Create a new instance of the C compiler and return it.  The new
-   compiler is owned by the caller and must be freed using the destroy
-   method.  This function never returns NULL, but rather throws an
-   exception on failure.  This is suitable for use as the
+/* Create a new instance of the C compiler and return it.  This
+   function never returns NULL, but rather throws an exception on
+   failure.  This is suitable for use as the
    language_defn::get_compile_instance method.  */
 
-extern compile_instance *c_get_compile_context (void);
+extern std::unique_ptr<compile_instance> c_get_compile_context ();
 
-/* Create a new instance of the C++ compiler and return it.  The new
-   compiler is owned by the caller and must be freed using the destroy
-   method.  This function never returns NULL, but rather throws an
-   exception on failure.  This is suitable for use as the
+/* Create a new instance of the C++ compiler and return it.  This
+   function never returns NULL, but rather throws an exception on
+   failure.  This is suitable for use as the
    language_defn::get_compile_instance method.  */
 
-extern compile_instance *cplus_get_compile_context ();
+extern std::unique_ptr<compile_instance> cplus_get_compile_context ();
 
 /* This takes the user-supplied text and returns a new bit of code to
    compile.

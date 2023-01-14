@@ -1,3 +1,99 @@
+2021-04-09  Luis Machado  <luis.machado@linaro.org>
+
+	* fpu.c (rxfp_itof): Initialize structure.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* trace.c (load_file_and_line): Use fread return value to index
+	the data.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regenerate.
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Delete call.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* mem.c (mem_put_blk): Rename parameter, add cast from parameter
+	type to local type.  Remove cast later in the function.
+	(mem_get_blk): Likewise.
+	* mem.h (mem_put_blk): Rename parameter to match definition.
+	(mem_get_blk): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* load.c: Replace 'elf/internal.h' and 'elf/common.h' includes
+	with 'elf-bfd.h' include.
+	* trace.c: Add 'trace.h' include.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* reg.c (trace_register_changes): Use PRIx64 in printf format
+	string.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* syscalls.c (rx_syscall): Move declaration of some variables to
+	the start of the enclosing block.
+	* trace.c (load_file_and_line): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* reg.c (fpsw2str): Provide a format string to printf.
+	(trace_register_changes): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* err.c (execution_error_exit_all): Delete.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* fpu.c (check_exceptions): Make static.
+	* gdb-if.c (handle_step): Likewise.
+	* mem.c (mem_put_byte): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cpu.h (trace_register_changes): Add void parameter type.
+	* err.c (ee_overrides): Likewise.
+	* mem.c (mem_usage_stats): Likewise.
+	(e): Likewise.
+	* reg.c (stack_heap_stats): Likewise.
+	* rx.c (pop): Likewise.
+	(poppc): Likewise.
+	(decode_opcode): Likewise.
+	* syscalls.c (arg): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb-if.c (sim_do_command): Work with a copy of the command.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb-if.c (sim_memory_map): New function.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Call SIM_AC_OPTION_WARNINGS.

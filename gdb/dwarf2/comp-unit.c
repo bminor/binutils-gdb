@@ -29,34 +29,7 @@
 #include "dwarf2/leb.h"
 #include "dwarf2/read.h"
 #include "dwarf2/section.h"
-
-/* Convert a unit type to corresponding DW_UT name.  */
-
-static const char *
-dwarf_unit_type_name (int unit_type)
-{
-  switch (unit_type)
-    {
-      case 0x01:
-	return "DW_UT_compile (0x01)";
-      case 0x02:
-	return "DW_UT_type (0x02)";
-      case 0x03:
-	return "DW_UT_partial (0x03)";
-      case 0x04:
-	return "DW_UT_skeleton (0x04)";
-      case 0x05:
-	return "DW_UT_split_compile (0x05)";
-      case 0x06:
-	return "DW_UT_split_type (0x06)";
-      case 0x80:
-	return "DW_UT_lo_user (0x80)";
-      case 0xff:
-	return "DW_UT_hi_user (0xff)";
-      default:
-	return nullptr;
-    }
-}
+#include "dwarf2/stringify.h"
 
 /* See comp-unit.h.  */
 

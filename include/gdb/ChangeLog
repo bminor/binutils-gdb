@@ -1,3 +1,7 @@
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-riscv.h: New file.
+
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.h (sim_memory_map): Define.

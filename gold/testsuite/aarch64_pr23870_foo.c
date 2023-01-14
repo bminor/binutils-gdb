@@ -1,6 +1,6 @@
-void foo (void (*bar)(void));
+int foo (int (*bar)(void));
 
-void foo (void (*bar)(void))
+int foo (int (*bar)(void))
 {
-  bar();
+  return bar() == 0x55 ? 0 : 1;
 }

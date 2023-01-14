@@ -55,26 +55,40 @@ struct die_info
     return gdb::optional<ULONGEST> ();
   }
 
-  /* Return range lists base of the compile unit, which, if exists, is
-     stored either at the attribute DW_AT_rnglists_base or
-     DW_AT_GNU_ranges_base.  */
-  ULONGEST ranges_base ()
+  /* Return the base address of the compile unit into the .debug_ranges section,
+     which, if exists, is stored in the DW_AT_GNU_ranges_base attribute.  This
+     value is only relevant in pre-DWARF 5 split-unit scenarios.  */
+  ULONGEST gnu_ranges_base ()
   {
     for (unsigned i = 0; i < num_attrs; ++i)
-      if (attrs[i].name == DW_AT_rnglists_base
-	  || attrs[i].name == DW_AT_GNU_ranges_base)
+      if (attrs[i].name == DW_AT_GNU_ranges_base)
 	{
 	  if (attrs[i].form_is_unsigned ())
-	    {
-	      /* If both exist, just use the first one.  */
-	      return attrs[i].as_unsigned ();
-	    }
-	  complaint (_("ranges base attribute (offset %s) as wrong form"),
+	    return attrs[i].as_unsigned ();
+
+	  complaint (_("ranges base attribute (offset %s) has wrong form"),
 		     sect_offset_str (sect_off));
 	}
+
     return 0;
   }
 
+  /* Return the rnglists base of the compile unit, which, if exists, is stored
+     in the DW_AT_rnglists_base attribute.  */
+  ULONGEST rnglists_base ()
+  {
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == DW_AT_rnglists_base)
+	{
+	  if (attrs[i].form_is_unsigned ())
+	    return attrs[i].as_unsigned ();
+
+	  complaint (_("rnglists base attribute (offset %s) has wrong form"),
+		     sect_offset_str (sect_off));
+	}
+
+    return 0;
+  }
 
   /* DWARF-2 tag for this DIE.  */
   ENUM_BITFIELD(dwarf_tag) tag : 16;

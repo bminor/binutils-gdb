@@ -874,7 +874,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	    }
 #endif
 	  if (IS_COMMENT (ch)
-	      || ch == '/'
 	      || IS_LINE_SEPARATOR (ch)
 	      || IS_PARALLEL_SEPARATOR (ch))
 	    {

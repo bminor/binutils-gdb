@@ -55,6 +55,8 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
+set have_index [exec_has_index_section $binfile]
+
 # Test that the "start" command stops in the "mymain" function.
 # This should happen because we used DW_AT_main_subprogram to tell gdb
 # that this was the real "main".
@@ -64,4 +66,14 @@ if {[gdb_start_cmd] < 0} {
     return -1
 }
 
-gdb_test "" "Temporary breakpoint .* mymain.*" "stopped at mymain"
+gdb_test_multiple "" "stopped at mymain" {
+    -re -wrap "Temporary breakpoint .* mymain.*" {
+	pass $gdb_test_name
+    }
+    -re -wrap "Temporary breakpoint .* main.*" {
+	if { $have_index } {
+	    setup_kfail "gdb/24549" *-*-*
+	}
+	fail $gdb_test_name
+    }
+}

@@ -1,3 +1,14 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp (arch): Delete.
+	* iwmmxt/iwmmxt.exp, misc.exp, thumb/allthumb.exp, xscale/xscale.exp:
+	Likewise.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp, iwmmxt/iwmmxt.exp, misc.exp, thumb/allthumb.ex,
+	xscale/xscale.exp: Define arch.
+
 2013-05-07  Jayant Sonar  <jayant.sonar@kpitcummins.com>
 	    Kaushik Phatak <Kaushik.Phatak@kpitcummins.com>
 

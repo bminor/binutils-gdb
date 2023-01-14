@@ -1,3 +1,46 @@
+2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Set ASAN_OPTIONS when running opc2c.
+
+2021-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* opc2c.c (main): Remove vlist variable.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (opc2c.o, safe-fgets.o): Call COMPILE_FOR_BUILD.
+	(opc2c): Call LINK_FOR_BUILD.
+
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (opc2c): Delete $(BUILD_LIBS).
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c (sim_memory_map): Define.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

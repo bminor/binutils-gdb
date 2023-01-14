@@ -41,13 +41,13 @@ include_HEADERS =
 noinst_LTLIBRARIES = libctf.la libctf-nobfd.la
 endif
 
-libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(LIBINTL) $(ZLIB)
+libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(ZLIB)
 libctf_nobfd_la_LDFLAGS = -version-info 0:0:0 @SHARED_LDFLAGS@ @VERSION_FLAGS@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
 			  ctf-hash.c ctf-labels.c ctf-dedup.c ctf-link.c ctf-lookup.c \
-			  ctf-open.c ctf-sha1.c ctf-string.c ctf-subr.c ctf-types.c \
-			  ctf-util.c
+			  ctf-open.c ctf-serialize.c ctf-sha1.c ctf-string.c ctf-subr.c \
+			  ctf-types.c ctf-util.c
 if NEED_CTF_QSORT_R
 libctf_nobfd_la_SOURCES += ctf-qsort_r.c
 endif
@@ -62,6 +62,7 @@ EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS =
 
+if TCL_TRY
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
@@ -86,7 +87,7 @@ check-DEJAGNU: site.exp development.exp
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
 		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS) -I$(INCDIR) -I$(srcdir) -I$(builddir) -I$(builddir)/../bfd $(ZLIBINC)" \
-		CC_FOR_HOST="$(CC)" LIBS="$(LIBS)" $(RUNTESTFLAGS); \
+		CC_FOR_HOST="$(CC)" LIBS="$(libctf_nobfd_la_LIBADD) $(LIBS)" $(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
@@ -100,3 +101,4 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES = site.exp development.exp
+endif

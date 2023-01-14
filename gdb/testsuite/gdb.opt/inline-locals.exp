@@ -124,3 +124,33 @@ if { ! $no_frames } {
 }
 
 gdb_test "print array\[0\]" "\\\$$decimal = 184" "print local 3"
+
+# Test printing scoped local variables.
+
+proc check_scoped_locals {bp_label pass_re} {
+    global srcfile
+
+    set locals_bp [gdb_get_line_number $bp_label ${srcfile}]
+    gdb_breakpoint $srcfile:$locals_bp
+
+    gdb_continue_to_breakpoint "$bp_label" ".*$srcfile:$locals_bp.*"
+    set kfail_re [multi_line $pass_re ".*<optimized out>"]
+    gdb_test_multiple "info locals" "scoped info locals at $bp_label" {
+	-re -wrap $pass_re {
+	    pass $gdb_test_name
+	}
+	-re -wrap $kfail_re {
+	    if {[test_compiler_info {gcc-[0-8]-*-*}]} {
+		kfail gdb/25695 $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
+    }
+}
+
+if {! $no_frames } {
+    check_scoped_locals "bp for locals 1" "loc2 = 20\r\nloc1 = 10"
+    check_scoped_locals "bp for locals 2" "loc3 = 30\r\nloc2 = 20\r\nloc1 = 10"
+    check_scoped_locals "bp for locals 3" "loc1 = 10"
+}

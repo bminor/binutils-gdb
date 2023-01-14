@@ -23,7 +23,6 @@ AC_INIT([binutils], BFD_VERSION)
 AC_CONFIG_SRCDIR(ar.c)
 
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 
@@ -33,6 +32,19 @@ AC_USE_SYSTEM_EXTENSIONS
 
 LT_INIT
 ACX_LARGEFILE
+
+ac_checking=
+. ${srcdir}/../bfd/development.sh
+test "$development" = true && ac_checking=yes
+AC_ARG_ENABLE(checking,
+[  --enable-checking       enable run-time checks],
+[case "${enableval}" in
+  no|none)  ac_checking= ;;
+  *)	    ac_checking=yes ;;
+esac])dnl
+if test x$ac_checking != x ; then
+  AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
+fi
 
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
@@ -81,6 +93,20 @@ fi], [default_f_for_ifunc=0])
 
 AC_DEFINE_UNQUOTED(DEFAULT_F_FOR_IFUNC_SYMBOLS, $default_f_for_ifunc,
 		   [Have nm use F and f for global and local ifunc symbols])
+
+
+AC_ARG_ENABLE(follow-debug-links,
+[AS_HELP_STRING([--enable-follow-debug-links],
+	[Have readelf and objdump follow debug links by default])], [
+if test "${enableval}" = no; then
+  default_for_follow_links=0
+else
+  default_for_follow_links=1
+fi], [default_for_follow_links=1])
+
+AC_DEFINE_UNQUOTED(DEFAULT_FOR_FOLLOW_LINKS, $default_for_follow_links,
+		   [Have readelf and objdump follow debug links by default])
+
 
 AC_DEBUGINFOD
 
@@ -148,53 +174,70 @@ esac
 AC_SUBST(DEMANGLER_NAME)
 
 AC_CHECK_SIZEOF([long])
-AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
+AC_CHECK_SIZEOF([long long])
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h locale.h sys/param.h wchar.h)
+# We use headers from include/ that check various HAVE_*_H macros, thus
+# should ensure they are set by configure.  This is true even when C99
+# guarantees they are available.
+# plugin-api.h tests HAVE_STDINT_H and HAVE_INTTYPES_H
+# Besides those, we need to check anything used in binutils/ not in C99.
+AC_CHECK_HEADERS(fcntl.h inttypes.h stdint.h sys/file.h \
+		 sys/stat.h sys/time.h sys/types.h unistd.h)
 AC_HEADER_SYS_WAIT
-ACX_HEADER_STRING
-AC_FUNC_ALLOCA
 AC_FUNC_MMAP
-AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll setlocale)
-AC_CHECK_FUNC([mkstemp],
-	      AC_DEFINE([HAVE_MKSTEMP], 1,
-	      [Define to 1 if you have the `mkstemp' function.]))
-AC_CHECK_FUNC([mkdtemp],
-              AC_DEFINE([HAVE_MKDTEMP], 1,
-              [Define to 1 if you have the `mkdtemp' function.]))
-  AC_MSG_CHECKING([for mbstate_t])
-  AC_TRY_COMPILE([#include <wchar.h>],
-  [mbstate_t teststate;],
-  have_mbstate_t=yes, have_mbstate_t=no)
-  AC_MSG_RESULT($have_mbstate_t)
-  if test x"$have_mbstate_t" = xyes; then
-    AC_DEFINE(HAVE_MBSTATE_T,1,[Define if mbstate_t exists in wchar.h.])
-  fi
+AC_CHECK_FUNCS(getc_unlocked mkdtemp mkstemp sbrk utimensat utimes)
+
+AC_MSG_CHECKING([for mbstate_t])
+AC_TRY_COMPILE([#include <wchar.h>],
+[mbstate_t teststate;],
+have_mbstate_t=yes, have_mbstate_t=no)
+AC_MSG_RESULT($have_mbstate_t)
+if test x"$have_mbstate_t" = xyes; then
+  AC_DEFINE(HAVE_MBSTATE_T,1,[Define if mbstate_t exists in wchar.h.])
+fi
+
+# Copied from gnulib stat-time.m4.
+# We should just switch over to using gnulib.
+AC_CHECK_MEMBERS([struct stat.st_atim.tv_nsec],
+  [AC_CACHE_CHECK([whether struct stat.st_atim is of type struct timespec],
+     [ac_cv_typeof_struct_stat_st_atim_is_struct_timespec],
+     [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[
+          #include <sys/types.h>
+          #include <sys/stat.h>
+          #if HAVE_SYS_TIME_H
+          # include <sys/time.h>
+          #endif
+          #include <time.h>
+          struct timespec ts;
+          struct stat st;
+        ]],
+        [[
+          st.st_atim = ts;
+        ]])],
+        [ac_cv_typeof_struct_stat_st_atim_is_struct_timespec=yes],
+        [ac_cv_typeof_struct_stat_st_atim_is_struct_timespec=no])])
+   if test $ac_cv_typeof_struct_stat_st_atim_is_struct_timespec = yes; then
+     AC_DEFINE([TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC], [1],
+       [Define to 1 if the type of the st_atim member of a struct stat is
+        struct timespec.])
+   fi],
+  [AC_CHECK_MEMBERS([struct stat.st_atimespec.tv_nsec], [],
+     [AC_CHECK_MEMBERS([struct stat.st_atimensec], [],
+        [AC_CHECK_MEMBERS([struct stat.st_atim.st__tim.tv_nsec], [], [],
+           [#include <sys/types.h>
+            #include <sys/stat.h>])],
+        [#include <sys/types.h>
+         #include <sys/stat.h>])],
+     [#include <sys/types.h>
+      #include <sys/stat.h>])],
+  [#include <sys/types.h>
+   #include <sys/stat.h>])
 
 # Some systems have frexp only in -lm, not in -lc.
 AC_SEARCH_LIBS(frexp, m)
 
 AM_LC_MESSAGES
-
-AC_MSG_CHECKING(for time_t in time.h)
-AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <time.h>], [time_t i;])],
-bu_cv_decl_time_t_time_h=yes, bu_cv_decl_time_t_time_h=no)])
-AC_MSG_RESULT($bu_cv_decl_time_t_time_h)
-if test $bu_cv_decl_time_t_time_h = yes; then
-  AC_DEFINE([HAVE_TIME_T_IN_TIME_H], 1,
-	    [Is the type time_t defined in <time.h>?])
-fi
-
-AC_MSG_CHECKING(for time_t in sys/types.h)
-AC_CACHE_VAL(bu_cv_decl_time_t_types_h,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>], [time_t i;])],
-bu_cv_decl_time_t_types_h=yes, bu_cv_decl_time_t_types_h=no)])
-AC_MSG_RESULT($bu_cv_decl_time_t_types_h)
-if test $bu_cv_decl_time_t_types_h = yes; then
-  AC_DEFINE([HAVE_TIME_T_IN_TYPES_H], 1,
-	    [Is the type time_t defined in <sys/types.h>?])
-fi
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(bu_cv_decl_getopt_unistd_h,
@@ -222,8 +265,7 @@ if test $bu_cv_header_utime_h = yes; then
   AC_DEFINE(HAVE_GOOD_UTIME_H, 1, [Does <utime.h> define struct utimbuf?])
 fi
 
-AC_CHECK_DECLS([asprintf, environ, fprintf, getc_unlocked, getenv,
-		sbrk, snprintf, stpcpy, strnlen, strstr, vsnprintf])
+AC_CHECK_DECLS([asprintf, environ, getc_unlocked, sbrk, stpcpy])
 
 # Link in zlib if we can.  This allows us to read compressed debug
 # sections.  This is used only by readelf.c (objdump uses bfd for

@@ -46,6 +46,7 @@
 #include "c-lang.h"
 #include <algorithm>
 #include "gdbarch.h"
+#include "compile/compile-internal.h"
 
 static void set_range_case (void);
 
@@ -373,26 +374,17 @@ set_language (enum language lang)
 }
 
 
-/* Print out the current language settings: language, range and
-   type checking.  If QUIETLY, print only what has changed.  */
+/* See language.h.  */
 
 void
-language_info (int quietly)
+language_info ()
 {
-  if (quietly && expected_language == current_language)
+  if (expected_language == current_language)
     return;
 
   expected_language = current_language;
   printf_unfiltered (_("Current language:  %s\n"), language);
   show_language_command (NULL, 1, NULL, NULL);
-
-  if (!quietly)
-    {
-      printf_unfiltered (_("Range checking:    %s\n"), range);
-      show_range_command (NULL, 1, NULL, NULL);
-      printf_unfiltered (_("Case sensitivity:  %s\n"), case_sensitive);
-      show_case_command (NULL, 1, NULL, NULL);
-    }
 }
 
 
@@ -704,6 +696,14 @@ language_defn::is_string_type_p (struct type *type) const
   return c_is_string_type_p (type);
 }
 
+/* See language.h.  */
+
+std::unique_ptr<compile_instance>
+language_defn::get_compile_instance () const
+{
+  return {};
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -763,14 +763,6 @@ language_defn::varobj_ops () const
   /* The ops for the C language are suitable for the vast majority of the
      supported languages.  */
   return &c_varobj_ops;
-}
-
-/* See language.h.  */
-
-const struct exp_descriptor *
-language_defn::expression_ops () const
-{
-  return &exp_descriptor_standard;
 }
 
 /* Parent class for both the "auto" and "unknown" languages.  These two
@@ -892,18 +884,6 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  {
-    static const struct op_print unk_op_print_tab[] =
-      {
-	{NULL, OP_NULL, PREC_NULL, 0}
-      };
-
-    return unk_op_print_tab;
-  }
 };
 
 /* Class representing the fake "auto" language.  */
@@ -1037,13 +1017,13 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   struct symbol *symbol;
   struct gdbarch *gdbarch;
   gdb_assert (!type->is_objfile_owned ());
-  gdbarch = type->arch ();
+  gdbarch = type->arch_owner ();
   symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
   symbol->m_name = type->name ();
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;
-  SYMBOL_SECTION (symbol) = 0;
+  symbol->set_section_index (0);
   SYMBOL_TYPE (symbol) = type;
   SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
   SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;

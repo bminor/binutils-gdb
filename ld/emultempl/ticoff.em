@@ -69,13 +69,13 @@ gld_${EMULATION_NAME}_list_options (FILE * file)
   fprintf (file, _("  --format 0|1|2              Specify which COFF version to use\n"));
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_COFF_FORMAT:
       if ((*optarg == '0' || *optarg == '1' || *optarg == '2')
@@ -92,7 +92,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	}
       break;
     }
-  return FALSE;
+  return false;
 }
 
 static void

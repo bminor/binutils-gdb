@@ -40,7 +40,7 @@ simple_dummy_undefined_symbol (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			       bfd *abfd ATTRIBUTE_UNUSED,
 			       asection *section ATTRIBUTE_UNUSED,
 			       bfd_vma address ATTRIBUTE_UNUSED,
-			       bfd_boolean fatal ATTRIBUTE_UNUSED)
+			       bool fatal ATTRIBUTE_UNUSED)
 {
 }
 

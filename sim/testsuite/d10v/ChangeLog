@@ -1,3 +1,11 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp (arch): Delete.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp: Define arch.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* allinsn.exp: New file.
@@ -141,4 +149,3 @@ Mon Nov 10 19:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (RUN_FOR_TARGET): Look for simulator in d10v
  	directory.
-

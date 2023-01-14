@@ -310,6 +310,7 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-interp.c \
 	tui/tui-io.c \
 	tui/tui-layout.c \
+	tui/tui-location.c \
 	tui/tui-out.c \
 	tui/tui-regs.c \
 	tui/tui-source.c \
@@ -698,6 +699,7 @@ ALL_64_TARGET_OBS = \
 	amd64-windows-tdep.o \
 	arch/aarch64.o \
 	arch/aarch64-insn.o \
+	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
@@ -729,7 +731,6 @@ ALL_TARGET_OBS = \
 	arm-netbsd-tdep.o \
 	arm-obsd-tdep.o \
 	arm-pikeos-tdep.o \
-	arm-symbian-tdep.o \
 	arm-tdep.o \
 	arm-wince-tdep.o \
 	avr-tdep.o \
@@ -808,6 +809,7 @@ ALL_TARGET_OBS = \
 	ravenscar-thread.o \
 	riscv-fbsd-tdep.o \
 	riscv-linux-tdep.o \
+	riscv-none-tdep.o \
 	riscv-ravenscar-thread.o \
 	riscv-tdep.o \
 	rl78-tdep.o \
@@ -1132,6 +1134,7 @@ COMMON_SFILES = \
 	reverse.c \
 	run-on-main-thread.c \
 	rust-lang.c \
+	rust-parse.c \
 	sentinel-frame.c \
 	ser-event.c \
 	serial.c \
@@ -1189,14 +1192,15 @@ SFILES = \
 	cp-name-parser.y \
 	d-exp.y \
 	dtrace-probe.c \
+	elf-none-tdep.c \
 	elfread.c \
 	f-exp.y \
+	gcore-elf.c \
 	gdb.c \
 	go-exp.y \
 	m2-exp.y \
 	p-exp.y \
 	proc-service.list \
-	rust-exp.y \
 	ser-base.c \
 	ser-unix.c \
 	sol-thread.c \
@@ -1292,6 +1296,7 @@ HFILES_NO_SRCDIR = \
 	frame-unwind.h \
 	frv-tdep.h \
 	ft32-tdep.h \
+	gcore-elf.h \
 	gcore.h \
 	gdb_bfd.h \
 	gdb_curses.h \
@@ -1361,6 +1366,7 @@ HFILES_NO_SRCDIR = \
 	netbsd-tdep.h \
 	nds32-tdep.h \
 	nios2-tdep.h \
+	elf-none-tdep.h \
 	nto-tdep.h \
 	objc-lang.h \
 	objfiles.h \
@@ -1469,6 +1475,7 @@ HFILES_NO_SRCDIR = \
 	arch/aarch32.h \
 	arch/aarch64.h \
 	arch/aarch64-insn.h \
+	arch/aarch64-mte-linux.h \
 	arch/arc.h \
 	arch/arm.h \
 	arch/i386.h \
@@ -1504,6 +1511,7 @@ HFILES_NO_SRCDIR = \
 	mi/mi-parse.h \
 	nat/aarch64-linux.h \
 	nat/aarch64-linux-hw-point.h \
+	nat/aarch64-mte-linux-ptrace.h \
 	nat/aarch64-sve-linux-ptrace.h \
 	nat/amd64-linux-siginfo.h \
 	nat/gdb_ptrace.h \
@@ -1541,6 +1549,7 @@ HFILES_NO_SRCDIR = \
 	tui/tui-hooks.h \
 	tui/tui-io.h \
 	tui/tui-layout.h \
+	tui/tui-location.h \
 	tui/tui-out.h \
 	tui/tui-regs.h \
 	tui/tui-source.h \
@@ -1599,8 +1608,7 @@ YYFILES = \
 	f-exp.c \
 	go-exp.c \
 	m2-exp.c \
-	p-exp.c \
-	rust-exp.c
+	p-exp.c
 
 # ada-lex.c is included by another file, so it shouldn't wind up as a
 # .o itself.
@@ -1960,7 +1968,7 @@ local-maintainer-clean:
 	rm -f c-exp.c \
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
-		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
+		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
 	rm -f TAGS
 	rm -f $(YYFILES)
 	rm -f nm.h config.status
@@ -2166,7 +2174,6 @@ ALLDEPFILES = \
 	arm-netbsd-nat.c \
 	arm-netbsd-tdep.c \
 	arm-obsd-tdep.c \
-	arm-symbian-tdep.c \
 	arm-tdep.c \
 	avr-tdep.c \
 	bfin-linux-tdep.c \
@@ -2272,6 +2279,7 @@ ALLDEPFILES = \
 	riscv-fbsd-tdep.c \
 	riscv-linux-nat.c \
 	riscv-linux-tdep.c \
+	riscv-none-tdep.c \
 	riscv-ravenscar-thread.c \
 	riscv-tdep.c \
 	rl78-tdep.c \

@@ -1,3 +1,35 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-07  Jim Wilson  <jimw@sifive.com>
+
+	PR sim/27483
+	* simulator.c (set_flags_for_add32): Compare uresult against
+	itself.  Compare sresult against itself.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

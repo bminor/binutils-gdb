@@ -209,22 +209,7 @@ public:
   bool range_checking_on_by_default () const override
   { return true; }
 
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_tab; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return c_op_print_tab; }
-
 private:
-
-  /* Table of expression handling functions for use by EXPRESSION_OPS
-     member function.  */
-
-  static const struct exp_descriptor exp_descriptor_tab;
 
   /* Helper for value_print_inner, arguments are as for that function.
      Prints structs and untagged unions.  */

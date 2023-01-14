@@ -387,7 +387,7 @@ sol_thread_target::detach (inferior *inf, int from_tty)
 
   sol_thread_active = 0;
   inferior_ptid = ptid_t (main_ph.ptid.pid ());
-  unpush_target (this);
+  inf->unpush_target (this);
   beneath->detach (inf, from_tty);
 }
 
@@ -641,7 +641,7 @@ check_for_thread_db (void)
       printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
 
       /* The thread library was detected.  Activate the sol_thread target.  */
-      push_target (&sol_thread_ops);
+      current_inferior ()->push_target (&sol_thread_ops);
       sol_thread_active = 1;
 
       main_ph.ptid = inferior_ptid; /* Save for xfer_memory.  */
@@ -681,7 +681,7 @@ sol_thread_target::mourn_inferior ()
 
   sol_thread_active = 0;
 
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 
   beneath->mourn_inferior ();
 }

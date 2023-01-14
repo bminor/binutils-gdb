@@ -1,3 +1,134 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Make-common.in (CONFIG_CFLAGS): Remove SIM_EXTRA_CFLAGS.
+	(ALL_CLAGS, COMMON_DEP_CFLAGS): Add SIM_EXTRA_CFLAGS after
+	CSEARCH.
+
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-cpu.c (sim_cpu_alloc_all): Delete 3rd arg.  Delete 2nd arg to
+	sim_cpu_alloc.
+	(sim_cpu_alloc): Move extra_bytes to local var.  Add result of
+	cgen_cpu_max_extra_bytes.
+	* sim-cpu.h (sim_cpu_alloc_all): Delete 3rd arg.
+	(sim_cpu_alloc): Delete 2nd arg.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* cgen-utils.c (RORQI, ROLQI, RORHI, ROLHI, RORSI, ROLSI): Use
+	new-style declaration.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (install-common): Install as run-$arch and
+	libsim-$arch.a when not the primary arch.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (CFLAGS_FOR_BUILD): Define.
+	(BUILD_CFLAGS): Replace -g -O with $(CFLAGS_FOR_BUILD).
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (LINK_FOR_BUILD): Change BUILD_LDFLAGS to
+	LDFLAGS_FOR_BUILD.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	(gentmap.o): New rule.
+	(gentmap): Call LINK_FOR_BUILD.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (check): Delete body.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_EXTRA_LIBDEPS): Delete.
+	(LIBDEPS): Delete $(SIM_EXTRA_LIBDEPS).
+
+2021-02-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_EXTRA_ALL): Delete.
+	(all): Delete $(SIM_EXTRA_ALL).
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Removed.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Delete all sinclude & m4_include calls.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Delete.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-events.c: Include sim-cpu.h.
+	(sim_event_watchpoints): Define watch_pc.
+	(sim_events_watch_pc): New function.
+	(WATCH_SIM): Handle watch_pc.
+	* sim-events.h (sim_events_watch_pc): New prototype.
+	* sim-watch.c (schedule_watchpoint): Replace sim_events_watch_sim with
+	sim_events_watch_pc.
+	* sim-watch.h (sim_watchpoints): Delete pc.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_COMMON): Replace AC_CONFIG_HEADER with
+	AC_CONFIG_HEADERS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (HDEFINES, TDEFINES): Delete.
+	(CONFIG_CFLAGS): Delete $(HDEFINES) $(TDEFINES).
+	* acinclude.m4 (SIM_AC_COMMON): Delete AC_SUBST(HDEFINES) and
+	bfd/configure.host sourcing.
+
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.py (TARGETS): Add riscv.
+	(TARGET_DIRS): Likewise.
+	* nltvals.def: Regenerate from the latest libgloss sources.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-trace.c (cgen_trace_insn): Add "%s" argument.
+
+2021-01-31  Stafford Horne  <shorne@gmail.com>
+
+	* cgen-accfp.c (fixsfsi): Change res from unsigned32 to signed32.
+	(fixdfsi): Change res from unsigned32 to signed32.
+	(fixdfdi): Change res from unsigned64 to signed64.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.sh: Replace shell script with ...
+	* gennltvals.py: ... this Python script.
+	* nltvals.def: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-watch.c (schedule_watchpoint): Change sizeof_pc to sizeof
+	sim_cia.
+	* sim-watch.h (struct _sim_watchpoints): Delete sizeof_pc.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-profile.c (profile_pc_init): Change 1 in shifts to 1ULL.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-hw.c (merge_device_file): Replace fgets with getline.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.sh (gen_arches): Sort calls by first arg.
+	* nltvals.def: Regenerate.
+
 2021-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (version.c): Simplifiy args and call move-if-change.

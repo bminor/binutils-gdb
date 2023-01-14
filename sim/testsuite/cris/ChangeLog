@@ -1,3 +1,12 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* asm/asm.exp (arch): Delete.
+	* c/c.exp, hw/rv-n-cris/rvc.exp: Likewise.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* asm/asm.exp, c/c.exp, hw/rv-n-cris/rvc.exp: Define arch.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* c/c.exp: Change sim_run return to return_code.  Set status to

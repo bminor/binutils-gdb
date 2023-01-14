@@ -47,6 +47,7 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/def-vector.h"
 #include <algorithm>
+#include "inferior.h"
 
 /* An enumeration of the various things a user might attempt to
    complete for a linespec location.  */
@@ -1168,12 +1169,11 @@ iterate_over_all_matching_symtabs
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  if (objfile->sf)
-	    objfile->sf->qf->expand_symtabs_matching (objfile,
-						      NULL,
-						      &lookup_name,
-						      NULL, NULL,
-						      search_domain);
+	  objfile->expand_symtabs_matching (NULL, &lookup_name, NULL, NULL,
+					    (SEARCH_GLOBAL_BLOCK
+					     | SEARCH_STATIC_BLOCK),
+					    UNDEF_DOMAIN,
+					    search_domain);
 
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
@@ -2318,7 +2318,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 				= (gdbarch_convert_from_func_ptr_addr
 				   (gdbarch,
 				    msym_addr,
-				    current_top_target ()));
+				    current_inferior ()->top_target ()));
 			    }
 
 			  if (msym_addr == addr)
@@ -4258,7 +4258,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       sal.pspace = current_program_space;
     }
 
-  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
+  sal.section = msymbol->obj_section (objfile);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
     add_sal_to_sals (self, result, &sal, msymbol->natural_name (), 0);

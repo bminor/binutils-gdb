@@ -147,12 +147,12 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
 
 /* Return target_desc to use for IPA, given the tdesc index passed by
    gdbserver.  Index is ignored, since we have only one tdesc
-   at the moment.  SVE and pauth not yet supported.  */
+   at the moment.  SVE, pauth and MTE not yet supported.  */
 
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
-  return aarch64_linux_read_description (0, false);
+  return aarch64_linux_read_description (0, false, false);
 }
 
 /* Allocate buffer for the jump pads.  The branch instruction has a reach
@@ -204,6 +204,6 @@ alloc_jump_pad_buffer (size_t size)
 void
 initialize_low_tracepoint (void)
 {
-  /* SVE and pauth not yet supported.  */
-  aarch64_linux_read_description (0, false);
+  /* SVE, pauth and MTE not yet supported.  */
+  aarch64_linux_read_description (0, false, false);
 }

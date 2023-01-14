@@ -559,7 +559,7 @@ rather recognizes it when thrown from user Python code.  Example:
 >    argv = gdb.string_to_argv (args)
 >    if len (argv) != 0:
 >      raise gdb.GdbError ("hello-world takes no arguments")
->    print "Hello, World!"
+>    print ("Hello, World!")
 >HelloWorld ()
 >end
 (gdb) hello-world 42
@@ -3100,8 +3100,8 @@ Here is an example:
 
 @smallexample
 def exit_handler (event):
-    print "event type: exit"
-    print "exit code: %d" % (event.exit_code)
+    print ("event type: exit")
+    print ("exit code: %d" % (event.exit_code))
 
 gdb.events.exited.connect (exit_handler)
 @end smallexample
@@ -3921,7 +3921,7 @@ class HelloWorld (gdb.Command):
     super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_USER)
 
   def invoke (self, arg, from_tty):
-    print "Hello, World!"
+    print ("Hello, World!")
 
 HelloWorld ()
 @end smallexample
@@ -4041,6 +4041,7 @@ class ExampleParam (gdb.Parameter):
         self.value = self.saved_value
         raise gdb.GdbError('Failed to validate')
       self.saved_value = self.value
+      return ""
 @end smallexample
 @end defun
 
@@ -4309,7 +4310,7 @@ def clear_objfiles_handler(event):
     event.progspace.expensive_computation = None
 def expensive(symbol):
     """A mock routine to perform an "expensive" computation on symbol."""
-    print "Computing the answer to the ultimate question ..."
+    print ("Computing the answer to the ultimate question ...")
     return 42
 def new_objfile_handler(event):
     objfile = event.new_objfile
@@ -4654,7 +4655,7 @@ versions.  Using it, you could write:
 reason = gdb.selected_frame().unwind_stop_reason ()
 reason_str =  gdb.frame_stop_reason_string (reason)
 if reason >=  gdb.FRAME_UNWIND_FIRST_ERROR:
-    print "An error occured: %s" % reason_str
+    print ("An error occured: %s" % reason_str)
 @end smallexample
 @end table
 
@@ -5295,7 +5296,7 @@ example illustrating iterating over a line table.
 symtab = gdb.selected_frame().find_sal().symtab
 linetable = symtab.linetable()
 for line in linetable:
-   print "Line: "+str(line.line)+" Address: "+hex(line.pc)
+   print ("Line: "+str(line.line)+" Address: "+hex(line.pc))
 @end smallexample
 
 This will have the following output:
@@ -5622,11 +5623,11 @@ method:
 @smallexample
 class MyFinishBreakpoint (gdb.FinishBreakpoint)
     def stop (self):
-        print "normal finish"
+        print ("normal finish")
         return True
     
     def out_of_scope ():
-        print "abnormal finish"
+        print ("abnormal finish")
 @end smallexample 
 @end defun
 
@@ -5848,6 +5849,11 @@ user changes the TUI layout, windows no longer visible in the new
 layout will be destroyed.  At this point, the @code{gdb.TuiWindow}
 will no longer be valid, and methods (and attributes) other than
 @code{is_valid} will throw an exception.
+
+When the TUI is disabled using @code{tui disable} (@pxref{TUI
+Commands,,tui disable}) the window is hidden rather than destroyed,
+but @code{is_valid} will still return @code{False} and other methods
+(and attributes) will still throw an exception.
 @end defun
 
 @defvar TuiWindow.width

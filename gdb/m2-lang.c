@@ -28,148 +28,88 @@
 #include "c-lang.h"
 #include "valprint.h"
 #include "gdbarch.h"
+#include "m2-exp.h"
 
-static struct value *
-evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
-			 int *pos, enum noside noside)
+/* A helper function for UNOP_HIGH.  */
+
+struct value *
+eval_op_m2_high (struct type *expect_type, struct expression *exp,
+		 enum noside noside,
+		 struct value *arg1)
 {
-  enum exp_opcode op = exp->elts[*pos].opcode;
-  struct value *arg1;
-  struct value *arg2;
-  struct type *type;
-
-  switch (op)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+  else
     {
-    case UNOP_HIGH:
-      (*pos)++;
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
-      else
-	{
-	  arg1 = coerce_ref (arg1);
-	  type = check_typedef (value_type (arg1));
-
-	  if (m2_is_unbounded_array (type))
-	    {
-	      struct value *temp = arg1;
-
-	      type = type->field (1).type ();
-	      /* i18n: Do not translate the "_m2_high" part!  */
-	      arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
-				       _("unbounded structure "
-					 "missing _m2_high field"));
-	  
-	      if (value_type (arg1) != type)
-		arg1 = value_cast (type, arg1);
-	    }
-	}
-      return arg1;
-
-    case BINOP_SUBSCRIPT:
-      (*pos)++;
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      /* If the user attempts to subscript something that is not an
-	 array or pointer type (like a plain int variable for example),
-	 then report this as an error.  */
-
       arg1 = coerce_ref (arg1);
-      type = check_typedef (value_type (arg1));
+      struct type *type = check_typedef (value_type (arg1));
 
       if (m2_is_unbounded_array (type))
 	{
 	  struct value *temp = arg1;
-	  type = type->field (0).type ();
-	  if (type == NULL || (type->code () != TYPE_CODE_PTR))
-	    {
-	      warning (_("internal error: unbounded "
-			 "array structure is unknown"));
-	      return evaluate_subexp_standard (expect_type, exp, pos, noside);
-	    }
-	  /* i18n: Do not translate the "_m2_contents" part!  */
-	  arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
+
+	  type = type->field (1).type ();
+	  /* i18n: Do not translate the "_m2_high" part!  */
+	  arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
 				   _("unbounded structure "
-				     "missing _m2_contents field"));
-	  
+				     "missing _m2_high field"));
+
 	  if (value_type (arg1) != type)
 	    arg1 = value_cast (type, arg1);
-
-	  check_typedef (value_type (arg1));
-	  return value_ind (value_ptradd (arg1, value_as_long (arg2)));
 	}
-      else
-	if (type->code () != TYPE_CODE_ARRAY)
-	  {
-	    if (type->name ())
-	      error (_("cannot subscript something of type `%s'"),
-		     type->name ());
-	    else
-	      error (_("cannot subscript requested type"));
-	  }
-
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
-      else
-	return value_subscript (arg1, value_as_long (arg2));
-
-    default:
-      return evaluate_subexp_standard (expect_type, exp, pos, noside);
     }
-
- nosideret:
-  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
+  return arg1;
 }
-
 
-/* Table of operators and their precedences for printing expressions.  */
+/* A helper function for BINOP_SUBSCRIPT.  */
 
-const struct op_print m2_language::op_print_tab[] =
+struct value *
+eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
+		      enum noside noside,
+		      struct value *arg1, struct value *arg2)
 {
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"+", UNOP_PLUS, PREC_PREFIX, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"DIV", BINOP_INTDIV, PREC_MUL, 0},
-  {"MOD", BINOP_REM, PREC_MUL, 0},
-  {":=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {"OR", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {"AND", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {"NOT", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {"=", BINOP_EQUAL, PREC_EQUAL, 0},
-  {"<>", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-  {"<=", BINOP_LEQ, PREC_ORDER, 0},
-  {">=", BINOP_GEQ, PREC_ORDER, 0},
-  {">", BINOP_GTR, PREC_ORDER, 0},
-  {"<", BINOP_LESS, PREC_ORDER, 0},
-  {"^", UNOP_IND, PREC_PREFIX, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {"CAP", UNOP_CAP, PREC_BUILTIN_FUNCTION, 0},
-  {"CHR", UNOP_CHR, PREC_BUILTIN_FUNCTION, 0},
-  {"ORD", UNOP_ORD, PREC_BUILTIN_FUNCTION, 0},
-  {"FLOAT", UNOP_FLOAT, PREC_BUILTIN_FUNCTION, 0},
-  {"HIGH", UNOP_HIGH, PREC_BUILTIN_FUNCTION, 0},
-  {"MAX", UNOP_MAX, PREC_BUILTIN_FUNCTION, 0},
-  {"MIN", UNOP_MIN, PREC_BUILTIN_FUNCTION, 0},
-  {"ODD", UNOP_ODD, PREC_BUILTIN_FUNCTION, 0},
-  {"TRUNC", UNOP_TRUNC, PREC_BUILTIN_FUNCTION, 0},
-  {NULL, OP_NULL, PREC_BUILTIN_FUNCTION, 0}
-};
-
+  /* If the user attempts to subscript something that is not an
+     array or pointer type (like a plain int variable for example),
+     then report this as an error.  */
 
-const struct exp_descriptor m2_language::exp_descriptor_modula2 =
-{
-  print_subexp_standard,
-  operator_length_standard,
-  operator_check_standard,
-  dump_subexp_body_standard,
-  evaluate_subexp_modula2
-};
+  arg1 = coerce_ref (arg1);
+  struct type *type = check_typedef (value_type (arg1));
+
+  if (m2_is_unbounded_array (type))
+    {
+      struct value *temp = arg1;
+      type = type->field (0).type ();
+      if (type == NULL || (type->code () != TYPE_CODE_PTR))
+	error (_("internal error: unbounded "
+		 "array structure is unknown"));
+      /* i18n: Do not translate the "_m2_contents" part!  */
+      arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
+			       _("unbounded structure "
+				 "missing _m2_contents field"));
+	  
+      if (value_type (arg1) != type)
+	arg1 = value_cast (type, arg1);
+
+      check_typedef (value_type (arg1));
+      return value_ind (value_ptradd (arg1, value_as_long (arg2)));
+    }
+  else
+    if (type->code () != TYPE_CODE_ARRAY)
+      {
+	if (type->name ())
+	  error (_("cannot subscript something of type `%s'"),
+		 type->name ());
+	else
+	  error (_("cannot subscript requested type"));
+      }
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+  else
+    return value_subscript (arg1, value_as_long (arg2));
+}
+
+
 
 /* Single instance of the M2 language.  */
 

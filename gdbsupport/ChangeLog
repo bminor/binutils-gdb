@@ -1,3 +1,22 @@
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* rsp-low.cc (fromhex, hex2bin): Move to ...
+	* common-utils.cc: ... here.
+	(fromhex) Change error message text to not be RSP-specific.
+	* rsp-low.h (fromhex, hex2bin): Move to ...
+	* common-utils.h: ... here.
+
+2021-03-21  Alan Modra  <amodra@gmail.com>
+
+	* common-utils.h (startswith): Delete version now supplied by bfd.h.
+
+2021-02-05  Paul E. Murphy  <murphy@linux.ibm.com>
+
+	* common-defs.h (ATTRIBUTE_PRINTF): Rename
+	_GL_ATTRIBUTE_FORMAT_PRINTF to _GL_ATTRIBUTE_FORMAT_PRINTF_STANDARD.
+	* common-utils.h (xfree): Use GNULIB_NAMESPACE namespace when calling
+	free if this macro is defined.
+
 2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* gdb_tilde_expand.cc (gdb_tilde_expand): Improve

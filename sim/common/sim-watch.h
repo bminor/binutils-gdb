@@ -49,8 +49,6 @@ typedef struct _sim_watchpoints {
      address/size of the program-counter */
   /* FIXME: In the future this shall be generalized so that any of the
      N processors M registers can be watched */
-  void *pc;
-  int sizeof_pc;
 
   /* Pointer to the handler for interrupt watchpoints */
   /* FIXME: can this be done better? */

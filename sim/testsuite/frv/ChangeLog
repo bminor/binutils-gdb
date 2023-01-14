@@ -1,3 +1,15 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp (arch): Delete.
+	* fr400/allinsn.exp, fr500/allinsn.exp, fr550/allinsn.exp,
+	interrupts.exp, misc.exp, parallel.exp: Likewise.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp, fr400/allinsn.exp, fr500/allinsn.exp,
+	fr550/allinsn.exp, interrupts.exp, misc.exp,
+	parallel.exp: Define arch.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* cache.ms: New testcase from ../../frv-elf/.

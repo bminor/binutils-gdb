@@ -1,3 +1,96 @@
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* local.mk: New file.
+	* aclocal.m4, Makefile.in, configure.ac, configure: Removed.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_TOOLCHAIN and AC_CONFIG_FILES.
+	(AC_PROG_INSTALL, AC_PROG_CC, AC_CANONICAL_SYSTEM, CC_FOR_BUILD,
+	CFLAGS_FOR_BUILD): Delete.
+	* aclocal.m4: New file.
+	* configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (LDFLAGS_FOR_BUILD): Define.
+	(BUILD_LDFLAGS): Delete.
+	(LINK_FOR_BUILD): Change BUILD_LDFLAGS to LDFLAGS_FOR_BUILD.
+	* configure.ac (LDFLAGS_FOR_BUILD): Define.
+	* configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	(.c.o, igen.o): Call COMPILE_FOR_BUILD.
+	(igen, tmp-table, tmp-filter, tmp-ld-decode, tmp-ld-cache, tmp-ld-insn,
+	tmp-gen): Call LINK_FOR_BUILD.
+
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (tmp-table, tmp-filter, tmp-ld-decode, tmp-ld-cache,
+	tmp-ld-insn, tmp-gen): Delete $(BUILD_LIBS).
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gen.c (main): Delete options arg to INIT_OPTIONS.
+	* ld-decode.c (main): Likewise.
+	* ld-insn.c (main): Likewise.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (check): Define.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (filter_filename.o): Delete unused target.
+	(distclean): Remove config.h.
+	(config.h, stamp-h): Delete targets.
+	* configure.ac (AC_CONFIG_HEADER): Delete call.
+	(AC_CHECK_HEADERS, AC_HEADER_DIRENT): Likewise.
+	(AC_OUTPUT): Remove 2nd arg.
+	* filter.c: Remove config.h include.
+	* filter_host.c, igen.c, lf.c, misc.c, misc.h: Likewise.
+	* table.c: Likewise.  Remove HAVE_UNISTD_H check.
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (program_transform_name, AR, RANLIB): Delete.
+	* configure.ac (AC_ARG_PROGRAM, AC_PROG_RANLIB): Delete calls.
+	(AC_SUBST): Delete AR & CFLAGS calls.
+	* configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (AR_FOR_BUILD, AR_FLAGS_FOR_BUILD,
+	RANLIB_FOR_BUILD): Delete.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (LIBIBERTY_LIB): Delete.
+	(igen): Delete $(LIBIBERTY_LIB).
+	* configure.ac (LIBIBERTY_LIB): Delete.
+	* configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete bfd/configure.host sourcing.
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CHECK_HEADERS): Delete stdlib.h, string.h, and

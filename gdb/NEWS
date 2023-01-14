@@ -3,6 +3,21 @@
 
 *** Changes since GDB 10
 
+* GDB now supports general memory tagging functionality if the underlying
+  architecture supports the proper primitives and hooks.  Currently this is
+  enabled only for AArch64 MTE.
+
+  This includes:
+
+  - Additional information when the inferior crashes with a SIGSEGV caused by
+    a memory tag violation.
+
+  - A new modifier 'm' for the "x" command, which displays allocation tags for a
+    particular memory range.
+
+  - Display of memory tag mismatches by "print", for addresses and
+    pointers, if memory tagging is supported by the architecture.
+
 * Building GDB now requires GMP (The GNU Multiple Precision Arithmetic
   Library).
 
@@ -33,11 +48,29 @@
   the use of the GNAT encoding (based on information added to the type's
   name following a GNAT-specific format).
 
+* GDB will now load and process commands from ~/.config/gdb/gdbearlyinit
+  or ~/.gdbearlyinit if these files are present.  These files are
+  processed earlier than any of the other initialization files and
+  can affect parts of GDB's startup that previously had already been
+  completed before the initialization files were read, for example
+  styling of the initial GDB greeting.
+
+* GDB now has two new options "--early-init-command" and
+  "--early-init-eval-command" with corresponding short options "-eix"
+  and "-eiex" that allow options (that would normally appear in a
+  gdbearlyinit file) to be passed on the command line.
+
 * New commands
 
 set debug event-loop
 show debug event-loop
   Control the display of debug output about GDB's event loop.
+
+set print memory-tag-violations
+show print memory-tag-violations
+  Control whether to display additional information about memory tag violations
+  when printing pointers and addresses.  Architecture support for memory
+  tagging is required for this option to have an effect.
 
 maintenance flush symbol-cache
 maintenance flush register-cache
@@ -46,6 +79,27 @@ maintenance flush register-cache
 
 maintenance flush dcache
   A new command to flush the dcache.
+
+maintenance info target-sections
+  Print GDB's internal target sections table.
+
+memory-tag show-logical-tag POINTER
+  Print the logical tag for POINTER.
+memory-tag with-logical-tag POINTER TAG
+  Print POINTER with logical tag TAG.
+memory-tag show-allocation-tag ADDRESS
+  Print the allocation tag for ADDRESS.
+memory-tag set-allocation-tag ADDRESS LENGTH TAGS
+  Set the allocation tag for [ADDRESS, ADDRESS + LENGTH) to TAGS.
+memory-tag check POINTER
+  Validate that POINTER's logical tag matches the allocation tag.
+
+set startup-quietly on|off
+show startup-quietly
+  When 'on', this causes GDB to act as if "-silent" were passed on the
+  command line.  This command needs to be added to an early
+  initialization file (e.g. ~/.config/gdb/gdbearlyinit) in order to
+  affect GDB.
 
 * Changed commands
 
@@ -79,6 +133,29 @@ set style version foreground COLOR
 set style version background COLOR
 set style version intensity VALUE
   Control the styling of GDB's version number text.
+
+inferior [ID]
+  When the ID parameter is omitted, then this command prints information
+  about the current inferior.  When the ID parameter is present, the
+  behavior of the command is unchanged and have the inferior ID become
+  the current inferior.
+
+maintenance info sections
+  The ALLOBJ keyword has been replaced with an -all-objects command
+  line flag.  It is now possible to filter which sections are printed
+  even when -all-objects is passed.
+
+* Removed targets and native configurations
+
+ARM Symbian			arm*-*-symbianelf*
+
+* New remote packets
+
+qMemTags
+  Request the remote to send allocation tags for a particular memory range.
+QMemTags
+  Request the remote to store the specified allocation tags to the requested
+  memory range.
 
 *** Changes in GDB 10
 

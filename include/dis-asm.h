@@ -114,6 +114,10 @@ typedef struct disassemble_info
   /* Set if the user has requested wide output.  */
 #define WIDE_OUTPUT (1u << 28)
 
+  /* Dynamic relocations, if they have been loaded.  */
+  arelent **dynrelbuf;
+  long dynrelcount;
+
   /* Use internally by the target specific disassembly code.  */
   void *private_data;
 
@@ -144,13 +148,13 @@ typedef struct disassemble_info
      some circumstances we want to include the overlay number in the
      address, (normally because there is a symbol associated with
      that address), but sometimes we want to mask out the overlay bits.  */
-  int (* symbol_at_address_func)
+  asymbol * (*symbol_at_address_func)
     (bfd_vma addr, struct disassemble_info *dinfo);
 
   /* Function called to check if a SYMBOL is can be displayed to the user.
      This is used by some ports that want to hide special symbols when
      displaying debugging outout.  */
-  bfd_boolean (* symbol_is_valid)
+  bool (*symbol_is_valid)
     (asymbol *, struct disassemble_info *dinfo);
 
   /* These are for buffer_read_memory.  */
@@ -189,7 +193,7 @@ typedef struct disassemble_info
   unsigned int skip_zeroes_at_end;
 
   /* Whether the disassembler always needs the relocations.  */
-  bfd_boolean disassembler_needs_relocs;
+  bool disassembler_needs_relocs;
 
   /* Results from instruction decoders.  Not all decoders yet support
      this information.  This info is set each time an instruction is
@@ -303,10 +307,10 @@ extern void print_arm_disassembler_options (FILE *);
 extern void print_arc_disassembler_options (FILE *);
 extern void print_s390_disassembler_options (FILE *);
 extern void print_wasm32_disassembler_options (FILE *);
-extern bfd_boolean aarch64_symbol_is_valid (asymbol *, struct disassemble_info *);
-extern bfd_boolean arm_symbol_is_valid (asymbol *, struct disassemble_info *);
-extern bfd_boolean csky_symbol_is_valid (asymbol *, struct disassemble_info *);
-extern bfd_boolean riscv_symbol_is_valid (asymbol *, struct disassemble_info *);
+extern bool aarch64_symbol_is_valid (asymbol *, struct disassemble_info *);
+extern bool arm_symbol_is_valid (asymbol *, struct disassemble_info *);
+extern bool csky_symbol_is_valid (asymbol *, struct disassemble_info *);
+extern bool riscv_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern void disassemble_init_powerpc (struct disassemble_info *);
 extern void disassemble_init_s390 (struct disassemble_info *);
 extern void disassemble_init_wasm32 (struct disassemble_info *);
@@ -320,7 +324,7 @@ extern const disasm_options_and_args_t *disassembler_options_s390 (void);
    endian if BIG is true), bfd_mach value MACH, and ABFD, if that support
    is available.  ABFD may be NULL.  */
 extern disassembler_ftype disassembler (enum bfd_architecture arc,
-					bfd_boolean big, unsigned long mach,
+					bool big, unsigned long mach,
 					bfd *abfd);
 
 /* Amend the disassemble_info structure as necessary for the target architecture.
@@ -376,12 +380,12 @@ extern void perror_memory (int, bfd_vma, struct disassemble_info *);
 extern void generic_print_address
   (bfd_vma, struct disassemble_info *);
 
-/* Always true.  */
-extern int generic_symbol_at_address
+/* Always NULL.  */
+extern asymbol *generic_symbol_at_address
   (bfd_vma, struct disassemble_info *);
 
-/* Also always true.  */
-extern bfd_boolean generic_symbol_is_valid
+/* Always true.  */
+extern bool generic_symbol_is_valid
   (asymbol *, struct disassemble_info *);
 
 /* Method to initialize a disassemble_info struct.  This should be

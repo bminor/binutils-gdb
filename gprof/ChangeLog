@@ -1,3 +1,43 @@
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27716
+	* gprof.h (PATH_MAX): Don't define.
+	* corefile.c (core_create_line_syms): Don't use PATH_MAX for initial
+	file name size.
+	* source.c (annotate_source): Malloc file name buffer.  Always
+	trim off "-ann" when dos 8.3 annotate file matches original.
+	* utils.c (print_name_only): Malloc file name buffer.
+
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Check for sys/time.h and setitimer.  Don't invoke
+	AC_ISC_POSIX.  Don't check for setmode.
+	* gprof.c: Don't test HAVE_SETLOCALE.
+	* gprof.h: Include sys/time.h.
+	* configure: Regenerate.
+	* gconfig.in: Regenerate.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* basic_blocks.c: Replace bfd_boolean with bool, FALSE with false,
+	and TRUE with true throughout.
+	* basic_blocks.h: Likewise.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* corefile.c: Likewise.
+	* gmon_io.c: Likewise.
+	* gprof.c: Likewise.
+	* gprof.h: Likewise.
+	* hist.c: Likewise.
+	* mips.c: Likewise.
+	* source.c: Likewise.
+	* source.h: Likewise.
+	* sym_ids.c: Likewise.
+	* sym_ids.h: Likewise.
+	* symtab.h: Likewise.
+	* vax.c: Likewise.
+
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

@@ -1,6 +1,6 @@
 #as: 
 #objdump: -dw
-#name: i386 AVX512F insns with nondefault values in ignored bits
+#name: i386 AVX512F insns with nondefault values in ignored / reserved bits
 
 .*: +file format .*
 
@@ -16,4 +16,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62                   	vpmovdb %zmm6,\(bad\)
 [ 	]*[a-f0-9]+:	f2 7e 58             	bnd jle (0x7d|7d <.text\+0x7d>)
 [ 	]*[a-f0-9]+:	31 72 7f             	xor    %esi,0x7f\(%edx\)
+[ 	]*[a-f0-9]+:	62 f1 7c 88 58       	\(bad\)
+[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	62 f2 7d 4f 92 01    	vgatherdps \(bad\),%zmm0\{%k7\}
+[ 	]*[a-f0-9]+:	67 62 f2 7d 4f 92 01 	addr16 vgatherdps \(bad\),%zmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f2 7d cf 92 04 08 	vgatherdps \(%eax,%zmm1(,1)?\),%zmm0\{%k7\}\{z\}/\(bad\)
+[ 	]*[a-f0-9]+:	62 f2 7d 48 92 04 08 	vgatherdps \(%eax,%zmm1(,1)?\),%zmm0/\(bad\)
 #pass

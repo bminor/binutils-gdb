@@ -19,7 +19,7 @@
    see <http://www.gnu.org/licenses/>.  */
 
 #include "sysdep.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "disassemble.h"
 #include "libiberty.h"
 #include "opintl.h"
@@ -58,32 +58,32 @@ static void
 parse_aarch64_dis_option (const char *option, unsigned int len ATTRIBUTE_UNUSED)
 {
   /* Try to match options that are simple flags */
-  if (CONST_STRNEQ (option, "no-aliases"))
+  if (startswith (option, "no-aliases"))
     {
       no_aliases = 1;
       return;
     }
 
-  if (CONST_STRNEQ (option, "aliases"))
+  if (startswith (option, "aliases"))
     {
       no_aliases = 0;
       return;
     }
 
-  if (CONST_STRNEQ (option, "no-notes"))
+  if (startswith (option, "no-notes"))
     {
       no_notes = 1;
       return;
     }
 
-  if (CONST_STRNEQ (option, "notes"))
+  if (startswith (option, "notes"))
     {
       no_notes = 0;
       return;
     }
 
 #ifdef DEBUG_AARCH64
-  if (CONST_STRNEQ (option, "debug_dump"))
+  if (startswith (option, "debug_dump"))
     {
       debug_dump = 1;
       return;
@@ -252,27 +252,27 @@ get_expected_qualifier (const aarch64_inst *inst, int i)
 
 /* Operand extractors.  */
 
-bfd_boolean
+bool
 aarch64_ext_none (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		  aarch64_opnd_info *info ATTRIBUTE_UNUSED,
 		  const aarch64_insn code ATTRIBUTE_UNUSED,
 		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 aarch64_ext_regno (const aarch64_operand *self, aarch64_opnd_info *info,
 		   const aarch64_insn code,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   info->reg.regno = extract_field (self->fields[0], code, 0);
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 aarch64_ext_regno_pair (const aarch64_operand *self ATTRIBUTE_UNUSED, aarch64_opnd_info *info,
 		   const aarch64_insn code ATTRIBUTE_UNUSED,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -281,11 +281,11 @@ aarch64_ext_regno_pair (const aarch64_operand *self ATTRIBUTE_UNUSED, aarch64_op
   assert (info->idx == 1
 	  || info->idx ==3);
   info->reg.regno = inst->operands[info->idx - 1].reg.regno + 1;
-  return TRUE;
+  return true;
 }
 
 /* e.g. IC <ic_op>{, <Xt>}.  */
-bfd_boolean
+bool
 aarch64_ext_regrt_sysins (const aarch64_operand *self, aarch64_opnd_info *info,
 			  const aarch64_insn code,
 			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -300,11 +300,11 @@ aarch64_ext_regrt_sysins (const aarch64_operand *self, aarch64_opnd_info *info,
      not.  */
   info->present = aarch64_sys_ins_reg_has_xt (inst->operands[0].sysins_op);
 
-  return TRUE;
+  return true;
 }
 
 /* e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>].  */
-bfd_boolean
+bool
 aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 		     const aarch64_insn code,
 		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -344,7 +344,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  while (++pos <= 3 && (value & 0x1) == 0)
 	    value >>= 1;
 	  if (pos > 3)
-	    return FALSE;
+	    return false;
 	  info->qualifier = get_sreg_qualifier_from_value (pos);
 	  info->reglane.index = (unsigned) (value >> 1);
 	}
@@ -362,7 +362,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  info->reglane.regno &= 0x1f;
 	  break;
 	default:
-	  return FALSE;
+	  return false;
 	}
     }
   else if (inst->opcode->iclass == cryptosm3)
@@ -402,7 +402,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  info->reglane.index = extract_field (FLD_H, code, 0);
 	  break;
 	default:
-	  return FALSE;
+	  return false;
 	}
 
       if (inst->opcode->op == OP_FCMLA_ELEM
@@ -410,15 +410,15 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	{
 	  /* Complex operand takes two elements.  */
 	  if (info->reglane.index & 1)
-	    return FALSE;
+	    return false;
 	  info->reglane.index /= 2;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 aarch64_ext_reglist (const aarch64_operand *self, aarch64_opnd_info *info,
 		     const aarch64_insn code,
 		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -428,11 +428,11 @@ aarch64_ext_reglist (const aarch64_operand *self, aarch64_opnd_info *info,
   info->reglist.first_regno = extract_field (self->fields[0], code, 0);
   /* len */
   info->reglist.num_regs = extract_field (FLD_len, code, 0) + 1;
-  return TRUE;
+  return true;
 }
 
 /* Decode Rt and opcode fields of Vt in AdvSIMD load/store instructions.  */
-bfd_boolean
+bool
 aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			  aarch64_opnd_info *info, const aarch64_insn code,
 			  const aarch64_inst *inst,
@@ -467,17 +467,17 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   value = extract_field (FLD_opcode, code, 0);
   /* PR 21595: Check for a bogus value.  */
   if (value >= ARRAY_SIZE (data))
-    return FALSE;
+    return false;
   if (expected_num != data[value].num_elements || data[value].is_reserved)
-    return FALSE;
+    return false;
   info->reglist.num_regs = data[value].num_regs;
 
-  return TRUE;
+  return true;
 }
 
 /* Decode Rt and S fields of Vt in AdvSIMD load single structure to all
    lanes instructions.  */
-bfd_boolean
+bool
 aarch64_ext_ldst_reglist_r (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			    aarch64_opnd_info *info, const aarch64_insn code,
 			    const aarch64_inst *inst,
@@ -499,12 +499,12 @@ aarch64_ext_ldst_reglist_r (const aarch64_operand *self ATTRIBUTE_UNUSED,
   if (info->reglist.num_regs == 1 && value == (aarch64_insn) 1)
     info->reglist.num_regs = 2;
 
-  return TRUE;
+  return true;
 }
 
 /* Decode Q, opcode<2:1>, S, size and Rt fields of Vt in AdvSIMD
    load/store single element instructions.  */
-bfd_boolean
+bool
 aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			   aarch64_opnd_info *info, const aarch64_insn code,
 			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -531,7 +531,7 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
     case 0x1:
       if (QSsize & 0x1)
 	/* UND.  */
-	return FALSE;
+	return false;
       info->qualifier = AARCH64_OPND_QLF_S_H;
       /* Index encoded in "Q:S:size<1>".  */
       info->reglist.index = QSsize >> 1;
@@ -539,7 +539,7 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
     case 0x2:
       if ((QSsize >> 1) & 0x1)
 	/* UND.  */
-	return FALSE;
+	return false;
       if ((QSsize & 0x1) == 0)
 	{
 	  info->qualifier = AARCH64_OPND_QLF_S_S;
@@ -550,14 +550,14 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	{
 	  if (extract_field (FLD_S, code, 0))
 	    /* UND */
-	    return FALSE;
+	    return false;
 	  info->qualifier = AARCH64_OPND_QLF_S_D;
 	  /* Index encoded in "Q".  */
 	  info->reglist.index = QSsize >> 3;
 	}
       break;
     default:
-      return FALSE;
+      return false;
     }
 
   info->reglist.has_index = 1;
@@ -567,14 +567,14 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
   assert (info->reglist.num_regs >= 1 && info->reglist.num_regs <= 4);
 
-  return TRUE;
+  return true;
 }
 
 /* Decode fields immh:immb and/or Q for e.g.
    SSHR <Vd>.<T>, <Vn>.<T>, #<shift>
    or SSHR <V><d>, <V><n>, #<shift>.  */
 
-bfd_boolean
+bool
 aarch64_ext_advsimd_imm_shift (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			       aarch64_opnd_info *info, const aarch64_insn code,
 			       const aarch64_inst *inst,
@@ -586,7 +586,7 @@ aarch64_ext_advsimd_imm_shift (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   immh = extract_field (FLD_immh, code, 0);
   if (immh == 0)
-    return FALSE;
+    return false;
   imm = extract_fields (code, 0, 2, FLD_immh, FLD_immb);
   pos = 4;
   /* Get highest set bit in immh.  */
@@ -634,11 +634,11 @@ aarch64_ext_advsimd_imm_shift (const aarch64_operand *self ATTRIBUTE_UNUSED,
        1xxx	(UInt(immh:immb)-64)  */
     info->imm.value = imm - (8 << pos);
 
-  return TRUE;
+  return true;
 }
 
 /* Decode shift immediate for e.g. sshr (imm).  */
-bfd_boolean
+bool
 aarch64_ext_shll_imm (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		      aarch64_opnd_info *info, const aarch64_insn code,
 		      const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -652,15 +652,15 @@ aarch64_ext_shll_imm (const aarch64_operand *self ATTRIBUTE_UNUSED,
     case 0: imm = 8; break;
     case 1: imm = 16; break;
     case 2: imm = 32; break;
-    default: return FALSE;
+    default: return false;
     }
   info->imm.value = imm;
-  return TRUE;
+  return true;
 }
 
 /* Decode imm for e.g. BFM <Wd>, <Wn>, #<immr>, #<imms>.
    value in the field(s) will be extracted as unsigned immediate value.  */
-bfd_boolean
+bool
 aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 		 const aarch64_insn code,
 		 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -682,11 +682,11 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
     imm <<= 12;
 
   info->imm.value = imm;
-  return TRUE;
+  return true;
 }
 
 /* Decode imm and its shifter for e.g. MOVZ <Wd>, #<imm16>{, LSL #<shift>}.  */
-bfd_boolean
+bool
 aarch64_ext_imm_half (const aarch64_operand *self, aarch64_opnd_info *info,
 		      const aarch64_insn code,
 		      const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -695,12 +695,12 @@ aarch64_ext_imm_half (const aarch64_operand *self, aarch64_opnd_info *info,
   aarch64_ext_imm (self, info, code, inst, errors);
   info->shifter.kind = AARCH64_MOD_LSL;
   info->shifter.amount = extract_field (FLD_hw, code, 0) << 4;
-  return TRUE;
+  return true;
 }
 
 /* Decode cmode and "a:b:c:d:e:f:g:h" for e.g.
      MOVI <Vd>.<T>, #<imm8> {, LSL #<amount>}.  */
-bfd_boolean
+bool
 aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 				  aarch64_opnd_info *info,
 				  const aarch64_insn code,
@@ -749,7 +749,7 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	case 4: gen_sub_field (FLD_cmode, 1, 2, &field); break;	/* per word */
 	case 2: gen_sub_field (FLD_cmode, 1, 1, &field); break;	/* per half */
 	case 1: gen_sub_field (FLD_cmode, 1, 0, &field); break;	/* per byte */
-	default: assert (0); return FALSE;
+	default: assert (0); return false;
 	}
       /* 00: 0; 01: 8; 10:16; 11:24.  */
       info->shifter.amount = extract_field_2 (&field, code, 0) << 3;
@@ -762,14 +762,14 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
       break;
     default:
       assert (0);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Decode an 8-bit floating-point immediate.  */
-bfd_boolean
+bool
 aarch64_ext_fpimm (const aarch64_operand *self, aarch64_opnd_info *info,
 		   const aarch64_insn code,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -777,11 +777,11 @@ aarch64_ext_fpimm (const aarch64_operand *self, aarch64_opnd_info *info,
 {
   info->imm.value = extract_all_fields (self, code);
   info->imm.is_fp = 1;
-  return TRUE;
+  return true;
 }
 
 /* Decode a 1-bit rotate immediate (#90 or #270).  */
-bfd_boolean
+bool
 aarch64_ext_imm_rotate1 (const aarch64_operand *self, aarch64_opnd_info *info,
 			 const aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -790,11 +790,11 @@ aarch64_ext_imm_rotate1 (const aarch64_operand *self, aarch64_opnd_info *info,
   uint64_t rot = extract_field (self->fields[0], code, 0);
   assert (rot < 2U);
   info->imm.value = rot * 180 + 90;
-  return TRUE;
+  return true;
 }
 
 /* Decode a 2-bit rotate immediate (#0, #90, #180 or #270).  */
-bfd_boolean
+bool
 aarch64_ext_imm_rotate2 (const aarch64_operand *self, aarch64_opnd_info *info,
 			 const aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -803,23 +803,23 @@ aarch64_ext_imm_rotate2 (const aarch64_operand *self, aarch64_opnd_info *info,
   uint64_t rot = extract_field (self->fields[0], code, 0);
   assert (rot < 4U);
   info->imm.value = rot * 90;
-  return TRUE;
+  return true;
 }
 
 /* Decode scale for e.g. SCVTF <Dd>, <Wn>, #<fbits>.  */
-bfd_boolean
+bool
 aarch64_ext_fbits (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		   aarch64_opnd_info *info, const aarch64_insn code,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   info->imm.value = 64- extract_field (FLD_scale, code, 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode arithmetic immediate for e.g.
      SUBS <Wd>, <Wn|WSP>, #<imm> {, <shift>}.  */
-bfd_boolean
+bool
 aarch64_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		  aarch64_opnd_info *info, const aarch64_insn code,
 		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -831,18 +831,18 @@ aarch64_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* shift */
   value = extract_field (FLD_shift, code, 0);
   if (value >= 2)
-    return FALSE;
+    return false;
   info->shifter.amount = value ? 12 : 0;
   /* imm12 (unsigned) */
   info->imm.value = extract_field (FLD_imm12, code, 0);
 
-  return TRUE;
+  return true;
 }
 
 /* Return true if VALUE is a valid logical immediate encoding, storing the
    decoded value in *RESULT if so.  ESIZE is the number of bytes in the
    decoded immediate.  */
-static bfd_boolean
+static bool
 decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
 {
   uint64_t imm, mask;
@@ -870,7 +870,7 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
 	case 0x30 ... 0x37: /* 110xxx */ simd_size =  8; S &= 0x7; break;
 	case 0x38 ... 0x3b: /* 1110xx */ simd_size =  4; S &= 0x3; break;
 	case 0x3c ... 0x3d: /* 11110x */ simd_size =  2; S &= 0x1; break;
-	default: return FALSE;
+	default: return false;
 	}
       mask = (1ull << simd_size) - 1;
       /* Top bits are IGNORED.  */
@@ -878,11 +878,11 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
     }
 
   if (simd_size > esize * 8)
-    return FALSE;
+    return false;
 
   /* NOTE: if S = simd_size - 1 we get 0xf..f which is rejected.  */
   if (S == simd_size - 1)
-    return FALSE;
+    return false;
   /* S+1 consecutive bits to 1.  */
   /* NOTE: S can't be 63 due to detection above.  */
   imm = (1ull << (S + 1)) - 1;
@@ -908,11 +908,11 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
 
   *result = imm & ~((uint64_t) -1 << (esize * 4) << (esize * 4));
 
-  return TRUE;
+  return true;
 }
 
 /* Decode a logical immediate for e.g. ORR <Wd|WSP>, <Wn>, #<imm>.  */
-bfd_boolean
+bool
 aarch64_ext_limm (const aarch64_operand *self,
 		  aarch64_opnd_info *info, const aarch64_insn code,
 		  const aarch64_inst *inst,
@@ -928,21 +928,21 @@ aarch64_ext_limm (const aarch64_operand *self,
 }
 
 /* Decode a logical immediate for the BIC alias of AND (etc.).  */
-bfd_boolean
+bool
 aarch64_ext_inv_limm (const aarch64_operand *self,
 		      aarch64_opnd_info *info, const aarch64_insn code,
 		      const aarch64_inst *inst,
 		      aarch64_operand_error *errors)
 {
   if (!aarch64_ext_limm (self, info, code, inst, errors))
-    return FALSE;
+    return false;
   info->imm.value = ~info->imm.value;
-  return TRUE;
+  return true;
 }
 
 /* Decode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
    or LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>.  */
-bfd_boolean
+bool
 aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		aarch64_opnd_info *info,
 		const aarch64_insn code, const aarch64_inst *inst,
@@ -966,7 +966,7 @@ aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	case 0: qualifier = AARCH64_OPND_QLF_S_S; break;
 	case 1: qualifier = AARCH64_OPND_QLF_S_D; break;
 	case 2: qualifier = AARCH64_OPND_QLF_S_Q; break;
-	default: return FALSE;
+	default: return false;
 	}
       info->qualifier = qualifier;
     }
@@ -975,15 +975,15 @@ aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
       /* opc1:size */
       value = extract_fields (code, 0, 2, FLD_opc1, FLD_ldst_size);
       if (value > 0x4)
-	return FALSE;
+	return false;
       info->qualifier = get_sreg_qualifier_from_value (value);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g. STXRB <Ws>, <Wt>, [<Xn|SP>{,#0}].  */
-bfd_boolean
+bool
 aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_opnd_info *info,
 			 aarch64_insn code,
@@ -992,12 +992,12 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* Rn */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g.
      stlur <Xt>, [<Xn|SP>{, <amount>}].  */
-bfd_boolean
+bool
 aarch64_ext_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_opnd_info *info,
 			 aarch64_insn code, const aarch64_inst *inst,
@@ -1015,12 +1015,12 @@ aarch64_ext_addr_offset (const aarch64_operand *self ATTRIBUTE_UNUSED,
     info->addr.writeback = 1;
     info->addr.preind = 1;
   }
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g.
      STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
-bfd_boolean
+bool
 aarch64_ext_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_opnd_info *info,
 			 aarch64_insn code, const aarch64_inst *inst,
@@ -1035,7 +1035,7 @@ aarch64_ext_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* option */
   value = extract_field (FLD_option, code, 0);
   info->shifter.kind =
-    aarch64_get_operand_modifier_from_value (value, TRUE /* extend_p */);
+    aarch64_get_operand_modifier_from_value (value, true /* extend_p */);
   /* Fix-up the shifter kind; although the table-driven approach is
      efficient, it is slightly inflexible, thus needing this fix-up.  */
   if (info->shifter.kind == AARCH64_MOD_UXTX)
@@ -1060,11 +1060,11 @@ aarch64_ext_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
       info->shifter.amount_present = 1;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>], #<simm>.  */
-bfd_boolean
+bool
 aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
 		       aarch64_insn code, const aarch64_inst *inst,
 		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
@@ -1097,11 +1097,11 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
 	info->addr.postind = 1;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>{, #<simm>}].  */
-bfd_boolean
+bool
 aarch64_ext_addr_uimm12 (const aarch64_operand *self, aarch64_opnd_info *info,
 			 aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1114,11 +1114,11 @@ aarch64_ext_addr_uimm12 (const aarch64_operand *self, aarch64_opnd_info *info,
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   /* uimm12 */
   info->addr.offset.imm = extract_field (self->fields[1], code, 0) << shift;
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g. LDRAA <Xt>, [<Xn|SP>{, #<simm>}].  */
-bfd_boolean
+bool
 aarch64_ext_addr_simm10 (const aarch64_operand *self, aarch64_opnd_info *info,
 			 aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1136,12 +1136,12 @@ aarch64_ext_addr_simm10 (const aarch64_operand *self, aarch64_opnd_info *info,
     info->addr.writeback = 1;
     info->addr.preind = 1;
   }
-  return TRUE;
+  return true;
 }
 
 /* Decode the address operand for e.g.
      LD1 {<Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>}, [<Xn|SP>], <Xm|#<amount>>.  */
-bfd_boolean
+bool
 aarch64_ext_simd_addr_post (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			    aarch64_opnd_info *info,
 			    aarch64_insn code, const aarch64_inst *inst,
@@ -1171,11 +1171,11 @@ aarch64_ext_simd_addr_post (const aarch64_operand *self ATTRIBUTE_UNUSED,
     info->addr.offset.is_reg = 1;
   info->addr.writeback = 1;
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the condition operand for e.g. CSEL <Xd>, <Xn>, <Xm>, <cond>.  */
-bfd_boolean
+bool
 aarch64_ext_cond (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		  aarch64_opnd_info *info,
 		  aarch64_insn code, const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1185,11 +1185,11 @@ aarch64_ext_cond (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* cond */
   value = extract_field (FLD_cond, code, 0);
   info->cond = get_cond_from_value (value);
-  return TRUE;
+  return true;
 }
 
 /* Decode the system register operand for e.g. MRS <Xt>, <systemreg>.  */
-bfd_boolean
+bool
 aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		    aarch64_opnd_info *info,
 		    aarch64_insn code,
@@ -1214,11 +1214,11 @@ aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	info->sysreg.flags = F_REG_WRITE;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the PSTATE field operand for e.g. MSR <pstatefield>, #<imm>.  */
-bfd_boolean
+bool
 aarch64_ext_pstatefield (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_opnd_info *info, aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1229,13 +1229,13 @@ aarch64_ext_pstatefield (const aarch64_operand *self ATTRIBUTE_UNUSED,
   info->pstatefield = extract_fields (code, 0, 2, FLD_op1, FLD_op2);
   for (i = 0; aarch64_pstatefields[i].name != NULL; ++i)
     if (aarch64_pstatefields[i].value == (aarch64_insn)info->pstatefield)
-      return TRUE;
+      return true;
   /* Reserved value in <pstatefield>.  */
-  return FALSE;
+  return false;
 }
 
 /* Decode the system instruction op operand for e.g. AT <at_op>, <Xt>.  */
-bfd_boolean
+bool
 aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		       aarch64_opnd_info *info,
 		       aarch64_insn code,
@@ -1262,7 +1262,7 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	    aarch64_sys_regs_sr[].  */
 	value = value & ~(0x7);
 	break;
-    default: assert (0); return FALSE;
+    default: assert (0); return false;
     }
 
   for (i = 0; sysins_ops[i].name != NULL; ++i)
@@ -1273,15 +1273,15 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		     info->sysins_op->name,
 		     (unsigned)info->sysins_op->value,
 		     aarch64_sys_ins_reg_has_xt (info->sysins_op), i);
-	return TRUE;
+	return true;
       }
 
-  return FALSE;
+  return false;
 }
 
 /* Decode the memory barrier option operand for e.g. DMB <option>|#<imm>.  */
 
-bfd_boolean
+bool
 aarch64_ext_barrier (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		     aarch64_opnd_info *info,
 		     aarch64_insn code,
@@ -1290,12 +1290,12 @@ aarch64_ext_barrier (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* CRm */
   info->barrier = aarch64_barrier_options + extract_field (FLD_CRm, code, 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode the memory barrier option operand for DSB <option>nXS|#<imm>.  */
 
-bfd_boolean
+bool
 aarch64_ext_barrier_dsb_nxs (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		     aarch64_opnd_info *info,
 		     aarch64_insn code,
@@ -1305,13 +1305,13 @@ aarch64_ext_barrier_dsb_nxs (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* For the DSB nXS barrier variant immediate is encoded in 2-bit field.  */
   aarch64_insn field = extract_field (FLD_CRm_dsb_nxs, code, 0);
   info->barrier = aarch64_barrier_dsb_nxs_options + field;
-  return TRUE;
+  return true;
 }
 
 /* Decode the prefetch operation option operand for e.g.
      PRFM <prfop>, [<Xn|SP>{, #<pimm>}].  */
 
-bfd_boolean
+bool
 aarch64_ext_prfop (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		   aarch64_opnd_info *info,
 		   aarch64_insn code, const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1319,13 +1319,13 @@ aarch64_ext_prfop (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   /* prfop in Rt */
   info->prfop = aarch64_prfops + extract_field (FLD_Rt, code, 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode the hint number for an alias taking an operand.  Set info->hint_option
    to the matching name/value pair in aarch64_hint_options.  */
 
-bfd_boolean
+bool
 aarch64_ext_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		  aarch64_opnd_info *info,
 		  aarch64_insn code,
@@ -1343,16 +1343,16 @@ aarch64_ext_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
       if (hint_number == HINT_VAL (aarch64_hint_options[i].value))
 	{
 	  info->hint_option = &(aarch64_hint_options[i]);
-	  return TRUE;
+	  return true;
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Decode the extended register operand for e.g.
      STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
-bfd_boolean
+bool
 aarch64_ext_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			  aarch64_opnd_info *info,
 			  aarch64_insn code,
@@ -1366,7 +1366,7 @@ aarch64_ext_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* option */
   value = extract_field (FLD_option, code, 0);
   info->shifter.kind =
-    aarch64_get_operand_modifier_from_value (value, TRUE /* extend_p */);
+    aarch64_get_operand_modifier_from_value (value, true /* extend_p */);
   /* imm3 */
   info->shifter.amount = extract_field (FLD_imm3, code,  0);
 
@@ -1381,12 +1381,12 @@ aarch64_ext_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	  || info->shifter.kind == AARCH64_MOD_SXTX))
     info->qualifier = AARCH64_OPND_QLF_X;
 
-  return TRUE;
+  return true;
 }
 
 /* Decode the shifted register operand for e.g.
      SUBS <Xd>, <Xn>, <Xm> {, <shift> #<amount>}.  */
-bfd_boolean
+bool
 aarch64_ext_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_opnd_info *info,
 			 aarch64_insn code,
@@ -1400,48 +1400,48 @@ aarch64_ext_reg_shifted (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* shift */
   value = extract_field (FLD_shift, code, 0);
   info->shifter.kind =
-    aarch64_get_operand_modifier_from_value (value, FALSE /* extend_p */);
+    aarch64_get_operand_modifier_from_value (value, false /* extend_p */);
   if (info->shifter.kind == AARCH64_MOD_ROR
       && inst->opcode->iclass != log_shift)
     /* ROR is not available for the shifted register operand in arithmetic
        instructions.  */
-    return FALSE;
+    return false;
   /* imm6 */
   info->shifter.amount = extract_field (FLD_imm6, code,  0);
 
   /* This makes the constraint checking happy.  */
   info->shifter.operator_present = 1;
 
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE address [<base>, #<offset>*<factor>, MUL VL],
    where <offset> is given by the OFFSET parameter and where <factor> is
    1 plus SELF's operand-dependent value.  fields[0] specifies the field
    that holds <base>.  */
-static bfd_boolean
+static bool
 aarch64_ext_sve_addr_reg_mul_vl (const aarch64_operand *self,
 				 aarch64_opnd_info *info, aarch64_insn code,
 				 int64_t offset)
 {
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   info->addr.offset.imm = offset * (1 + get_operand_specific_data (self));
-  info->addr.offset.is_reg = FALSE;
-  info->addr.writeback = FALSE;
-  info->addr.preind = TRUE;
+  info->addr.offset.is_reg = false;
+  info->addr.writeback = false;
+  info->addr.preind = true;
   if (offset != 0)
     info->shifter.kind = AARCH64_MOD_MUL_VL;
   info->shifter.amount = 1;
   info->shifter.operator_present = (info->addr.offset.imm != 0);
-  info->shifter.amount_present = FALSE;
-  return TRUE;
+  info->shifter.amount_present = false;
+  return true;
 }
 
 /* Decode an SVE address [<base>, #<simm4>*<factor>, MUL VL],
    where <simm4> is a 4-bit signed value and where <factor> is 1 plus
    SELF's operand-dependent value.  fields[0] specifies the field that
    holds <base>.  <simm4> is encoded in the SVE_imm4 field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_ri_s4xvl (const aarch64_operand *self,
 			       aarch64_opnd_info *info, aarch64_insn code,
 			       const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1458,7 +1458,7 @@ aarch64_ext_sve_addr_ri_s4xvl (const aarch64_operand *self,
    where <simm6> is a 6-bit signed value and where <factor> is 1 plus
    SELF's operand-dependent value.  fields[0] specifies the field that
    holds <base>.  <simm6> is encoded in the SVE_imm6 field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_ri_s6xvl (const aarch64_operand *self,
 			       aarch64_opnd_info *info, aarch64_insn code,
 			       const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1476,7 +1476,7 @@ aarch64_ext_sve_addr_ri_s6xvl (const aarch64_operand *self,
    SELF's operand-dependent value.  fields[0] specifies the field that
    holds <base>.  <simm9> is encoded in the concatenation of the SVE_imm6
    and imm3 fields, with imm3 being the less-significant part.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_ri_s9xvl (const aarch64_operand *self,
 			       aarch64_opnd_info *info,
 			       aarch64_insn code,
@@ -1493,25 +1493,25 @@ aarch64_ext_sve_addr_ri_s9xvl (const aarch64_operand *self,
 /* Decode an SVE address [<base>, #<offset> << <shift>], where <offset>
    is given by the OFFSET parameter and where <shift> is SELF's operand-
    dependent value.  fields[0] specifies the base register field <base>.  */
-static bfd_boolean
+static bool
 aarch64_ext_sve_addr_reg_imm (const aarch64_operand *self,
 			      aarch64_opnd_info *info, aarch64_insn code,
 			      int64_t offset)
 {
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   info->addr.offset.imm = offset * (1 << get_operand_specific_data (self));
-  info->addr.offset.is_reg = FALSE;
-  info->addr.writeback = FALSE;
-  info->addr.preind = TRUE;
-  info->shifter.operator_present = FALSE;
-  info->shifter.amount_present = FALSE;
-  return TRUE;
+  info->addr.offset.is_reg = false;
+  info->addr.writeback = false;
+  info->addr.preind = true;
+  info->shifter.operator_present = false;
+  info->shifter.amount_present = false;
+  return true;
 }
 
 /* Decode an SVE address [X<n>, #<SVE_imm4> << <shift>], where <SVE_imm4>
    is a 4-bit signed number and where <shift> is SELF's operand-dependent
    value.  fields[0] specifies the base register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_ri_s4 (const aarch64_operand *self,
 			    aarch64_opnd_info *info, aarch64_insn code,
 			    const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1524,7 +1524,7 @@ aarch64_ext_sve_addr_ri_s4 (const aarch64_operand *self,
 /* Decode an SVE address [X<n>, #<SVE_imm6> << <shift>], where <SVE_imm6>
    is a 6-bit unsigned number and where <shift> is SELF's operand-dependent
    value.  fields[0] specifies the base register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_ri_u6 (const aarch64_operand *self,
 			    aarch64_opnd_info *info, aarch64_insn code,
 			    const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1537,7 +1537,7 @@ aarch64_ext_sve_addr_ri_u6 (const aarch64_operand *self,
 /* Decode an SVE address [X<n>, X<m>{, LSL #<shift>}], where <shift>
    is SELF's operand-dependent value.  fields[0] specifies the base
    register field and fields[1] specifies the offset register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_rr_lsl (const aarch64_operand *self,
 			     aarch64_opnd_info *info, aarch64_insn code,
 			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1547,25 +1547,25 @@ aarch64_ext_sve_addr_rr_lsl (const aarch64_operand *self,
 
   index_regno = extract_field (self->fields[1], code, 0);
   if (index_regno == 31 && (self->flags & OPD_F_NO_ZR) != 0)
-    return FALSE;
+    return false;
 
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   info->addr.offset.regno = index_regno;
-  info->addr.offset.is_reg = TRUE;
-  info->addr.writeback = FALSE;
-  info->addr.preind = TRUE;
+  info->addr.offset.is_reg = true;
+  info->addr.writeback = false;
+  info->addr.preind = true;
   info->shifter.kind = AARCH64_MOD_LSL;
   info->shifter.amount = get_operand_specific_data (self);
   info->shifter.operator_present = (info->shifter.amount != 0);
   info->shifter.amount_present = (info->shifter.amount != 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE address [X<n>, Z<m>.<T>, (S|U)XTW {#<shift>}], where
    <shift> is SELF's operand-dependent value.  fields[0] specifies the
    base register field, fields[1] specifies the offset register field and
    fields[2] is a single-bit field that selects SXTW over UXTW.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_rz_xtw (const aarch64_operand *self,
 			     aarch64_opnd_info *info, aarch64_insn code,
 			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1573,23 +1573,23 @@ aarch64_ext_sve_addr_rz_xtw (const aarch64_operand *self,
 {
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   info->addr.offset.regno = extract_field (self->fields[1], code, 0);
-  info->addr.offset.is_reg = TRUE;
-  info->addr.writeback = FALSE;
-  info->addr.preind = TRUE;
+  info->addr.offset.is_reg = true;
+  info->addr.writeback = false;
+  info->addr.preind = true;
   if (extract_field (self->fields[2], code, 0))
     info->shifter.kind = AARCH64_MOD_SXTW;
   else
     info->shifter.kind = AARCH64_MOD_UXTW;
   info->shifter.amount = get_operand_specific_data (self);
-  info->shifter.operator_present = TRUE;
+  info->shifter.operator_present = true;
   info->shifter.amount_present = (info->shifter.amount != 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE address [Z<n>.<T>, #<imm5> << <shift>], where <imm5> is a
    5-bit unsigned number and where <shift> is SELF's operand-dependent value.
    fields[0] specifies the base register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_zi_u5 (const aarch64_operand *self,
 			    aarch64_opnd_info *info, aarch64_insn code,
 			    const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1603,27 +1603,27 @@ aarch64_ext_sve_addr_zi_u5 (const aarch64_operand *self,
    where <modifier> is given by KIND and where <msz> is a 2-bit unsigned
    number.  fields[0] specifies the base register field and fields[1]
    specifies the offset register field.  */
-static bfd_boolean
+static bool
 aarch64_ext_sve_addr_zz (const aarch64_operand *self, aarch64_opnd_info *info,
 			 aarch64_insn code, enum aarch64_modifier_kind kind)
 {
   info->addr.base_regno = extract_field (self->fields[0], code, 0);
   info->addr.offset.regno = extract_field (self->fields[1], code, 0);
-  info->addr.offset.is_reg = TRUE;
-  info->addr.writeback = FALSE;
-  info->addr.preind = TRUE;
+  info->addr.offset.is_reg = true;
+  info->addr.writeback = false;
+  info->addr.preind = true;
   info->shifter.kind = kind;
   info->shifter.amount = extract_field (FLD_SVE_msz, code, 0);
   info->shifter.operator_present = (kind != AARCH64_MOD_LSL
 				    || info->shifter.amount != 0);
   info->shifter.amount_present = (info->shifter.amount != 0);
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE address [Z<n>.<T>, Z<m>.<T>{, LSL #<msz>}], where
    <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
    field and fields[1] specifies the offset register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_zz_lsl (const aarch64_operand *self,
 			     aarch64_opnd_info *info, aarch64_insn code,
 			     const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1635,7 +1635,7 @@ aarch64_ext_sve_addr_zz_lsl (const aarch64_operand *self,
 /* Decode an SVE address [Z<n>.<T>, Z<m>.<T>, SXTW {#<msz>}], where
    <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
    field and fields[1] specifies the offset register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_zz_sxtw (const aarch64_operand *self,
 			      aarch64_opnd_info *info, aarch64_insn code,
 			      const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1647,7 +1647,7 @@ aarch64_ext_sve_addr_zz_sxtw (const aarch64_operand *self,
 /* Decode an SVE address [Z<n>.<T>, Z<m>.<T>, UXTW {#<msz>}], where
    <msz> is a 2-bit unsigned number.  fields[0] specifies the base register
    field and fields[1] specifies the offset register field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_addr_zz_uxtw (const aarch64_operand *self,
 			      aarch64_opnd_info *info, aarch64_insn code,
 			      const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1658,7 +1658,7 @@ aarch64_ext_sve_addr_zz_uxtw (const aarch64_operand *self,
 
 /* Finish decoding an SVE arithmetic immediate, given that INFO already
    has the raw field value and that the low 8 bits decode to VALUE.  */
-static bfd_boolean
+static bool
 decode_sve_aimm (aarch64_opnd_info *info, int64_t value)
 {
   info->shifter.kind = AARCH64_MOD_LSL;
@@ -1674,11 +1674,11 @@ decode_sve_aimm (aarch64_opnd_info *info, int64_t value)
   info->shifter.operator_present = (info->shifter.amount != 0);
   info->shifter.amount_present = (info->shifter.amount != 0);
   info->imm.value = value;
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE ADD/SUB immediate.  */
-bfd_boolean
+bool
 aarch64_ext_sve_aimm (const aarch64_operand *self,
 		      aarch64_opnd_info *info, const aarch64_insn code,
 		      const aarch64_inst *inst,
@@ -1689,7 +1689,7 @@ aarch64_ext_sve_aimm (const aarch64_operand *self,
 }
 
 /* Decode an SVE CPY/DUP immediate.  */
-bfd_boolean
+bool
 aarch64_ext_sve_asimm (const aarch64_operand *self,
 		       aarch64_opnd_info *info, const aarch64_insn code,
 		       const aarch64_inst *inst,
@@ -1701,7 +1701,7 @@ aarch64_ext_sve_asimm (const aarch64_operand *self,
 
 /* Decode a single-bit immediate that selects between #0.5 and #1.0.
    The fields array specifies which field to use.  */
-bfd_boolean
+bool
 aarch64_ext_sve_float_half_one (const aarch64_operand *self,
 				aarch64_opnd_info *info, aarch64_insn code,
 				const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1711,13 +1711,13 @@ aarch64_ext_sve_float_half_one (const aarch64_operand *self,
     info->imm.value = 0x3f800000;
   else
     info->imm.value = 0x3f000000;
-  info->imm.is_fp = TRUE;
-  return TRUE;
+  info->imm.is_fp = true;
+  return true;
 }
 
 /* Decode a single-bit immediate that selects between #0.5 and #2.0.
    The fields array specifies which field to use.  */
-bfd_boolean
+bool
 aarch64_ext_sve_float_half_two (const aarch64_operand *self,
 				aarch64_opnd_info *info, aarch64_insn code,
 				const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1727,13 +1727,13 @@ aarch64_ext_sve_float_half_two (const aarch64_operand *self,
     info->imm.value = 0x40000000;
   else
     info->imm.value = 0x3f000000;
-  info->imm.is_fp = TRUE;
-  return TRUE;
+  info->imm.is_fp = true;
+  return true;
 }
 
 /* Decode a single-bit immediate that selects between #0.0 and #1.0.
    The fields array specifies which field to use.  */
-bfd_boolean
+bool
 aarch64_ext_sve_float_zero_one (const aarch64_operand *self,
 				aarch64_opnd_info *info, aarch64_insn code,
 				const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1743,15 +1743,15 @@ aarch64_ext_sve_float_zero_one (const aarch64_operand *self,
     info->imm.value = 0x3f800000;
   else
     info->imm.value = 0x0;
-  info->imm.is_fp = TRUE;
-  return TRUE;
+  info->imm.is_fp = true;
+  return true;
 }
 
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less
    significant part.  */
-bfd_boolean
+bool
 aarch64_ext_sve_index (const aarch64_operand *self,
 		       aarch64_opnd_info *info, aarch64_insn code,
 		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1766,11 +1766,11 @@ aarch64_ext_sve_index (const aarch64_operand *self,
   while ((val & 1) == 0)
     val /= 2;
   info->reglane.index = val / 2;
-  return TRUE;
+  return true;
 }
 
 /* Decode a logical immediate for the MOV alias of SVE DUPM.  */
-bfd_boolean
+bool
 aarch64_ext_sve_limm_mov (const aarch64_operand *self,
 			  aarch64_opnd_info *info, const aarch64_insn code,
 			  const aarch64_inst *inst,
@@ -1784,7 +1784,7 @@ aarch64_ext_sve_limm_mov (const aarch64_operand *self,
 /* Decode Zn[MM], where Zn occupies the least-significant part of the field
    and where MM occupies the most-significant part.  The operand-dependent
    value specifies the number of bits in Zn.  */
-bfd_boolean
+bool
 aarch64_ext_sve_quad_index (const aarch64_operand *self,
 			    aarch64_opnd_info *info, aarch64_insn code,
 			    const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1794,13 +1794,13 @@ aarch64_ext_sve_quad_index (const aarch64_operand *self,
   unsigned int val = extract_all_fields (self, code);
   info->reglane.regno = val & ((1 << reg_bits) - 1);
   info->reglane.index = val >> reg_bits;
-  return TRUE;
+  return true;
 }
 
 /* Decode {Zn.<T> - Zm.<T>}.  The fields array specifies which field
    to use for Zn.  The opcode-dependent value specifies the number
    of registers in the list.  */
-bfd_boolean
+bool
 aarch64_ext_sve_reglist (const aarch64_operand *self,
 			 aarch64_opnd_info *info, aarch64_insn code,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
@@ -1808,13 +1808,13 @@ aarch64_ext_sve_reglist (const aarch64_operand *self,
 {
   info->reglist.first_regno = extract_field (self->fields[0], code, 0);
   info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
-  return TRUE;
+  return true;
 }
 
 /* Decode <pattern>{, MUL #<amount>}.  The fields array specifies which
    fields to use for <pattern>.  <amount> - 1 is encoded in the SVE_imm4
    field.  */
-bfd_boolean
+bool
 aarch64_ext_sve_scale (const aarch64_operand *self,
 		       aarch64_opnd_info *info, aarch64_insn code,
 		       const aarch64_inst *inst, aarch64_operand_error *errors)
@@ -1822,13 +1822,13 @@ aarch64_ext_sve_scale (const aarch64_operand *self,
   int val;
 
   if (!aarch64_ext_imm (self, info, code, inst, errors))
-    return FALSE;
+    return false;
   val = extract_field (FLD_SVE_imm4, code, 0);
   info->shifter.kind = AARCH64_MOD_MUL;
   info->shifter.amount = val + 1;
   info->shifter.operator_present = (val != 0);
   info->shifter.amount_present = (val != 0);
-  return TRUE;
+  return true;
 }
 
 /* Return the top set bit in VALUE, which is expected to be relatively
@@ -1842,31 +1842,31 @@ get_top_bit (uint64_t value)
 }
 
 /* Decode an SVE shift-left immediate.  */
-bfd_boolean
+bool
 aarch64_ext_sve_shlimm (const aarch64_operand *self,
 			aarch64_opnd_info *info, const aarch64_insn code,
 			const aarch64_inst *inst, aarch64_operand_error *errors)
 {
   if (!aarch64_ext_imm (self, info, code, inst, errors)
       || info->imm.value == 0)
-    return FALSE;
+    return false;
 
   info->imm.value -= get_top_bit (info->imm.value);
-  return TRUE;
+  return true;
 }
 
 /* Decode an SVE shift-right immediate.  */
-bfd_boolean
+bool
 aarch64_ext_sve_shrimm (const aarch64_operand *self,
 			aarch64_opnd_info *info, const aarch64_insn code,
 			const aarch64_inst *inst, aarch64_operand_error *errors)
 {
   if (!aarch64_ext_imm (self, info, code, inst, errors)
       || info->imm.value == 0)
-    return FALSE;
+    return false;
 
   info->imm.value = get_top_bit (info->imm.value) * 2 - info->imm.value;
-  return TRUE;
+  return true;
 }
 
 /* Bitfields that are commonly used to encode certain operands' information
@@ -2600,7 +2600,7 @@ convert_to_alias (aarch64_inst *inst, const aarch64_opcode *alias)
     }
 }
 
-static bfd_boolean
+static bool
 aarch64_opcode_decode (const aarch64_opcode *, const aarch64_insn,
 		       aarch64_inst *, int, aarch64_operand_error *errors);
 
@@ -2759,7 +2759,7 @@ determine_disassembling_preference (struct aarch64_inst *inst,
    and fill in the operand qualifiers accordingly.  Return true if no
    problems are found.  */
 
-static bfd_boolean
+static bool
 aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 {
   int i, variant;
@@ -2774,7 +2774,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_index:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_imm5);
       if ((i & 31) == 0)
-	return FALSE;
+	return false;
       while ((i & 1) == 0)
 	{
 	  i >>= 1;
@@ -2810,7 +2810,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_SVE_tszl_8);
     sve_shift:
       if (i == 0)
-	return FALSE;
+	return false;
       while (i != 1)
 	{
 	  i >>= 1;
@@ -2825,7 +2825,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_size_bhs:
       variant = extract_field (FLD_size, inst->value, 0);
       if (variant >= 3)
-	return FALSE;
+	return false;
       break;
 
     case sve_size_bhsd:
@@ -2835,7 +2835,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_size_hsd:
       i = extract_field (FLD_size, inst->value, 0);
       if (i < 1)
-	return FALSE;
+	return false;
       variant = i - 1;
       break;
 
@@ -2851,7 +2851,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_size_hsd2:
       i = extract_field (FLD_SVE_size, inst->value, 0);
       if (i < 1)
-	return FALSE;
+	return false;
       variant = i - 1;
       break;
 
@@ -2865,7 +2865,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_shift_tsz_bhsd:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_tszh, FLD_SVE_tszl_19);
       if (i == 0)
-	return FALSE;
+	return false;
       while (i != 1)
 	{
 	  i >>= 1;
@@ -2876,11 +2876,11 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_size_tsz_bhs:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_sz, FLD_SVE_tszl_19);
       if (i == 0)
-	return FALSE;
+	return false;
       while (i != 1)
 	{
 	  if (i & 1)
-	    return FALSE;
+	    return false;
 	  i >>= 1;
 	  variant += 1;
 	}
@@ -2889,7 +2889,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
     case sve_shift_tsz_hsd:
       i = extract_fields (inst->value, 0, 2, FLD_SVE_sz, FLD_SVE_tszl_19);
       if (i == 0)
-	return FALSE;
+	return false;
       while (i != 1)
 	{
 	  i >>= 1;
@@ -2899,12 +2899,12 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
 
     default:
       /* No mapping between instruction class and qualifiers.  */
-      return TRUE;
+      return true;
     }
 
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     inst->operands[i].qualifier = inst->opcode->qualifiers_list[variant][i];
-  return TRUE;
+  return true;
 }
 /* Decode the CODE according to OPCODE; fill INST.  Return 0 if the decoding
    fails, which meanes that CODE is not an instruction of OPCODE; otherwise
@@ -2914,7 +2914,7 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
    determined and used to disassemble CODE; this is done just before the
    return.  */
 
-static bfd_boolean
+static bool
 aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
 		       aarch64_inst *inst, int noaliases_p,
 		       aarch64_operand_error *errors)
@@ -2983,7 +2983,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
 
   /* If the opcode has a verifier, then check it now.  */
   if (opcode->verifier
-      && opcode->verifier (inst, code, 0, FALSE, errors, NULL) != ERR_OK)
+      && opcode->verifier (inst, code, 0, false, errors, NULL) != ERR_OK)
     {
       DEBUG_TRACE ("operand verifier FAIL");
       goto decode_fail;
@@ -3000,7 +3000,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
       if (!noaliases_p)
 	determine_disassembling_preference (inst, errors);
       DEBUG_TRACE ("SUCCESS");
-      return TRUE;
+      return true;
     }
   else
     {
@@ -3008,7 +3008,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
     }
 
  decode_fail:
-  return FALSE;
+  return false;
 }
 
 /* This does some user-friendly fix-up to *INST.  It is currently focus on
@@ -3040,7 +3040,7 @@ user_friendly_fixup (aarch64_inst *inst)
 
 enum err_type
 aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
-		     bfd_boolean noaliases_p,
+		     bool noaliases_p,
 		     aarch64_operand_error *errors)
 {
   const aarch64_opcode *opcode = aarch64_opcode_lookup (insn);
@@ -3081,7 +3081,7 @@ aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
 static void
 print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 		const aarch64_opnd_info *opnds, struct disassemble_info *info,
-		bfd_boolean *has_notes)
+		bool *has_notes)
 {
   char *notes = NULL;
   int i, pcrel_p, num_printed;
@@ -3115,7 +3115,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
     if (notes && !no_notes)
       {
-	*has_notes = TRUE;
+	*has_notes = true;
 	(*info->fprintf_func) (info->stream, "  // note: %s", notes);
       }
 }
@@ -3203,7 +3203,7 @@ print_aarch64_insn (bfd_vma pc, const aarch64_inst *inst,
 		    struct disassemble_info *info,
 		    aarch64_operand_error *mismatch_details)
 {
-  bfd_boolean has_notes = FALSE;
+  bool has_notes = false;
 
   print_mnemonic_name (inst, info);
   print_operands (pc, inst->opcode, inst->operands, info, &has_notes);
@@ -3218,7 +3218,7 @@ print_aarch64_insn (bfd_vma pc, const aarch64_inst *inst,
   /* Always run constraint verifiers, this is needed because constraints need to
      maintain a global state regardless of whether the instruction has the flag
      set or not.  */
-  enum err_type result = verify_constraints (inst, code, pc, FALSE,
+  enum err_type result = verify_constraints (inst, code, pc, false,
 					     mismatch_details, &insn_sequence);
   switch (result)
     {
@@ -3298,14 +3298,14 @@ print_insn_aarch64_word (bfd_vma pc,
 /* Disallow mapping symbols ($x, $d etc) from
    being displayed in symbol relative addresses.  */
 
-bfd_boolean
+bool
 aarch64_symbol_is_valid (asymbol * sym,
 			 struct disassemble_info * info ATTRIBUTE_UNUSED)
 {
   const char * name;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   name = bfd_asymbol_name (sym);
 
@@ -3353,14 +3353,14 @@ get_sym_code_type (struct disassemble_info *info, int n,
 
   /* If the symbol is in a different section, ignore it.  */
   if (info->section != NULL && info->section != info->symtab[n]->section)
-    return FALSE;
+    return false;
 
   if (n >= info->symtab_size)
-    return FALSE;
+    return false;
 
   as = info->symtab[n];
   if (bfd_asymbol_flavour (as) != bfd_target_elf_flavour)
-    return FALSE;
+    return false;
   es = (elf_symbol_type *) as;
 
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
@@ -3369,7 +3369,7 @@ get_sym_code_type (struct disassemble_info *info, int n,
   if (type == STT_FUNC)
     {
       *map_type = MAP_INSN;
-      return TRUE;
+      return true;
     }
 
   /* Check for mapping symbols.  */
@@ -3379,10 +3379,10 @@ get_sym_code_type (struct disassemble_info *info, int n,
       && (name[2] == '\0' || name[2] == '.'))
     {
       *map_type = (name[1] == 'x' ? MAP_INSN : MAP_DATA);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Set the feature bits in arch_variant in order to get the correct disassembly
@@ -3413,11 +3413,11 @@ print_insn_aarch64 (bfd_vma pc,
   int		status;
   void		(*printer) (bfd_vma, uint32_t, struct disassemble_info *,
 			    aarch64_operand_error *);
-  bfd_boolean   found = FALSE;
+  bool   found = false;
   unsigned int	size = 4;
   unsigned long	data;
   aarch64_operand_error errors;
-  static bfd_boolean set_features;
+  static bool set_features;
 
   if (info->disassembler_options)
     {
@@ -3432,7 +3432,7 @@ print_insn_aarch64 (bfd_vma pc,
   if (!set_features)
     {
       select_aarch64_variant (info->mach);
-      set_features = TRUE;
+      set_features = true;
     }
 
   /* Aarch64 instructions are always little-endian */
@@ -3457,7 +3457,7 @@ print_insn_aarch64 (bfd_vma pc,
     {
       int last_sym = -1;
       bfd_vma addr, section_vma = 0;
-      bfd_boolean can_use_search_opt_p;
+      bool can_use_search_opt_p;
       int n;
 
       if (pc <= last_mapping_addr)
@@ -3488,7 +3488,7 @@ print_insn_aarch64 (bfd_vma pc,
 	  if (get_sym_code_type (info, n, &type))
 	    {
 	      last_sym = n;
-	      found = TRUE;
+	      found = true;
 	    }
 	}
 
@@ -3516,7 +3516,7 @@ print_insn_aarch64 (bfd_vma pc,
 	      if (get_sym_code_type (info, n, &type))
 		{
 		  last_sym = n;
-		  found = TRUE;
+		  found = true;
 		  break;
 		}
 	    }

@@ -120,6 +120,7 @@ enum dwarf_section_display_enum
   dwp_tu_index,
   gnu_debuglink,
   gnu_debugaltlink,
+  debug_sup,
   separate_debug_str,
   max
 };
@@ -143,18 +144,16 @@ struct dwarf_section
   /* Used by clients to help them implement the reloc_at callback.  */
   void *                           reloc_info;
   unsigned long                    num_relocs;
-  /* A spare field for random use.  */
-  void *                           user_data;
 };
 
 /* A structure containing the name of a debug section
    and a pointer to a function that can decode it.  */
 struct dwarf_section_display
 {
-  struct dwarf_section  section;
-  int (*                display) (struct dwarf_section *, void *);
-  int *                 enabled;
-  bfd_boolean           relocate;
+  struct dwarf_section section;
+  int (*display) (struct dwarf_section *, void *);
+  int *enabled;
+  bool relocate;
 };
 
 extern struct dwarf_section_display debug_displays [];
@@ -169,7 +168,7 @@ typedef struct
   dwarf_vma	 cu_offset;
   dwarf_vma	 base_address;
   /* This field is filled in when reading the attribute DW_AT_GNU_addr_base and
-     is used with the form DW_AT_GNU_FORM_addr_index.  */
+     is used with the form DW_FORM_GNU_addr_index.  */
   dwarf_vma	 addr_base;
   /* This field is filled in when reading the attribute DW_AT_GNU_ranges_base and
      is used when calculating ranges.  */
@@ -222,7 +221,7 @@ extern int do_debug_cu_index;
 extern int do_wide;
 extern int do_debug_links;
 extern int do_follow_links;
-extern bfd_boolean do_checks;
+extern bool do_checks;
 
 extern int dwarf_cutoff_level;
 extern unsigned long dwarf_start_die;
@@ -233,11 +232,11 @@ extern void init_dwarf_regnames_by_elf_machine_code (unsigned int);
 extern void init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 						      unsigned long mach);
 
-extern bfd_boolean  load_debug_section (enum dwarf_section_display_enum, void *);
-extern void         free_debug_section (enum dwarf_section_display_enum);
-extern bfd_boolean  load_separate_debug_files (void *, const char *);
-extern void         close_debug_file (void *);
-extern void *       open_debug_file (const char *);
+extern bool load_debug_section (enum dwarf_section_display_enum, void *);
+extern void free_debug_section (enum dwarf_section_display_enum);
+extern bool load_separate_debug_files (void *, const char *);
+extern void close_debug_file (void *);
+extern void *open_debug_file (const char *);
 
 extern void free_debug_memory (void);
 
@@ -255,10 +254,10 @@ extern void * xcrealloc (void *, size_t, size_t);
 /* A callback into the client.  Returns TRUE if there is a
    relocation against the given debug section at the given
    offset.  */
-extern bfd_boolean reloc_at (struct dwarf_section *, dwarf_vma);
+extern bool reloc_at (struct dwarf_section *, dwarf_vma);
 
 extern dwarf_vma read_leb128 (unsigned char *, const unsigned char *const,
-			      bfd_boolean, unsigned int *, int *);
+			      bool, unsigned int *, int *);
 
 #if HAVE_LIBDEBUGINFOD
 extern unsigned char * get_build_id (void *);
@@ -277,7 +276,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
   do								\
     {								\
       unsigned int _len;					\
-      read_leb128 (start, end, FALSE, &_len, NULL);		\
+      read_leb128 (start, end, false, &_len, NULL);		\
       start += _len;						\
     }								\
   while (0)
@@ -286,7 +285,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
   do								\
     {								\
       unsigned int _len;					\
-      read_leb128 (start, end, TRUE, &_len, NULL);		\
+      read_leb128 (start, end, true, &_len, NULL);		\
       start += _len;						\
     }								\
   while (0)
@@ -298,7 +297,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       unsigned int _len;					\
       int _status;						\
 								\
-      _val = read_leb128 (start, end, FALSE, &_len, &_status);	\
+      _val = read_leb128 (start, end, false, &_len, &_status);	\
       start += _len;						\
       (var) = _val;						\
       if ((var) != _val)					\
@@ -314,7 +313,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       unsigned int _len;					\
       int _status;						\
 								\
-      _val = read_leb128 (start, end, TRUE, &_len, &_status);	\
+      _val = read_leb128 (start, end, true, &_len, &_status);	\
       start += _len;						\
       (var) = _val;						\
       if ((var) != _val)					\

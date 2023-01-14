@@ -464,7 +464,7 @@ dump_segment (bfd *abfd ATTRIBUTE_UNUSED, bfd_mach_o_load_command *cmd)
 }
 
 static void
-dump_dysymtab (bfd *abfd, bfd_mach_o_load_command *cmd, bfd_boolean verbose)
+dump_dysymtab (bfd *abfd, bfd_mach_o_load_command *cmd, bool verbose)
 {
   bfd_mach_o_dysymtab_command *dysymtab = &cmd->command.dysymtab;
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -656,7 +656,7 @@ dump_dysymtab (bfd *abfd, bfd_mach_o_load_command *cmd, bfd_boolean verbose)
 
 }
 
-static bfd_boolean
+static bool
 load_and_dump (bfd *abfd, ufile_ptr off, unsigned int len,
 	       void (*dump)(bfd *abfd, unsigned char *buf, unsigned int len,
 			    ufile_ptr off))
@@ -664,7 +664,7 @@ load_and_dump (bfd *abfd, ufile_ptr off, unsigned int len,
   unsigned char *buf;
 
   if (len == 0)
-    return TRUE;
+    return true;
 
   buf = xmalloc (len);
 
@@ -672,10 +672,10 @@ load_and_dump (bfd *abfd, ufile_ptr off, unsigned int len,
       && bfd_bread (buf, len, abfd) == len)
     dump (abfd, buf, len, off);
   else
-    return FALSE;
+    return false;
 
   free (buf);
-  return TRUE;
+  return true;
 }
 
 static const bfd_mach_o_xlat_name bfd_mach_o_dyld_rebase_type_name[] =
@@ -968,7 +968,7 @@ dump_dyld_info_export (bfd *abfd, unsigned char *buf, unsigned int len,
 
 static void
 dump_dyld_info (bfd *abfd, bfd_mach_o_load_command *cmd,
-		bfd_boolean verbose)
+		bool verbose)
 {
   bfd_mach_o_dyld_info_command *dinfo = &cmd->command.dyld_info;
 
@@ -1527,7 +1527,7 @@ dump_build_version (bfd *abfd, bfd_mach_o_load_command *cmd)
 
 static void
 dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
-                   unsigned int idx, bfd_boolean verbose)
+                   unsigned int idx, bool verbose)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   const char *cmd_name;
@@ -1769,9 +1769,9 @@ dump_load_commands (bfd *abfd, unsigned int cmd32, unsigned int cmd64)
   for (cmd = mdata->first_command, i = 0; cmd != NULL; cmd = cmd->next, i++)
     {
       if (cmd32 == 0)
-        dump_load_command (abfd, cmd, i, FALSE);
+        dump_load_command (abfd, cmd, i, false);
       else if (cmd->type == cmd32 || cmd->type == cmd64)
-        dump_load_command (abfd, cmd, i, TRUE);
+        dump_load_command (abfd, cmd, i, true);
     }
 }
 

@@ -920,10 +920,10 @@ set_default_mips_dis_options (struct disassemble_info *info)
 /* Parse an ASE disassembler option and set the corresponding global
    ASE flag(s).  Return TRUE if successful, FALSE otherwise.  */
 
-static bfd_boolean
+static bool
 parse_mips_ase_option (const char *option)
 {
-  if (CONST_STRNEQ (option, "msa"))
+  if (startswith (option, "msa"))
     {
       mips_ase |= ASE_MSA;
       if ((mips_isa & INSN_ISA_MASK) == ISA_MIPS64R2
@@ -931,10 +931,10 @@ parse_mips_ase_option (const char *option)
 	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R5
 	   || (mips_isa & INSN_ISA_MASK) == ISA_MIPS64R6)
 	  mips_ase |= ASE_MSA64;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "virt"))
+  if (startswith (option, "virt"))
     {
       mips_ase |= ASE_VIRT;
       if (mips_isa & ISA_MIPS64R2
@@ -942,47 +942,47 @@ parse_mips_ase_option (const char *option)
 	  || mips_isa & ISA_MIPS64R5
 	  || mips_isa & ISA_MIPS64R6)
 	mips_ase |= ASE_VIRT64;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "xpa"))
+  if (startswith (option, "xpa"))
     {
       mips_ase |= ASE_XPA;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "ginv"))
+  if (startswith (option, "ginv"))
     {
       mips_ase |= ASE_GINV;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "loongson-mmi"))
+  if (startswith (option, "loongson-mmi"))
     {
       mips_ase |= ASE_LOONGSON_MMI;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "loongson-cam"))
+  if (startswith (option, "loongson-cam"))
     {
       mips_ase |= ASE_LOONGSON_CAM;
-      return TRUE;
+      return true;
     }
   
   /* Put here for match ext2 frist */
-  if (CONST_STRNEQ (option, "loongson-ext2"))
+  if (startswith (option, "loongson-ext2"))
     {
       mips_ase |= ASE_LOONGSON_EXT2;
-      return TRUE;
+      return true;
     }
 
-  if (CONST_STRNEQ (option, "loongson-ext"))
+  if (startswith (option, "loongson-ext"))
     {
       mips_ase |= ASE_LOONGSON_EXT;
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 static void
@@ -994,7 +994,7 @@ parse_mips_dis_option (const char *option, unsigned int len)
   const struct mips_arch_choice *chosen_arch;
 
   /* Try to match options that are simple flags */
-  if (CONST_STRNEQ (option, "no-aliases"))
+  if (startswith (option, "no-aliases"))
     {
       no_aliases = 1;
       return;
@@ -1654,7 +1654,7 @@ print_insn_arg (struct disassemble_info *info,
 /* Validate the arguments for INSN, which is described by OPCODE.
    Use DECODE_OPERAND to get the encoding of each operand.  */
 
-static bfd_boolean
+static bool
 validate_insn_args (const struct mips_opcode *opcode,
 		    const struct mips_operand *(*decode_operand) (const char *),
 		    unsigned int insn)
@@ -1705,7 +1705,7 @@ validate_insn_args (const struct mips_opcode *opcode,
 		    reg2 = uval >> 5;
 
 		    if (reg1 != reg2 || reg1 == 0)
-		      return FALSE;
+		      return false;
 		  }
 		break;
 
@@ -1716,20 +1716,20 @@ validate_insn_args (const struct mips_opcode *opcode,
 		    prev_op = (const struct mips_check_prev_operand *) operand;
 
 		    if (!prev_op->zero_ok && uval == 0)
-		      return FALSE;
+		      return false;
 
 		    if (((prev_op->less_than_ok && uval < state.last_regno)
 			|| (prev_op->greater_than_ok && uval > state.last_regno)
 			|| (prev_op->equal_ok && uval == state.last_regno)))
 		      break;
 
-		    return FALSE;
+		    return false;
 		  }
 
 		case OP_NON_ZERO_REG:
 		  {
 		    if (uval == 0)
-		      return FALSE;
+		      return false;
 		  }
 		break;
 
@@ -1760,7 +1760,7 @@ validate_insn_args (const struct mips_opcode *opcode,
 	    ++s;
 	}
     }
-  return TRUE;
+  return true;
 }
 
 /* Print the arguments for INSN, which is described by OPCODE.
@@ -1890,7 +1890,7 @@ print_insn_mips (bfd_vma memaddr,
   static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
   const fprintf_ftype infprintf = info->fprintf_func;
   const struct mips_opcode *op;
-  static bfd_boolean init = 0;
+  static bool init = 0;
   void *is = info->stream;
 
   /* Build a hash table to shorten the search time.  */
@@ -2002,8 +2002,8 @@ print_mips16_insn_arg (struct disassemble_info *info,
 		       struct mips_print_arg_state *state,
 		       const struct mips_opcode *opcode,
 		       char type, bfd_vma memaddr,
-		       unsigned insn, bfd_boolean use_extend,
-		       unsigned extend, bfd_boolean is_offset)
+		       unsigned insn, bool use_extend,
+		       unsigned extend, bool is_offset)
 {
   const fprintf_ftype infprintf = info->fprintf_func;
   void *is = info->stream;
@@ -2024,7 +2024,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
       break;
 
     default:
-      operand = decode_mips16_operand (type, FALSE);
+      operand = decode_mips16_operand (type, false);
       if (!operand)
 	{
 	  /* xgettext:c-format */
@@ -2061,7 +2061,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
       ext_size = 0;
       if (use_extend)
 	{
-	  ext_operand = decode_mips16_operand (type, TRUE);
+	  ext_operand = decode_mips16_operand (type, true);
 	  if (ext_operand != operand
 	      || (operand->type == OP_INT && operand->lsb == 0
 		  && mips_opcode_32bit_p (opcode)))
@@ -2134,16 +2134,16 @@ print_mips16_insn_arg (struct disassemble_info *info,
    This word is data and depending on the value it may interfere with
    disassembly of further PLT entries.  We make use of the fact PLT
    symbols are marked BSF_SYNTHETIC.  */
-static bfd_boolean
+static bool
 is_mips16_plt_tail (struct disassemble_info *info, bfd_vma addr)
 {
   if (info->symbols
       && info->symbols[0]
       && (info->symbols[0]->flags & BSF_SYNTHETIC)
       && addr == bfd_asymbol_value (info->symbols[0]) + 12)
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Whether none, a 32-bit or a 16-bit instruction match has been done.  */
@@ -2166,8 +2166,8 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   const struct mips_opcode *op, *opend;
   struct mips_print_arg_state state;
   void *is = info->stream;
-  bfd_boolean have_second;
-  bfd_boolean extend_only;
+  bool have_second;
+  bool extend_only;
   unsigned int second;
   unsigned int first;
   unsigned int full;
@@ -2211,7 +2211,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
       return -1;
     }
 
-  extend_only = FALSE;
+  extend_only = false;
 
   if (info->endian == BFD_ENDIAN_BIG)
     first = bfd_getb16 (buffer);
@@ -2221,7 +2221,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   status = (*info->read_memory_func) (memaddr + 2, buffer, 2, info);
   if (status == 0)
     {
-      have_second = TRUE;
+      have_second = true;
       if (info->endian == BFD_ENDIAN_BIG)
 	second = bfd_getb16 (buffer);
       else
@@ -2230,7 +2230,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
     }
   else
     {
-      have_second = FALSE;
+      have_second = false;
       second = 0;
       full = first;
     }
@@ -2270,7 +2270,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	  if (op->pinfo2 & INSN2_SHORT_ONLY)
 	    {
 	      match = MATCH_NONE;
-	      extend_only = TRUE;
+	      extend_only = true;
 	    }
 	  else
 	    match = MATCH_FULL;
@@ -2315,10 +2315,10 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 		  const struct mips_operand *operand;
 		  unsigned int reg, sel;
 
-		  operand = decode_mips16_operand (*s, TRUE);
+		  operand = decode_mips16_operand (*s, true);
 		  reg = mips_extract_operand (operand, (first << 16) | second);
 		  s += 2;
-		  operand = decode_mips16_operand (*s, TRUE);
+		  operand = decode_mips16_operand (*s, true);
 		  sel = mips_extract_operand (operand, (first << 16) | second);
 
 		  /* CP0 register including 'sel' code for mftc0, to be
@@ -2339,11 +2339,11 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 		  {
 		    case MATCH_FULL:
 		      print_mips16_insn_arg (info, &state, op, *s, memaddr + 2,
-					     second, TRUE, first, s[1] == '(');
+					     second, true, first, s[1] == '(');
 		      break;
 		    case MATCH_SHORT:
 		      print_mips16_insn_arg (info, &state, op, *s, memaddr,
-					     first, FALSE, 0, s[1] == '(');
+					     first, false, 0, s[1] == '(');
 		      break;
 		    case MATCH_NONE:	/* Stop the compiler complaining.  */
 		      break;
@@ -2500,8 +2500,8 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
    have been derived from function symbols defined elsewhere or could
    define data).  Otherwise, return 0.  */
 
-static bfd_boolean
-is_compressed_mode_p (struct disassemble_info *info, bfd_boolean micromips_p)
+static bool
+is_compressed_mode_p (struct disassemble_info *info, bool micromips_p)
 {
   int i;
   int l;
@@ -2562,9 +2562,9 @@ _print_insn_mips (bfd_vma memaddr,
 #endif
 
 #if SYMTAB_AVAILABLE
-  if (is_compressed_mode_p (info, TRUE))
+  if (is_compressed_mode_p (info, true))
     return print_insn_micromips (memaddr, info);
-  if (is_compressed_mode_p (info, FALSE))
+  if (is_compressed_mode_p (info, false))
     return print_insn_mips16 (memaddr, info);
 #endif
 

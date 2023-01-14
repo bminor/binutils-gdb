@@ -39,7 +39,7 @@
 
 extern void dlx_pop_insert         (void);
 extern int dlx_unrecognized_line   (int);
-extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
+extern bool md_dlx_fix_adjustable  (struct fix *);
 
 #define md_pop_insert()		        dlx_pop_insert ()
 

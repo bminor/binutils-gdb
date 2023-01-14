@@ -1,5 +1,51 @@
 -*- text -*-
 
+* Binutils now requires a C99 compiler and library to build.
+
+* A new format has been added to the nm program.  Specifying
+  --format=just-symbols (or just using -j) will tell the program to only
+  display symbol names and nothing else.
+
+* A new command line --keep-section-symbols has been added to objcopy and
+  strip.  This stops the removal of unused section symbols when the file is
+  copied.  Removing these symbols saves space, but sometimes they are needed by
+  other tools.
+
+* objcopy --weaken, --weaken-symbol and --weaken-symbols now make undefined
+  symbols weak on targets that support weak symbols.
+
+* Readelf and objdump can now display and use the contents of .debug_sup
+  sections.
+
+* Readelf and objdump will now follow links to separate debug info files by
+  default.  This behaviour can be stopped via the use of the new -wN or
+  --debug-dump=no-follow-links options for readelf and the -WN or
+  --dwarf=no-follow-links options for objdump.  Also the old behaviour can be
+  restored by the use of the --enable-follow-debug-links=no configure time
+  option.
+
+  The semantics of the =follow-links option have also been slightly changed.
+  When enabled, the option allows for the loading of symbol tables and string
+  tables from the separate files which can be used to enhance the information
+  displayed when dumping other sections, but it does not automatically imply
+  that information from the separate files should be displayed.
+
+  If other debug section display options are also enabled (eg
+  --debug-dump=info) then the contents of matching sections in both the main
+  file and the separate debuginfo file *will* be displayed.  This is because in
+  most cases the debug section will only be present in one of the files.
+
+  If however non-debug section display options are enabled (eg --sections) then
+  the contents of matching parts of the separate debuginfo file will *not* be
+  displayed.  This is because in most cases the user probably only wanted to
+  load the symbol information from the separate debuginfo file.  In order to
+  change this behaviour a new command line option --process-links can be used.
+  This will allow di0pslay options to applied to both the main file and any
+  separate debuginfo files.
+
+* Nm has a new command line option: --quiet.  This suppresses "no symbols"
+  diagnostic.
+
 Changes in 2.36:
 
 * Update elfedit and readelf with LAM_U48 and LAM_U57 support.

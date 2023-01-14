@@ -2,6 +2,7 @@
 .*: +file format .*
 
 SYMBOL TABLE:
+0+400000 g       .text\$mn	0000000000000000 __executable_start
 0+401000 g       .text\$mn	0000000000000000 getaddr1
 0+401020 g       .text\$mn	0000000000000000 begin
 0+403014 g       .bss	0000000000000000 __bss_start

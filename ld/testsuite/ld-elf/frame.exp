@@ -57,7 +57,7 @@ set test2	"read-only .gcc_except_table section"
 
 if { ![ld_assemble_flags $as $as_opt $srcdir/$subdir/tbss.s tmpdir/tbss.o ]
      || ![ld_assemble_flags $as $as_opt $srcdir/$subdir/frame.s tmpdir/frame.o] } {
-    unresolved "$test1"
+    unsupported "$test1"
     return
 }
 
@@ -74,7 +74,7 @@ if { [ld_link $ld tmpdir/frame.so "-z separate-code --shared tmpdir/frame.o tmpd
 }
 
 if ![ld_assemble_flags $as $as_opt $srcdir/$subdir/table.s tmpdir/table.o ] {
-    unresolved "$test2"
+    unsupported "$test2"
     return
 }
 

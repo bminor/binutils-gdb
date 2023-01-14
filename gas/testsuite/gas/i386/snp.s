@@ -1,23 +1,39 @@
 # Check SNP instructions
 
 	.text
-.ifdef __amd64__
-att64:
-        psmash  %rax
-        psmash
-        psmash  %eax
-        pvalidate  %rax
-        pvalidate  %eax
-        rmpupdate  %rax
-        rmpupdate
-        rmpupdate  %eax
-        rmpadjust  %rax
-        rmpadjust
-        rmpadjust  %eax
-.endif
-.ifndef __amd64__
-att32:
+att:
         pvalidate
-        pvalidate  %eax
-        pvalidate  %ax
+        pvalidate %eax, %ecx, %edx
+.ifdef x86_64
+        pvalidate %rax, %ecx, %edx
+        psmash
+        psmash	%rax
+        psmash	%eax
+        rmpupdate
+        rmpupdate %rax, %rcx
+        rmpupdate %eax, %rcx
+        rmpadjust
+        rmpadjust %rax, %rcx, %rdx
+        rmpadjust %eax, %rcx, %rdx
+.else
+        pvalidate %ax, %ecx, %edx
+.endif
+
+	.intel_syntax noprefix
+intel:
+        pvalidate
+        pvalidate eax, ecx, edx
+.ifdef x86_64
+        pvalidate rax, ecx, edx
+        psmash
+        psmash	rax
+        psmash	eax
+        rmpupdate
+        rmpupdate rax, rcx
+        rmpupdate eax, rcx
+        rmpadjust
+        rmpadjust rax, rcx, rdx
+        rmpadjust eax, rcx, rdx
+.else
+        pvalidate ax, ecx, edx
 .endif

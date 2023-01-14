@@ -390,6 +390,8 @@ catch_syscall_split_args (const char *arg)
       syscall_number = (int) strtol (cur_name, &endptr, 0);
       if (*endptr == '\0')
 	{
+	  if (syscall_number < 0)
+	    error (_("Unknown syscall number '%d'."), syscall_number);
 	  get_syscall_by_number (gdbarch, syscall_number, &s);
 	  result.push_back (s.number);
 	}

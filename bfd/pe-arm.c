@@ -29,7 +29,7 @@
 #endif
 
 #define COFF_WITH_PE
-#define PCRELOFFSET	     TRUE
+#define PCRELOFFSET	     true
 #define COFF_LONG_SECTION_NAMES
 
 #define COFF_SECTION_ALIGNMENT_ENTRIES \

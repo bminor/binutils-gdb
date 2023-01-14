@@ -36,10 +36,10 @@ gld${EMULATION_NAME}_before_parse (void)
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
 #endif /* not TARGET_ */
-  input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
-  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
-  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
-  link_info.check_relocs_after_open_input = TRUE;
+  input_flags.dynamic = ${DYNAMIC_LINK-true};
+  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
+  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo true ; else echo false ; fi`;
+  link_info.check_relocs_after_open_input = true;
 EOF
 if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF

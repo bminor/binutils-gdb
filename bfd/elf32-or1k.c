@@ -47,593 +47,593 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 0,			/* rightshift */
 	 3,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_NONE",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_32,
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_32",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_16,
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_16",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_8,
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_8",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_LO_16_IN_INSN, /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_LO_16_IN_INSN", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_HI_16_IN_INSN, /* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_HI_16_IN_INSN", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A PC relative 26 bit relocation, right shifted by 2.  */
   HOWTO (R_OR1K_INSN_REL_26, /* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_INSN_REL_26", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x03ffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_OR1K_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 NULL,			/* special_function */
 	 "R_OR1K_GNU_VTINHERIT", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_OR1K_GNU_VTENTRY, /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_elf_rel_vtable_reloc_fn, /* special_function */
 	 "R_OR1K_GNU_VTENTRY", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_32_PCREL,
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_32_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_16_PCREL,
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_16_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_8_PCREL,
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_8_PCREL",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
    HOWTO (R_OR1K_GOTPC_HI16,	/* Type.  */
 	 16,			/* Rightshift.  */
 	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* Bitsize.  */
-	 TRUE,			/* PC_relative.  */
+	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_dont, /* Complain on overflow.  */
 	 bfd_elf_generic_reloc, /* Special Function.  */
 	 "R_OR1K_GOTPC_HI16",	/* Name.  */
-	 FALSE,		/* Partial Inplace.  */
+	 false,		/* Partial Inplace.  */
 	 0,			/* Source Mask.  */
 	 0xffff,		/* Dest Mask.  */
-	 TRUE),			/* PC relative offset?  */
+	 true),			/* PC relative offset?  */
 
    HOWTO (R_OR1K_GOTPC_LO16,	/* Type.  */
 	 0,			/* Rightshift.  */
 	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* Bitsize.  */
-	 TRUE,			/* PC_relative.  */
+	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_dont, /* Complain on overflow.  */
 	 bfd_elf_generic_reloc, /* Special Function.  */
 	 "R_OR1K_GOTPC_LO16",	/* Name.  */
-	 FALSE,		/* Partial Inplace.  */
+	 false,		/* Partial Inplace.  */
 	 0,			/* Source Mask.  */
 	 0xffff,		/* Dest Mask.  */
-	 TRUE),			/* PC relative offset?  */
+	 true),			/* PC relative offset?  */
 
   HOWTO (R_OR1K_GOT16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOT16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 26 bit PLT relocation.  Shifted by 2.  */
   HOWTO (R_OR1K_PLT26,		/* Type.  */
 	 2,			/* Rightshift.  */
 	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
 	 26,			/* Bitsize.  */
-	 TRUE,			/* pc_relative.  */
+	 true,			/* pc_relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_signed, /* Complain on overflow.  */
 	 bfd_elf_generic_reloc, /* Special Function.  */
 	 "R_OR1K_PLT26",	/* Name.  */
-	 FALSE,			/* Partial Inplace.  */
+	 false,			/* Partial Inplace.  */
 	 0,			/* Source Mask.  */
 	 0x03ffffff,		/* Dest Mask.  */
-	 TRUE),			/* PC relative offset?  */
+	 true),			/* PC relative offset?  */
 
   HOWTO (R_OR1K_GOTOFF_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOTOFF_HI16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_GOTOFF_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOTOFF_LO16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_COPY,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_COPY",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GLOB_DAT",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_JMP_SLOT",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_RELATIVE,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_RELATIVE",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_GD_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_GD_HI16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_GD_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_GD_LO16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDM_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LDM_HI16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDM_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LDM_LO16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDO_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LDO_HI16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDO_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LDO_LO16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_IE_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_IE_HI16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_IE_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_IE_LO16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LE_HI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LE_HI16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LE_LO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LE_LO16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_TPOFF,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_TPOFF",    /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_DTPOFF,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_DTPOFF",   /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_DTPMOD,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_DTPMOD",   /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_AHI16,		/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_AHI16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_GOTOFF_AHI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOTOFF_AHI16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_IE_AHI16,   /* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_IE_AHI16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LE_AHI16,	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LE_AHI16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_SLO16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_SLO16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_GOTOFF_SLO16,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOTOFF_SLO16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LE_SLO16,   /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LE_SLO16", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A page relative 21 bit relocation, right shifted by 13, aligned.
      Note that this is *page* relative, not pc relative.  The idea is
@@ -644,170 +644,170 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 13,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_PCREL_PG21",   /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x001fffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_GOT_PG21,       /* type */
 	 13,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOT_PG21",     /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x001fffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_GD_PG21,    /* type */
 	 13,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_GD_PG21",  /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x001fffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDM_PG21,   /* type */
 	 13,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_LDM_PG21", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x001fffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_IE_PG21,    /* type */
 	 13,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_IE_PG21",  /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x001fffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   HOWTO (R_OR1K_LO13,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_LO13",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_GOT_LO13,       /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_GOT_LO13",     /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_GD_LO13,    /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_GD_LO13",  /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_LDM_LO13,   /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLD_LDM_LO13", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_TLS_IE_LO13,    /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_TLS_IE_LO13",  /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OR1K_SLO13,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_OR1K_SLO13",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 26 bit PLT relocation, using ADRP.  Shifted by 2.  */
   HOWTO (R_OR1K_PLTA26,		/* Type.  */
 	 2,			/* Rightshift.  */
 	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
 	 26,			/* Bitsize.  */
-	 TRUE,			/* pc_relative.  */
+	 true,			/* pc_relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_signed, /* Complain on overflow.  */
 	 bfd_elf_generic_reloc,	/* Special Function.  */
 	 "R_OR1K_PLTA26",	/* Name.  */
-	 FALSE,			/* Partial Inplace.  */
+	 false,			/* Partial Inplace.  */
 	 0,			/* Source Mask.  */
 	 0x03ffffff,		/* Dest Mask.  */
-	 TRUE),			/* PC relative offset?  */
+	 true),			/* PC relative offset?  */
 };
 
 /* Map BFD reloc types to Or1k ELF reloc types.  */
@@ -916,7 +916,7 @@ struct elf_or1k_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  bfd_boolean saw_plta;
+  bool saw_plta;
 };
 
 /* Get the ELF linker hash table from a link_info structure.  */
@@ -925,7 +925,7 @@ struct elf_or1k_link_hash_table
     && elf_hash_table_id (elf_hash_table (p)) == OR1K_ELF_DATA)		\
    ? (struct elf_or1k_link_hash_table *) (p)->hash : NULL)
 
-static bfd_boolean
+static bool
 elf_or1k_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_or1k_obj_tdata),
@@ -1024,7 +1024,7 @@ or1k_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an Or1k ELF reloc.  */
 
-static bfd_boolean
+static bool
 or1k_info_to_howto_rela (bfd * abfd,
 			 arelent * cache_ptr,
 			 Elf_Internal_Rela * dst)
@@ -1038,15 +1038,15 @@ or1k_info_to_howto_rela (bfd * abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
   cache_ptr->howto = & or1k_elf_howto_table[r_type];
-  return TRUE;
+  return true;
 }
 
 /* Return the relocation value for @tpoff relocations..  */
 static bfd_vma
-tpoff (struct bfd_link_info *info, bfd_vma address, bfd_boolean dynamic)
+tpoff (struct bfd_link_info *info, bfd_vma address, bool dynamic)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bfd_vma base;
@@ -1242,7 +1242,7 @@ or1k_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 or1k_elf_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,
@@ -1261,10 +1261,10 @@ or1k_elf_relocate_section (bfd *output_bfd,
   bfd_vma *local_got_offsets;
   asection *sgot, *splt;
   bfd_vma plt_base, got_base, got_sym_value;
-  bfd_boolean ret_val = TRUE;
+  bool ret_val = true;
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
@@ -1315,7 +1315,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    (_("%pB: unknown relocation type %d"),
 	     input_bfd, (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  ret_val = FALSE;
+	  ret_val = false;
 	  continue;
 	}
 
@@ -1336,7 +1336,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned, ignored;
+	  bool unresolved_reloc, warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -1369,7 +1369,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 		(_("%pB: addend should be zero for plt relocations"),
 		 input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
-	      ret_val = FALSE;
+	      ret_val = false;
 	    }
 	  break;
 
@@ -1384,7 +1384,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	  BFD_ASSERT (sgot != NULL);
 	  if (h != NULL)
 	    {
-	      bfd_boolean dyn;
+	      bool dyn;
 
 	      off = h->got.offset;
 	      BFD_ASSERT (off != (bfd_vma) -1);
@@ -1474,7 +1474,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 		(_("%pB: addend should be zero for got relocations"),
 		 input_bfd);
 	      bfd_set_error (bfd_error_bad_value);
-	      ret_val = FALSE;
+	      ret_val = false;
 	    }
 	  }
 	  break;
@@ -1490,7 +1490,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	      _bfd_error_handler
 		(_("%pB: gotoff relocation against dynamic symbol %s"),
 		 input_bfd, h->root.root.string);
-	      ret_val = FALSE;
+	      ret_val = false;
 	      bfd_set_error (bfd_error_bad_value);
 	    }
 	  relocation -= got_sym_value;
@@ -1507,7 +1507,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	      _bfd_error_handler
 		(_("%pB: pc-relative relocation against dynamic symbol %s"),
 		 input_bfd, name);
-	      ret_val = FALSE;
+	      ret_val = false;
 	      bfd_set_error (bfd_error_bad_value);
 	    }
 	  break;
@@ -1521,7 +1521,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	      _bfd_error_handler
 		(_("%pB: non-pic relocation against symbol %s"),
 		 input_bfd, name);
-	      ret_val = FALSE;
+	      ret_val = false;
 	      bfd_set_error (bfd_error_bad_value);
 	    }
 	  break;
@@ -1552,7 +1552,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	      {
 		Elf_Internal_Rela outrel;
 		bfd_byte *loc;
-		bfd_boolean skip;
+		bool skip;
 
 		/* When generating a shared object, these relocations
 		   are copied into the output file to be resolved at run
@@ -1560,15 +1560,15 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
 		BFD_ASSERT (sreloc != NULL);
 
-		skip = FALSE;
+		skip = false;
 
 		outrel.r_offset =
 		  _bfd_elf_section_offset (output_bfd, info, input_section,
 					   rel->r_offset);
 		if (outrel.r_offset == (bfd_vma) -1)
-		  skip = TRUE;
+		  skip = true;
 		else if (outrel.r_offset == (bfd_vma) -2)
-		  skip = TRUE;
+		  skip = true;
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
 
@@ -1606,7 +1606,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    (_("%pB: support for local dynamic not implemented"),
 	     input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 
 	case R_OR1K_TLS_GD_HI16:
 	case R_OR1K_TLS_GD_LO16:
@@ -1622,7 +1622,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    Elf_Internal_Rela rela;
 	    asection *srelgot;
 	    bfd_byte *loc;
-	    bfd_boolean dynamic;
+	    bool dynamic;
 	    int indx = 0;
 	    unsigned char tls_type;
 
@@ -1668,8 +1668,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
 	    if (h != NULL)
 	      {
-		bfd_boolean dyn = htab->root.dynamic_sections_created;
-		bfd_boolean pic = bfd_link_pic (info);
+		bool dyn = htab->root.dynamic_sections_created;
+		bool pic = bfd_link_pic (info);
 
 		if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, pic, h)
 		    && (!pic || !SYMBOL_REFERENCES_LOCAL (info, h)))
@@ -1785,7 +1785,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    (_("%pB: will not resolve runtime TLS relocation"),
 	     input_bfd);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 
 	default:
 	  break;
@@ -1808,7 +1808,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
 	    case bfd_reloc_undefined:
 	      (*info->callbacks->undefined_symbol)
-		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -1860,7 +1860,7 @@ or1k_elf_gc_mark_hook (asection *sec,
 
 /* Look through the relocs for a section during the first phase.  */
 
-static bfd_boolean
+static bool
 or1k_elf_check_relocs (bfd *abfd,
 		       struct bfd_link_info *info,
 		       asection *sec,
@@ -1876,14 +1876,14 @@ or1k_elf_check_relocs (bfd *abfd,
   asection *sreloc = NULL;
 
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->root.dynobj;
 
@@ -1956,7 +1956,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	      size = symtab_hdr->sh_info;
 	      local_tls_type = bfd_zalloc (abfd, size);
 	      if (local_tls_type == NULL)
-		return FALSE;
+		return false;
 	      elf_or1k_local_tls_type (abfd) = local_tls_type;
 	    }
 	  local_tls_type[r_symndx] |= tls_type;
@@ -1968,19 +1968,19 @@ or1k_elf_check_relocs (bfd *abfd,
 	     Reconstruct it for later use during GC.  */
 	case R_OR1K_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    return false;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_OR1K_GNU_VTENTRY:
 	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    return false;
 	  break;
 
 	  /* This relocation requires .plt entry.  */
 	case R_OR1K_PLTA26:
-	  htab->saw_plta = TRUE;
+	  htab->saw_plta = true;
 	  /* FALLTHRU */
 	case R_OR1K_PLT26:
 	  if (h != NULL)
@@ -2018,7 +2018,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		      size *= sizeof (bfd_signed_vma);
 		      local_got_refcounts = bfd_zalloc (abfd, size);
 		      if (local_got_refcounts == NULL)
-			return FALSE;
+			return false;
 		      elf_local_got_refcounts (abfd) = local_got_refcounts;
 		    }
 		  local_got_refcounts[r_symndx] += 1;
@@ -2034,7 +2034,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	      if (dynobj == NULL)
 		htab->root.dynobj = dynobj = abfd;
 	      if (!_bfd_elf_create_got_section (dynobj, info))
-		return FALSE;
+		return false;
 	    }
 	  break;
 
@@ -2108,9 +2108,9 @@ or1k_elf_check_relocs (bfd *abfd,
 
 		    name = bfd_elf_string_from_elf_section (abfd, strndx, shnam);
 		    if (name == NULL)
-		      return FALSE;
+		      return false;
 
-		    if (strncmp (name, ".rela", 5) != 0
+		    if (!startswith (name, ".rela")
 			|| strcmp (bfd_section_name (sec), name + 5) != 0)
 		      {
 			_bfd_error_handler
@@ -2127,10 +2127,10 @@ or1k_elf_check_relocs (bfd *abfd,
 		    if (sreloc == NULL)
 		      {
 			sreloc = _bfd_elf_make_dynamic_reloc_section
-			  (sec, dynobj, 2, abfd, /*rela?*/ TRUE);
+			  (sec, dynobj, 2, abfd, /*rela?*/ true);
 
 			if (sreloc == NULL)
-			  return FALSE;
+			  return false;
 		      }
 		    elf_section_data (sec)->sreloc = sreloc;
 		  }
@@ -2152,11 +2152,11 @@ or1k_elf_check_relocs (bfd *abfd,
 		    isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 						  abfd, r_symndx);
 		    if (isym == NULL)
-		      return FALSE;
+		      return false;
 
 		    s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		    if (s == NULL)
-		      return FALSE;
+		      return false;
 
 		    vpp = &elf_section_data (s)->local_dynrel;
 		    head = (struct elf_dyn_relocs **) vpp;
@@ -2171,7 +2171,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		    sec_relocs = ((struct elf_dyn_relocs *)
 				  bfd_alloc (htab->root.dynobj, amt));
 		    if (sec_relocs == NULL)
-		      return FALSE;
+		      return false;
 		    sec_relocs->next = *head;
 		    *head = sec_relocs;
 		    sec_relocs->sec = sec;
@@ -2188,7 +2188,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 static void
@@ -2223,7 +2223,7 @@ or1k_write_plt_entry (bfd *output_bfd, bfd_byte *contents, unsigned insn1,
 
 /* Finish up the dynamic sections.  */
 
-static bfd_boolean
+static bool
 or1k_elf_finish_dynamic_sections (bfd *output_bfd,
 				  struct bfd_link_info *info)
 {
@@ -2233,7 +2233,7 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
 
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->root.dynobj;
 
@@ -2338,13 +2338,13 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
   if (htab->root.sgot && htab->root.sgot->size > 0)
     elf_section_data (htab->root.sgot->output_section)->this_hdr.sh_entsize = 4;
 
-  return TRUE;
+  return true;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 
-static bfd_boolean
+static bool
 or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 				struct bfd_link_info *info,
 				struct elf_link_hash_entry *h,
@@ -2355,7 +2355,7 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -2519,7 +2519,7 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
       || h == htab->root.hgot)
     sym->st_shndx = SHN_ABS;
 
-  return TRUE;
+  return true;
 }
 
 static enum elf_reloc_type_class
@@ -2542,7 +2542,7 @@ or1k_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
    change the definition to something the rest of the link can
    understand.  */
 
-static bfd_boolean
+static bool
 or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h)
 {
@@ -2581,7 +2581,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->needs_plt = 0;
 	}
 
-      return TRUE;
+      return true;
     }
   else
     h->plt.offset = (bfd_vma) -1;
@@ -2595,7 +2595,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       BFD_ASSERT (def->root.type == bfd_link_hash_defined);
       h->root.u.def.section = def->root.u.def.section;
       h->root.u.def.value = def->root.u.def.value;
-      return TRUE;
+      return true;
     }
 
   /* This is a reference to a symbol defined by a dynamic object which
@@ -2606,18 +2606,18 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (bfd_link_pic (info))
-    return TRUE;
+    return true;
 
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
   if (!h->non_got_ref)
-    return TRUE;
+    return true;
 
   /* If -z nocopyreloc was given, we won't generate them either.  */
   if (info->nocopyreloc)
     {
       h->non_got_ref = 0;
-      return TRUE;
+      return true;
     }
 
   /* If we don't find any dynamic relocs in read-only sections, then
@@ -2625,7 +2625,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!_bfd_elf_readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
-      return TRUE;
+      return true;
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -2640,7 +2640,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* We must generate a R_OR1K_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
@@ -2679,26 +2679,26 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
 static void
 or1k_set_got_and_rela_sizes (const unsigned char tls_type,
-			     const bfd_boolean dynamic,
+			     const bool dynamic,
 			     bfd_vma *got_size,
 			     bfd_vma *rela_size)
 {
-  bfd_boolean is_tls_entry = FALSE;
+  bool is_tls_entry = false;
 
   /* TLS GD requires two GOT entries and two relocs.  */
   if ((tls_type & TLS_GD) != 0)
     {
       *got_size += 8;
-      is_tls_entry = TRUE;
+      is_tls_entry = true;
     }
 
   if ((tls_type & TLS_IE) != 0)
     {
       *got_size += 4;
-      is_tls_entry = TRUE;
+      is_tls_entry = true;
     }
 
-  if (is_tls_entry == FALSE)
+  if (!is_tls_entry)
     *got_size += 4;
 
   if (dynamic)
@@ -2709,7 +2709,7 @@ or1k_set_got_and_rela_sizes (const unsigned char tls_type,
       if ((tls_type & TLS_IE) != 0)
 	*rela_size += sizeof (Elf32_External_Rela);
 
-      if (is_tls_entry == FALSE)
+      if (!is_tls_entry)
 	*rela_size += sizeof (Elf32_External_Rela);
     }
 }
@@ -2718,7 +2718,7 @@ or1k_set_got_and_rela_sizes (const unsigned char tls_type,
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
-static bfd_boolean
+static bool
 allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
@@ -2726,12 +2726,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct elf_dyn_relocs *sec_relocs;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   info = (struct bfd_link_info *) inf;
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (htab->root.dynamic_sections_created
       && h->plt.refcount > 0)
@@ -2742,7 +2742,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  && !h->forced_local)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
+	    return false;
 	}
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
@@ -2793,7 +2793,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   if (h->got.refcount > 0)
     {
       asection *sgot;
-      bfd_boolean dyn;
+      bool dyn;
       unsigned char tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
@@ -2802,7 +2802,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  && !h->forced_local)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
+	    return false;
 	}
 
       sgot = htab->root.sgot;
@@ -2820,7 +2820,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     h->got.offset = (bfd_vma) -1;
 
   if (h->dyn_relocs == NULL)
-    return TRUE;
+    return true;
 
   /* In the shared -Bsymbolic case, discard space allocated for
      dynamic pc-relative relocs against symbols which turn out to be
@@ -2859,7 +2859,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		   && !h->forced_local)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
+		return false;
 	    }
 	}
     }
@@ -2882,7 +2882,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	      && !h->forced_local)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
+		return false;
 	    }
 
 	  /* If that succeeded, we know we'll be keeping all the
@@ -2905,24 +2905,24 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       sreloc->size += sec_relocs->count * sizeof (Elf32_External_Rela);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Set the sizes of the dynamic sections.  */
 
-static bfd_boolean
+static bool
 or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				struct bfd_link_info *info)
 {
   struct elf_or1k_link_hash_table *htab;
   bfd *dynobj;
   asection *s;
-  bfd_boolean relocs;
+  bool relocs;
   bfd *ibfd;
 
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->root.dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -3019,7 +3019,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
-  relocs = FALSE;
+  relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LINKER_CREATED) == 0)
@@ -3034,10 +3034,10 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
+      else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->root.srelplt)
-	    relocs = TRUE;
+	    relocs = true;
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
@@ -3073,7 +3073,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       s->contents = bfd_zalloc (dynobj, s->size);
 
       if (s->contents == NULL)
-	return FALSE;
+	return false;
     }
 
   return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
@@ -3106,7 +3106,7 @@ or1k_elf_copy_indirect_symbol (struct bfd_link_info *info,
 
 /* Set the right machine number.  */
 
-static bfd_boolean
+static bool
 or1k_elf_object_p (bfd *abfd)
 {
   unsigned long mach = bfd_mach_or1k;
@@ -3119,7 +3119,7 @@ or1k_elf_object_p (bfd *abfd)
 
 /* Store the machine number in the flags field.  */
 
-static bfd_boolean
+static bool
 or1k_elf_final_write_processing (bfd *abfd)
 {
   switch (bfd_get_mach (abfd))
@@ -3134,21 +3134,21 @@ or1k_elf_final_write_processing (bfd *abfd)
   return _bfd_elf_final_write_processing (abfd);
 }
 
-static bfd_boolean
+static bool
 or1k_elf_set_private_flags (bfd *abfd, flagword flags)
 {
   BFD_ASSERT (!elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = TRUE;
-  return TRUE;
+  elf_flags_init (abfd) = true;
+  return true;
 }
 
 /* Make sure all input files are consistent with respect to
    EF_OR1K_NODELAY flag setting.  */
 
-static bfd_boolean
+static bool
 elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
@@ -3160,18 +3160,18 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
+    return true;
 
   if (!elf_flags_init (obfd))
     {
-      elf_flags_init (obfd) = TRUE;
+      elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = in_flags;
 
-      return TRUE;
+      return true;
     }
 
   if (in_flags == out_flags)
-    return TRUE;
+    return true;
 
   if ((in_flags & EF_OR1K_NODELAY) != (out_flags & EF_OR1K_NODELAY))
     {
@@ -3180,16 +3180,16 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	 ibfd, "EF_OR1K_NODELAY");
 
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 
 }
 
 /* Implement elf_backend_grok_prstatus:
    Support for core dump NOTE sections.  */
-static bfd_boolean
+static bool
 or1k_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
@@ -3198,7 +3198,7 @@ or1k_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
   switch (note->descsz)
     {
     default:
-      return FALSE;
+      return false;
 
     case 212:	      /* Linux/OpenRISC */
       /* pr_cursig */
@@ -3220,13 +3220,13 @@ or1k_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 }
 
 /* Implement elf_backend_grok_psinfo.  */
-static bfd_boolean
+static bool
 or1k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {
     default:
-      return FALSE;
+      return false;
 
     case 128:	      /* Linux/OpenRISC elf_prpsinfo */
       elf_tdata (abfd)->core->program
@@ -3235,7 +3235,7 @@ or1k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	= _bfd_elfcore_strndup (abfd, note->descdata + 48, 80);
     }
 
-  return TRUE;
+  return true;
 }
 
 

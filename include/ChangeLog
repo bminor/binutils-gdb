@@ -1,3 +1,200 @@
+2021-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 27567
+	* coff/internal.h (struct internal_scnhdr): Make s_flags unsigned long.
+	* coff/pe.h (COFF_ENCODE_ALIGNMENT): Don't set align flags for an
+	executable and return false.  Do so for a relocatable object and
+	evaluate to true.
+	* coff/ti.h (COFF_ENCODE_ALIGNMENT): Add bfd arg and evaluate to true.
+	(COFF_DECODE_ALIGNMENT): Formatting.
+	* coff/z80.h (COFF_ENCODE_ALIGNMENT): Similarly.
+	(COFF_DECODE_ALIGNMENT): Similarly.
+
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (struct disassemble_info): Add dynrelbuf and dynrelcount.
+
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (struct disassemble_info <symbol_at_address_func>):
+	Return asymbol*.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* opcode/cr16.h (strneq): Remove strneq and use startswith.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h: Replace bfd_boolean with bool throughout.
+	* coff/ecoff.h: Likewise.
+	* coff/xcoff.h: Likewise.
+	* dis-asm.h: Likewise.
+	* elf/mmix.h: Likewise.
+	* elf/xtensa.h: Likewise.
+	* opcode/aarch64.h: Likewise, and FALSE with false, TRUE with true.
+	* opcode/arc.h: Likewise.
+	* opcode/mips.h: Likewise.
+	* opcode/tic6x-opcode-table.h: Likewise.
+	* opcode/tic6x.h: Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* cgen/basic-modes.h: Include stdint.h in place of bfd_stdint.h.
+	* elf/nfp.h: Likewise.
+	* opcode/aarch64.h: Likewise.
+	* opcode/cgen.h: Likewise.
+	* opcode/nfp.h: Likewise.
+	* opcode/ppc.h: Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/aarch64.h (alias_opcode_p): Simplify boolean expression.
+	(opcode_has_alias, pseudo_opcode_p, optional_operand_p): Likewise.
+	(opcode_has_special_coder): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/aarch64.h (aarch64_opcode_encode): Correct prototype.
+
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27628
+	* ctf-api.h: Fix some indentation.
+	(CTF_SET_STID): Always do an unsigned shift, even if STID is
+	signed.
+
+2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (EM_INTEL205): Renamed to ...
+	(EM_INTELGT): This.
+
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* coff/internal.h (struct internal_auxent): Fix a couple of typos
+	in comment describing the x_fname field.
+
+2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* opcode/riscv-opc.h: Support zba, zbb and zbc extensions.
+	* opcode/riscv.h (riscv_insn_class): Add INSN_CLASS_ZB*.
+
+2021-03-12  Frederic Cambus  <fred@statdns.com>
+
+	* elf/common.h (NT_NETBSD_PAX, NT_NETBSD_PAX_MPROTECT)
+	(NT_NETBSD_PAX_NOMPROTECT, NT_NETBSD_PAX_GUARD, NT_NETBSD_PAX_NOGUARD)
+	(NT_NETBSD_PAX_ASLR, NT_NETBSD_PAX_NOASLR): Define.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/internal.h (struct internal_aouthdr): Add new fields.
+	* coff/rs6000.h (AOUTHDRÃ): Add new fields.
+	* coff/rs6k64.h (struct external_filehdr): Likewise.
+	* coff/xcoff.h (_TDATA), _TBSS): New defines
+	(RS6K_AOUTHDR_TLS_LE, RS6K_AOUTHDR_RAS, RS6K_AOUTHDR_ALGNTDATA,
+	RS6K_AOUTHDR_SHR_SYMTAB, RS6K_AOUTHDR_FORK_POLICY,
+	RS6K_AOUTHDR_FORK_COR): New defines.
+	(XMC_TU): Removed.
+	(XMC_UL): New define.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/xcoff.h (R_RTB): Remove.
+	(R_TRL): Fix value.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/common.h (NT_RISCV_CSR): Define.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf/common.h (NT_GDB_TDESC): Define.
+
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	* coff/internal.h: Delete obsolete relocation defines.  Move used
+	relocation defines..
+	* coff/i386.h: ..to here..
+	* coff/ti.h: ..and here..
+	* coff/x86_64.h: ..and here..
+	* coff/z80.h: ..and here..
+	* coff/z8k.h: ..and here.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_SHARE_DUPLICATED): Note that this might
+	merely change how much deduplication is done.
+
+2021-03-01  Alan Modra  <amodra@gmail.com>
+	    Fangrui Song <maskray@google.com>
+
+	* bfdlink.h (struct bfd_link_info): Add start_stop_gc.
+
+2021-02-21  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_info): Add warn_multiple_definition.
+
+2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_arc_lookup_symbol_name): New.
+	(ctf_lookup_by_symbol_name): Likewise.
+
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* opcode/riscv.h: Updated encoding macros.
+
+2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Moved stuff and make the file tidy.
+
+2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* opcode/s390.h (enum s390_opcode_cpu_val): Add
+	S390_OPCODE_ARCH14.
+
+2021-02-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* opcode/tic54x.h (mmregs): Rename to ...
+	(tic54x_mmregs): ... this.
+	(regs): Rename to ...
+	(tic54x_regs): ... this.
+	(condition_codes): Rename to ...
+	(tic54x_condition_codes): ... this.
+	(cc2_codes): Rename to ...
+	(tic54x_cc2_codes): ... this.
+	(status_bits): Rename to ...
+	(tic54x_status_bits): ... this.
+	(cc3_codes): Rename to ...
+	(tic54x_cc3_codes): ... this.
+	(misc_symbols): Rename to ...
+	(tic54x_misc_symbols): ... this.
+
+2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27348
+	* opcode/riscv.h: Remove obsolete OP_*CUSTOM_IMM.
+
+2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27348
+	* opcode/riscv-opc.h: Remove obsolete Xcustom support.
+
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NONAME): New.
+	(ECTF_NERR): Adjust.
+
+2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_NO_FILTER_REPORTED_SYMS): New.
+
+2021-02-04  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Removed macros for zb* extensions.
+	* opcode/riscv.h (riscv_insn_class): Removed INSN_CLASS_ZB*.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv.h: Indent and GNU coding standards tidy,

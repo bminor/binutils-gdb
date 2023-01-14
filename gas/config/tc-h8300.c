@@ -167,8 +167,7 @@ h8300_elf_section (int push)
 
       if (i < 0)
 	for (i = ARRAY_SIZE (known_data_prefixes); i--;)
-	  if (strncmp (name, known_data_prefixes[i],
-		       strlen (known_data_prefixes[i])) == 0)
+	  if (startswith (name, known_data_prefixes[i]))
 	    break;
 
       if (i < 0)
@@ -872,10 +871,10 @@ get_operand (char **ptr, struct h8_op *op, int direction)
       *ptr = parse_exp (src + 1, op);
       return;
     }
-  else if (strncmp (src, "mach", 4) == 0 ||
-	   strncmp (src, "macl", 4) == 0 ||
-	   strncmp (src, "MACH", 4) == 0 ||
-	   strncmp (src, "MACL", 4) == 0)
+  else if (startswith (src, "mach") ||
+	   startswith (src, "macl") ||
+	   startswith (src, "MACH") ||
+	   startswith (src, "MACL"))
     {
       op->reg = TOLOWER (src[3]) == 'l';
       op->mode = MACREG;
@@ -2074,7 +2073,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 #define OPTION_H_TICK_HEX      (OPTION_MD_BASE)

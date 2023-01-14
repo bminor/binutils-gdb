@@ -1,9 +1,6 @@
 # Miscellaneous CR16 simulator testcases
 
 if [istarget cr16*-*-*] {
-    # load support procs
-    # load_lib cgen.exp
-
     # all machines
     set all_machs "cr16"
 

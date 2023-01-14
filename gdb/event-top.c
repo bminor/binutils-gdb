@@ -850,9 +850,17 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 }
 
 
-/* See event-top.h.  */
+/* The SIGSEGV handler for this thread, or NULL if there is none.  GDB
+   always installs a global SIGSEGV handler, and then lets threads
+   indicate their interest in handling the signal by setting this
+   thread-local variable.
 
-thread_local void (*thread_local_segv_handler) (int);
+   This is a static variable instead of extern because on various platforms
+   (notably Cygwin) extern thread_local variables cause link errors.  So
+   instead, we have scoped_segv_handler_restore, which also makes it impossible
+   to accidentally forget to restore it to the original value.  */
+
+static thread_local void (*thread_local_segv_handler) (int);
 
 static void handle_sigsegv (int sig);
 
@@ -1286,6 +1294,17 @@ gdb_disable_readline (void)
   if (ui->command_editing)
     gdb_rl_callback_handler_remove ();
   delete_file_handler (ui->input_fd);
+}
+
+scoped_segv_handler_restore::scoped_segv_handler_restore (segv_handler_t new_handler)
+{
+  m_old_handler = thread_local_segv_handler;
+  thread_local_segv_handler = new_handler;
+}
+
+scoped_segv_handler_restore::~scoped_segv_handler_restore()
+{
+  thread_local_segv_handler = m_old_handler;
 }
 
 static const char debug_event_loop_off[] = "off";

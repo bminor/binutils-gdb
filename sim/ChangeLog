@@ -1,3 +1,137 @@
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Add --example-sims option.
+	* configure: Regenerate.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (check_PROGRAMS, CLEANFILES, DISTCLEANFILES): Define.
+	* Makefile.in: Regenerated.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (SIM_PRIMARY_TARGET, AM_MAKEFLAGS): Define.
+	* configure.ac: Add --enable-targets option.  Define SIM_PRIMARY_TARGET
+	and SIM_TARGET.  Rewrite case statement with SIM_TARGET calls.
+	* Makefile.in, configure: Regenerate.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am [SIM_ENABLE_IGEN]: Include igen/local.mk.
+	* configure.ac: Delete AC_CONFIG_SUBDIRS(igen) call.
+	(SIM_ENABLE_IGEN): Define.
+	* configure, Makefile.in: Regenerate.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Add -Im4.
+	(COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	* configure.ac: Replace toolchain calls with SIM_AC_TOOLCHAIN.
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Replace toolchain calls
+	with SIM_AC_TOOLCHAIN.
+	* m4/sim_ac_toolchain.m4: New file.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-03-08  Tom Tromey  <tromey@adacore.com>
+
+	* aclocal.m4, configure, Makefile.in: Rebuild.
+	* configure.ac: Use AM_MAINTAINER_MODE.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_FILES): Delete testsuite/Makefile.
+	* Makefile.am: Include testsuite/local.mk.
+	(AUTOMAKE_OPTIONS): Add dejagnu.
+	* configure, Makefile.in: Regenerated.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am: New file.
+	* configure.ac: Update AC_INIT call.  Move AC_CANONICAL_SYSTEM after
+	it.  Call AM_INIT_AUTOMAKE.  Delete AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure, Makefile.in: Regenerated.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Delete CC_FOR_BUILD test.
+	Change CC_FOR_BUILD assignment.  Define CFLAGS_FOR_BUILD.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Replace AR assignment and
+	AC_SUBST(AR) with call to AC_CHECK_TOOL(AR, ar).
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Require AC_PROG_CPP.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete SIM_EXTRA_LIBDEPS.
+
+2021-02-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete SIM_EXTRA_ALL.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4, m4/sim_ac_option_alignment.m4,
+	m4/sim_ac_option_assert.m4, m4/sim_ac_option_bitsize.m4,
+	m4/sim_ac_option_cgen_maint.m4, m4/sim_ac_option_default_model.m4,
+	m4/sim_ac_option_endian.m4, m4/sim_ac_option_environment.m4,
+	m4/sim_ac_option_float.m4, m4/sim_ac_option_hardware.m4,
+	m4/sim_ac_option_inline.m4, m4/sim_ac_option_reserved_bits.m4,
+	m4/sim_ac_option_scache.m4, m4/sim_ac_option_smp.m4,
+	m4/sim_ac_option_warnings.m4, m4/sim_ac_option_xor_endian.m4,
+	m4/sim_ac_output.m4: New files.
+
+2021-02-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt: Move arch list ...
+	* configure.ac: ... here.
+	* configure: Regenerate.
+
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* riscv/sim-main.c (execute_i): Updated encoding macros.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt: Delete call to AC_SUBST(sim_arch).
+	* configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Replace sinclude with AC_CONFIG_MACRO_DIRS in
+	configure.ac skeleton.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Replace STATE_WATCHPOINTS with CPU_PC_FETCH.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (HDEFINES): Delete AC_SUBST call.
+	* configure: Regenerate.
+
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (sim_arch): Add entry for riscv*-*-*.
+	* configure: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (nltvals): Change to gennltvals.py.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete reference to sizeof_pc.
+
+2021-01-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS (Global Maintainers): Move myself back.
+
 2021-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Call AC_PROG_CPP.
@@ -1409,5 +1543,3 @@ Mon Feb  8 11:46:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in, configure.in: if target isn't supported, build a
 	harmless makefile.
-
-

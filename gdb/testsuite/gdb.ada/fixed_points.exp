@@ -49,84 +49,46 @@ foreach_with_prefix scenario {all minimal} {
     gdb_test "print Overprecise_Object" \
 	"= 0.13579135791"
 
-    gdb_test_multiple "ptype Overprecise_Object" "" {
-	-re "type = <2-byte fixed point \\(small = 135791357913579/1000000000000000\\)>\r\n$gdb_prompt $" {
-	    pass $gdb_test_name
-	}
-	-re "type = delta 0.135791\r\n$gdb_prompt $" {
-	    # The (legacy) output we obtain when the compiler described
-	    # our fixed point types using the GNAT encodings rather than
-	    # standard DWARF.  OK as well.
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test "ptype Overprecise_Object" \
+	"type = <2-byte fixed point \\(small = 135791357913579/1000000000000000\\)>"
 
     # FP*_Var...
 
     gdb_test "print fp1_var" \
 	" = 0.25"
 
-    gdb_test_multiple "ptype fp1_var" "" {
-	-re "type = <1-byte fixed point \\(small = 1/16\\)>\r\n$gdb_prompt $" {
-	    pass $gdb_test_name
-	}
-	-re "type = delta 0\\.1 <'small = 0\\.0625>\r\n$gdb_prompt $" {
-	    # The (legacy) output we obtain when the compiler described
-	    # our fixed point types using the GNAT encodings rather than
-	    # standard DWARF.  OK as well.
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test "ptype fp1_var" "type = <1-byte fixed point \\(small = 1/16\\)>"
 
     gdb_test "print fp2_var" \
 	" = -0.01"
 
-    gdb_test_multiple "ptype fp2_var" "" {
-	-re "type = <8-byte fixed point \\(small = 1/100\\)>\r\n$gdb_prompt $" {
-	    pass $gdb_test_name
-	}
-	-re "type = delta 0\\.01\r\n$gdb_prompt $" {
-	    # The (legacy) output we obtain when the compiler described
-	    # our fixed point types using the GNAT encodings rather than
-	    # standard DWARF.  OK as well.
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test "ptype fp2_var" "type = <8-byte fixed point \\(small = 1/100\\)>"
 
     gdb_test "print fp3_var" \
 	" = 0.1"
 
-    gdb_test_multiple "ptype fp3_var" "" {
-	-re "type = <1-byte fixed point \\(small = 1/30\\)>\r\n$gdb_prompt $" {
-	    pass $gdb_test_name
-	}
-	-re "type = delta 0\\.1 <'small = 0\\.0333333>\r\n$gdb_prompt $" {
-	    # The (legacy) output we obtain when the compiler described
-	    # our fixed point types using the GNAT encodings rather than
-	    # standard DWARF.  OK as well.
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test "ptype fp3_var" "type = <1-byte fixed point \\(small = 1/30\\)>"
 
-    # One of the benefits of minimal encoding is that operations work
-    # a bit better.
-    if {$scenario == "minimal"} {
-	gdb_test "print fp2_var + 0" \
-	    " = -0.01"
-	gdb_test "print 0 + fp2_var" \
-	    " = -0.01"
-	gdb_test "print fp2_var - 0" \
-	    " = -0.01"
+    gdb_test "print fp2_var + 0" \
+	" = -0.01"
+    gdb_test "print 0 + fp2_var" \
+	" = -0.01"
+    gdb_test "print fp2_var - 0" \
+	" = -0.01"
 
-	set fp4 "= 2e-07"
-	gdb_test "print fp4_var" $fp4
-	gdb_test "print fp4_var * 1" $fp4
-	gdb_test "print 1 * fp4_var" $fp4
-	gdb_test "print fp4_var / 1" $fp4
+    gdb_test "print + fp2_var" \
+	" = -0.01"
+    gdb_test "print - fp2_var" \
+	" = 0.01"
 
-	# This only started working in GCC 11.
-	if {[test_compiler_info {gcc-11-*}]} {
-	    gdb_test "print fp5_var" " = 3e-19"
-	}
+    set fp4 "= 2e-07"
+    gdb_test "print fp4_var" $fp4
+    gdb_test "print fp4_var * 1" $fp4
+    gdb_test "print 1 * fp4_var" $fp4
+    gdb_test "print fp4_var / 1" $fp4
+
+    # This only started working in GCC 11.
+    if {$scenario == "minimal" && [test_compiler_info {gcc-11-*}]} {
+	gdb_test "print fp5_var" " = 3e-19"
     }
 }

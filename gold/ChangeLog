@@ -1,3 +1,108 @@
+2021-03-30  Alan Modra  <amodra@gmail.com>
+
+	PR gold/27625
+	* powerpc.cc (Powerpc_relobj): Add no_tls_marker_, tls_marker_,
+	and tls_opt_error_ variables and accessors.
+	(Target_powerpc::Scan::local, global): Call set_tls_marker and
+	set_no_tls_marker for GD and LD code sequence relocations.
+	(Target_powerpc::Relocate::relocate): Downgrade the "lacks marker
+	reloc" error to a warning when safe to do so, and omit the error
+	entirely if not optimising TLS sequences.  Do not optimise GD and
+	LD sequences for objects lacking marker relocs.
+	(Target_powerpc::relocate_relocs): Heed no_tls_marker here too.
+
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/27615
+	* errors.cc (Errors::trace): New method.
+	(gold_trace): New function.
+	* errors.h (Errors::trace): New method.
+	* gold.h (gold_trace): New function.
+	* object.cc (Input_objects::add_object): Use gold_trace to print
+	object file names.
+
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/pr23870
+	* testsuite/aarch64_pr23870_bar.c: Return a magic value.
+	* testsuite/aarch64_pr23870_foo.c: Check the magic value and return
+	success or failure.
+
+2021-03-19  Holger Berger  <holger.berger@googlemail.com>
+
+	PR gold/26541
+	* output.cc (gold_fallocate): Use errno when calling system fallocate.
+
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/26585
+	* main.cc (main): Fix typo in previous patch.
+
+2021-03-19  Duncan Simpson  <dr.duncan.p.simpson@gmail.com>
+
+	PR gold/26585
+	* configure.ac: Add check for mallinfo2.
+	* configure: Regenerate.
+	* config.in: Regenerate from previous commit.
+	* main.cc (main): Use mallinfo2 if available.
+
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/27246
+	* dwarf_reader.cc (Dwarf_abbrev_table::do_get_abbrev): Handle
+	DW_FORM_implicit_const.
+	(Dwarf_ranges_table::read_ranges_table): Add version parameter;
+	Adjust all callers.  Look for .debug_rnglists section if DWARF 5.
+	(Dwarf_ranges_table::read_range_list_v5): New method.
+	(Dwarf_die::read_attributes): Handle new DWARF 5 DW_FORM codes.
+	(Dwarf_die::skip_attributes): Likewise.
+	(Dwarf_info_reader::do_parse): Support DWARF 5 unit header format.
+	(Dwarf_info_reader::read_3bytes_from_pointer): New method.
+	(Sized_dwarf_line_info::Sized_dwarf_line_info): Initialize
+	str_buffer_, str_buffer_start, reloc_map_, line_number_map_.
+	Look for .debug_line_str section.
+	(Sized_dwarf_line_info::read_header_prolog): Support DWARF 5 prolog.
+	(Sized_dwarf_line_info::read_header_tables): Rename to...
+	(Sized_dwarf_line_info::read_header_tables_v2): ... this.
+	(Sized_dwarf_line_info::read_header_tables_v5): New method.
+	(Sized_dwarf_line_info::process_one_opcode): Insert missing "this->".
+	Change advance_line to signed int64_t.
+	(Sized_dwarf_line_info::read_lines): Add endptr parameter; adjust
+	callers.  Insert missing "this->".
+	(Sized_dwarf_line_info::read_line_mappings): Support DWARF 5.
+	(Sized_dwarf_line_info::do_addr2line): Add debug code.
+	* dwarf_reader.h (Dwarf_abbrev_table::Attribute): Add implicit_const
+	field. Adjust constructor.
+	(Dwarf_abbrev_table::add_sttribute): Add implicit_const parameter.
+	(Dwarf_ranges_table::read_ranges_table): Add version parameter.
+	(Dwarf_ranges_table::read_range_list_v5): New method.
+	(Dwarf_die): Remove unused attr_off field.
+	(Dwarf_info_reader::Dwarf_info_reader): Initialize unit_type_ field.
+	(Dwarf_info_reader::is_type_unit): New method.
+	(Dwarf_info_reader::read_3bytes_from_pointer): New method.
+	(Dwarf_info_reader::read_range_list): Call read_range_list_v5 for
+	DWARF 5 range lists.
+	(Dwarf_info_reader::is_type_unit_): Remove.
+	(Dwarf_info_reader::unit_type_): New field.
+	(Sized_dwarf_line_info::~Sized_dwarf_line_info): Delete
+	str_buffer_start_.
+	(Sized_dwarf_line_info::read_header_tables): Rename to...
+	(Sized_dwarf_line_info::read_header_tables_v2): ... this.
+	(Sized_dwarf_line_info::read_header_tables_v5): New method.
+	(Sized_dwarf_line_info::read_lines): Add endptr parameter.
+	(Sized_dwarf_line_info::Dwarf_line_infoHeader): Add address_size field.
+	(Sized_dwarf_line_info::str_buffer_): New field.
+	(Sized_dwarf_line_info::str_buffer_end_): New field.
+	(Sized_dwarf_line_info::str_buffer_start_): New field.
+	(Sized_dwarf_line_info::end_of_header_length_): New field.
+	(Sized_dwarf_line_info::end_of_unit_): New field.
+
+2021-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/27246
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_header_prolog):
+	Skip address size and segment selector for DWARF5.
+
 2021-01-19  Alan Modra  <amodra@gmail.com>
 
 	PR 27203

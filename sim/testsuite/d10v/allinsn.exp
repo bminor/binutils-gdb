@@ -1,8 +1,6 @@
 # d10v simulator testsuite.
 
 if [istarget d10v*-*] {
-    # load support procs (none yet)
-    # load_lib cgen.exp
     # all machines
     set all_machs "d10v"
 

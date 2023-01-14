@@ -455,6 +455,14 @@ dependencies = { module=all-ld; on=all-libctf; };
 dependencies = { module=install-binutils; on=install-opcodes; };
 dependencies = { module=install-strip-binutils; on=install-strip-opcodes; };
 
+// Likewise for ld, libctf, and bfd.
+dependencies = { module=install-libctf; on=install-bfd; };
+dependencies = { module=install-ld; on=install-bfd; };
+dependencies = { module=install-ld; on=install-libctf; };
+dependencies = { module=install-strip-libctf; on=install-strip-bfd; };
+dependencies = { module=install-strip-ld; on=install-strip-bfd; };
+dependencies = { module=install-strip-ld; on=install-strip-libctf; };
+
 // libopcodes depends on libbfd
 dependencies = { module=install-opcodes; on=install-bfd; };
 dependencies = { module=install-strip-opcodes; on=install-strip-bfd; };
@@ -532,7 +540,6 @@ dependencies = { module=all-sim; on=all-libiberty; };
 dependencies = { module=all-sim; on=all-bfd; };
 dependencies = { module=all-sim; on=all-opcodes; };
 dependencies = { module=all-sim; on=all-readline; };
-dependencies = { module=all-sim; on=configure-gdb; };
 
 // Other host modules.
 dependencies = { module=all-fastjar; on=all-zlib; };

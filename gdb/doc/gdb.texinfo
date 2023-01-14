@@ -1040,6 +1040,20 @@ Execute a single @value{GDBN} command before loading the inferior (but
 after loading gdbinit files).
 @xref{Startup}.
 
+@item -early-init-command @var{file}
+@itemx -eix @var{file}
+@cindex @code{--early-init-command}
+@cindex @code{-eix}
+Execute commands from @var{file} very early in the initialization
+process, before any output is produced.  @xref{Startup}.
+
+@item -early-init-eval-command @var{command}
+@itemx -eiex @var{command}
+@cindex @code{--early-init-eval-command}
+@cindex @code{-eiex}
+Execute a single @value{GDBN} command very early in the initialization
+process, before any output is produced.
+
 @item -directory @var{directory}
 @itemx -d @var{directory}
 @cindex @code{--directory}
@@ -1097,6 +1111,14 @@ are still loaded.
 @cindex @code{-q}
 ``Quiet''.  Do not print the introductory and copyright messages.  These
 messages are also suppressed in batch mode.
+
+@kindex set startup-quietly
+@kindex show startup-quietly
+This can also be enabled using @code{set startup-quietly on}.  The
+default is @code{off}.  Use @code{show startup-quietly} to see the
+current setting.  Place @code{set startup-quietly on} into your early
+initialization file (@pxref{Initialization Files,,Initialization
+Files}) to have future @value{GDBN} sessions startup quietly.
 
 @item -batch
 @cindex @code{--batch}
@@ -1291,6 +1313,23 @@ important when reporting @value{GDBN} bugs (@pxref{GDB Bugs}).
 Here's the description of what @value{GDBN} does during session startup:
 
 @enumerate
+
+@item
+Performs minimal setup required to initialize basic internal state.
+
+@item
+@cindex early initialization file
+Reads commands from the early initialization file (if any) in your
+home directory.  Only a restricted set of commands can be placed into
+an early initialization file, see @ref{Initialization Files}, for
+details.
+
+@item
+Executes commands and command files specified by the @samp{-eiex} and
+@samp{-eix} command line options in their specified order.  Only a
+restricted set of commands can be used with @samp{-eiex} and
+@samp{eix}, see @ref{Initialization Files}, for details.
+
 @item
 Sets up the command interpreter as specified by the command line
 (@pxref{Mode Options, interpreter}).
@@ -1367,13 +1406,82 @@ To display the list of initialization files loaded by @value{GDBN} at
 startup, in the order they will be loaded, you can use @kbd{gdb
 --help}.
 
+@cindex early initialization
+The @dfn{early initialization} file is loaded very early in
+@value{GDBN}'s initialization process, before the interpreter
+(@pxref{Interpreters}) has been initialized, and before the default
+target (@pxref{Targets}) is initialized.  Only @code{set} or
+@code{source} commands should be placed into an early initialization
+file, and the only @code{set} commands that can be used are those that
+control how @value{GDBN} starts up.
+
+Commands that can be placed into an early initialization file will be
+documented as such throughout this manual.  Any command that is not
+documented as being suitable for an early initialization file should
+instead be placed into a general initialization file.  Command files
+passed to @code{--early-init-command} or @code{-eix} are also early
+initialization files, with the same command restrictions.  Only
+commands that can appear in an early initialization file should be
+passed to @code{--early-init-eval-command} or @code{-eiex}.
+
+@cindex general initialization
+In contrast, the @dfn{general initialization} files are processed
+later, after @value{GDBN} has finished its own internal initialization
+process, any valid command can be used in these files.
+
+@cindex initialization file
+Throughout the rest of this document the term @dfn{initialization
+file} refers to one of the general initialization files, not the early
+initialization file.  Any discussion of the early initialization file
+will specifically mention that it is the early initialization file
+being discussed.
+
 As the system wide and home directory initialization files are
 processed before most command line options, changes to settings
 (e.g. @samp{set complaints}) can affect subsequent processing of
 command line options and operands.
 
-The following sections describe where @value{GDBN} looks for the
-initialization and the order that the files are searched for.
+The following sections describe where @value{GDBN} looks for the early
+initialization and initialization files, and the order that the files
+are searched for.
+
+@subsubsection Home directory early initialization files
+
+@value{GDBN} initially looks for an early initialization file in the
+users home directory@footnote{On DOS/Windows systems, the home
+directory is the one pointed to by the @code{HOME} environment
+variable.}.  There are a number of locations that @value{GDBN} will
+search in the home directory, these locations are searched in order
+and @value{GDBN} will load the first file that it finds, and
+subsequent locations will not be checked.
+
+On non-macOS hosts the locations searched are:
+@itemize
+@item
+The file @file{gdb/gdbearlyinit} within the directory pointed to by the
+environment variable @env{XDG_CONFIG_HOME}, if it is defined.
+@item
+The file @file{.config/gdb/gdbearlyinit} within the directory pointed to
+by the environment variable @env{HOME}, if it is defined.
+@item
+The file @file{.gdbearlyinit} within the directory pointed to by the
+environment variable @env{HOME}, if it is defined.
+@end itemize
+
+By contrast, on macOS hosts the locations searched are:
+@itemize
+@item
+The file @file{Library/Preferences/gdb/gdbearlyinit} within the
+directory pointed to by the environment variable @env{HOME}, if it is
+defined.
+@item
+The file @file{.gdbearlyinit} within the directory pointed to by the
+environment variable @env{HOME}, if it is defined.
+@end itemize
+
+It is possible to prevent the home directory early initialization file
+from being loaded using the @samp{-nx} or @samp{-nh} command line
+options, @pxref{Mode Options,,Choosing Modes}.
 
 @anchor{System Wide Init Files}
 @subsubsection System wide initialization files
@@ -3116,6 +3224,22 @@ For example,
   Num  Description       Connection                      Executable
 * 1    process 3401      1 (native)                      goodbye
   2    process 2307      2 (extended-remote host:10000)  hello
+@end smallexample
+
+To get informations about the current inferior, use @code{inferior}:
+
+@table @code
+@kindex inferior
+@item inferior
+Shows information about the current inferior.
+
+For example,
+@end table
+@c end table here to get a little more width for example
+
+@smallexample
+(@value{GDBP}) inferior
+[Current inferior is 1 [process 3401] (helloworld)]
 @end smallexample
 
 To find out what open target connections exist at any moment, use
@@ -9935,6 +10059,10 @@ If you omit @var{expr}, @value{GDBN} displays the last value again (from the
 conveniently inspect the same value in an alternative format.
 @end table
 
+If the architecture supports memory tagging, the @code{print} command will
+display pointer/memory tag mismatches if what is being printed is a pointer
+or reference type. @xref{Memory Tagging}.
+
 A more low-level way of examining data is with the @code{x} command.
 It examines data in memory at a specified address and prints it in a
 specified format.  @xref{Memory, ,Examining Memory}.
@@ -10098,6 +10226,7 @@ being passed the type of @var{arg} as the argument.
 * Arrays::                      Artificial arrays
 * Output Formats::              Output formats
 * Memory::                      Examining memory
+* Memory Tagging::              Memory Tagging
 * Auto Display::                Automatic display
 * Print Settings::              Print settings
 * Pretty Printing::             Python pretty printing
@@ -10702,7 +10831,8 @@ number is specified, memory is examined backward from @var{addr}.
 @item @var{f}, the display format
 The display format is one of the formats used by @code{print}
 (@samp{x}, @samp{d}, @samp{u}, @samp{o}, @samp{t}, @samp{a}, @samp{c},
-@samp{f}, @samp{s}), and in addition @samp{i} (for machine instructions).
+@samp{f}, @samp{s}), @samp{i} (for machine instructions) and
+@samp{m} (for displaying memory tags).
 The default is @samp{x} (hexadecimal) initially.  The default changes
 each time you use either @code{x} or @code{print}.
 
@@ -10797,6 +10927,22 @@ counter is shown with a @code{=>} marker. For example:
    0x804838c <main+24>: call   0x80482d4 <puts@@plt>
 @end smallexample
 
+If the architecture supports memory tagging, the tags can be displayed by
+using @samp{m}.  @xref{Memory Tagging}.
+
+The information will be displayed once per granule size
+(the amount of bytes a particular memory tag covers).  For example, AArch64
+has a granule size of 16 bytes, so it will display a tag every 16 bytes.
+
+Due to the way @value{GDBN} prints information with the @code{x} command (not
+aligned to a particular boundary), the tag information will refer to the
+initial address displayed on a particular line.  If a memory tag boundary
+is crossed in the middle of a line displayed by the @code{x} command, it
+will be displayed on the next line.
+
+The @samp{m} format doesn't affect any other specified formats that were
+passed to the @code{x} command.
+
 @cindex @code{$_}, @code{$__}, and value history
 The addresses and contents printed by the @code{x} command are not saved
 in the value history because there is often too much of them and they
@@ -10846,6 +10992,67 @@ arguments, compares all loadable sections.  With an argument of
 Note: for remote targets, this command can be accelerated if the
 target supports computing the CRC checksum of a block of memory
 (@pxref{qCRC packet}).
+@end table
+
+@node Memory Tagging
+@section Memory Tagging
+
+Memory tagging is a memory protection technology that uses a pair of tags to
+validate memory accesses through pointers.  The tags are integer values
+usually comprised of a few bits, depending on the architecture.
+
+There are two types of tags that are used in this setup: logical and
+allocation.  A logical tag is stored in the pointers themselves, usually at the
+higher bits of the pointers.  An allocation tag is the tag associated
+with particular ranges of memory in the physical address space, against which
+the logical tags from pointers are compared.
+
+The pointer tag (logical tag) must match the memory tag (allocation tag)
+for the memory access to be valid.  If the logical tag does not match the
+allocation tag, that will raise a memory violation.
+
+Allocation tags cover multiple contiguous bytes of physical memory.  This
+range of bytes is called a memory tag granule and is architecture-specific.
+For example,  AArch64 has a tag granule of 16 bytes, meaning each allocation
+tag spans 16 bytes of memory.
+
+If the underlying architecture supports memory tagging, like AArch64 MTE
+or SPARC ADI do,  @value{GDBN} can make use of it to validate pointers
+against memory allocation tags.
+
+The @code{print} (@pxref{Data}) and @code{x} (@pxref{Memory}) commands will
+display tag information when appropriate, and a command prefix of
+@code{memory-tag} gives access to the various memory tagging commands.
+
+The @code{memory-tag} commands are the following:
+
+@table @code
+@kindex memory-tag print-logical-tag
+@item memory-tag print-logical-tag @var{pointer_expression}
+Print the logical tag stored in @var{pointer_expression}.
+@kindex memory-tag with-logical-tag
+@item memory-tag with-logical-tag @var{pointer_expression} @var{tag_bytes}
+Print the pointer given by @var{pointer_expression}, augmented with a logical
+tag of @var{tag_bytes}.
+@kindex memory-tag print-allocation-tag
+@item memory-tag print-allocation-tag @var{address_expression}
+Print the allocation tag associated with the memory address given by
+@var{address_expression}.
+@kindex memory-tag setatag
+@item memory-tag setatag @var{starting_address} @var{length} @var{tag_bytes}
+Set the allocation tag(s) for memory range @r{[}@var{starting_address},
+@var{starting_address} + @var{length}@r{)} to @var{tag_bytes}.
+@kindex memory-tag check
+@item memory-tag check @var{pointer_expression}
+Check if the logical tag in the pointer given by @var{pointer_expression}
+matches the allocation tag for the memory referenced by the pointer.
+
+This essentially emulates the hardware validation that is done when tagged
+memory is accessed through a pointer, but does not cause a memory fault as
+it would during hardware validation.
+
+It can be used to inspect potential memory tagging violations in the running
+process, before any faults get triggered.
 @end table
 
 @node Auto Display
@@ -11450,6 +11657,20 @@ language, for most languages @code{@{...@}} is used, but Fortran uses
 @item show print max-depth
 Display the current threshold after which nested structures are
 replaces with ellipsis.
+
+@anchor{set print memory-tag-violations}
+@cindex printing memory tag violation information
+@item set print memory-tag-violations
+@itemx set print memory-tag-violations on
+Cause @value{GDBN} to display additional information about memory tag violations
+when printing pointers and addresses.
+
+@item set print memory-tag-violations off
+Stop printing memory tag violation information.
+
+@item show print memory-tag-violations
+Show whether memory tag violation information is displayed when printing
+pointers and addresses.
 
 @anchor{set print null-stop}
 @item set print null-stop
@@ -20603,22 +20824,25 @@ command @code{help target} lists all possible targets rather than
 current ones.
 
 @kindex maint info sections
-@item maint info sections
+@item maint info sections @r{[}-all-objects@r{]} @r{[}@var{filter-list}@r{]}
 Another command that can give you extra information about program sections
 is @code{maint info sections}.  In addition to the section information
 displayed by @code{info files}, this command displays the flags and file
-offset of each section in the executable and core dump files.  In addition,
-@code{maint info sections} provides the following command options (which
-may be arbitrarily combined):
+offset of each section in the executable and core dump files.
+
+When @samp{-all-objects} is passed then sections from all loaded object
+files, including shared libraries, are printed.
+
+The optional @var{filter-list} is a space separated list of filter
+keywords.  Sections that match any one of the filter criteria will be
+printed.  There are two types of filter:
 
 @table @code
-@item ALLOBJ
-Display sections for all loaded object files, including shared libraries.
-@item @var{sections}
-Display info only for named @var{sections}.
-@item @var{section-flags}
-Display info only for sections for which @var{section-flags} are true.
-The section flags that @value{GDBN} currently knows about are:
+@item @var{section-name}
+Display information about any section named @var{section-name}.
+@item @var{section-flag}
+Display information for any section with @var{section-flag}.  The
+section flags that @value{GDBN} currently knows about are:
 @table @code
 @item ALLOC
 Section will have space allocated in the process when loaded.
@@ -20649,6 +20873,14 @@ COFF shared library information.
 Section contains common symbols.
 @end table
 @end table
+
+@kindex maint info target-sections
+@item maint info target-sections
+This command prints @value{GDBN}'s internal section table.  For each
+target @value{GDBN} maintains a table containing the allocatable
+sections from all currently mapped objects, along with information
+about where the section is mapped.
+
 @kindex set trust-readonly-sections
 @cindex read-only sections
 @item set trust-readonly-sections on
@@ -20834,8 +21066,8 @@ to specify a local system root using a directory that happens to be
 named @file{target:} or @file{remote:}, you need to use some
 equivalent variant of the name like @file{./target:}.
 
-For targets with an MS-DOS based filesystem, such as MS-Windows and
-SymbianOS, @value{GDBN} tries prefixing a few variants of the target
+For targets with an MS-DOS based filesystem, such as MS-Windows,
+@value{GDBN} tries prefixing a few variants of the target
 absolute file name with @var{path}.  But first, on Unix hosts,
 @value{GDBN} converts all backslash directory separators into forward
 slashes, because the backslash is not a directory separator on Unix:
@@ -22886,7 +23118,7 @@ is high level of serial line for some certain time.
 Linux kernel prefers @samp{BREAK-g}, a.k.a Magic SysRq g.
 It is @code{BREAK} signal followed by character @code{g}.
 
-@item show interrupt-sequence
+@item show remote interrupt-sequence
 Show which of @samp{Ctrl-C}, @code{BREAK} or @code{BREAK-g}
 is sent by @value{GDBN} to interrupt the remote program.
 @code{BREAK-g} is BREAK signal followed by @code{g} and
@@ -22899,7 +23131,7 @@ Specify whether interrupt-sequence is sent to remote target when
 Linux kernel.  Linux kernel expects @code{BREAK} followed by @code{g}
 which is known as Magic SysRq g in order to connect @value{GDBN}.
 
-@item show interrupt-on-connect
+@item show remote interrupt-on-connect
 Show whether interrupt-sequence is sent
 to remote target when @value{GDBN} connects to it.
 
@@ -24966,6 +25198,42 @@ When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
 
+@subsubsection AArch64 Memory Tagging Extension.
+@cindex AArch64 Memory Tagging Extension.
+
+When @value{GDBN} is debugging the AArch64 architecture, the program is
+using the v8.5-A feature Memory Tagging Extension (MTE) and there is support
+in the kernel for MTE, @value{GDBN} will make memory tagging functionality
+available for inspection and editing of logical and allocation tags.
+@xref{Memory Tagging}.
+
+To aid debugging, @value{GDBN} will output additional information when SIGSEGV
+signals are generated as a result of memory tag failures.
+
+If the tag violation is synchronous, the following will be shown:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Memory tag violation while accessing address 0x0500fffff7ff8000
+Allocation tag 0x1
+Logical tag 0x5.
+@end smallexample
+
+If the tag violation is asynchronous, the fault address is not available.
+In this case @value{GDBN} will show the following:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Memory tag violation
+Fault address unavailable.
+@end smallexample
+
+A special register, @code{tag_ctl}, is made available through the
+@code{org.gnu.gdb.aarch64.mte} feature.  This register exposes some
+options that can be controlled at runtime and emulates the @code{prctl}
+option @code{PR_SET_TAGGED_ADDR_CTRL}.  For further information, see the
+documentation in the Linux kernel.
+
 @node i386
 @subsection x86 Architecture-specific Issues
 
@@ -25794,11 +26062,10 @@ default, this style's foreground color is magenta and it has bold
 intensity.  The version number is displayed in two places, the output
 of @command{show version}, and when @value{GDBN} starts up.
 
-Currently the version string displayed at startup is printed before
-@value{GDBN} has parsed any command line options, or parsed any
-command files, so there is currently no way to control the styling of
-this string.  However, @value{GDBN}'s @code{--quiet} command line option
-can be used to disable printing of the version string on startup.
+In order to control how @value{GDBN} styles the version number at
+startup, add the @code{set style version} family of commands to the
+early initialization command file (@pxref{Initialization
+Files}).
 
 @item title
 Control the styling of titles.  These are managed with the
@@ -27669,7 +27936,7 @@ extensions when a new object file is read (for example, due to the
 library): @file{@var{objfile}-gdb.@var{ext}} (@pxref{objfile-gdbdotext
 file,,The @file{@var{objfile}-gdb.@var{ext}} file}) and the
 @code{.debug_gdb_scripts} section of modern file formats like ELF
-(@pxref {dotdebug_gdb_scripts section,,The @code{.debug_gdb_scripts}
+(@pxref{dotdebug_gdb_scripts section,,The @code{.debug_gdb_scripts}
 section}).  For a discussion of the differences between these two
 approaches see @ref{Which flavor to choose?}.
 
@@ -36353,7 +36620,7 @@ and only if there is a corresponding executable file.
 @subheading Example
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -list-thread-groups
 ^done,groups=[@{id="17",type="process",pid="yyy",num_children="2"@}]
 -list-thread-groups 17
@@ -36401,7 +36668,7 @@ When run on a @sc{gnu}/Linux system, the output will look something
 like this:
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -info-os
 ^done,OSDataTable=@{nr_rows="10",nr_cols="3",
 hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="Type"@},
@@ -36427,7 +36694,7 @@ body=[item=@{col0="cpus",col1="Listing of all cpus/cores on the system",
             col2="Sockets"@},
       item=@{col0="threads",col1="Listing of all threads",
             col2="Threads"@}]
-@value{GDBP}
+(@value{GDBP})
 -info-os processes
 ^done,OSDataTable=@{nr_rows="190",nr_cols="4",
 hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="pid"@},
@@ -36440,7 +36707,7 @@ body=[item=@{col0="1",col1="root",col2="/sbin/init",col3="0"@},
       ...
       item=@{col0="26446",col1="stan",col2="bash",col3="0"@},
       item=@{col0="28152",col1="stan",col2="bash",col3="1"@}]@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 (Note that the MI output here includes a @code{"Title"} column that
@@ -36468,7 +36735,7 @@ thread group corresponding to the new inferior.
 @subheading Example
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -add-inferior
 ^done,inferior="i3"
 @end smallexample
@@ -40965,6 +41232,87 @@ is a sequence of thread IDs, @var{threadid} (eight hex
 digits), from the target.  See @code{remote.c:parse_threadlist_response()}.
 @end table
 
+@item qMemTags:@var{start address},@var{length}:@var{type}
+@anchor{qMemTags}
+@cindex fetch memory tags
+@cindex @samp{qMemTags} packet
+Fetch memory tags of type @var{type} from the address range
+@w{@r{[}@var{start address}, @var{start address} + @var{length}@r{)}}.  The
+target is responsible for calculating how many tags will be returned, as this
+is architecture-specific.
+
+@var{start address} is the starting address of the memory range.
+
+@var{length} is the length, in bytes, of the memory range.
+
+@var{type} is the type of tag the request wants to fetch.  The type is a signed
+integer.
+
+Reply:
+@table @samp
+@item @var{mxx}@dots{}
+Hex encoded sequence of uninterpreted bytes, @var{xx}@dots{}, representing the
+tags found in the requested memory range.
+
+@item E @var{nn}
+An error occured.  This means that fetching of memory tags failed for some
+reason.
+
+@item @w{}
+An empty reply indicates that @samp{qMemTags} is not supported by the stub,
+although this should not happen given @value{GDBN} will only send this packet
+if the stub has advertised support for memory tagging via @samp{qSupported}.
+@end table
+
+@item QMemTags:@var{start address},@var{length}:@var{type}:@var{tag bytes}
+@anchor{QMemTags}
+@cindex store memory tags
+@cindex @samp{QMemTags} packet
+Store memory tags of type @var{type} to the address range
+@w{@r{[}@var{start address}, @var{start address} + @var{length}@r{)}}.  The
+target is responsible for interpreting the type, the tag bytes and modifying
+the memory tag granules accordingly, given this is architecture-specific.
+
+The interpretation of how many tags (@var{nt}) should be written to how many
+memory tag granules (@var{ng}) is also architecture-specific.  The behavior is
+implementation-specific, but the following is suggested.
+
+If the number of memory tags, @var{nt}, is greater than or equal to the
+number of memory tag granules, @var{ng}, only @var{ng} tags will be
+stored.
+
+If @var{nt} is less than @var{ng}, the behavior is that of a fill operation,
+and the tag bytes will be used as a pattern that will get repeated until
+@var{ng} tags are stored.
+
+@var{start address} is the starting address of the memory range.  The address
+does not have any restriction on alignment or size.
+
+@var{length} is the length, in bytes, of the memory range.
+
+@var{type} is the type of tag the request wants to fetch.  The type is a signed
+integer.
+
+@var{tag bytes} is a sequence of hex encoded uninterpreted bytes which will be
+interpreted by the target.  Each pair of hex digits is interpreted as a
+single byte.
+
+Reply:
+@table @samp
+@item OK
+The request was successful and the memory tag granules were modified
+accordingly.
+
+@item E @var{nn}
+An error occured.  This means that modifying the memory tag granules failed
+for some reason.
+
+@item @w{}
+An empty reply indicates that @samp{QMemTags} is not supported by the stub,
+although this should not happen given @value{GDBN} will only send this packet
+if the stub has advertised support for memory tagging via @samp{qSupported}.
+@end table
+
 @item qOffsets
 @cindex section offsets, remote request
 @cindex @samp{qOffsets} packet
@@ -41632,6 +41980,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{memory-tagging}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -41845,6 +42198,16 @@ The remote stub understands the @samp{QThreadEvents} packet.
 
 @item no-resumed
 The remote stub reports the @samp{N} stop reply.
+
+
+@item memory-tagging
+The remote stub supports and implements the required memory tagging
+functionality and understands the @samp{qMemTags} (@pxref{qMemTags}) and
+@samp{QMemTags} (@pxref{QMemTags}) packets.
+
+For AArch64 GNU/Linux systems, this feature also requires access to the
+@file{/proc/@var{pid}/smaps} file so memory mapping page flags can be inspected.
+This is done via the @samp{vFile} requests.
 
 @end table
 
@@ -42327,6 +42690,7 @@ details of XML target descriptions for each architecture.
 
 @menu
 * ARM Breakpoint Kinds::
+* ARM Memory Tag Types::
 @end menu
 
 @node ARM Breakpoint Kinds
@@ -42345,6 +42709,23 @@ These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 
 @item 4
 32-bit @acronym{ARM} mode breakpoint.
+
+@end table
+
+@node ARM Memory Tag Types
+@subsubsection @acronym{ARM} Memory Tag Types
+@cindex memory tag types, @acronym{ARM}
+
+These memory tag types are defined for the @samp{qMemTag} and @samp{QMemTag}
+packets.
+
+@table @r
+
+@item 0
+MTE logical tag
+
+@item 1
+MTE allocation tag
 
 @end table
 
@@ -46603,12 +46984,14 @@ Execute given @value{GDBN} @var{command}.
 Add @var{directory} to the path to search for source files.
 
 @item -nh
-Do not execute commands from @file{~/.config/gdb/gdbinit} or
-@file{~/.gdbinit}.
+Do not execute commands from @file{~/.config/gdb/gdbinit},
+@file{~/.gdbinit}, @file{~/.config/gdb/gdbearlyinit}, or
+@file{~/.gdbearlyinit}
 
 @item -nx
 @itemx -n
-Do not execute commands from any @file{.gdbinit} initialization files.
+Do not execute commands from any @file{.gdbinit} or
+@file{.gdbearlyinit} initialization files.
 
 @item -quiet
 @itemx -q

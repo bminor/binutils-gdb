@@ -37,12 +37,12 @@ struct avr_property_record_link
 
 struct avr_opcodes_s
 {
-  const char *        name;
-  const char *        constraints;
-  const char *        opcode;
-  int           insn_size;		/* In words.  */
-  int           isa;
-  unsigned int  bin_opcode;
+  const char *name;
+  const char *constraints;
+  const char *opcode;
+  int insn_size;		/* In words.  */
+  int isa;
+  unsigned int bin_opcode;
 };
 
 #define AVR_INSN(NAME, CONSTR, OPCODE, SIZE, ISA, BIN) \
@@ -791,7 +791,7 @@ avr_undefined_symbol (char *name)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 void
@@ -942,10 +942,10 @@ avr_ldi_expression (expressionS *exp)
 
 	      ++str;
 
-	      if (strncmp ("pm(", str, 3) == 0
-                  || strncmp ("gs(",str,3) == 0
-                  || strncmp ("-(gs(",str,5) == 0
-		  || strncmp ("-(pm(", str, 5) == 0)
+	      if (startswith (str, "pm(")
+                  || startswith (str, "gs(")
+                  || startswith (str, "-(gs(")
+		  || startswith (str, "-(pm("))
 		{
 		  if (HAVE_PM_P (mod))
 		    {
@@ -1206,7 +1206,7 @@ avr_operand (struct avr_opcodes_s *opcode,
 	    avr_offset_expression (& op_expr);
 	    str = input_line_pointer;
 	    fix_new_exp (frag_now, where, 3,
-			 &op_expr, FALSE, BFD_RELOC_AVR_6);
+			 &op_expr, false, BFD_RELOC_AVR_6);
 	  }
       }
       break;
@@ -1214,31 +1214,31 @@ avr_operand (struct avr_opcodes_s *opcode,
     case 'h':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, FALSE, BFD_RELOC_AVR_CALL);
+		   &op_expr, false, BFD_RELOC_AVR_CALL);
       break;
 
     case 'L':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, TRUE, BFD_RELOC_AVR_13_PCREL);
+		   &op_expr, true, BFD_RELOC_AVR_13_PCREL);
       break;
 
     case 'l':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, TRUE, BFD_RELOC_AVR_7_PCREL);
+		   &op_expr, true, BFD_RELOC_AVR_7_PCREL);
       break;
 
     case 'i':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where + 2, opcode->insn_size * 2,
-		   &op_expr, FALSE, BFD_RELOC_16);
+		   &op_expr, false, BFD_RELOC_16);
       break;
 
     case 'j':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, FALSE, BFD_RELOC_AVR_LDS_STS_16);
+		   &op_expr, false, BFD_RELOC_AVR_LDS_STS_16);
       break;
 
     case 'M':
@@ -1249,7 +1249,7 @@ avr_operand (struct avr_opcodes_s *opcode,
 	r_type = avr_ldi_expression (&op_expr);
 	str = input_line_pointer;
 	fix_new_exp (frag_now, where, 3,
-		     &op_expr, FALSE, r_type);
+		     &op_expr, false, r_type);
       }
       break;
 
@@ -1278,7 +1278,7 @@ avr_operand (struct avr_opcodes_s *opcode,
       avr_offset_expression (& op_expr);
       str = input_line_pointer;
       fix_new_exp (frag_now, where, 3,
-		   & op_expr, FALSE, BFD_RELOC_AVR_6_ADIW);
+		   & op_expr, false, BFD_RELOC_AVR_6_ADIW);
       break;
 
     case 'S':
@@ -1297,13 +1297,13 @@ avr_operand (struct avr_opcodes_s *opcode,
     case 'P':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		     &op_expr, FALSE, BFD_RELOC_AVR_PORT6);
+		     &op_expr, false, BFD_RELOC_AVR_PORT6);
       break;
 
     case 'p':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		     &op_expr, FALSE, BFD_RELOC_AVR_PORT5);
+		     &op_expr, false, BFD_RELOC_AVR_PORT5);
       break;
 
     case 'E':
@@ -1452,7 +1452,7 @@ md_pcrel_from_section (fixS *fixp, segT sec)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
-static bfd_boolean
+static bool
 relaxable_section (asection *sec)
 {
   return ((sec->flags & SEC_DEBUGGING) == 0
@@ -2020,11 +2020,11 @@ avr_cons_fix_new (fragS *frag,
     {
     default:
       if (nbytes == 1)
-	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_8);
+	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_8);
       else if (nbytes == 2)
-	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_16);
+	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_16);
       else if (nbytes == 4)
-	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_32);
+	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_32);
       else
 	bad = 1;
       break;
@@ -2034,7 +2034,7 @@ avr_cons_fix_new (fragS *frag,
     case BFD_RELOC_AVR_8_HI:
     case BFD_RELOC_AVR_8_HLO:
       if (nbytes == pexp_mod_data->nbytes)
-        fix_new_exp (frag, where, nbytes, exp, FALSE, pexp_mod_data->reloc);
+        fix_new_exp (frag, where, nbytes, exp, false, pexp_mod_data->reloc);
       else
         bad = 1;
       break;
@@ -2044,7 +2044,7 @@ avr_cons_fix_new (fragS *frag,
     as_bad (_("illegal %s relocation size: %d"), pexp_mod_data->error, nbytes);
 }
 
-static bfd_boolean
+static bool
 mcu_has_3_byte_pc (void)
 {
   int mach = avr_mcu->mach;
@@ -2069,26 +2069,26 @@ tc_cfi_frame_initial_instructions (void)
   cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, 1-return_size);
 }
 
-bfd_boolean
+bool
 avr_allow_local_subtract (expressionS * left,
 			     expressionS * right,
 			     segT section)
 {
   /* If we are not in relaxation mode, subtraction is OK.  */
   if (!linkrelax)
-    return TRUE;
+    return true;
 
   /* If the symbols are not in a code section then they are OK.  */
   if ((section->flags & SEC_CODE) == 0)
-    return TRUE;
+    return true;
 
   if (left->X_add_symbol == right->X_add_symbol)
-    return TRUE;
+    return true;
 
   /* We have to assume that there may be instructions between the
      two symbols and that relaxation may increase the distance between
      them.  */
-  return FALSE;
+  return false;
 }
 
 void
@@ -2178,7 +2178,7 @@ avr_output_property_record (char * const frag_base, char *frag_ptr,
   where = frag_ptr - frag_base;
   fix = fix_new (frag_now, where, 4,
                  section_symbol (record->section),
-                 record->offset, FALSE, BFD_RELOC_32);
+                 record->offset, false, BFD_RELOC_32);
   fix->fx_file = "<internal>";
   fix->fx_line = 0;
   frag_ptr += 4;
@@ -2253,7 +2253,7 @@ avr_handle_align (fragS *fragP)
         {
           char *p = fragP->fr_literal + fragP->fr_fix;
 
-          fragP->tc_frag_data.is_align = TRUE;
+          fragP->tc_frag_data.is_align = true;
           fragP->tc_frag_data.alignment = fragP->fr_offset;
           fragP->tc_frag_data.fill = *p;
           fragP->tc_frag_data.has_fill = (fragP->tc_frag_data.fill != 0);
@@ -2263,7 +2263,7 @@ avr_handle_align (fragS *fragP)
         {
           char *p = fragP->fr_literal + fragP->fr_fix;
 
-          fragP->tc_frag_data.is_org = TRUE;
+          fragP->tc_frag_data.is_org = true;
           fragP->tc_frag_data.fill = *p;
           fragP->tc_frag_data.has_fill = (fragP->tc_frag_data.fill != 0);
         }
@@ -2273,7 +2273,7 @@ avr_handle_align (fragS *fragP)
 /* Return TRUE if this section is not one for which we need to record
    information in the avr property section.  */
 
-static bfd_boolean
+static bool
 exclude_section_from_property_tables (segT sec)
 {
   /* Only generate property information for sections on which linker

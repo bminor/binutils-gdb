@@ -51,7 +51,7 @@ void d10v_frob_label (symbolS *);
 #define tc_frob_label(sym)	     d10v_frob_label (sym)
 
 #define tc_fix_adjustable(FIX) d10v_fix_adjustable(FIX)
-bfd_boolean d10v_fix_adjustable (struct fix *);
+bool d10v_fix_adjustable (struct fix *);
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

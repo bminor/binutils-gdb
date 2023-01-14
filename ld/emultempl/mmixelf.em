@@ -37,9 +37,9 @@ elfmmix_before_parse (void)
      page in the linked file, which is non-intuitive.  If there's ever a
      full system with shared libraries and demand paging, you will want to
      exclude this file.  */
-  config.magic_demand_paged = FALSE;
+  config.magic_demand_paged = false;
 
-  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo true ; else echo false ; fi`;
 }
 EOF
 

@@ -28,8 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "load.h"
-#include "elf/internal.h"
-#include "elf/common.h"
+#include "elf-bfd.h"
 
 /* Helper function for invoking a GDB-specified printf.  */
 static void

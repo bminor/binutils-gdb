@@ -85,7 +85,7 @@ struct req_option_list
 struct req_or_option_list
 {
   char *option_name;
-  bfd_boolean is_true;
+  bool is_true;
   ReqOrOptionList *next;
 };
 
@@ -170,7 +170,7 @@ typedef int (*transition_cmp_fn) (const TransitionRule *,
 extern TransitionTable *xg_build_simplify_table (transition_cmp_fn);
 extern TransitionTable *xg_build_widen_table (transition_cmp_fn);
 
-extern bfd_boolean xg_has_userdef_op_fn (OpType);
+extern bool xg_has_userdef_op_fn (OpType);
 extern long xg_apply_userdef_op_fn (OpType, long);
 
 enum flix_level

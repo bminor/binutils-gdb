@@ -22,7 +22,7 @@
 #include "as.h"
 #include <limits.h>
 #include <stdarg.h>
-#include "bfd_stdint.h"
+#include <stdint.h>
 #define	 NO_RELOC 0
 #include "safe-ctype.h"
 #include "subsegs.h"
@@ -146,8 +146,8 @@ typedef struct aarch64_instruction aarch64_instruction;
 
 static aarch64_instruction inst;
 
-static bfd_boolean parse_operands (char *, const aarch64_opcode *);
-static bfd_boolean programmer_friendly_fixup (aarch64_instruction *);
+static bool parse_operands (char *, const aarch64_opcode *);
+static bool programmer_friendly_fixup (aarch64_instruction *);
 
 #ifdef OBJ_ELF
 #  define now_instr_sequence seg_info \
@@ -180,7 +180,7 @@ clear_error (void)
   inst.parsing_error.error = NULL;
 }
 
-static inline bfd_boolean
+static inline bool
 error_p (void)
 {
   return inst.parsing_error.kind != AARCH64_OPDE_NIL;
@@ -532,85 +532,99 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpPhH";
 
 #define skip_whitespace(str)  do { if (*(str) == ' ') ++(str); } while (0)
 
-static inline bfd_boolean
+static inline bool
 skip_past_char (char **str, char c)
 {
   if (**str == c)
     {
       (*str)++;
-      return TRUE;
+      return true;
     }
   else
-    return FALSE;
+    return false;
 }
 
 #define skip_past_comma(str) skip_past_char (str, ',')
 
 /* Arithmetic expressions (possibly involving symbols).	 */
 
-static bfd_boolean in_my_get_expression_p = FALSE;
+static bool in_aarch64_get_expression = false;
 
-/* Third argument to my_get_expression.	 */
-#define GE_NO_PREFIX 0
-#define GE_OPT_PREFIX 1
+/* Third argument to aarch64_get_expression.  */
+#define GE_NO_PREFIX  false
+#define GE_OPT_PREFIX true
+
+/* Fourth argument to aarch64_get_expression.  */
+#define ALLOW_ABSENT  false
+#define REJECT_ABSENT true
+
+/* Fifth argument to aarch64_get_expression.  */
+#define NORMAL_RESOLUTION false
 
 /* Return TRUE if the string pointed by *STR is successfully parsed
    as an valid expression; *EP will be filled with the information of
-   such an expression.  Otherwise return FALSE.  */
+   such an expression.  Otherwise return FALSE.
 
-static bfd_boolean
-my_get_expression (expressionS * ep, char **str, int prefix_mode,
-		   int reject_absent)
+   If ALLOW_IMMEDIATE_PREFIX is true then skip a '#' at the start.
+   If REJECT_ABSENT is true then trat missing expressions as an error.
+   If DEFER_RESOLUTION is true, then do not resolve expressions against
+   constant symbols.  Necessary if the expression is part of a fixup
+   that uses a reloc that must be emitted.  */
+
+static bool
+aarch64_get_expression (expressionS *  ep,
+			char **        str,
+			bool           allow_immediate_prefix,
+			bool           reject_absent,
+			bool           defer_resolution)
 {
   char *save_in;
   segT seg;
-  int prefix_present_p = 0;
+  bool prefix_present = false;
 
-  switch (prefix_mode)
+  if (allow_immediate_prefix)
     {
-    case GE_NO_PREFIX:
-      break;
-    case GE_OPT_PREFIX:
       if (is_immediate_prefix (**str))
 	{
 	  (*str)++;
-	  prefix_present_p = 1;
+	  prefix_present = true;
 	}
-      break;
-    default:
-      abort ();
     }
 
   memset (ep, 0, sizeof (expressionS));
 
   save_in = input_line_pointer;
   input_line_pointer = *str;
-  in_my_get_expression_p = TRUE;
-  seg = expression (ep);
-  in_my_get_expression_p = FALSE;
+  in_aarch64_get_expression = true;
+  if (defer_resolution)
+    seg = deferred_expression (ep);
+  else
+    seg = expression (ep);
+  in_aarch64_get_expression = false;
 
   if (ep->X_op == O_illegal || (reject_absent && ep->X_op == O_absent))
     {
       /* We found a bad expression in md_operand().  */
       *str = input_line_pointer;
       input_line_pointer = save_in;
-      if (prefix_present_p && ! error_p ())
+      if (prefix_present && ! error_p ())
 	set_fatal_syntax_error (_("bad expression"));
       else
 	set_first_syntax_error (_("bad expression"));
-      return FALSE;
+      return false;
     }
 
 #ifdef OBJ_AOUT
   if (seg != absolute_section
       && seg != text_section
       && seg != data_section
-      && seg != bss_section && seg != undefined_section)
+      && seg != bss_section
+      && seg != undefined_section)
     {
       set_syntax_error (_("bad segment"));
       *str = input_line_pointer;
       input_line_pointer = save_in;
-      return FALSE;
+      return false;
     }
 #else
   (void) seg;
@@ -618,7 +632,7 @@ my_get_expression (expressionS * ep, char **str, int prefix_mode,
 
   *str = input_line_pointer;
   input_line_pointer = save_in;
-  return TRUE;
+  return true;
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
@@ -685,7 +699,7 @@ md_atof (int type, char *litP, int *sizeP)
 void
 md_operand (expressionS * exp)
 {
-  if (in_my_get_expression_p)
+  if (in_aarch64_get_expression)
     exp->X_op = O_illegal;
 }
 
@@ -769,7 +783,7 @@ parse_reg (char **ccp)
 
 /* Return TRUE if REG->TYPE is a valid type of TYPE; otherwise
    return FALSE.  */
-static bfd_boolean
+static bool
 aarch64_check_reg_type (const reg_entry *reg, aarch64_reg_type type)
 {
   return (reg_type_masks[type] & (1 << reg->type)) != 0;
@@ -852,7 +866,7 @@ aarch64_reg_parse_32_64 (char **ccp, aarch64_opnd_qualifier_t *qualifier)
    Accept only one occurrence of:
    4b 8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
-static bfd_boolean
+static bool
 parse_vector_type_for_operand (aarch64_reg_type reg_type,
 			       struct vector_type_el *parsed_type, char **str)
 {
@@ -874,7 +888,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
   if (width != 1 && width != 2 && width != 4 && width != 8 && width != 16)
     {
       first_error_fmt (_("bad size %d in vector width specifier"), width);
-      return FALSE;
+      return false;
     }
 
  elt_size:
@@ -909,7 +923,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
 	first_error_fmt (_("unexpected character `%c' in element size"), *ptr);
       else
 	first_error (_("missing element size"));
-      return FALSE;
+      return false;
     }
   if (width != 0 && width * element_size != 64
       && width * element_size != 128
@@ -919,7 +933,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
       first_error_fmt (_
 		       ("invalid element size %d and vector size combination %c"),
 		       width, *ptr);
-      return FALSE;
+      return false;
     }
   ptr++;
 
@@ -928,13 +942,13 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
 
   *str = ptr;
 
-  return TRUE;
+  return true;
 }
 
 /* *STR contains an SVE zero/merge predication suffix.  Parse it into
    *PARSED_TYPE and point *STR at the end of the suffix.  */
 
-static bfd_boolean
+static bool
 parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
 {
   char *ptr = *str;
@@ -956,11 +970,11 @@ parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
 			 *ptr);
       else
 	first_error (_("missing predication type"));
-      return FALSE;
+      return false;
     }
   parsed_type->width = 0;
   *str = ptr + 1;
-  return TRUE;
+  return true;
 }
 
 /* Parse a register of the type TYPE.
@@ -977,13 +991,13 @@ parse_predication_for_operand (struct vector_type_el *parsed_type, char **str)
 
 static int
 parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
-		 struct vector_type_el *typeinfo, bfd_boolean in_reg_list)
+		 struct vector_type_el *typeinfo, bool in_reg_list)
 {
   char *str = *ccp;
   const reg_entry *reg = parse_reg (&str);
   struct vector_type_el atype;
   struct vector_type_el parsetype;
-  bfd_boolean is_typed_vecreg = FALSE;
+  bool is_typed_vecreg = false;
 
   atype.defined = 0;
   atype.type = NT_invtype;
@@ -1021,7 +1035,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 	}
 
       /* Register if of the form Vn.[bhsdq].  */
-      is_typed_vecreg = TRUE;
+      is_typed_vecreg = true;
 
       if (type == REG_TYPE_ZN || type == REG_TYPE_PN)
 	{
@@ -1062,7 +1076,8 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 
       atype.defined |= NTA_HASINDEX;
 
-      my_get_expression (&exp, &str, GE_NO_PREFIX, 1);
+      aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
+			      NORMAL_RESOLUTION);
 
       if (exp.X_op != O_constant)
 	{
@@ -1118,7 +1133,7 @@ aarch64_reg_parse (char **ccp, aarch64_reg_type type,
   struct vector_type_el atype;
   char *str = *ccp;
   int reg = parse_typed_reg (&str, type, rtype, &atype,
-			     /*in_reg_list= */ FALSE);
+			     /*in_reg_list= */ false);
 
   if (reg == PARSE_FAIL)
     return PARSE_FAIL;
@@ -1131,7 +1146,7 @@ aarch64_reg_parse (char **ccp, aarch64_reg_type type,
   return reg;
 }
 
-static inline bfd_boolean
+static inline bool
 eq_vector_type_el (struct vector_type_el e1, struct vector_type_el e2)
 {
   return
@@ -1172,8 +1187,8 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   int in_range;
   int ret_val;
   int i;
-  bfd_boolean error = FALSE;
-  bfd_boolean expect_index = FALSE;
+  bool error = false;
+  bool expect_index = false;
 
   if (*str != '{')
     {
@@ -1199,23 +1214,23 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	  val_range = val;
 	}
       val = parse_typed_reg (&str, type, NULL, &typeinfo,
-			     /*in_reg_list= */ TRUE);
+			     /*in_reg_list= */ true);
       if (val == PARSE_FAIL)
 	{
 	  set_first_syntax_error (_("invalid vector register in list"));
-	  error = TRUE;
+	  error = true;
 	  continue;
 	}
       /* reject [bhsd]n */
       if (type == REG_TYPE_VN && typeinfo.defined == 0)
 	{
 	  set_first_syntax_error (_("invalid scalar register in list"));
-	  error = TRUE;
+	  error = true;
 	  continue;
 	}
 
       if (typeinfo.defined & NTA_HASINDEX)
-	expect_index = TRUE;
+	expect_index = true;
 
       if (in_range)
 	{
@@ -1223,7 +1238,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	    {
 	      set_first_syntax_error
 		(_("invalid range in vector register list"));
-	      error = TRUE;
+	      error = true;
 	    }
 	  val_range++;
 	}
@@ -1236,7 +1251,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	    {
 	      set_first_syntax_error
 		(_("type mismatch in vector register list"));
-	      error = TRUE;
+	      error = true;
 	    }
 	}
       if (! error)
@@ -1253,7 +1268,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   if (*str != '}')
     {
       set_first_syntax_error (_("end of vector register list not found"));
-      error = TRUE;
+      error = true;
     }
   str++;
 
@@ -1265,33 +1280,34 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	{
 	  expressionS exp;
 
-	  my_get_expression (&exp, &str, GE_NO_PREFIX, 1);
+	  aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
+				  NORMAL_RESOLUTION);
 	  if (exp.X_op != O_constant)
 	    {
 	      set_first_syntax_error (_("constant expression required."));
-	      error = TRUE;
+	      error = true;
 	    }
 	  if (! skip_past_char (&str, ']'))
-	    error = TRUE;
+	    error = true;
 	  else
 	    typeinfo_first.index = exp.X_add_number;
 	}
       else
 	{
 	  set_first_syntax_error (_("expected index"));
-	  error = TRUE;
+	  error = true;
 	}
     }
 
   if (nb_regs > 4)
     {
       set_first_syntax_error (_("too many registers in vector register list"));
-      error = TRUE;
+      error = true;
     }
   else if (nb_regs == 0)
     {
       set_first_syntax_error (_("empty vector register list"));
-      error = TRUE;
+      error = true;
     }
 
   *ccp = str;
@@ -1329,7 +1345,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
   new->name = name;
   new->number = number;
   new->type = type;
-  new->builtin = FALSE;
+  new->builtin = false;
 
   str_hash_insert (aarch64_reg_hsh, name, new, 0);
 
@@ -1343,7 +1359,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
    If we find one, or if it looks sufficiently like one that we want to
    handle any error here, return TRUE.  Otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 create_register_alias (char *newname, char *p)
 {
   const reg_entry *old;
@@ -1353,18 +1369,18 @@ create_register_alias (char *newname, char *p)
   /* The input scrubber ensures that whitespace after the mnemonic is
      collapsed to single spaces.  */
   oldname = p;
-  if (strncmp (oldname, " .req ", 6) != 0)
-    return FALSE;
+  if (!startswith (oldname, " .req "))
+    return false;
 
   oldname += 6;
   if (*oldname == '\0')
-    return FALSE;
+    return false;
 
   old = str_hash_find (aarch64_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
-      return TRUE;
+      return true;
     }
 
   /* If TC_CASE_SENSITIVE is defined, then newname already points to
@@ -1401,7 +1417,7 @@ create_register_alias (char *newname, char *p)
 	  if (insert_reg_alias (nbuf, old->number, old->type) == NULL)
 	    {
 	      free (nbuf);
-	      return TRUE;
+	      return true;
 	    }
 	}
 
@@ -1413,7 +1429,7 @@ create_register_alias (char *newname, char *p)
     }
 
   free (nbuf);
-  return TRUE;
+  return true;
 }
 
 /* Should never be called, as .req goes between the alias and the
@@ -1746,7 +1762,7 @@ find_or_make_literal_pool (int size)
 
 /* Add the literal of size SIZE in *EXP to the relevant literal pool.
    Return TRUE on success, otherwise return FALSE.  */
-static bfd_boolean
+static bool
 add_to_lit_pool (expressionS *exp, int size)
 {
   literal_pool *pool;
@@ -1779,7 +1795,7 @@ add_to_lit_pool (expressionS *exp, int size)
       if (entry >= MAX_LITERAL_POOL_SIZE)
 	{
 	  set_syntax_error (_("literal pool overflow"));
-	  return FALSE;
+	  return false;
 	}
 
       pool->literals[entry].exp = *exp;
@@ -1801,7 +1817,7 @@ add_to_lit_pool (expressionS *exp, int size)
   exp->X_add_number = ((int) entry) * size;
   exp->X_add_symbol = pool->symbol;
 
-  return TRUE;
+  return true;
 }
 
 /* Can't use symbol_new here, so have to create a symbol and then at
@@ -2165,14 +2181,14 @@ const pseudo_typeS md_pseudo_table[] = {
    state from being spoiled.
    The function currently serves parse_constant_immediate and
    parse_big_immediate only.  */
-static bfd_boolean
+static bool
 reg_name_p (char *str, aarch64_reg_type reg_type)
 {
   int reg;
 
   /* Prevent the diagnostics state from being spoiled.  */
   if (error_p ())
-    return FALSE;
+    return false;
 
   reg = aarch64_reg_parse (&str, reg_type, NULL, NULL);
 
@@ -2180,13 +2196,13 @@ reg_name_p (char *str, aarch64_reg_type reg_type)
   clear_error ();
 
   if (reg == PARSE_FAIL)
-    return FALSE;
+    return false;
 
   skip_whitespace (str);
   if (*str == ',' || is_end_of_line[(unsigned char) *str])
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Parser functions used exclusively in instruction operands.  */
@@ -2198,25 +2214,26 @@ reg_name_p (char *str, aarch64_reg_type reg_type)
    done to find out whether STR is a register of type REG_TYPE followed
    by a comma or the end of line.  Return FALSE if STR is such a string.  */
 
-static bfd_boolean
+static bool
 parse_immediate_expression (char **str, expressionS *exp,
 			    aarch64_reg_type reg_type)
 {
   if (reg_name_p (*str, reg_type))
     {
       set_recoverable_error (_("immediate operand required"));
-      return FALSE;
+      return false;
     }
 
-  my_get_expression (exp, str, GE_OPT_PREFIX, 1);
+  aarch64_get_expression (exp, str, GE_OPT_PREFIX, REJECT_ABSENT,
+			  NORMAL_RESOLUTION);
 
   if (exp->X_op == O_absent)
     {
       set_fatal_syntax_error (_("missing immediate expression"));
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Constant immediate-value read function for use in insn parsing.
@@ -2226,22 +2243,22 @@ parse_immediate_expression (char **str, expressionS *exp,
 
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 parse_constant_immediate (char **str, int64_t *val, aarch64_reg_type reg_type)
 {
   expressionS exp;
 
   if (! parse_immediate_expression (str, &exp, reg_type))
-    return FALSE;
+    return false;
 
   if (exp.X_op != O_constant)
     {
       set_syntax_error (_("constant expression required"));
-      return FALSE;
+      return false;
     }
 
   *val = exp.X_add_number;
-  return TRUE;
+  return true;
 }
 
 static uint32_t
@@ -2258,7 +2275,7 @@ encode_imm_float_bits (uint32_t imm)
      (+/-) n / 16 * power (2, r)
    where n and r are integers such that 16 <= n <=31 and -3 <= r <= 4.  */
 
-static bfd_boolean
+static bool
 aarch64_imm_float_p (uint32_t imm)
 {
   /* If a single-precision floating-point value has the following bit
@@ -2288,7 +2305,7 @@ aarch64_imm_float_p (uint32_t imm)
    as an IEEE float without any loss of precision.  Store the value in
    *FPWORD if so.  */
 
-static bfd_boolean
+static bool
 can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
 {
   /* If a double-precision floating-point value has the following bit
@@ -2310,7 +2327,7 @@ can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
 
   /* Lower 29 bits need to be 0s.  */
   if ((imm & 0x1fffffff) != 0)
-    return FALSE;
+    return false;
 
   /* Prepare the pattern for 'Eeeeeeeee'.  */
   if (((high32 >> 30) & 0x1) == 0)
@@ -2320,21 +2337,21 @@ can_convert_double_to_float (uint64_t imm, uint32_t *fpword)
 
   /* Check E~~~.  */
   if ((high32 & 0x78000000) != pattern)
-    return FALSE;
+    return false;
 
   /* Check Eeee_eeee != 1111_1111.  */
   if ((high32 & 0x7ff00000) == 0x47f00000)
-    return FALSE;
+    return false;
 
   *fpword = ((high32 & 0xc0000000)		/* 1 n bit and 1 E bit.  */
 	     | ((high32 << 3) & 0x3ffffff8)	/* 7 e and 20 s bits.  */
 	     | (low32 >> 29));			/* 3 S bits.  */
-  return TRUE;
+  return true;
 }
 
 /* Return true if we should treat OPERAND as a double-precision
    floating-point operand rather than a single-precision one.  */
-static bfd_boolean
+static bool
 double_precision_operand_p (const aarch64_opnd_info *operand)
 {
   /* Check for unsuffixed SVE registers, which are allowed
@@ -2356,8 +2373,8 @@ double_precision_operand_p (const aarch64_opnd_info *operand)
    This routine accepts any IEEE float; it is up to the callers to reject
    invalid ones.  */
 
-static bfd_boolean
-parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
+static bool
+parse_aarch64_imm_float (char **ccp, int *immed, bool dp_p,
 			 aarch64_reg_type reg_type)
 {
   char *str = *ccp;
@@ -2365,14 +2382,14 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   int64_t val = 0;
   unsigned fpword = 0;
-  bfd_boolean hex_p = FALSE;
+  bool hex_p = false;
 
   skip_past_char (&str, '#');
 
   fpnum = str;
   skip_whitespace (fpnum);
 
-  if (strncmp (fpnum, "0x", 2) == 0)
+  if (startswith (fpnum, "0x"))
     {
       /* Support the hexadecimal representation of the IEEE754 encoding.
 	 Double-precision is expected when DP_P is TRUE, otherwise the
@@ -2390,12 +2407,12 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
       else
 	fpword = val;
 
-      hex_p = TRUE;
+      hex_p = true;
     }
   else if (reg_name_p (str, reg_type))
    {
      set_recoverable_error (_("immediate operand required"));
-     return FALSE;
+     return false;
     }
 
   if (! hex_p)
@@ -2415,11 +2432,11 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
 
   *immed = fpword;
   *ccp = str;
-  return TRUE;
+  return true;
 
  invalid_fp:
   set_fatal_syntax_error (_("invalid floating-point constant"));
-  return FALSE;
+  return false;
 }
 
 /* Less-generic immediate-value read function with the possibility of loading
@@ -2431,7 +2448,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p,
    out whether STR is a register of type REG_TYPE followed by a comma or
    the end of line.  Return FALSE if STR is such a register.  */
 
-static bfd_boolean
+static bool
 parse_big_immediate (char **str, int64_t *imm, aarch64_reg_type reg_type)
 {
   char *ptr = *str;
@@ -2439,17 +2456,18 @@ parse_big_immediate (char **str, int64_t *imm, aarch64_reg_type reg_type)
   if (reg_name_p (ptr, reg_type))
     {
       set_syntax_error (_("immediate operand required"));
-      return FALSE;
+      return false;
     }
 
-  my_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, 1);
+  aarch64_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, REJECT_ABSENT,
+			  NORMAL_RESOLUTION);
 
   if (inst.reloc.exp.X_op == O_constant)
     *imm = inst.reloc.exp.X_add_number;
 
   *str = ptr;
 
-  return TRUE;
+  return true;
 }
 
 /* Set operand IDX of the *INSTR that needs a GAS internal fixup.
@@ -2470,7 +2488,7 @@ aarch64_set_gas_internal_fixup (struct reloc *reloc,
 /* Return TRUE if the instruction needs to be fixed up later internally by
    the GAS; otherwise return FALSE.  */
 
-static inline bfd_boolean
+static inline bool
 aarch64_gas_internal_fixup_p (void)
 {
   return inst.reloc.type == BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP;
@@ -2526,7 +2544,8 @@ struct reloc_table_entry
   bfd_reloc_code_real_type ld_literal_type;
 };
 
-static struct reloc_table_entry reloc_table[] = {
+static struct reloc_table_entry reloc_table[] =
+{
   /* Low 12 bits of absolute address: ADD/i and LDR/STR */
   {"lo12", 0,
    0,				/* adr_type */
@@ -3079,6 +3098,114 @@ find_reloc_table_entry (char **str)
   return NULL;
 }
 
+/* Returns 0 if the relocation should never be forced,
+   1 if the relocation must be forced, and -1 if either
+   result is OK.  */
+
+static signed int
+aarch64_force_reloc (unsigned int type)
+{
+  switch (type)
+    {
+    case BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP:
+      /* Perform these "immediate" internal relocations
+         even if the symbol is extern or weak.  */
+      return 0;
+
+    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
+      /* Pseudo relocs that need to be fixed up according to
+	 ilp32_p.  */
+      return 0;
+
+    case BFD_RELOC_AARCH64_ADD_LO12:
+    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
+    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LDST128_LO12:
+    case BFD_RELOC_AARCH64_LDST16_LO12:
+    case BFD_RELOC_AARCH64_LDST32_LO12:
+    case BFD_RELOC_AARCH64_LDST64_LO12:
+    case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+    case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+    case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
+      /* Always leave these relocations for the linker.  */
+      return 1;
+
+    default:
+      return -1;
+    }
+}
+
+int
+aarch64_force_relocation (struct fix *fixp)
+{
+  int res = aarch64_force_reloc (fixp->fx_r_type);
+
+  if (res == -1)
+    return generic_force_reloc (fixp);
+  return res;
+}
+
 /* Mode argument to parse_shift and parser_shifter_operand.  */
 enum parse_shift_mode
 {
@@ -3096,7 +3223,7 @@ enum parse_shift_mode
 
 /* Parse a <shift> operator on an AArch64 data processing instruction.
    Return TRUE on success; otherwise return FALSE.  */
-static bfd_boolean
+static bool
 parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 {
   const struct aarch64_name_value_pair *shift_op;
@@ -3112,7 +3239,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   if (p == *str)
     {
       set_syntax_error (_("shift expression expected"));
-      return FALSE;
+      return false;
     }
 
   shift_op = str_hash_find_n (aarch64_shift_hsh, *str, p - *str);
@@ -3120,7 +3247,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   if (shift_op == NULL)
     {
       set_syntax_error (_("shift operator expected"));
-      return FALSE;
+      return false;
     }
 
   kind = aarch64_get_operand_modifier (shift_op);
@@ -3128,7 +3255,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   if (kind == AARCH64_MOD_MSL && mode != SHIFTED_LSL_MSL)
     {
       set_syntax_error (_("invalid use of 'MSL'"));
-      return FALSE;
+      return false;
     }
 
   if (kind == AARCH64_MOD_MUL
@@ -3136,7 +3263,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       && mode != SHIFTED_MUL_VL)
     {
       set_syntax_error (_("invalid use of 'MUL'"));
-      return FALSE;
+      return false;
     }
 
   switch (mode)
@@ -3145,7 +3272,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (aarch64_extend_operator_p (kind))
 	{
 	  set_syntax_error (_("extending shift is not permitted"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3153,7 +3280,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (kind == AARCH64_MOD_ROR)
 	{
 	  set_syntax_error (_("'ROR' shift is not permitted"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3161,7 +3288,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (kind != AARCH64_MOD_LSL)
 	{
 	  set_syntax_error (_("only 'LSL' shift is permitted"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3169,7 +3296,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (kind != AARCH64_MOD_MUL)
 	{
 	  set_syntax_error (_("only 'MUL' is permitted"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3187,7 +3314,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	    }
 	}
       set_syntax_error (_("only 'MUL VL' is permitted"));
-      return FALSE;
+      return false;
 
     case SHIFTED_REG_OFFSET:
       if (kind != AARCH64_MOD_UXTW && kind != AARCH64_MOD_LSL
@@ -3195,7 +3322,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	{
 	  set_fatal_syntax_error
 	    (_("invalid shift for the register offset addressing mode"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3203,7 +3330,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (kind != AARCH64_MOD_LSL && kind != AARCH64_MOD_MSL)
 	{
 	  set_syntax_error (_("invalid shift operator"));
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -3225,7 +3352,8 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	  p++;
 	  exp_has_prefix = 1;
 	}
-      my_get_expression (&exp, &p, GE_NO_PREFIX, 0);
+      (void) aarch64_get_expression (&exp, &p, GE_NO_PREFIX, ALLOW_ABSENT,
+				     NORMAL_RESOLUTION);
     }
   if (kind == AARCH64_MOD_MUL_VL)
     /* For consistency, give MUL VL the same shift amount as an implicit
@@ -3236,14 +3364,14 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       if (!aarch64_extend_operator_p (kind) || exp_has_prefix)
 	{
 	  set_syntax_error (_("missing shift amount"));
-	  return FALSE;
+	  return false;
 	}
       operand->shifter.amount = 0;
     }
   else if (exp.X_op != O_constant)
     {
       set_syntax_error (_("constant shift amount required"));
-      return FALSE;
+      return false;
     }
   /* For parsing purposes, MUL #n has no inherent range.  The range
      depends on the operand and will be checked by operand-specific
@@ -3252,7 +3380,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	   && (exp.X_add_number < 0 || exp.X_add_number > 63))
     {
       set_fatal_syntax_error (_("shift amount out of range 0 to 63"));
-      return FALSE;
+      return false;
     }
   else
     {
@@ -3264,7 +3392,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
   operand->shifter.kind = kind;
 
   *str = p;
-  return TRUE;
+  return true;
 }
 
 /* Parse a <shifter_operand> for a data processing instruction:
@@ -3276,36 +3404,37 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 parse_shifter_operand_imm (char **str, aarch64_opnd_info *operand,
 			   enum parse_shift_mode mode)
 {
   char *p;
 
   if (mode != SHIFTED_ARITH_IMM && mode != SHIFTED_LOGIC_IMM)
-    return FALSE;
+    return false;
 
   p = *str;
 
   /* Accept an immediate expression.  */
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_OPT_PREFIX, 1))
-    return FALSE;
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_OPT_PREFIX,
+				REJECT_ABSENT, NORMAL_RESOLUTION))
+    return false;
 
   /* Accept optional LSL for arithmetic immediate values.  */
   if (mode == SHIFTED_ARITH_IMM && skip_past_comma (&p))
     if (! parse_shift (&p, operand, SHIFTED_LSL))
-      return FALSE;
+      return false;
 
   /* Not accept any shifter for logical immediate values.  */
   if (mode == SHIFTED_LOGIC_IMM && skip_past_comma (&p)
       && parse_shift (&p, operand, mode))
     {
       set_syntax_error (_("unexpected shift operator"));
-      return FALSE;
+      return false;
     }
 
   *str = p;
-  return TRUE;
+  return true;
 }
 
 /* Parse a <shifter_operand> for a data processing instruction:
@@ -3322,7 +3451,7 @@ parse_shifter_operand_imm (char **str, aarch64_opnd_info *operand,
 
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 		       enum parse_shift_mode mode)
 {
@@ -3337,13 +3466,13 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
       if (opd_class == AARCH64_OPND_CLASS_IMMEDIATE)
 	{
 	  set_syntax_error (_("unexpected register in the immediate operand"));
-	  return FALSE;
+	  return false;
 	}
 
       if (!aarch64_check_reg_type (reg, REG_TYPE_R_Z))
 	{
 	  set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_Z)));
-	  return FALSE;
+	  return false;
 	}
 
       operand->reg.regno = reg->number;
@@ -3351,19 +3480,19 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 
       /* Accept optional shift operation on register.  */
       if (! skip_past_comma (str))
-	return TRUE;
+	return true;
 
       if (! parse_shift (str, operand, mode))
-	return FALSE;
+	return false;
 
-      return TRUE;
+      return true;
     }
   else if (opd_class == AARCH64_OPND_CLASS_MODIFIED_REG)
     {
       set_syntax_error
 	(_("integer register expected in the extended/shifted operand "
 	   "register"));
-      return FALSE;
+      return false;
     }
 
   /* We have a shifted immediate variable.  */
@@ -3372,7 +3501,7 @@ parse_shifter_operand (char **str, aarch64_opnd_info *operand,
 
 /* Return TRUE on success; return FALSE otherwise.  */
 
-static bfd_boolean
+static bool
 parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
 			     enum parse_shift_mode mode)
 {
@@ -3397,30 +3526,32 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
       if (!(entry = find_reloc_table_entry (str)))
 	{
 	  set_syntax_error (_("unknown relocation modifier"));
-	  return FALSE;
+	  return false;
 	}
 
       if (entry->add_type == 0)
 	{
 	  set_syntax_error
 	    (_("this relocation modifier is not allowed on this instruction"));
-	  return FALSE;
+	  return false;
 	}
 
       /* Save str before we decompose it.  */
       p = *str;
 
       /* Next, we parse the expression.  */
-      if (! my_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX, 1))
-	return FALSE;
-
+      if (! aarch64_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX,
+				    REJECT_ABSENT,
+				    aarch64_force_reloc (entry->add_type) == 1))
+	return false;
+      
       /* Record the relocation type (use the ADD variant here).  */
       inst.reloc.type = entry->add_type;
       inst.reloc.pc_rel = entry->pc_rel;
 
       /* If str is empty, we've reached the end, stop here.  */
       if (**str == '\0')
-	return TRUE;
+	return true;
 
       /* Otherwise, we have a shifted reloc modifier, so rewind to
          recover the variable name and continue parsing for the shifter.  */
@@ -3501,7 +3632,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
    for addressing modes not supported by the instruction, and to set
    inst.reloc.type.  */
 
-static bfd_boolean
+static bool
 parse_address_main (char **str, aarch64_opnd_info *operand,
 		    aarch64_opnd_qualifier_t *base_qualifier,
 		    aarch64_opnd_qualifier_t *offset_qualifier,
@@ -3533,7 +3664,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  if (! entry)
 	    {
 	      set_syntax_error (_("unknown relocation modifier"));
-	      return FALSE;
+	      return false;
 	    }
 
 	  switch (operand->type)
@@ -3553,16 +3684,16 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      set_syntax_error
 		(_("this relocation modifier is not allowed on this "
 		   "instruction"));
-	      return FALSE;
+	      return false;
 	    }
 
 	  /* #:<reloc_op>:  */
-	  if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+					aarch64_force_reloc (entry->add_type) == 1))
 	    {
 	      set_syntax_error (_("invalid relocation expression"));
-	      return FALSE;
+	      return false;
 	    }
-
 	  /* #:<reloc_op>:<expr>  */
 	  /* Record the relocation type.  */
 	  inst.reloc.type = ty;
@@ -3570,20 +3701,20 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	}
       else
 	{
-
 	  if (skip_past_char (&p, '='))
 	    /* =immediate; need to generate the literal in the literal pool. */
 	    inst.gen_lit_pool = 1;
 
-	  if (!my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	  if (!aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				       NORMAL_RESOLUTION))
 	    {
 	      set_syntax_error (_("invalid address"));
-	      return FALSE;
+	      return false;
 	    }
 	}
 
       *str = p;
-      return TRUE;
+      return true;
     }
 
   /* [ */
@@ -3592,7 +3723,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
   if (!reg || !aarch64_check_reg_type (reg, base_type))
     {
       set_syntax_error (_(get_reg_expected_msg (base_type)));
-      return FALSE;
+      return false;
     }
   operand->addr.base_regno = reg->number;
 
@@ -3608,7 +3739,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  if (!aarch64_check_reg_type (reg, offset_type))
 	    {
 	      set_syntax_error (_(get_reg_expected_msg (offset_type)));
-	      return FALSE;
+	      return false;
 	    }
 
 	  /* [Xn,Rm  */
@@ -3621,7 +3752,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      if (! parse_shift (&p, operand, SHIFTED_REG_OFFSET))
 		/* Use the diagnostics set in parse_shift, so not set new
 		   error message here.  */
-		return FALSE;
+		return false;
 	    }
 	  /* We only accept:
 	     [base,Xm]  # For vector plus scalar SVE2 indexing.
@@ -3635,7 +3766,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      if (*offset_qualifier == AARCH64_OPND_QLF_W)
 		{
 		  set_syntax_error (_("invalid use of 32-bit register offset"));
-		  return FALSE;
+		  return false;
 		}
 	      if (aarch64_get_qualifier_esize (*base_qualifier)
 		  != aarch64_get_qualifier_esize (*offset_qualifier)
@@ -3644,13 +3775,13 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 		      || *offset_qualifier != AARCH64_OPND_QLF_X))
 		{
 		  set_syntax_error (_("offset has different size from base"));
-		  return FALSE;
+		  return false;
 		}
 	    }
 	  else if (*offset_qualifier == AARCH64_OPND_QLF_X)
 	    {
 	      set_syntax_error (_("invalid use of 64-bit register offset"));
-	      return FALSE;
+	      return false;
 	    }
 	}
       else
@@ -3666,7 +3797,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      if (!(entry = find_reloc_table_entry (&p)))
 		{
 		  set_syntax_error (_("unknown relocation modifier"));
-		  return FALSE;
+		  return false;
 		}
 
 	      if (entry->ldst_type == 0)
@@ -3674,17 +3805,18 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 		  set_syntax_error
 		    (_("this relocation modifier is not allowed on this "
 		       "instruction"));
-		  return FALSE;
+		  return false;
 		}
 
 	      /* [Xn,#:<reloc_op>:  */
 	      /* We now have the group relocation table entry corresponding to
 	         the name in the assembler source.  Next, we parse the
 	         expression.  */
-	      if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+					    aarch64_force_reloc (entry->add_type) == 1))
 		{
 		  set_syntax_error (_("invalid relocation expression"));
-		  return FALSE;
+		  return false;
 		}
 
 	      /* [Xn,#:<reloc_op>:<expr>  */
@@ -3694,16 +3826,17 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    }
 	  else
 	    {
-	      if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+	      if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
+					    NORMAL_RESOLUTION))
 		{
 		  set_syntax_error (_("invalid expression in the address"));
-		  return FALSE;
+		  return false;
 		}
 	      /* [Xn,<expr>  */
 	      if (imm_shift_mode != SHIFTED_NONE && skip_past_comma (&p))
 		/* [Xn,<expr>,<shifter>  */
 		if (! parse_shift (&p, operand, imm_shift_mode))
-		  return FALSE;
+		  return false;
 	    }
 	}
     }
@@ -3711,7 +3844,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
   if (! skip_past_char (&p, ']'))
     {
       set_syntax_error (_("']' expected"));
-      return FALSE;
+      return false;
     }
 
   if (skip_past_char (&p, '!'))
@@ -3720,7 +3853,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	{
 	  set_syntax_error (_("register offset not allowed in pre-indexed "
 			      "addressing mode"));
-	  return FALSE;
+	  return false;
 	}
       /* [Xn]! */
       operand->addr.writeback = 1;
@@ -3734,7 +3867,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
       if (operand->addr.preind)
 	{
 	  set_syntax_error (_("cannot combine pre- and post-indexing"));
-	  return FALSE;
+	  return false;
 	}
 
       reg = aarch64_reg_parse_32_64 (&p, offset_qualifier);
@@ -3744,17 +3877,18 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  if (!aarch64_check_reg_type (reg, REG_TYPE_R_64))
 	    {
 	      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
-	      return FALSE;
+	      return false;
 	    }
 
 	  operand->addr.offset.regno = reg->number;
 	  operand->addr.offset.is_reg = 1;
 	}
-      else if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+      else if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
+					 NORMAL_RESOLUTION))
 	{
 	  /* [Xn],#expr */
 	  set_syntax_error (_("invalid expression in the address"));
-	  return FALSE;
+	  return false;
 	}
     }
 
@@ -3778,7 +3912,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
            {
 	     /* Reject [Rn]!   */
 	     set_syntax_error (_("missing offset in the pre-indexed address"));
-	     return FALSE;
+	     return false;
 	   }
 	}
        else
@@ -3799,12 +3933,12 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
     }
 
   *str = p;
-  return TRUE;
+  return true;
 }
 
 /* Parse a base AArch64 address (as opposed to an SVE one).  Return TRUE
    on success.  */
-static bfd_boolean
+static bool
 parse_address (char **str, aarch64_opnd_info *operand)
 {
   aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
@@ -3815,7 +3949,7 @@ parse_address (char **str, aarch64_opnd_info *operand)
 /* Parse an address in which SVE vector registers and MUL VL are allowed.
    The arguments have the same meaning as for parse_address_main.
    Return TRUE on success.  */
-static bfd_boolean
+static bool
 parse_sve_address (char **str, aarch64_opnd_info *operand,
 		   aarch64_opnd_qualifier_t *base_qualifier,
 		   aarch64_opnd_qualifier_t *offset_qualifier)
@@ -3827,7 +3961,7 @@ parse_sve_address (char **str, aarch64_opnd_info *operand,
 
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
    Return TRUE on success; otherwise return FALSE.  */
-static bfd_boolean
+static bool
 parse_half (char **str, int *internal_fixup_p)
 {
   char *p = *str;
@@ -3843,17 +3977,18 @@ parse_half (char **str, int *internal_fixup_p)
 
       /* Try to parse a relocation.  Anything else is an error.  */
       ++p;
+
       if (!(entry = find_reloc_table_entry (&p)))
 	{
 	  set_syntax_error (_("unknown relocation modifier"));
-	  return FALSE;
+	  return false;
 	}
 
       if (entry->movw_type == 0)
 	{
 	  set_syntax_error
 	    (_("this relocation modifier is not allowed on this instruction"));
-	  return FALSE;
+	  return false;
 	}
 
       inst.reloc.type = entry->movw_type;
@@ -3861,18 +3996,19 @@ parse_half (char **str, int *internal_fixup_p)
   else
     *internal_fixup_p = 1;
 
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
-    return FALSE;
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				aarch64_force_reloc (inst.reloc.type) == 1))
+    return false;
 
   *str = p;
-  return TRUE;
+  return true;
 }
 
 /* Parse an operand for an ADRP instruction:
      ADRP <Xd>, <label>
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 parse_adrp (char **str)
 {
   char *p;
@@ -3887,14 +4023,14 @@ parse_adrp (char **str)
       if (!(entry = find_reloc_table_entry (&p)))
 	{
 	  set_syntax_error (_("unknown relocation modifier"));
-	  return FALSE;
+	  return false;
 	}
 
       if (entry->adrp_type == 0)
 	{
 	  set_syntax_error
 	    (_("this relocation modifier is not allowed on this instruction"));
-	  return FALSE;
+	  return false;
 	}
 
       inst.reloc.type = entry->adrp_type;
@@ -3903,12 +4039,11 @@ parse_adrp (char **str)
     inst.reloc.type = BFD_RELOC_AARCH64_ADR_HI21_PCREL;
 
   inst.reloc.pc_rel = 1;
-
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
-    return FALSE;
-
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				aarch64_force_reloc (inst.reloc.type) == 1))
+    return false;
   *str = p;
-  return TRUE;
+  return true;
 }
 
 /* Miscellaneous. */
@@ -3941,22 +4076,22 @@ parse_enum_string (char **str, int64_t *val, const char *const *array,
       {
 	*val = i;
 	*str = q;
-	return TRUE;
+	return true;
       }
 
   if (!parse_immediate_expression (&p, &exp, reg_type))
-    return FALSE;
+    return false;
 
   if (exp.X_op == O_constant
       && (uint64_t) exp.X_add_number < size)
     {
       *val = exp.X_add_number;
       *str = p;
-      return TRUE;
+      return true;
     }
 
   /* Use the default error for this operand.  */
-  return FALSE;
+  return false;
 }
 
 /* Parse an option for a preload instruction.  Returns the encoding for the
@@ -4389,7 +4524,7 @@ const char* operand_mismatch_kind_names[] =
    line, only the error of the highest severity will be picked up for
    issuing the diagnostics.  */
 
-static inline bfd_boolean
+static inline bool
 operand_error_higher_severity_p (enum aarch64_operand_error_kind lhs,
 				 enum aarch64_operand_error_kind rhs)
 {
@@ -4492,7 +4627,7 @@ init_operand_error_report (void)
 /* Return TRUE if some operand error has been recorded during the
    parsing of the current assembly line using the opcode *OPCODE;
    otherwise return FALSE.  */
-static inline bfd_boolean
+static inline bool
 opcode_has_operand_error_p (const aarch64_opcode *opcode)
 {
   operand_error_record *record = operand_error_report.head;
@@ -4574,7 +4709,7 @@ record_operand_error (const aarch64_opcode *opcode, int idx,
   info.index = idx;
   info.kind = kind;
   info.error = error;
-  info.non_fatal = FALSE;
+  info.non_fatal = false;
   record_operand_error_info (opcode, &info);
 }
 
@@ -4590,7 +4725,7 @@ record_operand_error_with_data (const aarch64_opcode *opcode, int idx,
   info.data[0] = extra_data[0];
   info.data[1] = extra_data[1];
   info.data[2] = extra_data[2];
-  info.non_fatal = FALSE;
+  info.non_fatal = false;
   record_operand_error_info (opcode, &info);
 }
 
@@ -4817,7 +4952,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	     which is still not right.  */
 	  size_t len = strlen (get_mnemonic_name (str));
 	  int i, qlf_idx;
-	  bfd_boolean result;
+	  bool result;
 	  char buf[2048];
 	  aarch64_inst *inst_base = &inst.base;
 	  const aarch64_opnd_qualifier_seq_t *qualifiers_list;
@@ -4935,7 +5070,7 @@ output_operand_error_record (const operand_error_record *record, char *str)
    print due to the different instruction templates.  */
 
 static void
-output_operand_error_report (char *str, bfd_boolean non_fatal_only)
+output_operand_error_report (char *str, bool non_fatal_only)
 {
   int largest_error_pos;
   const char *msg = NULL;
@@ -5335,7 +5470,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
 /* Process the relocation type for move wide instructions.
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 process_movw_reloc_info (void)
 {
   int is32;
@@ -5359,7 +5494,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
 	set_syntax_error
 	  (_("the specified relocation type is not allowed for MOVK"));
-	return FALSE;
+	return false;
       default:
 	break;
       }
@@ -5408,7 +5543,7 @@ process_movw_reloc_info (void)
 	  set_fatal_syntax_error
 	    (_("the specified relocation type is not allowed for 32-bit "
 	       "register"));
-	  return FALSE;
+	  return false;
 	}
       shift = 32;
       break;
@@ -5419,7 +5554,7 @@ process_movw_reloc_info (void)
 	  set_fatal_syntax_error
 	    (_("the specified relocation type is not allowed for 32-bit "
 	       "register"));
-	  return FALSE;
+	  return false;
 	}
       shift = 48;
       break;
@@ -5428,10 +5563,10 @@ process_movw_reloc_info (void)
          are supported in GAS.  */
       gas_assert (aarch64_gas_internal_fixup_p ());
       /* The shift amount should have already been set by the parser.  */
-      return TRUE;
+      return true;
     }
   inst.base.operands[1].shifter.amount = shift;
-  return TRUE;
+  return true;
 }
 
 /* A primitive log calculator.  */
@@ -5537,7 +5672,7 @@ ldst_lo12_determine_real_reloc_type (void)
 
    Return FALSE if such a register list is invalid, otherwise return TRUE.  */
 
-static bfd_boolean
+static bool
 reg_list_valid_p (uint32_t reginfo, int accept_alternate)
 {
   uint32_t i, nb_regs, prev_regno, incr;
@@ -5553,11 +5688,11 @@ reg_list_valid_p (uint32_t reginfo, int accept_alternate)
       reginfo >>= 5;
       curr_regno = reginfo & 0x1f;
       if (curr_regno != ((prev_regno + incr) & 0x1f))
-	return FALSE;
+	return false;
       prev_regno = curr_regno;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Generic instruction operand parser.	This does no encoding and no
@@ -5565,7 +5700,7 @@ reg_list_valid_p (uint32_t reginfo, int accept_alternate)
    structure.  Returns TRUE or FALSE depending on whether the
    specified grammar matched.  */
 
-static bfd_boolean
+static bool
 parse_operands (char *str, const aarch64_opcode *opcode)
 {
   int i;
@@ -5997,10 +6132,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_FPIMM0:
 	  {
 	    int qfloat;
-	    bfd_boolean res1 = FALSE, res2 = FALSE;
+	    bool res1 = false, res2 = false;
 	    /* N.B. -0.0 will be rejected; although -0.0 shouldn't be rejected,
 	       it is probably not worth the effort to support it.  */
-	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, FALSE,
+	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, false,
 						  imm_reg_type))
 		&& (error_p ()
 		    || !(res2 = parse_constant_immediate (&str, &val,
@@ -6023,8 +6158,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		reg_name_p (str, REG_TYPE_VN))
 	      goto failure;
 	    str = saved;
-	    po_misc_or_fail (my_get_expression (&inst.reloc.exp, &str,
-						GE_OPT_PREFIX, 1));
+	    po_misc_or_fail (aarch64_get_expression (&inst.reloc.exp, &str,
+						     GE_OPT_PREFIX, REJECT_ABSENT,
+						     NORMAL_RESOLUTION));
 	    /* The MOV immediate alias will be fixed up by fix_mov_imm_insn
 	       later.  fix_mov_imm_insn will try to determine a machine
 	       instruction (MOVZ, MOVN or ORR) for it and will issue an error
@@ -6066,7 +6202,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_FPIMM8:
 	  {
 	    int qfloat;
-	    bfd_boolean dp_p;
+	    bool dp_p;
 
 	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
 	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type)
@@ -6087,7 +6223,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_I1_ZERO_ONE:
 	  {
 	    int qfloat;
-	    bfd_boolean dp_p;
+	    bool dp_p;
 
 	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
 	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type))
@@ -6857,12 +6993,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	 the problem.  */
       record_operand_error (opcode, i, get_error_kind (),
 			    get_error_message ());
-      return FALSE;
+      return false;
     }
   else
     {
       DEBUG_TRACE ("parsing SUCCESS");
-      return TRUE;
+      return true;
     }
 }
 
@@ -6871,7 +7007,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
    the preferred architectural syntax.
    Return FALSE if there is any failure; otherwise return TRUE.  */
 
-static bfd_boolean
+static bool
 programmer_friendly_fixup (aarch64_instruction *instr)
 {
   aarch64_inst *base = &instr->base;
@@ -6895,7 +7031,7 @@ programmer_friendly_fixup (aarch64_instruction *instr)
 	    {
 	      record_operand_out_of_range_error (opcode, 1, _("immediate value"),
 						 0, 31);
-	      return FALSE;
+	      return false;
 	    }
 	  operands[0].qualifier = AARCH64_OPND_QLF_X;
 	}
@@ -6920,14 +7056,14 @@ programmer_friendly_fixup (aarch64_instruction *instr)
 	      record_operand_error (opcode, 1,
 				    AARCH64_OPDE_FATAL_SYNTAX_ERROR,
 				    _("constant expression expected"));
-	      return FALSE;
+	      return false;
 	    }
 	  if (! add_to_lit_pool (&instr->reloc.exp, size))
 	    {
 	      record_operand_error (opcode, 1,
 				    AARCH64_OPDE_OTHER_ERROR,
 				    _("literal pool insertion failed"));
-	      return FALSE;
+	      return false;
 	    }
 	}
       break;
@@ -6971,7 +7107,7 @@ programmer_friendly_fixup (aarch64_instruction *instr)
     }
 
   DEBUG_TRACE ("exit with SUCCESS");
-  return TRUE;
+  return true;
 }
 
 /* Check for loads and stores that will cause unpredictable behavior.  */
@@ -7020,18 +7156,49 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
       break;
 
     case ldstexcl:
-      /* It is unpredictable if the destination and status registers are the
-	 same.  */
       if ((aarch64_get_operand_class (opnds[0].type)
 	   == AARCH64_OPND_CLASS_INT_REG)
 	  && (aarch64_get_operand_class (opnds[1].type)
-	      == AARCH64_OPND_CLASS_INT_REG)
-	  && (opnds[0].reg.regno == opnds[1].reg.regno
-	      || opnds[0].reg.regno == opnds[2].reg.regno))
-	as_warn (_("unpredictable: identical transfer and status registers"
-		   " --`%s'"),
-		 str);
+	      == AARCH64_OPND_CLASS_INT_REG))
+	{
+          if ((opcode->opcode & (1 << 22)))
+	    {
+	      /* It is unpredictable if load-exclusive pair with Rt == Rt2.  */
+	      if ((opcode->opcode & (1 << 21))
+		  && opnds[0].reg.regno == opnds[1].reg.regno)
+		as_warn (_("unpredictable load of register pair -- `%s'"), str);
+	    }
+	  else
+	    {
+	      /*  Store-Exclusive is unpredictable if Rt == Rs.  */
+	      if (opnds[0].reg.regno == opnds[1].reg.regno)
+		as_warn
+		  (_("unpredictable: identical transfer and status registers"
+		     " --`%s'"),str);
 
+	      if (opnds[0].reg.regno == opnds[2].reg.regno)
+		{
+		  if (!(opcode->opcode & (1 << 21)))
+	            /*  Store-Exclusive is unpredictable if Rn == Rs.  */
+		    as_warn
+		      (_("unpredictable: identical base and status registers"
+			 " --`%s'"),str);
+		  else
+	            /*  Store-Exclusive pair is unpredictable if Rt2 == Rs.  */
+		    as_warn
+		      (_("unpredictable: "
+			 "identical transfer and status registers"
+			 " --`%s'"),str);
+		}
+
+	      /* Store-Exclusive pair is unpredictable if Rn == Rs.  */
+	      if ((opcode->opcode & (1 << 21))
+		  && opnds[0].reg.regno == opnds[3].reg.regno
+		  && opnds[3].reg.regno != REG_SP)
+		as_warn (_("unpredictable: identical base and status registers"
+			   " --`%s'"),str);
+	    }
+	}
       break;
 
     default:
@@ -7055,7 +7222,7 @@ force_automatic_sequence_close (void)
 
    Return TRUE on success; otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 do_encode (const aarch64_opcode *opcode, aarch64_inst *instr,
 	   aarch64_insn *code)
 {
@@ -7064,7 +7231,7 @@ do_encode (const aarch64_opcode *opcode, aarch64_inst *instr,
   error_info.kind = AARCH64_OPDE_NIL;
   if (aarch64_opcode_encode (opcode, instr, code, NULL, &error_info, insn_sequence)
       && !error_info.non_fatal)
-    return TRUE;
+    return true;
 
   gas_assert (error_info.kind != AARCH64_OPDE_NIL);
   record_operand_error_info (opcode, &error_info);
@@ -7210,7 +7377,7 @@ md_assemble (char *str)
 	    }
 
 	  /* Issue non-fatal messages if any.  */
-	  output_operand_error_report (str, TRUE);
+	  output_operand_error_report (str, true);
 	  return;
 	}
 
@@ -7224,7 +7391,7 @@ md_assemble (char *str)
   while (template != NULL);
 
   /* Issue the error messages if any.  */
-  output_operand_error_report (str, FALSE);
+  output_operand_error_report (str, false);
 }
 
 /* Various frobbings of labels and their addresses.  */
@@ -7253,7 +7420,7 @@ aarch64_frob_section (asection *sec ATTRIBUTE_UNUSED)
 int
 aarch64_data_in_code (void)
 {
-  if (!strncmp (input_line_pointer + 1, "data:", 5))
+  if (startswith (input_line_pointer + 1, "data:"))
     {
       *input_line_pointer = '/';
       input_line_pointer += 5;
@@ -7280,8 +7447,8 @@ aarch64_canonicalize_symbol_name (char *name)
    should appear in both upper and lowercase variants.	Some registers
    also have mixed-case names.	*/
 
-#define REGDEF(s,n,t) { #s, n, REG_TYPE_##t, TRUE }
-#define REGDEF_ALIAS(s, n, t) { #s, n, REG_TYPE_##t, FALSE}
+#define REGDEF(s,n,t) { #s, n, REG_TYPE_##t, true }
+#define REGDEF_ALIAS(s, n, t) { #s, n, REG_TYPE_##t, false}
 #define REGNUM(p,n,t) REGDEF(p##n, n, t)
 #define REGSET16(p,t) \
   REGNUM(p, 0,t), REGNUM(p, 1,t), REGNUM(p, 2,t), REGNUM(p, 3,t), \
@@ -7629,12 +7796,12 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
    range expressible by a unsigned number with the indicated number of
    BITS.  */
 
-static bfd_boolean
+static bool
 unsigned_overflow (valueT value, unsigned bits)
 {
   valueT lim;
   if (bits >= sizeof (valueT) * 8)
-    return FALSE;
+    return false;
   lim = (valueT) 1 << bits;
   return (value >= lim);
 }
@@ -7644,12 +7811,12 @@ unsigned_overflow (valueT value, unsigned bits)
    range expressible by an signed number with the indicated number of
    BITS.  */
 
-static bfd_boolean
+static bool
 signed_overflow (offsetT value, unsigned bits)
 {
   offsetT lim;
   if (bits >= sizeof (offsetT) * 8)
-    return FALSE;
+    return false;
   lim = (offsetT) 1 << (bits - 1);
   return (value < -lim || value >= lim);
 }
@@ -7663,7 +7830,7 @@ signed_overflow (offsetT value, unsigned bits)
    in response to the standard LDR/STR mnemonics when the immediate offset is
    unambiguous, i.e. when it is negative or unaligned.  */
 
-static bfd_boolean
+static bool
 try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
 {
   int idx;
@@ -7690,7 +7857,7 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     }
 
   if (new_op == OP_NIL)
-    return FALSE;
+    return false;
 
   new_opcode = aarch64_get_opcode (new_op);
   gas_assert (new_opcode != NULL);
@@ -7712,9 +7879,9 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
 
   if (!aarch64_opcode_encode (instr->opcode, instr, &instr->value, NULL, NULL,
 			      insn_sequence))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Called by fix_insn to fix a MOV immediate alias instruction.
@@ -8434,102 +8601,6 @@ cons_fix_new_aarch64 (fragS * frag, int where, int size, expressionS * exp)
     }
 
   fix_new_exp (frag, where, (int) size, exp, pcrel, type);
-}
-
-int
-aarch64_force_relocation (struct fix *fixp)
-{
-  switch (fixp->fx_r_type)
-    {
-    case BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP:
-      /* Perform these "immediate" internal relocations
-         even if the symbol is extern or weak.  */
-      return 0;
-
-    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
-      /* Pseudo relocs that need to be fixed up according to
-	 ilp32_p.  */
-      return 0;
-
-    case BFD_RELOC_AARCH64_ADD_LO12:
-    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
-    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
-    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
-    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
-    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
-    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
-    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
-    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_LDST128_LO12:
-    case BFD_RELOC_AARCH64_LDST16_LO12:
-    case BFD_RELOC_AARCH64_LDST32_LO12:
-    case BFD_RELOC_AARCH64_LDST64_LO12:
-    case BFD_RELOC_AARCH64_LDST8_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
-    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
-    case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
-    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
-    case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
-    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
-   case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
-    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
-      /* Always leave these relocations for the linker.  */
-      return 1;
-
-    default:
-      break;
-    }
-
-  return generic_force_reloc (fixp);
 }
 
 #ifdef OBJ_ELF
@@ -9252,7 +9323,7 @@ aarch64_feature_enable_set (aarch64_feature_set set)
 
 static int
 aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
-			bfd_boolean ext_only)
+			bool ext_only)
 {
   /* We insist on extensions being added before being removed.  We achieve
      this by using the ADDING_VALUE variable to indicate whether we are
@@ -9287,7 +9358,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
       else
 	optlen = strlen (str);
 
-      if (optlen >= 2 && strncmp (str, "no", 2) == 0)
+      if (optlen >= 2 && startswith (str, "no"))
 	{
 	  if (adding_value != 0)
 	    adding_value = 0;
@@ -9302,7 +9373,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 	    {
 	      as_bad (_("must specify extensions to add before specifying "
 			"those to remove"));
-	      return FALSE;
+	      return false;
 	    }
 	}
 
@@ -9368,7 +9439,7 @@ aarch64_parse_cpu (const char *str)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  return aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE);
+	  return aarch64_parse_features (ext, &mcpu_cpu_opt, false);
 
 	return 1;
       }
@@ -9400,7 +9471,7 @@ aarch64_parse_arch (const char *str)
       {
 	march_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  return aarch64_parse_features (ext, &march_cpu_opt, FALSE);
+	  return aarch64_parse_features (ext, &march_cpu_opt, false);
 
 	return 1;
       }
@@ -9504,8 +9575,7 @@ md_parse_option (int c, const char *arg)
 	  /* These options are expected to have an argument.  */
 	  if (c == lopt->option[0]
 	      && arg != NULL
-	      && strncmp (arg, lopt->option + 1,
-			  strlen (lopt->option + 1)) == 0)
+	      && startswith (arg, lopt->option + 1))
 	    {
 	      /* If the option is deprecated, tell the user.  */
 	      if (lopt->deprecated != NULL)
@@ -9581,7 +9651,7 @@ s_aarch64_cpu (int ignored ATTRIBUTE_UNUSED)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE))
+	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
 	    return;
 
 	cpu_variant = *mcpu_cpu_opt;
@@ -9627,7 +9697,7 @@ s_aarch64_arch (int ignored ATTRIBUTE_UNUSED)
       {
 	mcpu_cpu_opt = &opt->value;
 	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, FALSE))
+	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
 	    return;
 
 	cpu_variant = *mcpu_cpu_opt;
@@ -9655,7 +9725,7 @@ s_aarch64_arch_extension (int ignored ATTRIBUTE_UNUSED)
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
 
-  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, TRUE))
+  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, true))
     return;
 
   cpu_variant = *mcpu_cpu_opt;

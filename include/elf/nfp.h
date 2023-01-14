@@ -24,7 +24,7 @@
 #include "bfd.h"
 #include "elf/common.h"
 #include "elf/reloc-macros.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"

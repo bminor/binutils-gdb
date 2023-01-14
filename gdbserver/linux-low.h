@@ -292,7 +292,7 @@ public:
 
   bool supports_pid_to_exec_file () override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   bool supports_multifs () override;
 
@@ -326,10 +326,10 @@ private:
      to a new LWP representing the new program.  */
   int handle_extended_wait (lwp_info **orig_event_lwp, int wstat);
 
-  /* Do low-level handling of the event, and check if we should go on
-     and pass it to caller code.  Return the affected lwp if we are, or
-     NULL otherwise.  */
-  lwp_info *filter_event (int lwpid, int wstat);
+  /* Do low-level handling of the event, and check if this is an event we want
+     to report.  Is so, store it as a pending status in the lwp_info structure
+     corresponding to LWPID.  */
+  void filter_event (int lwpid, int wstat);
 
   /* Wait for an event from child(ren) WAIT_PTID, and return any that
      match FILTER_PTID (leaving others pending).  The PTIDs can be:

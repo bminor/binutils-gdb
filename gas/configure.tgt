@@ -125,6 +125,7 @@ generic_target=${cpu_type}-$vendor-$os
 case ${generic_target} in
   aarch64*-*-elf*)			fmt=elf;;
   aarch64*-*-fuchsia*)			fmt=elf;;
+  aarch64*-*-genode*)			fmt=elf;;
   aarch64*-*-linux*)			fmt=elf em=linux
     case ${cpu}-${os} in
       aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
@@ -142,8 +143,7 @@ case ${generic_target} in
 
   arm-*-phoenix*)			fmt=elf ;;
   arm-*-elf)				fmt=elf ;;
-  arm-*-eabi* | arm-*-rtems*)		fmt=elf em=armeabi ;;
-  arm-*-symbianelf*)			fmt=elf em=symbian ;;
+  arm-*-eabi* | arm-*-rtems* | arm-*-genode*)	fmt=elf em=armeabi ;;
   arm-*-kaos*)				fmt=elf ;;
   arm-*-conix*)				fmt=elf ;;
   arm-*-freebsd[89].* | armeb-*-freebsd[89].*)
@@ -222,6 +222,7 @@ case ${generic_target} in
   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
   i386-*-elf*)				fmt=elf ;;
   i386-*-fuchsia*)			fmt=elf ;;
+  i386-*-genode*)			fmt=elf ;;
   i386-*-bsd*)				fmt=aout em=386bsd ;;
   i386-*-netbsdpe*)			fmt=coff em=pe ;;
   i386-*-netbsd*-gnu* | \

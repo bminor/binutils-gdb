@@ -19,7 +19,7 @@
    MA 02110-1301, USA.  */
 
 /* Don't generate unused section symbols.  */
-#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS false
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -508,7 +508,7 @@ struct elf_x86_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
-  bfd_boolean (*is_reloc_section) (const char *);
+  bool (*is_reloc_section) (const char *);
   unsigned int sizeof_reloc;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
@@ -592,7 +592,7 @@ struct elf_x86_plt
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == (htab)->elf.hash_table_id)
 
-extern bfd_boolean _bfd_x86_elf_mkobject
+extern bool _bfd_x86_elf_mkobject
   (bfd *);
 
 extern void _bfd_x86_elf_set_tls_module_base
@@ -601,12 +601,12 @@ extern void _bfd_x86_elf_set_tls_module_base
 extern bfd_vma _bfd_x86_elf_dtpoff_base
   (struct bfd_link_info *);
 
-extern bfd_boolean _bfd_x86_elf_readonly_dynrelocs
+extern bool _bfd_x86_elf_readonly_dynrelocs
   (struct elf_link_hash_entry *, void *);
 
 extern struct elf_link_hash_entry * _bfd_elf_x86_get_local_sym_hash
   (struct elf_x86_link_hash_table *, bfd *, const Elf_Internal_Rela *,
-   bfd_boolean);
+   bool);
 
 extern hashval_t _bfd_x86_elf_local_htab_hash
   (const void *);
@@ -623,43 +623,43 @@ extern struct bfd_link_hash_table * _bfd_x86_elf_link_hash_table_create
 extern int _bfd_x86_elf_compare_relocs
   (const void *, const void *);
 
-extern bfd_boolean _bfd_x86_elf_link_check_relocs
+extern bool _bfd_x86_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
 
-extern bfd_boolean _bfd_elf_x86_valid_reloc_p
+extern bool _bfd_elf_x86_valid_reloc_p
   (asection *, struct bfd_link_info *, struct elf_x86_link_hash_table *,
    const Elf_Internal_Rela *, struct elf_link_hash_entry *,
-   Elf_Internal_Sym *, Elf_Internal_Shdr *, bfd_boolean *);
+   Elf_Internal_Sym *, Elf_Internal_Shdr *, bool *);
 
-extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
+extern bool _bfd_x86_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
 extern struct elf_x86_link_hash_table *_bfd_x86_elf_finish_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
-extern bfd_boolean _bfd_x86_elf_always_size_sections
+extern bool _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 
 extern void _bfd_x86_elf_merge_symbol_attribute
-  (struct elf_link_hash_entry *, unsigned int, bfd_boolean, bfd_boolean);
+  (struct elf_link_hash_entry *, unsigned int, bool, bool);
 
 extern void _bfd_x86_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 
-extern bfd_boolean _bfd_x86_elf_fixup_symbol
+extern bool _bfd_x86_elf_fixup_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
-extern bfd_boolean _bfd_x86_elf_hash_symbol
+extern bool _bfd_x86_elf_hash_symbol
   (struct elf_link_hash_entry *);
 
-extern bfd_boolean _bfd_x86_elf_adjust_dynamic_symbol
+extern bool _bfd_x86_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
 extern void _bfd_x86_elf_hide_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
+  (struct bfd_link_info *, struct elf_link_hash_entry *, bool);
 
-extern bfd_boolean _bfd_x86_elf_link_symbol_references_local
+extern bool _bfd_x86_elf_link_symbol_references_local
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 
 extern asection * _bfd_x86_elf_gc_mark_hook
@@ -673,7 +673,7 @@ extern long _bfd_x86_elf_get_synthetic_symtab
 extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
   (bfd *, unsigned int, bfd_byte *, unsigned int);
 
-extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
+extern bool _bfd_x86_elf_merge_gnu_properties
   (struct bfd_link_info *, bfd *, bfd *, elf_property *, elf_property *);
 
 extern void _bfd_x86_elf_link_fixup_gnu_properties

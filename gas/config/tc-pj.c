@@ -58,7 +58,7 @@ const char EXP_CHARS[] = "eE";
 void
 md_operand (expressionS *op)
 {
-  if (strncmp (input_line_pointer, "%hi16", 5) == 0)
+  if (startswith (input_line_pointer, "%hi16"))
     {
       if (pending_reloc)
 	as_bad (_("confusing relocation expressions"));
@@ -67,7 +67,7 @@ md_operand (expressionS *op)
       expression (op);
     }
 
-  if (strncmp (input_line_pointer, "%lo16", 5) == 0)
+  if (startswith (input_line_pointer, "%lo16"))
     {
       if (pending_reloc)
 	as_bad (_("confusing relocation expressions"));

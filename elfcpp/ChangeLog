@@ -1,3 +1,13 @@
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/27246
+	* dwarf.h (enum DW_LNCT): Add line number table content type codes.
+	(enum DW_LINE_OPS): Reformat.
+	(enum DW_LINE_EXTENDED_OPS): Reformat.
+	(enum DW_CHILDREN): Reformat.
+	(enum DW_RLE): Add range list entry types.
+	(enum DW_SECT): Update values for DWARF 5.
+
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* 2.36 release branch crated.

@@ -86,6 +86,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "disas-jalr"
     run_dump_test "pcrel-lo-addend"
     run_dump_test "pcrel-lo-addend-2"
+    run_dump_test "restart-relax"
     run_dump_test "attr-merge-arch-01"
     run_dump_test "attr-merge-arch-02"
     run_dump_test "attr-merge-arch-03"

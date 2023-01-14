@@ -324,7 +324,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		      i_offset += value_embedded_offset (val);
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
 		      print_function_pointer_address (opts,
-						      get_type_arch (type),
+						      type->arch (),
 						      addr, stream);
 		    }
 		}

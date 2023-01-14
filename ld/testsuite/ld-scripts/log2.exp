@@ -22,11 +22,18 @@
 set testname "binary logarithm"
 
 if {![ld_assemble $as $srcdir/$subdir/log2.s tmpdir/log2.o]} {
-    unresolved $testname
+    unsupported $testname
     return
 }
 
-if {![ld_link $ld tmpdir/log2 "$LDFLAGS -T $srcdir/$subdir/log2.t tmpdir/log2.o"]} {
+if { [is_pecoff_format] } {
+    set IMAGE_BASE "--image-base 0"
+} else {
+    set IMAGE_BASE ""
+}
+
+if {![ld_link $ld tmpdir/log2 "$LDFLAGS -T $srcdir/$subdir/log2.t \
+	$IMAGE_BASE tmpdir/log2.o"]} {
     fail $testname
 } else {
     pass $testname

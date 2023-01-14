@@ -35,11 +35,13 @@ if {[prepare_for_testing_full "failed to prepare" \
     return -1
 }
 
+set have_index [exec_has_index_section $binfile]
+
 # Runs the test program and examins the stack.  LANG is a string, the
 # value to pass to GDB's 'set language ...' command.
 proc run_tests { lang } {
     with_test_prefix "lang=${lang}" {
-	global binfile hex
+	global binfile hex have_index
 
 	clean_restart ${binfile}
 
@@ -74,7 +76,22 @@ proc run_tests { lang } {
 		 "#7\\s+$hex in mixed_func_1b \\($1b_args\\) at \[^\r\n\]+" \
 		 "#8\\s+$hex in mixed_func_1a \\(\\) at \[^\r\n\]+" \
 		 "#9\\s+$hex in mixed_stack_main \\(\\) at \[^\r\n\]+" ]
-	gdb_test "bt -frame-arguments all" $bt_stack
+	set main_args "argc=1, argv=${hex}( \[^\r\n\]+)?"
+	set bt_stack_kfail \
+	    [multi_line \
+		 $bt_stack \
+		 "#10\\s+$hex in main \\($main_args\\) at \[^\r\n\]+"]
+	gdb_test_multiple "bt -frame-arguments all" "" {
+	    -re -wrap $bt_stack {
+		pass $gdb_test_name
+	    }
+	    -re -wrap $bt_stack_kfail {
+		if { $have_index } {
+		    setup_kfail "gdb/24549" *-*-*
+		}
+		fail $gdb_test_name
+	    }
+	}
 
 	# Check the language for frame #0.
 	gdb_test "info frame" "source language fortran\..*" \

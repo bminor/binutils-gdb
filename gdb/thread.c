@@ -246,6 +246,8 @@ new_thread (struct inferior *inf, ptid_t ptid)
 struct thread_info *
 add_thread_silent (process_stratum_target *targ, ptid_t ptid)
 {
+  gdb_assert (targ != nullptr);
+
   inferior *inf = find_inferior_ptid (targ, ptid);
 
   /* We may have an old thread with the same id in the thread list.
@@ -535,6 +537,8 @@ find_thread_ptid (process_stratum_target *targ, ptid_t ptid)
 struct thread_info *
 find_thread_ptid (inferior *inf, ptid_t ptid)
 {
+  gdb_assert (inf != nullptr);
+
   for (thread_info *tp : inf->non_exited_threads ())
     if (tp->ptid == ptid)
       return tp;
@@ -633,8 +637,8 @@ any_thread_of_inferior (inferior *inf)
 {
   gdb_assert (inf->pid != 0);
 
-  /* Prefer the current thread.  */
-  if (inf == current_inferior ())
+  /* Prefer the current thread, if there's one.  */
+  if (inf == current_inferior () && inferior_ptid != null_ptid)
     return inferior_thread ();
 
   for (thread_info *tp : inf->non_exited_threads ())
@@ -1466,15 +1470,16 @@ tp_array_compar_descending (const thread_info_ref &a, const thread_info_ref &b)
   return (a->per_inf_num > b->per_inf_num);
 }
 
-/* Switch to thread THR and execute CMD.
+/* Assuming that THR is the current thread, execute CMD.
    FLAGS.QUIET controls the printing of the thread information.
-   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  */
+   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  Can throw an
+   exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
 
 static void
 thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 		   const qcs_flags &flags)
 {
-  switch_to_thread (thr);
+  gdb_assert (is_current_thread (thr));
 
   /* The thread header is computed before running the command since
      the command can change the inferior, which is not permitted

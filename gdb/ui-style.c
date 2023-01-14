@@ -169,7 +169,7 @@ ui_file_style::to_ansi () const
    characters read and put the number into *NUM.  */
 
 static bool
-read_semi_number (const char *string, int *idx, long *num)
+read_semi_number (const char *string, regoff_t *idx, long *num)
 {
   if (string[*idx] != ';')
     return false;
@@ -186,7 +186,7 @@ read_semi_number (const char *string, int *idx, long *num)
    sequence; that is, and 8- or 24- bit color.  */
 
 static bool
-extended_color (const char *str, int *idx, ui_file_style::color *color)
+extended_color (const char *str, regoff_t *idx, ui_file_style::color *color)
 {
   long value;
 

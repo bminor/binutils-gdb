@@ -1,4 +1,3 @@
-bfd_stdint.h
 bfdver.h
 elf32-aarch64.c
 elf32-ia64.c

@@ -214,10 +214,12 @@ adi_available (void)
     return proc->stat.is_avail;
 
   proc->stat.checked_avail = true;
-  if (target_auxv_search (current_top_target (), AT_ADI_BLKSZ, &value) <= 0)
+  if (target_auxv_search (current_inferior ()->top_target (),
+			  AT_ADI_BLKSZ, &value) <= 0)
     return false;
   proc->stat.blksize = value;
-  target_auxv_search (current_top_target (), AT_ADI_NBITS, &value);
+  target_auxv_search (current_inferior ()->top_target (),
+		      AT_ADI_NBITS, &value);
   proc->stat.nbits = value;
   proc->stat.max_version = (1 << proc->stat.nbits) - 2;
   proc->stat.is_avail = true;

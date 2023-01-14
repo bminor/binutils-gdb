@@ -1,6 +1,6 @@
 /* Compile-time assert-like macros.
 
-   Copyright (C) 2005-2006, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2006, 2009-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,15 @@
 
 /* Define _GL_HAVE__STATIC_ASSERT to 1 if _Static_assert (R, DIAGNOSTIC)
    works as per C11.  This is supported by GCC 4.6.0 and later, in C
-   mode.
+   mode, and by clang (also in C++ mode).
 
    Define _GL_HAVE__STATIC_ASSERT1 to 1 if _Static_assert (R) works as
-   per C2X, and define _GL_HAVE_STATIC_ASSERT1 if static_assert (R)
-   works as per C++17.  This is supported by GCC 9.1 and later.
+   per C2X.  This is supported by GCC 9.1 and later, and by clang in
+   C++1z mode.
+
+   Define _GL_HAVE_STATIC_ASSERT1 if static_assert (R) works as per
+   C++17.  This is supported by GCC 9.1 and later, and by clang in
+   C++1z mode.
 
    Support compilers claiming conformance to the relevant standard,
    and also support GCC when not pedantic.  If we were willing to slow
@@ -35,7 +39,8 @@
    since this affects only the quality of diagnostics, why bother?  */
 #ifndef __cplusplus
 # if (201112L <= __STDC_VERSION__ \
-      || (!defined __STRICT_ANSI__ && 4 < __GNUC__ + (6 <= __GNUC_MINOR__)))
+      || (!defined __STRICT_ANSI__ \
+          && (4 < __GNUC__ + (6 <= __GNUC_MINOR__) || 4 <= __clang_major__)))
 #  define _GL_HAVE__STATIC_ASSERT 1
 # endif
 # if (202000L <= __STDC_VERSION__ \
@@ -43,7 +48,15 @@
 #  define _GL_HAVE__STATIC_ASSERT1 1
 # endif
 #else
-# if 201703L <= __cplusplus || 9 <= __GNUC__
+# if 4 <= __clang_major__
+#  define _GL_HAVE__STATIC_ASSERT 1
+# endif
+# if 4 <= __clang_major__ && 201411 <= __cpp_static_assert
+#  define _GL_HAVE__STATIC_ASSERT1 1
+# endif
+# if 201703L <= __cplusplus \
+     || 9 <= __GNUC__ \
+     || (4 <= __clang_major__ && 201411 <= __cpp_static_assert)
 #  define _GL_HAVE_STATIC_ASSERT1 1
 # endif
 #endif
@@ -292,7 +305,12 @@ template <int w>
 
    Although assuming R can help a compiler generate better code or
    diagnostics, performance can suffer if R uses hard-to-optimize
-   features such as function calls not inlined by the compiler.  */
+   features such as function calls not inlined by the compiler.
+
+   Avoid Clang's __builtin_assume, as it breaks GNU Emacs master
+   as of 2020-08-23T21:09:49Z!eggert@cs.ucla.edu; see
+   <https://bugs.gnu.org/43152#71>.  It's not known whether this breakage
+   is a Clang bug or an Emacs bug; play it safe for now.  */
 
 #if _GL_HAS_BUILTIN_UNREACHABLE
 # define assume(R) ((R) ? (void) 0 : __builtin_unreachable ())

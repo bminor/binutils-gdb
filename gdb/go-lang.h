@@ -134,22 +134,6 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override;
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return op_print_tab; }
-
-private:
-
-  /* Table of opcode data for use by OPCODE_PRINT_TABLE member function.  */
-
-  static const struct op_print op_print_tab[];
-
 };
 
 #endif /* !defined (GO_LANG_H) */

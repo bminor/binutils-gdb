@@ -33,7 +33,7 @@
 #define EXE_LOAD_LOW	0xffff
 #define EXE_PAGE_SIZE	512
 
-static bfd_boolean
+static bool
 msdos_mkobject (bfd *abfd)
 {
   bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i8086);
@@ -124,7 +124,7 @@ msdos_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
-static bfd_boolean
+static bool
 msdos_write_object_contents (bfd *abfd)
 {
   static char hdr[EXE_PAGE_SIZE];
@@ -157,7 +157,7 @@ msdos_write_object_contents (bfd *abfd)
   if (high_vma > (bfd_vma)0xffff)
     {
       bfd_set_error(bfd_error_file_too_big);
-      return FALSE;
+      return false;
     }
 
   /* Constants.  */
@@ -181,12 +181,12 @@ msdos_write_object_contents (bfd *abfd)
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite (hdr, (bfd_size_type) sizeof(hdr), abfd) != sizeof(hdr))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 msdos_set_section_contents (bfd *abfd,
 			    sec_ptr section,
 			    const void *location,
@@ -195,7 +195,7 @@ msdos_set_section_contents (bfd *abfd,
 {
 
   if (count == 0)
-    return TRUE;
+    return true;
 
   section->filepos = EXE_PAGE_SIZE + bfd_section_vma (section);
 
@@ -203,10 +203,10 @@ msdos_set_section_contents (bfd *abfd,
     {
       if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
 	  || bfd_bwrite (location, count, abfd) != count)
-	return FALSE;
+	return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 

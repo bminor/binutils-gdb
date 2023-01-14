@@ -1320,7 +1320,7 @@ gdbpy_print_stack (void)
 	      PyErr_Clear ();
 	    }
 	  else
-	    fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
+	    fprintf_filtered (gdb_stderr, "Python Exception %s: %s\n",
 			      type.get (), msg.get ());
 	}
       catch (const gdb_exception &except)
@@ -1388,11 +1388,10 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
     return;
 
   gdbpy_enter enter_py (objfile->arch (), current_language);
-  gdbpy_current_objfile = objfile;
+  scoped_restore restire_current_objfile
+    = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
   python_run_simple_file (file, filename);
-
-  gdbpy_current_objfile = NULL;
 }
 
 /* Set the current objfile to OBJFILE and then execute SCRIPT
@@ -1410,11 +1409,10 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
     return;
 
   gdbpy_enter enter_py (objfile->arch (), current_language);
-  gdbpy_current_objfile = objfile;
+  scoped_restore restire_current_objfile
+    = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
   PyRun_SimpleString (script);
-
-  gdbpy_current_objfile = NULL;
 }
 
 /* Return the current Objfile, or None if there isn't one.  */

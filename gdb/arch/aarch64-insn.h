@@ -61,7 +61,9 @@ enum aarch64_opcodes
   CBNZ            = 0x21000000 | B,
   TBZ             = 0x36000000 | B,
   TBNZ            = 0x37000000 | B,
+  /* BR             1101 0110 0001 1111 0000 00rr rrr0 0000 */
   /* BLR            1101 0110 0011 1111 0000 00rr rrr0 0000 */
+  BR              = 0xd61f0000,
   BLR             = 0xd63f0000,
   /* RET            1101 0110 0101 1111 0000 00rr rrr0 0000 */
   RET             = 0xd65f0000,
@@ -126,6 +128,13 @@ enum aarch64_opcodes
   SEVL            = (5 << 5) | HINT,
   WFE             = (2 << 5) | HINT,
   NOP             = (0 << 5) | HINT,
+};
+
+/* List of useful masks.  */
+enum aarch64_masks
+{
+  /* Used for masking out an Rn argument from an opcode.  */
+  CLEAR_Rn_MASK = 0xfffffc1f,
 };
 
 /* Representation of a general purpose register of the form xN or wN.

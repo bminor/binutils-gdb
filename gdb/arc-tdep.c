@@ -27,6 +27,7 @@
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
+#include "reggroups.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "osabi.h"
@@ -1472,7 +1473,7 @@ const static int MAX_PROLOGUE_LENGTH
 static CORE_ADDR
 arc_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  arc_debug_printf ("called");
+  arc_debug_printf ("pc = %s", paddress (gdbarch, pc));
 
   CORE_ADDR func_addr;
   const char *func_name;
@@ -1954,6 +1955,20 @@ static const struct frame_base arc_normal_base = {
   arc_frame_base_address
 };
 
+/* Add all the expected register sets into GDBARCH.  */
+
+static void
+arc_add_reggroups (struct gdbarch *gdbarch)
+{
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
+  reggroup_add (gdbarch, system_reggroup);
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, save_reggroup);
+  reggroup_add (gdbarch, restore_reggroup);
+}
+
 static enum arc_isa
 mach_type_to_arc_isa (const unsigned long mach)
 {
@@ -2351,6 +2366,9 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* This doesn't include possible long-immediate value.  */
   set_gdbarch_max_insn_length (gdbarch, 4);
+
+  /* Add default register groups.  */
+  arc_add_reggroups (gdbarch);
 
   /* Frame unwinders and sniffers.  */
   dwarf2_frame_set_init_reg (gdbarch, arc_dwarf2_frame_init_reg);

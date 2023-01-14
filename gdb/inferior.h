@@ -352,6 +352,13 @@ public:
   void push_target (struct target_ops *t)
   { m_target_stack.push (t); }
 
+  /* An overload that deletes the target on failure.  */
+  void push_target (target_ops_up &&t)
+  {
+    m_target_stack.push (t.get ());
+    t.release ();
+  }
+
   /* Unpush T from this inferior's target stack.  */
   int unpush_target (struct target_ops *t)
   { return m_target_stack.unpush (t); }

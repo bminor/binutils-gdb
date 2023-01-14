@@ -54,6 +54,7 @@
 #include "arch/ppc-linux-tdesc.h"
 #include "nat/ppc-linux.h"
 #include "linux-tdep.h"
+#include "expop.h"
 
 /* Similarly for the hardware watchpoint support.  These requests are used
    when the PowerPC HWDEBUG ptrace interface is not available.  */
@@ -1966,8 +1967,8 @@ ppc_linux_nat_target::read_description ()
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 
-  CORE_ADDR hwcap = linux_get_hwcap (current_top_target ());
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_top_target ());
+  CORE_ADDR hwcap = linux_get_hwcap (current_inferior ()->top_target ());
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_inferior ()->top_target ());
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))
@@ -2124,7 +2125,8 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	 takes two hardware watchpoints though.  */
       if (len > 1
 	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
-	  && linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+	  && (linux_get_hwcap (current_inferior ()->top_target ())
+	      & PPC_FEATURE_BOOKE))
 	return 2;
       /* Check if the processor provides DAWR interface.  */
       if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
@@ -2152,7 +2154,8 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
     {
       gdb_assert (m_dreg_interface.debugreg_p ());
 
-      if (((linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+      if (((linux_get_hwcap (current_inferior ()->top_target ())
+	    & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
 	  || (addr + len) > (addr & ~7) + 8)
 	return 0;
@@ -2487,20 +2490,24 @@ ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
 				       struct expression *cond,
 				       CORE_ADDR *data_value, int *len)
 {
-  int pc = 1, num_accesses_left, num_accesses_right;
+  int num_accesses_left, num_accesses_right;
   struct value *left_val, *right_val;
   std::vector<value_ref_ptr> left_chain, right_chain;
 
-  if (cond->elts[0].opcode != BINOP_EQUAL)
+  expr::equal_operation *eqop
+    = dynamic_cast<expr::equal_operation *> (cond->op.get ());
+  if (eqop == nullptr)
     return 0;
+  expr::operation *lhs = eqop->get_lhs ();
+  expr::operation *rhs = eqop->get_rhs ();
 
-  fetch_subexp_value (cond, &pc, &left_val, NULL, &left_chain, false);
+  fetch_subexp_value (cond, lhs, &left_val, NULL, &left_chain, false);
   num_accesses_left = num_memory_accesses (left_chain);
 
   if (left_val == NULL || num_accesses_left < 0)
     return 0;
 
-  fetch_subexp_value (cond, &pc, &right_val, NULL, &right_chain, false);
+  fetch_subexp_value (cond, rhs, &right_val, NULL, &right_chain, false);
   num_accesses_right = num_memory_accesses (right_chain);
 
   if (right_val == NULL || num_accesses_right < 0)
@@ -2635,7 +2642,8 @@ ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
       long wp_value;
       long read_mode, write_mode;
 
-      if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+      if (linux_get_hwcap (current_inferior ()->top_target ())
+	  & PPC_FEATURE_BOOKE)
 	{
 	  /* PowerPC 440 requires only the read/write flags to be passed
 	     to the kernel.  */
@@ -3008,9 +3016,11 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
   int mask;
 
   if (m_dreg_interface.hwdebug_p ()
-      && linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+      && (linux_get_hwcap (current_inferior ()->top_target ())
+	  & PPC_FEATURE_BOOKE))
     return start <= addr && start + length >= addr;
-  else if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+  else if (linux_get_hwcap (current_inferior ()->top_target ())
+	   & PPC_FEATURE_BOOKE)
     mask = 3;
   else
     mask = 7;

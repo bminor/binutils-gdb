@@ -31,9 +31,9 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_m32rx, "m32rx", FALSE, M32R2_NEXT) ,
-  N (bfd_mach_m32r2, "m32r2", FALSE, NULL)
+  N (bfd_mach_m32rx, "m32rx", false, M32R2_NEXT) ,
+  N (bfd_mach_m32r2, "m32r2", false, NULL)
 };
 
 const bfd_arch_info_type bfd_m32r_arch =
-  N (bfd_mach_m32r, "m32r", TRUE, NEXT);
+  N (bfd_mach_m32r, "m32r", true, NEXT);

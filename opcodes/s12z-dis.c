@@ -20,7 +20,7 @@
 
 #include "sysdep.h"
 #include <stdio.h>
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
 
@@ -206,27 +206,12 @@ decode_possible_symbol (bfd_vma addr, bfd_vma base,
                         struct disassemble_info *info, bool relative)
 {
   const char *fmt = relative  ? "*%+" BFD_VMA_FMT "d" : "%" BFD_VMA_FMT "d";
-  if (!info->symbol_at_address_func (addr + base, info))
-    {
-      (*info->fprintf_func) (info->stream, fmt, addr);
-    }
+  asymbol *sym = info->symbol_at_address_func (addr + base, info);
+
+  if (!sym)
+    (*info->fprintf_func) (info->stream, fmt, addr);
   else
-    {
-      asymbol *sym = NULL;
-      int j;
-      for (j = 0; j < info->symtab_size; ++j)
-	{
-	  sym = info->symtab[j];
-	  if (bfd_asymbol_value (sym) == addr + base)
-	    {
-	      break;
-	    }
-	}
-      if (j < info->symtab_size)
-	(*info->fprintf_func) (info->stream, "%s", bfd_asymbol_name (sym));
-      else
-        (*info->fprintf_func) (info->stream, fmt, addr);
-    }
+    (*info->fprintf_func) (info->stream, "%s", bfd_asymbol_name (sym));
 }
 
 

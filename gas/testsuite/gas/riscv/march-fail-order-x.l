@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Error: .*x ISA extension `xargle' is not in alphabetical order.  It must come before `xbargle'
+.*Error: .*prefixed ISA extension `xargle' is not in expected order.  It must come before `xbargle'

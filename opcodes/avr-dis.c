@@ -25,7 +25,7 @@
 #include "disassemble.h"
 #include "opintl.h"
 #include "libiberty.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 struct avr_opcodes_s
 {

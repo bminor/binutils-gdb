@@ -63,11 +63,11 @@ struct xcoff_backend_data_rec
      2 : XCOFF64.  */
   unsigned long _xcoff_ldhdr_version;
 
-  bfd_boolean (* _xcoff_put_symbol_name)
+  bool (* _xcoff_put_symbol_name)
     (struct bfd_link_info *, struct bfd_strtab_hash *,
      struct internal_syment *, const char *);
 
-  bfd_boolean (* _xcoff_put_ldsymbol_name)
+  bool (* _xcoff_put_ldsymbol_name)
     (bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
      const char *);
 
@@ -79,8 +79,8 @@ struct xcoff_backend_data_rec
   /* Line number and relocation overflow.
      XCOFF32 overflows to another section when the line number or the
      relocation count exceeds 0xffff.  XCOFF64 does not overflow.  */
-  bfd_boolean (*_xcoff_is_lineno_count_overflow) (bfd *, bfd_vma);
-  bfd_boolean (*_xcoff_is_reloc_count_overflow)  (bfd *, bfd_vma);
+  bool (*_xcoff_is_lineno_count_overflow) (bfd *, bfd_vma);
+  bool (*_xcoff_is_reloc_count_overflow)  (bfd *, bfd_vma);
 
   /* Loader section symbol and relocation table offset
      XCOFF32 is after the .loader header
@@ -97,8 +97,8 @@ struct xcoff_backend_data_rec
 
   /* rtinit.  */
   unsigned int _xcoff_rtinit_size;
-  bfd_boolean (*_xcoff_generate_rtinit)
-    (bfd *, const char *, const char *, bfd_boolean);
+  bool (*_xcoff_generate_rtinit)
+    (bfd *, const char *, const char *, bool);
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -111,7 +111,7 @@ struct xcoff_backend_data_rec
 #define xcoff_link_hash_traverse(table, func, info)			\
   (bfd_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) (struct bfd_link_hash_entry *, void *)) (func),	\
+    (bool (*) (struct bfd_link_hash_entry *, void *)) (func),		\
     (info)))
 
 /* Get the XCOFF link hash table from the info structure.  This is
@@ -202,7 +202,7 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_data_align_power(a) ((xcoff_data (a)->data_align_power))
 
 /* xcoff*_ppc_relocate_section macros  */
-#define XCOFF_MAX_CALCULATE_RELOCATION (0x1c)
+#define XCOFF_MAX_CALCULATE_RELOCATION (0x32)
 #define XCOFF_MAX_COMPLAIN_OVERFLOW (4)
 /* N_ONES produces N one bits, without overflowing machine arithmetic.  */
 #ifdef N_ONES
@@ -210,20 +210,20 @@ struct xcoff_backend_data_rec
 #endif
 #define N_ONES(n) (((((bfd_vma) 1 << ((n) - 1)) - 1) << 1) | 1)
 
-typedef bfd_boolean xcoff_reloc_function (bfd *, asection *, bfd *,
+typedef bool xcoff_reloc_function (bfd *, asection *, bfd *,
 					  struct internal_reloc *,
 					  struct internal_syment *,
 					  struct reloc_howto_struct *,
 					  bfd_vma, bfd_vma,
 					  bfd_vma *, bfd_byte *);
 
-typedef bfd_boolean xcoff_complain_function (bfd *, bfd_vma, bfd_vma,
+typedef bool xcoff_complain_function (bfd *, bfd_vma, bfd_vma,
 					     struct reloc_howto_struct *);
 
 extern xcoff_reloc_function *const xcoff_calculate_relocation[];
 extern xcoff_complain_function *const xcoff_complain_overflow[];
 
-#define XCOFF_NO_LONG_SECTION_NAMES  (FALSE), bfd_coff_set_long_section_names_disallowed
+#define XCOFF_NO_LONG_SECTION_NAMES  (false), bfd_coff_set_long_section_names_disallowed
 
 /* Relocation functions */
 extern xcoff_reloc_function xcoff_reloc_type_noop;
@@ -234,6 +234,7 @@ extern xcoff_reloc_function xcoff_reloc_type_rel;
 extern xcoff_reloc_function xcoff_reloc_type_toc;
 extern xcoff_reloc_function xcoff_reloc_type_ba;
 extern xcoff_reloc_function xcoff_reloc_type_crel;
+extern xcoff_reloc_function xcoff_reloc_type_tls;
 
 /* Structure to describe dwarf sections.
    Useful to convert from XCOFF section name to flag and vice-versa.
@@ -246,7 +247,7 @@ struct xcoff_dwsect_name {
   const char *name;
 
   /* True if size must be prepended.  */
-  bfd_boolean def_size;
+  bool def_size;
 };
 
 /* Number of entries in the array.  The number is known and public so that user

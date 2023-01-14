@@ -51,29 +51,29 @@
 	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0		      \
 	    || bfd_bwrite (&exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE, \
 			  abfd) != EXEC_BYTES_SIZE)			      \
-	  return FALSE;							      \
+	  return false;							      \
 	/* Now write out reloc info, followed by syms and strings */	      \
 									      \
 	if (bfd_get_symcount (abfd) != 0)				      \
 	    {								      \
 	      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF (execp)), SEEK_SET)    \
 		  != 0)							      \
-		return FALSE;						      \
+		return false;						      \
 									      \
-	      if (! NAME(aout,write_syms) (abfd)) return FALSE;		      \
+	      if (! NAME(aout,write_syms) (abfd)) return false;		      \
 									      \
 	      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF (execp)), SEEK_SET)   \
 		  != 0)							      \
-		return FALSE;						      \
+		return false;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
-		return FALSE;						      \
+		return false;						      \
 	      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF (execp)), SEEK_SET)   \
 		  != 0)							      \
 		return 0;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_datasec (abfd)))   \
-		return FALSE;						      \
+		return false;						      \
 	    }								      \
       }
 #endif
@@ -86,7 +86,7 @@
 
 char *lynx_core_file_failing_command ();
 int lynx_core_file_failing_signal ();
-bfd_boolean lynx_core_file_matches_executable_p ();
+bool lynx_core_file_matches_executable_p ();
 const bfd_target *lynx_core_file_p ();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command
@@ -367,7 +367,7 @@ NAME(lynx,swap_std_reloc_in) (bfd *abfd,
 
 /* Reloc hackery */
 
-static bfd_boolean
+static bool
 NAME(lynx,slurp_reloc_table) (bfd *abfd,
 			      sec_ptr asect,
 			      asymbol **symbols)
@@ -379,10 +379,10 @@ NAME(lynx,slurp_reloc_table) (bfd *abfd,
   size_t each_size;
 
   if (asect->relocation)
-    return TRUE;
+    return true;
 
   if (asect->flags & SEC_CONSTRUCTOR)
-    return TRUE;
+    return true;
 
   if (asect == obj_datasec (abfd))
     {
@@ -397,11 +397,11 @@ NAME(lynx,slurp_reloc_table) (bfd *abfd,
     }
 
   bfd_set_error (bfd_error_invalid_operation);
-  return FALSE;
+  return false;
 
  doit:
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
-    return FALSE;
+    return false;
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
@@ -409,13 +409,13 @@ NAME(lynx,slurp_reloc_table) (bfd *abfd,
 
   reloc_cache = (arelent *) bfd_zmalloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
-    return FALSE;
+    return false;
 
   relocs = _bfd_alloc_and_read (abfd, reloc_size, reloc_size);
   if (!relocs && reloc_size != 0)
     {
       free (reloc_cache);
-      return FALSE;
+      return false;
     }
 
   if (each_size == RELOC_EXT_SIZE)
@@ -447,14 +447,14 @@ NAME(lynx,slurp_reloc_table) (bfd *abfd,
   bfd_release (abfd, relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
-  return TRUE;
+  return true;
 }
 
 
 
 /* Write out a relocation section into an object file.  */
 
-static bfd_boolean
+static bool
 NAME(lynx,squirt_out_relocs) (bfd *abfd, asection *section)
 {
   arelent **generic;
@@ -464,14 +464,14 @@ NAME(lynx,squirt_out_relocs) (bfd *abfd, asection *section)
   bfd_size_type natsize;
 
   if (count == 0)
-    return TRUE;
+    return true;
 
   each_size = obj_reloc_entry_size (abfd);
   natsize = count;
   natsize *= each_size;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
-    return FALSE;
+    return false;
 
   generic = section->orelocation;
 
@@ -493,11 +493,11 @@ NAME(lynx,squirt_out_relocs) (bfd *abfd, asection *section)
   if (bfd_bwrite (native, natsize, abfd) != natsize)
     {
       bfd_release (abfd, native);
-      return FALSE;
+      return false;
     }
   bfd_release (abfd, native);
 
-  return TRUE;
+  return true;
 }
 
 /* This is stupid.  This function should be a boolean predicate */

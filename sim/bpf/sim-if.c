@@ -122,8 +122,7 @@ sim_open (SIM_OPEN_KIND kind,
 
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
-  if (sim_cpu_alloc_all (sd, 1, cgen_cpu_max_extra_bytes ())
-      != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     goto error;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)

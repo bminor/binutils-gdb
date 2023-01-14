@@ -65,19 +65,6 @@ abbrev_table::abbrev_table (sect_offset off)
 {
 }
 
-/* Allocate space for a struct abbrev_info object in ABBREV_TABLE.  */
-
-struct abbrev_info *
-abbrev_table::alloc_abbrev ()
-{
-  struct abbrev_info *abbrev;
-
-  abbrev = XOBNEW (&m_abbrev_obstack, struct abbrev_info);
-  memset (abbrev, 0, sizeof (struct abbrev_info));
-
-  return abbrev;
-}
-
 /* Add an abbreviation to the table.  */
 
 void
@@ -97,86 +84,70 @@ abbrev_table::read (struct dwarf2_section_info *section,
   bfd *abfd = section->get_bfd_owner ();
   const gdb_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
-  unsigned int abbrev_number, bytes_read, abbrev_name;
-  unsigned int abbrev_form;
-  std::vector<struct attr_abbrev> cur_attrs;
 
   abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
+  struct obstack *obstack = &abbrev_table->m_abbrev_obstack;
 
   /* Caller must ensure this.  */
   gdb_assert (section->readin);
   abbrev_ptr = section->buffer + to_underlying (sect_off);
-  abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-  abbrev_ptr += bytes_read;
 
-  /* Loop until we reach an abbrev number of 0.  */
-  while (abbrev_number)
+  while (true)
     {
-      cur_attrs.clear ();
-      cur_abbrev = abbrev_table->alloc_abbrev ();
+      unsigned int bytes_read;
+      /* Loop until we reach an abbrev number of 0.  */
+      unsigned int abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr,
+							 &bytes_read);
+      if (abbrev_number == 0)
+	break;
+      abbrev_ptr += bytes_read;
 
-      /* read in abbrev header */
+      /* Start without any attrs.  */
+      obstack_blank (obstack, offsetof (abbrev_info, attrs));
+      cur_abbrev = (struct abbrev_info *) obstack_base (obstack);
+
+      /* Read in abbrev header.  */
       cur_abbrev->number = abbrev_number;
       cur_abbrev->tag
-	= (enum dwarf_tag) read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+	= (enum dwarf_tag) read_unsigned_leb128 (abfd, abbrev_ptr,
+						 &bytes_read);
       abbrev_ptr += bytes_read;
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
 
-      /* now read in declarations */
+      /* Now read in declarations.  */
+      int num_attrs = 0;
       for (;;)
 	{
-	  LONGEST implicit_const;
+	  struct attr_abbrev cur_attr;
 
-	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+	  cur_attr.name
+	    = (enum dwarf_attribute) read_unsigned_leb128 (abfd, abbrev_ptr,
+							   &bytes_read);
 	  abbrev_ptr += bytes_read;
-	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+	  cur_attr.form
+	    = (enum dwarf_form) read_unsigned_leb128 (abfd, abbrev_ptr,
+						      &bytes_read);
 	  abbrev_ptr += bytes_read;
-	  if (abbrev_form == DW_FORM_implicit_const)
+	  if (cur_attr.form == DW_FORM_implicit_const)
 	    {
-	      implicit_const = read_signed_leb128 (abfd, abbrev_ptr,
-						   &bytes_read);
+	      cur_attr.implicit_const = read_signed_leb128 (abfd, abbrev_ptr,
+							    &bytes_read);
 	      abbrev_ptr += bytes_read;
 	    }
 	  else
-	    {
-	      /* Initialize it due to a false compiler warning.  */
-	      implicit_const = -1;
-	    }
+	    cur_attr.implicit_const = -1;
 
-	  if (abbrev_name == 0)
+	  if (cur_attr.name == 0)
 	    break;
 
-	  cur_attrs.emplace_back ();
-	  struct attr_abbrev &cur_attr = cur_attrs.back ();
-	  cur_attr.name = (enum dwarf_attribute) abbrev_name;
-	  cur_attr.form = (enum dwarf_form) abbrev_form;
-	  cur_attr.implicit_const = implicit_const;
+	  ++num_attrs;
+	  obstack_grow (obstack, &cur_attr, sizeof (cur_attr));
 	}
 
-      cur_abbrev->num_attrs = cur_attrs.size ();
-      cur_abbrev->attrs =
-	XOBNEWVEC (&abbrev_table->m_abbrev_obstack, struct attr_abbrev,
-		   cur_abbrev->num_attrs);
-      if (!cur_attrs.empty ())
-	memcpy (cur_abbrev->attrs, cur_attrs.data (),
-		cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
-
+      cur_abbrev = (struct abbrev_info *) obstack_finish (obstack);
+      cur_abbrev->num_attrs = num_attrs;
       abbrev_table->add_abbrev (cur_abbrev);
-
-      /* Get next abbreviation.
-	 Under Irix6 the abbreviations for a compilation unit are not
-	 always properly terminated with an abbrev number of 0.
-	 Exit loop if we encounter an abbreviation which we have
-	 already read (which means we are about to read the abbreviations
-	 for the next compile unit) or if the end of the abbreviation
-	 table is reached.  */
-      if ((unsigned int) (abbrev_ptr - section->buffer) >= section->size)
-	break;
-      abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      if (abbrev_table->lookup_abbrev (abbrev_number) != NULL)
-	break;
     }
 
   return abbrev_table;

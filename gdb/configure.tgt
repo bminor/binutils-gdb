@@ -85,7 +85,7 @@ ia64*-*-*)
 	;;
 
 riscv*-*-*)
-	cpu_obs="riscv-tdep.o arch/riscv.o \
+	cpu_obs="riscv-tdep.o riscv-none-tdep.o arch/riscv.o \
 	         ravenscar-thread.o riscv-ravenscar-thread.o";;
 
 x86_64-*-*)
@@ -125,6 +125,7 @@ aarch64*-*-freebsd*)
 aarch64*-*-linux*)
 	# Target: AArch64 linux
 	gdb_target_obs="aarch64-linux-tdep.o arch/aarch64.o\
+			arch/aarch64-mte-linux.o \
 			arch/arm.o arch/arm-linux.o arch/arm-get-next-pcs.o \
 			arm-tdep.o arm-linux-tdep.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o \
@@ -183,10 +184,6 @@ arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 arm*-*-openbsd*)
 	# Target: OpenBSD/arm
 	gdb_target_obs="arm-bsd-tdep.o arm-obsd-tdep.o"
-	;;
-arm*-*-symbianelf*)
-	# Target: SymbianOS/arm
-	gdb_target_obs="arm-symbian-tdep.o"
 	;;
 arm*-*-*)
 	# Target: ARM embedded system
@@ -554,6 +551,7 @@ riscv*-*-linux*)
 riscv*-*-*)
 	# Target: RISC-V architecture
 	gdb_target_obs=""
+	gdb_sim=../sim/riscv/libsim.a
 	;;
 
 rl78-*-elf)
@@ -786,8 +784,6 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-mingw*)	gdb_osabi=GDB_OSABI_WINDOWS ;;
 *-*-cygwin*)	gdb_osabi=GDB_OSABI_CYGWIN ;;
 *-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
-*-*-symbianelf*)
-		gdb_osabi=GDB_OSABI_SYMBIAN ;;
 powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
                 gdb_osabi=GDB_OSABI_AIX ;;
 esac

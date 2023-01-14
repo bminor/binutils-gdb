@@ -318,8 +318,8 @@ listing_newline (char *ps)
       const char *segname;
 
       segname = segment_name (now_seg);
-      if (strncmp (segname, ".debug", sizeof ".debug" - 1) == 0
-	  || strncmp (segname, ".line", sizeof ".line" - 1) == 0)
+      if (startswith (segname, ".debug")
+	  || startswith (segname, ".line"))
 	listing_tail->debugging = 1;
     }
 #endif
@@ -433,8 +433,8 @@ listing_newline (char *ps)
       const char *segname;
 
       segname = segment_name (now_seg);
-      if (strncmp (segname, ".debug", sizeof ".debug" - 1) == 0
-	  || strncmp (segname, ".line", sizeof ".line" - 1) == 0)
+      if (startswith (segname, ".debug")
+	  || startswith (segname, ".line"))
 	new_i->debugging = 1;
     }
 #endif
@@ -560,7 +560,7 @@ rebuffer_line (file_info_type *  file,
   long pos;
   long pos2;
   int c;
-  bfd_boolean found = FALSE;
+  bool found = false;
 
   /* Sanity checks.  */
   if (file == NULL || buffer == NULL || size <= 1 || file->linenum <= linenum)
@@ -630,7 +630,7 @@ rebuffer_line (file_info_type *  file,
 	      if (current_line == linenum)
 		{
 		  /* We have found the start of the line we seek.  */
-		  found = TRUE;
+		  found = true;
 
 		  /* FIXME: We could skip the read-in-the-line code
 		     below if we know that we already have the whole
@@ -1160,29 +1160,29 @@ debugging_pseudo (list_info_type *list, const char *line)
 
   line++;
 
-  if (strncmp (line, "def", 3) == 0)
+  if (startswith (line, "def"))
     return 1;
-  if (strncmp (line, "val", 3) == 0)
+  if (startswith (line, "val"))
     return 1;
-  if (strncmp (line, "scl", 3) == 0)
+  if (startswith (line, "scl"))
     return 1;
-  if (strncmp (line, "line", 4) == 0)
+  if (startswith (line, "line"))
     return 1;
-  if (strncmp (line, "endef", 5) == 0)
+  if (startswith (line, "endef"))
     return 1;
-  if (strncmp (line, "ln", 2) == 0)
+  if (startswith (line, "ln"))
     return 1;
-  if (strncmp (line, "type", 4) == 0)
+  if (startswith (line, "type"))
     return 1;
-  if (strncmp (line, "size", 4) == 0)
+  if (startswith (line, "size"))
     return 1;
-  if (strncmp (line, "dim", 3) == 0)
+  if (startswith (line, "dim"))
     return 1;
-  if (strncmp (line, "tag", 3) == 0)
+  if (startswith (line, "tag"))
     return 1;
-  if (strncmp (line, "stabs", 5) == 0)
+  if (startswith (line, "stabs"))
     return 1;
-  if (strncmp (line, "stabn", 5) == 0)
+  if (startswith (line, "stabn"))
     return 1;
 
   return 0;
@@ -1511,7 +1511,25 @@ listing_psize (int width_only)
       ++input_line_pointer;
     }
 
-  paper_width = get_absolute_expression ();
+  {
+    expressionS exp;
+
+    (void) expression_and_evaluate (& exp);
+
+    if (exp.X_op == O_constant)
+      {
+	offsetT new_width = exp.X_add_number;
+
+	if (new_width > 7)
+	  paper_width = new_width;
+	else
+	  as_bad (_("new paper width is too small"));
+      }
+    else if (exp.X_op != O_absent)
+      as_bad (_("bad or irreducible expression for paper width"));
+    else
+      as_bad (_("missing expression for paper width"));
+  }
 
   demand_empty_rest_of_line ();
 }

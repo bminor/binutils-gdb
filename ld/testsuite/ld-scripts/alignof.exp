@@ -32,7 +32,14 @@ if ![ld_assemble $as $srcdir/$subdir/alignof.s tmpdir/alignof.o] {
     return
 }
 
-if ![ld_link $ld tmpdir/alignof "-T $srcdir/$subdir/alignof.t tmpdir/alignof.o"] {
+if { [is_pecoff_format] } {
+    set IMAGE_BASE "--image-base 0"
+} else {
+    set IMAGE_BASE ""
+}
+
+if ![ld_link $ld tmpdir/alignof "-T $srcdir/$subdir/alignof.t \
+	$IMAGE_BASE tmpdir/alignof.o"] {
     fail $testname
     return
 }

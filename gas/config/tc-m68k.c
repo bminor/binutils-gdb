@@ -1839,7 +1839,7 @@ m68k_ip (char *instring)
 		case 'B':	/* FOO */
 		  if (opP->mode != ABSL
 		      || (flag_long_jumps
-			  && strncmp (instring, "jbsr", 4) == 0))
+			  && startswith (instring, "jbsr")))
 		    losing++;
 		  break;
 
@@ -2039,8 +2039,8 @@ m68k_ip (char *instring)
 			   || TRUNC (opP->disp.exp.X_add_number) - 1 > 7)
 		    losing++;
 		  else if (! m68k_quick
-			   && (strncmp (instring, "add", 3) == 0
-			       || strncmp (instring, "sub", 3) == 0)
+			   && (startswith (instring, "add")
+			       || startswith (instring, "sub"))
 			   && instring[3] != 'q')
 		    losing++;
 		  break;
@@ -4790,7 +4790,7 @@ m68k_mri_mode_change (int on)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 void
@@ -7482,9 +7482,9 @@ md_parse_option (int c, const char *arg)
 #endif
       /* Intentional fall-through.  */
     case 'm':
-      if (!strncmp (arg, "arch=", 5))
+      if (startswith (arg, "arch="))
 	m68k_set_arch (arg + 5, 1, 0);
-      else if (!strncmp (arg, "cpu=", 4))
+      else if (startswith (arg, "cpu="))
 	m68k_set_cpu (arg + 4, 1, 0);
       else if (m68k_set_extension (arg, 0, 1))
 	;
@@ -7861,7 +7861,7 @@ m68k_elf_suffix (char **str_p, expressionS *exp_p)
   *str2 = '\0';
   len = str2 - ident;
 
-  if (strncmp (ident, "TLSLDO", 6) == 0
+  if (startswith (ident, "TLSLDO")
       && len == 6)
     {
       /* Now check for identifier@suffix+constant.  */

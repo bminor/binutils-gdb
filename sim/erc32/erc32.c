@@ -297,7 +297,7 @@ extern int	ext_irl;
 /* One-time init */
 
 void
-init_sim()
+init_sim(void)
 {
     port_init();
 }
@@ -305,7 +305,7 @@ init_sim()
 /* Power-on reset init */
 
 void
-reset()
+reset(void)
 {
     mec_reset();
     uart_irq_start();
@@ -313,7 +313,7 @@ reset()
 }
 
 static void
-decode_ersr()
+decode_ersr(void)
 {
     if (mec_ersr & 0x01) {
 	if (!(mec_mcr & 0x20)) {
@@ -375,7 +375,7 @@ iucomperr()
 #endif
 
 static void
-mecparerror()
+mecparerror(void)
 {
     mec_ersr |= 0x20;
     decode_ersr();
@@ -385,8 +385,7 @@ mecparerror()
 /* IU error mode manager */
 
 void
-error_mode(pc)
-    uint32          pc;
+error_mode(uint32 pc)
 {
 
     mec_ersr |= 0x1;
@@ -397,7 +396,7 @@ error_mode(pc)
 /* Check memory settings */
 
 static void
-decode_memcfg()
+decode_memcfg(void)
 {
     if (rom8) mec_memcfg &= ~0x20000;
     else mec_memcfg |= 0x20000;
@@ -421,7 +420,7 @@ decode_memcfg()
 }
 
 static void
-decode_wcr()
+decode_wcr(void)
 {
     mem_ramr_ws = mec_wcr & 3;
     mem_ramw_ws = (mec_wcr >> 2) & 3;
@@ -437,7 +436,7 @@ decode_wcr()
 }
 
 static void
-decode_mcr()
+decode_mcr(void)
 {
     mem_accprot = (mec_wpr[0] | mec_wpr[1]);
     mem_blockprot = (mec_mcr >> 3) & 1;
@@ -456,7 +455,7 @@ decode_mcr()
 /* Flush ports when simulator stops */
 
 void
-sim_halt()
+sim_halt(void)
 {
 #ifdef FAST_UART
     flush_uart();
@@ -471,7 +470,7 @@ sim_stop(SIM_DESC sd)
 }
 
 static void
-close_port()
+close_port(void)
 {
     if (f1open && f1in != stdin)
 	fclose(f1in);
@@ -480,13 +479,13 @@ close_port()
 }
 
 void
-exit_sim()
+exit_sim(void)
 {
     close_port();
 }
 
 static void
-mec_reset()
+mec_reset(void)
 {
     int             i;
 
@@ -547,8 +546,7 @@ mec_reset()
 
 
 static void
-mec_intack(level)
-    int32           level;
+mec_intack(int32 level)
 {
     int             irq_test;
 
@@ -563,7 +561,7 @@ mec_intack(level)
 }
 
 static void
-chk_irq()
+chk_irq(void)
 {
     int32           i;
     uint32          itmp;
@@ -588,19 +586,14 @@ chk_irq()
 }
 
 static void
-mec_irq(level)
-    int32           level;
+mec_irq(int32 level)
 {
     mec_ipr |= (1 << level);
     chk_irq();
 }
 
 static void
-set_sfsr(fault, addr, asi, read)
-    uint32          fault;
-    uint32          addr;
-    uint32          asi;
-    uint32          read;
+set_sfsr(uint32 fault, uint32 addr, uint32 asi, uint32 read)
 {
     if ((asi == 0xa) || (asi == 0xb)) {
 	mec_ffar = addr;
@@ -618,10 +611,7 @@ set_sfsr(fault, addr, asi, read)
 }
 
 static int32
-mec_read(addr, asi, data)
-    uint32          addr;
-    uint32          asi;
-    uint32         *data;
+mec_read(uint32 addr, uint32 asi, uint32 *data)
 {
 
     switch (addr & 0x0ff) {
@@ -748,9 +738,7 @@ mec_read(addr, asi, data)
 }
 
 static int
-mec_write(addr, data)
-    uint32          addr;
-    uint32          data;
+mec_write(uint32 addr, uint32 data)
 {
     if (sis_verbose > 1)
 	printf("MEC write a: %08x, d: %08x\n",addr,data);
@@ -932,7 +920,7 @@ mec_write(addr, data)
 static int      ifd1 = -1, ifd2 = -1, ofd1 = -1, ofd2 = -1;
 
 void
-init_stdio()
+init_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
@@ -943,7 +931,7 @@ init_stdio()
 }
 
 void
-restore_stdio()
+restore_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
@@ -960,7 +948,7 @@ restore_stdio()
 
 
 static void
-port_init()
+port_init(void)
 {
 
     if (uben) {
@@ -1037,8 +1025,7 @@ port_init()
 }
 
 static uint32
-read_uart(addr)
-    uint32          addr;
+read_uart(uint32 addr)
 {
 
     unsigned        tmp;
@@ -1159,9 +1146,7 @@ read_uart(addr)
 }
 
 static void
-write_uart(addr, data)
-    uint32          addr;
-    uint32          data;
+write_uart(uint32 addr, uint32 data)
 {
     unsigned char   c;
 
@@ -1235,7 +1220,7 @@ write_uart(addr, data)
 }
 
 static void
-flush_uart()
+flush_uart(void)
 {
     while (wnuma && f1open)
 	wnuma -= fwrite(wbufa, 1, wnuma, f1out);
@@ -1246,7 +1231,7 @@ flush_uart()
 
 
 static void
-uarta_tx()
+uarta_tx(void)
 {
 
     while (f1open && fwrite(&uarta_sreg, 1, 1, f1out) != 1);
@@ -1261,7 +1246,7 @@ uarta_tx()
 }
 
 static void
-uartb_tx()
+uartb_tx(void)
 {
     while (f2open && fwrite(&uartb_sreg, 1, 1, f2out) != 1);
     if (uart_stat_reg & UARTB_HRE) {
@@ -1275,8 +1260,7 @@ uartb_tx()
 }
 
 static void
-uart_rx(arg)
-    caddr_t         arg;
+uart_rx(caddr_t arg)
 {
     int32           rsize;
     char            rxd;
@@ -1318,8 +1302,7 @@ uart_rx(arg)
 }
 
 static void
-uart_intr(arg)
-    caddr_t         arg;
+uart_intr(caddr_t arg)
 {
     read_uart(0xE8);		/* Check for UART interrupts every 1000 clk */
     flush_uart();		/* Flush UART ports      */
@@ -1328,7 +1311,7 @@ uart_intr(arg)
 
 
 static void
-uart_irq_start()
+uart_irq_start(void)
 {
 #ifdef FAST_UART
     event(uart_intr, 0, UART_FLUSH_TIME);
@@ -1342,8 +1325,7 @@ uart_irq_start()
 /* Watch-dog */
 
 static void
-wdog_intr(arg)
-    caddr_t         arg;
+wdog_intr(caddr_t arg)
 {
     if (wdog_status == disabled) {
 	wdog_status = stopped;
@@ -1368,7 +1350,7 @@ wdog_intr(arg)
 }
 
 static void
-wdog_start()
+wdog_start(void)
 {
     event(wdog_intr, 0, wdog_scaler + 1);
     if (sis_verbose)
@@ -1381,8 +1363,7 @@ wdog_start()
 
 
 static void
-rtc_intr(arg)
-    caddr_t         arg;
+rtc_intr(caddr_t arg)
 {
     if (rtc_counter == 0) {
 
@@ -1405,7 +1386,7 @@ rtc_intr(arg)
 }
 
 static void
-rtc_start()
+rtc_start(void)
 {
     if (sis_verbose)
 	printf("RTC started (period %d)\n\r", rtc_scaler + 1);
@@ -1415,28 +1396,25 @@ rtc_start()
 }
 
 static uint32
-rtc_counter_read()
+rtc_counter_read(void)
 {
     return rtc_counter;
 }
 
 static void
-rtc_scaler_set(val)
-    uint32          val;
+rtc_scaler_set(uint32 val)
 {
     rtc_scaler = val & 0x0ff;	/* eight-bit scaler only */
 }
 
 static void
-rtc_reload_set(val)
-    uint32          val;
+rtc_reload_set(uint32 val)
 {
     rtc_reload = val;
 }
 
 static void
-gpt_intr(arg)
-    caddr_t         arg;
+gpt_intr(caddr_t arg)
 {
     if (gpt_counter == 0) {
 	mec_irq(12);
@@ -1458,7 +1436,7 @@ gpt_intr(arg)
 }
 
 static void
-gpt_start()
+gpt_start(void)
 {
     if (sis_verbose)
 	printf("GPT started (period %d)\n\r", gpt_scaler + 1);
@@ -1468,28 +1446,25 @@ gpt_start()
 }
 
 static uint32
-gpt_counter_read()
+gpt_counter_read(void)
 {
     return gpt_counter;
 }
 
 static void
-gpt_scaler_set(val)
-    uint32          val;
+gpt_scaler_set(uint32 val)
 {
     gpt_scaler = val & 0x0ffff;	/* 16-bit scaler */
 }
 
 static void
-gpt_reload_set(val)
-    uint32          val;
+gpt_reload_set(uint32 val)
 {
     gpt_reload = val;
 }
 
 static void
-timer_ctrl(val)
-    uint32          val;
+timer_ctrl(uint32 val)
 {
 
     rtc_cr = ((val & TCR_TCRCR) != 0);
@@ -1577,12 +1552,7 @@ memory_iread (uint32 addr, uint32 *data, int32 *ws)
 }
 
 int
-memory_read(asi, addr, data, sz, ws)
-    int32           asi;
-    uint32          addr;
-    uint32         *data;
-    int32           sz;
-    int32          *ws;
+memory_read(int32 asi, uint32 addr, uint32 *data, int32 sz, int32 *ws)
 {
     int32           mexc;
 
@@ -1648,12 +1618,7 @@ memory_read(asi, addr, data, sz, ws)
 }
 
 int
-memory_write(asi, addr, data, sz, ws)
-    int32           asi;
-    uint32          addr;
-    uint32         *data;
-    int32           sz;
-    int32          *ws;
+memory_write(int32 asi, uint32 addr, uint32 *data, int32 sz, int32 *ws)
 {
     uint32          byte_addr;
     uint32          byte_mask;
@@ -1761,9 +1726,7 @@ memory_write(asi, addr, data, sz, ws)
 }
 
 static unsigned char  *
-get_mem_ptr(addr, size)
-    uint32          addr;
-    uint32          size;
+get_mem_ptr(uint32 addr, uint32 size)
 {
     if ((addr + size) < ROM_SZ) {
 	return &romb[addr];
@@ -1782,10 +1745,7 @@ get_mem_ptr(addr, size)
 }
 
 int
-sis_memory_write(addr, data, length)
-    uint32               addr;
-    const unsigned char *data;
-    uint32               length;
+sis_memory_write(uint32 addr, const unsigned char *data, uint32 length)
 {
     char           *mem;
 
@@ -1797,10 +1757,7 @@ sis_memory_write(addr, data, length)
 }
 
 int
-sis_memory_read(addr, data, length)
-    uint32          addr;
-    char           *data;
-    uint32          length;
+sis_memory_read(uint32 addr, char *data, uint32 length)
 {
     char           *mem;
 

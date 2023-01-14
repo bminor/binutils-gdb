@@ -269,7 +269,7 @@ gdb_test_no_output  "enable frame-filter global Error" \
     "enable frame-filter global Error"
 set test "bt 1 with Error filter"
 gdb_test_multiple "bt 1" $test {
-    -re "Python Exception .*whoops:.*$gdb_prompt $" {
+    -re "Python Exception .*: whoops\r\n.*$gdb_prompt $" {
 	pass $test
     }
 }

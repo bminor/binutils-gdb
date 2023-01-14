@@ -658,8 +658,11 @@ frapy_richcompare (PyObject *self, PyObject *other, int op)
       return Py_NotImplemented;
     }
 
-  if (frame_id_eq (((frame_object *) self)->frame_id,
-		   ((frame_object *) other)->frame_id))
+  frame_object *self_frame = (frame_object *) self;
+  frame_object *other_frame = (frame_object *) other;
+
+  if (self_frame->frame_id_is_next == other_frame->frame_id_is_next
+      && frame_id_eq (self_frame->frame_id, other_frame->frame_id))
     result = Py_EQ;
   else
     result = Py_NE;

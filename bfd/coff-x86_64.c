@@ -75,14 +75,14 @@ coff_amd64_reloc (bfd *abfd,
 {
   symvalue diff;
 
-#if !defined(COFF_WITH_PE)
+#if !defined (COFF_WITH_PE)
   if (output_bfd == NULL)
     return bfd_reloc_continue;
 #endif
 
   if (bfd_is_com_section (symbol->section))
     {
-#if !defined(COFF_WITH_PE)
+#if !defined (COFF_WITH_PE)
       /* We are relocating a common symbol.  The current value in the
 	 object file is ORIG + OFFSET, where ORIG is the value of the
 	 common symbol as seen by the object file when it was compiled
@@ -106,21 +106,10 @@ coff_amd64_reloc (bfd *abfd,
 	 ignores the addend for a COFF target when producing
 	 relocatable output.  This seems to be always wrong for 386
 	 COFF, so we handle the addend here instead.  */
-#if defined(COFF_WITH_PE)
+#if defined (COFF_WITH_PE)
       if (output_bfd == NULL)
 	{
-	  reloc_howto_type *howto = reloc_entry->howto;
-
-	  /* Although PC relative relocations are very similar between
-	     PE and non-PE formats, but they are off by 1 << howto->size
-	     bytes. For the external relocation, PE is very different
-	     from others. See md_apply_fix3 () in gas/config/tc-amd64.c.
-	     When we link PE and non-PE object files together to
-	     generate a non-PE executable, we have to compensate it
-	     here.  */
-	  if(howto->pc_relative && howto->pcrel_offset)
-	    diff = -(1 << howto->size);
-	  else if(symbol->flags & BSF_WEAK)
+	  if (symbol->flags & BSF_WEAK)
 	    diff = reloc_entry->addend - symbol->value;
 	  else
 	    diff = -reloc_entry->addend;
@@ -130,12 +119,50 @@ coff_amd64_reloc (bfd *abfd,
 	diff = reloc_entry->addend;
     }
 
-#if defined(COFF_WITH_PE)
-  /* FIXME: How should this case be handled?  */
+#if defined (COFF_WITH_PE)
+  if (output_bfd == NULL)
+    {
+      /* PC relative relocations are off by their size.  */
+      if (reloc_entry->howto->pc_relative)
+	diff -= bfd_get_reloc_size (reloc_entry->howto);
+
+      if (reloc_entry->howto->type >= R_AMD64_PCRLONG_1
+	  && reloc_entry->howto->type <= R_AMD64_PCRLONG_5)
+	diff -= reloc_entry->howto->type - R_AMD64_PCRLONG;
+    }
+
   if (reloc_entry->howto->type == R_AMD64_IMAGEBASE
-      && output_bfd != NULL
-      && bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
-    diff -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+      && output_bfd == NULL)
+    {
+      bfd *obfd = input_section->output_section->owner;
+      struct bfd_link_info *link_info;
+      struct bfd_link_hash_entry *h;
+      switch (bfd_get_flavour (obfd))
+	{
+	case bfd_target_coff_flavour:
+	  diff -= pe_data (obfd)->pe_opthdr.ImageBase;
+	  break;
+	case bfd_target_elf_flavour:
+	  /* Subtract __ImageBase.  */
+	  link_info = _bfd_get_link_info (obfd);
+	  if (link_info == NULL)
+	    return bfd_reloc_dangerous;
+	  h = bfd_link_hash_lookup (link_info->hash, "__ImageBase",
+				    false, false, false);
+	  if (h == NULL)
+	    return bfd_reloc_dangerous;
+	  while (h->type == bfd_link_hash_indirect)
+	    h = h->u.i.link;
+	  /* ELF symbols in relocatable files are section relative,
+	     but in nonrelocatable files they are virtual addresses.  */
+	  diff -= (h->u.def.value
+		   + h->u.def.section->output_offset
+		   + h->u.def.section->output_section->vma);
+	  break;
+	default:
+	  break;
+	}
+    }
 #endif
 
 #define DOIT(x) \
@@ -199,7 +226,7 @@ coff_amd64_reloc (bfd *abfd,
 /* Return TRUE if this relocation should appear in the output .reloc
    section.  */
 
-static bfd_boolean
+static bool
 in_reloc_p (bfd *abfd ATTRIBUTE_UNUSED, reloc_howto_type *howto)
 {
   return ! howto->pc_relative && howto->type != R_AMD64_IMAGEBASE
@@ -208,7 +235,7 @@ in_reloc_p (bfd *abfd ATTRIBUTE_UNUSED, reloc_howto_type *howto)
 #endif /* COFF_WITH_PE */
 
 #ifndef PCRELOFFSET
-#define PCRELOFFSET TRUE
+#define PCRELOFFSET true
 #endif
 
 static reloc_howto_type howto_table[] =
@@ -218,53 +245,53 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long, 4 = long long) */
 	 64,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_ADDR64", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffffffffffffll,	/* src_mask */
 	 0xffffffffffffffffll,	/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
   HOWTO (R_AMD64_DIR32,		/* type 2 */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_ADDR32", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
   /* PE IMAGE_REL_AMD64_ADDR32NB relocation (3).	*/
   HOWTO (R_AMD64_IMAGEBASE,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_ADDR32NB", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
   /* 32-bit longword PC relative relocation (4).  */
   HOWTO (R_AMD64_PCRLONG,	/* type 4 */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -273,12 +300,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32_1", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -286,12 +313,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32_2", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -299,12 +326,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32_3", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -312,12 +339,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32_4", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -325,12 +352,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_REL32_5", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -341,15 +368,15 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "IMAGE_REL_AMD64_SECREL", /* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 #else
   EMPTY_HOWTO (11),
 #endif
@@ -360,12 +387,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_PC64",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffffffffffffll,	/* src_mask */
 	 0xffffffffffffffffll,	/* dst_mask */
 	 PCRELOFFSET),		 /* pcrel_offset */
@@ -377,12 +404,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_8",		/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x000000ff,		/* src_mask */
 	 0x000000ff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -391,12 +418,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_16",		/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -405,12 +432,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_32S",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -419,12 +446,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_PC8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x000000ff,		/* src_mask */
 	 0x000000ff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -433,12 +460,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_PC16",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 PCRELOFFSET),		/* pcrel_offset */
@@ -447,12 +474,12 @@ static reloc_howto_type howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 coff_amd64_reloc,	/* special_function */
 	 "R_X86_64_PC32",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 PCRELOFFSET)		/* pcrel_offset */
@@ -527,7 +554,7 @@ static reloc_howto_type howto_table[] =
    and the regular routine is that we don't want to do anything for a
    relocatable link.  */
 
-static bfd_boolean
+static bool
 coff_pe_amd64_relocate_section (bfd *output_bfd,
 				struct bfd_link_info *info,
 				bfd *input_bfd,
@@ -538,7 +565,7 @@ coff_pe_amd64_relocate_section (bfd *output_bfd,
 				asection **sections)
 {
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   return _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,input_section, contents,relocs, syms, sections);
 }
@@ -723,11 +750,11 @@ coff_amd64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
    a leading dot for local labels, so if TARGET_UNDERSCORE is defined
    we treat all symbols starting with L as local.  */
 
-static bfd_boolean
+static bool
 coff_amd64_is_local_label_name (bfd *abfd, const char *name)
 {
   if (name[0] == 'L')
-    return TRUE;
+    return true;
 
   return _bfd_coff_is_local_label_name (abfd, name);
 }

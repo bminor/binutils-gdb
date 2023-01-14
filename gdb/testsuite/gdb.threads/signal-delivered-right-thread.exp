@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+standard_testfile
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping ${testfile}.exp because of nosignals."
     return -1
 }
-
-standard_testfile
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable { debug }] != "" } {

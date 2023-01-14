@@ -11,11 +11,11 @@ PARSE_AND_LIST_OPTIONS_CET='
 '
 PARSE_AND_LIST_ARGS_CASE_Z_CET='
       else if (strcmp (optarg, "ibtplt") == 0)
-	params.ibtplt = TRUE;
+	params.ibtplt = true;
       else if (strcmp (optarg, "ibt") == 0)
-	params.ibt = TRUE;
+	params.ibt = true;
       else if (strcmp (optarg, "shstk") == 0)
-	params.shstk = TRUE;
+	params.shstk = true;
       else if (strncmp (optarg, "cet-report=", 11) == 0)
 	{
 	  if (strcmp (optarg + 11, "none") == 0)

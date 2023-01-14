@@ -2133,12 +2133,6 @@ proc skip_cplus_tests {} {
 # Return a 1 for configurations for which don't have both C++ and the STL.
 
 proc skip_stl_tests {} {
-    # Symbian supports the C++ language, but the STL is missing
-    # (both headers and libraries).
-    if { [istarget "arm*-*-symbianelf*"] } {
-	return 1
-    }
-
     return [skip_cplus_tests]
 }
 
@@ -2236,7 +2230,6 @@ proc skip_shlib_tests {} {
     if {([istarget *-*-linux*]
 	 || [istarget *-*-*bsd*]
 	 || [istarget *-*-solaris2*]
-	 || [istarget arm*-*-symbianelf*]
 	 || [istarget *-*-mingw*]
 	 || [istarget *-*-cygwin*]
 	 || [istarget *-*-pe*])} {
@@ -2753,6 +2746,22 @@ proc supports_get_siginfo_type {} {
     } else {
 	return 0
     }
+}
+
+# Return 1 if memory tagging is supported at runtime, otherwise return 0.
+
+gdb_caching_proc supports_memtag {
+    global gdb_prompt
+
+    gdb_test_multiple "memory-tag check" "" {
+	-re "Memory tagging not supported or disabled by the current architecture\..*$gdb_prompt $" {
+	  return 0
+	}
+	-re "Argument required \\(address or pointer\\).*$gdb_prompt $" {
+	    return 1
+	}
+    }
+    return 0
 }
 
 # Return 1 if the target supports hardware single stepping.
@@ -3653,6 +3662,9 @@ proc gdb_is_target_native { } {
 # This is the preferred way of checking use_gdb_stub, since it allows to check
 # the value before the gdb has been spawned and it will return the correct value
 # even when it was overriden by the test.
+#
+# Note that stub targets are not able to spawn new inferiors.  Use this
+# check for skipping respective tests.
 
 proc use_gdb_stub {} {
   global use_gdb_stub
@@ -4153,10 +4165,6 @@ proc gdb_compile {source dest type options} {
 	    # Do not need anything.
 	} elseif { [istarget *-*-freebsd*] || [istarget *-*-openbsd*] } {
 	    lappend new_options "ldflags=-Wl,-rpath,${outdir}"
-	} elseif { [istarget arm*-*-symbianelf*] } {
-	    if { $shlib_load } {
-		lappend new_options "libs=-ldl"
-	    }
 	} else {
 	    if { $shlib_load } {
 		lappend new_options "libs=-ldl"
@@ -4218,16 +4226,23 @@ proc gdb_compile {source dest type options} {
 	lappend options "$flag"
     }
 
-    # Replace the "nopie" option with the appropriate linker flag to disable
-    # PIE executables.  There are no compiler flags for this option.
+    # Replace the "nopie" option with the appropriate compiler and linker
+    # flags to disable PIE executables.
     set nopie [lsearch -exact $options nopie]
     if {$nopie != -1} {
 	if [target_info exists gdb,nopie_flag] {
-	    set flag "ldflags=[target_info gdb,nopie_flag]"
+	    set flag "additional_flags=[target_info gdb,nopie_flag]"
+	} else {
+	    set flag "additional_flags=-fno-pie"
+	}
+	set options [lreplace $options $nopie $nopie $flag]
+
+	if [target_info exists gdb,nopie_ldflag] {
+	    set flag "ldflags=[target_info gdb,nopie_ldflag]"
 	} else {
 	    set flag "ldflags=-no-pie"
 	}
-	set options [lreplace $options $nopie $nopie $flag]
+	lappend options "$flag"
     }
 
     if { $type == "executable" } {
@@ -4530,7 +4545,7 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
                 set why_msg "missing runtime threads library"
             }
             {^$} {
-                pass "successfully compiled posix threads test case"
+                pass "successfully compiled posix threads shlib test case"
                 set built_binfile 1
                 break
             }
@@ -5095,6 +5110,62 @@ proc gdb_load { arg } {
     return 0
 }
 
+#
+# with_complaints -- Execute BODY and set complaints temporary to N for the
+# duration.
+#
+proc with_complaints { n body } {
+    global decimal
+
+    # Save current setting of complaints.
+    set save ""
+    set show_complaints_re \
+	"Max number of complaints about incorrect symbols is ($decimal)\\."
+    gdb_test_multiple "show complaints" "" {
+	-re -wrap $show_complaints_re {
+	    set save $expect_out(1,string)
+	}
+    }
+
+    if { $save == "" } {
+	perror "Did not manage to set complaints"
+    } else {
+	# Set complaints.
+	gdb_test_no_output "set complaints $n" ""
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    # Restore saved setting of complaints.
+    if { $save != "" } {
+	gdb_test_no_output "set complaints $save" ""
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+#
+# gdb_load_no_complaints -- As gdb_load, but in addition verifies that
+# loading caused no symbol reading complaints.
+#
+proc gdb_load_no_complaints { arg } {
+    global gdb_prompt gdb_file_cmd_msg decimal
+
+    # Temporarily set complaint to a small non-zero number.
+    with_complaints 5 {
+	gdb_load $arg
+    }
+
+    # Verify that there were no complaints.
+    set re "^Reading symbols from \[^\r\n\]*\r\n$gdb_prompt $"
+    gdb_assert {[regexp $re $gdb_file_cmd_msg]} "No complaints"
+}
+
 # gdb_reload -- load a file into the target.  Called before "running",
 # either the first time or after already starting the program once,
 # for remote targets.  Most files that override gdb_load should now
@@ -5199,11 +5270,22 @@ proc default_gdb_init { test_file_name } {
     # tests.
     setenv TERM "dumb"
 
+    # If DEBUGINFOD_URLS is set, gdb will try to download sources and
+    # debug info for f.i. system libraries.  Prevent this.
+    unset -nocomplain ::env(DEBUGINFOD_URLS)
+
     # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
     # environment, we don't want these modifications to the history
     # settings.
     unset -nocomplain ::env(GDBHISTFILE)
     unset -nocomplain ::env(GDBHISTSIZE)
+
+    # Ensure that XDG_CONFIG_HOME is not set.  Some tests setup a fake
+    # home directory in order to test loading settings from gdbinit.
+    # If XDG_CONFIG_HOME is set then GDB will load a gdbinit from
+    # there (if one is present) rather than the home directory setup
+    # in the test.
+    unset -nocomplain ::env(XDG_CONFIG_HOME)
 
     # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
     # during startup.  See "man expect" for details about stty_init.
@@ -6136,7 +6218,6 @@ gdb_caching_proc gdb_has_argv0 {
 	  || [istarget *-*-cygwin*] || [istarget *-*-mingw32*]
 	  || [istarget *-*-*djgpp*] || [istarget *-*-go32*]
 	  || [istarget *-wince-pe] || [istarget *-*-mingw32ce*]
-	  || [istarget *-*-symbianelf*]
 	  || [istarget *-*-osf*]
 	  || [istarget *-*-dicos*]
 	  || [istarget *-*-nto*]
@@ -7379,11 +7460,13 @@ gdb_caching_proc skip_ctf_tests {
 	return 1
     }
 
-    return ![gdb_can_simple_compile ctfdebug {
+    set can_ctf [gdb_can_simple_compile ctfdebug {
 	int main () {
 	    return 0;
 	}
     } executable "additional_flags=-gt"]
+
+    return [expr {!$can_ctf}]
 }
 
 # Return 1 if compiler supports -gstatement-frontiers.  Otherwise,

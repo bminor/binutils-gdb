@@ -52,7 +52,7 @@ struct os_sections
 
 /* Add IS to data kept for OS.  */
 
-static bfd_boolean
+static bool
 add_link_order_input_section (lang_input_section_type *is,
 			      lang_output_section_statement_type *os)
 {
@@ -83,18 +83,18 @@ add_link_order_input_section (lang_input_section_type *is,
       && (s->flags & SEC_LINKER_CREATED) == 0
       && elf_linked_to_section (s) != NULL)
     os_info->ordered++;
-  return FALSE;
+  return false;
 }
 
 /* Run over the linker's statement list, extracting info about input
    sections attached to each output section.  */
 
-static bfd_boolean
+static bool
 link_order_scan (lang_statement_union_type *u,
 		 lang_output_section_statement_type *os)
 {
   asection *s;
-  bfd_boolean ret = FALSE;
+  bool ret = false;
 
   for (; u != NULL; u = u->header.next)
     {
@@ -102,21 +102,21 @@ link_order_scan (lang_statement_union_type *u,
 	{
 	case lang_wild_statement_enum:
 	  if (link_order_scan (u->wild_statement.children.head, os))
-	    ret = TRUE;
+	    ret = true;
 	  break;
 	case lang_constructors_statement_enum:
 	  if (link_order_scan (constructor_list.head, os))
-	    ret = TRUE;
+	    ret = true;
 	  break;
 	case lang_output_section_statement_enum:
 	  if (u->output_section_statement.constraint != -1
 	      && link_order_scan (u->output_section_statement.children.head,
 				  &u->output_section_statement))
-	    ret = TRUE;
+	    ret = true;
 	  break;
 	case lang_group_statement_enum:
 	  if (link_order_scan (u->group_statement.children.head, os))
-	    ret = TRUE;
+	    ret = true;
 	  break;
 	case lang_input_section_enum:
 	  s = u->input_section.section;
@@ -127,7 +127,7 @@ link_order_scan (lang_statement_union_type *u,
 		  || ((s->output_section->flags & (SEC_LOAD | SEC_THREAD_LOCAL))
 		      == (SEC_LOAD | SEC_THREAD_LOCAL))))
 	    if (add_link_order_input_section (&u->input_section, os))
-	      ret = TRUE;
+	      ret = true;
 	  break;
 	default:
 	  break;
@@ -195,7 +195,7 @@ compare_link_order (const void *a, const void *b)
 /* Rearrange sections with SHF_LINK_ORDER into the same order as their
    linked sections.  */
 
-static bfd_boolean
+static bool
 fixup_link_order (lang_output_section_statement_type *os)
 {
   struct os_sections *os_info = os->data;
@@ -223,7 +223,7 @@ fixup_link_order (lang_output_section_statement_type *os)
     if (os_info->isec[i].idx != i)
       break;
   if (i == os_info->count)
-    return FALSE;
+    return false;
 
   /* Now reorder the linker input section statements to reflect the
      proper sorting.  The is done by rewriting the existing statements
@@ -247,19 +247,19 @@ fixup_link_order (lang_output_section_statement_type *os)
       }
   free (save_s);
   free (orig_is);
-  return TRUE;
+  return true;
 }
 
 void
-ldelf_map_segments (bfd_boolean need_layout)
+ldelf_map_segments (bool need_layout)
 {
   int tries = 10;
-  static bfd_boolean done_link_order_scan = FALSE;
+  static bool done_link_order_scan = false;
 
   do
     {
       lang_relax_sections (need_layout);
-      need_layout = FALSE;
+      need_layout = false;
 
       if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
 	{
@@ -267,7 +267,7 @@ ldelf_map_segments (bfd_boolean need_layout)
 	  if (!done_link_order_scan)
 	    {
 	      link_order_scan (statement_list.head, NULL);
-	      done_link_order_scan = TRUE;
+	      done_link_order_scan = true;
 	    }
 	  for (os = (void *) lang_os_list.head; os != NULL; os = os->next)
 	    {
@@ -284,7 +284,7 @@ ldelf_map_segments (bfd_boolean need_layout)
 		    }
 		  if (os_info->count > 1
 		      && fixup_link_order (os))
-		    need_layout = TRUE;
+		    need_layout = true;
 		}
 	    }
 	}
@@ -308,11 +308,11 @@ ldelf_map_segments (bfd_boolean need_layout)
 	      if (tries > 6)
 		/* The first few times we allow any change to
 		   phdr_size .  */
-		need_layout = TRUE;
+		need_layout = true;
 	      else if (phdr_size
 		       < elf_program_header_size (link_info.output_bfd))
 		/* After that we only allow the size to grow.  */
-		need_layout = TRUE;
+		need_layout = true;
 	      else
 		elf_program_header_size (link_info.output_bfd) = phdr_size;
 	    }
@@ -375,13 +375,20 @@ ldelf_ctf_strtab_iter_cb (uint32_t *offset, void *arg_)
   if (arg->next_i == 0)
     arg->next_i = 1;
 
-  if (arg->next_i >= _bfd_elf_strtab_len (arg->strtab))
+  /* Hunt through strings until we fall off the end or find one with
+     a nonzero refcount.  */
+  do
     {
-      arg->next_i = 0;
-      return NULL;
-    }
+      if (arg->next_i >= _bfd_elf_strtab_len (arg->strtab))
+	{
+	  arg->next_i = 0;
+	  return NULL;
+	}
 
-  ret = _bfd_elf_strtab_str (arg->strtab, arg->next_i++, &off);
+      ret = _bfd_elf_strtab_str (arg->strtab, arg->next_i++, &off);
+    }
+  while (ret == NULL);
+
   *offset = off;
 
   /* If we've overflowed, we cannot share any further strings: the CTF

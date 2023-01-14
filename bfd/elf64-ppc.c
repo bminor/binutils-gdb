@@ -26,7 +26,7 @@
    http://www.linuxbase.org/spec/ELF/ppc64/spec/book1.html  */
 
 /* Don't generate unused section symbols.  */
-#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS false
 
 #include "sysdep.h"
 #include <stdarg.h>
@@ -62,7 +62,7 @@ static bfd_reloc_status_type ppc64_elf_prefix_reloc
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_vma opd_entry_value
-  (asection *, bfd_vma, asection **, bfd_vma *, bfd_boolean);
+  (asection *, bfd_vma, asection **, bfd_vma *, bool);
 
 #define TARGET_LITTLE_SYM	powerpc_elf64_le_vec
 #define TARGET_LITTLE_NAME	"elf64-powerpcle"
@@ -308,101 +308,101 @@ set_abiversion (bfd *abfd, int ver)
 	    complain, special_func)				\
   HOWTO (type, rightshift, size, bitsize, pc_relative, 0,	\
 	 complain_overflow_ ## complain, special_func,		\
-	 #type, FALSE, 0, mask, pc_relative)
+	 #type, false, 0, mask, pc_relative)
 
 static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC64_max];
 
 static reloc_howto_type ppc64_elf_howto_raw[] =
 {
   /* This reloc does nothing.  */
-  HOW (R_PPC64_NONE, 3, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_NONE, 3, 0, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* A standard 32 bit relocation.  */
-  HOW (R_PPC64_ADDR32, 2, 32, 0xffffffff, 0, FALSE, bitfield,
+  HOW (R_PPC64_ADDR32, 2, 32, 0xffffffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* An absolute 26 bit branch; the lower two bits must be zero.
      FIXME: we don't check that, we just clear them.  */
-  HOW (R_PPC64_ADDR24, 2, 26, 0x03fffffc, 0, FALSE, bitfield,
+  HOW (R_PPC64_ADDR24, 2, 26, 0x03fffffc, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* A standard 16 bit relocation.  */
-  HOW (R_PPC64_ADDR16, 1, 16, 0xffff, 0, FALSE, bitfield,
+  HOW (R_PPC64_ADDR16, 1, 16, 0xffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relocation without overflow.  */
-  HOW (R_PPC64_ADDR16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_ADDR16_LO, 1, 16, 0xffff, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Bits 16-31 of an address.  */
-  HOW (R_PPC64_ADDR16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_ADDR16_HI, 1, 16, 0xffff, 16, false, signed,
        bfd_elf_generic_reloc),
 
   /* Bits 16-31 of an address, plus 1 if the contents of the low 16
      bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_ADDR16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_ha_reloc),
 
   /* An absolute 16 bit branch; the lower two bits must be zero.
      FIXME: we don't check that, we just clear them.  */
-  HOW (R_PPC64_ADDR14, 2, 16, 0x0000fffc, 0, FALSE, signed,
+  HOW (R_PPC64_ADDR14, 2, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_branch_reloc),
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
      indicate that the branch is expected to be taken.  The lower two
      bits must be zero.  */
-  HOW (R_PPC64_ADDR14_BRTAKEN, 2, 16, 0x0000fffc, 0, FALSE, signed,
+  HOW (R_PPC64_ADDR14_BRTAKEN, 2, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_brtaken_reloc),
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
      indicate that the branch is not expected to be taken.  The lower
      two bits must be zero.  */
-  HOW (R_PPC64_ADDR14_BRNTAKEN, 2, 16, 0x0000fffc, 0, FALSE, signed,
+  HOW (R_PPC64_ADDR14_BRNTAKEN, 2, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_brtaken_reloc),
 
   /* A relative 26 bit branch; the lower two bits must be zero.  */
-  HOW (R_PPC64_REL24, 2, 26, 0x03fffffc, 0, TRUE, signed,
+  HOW (R_PPC64_REL24, 2, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A variant of R_PPC64_REL24, used when r2 is not the toc pointer.  */
-  HOW (R_PPC64_REL24_NOTOC, 2, 26, 0x03fffffc, 0, TRUE, signed,
+  HOW (R_PPC64_REL24_NOTOC, 2, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A relative 16 bit branch; the lower two bits must be zero.  */
-  HOW (R_PPC64_REL14, 2, 16, 0x0000fffc, 0, TRUE, signed,
+  HOW (R_PPC64_REL14, 2, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
      the branch is expected to be taken.  The lower two bits must be
      zero.  */
-  HOW (R_PPC64_REL14_BRTAKEN, 2, 16, 0x0000fffc, 0, TRUE, signed,
+  HOW (R_PPC64_REL14_BRTAKEN, 2, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_brtaken_reloc),
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
      the branch is not expected to be taken.  The lower two bits must
      be zero.  */
-  HOW (R_PPC64_REL14_BRNTAKEN, 2, 16, 0x0000fffc, 0, TRUE, signed,
+  HOW (R_PPC64_REL14_BRNTAKEN, 2, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_brtaken_reloc),
 
   /* Like R_PPC64_ADDR16, but referring to the GOT table entry for the
      symbol.  */
-  HOW (R_PPC64_GOT16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_GOT16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_GOT16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* This is used only by the dynamic linker.  The symbol should exist
@@ -410,148 +410,148 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
      dynamic linker copies the data addressed by the symbol from the
      shared library into the object, because the object being
      run has to have the data at some particular address.  */
-  HOW (R_PPC64_COPY, 0, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_COPY, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR64, but used when setting global offset table
      entries.  */
-  HOW (R_PPC64_GLOB_DAT, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_GLOB_DAT, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Created by the link editor.  Marks a procedure linkage table
      entry for a symbol.  */
-  HOW (R_PPC64_JMP_SLOT, 0, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_JMP_SLOT, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Used only by the dynamic linker.  When the object is run, this
      doubleword64 is set to the load address of the object, plus the
      addend.  */
-  HOW (R_PPC64_RELATIVE, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_RELATIVE, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR32, but may be unaligned.  */
-  HOW (R_PPC64_UADDR32, 2, 32, 0xffffffff, 0, FALSE, bitfield,
+  HOW (R_PPC64_UADDR32, 2, 32, 0xffffffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16, but may be unaligned.  */
-  HOW (R_PPC64_UADDR16, 1, 16, 0xffff, 0, FALSE, bitfield,
+  HOW (R_PPC64_UADDR16, 1, 16, 0xffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* 32-bit PC relative.  */
-  HOW (R_PPC64_REL32, 2, 32, 0xffffffff, 0, TRUE, signed,
+  HOW (R_PPC64_REL32, 2, 32, 0xffffffff, 0, true, signed,
        bfd_elf_generic_reloc),
 
   /* 32-bit relocation to the symbol's procedure linkage table.  */
-  HOW (R_PPC64_PLT32, 2, 32, 0xffffffff, 0, FALSE, bitfield,
+  HOW (R_PPC64_PLT32, 2, 32, 0xffffffff, 0, false, bitfield,
        ppc64_elf_unhandled_reloc),
 
   /* 32-bit PC relative relocation to the symbol's procedure linkage table.
      FIXME: R_PPC64_PLTREL32 not supported.  */
-  HOW (R_PPC64_PLTREL32, 2, 32, 0xffffffff, 0, TRUE, signed,
+  HOW (R_PPC64_PLTREL32, 2, 32, 0xffffffff, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_PLT16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_PLT16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_PLT16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* 16-bit section relative relocation.  */
-  HOW (R_PPC64_SECTOFF, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_SECTOFF, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_SECTOFF, but no overflow warning.  */
-  HOW (R_PPC64_SECTOFF_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_SECTOFF_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_sectoff_reloc),
 
   /* 16-bit upper half section relative relocation.  */
-  HOW (R_PPC64_SECTOFF_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_SECTOFF_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* 16-bit upper half adjusted section relative relocation.  */
-  HOW (R_PPC64_SECTOFF_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_SECTOFF_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_sectoff_ha_reloc),
 
   /* Like R_PPC64_REL24 without touching the two least significant bits.  */
-  HOW (R_PPC64_REL30, 2, 30, 0xfffffffc, 2, TRUE, dont,
+  HOW (R_PPC64_REL30, 2, 30, 0xfffffffc, 2, true, dont,
        bfd_elf_generic_reloc),
 
   /* Relocs in the 64-bit PowerPC ELF ABI, not in the 32-bit ABI.  */
 
   /* A standard 64-bit relocation.  */
-  HOW (R_PPC64_ADDR64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_ADDR64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 32-47 of an address.  */
-  HOW (R_PPC64_ADDR16_HIGHER, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHER, 1, 16, 0xffff, 32, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 32-47 of an address, plus 1 if the contents of the low
      16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HIGHERA, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
        ppc64_elf_ha_reloc),
 
   /* The bits 48-63 of an address.  */
-  HOW (R_PPC64_ADDR16_HIGHEST, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 48-63 of an address, plus 1 if the contents of the low
      16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HIGHESTA, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
        ppc64_elf_ha_reloc),
 
   /* Like ADDR64, but may be unaligned.  */
-  HOW (R_PPC64_UADDR64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_UADDR64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* 64-bit relative relocation.  */
-  HOW (R_PPC64_REL64, 4, 64, 0xffffffffffffffffULL, 0, TRUE, dont,
+  HOW (R_PPC64_REL64, 4, 64, 0xffffffffffffffffULL, 0, true, dont,
        bfd_elf_generic_reloc),
 
   /* 64-bit relocation to the symbol's procedure linkage table.  */
-  HOW (R_PPC64_PLT64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_PLT64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* 64-bit PC relative relocation to the symbol's procedure linkage
      table.  */
   /* FIXME: R_PPC64_PLTREL64 not supported.  */
-  HOW (R_PPC64_PLTREL64, 4, 64, 0xffffffffffffffffULL, 0, TRUE, dont,
+  HOW (R_PPC64_PLTREL64, 4, 64, 0xffffffffffffffffULL, 0, true, dont,
        ppc64_elf_unhandled_reloc),
 
   /* 16 bit TOC-relative relocation.  */
   /* R_PPC64_TOC16	  47	   half16*	S + A - .TOC.  */
-  HOW (R_PPC64_TOC16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_TOC16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation without overflow.  */
   /* R_PPC64_TOC16_LO	  48	   half16	 #lo (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_TOC16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation, high 16 bits.  */
   /* R_PPC64_TOC16_HI	  49	   half16	 #hi (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_TOC16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation, high 16 bits, plus 1 if the
      contents of the low 16 bits, treated as a signed number, is
      negative.  */
   /* R_PPC64_TOC16_HA	  50	   half16	 #ha (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_TOC16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_toc_ha_reloc),
 
   /* 64-bit relocation; insert value of TOC base (.TOC.).  */
   /* R_PPC64_TOC		  51	   doubleword64	 .TOC.  */
-  HOW (R_PPC64_TOC, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_TOC, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_toc64_reloc),
 
   /* Like R_PPC64_GOT16, but also informs the link editor that the
@@ -563,428 +563,428 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
      The link editor may also skip all of this and just (c) emit a
      R_PPC64_GLOB_DAT to tie the symbol to the GOT entry.  */
   /* FIXME: R_PPC64_PLTGOT16 not implemented.  */
-    HOW (R_PPC64_PLTGOT16, 1, 16, 0xffff, 0, FALSE,signed,
+    HOW (R_PPC64_PLTGOT16, 1, 16, 0xffff, 0, false,signed,
 	  ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLTGOT16, but without overflow.  */
   /* FIXME: R_PPC64_PLTGOT16_LO not implemented.  */
-  HOW (R_PPC64_PLTGOT16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_PLTGOT16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT_GOT16, but using bits 16-31 of the address.  */
   /* FIXME: R_PPC64_PLTGOT16_HI not implemented.  */
-  HOW (R_PPC64_PLTGOT16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_PLTGOT16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT_GOT16, but using bits 16-31 of the address, plus
      1 if the contents of the low 16 bits, treated as a signed number,
      is negative.  */
   /* FIXME: R_PPC64_PLTGOT16_HA not implemented.  */
-  HOW (R_PPC64_PLTGOT16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_PLTGOT16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16, but for instructions with a DS field.  */
-  HOW (R_PPC64_ADDR16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_ADDR16_DS, 1, 16, 0xfffc, 0, false, signed,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_ADDR16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_ADDR16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_GOT16, but for instructions with a DS field.  */
-  HOW (R_PPC64_GOT16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_GOT16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_GOT16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_GOT16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_GOT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_PLT16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_PLT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_SECTOFF, but for instructions with a DS field.  */
-  HOW (R_PPC64_SECTOFF_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_SECTOFF_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_SECTOFF_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_SECTOFF_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_SECTOFF_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_TOC16, but for instructions with a DS field.  */
-  HOW (R_PPC64_TOC16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_TOC16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_toc_reloc),
 
   /* Like R_PPC64_TOC16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_TOC16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_TOC16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_toc_reloc),
 
   /* Like R_PPC64_PLTGOT16, but for instructions with a DS field.  */
   /* FIXME: R_PPC64_PLTGOT16_DS not implemented.  */
-  HOW (R_PPC64_PLTGOT16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_PLTGOT16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLTGOT16_LO, but for instructions with a DS field.  */
   /* FIXME: R_PPC64_PLTGOT16_LO not implemented.  */
-  HOW (R_PPC64_PLTGOT16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_PLTGOT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Marker relocs for TLS.  */
-  HOW (R_PPC64_TLS, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_TLS, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_TLSGD, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_TLSGD, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_TLSLD, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_TLSLD, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Marker reloc for optimizing r2 save in prologue rather than on
      each plt call stub.  */
-  HOW (R_PPC64_TOCSAVE, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_TOCSAVE, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Marker relocs on inline plt call instructions.  */
-  HOW (R_PPC64_PLTSEQ, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_PLTSEQ, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTCALL, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_PLTCALL, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Computes the load module index of the load module that contains the
      definition of its TLS sym.  */
-  HOW (R_PPC64_DTPMOD64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_DTPMOD64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Computes a dtv-relative displacement, the difference between the value
      of sym+add and the base address of the thread-local storage block that
      contains the definition of sym, minus 0x8000.  */
-  HOW (R_PPC64_DTPREL64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_DTPREL64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* A 16 bit dtprel reloc.  */
-  HOW (R_PPC64_DTPREL16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_DTPREL16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_DTPREL16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_DTPREL16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HI, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHER, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGHER, 1, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHER, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHERA, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHER, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHEST, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHEST, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHESTA, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16, but for insns with a DS field.  */
-  HOW (R_PPC64_DTPREL16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_DTPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Computes a tp-relative displacement, the difference between the value of
      sym+add and the value of the thread pointer (r13).  */
-  HOW (R_PPC64_TPREL64, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_TPREL64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* A 16 bit tprel reloc.  */
-  HOW (R_PPC64_TPREL16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_TPREL16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16, but no overflow.  */
-  HOW (R_PPC64_TPREL16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_TPREL16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_TPREL16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_TPREL16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HI, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHER, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGHER, 1, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHER, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHERA, 1, 16, 0xffff, 32, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHER, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHEST, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHEST, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHESTA, 1, 16, 0xffff, 48, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16, but for insns with a DS field.  */
-  HOW (R_PPC64_TPREL16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_TPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_TPREL16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_TPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates two contiguous entries in the GOT to hold a tls_index structure,
      with values (sym+add)@dtpmod and (sym+add)@dtprel, and computes the offset
      to the first entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TLSGD16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSGD16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16, but no overflow.  */
-  HOW (R_PPC64_GOT_TLSGD16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_GOT_TLSGD16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TLSGD16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSGD16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TLSGD16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSGD16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates two contiguous entries in the GOT to hold a tls_index structure,
      with values (sym+add)@dtpmod and zero, and computes the offset to the
      first entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TLSLD16, 1, 16, 0xffff, 0, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSLD16, 1, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16, but no overflow.  */
-  HOW (R_PPC64_GOT_TLSLD16_LO, 1, 16, 0xffff, 0, FALSE, dont,
+  HOW (R_PPC64_GOT_TLSLD16_LO, 1, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TLSLD16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSLD16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TLSLD16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TLSLD16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates an entry in the GOT with value (sym+add)@dtprel, and computes
      the offset to the entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_DTPREL16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_GOT_DTPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_GOT_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_GOT_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_LO_DS, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_DTPREL16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_DTPREL16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_DTPREL16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_DTPREL16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates an entry in the GOT with value (sym+add)@tprel, and computes the
      offset to the entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TPREL16_DS, 1, 16, 0xfffc, 0, FALSE, signed,
+  HOW (R_PPC64_GOT_TPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_GOT_TPREL16_LO_DS, 1, 16, 0xfffc, 0, FALSE, dont,
+  HOW (R_PPC64_GOT_TPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_LO_DS, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TPREL16_HI, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TPREL16_HI, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TPREL16_HA, 1, 16, 0xffff, 16, FALSE, signed,
+  HOW (R_PPC64_GOT_TPREL16_HA, 1, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_JMP_IREL, 0, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_JMP_IREL, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_IRELATIVE, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_IRELATIVE, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relative relocation.  */
-  HOW (R_PPC64_REL16, 1, 16, 0xffff, 0, TRUE, signed,
+  HOW (R_PPC64_REL16, 1, 16, 0xffff, 0, true, signed,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relative relocation without overflow.  */
-  HOW (R_PPC64_REL16_LO, 1, 16, 0xffff, 0, TRUE, dont,
+  HOW (R_PPC64_REL16_LO, 1, 16, 0xffff, 0, true, dont,
        bfd_elf_generic_reloc),
 
   /* The high order 16 bits of a relative address.  */
-  HOW (R_PPC64_REL16_HI, 1, 16, 0xffff, 16, TRUE, signed,
+  HOW (R_PPC64_REL16_HI, 1, 16, 0xffff, 16, true, signed,
        bfd_elf_generic_reloc),
 
   /* The high order 16 bits of a relative address, plus 1 if the contents of
      the low 16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_REL16_HA, 1, 16, 0xffff, 16, TRUE, signed,
+  HOW (R_PPC64_REL16_HA, 1, 16, 0xffff, 16, true, signed,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGH, 1, 16, 0xffff, 16, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGH, 1, 16, 0xffff, 16, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHA, 1, 16, 0xffff, 16, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHA, 1, 16, 0xffff, 16, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHER, 1, 16, 0xffff, 32, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHER, 1, 16, 0xffff, 32, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHERA, 1, 16, 0xffff, 32, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHERA, 1, 16, 0xffff, 32, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHEST, 1, 16, 0xffff, 48, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHEST, 1, 16, 0xffff, 48, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHESTA, 1, 16, 0xffff, 48, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHESTA, 1, 16, 0xffff, 48, true, dont,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_REL16_HA but for split field in addpcis.  */
-  HOW (R_PPC64_REL16DX_HA, 2, 16, 0x1fffc1, 16, TRUE, signed,
+  HOW (R_PPC64_REL16DX_HA, 2, 16, 0x1fffc1, 16, true, signed,
        ppc64_elf_ha_reloc),
 
   /* A split-field reloc for addpcis, non-relative (gas internal use only).  */
-  HOW (R_PPC64_16DX_HA, 2, 16, 0x1fffc1, 16, FALSE, signed,
+  HOW (R_PPC64_16DX_HA, 2, 16, 0x1fffc1, 16, false, signed,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but no overflow.  */
-  HOW (R_PPC64_ADDR16_HIGH, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGH, 1, 16, 0xffff, 16, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but no overflow.  */
-  HOW (R_PPC64_ADDR16_HIGHA, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHA, 1, 16, 0xffff, 16, false, dont,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_DTPREL16_HI, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_HIGH, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGH, 1, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_DTPREL16_HA, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_HIGHA, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_DTPREL16_HIGHA, 1, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_TPREL16_HI, but no overflow.  */
-  HOW (R_PPC64_TPREL16_HIGH, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGH, 1, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_TPREL16_HA, but no overflow.  */
-  HOW (R_PPC64_TPREL16_HIGHA, 1, 16, 0xffff, 16, FALSE, dont,
+  HOW (R_PPC64_TPREL16_HIGHA, 1, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Marker reloc on ELFv2 large-model function entry.  */
-  HOW (R_PPC64_ENTRY, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_ENTRY, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like ADDR64, but use local entry point of function.  */
-  HOW (R_PPC64_ADDR64_LOCAL, 4, 64, 0xffffffffffffffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_ADDR64_LOCAL, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTSEQ_NOTOC, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_PLTSEQ_NOTOC, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTCALL_NOTOC, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_PLTCALL_NOTOC, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PCREL_OPT, 2, 32, 0, 0, FALSE, dont,
+  HOW (R_PPC64_PCREL_OPT, 2, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_D34, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, signed,
+  HOW (R_PPC64_D34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_LO, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, dont,
+  HOW (R_PPC64_D34_LO, 4, 34, 0x3ffff0000ffffULL, 0, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_HI30, 4, 34, 0x3ffff0000ffffULL, 34, FALSE, dont,
+  HOW (R_PPC64_D34_HI30, 4, 34, 0x3ffff0000ffffULL, 34, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_HA30, 4, 34, 0x3ffff0000ffffULL, 34, FALSE, dont,
+  HOW (R_PPC64_D34_HA30, 4, 34, 0x3ffff0000ffffULL, 34, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_GOT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_GOT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_PLT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_PLT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_PLT_PCREL34_NOTOC, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_PLT_PCREL34_NOTOC, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_TPREL34, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, signed,
+  HOW (R_PPC64_TPREL34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_DTPREL34, 4, 34, 0x3ffff0000ffffULL, 0, FALSE, signed,
+  HOW (R_PPC64_DTPREL34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TLSGD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_GOT_TLSGD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TLSLD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_GOT_TLSLD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_GOT_TPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_DTPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_GOT_DTPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHER34, 1, 16, 0xffff, 34, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHER34, 1, 16, 0xffff, 34, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHERA34, 1, 16, 0xffff, 34, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHERA34, 1, 16, 0xffff, 34, false, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHEST34, 1, 16, 0xffff, 50, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHEST34, 1, 16, 0xffff, 50, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHESTA34, 1, 16, 0xffff, 50, FALSE, dont,
+  HOW (R_PPC64_ADDR16_HIGHESTA34, 1, 16, 0xffff, 50, false, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHER34, 1, 16, 0xffff, 34, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHER34, 1, 16, 0xffff, 34, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHERA34, 1, 16, 0xffff, 34, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHERA34, 1, 16, 0xffff, 34, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHEST34, 1, 16, 0xffff, 50, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHEST34, 1, 16, 0xffff, 50, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHESTA34, 1, 16, 0xffff, 50, TRUE, dont,
+  HOW (R_PPC64_REL16_HIGHESTA34, 1, 16, 0xffff, 50, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_D28, 4, 28, 0xfff0000ffffULL, 0, FALSE, signed,
+  HOW (R_PPC64_D28, 4, 28, 0xfff0000ffffULL, 0, false, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_PCREL28, 4, 28, 0xfff0000ffffULL, 0, TRUE, signed,
+  HOW (R_PPC64_PCREL28, 4, 28, 0xfff0000ffffULL, 0, true, signed,
        ppc64_elf_prefix_reloc),
 
   /* GNU extension to record C++ vtable hierarchy.  */
-  HOW (R_PPC64_GNU_VTINHERIT, 0, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_GNU_VTINHERIT, 0, 0, 0, 0, false, dont,
        NULL),
 
   /* GNU extension to record C++ vtable member usage.  */
-  HOW (R_PPC64_GNU_VTENTRY, 0, 0, 0, 0, FALSE, dont,
+  HOW (R_PPC64_GNU_VTENTRY, 0, 0, 0, 0, false, dont,
        NULL),
 };
 
@@ -1356,7 +1356,7 @@ ppc64_elf_reloc_name_lookup (bfd *abfd, const char *r_name)
 
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 			 Elf_Internal_Rela *dst)
 {
@@ -1373,7 +1373,7 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
   if (cache_ptr->howto == NULL || cache_ptr->howto->name == NULL)
@@ -1382,10 +1382,10 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Handle the R_PPC64_ADDR16_HA and similar relocs.  */
@@ -1456,7 +1456,7 @@ ppc64_elf_branch_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
     {
       bfd_vma dest = opd_entry_value (symbol->section,
 				      symbol->value + reloc_entry->addend,
-				      NULL, NULL, FALSE);
+				      NULL, NULL, false);
       if (dest != (bfd_vma) -1)
 	reloc_entry->addend = dest - (symbol->value
 				      + symbol->section->output_section->vma
@@ -1498,7 +1498,7 @@ ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   enum elf_ppc64_reloc_type r_type;
   bfd_size_type octets;
   /* Assume 'at' branch hints.  */
-  bfd_boolean is_isa_v2 = TRUE;
+  bool is_isa_v2 = true;
 
   /* If this is a relocatable link (output_bfd test tells us), just
      call the generic function.  Any adjustment will be done at final
@@ -1826,7 +1826,7 @@ struct ppc64_elf_obj_tdata
 
 /* Override the generic function because we store some extras.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct ppc64_elf_obj_tdata),
@@ -1836,11 +1836,11 @@ ppc64_elf_mkobject (bfd *abfd)
 /* Fix bad default arch selected for a 64 bit input bfd when the
    default is 32 bit.  Also select arch based on apuinfo.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_object_p (bfd *abfd)
 {
   if (!abfd->arch_info->the_default)
-    return TRUE;
+    return true;
 
   if (abfd->arch_info->bits_per_word == 32)
     {
@@ -1858,13 +1858,13 @@ ppc64_elf_object_p (bfd *abfd)
 
 /* Support for core dump NOTE sections.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   size_t offset, size;
 
   if (note->descsz != 504)
-    return FALSE;
+    return false;
 
   /* pr_cursig */
   elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
@@ -1881,11 +1881,11 @@ ppc64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 					  size, note->descpos + offset);
 }
 
-static bfd_boolean
+static bool
 ppc64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   if (note->descsz != 136)
-    return FALSE;
+    return false;
 
   elf_tdata (abfd)->core->pid
     = bfd_get_32 (abfd, note->descdata + 24);
@@ -1894,7 +1894,7 @@ ppc64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   elf_tdata (abfd)->core->command
     = _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
 
-  return TRUE;
+  return true;
 }
 
 static char *
@@ -2020,7 +2020,7 @@ struct _ppc64_elf_section_data
 #define ppc64_elf_section_data(sec) \
   ((struct _ppc64_elf_section_data *) elf_section_data (sec))
 
-static bfd_boolean
+static bool
 ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
 {
   if (!sec->used_by_bfd)
@@ -2030,23 +2030,23 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
 
       sdata = bfd_zalloc (abfd, amt);
       if (sdata == NULL)
-	return FALSE;
+	return false;
       sec->used_by_bfd = sdata;
     }
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
 
-static bfd_boolean
+static bool
 ppc64_elf_section_flags (const Elf_Internal_Shdr *hdr)
 {
   const char *name = hdr->bfd_section->name;
 
-  if (strncmp (name, ".sbss", 5) == 0
-      || strncmp (name, ".sdata", 6) == 0)
+  if (startswith (name, ".sbss")
+      || startswith (name, ".sdata"))
     hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
-  return TRUE;
+  return true;
 }
 
 static struct _opd_sec_data *
@@ -2060,7 +2060,7 @@ get_opd_info (asection * sec)
 }
 
 /* Parameters for the qsort hook.  */
-static bfd_boolean synthetic_relocatable;
+static bool synthetic_relocatable;
 static const asection *synthetic_opd;
 
 /* qsort comparison function for ppc64_elf_get_synthetic_symtab.  */
@@ -2196,7 +2196,7 @@ sym_exists_at (asymbol **syms, size_t lo, size_t hi, unsigned int id,
   return NULL;
 }
 
-static bfd_boolean
+static bool
 section_covers_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *ptr)
 {
   bfd_vma vma = *(bfd_vma *) ptr;
@@ -2220,7 +2220,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   char *names;
   size_t symcount, codesecsym, codesecsymend, secsymend, opdsymend;
   asection *opd = NULL;
-  bfd_boolean relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
+  bool relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
   asymbol **syms;
   int abi = abiversion (abfd);
 
@@ -2336,7 +2336,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
   if (relocatable)
     {
-      bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+      bool (*slurp_relocs) (bfd *, asection *, asymbol **, bool);
       arelent *r;
       size_t size;
       size_t relcount;
@@ -2349,7 +2349,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       if (relcount == 0)
 	goto done;
 
-      if (!(*slurp_relocs) (abfd, opd, static_syms, FALSE))
+      if (!(*slurp_relocs) (abfd, opd, static_syms, false))
 	{
 	  count = -1;
 	  goto done;
@@ -2435,7 +2435,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     }
   else
     {
-      bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+      bool (*slurp_relocs) (bfd *, asection *, asymbol **, bool);
       bfd_byte *contents = NULL;
       size_t size;
       size_t plt_count = 0;
@@ -2541,7 +2541,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	  if (relplt != NULL)
 	    {
 	      slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-	      if (!(*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
+	      if (!(*slurp_relocs) (abfd, relplt, dyn_syms, true))
 		goto free_contents_and_exit_err;
 
 	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
@@ -3529,7 +3529,7 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
 
 /* Create sections for linker generated code.  */
 
-static bfd_boolean
+static bool
 create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -3546,18 +3546,18 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 						       flags);
       if (htab->sfpr == NULL
 	  || !bfd_set_section_alignment (htab->sfpr, 2))
-	return FALSE;
+	return false;
     }
 
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   /* Create .glink for lazy dynamic linking support.  */
   htab->glink = bfd_make_section_anyway_with_flags (dynobj, ".glink",
 						    flags);
   if (htab->glink == NULL
       || !bfd_set_section_alignment (htab->glink, 3))
-    return FALSE;
+    return false;
 
   /* The part of .glink used by global entry stubs, separate so that
      it can be aligned appropriately without affecting htab->glink.  */
@@ -3565,7 +3565,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 							   flags);
   if (htab->global_entry == NULL
       || !bfd_set_section_alignment (htab->global_entry, 2))
-    return FALSE;
+    return false;
 
   if (!info->no_ld_generated_unwind_info)
     {
@@ -3576,14 +3576,14 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 								 flags);
       if (htab->glink_eh_frame == NULL
 	  || !bfd_set_section_alignment (htab->glink_eh_frame, 2))
-	return FALSE;
+	return false;
     }
 
   flags = SEC_ALLOC | SEC_LINKER_CREATED;
   htab->elf.iplt = bfd_make_section_anyway_with_flags (dynobj, ".iplt", flags);
   if (htab->elf.iplt == NULL
       || !bfd_set_section_alignment (htab->elf.iplt, 3))
-    return FALSE;
+    return false;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
@@ -3591,7 +3591,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.iplt", flags);
   if (htab->elf.irelplt == NULL
       || !bfd_set_section_alignment (htab->elf.irelplt, 3))
-    return FALSE;
+    return false;
 
   /* Create branch lookup table for plt_branch stubs.  */
   flags = (SEC_ALLOC | SEC_LOAD
@@ -3600,7 +3600,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 						   flags);
   if (htab->brlt == NULL
       || !bfd_set_section_alignment (htab->brlt, 3))
-    return FALSE;
+    return false;
 
   /* Local plt entries, put in .branch_lt but a separate section for
      convenience.  */
@@ -3608,10 +3608,10 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 						       flags);
   if (htab->pltlocal == NULL
       || !bfd_set_section_alignment (htab->pltlocal, 3))
-    return FALSE;
+    return false;
 
   if (!bfd_link_pic (info))
-    return TRUE;
+    return true;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
@@ -3619,20 +3619,20 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.branch_lt", flags);
   if (htab->relbrlt == NULL
       || !bfd_set_section_alignment (htab->relbrlt, 3))
-    return FALSE;
+    return false;
 
   htab->relpltlocal
     = bfd_make_section_anyway_with_flags (dynobj, ".rela.branch_lt", flags);
   if (htab->relpltlocal == NULL
       || !bfd_set_section_alignment (htab->relpltlocal, 3))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Satisfy the ELF linker by filling in some fields in our fake bfd.  */
 
-bfd_boolean
+bool
 ppc64_elf_init_stub_bfd (struct bfd_link_info *info,
 			 struct ppc64_elf_params *params)
 {
@@ -3706,9 +3706,9 @@ ppc_stub_name (const asection *input_section,
    occurs.  This function selects the correct entry to use.  */
 
 static struct ppc_stub_hash_entry *
-select_alt_stub (struct ppc_stub_hash_entry *entry, bfd_boolean notoc)
+select_alt_stub (struct ppc_stub_hash_entry *entry, bool notoc)
 {
-  bfd_boolean have_notoc;
+  bool have_notoc;
 
   have_notoc = (entry->stub_type == ppc_stub_plt_call_notoc
 		|| entry->stub_type == ppc_stub_plt_branch_notoc
@@ -3764,7 +3764,7 @@ ppc_get_stub_entry (const asection *input_section,
 	return NULL;
 
       stub_entry = ppc_stub_hash_lookup (&htab->stub_hash_table,
-					 stub_name, FALSE, FALSE);
+					 stub_name, false, false);
       if (h != NULL)
 	h->u.stub_cache = stub_entry;
 
@@ -3773,7 +3773,7 @@ ppc_get_stub_entry (const asection *input_section,
 
   if (stub_entry != NULL && htab->params->power10_stubs == -1)
     {
-      bfd_boolean notoc = ELF64_R_TYPE (rel->r_info) == R_PPC64_REL24_NOTOC;
+      bool notoc = ELF64_R_TYPE (rel->r_info) == R_PPC64_REL24_NOTOC;
 
       stub_entry = select_alt_stub (stub_entry, notoc);
     }
@@ -3820,7 +3820,7 @@ ppc_add_stub (const char *stub_name,
 
   /* Enter this entry into the linker stub hash table.  */
   stub_entry = ppc_stub_hash_lookup (&htab->stub_hash_table, stub_name,
-				     TRUE, FALSE);
+				     true, false);
   if (stub_entry == NULL)
     {
       /* xgettext:c-format */
@@ -3837,7 +3837,7 @@ ppc_add_stub (const char *stub_name,
 /* Create .got and .rela.got sections in ABFD, and .got in dynobj if
    not already done.  */
 
-static bfd_boolean
+static bool
 create_got_section (bfd *abfd, struct bfd_link_info *info)
 {
   asection *got, *relgot;
@@ -3845,13 +3845,13 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   if (!is_ppc64_elf (abfd))
-    return FALSE;
+    return false;
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (!htab->elf.sgot
       && !_bfd_elf_create_got_section (htab->elf.dynobj, info))
-    return FALSE;
+    return false;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
@@ -3859,17 +3859,17 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   got = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (!got
       || !bfd_set_section_alignment (got, 3))
-    return FALSE;
+    return false;
 
   relgot = bfd_make_section_anyway_with_flags (abfd, ".rela.got",
 					       flags | SEC_READONLY);
   if (!relgot
       || !bfd_set_section_alignment (relgot, 3))
-    return FALSE;
+    return false;
 
   ppc64_elf_tdata (abfd)->got = got;
   ppc64_elf_tdata (abfd)->relgot = relgot;
-  return TRUE;
+  return true;
 }
 
 /* Follow indirect and warning symbol links.  */
@@ -4057,7 +4057,7 @@ lookup_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
       const char *fd_name = fh->elf.root.root.string + 1;
 
       fdh = ppc_elf_hash_entry (elf_link_hash_lookup (&htab->elf, fd_name,
-						      FALSE, FALSE, FALSE));
+						      false, false, false));
       if (fdh == NULL)
 	return fdh;
 
@@ -4089,7 +4089,7 @@ make_fdh (struct bfd_link_info *info,
   if (!_bfd_generic_link_add_one_symbol (info, abfd,
 					 fh->elf.root.root.string + 1,
 					 flags, bfd_und_section_ptr, 0,
-					 NULL, FALSE, FALSE, &bh))
+					 NULL, false, false, &bh))
     return NULL;
 
   fdh = (struct ppc_link_hash_entry *) bh;
@@ -4105,7 +4105,7 @@ make_fdh (struct bfd_link_info *info,
 /* Fix function descriptor symbols defined in .opd sections to be
    function type.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   struct bfd_link_info *info,
 			   Elf_Internal_Sym *isym,
@@ -4128,7 +4128,7 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
       if (!bfd_link_relocatable (info)
 	  && (*sec)->reloc_count != 0
 	  && opd_entry_value (*sec, *value, &code_sec, NULL,
-			      FALSE) != (bfd_vma) -1
+			      false) != (bfd_vma) -1
 	  && discarded_section (code_sec))
 	{
 	  *sec = bfd_und_section_ptr;
@@ -4153,11 +4153,11 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 	  _bfd_error_handler (_("symbol '%s' has invalid st_other"
 				" for ABI version 1"), *name);
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Merge non-visibility st_other attributes: local entry point.  */
@@ -4165,8 +4165,8 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 static void
 ppc64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				  unsigned int st_other,
-				  bfd_boolean definition,
-				  bfd_boolean dynamic)
+				  bool definition,
+				  bool dynamic)
 {
   if (definition && (!dynamic || !h->def_regular))
     h->other = ((st_other & ~ELF_ST_VISIBILITY (-1))
@@ -4176,19 +4176,19 @@ ppc64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 /* Hook called on merging a symbol.  We use this to clear "fake" since
    we now have a real symbol.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_merge_symbol (struct elf_link_hash_entry *h,
 			const Elf_Internal_Sym *isym,
 			asection **psec ATTRIBUTE_UNUSED,
-			bfd_boolean newdef ATTRIBUTE_UNUSED,
-			bfd_boolean olddef ATTRIBUTE_UNUSED,
+			bool newdef ATTRIBUTE_UNUSED,
+			bool olddef ATTRIBUTE_UNUSED,
 			bfd *oldbfd ATTRIBUTE_UNUSED,
 			const asection *oldsec ATTRIBUTE_UNUSED)
 {
   ppc_elf_hash_entry (h)->fake = 0;
   if ((STO_PPC64_LOCAL_MASK & isym->st_other) != 0)
     ppc_elf_hash_entry (h)->non_zero_localentry = 1;
-  return TRUE;
+  return true;
 }
 
 /* This function makes an old ABI object reference to ".bar" cause the
@@ -4196,20 +4196,21 @@ ppc64_elf_merge_symbol (struct elf_link_hash_entry *h,
    NAME is a symbol defined in an archive.  Return a symbol in the hash
    table that might be satisfied by the archive symbols.  */
 
-static struct elf_link_hash_entry *
+static struct bfd_link_hash_entry *
 ppc64_elf_archive_symbol_lookup (bfd *abfd,
 				 struct bfd_link_info *info,
 				 const char *name)
 {
-  struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *h;
   char *dot_name;
   size_t len;
 
   h = _bfd_elf_archive_symbol_lookup (abfd, info, name);
   if (h != NULL
+      && ppc_hash_table (info) != NULL
       /* Don't return this sym if it is a fake function descriptor
 	 created by add_symbol_adjust.  */
-      && !ppc_elf_hash_entry (h)->fake)
+      && !((struct ppc_link_hash_entry *) h)->fake)
     return h;
 
   if (name[0] == '.')
@@ -4218,7 +4219,7 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
   len = strlen (name);
   dot_name = bfd_alloc (abfd, len + 2);
   if (dot_name == NULL)
-    return (struct elf_link_hash_entry *) -1;
+    return (struct bfd_link_hash_entry *) -1;
   dot_name[0] = '.';
   memcpy (dot_name + 1, name, len + 1);
   h = _bfd_elf_archive_symbol_lookup (abfd, info, dot_name);
@@ -4240,7 +4241,7 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
    most restrictive visibility of the function descriptor and the
    function entry symbol is used.  */
 
-static bfd_boolean
+static bool
 add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -4250,14 +4251,14 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
     eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
 
   if (eh->elf.root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   if (eh->elf.root.root.string[0] != '.')
     abort ();
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   fdh = lookup_fdh (eh, htab);
   if (fdh == NULL
@@ -4271,7 +4272,7 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 	 elsewhere.  */
       fdh = make_fdh (info, eh);
       if (fdh == NULL)
-	return FALSE;
+	return false;
     }
 
   if (fdh != NULL)
@@ -4303,17 +4304,17 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 	      || eh->elf.def_regular))
 	{
 	  if (!bfd_elf_link_record_dynamic_symbol (info, &fdh->elf))
-	    return FALSE;
+	    return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Set up opd section info and abiversion for IBFD, and process list
    of dot-symbols we made in link_hash_newfunc.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -4333,7 +4334,7 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 	  _bfd_error_handler (_("%pB .opd not allowed in ABI version %d"),
 			      ibfd, abiversion (ibfd));
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 	}
     }
 
@@ -4353,7 +4354,7 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return TRUE;
+    return true;
 
   if (opd != NULL && opd->size != 0
       && (ibfd->flags & DYNAMIC) == 0
@@ -4377,12 +4378,12 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
       amt = OPD_NDX (opd->size) * sizeof (*opd_sym_map);
       opd_sym_map = bfd_zalloc (ibfd, amt);
       if (opd_sym_map == NULL)
-	return FALSE;
+	return false;
       ppc64_elf_section_data (opd)->u.opd.func_sec = opd_sym_map;
       relocs = _bfd_elf_link_read_relocs (ibfd, opd, NULL, NULL,
 					  info->keep_memory);
       if (relocs == NULL)
-	return FALSE;
+	return false;
       symtab_hdr = &elf_symtab_hdr (ibfd);
       rel_end = relocs + opd->reloc_count - 1;
       for (rel = relocs; rel < rel_end; rel++)
@@ -4403,7 +4404,7 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 		{
 		  if (elf_section_data (opd)->relocs != relocs)
 		    free (relocs);
-		  return FALSE;
+		  return false;
 		}
 
 	      s = bfd_section_from_elf_index (ibfd, isym->st_shndx);
@@ -4428,17 +4429,17 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  htab->need_func_desc_adj = 1;
 	  if (!add_symbol_adjust (eh, info))
-	    return FALSE;
+	    return false;
 	}
       p = &eh->u.next_dot_sym;
     }
-  return TRUE;
+  return true;
 }
 
 /* Undo hash table changes when an --as-needed input file is determined
    not to be needed.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_notice_as_needed (bfd *ibfd,
 			    struct bfd_link_info *info,
 			    enum notice_asneeded_action act)
@@ -4448,7 +4449,7 @@ ppc64_elf_notice_as_needed (bfd *ibfd,
       struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
       if (htab == NULL)
-	return FALSE;
+	return false;
 
       htab->dot_syms = NULL;
     }
@@ -4507,12 +4508,12 @@ update_local_sym_info (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	  size_t amt = sizeof (*ent);
 	  ent = bfd_alloc (abfd, amt);
 	  if (ent == NULL)
-	    return FALSE;
+	    return false;
 	  ent->next = local_got_ents[r_symndx];
 	  ent->addend = r_addend;
 	  ent->owner = abfd;
 	  ent->tls_type = tls_type;
-	  ent->is_indirect = FALSE;
+	  ent->is_indirect = false;
 	  ent->got.refcount = 0;
 	  local_got_ents[r_symndx] = ent;
 	}
@@ -4526,7 +4527,7 @@ update_local_sym_info (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   return local_plt + r_symndx;
 }
 
-static bfd_boolean
+static bool
 update_plt_info (bfd *abfd, struct plt_entry **plist, bfd_vma addend)
 {
   struct plt_entry *ent;
@@ -4539,17 +4540,17 @@ update_plt_info (bfd *abfd, struct plt_entry **plist, bfd_vma addend)
       size_t amt = sizeof (*ent);
       ent = bfd_alloc (abfd, amt);
       if (ent == NULL)
-	return FALSE;
+	return false;
       ent->next = *plist;
       ent->addend = addend;
       ent->plt.refcount = 0;
       *plist = ent;
     }
   ent->plt.refcount += 1;
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_branch_reloc (enum elf_ppc64_reloc_type r_type)
 {
   return (r_type == R_PPC64_REL24
@@ -4567,7 +4568,7 @@ is_branch_reloc (enum elf_ppc64_reloc_type r_type)
 
 /* Relocs on inline plt call sequence insns prior to the call.  */
 
-static bfd_boolean
+static bool
 is_plt_seq_reloc (enum elf_ppc64_reloc_type r_type)
 {
   return (r_type == R_PPC64_PLT16_HA
@@ -4584,7 +4585,7 @@ is_plt_seq_reloc (enum elf_ppc64_reloc_type r_type)
    calculate needed space in the global offset table, procedure
    linkage table, and dynamic reloc sections.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			asection *sec, const Elf_Internal_Rela *relocs)
 {
@@ -4595,21 +4596,21 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   struct elf_link_hash_entry *tga, *dottga;
-  bfd_boolean is_opd;
+  bool is_opd;
 
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   BFD_ASSERT (is_ppc64_elf (abfd));
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   tga = elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
-			      FALSE, FALSE, TRUE);
+			      false, false, true);
   dottga = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
-				 FALSE, FALSE, TRUE);
+				 false, false, true);
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   sreloc = NULL;
@@ -4702,7 +4703,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 							  abfd, r_symndx);
 	  if (isym == NULL)
-	    return FALSE;
+	    return false;
 
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
@@ -4710,7 +4711,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					     rel->r_addend,
 					     NON_GOT | PLT_IFUNC);
 	      if (ifunc == NULL)
-		return FALSE;
+		return false;
 	    }
 	}
 
@@ -4727,7 +4728,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					rel->r_addend,
 					NON_GOT | TLS_TLS | TLS_MARK))
-	      return FALSE;
+	      return false;
 	  sec->has_tls_reloc = 1;
 	  break;
 
@@ -4790,7 +4791,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  if (ppc64_elf_tdata (abfd)->got == NULL
 	      && !create_got_section (abfd, info))
-	    return FALSE;
+	    return false;
 
 	  if (h != NULL)
 	    {
@@ -4808,12 +4809,12 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  size_t amt = sizeof (*ent);
 		  ent = bfd_alloc (abfd, amt);
 		  if (ent == NULL)
-		    return FALSE;
+		    return false;
 		  ent->next = eh->elf.got.glist;
 		  ent->addend = rel->r_addend;
 		  ent->owner = abfd;
 		  ent->tls_type = tls_type;
-		  ent->is_indirect = FALSE;
+		  ent->is_indirect = false;
 		  ent->got.refcount = 0;
 		  eh->elf.got.glist = ent;
 		}
@@ -4824,7 +4825,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* This is a global offset table entry for a local symbol.  */
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					rel->r_addend, tls_type))
-	      return FALSE;
+	      return false;
 	  break;
 
 	case R_PPC64_PLT16_HA:
@@ -4851,7 +4852,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					      rel->r_addend,
 					      NON_GOT | PLT_KEEP);
 	  if (!update_plt_info (abfd, plt_list, rel->r_addend))
-	    return FALSE;
+	    return false;
 	  break;
 
 	  /* The following relocations don't need to propagate the
@@ -4907,7 +4908,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 				      abfd, sec, rel->r_offset,
 				      ppc64_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      return false;
 	    }
 	  break;
 
@@ -4941,14 +4942,14 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     Reconstruct it for later use during GC.  */
 	case R_PPC64_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    return false;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_PPC64_GNU_VTENTRY:
 	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    return false;
 	  break;
 
 	case R_PPC64_REL14:
@@ -4973,7 +4974,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					      abfd, r_symndx);
 		if (isym == NULL)
-		  return FALSE;
+		  return false;
 
 		dest = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	      }
@@ -5019,7 +5020,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     refers to is in a shared lib.  */
 	  if (plt_list
 	      && !update_plt_info (abfd, plt_list, rel->r_addend))
-	    return FALSE;
+	    return false;
 	  break;
 
 	case R_PPC64_ADDR14:
@@ -5059,7 +5060,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  else
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					rel->r_addend, tls_type))
-	      return FALSE;
+	      return false;
 
 	  ppc64_sec = ppc64_elf_section_data (sec);
 	  if (ppc64_sec->sec_type != sec_toc)
@@ -5070,11 +5071,11 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      amt = sec->size * sizeof (unsigned) / 8 + sizeof (unsigned);
 	      ppc64_sec->u.toc.symndx = bfd_zalloc (abfd, amt);
 	      if (ppc64_sec->u.toc.symndx == NULL)
-		return FALSE;
+		return false;
 	      amt = sec->size * sizeof (bfd_vma) / 8;
 	      ppc64_sec->u.toc.add = bfd_zalloc (abfd, amt);
 	      if (ppc64_sec->u.toc.add == NULL)
-		return FALSE;
+		return false;
 	      BFD_ASSERT (ppc64_sec->sec_type == sec_normal);
 	      ppc64_sec->sec_type = sec_toc;
 	    }
@@ -5146,7 +5147,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* We may need a .plt entry if this reloc refers to a
 		 function in a shared lib.  */
 	      if (!update_plt_info (abfd, &h->plt.plist, 0))
-		return FALSE;
+		return false;
 	      h->pointer_equality_needed = 1;
 	    }
 	  /* Fall through.  */
@@ -5206,10 +5207,10 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (sreloc == NULL)
 		{
 		  sreloc = _bfd_elf_make_dynamic_reloc_section
-		    (sec, htab->elf.dynobj, 3, abfd, /*rela?*/ TRUE);
+		    (sec, htab->elf.dynobj, 3, abfd, /*rela?*/ true);
 
 		  if (sreloc == NULL)
-		    return FALSE;
+		    return false;
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -5225,7 +5226,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    {
 		      p = bfd_alloc (htab->elf.dynobj, sizeof *p);
 		      if (p == NULL)
-			return FALSE;
+			return false;
 		      p->next = *head;
 		      *head = p;
 		      p->sec = sec;
@@ -5243,7 +5244,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     easily.  Oh well.  */
 		  struct ppc_dyn_relocs *p;
 		  struct ppc_dyn_relocs **head;
-		  bfd_boolean is_ifunc;
+		  bool is_ifunc;
 		  asection *s;
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
@@ -5251,7 +5252,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
-		    return FALSE;
+		    return false;
 
 		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
@@ -5267,7 +5268,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    {
 		      p = bfd_alloc (htab->elf.dynobj, sizeof *p);
 		      if (p == NULL)
-			return FALSE;
+			return false;
 		      p->next = *head;
 		      *head = p;
 		      p->sec = sec;
@@ -5284,26 +5285,26 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
   unsigned long iflags, oflags;
 
   if ((ibfd->flags & BFD_LINKER_CREATED) != 0)
-    return TRUE;
+    return true;
 
   if (!is_ppc64_elf (ibfd) || !is_ppc64_elf (obfd))
-    return TRUE;
+    return true;
 
   if (!_bfd_generic_verify_endian_match (ibfd, info))
-    return FALSE;
+    return false;
 
   iflags = elf_elfheader (ibfd)->e_flags;
   oflags = elf_elfheader (obfd)->e_flags;
@@ -5314,7 +5315,7 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	/* xgettext:c-format */
 	(_("%pB uses unknown e_flags 0x%lx"), ibfd, iflags);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
   else if (iflags != oflags && iflags != 0)
     {
@@ -5323,17 +5324,17 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	(_("%pB: ABI version %ld is not compatible with ABI version %ld output"),
 	 ibfd, iflags, oflags);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
   if (!_bfd_elf_ppc_merge_fp_attributes (ibfd, info))
-    return FALSE;
+    return false;
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   return _bfd_elf_merge_object_attributes (ibfd, info);
 }
 
-static bfd_boolean
+static bool
 ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 {
   /* Print normal ELF private data.  */
@@ -5352,7 +5353,7 @@ ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
       fputc ('\n', file);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* OFFSET in OPD_SEC specifies a function descriptor.  Return the address
@@ -5364,7 +5365,7 @@ opd_entry_value (asection *opd_sec,
 		 bfd_vma offset,
 		 asection **code_sec,
 		 bfd_vma *code_off,
-		 bfd_boolean in_code_sec)
+		 bool in_code_sec)
 {
   bfd *opd_bfd = opd_sec->owner;
   Elf_Internal_Rela *relocs;
@@ -5422,7 +5423,7 @@ opd_entry_value (asection *opd_sec,
 
   relocs = ppc64_elf_tdata (opd_bfd)->opd.relocs;
   if (relocs == NULL)
-    relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
+    relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, true);
   /* PR 17512: file: df8e1fd6.  */
   if (relocs == NULL)
     return (bfd_vma) -1;
@@ -5561,7 +5562,7 @@ ppc64_elf_maybe_function_sym (const asymbol *sym, asection *sec,
 	}
 
       if (opd_entry_value (sym->section, symval,
-			   &sec, code_off, TRUE) == (bfd_vma) -1)
+			   &sec, code_off, true) == (bfd_vma) -1)
 	return 0;
       /* An old ABI binary with dot-syms has a size of 24 on the .opd
 	 symbol.  This size has nothing to do with the code size of the
@@ -5593,7 +5594,7 @@ ppc64_elf_maybe_function_sym (const asymbol *sym, asection *sec,
    object with st_other localentry bits of zero, ie. its local entry
    point coincides with its global entry point.  */
 
-static bfd_boolean
+static bool
 is_elfv2_localentry0 (struct elf_link_hash_entry *h)
 {
   return (h != NULL
@@ -5607,7 +5608,7 @@ is_elfv2_localentry0 (struct elf_link_hash_entry *h)
 
 /* Return true if symbol is defined in a regular object file.  */
 
-static bfd_boolean
+static bool
 is_static_defined (struct elf_link_hash_entry *h)
 {
   return ((h->root.type == bfd_link_hash_defined
@@ -5662,7 +5663,7 @@ defined_sym_val (struct elf_link_hash_entry *h)
 
 /* Return true if H matches __tls_get_addr or one of its variants.  */
 
-static bfd_boolean
+static bool
 is_tls_get_addr (struct elf_link_hash_entry *h,
 		 struct ppc_link_hash_table *htab)
 {
@@ -5672,11 +5673,11 @@ is_tls_get_addr (struct elf_link_hash_entry *h,
 	  || h == elf_hash_entry (htab->tga_desc));
 }
 
-static bfd_boolean func_desc_adjust (struct elf_link_hash_entry *, void *);
+static bool func_desc_adjust (struct elf_link_hash_entry *, void *);
 
 /* Garbage collect sections, after first dealing with dot-symbols.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
@@ -5706,7 +5707,7 @@ ppc64_elf_gc_keep (struct bfd_link_info *info)
       asection *sec;
 
       eh = ppc_elf_hash_entry (elf_link_hash_lookup (&htab->elf, sym->name,
-						     FALSE, FALSE, TRUE));
+						     false, false, true));
       if (eh == NULL)
 	continue;
       if (eh->elf.root.type != bfd_link_hash_defined
@@ -5722,7 +5723,7 @@ ppc64_elf_gc_keep (struct bfd_link_info *info)
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 	       && opd_entry_value (eh->elf.root.u.def.section,
 				   eh->elf.root.u.def.value,
-				   &sec, NULL, FALSE) != (bfd_vma) -1)
+				   &sec, NULL, false) != (bfd_vma) -1)
 	sec->flags |= SEC_KEEP;
 
       sec = eh->elf.root.u.def.section;
@@ -5734,7 +5735,7 @@ ppc64_elf_gc_keep (struct bfd_link_info *info)
    building shared libraries, we must assume that any visible symbol is
    referenced.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
@@ -5749,6 +5750,9 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 
   if ((eh->elf.root.type == bfd_link_hash_defined
        || eh->elf.root.type == bfd_link_hash_defweak)
+      && (!eh->elf.start_stop
+	  || eh->elf.root.ldscript_def
+	  || !info->start_stop_gc)
       && ((eh->elf.ref_dynamic && !eh->elf.forced_local)
 	  || ((eh->elf.def_regular || ELF_COMMON_DEF_P (&eh->elf))
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_INTERNAL
@@ -5780,11 +5784,11 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 	       && opd_entry_value (eh->elf.root.u.def.section,
 				   eh->elf.root.u.def.value,
-				   &code_sec, NULL, FALSE) != (bfd_vma) -1)
+				   &code_sec, NULL, false) != (bfd_vma) -1)
 	code_sec->flags |= SEC_KEEP;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -5848,7 +5852,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 		       && opd_entry_value (eh->elf.root.u.def.section,
 					   eh->elf.root.u.def.value,
-					   &rsec, NULL, FALSE) != (bfd_vma) -1)
+					   &rsec, NULL, false) != (bfd_vma) -1)
 		eh->elf.root.u.def.section->gc_mark = 1;
 	      else
 		rsec = h->root.u.def.section;
@@ -5895,7 +5899,7 @@ struct sfpr_def_parms
    If STUB_SEC is non-null, define alias symbols in STUB_SEC
    instead.  */
 
-static bfd_boolean
+static bool
 sfpr_define (struct bfd_link_info *info,
 	     const struct sfpr_def_parms *parm,
 	     asection *stub_sec)
@@ -5903,11 +5907,11 @@ sfpr_define (struct bfd_link_info *info,
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   unsigned int i;
   size_t len = strlen (parm->name);
-  bfd_boolean writing = FALSE;
+  bool writing = false;
   char sym[16];
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   memcpy (sym, parm->name, len);
   sym[len + 2] = 0;
@@ -5919,7 +5923,7 @@ sfpr_define (struct bfd_link_info *info,
       sym[len + 0] = i / 10 + '0';
       sym[len + 1] = i % 10 + '0';
       h = ppc_elf_hash_entry (elf_link_hash_lookup (&htab->elf, sym,
-						    writing, TRUE, TRUE));
+						    writing, true, true));
       if (stub_sec != NULL)
 	{
 	  if (h != NULL
@@ -5929,9 +5933,9 @@ sfpr_define (struct bfd_link_info *info,
 	      struct elf_link_hash_entry *s;
 	      char buf[32];
 	      sprintf (buf, "%08x.%s", stub_sec->id & 0xffffffff, sym);
-	      s = elf_link_hash_lookup (&htab->elf, buf, TRUE, TRUE, FALSE);
+	      s = elf_link_hash_lookup (&htab->elf, buf, true, true, false);
 	      if (s == NULL)
-		return FALSE;
+		return false;
 	      if (s->root.type == bfd_link_hash_new)
 		{
 		  s->root.type = bfd_link_hash_defined;
@@ -5959,14 +5963,14 @@ sfpr_define (struct bfd_link_info *info,
 	      h->elf.type = STT_FUNC;
 	      h->elf.def_regular = 1;
 	      h->elf.non_elf = 0;
-	      _bfd_elf_link_hash_hide_symbol (info, &h->elf, TRUE);
-	      writing = TRUE;
+	      _bfd_elf_link_hash_hide_symbol (info, &h->elf, true);
+	      writing = true;
 	      if (htab->sfpr->contents == NULL)
 		{
 		  htab->sfpr->contents
 		    = bfd_alloc (htab->elf.dynobj, SFPR_MAX);
 		  if (htab->sfpr->contents == NULL)
-		    return FALSE;
+		    return false;
 		}
 	    }
 	}
@@ -5981,7 +5985,7 @@ sfpr_define (struct bfd_link_info *info,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 static bfd_byte *
@@ -6228,30 +6232,30 @@ tls_get_addr_epilogue (bfd *obfd, bfd_byte *p, struct ppc_link_hash_table *htab)
    information on function code symbol entries to their corresponding
    function descriptor symbol entries.  */
 
-static bfd_boolean
+static bool
 func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry *fh;
   struct ppc_link_hash_entry *fdh;
-  bfd_boolean force_local;
+  bool force_local;
 
   fh = ppc_elf_hash_entry (h);
   if (fh->elf.root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   if (!fh->is_func)
-    return TRUE;
+    return true;
 
   if (fh->elf.root.root.string[0] != '.'
       || fh->elf.root.root.string[1] == '\0')
-    return TRUE;
+    return true;
 
   info = inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Find the corresponding function descriptor symbol.  */
   fdh = lookup_fdh (fh, htab);
@@ -6268,7 +6272,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       && opd_entry_value (fdh->elf.root.u.def.section,
 			  fdh->elf.root.u.def.value,
 			  &fh->elf.root.u.def.section,
-			  &fh->elf.root.u.def.value, FALSE) != (bfd_vma) -1)
+			  &fh->elf.root.u.def.value, false) != (bfd_vma) -1)
     {
       fh->elf.root.type = fdh->elf.root.type;
       fh->elf.forced_local = 1;
@@ -6284,7 +6288,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 	if (ent->plt.refcount > 0)
 	  break;
       if (ent == NULL)
-	return TRUE;
+	return true;
     }
 
   /* Create a descriptor as undefined if necessary.  */
@@ -6295,7 +6299,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
     {
       fdh = make_fdh (info, fh);
       if (fdh == NULL)
-	return FALSE;
+	return false;
     }
 
   /* We can't support overriding of symbols on a fake descriptor.  */
@@ -6303,7 +6307,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       && fdh->fake
       && (fh->elf.root.type == bfd_link_hash_defined
 	  || fh->elf.root.type == bfd_link_hash_defweak))
-    _bfd_elf_link_hash_hide_symbol (info, &fdh->elf, TRUE);
+    _bfd_elf_link_hash_hide_symbol (info, &fdh->elf, true);
 
   /* Transfer dynamic linking information to the function descriptor.  */
   if (fdh != NULL)
@@ -6321,7 +6325,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       if (!fdh->elf.forced_local
 	  && fh->elf.dynindx != -1)
 	if (!bfd_elf_link_record_dynamic_symbol (info, &fdh->elf))
-	  return FALSE;
+	  return false;
     }
 
   /* Now that the info is on the function descriptor, clear the
@@ -6337,7 +6341,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 		 || fdh->elf.forced_local);
   _bfd_elf_link_hash_hide_symbol (info, &fh->elf, force_local);
 
-  return TRUE;
+  return true;
 }
 
 static const struct sfpr_def_parms save_res_funcs[] =
@@ -6362,14 +6366,14 @@ static const struct sfpr_def_parms save_res_funcs[] =
    information gathered so far on function code symbol entries, to
    their corresponding function descriptor symbol entries.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_edit (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Call back into the linker, which then runs the edit functions.  */
   htab->params->edit ();
@@ -6382,17 +6386,17 @@ ppc64_elf_edit (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       htab->sfpr->size = 0;
       for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
 	if (!sfpr_define (info, &save_res_funcs[i], NULL))
-	  return FALSE;
+	  return false;
       if (htab->sfpr->size == 0)
 	htab->sfpr->flags |= SEC_EXCLUDE;
     }
 
   if (bfd_link_relocatable (info))
-    return TRUE;
+    return true;
 
   if (htab->elf.hgot != NULL)
     {
-      _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
+      _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, true);
       /* Make .TOC. defined so as to prevent it being made dynamic.
 	 The wrong value here is fixed later in ppc64_elf_set_toc.  */
       if (!htab->elf.hgot->def_regular
@@ -6415,59 +6419,59 @@ ppc64_elf_edit (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       htab->need_func_desc_adj = 0;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Return true if we have dynamic relocs against H or any of its weak
    aliases, that apply to read-only sections.  Cannot be used after
    size_dynamic_sections.  */
 
-static bfd_boolean
+static bool
 alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct ppc_link_hash_entry *eh = ppc_elf_hash_entry (h);
   do
     {
       if (_bfd_elf_readonly_dynrelocs (&eh->elf))
-	return TRUE;
+	return true;
       eh = ppc_elf_hash_entry (eh->elf.u.alias);
     }
   while (eh != NULL && &eh->elf != h);
 
-  return FALSE;
+  return false;
 }
 
 /* Return whether EH has pc-relative dynamic relocs.  */
 
-static bfd_boolean
+static bool
 pc_dynrelocs (struct ppc_link_hash_entry *eh)
 {
   struct elf_dyn_relocs *p;
 
   for (p = eh->elf.dyn_relocs; p != NULL; p = p->next)
     if (p->pc_count != 0)
-      return TRUE;
-  return FALSE;
+      return true;
+  return false;
 }
 
 /* Return true if a global entry stub will be created for H.  Valid
    for ELFv2 before plt entries have been allocated.  */
 
-static bfd_boolean
+static bool
 global_entry_stub (struct elf_link_hash_entry *h)
 {
   struct plt_entry *pent;
 
   if (!h->pointer_equality_needed
       || h->def_regular)
-    return FALSE;
+    return false;
 
   for (pent = h->plt.plist; pent != NULL; pent = pent->next)
     if (pent->plt.refcount > 0
 	&& pent->addend == 0)
-      return TRUE;
+      return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -6476,7 +6480,7 @@ global_entry_stub (struct elf_link_hash_entry *h)
    change the definition to something the rest of the link can
    understand.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 				 struct elf_link_hash_entry *h)
 {
@@ -6485,16 +6489,16 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Deal with function syms.  */
   if (h->type == STT_FUNC
       || h->type == STT_GNU_IFUNC
       || h->needs_plt)
     {
-      bfd_boolean local = (ppc_elf_hash_entry (h)->save_res
-			   || SYMBOL_CALLS_LOCAL (info, h)
-			   || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+      bool local = (ppc_elf_hash_entry (h)->save_res
+		    || SYMBOL_CALLS_LOCAL (info, h)
+		    || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
       /* Discard dyn_relocs when non-pic if we've decided that a
 	 function symbol is local and not an ifunc.  We keep dynamic
 	 relocs for ifuncs when local rather than always emitting a
@@ -6552,7 +6556,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	    }
 
 	  /* ELFv2 function symbols can't have copy relocs.  */
-	  return TRUE;
+	  return true;
 	}
       else if (!h->needs_plt
 	       && !_bfd_elf_readonly_dynrelocs (h))
@@ -6561,7 +6565,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     ifunc then we don't need a plt entry.  */
 	  h->plt.plist = NULL;
 	  h->pointer_equality_needed = 0;
-	  return TRUE;
+	  return true;
 	}
     }
   else
@@ -6579,7 +6583,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (def->root.u.def.section == htab->elf.sdynbss
 	  || def->root.u.def.section == htab->elf.sdynrelro)
 	h->dyn_relocs = NULL;
-      return TRUE;
+      return true;
     }
 
   /* If we are creating a shared library, we must presume that the
@@ -6587,12 +6591,12 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (!bfd_link_executable (info))
-    return TRUE;
+    return true;
 
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
   if (!h->non_got_ref)
-    return TRUE;
+    return true;
 
   /* Don't generate a copy reloc for symbols defined in the executable.  */
   if (!h->def_dynamic || !h->ref_regular || h->def_regular
@@ -6611,7 +6615,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 definition for the variable.  Text relocations are preferable
 	 to an incorrect program.  */
       || h->protected_def)
-    return TRUE;
+    return true;
 
   if (h->type == STT_FUNC
       || h->type == STT_GNU_IFUNC)
@@ -6623,7 +6627,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 That's wrong for copying a descriptor.  */
       if (ppc_elf_hash_entry (h)->oh == NULL
 	  || !(h->size == 24 || h->size == 16))
-	return TRUE;
+	return true;
 
       /* We should never get here, but unfortunately there are old
 	 versions of gcc (circa gcc-3.2) that improperly for the
@@ -6677,7 +6681,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 static void
 ppc64_elf_hide_symbol (struct bfd_link_info *info,
 		       struct elf_link_hash_entry *h,
-		       bfd_boolean force_local)
+		       bool force_local)
 {
   struct ppc_link_hash_entry *eh;
   _bfd_elf_link_hash_hide_symbol (info, h, force_local);
@@ -6708,8 +6712,8 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 	  p = eh->elf.root.root.string - 1;
 	  save = *p;
 	  *(char *) p = '.';
-	  fh = ppc_elf_hash_entry (elf_link_hash_lookup (htab, p, FALSE,
-							 FALSE, FALSE));
+	  fh = ppc_elf_hash_entry (elf_link_hash_lookup (htab, p, false,
+							 false, false));
 	  *(char *) p = save;
 
 	  /* Unfortunately, if it so happens that the string we were
@@ -6722,8 +6726,8 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 	      while (q >= eh->elf.root.root.string && *q == *p)
 		--q, --p;
 	      if (q < eh->elf.root.root.string && *p == '.')
-		fh = ppc_elf_hash_entry (elf_link_hash_lookup (htab, p, FALSE,
-							       FALSE, FALSE));
+		fh = ppc_elf_hash_entry (elf_link_hash_lookup (htab, p, false,
+							       false, false));
 	    }
 	  if (fh != NULL)
 	    {
@@ -6736,7 +6740,7 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
     }
 }
 
-static bfd_boolean
+static bool
 get_sym_h (struct elf_link_hash_entry **hp,
 	   Elf_Internal_Sym **symp,
 	   asection **symsecp,
@@ -6786,7 +6790,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 					    symtab_hdr->sh_info,
 					    0, NULL, NULL, NULL);
 	  if (locsyms == NULL)
-	    return FALSE;
+	    return false;
 	  *locsymsp = locsyms;
 	}
       sym = locsyms + r_symndx;
@@ -6818,7 +6822,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	  *tls_maskp = tls_mask;
 	}
     }
-  return TRUE;
+  return true;
 }
 
 /* Returns TLS_MASKP for the given REL symbol.  Function return is 0 on
@@ -6928,7 +6932,7 @@ tocsave_find (struct ppc_link_hash_table *htab,
 /* Adjust all global syms defined in opd sections.  In gcc generated
    code for the old ABI, these will already have been done.  */
 
-static bfd_boolean
+static bool
 adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
   struct ppc_link_hash_entry *eh;
@@ -6936,15 +6940,15 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
   struct _opd_sec_data *opd;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   if (h->root.type != bfd_link_hash_defined
       && h->root.type != bfd_link_hash_defweak)
-    return TRUE;
+    return true;
 
   eh = ppc_elf_hash_entry (h);
   if (eh->adjust_done)
-    return TRUE;
+    return true;
 
   sym_sec = eh->elf.root.u.def.section;
   opd = get_opd_info (sym_sec);
@@ -6971,14 +6975,14 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 	eh->elf.root.u.def.value += adjust;
       eh->adjust_done = 1;
     }
-  return TRUE;
+  return true;
 }
 
 /* Handles decrementing dynamic reloc counts for the reloc specified by
    R_INFO in section SEC.  If LOCAL_SYMS is NULL, then H and SYM
    have already been determined.  */
 
-static bfd_boolean
+static bool
 dec_dynrel_count (bfd_vma r_info,
 		  asection *sec,
 		  struct bfd_link_info *info,
@@ -6995,7 +6999,7 @@ dec_dynrel_count (bfd_vma r_info,
   switch (r_type)
     {
     default:
-      return TRUE;
+      return true;
 
     case R_PPC64_TOC16:
     case R_PPC64_TOC16_DS:
@@ -7004,7 +7008,7 @@ dec_dynrel_count (bfd_vma r_info,
     case R_PPC64_TOC16_HA:
     case R_PPC64_TOC16_LO_DS:
       if (h == NULL)
-	return TRUE;
+	return true;
       break;
 
     case R_PPC64_TPREL16:
@@ -7067,7 +7071,7 @@ dec_dynrel_count (bfd_vma r_info,
 
       r_symndx = ELF64_R_SYM (r_info);
       if (!get_sym_h (&h, &sym, &sym_sec, NULL, local_syms, r_symndx, ibfd))
-	return FALSE;
+	return false;
     }
 
   if ((h != NULL
@@ -7084,7 +7088,7 @@ dec_dynrel_count (bfd_vma r_info,
 	      : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)))
     ;
   else
-    return TRUE;
+    return true;
 
   if (h != NULL)
     {
@@ -7097,7 +7101,7 @@ dec_dynrel_count (bfd_vma r_info,
 	 changed by elf_gc_sweep_symbol, confusing the test above.  Don't
 	 report a dynreloc miscount.  */
       if (*pp == NULL && info->gc_sections)
-	return TRUE;
+	return true;
 
       while ((p = *pp) != NULL)
 	{
@@ -7108,7 +7112,7 @@ dec_dynrel_count (bfd_vma r_info,
 	      p->count -= 1;
 	      if (p->count == 0)
 		*pp = p->next;
-	      return TRUE;
+	      return true;
 	    }
 	  pp = &p->next;
 	}
@@ -7118,7 +7122,7 @@ dec_dynrel_count (bfd_vma r_info,
       struct ppc_dyn_relocs *p;
       struct ppc_dyn_relocs **pp;
       void *vpp;
-      bfd_boolean is_ifunc;
+      bool is_ifunc;
 
       if (local_syms == NULL)
 	sym_sec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
@@ -7129,7 +7133,7 @@ dec_dynrel_count (bfd_vma r_info,
       pp = (struct ppc_dyn_relocs **) vpp;
 
       if (*pp == NULL && info->gc_sections)
-	return TRUE;
+	return true;
 
       is_ifunc = ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC;
       while ((p = *pp) != NULL)
@@ -7139,7 +7143,7 @@ dec_dynrel_count (bfd_vma r_info,
 	      p->count -= 1;
 	      if (p->count == 0)
 		*pp = p->next;
-	      return TRUE;
+	      return true;
 	    }
 	  pp = &p->next;
 	}
@@ -7149,7 +7153,7 @@ dec_dynrel_count (bfd_vma r_info,
   _bfd_error_handler (_("dynreloc miscount for %pB, section %pA"),
 		      sec->owner, sec);
   bfd_set_error (bfd_error_bad_value);
-  return FALSE;
+  return false;
 }
 
 /* Remove unused Official Procedure Descriptor entries.  Currently we
@@ -7158,17 +7162,17 @@ dec_dynrel_count (bfd_vma r_info,
    would be possible to remove many more entries for statically linked
    applications.  */
 
-bfd_boolean
+bool
 ppc64_elf_edit_opd (struct bfd_link_info *info)
 {
   bfd *ibfd;
-  bfd_boolean some_edited = FALSE;
+  bool some_edited = false;
   asection *need_pad = NULL;
   struct ppc_link_hash_table *htab;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
@@ -7177,7 +7181,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *local_syms;
       struct _opd_sec_data *opd;
-      bfd_boolean need_edit, add_aux_fields, broken;
+      bool need_edit, add_aux_fields, broken;
       bfd_size_type cnt_16b = 0;
 
       if (!is_ppc64_elf (ibfd))
@@ -7204,12 +7208,12 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
       relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
 					    info->keep_memory);
       if (relstart == NULL)
-	return FALSE;
+	return false;
 
       /* First run through the relocs to check they are sane, and to
 	 determine whether we need to edit this opd section.  */
-      need_edit = FALSE;
-      broken = FALSE;
+      need_edit = false;
+      broken = false;
       need_pad = sec;
       relend = relstart + sec->reloc_count;
       for (rel = relstart; rel < relend; )
@@ -7236,7 +7240,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	    broken_opd:
 	      _bfd_error_handler
 		(_("%pB: .opd is not a regular array of opd entries"), ibfd);
-	      broken = TRUE;
+	      broken = true;
 	      break;
 	    }
 
@@ -7247,7 +7251,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 		/* xgettext:c-format */
 		(_("%pB: unexpected reloc type %u in .opd section"),
 		 ibfd, r_type);
-	      broken = TRUE;
+	      broken = true;
 	      break;
 	    }
 
@@ -7269,7 +7273,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 		/* xgettext:c-format */
 		(_("%pB: undefined sym `%s' in .opd section"),
 		 ibfd, sym_name);
-	      broken = TRUE;
+	      broken = true;
 	      break;
 	    }
 
@@ -7282,7 +7286,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	     which we test for via the output_section.  */
 	  if (sym_sec->owner != ibfd
 	      || sym_sec->output_section == bfd_abs_section_ptr)
-	    need_edit = TRUE;
+	    need_edit = true;
 
 	  rel += 2;
 	  if (rel + 1 == relend
@@ -7332,7 +7336,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	  opd = &ppc64_elf_section_data (sec)->u.opd;
 	  opd->adjust = bfd_zalloc (sec->owner, amt);
 	  if (opd->adjust == NULL)
-	    return FALSE;
+	    return false;
 
 	  /* This seems a waste of time as input .opd sections are all
 	     zeros as generated by gcc, but I suppose there's no reason
@@ -7349,7 +7353,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 		    free (local_syms);
 		  if (elf_section_data (sec)->relocs != relstart)
 		    free (relstart);
-		  return FALSE;
+		  return false;
 		}
 	      sec->contents = loc;
 	      sec->flags |= (SEC_IN_MEMORY | SEC_HAS_CONTENTS);
@@ -7362,7 +7366,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	    {
 	      new_contents = bfd_malloc (sec->size + cnt_16b * 8);
 	      if (new_contents == NULL)
-		return FALSE;
+		return false;
 	      need_pad = NULL;
 	    }
 	  wptr = new_contents;
@@ -7377,7 +7381,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	      Elf_Internal_Sym *sym;
 	      long opd_ent_size;
 	      Elf_Internal_Rela *next_rel;
-	      bfd_boolean skip;
+	      bool skip;
 
 	      r_symndx = ELF64_R_SYM (rel->r_info);
 	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
@@ -7508,7 +7512,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	     elf_bfd_final_link if we are emitting relocs.  */
 	  rel_hdr = _bfd_elf_single_rel_hdr (sec);
 	  rel_hdr->sh_size = sec->reloc_count * rel_hdr->sh_entsize;
-	  some_edited = TRUE;
+	  some_edited = true;
 	}
       else if (elf_section_data (sec)->relocs != relstart)
 	free (relstart);
@@ -7538,11 +7542,11 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 
 	  p = bfd_malloc (need_pad->size + 8);
 	  if (p == NULL)
-	    return FALSE;
+	    return false;
 
 	  if (!bfd_get_section_contents (need_pad->owner, need_pad,
 					 p, 0, need_pad->size))
-	    return FALSE;
+	    return false;
 
 	  need_pad->contents = p;
 	  need_pad->flags |= (SEC_IN_MEMORY | SEC_HAS_CONTENTS);
@@ -7551,7 +7555,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	{
 	  p = bfd_realloc (need_pad->contents, need_pad->size + 8);
 	  if (p == NULL)
-	    return FALSE;
+	    return false;
 
 	  need_pad->contents = p;
 	}
@@ -7560,13 +7564,13 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
       need_pad->size += 8;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Analyze inline PLT call relocations to see whether calls to locally
    defined functions can be converted to direct calls.  */
 
-bfd_boolean
+bool
 ppc64_elf_inline_plt (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -7576,7 +7580,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* A bl insn can reach -0x2000000 to 0x1fffffc.  The limit is
      reduced somewhat to cater for possible stubs that might be added
@@ -7611,7 +7615,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
   if (high_vma - low_vma < limit)
     {
       htab->can_convert_all_inline_plt = 1;
-      return TRUE;
+      return true;
     }
 
   /* Otherwise, go looking through relocs for cases where a direct
@@ -7648,7 +7652,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
 						  info->keep_memory);
 	    if (relstart == NULL)
-	      return FALSE;
+	      return false;
 
 	    relend = relstart + sec->reloc_count;
 	    for (rel = relstart; rel < relend; rel++)
@@ -7673,7 +7677,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 		      free (relstart);
 		    if (symtab_hdr->contents != (bfd_byte *) local_syms)
 		      free (local_syms);
-		    return FALSE;
+		    return false;
 		  }
 
 		if (sym_sec != NULL && sym_sec->output_section != NULL)
@@ -7711,14 +7715,14 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Set htab->tls_get_addr and various other info specific to TLS.
    This needs to run before dynamic symbols are processed in
    bfd_elf_size_dynamic_sections.  */
 
-bfd_boolean
+bool
 ppc64_elf_tls_setup (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -7726,7 +7730,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (abiversion (info->output_bfd) == 1)
     htab->opd_abi = 1;
@@ -7767,29 +7771,29 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
     }
   if (htab->params->plt_localentry0
       && elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
-			       FALSE, FALSE, FALSE) == NULL)
+			       false, false, false) == NULL)
     _bfd_error_handler
       (_("warning: --plt-localentry is especially dangerous without "
 	 "ld.so support to detect ABI violations"));
 
   tga = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
-			      FALSE, FALSE, TRUE);
+			      false, false, true);
   htab->tls_get_addr = ppc_elf_hash_entry (tga);
 
   /* Move dynamic linking info to the function descriptor sym.  */
   if (tga != NULL)
     func_desc_adjust (tga, info);
   tga_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
-				 FALSE, FALSE, TRUE);
+				 false, false, true);
   htab->tls_get_addr_fd = ppc_elf_hash_entry (tga_fd);
 
   desc = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr_desc",
-			       FALSE, FALSE, TRUE);
+			       false, false, true);
   htab->tga_desc = ppc_elf_hash_entry (desc);
   if (desc != NULL)
     func_desc_adjust (desc, info);
   desc_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr_desc",
-				  FALSE, FALSE, TRUE);
+				  false, false, true);
   htab->tga_desc_fd = ppc_elf_hash_entry (desc_fd);
 
   if (htab->params->tls_get_addr_opt)
@@ -7797,11 +7801,11 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
       struct elf_link_hash_entry *opt, *opt_fd;
 
       opt = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr_opt",
-				  FALSE, FALSE, TRUE);
+				  false, false, true);
       if (opt != NULL)
 	func_desc_adjust (opt, info);
       opt_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr_opt",
-				     FALSE, FALSE, TRUE);
+				     false, false, true);
       if (opt_fd != NULL
 	  && (opt_fd->root.type == bfd_link_hash_defined
 	      || opt_fd->root.type == bfd_link_hash_defweak))
@@ -7861,7 +7865,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 					      opt_fd->dynstr_index);
 		      if (!bfd_elf_link_record_dynamic_symbol (info, opt_fd))
-			return FALSE;
+			return false;
 		    }
 		  if (tga_fd != NULL)
 		    {
@@ -7920,13 +7924,13 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
       && htab->params->no_tls_get_addr_regsave == -1)
     htab->params->no_tls_get_addr_regsave = 0;
 
-  return TRUE;
+  return true;
 }
 
 /* Return TRUE iff REL is a branch reloc with a global symbol matching
    any of HASH1, HASH2, HASH3, or HASH4.  */
 
-static bfd_boolean
+static bool
 branch_reloc_hash_match (bfd *ibfd,
 			 Elf_Internal_Rela *rel,
 			 struct ppc_link_hash_entry *hash1,
@@ -7949,9 +7953,9 @@ branch_reloc_hash_match (bfd *ibfd,
 	  || h == elf_hash_entry (hash2)
 	  || h == elf_hash_entry (hash3)
 	  || h == elf_hash_entry (hash4))
-	return TRUE;
+	return true;
     }
-  return FALSE;
+  return false;
 }
 
 /* Run through all the TLS relocs looking for optimization
@@ -7961,7 +7965,7 @@ branch_reloc_hash_match (bfd *ibfd,
    to know the tp offset, and we need to optimize before allocating
    dynamic relocations.  */
 
-bfd_boolean
+bool
 ppc64_elf_tls_optimize (struct bfd_link_info *info)
 {
   bfd *ibfd;
@@ -7971,11 +7975,11 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
   int pass;
 
   if (!bfd_link_executable (info))
-    return TRUE;
+    return true;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   htab->do_tls_opt = 1;
 
@@ -7997,7 +8001,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 	  if (sec->has_tls_reloc && !bfd_is_abs_section (sec->output_section))
 	    {
 	      Elf_Internal_Rela *relstart, *rel, *relend;
-	      bfd_boolean found_tls_get_addr_arg = 0;
+	      bool found_tls_get_addr_arg = 0;
 
 	      /* Read the relocations.  */
 	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
@@ -8005,7 +8009,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 	      if (relstart == NULL)
 		{
 		  free (toc_ref);
-		  return FALSE;
+		  return false;
 		}
 
 	      relend = relstart + sec->reloc_count;
@@ -8019,10 +8023,10 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		  unsigned char *tls_mask;
 		  unsigned int tls_set, tls_clear, tls_type = 0;
 		  bfd_vma value;
-		  bfd_boolean ok_tprel, is_local;
+		  bool ok_tprel, is_local;
 		  long toc_ref_index = 0;
 		  int expecting_tls_get_addr = 0;
-		  bfd_boolean ret = FALSE;
+		  bool ret = false;
 
 		  r_symndx = ELF64_R_SYM (rel->r_info);
 		  if (!get_sym_h (&h, &sym, &sym_sec, &tls_mask, &locsyms,
@@ -8056,13 +8060,13 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		       STT_TLS.  So no need for .opd local sym adjust.  */
 		    value = sym->st_value;
 
-		  ok_tprel = FALSE;
+		  ok_tprel = false;
 		  is_local = SYMBOL_REFERENCES_LOCAL (info, h);
 		  if (is_local)
 		    {
 		      if (h != NULL
 			  && h->root.type == bfd_link_hash_undefweak)
-			ok_tprel = TRUE;
+			ok_tprel = true;
 		      else if (sym_sec != NULL
 			       && sym_sec->output_section != NULL)
 			{
@@ -8096,7 +8100,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      info->callbacks->minfo (_("%H __tls_get_addr lost arg, "
 						"TLS optimization disabled\n"),
 					      ibfd, sec, rel->r_offset);
-		      ret = TRUE;
+		      ret = true;
 		      goto err_free_rel;
 		    }
 
@@ -8367,7 +8371,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      info->callbacks->minfo (_("%H arg lost __tls_get_addr, "
 						"TLS optimization disabled\n"),
 					      ibfd, sec, rel->r_offset);
-		      ret = TRUE;
+		      ret = true;
 		      goto err_free_rel;
 		    }
 
@@ -8456,13 +8460,13 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			 we'll lose one or two dyn relocs.  */
 		      if (!dec_dynrel_count (rel->r_info, sec, info,
 					     NULL, h, sym))
-			return FALSE;
+			return false;
 
 		      if (tls_set == (TLS_EXPLICIT | TLS_GD))
 			{
 			  if (!dec_dynrel_count ((rel + 1)->r_info, sec, info,
 						 NULL, h, sym))
-			    return FALSE;
+			    return false;
 			}
 		    }
 
@@ -8485,7 +8489,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
       }
 
   free (toc_ref);
-  return TRUE;
+  return true;
 }
 
 /* Called via elf_link_hash_traverse from ppc64_elf_edit_toc to adjust
@@ -8498,12 +8502,12 @@ struct adjust_toc_info
 {
   asection *toc;
   unsigned long *skip;
-  bfd_boolean global_toc_syms;
+  bool global_toc_syms;
 };
 
 enum toc_skip_enum { ref_from_discarded = 1, can_optimize = 2 };
 
-static bfd_boolean
+static bool
 adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 {
   struct ppc_link_hash_entry *eh;
@@ -8512,11 +8516,11 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 
   if (h->root.type != bfd_link_hash_defined
       && h->root.type != bfd_link_hash_defweak)
-    return TRUE;
+    return true;
 
   eh = ppc_elf_hash_entry (h);
   if (eh->adjust_done)
-    return TRUE;
+    return true;
 
   if (eh->elf.root.u.def.section == toc_inf->toc)
     {
@@ -8539,15 +8543,15 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
       eh->adjust_done = 1;
     }
   else if (strcmp (eh->elf.root.u.def.section->name, ".toc") == 0)
-    toc_inf->global_toc_syms = TRUE;
+    toc_inf->global_toc_syms = true;
 
-  return TRUE;
+  return true;
 }
 
 /* Return TRUE iff INSN with a relocation of R_TYPE is one we expect
    on a _LO variety toc/got reloc.  */
 
-static bfd_boolean
+static bool
 ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
 {
   return ((insn & (0x3fu << 26)) == 12u << 26 /* addic */
@@ -8597,7 +8601,7 @@ ok_lo_toc_insn (unsigned int insn, enum elf_ppc64_reloc_type r_type)
    the pld can be replaced with pla: *PINSN1 is that pla insn,
    while *PINSN2 is the second instruction.  */
 
-static bfd_boolean
+static bool
 xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 {
   uint64_t insn1 = *pinsn1;
@@ -8608,29 +8612,29 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
     {
       /* Check that regs match.  */
       if (((insn2 >> 16) & 31) != ((insn1 >> 21) & 31))
-	return FALSE;
+	return false;
 
       /* P8LS or PMLS form, non-pcrel.  */
       if ((insn2 & (-1ULL << 50) & ~(1ULL << 56)) != (1ULL << 58))
-	return FALSE;
+	return false;
 
       *pinsn1 = (insn2 & ~(31 << 16) & ~0x3ffff0000ffffULL) | (1ULL << 52);
       *pinsn2 = PNOP;
       off = ((insn2 >> 16) & 0x3ffff0000ULL) | (insn2 & 0xffff);
       *poff = (off ^ 0x200000000ULL) - 0x200000000ULL;
-      return TRUE;
+      return true;
     }
 
   insn2 >>= 32;
 
   /* Check that regs match.  */
   if (((insn2 >> 16) & 31) != ((insn1 >> 21) & 31))
-    return FALSE;
+    return false;
 
   switch ((insn2 >> 26) & 63)
     {
     default:
-      return FALSE;
+      return false;
 
     case 32: /* lwz */
     case 34: /* lbz */
@@ -8652,7 +8656,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 
     case 58: /* lwa, ld */
       if ((insn2 & 1) != 0)
-	return FALSE;
+	return false;
       insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | (insn2 & 2 ? 41ULL << 26 : 57ULL << 26)
 	       | (insn2 & (31ULL << 21)));
@@ -8661,7 +8665,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 
     case 57: /* lxsd, lxssp */
       if ((insn2 & 3) < 2)
-	return FALSE;
+	return false;
       insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | ((40ULL | (insn2 & 3)) << 26)
 	       | (insn2 & (31ULL << 21)));
@@ -8670,7 +8674,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 
     case 61: /* stxsd, stxssp, lxv, stxv  */
       if ((insn2 & 3) == 0)
-	return FALSE;
+	return false;
       else if ((insn2 & 3) >= 2)
 	{
 	  insn1 = ((1ULL << 58) | (1ULL << 52)
@@ -8695,7 +8699,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 
     case 6: /* lxvp, stxvp */
       if ((insn2 & 0xe) != 0)
-	return FALSE;
+	return false;
       insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | ((insn2 & 1) == 0 ? 58ULL << 26 : 62ULL << 26)
 	       | (insn2 & (31ULL << 21)));
@@ -8704,7 +8708,7 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
 
     case 62: /* std, stq */
       if ((insn2 & 1) != 0)
-	return FALSE;
+	return false;
       insn1 = ((1ULL << 58) | (1ULL << 52)
 	       | ((insn2 & 2) == 0 ? 61ULL << 26 : 60ULL << 26)
 	       | (insn2 & (31ULL << 21)));
@@ -8715,13 +8719,13 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
   *pinsn1 = insn1;
   *pinsn2 = (uint64_t) NOP << 32;
   *poff = (off ^ 0x8000) - 0x8000;
-  return TRUE;
+  return true;
 }
 
 /* Examine all relocs referencing .toc sections in order to remove
    unused .toc entries.  */
 
-bfd_boolean
+bool
 ppc64_elf_edit_toc (struct bfd_link_info *info)
 {
   bfd *ibfd;
@@ -8729,7 +8733,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   htab->do_toc_opt = 1;
-  toc_inf.global_toc_syms = TRUE;
+  toc_inf.global_toc_syms = true;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     {
       asection *toc, *sec;
@@ -8766,7 +8770,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      || (sec->flags & SEC_DEBUGGING) != 0)
 	    continue;
 
-	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL, FALSE);
+	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL, false);
 	  if (relstart == NULL)
 	    goto error_ret;
 
@@ -8931,7 +8935,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  if (elf_section_data (toc)->relocs != toc_relocs)
 	    free (toc_relocs);
 	  free (skip);
-	  return FALSE;
+	  return false;
 	}
 
       /* Now check all kept sections that might reference the toc.
@@ -9092,7 +9096,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  bfd_byte *contents, *src;
 	  unsigned long off;
 	  Elf_Internal_Sym *sym;
-	  bfd_boolean local_toc_syms = FALSE;
+	  bool local_toc_syms = false;
 
 	  /* Shuffle the toc contents, and at the same time convert the
 	     skip array from booleans into offsets.  */
@@ -9168,7 +9172,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		    {
 		      val = sym->st_value;
 		      if (val != 0)
-			local_toc_syms = TRUE;
+			local_toc_syms = true;
 		    }
 
 		  val += rel->r_addend;
@@ -9258,7 +9262,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	    {
 	      toc_inf.toc = toc;
 	      toc_inf.skip = skip;
-	      toc_inf.global_toc_syms = FALSE;
+	      toc_inf.global_toc_syms = false;
 	      elf_link_hash_traverse (elf_hash_table (info), adjust_toc_syms,
 				      &toc_inf);
 	    }
@@ -9353,7 +9357,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      if (sec != NULL
 		  && elf_section_data (sec)->relocs != relstart)
 		free (relstart);
-	      return FALSE;
+	      return false;
 	    }
 
 	  for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
@@ -9550,13 +9554,13 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Return true iff input section I references the TOC using
    instructions limited to +/-32k offsets.  */
 
-bfd_boolean
+bool
 ppc64_elf_has_small_toc_reloc (asection *i)
 {
   return (is_ppc64_elf (i->owner)
@@ -9615,14 +9619,14 @@ merge_got_entries (struct got_entry **pent)
 	    && ent2->tls_type == ent->tls_type
 	    && elf_gp (ent2->owner) == elf_gp (ent->owner))
 	  {
-	    ent2->is_indirect = TRUE;
+	    ent2->is_indirect = true;
 	    ent2->got.ent = ent;
 	  }
 }
 
 /* If H is undefined, make it dynamic if that makes sense.  */
 
-static bfd_boolean
+static bool
 ensure_undef_dynamic (struct bfd_link_info *info,
 		      struct elf_link_hash_entry *h)
 {
@@ -9636,14 +9640,14 @@ ensure_undef_dynamic (struct bfd_link_info *info,
       && !h->forced_local
       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
     return bfd_elf_link_record_dynamic_symbol (info, h);
-  return TRUE;
+  return true;
 }
 
 /* Choose whether to use htab->iplt or htab->pltlocal rather than the
    usual htab->elf.splt section for a PLT entry.  */
 
 static inline
-bfd_boolean use_local_plt (struct bfd_link_info *info,
+bool use_local_plt (struct bfd_link_info *info,
 			   struct elf_link_hash_entry *h)
 {
   return (h == NULL
@@ -9654,7 +9658,7 @@ bfd_boolean use_local_plt (struct bfd_link_info *info,
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
-static bfd_boolean
+static bool
 allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
@@ -9664,12 +9668,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct got_entry **pgent, *gent;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   info = (struct bfd_link_info *) inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   eh = ppc_elf_hash_entry (h);
   /* Run through the TLS GD got entries first if we're changing them
@@ -9725,7 +9729,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	/* Ensure we catch all the cases where this symbol should
 	   be made dynamic.  */
 	if (!ensure_undef_dynamic (info, h))
-	  return FALSE;
+	  return false;
 
 	if (!is_ppc64_elf (gent->owner))
 	  abort ();
@@ -9785,7 +9789,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      /* Ensure we catch all the cases where this symbol
 		 should be made dynamic.  */
 	      if (!ensure_undef_dynamic (info, h))
-		return FALSE;
+		return false;
 	    }
 	}
 
@@ -9800,7 +9804,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      /* Ensure we catch all the cases where this symbol
 		 should be made dynamic.  */
 	      if (!ensure_undef_dynamic (info, h))
-		return FALSE;
+		return false;
 
 	      /* But if that didn't work out, discard dynamic relocs.  */
 	      if (h->dynindx == -1)
@@ -9836,7 +9840,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      & (TLS_TLS | PLT_KEEP)) == PLT_KEEP))
     {
       struct plt_entry *pent;
-      bfd_boolean doneone = FALSE;
+      bool doneone = false;
       for (pent = h->plt.plist; pent != NULL; pent = pent->next)
 	if (pent->plt.refcount > 0)
 	  {
@@ -9889,7 +9893,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      }
 	    if (s != NULL)
 	      s->size += sizeof (Elf64_External_Rela);
-	    doneone = TRUE;
+	    doneone = true;
 	  }
 	else
 	  pent->plt.offset = (bfd_vma) -1;
@@ -9905,7 +9909,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->needs_plt = 0;
     }
 
-  return TRUE;
+  return true;
 }
 
 #define PPC_LO(v) ((v) & 0xffff)
@@ -9919,7 +9923,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
    to set up space for global entry stubs.  These are put in glink,
    after the branch table.  */
 
-static bfd_boolean
+static bool
 size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
@@ -9928,18 +9932,18 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
   asection *s, *plt;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   if (!h->pointer_equality_needed)
-    return TRUE;
+    return true;
 
   if (h->def_regular)
-    return TRUE;
+    return true;
 
   info = inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   s = htab->global_entry;
   plt = htab->elf.splt;
@@ -9986,25 +9990,25 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	s->size = stub_off + stub_size;
 	break;
       }
-  return TRUE;
+  return true;
 }
 
 /* Set the sizes of the dynamic sections.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 				 struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   bfd *dynobj;
   asection *s;
-  bfd_boolean relocs;
+  bool relocs;
   bfd *ibfd;
   struct got_entry *first_tlsld;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
@@ -10172,7 +10176,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  if (!htab->do_multi_toc && first_tlsld != NULL)
 	    {
-	      ent->is_indirect = TRUE;
+	      ent->is_indirect = true;
 	      ent->got.ent = first_tlsld;
 	    }
 	  else
@@ -10196,7 +10200,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
-  relocs = FALSE;
+  relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LINKER_CREATED) == 0)
@@ -10223,12 +10227,12 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    /* Not sized yet.  */
 	    continue;
 	}
-      else if (CONST_STRNEQ (s->name, ".rela"))
+      else if (startswith (s->name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
 	      if (s != htab->elf.srelplt)
-		relocs = TRUE;
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -10272,7 +10276,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	 the GOT and .dynrelro.  */
       s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
-	return FALSE;
+	return false;
     }
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
@@ -10289,7 +10293,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      s->contents = bfd_zalloc (ibfd, s->size);
 	      if (s->contents == NULL)
-		return FALSE;
+		return false;
 	    }
 	}
       s = ppc64_elf_tdata (ibfd)->relgot;
@@ -10301,8 +10305,8 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      s->contents = bfd_zalloc (ibfd, s->size);
 	      if (s->contents == NULL)
-		return FALSE;
-	      relocs = TRUE;
+		return false;
+	      relocs = true;
 	      s->reloc_count = 0;
 	    }
 	}
@@ -10310,7 +10314,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.dynamic_sections_created)
     {
-      bfd_boolean tls_opt;
+      bool tls_opt;
 
       /* Add some entries to the .dynamic section.  We fill in the
 	 values later, in ppc64_elf_finish_dynamic_sections, but we
@@ -10323,7 +10327,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       if (bfd_link_executable (info))
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
+	    return false;
 	}
 
       if (htab->elf.splt != NULL && htab->elf.splt->size != 0)
@@ -10333,14 +10337,14 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
 	      || !add_dynamic_entry (DT_JMPREL, 0)
 	      || !add_dynamic_entry (DT_PPC64_GLINK, 0))
-	    return FALSE;
+	    return false;
 	}
 
       if (NO_OPD_RELOCS && abiversion (output_bfd) <= 1)
 	{
 	  if (!add_dynamic_entry (DT_PPC64_OPD, 0)
 	      || !add_dynamic_entry (DT_PPC64_OPDSZ, 0))
-	    return FALSE;
+	    return false;
 	}
 
       tls_opt = (htab->params->tls_get_addr_opt
@@ -10351,7 +10355,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       if (tls_opt || !htab->opd_abi)
 	{
 	  if (!add_dynamic_entry (DT_PPC64_OPT, tls_opt ? PPC64_OPT_TLS : 0))
-	    return FALSE;
+	    return false;
 	}
 
       if (relocs)
@@ -10359,7 +10363,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (!add_dynamic_entry (DT_RELA, 0)
 	      || !add_dynamic_entry (DT_RELASZ, 0)
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
-	    return FALSE;
+	    return false;
 
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
@@ -10370,24 +10374,24 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
 	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
+		return false;
 	    }
 	}
     }
 #undef add_dynamic_entry
 
-  return TRUE;
+  return true;
 }
 
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_hash_symbol (struct elf_link_hash_entry *h)
 {
   if (h->plt.plist != NULL
       && !h->def_regular
       && !h->pointer_equality_needed)
-    return FALSE;
+    return false;
 
   return _bfd_elf_hash_symbol (h);
 }
@@ -10493,7 +10497,7 @@ ppc_type_of_stub (asection *input_sec,
    .	add/ldx	%r12,%r11,%r12  */
 
 static bfd_byte *
-build_offset (bfd *abfd, bfd_byte *p, bfd_vma off, bfd_boolean load)
+build_offset (bfd *abfd, bfd_byte *p, bfd_vma off, bool load)
 {
   bfd_put_32 (abfd, MFLR_R12, p);
   p += 4;
@@ -10673,7 +10677,7 @@ emit_relocs_for_offset (struct bfd_link_info *info, Elf_Internal_Rela *r,
 
 static bfd_byte *
 build_power10_offset (bfd *abfd, bfd_byte *p, bfd_vma off, int odd,
-		      bfd_boolean load)
+		      bool load)
 {
   uint64_t insn;
   if (off - odd + (1ULL << 33) < 1ULL << 34)
@@ -10981,13 +10985,13 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 		bfd_byte *p, bfd_vma offset, Elf_Internal_Rela *r)
 {
   bfd *obfd = htab->params->stub_bfd;
-  bfd_boolean plt_load_toc = htab->opd_abi;
-  bfd_boolean plt_static_chain = htab->params->plt_static_chain;
-  bfd_boolean plt_thread_safe = (htab->params->plt_thread_safe
-				 && htab->elf.dynamic_sections_created
-				 && stub_entry->h != NULL
-				 && stub_entry->h->elf.dynindx != -1);
-  bfd_boolean use_fake_dep = plt_thread_safe;
+  bool plt_load_toc = htab->opd_abi;
+  bool plt_static_chain = htab->params->plt_static_chain;
+  bool plt_thread_safe = (htab->params->plt_thread_safe
+			  && htab->elf.dynamic_sections_created
+			  && stub_entry->h != NULL
+			  && stub_entry->h->elf.dynindx != -1);
+  bool use_fake_dep = plt_thread_safe;
   bfd_vma cmp_branch_off = 0;
 
   if (!ALWAYS_USE_FAKE_DEP
@@ -11334,7 +11338,7 @@ get_relocs (asection *sec, int count)
    forms, to the equivalent relocs against the global symbol given by
    STUB_ENTRY->H.  */
 
-static bfd_boolean
+static bool
 use_global_in_relocs (struct ppc_link_hash_table *htab,
 		      struct ppc_stub_hash_entry *stub_entry,
 		      Elf_Internal_Rela *r, unsigned int num_rel)
@@ -11358,7 +11362,7 @@ use_global_in_relocs (struct ppc_link_hash_table *htab,
       hsize = (htab->stub_globals + 1) * sizeof (*hashes);
       hashes = bfd_zalloc (htab->params->stub_bfd, hsize);
       if (hashes == NULL)
-	return FALSE;
+	return false;
       elf_sym_hashes (htab->params->stub_bfd) = hashes;
       htab->stub_globals = 1;
     }
@@ -11384,7 +11388,7 @@ use_global_in_relocs (struct ppc_link_hash_table *htab,
 	r->r_addend -= symval;
       --r;
     }
-  return TRUE;
+  return true;
 }
 
 static bfd_vma
@@ -11422,7 +11426,7 @@ get_r2off (struct bfd_link_info *info,
   return r2off;
 }
 
-static bfd_boolean
+static bool
 ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
   struct ppc_stub_hash_entry *stub_entry;
@@ -11437,7 +11441,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   asection *plt;
   int num_rel;
   int odd;
-  bfd_boolean is_tga;
+  bool is_tga;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct ppc_stub_hash_entry *) gen_entry;
@@ -11464,7 +11468,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size);
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
@@ -11494,8 +11498,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  if (r2off == (bfd_vma) -1)
 	    {
-	      htab->stub_error = TRUE;
-	      return FALSE;
+	      htab->stub_error = true;
+	      return false;
 	    }
 	  bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p);
 	  p += 4;
@@ -11519,21 +11523,21 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  _bfd_error_handler
 	    (_("long branch stub `%s' offset overflow"),
 	     stub_entry->root.string);
-	  htab->stub_error = TRUE;
-	  return FALSE;
+	  htab->stub_error = true;
+	  return false;
 	}
 
       if (info->emitrelocations)
 	{
 	  r = get_relocs (stub_entry->group->stub_sec, 1);
 	  if (r == NULL)
-	    return FALSE;
+	    return false;
 	  r->r_offset = p - 4 - stub_entry->group->stub_sec->contents;
 	  r->r_info = ELF64_R_INFO (0, R_PPC64_REL24);
 	  r->r_addend = targ;
 	  if (stub_entry->h != NULL
 	      && !use_global_in_relocs (htab, stub_entry, r, 1))
-	    return FALSE;
+	    return false;
 	}
       break;
 
@@ -11541,13 +11545,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     case ppc_stub_plt_branch_r2off:
       br_entry = ppc_branch_hash_lookup (&htab->branch_hash_table,
 					 stub_entry->root.string + 9,
-					 FALSE, FALSE);
+					 false, false);
       if (br_entry == NULL)
 	{
 	  _bfd_error_handler (_("can't find branch stub `%s'"),
 			      stub_entry->root.string);
-	  htab->stub_error = TRUE;
-	  return FALSE;
+	  htab->stub_error = true;
+	  return false;
 	}
 
       targ = (stub_entry->target_value
@@ -11584,7 +11588,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    {
 	      r = get_relocs (htab->brlt, 1);
 	      if (r == NULL)
-		return FALSE;
+		return false;
 	      /* brlt, being SEC_LINKER_CREATED does not go through the
 		 normal reloc processing.  Symbols and offsets are not
 		 translated from input file to output file form, so
@@ -11611,15 +11615,15 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    (_("%P: linkage table error against `%pT'\n"),
 	     stub_entry->root.string);
 	  bfd_set_error (bfd_error_bad_value);
-	  htab->stub_error = TRUE;
-	  return FALSE;
+	  htab->stub_error = true;
+	  return false;
 	}
 
       if (info->emitrelocations)
 	{
 	  r = get_relocs (stub_entry->group->stub_sec, 1 + (PPC_HA (off) != 0));
 	  if (r == NULL)
-	    return FALSE;
+	    return false;
 	  r[0].r_offset = loc - stub_entry->group->stub_sec->contents;
 	  if (bfd_big_endian (info->output_bfd))
 	    r[0].r_offset += 2;
@@ -11655,8 +11659,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  if (r2off == (bfd_vma) -1)
 	    {
-	      htab->stub_error = TRUE;
-	      return FALSE;
+	      htab->stub_error = true;
+	      return false;
 	    }
 
 	  bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p);
@@ -11744,7 +11748,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       num_rel = 0;
       if (htab->params->power10_stubs != 0)
 	{
-	  bfd_boolean load = stub_entry->stub_type >= ppc_stub_plt_call_notoc;
+	  bool load = stub_entry->stub_type >= ppc_stub_plt_call_notoc;
 	  p = build_power10_offset (obfd, p, off, odd, load);
 	}
       else
@@ -11814,7 +11818,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	  r = get_relocs (stub_entry->group->stub_sec, num_rel);
 	  if (r == NULL)
-	    return FALSE;
+	    return false;
 	  if (htab->params->power10_stubs != 0)
 	    r = emit_relocs_for_power10_offset (info, r, roff, targ, off, odd);
 	  else
@@ -11829,7 +11833,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      r->r_addend = targ;
 	      if (stub_entry->h != NULL
 		  && !use_global_in_relocs (htab, stub_entry, r, num_rel))
-		return FALSE;
+		return false;
 	    }
 	}
       break;
@@ -11878,8 +11882,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	     ? stub_entry->h->elf.root.root.string
 	     : "<local sym>");
 	  bfd_set_error (bfd_error_bad_value);
-	  htab->stub_error = TRUE;
-	  return FALSE;
+	  htab->stub_error = true;
+	  return false;
 	}
 
       r = NULL;
@@ -11892,7 +11896,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 				     && PPC_HA (off + 16) == PPC_HA (off))
 			      : 1)));
 	  if (r == NULL)
-	    return FALSE;
+	    return false;
 	  r[0].r_offset = loc - stub_entry->group->stub_sec->contents;
 	  if (bfd_big_endian (info->output_bfd))
 	    r[0].r_offset += 2;
@@ -11915,11 +11919,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       break;
 
     case ppc_stub_save_res:
-      return TRUE;
+      return true;
 
     default:
       BFD_FAIL ();
-      return FALSE;
+      return false;
     }
 
   stub_entry->group->stub_sec->size = stub_entry->stub_offset + (p - loc);
@@ -11946,13 +11950,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       len2 = strlen (stub_entry->root.string);
       name = bfd_malloc (len1 + len2 + 2);
       if (name == NULL)
-	return FALSE;
+	return false;
       memcpy (name, stub_entry->root.string, 9);
       memcpy (name + 9, stub_str[stub_entry->stub_type - 1], len1);
       memcpy (name + len1 + 9, stub_entry->root.string + 8, len2 - 8 + 1);
-      h = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
+      h = elf_link_hash_lookup (&htab->elf, name, true, false, false);
       if (h == NULL)
-	return FALSE;
+	return false;
       if (h->root.type == bfd_link_hash_new)
 	{
 	  h->root.type = bfd_link_hash_defined;
@@ -11967,14 +11971,14 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* As above, but don't actually build the stub.  Just bump offset so
    we know stub section sizes, and select plt_branch stubs where
    long_branch stubs won't do.  */
 
-static bfd_boolean
+static bool
 ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
   struct ppc_stub_hash_entry *stub_entry;
@@ -11990,7 +11994,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Fail if the target section could not be assigned to an output
      section.  The user should fix his linker script.  */
@@ -12023,7 +12027,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	 functions.  Instead, emit copies of the functions.  */
       stub_entry->group->needs_save_res = 1;
       stub_entry->stub_type = ppc_stub_save_res;
-      return TRUE;
+      return true;
     }
 
   switch (stub_entry->stub_type)
@@ -12051,8 +12055,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r2off = get_r2off (info, stub_entry);
 	  if (r2off == (bfd_vma) -1)
 	    {
-	      htab->stub_error = TRUE;
-	      return FALSE;
+	      htab->stub_error = true;
+	      return false;
 	    }
 	  size = 8;
 	  if (PPC_HA (r2off) != 0)
@@ -12074,13 +12078,13 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  br_entry = ppc_branch_hash_lookup (&htab->branch_hash_table,
 					     stub_entry->root.string + 9,
-					     TRUE, FALSE);
+					     true, false);
 	  if (br_entry == NULL)
 	    {
 	      _bfd_error_handler (_("can't build branch stub `%s'"),
 				  stub_entry->root.string);
-	      htab->stub_error = TRUE;
-	      return FALSE;
+	      htab->stub_error = true;
+	      return false;
 	    }
 
 	  if (br_entry->iter != htab->stub_iteration)
@@ -12369,11 +12373,11 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
     default:
       BFD_FAIL ();
-      return FALSE;
+      return false;
     }
 
   stub_entry->group->stub_sec->size += size;
-  return TRUE;
+  return true;
 }
 
 /* Set up various things so that we can make a list of input sections
@@ -12419,19 +12423,19 @@ ppc64_elf_start_multitoc_partition (struct bfd_link_info *info)
    and linker generated GOT section.  Group input bfds such that the toc
    within a group is less than 64k in size.  */
 
-bfd_boolean
+bool
 ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   bfd_vma addr, off, limit;
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (!htab->second_toc_pass)
     {
       /* Keep track of the first .toc or .got section for this input bfd.  */
-      bfd_boolean new_bfd = htab->toc_bfd != isec->owner;
+      bool new_bfd = htab->toc_bfd != isec->owner;
 
       if (new_bfd)
 	{
@@ -12465,17 +12469,17 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
       if (new_bfd
 	  && elf_gp (isec->owner) != 0
 	  && elf_gp (isec->owner) != off)
-	return FALSE;
+	return false;
 
       elf_gp (isec->owner) = off;
-      return TRUE;
+      return true;
     }
 
   /* During the second pass toc_first_sec points to the start of
      a toc group, and toc_curr is used to track the old elf_gp.
      We use toc_bfd to ensure we only look at each bfd once.  */
   if (htab->toc_bfd == isec->owner)
-    return TRUE;
+    return true;
   htab->toc_bfd = isec->owner;
 
   if (htab->toc_first_sec == NULL
@@ -12489,55 +12493,55 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
   off = addr - elf_gp (info->output_bfd) + TOC_BASE_OFF;
   elf_gp (isec->owner) = off;
 
-  return TRUE;
+  return true;
 }
 
 /* Called via elf_link_hash_traverse to merge GOT entries for global
    symbol H.  */
 
-static bfd_boolean
+static bool
 merge_global_got (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   merge_got_entries (&h->got.glist);
 
-  return TRUE;
+  return true;
 }
 
 /* Called via elf_link_hash_traverse to allocate GOT entries for global
    symbol H.  */
 
-static bfd_boolean
+static bool
 reallocate_got (struct elf_link_hash_entry *h, void *inf)
 {
   struct got_entry *gent;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   for (gent = h->got.glist; gent != NULL; gent = gent->next)
     if (!gent->is_indirect)
       allocate_got (h, (struct bfd_link_info *) inf, gent);
-  return TRUE;
+  return true;
 }
 
 /* Called on the first multitoc pass after the last call to
    ppc64_elf_next_toc_section.  This function removes duplicate GOT
    entries.  */
 
-bfd_boolean
+bool
 ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   struct bfd *ibfd, *ibfd2;
-  bfd_boolean done_something;
+  bool done_something;
 
   htab->multi_toc_needed = htab->toc_curr != elf_gp (info->output_bfd);
 
   if (!htab->do_multi_toc)
-    return FALSE;
+    return false;
 
   /* Merge global sym got entries within a toc group.  */
   elf_link_hash_traverse (&htab->elf, merge_global_got, info);
@@ -12564,7 +12568,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 		  && ent2->got.offset != (bfd_vma) -1
 		  && elf_gp (ibfd2) == elf_gp (ibfd))
 		{
-		  ent2->is_indirect = TRUE;
+		  ent2->is_indirect = true;
 		  ent2->got.ent = ent;
 		}
 	    }
@@ -12702,7 +12706,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
      on input sections.  */
   htab->toc_bfd = NULL;
   htab->toc_first_sec = NULL;
-  htab->second_toc_pass = TRUE;
+  htab->second_toc_pass = true;
   return done_something;
 }
 
@@ -12843,7 +12847,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 		}
 
 	      dest = opd_entry_value (sym_sec, sym_value,
-				      &sym_sec, NULL, FALSE);
+				      &sym_sec, NULL, false);
 	      if (dest == (bfd_vma) -1)
 		continue;
 	    }
@@ -12942,13 +12946,13 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
    Build lists of input sections to determine groupings between which
    we may insert linker stubs.  */
 
-bfd_boolean
+bool
 ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if ((isec->output_section->flags & SEC_CODE) != 0
       && isec->output_section->id < htab->sec_info_arr_size)
@@ -12972,7 +12976,7 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 	    || isec->call_check_done))
 	{
 	  if (toc_adjusting_stub_needed (info, isec) < 0)
-	    return FALSE;
+	    return false;
 	}
       /* Make all sections use the TOC assigned for this object file.
 	 This will be wrong for pasted sections;  We fix that in
@@ -12982,13 +12986,13 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
     }
 
   htab->sec_info[isec->id].toc_off = htab->toc_curr;
-  return TRUE;
+  return true;
 }
 
 /* Check that all .init and .fini sections use the same toc, if they
    have toc relocs.  */
 
-static bfd_boolean
+static bool
 check_pasted_section (struct bfd_link_info *info, const char *name)
 {
   asection *o = bfd_get_section_by_name (info->output_bfd, name);
@@ -13005,7 +13009,7 @@ check_pasted_section (struct bfd_link_info *info, const char *name)
 	    if (toc_off == 0)
 	      toc_off = htab->sec_info[i->id].toc_off;
 	    else if (toc_off != htab->sec_info[i->id].toc_off)
-	      return FALSE;
+	      return false;
 	  }
 
       if (toc_off == 0)
@@ -13021,10 +13025,10 @@ check_pasted_section (struct bfd_link_info *info, const char *name)
 	for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	  htab->sec_info[i->id].toc_off = toc_off;
     }
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 ppc64_elf_check_init_fini (struct bfd_link_info *info)
 {
   return (check_pasted_section (info, ".init")
@@ -13038,20 +13042,20 @@ ppc64_elf_check_init_fini (struct bfd_link_info *info)
    _init and _fini functions into multiple parts.  Putting a stub in
    the middle of a function is not a good idea.  */
 
-static bfd_boolean
+static bool
 group_sections (struct bfd_link_info *info,
 		bfd_size_type stub_group_size,
-		bfd_boolean stubs_always_before_branch)
+		bool stubs_always_before_branch)
 {
   struct ppc_link_hash_table *htab;
   asection *osec;
-  bfd_boolean suppress_size_errors;
+  bool suppress_size_errors;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
-  suppress_size_errors = FALSE;
+  suppress_size_errors = false;
   if (stub_group_size == 1)
     {
       /* Default values.  */
@@ -13059,7 +13063,7 @@ group_sections (struct bfd_link_info *info,
 	stub_group_size = 0x1e00000;
       else
 	stub_group_size = 0x1c00000;
-      suppress_size_errors = TRUE;
+      suppress_size_errors = true;
     }
 
   for (osec = info->output_bfd->sections; osec != NULL; osec = osec->next)
@@ -13075,7 +13079,7 @@ group_sections (struct bfd_link_info *info,
 	  asection *curr;
 	  asection *prev;
 	  bfd_size_type total;
-	  bfd_boolean big_sec;
+	  bool big_sec;
 	  bfd_vma curr_toc;
 	  struct map_stub *group;
 	  bfd_size_type group_size;
@@ -13113,7 +13117,7 @@ group_sections (struct bfd_link_info *info,
 	     than 2097152 bytes, or nearly 75000 plt call stubs.  */
 	  group = bfd_alloc (curr->owner, sizeof (*group));
 	  if (group == NULL)
-	    return FALSE;
+	    return false;
 	  group->link_sec = curr;
 	  group->stub_sec = NULL;
 	  group->needs_save_res = 0;
@@ -13154,7 +13158,7 @@ group_sections (struct bfd_link_info *info,
 	  tail = prev;
 	}
     }
-  return TRUE;
+  return true;
 }
 
 static const unsigned char glink_eh_frame_cie[] =
@@ -13198,15 +13202,15 @@ maybe_strip_output (struct bfd_link_info *info, asection *isec)
    PC-relative calls to a target that is unreachable with a "bl"
    instruction.  */
 
-bfd_boolean
+bool
 ppc64_elf_size_stubs (struct bfd_link_info *info)
 {
   bfd_size_type stub_group_size;
-  bfd_boolean stubs_always_before_branch;
+  bool stubs_always_before_branch;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (htab->params->power10_stubs == -1 && !htab->has_power10_relocs)
     htab->params->power10_stubs = 0;
@@ -13249,7 +13253,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	{
 	  struct elf_link_hash_entry *h;
 	  h = elf_link_hash_lookup (&htab->elf, thread_starter[i],
-				    FALSE, FALSE, TRUE);
+				    false, false, true);
 	  htab->params->plt_thread_safe = h != NULL && h->ref_regular;
 	  if (htab->params->plt_thread_safe)
 	    break;
@@ -13262,7 +13266,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
     stub_group_size = htab->params->group_size;
 
   if (!group_sections (info, stub_group_size, stubs_always_before_branch))
-    return FALSE;
+    return false;
 
   htab->tga_group = NULL;
   if (!htab->params->no_tls_get_addr_regsave
@@ -13281,12 +13285,12 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       code_sec = sym_sec;
       opd = get_opd_info (sym_sec);
       if (opd != NULL)
-	opd_entry_value (sym_sec, sym_value, &code_sec, NULL, FALSE);
+	opd_entry_value (sym_sec, sym_value, &code_sec, NULL, false);
       htab->tga_group = htab->sec_info[code_sec->id].u.group;
       stub_sec = (*htab->params->add_stub_section) (".tga_desc.stub",
 						    htab->tga_group->link_sec);
       if (stub_sec == NULL)
-	return FALSE;
+	return false;
       htab->tga_group->stub_sec = stub_sec;
 
       htab->tga_desc_fd->elf.root.type = bfd_link_hash_defined;
@@ -13295,7 +13299,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       htab->tga_desc_fd->elf.type = STT_FUNC;
       htab->tga_desc_fd->elf.def_regular = 1;
       htab->tga_desc_fd->elf.non_elf = 0;
-      _bfd_elf_link_hash_hide_symbol (info, &htab->tga_desc_fd->elf, TRUE);
+      _bfd_elf_link_hash_hide_symbol (info, &htab->tga_desc_fd->elf, true);
     }
 
 #define STUB_SHRINK_ITER 20
@@ -13371,7 +13375,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		  bfd_vma sym_value, code_value;
 		  bfd_vma destination;
 		  unsigned long local_off;
-		  bfd_boolean ok_dest;
+		  bool ok_dest;
 		  struct ppc_link_hash_entry *hash;
 		  struct ppc_link_hash_entry *fdh;
 		  struct elf_link_hash_entry *h;
@@ -13405,7 +13409,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		    goto error_ret_free_internal;
 		  hash = ppc_elf_hash_entry (h);
 
-		  ok_dest = FALSE;
+		  ok_dest = false;
 		  fdh = NULL;
 		  sym_value = 0;
 		  if (hash == NULL)
@@ -13413,14 +13417,14 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		      sym_value = sym->st_value;
 		      if (sym_sec != NULL
 			  && sym_sec->output_section != NULL)
-			ok_dest = TRUE;
+			ok_dest = true;
 		    }
 		  else if (hash->elf.root.type == bfd_link_hash_defined
 			   || hash->elf.root.type == bfd_link_hash_defweak)
 		    {
 		      sym_value = hash->elf.root.u.def.value;
 		      if (sym_sec->output_section != NULL)
-			ok_dest = TRUE;
+			ok_dest = true;
 		    }
 		  else if (hash->elf.root.type == bfd_link_hash_undefweak
 			   || hash->elf.root.type == bfd_link_hash_undefined)
@@ -13438,7 +13442,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			      sym_sec = fdh->elf.root.u.def.section;
 			      sym_value = fdh->elf.root.u.def.value;
 			      if (sym_sec->output_section != NULL)
-				ok_dest = TRUE;
+				ok_dest = true;
 			    }
 			  else
 			    fdh = NULL;
@@ -13479,7 +13483,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			  sym_value += adjust;
 			}
 		      dest = opd_entry_value (sym_sec, sym_value,
-					      &code_sec, &code_value, FALSE);
+					      &code_sec, &code_value, false);
 		      if (dest != (bfd_vma) -1)
 			{
 			  destination = dest;
@@ -13582,7 +13586,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		    goto error_ret_free_internal;
 
 		  stub_entry = ppc_stub_hash_lookup (&htab->stub_hash_table,
-						     stub_name, FALSE, FALSE);
+						     stub_name, false, false);
 		  if (stub_entry != NULL)
 		    {
 		      enum ppc_stub_type old_type;
@@ -13599,7 +13603,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			  /* For --power10-stubs=auto, don't merge _notoc
 			     and other varieties of stubs.  (The _both
 			     variety won't be created.)  */
-			  bfd_boolean notoc = r_type == R_PPC64_REL24_NOTOC;
+			  bool notoc = r_type == R_PPC64_REL24_NOTOC;
 			  struct ppc_stub_hash_entry *alt_stub
 			    = select_alt_stub (stub_entry, notoc);
 
@@ -13699,7 +13703,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		      if (symtab_hdr->contents
 			  != (unsigned char *) local_syms)
 			free (local_syms);
-		      return FALSE;
+		      return false;
 		    }
 
 		  stub_entry->stub_type = stub_type;
@@ -13854,7 +13858,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	 indexed in .eh_frame_hdr.  */
       p = bfd_zalloc (htab->glink_eh_frame->owner, htab->glink_eh_frame->size);
       if (p == NULL)
-	return FALSE;
+	return false;
       htab->glink_eh_frame->contents = p;
       last_fde = p;
       align = 4;
@@ -13934,7 +13938,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
   if (htab->glink_eh_frame != NULL)
     maybe_strip_output (info, htab->glink_eh_frame);
 
-  return TRUE;
+  return true;
 }
 
 /* Called after we have determined section placement.  If sections
@@ -13951,19 +13955,20 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
       struct elf_link_hash_entry *h;
       struct elf_link_hash_table *htab = elf_hash_table (info);
 
-      if (is_elf_hash_table (htab)
+      if (is_elf_hash_table (&htab->root)
 	  && htab->hgot != NULL)
 	h = htab->hgot;
       else
 	{
-	  h = elf_link_hash_lookup (htab, ".TOC.", FALSE, FALSE, TRUE);
-	  if (is_elf_hash_table (htab))
+	  h = (struct elf_link_hash_entry *)
+	    bfd_link_hash_lookup (&htab->root, ".TOC.", false, false, true);
+	  if (is_elf_hash_table (&htab->root))
 	    htab->hgot = h;
 	}
       if (h != NULL
 	  && h->root.type == bfd_link_hash_defined
 	  && !h->root.linker_def
-	  && (!is_elf_hash_table (htab)
+	  && (!is_elf_hash_table (&htab->root)
 	      || h->def_regular))
 	{
 	  TOCstart = defined_sym_val (h) - TOC_BASE_OFF;
@@ -14040,7 +14045,7 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
 	  struct bfd_link_hash_entry *bh = NULL;
 	  _bfd_generic_link_add_one_symbol (info, obfd, ".TOC.", BSF_GLOBAL,
 					    s, TOC_BASE_OFF - adjust,
-					    NULL, FALSE, FALSE, &bh);
+					    NULL, false, false, &bh);
 	}
     }
   return TOCstart;
@@ -14049,7 +14054,7 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
 /* Called via elf_link_hash_traverse from ppc64_elf_build_stubs to
    write out any global entry stubs, and PLT relocations.  */
 
-static bfd_boolean
+static bool
 build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
@@ -14058,12 +14063,12 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
   asection *s;
 
   if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
+    return true;
 
   info = inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   for (ent = h->plt.plist; ent != NULL; ent = ent->next)
     if (ent->plt.offset != (bfd_vma) -1)
@@ -14084,7 +14089,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	      {
 		plt = htab->elf.iplt;
 		relplt = htab->elf.irelplt;
-		htab->elf.ifunc_resolvers = TRUE;
+		htab->elf.ifunc_resolvers = true;
 		if (htab->opd_abi)
 		  rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
 		else
@@ -14138,20 +14143,20 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
 	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
-	      htab->elf.ifunc_resolvers = TRUE;
+	      htab->elf.ifunc_resolvers = true;
 	    bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
 	  }
       }
 
   if (!h->pointer_equality_needed)
-    return TRUE;
+    return true;
 
   if (h->def_regular)
-    return TRUE;
+    return true;
 
   s = htab->global_entry;
   if (s == NULL || s->size == 0)
-    return TRUE;
+    return true;
 
   for (ent = h->plt.plist; ent != NULL; ent = ent->next)
     if (ent->plt.offset != (bfd_vma) -1
@@ -14179,7 +14184,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	      (_("%P: linkage table error against `%pT'\n"),
 	       h->root.root.string);
 	    bfd_set_error (bfd_error_bad_value);
-	    htab->stub_error = TRUE;
+	    htab->stub_error = true;
 	  }
 
 	htab->stub_count[ppc_stub_global_entry - 1] += 1;
@@ -14189,12 +14194,12 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	    char *name = bfd_malloc (sizeof "12345678.global_entry." + len);
 
 	    if (name == NULL)
-	      return FALSE;
+	      return false;
 
 	    sprintf (name, "%08x.global_entry.%s", s->id, h->root.root.string);
-	    h = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
+	    h = elf_link_hash_lookup (&htab->elf, name, true, false, false);
 	    if (h == NULL)
-	      return FALSE;
+	      return false;
 	    if (h->root.type == bfd_link_hash_new)
 	      {
 		h->root.type = bfd_link_hash_defined;
@@ -14221,12 +14226,12 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	bfd_put_32 (s->owner, BCTR, p);
 	break;
       }
-  return TRUE;
+  return true;
 }
 
 /* Write PLT relocs for locals.  */
 
-static bfd_boolean
+static bool
 write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
@@ -14268,7 +14273,7 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 		{
 		  if (symtab_hdr->contents != (unsigned char *) local_syms)
 		    free (local_syms);
-		  return FALSE;
+		  return false;
 		}
 
 	      val = sym->st_value + ent->addend;
@@ -14277,7 +14282,7 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 
 	      if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 		{
-		  htab->elf.ifunc_resolvers = TRUE;
+		  htab->elf.ifunc_resolvers = true;
 		  plt = htab->elf.iplt;
 		  relplt = htab->elf.irelplt;
 		}
@@ -14333,13 +14338,13 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
     }
-  return TRUE;
+  return true;
 }
 
 /* Emit the static wrapper function preserving registers around a
    __tls_get_addr_opt call.  */
 
-static bfd_boolean
+static bool
 emit_tga_desc (struct ppc_link_hash_table *htab)
 {
   asection *stub_sec = htab->tga_group->stub_sec;
@@ -14356,8 +14361,8 @@ emit_tga_desc (struct ppc_link_hash_table *htab)
   if (delta + (1 << 25) >= 1 << 26)
     {
       _bfd_error_handler (_("__tls_get_addr call offset overflow"));
-      htab->stub_error = TRUE;
-      return FALSE;
+      htab->stub_error = true;
+      return false;
     }
 
   p = stub_sec->contents;
@@ -14408,7 +14413,7 @@ emit_tga_desc_eh_frame (struct ppc_link_hash_table *htab, bfd_byte *p)
    The stubs are kept in a hash table attached to the main linker
    hash table.  This function is called via gldelf64ppc_finish.  */
 
-bfd_boolean
+bool
 ppc64_elf_build_stubs (struct bfd_link_info *info,
 		       char **stats)
 {
@@ -14419,7 +14424,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
   int stub_sec_count = 0;
 
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Allocate memory to hold the linker stubs.  */
   for (group = htab->group; group != NULL; group = group->next)
@@ -14432,7 +14437,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  stub_sec->contents = bfd_zalloc (htab->params->stub_bfd,
 					   stub_sec->size);
 	  if (stub_sec->contents == NULL)
-	    return FALSE;
+	    return false;
 	  stub_sec->size = 0;
 	}
     }
@@ -14447,9 +14452,9 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	{
 	  struct elf_link_hash_entry *h;
 	  h = elf_link_hash_lookup (&htab->elf, "__glink_PLTresolve",
-				    TRUE, FALSE, FALSE);
+				    true, false, false);
 	  if (h == NULL)
-	    return FALSE;
+	    return false;
 	  if (h->root.type == bfd_link_hash_new)
 	    {
 	      h->root.type = bfd_link_hash_defined;
@@ -14470,7 +14475,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	{
 	  Elf_Internal_Rela *r = get_relocs (htab->glink, 1);
 	  if (r == NULL)
-	    return FALSE;
+	    return false;
 	  r->r_offset = (htab->glink->output_offset
 			 + htab->glink->output_section->vma);
 	  r->r_info = ELF64_R_INFO (0, R_PPC64_REL64);
@@ -14605,7 +14610,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
       htab->tga_group->lr_restore = 23 * 4;
       htab->tga_group->stub_sec->size = 24 * 4;
       if (!emit_tga_desc (htab))
-	return FALSE;
+	return false;
       if (htab->glink_eh_frame != NULL
 	  && htab->glink_eh_frame->size != 0)
 	{
@@ -14622,21 +14627,21 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
   elf_link_hash_traverse (&htab->elf, build_global_entry_stubs_and_plt, info);
 
   if (!write_plt_relocs_for_local_syms (info))
-    return FALSE;
+    return false;
 
   if (htab->brlt != NULL && htab->brlt->size != 0)
     {
       htab->brlt->contents = bfd_zalloc (htab->brlt->owner,
 					 htab->brlt->size);
       if (htab->brlt->contents == NULL)
-	return FALSE;
+	return false;
     }
   if (htab->relbrlt != NULL && htab->relbrlt->size != 0)
     {
       htab->relbrlt->contents = bfd_zalloc (htab->relbrlt->owner,
 					    htab->relbrlt->size);
       if (htab->relbrlt->contents == NULL)
-	return FALSE;
+	return false;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
@@ -14669,7 +14674,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
 	    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
 	      if (!sfpr_define (info, &save_res_funcs[i], stub_sec))
-		return FALSE;
+		return false;
 	  }
       }
 
@@ -14696,7 +14701,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 		_bfd_error_handler
 		  (_("%s offset too large for .eh_frame sdata4 encoding"),
 		   group->stub_sec->name);
-		return FALSE;
+		return false;
 	      }
 	    bfd_put_32 (htab->elf.dynobj, val, p + 8);
 	    p += (group->eh_size + 17 + 3) & -4;
@@ -14715,7 +14720,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	      _bfd_error_handler
 		(_("%s offset too large for .eh_frame sdata4 encoding"),
 		 htab->glink->name);
-	      return FALSE;
+	      return false;
 	    }
 	  bfd_put_32 (htab->elf.dynobj, val, p + 8);
 	  p += (24 + align - 1) & -align;
@@ -14734,12 +14739,12 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   if (group != NULL)
     {
-      htab->stub_error = TRUE;
+      htab->stub_error = true;
       _bfd_error_handler (_("stubs don't match calculated size"));
     }
 
   if (htab->stub_error)
-    return FALSE;
+    return false;
 
   if (stats != NULL)
     {
@@ -14784,7 +14789,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  free (groupmsg);
 	}
     }
-  return TRUE;
+  return true;
 }
 
 /* What to do when ld finds relocations against symbols defined in
@@ -14807,7 +14812,7 @@ ppc64_elf_action_discarded (asection *sec)
 
 /* These are the dynamic relocations supported by glibc.  */
 
-static bfd_boolean
+static bool
 ppc64_glibc_dynamic_reloc (enum elf_ppc64_reloc_type r_type)
 {
   switch (r_type)
@@ -14858,10 +14863,10 @@ ppc64_glibc_dynamic_reloc (enum elf_ppc64_reloc_type r_type)
     case R_PPC64_ADDR14_BRNTAKEN:
     case R_PPC64_REL32:
     case R_PPC64_REL64:
-      return TRUE;
+      return true;
 
     default:
-      return FALSE;
+      return false;
     }
 }
 
@@ -14894,7 +14899,7 @@ ppc64_glibc_dynamic_reloc (enum elf_ppc64_reloc_type r_type)
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 ppc64_elf_relocate_section (bfd *output_bfd,
 			    struct bfd_link_info *info,
 			    bfd *input_bfd,
@@ -14914,11 +14919,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   bfd_byte *loc;
   struct got_entry **local_got_ents;
   bfd_vma TOCstart;
-  bfd_boolean ret = TRUE;
-  bfd_boolean is_opd;
+  bool ret = true;
+  bool is_opd;
   /* Assume 'at' branch hints.  */
-  bfd_boolean is_isa_v2 = TRUE;
-  bfd_boolean warned_dynamic = FALSE;
+  bool is_isa_v2 = true;
+  bool warned_dynamic = false;
   bfd_vma d_offset = (bfd_big_endian (input_bfd) ? 2 : 0);
 
   /* Initialize howto table if needed.  */
@@ -14927,16 +14932,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   /* Don't relocate stub sections.  */
   if (input_section->owner == htab->params->stub_bfd)
-    return TRUE;
+    return true;
 
   if (!is_ppc64_elf (input_bfd))
     {
       bfd_set_error (bfd_error_wrong_format);
-      return FALSE;
+      return false;
     }
 
   local_got_ents = elf_local_got_ents (input_bfd);
@@ -14963,8 +14968,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       unsigned char tls_mask, tls_gd, tls_type;
       unsigned char sym_type;
       bfd_vma relocation;
-      bfd_boolean unresolved_reloc, save_unresolved_reloc;
-      bfd_boolean warned;
+      bool unresolved_reloc, save_unresolved_reloc;
+      bool warned;
       enum { DEST_NORMAL, DEST_OPD, DEST_STUB } reloc_dest;
       unsigned int insn;
       unsigned int mask;
@@ -14996,8 +15001,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       sec = NULL;
       h_elf = NULL;
       sym_name = NULL;
-      unresolved_reloc = FALSE;
-      warned = FALSE;
+      unresolved_reloc = false;
+      warned = false;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -15032,7 +15037,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean ignored;
+	  bool ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -15097,7 +15102,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	  relocation = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  sec = bfd_abs_section_ptr;
-	  unresolved_reloc = FALSE;
+	  unresolved_reloc = false;
 	}
 
       /* TLS optimizations.  Replace instruction sequences and relocs
@@ -15127,7 +15132,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	  if (!get_tls_mask (&toc_tls, &toc_symndx, &toc_addend,
 			     &local_syms, rel, input_bfd))
-	    return FALSE;
+	    return false;
 
 	  if (toc_tls)
 	    tls_mask = *toc_tls;
@@ -15200,7 +15205,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    retval = get_tls_mask (&toc_tls, &toc_symndx, &toc_addend,
 				   &local_syms, rel, input_bfd);
 	    if (retval == 0)
-	      return FALSE;
+	      return false;
 
 	    if (toc_tls)
 	      {
@@ -15810,7 +15815,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  || stub_entry->stub_type == ppc_stub_long_branch_r2off
 		  || stub_entry->stub_type == ppc_stub_long_branch_both))
 	    {
-	      bfd_boolean can_plt_call = FALSE;
+	      bool can_plt_call = false;
 
 	      if (stub_entry->stub_type == ppc_stub_plt_call
 		  && !htab->opd_abi
@@ -15819,12 +15824,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  && is_elfv2_localentry0 (&h->elf))
 		{
 		  /* The function doesn't use or change r2.  */
-		  can_plt_call = TRUE;
+		  can_plt_call = true;
 		}
 	      else if (r_type == R_PPC64_REL24_NOTOC)
 		{
 		  /* NOTOC calls don't need to restore r2.  */
-		  can_plt_call = TRUE;
+		  can_plt_call = true;
 		}
 
 	      /* All of these stubs may modify r2, so there must be a
@@ -15843,7 +15848,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      nop = bfd_get_32 (input_bfd,
 					contents + rel->r_offset + 4);
 		      if (nop == LD_R2_0R1 + STK_TOC (htab))
-			can_plt_call = TRUE;
+			can_plt_call = true;
 		      else if (nop == NOP
 			       || nop == CROR_151515
 			       || nop == CROR_313131)
@@ -15858,7 +15863,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			    bfd_put_32 (input_bfd,
 					LD_R2_0R1 + STK_TOC (htab),
 					contents + rel->r_offset + 4);
-			  can_plt_call = TRUE;
+			  can_plt_call = true;
 			}
 		    }
 		}
@@ -15870,13 +15875,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (*name == '.')
 		    ++name;
 
-		  if (strncmp (name, "__libc_start_main", 17) == 0
+		  if (startswith (name, "__libc_start_main")
 		      && (name[17] == 0 || name[17] == '@'))
 		    {
 		      /* Allow crt1 branch to go via a toc adjusting
 			 stub.  Other calls that never return could do
 			 the same, if we could detect such.  */
-		      can_plt_call = TRUE;
+		      can_plt_call = true;
 		    }
 		}
 
@@ -15898,10 +15903,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				     - sec->output_section->vma
 				     - sec->output_offset);
 
-		      opd_entry_value (sec, off, &code_sec, NULL, FALSE);
+		      opd_entry_value (sec, off, &code_sec, NULL, false);
 		    }
 		  if (code_sec == input_section)
-		    can_plt_call = TRUE;
+		    can_plt_call = true;
 		}
 
 	      if (!can_plt_call)
@@ -15921,13 +15926,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		       input_bfd, input_section, rel->r_offset, sym_name);
 
 		  bfd_set_error (bfd_error_bad_value);
-		  ret = FALSE;
+		  ret = false;
 		}
 
 	      if (can_plt_call
 		  && stub_entry->stub_type >= ppc_stub_plt_call
 		  && stub_entry->stub_type <= ppc_stub_plt_call_both)
-		unresolved_reloc = FALSE;
+		unresolved_reloc = false;
 	    }
 
 	  if ((stub_entry == NULL
@@ -15939,7 +15944,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_vma off = (relocation + addend
 			     - sec->output_section->vma
 			     - sec->output_offset);
-	      bfd_vma dest = opd_entry_value (sec, off, NULL, NULL, FALSE);
+	      bfd_vma dest = opd_entry_value (sec, off, NULL, NULL, false);
 	      if (dest != (bfd_vma) -1)
 		{
 		  relocation = dest;
@@ -16081,6 +16086,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x8000 < 0x10000
+	      && sec != NULL
+	      && sec->output_section != NULL
+	      && !discarded_section (sec)
 	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
@@ -16101,6 +16109,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x80008000ULL < 0x100000000ULL
+	      && sec != NULL
+	      && sec->output_section != NULL
+	      && !discarded_section (sec)
 	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
@@ -16129,6 +16140,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  + input_section->output_section->vma
 		  + input_section->output_offset);
 	  if (!(relocation - from + (1ULL << 33) < 1ULL << 34
+		&& sec != NULL
+		&& sec->output_section != NULL
+		&& !discarded_section (sec)
 		&& (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf))))
 	    break;
 
@@ -16211,7 +16225,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			      input_bfd, ppc64_elf_howto_table[r_type]->name);
 
 	  bfd_set_error (bfd_error_bad_value);
-	  ret = FALSE;
+	  ret = false;
 	  goto copy_reloc;
 
 	case R_PPC64_NONE:
@@ -16297,7 +16311,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    else
 		      {
 			indx = h->elf.dynindx;
-			unresolved_reloc = FALSE;
+			unresolved_reloc = false;
 		      }
 		    ent = h->elf.got.glist;
 		  }
@@ -16336,7 +16350,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   the case of TLSLD where we'll use one entry per
 		   module.  */
 		asection *relgot;
-		bfd_boolean ifunc;
+		bool ifunc;
 
 		*offp = off | 1;
 		relgot = NULL;
@@ -16347,7 +16361,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  {
 		    relgot = htab->elf.irelplt;
 		    if (indx == 0 || is_static_defined (&h->elf))
-		      htab->elf.ifunc_resolvers = TRUE;
+		      htab->elf.ifunc_resolvers = true;
 		  }
 		else if (indx != 0
 			 || (bfd_link_pic (info)
@@ -16478,7 +16492,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLTCALL_NOTOC:
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
-	  unresolved_reloc = TRUE;
+	  unresolved_reloc = true;
 	  {
 	    struct plt_entry **plt_list = NULL;
 	    if (h != NULL)
@@ -16523,7 +16537,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  relocation -= got;
 			}
 		      addend = 0;
-		      unresolved_reloc = FALSE;
+		      unresolved_reloc = false;
 		      break;
 		    }
 	      }
@@ -16540,7 +16554,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  else if (sec != NULL && sec->id < htab->sec_info_arr_size)
 	    relocation += htab->sec_info[sec->id].toc_off;
 	  else
-	    unresolved_reloc = TRUE;
+	    unresolved_reloc = true;
 	  goto dodyn;
 
 	  /* TOC16 relocs.  We want the offset relative to the TOC base,
@@ -16718,7 +16732,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 ? h->elf.dyn_relocs != NULL
 		 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC))
 	    {
-	      bfd_boolean skip, relocate;
+	      bool skip, relocate;
 	      asection *sreloc;
 	      bfd_vma out_off;
 	      long indx = 0;
@@ -16727,15 +16741,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 are copied into the output file to be resolved at run
 		 time.  */
 
-	      skip = FALSE;
-	      relocate = FALSE;
+	      skip = false;
+	      relocate = false;
 
 	      out_off = _bfd_elf_section_offset (output_bfd, info,
 						 input_section, rel->r_offset);
 	      if (out_off == (bfd_vma) -1)
-		skip = TRUE;
+		skip = true;
 	      else if (out_off == (bfd_vma) -2)
-		skip = TRUE, relocate = TRUE;
+		skip = true, relocate = true;
 	      out_off += (input_section->output_section->vma
 			  + input_section->output_offset);
 	      outrel.r_offset = out_off;
@@ -16783,7 +16797,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			     bug in binutils handling of weak syms.)
 			     In these cases we won't use the opd
 			     entry in this lib.  */
-			  unresolved_reloc = FALSE;
+			  unresolved_reloc = false;
 			}
 		      if (!is_opd
 			  && r_type == R_PPC64_ADDR64
@@ -16799,7 +16813,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			     Prelink also wants simple and consistent rules
 			     for relocs.  This make all RELATIVE relocs have
 			     *r_offset equal to r_addend.  */
-			  relocate = TRUE;
+			  relocate = true;
 			}
 		    }
 		  else
@@ -16815,14 +16829,14 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			     input_bfd, input_section, rel->r_offset,
 			     ppc64_elf_howto_table[r_type]->name,
 			     sym_name);
-			  ret = FALSE;
+			  ret = false;
 			}
 		      else if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
+			  return false;
 			}
 		      else
 			{
@@ -16878,7 +16892,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		{
 		  sreloc = htab->elf.irelplt;
 		  if (indx == 0 || is_static_defined (&h->elf))
-		    htab->elf.ifunc_resolvers = TRUE;
+		    htab->elf.ifunc_resolvers = true;
 		}
 	      if (sreloc == NULL)
 		abort ();
@@ -16900,7 +16914,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		     input_bfd,
 		     ppc64_elf_howto_table[ELF64_R_TYPE (outrel.r_info)]->name,
 		     sym_name);
-		  warned_dynamic = TRUE;
+		  warned_dynamic = true;
 		}
 
 	      /* If this reloc is against an external symbol, it will
@@ -16909,7 +16923,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 that the section contents are a known value.  */
 	      if (!relocate)
 		{
-		  unresolved_reloc = FALSE;
+		  unresolved_reloc = false;
 		  /* The value chosen here is quite arbitrary as ld.so
 		     ignores section contents except for the special
 		     case of .opd where the contents might be accessed
@@ -16955,7 +16969,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     ppc64_elf_howto_table[r_type]->name, sym_name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
-	  ret = FALSE;
+	  ret = false;
 	  goto copy_reloc;
 	}
 
@@ -17005,7 +17019,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLTSEQ:
 	  if (unresolved_reloc)
 	    {
-	      unresolved_reloc = FALSE;
+	      unresolved_reloc = false;
 	      goto nop_it;
 	    }
 	  break;
@@ -17020,7 +17034,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_byte *p = contents + rel->r_offset;
 	      bfd_put_32 (input_bfd, PNOP >> 32, p);
 	      bfd_put_32 (input_bfd, PNOP, p + 4);
-	      unresolved_reloc = FALSE;
+	      unresolved_reloc = false;
 	      goto copy_reloc;
 	    }
 	  break;
@@ -17028,7 +17042,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLT16_HA:
 	  if (unresolved_reloc)
 	    {
-	      unresolved_reloc = FALSE;
+	      unresolved_reloc = false;
 	      goto nop_it;
 	    }
 	  /* Fall through.  */
@@ -17053,7 +17067,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLT16_LO_DS:
 	  if (unresolved_reloc)
 	    {
-	      unresolved_reloc = FALSE;
+	      unresolved_reloc = false;
 	      goto nop_it;
 	    }
 	  /* Fall through.  */
@@ -17203,7 +17217,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 ppc64_elf_howto_table[r_type]->name,
 		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
-	      ret = FALSE;
+	      ret = false;
 	      goto copy_reloc;
 	    }
 	  break;
@@ -17225,7 +17239,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
 	     h->elf.root.root.string);
-	  ret = FALSE;
+	  ret = false;
 	}
 
       /* 16-bit fields in insns mostly have signed values, but a
@@ -17368,7 +17382,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		(_("%H: %s against `%pT': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 reloc_name, sym_name, (int) r);
-	      ret = FALSE;
+	      ret = false;
 	    }
 	  free (more_info);
 	}
@@ -17410,7 +17424,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       BFD_ASSERT (ppc64_elf_tdata (input_bfd)->opd.relocs == NULL);
       ppc64_elf_tdata (input_bfd)->opd.relocs = rel;
       if (rel == NULL)
-	return FALSE;
+	return false;
       memcpy (rel, relocs, amt);
     }
   return ret;
@@ -17451,7 +17465,7 @@ ppc64_elf_output_symbol_hook (struct bfd_link_info *info,
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 				 struct bfd_link_info *info,
 				 struct elf_link_hash_entry *h,
@@ -17462,7 +17476,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   if (!htab->opd_abi && !h->def_regular)
     for (ent = h->plt.plist; ent != NULL; ent = ent->next)
@@ -17514,7 +17528,7 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -17547,7 +17561,7 @@ ppc64_elf_reloc_type_class (const struct bfd_link_info *info,
 
 /* Finish up the dynamic sections.  */
 
-static bfd_boolean
+static bool
 ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				   struct bfd_link_info *info)
 {
@@ -17557,7 +17571,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return FALSE;
+    return false;
 
   dynobj = htab->elf.dynobj;
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
@@ -17672,7 +17686,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				       elf_section_data (htab->brlt)->rela.hdr,
 				       elf_section_data (htab->brlt)->relocs,
 				       NULL))
-    return FALSE;
+    return false;
 
   if (htab->glink != NULL
       && htab->glink->reloc_count != 0
@@ -17681,7 +17695,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				       elf_section_data (htab->glink)->rela.hdr,
 				       elf_section_data (htab->glink)->relocs,
 				       NULL))
-    return FALSE;
+    return false;
 
 
   if (htab->glink_eh_frame != NULL
@@ -17690,7 +17704,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
       && !_bfd_elf_write_section_eh_frame (output_bfd, info,
 					   htab->glink_eh_frame,
 					   htab->glink_eh_frame->contents))
-    return FALSE;
+    return false;
 
   /* We need to handle writing out multiple GOT sections ourselves,
      since we didn't add them to DYNOBJ.  We know dynobj is the first
@@ -17709,7 +17723,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	  && !bfd_set_section_contents (output_bfd, s->output_section,
 					s->contents, s->output_offset,
 					s->size))
-	return FALSE;
+	return false;
       s = ppc64_elf_tdata (dynobj)->relgot;
       if (s != NULL
 	  && s->size != 0
@@ -17717,10 +17731,10 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	  && !bfd_set_section_contents (output_bfd, s->output_section,
 					s->contents, s->output_offset,
 					s->size))
-	return FALSE;
+	return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 #include "elf64-target.h"

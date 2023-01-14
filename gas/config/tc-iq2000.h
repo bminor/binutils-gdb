@@ -45,8 +45,6 @@
 
 #define tc_frob_file() iq2000_frob_file ()
 
-#define obj_fix_adjustable(fixP) iq2000_fix_adjustable (fixP)
-
 /* After creating a fixup for an instruction operand, we need to check
    for HI16 relocs and queue them up for later sorting.  */
 #define md_cgen_record_fixup_exp  iq2000_cgen_record_fixup_exp
@@ -59,6 +57,6 @@
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
-extern void         iq2000_frob_file         (void);
-extern bfd_boolean  iq2000_fix_adjustable    (struct fix *);
-extern int          iq2000_force_relocation  (struct fix *);
+extern void iq2000_frob_file (void);
+extern bool iq2000_fix_adjustable (struct fix *);
+extern int iq2000_force_relocation (struct fix *);

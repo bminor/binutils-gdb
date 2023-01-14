@@ -1,6 +1,4 @@
 #...
-.*debuglink.o: Found separate debug info file:.*linkdebug.debug
-#...
 Contents of the .debug_str section \(loaded from .*debuglink.o\):
 
   0x00000000 73747269 6e672d31 00737472 696e672d string-1.string-

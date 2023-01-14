@@ -40,21 +40,6 @@ enum innermost_block_tracker_type
 DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
 		     innermost_block_tracker_types);
 
-/* Definitions for saved C expressions.  */
-
-/* An expression is represented as a vector of union exp_element's.
-   Each exp_element is an opcode, except that some opcodes cause
-   the following exp_element to be treated as a long or double constant
-   or as a variable.  The opcodes are obeyed, using a stack for temporaries.
-   The value is left on the temporary stack at the end.  */
-
-/* When it is necessary to include a string,
-   it can occupy as many exp_elements as it needs.
-   We find the length of the string using strlen,
-   divide to find out how many exp_elements are used up,
-   and skip that many.  Strings, like numbers, are indicated
-   by the preceding opcode.  */
-
 enum exp_opcode : uint8_t
   {
 #define OP(name) name ,
@@ -62,9 +47,6 @@ enum exp_opcode : uint8_t
 #include "std-operator.def"
 
 #undef OP
-
-    /* Existing only to swallow the last comma (',') from last .inc file.  */
-    OP_UNUSED_LAST
   };
 
 /* Values of NOSIDE argument to eval_subexp.  */
@@ -72,9 +54,6 @@ enum exp_opcode : uint8_t
 enum noside
   {
     EVAL_NORMAL,
-    EVAL_SKIP,			/* Only effect is to increment pos.
-				   Return type information where
-				   possible.  */
     EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
 				   call any functions.  The value
 				   returned will have the correct
@@ -89,54 +68,159 @@ enum noside
 				   does in many situations.  */
   };
 
-union exp_element
+struct expression;
+struct agent_expr;
+struct axs_value;
+struct type;
+struct ui_file;
+
+namespace expr
+{
+
+class operation;
+typedef std::unique_ptr<operation> operation_up;
+
+/* Base class for an operation.  An operation is a single component of
+   an expression.  */
+
+class operation
+{
+protected:
+
+  operation () = default;
+  DISABLE_COPY_AND_ASSIGN (operation);
+
+public:
+
+  virtual ~operation () = default;
+
+  /* Evaluate this operation.  */
+  virtual value *evaluate (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside) = 0;
+
+  /* Evaluate this operation in a context where C-like coercion is
+     needed.  */
+  virtual value *evaluate_with_coercion (struct expression *exp,
+					 enum noside noside)
   {
-    enum exp_opcode opcode;
-    struct symbol *symbol;
-    struct minimal_symbol *msymbol;
-    LONGEST longconst;
-    gdb_byte floatconst[16];
-    /* Really sizeof (union exp_element) characters (or less for the last
-       element of a string).  */
-    char string;
-    struct type *type;
-    struct internalvar *internalvar;
-    const struct block *block;
-    struct objfile *objfile;
-  };
+    return evaluate (nullptr, exp, noside);
+  }
+
+  /* Evaluate this expression in the context of a cast to
+     EXPECT_TYPE.  */
+  virtual value *evaluate_for_cast (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside);
+
+  /* Evaluate this expression in the context of a sizeof
+     operation.  */
+  virtual value *evaluate_for_sizeof (struct expression *exp,
+				      enum noside noside);
+
+  /* Evaluate this expression in the context of an address-of
+     operation.  Must return the address.  */
+  virtual value *evaluate_for_address (struct expression *exp,
+				       enum noside noside);
+
+  /* Evaluate a function call, with this object as the callee.
+     EXPECT_TYPE, EXP, and NOSIDE have the same meaning as in
+     'evaluate'.  ARGS holds the operations that should be evaluated
+     to get the arguments to the call.  */
+  virtual value *evaluate_funcall (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside,
+				   const std::vector<operation_up> &args)
+  {
+    /* Defer to the helper overload.  */
+    return evaluate_funcall (expect_type, exp, noside, nullptr, args);
+  }
+
+  /* True if this is a constant expression.  */
+  virtual bool constant_p () const
+  { return false; }
+
+  /* Return true if this operation uses OBJFILE (and will become
+     dangling when OBJFILE is unloaded), otherwise return false.
+     OBJFILE must not be a separate debug info file.  */
+  virtual bool uses_objfile (struct objfile *objfile) const
+  { return false; }
+
+  /* Generate agent expression bytecodes for this operation.  */
+  void generate_ax (struct expression *exp, struct agent_expr *ax,
+		    struct axs_value *value,
+		    struct type *cast_type = nullptr);
+
+  /* Return the opcode that is implemented by this operation.  */
+  virtual enum exp_opcode opcode () const = 0;
+
+  /* Print this operation to STREAM.  */
+  virtual void dump (struct ui_file *stream, int depth) const = 0;
+
+  /* Call to indicate that this is the outermost operation in the
+     expression.  This should almost never be overridden.  */
+  virtual void set_outermost () { }
+
+protected:
+
+  /* A helper overload that wraps evaluate_subexp_do_call.  */
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const char *function_name,
+			   const std::vector<operation_up> &args);
+
+  /* Called by generate_ax to do the work for this particular
+     operation.  */
+  virtual void do_generate_ax (struct expression *exp,
+			       struct agent_expr *ax,
+			       struct axs_value *value,
+			       struct type *cast_type)
+  {
+    error (_("Cannot translate to agent expression"));
+  }
+};
+
+/* A helper function for creating an operation_up, given a type.  */
+template<typename T, typename... Arg>
+operation_up
+make_operation (Arg... args)
+{
+  return operation_up (new T (std::forward<Arg> (args)...));
+}
+
+}
 
 struct expression
 {
-  expression (const struct language_defn *, struct gdbarch *, size_t);
-  ~expression ();
-  DISABLE_COPY_AND_ASSIGN (expression);
+  expression (const struct language_defn *lang, struct gdbarch *arch)
+    : language_defn (lang),
+      gdbarch (arch)
+  {
+  }
 
-  void resize (size_t);
+  DISABLE_COPY_AND_ASSIGN (expression);
 
   /* Return the opcode for the outermost sub-expression of this
      expression.  */
   enum exp_opcode first_opcode () const
   {
-      return elts[0].opcode;
+    return op->opcode ();
   }
+
+  /* Evaluate the expression.  EXPECT_TYPE is the context type of the
+     expression; normally this should be nullptr.  NOSIDE controls how
+     evaluation is performed.  */
+  struct value *evaluate (struct type *expect_type, enum noside noside);
 
   /* Language it was entered in.  */
   const struct language_defn *language_defn;
   /* Architecture it was parsed in.  */
   struct gdbarch *gdbarch;
-  int nelts = 0;
-  union exp_element *elts;
+  expr::operation_up op;
 };
 
 typedef std::unique_ptr<expression> expression_up;
-
-/* Macros for converting between number of expression elements and bytes
-   to store that many expression elements.  */
-
-#define EXP_ELEM_TO_BYTES(elements) \
-    ((elements) * sizeof (union exp_element))
-#define BYTES_TO_EXP_ELEM(bytes) \
-    (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
 
 /* From parse.c */
 
@@ -158,9 +242,6 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
 
 /* From eval.c */
 
-extern struct value *evaluate_subexp_standard
-  (struct type *, struct expression *, int *, enum noside);
-
 /* Evaluate a function call.  The function to be called is in CALLEE and
    the arguments passed to the function are in ARGVEC.
    FUNCTION_NAME is the name of the function, if known.
@@ -176,14 +257,8 @@ extern struct value *evaluate_subexp_do_call (expression *exp,
 
 /* From expprint.c */
 
-extern void print_expression (struct expression *, struct ui_file *);
-
 extern const char *op_name (enum exp_opcode opcode);
 
-extern const char *op_string (enum exp_opcode);
-
-extern void dump_raw_expression (struct expression *,
-				 struct ui_file *, const char *);
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound could be empty, indicating

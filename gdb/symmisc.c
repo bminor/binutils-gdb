@@ -38,19 +38,6 @@
 #include "source.h"
 #include "readline/tilde.h"
 
-#include "psymtab.h"
-#include "psympriv.h"
-
-/* Unfortunately for debugging, stderr is usually a macro.  This is painful
-   when calling functions that take FILE *'s from the debugger.
-   So we make a variable which has the same value and which is accessible when
-   debugging GDB with itself.  Because stdin et al need not be constants,
-   we initialize them in the _initialize_symmisc function at the bottom
-   of the file.  */
-static FILE *std_in;
-static FILE *std_out;
-static FILE *std_err;
-
 /* Prototypes for local functions */
 
 static int block_depth (const struct block *);
@@ -58,35 +45,6 @@ static int block_depth (const struct block *);
 static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  int depth, ui_file *outfile);
 
-
-void
-print_symbol_bcache_statistics (void)
-{
-  for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
-      {
-	QUIT;
-	printf_filtered (_("Byte cache statistics for '%s':\n"),
-			 objfile_name (objfile));
-	objfile->partial_symtabs->psymbol_cache.print_statistics
-	  ("partial symbol cache");
-	objfile->per_bfd->string_cache.print_statistics ("string cache");
-      }
-}
-
-/* Count the number of partial symbols in OBJFILE.  */
-
-static int
-count_psyms (struct objfile *objfile)
-{
-  int count = 0;
-  for (partial_symtab *pst : objfile->psymtabs ())
-    {
-      count += pst->global_psymbols.size ();
-      count += pst->static_psymbols.size ();
-    }
-  return count;
-}
 
 void
 print_objfile_statistics (void)
@@ -104,19 +62,13 @@ print_objfile_statistics (void)
 	if (objfile->per_bfd->n_minsyms > 0)
 	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
 			   objfile->per_bfd->n_minsyms);
-
-	int n_psyms = count_psyms (objfile);
-	if (n_psyms > 0)
-	  printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			   n_psyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
 	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
 			   OBJSTAT (objfile, n_syms));
 	if (OBJSTAT (objfile, n_types) > 0)
 	  printf_filtered (_("  Number of \"types\" defined: %d\n"),
 			   OBJSTAT (objfile, n_types));
-	if (objfile->sf)
-	  objfile->sf->qf->print_stats (objfile);
+
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
 	  {
@@ -135,6 +87,8 @@ print_objfile_statistics (void)
 	printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"),
 			 blockvectors);
 
+	objfile->print_stats (false);
+
 	if (OBJSTAT (objfile, sz_strtab) > 0)
 	  printf_filtered (_("  Space used by string tables: %d\n"),
 			   OBJSTAT (objfile, sz_strtab));
@@ -144,11 +98,13 @@ print_objfile_statistics (void)
 	printf_filtered (_("  Total memory used for BFD obstack: %s\n"),
 			 pulongest (obstack_memory_used (&objfile->per_bfd
 							 ->storage_obstack)));
-	printf_filtered
-	  (_("  Total memory used for psymbol cache: %d\n"),
-	   objfile->partial_symtabs->psymbol_cache.memory_used ());
+
 	printf_filtered (_("  Total memory used for string cache: %d\n"),
 			 objfile->per_bfd->string_cache.memory_used ());
+	printf_filtered (_("Byte cache statistics for '%s':\n"),
+			 objfile_name (objfile));
+	objfile->per_bfd->string_cache.print_statistics ("string cache");
+	objfile->print_stats (true);
       }
 }
 
@@ -163,8 +119,7 @@ dump_objfile (struct objfile *objfile)
   printf_filtered (", %d minsyms\n\n",
 		   objfile->per_bfd->minimal_symbol_count);
 
-  if (objfile->sf)
-    objfile->sf->qf->dump (objfile);
+  objfile->dump ();
 
   if (objfile->compunit_symtabs != NULL)
     {
@@ -206,7 +161,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   index = 0;
   for (minimal_symbol *msymbol : objfile->msymbols ())
     {
-      struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
+      struct obj_section *section = msymbol->obj_section (objfile);
 
       switch (MSYMBOL_TYPE (msymbol))
 	{
@@ -250,7 +205,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       /* Use the relocated address as shown in the symbol here -- do
 	 not try to respect copy relocations.  */
       CORE_ADDR addr = (msymbol->value.address
-			+ objfile->section_offsets[msymbol->section]);
+			+ objfile->section_offsets[msymbol->section_index ()]);
       fputs_filtered (paddress (gdbarch, addr), outfile);
       fprintf_filtered (outfile, " %s", msymbol->linkage_name ());
       if (section)
@@ -553,7 +508,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   struct obj_section *section;
 
   if (SYMBOL_OBJFILE_OWNED (symbol))
-    section = SYMBOL_OBJ_SECTION (symbol_objfile (symbol), symbol);
+    section = symbol->obj_section (symbol_objfile (symbol));
   else
     section = NULL;
 
@@ -973,23 +928,19 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
-      {
-	if (objfile->sf)
-	  {
-	    objfile->sf->qf->expand_symtabs_matching
-	      (objfile,
-	       [&] (const char *filename, bool basenames)
-	       {
-		 /* KISS: Only apply the regexp to the complete file name.  */
-		 return (!basenames
-			 && (regexp == NULL || re_exec (filename)));
-	       },
-	       NULL,
-	       NULL,
-	       NULL,
-	       ALL_DOMAIN);
-	  }
-      }
+      objfile->expand_symtabs_matching
+	([&] (const char *filename, bool basenames)
+	 {
+	   /* KISS: Only apply the regexp to the complete file name.  */
+	   return (!basenames
+		   && (regexp == NULL || re_exec (filename)));
+	 },
+	 NULL,
+	 NULL,
+	 NULL,
+	 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+	 UNDEF_DOMAIN,
+	 ALL_DOMAIN);
 }
 
 
@@ -1102,10 +1053,6 @@ void _initialize_symmisc ();
 void
 _initialize_symmisc ()
 {
-  std_in = stdin;
-  std_out = stdout;
-  std_err = stderr;
-
   add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _("\
 Print dump of current symbol definitions.\n\
 Usage: mt print symbols [-pc ADDRESS] [--] [OUTFILE]\n\

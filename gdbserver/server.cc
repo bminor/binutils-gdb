@@ -203,6 +203,15 @@ discard_queued_stop_replies (ptid_t ptid)
       next = iter;
       ++next;
 
+      if (iter == notif_stop.queue.begin ())
+	{
+	  /* The head of the list contains the notification that was
+	     already sent to GDB.  So we can't remove it, otherwise
+	     when GDB sends the vStopped, it would ack the _next_
+	     notification, which hadn't been sent yet!  */
+	  continue;
+	}
+
       if (remove_all_on_match_ptid (*iter, ptid))
 	{
 	  delete *iter;
@@ -545,6 +554,64 @@ handle_btrace_conf_general_set (char *own_buf)
 
   write_ok (own_buf);
   return 1;
+}
+
+/* Create the qMemTags packet reply given TAGS.
+
+   Returns true if parsing succeeded and false otherwise.  */
+
+static bool
+create_fetch_memtags_reply (char *reply, const gdb::byte_vector &tags)
+{
+  /* It is an error to pass a zero-sized tag vector.  */
+  gdb_assert (tags.size () != 0);
+
+  std::string packet ("m");
+
+  /* Write the tag data.  */
+  packet += bin2hex (tags.data (), tags.size ());
+
+  /* Check if the reply is too big for the packet to handle.  */
+  if (PBUFSIZ < packet.size ())
+    return false;
+
+  strcpy (reply, packet.c_str ());
+  return true;
+}
+
+/* Parse the QMemTags request into ADDR, LEN and TAGS.
+
+   Returns true if parsing succeeded and false otherwise.  */
+
+static bool
+parse_store_memtags_request (char *request, CORE_ADDR *addr, size_t *len,
+			     gdb::byte_vector &tags, int *type)
+{
+  gdb_assert (startswith (request, "QMemTags:"));
+
+  const char *p = request + strlen ("QMemTags:");
+
+  /* Read address and length.  */
+  unsigned int length = 0;
+  p = decode_m_packet_params (p, addr, &length, ':');
+  *len = length;
+
+  /* Read the tag type.  */
+  ULONGEST tag_type = 0;
+  p = unpack_varlen_hex (p, &tag_type);
+  *type = (int) tag_type;
+
+  /* Make sure there is a colon after the type.  */
+  if (*p != ':')
+    return false;
+
+  /* Skip the colon.  */
+  p++;
+
+  /* Read the tag data.  */
+  tags = hex2bin (p);
+
+  return true;
 }
 
 /* Handle all of the extended 'Q' packets.  */
@@ -899,6 +966,32 @@ handle_general_set (char *own_buf)
 [Unset the inferior's current directory; will use gdbserver's cwd]\n"));
 	}
       write_ok (own_buf);
+
+      return;
+    }
+
+
+  /* Handle store memory tags packets.  */
+  if (startswith (own_buf, "QMemTags:")
+      && target_supports_memory_tagging ())
+    {
+      gdb::byte_vector tags;
+      CORE_ADDR addr = 0;
+      size_t len = 0;
+      int type = 0;
+
+      require_running_or_return (own_buf);
+
+      bool ret = parse_store_memtags_request (own_buf, &addr, &len, tags,
+					     &type);
+
+      if (ret)
+	ret = the_target->store_memtags (addr, len, tags, type);
+
+      if (!ret)
+	write_enn (own_buf);
+      else
+	write_ok (own_buf);
 
       return;
     }
@@ -1373,7 +1466,6 @@ handle_qxfer_exec_file (const char *annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  char *file;
   ULONGEST pid;
   int total_len;
 
@@ -1397,7 +1489,7 @@ handle_qxfer_exec_file (const char *annex,
   if (pid <= 0)
     return -1;
 
-  file = the_target->pid_to_exec_file (pid);
+  const char *file = the_target->pid_to_exec_file (pid);
   if (file == NULL)
     return -1;
 
@@ -1461,7 +1553,8 @@ handle_qxfer_libraries (const char *annex,
 
   std::string document = "<library-list version=\"1.0\">\n";
 
-  for (const dll_info &dll : all_dlls)
+  process_info *proc = current_process ();
+  for (const dll_info &dll : proc->all_dlls)
     document += string_printf
       ("  <library name=\"%s\"><segment address=\"0x%s\"/></library>\n",
        dll.name.c_str (), paddress (dll.base_addr));
@@ -2066,6 +2159,27 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
   return (unsigned long long) crc;
 }
 
+/* Parse the qMemTags packet request into ADDR and LEN.  */
+
+static void
+parse_fetch_memtags_request (char *request, CORE_ADDR *addr, size_t *len,
+			     int *type)
+{
+  gdb_assert (startswith (request, "qMemTags:"));
+
+  const char *p = request + strlen ("qMemTags:");
+
+  /* Read address and length.  */
+  unsigned int length = 0;
+  p = decode_m_packet_params (p, addr, &length, ':');
+  *len = length;
+
+  /* Read the tag type.  */
+  ULONGEST tag_type = 0;
+  p = unpack_varlen_hex (p, &tag_type);
+  *type = (int) tag_type;
+}
+
 /* Add supported btrace packets to BUF.  */
 
 static void
@@ -2284,6 +2398,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		     events.  */
 		  report_no_resumed = true;
 		}
+	      else if (feature == "memory-tagging+")
+		{
+		  /* GDB supports memory tagging features.  */
+		  if (target_supports_memory_tagging ())
+		    cs.memory_tagging_feature = true;
+		}
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -2400,6 +2520,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       strcat (own_buf, ";QThreadEvents+");
 
       strcat (own_buf, ";no-resumed+");
+
+      if (target_supports_memory_tagging ())
+	strcat (own_buf, ";memory-tagging+");
 
       /* Reinitialize components as needed for the new connection.  */
       hostio_handle_new_gdb_connection ();
@@ -2592,6 +2715,31 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (target_supports_tracepoints () && handle_tracepoint_query (own_buf))
     return;
+
+  /* Handle fetch memory tags packets.  */
+  if (startswith (own_buf, "qMemTags:")
+      && target_supports_memory_tagging ())
+    {
+      gdb::byte_vector tags;
+      CORE_ADDR addr = 0;
+      size_t len = 0;
+      int type = 0;
+
+      require_running_or_return (own_buf);
+
+      parse_fetch_memtags_request (own_buf, &addr, &len, &type);
+
+      bool ret = the_target->fetch_memtags (addr, len, tags, type);
+
+      if (ret)
+	ret = create_fetch_memtags_reply (own_buf, tags);
+
+      if (!ret)
+	write_enn (own_buf);
+
+      *new_packet_len_p = strlen (own_buf);
+      return;
+    }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -2839,7 +2987,7 @@ handle_v_attach (char *own_buf)
 	 some libraries are preloaded.  GDB will always poll the
 	 library list.  Avoids the "stopped by shared library event"
 	 notice on the GDB side.  */
-      dlls_changed = 0;
+      current_process ()->dlls_changed = false;
 
       if (non_stop)
 	{
@@ -3504,6 +3652,81 @@ detach_or_kill_for_exit_cleanup ()
     }
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+static void
+test_memory_tagging_functions (void)
+{
+  /* Setup testing.  */
+  gdb::char_vector packet;
+  gdb::byte_vector tags, bv;
+  std::string expected;
+  packet.resize (32000);
+  CORE_ADDR addr;
+  size_t len;
+  int type;
+
+  /* Test parsing a qMemTags request.  */
+
+  /* Valid request, addr, len and type updated.  */
+  addr = 0xff;
+  len = 255;
+  type = 255;
+  strcpy (packet.data (), "qMemTags:0,0:0");
+  parse_fetch_memtags_request (packet.data (), &addr, &len, &type);
+  SELF_CHECK (addr == 0 && len == 0 && type == 0);
+
+  /* Valid request, addr, len and type updated.  */
+  addr = 0;
+  len = 0;
+  type = 0;
+  strcpy (packet.data (), "qMemTags:deadbeef,ff:5");
+  parse_fetch_memtags_request (packet.data (), &addr, &len, &type);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255 && type == 5);
+
+  /* Test creating a qMemTags reply.  */
+
+  /* Non-empty tag data.  */
+  bv.resize (0);
+
+  for (int i = 0; i < 5; i++)
+    bv.push_back (i);
+
+  expected = "m0001020304";
+  SELF_CHECK (create_fetch_memtags_reply (packet.data (), bv) == true);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  /* Test parsing a QMemTags request.  */
+
+  /* Valid request and empty tag data: addr, len, type and tags updated.  */
+  addr = 0xff;
+  len = 255;
+  type = 255;
+  tags.resize (5);
+  strcpy (packet.data (), "QMemTags:0,0:0:");
+  SELF_CHECK (parse_store_memtags_request (packet.data (),
+					   &addr, &len, tags, &type) == true);
+  SELF_CHECK (addr == 0 && len == 0 && type == 0 && tags.size () == 0);
+
+  /* Valid request and non-empty tag data: addr, len, type
+     and tags updated.  */
+  addr = 0;
+  len = 0;
+  type = 0;
+  tags.resize (0);
+  strcpy (packet.data (),
+	  "QMemTags:deadbeef,ff:5:0001020304");
+  SELF_CHECK (parse_store_memtags_request (packet.data (), &addr, &len, tags,
+					   &type) == true);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255 && type == 5
+	      && tags.size () == 5);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 /* Main function.  This is called by the real "main" function,
    wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
 
@@ -3521,6 +3744,9 @@ captured_main (int argc, char *argv[])
   bool selftest = false;
 #if GDB_SELF_TEST
   std::vector<const char *> selftest_filters;
+
+  selftests::register_test ("remote_memory_tagging",
+			    selftests::test_memory_tagging_functions);
 #endif
 
   current_directory = getcwd (NULL, 0);
@@ -3787,7 +4013,8 @@ captured_main (int argc, char *argv[])
   /* Don't report shared library events on the initial connection,
      even if some libraries are preloaded.  Avoids the "stopped by
      shared library event" notice on gdb side.  */
-  dlls_changed = 0;
+  if (current_thread != nullptr)
+    current_process ()->dlls_changed = false;
 
   if (cs.last_status.kind == TARGET_WAITKIND_EXITED
       || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
@@ -3811,6 +4038,7 @@ captured_main (int argc, char *argv[])
       cs.swbreak_feature = 0;
       cs.hwbreak_feature = 0;
       cs.vCont_supported = 0;
+      cs.memory_tagging_feature = false;
 
       remote_open (port);
 

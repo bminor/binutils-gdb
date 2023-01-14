@@ -25,17 +25,20 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "print ab" "No symbol .* in current context."
+gdb_test "print ab" "No symbol .* in current context." \
+    "ensure symbol ab is not known in main"
 
 ############################################
 gdb_breakpoint C::first
 gdb_continue_to_breakpoint "C::first"
 
-gdb_test "print ab" "No symbol .* in current context."
+gdb_test "print ab" "No symbol .* in current context."  \
+    "ensure symbol ab is not known in C::first"
 gdb_test "print C::D::ab" "= 11"
 
 ############################################
 gdb_breakpoint C::D::second
 gdb_continue_to_breakpoint "C::D::second"
 
-gdb_test "print ab" "= 11"
+gdb_test "print ab" "= 11"  \
+    "ensure symbol ab is known in C::D::second"

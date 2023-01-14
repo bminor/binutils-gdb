@@ -741,22 +741,10 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = ada_check_typedef (value_type (val));
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
-  if (ada_is_gnat_encoded_fixed_point_type (type))
-    {
-      struct value *scale = gnat_encoded_fixed_point_scaling_factor (type);
-      val = value_cast (value_type (scale), val);
-      val = value_binop (val, scale, BINOP_MUL);
-
-      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g";
-      std::string str
-	= target_float_to_string (value_contents (val), value_type (val), fmt);
-      fputs_filtered (str.c_str (), stream);
-      return;
-    }
-  else if (type->code () == TYPE_CODE_RANGE
-	   && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
-	       || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_BOOL
-	       || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR))
+  if (type->code () == TYPE_CODE_RANGE
+      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
+	  || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_BOOL
+	  || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR))
     {
       /* For enum-valued ranges, we want to recurse, because we'll end
 	 up printing the constant's name rather than its numeric
@@ -788,7 +776,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	     so we have to work-around this deficiency by handling
 	     System.Address values as a special case.  */
 
-	  struct gdbarch *gdbarch = get_type_arch (type);
+	  struct gdbarch *gdbarch = type->arch ();
 	  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 	  CORE_ADDR addr = extract_typed_address (valaddr, ptr_type);
 
@@ -909,7 +897,10 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
 
   fprintf_filtered (stream, "(");
   print_optional_low_bound (stream, type, options);
-  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+
+  if (value_entirely_optimized_out (val))
+    val_print_optimized_out (val, stream);
+  else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     {
       const gdb_byte *valaddr = value_contents_for_printing (val);
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;

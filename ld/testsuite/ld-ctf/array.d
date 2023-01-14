@@ -13,7 +13,7 @@ Contents of CTF section .ctf:
     Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
-    Data object section:	.* \(0x8 bytes\)
+    Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Type section:	.* \(0x5c bytes\)
     String section:	.*
 

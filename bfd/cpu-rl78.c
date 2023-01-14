@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_rl78_arch =
   "rl78",			/* Architecture name.  */
   "rl78",			/* Printable name.  */
   4,				/* Section align power.  */
-  TRUE,				/* The default ?  */
+  true,				/* The default ?  */
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
   bfd_arch_default_fill,	/* Default fill.  */

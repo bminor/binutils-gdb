@@ -1,3 +1,87 @@
+2021-04-15  Tom Tromey  <tom@tromey.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Mode Options): Mention "set startup-quietly".
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/25956
+	* gdb.texinfo (File Options): Mention new command line options.
+	(Startup): Discuss when early init files are processed.
+	(Initialization Files): Add description of early init files.
+	(Output Styling): Update description of 'version' style.
+	(gdb man): Mention early init files.
+
+2021-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add missing
+	parentheses to GDB prompt in example, and replace '(gdb)' with
+	'(@value{GDBP})' in one example where the latter was already in
+	use.
+
+2021-03-29  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.textinfo (Memory Tagging): Make it a @section.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.texinfo (Data): Document memory tagging changes to the "print"
+	command.
+	(Examining Memory): Document memory tagging changes to the "x"
+	command.
+	(Memory Tagging): Update with more information on changes to the "x"
+	and "print" commands.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.texinfo (Memory Tagging): New subsection and node.
+	(AArch64 Memory Tagging Extension): New subsection.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.texinfo (General Query Packets): Document qMemTags and
+	QMemTags.  Document the "memory-tagging" feature.
+	(ARM-Specific Protocol Details): Document memory tag types.
+
+2021-03-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texinfo (Parameters In Python): Return empty string in
+	small example code.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Files): Document new 'maint info target-sections'
+	command.
+
+2021-02-17  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR cli/17290
+	* gdb.texinfo (Remote Configuration): Fix show remote
+	interrupt-sequence and show remote interrupt-on-connect.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Files): Update documentation for 'maint info
+	sections'.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texinfo (TUI Windows In Python): Extend description of
+	TuiWindow.is_valid.
+
+2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb.texinfo (Inferiors Connections and Programs): Document the
+	inferior command when used without argument.
+
+2021-01-27  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Auto-loading extensions): Remove extraneous space.
+
+2021-01-25  Marco Barisione  <mbarisione@undo.io>
+
+	* python.texi: Add parentheses to print statements/functions.
+
 2021-01-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Specify Location): Move menu to the end of the

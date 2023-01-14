@@ -42,10 +42,10 @@
   }
 
 static const bfd_arch_info_type d10v_ts3_info =
-  N (bfd_mach_d10v_ts3, "d10v:ts3", FALSE, NULL);
+  N (bfd_mach_d10v_ts3, "d10v:ts3", false, NULL);
 
 static const bfd_arch_info_type d10v_ts2_info =
-  N (bfd_mach_d10v_ts2, "d10v:ts2", FALSE, & d10v_ts3_info);
+  N (bfd_mach_d10v_ts2, "d10v:ts2", false, & d10v_ts3_info);
 
 const bfd_arch_info_type bfd_d10v_arch =
-  N (bfd_mach_d10v, "d10v", TRUE, & d10v_ts2_info);
+  N (bfd_mach_d10v, "d10v", true, & d10v_ts2_info);

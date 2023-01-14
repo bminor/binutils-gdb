@@ -219,7 +219,7 @@ mri_draw_tree (void)
 	  tmp->spec.exclude_name_list = NULL;
 	  tmp->spec.sorted = none;
 	  tmp->spec.section_flag_list = NULL;
-	  lang_add_wild (NULL, tmp, FALSE);
+	  lang_add_wild (NULL, tmp, false);
 
 	  /* If there is an alias for this section, add it too.  */
 	  for (aptr = alias; aptr; aptr = aptr->next)
@@ -231,7 +231,7 @@ mri_draw_tree (void)
 		tmp->spec.exclude_name_list = NULL;
 		tmp->spec.sorted = none;
 		tmp->spec.section_flag_list = NULL;
-		lang_add_wild (NULL, tmp, FALSE);
+		lang_add_wild (NULL, tmp, false);
 	      }
 
 	  lang_leave_output_section_statement (0, "*default*", NULL, NULL);
@@ -294,7 +294,7 @@ mri_format (const char *name)
 void
 mri_public (const char *name, etree_type *exp)
 {
-  lang_add_assignment (exp_assign (name, exp, FALSE));
+  lang_add_assignment (exp_assign (name, exp, false));
 }
 
 void

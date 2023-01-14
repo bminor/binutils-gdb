@@ -94,7 +94,8 @@ typedef struct ctf_link_sym
 /* Share only types that are used by multiple inputs.  */
 #define CTF_LINK_SHARE_DUPLICATED 0x1
 
-/* Do a nondeduplicating link.  */
+/* Do a nondeduplicating link, or otherwise deduplicate "less hard", trading off
+   CTF output size for link time.  */
 #define CTF_LINK_NONDEDUP 0x2
 
 /* Create empty outputs for all registered CU mappings even if no types are
@@ -103,6 +104,15 @@ typedef struct ctf_link_sym
 
 /* Omit the content of the variables section.  */
 #define CTF_LINK_OMIT_VARIABLES_SECTION 0x8
+
+/* If *unset*, filter out entries corresponding to linker-reported symbols
+   from the variable section, and filter out all entries with no linker-reported
+   symbols from the data object and function info sections: if set, do no
+   filtering and leave all entries in place.  (This is a negative-sense flag
+   because it is rare to want symbols the linker has not reported as present to
+   stick around in the symtypetab sections nonetheless: relocatable links are
+   the only likely case.)  */
+#define CTF_LINK_NO_FILTER_REPORTED_SYMS 0x10
 
 /* Symbolic names for CTF sections.  */
 
@@ -231,7 +241,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NEXT_WRONGFP, "Iteration entity changed in mid-iterate.") \
   _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
   _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.") \
-  _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.")
+  _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.") \
+  _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -244,7 +255,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_INCOMPLETE - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NONAME - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -328,6 +339,9 @@ extern void ctf_arc_close (ctf_archive_t *);
 extern ctf_dict_t *ctf_arc_lookup_symbol (ctf_archive_t *,
 					  unsigned long symidx,
 					  ctf_id_t *, int *errp);
+extern ctf_dict_t *ctf_arc_lookup_symbol_name (ctf_archive_t *,
+					       const char *name,
+					       ctf_id_t *, int *errp);
 extern void ctf_arc_flush_caches (ctf_archive_t *);
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, int *);
@@ -378,6 +392,7 @@ extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
+extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 				 const char **name, int functions);
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);

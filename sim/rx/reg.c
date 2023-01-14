@@ -149,7 +149,7 @@ get_reg64 (int id)
 static int highest_sp = 0, lowest_sp = 0xffffff;
 
 void
-stack_heap_stats ()
+stack_heap_stats (void)
 {
   if (heapbottom < heaptop)
     printf ("heap:  %08x - %08x (%d bytes)\n", heapbottom, heaptop,
@@ -509,7 +509,7 @@ fpsw2str(int rpsw)
 #define TRC(f,n) \
   if (oldregs.f != regs.f) \
     { \
-      if (tag) { printf (tag); tag = 0; } \
+      if (tag) { printf ("%s", tag); tag = 0; }  \
       printf("  %s %08x:%08x", n, \
 	     (unsigned int)oldregs.f, \
 	     (unsigned int)regs.f); \
@@ -531,7 +531,7 @@ trace_register_changes (void)
   TRC (r_isp, "isp");
   if (oldregs.r_psw != regs.r_psw)
     {
-      if (tag) { printf (tag); tag = 0; }
+      if (tag) { printf ("%s", tag); tag = 0; }
       printf("  psw %s:", psw2str(oldregs.r_psw));
       printf("%s", psw2str(regs.r_psw));
       oldregs.r_psw = regs.r_psw;
@@ -539,7 +539,7 @@ trace_register_changes (void)
 
   if (oldregs.r_fpsw != regs.r_fpsw)
     {
-      if (tag) { printf (tag); tag = 0; }
+      if (tag) { printf ("%s", tag); tag = 0; }
       printf("  fpsw %s:", fpsw2str(oldregs.r_fpsw));
       printf("%s", fpsw2str(regs.r_fpsw));
       oldregs.r_fpsw = regs.r_fpsw;
@@ -547,9 +547,9 @@ trace_register_changes (void)
 
   if (oldregs.r_acc != regs.r_acc)
     {
-      if (tag) { printf (tag); tag = 0; }
-      printf("  acc %016llx:", oldregs.r_acc);
-      printf("%016llx", regs.r_acc);
+      if (tag) { printf ("%s", tag); tag = 0; }
+      printf("  acc %016" PRIx64 ":", oldregs.r_acc);
+      printf("%016" PRIx64, regs.r_acc);
       oldregs.r_acc = regs.r_acc;
     }
 

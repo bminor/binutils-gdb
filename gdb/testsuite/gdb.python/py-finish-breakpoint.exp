@@ -63,7 +63,7 @@ set python_file [gdb_remote_download host \
 
 gdb_test_no_output "set confirm off" "disable confirmation"
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 1"
 gdb_breakpoint "increase_1"
 gdb_test "continue" "Breakpoint .*at.*" "continue to the function to finish"
 
@@ -101,7 +101,7 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 2"
 set cond_line [gdb_get_line_number "Condition Break."]
 
 if ![runto_main] then {
@@ -116,7 +116,7 @@ gdb_test "continue" "Temporary breakpoint .*in \\.?do_nothing.*" \
 
 gdb_test "python finishBP = SimpleFinishBreakpoint(gdb.newest_frame())" \
          "SimpleFinishBreakpoint init" \
-         "set finish breakpoint"
+         "set finish breakpoint for no debug symbol test"
 gdb_test "continue" "SimpleFinishBreakpoint stop.*" "check FinishBreakpoint hit"
 gdb_test "python print (finishBP.return_value)" "None" "check return value without debug symbol"
 
@@ -128,7 +128,7 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 3"
 
 if ![runto call_longjmp_1] then {
     perror "couldn't run to breakpoint call_longjmp"
@@ -137,7 +137,7 @@ if ![runto call_longjmp_1] then {
 
 gdb_test "python finishbp = SimpleFinishBreakpoint(gdb.newest_frame())" \
          "SimpleFinishBreakpoint init" \
-         "set finish breakpoint" 
+         "set finish breakpoint for longjmp test"
 gdb_test "break [gdb_get_line_number "after longjmp."]" "Breakpoint.* at .*" \
          "set BP after the jump"
 gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" \
@@ -154,7 +154,7 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 4"
 
 
 if ![runto_main] then {
@@ -169,7 +169,8 @@ gdb_test "python TestBreakpoint()" "TestBreakpoint init" \
 gdb_test "continue" \
          "\"FinishBreakpoint\" cannot be set on a dummy frame.*" \
          "don't allow FinishBreakpoint on dummy frames"
-gdb_test "print i" "8" "check stopped location"
+gdb_test "print i" "8" \
+    "check stopped location for stop in dummy frame case"
 
 #
 # Test FinishBreakpoint in BP condition evaluation 
@@ -180,7 +181,7 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 5"
 
 if ![runto_main] then {
     fail "cannot run to main."
@@ -197,7 +198,8 @@ gdb_test "continue" \
 
 gdb_test "continue" "Continuing.*" "finish condition evaluation"
 gdb_test "continue" "Breakpoint.*" "stop at conditional breakpoint"
-gdb_test "print i" "8" "check stopped location"
+gdb_test "print i" "8" \
+    "check stopped location for stop in normal frame case"
 
 #
 # Test FinishBreakpoint in explicit inferior function call
@@ -207,7 +209,7 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 gdb_test "source $python_file" "Python script imported.*" \
-         "import python scripts"
+         "import python scripts, 6"
 
 if ![runto_main] then {
     fail "cannot run to main."
@@ -217,16 +219,16 @@ if ![runto_main] then {
 # return address in dummy frame
 
 gdb_test "python TestExplicitBreakpoint('increase_1')" "Breakpoint.*at.*" \
-         "prepare TestExplicitBreakpoint"
+         "prepare TestExplicitBreakpoint, return addr in dummy frame"
 gdb_test "print increase_1(&i)" \
          "\"FinishBreakpoint\" cannot be set on a dummy frame.*" \
-         "don't allow FinishBreakpoint on dummy frames"
+         "don't allow FinishBreakpoint on dummy frames, return address in dummy frame"
 
 # return address in normal frame
 
 delete_breakpoints
 gdb_test "python TestExplicitBreakpoint(\"increase_1\")" "Breakpoint.*at.*" \
-         "prepare TestExplicitBreakpoint"
+         "prepare TestExplicitBreakpoint, return addr in normal frame"
 gdb_test "print increase(&i)" \
          "SimpleFinishBreakpoint init.*SimpleFinishBreakpoint stop.*The program being debugged stopped while in a function called from GDB.*" \
          "FinishBP stop at during explicit function call"

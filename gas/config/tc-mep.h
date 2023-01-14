@@ -58,7 +58,7 @@ extern void mep_apply_fix (struct fix *, valueT *, segT);
 extern void mep_frob_file (void);
 
 #define tc_fix_adjustable(fixP) mep_fix_adjustable (fixP)
-extern bfd_boolean mep_fix_adjustable (struct fix *);
+extern bool mep_fix_adjustable (struct fix *);
 
 /* After creating a fixup for an instruction operand, we need
    to check for HI16 relocs and queue them up for later sorting.  */

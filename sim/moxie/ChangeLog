@@ -1,3 +1,49 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-08  Luis Machado  <luis.machado@linaro.org>
+
+	* Makefile.in (moxie-gdb.dtb): Add maintainer mode dependency.
+	(install-dtb): Install prebuilt dtb file.
+	* moxie-gdb.dtb: New prebuilt file.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete call to STATE_WATCHPOINTS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_create_inferior): Add const to avp.
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Delete call.
+	* configure: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete STATE_WATCHPOINTS (sd)->sizeof_pc.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

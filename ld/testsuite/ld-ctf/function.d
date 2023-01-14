@@ -13,7 +13,7 @@ Contents of CTF section .ctf:
     Version: 4 \(CTF_VERSION_3\)
 #...
     Compilation unit name: .*function.c
-    Function info section:	.* \(0x4 bytes\)
+    Function info section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Type section:	.* \(0x90 bytes\)
     String section:	.*
 #...

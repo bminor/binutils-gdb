@@ -36,7 +36,7 @@ proc section_check {} {
     set ldflags "$LDFLAGS --check-sections -e foo"
 
     if { ![ld_assemble $as $srcdir/$subdir/asm.s tmpdir/asm.o]} {
-	unresolved $test
+	unsupported $test
 	return
     }
 

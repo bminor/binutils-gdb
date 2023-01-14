@@ -1973,7 +1973,7 @@ insert_operand (unsigned insn,
 		const char *file,
 		unsigned line)
 {
-  if (operand->bits != 32 && !(operand->flags & AXP_OPERAND_NOOVERFLOW))
+  if (!(operand->flags & AXP_OPERAND_NOOVERFLOW))
     {
       offsetT min, max;
 
@@ -4229,7 +4229,7 @@ s_alpha_section_word (char *str, size_t len)
   int no = 0;
   flagword flag = 0;
 
-  if (len == 5 && strncmp (str, "NO", 2) == 0)
+  if (len == 5 && startswith (str, "NO"))
     {
       no = 1;
       str += 2;
@@ -4238,30 +4238,30 @@ s_alpha_section_word (char *str, size_t len)
 
   if (len == 3)
     {
-      if (strncmp (str, "PIC", 3) == 0)
+      if (startswith (str, "PIC"))
 	flag = EGPS__V_PIC;
-      else if (strncmp (str, "LIB", 3) == 0)
+      else if (startswith (str, "LIB"))
 	flag = EGPS__V_LIB;
-      else if (strncmp (str, "OVR", 3) == 0)
+      else if (startswith (str, "OVR"))
 	flag = EGPS__V_OVR;
-      else if (strncmp (str, "REL", 3) == 0)
+      else if (startswith (str, "REL"))
 	flag = EGPS__V_REL;
-      else if (strncmp (str, "GBL", 3) == 0)
+      else if (startswith (str, "GBL"))
 	flag = EGPS__V_GBL;
-      else if (strncmp (str, "SHR", 3) == 0)
+      else if (startswith (str, "SHR"))
 	flag = EGPS__V_SHR;
-      else if (strncmp (str, "EXE", 3) == 0)
+      else if (startswith (str, "EXE"))
 	flag = EGPS__V_EXE;
-      else if (strncmp (str, "WRT", 3) == 0)
+      else if (startswith (str, "WRT"))
 	flag = EGPS__V_WRT;
-      else if (strncmp (str, "VEC", 3) == 0)
+      else if (startswith (str, "VEC"))
 	flag = EGPS__V_VEC;
-      else if (strncmp (str, "MOD", 3) == 0)
+      else if (startswith (str, "MOD"))
 	{
 	  flag = no ? EGPS__V_NOMOD : EGPS__V_NOMOD << EGPS__V_NO_SHIFT;
 	  no = 0;
 	}
-      else if (strncmp (str, "COM", 3) == 0)
+      else if (startswith (str, "COM"))
 	flag = EGPS__V_COM;
     }
 
@@ -4544,13 +4544,13 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   name_end = get_symbol_name (&name);
 
-  if (strncmp (name, "stack", 5) == 0)
+  if (startswith (name, "stack"))
     alpha_evax_proc->pdsckind = PDSC_S_K_KIND_FP_STACK;
 
-  else if (strncmp (name, "reg", 3) == 0)
+  else if (startswith (name, "reg"))
     alpha_evax_proc->pdsckind = PDSC_S_K_KIND_FP_REGISTER;
 
-  else if (strncmp (name, "null", 4) == 0)
+  else if (startswith (name, "null"))
     alpha_evax_proc->pdsckind = PDSC_S_K_KIND_NULL;
 
   else
@@ -5584,7 +5584,7 @@ md_atof (int type, char *litP, int *sizeP)
       return vax_md_atof (type, litP, sizeP);
 
     default:
-      return ieee_md_atof (type, litP, sizeP, FALSE);
+      return ieee_md_atof (type, litP, sizeP, false);
     }
 }
 

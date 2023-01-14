@@ -54,7 +54,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
     }
 
     if {![binutils_assemble_flags $srcdir/$subdir/${srcfile} $t_tempfile "$asflags"]} then {
-	unresolved "objcopy $type ($testname)"
+	unsupported "objcopy $type ($testname)"
 	remote_file host delete $t_tempfile
 	return
     }
@@ -73,10 +73,11 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	set t_copyfile $copyfile
 	set got [binutils_run $LD "$tempfile -o $t_tempfile $ldflags"]
 	if { ![string equal "" $got] } then {
-	    unresolved "objcopy $type ($testname)"
+	    unsupported "objcopy $type ($testname)"
 	    return
 	}
 	set xflags "--preserve-dates"
+	sleep 1
     }
 
     set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $xflags $t_tempfile $t_copyfile"]
@@ -102,6 +103,17 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 
 	if [string equal "" $exec_output] then {
 	    pass "objcopy $type ($testname)"
+	    if { $type == "executable" } {
+		set dir [file dirname $t_copyfile]
+		set f2 [file tail $t_copyfile]
+		set status [remote_exec host find "$dir -name $f2 -newer $t_tempfile -print"]
+		set exec_output [lindex $status 1]
+		if [string equal "" $exec_output] then {
+		    pass "objcopy $type ($testname) timestamp"
+		} else {
+		    fail "objcopy $type ($testname) timestamp"
+		}
+	    }
 	} else {
 	    send_log "$exec_output\n"
 	    verbose "$exec_output" 1
@@ -133,7 +145,7 @@ proc objcopy_test_verilog {testname} {
 
     set got [binutils_assemble $srcdir/$subdir/verilogtest.s $binfile]
     if {![binutils_assemble $srcdir/$subdir/verilogtest.s $binfile]} then {
-	unresolved "objcopy ($testname)"
+	unsupported "objcopy ($testname)"
 	return
     }
 
@@ -484,7 +496,7 @@ proc strip_test { } {
 	verbose -log "$READELF -a tmpdir/testprog.o > tmpdir/osabi.in"
 	set exec_output [remote_exec host "$READELF -h tmpdir/testprog.o" "" "/dev/null" "tmpdir/osabi.in"]
 	if { [lindex $exec_output 0] != 0 } then {
-	    unresolved "$test preserving OS/ABI"
+	    fail "$test preserving OS/ABI"
 	    set osabi_fail "true"
 	} else {
 	    verbose -log "grep OS/ABI tmpdir/osabi.in"
@@ -531,7 +543,7 @@ proc strip_test { } {
 	verbose -log "$READELF -a tmpdir/testprog.o > tmpdir/osabi.out"
 	set exec_output [remote_exec host "$READELF -h tmpdir/testprog.o" "" "/dev/null" "tmpdir/osabi.out"]
 	if { [lindex $exec_output 0] != 0 } then {
-	    unresolved "$test preserving OS/ABI"
+	    fail "$test preserving OS/ABI"
 	} else {
 	    verbose -log "grep OS/ABI tmpdir/osabi.out"
 	    catch "exec grep OS/ABI tmpdir/osabi.out" osabi_out
@@ -762,7 +774,7 @@ proc strip_executable { prog flags test1 test2 } {
 	verbose -log "$READELF -a ${copyfile} > tmpdir/osabi.in"
 	set exec_output [remote_exec host "$READELF -h ${copyfile}" "" "/dev/null" "tmpdir/osabi.in"]
 	if { [lindex $exec_output 0] != 0 } then {
-	    unresolved "$test1 preserving OS/ABI"
+	    fail "$test1 preserving OS/ABI"
 	    set osabi_fail "true"
 	} else {
 	    verbose -log "grep OS/ABI tmpdir/osabi.in"
@@ -788,7 +800,7 @@ proc strip_executable { prog flags test1 test2 } {
 	verbose -log "$READELF -a ${copyfile} > tmpdir/osabi.out"
 	set exec_output [remote_exec host "$READELF -h ${copyfile}" "" "/dev/null" "tmpdir/osabi.out"]
 	if { [lindex $exec_output 0] != 0 } then {
-	    unresolved "$test1 preserving OS/ABI"
+	    fail "$test1 preserving OS/ABI"
 	} else {
 	    verbose -log "grep OS/ABI tmpdir/osabi.out"
 	    catch "exec grep OS/ABI tmpdir/osabi.out" osabi_out
@@ -1021,7 +1033,7 @@ proc objcopy_test_readelf {testname srcfile} {
     global subdir
 
     if {![binutils_assemble $srcdir/$subdir/${srcfile} tmpdir/bintest.o]} then {
-	unresolved "objcopy ($testname)"
+	unsupported "objcopy ($testname)"
 	return
     }
 
@@ -1036,7 +1048,7 @@ proc objcopy_test_readelf {testname srcfile} {
     verbose -log "$READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out"
     set exec_output [remote_exec host "$READELF -a tmpdir/bintest.o" "" "/dev/null" "tmpdir/bintest.o.out"]
     if { [lindex $exec_output 0] != 0 } then {
-	unresolved "objcopy ($testname)"
+	fail "objcopy ($testname)"
 	return
     }
     set exec_output [prune_warnings [lindex $exec_output 1]]
@@ -1048,7 +1060,7 @@ proc objcopy_test_readelf {testname srcfile} {
     verbose -log "$READELF -a tmpdir/copy.o > tmpdir/copy.o.out"
     set exec_output [remote_exec host "$READELF -a tmpdir/copy.o" "" "/dev/null" "tmpdir/copy.o.out"]
     if { [lindex $exec_output 0] != 0 } then {
-	unresolved "objcopy ($testname)"
+	fail "objcopy ($testname)"
 	return
     }
     set exec_output [prune_warnings [lindex $exec_output 1]]
@@ -1216,7 +1228,7 @@ if [is_elf_format] {
 	set srcfile $srcdir/$subdir/needed-by-reloc.s
 
 	if {![binutils_assemble $srcfile tmpdir/bintest.o]} then {
-	    unresolved $test
+	    unsupported $test
 	} else {
 	    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-symbol=foo tmpdir/bintest.o ${copyfile}.o"]
 

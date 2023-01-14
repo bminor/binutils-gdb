@@ -49,9 +49,9 @@ static void
 gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
-  input_flags.dynamic = TRUE;
-  config.has_shared = TRUE;
-  link_info.check_relocs_after_open_input = TRUE;
+  input_flags.dynamic = true;
+  config.has_shared = true;
+  link_info.check_relocs_after_open_input = true;
 EOF
 if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
@@ -64,14 +64,14 @@ fragment <<EOF
 /* Try to open a dynamic archive.  This is where we know that Linux
    dynamic libraries have an extension of .sa.  */
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_open_dynamic_archive
   (const char *arch, search_dirs_type *search, lang_input_statement_type *entry)
 {
   char *string;
 
   if (! entry->flags.maybe_archive || entry->flags.full_name_provided)
-    return FALSE;
+    return false;
 
   string = (char *) xmalloc (strlen (search->name)
 			     + strlen (entry->filename)
@@ -83,12 +83,12 @@ gld${EMULATION_NAME}_open_dynamic_archive
   if (! ldfile_try_open_bfd (string, entry))
     {
       free (string);
-      return FALSE;
+      return false;
     }
 
   entry->filename = string;
 
-  return TRUE;
+  return true;
 }
 
 /* This is called by the create_output_section_statements routine via

@@ -699,7 +699,7 @@ gdbsim_target_open (const char *args, int from_tty)
      operation until after we complete those operations which could
      error out.  */
   if (gdbsim_is_open)
-    unpush_target (&gdbsim_ops);
+    current_inferior ()->unpush_target (&gdbsim_ops);
 
   len = (7 + 1			/* gdbsim */
 	 + strlen (" -E little")
@@ -763,7 +763,7 @@ gdbsim_target_open (const char *args, int from_tty)
 
   sim_data->gdbsim_desc = gdbsim_desc;
 
-  push_target (&gdbsim_ops);
+  current_inferior ()->push_target (&gdbsim_ops);
   printf_filtered ("Connected to the simulator.\n");
 
   /* There's nothing running after "target sim" or "load"; not until
@@ -834,9 +834,9 @@ gdbsim_target::detach (inferior *inf, int from_tty)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_detach\n");
 
-  unpush_target (this);		/* calls gdbsim_close to do the real work */
+  inf->unpush_target (this);		/* calls gdbsim_close to do the real work */
   if (from_tty)
-    printf_filtered ("Ending simulator %s debugging\n", target_shortname);
+    printf_filtered ("Ending simulator %s debugging\n", target_shortname ());
 }
 
 /* Resume execution of the target process.  STEP says whether to single-step
@@ -1119,7 +1119,7 @@ gdbsim_target::files_info ()
   if (current_program_space->exec_bfd ())
     {
       fprintf_unfiltered (gdb_stdlog, "\tAttached to %s running program %s\n",
-			  target_shortname, file);
+			  target_shortname (), file);
       sim_info (sim_data->gdbsim_desc, 0);
     }
 }

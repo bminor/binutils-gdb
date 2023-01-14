@@ -42,7 +42,6 @@ earmelfb_nacl.c
 earmelfb_nbsd.c
 earmnto.c
 earmpe.c
-earmsymbian.c
 eavr1.c
 eavr2.c
 eavr25.c

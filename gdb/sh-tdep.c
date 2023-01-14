@@ -432,7 +432,7 @@ sh_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
   *size = kind;
 
   /* For remote stub targets, trapa #20 is used.  */
-  if (strcmp (target_shortname, "remote") == 0)
+  if (strcmp (target_shortname (), "remote") == 0)
     {
       static unsigned char big_remote_breakpoint[] = { 0xc3, 0x20 };
       static unsigned char little_remote_breakpoint[] = { 0x20, 0xc3 };

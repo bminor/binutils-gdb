@@ -22,7 +22,6 @@
 #include "ax.h"  /* For agent_expr_up.  */
 
 struct expression;
-union exp_element;
 
 /* Types and enums */
 

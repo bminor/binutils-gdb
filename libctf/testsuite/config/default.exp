@@ -41,6 +41,7 @@ if {![file isdirectory tmpdir/libctf]} then {
     catch "exec ln -s ../../../gas/as-new tmpdir/libctf/as" status
 }
 set gcc_B_opt "-B[pwd]/tmpdir/libctf/"
+set ld_L_opt ""
 
 # The "make check" target in the Makefile passes in
 # "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly,

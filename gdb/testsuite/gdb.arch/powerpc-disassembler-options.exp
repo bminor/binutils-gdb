@@ -42,7 +42,7 @@ gdb_test "show disassembler-options" \
 gdb_test_no_output "set disassembler-options $option"
 gdb_test "show disassembler-options" \
 	"The current disassembler options are '$option'.*" \
-	"show disassembler-options $option"
+	"show disassembler-options $option after set arch $arch1"
 
 # Change architectures and verify the disassembler options have been preserved.
 
@@ -52,5 +52,5 @@ gdb_test "set architecture $arch2" \
 
 gdb_test "show disassembler-options" \
 	"The current disassembler options are '$option'.*" \
-	"show disassembler-options $option"
+	"show disassembler-options $option after set arch $arch2"
 

@@ -1,6 +1,6 @@
 /* Obtain a series of random bytes.
 
-   Copyright 2020 Free Software Foundation, Inc.
+   Copyright 2020-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 # if HAVE_BCRYPT_H
 #  include <bcrypt.h>
 # else
-#  include <ntdef.h> /* NTSTATUS */
+#  define NTSTATUS LONG
 typedef void * BCRYPT_ALG_HANDLE;
 #  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  if HAVE_LIB_BCRYPT

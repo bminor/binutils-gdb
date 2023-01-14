@@ -3,10 +3,7 @@
 if [istarget v850*-*] {
     global opt
 
-    # load support procs (none yet)
-    # load_lib cgen.exp
     # all machines
-
     switch -regexp -- $opt {
 	.*v850e.* {
 	    set all_machs "v850e"
@@ -36,4 +33,3 @@ if [istarget v850*-*] {
 #    }
 #    puts [format "%-30s %s" $var "[set ::$var]"]
 #}
-	

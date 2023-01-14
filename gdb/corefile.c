@@ -218,8 +218,8 @@ read_memory_object (enum target_object object, CORE_ADDR memaddr,
       enum target_xfer_status status;
       ULONGEST xfered_len;
 
-      status = target_xfer_partial (current_top_target (), object, NULL,
-				    myaddr + xfered, NULL,
+      status = target_xfer_partial (current_inferior ()->top_target (), object,
+				    NULL, myaddr + xfered, NULL,
 				    memaddr + xfered, len - xfered,
 				    &xfered_len);
 

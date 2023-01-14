@@ -731,7 +731,7 @@ mi_traceframe_changed (int tfnum, int tpnum)
 
       if (tfnum >= 0)
 	fprintf_unfiltered (mi->event_channel, "traceframe-changed,"
-			    "num=\"%d\",tracepoint=\"%d\"\n",
+			    "num=\"%d\",tracepoint=\"%d\"",
 			    tfnum, tpnum);
       else
 	fprintf_unfiltered (mi->event_channel, "traceframe-changed,end");
@@ -756,7 +756,7 @@ mi_tsv_created (const struct trace_state_variable *tsv)
       target_terminal::ours_for_output ();
 
       fprintf_unfiltered (mi->event_channel, "tsv-created,"
-			  "name=\"%s\",initial=\"%s\"\n",
+			  "name=\"%s\",initial=\"%s\"",
 			  tsv->name.c_str (), plongest (tsv->initial_value));
 
       gdb_flush (mi->event_channel);
@@ -780,9 +780,9 @@ mi_tsv_deleted (const struct trace_state_variable *tsv)
 
       if (tsv != NULL)
 	fprintf_unfiltered (mi->event_channel, "tsv-deleted,"
-			    "name=\"%s\"\n", tsv->name.c_str ());
+			    "name=\"%s\"", tsv->name.c_str ());
       else
-	fprintf_unfiltered (mi->event_channel, "tsv-deleted\n");
+	fprintf_unfiltered (mi->event_channel, "tsv-deleted");
 
       gdb_flush (mi->event_channel);
     }

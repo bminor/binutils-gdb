@@ -43,7 +43,7 @@ if ![runto_main] then {
 
 set args ""
 foreach i {0 1 2 3 4} {
-    set test "print (int) g$i ($args)"
+    set test "print (int) test_g$i ($args)"
     gdb_test_multiple $test $test {
 	-re " = 2\r\n$gdb_prompt $" {
 	    pass $test

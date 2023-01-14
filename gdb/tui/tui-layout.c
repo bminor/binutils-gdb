@@ -64,11 +64,6 @@ static tui_layout_split *asm_regs_layout;
 /* See tui-data.h.  */
 std::vector<tui_win_info *> tui_windows;
 
-/* When applying a layout, this is the list of all windows that were
-   in the previous layout.  This is used to re-use windows when
-   changing a layout.  */
-static std::vector<tui_win_info *> saved_tui_windows;
-
 /* See tui-layout.h.  */
 
 void
@@ -79,10 +74,7 @@ tui_apply_current_layout ()
 
   extract_display_start_addr (&gdbarch, &addr);
 
-  saved_tui_windows = std::move (tui_windows);
-  tui_windows.clear ();
-
-  for (tui_win_info *win_info : saved_tui_windows)
+  for (tui_win_info *win_info : tui_windows)
     win_info->make_visible (false);
 
   applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
@@ -94,27 +86,31 @@ tui_apply_current_layout ()
       tui_win_list[win_type] = nullptr;
 
   /* This should always be made visible by a layout.  */
+  gdb_assert (TUI_CMD_WIN != nullptr);
   gdb_assert (TUI_CMD_WIN->is_visible ());
+
+  /* Get the new list of currently visible windows.  */
+  std::vector<tui_win_info *> new_tui_windows;
+  applied_layout->get_windows (&new_tui_windows);
 
   /* Now delete any window that was not re-applied.  */
   tui_win_info *focus = tui_win_with_focus ();
-  tui_win_info *locator = tui_locator_win_info_ptr ();
-  for (tui_win_info *win_info : saved_tui_windows)
+  for (tui_win_info *win_info : tui_windows)
     {
       if (!win_info->is_visible ())
 	{
 	  if (focus == win_info)
-	    tui_set_win_focus_to (tui_windows[0]);
-	  if (win_info != locator)
-	    delete win_info;
+	    tui_set_win_focus_to (new_tui_windows[0]);
+	  delete win_info;
 	}
     }
+
+  /* Replace the global list of active windows.  */
+  tui_windows = std::move (new_tui_windows);
 
   if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
     tui_get_begin_asm_address (&gdbarch, &addr);
   tui_update_source_windows_with_addr (gdbarch, addr);
-
-  saved_tui_windows.clear ();
 }
 
 /* See tui-layout.  */
@@ -331,15 +327,6 @@ make_standard_window (const char *)
   return tui_win_list[V];
 }
 
-/* Helper function to wrap tui_locator_win_info_ptr for
-   tui_get_window_by_name.  */
-
-static tui_win_info *
-get_locator_window (const char *)
-{
-  return tui_locator_win_info_ptr ();
-}
-
 /* A map holding all the known window types, keyed by name.  Note that
    this is heap-allocated and "leaked" at gdb exit.  This avoids
    ordering issues with destroying elements in the map at shutdown.
@@ -354,7 +341,7 @@ static std::unordered_map<std::string, window_factory> *known_window_types;
 static tui_win_info *
 tui_get_window_by_name (const std::string &name)
 {
-  for (tui_win_info *window : saved_tui_windows)
+  for (tui_win_info *window : tui_windows)
     if (name == window->name ())
       return window;
 
@@ -386,7 +373,9 @@ initialize_known_windows ()
   known_window_types->emplace (DISASSEM_NAME,
 			       make_standard_window<DISASSEM_WIN,
 						    tui_disasm_window>);
-  known_window_types->emplace (STATUS_NAME, get_locator_window);
+  known_window_types->emplace (STATUS_NAME,
+			       make_standard_window<STATUS_WIN,
+						    tui_locator_window>);
 }
 
 /* See tui-layout.h.  */
@@ -424,7 +413,6 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_)
   height = height_;
   gdb_assert (m_window != nullptr);
   m_window->resize (height, width, x, y);
-  tui_windows.push_back (m_window);
 }
 
 /* See tui-layout.h.  */

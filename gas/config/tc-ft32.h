@@ -61,8 +61,6 @@ extern int ft32_validate_fix_sub (struct fix *);
 /* The difference between same-section symbols may be affected by linker
    relaxation, so do not resolve such expressions in the assembler.  */
 #define md_allow_local_subtract(l,r,s) ft32_allow_local_subtract (l, r, s)
-extern bfd_boolean ft32_allow_local_subtract (expressionS *,
-                                              expressionS *,
-                                              segT);
+extern bool ft32_allow_local_subtract (expressionS *, expressionS *, segT);
 
 #define md_operand(x)

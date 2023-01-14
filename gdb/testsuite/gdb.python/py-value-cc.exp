@@ -61,8 +61,6 @@ gdb_test_no_output "python x_ptr = gdb.parse_and_eval('x_ptr')" "init x_ptr"
 gdb_test_no_output "python xtd = gdb.parse_and_eval('xtd')" "init xtd"
 
 gdb_test "python print(b\[b_fields\[1\]\])" "97 'a'" "b.a via field"
-
-gdb_test "python print(b\[b_fields\[1\]\])" "97 'a'" "b.a via field"
 gdb_test "python print(b\[b_fields\[0\]\].type)" "A" \
   "type of b's base class via field"
 gdb_test "python print(b\[b_fields\[0\]\]\['a'\])" "10" "b.A::a via field"

@@ -46,7 +46,7 @@ case "${targ}" in
 aarch64_be-*-elf)	targ_emul=aarch64elfb
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b armelfb armelf"
 			;;
-aarch64-*-elf | aarch64-*-rtems*)
+aarch64-*-elf | aarch64-*-rtems* | aarch64-*-genode*)
 			targ_emul=aarch64elf
 			targ_extra_emuls="aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb"
 			;;
@@ -148,10 +148,9 @@ arm-*-phoenix*)		targ_emul=armelf
 armeb-*-elf | armeb-*-eabi*)
 			targ_emul=armelfb
 			;;
-arm-*-elf | arm*-*-eabi* | arm-*-rtems*)
+arm-*-elf | arm*-*-eabi* | arm-*-rtems* | arm-*-genode*)
 			targ_emul=armelf
 			;;
-arm*-*-symbianelf*)	targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf
 			;;
 arm9e-*-elf)		targ_emul=armelf
@@ -354,7 +353,7 @@ i[3-7]86-*-netbsdpe*)	targ_emul=i386pe
 i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
 			targ_extra_emuls=elf_i386
 			;;
-i[3-7]86-*-elf* | i[3-7]86-*-rtems*)
+i[3-7]86-*-elf* | i[3-7]86-*-rtems* | i[3-7]86-*-genode*)
 			targ_emul=elf_i386
 			targ_extra_emuls=elf_iamcu
 			;;
@@ -969,7 +968,7 @@ x86_64-*-netbsd* | x86_64-*-openbsd*)
 					sed -e 's/netbsd/netbsdelf/'`;;
 			esac
 			;;
-x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia*)
+x86_64-*-elf* | x86_64-*-rtems* | x86_64-*-fuchsia* | x86_64-*-genode*)
 			targ_emul=elf_x86_64
 			targ_extra_emuls="elf_i386 elf_iamcu elf32_x86_64 elf_l1om elf_k1om"
 			targ_extra_libpath="elf_i386 elf_iamcu elf32_x86_64 elf_l1om elf_k1om"

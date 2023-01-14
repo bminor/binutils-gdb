@@ -64,7 +64,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  ldelf_map_segments (FALSE);
+  ldelf_map_segments (false);
 }
 EOF
 # Put these extra routines in ld_${EMULATION_NAME}_emulation

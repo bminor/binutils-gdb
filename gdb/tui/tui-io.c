@@ -991,6 +991,45 @@ tui_dispatch_ctrl_char (unsigned int ch)
   return 0;
 }
 
+/* See tui-io.h.   */
+
+void
+tui_inject_newline_into_command_window ()
+{
+  gdb_assert (tui_active);
+
+  WINDOW *w= TUI_CMD_WIN->handle.get ();
+
+  /* When hitting return with an empty input, gdb executes the last
+     command.  If we emit a newline, this fills up the command window
+     with empty lines with gdb prompt at beginning.  Instead of that,
+     stay on the same line but provide a visual effect to show the
+     user we recognized the command.  */
+  if (rl_end == 0 && !gdb_in_secondary_prompt_p (current_ui))
+    {
+      wmove (w, getcury (w), 0);
+
+      /* Clear the line.  This will blink the gdb prompt since
+	 it will be redrawn at the same line.  */
+      wclrtoeol (w);
+      wrefresh (w);
+      napms (20);
+    }
+  else
+    {
+      /* Move cursor to the end of the command line before emitting the
+	 newline.  We need to do so because when ncurses outputs a newline
+	 it truncates any text that appears past the end of the cursor.  */
+      int px, py;
+      getyx (w, py, px);
+      px += rl_end - rl_point;
+      py += px / TUI_CMD_WIN->width;
+      px %= TUI_CMD_WIN->width;
+      wmove (w, py, px);
+      tui_putc ('\n');
+    }
+}
+
 /* Main worker for tui_getc.  Get a character from the command window.
    This is called from the readline package, but wrapped in a
    try/catch by tui_getc.  */
@@ -1010,40 +1049,6 @@ tui_getc_1 (FILE *fp)
 
   ch = gdb_wgetch (w);
 
-  /* The \n must be echoed because it will not be printed by
-     readline.  */
-  if (ch == '\n' || ch == '\r')
-    {
-      /* When hitting return with an empty input, gdb executes the last
-	 command.  If we emit a newline, this fills up the command window
-	 with empty lines with gdb prompt at beginning.  Instead of that,
-	 stay on the same line but provide a visual effect to show the
-	 user we recognized the command.  */
-      if (rl_end == 0 && !gdb_in_secondary_prompt_p (current_ui))
-	{
-	  wmove (w, getcury (w), 0);
-
-	  /* Clear the line.  This will blink the gdb prompt since
-	     it will be redrawn at the same line.  */
-	  wclrtoeol (w);
-	  wrefresh (w);
-	  napms (20);
-	}
-      else
-	{
-	  /* Move cursor to the end of the command line before emitting the
-	     newline.  We need to do so because when ncurses outputs a newline
-	     it truncates any text that appears past the end of the cursor.  */
-	  int px, py;
-	  getyx (w, py, px);
-	  px += rl_end - rl_point;
-	  py += px / TUI_CMD_WIN->width;
-	  px %= TUI_CMD_WIN->width;
-	  wmove (w, py, px);
-	  tui_putc ('\n');
-	}
-    }
-  
   /* Handle prev/next/up/down here.  */
   ch = tui_dispatch_ctrl_char (ch);
   

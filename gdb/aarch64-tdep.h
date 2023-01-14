@@ -100,9 +100,19 @@ struct gdbarch_tdep
   {
     return pauth_reg_base != -1;
   }
+
+  /* First MTE register.  This is -1 if no MTE registers are available.  */
+  int mte_reg_base;
+
+  /* Returns true if the target supports MTE.  */
+  bool has_mte () const
+  {
+    return mte_reg_base != -1;
+  }
 };
 
-const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);
+const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p,
+					     bool mte_p);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

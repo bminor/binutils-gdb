@@ -50,6 +50,10 @@
 #include "gdb_proc_service.h"
 #include "arch-utils.h"
 
+#include "arch/aarch64-mte-linux.h"
+
+#include "nat/aarch64-mte-linux-ptrace.h"
+
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
 #endif
@@ -100,6 +104,16 @@ public:
     override;
 
   struct gdbarch *thread_architecture (ptid_t) override;
+
+  bool supports_memory_tagging () override;
+
+  /* Read memory allocation tags from memory via PTRACE.  */
+  bool fetch_memtags (CORE_ADDR address, size_t len,
+		      gdb::byte_vector &tags, int type) override;
+
+  /* Write allocation tags to memory via PTRACE.  */
+  bool store_memtags (CORE_ADDR address, size_t len,
+		      const gdb::byte_vector &tags, int type) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -459,6 +473,58 @@ fetch_pauth_masks_from_thread (struct regcache *regcache)
 			&pauth_regset[1]);
 }
 
+/* Fill GDB's register array with the MTE register values from
+   the current thread.  */
+
+static void
+fetch_mteregs_from_thread (struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int regno = tdep->mte_reg_base;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tag_ctl = 0;
+  struct iovec iovec;
+
+  iovec.iov_base = &tag_ctl;
+  iovec.iov_len = sizeof (tag_ctl);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL, &iovec) != 0)
+      perror_with_name (_("unable to fetch MTE registers."));
+
+  regcache->raw_supply (regno, &tag_ctl);
+}
+
+/* Store to the current thread the valid MTE register set in the GDB's
+   register array.  */
+
+static void
+store_mteregs_to_thread (struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int regno = tdep->mte_reg_base;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tag_ctl = 0;
+
+  if (REG_VALID != regcache->get_register_status (regno))
+    return;
+
+  regcache->raw_collect (regno, (char *) &tag_ctl);
+
+  struct iovec iovec;
+
+  iovec.iov_base = &tag_ctl;
+  iovec.iov_len = sizeof (tag_ctl);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL, &iovec) != 0)
+    perror_with_name (_("unable to store MTE registers."));
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -477,6 +543,9 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 
       if (tdep->has_pauth ())
 	fetch_pauth_masks_from_thread (regcache);
+
+      if (tdep->has_mte ())
+	fetch_mteregs_from_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
@@ -491,6 +560,11 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 	  || regno == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
 	fetch_pauth_masks_from_thread (regcache);
     }
+
+  /* Fetch individual MTE registers.  */
+  if (tdep->has_mte ()
+      && (regno == tdep->mte_reg_base))
+    fetch_mteregs_from_thread (regcache);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -508,6 +582,9 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 	store_sveregs_to_thread (regcache);
       else
 	store_fpregs_to_thread (regcache);
+
+      if (tdep->has_mte ())
+	store_mteregs_to_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (regcache);
@@ -515,6 +592,11 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
     store_sveregs_to_thread (regcache);
   else
     store_fpregs_to_thread (regcache);
+
+  /* Store MTE registers.  */
+  if (tdep->has_mte ()
+      && (regno == tdep->mte_reg_base))
+    store_mteregs_to_thread (regcache);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -651,9 +733,12 @@ aarch64_linux_nat_target::read_description ()
     return aarch32_read_description ();
 
   CORE_ADDR hwcap = linux_get_hwcap (this);
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (this);
 
-  return aarch64_read_description (aarch64_sve_get_vq (tid),
-				   hwcap & AARCH64_HWCAP_PACA);
+  bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+  bool mte_p = hwcap2 & HWCAP2_MTE;
+
+  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p, mte_p);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
@@ -979,6 +1064,44 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);
   info.id = (int *) (vq == 0 ? -1 : vq);
   return gdbarch_find_by_info (info);
+}
+
+/* Implement the "supports_memory_tagging" target_ops method.  */
+
+bool
+aarch64_linux_nat_target::supports_memory_tagging ()
+{
+  return (linux_get_hwcap2 (this) & HWCAP2_MTE) != 0;
+}
+
+/* Implement the "fetch_memtags" target_ops method.  */
+
+bool
+aarch64_linux_nat_target::fetch_memtags (CORE_ADDR address, size_t len,
+					 gdb::byte_vector &tags, int type)
+{
+  int tid = get_ptrace_pid (inferior_ptid);
+
+  /* Allocation tags?  */
+  if (type == static_cast<int> (aarch64_memtag_type::mte_allocation))
+    return aarch64_mte_fetch_memtags (tid, address, len, tags);
+
+  return false;
+}
+
+/* Implement the "store_memtags" target_ops method.  */
+
+bool
+aarch64_linux_nat_target::store_memtags (CORE_ADDR address, size_t len,
+					 const gdb::byte_vector &tags, int type)
+{
+  int tid = get_ptrace_pid (inferior_ptid);
+
+  /* Allocation tags?  */
+  if (type == static_cast<int> (aarch64_memtag_type::mte_allocation))
+    return aarch64_mte_store_memtags (tid, address, len, tags);
+
+  return false;
 }
 
 /* Define AArch64 maintenance commands.  */

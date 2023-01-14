@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 #ifdef HAVE_UNISTD_H

@@ -1,0 +1,37 @@
+2021-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
+	* aclocal.m4, configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.c: Include gdb/sim-riscv.h.
+	(reg_fetch, reg_store): Define.
+	(initialize_cpu): Assign reg_fetch & reg_store.
+
+2021-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in, configure.ac, interp.c, machs.c, machs.h,
+	model_list.def, sim-main.c, sim-main.h: New files.
+	* aclocal.m4, config.in, configure: Regenerated.

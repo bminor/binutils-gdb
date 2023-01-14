@@ -28,11 +28,11 @@ extern int elf_metag_setup_section_lists
 extern void elf_metag_next_input_section
   (struct bfd_link_info *, asection *);
 
-extern bfd_boolean elf_metag_size_stubs
+extern bool elf_metag_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
    asection * (*) (const char *, asection *), void (*) (void));
 
-extern bfd_boolean elf_metag_build_stubs
+extern bool elf_metag_build_stubs
   (struct bfd_link_info *);
 
 #endif  /* _ELF32_METAG_H */

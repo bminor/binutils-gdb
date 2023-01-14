@@ -53,6 +53,24 @@ inline ATTR int func2(int arg2)
   return x * func1 (arg2);
 }
 
+inline ATTR
+void
+scoped (int s)
+{
+  int loc1 = 10;
+  if (s > 0)
+    {
+      int loc2 = 20;
+      s++; /* bp for locals 1 */
+      if (s > 1)
+	{
+	  int loc3 = 30;
+	  s++; /* bp for locals 2 */
+	}
+    }
+  s++; /* bp for locals 3 */
+}
+
 int main (void)
 {
   int val;
@@ -66,6 +84,8 @@ int main (void)
 
   val = func2 (result);
   result = val;
+
+  scoped (40);
 
   return 0;
 }

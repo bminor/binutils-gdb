@@ -64,7 +64,7 @@ struct scoped_mock_context
     /* Push the process_stratum target so we can mock accessing
        registers.  */
     gdb_assert (mock_target.stratum () == process_stratum);
-    push_target (&mock_target);
+    mock_inferior.push_target (&mock_target);
 
     /* Switch to the mock thread.  */
     switch_to_thread (&mock_thread);

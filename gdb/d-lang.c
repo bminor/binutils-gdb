@@ -57,44 +57,6 @@ d_demangle (const char *symbol, int options)
   return gdb_demangle (symbol, options | DMGL_DLANG);
 }
 
-/* Table mapping opcodes into strings for printing operators
-   and precedences of the operators.  */
-static const struct op_print d_op_print_tab[] =
-{
-  {",", BINOP_COMMA, PREC_COMMA, 0},
-  {"=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {"||", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {"&&", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {"|", BINOP_BITWISE_IOR, PREC_BITWISE_IOR, 0},
-  {"^", BINOP_BITWISE_XOR, PREC_BITWISE_XOR, 0},
-  {"&", BINOP_BITWISE_AND, PREC_BITWISE_AND, 0},
-  {"==", BINOP_EQUAL, PREC_ORDER, 0},
-  {"!=", BINOP_NOTEQUAL, PREC_ORDER, 0},
-  {"<=", BINOP_LEQ, PREC_ORDER, 0},
-  {">=", BINOP_GEQ, PREC_ORDER, 0},
-  {">", BINOP_GTR, PREC_ORDER, 0},
-  {"<", BINOP_LESS, PREC_ORDER, 0},
-  {">>", BINOP_RSH, PREC_SHIFT, 0},
-  {"<<", BINOP_LSH, PREC_SHIFT, 0},
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"~", BINOP_CONCAT, PREC_ADD, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"%", BINOP_REM, PREC_MUL, 0},
-  {"^^", BINOP_EXP, PREC_REPEAT, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"!", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {"~", UNOP_COMPLEMENT, PREC_PREFIX, 0},
-  {"*", UNOP_IND, PREC_PREFIX, 0},
-  {"&", UNOP_ADDR, PREC_PREFIX, 0},
-  {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
-  {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
-  {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-  {NULL, OP_NULL, PREC_PREFIX, 0}
-};
-
 /* Class representing the D language.  */
 
 class d_language : public language_defn
@@ -216,16 +178,6 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return d_op_print_tab; }
 };
 
 /* Single instance of the D language class.  */

@@ -622,6 +622,9 @@ ac_unique_file="gettext.c"
 ac_header_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+BISON3_NO
+BISON3_YES
+PICFLAG
 INCINTL
 LIBINTL_DEP
 MAINT
@@ -6784,12 +6787,118 @@ LIBINTL_DEP=
 INCINTL=
 case $USE_INCLUDED_LIBINTL in
   yes)
-    LIBINTL=`echo $LIBINTL | sed 's,${top_builddir},&/..,' `
-    LTLIBINTL=`echo $LTLIBINTL | sed 's,${top_builddir},&/..,' `
+    LIBINTL=`echo $LIBINTL | sed 's,${top_builddir},-L&/..,; s,\.\./intl/libintl\.a,../intl -lintl,' `
     LIBINTL_DEP='${top_builddir}/../intl/libintl.a'
     INCINTL='-I${top_builddir}/../intl'
     ;;
 esac
+
+# intl is sometimes linked into shared libraries even without --enable-shared
+# (e.g. gdbsupport's inprocess agent): so always PICify, just in case.
+
+
+
+
+case "${host}" in
+    # PIC is the default on some targets or must not be used.
+    *-*-darwin*)
+	# For darwin, common symbols are not allowed in MH_DYLIB files
+	case "${CFLAGS}" in
+	  # If we are using a compiler supporting mdynamic-no-pic
+	  # and the option has been tested as safe to add, then cancel
+	  # it here, since the code generated is incompatible with shared
+	  # libs.
+	  *-mdynamic-no-pic*) PICFLAG='-fno-common -mno-dynamic-no-pic' ;;
+	  *) PICFLAG=-fno-common ;;
+	esac
+	;;
+    alpha*-dec-osf5*)
+	# PIC is the default.
+	;;
+    hppa*64*-*-hpux*)
+	# PIC is the default for 64-bit PA HP-UX.
+	;;
+    i[34567]86-*-cygwin* | x86_64-*-cygwin*)
+	;;
+    i[34567]86-*-mingw* | x86_64-*-mingw*)
+	;;
+    i[34567]86-*-interix[3-9]*)
+	# Interix 3.x gcc -fpic/-fPIC options generate broken code.
+	# Instead, we relocate shared libraries at runtime.
+	;;
+    i[34567]86-*-nto-qnx*)
+	# QNX uses GNU C++, but need to define -shared option too, otherwise
+	# it will coredump.
+	PICFLAG='-fPIC -shared'
+	;;
+    i[34567]86-pc-msdosdjgpp*)
+	# DJGPP does not support shared libraries at all.
+	;;
+    ia64*-*-hpux*)
+	# On IA64 HP-UX, PIC is the default but the pic flag
+	# sets the default TLS model and affects inlining.
+	PICFLAG=-fPIC
+	;;
+    mips-sgi-irix6*)
+	# PIC is the default.
+	;;
+    rs6000-ibm-aix* | powerpc-ibm-aix*)
+	# All AIX code is PIC.
+	;;
+
+    # Some targets support both -fPIC and -fpic, but prefer the latter.
+    # FIXME: Why?
+    i[34567]86-*-* | x86_64-*-*)
+	PICFLAG=-fpic
+	;;
+    # FIXME: Override -fPIC default in libgcc only?
+    sh-*-linux* | sh[2346lbe]*-*-linux*)
+	PICFLAG=-fpic
+	;;
+    # FIXME: Simplify to sh*-*-netbsd*?
+    sh-*-netbsdelf* | shl*-*-netbsdelf* | sh5-*-netbsd* | sh5l*-*-netbsd* | \
+      sh64-*-netbsd* | sh64l*-*-netbsd*)
+	PICFLAG=-fpic
+	;;
+    # Default to -fPIC unless specified otherwise.
+    *)
+	PICFLAG=-fPIC
+	;;
+esac
+
+# If the user explicitly uses -fpic/-fPIC, keep that.
+case "${CFLAGS}" in
+    *-fpic*)
+	PICFLAG=-fpic
+	;;
+    *-fPIC*)
+	PICFLAG=-fPIC
+	;;
+esac
+
+
+
+BISON3_YES='#'
+BISON3_NO=
+if test "$INTLBISON" != :; then
+  ac_bison3=no
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking bison 3 or later" >&5
+$as_echo_n "checking bison 3 or later... " >&6; }
+  ac_prog_version=`$INTLBISON --version 2>&1 | sed -n 's/^.*GNU Bison.* \([0-9]*\.[0-9.]*\).*$/\1/p'`
+  case $ac_prog_version in
+    [3-9].*)
+      ac_prog_version="$ac_prog_version, bison3"; ac_bison3=yes;;
+    *) ac_prog_version="$ac_prog_version, old";;
+  esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_prog_version" >&5
+$as_echo "$ac_prog_version" >&6; }
+  if test $ac_bison3 = yes; then
+    BISON3_YES=
+    BISON3_NO='#'
+  fi
+fi
+
+
 
 ac_config_files="$ac_config_files Makefile config.intl"
 

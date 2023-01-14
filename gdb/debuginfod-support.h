@@ -19,6 +19,8 @@
 #ifndef DEBUGINFOD_SUPPORT_H
 #define DEBUGINFOD_SUPPORT_H
 
+#include "gdbsupport/scoped_fd.h"
+
 /* Query debuginfod servers for a source file associated with an
    executable with BUILD_ID.  BUILD_ID can be given as a binary blob or
    a null-terminated string.  If given as a binary blob, BUILD_ID_LEN

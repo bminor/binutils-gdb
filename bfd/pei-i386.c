@@ -25,7 +25,7 @@
 #define TARGET_NAME		"pei-i386"
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
-#define PCRELOFFSET		TRUE
+#define PCRELOFFSET		true
 #define TARGET_UNDERSCORE	'_'
 /* Long section names not allowed in executable images, only object files.  */
 #define COFF_LONG_SECTION_NAMES 0

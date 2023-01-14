@@ -120,12 +120,10 @@ objfile_per_bfd_storage::~objfile_per_bfd_storage ()
 
 /* Create the per-BFD storage object for OBJFILE.  If ABFD is not
    NULL, and it already has a per-BFD storage object, use that.
-   Otherwise, allocate a new per-BFD storage object.  Note that it is
-   not safe to call this multiple times for a given OBJFILE -- it can
-   only be called when allocating or re-initializing OBJFILE.  */
+   Otherwise, allocate a new per-BFD storage object.  */
 
 static struct objfile_per_bfd_storage *
-get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
+get_objfile_bfd_data (bfd *abfd)
 {
   struct objfile_per_bfd_storage *storage = NULL;
 
@@ -134,7 +132,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 
   if (storage == NULL)
     {
-      storage = new objfile_per_bfd_storage;
+      storage = new objfile_per_bfd_storage (abfd);
       /* If the object requires gdb to do relocations, we simply fall
 	 back to not sharing data across users.  These cases are rare
 	 enough that this seems reasonable.  */
@@ -154,7 +152,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 void
 set_objfile_per_bfd (struct objfile *objfile)
 {
-  objfile->per_bfd = get_objfile_bfd_data (objfile, objfile->obfd);
+  objfile->per_bfd = get_objfile_bfd_data (objfile->obfd);
 }
 
 /* Set the objfile's per-BFD notion of the "main" name and
@@ -323,7 +321,6 @@ build_objfile_section_table (struct objfile *objfile)
 objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   : flags (flags_),
     pspace (current_program_space),
-    partial_symtabs (new psymtab_storage ()),
     obfd (abfd)
 {
   const char *expanded_name;
@@ -364,7 +361,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
       build_objfile_section_table (this);
     }
 
-  per_bfd = get_objfile_bfd_data (this, abfd);
+  per_bfd = get_objfile_bfd_data (abfd);
 }
 
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
@@ -621,11 +618,11 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
      they can't possibly pass the tests below.  */
   if ((SYMBOL_CLASS (sym) == LOC_LABEL
        || SYMBOL_CLASS (sym) == LOC_STATIC)
-      && SYMBOL_SECTION (sym) >= 0)
+      && sym->section_index () >= 0)
     {
       SET_SYMBOL_VALUE_ADDRESS (sym,
 				SYMBOL_VALUE_ADDRESS (sym)
-				+ delta[SYMBOL_SECTION (sym)]);
+				+ delta[sym->section_index ()]);
     }
 }
 
@@ -703,9 +700,9 @@ objfile_relocate1 (struct objfile *objfile,
       }
   }
 
-  /* This stores relocated addresses and so must be cleared.  This
-     will cause it to be recreated on demand.  */
-  objfile->psymbol_map.clear ();
+  /* Notify the quick symbol object.  */
+  for (const auto &iter : objfile->qf)
+    iter->relocated ();
 
   /* Relocate isolated symbols.  */
   {
@@ -810,25 +807,6 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
     breakpoint_re_set ();
 }
 
-/* Return non-zero if OBJFILE has partial symbols.  */
-
-int
-objfile_has_partial_symbols (struct objfile *objfile)
-{
-  if (!objfile->sf)
-    return 0;
-
-  /* If we have not read psymbols, but we have a function capable of reading
-     them, then that is an indication that they are in fact available.  Without
-     this function the symbols may have been already read in but they also may
-     not be present in this objfile.  */
-  if ((objfile->flags & OBJF_PSYMTABS_READ) == 0
-      && objfile->sf->sym_read_psymbols != NULL)
-    return 1;
-
-  return objfile->sf->qf->has_symbols (objfile);
-}
-
 /* Return non-zero if OBJFILE has full symbols.  */
 
 int
@@ -844,7 +822,7 @@ int
 objfile_has_symbols (struct objfile *objfile)
 {
   for (::objfile *o : objfile->separate_debug_objfiles ())
-    if (objfile_has_partial_symbols (o) || objfile_has_full_symbols (o))
+    if (o->has_partial_symbols () || objfile_has_full_symbols (o))
       return 1;
   return 0;
 }
@@ -859,7 +837,7 @@ have_partial_symbols (void)
 {
   for (objfile *ofp : current_program_space->objfiles ())
     {
-      if (objfile_has_partial_symbols (ofp))
+      if (ofp->has_partial_symbols ())
 	return 1;
     }
   return 0;

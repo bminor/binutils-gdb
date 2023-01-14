@@ -148,29 +148,29 @@ gdb_test_no_output "set filename-display basename"
 # moving forward again, but this time with file and line number, expected to see the first 15 entries
 gdb_test "record function-call-history /l +" [multi_line \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
   ] "forward /l - 1"
 
 # moving forward and expect to see the latest 6 entries
 gdb_test "record function-call-history /l +" [multi_line \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,41" \
-  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tinc\tat $srcfile:22,2\[34\]" \
   "\[0-9\]*\tmain\tat $srcfile:40,43" \
   ] "forward /l - 2"
 

@@ -53,6 +53,4 @@ test_lookup_type "opencl" "ushort"
 
 test_lookup_type "objective-c" "char"
 
-test_lookup_type "opencl" "ushort"
-
 test_lookup_type "pascal" "char"

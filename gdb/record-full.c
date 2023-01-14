@@ -924,7 +924,7 @@ record_full_core_open_1 (const char *name, int from_tty)
 
   record_full_core_sections = build_section_table (core_bfd);
 
-  push_target (&record_full_core_ops);
+  current_inferior ()->push_target (&record_full_core_ops);
   record_full_restore ();
 }
 
@@ -947,7 +947,7 @@ record_full_open_1 (const char *name, int from_tty)
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 
-  push_target (&record_full_ops);
+  current_inferior ()->push_target (&record_full_ops);
 }
 
 static void record_full_init_record_breakpoints (void);
@@ -1242,11 +1242,11 @@ record_full_wait_1 (struct target_ops *ops,
 			   break;
   			}
 
+		      process_stratum_target *proc_target
+			= current_inferior ()->process_target ();
+
 		      if (gdbarch_software_single_step_p (gdbarch))
 			{
-			  process_stratum_target *proc_target
-			    = current_inferior ()->process_target ();
-
 			  /* Try to insert the software single step breakpoint.
 			     If insert success, set step to 0.  */
 			  set_executing (proc_target, inferior_ptid, false);
@@ -1263,7 +1263,9 @@ record_full_wait_1 (struct target_ops *ops,
 					    "issuing one more step in the "
 					    "target beneath\n");
 		      ops->beneath ()->resume (ptid, step, GDB_SIGNAL_0);
-		      ops->beneath ()->commit_resume ();
+		      proc_target->commit_resumed_state = true;
+		      proc_target->commit_resumed ();
+		      proc_target->commit_resumed_state = false;
 		      continue;
 		    }
 		}
@@ -1452,6 +1454,8 @@ record_full_base_target::wait (ptid_t ptid, struct target_waitstatus *status,
 			       target_wait_flags options)
 {
   ptid_t return_ptid;
+
+  clear_async_event_handler (record_full_async_inferior_event_token);
 
   return_ptid = record_full_wait_1 (this, ptid, status, options);
   if (status->kind != TARGET_WAITKIND_IGNORE)
@@ -2076,7 +2080,7 @@ record_full_core_target::kill ()
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_core_kill\n");
 
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 }
 
 /* "fetch_registers" method for prec over corefile.  */

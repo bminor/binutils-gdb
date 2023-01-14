@@ -2043,10 +2043,10 @@ md_number_to_chars (char *buf, valueT val, int n)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
-bfd_boolean
+bool
 mep_fix_adjustable (fixS *fixP)
 {
   bfd_reloc_code_real_type reloc_type;

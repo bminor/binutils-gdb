@@ -139,7 +139,7 @@ str2vec (char *in)
 
   end = in + strlen (in);
   s = in;
-  while (isspace (*s)) s++;
+  while (isspace ((unsigned char) *s)) s++;
   first = s;
 
   i = 1;
@@ -163,12 +163,12 @@ str2vec (char *in)
 	  memmove (s, s+1, end-s-1);
 	  end--;
 	}
-      if (isspace (*s))
+      if (isspace ((unsigned char) *s))
 	{
 	  if (sq || dq)
 	    continue;
 	  *s++ = '\0';
-	  while (isspace (*s)) s++;
+	  while (isspace ((unsigned char) *s)) s++;
 	  if (*s)
 	    res[++i] = s;
 	}

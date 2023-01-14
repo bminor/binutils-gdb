@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -64,10 +64,10 @@ extern int fnmatch (const char *pattern, const char *string, int flags);
 #endif
 
 #ifdef _LIBC
-# if __GNUC__ < 7
-#  define FALLTHROUGH ((void) 0)
-# else
+# if (__GNUC__ >= 7) || (__clang_major__ >= 10)
 #  define FALLTHROUGH __attribute__ ((__fallthrough__))
+# else
+#  define FALLTHROUGH ((void) 0)
 # endif
 #else
 # include "attribute.h"
@@ -75,6 +75,12 @@ extern int fnmatch (const char *pattern, const char *string, int flags);
 
 #include <intprops.h>
 #include <flexmember.h>
+
+#ifdef _LIBC
+typedef ptrdiff_t idx_t;
+#else
+# include "idx.h"
+#endif
 
 /* We often have to test for FNM_FILE_NAME and FNM_PERIOD being both set.  */
 #define NO_LEADING_PERIOD(flags) \
