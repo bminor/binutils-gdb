@@ -1,5 +1,17 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_import_statement, read_file_scope)
+	(read_type_unit_scope, inherit_abstract_dies, read_func_scope)
+	(read_lexical_block_scope, read_call_site_scope)
+	(dwarf2_get_subprogram_pc_bounds, get_scope_pc_bounds)
+	(handle_struct_member_die, process_structure_scope)
+	(update_enumeration_type_from_children)
+	(process_enumeration_scope, read_array_type, read_common_block)
+	(read_namespace, read_module, read_subroutine_type): Update.
+	(sibling_die): Remove.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (lookup_addr_base, lookup_ranges_base)
 	(build_type_psymtabs_reader, read_structure_type)
 	(read_enumeration_type, read_full_die_1): Update.
