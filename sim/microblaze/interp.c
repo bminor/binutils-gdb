@@ -19,7 +19,6 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
