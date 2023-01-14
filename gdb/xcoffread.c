@@ -1521,11 +1521,6 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
     }
 }
 
-#define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
-  (SYMBOL2) = new (&objfile->objfile_obstack) symbol (); \
-  *(SYMBOL2) = *(SYMBOL1);
-
-
 #define	SYMNAME_ALLOC(NAME, ALLOCED)	\
   ((ALLOCED) ? (NAME) : obstack_strdup (&objfile->objfile_obstack, \
 					(NAME)))
@@ -1561,8 +1556,6 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   if (name[0] == '.')
     ++name;
 
-  initialize_objfile_symbol (sym);
-
   /* default assumptions */
   SET_SYMBOL_VALUE_ADDRESS (sym, cs->c_value + off);
   SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -1578,7 +1571,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
       SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
-      SYMBOL_DUP (sym, sym2);
+      sym2 = new (&objfile->objfile_obstack) symbol (*sym);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)
 	add_symbol_to_list (sym2, get_global_symbols ());

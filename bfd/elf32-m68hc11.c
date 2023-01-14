@@ -1082,11 +1082,8 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
       prev_insn_group = 0;
     }
 
-  if (free_relocs != NULL)
-    {
-      free (free_relocs);
-      free_relocs = NULL;
-    }
+  free (free_relocs);
+  free_relocs = NULL;
 
   if (free_contents != NULL)
     {
@@ -1115,12 +1112,9 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
-  if (free_extsyms != NULL)
-    free (free_extsyms);
+  free (free_relocs);
+  free (free_contents);
+  free (free_extsyms);
   return FALSE;
 }
 

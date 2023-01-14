@@ -1431,13 +1431,13 @@ scalar_type:
 						0); }
 	|	UNSIGNED type_name
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 TYPE_NAME($2.type)); }
+							 $2.type->name ()); }
 	|	UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
 							 "int"); }
 	|	SIGNED_KEYWORD type_name
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       TYPE_NAME($2.type)); }
+						       $2.type->name ()); }
 	|	SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
 						       "int"); }
@@ -1739,13 +1739,14 @@ oper:	OPERATOR NEW
 
 			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
+			  std::string name = std::move (buf.string ());
 
 			  /* This also needs canonicalization.  */
-			  std::string canon
-			    = cp_canonicalize_string (buf.c_str ());
-			  if (canon.empty ())
-			    canon = std::move (buf.string ());
-			  $$ = operator_stoken ((" " + canon).c_str ());
+			  gdb::unique_xmalloc_ptr<char> canon
+			    = cp_canonicalize_string (name.c_str ());
+			  if (canon != nullptr)
+			    name = canon.get ();
+			  $$ = operator_stoken ((" " + name).c_str ());
 			}
 	;
 
@@ -1851,10 +1852,10 @@ typename_stoken (const char *type)
 static int
 type_aggregate_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION
-	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE
-	  || (TYPE_CODE (type) == TYPE_CODE_ENUM
+  return (type->code () == TYPE_CODE_STRUCT
+	  || type->code () == TYPE_CODE_UNION
+	  || type->code () == TYPE_CODE_NAMESPACE
+	  || (type->code () == TYPE_CODE_ENUM
 	      && TYPE_DECLARED_CLASS (type)));
 }
 
@@ -1869,7 +1870,7 @@ check_parameter_typelist (std::vector<struct type *> *params)
   for (ix = 0; ix < params->size (); ++ix)
     {
       type = (*params)[ix];
-      if (type != NULL && TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
+      if (type != NULL && check_typedef (type)->code () == TYPE_CODE_VOID)
 	{
 	  if (ix == 0)
 	    {

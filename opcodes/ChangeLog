@@ -1,3 +1,262 @@
+2020-05-26  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Fix extraction of signed constants in nios2 disassembler (again).
+
+	* nios2-dis.c (nios2_print_insn_arg): Add explicit casts to
+	extractions of signed fields.
+
+2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	* s390-opc.txt: Relocate vector load/store instructions with
+	additional alignment parameter and change architecture level
+	constraint from z14 to z13.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* arc-ext.c: Replace "if (x) free (x)" with "free (x)" throughout.
+	* sparc-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* xtensa-dis.c: Likewise.
+	* bpf-desc.c: Regenerate.
+	* epiphany-desc.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* lm32-desc.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mt-desc.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_ext_version_table): The table used to store
+	all information about the supported spec and the corresponding ISA
+	versions.  Currently, only Zicsr is supported to verify the
+	correctness of Z sub extension settings.  Others will be supported
+	in the future patches.
+	(struct isa_spec_t, isa_specs): List for all supported ISA spec
+	classes and the corresponding strings.
+	(riscv_get_isa_spec_class): New function.  Get the corresponding ISA
+	spec class by giving a ISA spec string.
+	* riscv-opc.c (struct priv_spec_t): New structure.
+	(struct priv_spec_t priv_specs): List for all supported privilege spec
+	classes and the corresponding strings.
+	(riscv_get_priv_spec_class): New function.  Get the corresponding
+	privilege spec class by giving a spec string.
+	(riscv_get_priv_spec_name): New function.  Get the corresponding
+	privilege spec string by giving a CSR version class.
+	* riscv-dis.c: Updated since DECLARE_CSR is changed.
+	* riscv-dis.c: Add new disassembler option -Mpriv-spec to dump the CSR
+	according to the chosen version.  Build a hash table riscv_csr_hash to
+	store the valid CSR for the chosen pirv verison.  Dump the direct
+	CSR address rather than it's name if it is invalid.
+	(parse_riscv_dis_option_without_args): New function.  Parse the options
+	without arguments.
+	(parse_riscv_dis_option): Call parse_riscv_dis_option_without_args to
+	parse the options without arguments first, and then handle the options
+	with arguments.  Add the new option -Mpriv-spec, which has argument.
+	* riscv-dis.c (print_riscv_disassembler_options): Add description
+	about the new OBJDUMP option.
+
+2020-05-19  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (insert_ls, extract_ls): Handle 3-bit L fields and new
+	WC values on POWER10 sync, dcbf  and wait instructions.
+	(insert_pl, extract_pl): New functions.
+	(L2OPT, LS, WC): Use insert_ls and extract_ls.
+	(LS3): New , 3-bit L for sync.
+	(LS3, L3OPT): New, 3-bit L for sync and dcbf.
+	(SC2, PL): New, 2-bit SC and PL for sync and wait.
+	(XWCPL_MASK, XL3RT_MASK, XSYNCLS_MASK): New instruction masks.
+	(XOPL3, XWCPL, XSYNCLS): New opcode macros.
+	(powerpc_opcodes) <dcbflp, dcbfps, dcbstps pause_short, phwsync,
+	plwsync, stcisync, stncisync, stsync, waitrsv>: New extended mnemonics.
+	<wait>: Enable PL operand on POWER10.
+	<dcbf>: Enable L3OPT operand on POWER10.
+	<sync>: Enable SC2 operand on POWER10.
+
+2020-05-19  Stafford Horne  <shorne@gmail.com>
+
+	PR 25184
+	* or1k-asm.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-dis.c: Regenerate.
+	* or1k-ibld.c: Regenerate.
+	* or1k-opc.c: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* or1k-opinst.c: Regenerate.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc (powerpc_opcodes): Add xscmpeqqp, xscmpgeqp, xscmpgtqp,
+	xsmaxcqp, xsmincqp.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add lxvrbx, lxvrhx, lxvrwx, lxvrdx,
+	stxvrbx, stxvrhx, stxvrwx, stxvrdx.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add xvtlsbb.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add vstribl, vstribr, vstrihl, vstrihr,
+	vclrlb, vclrrb, vstribl., vstribr., vstrihl., vstrihr..
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <setbc, setbcr, setnbc, setnbcr>: New
+	mnemonics.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (UIM8, P_U8XX4_MASK): Define.
+	(powerpc_opcodes): Add vgnb, vcfuged, vpextd, vpdepd, vclzdm,
+	vctzdm, cntlzdm, pdepd, pextd, cfuged, cnttzdm.
+	(prefix_opcodes): Add xxeval.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add xxgenpcvbm, xxgenpcvhm,
+	xxgenpcvwm, xxgenpcvdm.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (MP, VXVAM_MASK): Define.
+	(VXVAPS_MASK): Use VXVA_MASK.
+	(powerpc_opcodes): Add mtvsrbmi, vexpandbm, vexpandhm, vexpandwm,
+	vexpanddm, vexpandqm, vextractbm, vextracthm, vextractwm,
+	vextractdm, vextractqm, mtvsrbm, mtvsrhm, mtvsrwm, mtvsrdm, mtvsrqm,
+	vcntmbb, vcntmbh, vcntmbw, vcntmbd.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (insert_xa6a, extract_xa6a, insert_xb6a, extract_xb6a):
+	New functions.
+	(powerpc_operands): Define ACC, PMSK8, PMSK4, PMSK2, XMSK, YMSK,
+	YMSK2, XA6a, XA6ap, XB6a entries.
+	(PMMIRR, P_X_MASK, P_XX1_MASK, P_GER_MASK): Define
+	(P_GER2_MASK, P_GER4_MASK, P_GER8_MASK, P_GER64_MASK): Define.
+	(PPCVSX4): Define.
+	(powerpc_opcodes): Add xxmfacc, xxmtacc, xxsetaccz,
+	xvi8ger4pp, xvi8ger4, xvf16ger2pp, xvf16ger2, xvf32gerpp, xvf32ger,
+	xvi4ger8pp, xvi4ger8, xvi16ger2spp, xvi16ger2s, xvbf16ger2pp,
+	xvbf16ger2, xvf64gerpp, xvf64ger, xvi16ger2, xvf16ger2np,
+	xvf32gernp, xvi8ger4spp, xvi16ger2pp, xvbf16ger2np, xvf64gernp,
+	xvf16ger2pn, xvf32gerpn, xvbf16ger2pn, xvf64gerpn, xvf16ger2nn,
+	xvf32gernn, xvbf16ger2nn, xvf64gernn, xvcvbf16sp, xvcvspbf16.
+	(prefix_opcodes): Add pmxvi8ger4pp, pmxvi8ger4, pmxvf16ger2pp,
+	pmxvf16ger2, pmxvf32gerpp, pmxvf32ger, pmxvi4ger8pp, pmxvi4ger8,
+	pmxvi16ger2spp, pmxvi16ger2s, pmxvbf16ger2pp, pmxvbf16ger2,
+	pmxvf64gerpp, pmxvf64ger, pmxvi16ger2, pmxvf16ger2np, pmxvf32gernp,
+	pmxvi8ger4spp, pmxvi16ger2pp, pmxvbf16ger2np, pmxvf64gernp,
+	pmxvf16ger2pn, pmxvf32gerpn, pmxvbf16ger2pn, pmxvf64gerpn,
+	pmxvf16ger2nn, pmxvf32gernn, pmxvbf16ger2nn, pmxvf64gernn.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (insert_imm32, extract_imm32): New functions.
+	(insert_xts, extract_xts): New functions.
+	(IMM32, UIM3, IX, UIM5, SH3, XTS, P8RR): Define.
+	(P_XX4_MASK, P_UXX4_MASK, VSOP, P_VS_MASK, P_VSI_MASK): Define.
+	(VXRC_MASK, VXSH_MASK): Define.
+	(powerpc_opcodes): Add vinsbvlx, vsldbi, vextdubvlx, vextdubvrx,
+	vextduhvlx, vextduhvrx, vextduwvlx, vextduwvrx, vextddvlx,
+	vextddvrx, vinshvlx, vinswvlx, vinsw, vinsbvrx, vinshvrx,
+	vinswvrx, vinsd, vinsblx, vsrdbi, vinshlx, vinswlx, vinsdlx,
+	vinsbrx, vinshrx, vinswrx, vinsdrx, lxvkq.
+	(prefix_opcodes): Add xxsplti32dx, xxspltidp, xxspltiw, xxblendvb,
+	xxblendvh, xxblendvw, xxblendvd, xxpermx.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add vrlq, vdivuq, vmsumcud, vrlqmi,
+	vmuloud, vcmpuq, vslq, vdivsq, vcmpsq, vrlqnm, vcmpequq, vmulosd,
+	vsrq, vdiveuq, vcmpgtuq, vmuleud, vsraq, vdivesq, vcmpgtsq, vmulesd,
+	vcmpequq., vextsd2q, vmoduq, vcmpgtuq., vmodsq, vcmpgtsq., xscvqpuqz,
+	xscvuqqp, xscvqpsqz, xscvsqqp, dcffixqq, dctfixqq.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (insert_xtp, extract_xtp): New functions.
+	(XTP, DQXP, DQXP_MASK): Define.
+	(powerpc_opcodes): Add lxvp, stxvp, lxvpx, stxvpx.
+	(prefix_opcodes): Add plxvp and pstxvp.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add vdivuw, vdivud, vdivsw, vmulld,
+	vdivsd, vmulhuw, vdiveuw, vmulhud, vdiveud, vmulhsw, vdivesw,
+	vmulhsd, vdivesd, vmoduw, vmodud, vmodsw, vmodsd.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <brd, brh, brw>: New mnemonics.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (insert_l1opt, extract_l1opt): New functions.
+	(L1OPT): Define.
+	(powerpc_opcodes) <paste.>: Add L operand for cpu POWER10.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <slbiag>: Add variant with L operand.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Default to "power10".
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Add "power10" entry.
+	(print_insn_powerpc): Update for PPC_OPCODE_POWER10 renaming.
+	* ppc-opc.c (POWER10): Rename from POWERXX.  Update all uses.
+
+2020-05-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-opc.h (enum aarch64_field_kind): Add FLD_imm16_2.
+	* aarch64-opc.c (fields): Add entry for FLD_imm16_2.
+	(operand_general_constraint_met_p): validate
+	AARCH64_OPND_UNDEFINED.
+	* aarch64-tbl.h (aarch64_opcode_table): Add udf instruction, entry
+	for FLD_imm16_2.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22699
+	* sh-opc.h: Also use unsigned 8-bit immediate values for the LDRC
+	and SETRC insns.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22699
+	* sh-opc.h (IMM0_8): Replace with IMM0_8S and IMM0_8U.  Use
+	IMM0_8S for arithmetic insns and IMM0_8U for logical insns.
+	* sh-dis.c (print_insn_sh): Change IMM0_8 case to IMM0_8S and add
+	IMM0_8U case.
+
 2020-04-21  Andreas Schwab  <schwab@linux-m68k.org>
 
 	PR 25848

@@ -23,48 +23,21 @@ if {[get_compiler_info]} {
     return 1
 }
 
-# Compile the testcase program and library.  BINSUFFIX is the suffix
-# to append to the program and library filenames, to make them unique
-# between invocations.  OPTIONS is passed to gdb_compile when
-# compiling the program.
+load_lib jit-elf-helpers.exp
 
-proc compile_jit_test {testname binsuffix options} {
-    global testfile srcfile binfile srcdir subdir
-    global solib_testfile solib_srcfile solib_binfile solib_binfile_test_msg
-    global solib_binfile_target
+# The main code that loads and registers JIT objects.
+set main_basename "jit-elf-main"
+set main_srcfile ${srcdir}/${subdir}/${main_basename}.c
+set main_binfile [standard_output_file ${main_basename}]
 
-    set testfile jit-elf-main
-    set srcfile ${testfile}.c
-    set binfile [standard_output_file $testfile$binsuffix]
-    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	      executable [concat debug $options]] != "" } {
-	untested $testname
-	return -1
-    }
-
-    set solib_testfile "jit-elf-solib"
-    set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
-    set solib_binfile [standard_output_file ${solib_testfile}$binsuffix.so]
-    set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}$binsuffix.so"
-
-    # Note: compiling without debug info: the library goes through
-    # symbol renaming by munging on its symbol table, and that
-    # wouldn't work for .debug sections.  Also, output for "info
-    # function" changes when debug info is present.
-    if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {-fPIC}] != "" } {
-	untested $testname
-	return -1
-    }
-
-    set solib_binfile_target [gdb_remote_download target ${solib_binfile}]
-
-    return 0
-}
+# The shared library that gets loaded as JIT objects.
+set jit_solib_basename jit-elf-solib
+set jit_solib_srcfile ${srcdir}/${subdir}/${jit_solib_basename}.c
 
 # Detach, restart GDB, and re-attach to the program.
-
 proc clean_reattach {} {
-    global decimal gdb_prompt srcfile testfile
+    global decimal gdb_prompt
+    global main_binfile main_srcfile
 
     # Get PID of test program.
     set testpid -1
@@ -79,11 +52,11 @@ proc clean_reattach {} {
     gdb_test_no_output "set var wait_for_gdb = 1"
     gdb_test "detach" "Detaching from .*"
 
-    clean_restart $testfile
+    clean_restart ${main_binfile}
 
     set test "attach"
     gdb_test_multiple "attach $testpid" "$test" {
-	-re "Attaching to program.*.*main.*at .*$srcfile:.*$gdb_prompt $" {
+	-re "Attaching to program.*.*main.*at .*$main_srcfile:.*$gdb_prompt $" {
 	    pass "$test"
 	}
     }
@@ -94,7 +67,9 @@ proc clean_reattach {} {
 # Continue to LOCATION in the program.  If REATTACH, detach and
 # re-attach to the program from scratch.
 proc continue_to_test_location {location reattach} {
-    gdb_breakpoint [gdb_get_line_number $location]
+    global main_srcfile
+
+    gdb_breakpoint [gdb_get_line_number $location $main_srcfile]
     gdb_continue_to_breakpoint $location
     if {$reattach} {
 	with_test_prefix "$location" {
@@ -103,11 +78,14 @@ proc continue_to_test_location {location reattach} {
     }
 }
 
-proc one_jit_test {count match_str reattach} {
-    with_test_prefix "one_jit_test-$count" {
-	global verbose testfile solib_binfile_target solib_binfile_test_msg
+proc one_jit_test {jit_solibs_target match_str reattach} {
+    set count [llength $jit_solibs_target]
 
-	clean_restart $testfile
+    with_test_prefix "one_jit_test-$count" {
+	global verbose
+	global main_binfile main_srcfile
+
+	clean_restart ${main_binfile}
 
 	# This is just to help debugging when things fail
 	if {$verbose > 0} {
@@ -119,14 +97,20 @@ proc one_jit_test {count match_str reattach} {
 	    return
 	}
 
-	gdb_breakpoint [gdb_get_line_number "break here 0"]
-	gdb_continue_to_breakpoint "break here 0"
-
 	# Poke desired values directly into inferior instead of using "set args"
 	# because "set args" does not work under gdbserver.
-	gdb_test_no_output "set var argc = 2"
-	gdb_test_no_output "set var libname = \"$solib_binfile_target\"" "set var libname = \"$solib_binfile_test_msg\""
-	gdb_test_no_output "set var count = $count"
+	incr count
+	gdb_test_no_output "set var argc=$count" "forging argc"
+	gdb_test_no_output "set var argv=fake_argv" "forging argv"
+	for {set i 1} {$i < $count} {incr i} {
+	    set jit_solib_target [lindex $jit_solibs_target [expr $i-1]]
+	    gdb_test_no_output "set var argv\[$i\]=\"${jit_solib_target}\"" \
+		"forging argv\[$i\]"
+	}
+
+	gdb_breakpoint [gdb_get_line_number "break here 0" $main_srcfile]
+	gdb_continue_to_breakpoint "break here 0"
+
 
 	continue_to_test_location "break here 1" $reattach
 
@@ -146,31 +130,34 @@ proc one_jit_test {count match_str reattach} {
     }
 }
 
-if {[compile_jit_test jit.exp "" {}] < 0} {
+# Compile two shared libraries to use as JIT objects.
+set jit_solibs_target [compile_and_download_n_jit_so \
+		      $jit_solib_basename $jit_solib_srcfile 2]
+if { $jit_solibs_target == -1 } {
     return
 }
-one_jit_test 1 "${hex}  jit_function_0000" 0
-one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001" 0
+
+# Compile the main code (which loads the JIT objects).
+if { [compile_jit_main ${main_srcfile} ${main_binfile} {}] == 0 } {
+    one_jit_test [lindex $jit_solibs_target 0] "${hex}  jit_function_0001" 0
+    one_jit_test $jit_solibs_target "${hex}  jit_function_0001\[\r\n\]+${hex}  jit_function_0002" 0
+}
 
 # Test attaching to an inferior with some JIT libraries already
 # registered.  We reuse the normal test, and detach/reattach at
 # specific interesting points.
 if {[can_spawn_for_attach]} {
-    if {[compile_jit_test "jit.exp attach tests" \
-	     "-attach" {additional_flags=-DATTACH=1}] < 0} {
-	return
-    }
-
-    with_test_prefix attach {
-	one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001" 1
+    if { [compile_jit_main ${main_srcfile} "${main_binfile}-attach" \
+	    {additional_flags=-DATTACH=1}] == 0 } {
+	with_test_prefix attach {
+	    one_jit_test $jit_solibs_target "${hex}  jit_function_0001\[\r\n\]+${hex}  jit_function_0002" 1
+	}
     }
 }
 
-with_test_prefix PIE {
-    if {[compile_jit_test "jit.exp PIE tests" \
-	     "-pie" {additional_flags=-fPIE ldflags=-pie}] < 0} {
-	return
+if { [compile_jit_main ${main_srcfile} "${main_binfile}-pie" \
+	  {additional_flags=-fPIE ldflags=-pie}] == 0 } {
+    with_test_prefix PIE {
+	one_jit_test [lindex $jit_solibs_target 0] "${hex}  jit_function_0001" 0
     }
-
-    one_jit_test 1 "${hex}  jit_function_0000" 0
 }

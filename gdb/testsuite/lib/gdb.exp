@@ -29,6 +29,7 @@ load_lib libgloss.exp
 load_lib cache.exp
 load_lib gdb-utils.exp
 load_lib memory.exp
+load_lib check-test-names.exp
 
 global GDB
 
@@ -241,14 +242,19 @@ proc target_can_use_run_cmd {} {
 
 # Generic run command.
 #
+# Return 0 if we could start the program, -1 if we could not.
+#
 # The second pattern below matches up to the first newline *only*.
 # Using ``.*$'' could swallow up output that we attempt to match
 # elsewhere.
 #
+# INFERIOR_ARGS is passed as arguments to the start command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_run_cmd {args} {
+proc gdb_run_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -264,15 +270,15 @@ proc gdb_run_cmd {args} {
 
     if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
-	    if { [gdb_reload] != 0 } {
-		return
+	    if { [gdb_reload $inferior_args] != 0 } {
+		return -1
 	    }
 	    send_gdb "continue\n"
 	    gdb_expect 60 {
 		-re "Continu\[^\r\n\]*\[\r\n\]" {}
 		default {}
 	    }
-	    return
+	    return 0
 	}
 
 	if [target_info exists gdb,start_symbol] {
@@ -288,7 +294,7 @@ proc gdb_run_cmd {args} {
 	    # clever and not send a command when it has failed.
 	    if [expr $start_attempt > 3] {
 		perror "Jump to start() failed (retry count exceeded)"
-		return
+		return -1
 	    }
 	    set start_attempt [expr $start_attempt + 1]
 	    gdb_expect 30 {
@@ -297,7 +303,7 @@ proc gdb_run_cmd {args} {
 		}
 		-re "No symbol \"_start\" in current.*$gdb_prompt $" {
 		    perror "Can't find start symbol to run in gdb_run"
-		    return
+		    return -1
 		}
 		-re "No symbol \"start\" in current.*$gdb_prompt $" {
 		    send_gdb "jump *_start\n"
@@ -309,26 +315,27 @@ proc gdb_run_cmd {args} {
 		    send_gdb "y\n" answer
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
-		    if { [gdb_reload] != 0 } {
-			return
+		    if { [gdb_reload $inferior_args] != 0 } {
+			return -1
 		    }
 		    send_gdb "jump *$start\n"
 		}
 		timeout {
 		    perror "Jump to start() failed (timeout)"
-		    return
+		    return -1
 		}
 	    }
 	}
-	return
+
+	return 0
     }
 
     if [target_info exists gdb,do_reload_on_run] {
-	if { [gdb_reload] != 0 } {
-	    return
+	if { [gdb_reload $inferior_args] != 0 } {
+	    return -1
 	}
     }
-    send_gdb "run $args\n"
+    send_gdb "run $inferior_args\n"
 # This doesn't work quite right yet.
 # Use -notransfer here so that test cases (like chng-sym.exp)
 # may test for additional start-up messages.
@@ -342,15 +349,20 @@ proc gdb_run_cmd {args} {
 	    # There is no more input expected.
 	}
     }
+
+    return 0
 }
 
 # Generic start command.  Return 0 if we could start the program, -1
 # if we could not.
 #
+# INFERIOR_ARGS is passed as arguments to the start command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_start_cmd {args} {
+proc gdb_start_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -368,7 +380,7 @@ proc gdb_start_cmd {args} {
 	return -1
     }
 
-    send_gdb "start $args\n"
+    send_gdb "start $inferior_args\n"
     # Use -notransfer here so that test cases (like chng-sym.exp)
     # may test for additional start-up messages.
     gdb_expect 60 {
@@ -386,10 +398,13 @@ proc gdb_start_cmd {args} {
 # Generic starti command.  Return 0 if we could start the program, -1
 # if we could not.
 #
+# INFERIOR_ARGS is passed as arguments to the starti command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_starti_cmd {args} {
+proc gdb_starti_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -407,7 +422,7 @@ proc gdb_starti_cmd {args} {
 	return -1
     }
 
-    send_gdb "starti $args\n"
+    send_gdb "starti $inferior_args\n"
     gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
 	    send_gdb "y\n" answer
@@ -4817,8 +4832,13 @@ proc gdb_load { arg } {
 # either the first time or after already starting the program once,
 # for remote targets.  Most files that override gdb_load should now
 # override this instead.
+#
+# INFERIOR_ARGS contains the arguments to pass to the inferiors, as a
+# single string to get interpreted by a shell.  If the target board
+# overriding gdb_reload is a "stub", then it should arrange things such
+# these arguments make their way to the inferior process.
 
-proc gdb_reload { } {
+proc gdb_reload { {inferior_args {}} } {
     # For the benefit of existing configurations, default to gdb_load.
     # Specifying no file defaults to the executable currently being
     # debugged.
@@ -5508,11 +5528,15 @@ proc exec_is_pie { executable } {
 	return -1
     }
     set readelf_program [gdb_find_readelf]
-    set res [catch {exec $readelf_program -d $executable} output]
+    # We're not testing readelf -d | grep "FLAGS_1.*Flags:.*PIE"
+    # because the PIE flag is not set by all versions of gold, see PR
+    # binutils/26039.
+    set res [catch {exec $readelf_program -h $executable} output]
     if { $res != 0 } {
 	return -1
     }
-    set res [regexp -line {\(FLAGS_1\).*Flags:.* PIE($| )} $output]
+    set res [regexp -line {^[ \t]*Type:[ \t]*DYN \(Shared object file\)$} \
+		 $output]
     if { $res == 1 } {
 	return 1
     }
@@ -7007,6 +7031,29 @@ gdb_caching_proc supports_statement_frontiers {
     } executable "additional_flags=-gstatement-frontiers"]
 }
 
+# Return 1 if compiler supports -mmpx -fcheck-pointer-bounds.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_mpx_check_pointer_bounds {
+    set flags "additional_flags=-mmpx additional_flags=-fcheck-pointer-bounds"
+    return [gdb_can_simple_compile supports_mpx_check_pointer_bounds {
+	int main () {
+	    return 0;
+	}
+    } executable $flags]
+}
+
+# Return 1 if compiler supports -fcf-protection=.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_fcf_protection {
+    return [gdb_can_simple_compile supports_fcf_protection {
+	int main () {
+	    return 0;
+	}
+  } executable "additional_flags=-fcf-protection=full"]
+}
+
 # Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
 
 proc readnow { } {
@@ -7104,6 +7151,56 @@ proc ensure_gdb_index { binfile } {
 	}
     }
     return -1
+}
+
+# Return 1 if executable contains .debug_types section.  Otherwise, return 0.
+
+proc debug_types { } {
+    global hex
+
+    set cmd "maint info sections"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "at $hex: .debug_types.*" {
+	    return 1
+	}
+	-re -wrap "" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
+# Return the addresses in the line table for FILE for which is_stmt is true.
+
+proc is_stmt_addresses { file } {
+    global decimal
+    global hex
+
+    set is_stmt [list]
+
+    gdb_test_multiple "maint info line-table $file" "" {
+	-re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+Y\[^\r\n\]*" {
+	    lappend is_stmt $expect_out(1,string)
+	    exp_continue
+	}
+	-re -wrap "" {
+	}
+    }
+
+    return $is_stmt
+}
+
+# Return 1 if hex number VAL is an element of HEXLIST.
+
+proc hex_in_list { val hexlist } {
+    # Normalize val by removing 0x prefix, and leading zeros.
+    set val [regsub ^0x $val ""]
+    set val [regsub ^0+ $val "0"]
+
+    set re 0x0*$val
+    set index [lsearch -regexp $hexlist $re]
+    return [expr $index != -1]
 }
 
 # Always load compatibility stuff.

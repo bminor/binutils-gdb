@@ -815,8 +815,8 @@ add_archive_element (struct bfd_link_info *info,
   input = (lang_input_statement_type *)
       xcalloc (1, sizeof (lang_input_statement_type));
   input->header.type = lang_input_statement_enum;
-  input->filename = abfd->filename;
-  input->local_sym_name = abfd->filename;
+  input->filename = bfd_get_filename (abfd);
+  input->local_sym_name = bfd_get_filename (abfd);
   input->the_bfd = abfd;
 
   parent = bfd_usrdata (abfd->my_archive);
@@ -839,7 +839,7 @@ add_archive_element (struct bfd_link_info *info,
 	      /* Don't claim new IR symbols after all IR symbols have
 		 been claimed.  */
 	      if (verbose)
-		info_msg ("%pI: no new IR symbols to claimi\n",
+		info_msg ("%pI: no new IR symbols to claim\n",
 			  &orig_input);
 	      input->flags.claimed = 0;
 	      return FALSE;
@@ -1349,8 +1349,7 @@ undefined_symbol (struct bfd_link_info *info,
   else
     {
       error_count = 0;
-      if (error_name != NULL)
-	free (error_name);
+      free (error_name);
       error_name = xstrdup (name);
     }
 

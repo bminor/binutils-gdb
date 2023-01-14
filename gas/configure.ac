@@ -569,11 +569,42 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_zol_ext)
 	;;
 
-      aarch64 | i386 | riscv | s390 | sparc)
+      aarch64 | i386 | s390 | sparc)
 	if test $this_target = $target ; then
 	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
 	fi
 	;;
+
+      riscv)
+        # --target=riscv[32|64]-*-*.  */
+        if test $this_target = $target ; then
+          AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
+        fi
+
+        # --with-arch=<value>.  The syntax of <value> is same as Gas option -march.
+        AC_MSG_CHECKING(for default configuration of --with-arch)
+        if test "x${with_arch}" != x; then
+        AC_DEFINE_UNQUOTED(DEFAULT_RISCV_ARCH_WITH_EXT, "$with_arch",
+                           [Define default value for RISC-V -march.])
+        fi
+        AC_MSG_RESULT($with_arch)
+
+        # --with-isa-spec=[2.2|20190608|20191213].
+        AC_MSG_CHECKING(for default configuration of --with-isa-spec)
+        if test "x${with_isa_spec}" != x; then
+          AC_DEFINE_UNQUOTED(DEFAULT_RISCV_ISA_SPEC, "$with_isa_spec",
+                             [Define default value for RISC-V -misa-spec.])
+        fi
+        AC_MSG_RESULT($with_isa_spec)
+
+        # --with-priv-spec=[1.9|1.9.1|1.10|1.11].
+        AC_MSG_CHECKING(for default configuration of --with-priv-spec)
+        if test "x${with_priv_spec}" != x; then
+          AC_DEFINE_UNQUOTED(DEFAULT_RISCV_PRIV_SPEC, "$with_priv_spec",
+                             [Define default value for RISC-V -mpriv-spec])
+        fi
+        AC_MSG_RESULT($with_priv_spec)
+        ;;
 
       rl78)
 	f=rl78-parse.o

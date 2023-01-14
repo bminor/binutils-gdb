@@ -30,8 +30,8 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
     return -1
 }
 
-if ![runto MAIN__] then {
-    untested "couldn't run to breakpoint MAIN__"
+if ![fortran_runto_main] then {
+    untested "couldn't run to main"
     return -1
 }
 

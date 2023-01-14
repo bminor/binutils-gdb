@@ -1629,7 +1629,7 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* union sigval */
   sigval_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
-  TYPE_NAME (sigval_type) = xstrdup ("sigval");
+  sigval_type->set_name (xstrdup ("sigval"));
   append_composite_type_field (sigval_type, "sival_int", int_type);
   append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
 
@@ -1679,7 +1679,7 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* struct siginfo */
   siginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (siginfo_type) = xstrdup ("siginfo");
+  siginfo_type->set_name (xstrdup ("siginfo"));
   append_composite_type_field (siginfo_type, "si_signo", int_type);
   append_composite_type_field (siginfo_type, "si_errno", int_type);
   append_composite_type_field (siginfo_type, "si_code", int_type);
@@ -1983,9 +1983,9 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
 				     language_c, NULL).symbol;
       if (obj_entry_sym == NULL)
 	error (_("Unable to find Struct_Obj_Entry symbol"));
-      data->off_linkmap = lookup_struct_elt (SYMBOL_TYPE(obj_entry_sym),
+      data->off_linkmap = lookup_struct_elt (SYMBOL_TYPE (obj_entry_sym),
 					     "linkmap", 0).offset / 8;
-      data->off_tlsindex = lookup_struct_elt (SYMBOL_TYPE(obj_entry_sym),
+      data->off_tlsindex = lookup_struct_elt (SYMBOL_TYPE (obj_entry_sym),
 					      "tlsindex", 0).offset / 8;
       data->rtld_offsets_valid = true;
       return;

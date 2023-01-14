@@ -319,8 +319,7 @@ read_symbol_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	      sc[strlen (sc) - 1] = '\0';
 	      n = concat (sc, bfd_asymbol_name (*ps), (const char *) NULL);
 	      free (sc);
-	      if (f != NULL)
-		free (f);
+	      free (f);
 	      f = n;
 	      s = n;
 	    }
@@ -372,8 +371,7 @@ static int saved_stabs_index;
 static void
 save_stab (int type, int desc, bfd_vma value, const char *string)
 {
-  if (saved_stabs[saved_stabs_index].string != NULL)
-    free (saved_stabs[saved_stabs_index].string);
+  free (saved_stabs[saved_stabs_index].string);
   saved_stabs[saved_stabs_index].type = type;
   saved_stabs[saved_stabs_index].desc = desc;
   saved_stabs[saved_stabs_index].value = value;
@@ -428,11 +426,8 @@ free_saved_stabs (void)
 
   for (i = 0; i < SAVE_STABS_COUNT; i++)
     {
-      if (saved_stabs[i].string != NULL)
-	{
-	  free (saved_stabs[i].string);
-	  saved_stabs[i].string = NULL;
-	}
+      free (saved_stabs[i].string);
+      saved_stabs[i].string = NULL;
     }
 
   saved_stabs_index = 0;

@@ -99,7 +99,7 @@ convert_one_symbol (compile_c_instance *context,
 	  break;
 
 	case LOC_CONST:
-	  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_ENUM)
+	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
 	      return;
@@ -497,7 +497,7 @@ generate_vla_size (compile_instance *compiler,
   if (TYPE_IS_REFERENCE (type))
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_RANGE:
       {
@@ -526,8 +526,8 @@ generate_vla_size (compile_instance *compiler,
       {
 	int i;
 
-	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  if (!field_is_static (&TYPE_FIELD (type, i)))
+	for (i = 0; i < type->num_fields (); ++i)
+	  if (!field_is_static (&type->field (i)))
 	    generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
 			       TYPE_FIELD_TYPE (type, i), sym);
       }

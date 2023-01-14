@@ -298,16 +298,6 @@ tui_update_variables ()
   return need_redraw;
 }
 
-static void
-set_tui_cmd (const char *args, int from_tty)
-{
-}
-
-static void
-show_tui_cmd (const char *args, int from_tty)
-{
-}
-
 static struct cmd_list_element *tuilist;
 
 struct cmd_list_element **
@@ -1004,14 +994,14 @@ _initialize_tui_win ()
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_prefix_cmd ("tui", class_tui, set_tui_cmd,
-                  _("TUI configuration variables."),
-		  &tui_setlist, "set tui ",
-		  0 /* allow-unknown */, &setlist);
-  add_prefix_cmd ("tui", class_tui, show_tui_cmd,
-                  _("TUI configuration variables."),
-		  &tui_showlist, "show tui ",
-		  0 /* allow-unknown */, &showlist);
+  add_basic_prefix_cmd ("tui", class_tui,
+			_("TUI configuration variables."),
+			&tui_setlist, "set tui ",
+			0 /* allow-unknown */, &setlist);
+  add_show_prefix_cmd ("tui", class_tui,
+		       _("TUI configuration variables."),
+		       &tui_showlist, "show tui ",
+		       0 /* allow-unknown */, &showlist);
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
            _("Refresh the terminal display."));

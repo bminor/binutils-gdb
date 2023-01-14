@@ -2043,7 +2043,7 @@ thread_select (const char *tidstr, thread_info *tp)
 
   /* Since the current thread may have changed, see if there is any
      exited thread we can now delete.  */
-  prune_threads ();
+  delete_exited_threads ();
 }
 
 /* Print thread and frame switch command response.  */

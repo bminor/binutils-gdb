@@ -80,18 +80,40 @@ win32_get_current_dr (int dr)
 
   win32_require_context (th);
 
+#ifdef __x86_64__
+#define RET_DR(DR)				\
+  case DR:					\
+    return th->wow64_context.Dr ## DR
+
+  if (wow64_process)
+    {
+      switch (dr)
+	{
+	  RET_DR (0);
+	  RET_DR (1);
+	  RET_DR (2);
+	  RET_DR (3);
+	  RET_DR (6);
+	  RET_DR (7);
+	}
+    }
+  else
+#undef RET_DR
+#endif
 #define RET_DR(DR)				\
   case DR:					\
     return th->context.Dr ## DR
 
-  switch (dr)
     {
-      RET_DR (0);
-      RET_DR (1);
-      RET_DR (2);
-      RET_DR (3);
-      RET_DR (6);
-      RET_DR (7);
+      switch (dr)
+	{
+	  RET_DR (0);
+	  RET_DR (1);
+	  RET_DR (2);
+	  RET_DR (3);
+	  RET_DR (6);
+	  RET_DR (7);
+	}
     }
 
 #undef RET_DR
@@ -140,6 +162,7 @@ i386_supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
+    case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
       return 1;
@@ -154,6 +177,7 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   switch (type)
     {
+    case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
@@ -175,6 +199,7 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   switch (type)
     {
+    case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
@@ -219,12 +244,27 @@ i386_get_thread_context (windows_thread_info *th)
   static DWORD extended_registers = CONTEXT_EXTENDED_REGISTERS;
 
  again:
-  th->context.ContextFlags = (CONTEXT_FULL
-			      | CONTEXT_FLOATING_POINT
-			      | CONTEXT_DEBUG_REGISTERS
-			      | extended_registers);
+#ifdef __x86_64__
+  if (wow64_process)
+    th->wow64_context.ContextFlags = (CONTEXT_FULL
+				      | CONTEXT_FLOATING_POINT
+				      | CONTEXT_DEBUG_REGISTERS
+				      | extended_registers);
+  else
+#endif
+    th->context.ContextFlags = (CONTEXT_FULL
+				| CONTEXT_FLOATING_POINT
+				| CONTEXT_DEBUG_REGISTERS
+				| extended_registers);
 
-  if (!GetThreadContext (th->h, &th->context))
+  BOOL ret;
+#ifdef __x86_64__
+  if (wow64_process)
+    ret = win32_Wow64GetThreadContext (th->h, &th->wow64_context);
+  else
+#endif
+    ret = GetThreadContext (th->h, &th->context);
+  if (!ret)
     {
       DWORD e = GetLastError ();
 
@@ -247,13 +287,28 @@ i386_prepare_to_resume (windows_thread_info *th)
 
       win32_require_context (th);
 
-      th->context.Dr0 = dr->dr_mirror[0];
-      th->context.Dr1 = dr->dr_mirror[1];
-      th->context.Dr2 = dr->dr_mirror[2];
-      th->context.Dr3 = dr->dr_mirror[3];
-      /* th->context.Dr6 = dr->dr_status_mirror;
-	 FIXME: should we set dr6 also ?? */
-      th->context.Dr7 = dr->dr_control_mirror;
+#ifdef __x86_64__
+      if (wow64_process)
+	{
+	  th->wow64_context.Dr0 = dr->dr_mirror[0];
+	  th->wow64_context.Dr1 = dr->dr_mirror[1];
+	  th->wow64_context.Dr2 = dr->dr_mirror[2];
+	  th->wow64_context.Dr3 = dr->dr_mirror[3];
+	  /* th->wow64_context.Dr6 = dr->dr_status_mirror;
+	     FIXME: should we set dr6 also ?? */
+	  th->wow64_context.Dr7 = dr->dr_control_mirror;
+	}
+      else
+#endif
+	{
+	  th->context.Dr0 = dr->dr_mirror[0];
+	  th->context.Dr1 = dr->dr_mirror[1];
+	  th->context.Dr2 = dr->dr_mirror[2];
+	  th->context.Dr3 = dr->dr_mirror[3];
+	  /* th->context.Dr6 = dr->dr_status_mirror;
+	     FIXME: should we set dr6 also ?? */
+	  th->context.Dr7 = dr->dr_control_mirror;
+	}
 
       th->debug_registers_changed = false;
     }
@@ -268,10 +323,13 @@ i386_thread_added (windows_thread_info *th)
 static void
 i386_single_step (windows_thread_info *th)
 {
-  th->context.EFlags |= FLAG_TRACE_BIT;
+#ifdef __x86_64__
+  if (wow64_process)
+    th->wow64_context.EFlags |= FLAG_TRACE_BIT;
+  else
+#endif
+    th->context.EFlags |= FLAG_TRACE_BIT;
 }
-
-#ifndef __x86_64__
 
 /* An array of offset mappings into a Win32 Context structure.
    This is a one-to-one mapping which is indexed by gdb's register
@@ -280,8 +338,12 @@ i386_single_step (windows_thread_info *th)
    An offset value of -1 indicates that Win32 does not provide this
    register in it's CONTEXT structure.  In this case regptr will return
    a pointer into a dummy register.  */
+#ifdef __x86_64__
+#define context_offset(x) (offsetof (WOW64_CONTEXT, x))
+#else
 #define context_offset(x) ((int)&(((CONTEXT *)NULL)->x))
-static const int mappings[] = {
+#endif
+static const int i386_mappings[] = {
   context_offset (Eax),
   context_offset (Ecx),
   context_offset (Edx),
@@ -328,10 +390,10 @@ static const int mappings[] = {
 };
 #undef context_offset
 
-#else /* __x86_64__ */
+#ifdef __x86_64__
 
 #define context_offset(x) (offsetof (CONTEXT, x))
-static const int mappings[] =
+static const int amd64_mappings[] =
 {
   context_offset (Rax),
   context_offset (Rbx),
@@ -402,7 +464,21 @@ static void
 i386_fetch_inferior_register (struct regcache *regcache,
 			      windows_thread_info *th, int r)
 {
-  char *context_offset = (char *) &th->context + mappings[r];
+  const int *mappings;
+#ifdef __x86_64__
+  if (!wow64_process)
+    mappings = amd64_mappings;
+  else
+#endif
+    mappings = i386_mappings;
+
+  char *context_offset;
+#ifdef __x86_64__
+  if (wow64_process)
+    context_offset = (char *) &th->wow64_context + mappings[r];
+  else
+#endif
+    context_offset = (char *) &th->context + mappings[r];
 
   long l;
   if (r == FCS_REGNUM)
@@ -424,7 +500,22 @@ static void
 i386_store_inferior_register (struct regcache *regcache,
 			      windows_thread_info *th, int r)
 {
-  char *context_offset = (char *) &th->context + mappings[r];
+  const int *mappings;
+#ifdef __x86_64__
+  if (!wow64_process)
+    mappings = amd64_mappings;
+  else
+#endif
+    mappings = i386_mappings;
+
+  char *context_offset;
+#ifdef __x86_64__
+  if (wow64_process)
+    context_offset = (char *) &th->wow64_context + mappings[r];
+  else
+#endif
+    context_offset = (char *) &th->context + mappings[r];
+
   collect_register (regcache, r, context_offset);
 }
 
@@ -439,15 +530,32 @@ i386_arch_setup (void)
 #ifdef __x86_64__
   tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
 					   false, false);
-  const char **expedite_regs = amd64_expedite_regs;
-#else
-  tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false, false);
-  const char **expedite_regs = i386_expedite_regs;
+  init_target_desc (tdesc, amd64_expedite_regs);
+  win32_tdesc = tdesc;
 #endif
 
-  init_target_desc (tdesc, expedite_regs);
-
+  tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false, false);
+  init_target_desc (tdesc, i386_expedite_regs);
+#ifdef __x86_64__
+  wow64_win32_tdesc = tdesc;
+#else
   win32_tdesc = tdesc;
+#endif
+}
+
+/* Implement win32_target_ops "num_regs" method.  */
+
+static int
+i386_win32_num_regs (void)
+{
+  int num_regs;
+#ifdef __x86_64__
+  if (!wow64_process)
+    num_regs = sizeof (amd64_mappings) / sizeof (amd64_mappings[0]);
+  else
+#endif
+    num_regs = sizeof (i386_mappings) / sizeof (i386_mappings[0]);
+  return num_regs;
 }
 
 /* Implement win32_target_ops "get_pc" method.  */
@@ -496,7 +604,7 @@ i386_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
 struct win32_target_ops the_low_target = {
   i386_arch_setup,
-  sizeof (mappings) / sizeof (mappings[0]),
+  i386_win32_num_regs,
   i386_initial_stuff,
   i386_get_thread_context,
   i386_prepare_to_resume,

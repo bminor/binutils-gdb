@@ -695,16 +695,10 @@ tic4x_disassemble (unsigned long pc,
       tic4x_version = info->mach;
       /* Don't stash anything from a previous call using a different
 	 machine.  */
-      if (optab)
-	{
-	  free (optab);
-	  optab = NULL;
-	}
-      if (optab_special)
-	{
-	  free (optab_special);
-	  optab_special = NULL;
-	}
+      free (optab);
+      optab = NULL;
+      free (optab_special);
+      optab_special = NULL;
       registernames[REG_R0] = NULL;
     }
 

@@ -74,7 +74,10 @@ enum btrace_cpu_vendor
   CV_UNKNOWN,
 
   /* Intel.  */
-  CV_INTEL
+  CV_INTEL,
+
+  /* AMD.  */
+  CV_AMD
 };
 
 /* A cpu identifier.  */

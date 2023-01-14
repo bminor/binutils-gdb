@@ -185,10 +185,15 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
 		| PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
     0 },
+  { "power10", (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
+		| PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
+		| PPC_OPCODE_POWER10 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
+    0 },
   { "future",  (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
 		| PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
 		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
-		| PPC_OPCODE_POWERXX | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
+		| PPC_OPCODE_POWER10 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
     0 },
   { "ppc",     PPC_OPCODE_PPC,
     0 },
@@ -354,7 +359,7 @@ powerpc_init_dialect (struct disassemble_info *info)
       break;
     default:
       if (info->arch == bfd_arch_powerpc)
-	dialect = ppc_parse_cpu (dialect, &sticky, "power9") | PPC_OPCODE_ANY;
+	dialect = ppc_parse_cpu (dialect, &sticky, "power10") | PPC_OPCODE_ANY;
       else
 	dialect = ppc_parse_cpu (dialect, &sticky, "pwr");
       break;
@@ -768,7 +773,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
   /* Get the major opcode of the insn.  */
   opcode = NULL;
-  if ((dialect & PPC_OPCODE_POWERXX) != 0
+  if ((dialect & PPC_OPCODE_POWER10) != 0
       && PPC_OP (insn) == 0x1)
     {
       uint64_t temp_insn, suffix;
@@ -876,6 +881,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->fprintf_func) (info->stream, "v%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
 	    (*info->fprintf_func) (info->stream, "vs%" PRId64, value);
+	  else if ((operand->flags & PPC_OPERAND_ACC) != 0)
+	    (*info->fprintf_func) (info->stream, "a%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0)
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)

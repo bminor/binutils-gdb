@@ -1,7 +1,7 @@
 #source: notoc2.s
-#as: -a64 -mfuture
+#as: -a64 -mpower10
 #ld: -shared -z norelro
-#objdump: -d -Mfuture
+#objdump: -d -Mpower10
 #target: powerpc64*-*-*
 
 .*

@@ -236,6 +236,7 @@ run_dump_test_lp64 "emit-relocs-557"
 run_dump_test_lp64 "emit-relocs-558"
 run_dump_test_lp64 "emit-relocs-558-overflow"
 run_dump_test_lp64 "emit-relocs-559"
+run_dump_test_lp64 "emit-relocs-560"
 
 run_dump_test "reloc-overflow-bad"
 
@@ -262,6 +263,7 @@ run_dump_test "farcall-b-none-function"
 run_dump_test "farcall-bl-none-function"
 run_dump_test "farcall-b-section"
 run_dump_test "farcall-bl-section"
+run_dump_test "farcall-group"
 
 run_dump_test "tls-relax-all"
 run_dump_test "tls-relax-all-ilp32"

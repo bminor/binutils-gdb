@@ -47,7 +47,7 @@ foreach_with_prefix scenario {all minimal} {
 	}
 	-re -wrap $kfail_re {
 	    if {$scenario == "minimal"} {
-		setup_kfail "gnat compiler bug" *-*-*
+		setup_xfail "gnat compiler bug" *-*-*
 	    }
 	    fail $gdb_test_name
 	}
@@ -79,7 +79,7 @@ foreach_with_prefix scenario {all minimal} {
 	}
 	-re -wrap $kfail_re {
 	    if {$scenario == "minimal"} {
-		setup_kfail "gnat compiler bug" *-*-*
+		setup_xfail "gnat compiler bug" *-*-*
 	    }
 	    fail $gdb_test_name
 	}

@@ -24,6 +24,7 @@
 #include "riscv-opc.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "bfd.h"
 
 typedef uint64_t insn_t;
 
@@ -343,6 +344,73 @@ struct riscv_opcode
   unsigned long pinfo;
 };
 
+/* The current supported ISA spec versions.  */
+
+enum riscv_isa_spec_class
+{
+  ISA_SPEC_CLASS_NONE,
+
+  ISA_SPEC_CLASS_2P2,
+  ISA_SPEC_CLASS_20190608,
+  ISA_SPEC_CLASS_20191213
+};
+
+/* This structure holds version information for specific ISA.  */
+
+struct riscv_ext_version
+{
+  const char *name;
+  enum riscv_isa_spec_class isa_spec_class;
+  unsigned int major_version;
+  unsigned int minor_version;
+};
+
+/* All RISC-V CSR belong to one of these classes.  */
+
+enum riscv_csr_class
+{
+  CSR_CLASS_NONE,
+
+  CSR_CLASS_I,
+  CSR_CLASS_I_32,      /* rv32 only */
+  CSR_CLASS_F,         /* f-ext only */
+};
+
+/* The current supported privilege spec versions.  */
+
+enum riscv_priv_spec_class
+{
+  PRIV_SPEC_CLASS_NONE,
+
+  PRIV_SPEC_CLASS_1P9,
+  PRIV_SPEC_CLASS_1P9P1,
+  PRIV_SPEC_CLASS_1P10,
+  PRIV_SPEC_CLASS_1P11,
+  PRIV_SPEC_CLASS_DRAFT
+};
+
+/* This structure holds all restricted conditions for a CSR.  */
+
+struct riscv_csr_extra
+{
+  /* Class to which this CSR belongs.  Used to decide whether or
+     not this CSR is legal in the current -march context.  */
+  enum riscv_csr_class csr_class;
+
+  /* CSR may have differnet numbers in the previous priv spec.  */
+  unsigned address;
+
+  /* Record the CSR is defined/valid in which versions.  */
+  enum riscv_priv_spec_class define_version;
+
+  /* Record the CSR is aborted/invalid from which versions.  If it isn't
+     aborted in the current version, then it should be CSR_CLASS_VDRAFT.  */
+  enum riscv_priv_spec_class abort_version;
+
+  /* The CSR may have more than one setting.  */
+  struct riscv_csr_extra *next;
+};
+
 /* Instruction is a simple alias (e.g. "mv" for "addi").  */
 #define	INSN_ALIAS		0x00000001
 
@@ -420,5 +488,13 @@ extern const char * const riscv_fpr_names_abi[NFPR];
 
 extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
+extern const struct riscv_ext_version riscv_ext_version_table[];
+
+extern bfd_boolean
+riscv_get_isa_spec_class (const char *, enum riscv_isa_spec_class *);
+extern bfd_boolean
+riscv_get_priv_spec_class (const char *, enum riscv_priv_spec_class *);
+extern const char *
+riscv_get_priv_spec_name (enum riscv_priv_spec_class);
 
 #endif /* _RISCV_H_ */

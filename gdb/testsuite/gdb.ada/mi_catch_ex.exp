@@ -69,9 +69,11 @@ mi_gdb_load ${binfile}
 # 1. Try catching all exceptions.  #
 ####################################
 
-if ![mi_run_to_main] then {
-   fail "cannot run to main, testcase aborted"
-   return 0
+with_test_prefix "scenario 1" {
+    if ![mi_run_to_main] then {
+	fail "cannot run to main, testcase aborted"
+	return 0
+    }
 }
 
 mi_gdb_test "-catch-exception" \
@@ -125,9 +127,11 @@ continue_to_exception \
 #  - continue, we should see the unhandled Constrait_Error exception
 #  - continue, the program exits.
 
-if ![mi_run_to_main] then {
-   fail "cannot run to main, testcase aborted"
-   return 0
+with_test_prefix "scenario 2" {
+    if ![mi_run_to_main] then {
+	fail "cannot run to main, testcase aborted"
+	return 0
+    }
 }
 
 mi_gdb_test "-catch-exception -e Program_Error" \

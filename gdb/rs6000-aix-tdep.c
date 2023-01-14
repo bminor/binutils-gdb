@@ -349,7 +349,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (type);
 
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+      if (type->code () == TYPE_CODE_FLT)
 	{
 	  /* Floating point arguments are passed in fpr's, as well as gpr's.
 	     There are 13 fpr's reserved for passing parameters.  At this point
@@ -473,7 +473,7 @@ ran_out_of_registers_for_arguments:
 
 	  /* Float types should be passed in fpr's, as well as in the
              stack.  */
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13)
+	  if (type->code () == TYPE_CODE_FLT && f_argno < 13)
 	    {
 
 	      gdb_assert (len <= 8);
@@ -527,7 +527,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 
   /* AltiVec extension: Functions that declare a vector data type as a
      return value place that return value in VR2.  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
+  if (valtype->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
       && TYPE_LENGTH (valtype) == 16)
     {
       if (readbuf)
@@ -543,16 +543,16 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
      allocated buffer into which the callee is assumed to store its
      return value.  All explicit parameters are appropriately
      relabeled.  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (valtype) == TYPE_CODE_UNION
-      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+  if (valtype->code () == TYPE_CODE_STRUCT
+      || valtype->code () == TYPE_CODE_UNION
+      || valtype->code () == TYPE_CODE_ARRAY)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   /* Scalar floating-point values are returned in FPR1 for float or
      double, and in FPR1:FPR2 for quadword precision.  Fortran
      complex*8 and complex*16 are returned in FPR1:FPR2, and
      complex*32 is returned in FPR1:FPR4.  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+  if (valtype->code () == TYPE_CODE_FLT
       && (TYPE_LENGTH (valtype) == 4 || TYPE_LENGTH (valtype) == 8))
     {
       struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
@@ -608,7 +608,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 
   if (TYPE_LENGTH (valtype) == 8)
     {
-      gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_FLT);
+      gdb_assert (valtype->code () != TYPE_CODE_FLT);
       gdb_assert (tdep->wordsize == 4);
 
       if (readbuf)

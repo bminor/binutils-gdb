@@ -1240,7 +1240,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       arg = args[argnum];
       arg_type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (arg_type);
-      typecode = TYPE_CODE (arg_type);
+      typecode = arg_type->code ();
 
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
@@ -1253,7 +1253,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else if (abi == FRV_ABI_FDPIC
 	       && len == 4
                && typecode == TYPE_CODE_PTR
-               && TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_FUNC)
+               && TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_FUNC)
 	{
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */
@@ -1345,9 +1345,9 @@ frv_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int struct_return = TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-		      || TYPE_CODE (valtype) == TYPE_CODE_UNION
-		      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY;
+  int struct_return = valtype->code () == TYPE_CODE_STRUCT
+		      || valtype->code () == TYPE_CODE_UNION
+		      || valtype->code () == TYPE_CODE_ARRAY;
 
   if (writebuf != NULL)
     {

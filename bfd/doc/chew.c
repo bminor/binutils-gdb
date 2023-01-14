@@ -170,8 +170,7 @@ static void
 delete_string (buffer)
      string_type *buffer;
 {
-  if (buffer->ptr)
-    free (buffer->ptr);
+  free (buffer->ptr);
   buffer->ptr = NULL;
 }
 
@@ -1258,8 +1257,7 @@ free_words (void)
     {
       dict_type *next;
 
-      if (ptr->word)
-	free (ptr->word);
+      free (ptr->word);
       if (ptr->code)
 	{
 	  int i;
@@ -1443,8 +1441,7 @@ compile (string)
 	  fprintf (stderr, "syntax error at %s\n", string - 1);
 	}
     }
-  if (word)
-    free (word);
+  free (word);
 }
 
 static void

@@ -38,6 +38,9 @@ set asm_file [standard_output_file ${srcfile2}]
 if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
     return -1
 }
+set int_size [get_sizeof "int" -1]
+# gdb always assumes references are implemented as pointers.
+set addr_size [get_sizeof "void *" -1]
 
 proc setup_exec { arg_bad } {
     global asm_file executable srcfile bad
@@ -45,7 +48,7 @@ proc setup_exec { arg_bad } {
 
     # Create the DWARF.  
     Dwarf::assemble ${asm_file} {
-	global srcdir subdir srcfile bad
+	global srcdir subdir srcfile bad int_size addr_size
 
 	cu {} {
 	    DW_TAG_compile_unit {
@@ -58,10 +61,6 @@ proc setup_exec { arg_bad } {
 		    varval2_label varval3_def_label varval3_decl_label \
 		    int_array_label int_array_of_1_label
 
-		set int_size [get_sizeof "int" -1]
-
-		# gdb always assumes references are implemented as pointers.
-		set addr_size [get_sizeof "void *" -1]
 
 		int_label: DW_TAG_base_type {
 		    {DW_AT_byte_size ${int_size} DW_FORM_udata}

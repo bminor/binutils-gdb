@@ -516,9 +516,11 @@ static const struct ld_option ld_options[] =
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
-  { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_SHARED_TEXTREL},
-    '\0', NULL, N_("Warn if shared object has DT_TEXTREL"),
+  { {"warn-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
+    '\0', NULL, N_("Warn if outpout has DT_TEXTREL"),
     TWO_DASHES },
+  { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
+    '\0', NULL, NULL, NO_HELP },
   { {"warn-alternate-em", no_argument, NULL, OPTION_WARN_ALTERNATE_EM},
     '\0', NULL, N_("Warn if an object has alternate ELF machine code"),
     TWO_DASHES },
@@ -1390,22 +1392,16 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_DYNAMIC_LIST_DATA:
 	  opt_dynamic_list = dynamic_list_data;
-	  if (opt_symbolic == symbolic)
-	    opt_symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST_CPP_TYPEINFO:
 	  lang_append_dynamic_list_cpp_typeinfo ();
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
-	  if (opt_symbolic == symbolic)
-	    opt_symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST_CPP_NEW:
 	  lang_append_dynamic_list_cpp_new ();
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
-	  if (opt_symbolic == symbolic)
-	    opt_symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST:
 	  /* This option indicates a small script that only specifies
@@ -1422,8 +1418,6 @@ parse_args (unsigned argc, char **argv)
 	  }
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
-	  if (opt_symbolic == symbolic)
-	    opt_symbolic = symbolic_unset;
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;
@@ -1446,8 +1440,8 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;
 	  break;
-	case OPTION_WARN_SHARED_TEXTREL:
-	  link_info.warn_shared_textrel = TRUE;
+	case OPTION_WARN_TEXTREL:
+	  link_info.textrel_check = textrel_check_warning;
 	  break;
 	case OPTION_WARN_ALTERNATE_EM:
 	  link_info.warn_alternate_em = TRUE;
@@ -1485,8 +1479,7 @@ parse_args (unsigned argc, char **argv)
 	case 'Y':
 	  if (CONST_STRNEQ (optarg, "P,"))
 	    optarg += 2;
-	  if (default_dirlist != NULL)
-	    free (default_dirlist);
+	  free (default_dirlist);
 	  default_dirlist = xstrdup (optarg);
 	  break;
 	case 'y':
@@ -1633,6 +1626,19 @@ parse_args (unsigned argc, char **argv)
       && command_line.check_section_addresses < 0)
     command_line.check_section_addresses = 0;
 
+  switch (opt_dynamic_list)
+    {
+    case dynamic_list_unset:
+      break;
+    case dynamic_list_data:
+      link_info.dynamic_data = TRUE;
+      /* Fall through.  */
+    case dynamic_list:
+      link_info.dynamic = TRUE;
+      opt_symbolic = symbolic_unset;
+      break;
+    }
+
   /* -Bsymbolic and -Bsymbols-functions are for shared library output.  */
   if (bfd_link_dll (&link_info))
     switch (opt_symbolic)
@@ -1652,24 +1658,12 @@ parse_args (unsigned argc, char **argv)
 	    free (link_info.dynamic_list);
 	    link_info.dynamic_list = NULL;
 	  }
-	opt_dynamic_list = dynamic_list_unset;
 	break;
       case symbolic_functions:
-	opt_dynamic_list = dynamic_list_data;
+	link_info.dynamic = TRUE;
+	link_info.dynamic_data = TRUE;
 	break;
       }
-
-  switch (opt_dynamic_list)
-    {
-    case dynamic_list_unset:
-      break;
-    case dynamic_list_data:
-      link_info.dynamic_data = TRUE;
-      /* Fall through.  */
-    case dynamic_list:
-      link_info.dynamic = TRUE;
-      break;
-    }
 
   if (!bfd_link_dll (&link_info))
     {
@@ -1775,7 +1769,24 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
   fprintf (file, _("\
-  --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
+  --hash-style=STYLE          Set hash style to sysv/gnu/both.  Default: "));
+  if (DEFAULT_EMIT_SYSV_HASH)
+    {
+      /* Note - these strings are not translated as
+	 they are keywords not descriptive text.  */
+      if (DEFAULT_EMIT_GNU_HASH)
+	fprintf (file, "both\n");
+      else
+	fprintf (file, "sysv\n");
+    }
+  else
+    {
+      if (DEFAULT_EMIT_GNU_HASH)
+	fprintf (file, "gnu\n");
+      else
+	/* FIXME: Can this happen ?  */
+	fprintf (file, "none\n");
+    }
   fprintf (file, _("\
   -P AUDITLIB, --depaudit=AUDITLIB\n" "\
                               Specify a library to use for auditing dependencies\n"));
@@ -1837,12 +1848,26 @@ elf_shlib_list_options (FILE *file)
   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
   fprintf (file, _("\
   -z stack-size=SIZE          Set size of stack segment\n"));
-  fprintf (file, _("\
-  -z text                     Treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z notext                   Don't treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z textoff                  Don't treat DT_TEXTREL in shared object as error\n"));
+  if (link_info.textrel_check == textrel_check_error)
+    fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in output as error (default)\n"));
+  else
+    fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in output as error\n"));
+  if (link_info.textrel_check == textrel_check_none)
+    {
+      fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in output as error (default)\n"));
+      fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in output as error (default)\n"));
+    }
+  else
+    {
+      fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in output as error\n"));
+      fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in output as error\n"));
+    }
 }
 
 static void

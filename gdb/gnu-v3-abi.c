@@ -165,9 +165,9 @@ build_gdb_vtable_type (struct gdbarch *arch)
   gdb_assert (field == (field_list + 4));
 
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
-  TYPE_NFIELDS (t) = field - field_list;
-  TYPE_FIELDS (t) = field_list;
-  TYPE_NAME (t) = "gdb_gnu_v3_abi_vtable";
+  t->set_num_fields (field - field_list);
+  t->set_fields (field_list);
+  t->set_name ("gdb_gnu_v3_abi_vtable");
   INIT_CPLUS_SPECIFIC (t);
 
   return make_type_with_address_space (t, TYPE_INSTANCE_FLAG_CODE_SPACE);
@@ -208,10 +208,10 @@ gnuv3_dynamic_class (struct type *type)
   int fieldnum, fieldelem;
 
   type = check_typedef (type);
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (type->code () == TYPE_CODE_STRUCT
+	      || type->code () == TYPE_CODE_UNION);
 
-  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_UNION)
     return 0;
 
   if (TYPE_CPLUS_DYNAMIC (type))
@@ -259,7 +259,7 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
   CORE_ADDR vtable_address;
 
   container_type = check_typedef (container_type);
-  gdb_assert (TYPE_CODE (container_type) == TYPE_CODE_STRUCT);
+  gdb_assert (container_type->code () == TYPE_CODE_STRUCT);
 
   /* If this type does not have a virtual table, don't read the first
      field.  */
@@ -303,7 +303,7 @@ gnuv3_rtti_type (struct value *value,
   const char *atsign;
 
   /* We only have RTTI for dynamic class objects.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT
+  if (values_type->code () != TYPE_CODE_STRUCT
       || !gnuv3_dynamic_class (values_type))
     return NULL;
 
@@ -418,7 +418,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   struct gdbarch *gdbarch;
 
   /* Some simple sanity checks.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT)
+  if (values_type->code () != TYPE_CODE_STRUCT)
     error (_("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
@@ -849,7 +849,7 @@ compute_vtable_size (htab_t offset_hash,
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+  gdb_assert (type->code () == TYPE_CODE_STRUCT);
 
   /* If the object is not dynamic, then we are done; as it cannot have
      dynamic base types either.  */
@@ -964,7 +964,7 @@ gnuv3_print_vtable (struct value *value)
 
   value = coerce_ref (value);
   type = check_typedef (value_type (value));
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       value = value_ind (value);
       type = check_typedef (value_type (value));
@@ -982,7 +982,7 @@ gnuv3_print_vtable (struct value *value)
   gdbarch = get_type_arch (type);
 
   vtable = NULL;
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     vtable = gnuv3_get_vtable (gdbarch, type,
 			       value_as_address (value_addr (value)));
 
@@ -1054,9 +1054,9 @@ build_std_type_info_type (struct gdbarch *arch)
   gdb_assert (field == (field_list + 2));
 
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
-  TYPE_NFIELDS (t) = field - field_list;
-  TYPE_FIELDS (t) = field_list;
-  TYPE_NAME (t) = "gdb_gnu_v3_type_info";
+  t->set_num_fields (field - field_list);
+  t->set_fields (field_list);
+  t->set_name ("gdb_gnu_v3_type_info");
   INIT_CPLUS_SPECIFIC (t);
 
   return t;
@@ -1090,7 +1090,8 @@ gnuv3_get_typeid (struct value *value)
   struct type *type;
   struct gdbarch *gdbarch;
   struct value *result;
-  std::string type_name, canonical;
+  std::string type_name;
+  gdb::unique_xmalloc_ptr<char> canonical;
 
   /* We have to handle values a bit trickily here, to allow this code
      to work properly with non_lvalue values that are really just
@@ -1102,7 +1103,7 @@ gnuv3_get_typeid (struct value *value)
 
   /* In the non_lvalue case, a reference might have slipped through
      here.  */
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (type->code () == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   /* Ignore top-level cv-qualifiers.  */
@@ -1118,14 +1119,15 @@ gnuv3_get_typeid (struct value *value)
      uses.  E.g., GDB tends to use "const char *" as a type name, but
      the demangler uses "char const *".  */
   canonical = cp_canonicalize_string (type_name.c_str ());
-  if (!canonical.empty ())
-    type_name = canonical;
+  const char *name = (canonical == nullptr
+		      ? type_name.c_str ()
+		      : canonical.get ());
 
   typeinfo_type = gnuv3_get_typeid_type (gdbarch);
 
   /* We check for lval_memory because in the "typeid (type-id)" case,
      the type is passed via a not_lval value object.  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  if (type->code () == TYPE_CODE_STRUCT
       && value_lval_const (value) == lval_memory
       && gnuv3_dynamic_class (type))
     {
@@ -1135,19 +1137,19 @@ gnuv3_get_typeid (struct value *value)
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)
 	error (_("cannot find typeinfo for object of type '%s'"),
-	       type_name.c_str ());
+	       name);
       typeinfo_value = value_field (vtable, vtable_field_type_info);
       result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
 				      typeinfo_value));
     }
   else
     {
-      std::string sym_name = std::string ("typeinfo for ") + type_name;
+      std::string sym_name = std::string ("typeinfo for ") + name;
       bound_minimal_symbol minsym
 	= lookup_minimal_symbol (sym_name.c_str (), NULL, NULL);
 
       if (minsym.minsym == NULL)
-	error (_("could not find typeinfo symbol for '%s'"), type_name.c_str ());
+	error (_("could not find typeinfo symbol for '%s'"), name);
 
       result = value_at_lazy (typeinfo_type, BMSYMBOL_VALUE_ADDRESS (minsym));
     }
@@ -1324,14 +1326,14 @@ is_copy_or_move_constructor_type (struct type *class_type,
 				  type_code expected)
 {
   /* The method should take at least two arguments...  */
-  if (TYPE_NFIELDS (method_type) < 2)
+  if (method_type->num_fields () < 2)
     return false;
 
   /* ...and the second argument should be the same as the class
      type, with the expected type code...  */
   struct type *arg_type = TYPE_FIELD_TYPE (method_type, 1);
 
-  if (TYPE_CODE (arg_type) != expected)
+  if (arg_type->code () != expected)
     return false;
 
   struct type *target = check_typedef (TYPE_TARGET_TYPE (arg_type));
@@ -1341,7 +1343,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
   /* ...and if any of the remaining arguments don't have a default value
      then this is not a copy or move constructor, but just a
      constructor.  */
-  for (int i = 2; i < TYPE_NFIELDS (method_type); i++)
+  for (int i = 2; i < method_type->num_fields (); i++)
     {
       arg_type = TYPE_FIELD_TYPE (method_type, i);
       /* FIXME aktemur/2019-10-31: As of this date, neither
@@ -1415,8 +1417,8 @@ gnuv3_pass_by_reference (struct type *type)
   definition_style mctor_def = DOES_NOT_EXIST_IN_SOURCE;
 
   /* We're only interested in things that can have methods.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION)
     return info;
 
   /* The compiler may have emitted the calling convention attribute.
@@ -1525,13 +1527,13 @@ gnuv3_pass_by_reference (struct type *type)
      are constructed whenever this class is.  We do not need to worry
      about recursive loops here, since we are only looking at members
      of complete class type.  Also ignore any static members.  */
-  for (fieldnum = 0; fieldnum < TYPE_NFIELDS (type); fieldnum++)
-    if (!field_is_static (&TYPE_FIELD (type, fieldnum)))
+  for (fieldnum = 0; fieldnum < type->num_fields (); fieldnum++)
+    if (!field_is_static (&type->field (fieldnum)))
       {
 	struct type *field_type = TYPE_FIELD_TYPE (type, fieldnum);
 
 	/* For arrays, make the decision based on the element type.  */
-	if (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
+	if (field_type->code () == TYPE_CODE_ARRAY)
 	  field_type = check_typedef (TYPE_TARGET_TYPE (field_type));
 
 	struct language_pass_by_ref_info field_info

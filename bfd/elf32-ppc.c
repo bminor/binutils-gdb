@@ -1633,8 +1633,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
       apuinfo_set = TRUE;
       if (largest_input_size < asec->size)
 	{
-	  if (buffer)
-	    free (buffer);
+	  free (buffer);
 	  largest_input_size = asec->size;
 	  buffer = bfd_malloc (largest_input_size);
 	  if (!buffer)
@@ -1692,8 +1691,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
     }
 
  fail:
-  if (buffer)
-    free (buffer);
+  free (buffer);
 
   if (error_message)
     _bfd_error_handler (error_message, APUINFO_SECTION_NAME, ibfd);
@@ -3559,6 +3557,17 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
   bfd_boolean ret = TRUE;
+  bfd_boolean warn_only;
+
+  /* We only warn about shared library mismatches, because common
+     libraries advertise support for a particular long double variant
+     but actually support more than one variant.  For example, glibc
+     typically supports 128-bit IBM long double in the shared library
+     but has a compatibility static archive for 64-bit long double.
+     The linker doesn't have the smarts to see that an app using
+     object files marked as 64-bit long double call the compatibility
+     layer objects and only from there call into the shared library.  */
+  warn_only = (ibfd->flags & DYNAMIC) != 0;
 
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
@@ -3576,9 +3585,12 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
-	  out_attr->i ^= in_fp;
-	  last_fp = ibfd;
+	  if (!warn_only)
+	    {
+	      out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
+	      out_attr->i ^= in_fp;
+	      last_fp = ibfd;
+	    }
 	}
       else if (out_fp != 2 && in_fp == 2)
 	{
@@ -3586,7 +3598,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses hard float, %pB uses soft float"),
 	     last_fp, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 2 && in_fp != 2)
 	{
@@ -3594,7 +3606,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses hard float, %pB uses soft float"),
 	     ibfd, last_fp);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 1 && in_fp == 3)
 	{
@@ -3602,7 +3614,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses double-precision hard float, "
 	       "%pB uses single-precision hard float"), last_fp, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 3 && in_fp == 1)
 	{
@@ -3610,7 +3622,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses double-precision hard float, "
 	       "%pB uses single-precision hard float"), ibfd, last_fp);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
 
       in_fp = in_attr->i & 0xc;
@@ -3619,9 +3631,12 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
-	  out_attr->i ^= in_fp;
-	  last_ld = ibfd;
+	  if (!warn_only)
+	    {
+	      out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
+	      out_attr->i ^= in_fp;
+	      last_ld = ibfd;
+	    }
 	}
       else if (out_fp != 2 * 4 && in_fp == 2 * 4)
 	{
@@ -3629,7 +3644,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses 64-bit long double, "
 	       "%pB uses 128-bit long double"), ibfd, last_ld);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (in_fp != 2 * 4 && out_fp == 2 * 4)
 	{
@@ -3637,7 +3652,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses 64-bit long double, "
 	       "%pB uses 128-bit long double"), last_ld, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 1 * 4 && in_fp == 3 * 4)
 	{
@@ -3645,7 +3660,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses IBM long double, "
 	       "%pB uses IEEE long double"), last_ld, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 3 * 4 && in_fp == 1 * 4)
 	{
@@ -3653,7 +3668,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses IBM long double, "
 	       "%pB uses IEEE long double"), ibfd, last_ld);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
     }
 
@@ -3801,6 +3816,9 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   if (!ppc_elf_merge_obj_attributes (ibfd, info))
     return FALSE;
+
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
@@ -4260,8 +4278,7 @@ ppc_elf_inline_plt (struct bfd_link_info *info)
 		  {
 		    if (elf_section_data (sec)->relocs != relstart)
 		      free (relstart);
-		    if (local_syms != NULL
-			&& symtab_hdr->contents != (unsigned char *) local_syms)
+		    if (symtab_hdr->contents != (unsigned char *) local_syms)
 		      free (local_syms);
 		    return FALSE;
 		  }
@@ -6648,8 +6665,7 @@ ppc_elf_relax_section (bfd *abfd,
       rel_hdr = _bfd_elf_single_rel_hdr (isec);
       rel_hdr->sh_size += changes * rel_hdr->sh_entsize;
     }
-  else if (internal_relocs != NULL
-	   && elf_section_data (isec)->relocs != internal_relocs)
+  else if (elf_section_data (isec)->relocs != internal_relocs)
     free (internal_relocs);
 
   *again = changes != 0 || workaround_change;
@@ -6662,13 +6678,11 @@ ppc_elf_relax_section (bfd *abfd,
       branch_fixups = branch_fixups->next;
       free (f);
     }
-  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+  if ((unsigned char *) isymbuf != symtab_hdr->contents)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (isec)->this_hdr.contents != contents)
+  if (elf_section_data (isec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (isec)->relocs != internal_relocs)
+  if (elf_section_data (isec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }
@@ -9707,8 +9721,7 @@ ppc_finish_symbols (struct bfd_link_info *info)
 		if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
 				lplt - local_plt, ibfd))
 		  {
-		    if (local_syms != NULL
-			&& symtab_hdr->contents != (unsigned char *) local_syms)
+		    if (symtab_hdr->contents != (unsigned char *) local_syms)
 		      free (local_syms);
 		    return FALSE;
 		  }

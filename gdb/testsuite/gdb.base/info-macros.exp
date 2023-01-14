@@ -273,7 +273,4 @@ set test "info macros info-macros.c:42"
 
 set r1 ".*define DEF_MACROS"
 set r2 ".*define ONE"
-# info macros on the line where the #define or #include is
-# fails to find the macro defined (though it works on the next line.)
-setup_kfail "gdb/NNNN" *-*-*
-gdb_test "$test" "$r1$r2"
+gdb_test "$test" "$r1$r2.*"

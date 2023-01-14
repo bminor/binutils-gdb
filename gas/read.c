@@ -1332,8 +1332,7 @@ read_a_source_file (const char *name)
 		  new_length += 100;
 		}
 
-	      if (tmp_buf)
-		free (tmp_buf);
+	      free (tmp_buf);
 
 	      /* We've "scrubbed" input to the preferred format.  In the
 		 process we may have consumed the whole of the remaining
@@ -1801,8 +1800,7 @@ s_comm_internal (int param,
  out:
   if (flag_mri)
     mri_comment_end (stop, stopc);
-  if (name != NULL)
-    free (name);
+  free (name);
   return symbolP;
 }
 
@@ -1862,8 +1860,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
 
   sym = symbol_find_or_make (name);
   c = restore_line_pointer (c);
-  if (alc != NULL)
-    free (alc);
+  free (alc);
 
   if (*input_line_pointer != ',')
     align = 0;
@@ -5814,8 +5811,7 @@ s_incbin (int x ATTRIBUTE_UNUSED)
  done:
   if (binfile != NULL)
     fclose (binfile);
-  if (path)
-    free (path);
+  free (path);
 }
 
 /* .include -- include a file at this point.  */

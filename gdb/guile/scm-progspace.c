@@ -353,17 +353,16 @@ gdbscm_current_progspace (void)
 static SCM
 gdbscm_progspaces (void)
 {
-  struct program_space *ps;
   SCM result;
 
   result = SCM_EOL;
 
-  ALL_PSPACES (ps)
-  {
-    SCM item = psscm_scm_from_pspace (ps);
+  for (struct program_space *ps : program_spaces)
+    {
+      SCM item = psscm_scm_from_pspace (ps);
 
-    result = scm_cons (item, result);
-  }
+      result = scm_cons (item, result);
+    }
 
   return scm_reverse_x (result, SCM_EOL);
 }

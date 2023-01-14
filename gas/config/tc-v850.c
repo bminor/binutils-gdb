@@ -1705,7 +1705,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == SUBYPTE_LOOP_16_22 + 1)
     {
       unsigned char * buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+	(unsigned char *) (fragP->fr_fix + &fragP->fr_literal[0]);
       int loop_reg = (buffer[0] & 0x1f);
 
       /* Add -1.reg.  */
@@ -1743,7 +1743,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22_32 + 1)
     {
       unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+	(unsigned char *) (fragP->fr_fix + &fragP->fr_literal[0]);
 
       buffer[0] &= 0x0f;	/* Use condition.  */
       buffer[0] |= 0xe0;

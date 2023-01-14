@@ -53,8 +53,17 @@
 /* Define to 1 if you want to fix Loongson3 LLSC Errata by default. */
 #undef DEFAULT_MIPS_FIX_LOONGSON3_LLSC
 
+/* Define default value for RISC-V -march. */
+#undef DEFAULT_RISCV_ARCH_WITH_EXT
+
 /* Define to 1 if you want to generate RISC-V arch attribute by default. */
 #undef DEFAULT_RISCV_ATTR
+
+/* Define default value for RISC-V -misa-spec. */
+#undef DEFAULT_RISCV_ISA_SPEC
+
+/* Define default value for RISC-V -mpriv-spec */
+#undef DEFAULT_RISCV_PRIV_SPEC
 
 /* Define to 1 if you want to generate GNU x86 used ISA and feature properties
    by default. */

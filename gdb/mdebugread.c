@@ -747,7 +747,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
 	  if (strcmp (name, "malloc") == 0
-	      && TYPE_CODE (t) == TYPE_CODE_VOID)
+	      && t->code () == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -1010,17 +1010,16 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	   (.Fxx or .xxfake or empty) for unnamed struct/union/enums.
 	   Alpha cc puts out an sh->iss of zero for those.  */
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
-	  TYPE_NAME (t) = NULL;
+	  t->set_name (NULL);
 	else
-	  TYPE_NAME (t) = obconcat (&mdebugread_objfile->objfile_obstack,
-				    name, (char *) NULL);
+	  t->set_name (obconcat (&mdebugread_objfile->objfile_obstack,
+				 name, (char *) NULL));
 
-	TYPE_CODE (t) = type_code;
+	t->set_code (type_code);
 	TYPE_LENGTH (t) = sh->value;
-	TYPE_NFIELDS (t) = nfields;
-	TYPE_FIELDS (t) = f = ((struct field *)
-			       TYPE_ALLOC (t,
-					   nfields * sizeof (struct field)));
+	t->set_num_fields (nfields);
+	f = ((struct field *) TYPE_ALLOC (t, nfields * sizeof (struct field)));
+	t->set_fields (f);
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
@@ -1036,7 +1035,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	       are hopefully rare enough.
 	       Alpha cc -migrate has a sh.value field of zero, we adjust
 	       that too.  */
-	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t)
+	    if (TYPE_LENGTH (t) == t->num_fields ()
 		|| TYPE_LENGTH (t) == 0)
 	      TYPE_LENGTH (t) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
@@ -1056,7 +1055,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
 
-		enum_sym = allocate_symbol (mdebugread_objfile);
+		enum_sym = new (&mdebugread_objfile->objfile_obstack) symbol;
 		enum_sym->set_linkage_name
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 				   f->name));
@@ -1085,7 +1084,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	/* gcc puts out an empty struct for an opaque struct definitions,
 	   do not create a symbol for it either.  */
-	if (TYPE_NFIELDS (t) == 0)
+	if (t->num_fields () == 0)
 	  {
 	    TYPE_STUB (t) = 1;
 	    break;
@@ -1174,7 +1173,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		}
 	    }
 
-	  if (TYPE_NFIELDS (ftype) <= 0)
+	  if (ftype->num_fields () <= 0)
 	    {
 	      /* No parameter type information is recorded with the function's
 	         type.  Set that from the type of the parameter symbols.  */
@@ -1186,9 +1185,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		{
 		  struct block_iterator iter;
 
-		  TYPE_NFIELDS (ftype) = nparams;
-		  TYPE_FIELDS (ftype) = (struct field *)
-		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+		  ftype->set_num_fields (nparams);
+		  ftype->set_fields
+		    ((struct field *)
+		     TYPE_ALLOC (ftype, nparams * sizeof (struct field)));
 
 		  iparams = 0;
 		  ALL_BLOCK_SYMBOLS (cblock, iter, sym)
@@ -1233,8 +1233,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stMember:		/* member of struct or union */
       {
-	struct field *f
-	  = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
+	struct field *f = &top_stack->cur_type->field (top_stack->cur_field);
+	top_stack->cur_field++;
 	FIELD_NAME (*f) = name;
 	SET_FIELD_BITPOS (*f, sh->value);
 	bitsize = 0;
@@ -1296,13 +1296,13 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
       /* Incomplete definitions of structs should not get a name.  */
-      if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
-	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
-	      || (TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_STRUCT
-		  && TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_UNION)))
+      if (SYMBOL_TYPE (s)->name () == NULL
+	  && (SYMBOL_TYPE (s)->num_fields () != 0
+	      || (SYMBOL_TYPE (s)->code () != TYPE_CODE_STRUCT
+		  && SYMBOL_TYPE (s)->code () != TYPE_CODE_UNION)))
 	{
-	  if (TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_PTR
-	      || TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_FUNC)
+	  if (SYMBOL_TYPE (s)->code () == TYPE_CODE_PTR
+	      || SYMBOL_TYPE (s)->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 	         foo" or "function returning foo", we better not set
@@ -1324,7 +1324,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	         for anything except pointers or functions.  */
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (s)) = s->linkage_name ();
+	    SYMBOL_TYPE (s)->set_name (s->linkage_name ());
 	}
       break;
 
@@ -1639,16 +1639,16 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* DEC c89 produces cross references to qualified aggregate types,
          dereference them.  */
-      while (TYPE_CODE (tp) == TYPE_CODE_PTR
-	     || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
+      while (tp->code () == TYPE_CODE_PTR
+	     || tp->code () == TYPE_CODE_ARRAY)
 	tp = TYPE_TARGET_TYPE (tp);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries
          are corrupted.  */
-      if (TYPE_CODE (tp) != TYPE_CODE_STRUCT
-	  && TYPE_CODE (tp) != TYPE_CODE_UNION
-	  && TYPE_CODE (tp) != TYPE_CODE_ENUM)
+      if (tp->code () != TYPE_CODE_STRUCT
+	  && tp->code () != TYPE_CODE_UNION
+	  && tp->code () != TYPE_CODE_ENUM)
 	{
 	  unexpected_type_code_complaint (sym_name);
 	}
@@ -1658,27 +1658,27 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	     exception is if we guessed wrong re struct/union/enum.
 	     But for struct vs. union a wrong guess is harmless, so
 	     don't complain().  */
-	  if ((TYPE_CODE (tp) == TYPE_CODE_ENUM
+	  if ((tp->code () == TYPE_CODE_ENUM
 	       && type_code != TYPE_CODE_ENUM)
-	      || (TYPE_CODE (tp) != TYPE_CODE_ENUM
+	      || (tp->code () != TYPE_CODE_ENUM
 		  && type_code == TYPE_CODE_ENUM))
 	    {
 	      bad_tag_guess_complaint (sym_name);
 	    }
 
-	  if (TYPE_CODE (tp) != type_code)
+	  if (tp->code () != type_code)
 	    {
-	      TYPE_CODE (tp) = type_code;
+	      tp->set_code (type_code);
 	    }
 
 	  /* Do not set the tag name if it is a compiler generated tag name
 	     (.Fxx or .xxfake or empty) for unnamed struct/union/enums.  */
 	  if (name[0] == '.' || name[0] == '\0')
-	    TYPE_NAME (tp) = NULL;
-	  else if (TYPE_NAME (tp) == NULL
-		   || strcmp (TYPE_NAME (tp), name) != 0)
-	    TYPE_NAME (tp)
-	      = obstack_strdup (&mdebugread_objfile->objfile_obstack, name);
+	    tp->set_name (NULL);
+	  else if (tp->name () == NULL
+		   || strcmp (tp->name (), name) != 0)
+	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
+					  name));
 	}
     }
 
@@ -1698,7 +1698,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries
          are corrupted.  */
-      if (TYPE_CODE (tp) != TYPE_CODE_RANGE)
+      if (tp->code () != TYPE_CODE_RANGE)
 	{
 	  unexpected_type_code_complaint (sym_name);
 	}
@@ -1706,15 +1706,15 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	{
 	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
 	     exception is if we guessed wrong re struct/union/enum.  */
-	  if (TYPE_CODE (tp) != type_code)
+	  if (tp->code () != type_code)
 	    {
 	      bad_tag_guess_complaint (sym_name);
-	      TYPE_CODE (tp) = type_code;
+	      tp->set_code (type_code);
 	    }
-	  if (TYPE_NAME (tp) == NULL
-	      || strcmp (TYPE_NAME (tp), name) != 0)
-	    TYPE_NAME (tp)
-	      = obstack_strdup (&mdebugread_objfile->objfile_obstack, name);
+	  if (tp->name () == NULL
+	      || strcmp (tp->name (), name) != 0)
+	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
+					  name));
 	}
     }
   if (t->bt == btTypedef)
@@ -1733,7 +1733,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   /* Deal with range types.  */
   if (t->bt == btRange)
     {
-      TYPE_NFIELDS (tp) = 0;
+      tp->set_num_fields (0);
       TYPE_RANGE_DATA (tp) = ((struct range_bounds *)
 			  TYPE_ZALLOC (tp, sizeof (struct range_bounds)));
       TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);
@@ -1831,7 +1831,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
       /* The bounds type should be an integer type, but might be anything
          else due to corrupt aux entries.  */
-      if (TYPE_CODE (indx) != TYPE_CODE_INT)
+      if (indx->code () != TYPE_CODE_INT)
 	{
 	  complaint (_("illegal array index type for %s, assuming int"),
 		     sym_name);
@@ -2038,7 +2038,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
-      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
+      && TYPE_TARGET_TYPE (SYMBOL_TYPE (s))->code () == TYPE_CODE_VOID)
     SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->nodebug_text_symbol;
 }
 
@@ -4721,7 +4721,7 @@ new_block (enum block_type type, enum language language)
 static struct symbol *
 new_symbol (const char *name)
 {
-  struct symbol *s = allocate_symbol (mdebugread_objfile);
+  struct symbol *s = new (&mdebugread_objfile->objfile_obstack) symbol;
 
   s->set_language (psymtab_language, &mdebugread_objfile->objfile_obstack);
   s->compute_and_set_names (name, true, mdebugread_objfile->per_bfd);
@@ -4736,7 +4736,7 @@ new_type (char *name)
   struct type *t;
 
   t = alloc_type (mdebugread_objfile);
-  TYPE_NAME (t) = name;
+  t->set_name (name);
   INIT_CPLUS_SPECIFIC (t);
   return t;
 }

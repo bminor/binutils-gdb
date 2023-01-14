@@ -22,7 +22,7 @@
 #include <unistd.h>
 #endif
 
-static int
+static void
 gdb_unbuffer_output (void)
 {
   /* Always force this for Windows testing.  To a native Windows

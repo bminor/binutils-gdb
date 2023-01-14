@@ -288,11 +288,11 @@ xcoff64_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
     }
 
   str1 = strrchr (path, '/');
-  str2 = strrchr (exec_bfd->filename, '/');
+  str2 = strrchr (bfd_get_filename (exec_bfd), '/');
 
   /* Step over character '/'.  */
   str1 = str1 != NULL ? str1 + 1 : path;
-  str2 = str2 != NULL ? str2 + 1 : exec_bfd->filename;
+  str2 = str2 != NULL ? str2 + 1 : bfd_get_filename (exec_bfd);
 
   if (strcmp (str1, str2) == 0)
     return_value = TRUE;

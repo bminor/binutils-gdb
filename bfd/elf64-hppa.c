@@ -534,8 +534,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 
 	 ?!? Note we leak the last section_syms array.  Presumably we
 	 could free it in one of the later routines in this file.  */
-      if (hppa_info->section_syms)
-	free (hppa_info->section_syms);
+      free (hppa_info->section_syms);
 
       /* Read this BFD's local symbols.  */
       if (symtab_hdr->sh_info != 0)
@@ -3040,7 +3039,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Do not attempt to sort non-regular files.  This is here
      especially for configure scripts and kernel builds which run
      tests with "ld [...] -o /dev/null".  */
-  if (stat (abfd->filename, &buf) != 0
+  if (stat (bfd_get_filename (abfd), &buf) != 0
       || !S_ISREG(buf.st_mode))
     return TRUE;
 

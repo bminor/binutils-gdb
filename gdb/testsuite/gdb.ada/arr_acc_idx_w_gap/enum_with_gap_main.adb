@@ -19,6 +19,7 @@ procedure Enum_With_Gap_Main is
    Indexed_By_Enum : AR_Access :=
      new AR'(LIT1 => 1,  LIT2 => 43, LIT3 => 42, LIT4 => 41);
    S : String_Access := new String'("Hello!");
+   V : Enum_Subrange := LIT3;
 begin
    Do_Nothing (Indexed_By_Enum); --  BREAK
    Do_Nothing (S);

@@ -89,7 +89,7 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
 
     # Call a contained function.
     if { ${with_nest_prefix_p} } {
-	gdb_test "call ${nest_prefix}subroutine_to_call()" " called"
+	gdb_test_stdio "call ${nest_prefix}subroutine_to_call()" " called" ""
     }
 
     # Break on another contained function and run to it.

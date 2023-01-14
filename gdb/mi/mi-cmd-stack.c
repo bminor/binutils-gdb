@@ -650,9 +650,9 @@ list_args_or_locals (const frame_print_options &fp_opts,
 		{
 		case PRINT_SIMPLE_VALUES:
 		  type = check_typedef (sym2->type);
-		  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (type) != TYPE_CODE_UNION)
+		  if (type->code () != TYPE_CODE_ARRAY
+		      && type->code () != TYPE_CODE_STRUCT
+		      && type->code () != TYPE_CODE_UNION)
 		    {
 		case PRINT_ALL_VALUES:
 		  if (SYMBOL_IS_ARGUMENT (sym))

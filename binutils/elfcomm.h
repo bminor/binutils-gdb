@@ -26,8 +26,8 @@
 
 #include "aout/ar.h"
 
-void error (const char *, ...) ATTRIBUTE_PRINTF_1;
-void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
+extern void error (const char *, ...) ATTRIBUTE_PRINTF_1;
+extern void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
 
 typedef unsigned HOST_WIDEST_INT elf_vma;
 

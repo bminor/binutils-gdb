@@ -2,7 +2,7 @@
 #ld: -shared -z separate-code -z relro
 #readelf: -l --wide
 #target: *-*-linux-gnu *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
-#xfail: h8300-*-*
+#xfail: ![check_shared_lib_support] 
 
 #failif
 #...

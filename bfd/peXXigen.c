@@ -1343,8 +1343,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 
       if (!bfd_malloc_and_get_section (abfd, rel_section, &data))
 	{
-	  if (data != NULL)
-	    free (data);
+	  free (data);
 	  return FALSE;
 	}
 
@@ -1352,8 +1351,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 
       if (offset >= rel_section->size || offset + 8 > rel_section->size)
 	{
-	  if (data != NULL)
-	    free (data);
+	  free (data);
 	  return FALSE;
 	}
 
@@ -1368,8 +1366,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 	       /* xgettext:c-format */
 	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
 	       start_address, loadable_toc_address, toc_address);
-      if (data != NULL)
-	free (data);
+      free (data);
     }
   else
     {
@@ -1389,8 +1386,7 @@ pe_print_idata (bfd * abfd, void * vfile)
   /* Read the whole section.  Some of the fields might be before dataoff.  */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -1935,8 +1931,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -2119,8 +2114,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -2235,8 +2229,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -2543,8 +2536,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
 
   if (! bfd_malloc_and_get_section (abfd, section, & data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -2688,8 +2680,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   /* Read the whole section.  */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 
@@ -2786,8 +2777,7 @@ pe_is_repro (bfd * abfd)
 
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return FALSE;
     }
 

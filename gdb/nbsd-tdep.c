@@ -25,6 +25,7 @@
 #include "nbsd-tdep.h"
 #include "gdbarch.h"
 #include "objfiles.h"
+#include "xml-syscall.h"
 
 /* Flags in the 'kve_protection' field in struct kinfo_vmentry.  These
    match the KVME_PROT_* constants in <sys/sysctl.h>.  */
@@ -444,6 +445,21 @@ nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
     }
 }
 
+/* Implement the "get_syscall_number" gdbarch method.  */
+
+static LONGEST
+nbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
+{
+
+  /* NetBSD doesn't use gdbarch_get_syscall_number since NetBSD
+     native targets fetch the system call number from the
+     'si_sysnum' member of siginfo_t in nbsd_nat_target::wait.
+     However, system call catching requires this function to be
+     set.  */
+
+  internal_error (__FILE__, __LINE__, _("nbsd_get_sycall_number called"));
+}
+
 /* See nbsd-tdep.h.  */
 
 void
@@ -453,4 +469,8 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch, nbsd_gdb_signal_to_target);
   set_gdbarch_skip_solib_resolver (gdbarch, nbsd_skip_solib_resolver);
   set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
+
+  /* `catch syscall' */
+  set_xml_syscall_file_name (gdbarch, "syscalls/netbsd.xml");
+  set_gdbarch_get_syscall_number (gdbarch, nbsd_get_syscall_number);
 }

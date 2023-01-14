@@ -1133,58 +1133,56 @@ iterate_over_all_matching_symtabs
    struct program_space *search_pspace, bool include_inline,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
-  struct program_space *pspace;
+  for (struct program_space *pspace : program_spaces)
+    {
+      if (search_pspace != NULL && search_pspace != pspace)
+	continue;
+      if (pspace->executing_startup)
+	continue;
 
-  ALL_PSPACES (pspace)
-  {
-    if (search_pspace != NULL && search_pspace != pspace)
-      continue;
-    if (pspace->executing_startup)
-      continue;
+      set_current_program_space (pspace);
 
-    set_current_program_space (pspace);
+      for (objfile *objfile : current_program_space->objfiles ())
+	{
+	  if (objfile->sf)
+	    objfile->sf->qf->expand_symtabs_matching (objfile,
+						      NULL,
+						      &lookup_name,
+						      NULL, NULL,
+						      search_domain);
 
-    for (objfile *objfile : current_program_space->objfiles ())
-      {
-	if (objfile->sf)
-	  objfile->sf->qf->expand_symtabs_matching (objfile,
-						    NULL,
-						    &lookup_name,
-						    NULL, NULL,
-						    search_domain);
+	  for (compunit_symtab *cu : objfile->compunits ())
+	    {
+	      struct symtab *symtab = COMPUNIT_FILETABS (cu);
 
-	for (compunit_symtab *cu : objfile->compunits ())
-	  {
-	    struct symtab *symtab = COMPUNIT_FILETABS (cu);
+	      iterate_over_file_blocks (symtab, lookup_name, name_domain,
+					callback);
 
-	    iterate_over_file_blocks (symtab, lookup_name, name_domain,
-				      callback);
+	      if (include_inline)
+		{
+		  const struct block *block;
+		  int i;
 
-	    if (include_inline)
-	      {
-		const struct block *block;
-		int i;
-
-		for (i = FIRST_LOCAL_BLOCK;
-		     i < BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (symtab));
-		     i++)
-		  {
-		    block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
-		    state->language->la_iterate_over_symbols
-		      (block, lookup_name, name_domain,
-		       [&] (block_symbol *bsym)
-		       {
-			 /* Restrict calls to CALLBACK to symbols
-			    representing inline symbols only.  */
-			 if (SYMBOL_INLINED (bsym->symbol))
-			   return callback (bsym);
-			 return true;
-		       });
-		  }
-	      }
-	  }
-      }
-  }
+		  for (i = FIRST_LOCAL_BLOCK;
+		       i < BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (symtab));
+		       i++)
+		    {
+		      block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
+		      state->language->la_iterate_over_symbols
+			(block, lookup_name, name_domain,
+			 [&] (block_symbol *bsym)
+			 {
+			   /* Restrict calls to CALLBACK to symbols
+			      representing inline symbols only.  */
+			   if (SYMBOL_INLINED (bsym->symbol))
+			     return callback (bsym);
+			   return true;
+			 });
+		    }
+		}
+	    }
+	}
+    }
 }
 
 /* Returns the block to be used for symbol searches from
@@ -1224,7 +1222,7 @@ find_methods (struct type *t, enum language t_lang, const char *name,
 	      std::vector<struct type *> *superclasses)
 {
   int ibase;
-  const char *class_name = TYPE_NAME (t);
+  const char *class_name = t->name ();
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
@@ -3493,9 +3491,9 @@ decode_compound_collector::operator () (block_symbol *bsym)
 
   t = SYMBOL_TYPE (sym);
   t = check_typedef (t);
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-      && TYPE_CODE (t) != TYPE_CODE_UNION
-      && TYPE_CODE (t) != TYPE_CODE_NAMESPACE)
+  if (t->code () != TYPE_CODE_STRUCT
+      && t->code () != TYPE_CODE_UNION
+      && t->code () != TYPE_CODE_NAMESPACE)
     return true; /* Continue iterating.  */
 
   slot = htab_find_slot (m_unique_syms, sym, INSERT);
@@ -3670,12 +3668,12 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
      because we collect data across the program space before deciding
      what to do.  */
   last_result_len = 0;
-  unsigned int ix = 0;
   for (const auto &elt : *sym_classes)
     {
       struct type *t;
       struct program_space *pspace;
       struct symbol *sym = elt.symbol;
+      unsigned int ix = &elt - &*sym_classes->begin ();
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
@@ -3706,7 +3704,6 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 
 	  superclass_vec.clear ();
 	  last_result_len = result_names.size ();
-	  ++ix;
 	}
     }
 
@@ -3787,9 +3784,7 @@ collect_symtabs_from_filename (const char *file,
   /* Find that file's data.  */
   if (search_pspace == NULL)
     {
-      struct program_space *pspace;
-
-      ALL_PSPACES (pspace)
+      for (struct program_space *pspace : program_spaces)
         {
 	  if (pspace->executing_startup)
 	    continue;
@@ -3899,9 +3894,10 @@ find_linespec_symbols (struct linespec_state *state,
 		       std::vector <block_symbol> *symbols,
 		       std::vector<bound_minimal_symbol> *minsyms)
 {
-  std::string canon = cp_canonicalize_string_no_typedefs (lookup_name);
-  if (!canon.empty ())
-    lookup_name = canon.c_str ();
+  gdb::unique_xmalloc_ptr<char> canon
+    = cp_canonicalize_string_no_typedefs (lookup_name);
+  if (canon != nullptr)
+    lookup_name = canon.get ();
 
   /* It's important to not call expand_symtabs_matching unnecessarily
      as it can really slow things down (by unnecessarily expanding
@@ -4168,7 +4164,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
       sscanf ((variable[1] == '$') ? variable + 2 : variable + 1, "%d", &index);
       val_history
 	= access_value_history ((variable[1] == '$') ? -index : index);
-      if (TYPE_CODE (value_type (val_history)) != TYPE_CODE_INT)
+      if (value_type (val_history)->code () != TYPE_CODE_INT)
 	error (_("History values used in line "
 		 "specs must have integer values."));
       offset.offset = value_as_long (val_history);
@@ -4335,29 +4331,27 @@ search_minsyms_for_name (struct collect_info *info,
 
   if (symtab == NULL)
     {
-      struct program_space *pspace;
+      for (struct program_space *pspace : program_spaces)
+	{
+	  if (search_pspace != NULL && search_pspace != pspace)
+	    continue;
+	  if (pspace->executing_startup)
+	    continue;
 
-      ALL_PSPACES (pspace)
-      {
-	if (search_pspace != NULL && search_pspace != pspace)
-	  continue;
-	if (pspace->executing_startup)
-	  continue;
+	  set_current_program_space (pspace);
 
-	set_current_program_space (pspace);
-
-	for (objfile *objfile : current_program_space->objfiles ())
-	  {
-	    iterate_over_minimal_symbols (objfile, name,
-					  [&] (struct minimal_symbol *msym)
-					  {
-					    add_minsym (msym, objfile, nullptr,
-							info->state->list_mode,
-							&minsyms);
-					    return false;
-					  });
-	  }
-      }
+	  for (objfile *objfile : current_program_space->objfiles ())
+	    {
+	      iterate_over_minimal_symbols (objfile, name,
+					    [&] (struct minimal_symbol *msym)
+					    {
+					      add_minsym (msym, objfile, nullptr,
+							  info->state->list_mode,
+							  &minsyms);
+					      return false;
+					    });
+	    }
+	}
     }
   else
     {

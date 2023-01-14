@@ -82,6 +82,13 @@ foreach f [list update-1.s update-2.s update-3.s update-4.s] {
     }
 }
 
+# Check that we can dump empty sections.
+if { ![do_objcopy update-1.o "--dump-section .text=tmpdir/empty"] } {
+    fail "objcopy (dump empty section)"
+} else {
+    pass "objcopy (dump empty section)"
+}
+
 if { ![do_objcopy update-1.o \
            "--dump-section .foo=tmpdir/dumped-contents"]
      || ![do_objcopy update-2.o \

@@ -2615,8 +2615,7 @@ remote_target::pass_signals (gdb::array_view<const unsigned char> pass_signals)
 	  putpkt (pass_packet);
 	  getpkt (&rs->buf, 0);
 	  packet_ok (rs->buf, &remote_protocol_packets[PACKET_QPassSignals]);
-	  if (rs->last_pass_packet)
-	    xfree (rs->last_pass_packet);
+	  xfree (rs->last_pass_packet);
 	  rs->last_pass_packet = pass_packet;
 	}
       else
@@ -3785,6 +3784,18 @@ remote_target::remote_get_threads_with_qthreadinfo (threads_listing_context *con
   return 0;
 }
 
+/* Return true if INF only has one non-exited thread.  */
+
+static bool
+has_single_non_exited_thread (inferior *inf)
+{
+  int count = 0;
+  for (thread_info *tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
+    if (++count > 1)
+      break;
+  return count == 1;
+}
+
 /* Implement the to_update_thread_list function for the remote
    targets.  */
 
@@ -3824,6 +3835,14 @@ remote_target::update_thread_list ()
 
 	  if (!context.contains_thread (tp->ptid))
 	    {
+	      /* Do not remove the thread if it is the last thread in
+		 the inferior.  This situation happens when we have a
+		 pending exit process status to process.  Otherwise we
+		 may end up with a seemingly live inferior (i.e.  pid
+		 != 0) that has no threads.  */
+	      if (has_single_non_exited_thread (tp->inf))
+		continue;
+
 	      /* Not found.  */
 	      delete_thread (tp);
 	    }
@@ -4085,7 +4104,6 @@ remote_target::get_offsets ()
   char *ptr;
   int lose, num_segments = 0, do_sections, do_segments;
   CORE_ADDR text_addr, data_addr, bss_addr, segments[2];
-  struct symfile_segment_data *data;
 
   if (symfile_objfile == NULL)
     return;
@@ -4165,7 +4183,8 @@ remote_target::get_offsets ()
 
   section_offsets offs = symfile_objfile->section_offsets;
 
-  data = get_symfile_segment_data (symfile_objfile->obfd);
+  symfile_segment_data_up data
+    = get_symfile_segment_data (symfile_objfile->obfd);
   do_segments = (data != NULL);
   do_sections = num_segments == 0;
 
@@ -4178,10 +4197,10 @@ remote_target::get_offsets ()
      by assuming that the .text and .data offsets apply to the whole
      text and data segments.  Convert the offsets given in the packet
      to base addresses for symfile_map_offsets_to_segments.  */
-  else if (data && data->num_segments == 2)
+  else if (data != nullptr && data->segments.size () == 2)
     {
-      segments[0] = data->segment_bases[0] + text_addr;
-      segments[1] = data->segment_bases[1] + data_addr;
+      segments[0] = data->segments[0].base + text_addr;
+      segments[1] = data->segments[1].base + data_addr;
       num_segments = 2;
     }
   /* If the object file has only one segment, assume that it is text
@@ -4189,9 +4208,9 @@ remote_target::get_offsets ()
      but programs with no code are useless.  Of course the code might
      have ended up in the data segment... to detect that we would need
      the permissions here.  */
-  else if (data && data->num_segments == 1)
+  else if (data && data->segments.size () == 1)
     {
-      segments[0] = data->segment_bases[0] + text_addr;
+      segments[0] = data->segments[0].base + text_addr;
       num_segments = 1;
     }
   /* There's no way to relocate by segment.  */
@@ -4200,8 +4219,9 @@ remote_target::get_offsets ()
 
   if (do_segments)
     {
-      int ret = symfile_map_offsets_to_segments (symfile_objfile->obfd, data,
-						 offs, num_segments, segments);
+      int ret = symfile_map_offsets_to_segments (symfile_objfile->obfd,
+						 data.get (), offs,
+						 num_segments, segments);
 
       if (ret == 0 && !do_sections)
 	error (_("Can not handle qOffsets TextSeg "
@@ -4210,9 +4230,6 @@ remote_target::get_offsets ()
       if (ret > 0)
 	do_sections = 0;
     }
-
-  if (data)
-    free_symfile_segment_data (data);
 
   if (do_sections)
     {
@@ -14856,5 +14873,5 @@ Specify \"unlimited\" to display all the characters."),
 				       &setdebuglist, &showdebuglist);
 
   /* Eventually initialize fileio.  See fileio.c */
-  initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);
+  initialize_remote_fileio (&remote_set_cmdlist, &remote_show_cmdlist);
 }

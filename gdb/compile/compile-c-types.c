@@ -94,16 +94,16 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     result = context->plugin ().build_record_type ();
   else
     {
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+      gdb_assert (type->code () == TYPE_CODE_UNION);
       result = context->plugin ().build_union_type ();
     }
   context->insert_type (type, result);
 
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       gcc_type field_type;
       unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
@@ -134,7 +134,7 @@ convert_enum (compile_c_instance *context, struct type *type)
 					     TYPE_LENGTH (type));
 
   result = context->plugin ().build_enum_type (int_type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       context->plugin ().build_add_enum_constant
 	(result, TYPE_FIELD_NAME (type, i), TYPE_FIELD_ENUMVAL (type, i));
@@ -175,9 +175,9 @@ convert_func (compile_c_instance *context, struct type *type)
      types.  Those are impossible in C, though.  */
   return_type = context->convert_type (target_type);
 
-  array.n_elements = TYPE_NFIELDS (type);
-  array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  array.n_elements = type->num_fields ();
+  array.elements = XNEWVEC (gcc_type, type->num_fields ());
+  for (i = 0; i < type->num_fields (); ++i)
     array.elements[i] = context->convert_type (TYPE_FIELD_TYPE (type, i));
 
   result = context->plugin ().build_function_type (return_type,
@@ -201,7 +201,7 @@ convert_int (compile_c_instance *context, struct type *type)
 	}
       return context->plugin ().int_type (TYPE_UNSIGNED (type),
 					  TYPE_LENGTH (type),
-					  TYPE_NAME (type));
+					  type->name ());
     }
   else
     return context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
@@ -215,7 +215,7 @@ convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
     return context->plugin ().float_type (TYPE_LENGTH (type),
-					  TYPE_NAME (type));
+					  type->name ());
   else
     return context->plugin ().float_type_v0 (TYPE_LENGTH (type));
 }
@@ -282,7 +282,7 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return convert_qualified (context, type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       return convert_pointer (context, type);

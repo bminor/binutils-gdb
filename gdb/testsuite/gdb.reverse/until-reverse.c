@@ -37,7 +37,8 @@ main (int argc, char **argv, char **envp)
     {
       /* We're used by a test that requires malloc, so make sure it is
 	 in the executable.  */
-      (void) malloc (1);
+      void *p = malloc (1);
+      free (p);
       return 1;
     }
 

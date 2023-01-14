@@ -1,3 +1,75 @@
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	PR gdbserver/25893
+	* linux-low.cc (linux_process_target::create_inferior),
+	lynx-low.cc (lynx_process_target::create_inferior),
+	win32-low.cc (win32_process_target::create_inferior): Use
+	construct_inferior_arguments instead of stringify_argv
+	to get string representation which properly escapes
+	special characters.
+	* server.cc (handle_v_run): Just pass empty program arg
+	as such, since any further processing is now handled via
+	construct_inferior_arguments.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* nto-low.cc (nto_process_target::create_inferior): Pass
+	argv to spawnp function as char **.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* server.cc (captured_main), (handle_v_run): No longer
+	insert extra NULL element to args vector.
+
+2020-05-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb-safe-ctype.h: New.
+
+2020-05-16  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-ia64-low.cc (ia64_target::sw_breakpoint_from_kind):
+	Fix incorrect 'gdb_assert_no_reached' to 'gdb_assert_not_reached'.
+	(ia64_target::low_breakpoint_at): Ditto.
+
+2020-05-15  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-i386-low.cc (i386_supports_z_point_type): Handle
+	Z_PACKET_HW_BP z_type.
+	(i386_insert_point): Handle raw_bkpt_type type.
+	(i386_remove_point): Likewise.
+
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
+	* configure.srv <x86_64-*-mingw*, x86_64-*-cygwin*> (srv_tgtobj):
+	Add arch/i386.o.
+	* win32-arm-low.cc (arm_num_regs): New function.
+	(struct win32_target_ops): Use arm_num_regs.
+	* win32-i386-low.cc (win32_get_current_dr): Adapt for WOW64
+	processes.
+	(i386_get_thread_context): Likewise.
+	(i386_prepare_to_resume): Likewise.
+	(i386_thread_added): Likewise.
+	(i386_single_step): Likewise.
+	(i386_fetch_inferior_register): Likewise.
+	(i386_store_inferior_register): Likewise.
+	(i386_arch_setup): Likewise.
+	(i386_win32_num_regs): New function.
+	(struct win32_target_ops): Use i386_win32_num_regs.
+	* win32-low.cc (win32_get_thread_context): Adapt for WOW64
+	processes.
+	(win32_require_context): Likewise.
+	(child_add_thread): Likewise.
+	(do_initial_child_stuff): Likewise.
+	(continue_one_thread): Likewise.
+	(win32_process_target::resume): Likewise.
+	(load_psapi): Likewise.
+	(win32_add_all_dlls): Likewise.
+	(maybe_adjust_pc): Likewise.
+	(win32_process_target::qxfer_siginfo): Likewise.
+	(initialize_low): Likewise.
+	* win32-low.h (struct win32_target_ops): Change num_regs to
+	callback function.
+
 2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure.ac: Remove check for fs_base/gs_base in

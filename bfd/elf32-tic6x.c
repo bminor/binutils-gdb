@@ -3724,6 +3724,10 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   int i;
   int array_align_in, array_align_out, array_expect_in, array_expect_out;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
       /* This is the first object.  Copy the attributes.  */
@@ -3862,6 +3866,9 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	case Tag_ABI_PIC:
 	case Tag_ABI_PID:
+	  /* Don't transfer these tags from dynamic objects.  */
+	  if ((ibfd->flags & DYNAMIC) != 0)
+	    continue;
 	  if (out_attr[i].i > in_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;

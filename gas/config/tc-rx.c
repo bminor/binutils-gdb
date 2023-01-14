@@ -41,16 +41,15 @@ const char line_separator_chars[] = "!";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
-/* ELF flags to set in the output file header.  */
-static int elf_flags = E_FLAG_RX_ABI;
-
 #ifndef TE_LINUX
 bfd_boolean rx_use_conventional_section_names = FALSE;
+static int elf_flags = E_FLAG_RX_ABI;
 #else
 bfd_boolean rx_use_conventional_section_names = TRUE;
+static int elf_flags;
 #endif
-static bfd_boolean rx_use_small_data_limit = FALSE;
 
+static bfd_boolean rx_use_small_data_limit = FALSE;
 static bfd_boolean rx_pid_mode = FALSE;
 static int rx_num_int_regs = 0;
 int rx_pid_register;

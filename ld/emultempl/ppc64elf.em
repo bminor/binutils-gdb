@@ -602,8 +602,7 @@ gld${EMULATION_NAME}_finish (void)
       fprintf (stderr, "%s: %s\n", program_name, line);
     }
   fflush (stderr);
-  if (msg != NULL)
-    free (msg);
+  free (msg);
 
   finish_default ();
 }

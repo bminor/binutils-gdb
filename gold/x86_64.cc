@@ -2086,7 +2086,12 @@ Output_data_plt_x86_64_bnd::do_address_for_local(const Relobj* object,
 						 unsigned int r_sym)
 {
   // Convert the PLT offset into an APLT offset.
-  unsigned int plt_offset = ((object->local_plt_offset(r_sym) - plt_entry_size)
+  const Sized_relobj_file<64, false>* sized_relobj =
+    static_cast<const Sized_relobj_file<64, false>*>(object);
+  const Symbol_value<64>* psymval = sized_relobj->local_symbol(r_sym);
+  unsigned int plt_offset = ((object->local_plt_offset(r_sym)
+			      - (psymval->is_ifunc_symbol()
+				 ? 0 : plt_entry_size))
 			     / (plt_entry_size / aplt_entry_size));
   return (this->address()
 	  + this->aplt_offset_
@@ -2260,7 +2265,12 @@ Output_data_plt_x86_64_ibt<size>::do_address_for_local(const Relobj* object,
 						 unsigned int r_sym)
 {
   // Convert the PLT offset into an APLT offset.
-  unsigned int plt_offset = ((object->local_plt_offset(r_sym) - plt_entry_size)
+  const Sized_relobj_file<size, false>* sized_relobj =
+    static_cast<const Sized_relobj_file<size, false>*>(object);
+  const Symbol_value<size>* psymval = sized_relobj->local_symbol(r_sym);
+  unsigned int plt_offset = ((object->local_plt_offset(r_sym)
+			      - (psymval->is_ifunc_symbol()
+				 ? 0 : plt_entry_size))
 			     / (plt_entry_size / aplt_entry_size));
   return (this->address()
 	  + this->aplt_offset_
@@ -2726,6 +2736,7 @@ Output_data_plt_x86_64_bnd::do_write(Output_file* of)
       this->fill_tlsdesc_entry(pov, got_address, plt_address, got_base,
 			       tlsdesc_got_offset, plt_offset);
       pov += this->get_plt_entry_size();
+      plt_offset += plt_entry_size;
     }
 
   // Write the additional PLT.
@@ -2821,6 +2832,7 @@ Output_data_plt_x86_64_ibt<size>::do_write(Output_file* of)
       this->fill_tlsdesc_entry(pov, got_address, plt_address, got_base,
 			       tlsdesc_got_offset, plt_offset);
       pov += this->get_plt_entry_size();
+      plt_offset += plt_entry_size;
     }
 
   // Write the additional PLT.
@@ -5460,26 +5472,49 @@ Target_x86_64<size>::Relocate::tls_desc_gd_to_ie(
 {
   if (r_type == elfcpp::R_X86_64_GOTPC32_TLSDESC)
     {
-      // leaq foo@tlsdesc(%rip), %rax
-      // ==> movq foo@gottpoff(%rip), %rax
+      // LP64: leaq foo@tlsdesc(%rip), %rax
+      //       ==> movq foo@gottpoff(%rip), %rax
+      // X32:  rex leal foo@tlsdesc(%rip), %eax
+      //       ==> rex movl foo@gottpoff(%rip), %eax
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+		     (((view[-3] & 0xfb) == 0x48
+		       || (size == 32 && (view[-3] & 0xfb) == 0x40))
+		      && view[-2] == 0x8d
+		      && (view[-1] & 0xc7) == 0x05));
       view[-2] = 0x8b;
       const elfcpp::Elf_Xword addend = rela.get_r_addend();
       Relocate_functions<size, false>::pcrela32(view, value, addend, address);
     }
   else
     {
-      // call *foo@tlscall(%rax)
-      // ==> nop; nop
+      // LP64: call *foo@tlscall(%rax)
+      //       ==> xchg %ax, %ax
+      // X32:  call *foo@tlscall(%eax)
+      //       ==> nopl (%rax)
       gold_assert(r_type == elfcpp::R_X86_64_TLSDESC_CALL);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 2);
+      int prefix = 0;
+      if (size == 32 && view[0] == 0x67)
+	{
+	  tls::check_range(relinfo, relnum, rela.get_r_offset(),
+			   view_size, 3);
+	  prefix = 1;
+	}
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[0] == 0xff && view[1] == 0x10);
-      view[0] = 0x66;
-      view[1] = 0x90;
+		     view[prefix] == 0xff && view[prefix + 1] == 0x10);
+      if (prefix)
+	{
+	  view[0] = 0x0f;
+	  view[1] = 0x1f;
+	  view[2] = 0x00;
+	}
+      else
+	{
+	  view[0] = 0x66;
+	  view[1] = 0x90;
+	}
     }
 }
 
@@ -5499,27 +5534,51 @@ Target_x86_64<size>::Relocate::tls_desc_gd_to_le(
 {
   if (r_type == elfcpp::R_X86_64_GOTPC32_TLSDESC)
     {
-      // leaq foo@tlsdesc(%rip), %rax
-      // ==> movq foo@tpoff, %rax
+      // LP64: leaq foo@tlsdesc(%rip), %rax
+      //       ==> movq foo@tpoff, %rax
+      // X32:  rex leal foo@tlsdesc(%rip), %eax
+      //       ==> rex movl foo@tpoff, %eax
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+		     (((view[-3] & 0xfb) == 0x48
+		       || (size == 32 && (view[-3] & 0xfb) == 0x40))
+		      && view[-2] == 0x8d
+		      && (view[-1] & 0xc7) == 0x05));
+      view[-3] = (view[-3] & 0x48) | ((view[-3] >> 2) & 1);
       view[-2] = 0xc7;
-      view[-1] = 0xc0;
+      view[-1] = 0xc0 | ((view[-1] >> 3) & 7);
       value -= tls_segment->memsz();
       Relocate_functions<size, false>::rela32(view, value, 0);
     }
   else
     {
-      // call *foo@tlscall(%rax)
-      // ==> nop; nop
+      // LP64: call *foo@tlscall(%rax)
+      //       ==> xchg %ax, %ax
+      // X32:  call *foo@tlscall(%eax)
+      //       ==> nopl (%rax)
       gold_assert(r_type == elfcpp::R_X86_64_TLSDESC_CALL);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 2);
+      int prefix = 0;
+      if (size == 32 && view[0] == 0x67)
+	{
+	  tls::check_range(relinfo, relnum, rela.get_r_offset(),
+			   view_size, 3);
+	  prefix = 1;
+	}
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[0] == 0xff && view[1] == 0x10);
-      view[0] = 0x66;
-      view[1] = 0x90;
+		     view[prefix] == 0xff && view[prefix + 1] == 0x10);
+      if (prefix)
+	{
+	  view[0] = 0x0f;
+	  view[1] = 0x1f;
+	  view[2] = 0x00;
+	}
+      else
+	{
+	  view[0] = 0x66;
+	  view[1] = 0x90;
+	}
     }
 }
 

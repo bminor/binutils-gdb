@@ -775,6 +775,8 @@ rs6000-*-aix*)		targ_emul=aixrs6
 			;;
 rl78-*-*)		targ_emul=elf32rl78
 			;;
+rx-*-linux*)		targ_emul=elf32rx_linux
+			;;
 rx-*-*)			targ_emul=elf32rx
 			;;
 s12z-*-*)		targ_emul=m9s12zelf

@@ -319,11 +319,11 @@ set ppc64elftests {
     {"notoc ext" "" "" "-a64" {ext.s} {} ""}
     {"notoc" "-melf64ppc --no-plt-localentry -T ext.lnk" "" "-a64" {notoc.s}
 	{{objdump -d notoc.d} {readelf {-wf -W} notoc.wf}} "notoc"}
-    {"notoc2" "-melf64ppc -shared" "" "-a64 -mfuture" {notoc2.s}
-	{{objdump {-d -Mfuture} notoc2.d}} "notoc2"}
+    {"notoc2" "-melf64ppc -shared" "" "-a64 -mpower10" {notoc2.s}
+	{{objdump {-d -Mpower10} notoc2.d}} "notoc2"}
     {"pcrelopt" "-melf64ppc --hash-style=gnu" "tmpdir/symtocbase.so"
-	"-a64 -mfuture" {pcrelopt.s}
-	{{objdump {-d -Mfuture} pcrelopt.d}
+	"-a64 -mpower10" {pcrelopt.s}
+	{{objdump {-d -Mpower10} pcrelopt.d}
 	 {readelf {-S --wide} pcrelopt.sec}} "pcrelopt" }
 }
 

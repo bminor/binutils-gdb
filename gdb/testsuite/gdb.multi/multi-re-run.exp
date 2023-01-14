@@ -51,6 +51,7 @@ proc test_re_run {re_run_inf} {
     global binfile1 binfile2
     global inferior_exited_re
     global gdb_prompt
+    global last_loaded_file
 
     clean_restart ${binfile1}
 
@@ -65,12 +66,17 @@ proc test_re_run {re_run_inf} {
 
     if {$re_run_inf == 1} {
 	set steady_inf 2
+	set steady_binfile $binfile2
+	set re_run_binfile $binfile1
     } else {
 	set steady_inf 1
+	set steady_binfile $binfile1
+	set re_run_binfile $binfile2
     }
 
     gdb_test "inferior $steady_inf" "Switching to inferior $steady_inf.*" \
 	"switch to steady inferior"
+    set last_loaded_file $steady_binfile
 
     # Run the steady inferior to a breakpoint, and let it stay stopped
     # there.
@@ -81,6 +87,7 @@ proc test_re_run {re_run_inf} {
 
     gdb_test "inferior $re_run_inf" "Switching to inferior $re_run_inf.*" \
 	"switch to re-run inferior"
+    set last_loaded_file $re_run_binfile
 
     # Now run the RE_RUN_INF inferior a couple times.  GDB used to
     # have a bug that caused the second run to fail to load

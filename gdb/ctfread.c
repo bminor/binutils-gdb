@@ -308,15 +308,15 @@ attach_fields_to_type (struct ctf_field_info *fip, struct type *type)
     return;
 
   /* Record the field count, allocate space for the array of fields.  */
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, sizeof (struct field) * nfields);
+  type->set_num_fields (nfields);
+  type->set_fields
+    ((struct field *) TYPE_ZALLOC (type, sizeof (struct field) * nfields));
 
   /* Copy the saved-up fields into the field vector.  */
   for (int i = 0; i < nfields; ++i)
     {
       struct ctf_nextfield &field = fip->fields[i];
-      TYPE_FIELD (type, i) = field.field;
+      type->field (i) = field.field;
     }
 }
 
@@ -407,7 +407,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
   if (name != NULL)
     {
-      struct symbol *sym = allocate_symbol (ccp->of);
+      struct symbol *sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
 
       sym->set_language (language_c, &ccp->of->objfile_obstack);
@@ -436,7 +436,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL)
     {
-      sym = allocate_symbol (objfile);
+      sym = new (&objfile->objfile_obstack) symbol;
       OBJSTAT (objfile, n_syms++);
 
       sym->set_language (language_c, &objfile->objfile_obstack);
@@ -460,7 +460,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	    break;
 	  case CTF_K_CONST:
-	    if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
+	    if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
 	      SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
 	    break;
 	  case CTF_K_TYPEDEF:
@@ -596,13 +596,13 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get() ) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_UNION)
-    TYPE_CODE (type) = TYPE_CODE_UNION;
+    type->set_code (TYPE_CODE_UNION);
   else
-    TYPE_CODE (type) = TYPE_CODE_STRUCT;
+    type->set_code (TYPE_CODE_STRUCT);
 
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
   set_type_align (type, ctf_type_align (fp, tid));
@@ -654,9 +654,9 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get ()) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
-  TYPE_CODE (type) = TYPE_CODE_FUNC;
+  type->set_code (TYPE_CODE_FUNC);
   ctf_func_type_info (fp, tid, &cfi);
   rettype = get_tid_type (of, cfi.ctc_return);
   TYPE_TARGET_TYPE (type) = rettype;
@@ -680,9 +680,9 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get ()) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
+  type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
   ctf_func_type_info (fp, tid, &fi);
   target_type = get_tid_type (of, fi.ctc_return);
@@ -726,7 +726,7 @@ add_array_cv_type (struct ctf_context *ccp,
   base_type = copy_type (base_type);
   inner_array = base_type;
 
-  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+  while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
     {
       TYPE_TARGET_TYPE (inner_array)
 	= copy_type (TYPE_TARGET_TYPE (inner_array));
@@ -1071,7 +1071,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	  complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
 	  type = objfile_type (ccp->of)->builtin_error;
 	}
-	sym = allocate_symbol (ccp->of);
+	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
 	SYMBOL_TYPE (sym) = type;
 	SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -1139,12 +1139,12 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
   ftype = get_tid_type (ccp->of, tid);
   if (finfo.ctc_flags & CTF_FUNC_VARARG)
     TYPE_VARARGS (ftype) = 1;
-  TYPE_NFIELDS (ftype) = argc;
+  ftype->set_num_fields (argc);
 
   /* If argc is 0, it has a "void" type.  */
   if (argc != 0)
-    TYPE_FIELDS (ftype)
-      = (struct field *) TYPE_ZALLOC (ftype, argc * sizeof (struct field));
+    ftype->set_fields
+      ((struct field *) TYPE_ZALLOC (ftype, argc * sizeof (struct field)));
 
   /* TYPE_FIELD_TYPE must never be NULL.  Fill it with void_type, if failed
      to find the argument type.  */

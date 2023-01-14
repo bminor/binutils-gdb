@@ -711,10 +711,8 @@ output_insns (func **insn, FILE *as_in, FILE *dis_out)
 	  for (; part-- > 0;)
 	    {
 	    skip:
-	      if (data[part].as_in)
-		free (data[part].as_in);
-	      if (data[part].dis_out
-		  && data[part].dis_out != data[part].as_in)
+	      free (data[part].as_in);
+	      if (data[part].dis_out != data[part].as_in)
 		free (data[part].dis_out);
 	    }
 

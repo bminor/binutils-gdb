@@ -95,7 +95,7 @@ if { ! $no_frames } {
     set pass_re "array = {$decimal, \[^\r\n\]*}"
     set kfail_re [multi_line $pass_re \
 		      "array = {<optimized out> <repeats 64 times>}"]
-    gdb_test_multiple "info locals" "info locals above bar 2" {
+    gdb_test_multiple "info locals" "info locals above bar 3" {
 	-re -wrap $pass_re {
 	    pass $gdb_test_name
 	}

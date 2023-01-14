@@ -151,12 +151,10 @@ get_inferior_args (void)
 {
   if (current_inferior ()->argc != 0)
     {
-      char *n;
-
-      n = construct_inferior_arguments (current_inferior ()->argc,
-					current_inferior ()->argv);
-      set_inferior_args (n);
-      xfree (n);
+      gdb::array_view<char * const> args (current_inferior ()->argv,
+                                          current_inferior ()->argc);
+      std::string n = construct_inferior_arguments (args);
+      set_inferior_args (n.c_str ());
     }
 
   if (current_inferior ()->args == NULL)
@@ -259,130 +257,6 @@ server's cwd if remote debugging.\n"));
 			"when starting the inferior is \"%s\".\n"), cwd);
 }
 
-
-/* Compute command-line string given argument vector.  This does the
-   same shell processing as fork_inferior.  */
-
-char *
-construct_inferior_arguments (int argc, char **argv)
-{
-  char *result;
-
-  /* ARGC should always be at least 1, but we double check this
-     here.  This is also needed to silence -Werror-stringop
-     warnings.  */
-  gdb_assert (argc > 0);
-
-  if (startup_with_shell)
-    {
-#ifdef __MINGW32__
-      /* This holds all the characters considered special to the
-	 Windows shells.  */
-      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
-      static const char quote = '"';
-#else
-      /* This holds all the characters considered special to the
-	 typical Unix shells.  We include `^' because the SunOS
-	 /bin/sh treats it as a synonym for `|'.  */
-      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
-      static const char quote = '\'';
-#endif
-      int i;
-      int length = 0;
-      char *out, *cp;
-
-      /* We over-compute the size.  It shouldn't matter.  */
-      for (i = 0; i < argc; ++i)
-	length += 3 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
-
-      result = (char *) xmalloc (length);
-      out = result;
-
-      for (i = 0; i < argc; ++i)
-	{
-	  if (i > 0)
-	    *out++ = ' ';
-
-	  /* Need to handle empty arguments specially.  */
-	  if (argv[i][0] == '\0')
-	    {
-	      *out++ = quote;
-	      *out++ = quote;
-	    }
-	  else
-	    {
-#ifdef __MINGW32__
-	      int quoted = 0;
-
-	      if (strpbrk (argv[i], special))
-		{
-		  quoted = 1;
-		  *out++ = quote;
-		}
-#endif
-	      for (cp = argv[i]; *cp; ++cp)
-		{
-		  if (*cp == '\n')
-		    {
-		      /* A newline cannot be quoted with a backslash (it
-			 just disappears), only by putting it inside
-			 quotes.  */
-		      *out++ = quote;
-		      *out++ = '\n';
-		      *out++ = quote;
-		    }
-		  else
-		    {
-#ifdef __MINGW32__
-		      if (*cp == quote)
-#else
-		      if (strchr (special, *cp) != NULL)
-#endif
-			*out++ = '\\';
-		      *out++ = *cp;
-		    }
-		}
-#ifdef __MINGW32__
-	      if (quoted)
-		*out++ = quote;
-#endif
-	    }
-	}
-      *out = '\0';
-    }
-  else
-    {
-      /* In this case we can't handle arguments that contain spaces,
-	 tabs, or newlines -- see breakup_args().  */
-      int i;
-      int length = 0;
-
-      for (i = 0; i < argc; ++i)
-	{
-	  char *cp = strchr (argv[i], ' ');
-	  if (cp == NULL)
-	    cp = strchr (argv[i], '\t');
-	  if (cp == NULL)
-	    cp = strchr (argv[i], '\n');
-	  if (cp != NULL)
-	    error (_("can't handle command-line "
-		     "argument containing whitespace"));
-	  length += strlen (argv[i]) + 1;
-	}
-
-      result = (char *) xmalloc (length);
-      result[0] = '\0';
-      for (i = 0; i < argc; ++i)
-	{
-	  if (i > 0)
-	    strcat (result, " ");
-	  strcat (result, argv[i]);
-	}
-    }
-
-  return result;
-}
-
 
 /* This function strips the '&' character (indicating background
    execution) that is added as *the last* of the arguments ARGS of a
@@ -1589,7 +1463,7 @@ get_return_value (struct value *function, struct type *value_type)
   struct value *value;
 
   value_type = check_typedef (value_type);
-  gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
+  gdb_assert (value_type->code () != TYPE_CODE_VOID);
 
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
@@ -1680,7 +1554,7 @@ void
 print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 {
   if (rv->type == NULL
-      || TYPE_CODE (check_typedef (rv->type)) == TYPE_CODE_VOID)
+      || check_typedef (rv->type)->code () == TYPE_CODE_VOID)
     return;
 
   try
@@ -1744,7 +1618,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
 
-      if (TYPE_CODE (check_typedef (rv->type)) != TYPE_CODE_VOID)
+      if (check_typedef (rv->type)->code () != TYPE_CODE_VOID)
 	{
 	  struct value *func;
 
@@ -2250,8 +2124,8 @@ default_print_one_register_info (struct ui_file *file,
 
   /* If virtual format is floating, print it that way, and in raw
      hex.  */
-  if (TYPE_CODE (regtype) == TYPE_CODE_FLT
-      || TYPE_CODE (regtype) == TYPE_CODE_DECFLOAT)
+  if (regtype->code () == TYPE_CODE_FLT
+      || regtype->code () == TYPE_CODE_DECFLOAT)
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
@@ -3180,7 +3054,7 @@ is restored."),
   cmd_name = "inferior-tty";
   c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
   gdb_assert (c != NULL);
-  add_alias_cmd ("tty", c, class_alias, 0, &cmdlist);
+  add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
 
   cmd_name = "args";
   add_setshow_string_noescape_cmd (cmd_name, class_run,
@@ -3318,14 +3192,14 @@ Step one instruction exactly.\n\
 Usage: stepi [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("si", "stepi", class_alias, 0);
+  add_com_alias ("si", "stepi", class_run, 0);
 
   add_com ("nexti", class_run, nexti_command, _("\
 Step one instruction, but proceed through subroutine calls.\n\
 Usage: nexti [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("ni", "nexti", class_alias, 0);
+  add_com_alias ("ni", "nexti", class_run, 0);
 
   add_com ("finish", class_run, finish_command, _("\
 Execute until selected stack frame returns.\n\

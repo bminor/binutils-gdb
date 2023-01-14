@@ -20,6 +20,7 @@
 load_lib opencl.exp
 
 if { [skip_opencl_tests] } {
+    unsupported "OpenCL support not detected"
     return 0
 }
 

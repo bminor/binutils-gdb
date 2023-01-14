@@ -228,8 +228,8 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is supported by EFS2.  */
 #define PPC_OPCODE_EFS2	    0x200000000000ull
 
-/* Opcode is only supported by powerxx architecture.  */
-#define PPC_OPCODE_POWERXX  0x400000000000ull
+/* Opcode is only supported by power10 architecture.  */
+#define PPC_OPCODE_POWER10  0x400000000000ull
 
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
@@ -362,6 +362,9 @@ extern const unsigned int num_powerpc_operands;
    prints these with a leading 'vs'.  */
 #define PPC_OPERAND_VSR (0x10)
 
+/* This operand names a VSX accumulator.  */
+#define PPC_OPERAND_ACC (0x20)
+
 /* This operand may use the symbolic names for the CR fields (even
    without -mregnames), which are
        lt  0	gt  1	eq  2	so  3	un  3
@@ -369,60 +372,60 @@ extern const unsigned int num_powerpc_operands;
        cr4 4	cr5 5	cr6 6	cr7 7
    These may be combined arithmetically, as in cr2*4+gt.  These are
    only supported on the PowerPC, not the POWER.  */
-#define PPC_OPERAND_CR_BIT (0x20)
+#define PPC_OPERAND_CR_BIT (0x40)
 
 /* This is a CR FIELD that does not use symbolic names (unless
    -mregnames is in effect).  If both PPC_OPERAND_CR_BIT and
    PPC_OPERAND_CR_REG are set then treat the field as per
    PPC_OPERAND_CR_BIT for assembly, but as if neither of these
    bits are set for disassembly.  */
-#define PPC_OPERAND_CR_REG (0x40)
+#define PPC_OPERAND_CR_REG (0x80)
 
 /* This operand names a special purpose register.  */
-#define PPC_OPERAND_SPR (0x80)
+#define PPC_OPERAND_SPR (0x100)
 
 /* This operand names a paired-single graphics quantization register.  */
-#define PPC_OPERAND_GQR (0x100)
+#define PPC_OPERAND_GQR (0x200)
 
 /* This operand is a relative branch displacement.  The disassembler
    prints these symbolically if possible.  */
-#define PPC_OPERAND_RELATIVE (0x200)
+#define PPC_OPERAND_RELATIVE (0x400)
 
 /* This operand is an absolute branch address.  The disassembler
    prints these symbolically if possible.  */
-#define PPC_OPERAND_ABSOLUTE (0x400)
+#define PPC_OPERAND_ABSOLUTE (0x800)
 
 /* This operand takes signed values.  */
-#define PPC_OPERAND_SIGNED (0x800)
+#define PPC_OPERAND_SIGNED (0x1000)
 
 /* This operand takes signed values, but also accepts a full positive
    range of values when running in 32 bit mode.  That is, if bits is
    16, it takes any value from -0x8000 to 0xffff.  In 64 bit mode,
    this flag is ignored.  */
-#define PPC_OPERAND_SIGNOPT (0x1000)
+#define PPC_OPERAND_SIGNOPT (0x2000)
 
 /* The next operand should be wrapped in parentheses rather than
    separated from this one by a comma.  This is used for the load and
    store instructions which want their operands to look like
        reg,displacement(reg)
    */
-#define PPC_OPERAND_PARENS (0x2000)
+#define PPC_OPERAND_PARENS (0x4000)
 
 /* This operand is for the DS field in a DS form instruction.  */
-#define PPC_OPERAND_DS (0x4000)
+#define PPC_OPERAND_DS (0x8000)
 
 /* This operand is for the DQ field in a DQ form instruction.  */
-#define PPC_OPERAND_DQ (0x8000)
+#define PPC_OPERAND_DQ (0x10000)
 
 /* This operand should be regarded as a negative number for the
    purposes of overflow checking (i.e., the normal most negative
    number is disallowed and one more than the normal most positive
    number is allowed).  This flag will only be set for a signed
    operand.  */
-#define PPC_OPERAND_NEGATIVE (0x10000)
+#define PPC_OPERAND_NEGATIVE (0x20000)
 
 /* Valid range of operand is 0..n rather than 0..n-1.  */
-#define PPC_OPERAND_PLUS1 (0x20000)
+#define PPC_OPERAND_PLUS1 (0x40000)
 
 /* This operand is optional, and is zero if omitted.  This is used for
    example, in the optional BF field in the comparison instructions.  The

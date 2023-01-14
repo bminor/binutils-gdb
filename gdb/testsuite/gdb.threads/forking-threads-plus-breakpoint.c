@@ -90,6 +90,8 @@ thread_forks (void *arg)
 	  exit (1);
 	}
     }
+
+  return NULL;
 }
 
 /* Set this to tell the thread_breakpoint thread to exit.  */

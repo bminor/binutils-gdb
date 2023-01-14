@@ -84,6 +84,7 @@ _bfd_new_bfd (void)
   if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
 			      sizeof (struct section_hash_entry), 13))
     {
+      objalloc_free ((struct objalloc *) nbfd->memory);
       free (nbfd);
       return NULL;
     }
@@ -125,9 +126,9 @@ _bfd_delete_bfd (bfd *abfd)
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
     }
+  else
+    free ((char *) bfd_get_filename (abfd));
 
-  if (abfd->filename)
-    free ((char *) abfd->filename);
   free (abfd->arelt_data);
   free (abfd);
 }
@@ -139,6 +140,29 @@ _bfd_free_cached_info (bfd *abfd)
 {
   if (abfd->memory)
     {
+      const char *filename = bfd_get_filename (abfd);
+      if (filename)
+	{
+	  /* We can't afford to lose the bfd filename when freeing
+	     abfd->memory, because that would kill the cache.c scheme
+	     of closing and reopening files in order to limit the
+	     number of open files.  To reopen, you need the filename.
+	     And indeed _bfd_compute_and_write_armap calls
+	     _bfd_free_cached_info to free up space used by symbols
+	     and by check_format_matches.  Which we want to continue
+	     doing to handle very large archives.  Later the archive
+	     elements are copied, which might require reopening files.
+	     We also want to keep using objalloc memory for the
+	     filename since that allows the name to be updated
+	     without either leaking memory or implementing some sort
+	     of reference counted string for copies of the filename.  */
+	  size_t len = strlen (filename) + 1;
+	  char *copy = bfd_malloc (len);
+	  if (copy == NULL)
+	    return FALSE;
+	  memcpy (copy, filename, len);
+	  abfd->filename = copy;
+	}
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
 
@@ -233,8 +257,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       fclose (nbfd->iostream);
       _bfd_delete_bfd (nbfd);
@@ -407,8 +430,7 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
   nbfd->iostream = stream;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -608,8 +630,7 @@ bfd_openr_iovec (const char *filename, const char *target,
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -680,8 +701,7 @@ bfd_openw (const char *filename, const char *target)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -709,7 +729,7 @@ _maybe_make_executable (bfd * abfd)
     {
       struct stat buf;
 
-      if (stat (abfd->filename, &buf) == 0
+      if (stat (bfd_get_filename (abfd), &buf) == 0
 	  /* Do not attempt to change non-regular files.  This is
 	     here especially for configure scripts and kernel builds
 	     which run tests with "ld [...] -o /dev/null".  */
@@ -718,7 +738,7 @@ _maybe_make_executable (bfd * abfd)
 	  unsigned int mask = umask (0);
 
 	  umask (mask);
-	  chmod (abfd->filename,
+	  chmod (bfd_get_filename (abfd),
 		 (0777
 		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
 	}
@@ -825,8 +845,7 @@ bfd_create (const char *filename, bfd *templ)
     return NULL;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -1169,8 +1188,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
 
   if (!bfd_malloc_and_get_section (abfd, sect, &contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 
@@ -1259,8 +1277,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 
@@ -1400,7 +1417,7 @@ find_separate_debug_file (bfd *		  abfd,
     debug_file_directory = ".";
 
   /* BFD may have been opened from a stream.  */
-  if (abfd->filename == NULL)
+  if (bfd_get_filename (abfd) == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
@@ -1420,8 +1437,9 @@ find_separate_debug_file (bfd *		  abfd,
 
   if (include_dirs)
     {
-      for (dirlen = strlen (abfd->filename); dirlen > 0; dirlen--)
-	if (IS_DIR_SEPARATOR (abfd->filename[dirlen - 1]))
+      const char *fname = bfd_get_filename (abfd);
+      for (dirlen = strlen (fname); dirlen > 0; dirlen--)
+	if (IS_DIR_SEPARATOR (fname[dirlen - 1]))
 	  break;
 
       dir = (char *) bfd_malloc (dirlen + 1);
@@ -1430,7 +1448,7 @@ find_separate_debug_file (bfd *		  abfd,
 	  free (base);
 	  return NULL;
 	}
-      memcpy (dir, abfd->filename, dirlen);
+      memcpy (dir, fname, dirlen);
       dir[dirlen] = '\0';
     }
   else
@@ -1442,7 +1460,7 @@ find_separate_debug_file (bfd *		  abfd,
 
   /* Compute the canonical name of the bfd object with all symbolic links
      resolved, for use in the global debugfile directory.  */
-  canon_dir = lrealpath (abfd->filename);
+  canon_dir = lrealpath (bfd_get_filename (abfd));
   for (canon_dirlen = strlen (canon_dir); canon_dirlen > 0; canon_dirlen--)
     if (IS_DIR_SEPARATOR (canon_dir[canon_dirlen - 1]))
       break;
@@ -1827,8 +1845,7 @@ get_build_id (bfd *abfd)
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 
@@ -1909,7 +1926,7 @@ get_build_id_name (bfd *abfd, void *build_id_out_p)
   bfd_size_type s;
   bfd_byte *d;
 
-  if (abfd == NULL || abfd->filename == NULL || build_id_out == NULL)
+  if (abfd == NULL || bfd_get_filename (abfd) == NULL || build_id_out == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
@@ -2040,17 +2057,23 @@ FUNCTION
 	bfd_set_filename
 
 SYNOPSIS
-	void bfd_set_filename (bfd *abfd, char *filename);
+	const char *bfd_set_filename (bfd *abfd, const char *filename);
 
 DESCRIPTION
-	Set the filename of @var{abfd}.  The old filename, if any, is freed.
-	@var{filename} must be allocated using @code{xmalloc}.  After
-	this call, it is owned @var{abfd}.
+	Set the filename of @var{abfd}, copying the FILENAME parameter to
+	bfd_alloc'd memory owned by @var{abfd}.  Returns a pointer the
+	newly allocated name, or NULL if the allocation failed.
 */
 
-void
-bfd_set_filename (bfd *abfd, char *filename)
+const char *
+bfd_set_filename (bfd *abfd, const char *filename)
 {
-  free ((char *) abfd->filename);
-  abfd->filename = filename;
+  size_t len = strlen (filename) + 1;
+  char *n = bfd_alloc (abfd, len);
+  if (n)
+    {
+      memcpy (n, filename, len);
+      abfd->filename = n;
+    }
+  return n;
 }

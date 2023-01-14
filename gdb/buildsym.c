@@ -254,7 +254,7 @@ buildsym_compunit::finish_block_internal
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
 
-      if (TYPE_NFIELDS (ftype) <= 0)
+      if (ftype->num_fields () <= 0)
 	{
 	  /* No parameter type information is recorded with the
 	     function's type.  Set that from the type of the
@@ -271,9 +271,10 @@ buildsym_compunit::finish_block_internal
 	    }
 	  if (nparams > 0)
 	    {
-	      TYPE_NFIELDS (ftype) = nparams;
-	      TYPE_FIELDS (ftype) = (struct field *)
-		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+	      ftype->set_num_fields (nparams);
+	      ftype->set_fields
+		((struct field *)
+		 TYPE_ALLOC (ftype, nparams * sizeof (struct field)));
 
 	      iparams = 0;
 	      /* Here we want to directly access the dictionary, because

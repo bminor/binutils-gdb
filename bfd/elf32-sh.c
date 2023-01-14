@@ -167,8 +167,7 @@ sh_elf_reloc_loop (int r_type ATTRIBUTE_UNUSED, bfd *input_bfd,
 	  if (!bfd_malloc_and_get_section (input_bfd, symbol_section,
 					   &contents))
 	    {
-	      if (contents != NULL)
-		free (contents);
+	      free (contents);
 	      return bfd_reloc_outofrange;
 	    }
 	}
@@ -203,8 +202,7 @@ sh_elf_reloc_loop (int r_type ATTRIBUTE_UNUSED, bfd *input_bfd,
       end = start0;
     }
 
-  if (contents != NULL
-      && elf_section_data (symbol_section)->this_hdr.contents != contents)
+  if (elf_section_data (symbol_section)->this_hdr.contents != contents)
     free (contents);
 
   insn = bfd_get_16 (input_bfd, contents + addr);
@@ -811,21 +809,17 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 	}
     }
 
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return FALSE;
@@ -1195,8 +1189,7 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 			 when we leave sh_coff_relax_section.  */
 		      if (!bfd_malloc_and_get_section (abfd, o, &ocontents))
 			{
-			  if (ocontents != NULL)
-			    free (ocontents);
+			  free (ocontents);
 			  return FALSE;
 			}
 
@@ -1253,8 +1246,7 @@ sh_elf_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr,
 			 when we leave sh_coff_relax_section.  */
 		      if (!bfd_malloc_and_get_section (abfd, o, &ocontents))
 			{
-			  if (ocontents != NULL)
-			    free (ocontents);
+			  free (ocontents);
 			  return FALSE;
 			}
 
@@ -1387,8 +1379,7 @@ sh_elf_align_loads (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
   return TRUE;
 
  error_return:
-  if (labels != NULL)
-    free (labels);
+  free (labels);
   return FALSE;
 }
 
@@ -5257,10 +5248,8 @@ sh_elf_get_relocated_section_contents (bfd *output_bfd,
 				     isymbuf, sections))
 	goto error_return;
 
-      if (sections != NULL)
-	free (sections);
-      if (isymbuf != NULL
-	  && symtab_hdr->contents != (unsigned char *) isymbuf)
+      free (sections);
+      if (symtab_hdr->contents != (unsigned char *) isymbuf)
 	free (isymbuf);
       if (elf_section_data (input_section)->relocs != internal_relocs)
 	free (internal_relocs);
@@ -5269,13 +5258,10 @@ sh_elf_get_relocated_section_contents (bfd *output_bfd,
   return data;
 
  error_return:
-  if (sections != NULL)
-    free (sections);
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
+  free (sections);
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (internal_relocs != NULL
-      && elf_section_data (input_section)->relocs != internal_relocs)
+  if (elf_section_data (input_section)->relocs != internal_relocs)
     free (internal_relocs);
   return NULL;
 }
@@ -6027,6 +6013,10 @@ static bfd_boolean
 sh_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
+
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
 
   if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
     return TRUE;

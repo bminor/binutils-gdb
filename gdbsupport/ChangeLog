@@ -1,3 +1,38 @@
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* common-utils.cc, common-utils.h (stringify_argv): Drop
+	now unused function stringify_argv
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* common-inferior.cc, common-inferior.h (construct_inferior_arguments):
+	Adapt to take a gdb::array_view<char * const> parameter.
+	Adapt call site.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* common-inferior.cc, common-inferior.h (construct_inferior_arguments):
+	Adapt to handle zero args and return a std::string.
+	Adapt call site.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* common-inferior.h, common-inferior.cc: (construct_inferior_arguments):
+	Move function here from gdb/infcmd.c, gdb/inferior.h
+
+2020-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* btrace-common.h (btrace_cpu_vendor): Add CV_AMD.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* common-regcache.h (regcache_read_pc_protected): New function
+	declaration.
+
+2020-04-28  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb-sigmask.h: Fix typo (pthead_sigmask -> pthread_sigmask).
+
 2020-04-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common-defs.h: Include cstdlib.h.

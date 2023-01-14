@@ -23,8 +23,8 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if ![runto MAIN__] {
-    fail "run to MAIN__"
+if ![fortran_runto_main] {
+    fail "run to main"
     return
 }
 

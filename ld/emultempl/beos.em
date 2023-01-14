@@ -400,12 +400,13 @@ sort_by_file_name (const void *a, const void *b)
   asection *sb = (*rb)->section;
   int i, a_sec, b_sec;
 
-  i = filename_cmp (sa->owner->my_archive->filename,
-		    sb->owner->my_archive->filename);
+  i = filename_cmp (bfd_get_filename (sa->owner->my_archive),
+		    bfd_get_filename (sb->owner->my_archive));
   if (i != 0)
     return i;
 
-  i = filename_cmp (sa->owner->filename, sb->owner->filename);
+  i = filename_cmp (bfd_get_filename (sa->owner),
+		    bfd_get_filename (sb->owner));
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an
@@ -786,6 +787,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* new_vers_pattern */
   NULL,	/* extra_map_file_text */
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_PRINT_SYMBOL-NULL}
 };
 EOF

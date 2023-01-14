@@ -470,7 +470,7 @@ gdbscm_value_referenced_value (SCM self)
 
       struct value *res_val;
 
-      switch (TYPE_CODE (check_typedef (value_type (value))))
+      switch (check_typedef (value_type (value))->code ())
         {
         case TYPE_CODE_PTR:
           res_val = value_ind (value);
@@ -523,12 +523,12 @@ gdbscm_value_dynamic_type (SCM self)
       type = value_type (value);
       type = check_typedef (type);
 
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
-	   || (TYPE_CODE (type) == TYPE_CODE_REF))
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
+      if (((type->code () == TYPE_CODE_PTR)
+	   || (type->code () == TYPE_CODE_REF))
+	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
-	  int was_pointer = TYPE_CODE (type) == TYPE_CODE_PTR;
+	  int was_pointer = type->code () == TYPE_CODE_PTR;
 
 	  if (was_pointer)
 	    target = value_ind (value);
@@ -544,7 +544,7 @@ gdbscm_value_dynamic_type (SCM self)
 		type = lookup_lvalue_reference_type (type);
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT)
 	type = value_rtti_type (value, NULL, NULL, NULL);
       else
 	{
@@ -682,8 +682,8 @@ gdbscm_value_subscript (SCM self, SCM index_scm)
 	 a subscript.  */
       struct value *tmp = coerce_ref (value);
       struct type *tmp_type = check_typedef (value_type (tmp));
-      if (TYPE_CODE (tmp_type) != TYPE_CODE_ARRAY
-	  && TYPE_CODE (tmp_type) != TYPE_CODE_PTR)
+      if (tmp_type->code () != TYPE_CODE_ARRAY
+	  && tmp_type->code () != TYPE_CODE_PTR)
 	error (_("Cannot subscript requested type"));
 
       struct value *res_val = value_subscript (tmp, value_as_long (index));
@@ -715,7 +715,7 @@ gdbscm_value_call (SCM self, SCM args)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  SCM_ASSERT_TYPE (TYPE_CODE (ftype) == TYPE_CODE_FUNC, self,
+  SCM_ASSERT_TYPE (ftype->code () == TYPE_CODE_FUNC, self,
 		   SCM_ARG1, FUNC_NAME,
 		   _("function (value of TYPE_CODE_FUNC)"));
 
@@ -796,11 +796,11 @@ gdbscm_value_to_bytevector (SCM self)
 static int
 is_intlike (struct type *type, int ptr_ok)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_INT
-	  || TYPE_CODE (type) == TYPE_CODE_ENUM
-	  || TYPE_CODE (type) == TYPE_CODE_BOOL
-	  || TYPE_CODE (type) == TYPE_CODE_CHAR
-	  || (ptr_ok && TYPE_CODE (type) == TYPE_CODE_PTR));
+  return (type->code () == TYPE_CODE_INT
+	  || type->code () == TYPE_CODE_ENUM
+	  || type->code () == TYPE_CODE_BOOL
+	  || type->code () == TYPE_CODE_CHAR
+	  || (ptr_ok && type->code () == TYPE_CODE_PTR));
 }
 
 /* (value->bool <gdb:value>) -> boolean
@@ -833,7 +833,7 @@ gdbscm_value_to_bool (SCM self)
 
   try
     {
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+      if (type->code () == TYPE_CODE_PTR)
 	l = value_as_address (value);
       else
 	l = value_as_long (value);
@@ -877,7 +877,7 @@ gdbscm_value_to_integer (SCM self)
 
   try
     {
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+      if (type->code () == TYPE_CODE_PTR)
 	l = value_as_address (value);
       else
 	l = value_as_long (value);
@@ -920,7 +920,7 @@ gdbscm_value_to_real (SCM self)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  SCM_ASSERT_TYPE (is_intlike (type, 0) || TYPE_CODE (type) == TYPE_CODE_FLT,
+  SCM_ASSERT_TYPE (is_intlike (type, 0) || type->code () == TYPE_CODE_FLT,
 		   self, SCM_ARG1, FUNC_NAME, _("number"));
 
   try
@@ -1113,7 +1113,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
       type = value_type (value);
       realtype = check_typedef (type);
 
-      switch (TYPE_CODE (realtype))
+      switch (realtype->code ())
 	{
 	case TYPE_CODE_ARRAY:
 	  {

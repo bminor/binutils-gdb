@@ -94,7 +94,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
     }
 
   /* We expect to be silent on the non-existing files.  */
-  gdb_bfd_ref_ptr debug_bfd = gdb_bfd_open (filename.get (), gnutarget, -1);
+  gdb_bfd_ref_ptr debug_bfd = gdb_bfd_open (filename.get (), gnutarget);
 
   if (debug_bfd == NULL)
     {

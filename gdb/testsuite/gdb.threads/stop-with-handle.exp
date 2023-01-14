@@ -15,7 +15,7 @@
 
 # This test covers a case where SIGSTOP has been configured to be
 # passed to the target with GDB's 'handle' command, and then a
-# multi-threaded inferior encounters an event that causes all theads
+# multi-threaded inferior encounters an event that causes all threads
 # to be stopped.
 #
 # The problem that (used) to exist was that GDB would see the SIGSTOP,

@@ -271,24 +271,30 @@ fileio_errno_to_host (int errnum)
   return -1;
 }
 
+/* bfd_openr_iovec OPEN_CLOSURE data for gdb_bfd_open.  */
+struct gdb_bfd_open_closure
+{
+  inferior *inf;
+  bool warn_if_slow;
+};
+
 /* Wrapper for target_fileio_open suitable for passing as the
-   OPEN_FUNC argument to gdb_bfd_openr_iovec.  The supplied
-   OPEN_CLOSURE is unused.  */
+   OPEN_FUNC argument to gdb_bfd_openr_iovec.  */
 
 static void *
-gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *inferior)
+gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *open_closure)
 {
   const char *filename = bfd_get_filename (abfd);
   int fd, target_errno;
   int *stream;
+  gdb_bfd_open_closure *oclosure = (gdb_bfd_open_closure *) open_closure;
 
   gdb_assert (is_target_filename (filename));
 
-  fd = target_fileio_open_warn_if_slow ((struct inferior *) inferior,
-					filename
-					+ strlen (TARGET_SYSROOT_PREFIX),
-					FILEIO_O_RDONLY, 0,
-					&target_errno);
+  fd = target_fileio_open (oclosure->inf,
+			   filename + strlen (TARGET_SYSROOT_PREFIX),
+			   FILEIO_O_RDONLY, 0, oclosure->warn_if_slow,
+			   &target_errno);
   if (fd == -1)
     {
       errno = fileio_errno_to_host (target_errno);
@@ -379,7 +385,8 @@ gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
 /* See gdb_bfd.h.  */
 
 gdb_bfd_ref_ptr
-gdb_bfd_open (const char *name, const char *target, int fd)
+gdb_bfd_open (const char *name, const char *target, int fd,
+	      bool warn_if_slow)
 {
   hashval_t hash;
   void **slot;
@@ -393,9 +400,10 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 	{
 	  gdb_assert (fd == -1);
 
+	  gdb_bfd_open_closure open_closure { current_inferior (), warn_if_slow };
 	  return gdb_bfd_openr_iovec (name, target,
 				      gdb_bfd_iovec_fileio_open,
-				      current_inferior (),
+				      &open_closure,
 				      gdb_bfd_iovec_fileio_pread,
 				      gdb_bfd_iovec_fileio_close,
 				      gdb_bfd_iovec_fileio_fstat);

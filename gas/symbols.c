@@ -114,7 +114,7 @@ struct symbol
 /* A pointer in the symbol may point to either a complete symbol
    (struct symbol above) or to a local symbol (struct local_symbol
    defined here).  The symbol code can detect the case by examining
-   the first field.  It is always NULL for a local symbol.
+   the first field which is present in both structs.
 
    We do this because we ordinarily only need a small amount of
    information for a local symbol.  The symbol table takes up a lot of
@@ -327,14 +327,14 @@ local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
 {
   const char *name_copy;
   struct local_symbol *ret;
+  struct symbol_flags flags = { .sy_local_symbol = 1, .sy_resolved = 0 };
 
   ++local_symbol_count;
 
   name_copy = save_symbol_name (name);
 
   ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
-  ret->lsy_flags.sy_local_symbol = 1;
-  ret->lsy_flags.sy_resolved = 0;
+  ret->lsy_flags = flags;
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
   local_symbol_set_frag (ret, frag);
@@ -923,14 +923,12 @@ symbol_find_noref (const char *name, int noref)
 	*copy++ = TOUPPER (c);
       *copy = '\0';
 
-      if (copy2 != NULL)
-	free (copy2);
+      free (copy2);
       copy = (char *) name;
     }
 
   result = symbol_find_exact_noref (name, noref);
-  if (copy != NULL)
-    free (copy);
+  free (copy);
   return result;
 }
 
@@ -1237,11 +1235,18 @@ resolve_symbol_value (symbolS *symp)
   if (symp->sy_flags.sy_resolved)
     {
       final_val = 0;
-      while (symp->sy_value.X_op == O_symbol
-	     && symp->sy_value.X_add_symbol->sy_flags.sy_resolved)
+      while (symp->sy_value.X_op == O_symbol)
 	{
 	  final_val += symp->sy_value.X_add_number;
 	  symp = symp->sy_value.X_add_symbol;
+	  if (LOCAL_SYMBOL_CHECK (symp))
+	    {
+	      struct local_symbol *locsym = (struct local_symbol *) symp;
+	      final_val += locsym->lsy_value;
+	      return final_val;
+	    }
+	  if (!symp->sy_flags.sy_resolved)
+	    return 0;
 	}
       if (symp->sy_value.X_op == O_constant)
 	final_val += symp->sy_value.X_add_number;
@@ -1379,6 +1384,12 @@ resolve_symbol_value (symbolS *symp)
 	      resolved = symbol_resolved_p (add_symbol);
 	      break;
 	    }
+
+	  /* Don't leave symbol loops.  */
+	  if (finalize_syms
+	      && !LOCAL_SYMBOL_CHECK (add_symbol)
+	      && add_symbol->sy_flags.sy_resolving)
+	    break;
 
 	  if (finalize_syms && final_val == 0)
 	    {

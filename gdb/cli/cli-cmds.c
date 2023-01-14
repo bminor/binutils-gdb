@@ -191,6 +191,17 @@ error_no_arg (const char *why)
   error (_("Argument required (%s)."), why);
 }
 
+/* This implements the "info" prefix command.  Normally such commands
+   are automatically handled by add_basic_prefix_cmd, but in this case
+   a separate command is used so that it can be hooked into by
+   gdb-gdb.gdb.  */
+
+static void
+info_command (const char *arg, int from_tty)
+{
+  help_list (infolist, "info ", all_commands, gdb_stdout);
+}
+
 /* See cli/cli-cmds.h.  */
 
 void
@@ -1683,8 +1694,29 @@ alias_command (const char *args, int from_tty)
   /* ALIAS must not exist.  */
   std::string alias_string (argv_to_string (alias_argv, alias_argc));
   alias = alias_string.c_str ();
-  if (valid_command_p (alias))
-    error (_("Alias already exists: %s"), alias);
+  {
+    cmd_list_element *alias_cmd, *prefix_cmd, *cmd;
+
+    if (lookup_cmd_composition (alias, &alias_cmd, &prefix_cmd, &cmd))
+      {
+	const char *alias_name = alias_argv[alias_argc-1];
+
+	/* If we found an existing ALIAS_CMD, check that the prefix differ or
+	   the name differ.  */
+
+	if (alias_cmd != nullptr
+	    && alias_cmd->prefix == prefix_cmd
+	    && strcmp (alias_name, alias_cmd->name) == 0)
+	  error (_("Alias already exists: %s"), alias);
+
+	/* Check ALIAS differs from the found CMD.  */
+
+	if (cmd->prefix == prefix_cmd
+	    && strcmp (alias_name, cmd->name) == 0)
+	  error (_("Alias %s is the name of an existing command"), alias);
+      }
+  }
+
 
   /* If ALIAS is one word, it is an alias for the entire COMMAND.
      Example: alias spe = set print elements
@@ -1901,8 +1933,8 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
 
   struct type *type0 = check_typedef (value_type (argv[0]));
 
-  if (TYPE_CODE (type0) != TYPE_CODE_ARRAY
-      && TYPE_CODE (type0) != TYPE_CODE_STRING)
+  if (type0->code () != TYPE_CODE_ARRAY
+      && type0->code () != TYPE_CODE_STRING)
     error (_("First argument of %s must be a string."), fnname);
 
   const char *a0 = (const char *) value_contents (argv[0]);
@@ -2118,6 +2150,12 @@ Variable lookups are done with respect to the selected frame.\n\
 When the program being debugged stops, gdb selects the innermost frame.\n\
 The commands below can be used to select other frames by number or address."),
 	   &cmdlist);
+#ifdef TUI
+  add_cmd ("text-user-interface", class_tui,
+	   _("TUI is the GDB text based interface.\n\
+In TUI mode, GDB can display several text windows showing\n\
+the source file, the processor registers, the program disassembly, ..."), &cmdlist);
+#endif
   add_cmd ("running", class_run, _("Running the program."), &cmdlist);
 
   /* Define general commands.  */
@@ -2189,21 +2227,20 @@ Without an argument, history expansion is enabled."),
 			   show_history_expansion_p,
 			   &sethistlist, &showhistlist);
 
-  add_basic_prefix_cmd ("info", class_info, _("\
+  add_prefix_cmd ("info", class_info, info_command, _("\
 Generic command for showing things about the program being debugged."),
-			&infolist, "info ", 0, &cmdlist);
+		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
   add_com_alias ("inf", "info", class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
 	   _("List the completions for the rest of the line as a command."));
 
-  add_show_prefix_cmd ("show", class_info, _("\
+  c = add_show_prefix_cmd ("show", class_info, _("\
 Generic command for showing things about the debugger."),
-		       &showlist, "show ", 0, &cmdlist);
+			   &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
-  add_show_prefix_cmd ("set", class_info, _("Show all GDB settings."),
-		       &showlist, "info set ", 0, &infolist);
+  add_alias_cmd ("set", c, class_info, 0, &infolist);
 
   c = add_com ("with", class_vars, with_command, _("\
 Temporarily set SETTING to VALUE, run COMMAND, and restore SETTING.\n\
@@ -2423,7 +2460,7 @@ Usage: alias [-a] [--] ALIAS = COMMAND\n\
 ALIAS is the name of the alias command to create.\n\
 COMMAND is the command being aliased to.\n\
 If \"-a\" is specified, the command is an abbreviation,\n\
-and will not appear in help command list output.\n\
+and will not be used in command completion.\n\
 \n\
 Examples:\n\
 Make \"spe\" an alias of \"set print elements\":\n\

@@ -458,8 +458,7 @@ bfd_arm_update_notes (bfd *abfd, const char *note_section)
   return TRUE;
 
  FAIL:
-  if (buffer != NULL)
-    free (buffer);
+  free (buffer);
   return FALSE;
 }
 
@@ -528,8 +527,7 @@ bfd_arm_get_mach_from_notes (bfd *abfd, const char *note_section)
       }
 
  FAIL:
-  if (buffer != NULL)
-    free (buffer);
+  free (buffer);
   return bfd_mach_arm_unknown;
 }
 

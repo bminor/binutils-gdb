@@ -2021,8 +2021,7 @@ elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
     }
   else
     {
-      if (destelf->size != NULL)
-	free (destelf->size);
+      free (destelf->size);
       destelf->size = NULL;
     }
   S_SET_SIZE (dest, S_GET_SIZE (src));
@@ -2124,11 +2123,8 @@ obj_elf_size (int ignore ATTRIBUTE_UNUSED)
   if (exp.X_op == O_constant)
     {
       S_SET_SIZE (sym, exp.X_add_number);
-      if (symbol_get_obj (sym)->size)
-	{
-	  xfree (symbol_get_obj (sym)->size);
-	  symbol_get_obj (sym)->size = NULL;
-	}
+      xfree (symbol_get_obj (sym)->size);
+      symbol_get_obj (sym)->size = NULL;
     }
   else
     {

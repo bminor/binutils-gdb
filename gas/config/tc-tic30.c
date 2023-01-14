@@ -1997,8 +1997,7 @@ md_assemble (char *line)
 
     for (i = 0; i < insn.operands; i++)
       {
-	if (insn.operand_type[i]->immediate.label)
-	  free (insn.operand_type[i]->immediate.label);
+	free (insn.operand_type[i]->immediate.label);
 	free (insn.operand_type[i]);
       }
   }

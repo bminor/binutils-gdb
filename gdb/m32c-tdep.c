@@ -1986,7 +1986,7 @@ static const struct frame_unwind m32c_unwind = {
 static int
 m32c_reg_arg_type (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   return (code == TYPE_CODE_INT
 	  || code == TYPE_CODE_ENUM
@@ -2021,11 +2021,11 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     struct type *func_type = value_type (function);
 
     /* Dereference function pointer types.  */
-    if (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+    if (func_type->code () == TYPE_CODE_PTR)
       func_type = TYPE_TARGET_TYPE (func_type);
 
-    gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC ||
-		TYPE_CODE (func_type) == TYPE_CODE_METHOD);
+    gdb_assert (func_type->code () == TYPE_CODE_FUNC ||
+		func_type->code () == TYPE_CODE_METHOD);
 
 #if 0
     /* The ABI description in gcc/config/m32c/m32c.abi says that
@@ -2033,7 +2033,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
        separately, but the code in GCC doesn't actually do so.  */
     if (TYPE_PROTOTYPED (func_type))
 #endif
-      num_prototyped_args = TYPE_NFIELDS (func_type);
+      num_prototyped_args = func_type->num_fields ();
   }
 
   /* First, if the function returns an aggregate by value, push a
@@ -2153,7 +2153,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static int
 m32c_return_by_passed_buf (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   return (code == TYPE_CODE_STRUCT
 	  || code == TYPE_CODE_UNION);
@@ -2399,9 +2399,9 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target_code;
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
+  gdb_assert (type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
-  target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  target_code = TYPE_TARGET_TYPE (type)->code ();
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
@@ -2478,11 +2478,11 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
   CORE_ADDR ptr;
   enum type_code target_code;
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
+  gdb_assert (type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
   ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
-  target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  target_code = TYPE_TARGET_TYPE (type)->code ();
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {

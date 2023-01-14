@@ -1692,8 +1692,7 @@ bfd_get_target_info (const char *target_name, bfd *abfd,
 	    _bfd_find_arch_match (tname, arches, def_target_arch);
 	}
 
-      if (arches)
-	free (arches);
+      free (arches);
     }
   return target_vec;
 }

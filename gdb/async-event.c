@@ -1,5 +1,5 @@
 /* Async events for the GDB event loop.
-   Copyright (C) 1999-2019 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,16 +32,21 @@
    Async_init_signals takes care of setting up such an
    async_signal_handler for each interesting signal.  */
 
-typedef struct async_signal_handler
-  {
-    int ready;			    /* If ready, call this handler
-				       from the main event loop, using
-				       invoke_async_handler.  */
-    struct async_signal_handler *next_handler;	/* Ptr to next handler.  */
-    sig_handler_func *proc;	    /* Function to call to do the work.  */
-    gdb_client_data client_data;    /* Argument to async_handler_func.  */
-  }
-async_signal_handler;
+struct async_signal_handler
+{
+  /* If ready, call this handler  from the main event loop, using
+     invoke_async_handler.  */
+  int ready;
+
+  /* Pointer to next handler.  */
+  struct async_signal_handler *next_handler;
+
+  /* Function to call to do the work.  */
+  sig_handler_func *proc;
+
+  /* Argument to PROC.  */
+  gdb_client_data client_data;
+};
 
 /* PROC is a function to be invoked when the READY flag is set.  This
    happens when the event has been marked with
@@ -49,45 +54,44 @@ async_signal_handler;
    to an event will be carried out by PROC at a later time, within
    process_event.  This provides a deferred execution of event
    handlers.  */
-typedef struct async_event_handler
-  {
-    /* If ready, call this handler from the main event loop, using
-       invoke_event_handler.  */
-    int ready;
+struct async_event_handler
+{
+  /* If ready, call this handler from the main event loop, using
+     invoke_event_handler.  */
+  int ready;
 
-    /* Point to next handler.  */
-    struct async_event_handler *next_handler;
+  /* Pointer to next handler.  */
+  struct async_event_handler *next_handler;
 
-    /* Function to call to do the work.  */
-    async_event_handler_func *proc;
+  /* Function to call to do the work.  */
+  async_event_handler_func *proc;
 
-    /* Argument to PROC.  */
-    gdb_client_data client_data;
-  }
-async_event_handler;
+  /* Argument to PROC.  */
+  gdb_client_data client_data;
+};
 
 /* All the async_signal_handlers gdb is interested in are kept onto
    this list.  */
 static struct
-  {
-    /* Pointer to first in handler list.  */
-    async_signal_handler *first_handler;
+{
+  /* Pointer to first in handler list.  */
+  async_signal_handler *first_handler;
 
-    /* Pointer to last in handler list.  */
-    async_signal_handler *last_handler;
-  }
+  /* Pointer to last in handler list.  */
+  async_signal_handler *last_handler;
+}
 sighandler_list;
 
 /* All the async_event_handlers gdb is interested in are kept onto
    this list.  */
 static struct
-  {
-    /* Pointer to first in handler list.  */
-    async_event_handler *first_handler;
+{
+  /* Pointer to first in handler list.  */
+  async_event_handler *first_handler;
 
-    /* Pointer to last in handler list.  */
-    async_event_handler *last_handler;
-  }
+  /* Pointer to last in handler list.  */
+  async_event_handler *last_handler;
+}
 async_event_handler_list;
 
 

@@ -890,12 +890,12 @@ coff_grok (bfd *inabfd)
   storage = bfd_get_symtab_upper_bound (abfd);
 
   if (storage < 0)
-    bfd_fatal (abfd->filename);
+    bfd_fatal (bfd_get_filename (abfd));
 
   syms = (asymbol **) xmalloc (storage);
   symcount = bfd_canonicalize_symtab (abfd, syms);
   if (symcount < 0)
-    bfd_fatal (abfd->filename);
+    bfd_fatal (bfd_get_filename (abfd));
   rawsyms = obj_raw_syments (abfd);
   rawcount = obj_raw_syment_count (abfd);
   tindex = (struct coff_symbol **) (xcalloc (sizeof (struct coff_symbol *), rawcount));

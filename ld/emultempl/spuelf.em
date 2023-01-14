@@ -500,7 +500,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
     return FALSE;
 
   /* Use the filename as the symbol marking the program handle struct.  */
-  sym = base_name (entry->the_bfd->filename);
+  sym = base_name (bfd_get_filename (entry->the_bfd));
 
   handle = xstrdup (sym);
   for (p = handle; *p; ++p)
@@ -532,7 +532,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   cmd[0] = EMBEDSPU;
   cmd[1] = flags;
   cmd[2] = handle;
-  cmd[3] = entry->the_bfd->filename;
+  cmd[3] = bfd_get_filename (entry->the_bfd);
   cmd[4] = oname;
   cmd[5] = NULL;
   if (verbose)

@@ -1606,7 +1606,7 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
     {
       complaint (_("could not obtain base address for "
 					"SystemTap section on objfile `%s'."),
-		 obfd->filename);
+		 bfd_get_filename (obfd));
       return 0;
     }
 

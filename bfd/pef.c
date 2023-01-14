@@ -505,13 +505,11 @@ bfd_pef_scan_start_address (bfd *abfd)
   abfd->start_address = section->vma + header.main_offset;
 
  end:
-  if (loaderbuf != NULL)
-    free (loaderbuf);
+  free (loaderbuf);
   return 0;
 
  error:
-  if (loaderbuf != NULL)
-    free (loaderbuf);
+  free (loaderbuf);
   return -1;
 }
 
@@ -868,18 +866,14 @@ bfd_pef_parse_function_stubs (bfd *abfd,
   goto end;
 
  end:
-  if (libraries != NULL)
-    free (libraries);
-  if (imports != NULL)
-    free (imports);
+  free (libraries);
+  free (imports);
   *nsym = count;
   return 0;
 
  error:
-  if (libraries != NULL)
-    free (libraries);
-  if (imports != NULL)
-    free (imports);
+  free (libraries);
+  free (imports);
   *nsym = count;
   return -1;
 }
@@ -941,12 +935,8 @@ bfd_pef_parse_symbols (bfd *abfd, asymbol **csym)
     csym[count] = NULL;
 
  end:
-  if (codebuf != NULL)
-    free (codebuf);
-
-  if (loaderbuf != NULL)
-    free (loaderbuf);
-
+  free (codebuf);
+  free (loaderbuf);
   return count;
 }
 

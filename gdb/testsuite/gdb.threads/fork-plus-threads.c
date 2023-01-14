@@ -33,6 +33,7 @@ static void *
 thread_func (void *arg)
 {
   /* Empty.  */
+  return NULL;
 }
 
 static void

@@ -513,17 +513,14 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	_bfd_error_handler (_("%pB symbol number %lu references"
 			      " nonexistent SHT_SYMTAB_SHNDX section"),
 			    ibfd, (unsigned long) symoffset);
-	if (alloc_intsym != NULL)
-	  free (alloc_intsym);
+	free (alloc_intsym);
 	intsym_buf = NULL;
 	goto out;
       }
 
  out:
-  if (alloc_ext != NULL)
-    free (alloc_ext);
-  if (alloc_extshndx != NULL)
-    free (alloc_extshndx);
+  free (alloc_ext);
+  free (alloc_extshndx);
 
   return intsym_buf;
 }
@@ -1878,8 +1875,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return TRUE;
 
  error_return:
-  if (dynbuf != NULL)
-    free (dynbuf);
+  free (dynbuf);
   return FALSE;
 }
 
@@ -2071,9 +2067,13 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (sections_being_created == NULL)
 	{
 	  size_t amt = elf_numsections (abfd) * sizeof (bfd_boolean);
-	  sections_being_created = (bfd_boolean *) bfd_zalloc (abfd, amt);
+
+	  /* PR 26005: Do not use bfd_zalloc here as the memory might
+	     be released before the bfd has been fully scanned.  */
+	  sections_being_created = (bfd_boolean *) bfd_malloc (amt);
 	  if (sections_being_created == NULL)
 	    return FALSE;
+	  memset (sections_being_created, FALSE, amt);
 	  sections_being_created_abfd = abfd;
 	}
       if (sections_being_created [shindex])
@@ -2611,8 +2611,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     sections_being_created [shindex] = FALSE;
   if (-- nesting == 0)
     {
+      free (sections_being_created);
       sections_being_created = NULL;
-      sections_being_created_abfd = abfd;
+      sections_being_created_abfd = NULL;
     }
   return ret;
 }
@@ -5247,8 +5248,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 
  error_return:
-  if (sections != NULL)
-    free (sections);
+  free (sections);
   return FALSE;
 }
 
@@ -8503,9 +8503,23 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
 }
 
 long
-_bfd_elf_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
-				sec_ptr asect)
+_bfd_elf_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 {
+  if (asect->reloc_count != 0)
+    {
+      /* Sanity check reloc section size.  */
+      struct bfd_elf_section_data *d = elf_section_data (asect);
+      Elf_Internal_Shdr *rel_hdr = &d->this_hdr;
+      bfd_size_type ext_rel_size = rel_hdr->sh_size;
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && ext_rel_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
+
 #if SIZEOF_LONG == SIZEOF_INT
   if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
     {
@@ -8571,7 +8585,7 @@ _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
 long
 _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
-  bfd_size_type count;
+  bfd_size_type count, ext_rel_size;
   asection *s;
 
   if (elf_dynsymtab (abfd) == 0)
@@ -8581,11 +8595,18 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
     }
 
   count = 1;
+  ext_rel_size = 0;
   for (s = abfd->sections; s != NULL; s = s->next)
     if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
       {
+	ext_rel_size += s->size;
+	if (ext_rel_size < s->size)
+	  {
+	    bfd_set_error (bfd_error_file_truncated);
+	    return -1;
+	  }
 	count += s->size / elf_section_data (s)->this_hdr.sh_entsize;
 	if (count > LONG_MAX / sizeof (arelent *))
 	  {
@@ -8593,6 +8614,16 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 	    return -1;
 	  }
       }
+  if (count > 1)
+    {
+      /* Sanity check reloc section sizes.  */
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && ext_rel_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
   return count * sizeof (arelent *);
 }
 
@@ -9001,8 +9032,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
   return TRUE;
 
  error_return:
-  if (contents != NULL)
-    free (contents);
+  free (contents);
   return FALSE;
 }
 

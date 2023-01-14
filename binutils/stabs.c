@@ -2119,8 +2119,7 @@ parse_stab_struct_type (void *                dhandle,
       || ! parse_stab_tilde_field (dhandle, info, pp, typenums, &vptrbase,
 				   &ownvptr, p_end))
     {
-      if (fields != NULL)
-	free (fields);
+      free (fields);
       return DEBUG_TYPE_NULL;
     }
 
@@ -2955,12 +2954,9 @@ parse_stab_members (void *                dhandle,
   return TRUE;
 
  fail:
-  if (name != NULL)
-    free (name);
-  if (variants != NULL)
-    free (variants);
-  if (argtypes != NULL)
-    free (argtypes);
+  free (name);
+  free (variants);
+  free (argtypes);
   return FALSE;
 }
 
@@ -3901,8 +3897,7 @@ stab_demangle_argtypes (void *dhandle, struct stab_handle *info,
   return minfo.args;
 
  error_return:
-  if (minfo.typestrings != NULL)
-    free (minfo.typestrings);
+  free (minfo.typestrings);
   return NULL;
 }
 
@@ -4516,8 +4511,7 @@ stab_demangle_template (struct stab_demangle_info *minfo, const char **pp,
       if (s3 == NULL || s4 == NULL)
 	{
 	  stab_bad_demangle (orig);
-	  if (s3 != NULL)
-	    free (s3);
+	  free (s3);
 	  return FALSE;
 	}
 

@@ -4162,14 +4162,11 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	}
     }
 
-  if (allocated != NULL)
-    free (allocated);
-
+  free (allocated);
   return TRUE;
 
  error_return:
-  if (allocated != NULL)
-    free (allocated);
+  free (allocated);
   return FALSE;
 }
 

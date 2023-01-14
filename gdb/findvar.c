@@ -153,7 +153,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
 CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("extract_typed_address: "
 		    "type is not a pointer or reference"));
@@ -206,7 +206,7 @@ template void store_integer (gdb_byte *addr, int len,
 void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
     internal_error (__FILE__, __LINE__,
 		    _("store_typed_address: "
 		    "type is not a pointer or reference"));
@@ -257,7 +257,7 @@ copy_integer_to_size (gdb_byte *dest, int dest_size, const gdb_byte *source,
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by register_type().  */
+   determined by register_type ().  */
 
 struct value *
 value_of_register (int regnum, struct frame_info *frame)
@@ -277,7 +277,7 @@ value_of_register (int regnum, struct frame_info *frame)
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by register_type().  The value is not fetched.  */
+   determined by register_type ().  The value is not fetched.  */
 
 struct value *
 value_of_register_lazy (struct frame_info *frame, int regnum)

@@ -475,7 +475,7 @@ debug_sym_offsets (struct objfile *objfile,
   debug_data->real_sf->sym_offsets (objfile, info);
 }
 
-static struct symfile_segment_data *
+static symfile_segment_data_up
 debug_sym_segments (bfd *abfd)
 {
   /* This API function is annoying, it doesn't take a "this" pointer.
@@ -621,9 +621,7 @@ objfile_set_sym_fns (struct objfile *objfile, const struct sym_fns *sf)
 static void
 set_debug_symfile (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	if (debug_symfile)

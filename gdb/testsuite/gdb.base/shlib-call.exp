@@ -142,9 +142,14 @@ gdb_test_multiple "step" "step out of shr2 to main" {
     }
     -re ".*\\\}.*$gdb_prompt $" {
 	pass "step out of shr2 to main (stopped in shr2 epilogue)"
-	gdb_test "step" \
-	    "main \\(\\) at.*g = mainshr1\\(g\\);" \
-	    "step out of shr2 epilogue to main"
+	gdb_test_multiple "step" "step out of shr2 epilogue to main" {
+	    -re -wrap "main \\(\\) at.*g = mainshr1\\(g\\);" {
+		pass $gdb_test_name
+	    }
+	    -re -wrap "main \\(\\) at.*g = shr2\\(g\\);" {
+		gdb_test "step" "g = mainshr1\\(g\\);" $gdb_test_name
+	    }
+	}
     }
 }
     

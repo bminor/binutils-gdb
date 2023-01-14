@@ -101,7 +101,7 @@ type_is_full_subrange_of_target_type (struct type *type)
 {
   struct type *subtype;
 
-  if (TYPE_CODE (type) != TYPE_CODE_RANGE)
+  if (type->code () != TYPE_CODE_RANGE)
     return 0;
 
   subtype = TYPE_TARGET_TYPE (type);
@@ -146,7 +146,7 @@ print_range (struct type *type, struct ui_file *stream,
 	type = TYPE_TARGET_TYPE (type);
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_RANGE:
     case TYPE_CODE_ENUM:
@@ -180,8 +180,8 @@ print_range (struct type *type, struct ui_file *stream,
       break;
     default:
       fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (TYPE_NAME (type)),
-			TYPE_NAME (type));
+			ada_name_prefix_len (type->name ()),
+			type->name ());
       break;
     }
 }
@@ -208,7 +208,7 @@ print_range_bound (struct type *type, const char *bounds, int *n,
          to indicate default output when we detect that the bound is negative,
          and the type is a TYPE_CODE_INT.  The bound is negative when
          'm' is the last character of the number scanned in BOUNDS.  */
-      if (bounds[*n - 1] == 'm' && TYPE_CODE (type) == TYPE_CODE_INT)
+      if (bounds[*n - 1] == 'm' && type->code () == TYPE_CODE_INT)
 	type = NULL;
       ada_print_scalar (type, B, stream);
       if (bounds[*n] == '_')
@@ -267,10 +267,10 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
   const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
-  name = TYPE_NAME (raw_type);
+  name = raw_type->name ();
   gdb_assert (name != NULL);
 
-  if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
+  if (raw_type->code () == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else
     base_type = raw_type;
@@ -312,7 +312,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
 static void
 print_enum_type (struct type *type, struct ui_file *stream)
 {
-  int len = TYPE_NFIELDS (type);
+  int len = type->num_fields ();
   int i;
   LONGEST lastval;
 
@@ -342,9 +342,9 @@ print_enum_type (struct type *type, struct ui_file *stream)
 /* Print representation of Ada fixed-point type TYPE on STREAM.  */
 
 static void
-print_fixed_point_type (struct type *type, struct ui_file *stream)
+print_gnat_encoded_fixed_point_type (struct type *type, struct ui_file *stream)
 {
-  struct value *delta = ada_delta (type);
+  struct value *delta = gnat_encoded_fixed_point_delta (type);
   struct value *small = ada_scaling_factor (type);
 
   if (delta == nullptr)
@@ -402,7 +402,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
       bitsize = 0;
       if (range_desc_type == NULL)
 	{
-	  for (arr_type = type; TYPE_CODE (arr_type) == TYPE_CODE_ARRAY;
+	  for (arr_type = type; arr_type->code () == TYPE_CODE_ARRAY;
 	       arr_type = TYPE_TARGET_TYPE (arr_type))
 	    {
 	      if (arr_type != type)
@@ -417,7 +417,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	{
 	  int k;
 
-	  n_indices = TYPE_NFIELDS (range_desc_type);
+	  n_indices = range_desc_type->num_fields ();
 	  for (k = 0, arr_type = type;
 	       k < n_indices;
 	       k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
@@ -552,10 +552,10 @@ print_variant_clauses (struct type *type, int field_num,
   var_type = TYPE_FIELD_TYPE (type, field_num);
   discr_type = ada_variant_discrim_type (var_type, outer_type);
 
-  if (TYPE_CODE (var_type) == TYPE_CODE_PTR)
+  if (var_type->code () == TYPE_CODE_PTR)
     {
       var_type = TYPE_TARGET_TYPE (var_type);
-      if (var_type == NULL || TYPE_CODE (var_type) != TYPE_CODE_UNION)
+      if (var_type == NULL || var_type->code () != TYPE_CODE_UNION)
 	return;
     }
 
@@ -563,7 +563,7 @@ print_variant_clauses (struct type *type, int field_num,
   if (par_type != NULL)
     var_type = par_type;
 
-  for (i = 0; i < TYPE_NFIELDS (var_type); i += 1)
+  for (i = 0; i < var_type->num_fields (); i += 1)
     {
       fprintf_filtered (stream, "\n%*swhen ", level + 4, "");
       if (print_choices (var_type, i, stream, discr_type))
@@ -776,23 +776,23 @@ print_record_field_types (struct type *type, struct type *outer_type,
 			  struct ui_file *stream, int show, int level,
 			  const struct type_print_options *flags)
 {
-  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+  struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
   if (prop != nullptr)
     {
       if (prop->kind == PROP_TYPE)
 	{
 	  type = prop->data.original_type;
-	  prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+	  prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
 	}
       gdb_assert (prop->kind == PROP_VARIANT_PARTS);
       print_record_field_types_dynamic (*prop->data.variant_parts,
-					0, TYPE_NFIELDS (type),
+					0, type->num_fields (),
 					type, stream, show, level, flags);
-      return TYPE_NFIELDS (type);
+      return type->num_fields ();
     }
 
   return print_selected_record_field_types (type, outer_type,
-					    0, TYPE_NFIELDS (type) - 1,
+					    0, type->num_fields () - 1,
 					    stream, show, level, flags);
 }
    
@@ -863,7 +863,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 {
   if (show < 0)
     fprintf_filtered (stream, "record (?) is ... end record");
-  else if (TYPE_NFIELDS (type) == 0)
+  else if (type->num_fields () == 0)
     fprintf_filtered (stream, "record (?) is null; end record");
   else
     {
@@ -871,7 +871,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 
       fprintf_filtered (stream, "record (?) is\n%*scase ? is", level + 4, "");
 
-      for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+      for (i = 0; i < type->num_fields (); i += 1)
 	{
 	  fprintf_filtered (stream, "\n%*swhen ? =>\n%*s", level + 8, "",
 			    level + 12, "");
@@ -895,10 +895,10 @@ static void
 print_func_type (struct type *type, struct ui_file *stream, const char *name,
 		 const struct type_print_options *flags)
 {
-  int i, len = TYPE_NFIELDS (type);
+  int i, len = type->num_fields ();
 
   if (TYPE_TARGET_TYPE (type) != NULL
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID)
     fprintf_filtered (stream, "procedure");
   else
     fprintf_filtered (stream, "function");
@@ -928,7 +928,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
   if (TYPE_TARGET_TYPE (type) == NULL)
     fprintf_filtered (stream, " return <unknown return type>");
-  else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+  else if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
       fprintf_filtered (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
@@ -970,7 +970,7 @@ ada_print_type (struct type *type0, const char *varstring,
   if (show > 0)
     type = ada_check_typedef (type);
 
-  if (is_var_decl && TYPE_CODE (type) != TYPE_CODE_FUNC)
+  if (is_var_decl && type->code () != TYPE_CODE_FUNC)
     fprintf_filtered (stream, "%.*s: ",
 		      ada_name_prefix_len (varstring), varstring);
 
@@ -984,10 +984,10 @@ ada_print_type (struct type *type0, const char *varstring,
   if (ada_is_aligner_type (type))
     ada_print_type (ada_aligned_type (type), "", stream, show, level, flags);
   else if (ada_is_constrained_packed_array_type (type)
-	   && TYPE_CODE (type) != TYPE_CODE_PTR)
+	   && type->code () != TYPE_CODE_PTR)
     print_array_type (type, stream, show, level, flags);
   else
-    switch (TYPE_CODE (type))
+    switch (type->code ())
       {
       default:
 	fprintf_filtered (stream, "<");
@@ -1012,8 +1012,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	fprintf_filtered (stream, "(false, true)");
 	break;
       case TYPE_CODE_INT:
-	if (ada_is_fixed_point_type (type))
-	  print_fixed_point_type (type, stream);
+	if (ada_is_gnat_encoded_fixed_point_type (type))
+	  print_gnat_encoded_fixed_point_type (type, stream);
 	else
 	  {
 	    const char *name = ada_type_name (type);
@@ -1030,8 +1030,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	  }
 	break;
       case TYPE_CODE_RANGE:
-	if (ada_is_fixed_point_type (type))
-	  print_fixed_point_type (type, stream);
+	if (ada_is_gnat_encoded_fixed_point_type (type))
+	  print_gnat_encoded_fixed_point_type (type, stream);
 	else if (ada_is_modular_type (type))
 	  fprintf_filtered (stream, "mod %s", 
 			    int_string (ada_modulus (type), 10, 0, 0, 1));

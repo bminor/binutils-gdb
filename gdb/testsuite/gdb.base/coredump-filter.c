@@ -29,7 +29,7 @@ do_mmap (void *addr, size_t size, int prot, int flags, int fd, off_t offset)
 {
   void *ret = mmap (addr, size, prot, flags, fd, offset);
 
-  assert (ret != NULL);
+  assert (ret != MAP_FAILED);
   return ret;
 }
 

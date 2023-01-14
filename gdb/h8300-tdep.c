@@ -178,10 +178,10 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (IS_MOVB_Rn24_SP (read_memory_unsigned_integer (pc + 2,
 							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
+	  ULONGEST disp = read_memory_unsigned_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
-	  if (disp < 0 && disp > 0xffffff)
+	  if ((disp & 0x00800000) != 0)
 	    return 8;
 	}
     }
@@ -197,10 +197,10 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (IS_MOVW_Rn24_SP (read_memory_unsigned_integer (pc + 2,
 							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
+	  ULONGEST disp = read_memory_unsigned_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
-	  if (disp < 0 && disp > 0xffffff)
+	  if ((disp & 0x00800000) != 0)
 	    return 8;
 	}
     }
@@ -219,10 +219,11 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
 	{
 	  if (IS_MOVL_Rn24_SP (read_memory_integer (pc + 4, 2, byte_order)))
 	    {
-	      LONGEST disp = read_memory_integer (pc + 6, 4, byte_order);
+	      ULONGEST disp = read_memory_unsigned_integer (pc + 6, 4,
+							    byte_order);
 
 	      /* ... and d:24 is negative.  */
-	      if (disp < 0 && disp > 0xffffff)
+	      if ((disp & 0x00800000) != 0)
 		return 10;
 	    }
 	}
@@ -740,7 +741,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer (valbuf + 2, 2, byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
-      if (TYPE_CODE (type) == TYPE_CODE_INT)
+      if (type->code () == TYPE_CODE_INT)
 	{
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
 	  c = read_memory_unsigned_integer ((CORE_ADDR) addr, len, byte_order);
@@ -771,7 +772,7 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
-      if (TYPE_CODE (type) == TYPE_CODE_INT)
+      if (type->code () == TYPE_CODE_INT)
 	{
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
 	  store_unsigned_integer (valbuf, 4, byte_order, c);
@@ -792,8 +793,8 @@ h8300_use_struct_convention (struct type *value_type)
   /* Types of 1, 2 or 4 bytes are returned in R0/R1, everything else on the
      stack.  */
 
-  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+  if (value_type->code () == TYPE_CODE_STRUCT
+      || value_type->code () == TYPE_CODE_UNION)
     return 1;
   return !(TYPE_LENGTH (value_type) == 1
 	   || TYPE_LENGTH (value_type) == 2
@@ -805,14 +806,14 @@ h8300h_use_struct_convention (struct type *value_type)
 {
   /* Types of 1, 2 or 4 bytes are returned in R0, INT types of 8 bytes are
      returned in R0/R1, everything else on the stack.  */
-  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+  if (value_type->code () == TYPE_CODE_STRUCT
+      || value_type->code () == TYPE_CODE_UNION)
     return 1;
   return !(TYPE_LENGTH (value_type) == 1
 	   || TYPE_LENGTH (value_type) == 2
 	   || TYPE_LENGTH (value_type) == 4
 	   || (TYPE_LENGTH (value_type) == 8
-	       && TYPE_CODE (value_type) == TYPE_CODE_INT));
+	       && value_type->code () == TYPE_CODE_INT));
 }
 
 /* Function: store_return_value

@@ -908,10 +908,7 @@ main_got (void)
 CORE_ADDR
 frv_fdpic_find_global_pointer (CORE_ADDR addr)
 {
-  struct so_list *so;
-
-  so = master_so_list ();
-  while (so)
+  for (struct so_list *so : current_program_space->solibs ())
     {
       int seg;
       lm_info_frv *li = (lm_info_frv *) so->lm_info;
@@ -923,8 +920,6 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
 	      && addr < map->segs[seg].addr + map->segs[seg].p_memsz)
 	    return li->got_value;
 	}
-
-      so = so->next;
     }
 
   /* Didn't find it in any of the shared objects.  So assume it's in the
@@ -969,10 +964,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
      in list of shared objects.  */
   if (addr == 0)
     {
-      struct so_list *so;
-
-      so = master_so_list ();
-      while (so)
+      for (struct so_list *so : current_program_space->solibs ())
 	{
 	  lm_info_frv *li = (lm_info_frv *) so->lm_info;
 
@@ -981,8 +973,6 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
 
 	  if (addr != 0)
 	    break;
-
-	  so = so->next;
 	}
     }
 
@@ -1116,8 +1106,6 @@ find_canonical_descriptor_in_load_object
 CORE_ADDR
 frv_fetch_objfile_link_map (struct objfile *objfile)
 {
-  struct so_list *so;
-
   /* Cause frv_current_sos() to be run if it hasn't been already.  */
   if (main_lm_addr == 0)
     solib_add (0, 0, 1);
@@ -1128,7 +1116,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
-  for (so = master_so_list (); so; so = so->next)
+  for (struct so_list *so : current_program_space->solibs ())
     {
       lm_info_frv *li = (lm_info_frv *) so->lm_info;
 

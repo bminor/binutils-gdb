@@ -1107,7 +1107,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     /* Class-initialization of bitfields is only allowed in C++20.  */
     : domain (UNDEF_DOMAIN),
       aclass_index (0),
-      is_objfile_owned (0),
+      is_objfile_owned (1),
       is_argument (0),
       is_inlined (0),
       maybe_copied (0),
@@ -1120,11 +1120,13 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       language_specific.obstack = nullptr;
       m_language = language_unknown;
       ada_mangled = 0;
-      section = 0;
+      section = -1;
       /* GCC 4.8.5 (on CentOS 7) does not correctly compile class-
          initialization of unions, so we initialize it manually here.  */
       owner.symtab = nullptr;
     }
+
+  symbol (const symbol &) = default;
 
   /* Data type of value */
 
@@ -2236,10 +2238,6 @@ bool producer_is_realview (const char *producer);
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
 
-/* Look up objfile containing BLOCK.  */
-
-struct objfile *lookup_objfile_from_block (const struct block *block);
-
 extern unsigned int symtab_create_debug;
 
 extern unsigned int symbol_lookup_debug;
@@ -2299,20 +2297,18 @@ bool iterate_over_symbols_terminated
 /* Storage type used by demangle_for_lookup.  demangle_for_lookup
    either returns a const char * pointer that points to either of the
    fields of this type, or a pointer to the input NAME.  This is done
-   this way because the underlying functions that demangle_for_lookup
-   calls either return a std::string (e.g., cp_canonicalize_string) or
-   a malloc'ed buffer (libiberty's demangled), and we want to avoid
-   unnecessary reallocation/string copying.  */
+   this way to avoid depending on the precise details of the storage
+   for the string.  */
 class demangle_result_storage
 {
 public:
 
-  /* Swap the std::string storage with STR, and return a pointer to
-     the beginning of the new string.  */
-  const char *swap_string (std::string &str)
+  /* Swap the malloc storage to STR, and return a pointer to the
+     beginning of the new string.  */
+  const char *set_malloc_ptr (gdb::unique_xmalloc_ptr<char> &&str)
   {
-    std::swap (m_string, str);
-    return m_string.c_str ();
+    m_malloc = std::move (str);
+    return m_malloc.get ();
   }
 
   /* Set the malloc storage to now point at PTR.  Any previous malloc
@@ -2326,7 +2322,6 @@ public:
 private:
 
   /* The storage.  */
-  std::string m_string;
   gdb::unique_xmalloc_ptr<char> m_malloc;
 };
 
@@ -2334,17 +2329,12 @@ const char *
   demangle_for_lookup (const char *name, enum language lang,
 		       demangle_result_storage &storage);
 
-struct symbol *allocate_symbol (struct objfile *);
-
-void initialize_objfile_symbol (struct symbol *);
-
-struct template_symbol *allocate_template_symbol (struct objfile *);
-
 /* Test to see if the symbol of language SYMBOL_LANGUAGE specified by
    SYMNAME (which is already demangled for C++ symbols) matches
    SYM_TEXT in the first SYM_TEXT_LEN characters.  If so, add it to
-   the current completion list.  */
-void completion_list_add_name (completion_tracker &tracker,
+   the current completion list and return true.  Otherwise, return
+   false.  */
+bool completion_list_add_name (completion_tracker &tracker,
 			       language symbol_language,
 			       const char *symname,
 			       const lookup_name_info &lookup_name,

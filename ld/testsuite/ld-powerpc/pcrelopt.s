@@ -127,5 +127,21 @@ _start:
 	pld 7,sym@got@pcrel
 	lbz 6,0(7)
 
+	pld 9,sym@got@pcrel
+		.reloc .-8,R_PPC64_PCREL_OPT,0f-(.-8)
+0:	lxvp 62,0(9)
+
+	pld 9,sym@got@pcrel
+		.reloc .-8,R_PPC64_PCREL_OPT,0f-(.-8)
+0:	lxvp 0,0(9)
+
+	pld 9,sym@got@pcrel
+		.reloc .-8,R_PPC64_PCREL_OPT,0f-(.-8)
+0:	stxvp 62,0(9)
+
+	pld 9,sym@got@pcrel
+		.reloc .-8,R_PPC64_PCREL_OPT,0f-(.-8)
+0:	stxvp 0,0(9)
+
 	.data
 sym:	.space 32

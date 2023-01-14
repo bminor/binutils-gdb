@@ -29,8 +29,8 @@ gdb_test "p modmany::var_i" " = 14" "stopped language detection"
 
 gdb_test "print mod1::var_const" " = 20" "fully qualified name of DW_TAG_constant"
 
-if ![runto MAIN__] then {
-    perror "couldn't run to breakpoint MAIN__"
+if ![fortran_runto_main] then {
+    perror "couldn't run to main"
     continue
 }
 
@@ -123,7 +123,7 @@ complete "modmany::var" $modmany_list
 # Breakpoint would work in language "c".
 gdb_test "show language" {The current source language is "(auto; currently )?fortran".}
 
-# gcc-4.4.2: The main program is always MAIN__ in .symtab so "runto" above
+# gcc-4.4.2: The main program is always $fmain in .symtab so "runto" above
 # works.  But DWARF DW_TAG_subprogram contains the name specified by
 # the "program" Fortran statement.
 if [gdb_breakpoint "module"] {

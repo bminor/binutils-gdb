@@ -2633,17 +2633,17 @@ static int
 i386_16_byte_align_p (struct type *type)
 {
   type = check_typedef (type);
-  if ((TYPE_CODE (type) == TYPE_CODE_DECFLOAT
-       || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
+  if ((type->code () == TYPE_CODE_DECFLOAT
+       || (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
       && TYPE_LENGTH (type) == 16)
     return 1;
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     return i386_16_byte_align_p (TYPE_TARGET_TYPE (type));
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION)
     {
       int i;
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  if (i386_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
 	    return 1;
@@ -2668,12 +2668,15 @@ i386_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr,
   return sp - 16;
 }
 
-static CORE_ADDR
-i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		      struct value **args, CORE_ADDR sp,
-		      function_call_return_method return_method,
-		      CORE_ADDR struct_addr)
+/* The "push_dummy_call" gdbarch method, optionally with the thiscall
+   calling convention.  */
+
+CORE_ADDR
+i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			       struct regcache *regcache, CORE_ADDR bp_addr,
+			       int nargs, struct value **args, CORE_ADDR sp,
+			       function_call_return_method return_method,
+			       CORE_ADDR struct_addr, bool thiscall)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
@@ -2709,7 +2712,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    args_space += 4;
 	}
 
-      for (i = 0; i < nargs; i++)
+      for (i = thiscall ? 1 : 0; i < nargs; i++)
 	{
 	  int len = TYPE_LENGTH (value_enclosing_type (args[i]));
 
@@ -2761,6 +2764,10 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* ...and fake a frame pointer.  */
   regcache->cooked_write (I386_EBP_REGNUM, buf);
 
+  /* The 'this' pointer needs to be in ECX.  */
+  if (thiscall)
+    regcache->cooked_write (I386_ECX_REGNUM, value_contents_all (args[0]));
+
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
      i386_dummy_id).  It's there, since all frame unwinders for
@@ -2771,6 +2778,20 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      the i386, when %ebp is used as a frame pointer, the offset
      between the contents %ebp and the CFA as defined by GCC.  */
   return sp + 8;
+}
+
+/* Implement the "push_dummy_call" gdbarch method.  */
+
+static CORE_ADDR
+i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		      struct value **args, CORE_ADDR sp,
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
+{
+  return i386_thiscall_push_dummy_call (gdbarch, function, regcache, bp_addr,
+					nargs, args, sp, return_method,
+					struct_addr, false);
 }
 
 /* These registers are used for returning integers (and on some
@@ -2790,7 +2811,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[I386_MAX_REGISTER_SIZE];
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (type->code () == TYPE_CODE_FLT)
     {
       if (tdep->st0_regnum < 0)
 	{
@@ -2840,7 +2861,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int len = TYPE_LENGTH (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (type->code () == TYPE_CODE_FLT)
     {
       ULONGEST fstat;
       gdb_byte buf[I386_MAX_REGISTER_SIZE];
@@ -2917,7 +2938,7 @@ static int
 i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
 
   gdb_assert (code == TYPE_CODE_STRUCT
@@ -2931,10 +2952,10 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 
   /* Structures consisting of a single `float', `double' or 'long
      double' member are returned in %st(0).  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+  if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+      if (type->code () == TYPE_CODE_FLT)
 	return (len == 4 || len == 8 || len == 12);
     }
 
@@ -2952,7 +2973,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   if (((code == TYPE_CODE_STRUCT
 	|| code == TYPE_CODE_UNION
@@ -2999,7 +3020,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
      the structure.  Since that should work for all structures that
      have only one member, we don't bother to check the member's type
      here.  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+  if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
       return i386_return_value (gdbarch, function, type, regcache,
@@ -3059,7 +3080,7 @@ i386_bnd_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "lbound", bt->builtin_data_ptr);
       append_composite_type_field (t, "ubound", bt->builtin_data_ptr);
 
-      TYPE_NAME (t) = "builtin_type_bound128";
+      t->set_name ("builtin_type_bound128");
       tdep->i386_bnd_type = t;
     }
 
@@ -3112,7 +3133,7 @@ i386_zmm_type (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int128, 4));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_vec512i";
+      t->set_name ("builtin_type_vec512i");
       tdep->i386_zmm_type = t;
     }
 
@@ -3165,7 +3186,7 @@ i386_ymm_type (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int128, 2));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_vec256i";
+      t->set_name ("builtin_type_vec256i");
       tdep->i386_ymm_type = t;
     }
 
@@ -3207,7 +3228,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int8, 8));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_vec64i";
+      t->set_name ("builtin_type_vec64i");
       tdep->i386_mmx_type = t;
     }
 
@@ -8377,13 +8398,13 @@ i386_type_align (struct gdbarch *gdbarch, struct type *type)
 
   if (gdbarch_ptr_bit (gdbarch) == 32)
     {
-      if ((TYPE_CODE (type) == TYPE_CODE_INT
-	   || TYPE_CODE (type) == TYPE_CODE_FLT)
+      if ((type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_FLT)
 	  && TYPE_LENGTH (type) > 4)
 	return 4;
 
       /* Handle x86's funny long double.  */
-      if (TYPE_CODE (type) == TYPE_CODE_FLT
+      if (type->code () == TYPE_CODE_FLT
 	  && gdbarch_long_double_bit (gdbarch) == TYPE_LENGTH (type) * 8)
 	return 4;
     }

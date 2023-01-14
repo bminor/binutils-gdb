@@ -58,6 +58,8 @@ struct field;
 struct block;
 struct value_print_options;
 struct language_defn;
+struct dwarf2_per_cu_data;
+struct dwarf2_per_objfile;
 
 /* These declarations are DWARF-specific as some of the gdbtypes.h data types
    are already DWARF-specific.  */
@@ -246,16 +248,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_PROTOTYPED(t)	(TYPE_MAIN_TYPE (t)->flag_prototyped)
 
-/* * This flag is used to indicate that processing for this type
-   is incomplete.
-
-   (Mostly intended for HP platforms, where class methods, for
-   instance, can be encountered before their classes in the debug
-   info; the incomplete type has to be marked so that the class and
-   the method can be assigned correct types.)  */
-
-#define TYPE_INCOMPLETE(t)	(TYPE_MAIN_TYPE (t)->flag_incomplete)
-
 /* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
    to functions.  */
 
@@ -345,19 +337,19 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * True if this type represents either an lvalue or lvalue reference type.  */
 
 #define TYPE_IS_REFERENCE(t) \
-  (TYPE_CODE (t) == TYPE_CODE_REF || TYPE_CODE (t) == TYPE_CODE_RVALUE_REF)
+  ((t)->code () == TYPE_CODE_REF || (t)->code () == TYPE_CODE_RVALUE_REF)
 
 /* * True if this type is allocatable.  */
 #define TYPE_IS_ALLOCATABLE(t) \
-  (get_dyn_prop (DYN_PROP_ALLOCATED, t) != NULL)
+  ((t)->dyn_prop (DYN_PROP_ALLOCATED) != NULL)
 
 /* * True if this type has variant parts.  */
 #define TYPE_HAS_VARIANT_PARTS(t) \
-  (get_dyn_prop (DYN_PROP_VARIANT_PARTS, t) != nullptr)
+  ((t)->dyn_prop (DYN_PROP_VARIANT_PARTS) != nullptr)
 
 /* * True if this type has a dynamic length.  */
 #define TYPE_HAS_DYNAMIC_LENGTH(t) \
-  (get_dyn_prop (DYN_PROP_BYTE_SIZE, t) != nullptr)
+  ((t)->dyn_prop (DYN_PROP_BYTE_SIZE) != nullptr)
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -547,7 +539,7 @@ enum dynamic_prop_node_kind
      indicates that the object of the type can be allocated/deallocated.  */
   DYN_PROP_ALLOCATED,
 
-  /* A property representing DW_AT_allocated.  The presence of this attribute
+  /* A property representing DW_AT_associated.  The presence of this attribute
      indicated that the object of the type can be associated.  */
   DYN_PROP_ASSOCIATED,
 
@@ -773,9 +765,7 @@ struct main_type
   unsigned int flag_nosign : 1;
   unsigned int flag_stub : 1;
   unsigned int flag_target_stub : 1;
-  unsigned int flag_static : 1;
   unsigned int flag_prototyped : 1;
-  unsigned int flag_incomplete : 1;
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
   unsigned int flag_stub_supported : 1;
@@ -886,6 +876,76 @@ struct main_type
 
 struct type
 {
+  /* Get the type code of this type. 
+
+     Note that the code can be TYPE_CODE_TYPEDEF, so if you want the real
+     type, you need to do `check_typedef (type)->code ()`.  */
+  type_code code () const
+  {
+    return this->main_type->code;
+  }
+
+  /* Set the type code of this type.  */
+  void set_code (type_code code)
+  {
+    this->main_type->code = code;
+  }
+
+  /* Get the name of this type.  */
+  const char *name () const
+  {
+    return this->main_type->name;
+  }
+
+  /* Set the name of this type.  */
+  void set_name (const char *name)
+  {
+    this->main_type->name = name;
+  }
+
+  /* Get the number of fields of this type.  */
+  int num_fields () const
+  {
+    return this->main_type->nfields;
+  }
+
+  /* Set the number of fields of this type.  */
+  void set_num_fields (int num_fields)
+  {
+    this->main_type->nfields = num_fields;
+  }
+
+  /* Get the fields array of this type.  */
+  struct field *fields () const
+  {
+    return this->main_type->flds_bnds.fields;
+  }
+
+  /* Get the field at index IDX.  */
+  struct field &field (int idx) const
+  {
+    return this->fields ()[idx];
+  }
+
+  /* Set the fields array of this type.  */
+  void set_fields (struct field *fields)
+  {
+    this->main_type->flds_bnds.fields = fields;
+  }
+
+  /* * Return the dynamic property of the requested KIND from this type's
+     list of dynamic properties.  */
+  dynamic_prop *dyn_prop (dynamic_prop_node_kind kind) const;
+
+  /* * Given a dynamic property PROP of a given KIND, add this dynamic
+     property to this type.
+
+     This function assumes that this type is objfile-owned.  */
+  void add_dyn_prop (dynamic_prop_node_kind kind, dynamic_prop prop);
+
+  /* * Remove dynamic property of kind KIND from this type, if it exists.  */
+  void remove_dyn_prop (dynamic_prop_node_kind kind);
+
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.
      The debugger may add the address of such a type
@@ -1332,7 +1392,11 @@ struct call_site
     /* * CU of the function where the call is located.  It gets used
        for DWARF blocks execution in the parameter array below.  */
 
-    struct dwarf2_per_cu_data *per_cu;
+    dwarf2_per_cu_data *per_cu;
+
+    /* objfile of the function where the call is located.  */
+
+    dwarf2_per_objfile *per_objfile;
 
     /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 
@@ -1388,7 +1452,6 @@ extern void allocate_gnat_aux_type (struct type *);
 
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
-#define TYPE_NAME(thistype) TYPE_MAIN_TYPE(thistype)->name
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
@@ -1419,12 +1482,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-/* * Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real
-   type, you need to do TYPE_CODE (check_type (this_type)).  */
-#define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code
-#define TYPE_NFIELDS(thistype) TYPE_MAIN_TYPE(thistype)->nfields
-#define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields
-
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
 #define TYPE_LOW_BOUND(range_type) \
@@ -1445,7 +1502,7 @@ extern bool set_type_align (struct type *, ULONGEST);
 
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
-  get_dyn_prop (DYN_PROP_DATA_LOCATION, thistype)
+  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION))
 #define TYPE_DATA_LOCATION_BATON(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.baton
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
@@ -1453,17 +1510,15 @@ extern bool set_type_align (struct type *, ULONGEST);
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
 #define TYPE_DYNAMIC_LENGTH(thistype) \
-  get_dyn_prop (DYN_PROP_BYTE_SIZE, thistype)
+  ((thistype)->dyn_prop (DYN_PROP_BYTE_SIZE))
 
 /* Property accessors for the type allocated/associated.  */
 #define TYPE_ALLOCATED_PROP(thistype) \
-  get_dyn_prop (DYN_PROP_ALLOCATED, thistype)
+  ((thistype)->dyn_prop (DYN_PROP_ALLOCATED))
 #define TYPE_ASSOCIATED_PROP(thistype) \
-  get_dyn_prop (DYN_PROP_ASSOCIATED, thistype)
+  ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
 
 /* Attribute accessors for dynamic properties.  */
-#define TYPE_DYN_PROP_LIST(thistype) \
-  TYPE_MAIN_TYPE(thistype)->dyn_prop_list
 #define TYPE_DYN_PROP_BATON(dynprop) \
   dynprop->data.baton
 #define TYPE_DYN_PROP_ADDR(dynprop) \
@@ -1564,18 +1619,17 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields[n]
-#define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
-#define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
-#define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
+#define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE((thistype)->field (n))
+#define TYPE_FIELD_NAME(thistype, n) FIELD_NAME((thistype)->field (n))
+#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
+#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
+#define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL ((thistype)->field (n))
+#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME ((thistype)->field (n))
+#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR ((thistype)->field (n))
+#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK ((thistype)->field (n))
+#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))
+#define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE((thistype)->field (n))
+#define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE((thistype)->field (n))!=0)
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
@@ -1622,7 +1676,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
 #define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname
 #define TYPE_FN_FIELD_TYPE(thisfn, n) (thisfn)[n].type
-#define TYPE_FN_FIELD_ARGS(thisfn, n) TYPE_FIELDS ((thisfn)[n].type)
+#define TYPE_FN_FIELD_ARGS(thisfn, n) (((thisfn)[n].type)->fields ())
 #define TYPE_FN_FIELD_CONST(thisfn, n) ((thisfn)[n].is_const)
 #define TYPE_FN_FIELD_VOLATILE(thisfn, n) ((thisfn)[n].is_volatile)
 #define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
@@ -1669,9 +1723,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   TYPE_NESTED_TYPES_FIELD (thistype, n).is_private
 
 #define TYPE_IS_OPAQUE(thistype) \
-  (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \
-    || (TYPE_CODE (thistype) == TYPE_CODE_UNION)) \
-   && (TYPE_NFIELDS (thistype) == 0) \
+  ((((thistype)->code () == TYPE_CODE_STRUCT) \
+    || ((thistype)->code () == TYPE_CODE_UNION)) \
+   && ((thistype)->num_fields () == 0) \
    && (!HAVE_CPLUS_STRUCT (thistype) \
        || TYPE_NFN_FIELDS (thistype) == 0) \
    && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
@@ -1680,13 +1734,13 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
    if the type has no name.  */
 
 #define TYPE_SAFE_NAME(type) \
-  (TYPE_NAME (type) ? TYPE_NAME (type) : _("<unnamed type>"))
+  (type->name () != nullptr ? type->name () : _("<unnamed type>"))
 
 /* * A helper macro that returns the name of an error type.  If the
    type has a name, it is used; otherwise, a default is used.  */
 
 #define TYPE_ERROR_NAME(type) \
-  (TYPE_NAME (type) ? TYPE_NAME (type) : _("<error type>"))
+  (type->name () ? type->name () : _("<error type>"))
 
 /* Given TYPE, return its floatformat.  */
 const struct floatformat *floatformat_from_type (const struct type *type);
@@ -2104,22 +2158,6 @@ extern struct type *resolve_dynamic_type
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.  */
 extern int is_dynamic_type (struct type *type);
-
-/* * Return the dynamic property of the requested KIND from TYPE's
-   list of dynamic properties.  */
-extern struct dynamic_prop *get_dyn_prop
-  (enum dynamic_prop_node_kind kind, const struct type *type);
-
-/* * Given a dynamic property PROP of a given KIND, add this dynamic
-   property to the given TYPE.
-
-   This function assumes that TYPE is objfile-owned.  */
-extern void add_dyn_prop
-  (enum dynamic_prop_node_kind kind, struct dynamic_prop prop,
-   struct type *type);
-
-extern void remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
-                             struct type *type);
 
 extern struct type *check_typedef (struct type *);
 

@@ -56,6 +56,7 @@ int
 call_longjmp (jmp_buf *buf)
 {
   call_longjmp_1 (buf);
+  return 0;
 }
 
 void

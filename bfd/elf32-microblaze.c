@@ -2234,11 +2234,8 @@ microblaze_elf_relax_section (bfd *abfd,
       symtab_hdr->contents = (bfd_byte *) isymbuf;
     }
 
-  if (free_relocs != NULL)
-    {
-      free (free_relocs);
-      free_relocs = NULL;
-    }
+  free (free_relocs);
+  free_relocs = NULL;
 
   if (free_contents != NULL)
     {
@@ -2261,16 +2258,11 @@ microblaze_elf_relax_section (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
-  if (sec->relax != NULL)
-    {
-      free (sec->relax);
-      sec->relax = NULL;
-      sec->relax_count = 0;
-    }
+  free (free_relocs);
+  free (free_contents);
+  free (sec->relax);
+  sec->relax = NULL;
+  sec->relax_count = 0;
   return FALSE;
 }
 

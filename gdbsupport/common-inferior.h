@@ -21,6 +21,8 @@
 #ifndef COMMON_COMMON_INFERIOR_H
 #define COMMON_COMMON_INFERIOR_H
 
+#include "gdbsupport/array-view.h"
+
 /* Return the exec wrapper to be used when starting the inferior, or NULL
    otherwise.  */
 extern const char *get_exec_wrapper ();
@@ -57,5 +59,10 @@ extern void set_inferior_cwd (const char *cwd);
    The catch-exec traps expected during start-up will be one more if
    the target is started up with a shell.  */
 extern bool startup_with_shell;
+
+/* Compute command-line string given argument vector. This does the
+   same shell processing as fork_inferior.  */
+extern std::string
+construct_inferior_arguments (gdb::array_view<char * const>);
 
 #endif /* COMMON_COMMON_INFERIOR_H */

@@ -579,14 +579,14 @@ or1k_cgen_insert_operand (CGEN_CPU_DESC cd,
     case OR1K_OPERAND_DISP21 :
       {
         long value = fields->f_disp21;
-        value = ((((DI) (value) >> (13))) - (((DI) (pc) >> (13))));
+        value = ((((SI) (value) >> (13))) - (((SI) (pc) >> (13))));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_ABS_ADDR), 0, 20, 21, 32, total_length, buffer);
       }
       break;
     case OR1K_OPERAND_DISP26 :
       {
         long value = fields->f_disp26;
-        value = ((DI) (((value) - (pc))) >> (2));
+        value = ((SI) (((value) - (pc))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 25, 26, 32, total_length, buffer);
       }
       break;
@@ -606,9 +606,6 @@ or1k_cgen_insert_operand (CGEN_CPU_DESC cd,
         if (errmsg)
           break;
       }
-      break;
-    case OR1K_OPERAND_RADF :
-      errmsg = insert_normal (cd, fields->f_r2, 0, 0, 20, 5, 32, total_length, buffer);
       break;
     case OR1K_OPERAND_RADI :
       {
@@ -644,9 +641,6 @@ or1k_cgen_insert_operand (CGEN_CPU_DESC cd,
           break;
       }
       break;
-    case OR1K_OPERAND_RBDF :
-      errmsg = insert_normal (cd, fields->f_r3, 0, 0, 15, 5, 32, total_length, buffer);
-      break;
     case OR1K_OPERAND_RBDI :
       {
 {
@@ -680,9 +674,6 @@ or1k_cgen_insert_operand (CGEN_CPU_DESC cd,
         if (errmsg)
           break;
       }
-      break;
-    case OR1K_OPERAND_RDDF :
-      errmsg = insert_normal (cd, fields->f_r1, 0, 0, 25, 5, 32, total_length, buffer);
       break;
     case OR1K_OPERAND_RDDI :
       {
@@ -786,7 +777,7 @@ or1k_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_ABS_ADDR), 0, 20, 21, 32, total_length, pc, & value);
-        value = ((((value) + (((DI) (pc) >> (13))))) * (MAKEDI (0, 8192)));
+        value = ((((value) + (((SI) (pc) >> (13))))) * (8192));
         fields->f_disp21 = value;
       }
       break;
@@ -794,7 +785,7 @@ or1k_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 25, 26, 32, total_length, pc, & value);
-        value = ((((value) * (MAKEDI (0, 4)))) + (pc));
+        value = ((((value) * (4))) + (pc));
         fields->f_disp26 = value;
       }
       break;
@@ -809,9 +800,6 @@ or1k_cgen_extract_operand (CGEN_CPU_DESC cd,
         if (length <= 0) break;
   FLD (f_rad32) = ((FLD (f_r2)) | (((FLD (f_raoff_9_1)) << (5))));
       }
-      break;
-    case OR1K_OPERAND_RADF :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 20, 5, 32, total_length, pc, & fields->f_r2);
       break;
     case OR1K_OPERAND_RADI :
       {
@@ -837,9 +825,6 @@ or1k_cgen_extract_operand (CGEN_CPU_DESC cd,
   FLD (f_rbd32) = ((FLD (f_r3)) | (((FLD (f_rboff_8_1)) << (5))));
       }
       break;
-    case OR1K_OPERAND_RBDF :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 5, 32, total_length, pc, & fields->f_r3);
-      break;
     case OR1K_OPERAND_RBDI :
       {
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 5, 32, total_length, pc, & fields->f_r3);
@@ -863,9 +848,6 @@ or1k_cgen_extract_operand (CGEN_CPU_DESC cd,
         if (length <= 0) break;
   FLD (f_rdd32) = ((FLD (f_r1)) | (((FLD (f_rdoff_10_1)) << (5))));
       }
-      break;
-    case OR1K_OPERAND_RDDF :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 5, 32, total_length, pc, & fields->f_r1);
       break;
     case OR1K_OPERAND_RDDI :
       {
@@ -957,9 +939,6 @@ or1k_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RAD32F :
       value = fields->f_rad32;
       break;
-    case OR1K_OPERAND_RADF :
-      value = fields->f_r2;
-      break;
     case OR1K_OPERAND_RADI :
       value = fields->f_rad32;
       break;
@@ -972,9 +951,6 @@ or1k_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RBD32F :
       value = fields->f_rbd32;
       break;
-    case OR1K_OPERAND_RBDF :
-      value = fields->f_r3;
-      break;
     case OR1K_OPERAND_RBDI :
       value = fields->f_rbd32;
       break;
@@ -986,9 +962,6 @@ or1k_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case OR1K_OPERAND_RDD32F :
       value = fields->f_rdd32;
-      break;
-    case OR1K_OPERAND_RDDF :
-      value = fields->f_r1;
       break;
     case OR1K_OPERAND_RDDI :
       value = fields->f_rdd32;
@@ -1044,9 +1017,6 @@ or1k_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RAD32F :
       value = fields->f_rad32;
       break;
-    case OR1K_OPERAND_RADF :
-      value = fields->f_r2;
-      break;
     case OR1K_OPERAND_RADI :
       value = fields->f_rad32;
       break;
@@ -1059,9 +1029,6 @@ or1k_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RBD32F :
       value = fields->f_rbd32;
       break;
-    case OR1K_OPERAND_RBDF :
-      value = fields->f_r3;
-      break;
     case OR1K_OPERAND_RBDI :
       value = fields->f_rbd32;
       break;
@@ -1073,9 +1040,6 @@ or1k_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case OR1K_OPERAND_RDD32F :
       value = fields->f_rdd32;
-      break;
-    case OR1K_OPERAND_RDDF :
-      value = fields->f_r1;
       break;
     case OR1K_OPERAND_RDDI :
       value = fields->f_rdd32;
@@ -1138,9 +1102,6 @@ or1k_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RAD32F :
       fields->f_rad32 = value;
       break;
-    case OR1K_OPERAND_RADF :
-      fields->f_r2 = value;
-      break;
     case OR1K_OPERAND_RADI :
       fields->f_rad32 = value;
       break;
@@ -1153,9 +1114,6 @@ or1k_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RBD32F :
       fields->f_rbd32 = value;
       break;
-    case OR1K_OPERAND_RBDF :
-      fields->f_r3 = value;
-      break;
     case OR1K_OPERAND_RBDI :
       fields->f_rbd32 = value;
       break;
@@ -1167,9 +1125,6 @@ or1k_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case OR1K_OPERAND_RDD32F :
       fields->f_rdd32 = value;
-      break;
-    case OR1K_OPERAND_RDDF :
-      fields->f_r1 = value;
       break;
     case OR1K_OPERAND_RDDI :
       fields->f_rdd32 = value;
@@ -1222,9 +1177,6 @@ or1k_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RAD32F :
       fields->f_rad32 = value;
       break;
-    case OR1K_OPERAND_RADF :
-      fields->f_r2 = value;
-      break;
     case OR1K_OPERAND_RADI :
       fields->f_rad32 = value;
       break;
@@ -1237,9 +1189,6 @@ or1k_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case OR1K_OPERAND_RBD32F :
       fields->f_rbd32 = value;
       break;
-    case OR1K_OPERAND_RBDF :
-      fields->f_r3 = value;
-      break;
     case OR1K_OPERAND_RBDI :
       fields->f_rbd32 = value;
       break;
@@ -1251,9 +1200,6 @@ or1k_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case OR1K_OPERAND_RDD32F :
       fields->f_rdd32 = value;
-      break;
-    case OR1K_OPERAND_RDDF :
-      fields->f_r1 = value;
       break;
     case OR1K_OPERAND_RDDI :
       fields->f_rdd32 = value;

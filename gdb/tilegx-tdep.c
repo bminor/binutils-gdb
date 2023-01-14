@@ -188,9 +188,9 @@ tilegx_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
 static int
 tilegx_type_is_scalar (struct type *t)
 {
-  return (TYPE_CODE(t) != TYPE_CODE_STRUCT
-	  && TYPE_CODE(t) != TYPE_CODE_UNION
-	  && TYPE_CODE(t) != TYPE_CODE_ARRAY);
+  return (t->code () != TYPE_CODE_STRUCT
+	  && t->code () != TYPE_CODE_UNION
+	  && t->code () != TYPE_CODE_ARRAY);
 }
 
 /* Returns non-zero if the given struct type will be returned using

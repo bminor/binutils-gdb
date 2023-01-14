@@ -157,7 +157,7 @@ typy_get_code (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  return PyInt_FromLong (TYPE_CODE (type));
+  return PyInt_FromLong (type->code ());
 }
 
 /* Helper function for typy_fields which converts a single field to a
@@ -177,11 +177,11 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "parent_type", arg.get ()) < 0)
     return NULL;
 
-  if (!field_is_static (&TYPE_FIELD (type, field)))
+  if (!field_is_static (&type->field (field)))
     {
       const char *attrstring;
 
-      if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+      if (type->code () == TYPE_CODE_ENUM)
 	{
 	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type,
 								   field)));
@@ -227,7 +227,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     arg = gdbpy_ref<>::new_reference (field < TYPE_N_BASECLASSES (type)
 				      ? Py_True : Py_False);
   else
@@ -356,7 +356,7 @@ typy_fields (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
+  if (type->code () != TYPE_CODE_ARRAY)
     return typy_fields_items (self, iter_values);
 
   /* Array type.  Handle this as a special case because the common
@@ -393,9 +393,9 @@ typy_get_name (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     Py_RETURN_NONE;
-  return PyString_FromString (TYPE_NAME (type));
+  return PyString_FromString (type->name ());
 }
 
 /* Return the type's tag, or None.  */
@@ -405,10 +405,10 @@ typy_get_tag (PyObject *self, void *closure)
   struct type *type = ((type_object *) self)->type;
   const char *tagname = nullptr;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ENUM)
-    tagname = TYPE_NAME (type);
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ENUM)
+    tagname = type->name ();
 
   if (tagname == nullptr)
     Py_RETURN_NONE;
@@ -463,17 +463,17 @@ typy_get_composite (struct type *type)
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
 
-      if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+      if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	break;
       type = TYPE_TARGET_TYPE (type);
     }
 
   /* If this is not a struct, union, or enum type, raise TypeError
      exception.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_ENUM
-      && TYPE_CODE (type) != TYPE_CODE_FUNC)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION
+      && type->code () != TYPE_CODE_ENUM
+      && type->code () != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_TypeError,
 		       "Type is not a structure, union, enum, or function type.");
@@ -579,16 +579,16 @@ typy_range (PyObject *self, PyObject *args)
   /* Initialize these to appease GCC warnings.  */
   LONGEST low = 0, high = 0;
 
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-      && TYPE_CODE (type) != TYPE_CODE_STRING
-      && TYPE_CODE (type) != TYPE_CODE_RANGE)
+  if (type->code () != TYPE_CODE_ARRAY
+      && type->code () != TYPE_CODE_STRING
+      && type->code () != TYPE_CODE_RANGE)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("This type does not have a range."));
       return NULL;
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
@@ -875,7 +875,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   std::string err;
   struct type *argtype;
 
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError, _("Null type name."));
       return NULL;
@@ -884,7 +884,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   try
     {
       /* Note -- this is not thread-safe.  */
-      info = cp_demangled_name_to_comp (TYPE_NAME (type), &err);
+      info = cp_demangled_name_to_comp (type->name (), &err);
     }
   catch (const gdb_exception &except)
     {
@@ -1150,7 +1150,7 @@ typy_length (PyObject *self)
   if (type == NULL)
     return -1;
 
-  return TYPE_NFIELDS (type);
+  return type->num_fields ();
 }
 
 /* Implements boolean evaluation of gdb.Type.  Handle this like other
@@ -1193,7 +1193,7 @@ typy_getitem (PyObject *self, PyObject *key)
   if (type == NULL)
     return NULL;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < type->num_fields (); i++)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1251,7 +1251,7 @@ typy_has_key (PyObject *self, PyObject *args)
   if (type == NULL)
     return NULL;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < type->num_fields (); i++)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1336,7 +1336,7 @@ typy_iterator_iternext (PyObject *self)
   typy_iterator_object *iter_obj = (typy_iterator_object *) self;
   struct type *type = iter_obj->source->type;
 
-  if (iter_obj->field < TYPE_NFIELDS (type))
+  if (iter_obj->field < type->num_fields ())
     {
       gdbpy_ref<> result = make_fielditem (type, iter_obj->field,
 					   iter_obj->kind);

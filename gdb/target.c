@@ -168,15 +168,6 @@ show_targetdebug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Target debugging is %s.\n"), value);
 }
 
-/* The user just typed 'target' without the name of a target.  */
-
-static void
-target_command (const char *arg, int from_tty)
-{
-  fputs_filtered ("Argument required (target name).  Try `help target'\n",
-		  gdb_stdout);
-}
-
 int
 target_has_all_memory_1 (void)
 {
@@ -269,13 +260,13 @@ add_target (const target_info &t, target_open_ftype *func,
   func_slot = func;
 
   if (targetlist == NULL)
-    add_prefix_cmd ("target", class_run, target_command, _("\
+    add_basic_prefix_cmd ("target", class_run, _("\
 Connect to a target machine or process.\n\
 The first argument is the type or protocol of the target machine.\n\
 Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
-		    &targetlist, "target ", 0, &cmdlist);
+			  &targetlist, "target ", 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
   set_cmd_context (c, (void *) &t);
   set_cmd_sfunc (c, open_target);
@@ -2784,13 +2775,11 @@ target_ops::fileio_readlink (struct inferior *inf, const char *filename,
   return {};
 }
 
-/* Helper for target_fileio_open and
-   target_fileio_open_warn_if_slow.  */
+/* See target.h.  */
 
-static int
-target_fileio_open_1 (struct inferior *inf, const char *filename,
-		      int flags, int mode, int warn_if_slow,
-		      int *target_errno)
+int
+target_fileio_open (struct inferior *inf, const char *filename,
+		    int flags, int mode, bool warn_if_slow, int *target_errno)
 {
   for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
@@ -2818,27 +2807,6 @@ target_fileio_open_1 (struct inferior *inf, const char *filename,
 
   *target_errno = FILEIO_ENOSYS;
   return -1;
-}
-
-/* See target.h.  */
-
-int
-target_fileio_open (struct inferior *inf, const char *filename,
-		    int flags, int mode, int *target_errno)
-{
-  return target_fileio_open_1 (inf, filename, flags, mode, 0,
-			       target_errno);
-}
-
-/* See target.h.  */
-
-int
-target_fileio_open_warn_if_slow (struct inferior *inf,
-				 const char *filename,
-				 int flags, int mode, int *target_errno)
-{
-  return target_fileio_open_1 (inf, filename, flags, mode, 1,
-			       target_errno);
 }
 
 /* See target.h.  */
@@ -3045,7 +3013,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   int target_errno;
 
   scoped_target_fd fd (target_fileio_open (inf, filename, FILEIO_O_RDONLY,
-					   0700, &target_errno));
+					   0700, false, &target_errno));
   if (fd.get () == -1)
     return -1;
 

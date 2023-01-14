@@ -346,6 +346,16 @@ struct pd_reg
 
 static const struct pd_reg pre_defined_registers[] =
 {
+  /* VSX accumulators.  */
+  { "a0", 0, PPC_OPERAND_ACC },
+  { "a1", 1, PPC_OPERAND_ACC },
+  { "a2", 2, PPC_OPERAND_ACC },
+  { "a3", 3, PPC_OPERAND_ACC },
+  { "a4", 4, PPC_OPERAND_ACC },
+  { "a5", 5, PPC_OPERAND_ACC },
+  { "a6", 6, PPC_OPERAND_ACC },
+  { "a7", 7, PPC_OPERAND_ACC },
+
   /* Condition Registers */
   { "cr.0", 0, PPC_OPERAND_CR_REG },
   { "cr.1", 1, PPC_OPERAND_CR_REG },
@@ -3569,7 +3579,7 @@ md_assemble (char *str)
 	       & ~operand->flags
 	       & (PPC_OPERAND_GPR | PPC_OPERAND_FPR | PPC_OPERAND_VR
 		  | PPC_OPERAND_VSR | PPC_OPERAND_CR_BIT | PPC_OPERAND_CR_REG
-		  | PPC_OPERAND_SPR | PPC_OPERAND_GQR)) != 0
+		  | PPC_OPERAND_SPR | PPC_OPERAND_GQR | PPC_OPERAND_ACC)) != 0
 	      && !((ex.X_md & PPC_OPERAND_GPR) != 0
 		   && ex.X_add_number != 0
 		   && (operand->flags & PPC_OPERAND_GPR_0) != 0))
@@ -4131,7 +4141,7 @@ md_assemble (char *str)
   insn_length = 4;
   if ((ppc_cpu & PPC_OPCODE_VLE) != 0 && PPC_OP_SE_VLE (insn))
     insn_length = 2;
-  else if ((opcode->flags & PPC_OPCODE_POWERXX) != 0
+  else if ((opcode->flags & PPC_OPCODE_POWER10) != 0
 	   && PPC_PREFIX_P (insn))
     {
       struct insn_label_list *l;

@@ -340,9 +340,9 @@ mi_print_value_p (struct varobj *var, enum print_values print_values)
 
       /* For PRINT_SIMPLE_VALUES, only print the value if it has a type
 	 and that type is not a compound type.  */
-      return (TYPE_CODE (type) != TYPE_CODE_ARRAY
-	      && TYPE_CODE (type) != TYPE_CODE_STRUCT
-	      && TYPE_CODE (type) != TYPE_CODE_UNION);
+      return (type->code () != TYPE_CODE_ARRAY
+	      && type->code () != TYPE_CODE_STRUCT
+	      && type->code () != TYPE_CODE_UNION);
     }
 }
 

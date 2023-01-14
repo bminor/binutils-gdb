@@ -251,6 +251,7 @@ const aarch64_field fields[] =
     { 10, 12 },	/* imm12: in ld/st unsigned imm or add/sub shifted inst.  */
     {  5, 14 },	/* imm14: in test bit and branch instructions.  */
     {  5, 16 },	/* imm16: in exception instructions.  */
+    {  0, 16 },	/* imm16_2: in udf instruction. */
     {  0, 26 },	/* imm26: in unconditional branch instructions.  */
     { 10,  6 },	/* imms: in bitfield and logical immediate instructions.  */
     { 16,  6 },	/* immr: in bitfield and logical immediate instructions.  */
@@ -2145,6 +2146,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_NZCV:
 	case AARCH64_OPND_CCMP_IMM:
 	case AARCH64_OPND_EXCEPTION:
+	case AARCH64_OPND_UNDEFINED:
 	case AARCH64_OPND_TME_UIMM16:
 	case AARCH64_OPND_UIMM4:
 	case AARCH64_OPND_UIMM4_ADDG:
@@ -3357,6 +3359,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMM0:
     case AARCH64_OPND_IMMR:
     case AARCH64_OPND_IMMS:
+    case AARCH64_OPND_UNDEFINED:
     case AARCH64_OPND_FBITS:
     case AARCH64_OPND_TME_UIMM16:
     case AARCH64_OPND_SIMM5:

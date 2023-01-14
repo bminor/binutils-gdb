@@ -519,9 +519,6 @@ or1k_cgen_parse_operand (CGEN_CPU_DESC cd,
     case OR1K_OPERAND_RAD32F :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RAD32F, (unsigned long *) (& fields->f_rad32));
       break;
-    case OR1K_OPERAND_RADF :
-      errmsg = cgen_parse_keyword (cd, strp, & or1k_cgen_opval_h_fdr, & fields->f_r2);
-      break;
     case OR1K_OPERAND_RADI :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RADI, (unsigned long *) (& fields->f_rad32));
       break;
@@ -534,9 +531,6 @@ or1k_cgen_parse_operand (CGEN_CPU_DESC cd,
     case OR1K_OPERAND_RBD32F :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RBD32F, (unsigned long *) (& fields->f_rbd32));
       break;
-    case OR1K_OPERAND_RBDF :
-      errmsg = cgen_parse_keyword (cd, strp, & or1k_cgen_opval_h_fdr, & fields->f_r3);
-      break;
     case OR1K_OPERAND_RBDI :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RBDI, (unsigned long *) (& fields->f_rbd32));
       break;
@@ -548,9 +542,6 @@ or1k_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case OR1K_OPERAND_RDD32F :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RDD32F, (unsigned long *) (& fields->f_rdd32));
-      break;
-    case OR1K_OPERAND_RDDF :
-      errmsg = cgen_parse_keyword (cd, strp, & or1k_cgen_opval_h_fdr, & fields->f_r1);
       break;
     case OR1K_OPERAND_RDDI :
       errmsg = parse_regpair (cd, strp, OR1K_OPERAND_RDDI, (unsigned long *) (& fields->f_rdd32));

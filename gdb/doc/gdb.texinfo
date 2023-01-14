@@ -2041,8 +2041,10 @@ Command name abbreviations are allowed if unambiguous.
 
 @item help @var{class}
 Using one of the general help classes as an argument, you can get a
-list of the individual commands in that class.  For example, here is the
-help display for the class @code{status}:
+list of the individual commands in that class.  If a command has
+aliases, the aliases are given after the command name, separated by
+commas.  For example, here is the help display for the class
+@code{status}:
 
 @smallexample
 (@value{GDBP}) help status
@@ -2052,9 +2054,11 @@ List of commands:
 
 @c Line break in "show" line falsifies real output, but needed
 @c to fit in smallbook page size.
-info -- Generic command for showing things
+info, inf, i -- Generic command for showing things
         about the program being debugged
-show -- Generic command for showing things
+info address -- Describe where symbol SYM is stored.
+...
+show, info set -- Generic command for showing things
         about the debugger
 
 Type "help" followed by command name for full
@@ -2065,7 +2069,9 @@ Command name abbreviations are allowed if unambiguous.
 
 @item help @var{command}
 With a command name as @code{help} argument, @value{GDBN} displays a
-short paragraph on how to use that command.
+short paragraph on how to use that command.  If that command has
+one or more aliases, @value{GDBN} will display a first line with
+the command name and all its aliases separated by commas.
 
 @kindex apropos
 @item apropos [-v] @var{regexp}
@@ -2087,9 +2093,6 @@ results in:
 @group
 alias -- Define a new command that is an alias of an existing command
 aliases -- Aliases of other commands
-d -- Delete some breakpoints or auto-display expressions
-del -- Delete some breakpoints or auto-display expressions
-delete -- Delete some breakpoints or auto-display expressions
 @end group
 @end smallexample
 
@@ -2906,22 +2909,22 @@ the @code{file} command to load the program.  @xref{Files, ,Commands to
 Specify Files}.
 
 @anchor{set exec-file-mismatch}
-If the debugger can determine the name of the executable file running
-in the process it is attaching to, and this file name does not match
-the name of the current exec-file loaded by @value{GDBN}, the option
-@code{exec-file-mismatch} specifies how to handle the mismatch.
+If the debugger can determine that the executable file running in the
+process it is attaching to does not match the current exec-file loaded
+by @value{GDBN}, the option @code{exec-file-mismatch} specifies how to
+handle the mismatch.  @value{GDBN} tries to compare the files by
+comparing their build IDs (@pxref{build ID}), if available.
 
 @table @code
 @kindex exec-file-mismatch
 @cindex set exec-file-mismatch
 @item set exec-file-mismatch @samp{ask|warn|off}
 
-Whether to detect mismatch between the name of the current executable
-file loaded by @value{GDBN} and the name of the executable file used to
-start the process.  If @samp{ask}, the default, display a warning
-and ask the user whether to load the process executable file; if
-@samp{warn}, just display a warning; if @samp{off}, don't attempt to
-detect a mismatch.
+Whether to detect mismatch between the current executable file loaded
+by @value{GDBN} and the executable file used to start the process.  If
+@samp{ask}, the default, display a warning and ask the user whether to
+load the process executable file; if @samp{warn}, just display a
+warning; if @samp{off}, don't attempt to detect a mismatch.
 
 @cindex show exec-file-mismatch
 @item show exec-file-mismatch
@@ -20871,6 +20874,7 @@ checksum for the debug file, which @value{GDBN} uses to validate that
 the executable and the debug file came from the same build.
 
 @item
+@anchor{build ID}
 The executable contains a @dfn{build ID}, a unique bit string that is
 also present in the corresponding debug info file.  (This is supported
 only on some operating systems, when using the ELF or PE file formats
@@ -23407,8 +23411,8 @@ used to examine the image of a running process using file-system
 subroutines.  This facility is supported on @sc{gnu}/Linux and Solaris
 systems.
 
-On FreeBSD systems, system control nodes are used to query process
-information.
+On FreeBSD and NetBSD systems, system control nodes are used to query
+process information.
 
 In addition, some systems may provide additional process information
 in core files.  Note that a core file may include a subset of the
@@ -23438,17 +23442,17 @@ a process ID rather than a thread ID).
 @item info proc cmdline
 @cindex info proc cmdline
 Show the original command line of the process.  This command is
-supported on @sc{gnu}/Linux and FreeBSD.
+supported on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc cwd
 @cindex info proc cwd
 Show the current working directory of the process.  This command is
-supported on @sc{gnu}/Linux and FreeBSD.
+supported on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc exe
 @cindex info proc exe
 Show the name of executable of the process.  This command is supported
-on @sc{gnu}/Linux and FreeBSD.
+on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc files
 @cindex info proc files
@@ -23483,9 +23487,9 @@ Open files:
 @item info proc mappings
 @cindex memory address space mappings
 Report the memory address space ranges accessible in a process.  On
-Solaris and FreeBSD systems, each memory range includes information on
-whether the process has read, write, or execute access rights to each
-range.  On @sc{gnu}/Linux and FreeBSD systems, each memory range
+Solaris, FreeBSD and NetBSD systems, each memory range includes information
+on whether the process has read, write, or execute access rights to each
+range.  On @sc{gnu}/Linux, FreeBSD and NetBSD systems, each memory range
 includes the object file which is mapped to that range.
 
 @item info proc stat
@@ -23495,13 +23499,13 @@ Show additional process-related information, including the user ID and
 group ID; virtual memory usage; the signals that are pending, blocked,
 and ignored; its TTY; its consumption of system and user time; its
 stack size; its @samp{nice} value; etc.  These commands are supported
-on @sc{gnu}/Linux and FreeBSD.
+on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 For @sc{gnu}/Linux systems, see the @samp{proc} man page for more
 information (type @kbd{man 5 proc} from your shell prompt).
 
-For FreeBSD systems, @code{info proc stat} is an alias for @code{info
-proc status}.
+For FreeBSD and NetBSD systems, @code{info proc stat} is an alias for
+@code{info proc status}.
 
 @item info proc all
 Show all the information about the process described under all of the
@@ -27512,8 +27516,7 @@ underscores.
 that is being aliased.
 
 The @samp{-a} option specifies that the new alias is an abbreviation
-of the command.  Abbreviations are not shown in command
-lists displayed by the @samp{help} command.
+of the command.  Abbreviations are not used in command completion.
 
 The @samp{--} option specifies the end of options,
 and is useful when @var{ALIAS} begins with a dash.

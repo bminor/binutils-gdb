@@ -423,7 +423,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      /* On xcoff, if a global is defined and never referenced,
 	         ld will remove it from the executable.  There is then
 	         a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
-	      sym = allocate_symbol (objfile);
+	      sym = new (&objfile->objfile_obstack) symbol;
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 	      sym->set_linkage_name
@@ -687,7 +687,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
      e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
-  current_symbol = sym = allocate_symbol (objfile);
+  current_symbol = sym = new (&objfile->objfile_obstack) symbol;
 
   if (processing_gcc_compilation)
     {
@@ -738,7 +738,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
   else
     {
     normal:
-      std::string new_name;
+      gdb::unique_xmalloc_ptr<char> new_name;
 
       if (sym->language () == language_cplus)
 	{
@@ -748,8 +748,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  name[p - string] = '\0';
 	  new_name = cp_canonicalize_string (name);
 	}
-      if (!new_name.empty ())
-	sym->compute_and_set_names (new_name, true, objfile->per_bfd);
+      if (new_name != nullptr)
+	sym->compute_and_set_names (new_name.get (), true, objfile->per_bfd);
       else
 	sym->compute_and_set_names (gdb::string_view (string, p - string), true,
 				    objfile->per_bfd);
@@ -955,7 +955,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Function result types are described as the result type in stabs.
          We need to convert this to the function-returning-type-X type
          in GDB.  E.g. "int" is converted to "function returning int".  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
+      if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 
       /* All functions in C++ have prototypes.  Stabs does not offer an
@@ -986,8 +986,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    }
 
 	  /* Allocate parameter information fields and fill them in.  */
-	  TYPE_FIELDS (ftype) = (struct field *)
-	    TYPE_ALLOC (ftype, nsemi * sizeof (struct field));
+	  ftype->set_fields
+	    ((struct field *)
+	     TYPE_ALLOC (ftype, nsemi * sizeof (struct field)));
 	  while (*p++ == ';')
 	    {
 	      struct type *ptype;
@@ -1004,12 +1005,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	         a TYPE_CODE_VOID type by read_type, and we have to turn
 	         it back into builtin_int here.
 	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
-	      if (TYPE_CODE (ptype) == TYPE_CODE_VOID)
+	      if (ptype->code () == TYPE_CODE_VOID)
 		ptype = objfile_type (objfile)->builtin_int;
 	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
-	  TYPE_NFIELDS (ftype) = nparams;
+	  ftype->set_num_fields (nparams);
 	  TYPE_PROTOTYPED (ftype) = 1;
 	}
       break;
@@ -1093,7 +1094,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	     really an int.  */
 	  if (TYPE_LENGTH (SYMBOL_TYPE (sym))
 	      < gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT
-	      && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
+	      && SYMBOL_TYPE (sym)->code () == TYPE_CODE_INT)
 	    {
 	      SYMBOL_TYPE (sym) =
 		TYPE_UNSIGNED (SYMBOL_TYPE (sym))
@@ -1238,9 +1239,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
          a base type which did not have its name defined when the
          derived class was output.  We fill in the derived class's
          base part member's name here in that case.  */
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) != NULL)
-	if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-	     || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+      if (SYMBOL_TYPE (sym)->name () != NULL)
+	if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT
+	     || SYMBOL_TYPE (sym)->code () == TYPE_CODE_UNION)
 	    && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
 	  {
 	    int j;
@@ -1248,14 +1249,14 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
 	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
 		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		  TYPE_NAME (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
+		  TYPE_BASECLASS (SYMBOL_TYPE (sym), j)->name ();
 	  }
 
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
+      if (SYMBOL_TYPE (sym)->name () == NULL)
 	{
-	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	  if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 	       && strcmp (sym->linkage_name (), vtbl_ptr_name))
-	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
+	      || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 	         foo" or "function returning foo", we better not set
@@ -1294,12 +1295,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	      /* Pascal accepts names for pointer types.  */
 	      if (get_current_subfile ()->language == language_pascal)
-		{
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
-          	}
+		SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
+	    SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
 	}
 
       add_symbol_to_list (sym, get_file_symbols ());
@@ -1307,19 +1306,19 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (synonym)
         {
           /* Create the STRUCT_DOMAIN clone.  */
-          struct symbol *struct_sym = allocate_symbol (objfile);
+          struct symbol *struct_sym = new (&objfile->objfile_obstack) symbol;
 
           *struct_sym = *sym;
           SYMBOL_ACLASS_INDEX (struct_sym) = LOC_TYPEDEF;
           SYMBOL_VALUE (struct_sym) = valu;
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
-          if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-            TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-			  (char *) NULL);
+          if (SYMBOL_TYPE (sym)->name () == 0)
+	    SYMBOL_TYPE (sym)->set_name
+	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+			 (char *) NULL));
           add_symbol_to_list (struct_sym, get_file_symbols ());
         }
-      
+
       break;
 
     case 'T':
@@ -1340,25 +1339,25 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-		      (char *) NULL);
+      if (SYMBOL_TYPE (sym)->name () == 0)
+	SYMBOL_TYPE (sym)->set_name
+	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+		     (char *) NULL));
       add_symbol_to_list (sym, get_file_symbols ());
 
       if (synonym)
 	{
 	  /* Clone the sym and then modify it.  */
-	  struct symbol *typedef_sym = allocate_symbol (objfile);
+	  struct symbol *typedef_sym = new (&objfile->objfile_obstack) symbol;
 
 	  *typedef_sym = *sym;
 	  SYMBOL_ACLASS_INDEX (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-			  (char *) NULL);
+	  if (SYMBOL_TYPE (sym)->name () == 0)
+	    SYMBOL_TYPE (sym)->set_name
+	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+			 (char *) NULL));
 	  add_symbol_to_list (typedef_sym, get_file_symbols ());
 	}
       break;
@@ -1548,7 +1547,7 @@ read_type (const char **pp, struct objfile *objfile)
           /* If this is a forward reference, arrange to complain if it
              doesn't get patched up by the time we're done
              reading.  */
-          if (TYPE_CODE (type) == TYPE_CODE_UNDEF)
+          if (type->code () == TYPE_CODE_UNDEF)
             add_undefined_type (type, typenums);
 
           return type;
@@ -1637,10 +1636,10 @@ again:
 	      memcpy (name, *pp, p - *pp);
 	      name[p - *pp] = '\0';
 
-	      std::string new_name = cp_canonicalize_string (name);
-	      if (!new_name.empty ())
+	      gdb::unique_xmalloc_ptr<char> new_name = cp_canonicalize_string (name);
+	      if (new_name != nullptr)
 		type_name = obstack_strdup (&objfile->objfile_obstack,
-					    new_name);
+					    new_name.get ());
 	    }
 	  if (type_name == NULL)
 	    {
@@ -1670,7 +1669,7 @@ again:
 
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
+		  && (SYMBOL_TYPE (sym)->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
 		  obstack_free (&objfile->objfile_obstack, type_name);
@@ -1687,8 +1686,8 @@ again:
 	   fill in the rest of the fields when we get the full
 	   type.  */
 	type = dbx_alloc_type (typenums, objfile);
-	TYPE_CODE (type) = code;
-	TYPE_NAME (type) = type_name;
+	type->set_code (code);
+	type->set_name (type_name);
 	INIT_CPLUS_SPECIFIC (type);
 	TYPE_STUB (type) = 1;
 
@@ -1716,14 +1715,14 @@ again:
       /* Allocate and enter the typedef type first.
          This handles recursive types.  */
       type = dbx_alloc_type (typenums, objfile);
-      TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
+      type->set_code (TYPE_CODE_TYPEDEF);
       {
 	struct type *xtype = read_type (pp, objfile);
 
 	if (type == xtype)
 	  {
 	    /* It's being defined as itself.  That means it is "void".  */
-	    TYPE_CODE (type) = TYPE_CODE_VOID;
+	    type->set_code (TYPE_CODE_VOID);
 	    TYPE_LENGTH (type) = 1;
 	  }
 	else if (type_size >= 0 || is_string)
@@ -1752,7 +1751,7 @@ again:
                "complete_this_type" function, but never create unnecessary
                copies of a type otherwise.  */
 	    replace_type (type, xtype);
-	    TYPE_NAME (type) = NULL;
+	    type->set_name (NULL);
 	  }
 	else
 	  {
@@ -1835,13 +1834,13 @@ again:
            that's just an empty argument list.  */
         if (arg_types
             && ! arg_types->next
-            && TYPE_CODE (arg_types->type) == TYPE_CODE_VOID)
+            && arg_types->type->code () == TYPE_CODE_VOID)
           num_args = 0;
 
-        TYPE_FIELDS (func_type)
-          = (struct field *) TYPE_ALLOC (func_type,
-                                         num_args * sizeof (struct field));
-        memset (TYPE_FIELDS (func_type), 0, num_args * sizeof (struct field));
+	func_type->set_fields
+	  ((struct field *) TYPE_ALLOC (func_type,
+					num_args * sizeof (struct field)));
+        memset (func_type->fields (), 0, num_args * sizeof (struct field));
         {
           int i;
           struct type_list *t;
@@ -1852,7 +1851,7 @@ again:
           for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
             TYPE_FIELD_TYPE (func_type, i) = t->type;
         }
-        TYPE_NFIELDS (func_type) = num_args;
+        func_type->set_num_fields (num_args);
         TYPE_PROTOTYPED (func_type) = 1;
 
         type = func_type;
@@ -2022,7 +2021,7 @@ again:
       type = dbx_alloc_type (typenums, objfile);
       type = read_array_type (pp, type, objfile);
       if (is_string)
-	TYPE_CODE (type) = TYPE_CODE_STRING;
+	type->set_code (TYPE_CODE_STRING);
       if (is_vector)
 	make_vector_type (type);
       break;
@@ -2369,10 +2368,10 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	    }
 
 	  /* These are methods, not functions.  */
-	  if (TYPE_CODE (new_sublist->fn_field.type) == TYPE_CODE_FUNC)
-	    TYPE_CODE (new_sublist->fn_field.type) = TYPE_CODE_METHOD;
+	  if (new_sublist->fn_field.type->code () == TYPE_CODE_FUNC)
+	    new_sublist->fn_field.type->set_code (TYPE_CODE_METHOD);
 	  else
-	    gdb_assert (TYPE_CODE (new_sublist->fn_field.type)
+	    gdb_assert (new_sublist->fn_field.type->code ()
 			== TYPE_CODE_METHOD);
 
 	  /* If this is just a stub, then we don't have the real name here.  */
@@ -2750,7 +2749,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
       switch (cpp_abbrev)
 	{
 	case 'f':		/* $vf -- a virtual function table pointer */
-	  name = TYPE_NAME (context);
+	  name = context->name ();
 	  if (name == NULL)
 	    {
 	      name = "";
@@ -2760,7 +2759,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
-	  name = TYPE_NAME (context);
+	  name = context->name ();
 	  if (name == NULL)
 	    {
 	      complaint (_("C++ abbreviated type name "
@@ -2920,16 +2919,16 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 
       struct type *field_type = check_typedef (FIELD_TYPE (fip->list->field));
 
-      if (TYPE_CODE (field_type) != TYPE_CODE_INT
-	  && TYPE_CODE (field_type) != TYPE_CODE_RANGE
-	  && TYPE_CODE (field_type) != TYPE_CODE_BOOL
-	  && TYPE_CODE (field_type) != TYPE_CODE_ENUM)
+      if (field_type->code () != TYPE_CODE_INT
+	  && field_type->code () != TYPE_CODE_RANGE
+	  && field_type->code () != TYPE_CODE_BOOL
+	  && field_type->code () != TYPE_CODE_ENUM)
 	{
 	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
       if ((FIELD_BITSIZE (fip->list->field)
 	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
-	   || (TYPE_CODE (field_type) == TYPE_CODE_ENUM
+	   || (field_type->code () == TYPE_CODE_ENUM
 	       && FIELD_BITSIZE (fip->list->field)
 		  == gdbarch_int_bit (gdbarch))
 	  )
@@ -3163,7 +3162,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
          field's name.  */
 
       newobj->field.type = read_type (pp, objfile);
-      newobj->field.name = TYPE_NAME (newobj->field.type);
+      newobj->field.name = newobj->field.type->name ();
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')
@@ -3234,7 +3233,7 @@ read_tilde_fields (struct stab_field_info *fip, const char **pp,
 	  set_type_vptr_basetype (type, t);
 	  if (type == t)	/* Our own class provides vtbl ptr.  */
 	    {
-	      for (i = TYPE_NFIELDS (t) - 1;
+	      for (i = t->num_fields () - 1;
 		   i >= TYPE_N_BASECLASSES (t);
 		   --i)
 		{
@@ -3250,7 +3249,7 @@ read_tilde_fields (struct stab_field_info *fip, const char **pp,
 	      /* Virtual function table field not found.  */
 	      complaint (_("virtual function table pointer "
 			   "not found when defining class `%s'"),
-			 TYPE_NAME (type));
+			 type->name ());
 	      return 0;
 	    }
 	  else
@@ -3310,10 +3309,11 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
      non-public fields.  Record the field count, allocate space for the
      array of fields, and create blank visibility bitfields if necessary.  */
 
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nfields);
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
+  type->set_num_fields (nfields);
+  type->set_fields
+    ((struct field *)
+     TYPE_ALLOC (type, sizeof (struct field) * nfields));
+  memset (type->fields (), 0, sizeof (struct field) * nfields);
 
   if (non_public_fields)
     {
@@ -3339,7 +3339,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 
   while (nfields-- > 0)
     {
-      TYPE_FIELD (type, nfields) = fip->list->field;
+      type->field (nfields) = fip->list->field;
       switch (fip->list->visibility)
 	{
 	case VISIBILITY_PRIVATE:
@@ -3379,10 +3379,10 @@ complain_about_struct_wipeout (struct type *type)
   const char *name = "";
   const char *kind = "";
 
-  if (TYPE_NAME (type))
+  if (type->name ())
     {
-      name = TYPE_NAME (type);
-      switch (TYPE_CODE (type))
+      name = type->name ();
+      switch (type->code ())
         {
         case TYPE_CODE_STRUCT: kind = "struct "; break;
         case TYPE_CODE_UNION:  kind = "union ";  break;
@@ -3467,7 +3467,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
      Obviously, GDB can't fix this by itself, but it can at least avoid
      scribbling on existing structure type objects when new definitions
      appear.  */
-  if (! (TYPE_CODE (type) == TYPE_CODE_UNDEF
+  if (! (type->code () == TYPE_CODE_UNDEF
          || TYPE_STUB (type)))
     {
       complain_about_struct_wipeout (type);
@@ -3477,7 +3477,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
     }
 
   INIT_CPLUS_SPECIFIC (type);
-  TYPE_CODE (type) = type_code;
+  type->set_code (type_code);
   TYPE_STUB (type) = 0;
 
   /* First comes the total size in bytes.  */
@@ -3632,7 +3632,7 @@ read_enum_type (const char **pp, struct type *type,
       if (nbits != 0)
 	return error_type (pp, objfile);
 
-      sym = allocate_symbol (objfile);
+      sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (name);
       sym->set_language (get_current_subfile ()->language,
 			 &objfile->objfile_obstack);
@@ -3652,14 +3652,15 @@ read_enum_type (const char **pp, struct type *type,
 
   TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   set_length_in_type_chain (type);
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
+  type->set_code (TYPE_CODE_ENUM);
   TYPE_STUB (type) = 0;
   if (unsigned_enum)
     TYPE_UNSIGNED (type) = 1;
-  TYPE_NFIELDS (type) = nsyms;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nsyms);
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nsyms);
+  type->set_num_fields (nsyms);
+  type->set_fields
+    ((struct field *)
+     TYPE_ALLOC (type, sizeof (struct field) * nsyms));
+  memset (type->fields (), 0, sizeof (struct field) * nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
@@ -3680,7 +3681,7 @@ read_enum_type (const char **pp, struct type *type,
 
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
-	  SET_FIELD_ENUMVAL (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
+	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)
@@ -4231,7 +4232,7 @@ read_args (const char **pp, int end, struct objfile *objfile, int *nargsp,
       complaint (_("Invalid (empty) method arguments"));
       *varargsp = 0;
     }
-  else if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
+  else if (types[n - 1]->code () != TYPE_CODE_VOID)
     *varargsp = 1;
   else
     {
@@ -4299,7 +4300,7 @@ common_block_end (struct objfile *objfile)
       return;
     }
 
-  sym = allocate_symbol (objfile);
+  sym = new (&objfile->objfile_obstack) symbol;
   /* Note: common_block_name already saved on objfile_obstack.  */
   sym->set_linkage_name (common_block_name);
   SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
@@ -4410,7 +4411,7 @@ add_undefined_type_1 (struct type *type)
 static void
 add_undefined_type (struct type *type, int typenums[2])
 {
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     add_undefined_type_noname (type, typenums);
   else
     add_undefined_type_1 (type);
@@ -4429,7 +4430,7 @@ cleanup_undefined_types_noname (struct objfile *objfile)
       struct type **type;
 
       type = dbx_lookup_type (nat.typenums, objfile);
-      if (nat.type != *type && TYPE_CODE (*type) != TYPE_CODE_UNDEF)
+      if (nat.type != *type && (*type)->code () != TYPE_CODE_UNDEF)
         {
           /* The instance flags of the undefined type are still unset,
              and needs to be copied over from the reference type.
@@ -4479,7 +4480,7 @@ cleanup_undefined_types_1 (void)
 
   for (type = undef_types; type < undef_types + undef_types_length; type++)
     {
-      switch (TYPE_CODE (*type))
+      switch ((*type)->code ())
 	{
 
 	case TYPE_CODE_STRUCT:
@@ -4495,7 +4496,7 @@ cleanup_undefined_types_1 (void)
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union".  */
-		const char *type_name = TYPE_NAME (*type);
+		const char *type_name = (*type)->name ();
 
 		if (type_name == NULL)
 		  {
@@ -4510,8 +4511,8 @@ cleanup_undefined_types_1 (void)
 
 			if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
-				TYPE_CODE (*type))
+			    && (SYMBOL_TYPE (sym)->code () ==
+				(*type)->code ())
 			    && (TYPE_INSTANCE_FLAGS (*type) ==
 				TYPE_INSTANCE_FLAGS (SYMBOL_TYPE (sym)))
 			    && strcmp (sym->linkage_name (), type_name) == 0)
@@ -4526,7 +4527,7 @@ cleanup_undefined_types_1 (void)
 	  {
 	    complaint (_("forward-referenced types left unresolved, "
                        "type code %d."),
-		       TYPE_CODE (*type));
+		       (*type)->code ());
 	  }
 	  break;
 	}

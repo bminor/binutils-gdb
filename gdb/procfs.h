@@ -25,10 +25,4 @@
 
 extern ptid_t procfs_first_available (void);
 
-#if (defined (__i386__) || defined (__x86_64__)) && defined (sun)
-struct ssd;
-
-extern struct ssd *procfs_find_LDT_entry (ptid_t);
-#endif
-
 #endif /* PROCFS_H */

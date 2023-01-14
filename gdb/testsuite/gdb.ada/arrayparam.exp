@@ -29,7 +29,7 @@ runto "foo.adb:$bp_location"
 # Verify that a call to a function that takes an array as a parameter
 # works without problem.
 
-gdb_test "print call_me (\"bonjour\")" \
+gdb_test "print call_me(\"bonjour\")" \
          "= void"
 
 # Verify that the array was passed properly by checking the global

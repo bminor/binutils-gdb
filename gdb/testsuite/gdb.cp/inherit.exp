@@ -693,9 +693,16 @@ proc do_tests { } {
 	return
     }
 
-    test_print_si_members
+    with_test_prefix "single inheritance" {
+	test_print_si_members
+    }
+
     test_print_si_classes
-    test_print_mi_members
+
+    with_test_prefix "multiple inheritance" {
+	test_print_mi_members
+    }
+
     test_print_mi_member_types
     test_print_mi_classes
     test_print_anon_union

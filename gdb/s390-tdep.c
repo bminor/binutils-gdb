@@ -63,7 +63,7 @@ s390_type_align (gdbarch *gdbarch, struct type *t)
 
   if (TYPE_LENGTH (t) > 8)
     {
-      switch (TYPE_CODE (t))
+      switch (t->code ())
 	{
 	case TYPE_CODE_INT:
 	case TYPE_CODE_RANGE:
@@ -1638,15 +1638,15 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 static struct type *
 s390_effective_inner_type (struct type *type, unsigned int min_size)
 {
-  while (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  while (type->code () == TYPE_CODE_STRUCT)
     {
       struct type *inner = NULL;
 
       /* Find a non-static field, if any.  Unless there's exactly one,
 	 abort the unwrapping.  */
-      for (int i = 0; i < TYPE_NFIELDS (type); i++)
+      for (int i = 0; i < type->num_fields (); i++)
 	{
-	  struct field f = TYPE_FIELD (type, i);
+	  struct field f = type->field (i);
 
 	  if (field_is_static (&f))
 	    continue;
@@ -1681,8 +1681,8 @@ s390_function_arg_float (struct type *type)
      or double.  */
   type = s390_effective_inner_type (type, 0);
 
-  return (TYPE_CODE (type) == TYPE_CODE_FLT
-	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT);
+  return (type->code () == TYPE_CODE_FLT
+	  || type->code () == TYPE_CODE_DECFLOAT);
 }
 
 /* Return non-zero if TYPE should be passed like a vector.  */
@@ -1696,7 +1696,7 @@ s390_function_arg_vector (struct type *type)
   /* Structs containing just a vector are passed like a vector.  */
   type = s390_effective_inner_type (type, TYPE_LENGTH (type));
 
-  return TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type);
+  return type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type);
 }
 
 /* Determine whether N is a power of two.  */
@@ -1714,7 +1714,7 @@ is_power_of_two (unsigned int n)
 static int
 s390_function_arg_integer (struct type *type)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   if (TYPE_LENGTH (type) > 8)
     return 0;
@@ -1921,7 +1921,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   CORE_ADDR param_area_start, new_sp;
   struct type *ftype = check_typedef (value_type (function));
 
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+  if (ftype->code () == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   arg_prep.copy = sp;
@@ -1938,7 +1938,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      and arg_state.argp with the size of the parameter area.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
   param_area_start = align_down (arg_state.copy - arg_state.argp, 8);
 
@@ -1965,7 +1965,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Write all parameters.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
   /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
   if (word_size == 4)
@@ -2021,7 +2021,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   int length = TYPE_LENGTH (type);
-  int code = TYPE_CODE (type);
+  int code = type->code ();
 
   if (code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
     {
@@ -2083,7 +2083,7 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
 
   type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:

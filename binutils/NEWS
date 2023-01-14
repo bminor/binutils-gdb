@@ -1,5 +1,11 @@
 -*- text -*-
 
+* The readelf tool now has a -L or --lint or --enable-checks option which turns
+  on warning messages about possible problems with the file(s) being examined.
+  These checks include things like zero-sized sections, which are allowed by
+  the ELF standard but which nevertheless might be of concern if the user
+  was expecting them to actually contain something.
+
 Changes in 2.34:
 
 * Binutils now supports debuginfod, an HTTP server for distributing

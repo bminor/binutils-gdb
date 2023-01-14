@@ -1,3 +1,55 @@
+2020-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22909
+	* bfdlink.h (textrel_check_method): New enum.
+	(bfd_link_textrel_check): New.
+	(bfd_link_info): Replace warn_shared_textrel and error_textrel
+	with textrel_check.
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h: Update comments for ET_EXEC and ET_DYN.
+
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Include "bfd.h" to support bfd_boolean.
+	(enum riscv_isa_spec_class): New enum class.  All supported ISA spec
+	belong to one of the class
+	(struct riscv_ext_version): New structure holds version information
+	for the specific ISA.
+	* opcode/riscv-opc.h (DECLARE_CSR): There are two version information,
+	define_version and abort_version.  The define_version means which
+	privilege spec is started to define the CSR, and the abort_version
+	means which privilege spec is started to abort the CSR.  If the CSR is
+	valid for the newest spec, then the abort_version should be
+	PRIV_SPEC_CLASS_DRAFT.
+	(DECLARE_CSR_ALIAS): Same as DECLARE_CSR, but only for the obselete CSR.
+	* opcode/riscv.h (enum riscv_priv_spec_class): New enum class.  Define
+	the current supported privilege spec versions.
+	(struct riscv_csr_extra): Add new fields to store more information
+	about the CSR.  We use these information to find the suitable CSR
+	address when user choosing a specific privilege spec.
+
+2020-05-19  Alexander Fedotov  <alfedotov@gmail.com>
+
+	PR 25992
+	* opcode/arm.h (ARM_EXT2_V8R): Define. Modified ARM_AEXT2_V8R.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (PPC_OPERAND_ACC): Define.  Renumber following
+	PPC_OPERAND defines.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h: Update comment.
+	* opcode/ppc.h (PPC_OPCODE_POWER10): Rename from PPC_OPCODE_POWERXX.
+
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add
+	AARCH64_OPND_UNDEFINED.
+
 2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* elf/common.h (NT_ARC_V2): New macro definitions.

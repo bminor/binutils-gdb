@@ -30,61 +30,13 @@
 #include <unistd.h>
 
 #include "jit-protocol.h"
-
-/* ElfW is coming from linux. On other platforms it does not exist.
-   Let us define it here. */
-#ifndef ElfW
-# if (defined  (_LP64) || defined (__LP64__)) 
-#   define WORDSIZE 64
-# else
-#   define WORDSIZE 32
-# endif /* _LP64 || __LP64__  */
-#define ElfW(type)      _ElfW (Elf, WORDSIZE, type)
-#define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
-#define _ElfW_1(e,w,t)  e##w##t
-#endif /* !ElfW  */
+#include "jit-elf-util.h"
 
 static void
-usage (const char *const argv0)
+usage (void)
 {
-  fprintf (stderr, "Usage: %s library [count]\n", argv0);
+  fprintf (stderr, "Usage: jit-elf-main libraries...\n");
   exit (1);
-}
-
-/* Update .p_vaddr and .sh_addr as if the code was JITted to ADDR.  */
-
-static void
-update_locations (const void *const addr, int idx)
-{
-  const ElfW (Ehdr) *const ehdr = (ElfW (Ehdr) *)addr;
-  ElfW (Shdr) *const shdr = (ElfW (Shdr) *)((char *)addr + ehdr->e_shoff);
-  ElfW (Phdr) *const phdr = (ElfW (Phdr) *)((char *)addr + ehdr->e_phoff);
-  int i;
-
-  for (i = 0; i < ehdr->e_phnum; ++i)
-    if (phdr[i].p_type == PT_LOAD)
-      phdr[i].p_vaddr += (ElfW (Addr))addr;
-
-  for (i = 0; i < ehdr->e_shnum; ++i)
-    {
-      if (shdr[i].sh_type == SHT_STRTAB)
-        {
-          /* Note: we update both .strtab and .dynstr.  The latter would
-             not be correct if this were a regular shared library (.hash
-             would be wrong), but this is a simulation -- the library is
-             never exposed to the dynamic loader, so it all ends up ok.  */
-          char *const strtab = (char *)((ElfW (Addr))addr + shdr[i].sh_offset);
-          char *const strtab_end = strtab + shdr[i].sh_size;
-          char *p;
-
-          for (p = strtab; p < strtab_end; p += strlen (p) + 1)
-            if (strcmp (p, "jit_function_XXXX") == 0)
-              sprintf (p, "jit_function_%04d", idx);
-        }
-
-      if (shdr[i].sh_flags & SHF_ALLOC)
-        shdr[i].sh_addr += (ElfW (Addr))addr;
-    }
 }
 
 /* Defined by the .exp file if testing attach.  */
@@ -94,6 +46,15 @@ update_locations (const void *const addr, int idx)
 
 #ifndef MAIN
 #define MAIN main
+#endif
+
+/* Must be defined by .exp file when compiling to know
+   what address to map the ELF binary to.  */
+#ifndef LOAD_ADDRESS
+#error "Must define LOAD_ADDRESS"
+#endif
+#ifndef LOAD_INCREMENT
+#error "Must define LOAD_INCREMENT"
 #endif
 
 /* Used to spin waiting for GDB.  */
@@ -106,64 +67,35 @@ int mypid;
 int
 MAIN (int argc, char *argv[])
 {
-  /* These variables are here so they can easily be set from jit.exp.  */
-  const char *libname = NULL;
-  int count = 0, i, fd;
-  struct stat st;
-
+  int i;
   alarm (300);
+  /* Used as backing storage for GDB to populate argv.  */
+  char *fake_argv[10];
 
   mypid = getpid ();
-
-  count = count;  /* gdb break here 0  */
+  /* gdb break here 0  */
 
   if (argc < 2)
     {
-      usage (argv[0]);
+      usage ();
       exit (1);
     }
 
-  if (libname == NULL)
-    /* Only set if not already set from GDB.  */
-    libname = argv[1];
-
-  if (argc > 2 && count == 0)
-    /* Only set if not already set from GDB.  */
-    count = atoi (argv[2]);
-
-  printf ("%s:%d: libname = %s, count = %d\n", __FILE__, __LINE__,
-	  libname, count);
-
-  if ((fd = open (libname, O_RDONLY)) == -1)
+  for (i = 1; i < argc; ++i)
     {
-      fprintf (stderr, "open (\"%s\", O_RDONLY): %s\n", libname,
-	       strerror (errno));
-      exit (1);
-    }
+      size_t obj_size;
+      void *load_addr = (void *) (size_t) (LOAD_ADDRESS + (i - 1) * LOAD_INCREMENT);
+      printf ("Loading %s as JIT at %p\n", argv[i], load_addr);
+      void *addr = load_elf (argv[i], &obj_size, load_addr);
 
-  if (fstat (fd, &st) != 0)
-    {
-      fprintf (stderr, "fstat (\"%d\"): %s\n", fd, strerror (errno));
-      exit (1);
-    }
-
-  for (i = 0; i < count; ++i)
-    {
-      const void *const addr = mmap (0, st.st_size, PROT_READ|PROT_WRITE,
-				     MAP_PRIVATE, fd, 0);
-      struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
-
-      if (addr == MAP_FAILED)
-	{
-	  fprintf (stderr, "mmap: %s\n", strerror (errno));
-	  exit (1);
-	}
-
-      update_locations (addr, i);
+      char name[32];
+      sprintf (name, "jit_function_%04d", i);
+      int (*jit_function) (void) = (int (*) (void)) load_symbol (addr, name);
 
       /* Link entry at the end of the list.  */
+      struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
       entry->symfile_addr = (const char *)addr;
-      entry->symfile_size = st.st_size;
+      entry->symfile_size = obj_size;
       entry->prev_entry = __jit_debug_descriptor.relevant_entry;
       __jit_debug_descriptor.relevant_entry = entry;
 
@@ -175,6 +107,12 @@ MAIN (int argc, char *argv[])
       /* Notify GDB.  */
       __jit_debug_descriptor.action_flag = JIT_REGISTER;
       __jit_debug_register_code ();
+
+      if (jit_function () != 42)
+	{
+	  fprintf (stderr, "unexpected return value\n");
+	  exit (1);
+	}
     }
 
   WAIT_FOR_GDB; i = 0;  /* gdb break here 1 */

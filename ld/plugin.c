@@ -1191,7 +1191,7 @@ plugin_object_p (bfd *ibfd)
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
      the plugin may want to add.  */
-  abfd = plugin_get_ir_dummy_bfd (ibfd->filename, ibfd);
+  abfd = plugin_get_ir_dummy_bfd (bfd_get_filename (ibfd), ibfd);
 
   input = bfd_alloc (abfd, sizeof (*input));
   if (input == NULL)
@@ -1201,7 +1201,7 @@ plugin_object_p (bfd *ibfd)
   if (!bfd_plugin_open_input (ibfd, &file))
     return NULL;
 
-  if (file.name == ibfd->filename)
+  if (file.name == bfd_get_filename (ibfd))
     {
       /* We must copy filename attached to ibfd if it is not an archive
 	 member since it may be freed by bfd_close below.  */
@@ -1217,7 +1217,7 @@ plugin_object_p (bfd *ibfd)
   input->use_mmap = FALSE;
   input->offset = file.offset;
   input->filesize = file.filesize;
-  input->name = plugin_strdup (abfd, ibfd->filename);
+  input->name = plugin_strdup (abfd, bfd_get_filename (ibfd));
 
   claimed = 0;
 

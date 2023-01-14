@@ -1452,24 +1452,21 @@ patch_type (struct type *type, struct type *real_type)
 {
   struct type *target = TYPE_TARGET_TYPE (type);
   struct type *real_target = TYPE_TARGET_TYPE (real_type);
-  int field_size = TYPE_NFIELDS (real_target) * sizeof (struct field);
+  int field_size = real_target->num_fields () * sizeof (struct field);
 
   TYPE_LENGTH (target) = TYPE_LENGTH (real_target);
-  TYPE_NFIELDS (target) = TYPE_NFIELDS (real_target);
-  TYPE_FIELDS (target) = (struct field *) TYPE_ALLOC (target,
-						      field_size);
+  target->set_num_fields (real_target->num_fields ());
 
-  memcpy (TYPE_FIELDS (target), 
-	  TYPE_FIELDS (real_target), 
-	  field_size);
+  field *fields = (struct field *) TYPE_ALLOC (target, field_size);
+  memcpy (fields, real_target->fields (), field_size);
+  target->set_fields (fields);
 
-  if (TYPE_NAME (real_target))
+  if (real_target->name ())
     {
       /* The previous copy of TYPE_NAME is allocated by
 	 process_coff_symbol.  */
-      if (TYPE_NAME (target))
-	xfree ((char*) TYPE_NAME (target));
-      TYPE_NAME (target) = xstrdup (TYPE_NAME (real_target));
+      xfree ((char *) target->name ());
+      target->set_name (xstrdup (real_target->name ()));
     }
 }
 
@@ -1494,7 +1491,7 @@ patch_opaque_types (struct symtab *s)
          from different files with the same name.  */
       if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF
 	  && SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN
-	  && TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR
+	  && SYMBOL_TYPE (real_sym)->code () == TYPE_CODE_PTR
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
 	  const char *name = real_sym->linkage_name ();
@@ -1556,7 +1553,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
 		     struct objfile *objfile)
 {
-  struct symbol *sym = allocate_symbol (objfile);
+  struct symbol *sym = new (&objfile->objfile_obstack) symbol;
   char *name;
 
   name = cs->c_name;
@@ -1658,10 +1655,10 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one.  */
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    {
-	      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
+	      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
+		  || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
 		{
 		  /* If we are giving a name to a type such as
 		     "pointer to foo" or "function returning foo", we
@@ -1684,8 +1681,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		  ;
 		}
 	      else
-		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  xstrdup (sym->linkage_name ());
+		SYMBOL_TYPE (sym)->set_name (xstrdup (sym->linkage_name ()));
 	    }
 
 	  /* Keep track of any type which points to empty structured
@@ -1694,10 +1690,10 @@ process_coff_symbol (struct coff_symbol *cs,
 	     not an empty structured type, though; the forward
 	     references work themselves out via the magic of
 	     coff_lookup_type.  */
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	  if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 	      && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0
-	      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym)))
-	         != TYPE_CODE_UNDEF)
+	      && TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))->code ()
+	      != TYPE_CODE_UNDEF)
 	    {
 	      int i = hashname (sym->linkage_name ());
 
@@ -1716,11 +1712,11 @@ process_coff_symbol (struct coff_symbol *cs,
 	  /* Some compilers try to be helpful by inventing "fake"
 	     names for anonymous enums, structures, and unions, like
 	     "~0fake" or ".0fake".  Thanks, but no thanks...  */
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    if (sym->linkage_name () != NULL
 		&& *sym->linkage_name () != '~'
 		&& *sym->linkage_name () != '.')
-	      TYPE_NAME (SYMBOL_TYPE (sym)) = xstrdup (sym->linkage_name ());
+	      SYMBOL_TYPE (sym)->set_name (xstrdup (sym->linkage_name ()));
 
 	  add_symbol_to_list (sym, get_file_symbols ());
 	  break;
@@ -1880,12 +1876,12 @@ decode_base_type (struct coff_symbol *cs,
 	{
 	  /* Anonymous structure type.  */
 	  type = coff_alloc_type (cs->c_symnum);
-	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	  TYPE_NAME (type) = NULL;
+	  type->set_code (TYPE_CODE_STRUCT);
+	  type->set_name (NULL);
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
-	  TYPE_FIELDS (type) = 0;
-	  TYPE_NFIELDS (type) = 0;
+	  type->set_fields (nullptr);
+	  type->set_num_fields (0);
 	}
       else
 	{
@@ -1901,11 +1897,11 @@ decode_base_type (struct coff_symbol *cs,
 	{
 	  /* Anonymous union type.  */
 	  type = coff_alloc_type (cs->c_symnum);
-	  TYPE_NAME (type) = NULL;
+	  type->set_name (NULL);
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
-	  TYPE_FIELDS (type) = 0;
-	  TYPE_NFIELDS (type) = 0;
+	  type->set_fields (nullptr);
+	  type->set_num_fields (0);
 	}
       else
 	{
@@ -1914,7 +1910,7 @@ decode_base_type (struct coff_symbol *cs,
 					aux->x_sym.x_fcnary.x_fcn.x_endndx.l,
 					objfile);
 	}
-      TYPE_CODE (type) = TYPE_CODE_UNION;
+      type->set_code (TYPE_CODE_UNION);
       return type;
 
     case T_ENUM:
@@ -1922,11 +1918,11 @@ decode_base_type (struct coff_symbol *cs,
 	{
 	  /* Anonymous enum type.  */
 	  type = coff_alloc_type (cs->c_symnum);
-	  TYPE_CODE (type) = TYPE_CODE_ENUM;
-	  TYPE_NAME (type) = NULL;
+	  type->set_code (TYPE_CODE_ENUM);
+	  type->set_name (NULL);
 	  TYPE_LENGTH (type) = 0;
-	  TYPE_FIELDS (type) = 0;
-	  TYPE_NFIELDS (type) = 0;
+	  type->set_fields (nullptr);
+	  type->set_num_fields (0);
 	}
       else
 	{
@@ -1990,7 +1986,7 @@ coff_read_struct_type (int index, int length, int lastsym,
   int done = 0;
 
   type = coff_alloc_type (index);
-  TYPE_CODE (type) = TYPE_CODE_STRUCT;
+  type->set_code (TYPE_CODE_STRUCT);
   INIT_CPLUS_SPECIFIC (type);
   TYPE_LENGTH (type) = length;
 
@@ -2042,14 +2038,14 @@ coff_read_struct_type (int index, int length, int lastsym,
     }
   /* Now create the vector of fields, and record how big it is.  */
 
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nfields);
+  type->set_num_fields (nfields);
+  type->set_fields
+    ((struct field *) TYPE_ALLOC (type, sizeof (struct field) * nfields));
 
   /* Copy the saved-up fields into the field vector.  */
 
   for (n = nfields; list; list = list->next)
-    TYPE_FIELD (type, --n) = list->field;
+    type->field (--n) = list->field;
 
   return type;
 }
@@ -2095,7 +2091,7 @@ coff_read_enum_type (int index, int length, int lastsym,
       switch (ms->c_sclass)
 	{
 	case C_MOE:
-	  sym = allocate_symbol (objfile);
+	  sym = new (&objfile->objfile_obstack) symbol;
 
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  sym->set_linkage_name (name);
@@ -2121,10 +2117,10 @@ coff_read_enum_type (int index, int length, int lastsym,
     TYPE_LENGTH (type) = length;
   else /* Assume ints.  */
     TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT;
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
-  TYPE_NFIELDS (type) = nsyms;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nsyms);
+  type->set_code (TYPE_CODE_ENUM);
+  type->set_num_fields (nsyms);
+  type->set_fields
+    ((struct field *) TYPE_ALLOC (type, sizeof (struct field) * nsyms));
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
@@ -2146,7 +2142,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
-	  SET_FIELD_ENUMVAL (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
+	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;

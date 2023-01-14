@@ -4196,7 +4196,7 @@ void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec,  fragS *fragp)
 {
   offsetT disp;
-  char *buf = fragp->fr_fix + fragp->fr_literal;
+  char *buf = fragp->fr_fix + &fragp->fr_literal[0];
 
   gas_assert (fragp->fr_symbol);
   if (IS_EXTERNAL_SYM (fragp->fr_symbol, asec))

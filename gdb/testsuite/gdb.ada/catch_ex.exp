@@ -162,9 +162,10 @@ gdb_test "continue" \
          "Continuing\.$eol$temp_catchpoint_msg$eol.*SPOT1" \
          "continuing to temporary catchpoint"
 
-gdb_test "continue" \
-         "Continuing\..*$inferior_exited_re.*" \
-         "continuing to program completion"
-
+with_test_prefix "temporary catchpoint" {
+    gdb_test "continue" \
+	"Continuing\..*$inferior_exited_re.*" \
+	"continuing to program completion"
+}
 
 

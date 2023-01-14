@@ -21,6 +21,7 @@
 #define PROCESS_STRATUM_TARGET_H
 
 #include "target.h"
+#include <set>
 
 /* Abstract base class inherited by all process_stratum targets.  */
 
@@ -81,5 +82,14 @@ as_process_stratum_target (target_ops *target)
   gdb_assert (target->stratum () == process_stratum);
   return static_cast<process_stratum_target *> (target);
 }
+
+/* Return a collection of targets that have non-exited inferiors.  */
+
+extern std::set<process_stratum_target *> all_non_exited_process_targets ();
+
+/* Switch to the first inferior (and program space) of TARGET, and
+   switch to no thread selected.  */
+
+extern void switch_to_target_no_thread (process_stratum_target *target);
 
 #endif /* !defined (PROCESS_STRATUM_TARGET_H) */

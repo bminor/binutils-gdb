@@ -1,6 +1,6 @@
 #source: pr19636-2.s
 #as: --32 -mrelax-relocations=no
-#ld: -shared -m elf_i386
+#ld: -shared -m elf_i386 -z notext
 #readelf : -r --wide --dyn-syms
 #notarget: i?86-*-nacl* x86_64-*-nacl*
 

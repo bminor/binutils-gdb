@@ -472,8 +472,7 @@ complete_set_gnutarget (struct cmd_list_element *cmd,
 void
 set_gnutarget (const char *newtarget)
 {
-  if (gnutarget_string != NULL)
-    xfree (gnutarget_string);
+  xfree (gnutarget_string);
   gnutarget_string = xstrdup (newtarget);
   set_gnutarget_command (NULL, 0, NULL);
 }

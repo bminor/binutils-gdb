@@ -576,7 +576,7 @@ proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp 
   global shared
   # Make sure that PLT is used since PLT is expected.
   global PLT_CFLAGS
-  build_binary $shared $PLT_CFLAGS $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
+  build_binary "$shared -z notext" $PLT_CFLAGS $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
 }
 
 proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {

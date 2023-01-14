@@ -240,7 +240,7 @@ static struct riscv_register_feature riscv_csr_feature =
 {
  "org.gnu.gdb.riscv.csr",
  {
-#define DECLARE_CSR(NAME,VALUE,CLASS) \
+#define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
   { RISCV_ ## VALUE ## _REGNUM, { # NAME }, false },
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
@@ -498,7 +498,7 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
 
   if (regnum >= RISCV_FIRST_CSR_REGNUM && regnum <= RISCV_LAST_CSR_REGNUM)
     {
-#define DECLARE_CSR(NAME,VALUE,CLASS) \
+#define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
       case RISCV_ ## VALUE ## _REGNUM: return # NAME;
 
       switch (regnum)
@@ -544,7 +544,7 @@ riscv_fpreg_d_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "float", bt->builtin_float);
       append_composite_type_field (t, "double", bt->builtin_double);
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_fpreg_d";
+      t->set_name ("builtin_type_fpreg_d");
       tdep->riscv_fpreg_d_type = t;
     }
 
@@ -574,10 +574,10 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
          present the registers using a union type.  */
       int flen = riscv_isa_flen (gdbarch);
       if (flen == 8
-          && TYPE_CODE (type) == TYPE_CODE_FLT
+          && type->code () == TYPE_CODE_FLT
           && TYPE_LENGTH (type) == flen
-          && (strcmp (TYPE_NAME (type), "builtin_type_ieee_double") == 0
-              || strcmp (TYPE_NAME (type), "double") == 0))
+          && (strcmp (type->name (), "builtin_type_ieee_double") == 0
+              || strcmp (type->name (), "double") == 0))
         type = riscv_fpreg_d_type (gdbarch);
     }
 
@@ -587,7 +587,7 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
        || regnum == RISCV_SP_REGNUM
        || regnum == RISCV_GP_REGNUM
        || regnum == RISCV_TP_REGNUM)
-      && TYPE_CODE (type) == TYPE_CODE_INT
+      && type->code () == TYPE_CODE_INT
       && TYPE_LENGTH (type) == xlen)
     {
       /* This spots the case where some interesting registers are defined
@@ -640,16 +640,16 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   print_raw_format = (value_entirely_available (val)
 		      && !value_optimized_out (val));
 
-  if (TYPE_CODE (regtype) == TYPE_CODE_FLT
-      || (TYPE_CODE (regtype) == TYPE_CODE_UNION
-	  && TYPE_NFIELDS (regtype) == 2
-	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 0)) == TYPE_CODE_FLT
-	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 1)) == TYPE_CODE_FLT)
-      || (TYPE_CODE (regtype) == TYPE_CODE_UNION
-	  && TYPE_NFIELDS (regtype) == 3
-	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 0)) == TYPE_CODE_FLT
-	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 1)) == TYPE_CODE_FLT
-	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 2)) == TYPE_CODE_FLT))
+  if (regtype->code () == TYPE_CODE_FLT
+      || (regtype->code () == TYPE_CODE_UNION
+	  && regtype->num_fields () == 2
+	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
+	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT)
+      || (regtype->code () == TYPE_CODE_UNION
+	  && regtype->num_fields () == 3
+	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
+	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT
+	  && TYPE_FIELD_TYPE (regtype, 2)->code () == TYPE_CODE_FLT))
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
@@ -828,7 +828,7 @@ riscv_is_regnum_a_named_csr (int regnum)
 
   switch (regnum)
     {
-#define DECLARE_CSR(name, num, class) case RISCV_ ## num ## _REGNUM:
+#define DECLARE_CSR(name, num, class, define_ver, abort_ver) case RISCV_ ## num ## _REGNUM:
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
       return true;
@@ -1628,7 +1628,7 @@ static ULONGEST
 riscv_type_align (gdbarch *gdbarch, type *type)
 {
   type = check_typedef (type);
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
     return std::min (TYPE_LENGTH (type), (ULONGEST) BIGGEST_ALIGNMENT);
 
   /* Anything else will be aligned by the generic code.  */
@@ -2044,7 +2044,7 @@ private:
 void
 riscv_struct_info::analyse_inner (struct type *type, int offset)
 {
-  unsigned int count = TYPE_NFIELDS (type);
+  unsigned int count = type->num_fields ();
   unsigned int i;
 
   for (i = 0; i < count; ++i)
@@ -2057,7 +2057,7 @@ riscv_struct_info::analyse_inner (struct type *type, int offset)
       int field_offset
 	= offset + TYPE_FIELD_BITPOS (type, i) / TARGET_CHAR_BIT;
 
-      switch (TYPE_CODE (field_type))
+      switch (field_type->code ())
 	{
 	case TYPE_CODE_STRUCT:
 	  analyse_inner (field_type, field_offset);
@@ -2104,7 +2104,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 
       sinfo.analyse (ainfo->type);
       if (sinfo.number_of_fields () == 1
-	  && TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_COMPLEX)
+	  && sinfo.field_type(0)->code () == TYPE_CODE_COMPLEX)
 	{
 	  /* The following is similar to RISCV_CALL_ARG_COMPLEX_FLOAT,
 	     except we use the type of the complex field instead of the
@@ -2134,7 +2134,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	}
 
       if (sinfo.number_of_fields () == 1
-	  && TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_FLT)
+	  && sinfo.field_type(0)->code () == TYPE_CODE_FLT)
 	{
 	  /* The following is similar to RISCV_CALL_ARG_SCALAR_FLOAT,
 	     except we use the type of the first scalar field instead of
@@ -2157,9 +2157,9 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	}
 
       if (sinfo.number_of_fields () == 2
-	  && TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_FLT
+	  && sinfo.field_type(0)->code () == TYPE_CODE_FLT
 	  && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->flen
-	  && TYPE_CODE (sinfo.field_type (1)) == TYPE_CODE_FLT
+	  && sinfo.field_type(1)->code () == TYPE_CODE_FLT
 	  && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen
 	  && riscv_arg_regs_available (&cinfo->float_regs) >= 2)
 	{
@@ -2183,7 +2183,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 
       if (sinfo.number_of_fields () == 2
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
-	  && (TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_FLT
+	  && (sinfo.field_type(0)->code () == TYPE_CODE_FLT
 	      && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->flen
 	      && is_integral_type (sinfo.field_type (1))
 	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->xlen))
@@ -2207,7 +2207,7 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
 	  && (is_integral_type (sinfo.field_type (0))
 	      && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->xlen
-	      && TYPE_CODE (sinfo.field_type (1)) == TYPE_CODE_FLT
+	      && sinfo.field_type(1)->code () == TYPE_CODE_FLT
 	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen))
 	{
 	  int len0 = TYPE_LENGTH (sinfo.field_type (0));
@@ -2260,7 +2260,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
   ainfo->argloc[0].c_length = 0;
   ainfo->argloc[1].c_length = 0;
 
-  switch (TYPE_CODE (ainfo->type))
+  switch (ainfo->type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_BOOL:
@@ -2428,7 +2428,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
   struct type *ftype = check_typedef (value_type (function));
 
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+  if (ftype->code () == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   /* We'll use register $a0 if we're returning a struct.  */
@@ -2445,7 +2445,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       arg_type = check_typedef (value_type (arg_value));
 
       riscv_arg_location (gdbarch, info, &call_info, arg_type,
-			  TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+			  TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);

@@ -1,3 +1,1477 @@
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (process_psymtab_comp_unit): Remove reference to
+	dwarf2_per_cu_data::dwarf2_per_objfile.
+	(compute_compunit_symtab_includes): Likewise.
+	(dwarf2_cu::start_symtab): Likewise.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (dwarf2_get_die_type): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/read.c (get_die_type_at_offset): Likewise.
+	(read_namespace_alias): Update.
+	(lookup_die_type): Update.
+	(dwarf2_get_die_type): Add dwarf2_per_objfile parameter.
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc) <get_base_type>:
+	Update.
+	(disassemble_dwarf_expression): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_queue_item): Add
+	dwarf2_per_objfile parameter, assign new parameter.
+	<per_objfile>: New field.
+	* dwarf2/read.c (free_one_cached_comp_unit): Add
+	dwarf2_per_objfile parameter.
+	(queue_comp_unit): Likewise.
+	(dw2_do_instantiate_symtab): Update.
+	(process_psymtab_comp_unit): Update.
+	(maybe_queue_comp_unit): Add dwarf2_per_objfile parameter.
+	(process_imported_unit_die): Update.
+	(queue_and_load_dwo_tu): Update.
+	(follow_die_offset): Update.
+	(follow_die_sig_1): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <objfile>: Remove.
+	* dwarf2/read.c (dwarf2_compute_name): Pass per_objfile down.
+	(read_call_site_scope): Assign per_objfile.
+	(dwarf2_per_cu_data::objfile): Remove.
+	* gdbtypes.h (struct call_site) <per_objfile>: New member.
+	* dwarf2/loc.h (dwarf2_evaluate_loc_desc): Add
+	dwarf2_per_objfile parameter.
+	* dwarf2/loc.c (dwarf2_evaluate_loc_desc_full): Add
+	dwarf2_per_objfile parameter.
+	(dwarf_expr_reg_to_entry_parameter): Add output
+	dwarf2_per_objfile parameter.
+	(locexpr_get_frame_base): Update.
+	(class dwarf_evaluate_loc_desc) <get_tls_address>: Update.
+	<push_dwarf_reg_entry_value>: Update.
+	<call_site_to_target_addr>: Update.
+	(dwarf_entry_parameter_to_value): Add dwarf2_per_objfile
+	parameter.
+	(value_of_dwarf_reg_entry): Update.
+	(rw_pieced_value): Update.
+	(indirect_synthetic_pointer): Update.
+	(dwarf2_evaluate_property): Update.
+	(dwarf2_loc_desc_get_symbol_read_needs): Add dwarf2_per_objfile
+	parameter.
+	(locexpr_read_variable): Update.
+	(locexpr_get_symbol_read_needs): Update.
+	(loclist_read_variable): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/read.c (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/loc.c (indirect_synthetic_pointer, per_cu_dwarf_call,
+	sect_variable_value): Add dwarf2_per_objfile parameter.
+	(class dwarf_evaluate_loc_desc) <dwarf_call,
+	dwarf_variable_value>: Update.
+	(fetch_const_value_from_synthetic_pointer): Add
+	dwarf2_per_objfile parameter.
+	(fetch_const_value_from_synthetic_pointer): Update.
+	(coerced_pieced_ref): Update.
+	(class symbol_needs_eval_context) <dwarf_call,
+	dwarf_variable_value>: Update.
+	(dwarf2_compile_expr_to_ax): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (allocate_piece_closure): Add dwarf2_per_objfile
+	parameter.
+	(dwarf2_evaluate_loc_desc_full): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (dwarf2_read_addr_index): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/read.c (dwarf2_read_addr_index): Likewise.
+	* dwarf2/loc.c (decode_debug_loclists_addresses): Add
+	dwarf2_per_objfile parameter.
+	(decode_debug_loc_dwo_addresses): Likewise.
+	(dwarf2_find_location_expression): Update.
+	(class dwarf_evaluate_loc_desc) <get_addr_index>: Update.
+	(locexpr_describe_location_piece): Add dwarf2_per_objfile
+	parameter.
+	(disassemble_dwarf_expression): Add dwarf2_per_objfile
+	parameter.
+	(locexpr_describe_location_1): Likewise.
+	(locexpr_describe_location): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <text_offset>:
+	Remove.
+	* dwarf2/read.c (dwarf2_per_cu_data::text_offset): Remove.
+	* dwarf2/loc.c (dwarf2_find_location_expression): Update.
+	(dwarf2_compile_property_to_c): Update.
+	(dwarf2_compile_expr_to_ax): Add dwarf2_per_objfile parameter,
+	use text offset from objfile.
+	(locexpr_tracepoint_var_ref): Update.
+	(locexpr_generate_c_location): Update.
+	(loclist_describe_location): Update.
+	(loclist_tracepoint_var_ref): Update.
+	* dwarf2/compile.h (compile_dwarf_bounds_to_c): Add
+	dwarf2_per_objfile parameter.
+	* dwarf2/loc2c.c (do_compile_dwarf_expr_to_c): Likewise,
+	use text offset from objfile.
+	(compile_dwarf_expr_to_c): Add dwarf2_per_objfile parameter.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/expr.h (struct dwarf_expr_context)
+	<dwarf_expr_context>: Add dwarf2_per_objfile parameter.
+	<offset>: Remove.
+	<per_objfile>: New member.
+	* dwarf2/expr.c (dwarf_expr_context::dwarf_expr_context): Add
+	dwarf2_per_objfile parameter.  Don't set offset, set
+	per_objfile.
+	(dwarf_expr_context::execute_stack_op): Use offset from objfile.
+	* dwarf2/frame.c (dwarf2_frame_find_fde): Return (by parameter)
+	a dwarf2_per_objfile object instead of an offset.
+	(class dwarf_expr_executor) <dwarf_expr_executor>: Add
+	constructor.
+	(execute_stack_op): Add dwarf2_per_objfile parameter, pass it
+	to dwarf2_expr_executor constructor.  Don't set offset.
+	(dwarf2_fetch_cfa_info): Update.
+	(struct dwarf2_frame_cache) <text_offset>: Remove.
+	<per_objfile>: New field.
+	(dwarf2_frame_cache): Update.
+	(dwarf2_frame_prev_register): Update.
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)
+	<dwarf_evaluate_loc_desc>: Add constructor.
+	(dwarf2_evaluate_loc_desc_full): Update.
+	(dwarf2_locexpr_baton_eval): Update.
+	(class symbol_needs_eval_context) <symbol_needs_eval_context>:
+	Add constructor.
+	(dwarf2_loc_desc_get_symbol_read_needs): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <addr_type,
+	addr_sized_int_type>: Move to dwarf2_cu.
+	<int_type>: Move to dwarf2_per_objfile.
+	(struct dwarf2_per_objfile) <int_type>: Move here.
+	* dwarf2/read.c (struct dwarf2_cu) <addr_type,
+	addr_sized_int_type>: Move here.
+	(read_func_scope): Update.
+	(read_array_type): Update.
+	(read_tag_string_type): Update.
+	(attr_to_dynamic_prop): Update.
+	(dwarf2_per_cu_data::int_type): Rename to...
+	(dwarf2_per_objfile::int_type): ... this.
+	(dwarf2_per_cu_data::addr_sized_int_type): Rename to...
+	(dwarf2_cu::addr_sized_int_type): ... this.
+	(read_subrange_type): Update.
+	(dwarf2_per_cu_data::addr_type): Rename to...
+	(dwarf2_cu::addr_type): ... this.
+	(set_die_type): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (queue_and_load_all_dwo_tus): Access per_objfile
+	data through per_cu->cu.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (lookup_dwo_comp_unit): Change
+	dwarf2_per_cu_data parameter fo dwarf2_cu.
+	(lookup_dwo_type_unit): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(lookup_dwo_unit): Likewise.
+	(open_and_init_dwo_file): Likewise.
+	(lookup_dwo_cutu): Likewise.
+	(lookup_dwo_comp_unit): Likewise.
+	(lookup_dwo_type_unit): Likewise.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (process_full_comp_unit): Add dwarf2_per_objfile
+	parameter.
+	(process_full_type_unit): Likewise.
+	(process_queue): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (recursively_compute_inclusions): Add
+	dwarf2_per_objfile parameter.
+	(compute_compunit_symtab_includes): Likewise.
+	(process_cu_includes): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (create_partial_symtab): Add dwarf2_per_objfile
+	parameter.
+	(create_type_unit_group): Update.
+	(process_psymtab_comp_unit_reader): Update.
+	(build_type_psymtabs_reader): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (cutu_reader::keep): Access dwarf2_per_objfile
+	object through m_this_cu->cu.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (queue_and_load_dwo_tu): Expect a dwarf2_cu as
+	the info parameter.
+	(queue_and_load_all_dwo_tus): Pass per_cu->cu.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Add
+	per_objfile parameter.
+	(load_full_type_unit): Add per_objfile parameter.
+	(read_signatured_type): Likewise.
+	(load_full_comp_unit): Likewise.
+	(load_cu): Likewise.
+	(dw2_do_instantiate_symtab): Likewise.
+	(dw2_get_file_names): Likewise.
+	(dw2_map_symtabs_matching_filename): Update.
+	(dw_expand_symtabs_matching_file_matcher): Update.
+	(dw2_map_symbol_filenames): Update.
+	(process_psymtab_comp_unit): Add per_objfile parameter.
+	(build_type_psymtabs_1): Update.
+	(process_skeletonless_type_unit): Update.
+	(dwarf2_build_psymtabs_hard): Update.
+	(load_partial_comp_unit): Add per_objfile parameter.
+	(scan_partial_symbols): Update.
+	(load_full_comp_unit): Add per_objfile parameter.
+	(process_imported_unit_die): Update.
+	(create_cus_hash_table): Update.
+	(find_partial_die): Update.
+	(dwarf2_read_addr_index): Update.
+	(follow_die_offset): Update.
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	(dwarf2_fetch_constant_bytes): Update.
+	(dwarf2_fetch_die_type_sect_off): Update.
+	(follow_die_sig_1): Update.
+	(load_full_type_unit): Add per_objfile parameter.
+	(read_signatured_type): Likewise.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (lookup_dwo_unit): Use bfd_get_filename instead
+	of objfile_name.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <obfd>: New member.
+	(dwarf2_get_dwz_file): Replace parameter with dwarf2_per_bfd.
+	* dwarf2/read.c (dwarf2_per_bfd::dwarf2_per_bfd): Assign obfd
+	field.
+	(dwarf2_get_dwz_file): Replace parameter with dwarf2_per_bfd.
+	(create_cus_from_index): Update.
+	(dwarf2_read_gdb_index): Update.
+	(create_cus_from_debug_names): Update.
+	(dwarf2_read_debug_names): Update.
+	(get_abbrev_section_for_cu): Update.
+	(create_all_comp_units): Update.
+	(read_attribute_value): Update.
+	(get_debug_line_section): Update.
+	* dwarf2/index-cache.c (index_cache::store): Update.
+	* dwarf2/index-write.c (save_gdb_index_command): Update.
+	* dwarf2/macro.c (dwarf_decode_macro_bytes): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <per_bfd>: New
+	member.
+	* dwarf2/read.c (dwarf2_per_bfd::allocate_per_cu): Initialize
+	dwarf2_per_cu_data::per_bfd.
+	(dwarf2_per_bfd::allocate_signatured_type): Likewise.
+	(create_type_unit_group): Likewise.
+	(queue_comp_unit): Remove reference to
+	per_cu->dwarf2_per_objfile.
+	(maybe_queue_comp_unit): Likewise.
+	(fill_in_sig_entry_from_dwo_entry): Assign new field.
+	(create_cus_hash_table): Assign new field.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c: Replace
+	dwarf2_cu->per_cu->dwarf2_per_objfile references with
+	dwarf2_cu->per_objfile throughout.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (dw2_do_instantiate_symtab): Add per_objfile
+	parameter, don't use per_cu->dwarf2_per_objfile.
+	(dw2_instantiate_symtab): Likewise.
+	(dw2_find_last_source_symtab): Update.
+	(dw2_map_expand_apply): Update.
+	(dw2_lookup_symbol): Update.
+	(dw2_expand_symtabs_for_function): Update.
+	(dw2_expand_all_symtabs): Update.
+	(dw2_expand_symtabs_with_fullname): Update.
+	(dw2_expand_symtabs_matching_one): Add per_objfile parameter,
+	don't use per_cu->dwarf2_per_objfile.
+	(dw2_expand_marked_cus): Update.
+	(dw2_find_pc_sect_compunit_symtab): Update.
+	(dw2_debug_names_lookup_symbol): Update.
+	(dw2_debug_names_expand_symtabs_for_function): Update.
+	(dw2_debug_names_map_matching_symbols): Update.
+	(dwarf2_psymtab::expand_psymtab): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (struct dwarf2_cu) <dwarf2_cu>: Add parameter.
+	<per_objfile>: New member.
+	(class cutu_reader) <init_tu_and_read_dwo_dies>: Add parameter.
+	(cutu_reader::init_tu_and_read_dwo_dies): Add parameter, update
+	call to dwarf2_cu.
+	(cutu_reader::cutu_reader): Update.
+	(dwarf2_cu::dwarf2_cu): Add parameter, initialize per_objfile.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <die_type_hash>: Move to
+	struct dwarf2_per_objfile.
+	(struct dwarf2_per_objfile) <die_type_hash>: Move from struct
+	dwarf2_per_bfd.
+	* dwarf2/read.c (set_die_type): Update.
+	(get_die_type_at_offset): Update.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <num_psymtabs>: New
+	method.
+	(struct dwarf2_per_objfile) <resize_symtabs, symtab_set_p,
+	get_symtab, set_symtab>: New methods.
+	<m_symtabs>: New field.
+	(struct dwarf2_psymtab): Derive from partial_symtab.
+	<readin_p, get_compunit_symtab>: Declare methods.
+	* dwarf2/read.c (dwarf2_per_objfile::symtab_set_p,
+	dwarf2_per_objfile::get_symtab, dwarf2_per_objfile::set_symtab):
+	New methods.
+	(struct dwarf2_per_cu_quick_data) <compunit_symtab>: Remove.
+	(dw2_do_instantiate_symtab, dw2_instantiate_symtab)
+	(dw2_map_expand_apply, dw2_map_symtabs_matching_filename)
+	(dw2_symtab_iter_next, dw2_print_stats)
+	(dw2_expand_symtabs_with_fullname)
+	(dw2_expand_symtabs_matching_one)
+	(dw_expand_symtabs_matching_file_matcher)
+	(dw2_find_pc_sect_compunit_symtab, dw2_map_symbol_filenames)
+	(dw2_debug_names_iterator::next)
+	(dw2_debug_names_map_matching_symbols)
+	(fill_in_sig_entry_from_dwo_entry, dwarf2_psymtab::read_symtab)
+	(process_queue, dwarf2_psymtab::expand_psymtab): Update.
+	(dwarf2_psymtab::readin_p, dwarf2_psymtab::get_compunit_symtab):
+	New methods.
+	(get_compunit_symtab, process_full_comp_unit)
+	(process_full_type_unit): Update.
+	(dwarf2_build_psymtabs, dwarf2_initialize_objfile, add_type_unit): Call
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (dwarf2_per_objfile): Rename to dwarf2_per_bfd,
+	then introduce a new dwarf2_per_objfile type.
+	<read_line_string>: Move to the new dwarf2_per_objfile type.
+	<objfile>: Likewise.
+	(dwarf2_per_bfd): Rename dwarf2_per_objfile to this.
+	* dwarf2/read.c: Replace references to dwarf2_per_objfile with
+	dwarf2_per_objfile->per_bfd.
+	(dwarf2_per_objfile::dwarf2_per_objfile): Rename to...
+	(dwarf2_per_bfd::dwarf2_per_bfd): ... this.
+	(dwarf2_per_objfile::free_cached_comp_units): Rename to...
+	(dwarf2_per_bfd::free_cached_comp_units): ... this.
+	(dwarf2_has_info): Allocate dwarf2_per_bfd.
+	(dwarf2_per_objfile::locate_sections): Rename to...
+	(dwarf2_per_bfd::locate_sections): ... this.
+	(dwarf2_per_objfile::get_cutu): Rename to...
+	(dwarf2_per_bfd::get_cutu): ... this.
+	(dwarf2_per_objfile::get_cu): Rename to...
+	(dwarf2_per_bfd::get_cu): ... this.
+	(dwarf2_per_objfile::get_tu): Rename to...
+	(dwarf2_per_bfd::get_tu): ... this.
+	(dwarf2_per_objfile::allocate_per_cu): Rename to...
+	(dwarf2_per_bfd::allocate_per_cu): ... this.
+	(dwarf2_per_objfile::allocate_signatured_type): Rename to...
+	(dwarf2_per_bfd::allocate_signatured_type): ... this.
+	(get_gdb_index_contents_ftype): Change parameter from
+	dwarf2_per_objfile to dwarf2_per_bfd.
+	* dwarf2/macro.c, dwarf2/index-write.c: Replace references to
+	dwarf2_per_objfile with dwarf2_per_objfile->per_bfd.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (struct piece_closure) <per_objfile>: New member.
+	(allocate_piece_closure): Set "per_objfile" member.
+	(dwarf2_find_location_expression, dwarf2_locexpr_baton_eval)
+	(locexpr_describe_location, loclist_describe_location): Use new
+	member.
+	* dwarf2/read.c (read_call_site_scope)
+	(mark_common_block_symbol_computed, attr_to_dynamic_prop)
+	(dwarf2_const_value_attr, dwarf2_fetch_die_loc_sect_off)
+	(fill_in_loclist_baton, dwarf2_symbol_mark_computed,
+	handle_data_member_location): Set per_objfile member.
+	* dwarf2/loc.h (struct dwarf2_locexpr_baton) <per_objfile>: New
+	member.
+	(struct dwarf2_loclist_baton) <per_objfile>: New member.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile) <allocate_per_cu,
+	allocate_signatured_type>: Declare new methods.
+	<m_num_psymtabs>: New member.
+	(struct dwarf2_per_cu_data) <index>: New member.
+	* dwarf2/read.c (dwarf2_per_objfile::allocate_per_cu)
+	(dwarf2_per_objfile::allocate_signatured_type): New methods.
+	(create_cu_from_index_list): Use allocate_per_cu.
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(create_debug_type_hash_table, add_type_unit)
+	(read_comp_units_from_section): Use allocate_signatured_type.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.c (partial_map_expand_apply)
+	(psym_find_pc_sect_compunit_symtab, psym_lookup_symbol)
+	(psym_lookup_global_symbol_language)
+	(psymtab_to_symtab, psym_find_last_source_symtab, dump_psymtab)
+	(psym_print_stats, psym_expand_symtabs_for_function)
+	(psym_map_symbol_filenames, psym_map_matching_symbols)
+	(psym_expand_symtabs_matching)
+	(partial_symtab::read_dependencies, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* psympriv.h (struct partial_symtab) <readin_p,
+	get_compunit_symtab>: Add objfile parameter.
+	(struct standard_psymtab) <readin_p, get_compunit_symtab>:
+	Likewise.
+	* dwarf2/read.c (struct dwarf2_include_psymtab) <readin_p,
+	get_compunit_symtab>: Likewise.
+	(dwarf2_psymtab::expand_psymtab): Pass objfile argument.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile) <obstack>: New
+	member.
+	* dwarf2/read.c (delete_file_name_entry): Fix comment.
+	(create_cu_from_index_list)
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(dw2_get_file_names_reader, dwarf2_initialize_objfile)
+	(dwarf2_create_include_psymtab)
+	(create_debug_type_hash_table, add_type_unit)
+	(create_type_unit_group, read_comp_units_from_section)
+	(dwarf2_compute_name, create_cus_hash_table)
+	(create_dwp_hash_table, create_dwo_unit_in_dwp_v1)
+	(create_dwo_unit_in_dwp_v2, open_and_init_dwp_file): Use new
+	obstack.
+	(dw2_get_real_path): Likewise.  Change argument to
+	dwarf2_per_objfile.
+
+2020-05-27  Luis Machado  <luis.machado@linaro.org>
+
+	PR tdep/26000
+	* arm-tdep.c (thumb_analyze_prologue): Fix instruction matching
+	for ldrd (immediate).
+
+2020-05-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* command.h: Add comment giving the name of class_tui.
+	* cli/cli-cmds.c (_initialize_cli_cmds): If TUI defined,
+	create the fake command for the help for class_tui.
+
+2020-05-26  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_print_array_index): Change type.  Call val_atr.
+	(ada_value_ptr_subscript): Don't call pos_atr on the lower bound.
+	(val_atr): New function.
+	(value_val_atr): Use it.
+	* ada-valprint.c (print_optional_low_bound): Change low bound
+	handling for enums.
+	(val_print_packed_array_elements): Don't call discrete_position.
+	* gdbtypes.c (get_discrete_bounds) <TYPE_CODE_RANGE>: Call
+	discrete_position for enum types.
+	* language.c (default_print_array_index): Change type.
+	* language.h (struct language_defn) <la_print_array_index>: Add
+	index_type parameter, change type of index_value.
+	(LA_PRINT_ARRAY_INDEX): Add index_type parameter.
+	(default_print_array_index): Update.
+	* valprint.c (maybe_print_array_index): Don't call
+	value_from_longest.  Update.
+	(value_print_array_elements): Don't call discrete_position.
+
+2020-05-26  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (value_val_atr): Handle TYPE_CODE_RANGE.
+	* gdbtypes.c (discrete_position): Handle TYPE_CODE_RANGE.
+
+2020-05-25  Cristiano De Alti  <cristiano_dealti@hotmail.com>
+
+	PR gdb/13519
+	* avr-tdep.c (avr_integer_to_address): Return data or code
+	address accordingly to the second 'type' argument of the
+	function.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* infcmd.c, inferior.h: (construct_inferior_arguments):
+	Moved function from here to gdbsupport/common-inferior.{h,cc}
+
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	Revert commit eca1f90c:
+	* NEWS: Remove entry for completion styling.
+	* completer.c (_rl_completion_prefix_display_length): Move
+	declaration later.
+	(gdb_fnprint): Revert.
+	(gdb_display_match_list_1): Likewise.
+	* cli/cli-style.c (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Remove.
+	(_initialize_cli_style): Revert.
+	* cli/cli-style.h (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Don't
+	declare.
+
+2020-05-24  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (completion_list_add_name): Return boolean indication
+	of whether the symbol matched.
+	(completion_list_add_symbol): Don't try to remove C++ aliases if
+	the symbol didn't match in the first place.
+	* symtab.h (completion_list_add_name): Return bool.
+
+2020-05-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_FIELD): Remove.  Replace all uses with
+	type::field.
+
+2020-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 9.2 released.
+
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add entry for completion styling.
+	* completer.c (_rl_completion_prefix_display_length): Move
+	declaration earlier.
+	(gdb_fnprint): Use completion_style.
+	(gdb_display_match_list_1): Likewise.
+	* cli/cli-style.c (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): New
+	globals.
+	(_initialize_cli_style): Register new globals.
+	* cli/cli-style.h (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Declare.
+
+2020-05-23  Pedro Alves  <palves@redhat.com>
+
+	* utils.c: Include "gdbsupport/gdb-safe-ctype.h".
+	(parse_escape): Use ISDIGIT instead of isdigit.
+	(puts_debug): Use gdb_isprint instead of isprint.
+	(fprintf_symbol_filtered): Use ISALNUM instead of isalnum.
+	(cp_skip_operator_token, skip_ws, strncmp_iw_with_mode): Use
+	ISSPACE instead of isspace.
+	(strncmp_iw_with_mode): Use TOLOWER instead of tolower and ISSPACE
+	instead of isspace.
+	(strcmp_iw_ordered): Use ISSPACE instead of isspace.
+	(string_to_core_addr): Use TOLOWER instead of tolower, ISXDIGIT
+	instead of isxdigit and ISDIGIT instead of isdigit.
+
+2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <field>: New method.
+	(TYPE_FIELDS): Remove, replace all uses with either type::fields
+	or type::field.
+
+2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <fields, set_fields>: New methods.
+	(TYPE_FIELDS): Use type::fields.  Change all call sites that
+	modify the propery to use type::set_fields instead.
+
+2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_NFIELDS): Remove.  Change all cal sites to use
+	type::num_fields instead.
+
+2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <num_fields, set_num_fields>: New
+	methods.
+	(TYPE_NFIELDS): Use type::num_fields.  Change all call sites
+	that modify the number of fields to use type::set_num_fields
+	instead.
+
+2020-05-22  Tom Tromey  <tromey@adacore.com>
+
+	* compile/compile-object-load.h (munmap_list_free): Don't
+	declare.
+
+2020-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* annotate.c (annotate_source_line): Update return type, add call
+	to update current symtab and line.
+	* annotate.h (annotate_source_line): Update return type, and
+	extend header comment.
+	* source.c (info_line_command): Check annotation_level before
+	calling annotate_source_line.
+	* stack.c (print_frame_info): If calling annotate_source_line
+	returns true, then don't print any other source line information.
+
+2020-05-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lm32-tdep.c (lm32_register_reggroup_p): Fix condition.
+
+2020-05-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* coffread.c (patch_type): Remove NULL check before xfree.
+	* corefile.c (set_gnutarget): Likewise.
+	* cp-abi.c (set_cp_abi_as_auto_default): Likewise.
+	* exec.c (build_section_table): Likewise.
+	* remote.c (remote_target::pass_signals): Likewise.
+	* utils.c (n_spaces): Likewise.
+	* cli/cli-script.c (document_command): Likewise.
+	* i386-windows-tdep.c (core_process_module_section): Likewise.
+	* linux-fork.c (struct fork_info) <~fork_info>: Likewise.
+
+2020-05-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.c (reread_symbols): Clear objfile's section_offsets
+	vector and section indices, re-compute them by calling
+	sym_offsets.
+
+2020-05-20  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (bound_name, MAX_ADA_DIMENS): Remove.
+        (desc_one_bound, desc_index_type): Compute field name.
+
+2020-05-20  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25833
+	* dwarf2/read.c (dw2_map_matching_symbols): Handle .gdb_index.
+
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR 25993
+	* solib-darwin.c (darwin_bfd_open): Don't strdup pathname for
+	bfd_set_filename.
+	* solib-aix.c (solib_aix_bfd_open): Use std::string for name
+	passed to bfd_set_filename.
+	* symfile-mem.c (add_vsyscall_page): Likewise for string
+	passed to symbol_file_add_from_memory.
+	(symbol_file_add_from_memory): Make name param a const char* and
+	don't strdup.
+
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
+	* coff-pe-read.c (read_pe_exported_syms): Use bfd_get_filename
+	rather than accessing bfd->filename directly.
+	* dtrace-probe.c (dtrace_static_probe_ops::get_probes): Likewise,
+	and use bfd_section_name.
+	* dwarf2/frame.c (decode_frame_entry): Likewise.
+	* exec.c (exec_set_section_address): Likewise.
+	* solib-aix.c (solib_aix_bfd_open): Likewise.
+	* stap-probe.c (get_stap_base_address): Likewise.
+	* symfile.c (reread_symbols): Likewise.
+
+2020-05-19  Tom Tromey  <tromey@adacore.com>
+
+	* sparc64-tdep.c (adi_tag_fd): Update call to target_fileio_open.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (quirk_rust_enum): Allocate enough fields.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (set exec-file-mismatch): Adjust entry.
+	* exec.c: Include "build-id.h".
+	(validate_exec_file): Try to match build IDs instead of filenames.
+	* gdb_bfd.c (struct gdb_bfd_open_closure): New.
+	(gdb_bfd_iovec_fileio_open): Adjust to use gdb_bfd_open_closure
+	and pass down 'warn_if_slow'.
+	(gdb_bfd_open): Add 'warn_if_slow' parameter.  Use
+	gdb_bfd_open_closure to pass it down.
+	* gdb_bfd.h (gdb_bfd_open): Add 'warn_if_slow' parameter.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_open): Adjust.
+	* target.c (target_fileio_open_1): Rename to target_fileio_open
+	and make extern.  Use bool.
+	(target_fileio_open, target_fileio_open_warn_if_slow): Delete.
+	(target_fileio_read_alloc_1): Adjust.
+	* target.h (target_fileio_open): Add 'warn_if_slow' parameter.
+	(target_fileio_open_warn_if_slow): Delete declaration.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb_bfd.h: (gdb_bfd_open): Default to 'fd' parameter to -1.
+	Adjust all callers.
+
+2020-05-19  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* h8300-tdep.c (h8300_is_argument_spill): Change how we check
+	whether disp is negative.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.h (struct symfile_segment_data)
+	<~symfile_segment_data>: Remove.
+	<segment_info>: Change to std::vector.
+	* symfile.c (default_symfile_segments): Update.
+	* elfread.c (elf_symfile_segments): Update.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.h (struct symfile_segment_data) <struct segment>: New.
+	<segments>: New.
+	<segment_bases, segment_sizes>: Remove.
+	* symfile.c (default_symfile_segments): Update.
+	* elfread.c (elf_symfile_segments): Update.
+	* remote.c (remote_target::get_offsets): Update.
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Update.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.h (struct symfile_segment_data): Initialize fields.
+	<~symfile_segment_data>: Add.
+	(symfile_segment_data_up): New.
+	(struct sym_fns) <sym_segments>: Return a
+	symfile_segment_data_up.
+	(default_symfile_segments): Return a symfile_segment_data_up.
+	(free_symfile_segment_data): Remove.
+	(get_symfile_segment_data): Return a symfile_segment_data_up.
+	* symfile.c (default_symfile_segments): Likewise.
+	(get_symfile_segment_data): Likewise.
+	(free_symfile_segment_data): Remove.
+	(symfile_find_segment_sections): Update.
+	* elfread.c (elf_symfile_segments): Return a
+	symfile_segment_data_up.
+	* remote.c (remote_target::get_offsets): Update.
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Update.
+	* symfile-debug.c (debug_sym_segments): Return a
+	symfile_segment_data_up.
+
+2020-05-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/25981
+	* i386-sol2-nat.c [PR_MODEL_NATIVE != PR_MODEL_LP64] (regmap):
+	Hardcode register numbers.
+
+	PR build/25981
+	* procfs.c [(__i386__ || __x86_64__) && sun] (proc_get_LDT_entry,
+	procfs_find_LDT_entry): Remove.
+	* procfs.h [(__i386__ || __x86_64__) && sun] (struct ssd,
+	procfs_find_LDT_entry): Remove.
+	* sol-thread.c [(__i386__ || __x86_64__) && sun] (ps_lgetLDT):
+	Remove.
+
+2020-05-17  Pedro Alves  <palves@redhat.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Keno Fischer  <keno@juliacomputing.com>
+
+	PR gdb/25741
+	* breakpoint.c (build_target_condition_list): Update comments.
+	(build_target_command_list): Update comments and skip matching
+	locations.
+	(insert_bp_location): Move "set breakpoint auto-hw on" handling to
+	a separate function.  Simplify "set breakpoint auto-hw off"
+	handling.
+	(insert_breakpoints): Update comment.
+	(tracepoint_locations_match): New parameter.  For breakpoints,
+	compare location types too, if the caller wants to.
+	(handle_automatic_hardware_breakpoints): New functions.
+	(bp_location_is_less_than): Also sort by location type and
+	hardware breakpoint length.
+	(update_global_location_list): Handle "set breakpoint auto-hw on"
+	here.
+	(update_breakpoint_locations): Ask breakpoint_locations_match to
+	ignore location types.
+
+2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_NAME): Remove.  Change all cal sites to use
+	type::name instead.
+
+2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <name, set_name>: New methods.
+	(TYPE_CODE): Use type::name.  Change all call sites used to set
+	the name to use type::set_name instead.
+
+2020-05-16  Tom Tromey  <tom@tromey.com>
+
+	* top.c (quit_force): Update.
+	* infrun.c (handle_no_resumed): Update.
+	* top.h (all_uis): New function.
+	(ALL_UIS): Remove.
+
+2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* mips-linux-tdep.c (mips_linux_in_dynsym_stub): Fix condition.
+
+2020-05-16  Pedro Alves  <palves@redhat.com>
+
+	* ia64-linux-nat.c
+	(ia64_linux_nat_target) <enable_watchpoints_in_psr(ptid_t)>:
+	Declare method.
+	(enable_watchpoints_in_psr): Now a method of ia64_linux_nat_target.
+
+2020-05-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* sparc64-tdep.c (adi_stat_t): Remove typedef (leaving struct).
+	(sparc64_adi_info): Likewise.
+
+2020-05-15  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (lookup_language_this, lookup_symbol_aux): Use
+	block_objfile.
+	(lookup_objfile_from_block): Remove.
+	(lookup_symbol_in_block, lookup_symbol_in_static_block)
+	(lookup_global_symbol): Use block_objfile.
+	* symtab.h (lookup_objfile_from_block): Don't declare.
+	* printcmd.c (clear_dangling_display_expressions): Use
+	block_objfile.
+	* parse.c (operator_check_standard): Use block_objfile.
+
+2020-05-15  Tom Tromey  <tom@tromey.com>
+
+	* language.c (language_alloc_type_symbol): Set
+	SYMBOL_SECTION.
+	* symtab.c (initialize_objfile_symbol): Remove.
+	(allocate_symbol): Remove.
+	(allocate_template_symbol): Remove.
+	* dwarf2/read.c (fixup_go_packaging): Use "new".
+	(new_symbol): Use "new".
+	(read_variable): Don't call initialize_objfile_symbol.  Use
+	"new".
+	(read_func_scope): Use "new".
+	* xcoffread.c (process_xcoff_symbol): Don't call
+	initialize_objfile_symbol.
+	(SYMBOL_DUP): Remove.
+	* coffread.c (process_coff_symbol, coff_read_enum_type): Use
+	"new".
+	* symtab.h (allocate_symbol, initialize_objfile_symbol)
+	(allocate_template_symbol): Don't declare.
+	(struct symbol): Add copy constructor.  Change defaults.
+	* jit.c (finalize_symtab): Use "new".
+	* ctfread.c (ctf_add_enum_member_cb, new_symbol, ctf_add_var_cb):
+	Use "new".
+	* stabsread.c (patch_block_stabs, define_symbol, read_enum_type)
+	(common_block_end): Use "new".
+	* mdebugread.c (parse_symbol): Use "new".
+	(new_symbol): Likewise.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Mention changes to help and apropos.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* command.h (enum command_class): Improve comments, document
+	that class_alias is for user-defined aliases, give the class
+	name for each class, remove unused class_xdb.
+	* cli/cli-decode.c (add_com_alias): Document THECLASS intended usage.
+	* breakpoint.c (_initialize_breakpoint): Replace class_alias
+	by a precise class.
+	* infcmd.c (_initialize_infcmd): Likewise.
+	* reverse.c (_initialize_reverse): Likewise.
+	* stack.c (_initialize_stack): Likewise.
+	* symfile.c (_initialize_symfile): Likewise.
+	* tracepoint.c (_initialize_tracepoint): Likewise.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.c (apropos_cmd): Produce output for aliases
+	when their aliased command is traversed.
+	(help_cmd): Add fput_command_names_styled call to
+	output command name and aliases when command has an alias.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.h (help_cmd_list): Remove declaration.
+	* cli/cli-decode.c (help_cmd_list): Declare as static,
+	remove prefix argument, use bool for recurse arg, rework to show the aliases of
+	a command together with the command.
+	(fput_command_name_styled, fput_command_names_styled): New functions.
+	(print_help_for_command): Remove prefix arg, use bool for recurse arg, use
+	fput_command_name_styled.
+	(help_list, help_all): Update callers to remove prefix arg and use bool recurse.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Update alias_command doc.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-setshow.h (cmd_show_list): Remove prefix argument.
+	* cli/cli-decode.c (do_show_prefix_cmd): Likewise.
+	* command.h (cmd_show_list): Likewise.
+	* dwarf2/index-cache.c (show_index_cache_command): Likewise.
+	* cli/cli-setshow.c (cmd_show_list): Use the prefix to produce the output.  Skip aliases.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* unittests/command-def-selftests.c (traverse_command_structure):
+	Verify all commands of a list have the same prefix command and
+	that only the top cmdlist commands have a null prefix.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.c (lookup_cmd_for_prefix): Return the aliased command
+	as prefix, not one of its aliases.
+	(set_cmd_prefix): Remove.
+	(do_add_cmd): Centralize the setting of the prefix of a command, when
+	command is defined after its full chain of prefix commands.
+	(add_alias_cmd): Remove call to set_cmd_prefix, as do_add_cmd does it.
+	(add_setshow_cmd_full): Likewise.
+	(update_prefix_field_of_prefixed_commands): New function.
+	(add_prefix_cmd): Replace non working call to set_cmd_prefix by
+	update_prefix_field_of_prefixed_commands.
+	* gdb/remote-fileio.c (initialize_remote_fileio): Use the real
+	addresses of remote_set_cmdlist and remote_show_cmdlist given
+	as argument, not the address of an argument.
+	* gdb/remote-fileio.h (initialize_remote_fileio): Likewise.
+	* gdb/remote.c (_initialize_remote): Likewise.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (alias_command): Check for an existing alias
+	using lookup_cmd_composition, as valid_command_p is too strict
+	and forbids aliases that are the prefix of an existing alias
+	or command.
+	* cli/cli-decode.c (lookup_cmd_composition): Ensure a prefix
+	command is properly recognised as a valid command.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* unittests/help-doc-selftests.c: Rename to
+	unittests/command-def-selftests.c
+	* unittests/command-def-selftests.c (help_doc_tests): Update some
+	comments.
+	(command_structure_tests, traverse_command_structure): New namespace
+	and function.
+	(command_structure_invariants_tests): New function.
+	(_initialize_command_def_selftests) Renamed from
+	_initialize_help_doc_selftests, register command_structure_invariants
+	selftest.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Define 'info set' as
+	an alias of 'show'.
+
+2020-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h: (ada_is_gnat_encoded_fixed_point_type): Renames
+	ada_is_fixed_point_type.  Update all callers.
+	(gnat_encoded_fixed_point_delta): Renames ada_delta.  Update
+	all callers.
+	* ada-lang.c (gnat_encoded_fixed_type_info): Renames fixed_type_info.
+	Update all callers.
+	* ada-typeprint.c (print_gnat_encoded_fixed_point_type): Renames
+	print_fixed_point_type.  Update all callers.
+	* ada-valprint.c (ada_value_print_num): Replace call to
+	ada_is_fixed_point_type by ada_is_gnat_encoded_fixed_point_type.
+
+2020-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* nat/linux-btrace.c (btrace_this_cpu): Add check for AMD
+	processors.
+	(cpu_supports_bts): Add CV_AMD case.
+
+2020-05-14  Laurent Morichetti  <Laurent.Morichetti@amd.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (stop_all_threads): Collect multiple wait events at
+	each pass.
+
+2020-05-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_CODE): Remove.  Change all call sites to use
+	type::code instead.
+
+2020-05-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <code, set_code>: New methods.
+	(TYPE_CODE): Use type::code.  Change all call sites used to set
+	the code to use type::set_code instead.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Tom de Vries  <tdevries@suse.de>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR threads/25478
+	* infrun.c (stop_all_threads): Do NOT ignore
+	TARGET_WAITKIND_NO_RESUMED, TARGET_WAITKIND_THREAD_EXITED,
+	TARGET_WAITKIND_EXITED, TARGET_WAITKIND_SIGNALLED wait statuses
+	received.
+	(handle_no_resumed): Remove code handling a live inferior with no
+	threads.
+	* remote.c (has_single_non_exited_thread): New.
+	(remote_target::update_thread_list): Do not delete a thread if is
+	the last thread of the process.
+	* thread.c (thread_select): Call delete_exited_threads instead of
+	prune_threads.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (stop_all_threads): Enable/disable thread events of all
+	targets.  Move a debug message denoting the end of the function
+	into the SCOPED_EXIT block.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* process-stratum-target.h: Include <set>.
+	(all_non_exited_process_targets, switch_to_target_no_thread): New
+	function declarations.
+	* process-stratum-target.c (all_non_exited_process_targets)
+	(switch_to_target_no_thread): New function implementations.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (handle_inferior_event): Extract out a piece of code
+	into...
+	(mark_non_executing_threads): ...this new function.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (resume_1): Move a 'regcache_read_pc' call down to first
+	use.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* regcache.c (regcache_read_pc_protected): New function
+	implementation that returns 0 if the PC cannot read via
+	'regcache_read_pc'.
+	* infrun.c (proceed): Call 'regcache_read_pc_protected'
+	instead of 'regcache_read_pc'.
+	(keep_going_pass_signal): Ditto.
+
+2020-05-13  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (align_value): Remove.
+	(ada_template_to_fixed_record_type_1): Use align_up.
+
+2020-05-13  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* async-event.c: Update the copyright year.
+	* async-event.h: Update the copyright year.
+
+2020-05-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* objfiles.h (is_addr_in_objfile,
+	shared_objfile_contains_address_p): Return bool.
+	* objfile.c (is_addr_in_objfile,
+	shared_objfile_contains_address_p): Return bool.
+
+2020-05-11  Tom Tromey  <tromey@adacore.com>
+
+	* cli/cli-cmds.c (info_command): Restore.
+	(_initialize_cli_cmds): Use add_prefix_command for "info".
+	* gdb-gdb.gdb.in: Restore breakpoint on info_command.
+
+2020-05-11  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_field): Now public.
+	* ada-lang.h (ada_value_primitive_field): Declare.
+	* ada-valprint.c (print_field_values): Use
+	ada_value_primitive_field for wrapper fields.
+
+2020-05-11  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/index-write.c (debug_names::psymbol_tag): Handle
+	MODULE_DOMAIN.
+
+2020-05-11  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25941
+	* dwarf2/read.c (create_cus_from_debug_names_list): Initialize CUs
+	with length 0, if not gdb-produced.
+	(cutu_reader::cutu_reader): Set CU length to actual length if 0.
+
+2020-05-09  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25955
+	* break-catch-throw.c (check_status_exception_catchpoint): Fix name
+	calculation.
+
+2020-05-09  Tom Tromey  <tom@tromey.com>
+
+	* top.c (server_command): Now bool.
+	* top.h (server_command): Now bool.
+
+2020-05-08  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (read_lexical_block_scope): Don't process a DIE
+	already being processed.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* printcmd.c (struct display) <next>: Remove.
+	<display>: New constructor.
+	<exp_string>: Now a std::string.
+	<enabled_p>: Now a bool.
+	(display_number): Move definition earlier.
+	(displays): Rename from display_chain.  Now a std::vector.
+	(ALL_DISPLAYS, ALL_DISPLAYS_SAFE): Remove.
+	(display_command): Update.
+	(do_one_display, disable_display)
+	(enable_disable_display_command, do_enable_disable_display):
+	Update.
+	(free_display): Remove.
+	(clear_displays): Rewrite.
+	(delete_display): Update.
+	(map_display_numbers): Use function_view.  Remove "data"
+	parameter.  Update.
+	(do_delete_display): Remove.
+	(undisplay_command): Update.
+	(do_one_display, do_displays, disable_display)
+	(info_display_command): Update.
+	(do_enable_disable_display): Remove.
+	(enable_disable_display_command)
+	(clear_dangling_display_expressions): Update.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (set_symbol_cache_size)
+	(maintenance_print_symbol_cache, maintenance_flush_symbol_cache)
+	(maintenance_print_symbol_cache_statistics): Update.
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs)
+	(maintenance_expand_symtabs, maintenance_info_line_tables):
+	Update.
+	* symfile-debug.c (set_debug_symfile): Update.
+	* source.c (forget_cached_source_info): Update.
+	* python/python.c (gdbpy_progspaces): Update.
+	* psymtab.c (maintenance_info_psymtabs): Update.
+	* probe.c (parse_probes): Update.
+	* linespec.c (iterate_over_all_matching_symtabs)
+	(collect_symtabs_from_filename, search_minsyms_for_name): Update.
+	* guile/scm-progspace.c (gdbscm_progspaces): Update.
+	* exec.c (exec_target::close): Update.
+	* ada-tasks.c (ada_tasks_new_objfile_observer): Update.
+	* breakpoint.c (print_one_breakpoint_location)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint): Update.
+	* progspace.c (program_spaces): Now a std::vector.
+	(maybe_new_address_space): Update.
+	(add_program_space): Remove.
+	(program_space::program_space): Update.
+	(remove_program_space): Update.
+	(number_of_program_spaces): Remove.
+	(print_program_space, update_address_spaces): Update.
+	* progspace.h (program_spaces): Change type.
+	(ALL_PSPACES): Remove.
+	(number_of_program_spaces): Don't declare.
+	(struct program_space) <next>: Remove.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Update.
+	* solib-svr4.c (svr4_fetch_objfile_link_map): Update.
+	(enable_break): Update.
+	* solib-frv.c (frv_fdpic_find_global_pointer): Update.
+	(frv_fdpic_find_canonical_descriptor): Update.
+	(frv_fetch_objfile_link_map): Update.
+	* progspace.c (program_space::free_all_objfiles): Update.
+	(program_space::solibs): New method.
+	* progspace.h (struct program_space) <solibs>: New method.
+	* solist.h (master_so_list): Don't declare.
+	(ALL_SO_LIBS): Remove.
+	* solib.h (so_list_head): Remove.
+	(update_solib_list): Update comment.
+	* solib.c (master_so_list): Remove.
+	(solib_used, update_solib_list, solib_add)
+	(info_sharedlibrary_command, clear_solib)
+	(reload_shared_libraries_1, remove_user_added_objfile): Update.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* extension.c (extension_languages): Now a std::array.
+	(ALL_EXTENSION_LANGUAGES): Remove.
+	(get_ext_lang_defn, get_ext_lang_of_file)
+	(eval_ext_lang_from_control_command): Update.
+	(finish_ext_lang_initialization)
+	(auto_load_ext_lang_scripts_for_objfile)
+	(ext_lang_type_printers::ext_lang_type_printers)
+	(apply_ext_lang_type_printers)
+	(ext_lang_type_printers::~ext_lang_type_printers)
+	(apply_ext_lang_val_pretty_printer, apply_ext_lang_frame_filter)
+	(preserve_ext_lang_values, get_breakpoint_cond_ext_lang)
+	(breakpoint_ext_lang_cond_says_stop, check_quit_flag)
+	(get_matching_xmethod_workers, ext_lang_colorize)
+	(ext_lang_before_prompt): Update.
+	(ALL_ENABLED_EXTENSION_LANGUAGES): Remove.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (class demangle_result_storage) <set_malloc_ptr>: New
+	overload.
+	<swap_string, m_string>: Remove.
+	* symtab.c (demangle_for_lookup, completion_list_add_symbol):
+	Update.
+	* stabsread.c (define_symbol, read_type): Update.
+	* linespec.c (find_linespec_symbols): Update.
+	* gnu-v3-abi.c (gnuv3_get_typeid): Update.
+	* dwarf2/read.c (dwarf2_canonicalize_name): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	* cp-support.h (cp_canonicalize_string_full)
+	(cp_canonicalize_string, cp_canonicalize_string_no_typedefs):
+	Return unique_xmalloc_ptr.
+	* cp-support.c (inspect_type): Update.
+	(cp_canonicalize_string_full): Return unique_xmalloc_ptr.
+	(cp_canonicalize_string_no_typedefs, cp_canonicalize_string):
+	Likewise.
+	* c-typeprint.c (print_name_maybe_canonical): Update.
+	* break-catch-throw.c (check_status_exception_catchpoint):
+	Update.
+
+2020-05-08  Tom de Vries  <tdevries@suse.de>
+
+	* infrun.c (follow_fork): Copy current_line and current_symtab to
+	child thread.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* async-event.c (struct async_signal_handler, struct
+	async_event_handler): Reformat, remove typedef.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_DYN_PROP_LIST): Remove.  Update all users
+	access thistype->main_type->dyn_prop_list directly.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <remove_dyn_prop>: New method.
+	(remove_dyn_prop): Remove.  Update all users to use
+	type::remove_dyn_prop.
+	* gdbtypes.c (remove_dyn_prop): Rename to...
+	(type::remove_dyn_prop): ... this.
+
+2020-05-07  Simon Marchi via Gdb-patches  <gdb-patches@sourceware.org>
+
+	* gdbtypes.h (struct type) <add_dyn_prop>: New method.
+	(add_dyn_prop): Remove.  Update all users to use
+	type::add_dyn_prop.
+	* gdbtypes.c (add_dyn_prop): Rename to...
+	(type::add_dyn_prop): ... this.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <get_dyn_prop>: New method.
+	(get_dyn_prop): Remove.  Update all users to use
+	type::dyn_prop.
+	* gdbtypes.c (get_dyn_prop): Rename to...
+	(type::dyn_prop): ... this.
+
+2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct main_type) <flag_static>: Remove.
+
+2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* amd64-tdep.c (amd64_analyze_prologue): Check for `endbr64`
+	instruction, skip it if it's there.
+
+2020-05-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct main_type) <flag_incomplete>: Remove.
+
+2020-05-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_INCOMPLETE): Remove.
+	* gdbtypes.c (recursive_dump_type): Remove use of
+	TYPE_INCOMPLETE.
+
+2020-05-03  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (catch_command, tcatch_command): Remove.
+	(_initialize_breakpoint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(set_breakpoint_cmd, show_breakpoint_cmd): Remove
+	* utils.c (set_internal_problem_cmd, show_internal_problem_cmd):
+	Remove.
+	(add_internal_problem_command): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* mips-tdep.c (set_mipsfpu_command): Remove.
+	(_initialize_mips_tdep): Use add_basic_prefix_cmd.
+	* dwarf2/index-cache.c (set_index_cache_command): Remove.
+	(_initialize_index_cache): Use add_basic_prefix_cmd.
+	* memattr.c (dummy_cmd): Remove.
+	(_initialize_mem): Use add_basic_prefix_cmd, add_show_prefix_cmd.
+	* tui/tui-win.c (set_tui_cmd, show_tui_cmd): Remove.
+	(_initialize_tui_win): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-logging.c (set_logging_command): Remove.
+	(_initialize_cli_logging): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(show_logging_command): Remove.
+	* target.c (target_command): Remove.
+	(add_target): Use add_basic_prefix_cmd.
+
+2020-05-02  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdbtypes.h (enum dynamic_prop_node_kind): Fix typo.
+
+2020-05-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb-gdb.gdb-in: Remove breakpoint on disappeared function
+	info_command.
+
+2020-04-30  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_enable_proc_events)
+	(nbsd_nat_target::post_startup_inferior): Add.
+	(nbsd_nat_target::post_attach): Call `nbsd_enable_proc_events'.
+	(nbsd_nat_target::update_thread_list): Rewrite.
+	(nbsd_nat_target::wait): Handle "PTRACE_LWP_EXIT" and
+	"PTRACE_LWP_CREATE".
+	* nbsd-nat.h (nbsd_nat_target::post_startup_inferior): Add.
+
+2020-04-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* stack.c (_initialize_stack): Remove duplicated creation
+	of "frame" command and "f" alias.
+
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/18706
+	* gdbtypes.c (check_typedef): Calculate size of array of
+	stubbed type.
+
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/15559
+	* i386-tdep.c (i386_push_dummy_call): Call
+	i386_thiscall_push_dummy_call.
+	(i386_thiscall_push_dummy_call): New function.
+	* i386-tdep.h (i386_thiscall_push_dummy_call): Declare.
+	* i386-windows-tdep.c (i386_windows_push_dummy_call): New function.
+	(i386_windows_init_abi): Call set_gdbarch_push_dummy_call.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh (do_read): Add shellcheck disable directive for
+	warning SC2162.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use ${foo:-} where shellcheck would report a
+	"referenced but not assigned" warning.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Remove code that sets fallbackdefault.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use shell operators && and || instead of
+	-a and -o.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use $(...) instead of `...`.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use double quotes around variables.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use %s with printf, instead of variables in the
+	format string.
+
+2020-04-29  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/25875:
+	* dwarf2/read.c (update_enumeration_type_from_children): Compute
+	type fields here.
+	(read_enumeration_type): Call
+	update_enumeration_type_from_children later.  Update comments.
+	(process_enumeration_scope): Don't create type fields.
+
+2020-04-29  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-tdep.c: Include "xml-syscall.h".
+	(nbsd_init_abi): Call `set_xml_syscall_file_name'.
+
+2020-04-29  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c: Include "sys/wait.h".
+	(nbsd_resume, nbsd_nat_target::resume, nbsd_wait)
+	(nbsd_nat_target::wait, nbsd_nat_target::insert_exec_catchpoint)
+	(nbsd_nat_target::remove_exec_catchpoint)
+	(nbsd_nat_target::set_syscall_catchpoint): Add.
+	* nbsd-nat.h (nbsd_nat_target::resume, nbsd_nat_target::wait)
+	(nbsd_nat_target::insert_exec_catchpoint)
+	(nbsd_nat_target::remove_exec_catchpoint)
+	(nbsd_nat_target::set_syscall_catchpoint): Add.
+	* nbsd-tdep.c (nbsd_get_syscall_number): Add.
+	(nbsd_init_abi): Call `set_gdbarch_get_syscall_number' and pass
+	`nbsd_get_syscall_number'.
+
+2020-04-29  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (print_block_frame_labels): Remove.
+
+2020-04-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/17320
+	* ada-valprint.c (val_print_packed_array_elements): Move array
+	end bracket to new line.
+	(ada_val_print_string): Remove extra spaces before first array
+	element.
+	* c-valprint.c (c_value_print_array): Likewise.
+	* m2-valprint.c (m2_print_array_contents): Likewise.
+	(m2_value_print_inner): Likewise.
+	* p-valprint.c (pascal_value_print_inner): Likewise.
+	* valprint.c (generic_val_print_array): Likewise.
+	(value_print_array_elements): Move first array element and array
+	end bracket to new line.
+
+2020-04-29  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25889
+	* linespec.c (find_method): Fix ix calculation.
+
+2020-04-28  Kamil Rytarowski  <n54@gmx.com>
+
+	* syscalls/update-netbsd.sh: New file.
+	* syscalls/netbsd.xml: Regenerate.
+	* data-directory/Makefile.in: Register `netbsd.xml' in
+	`SYSCALLS_FILES'.
+
+2020-04-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* syscalls/update-freebsd.sh: Add double quotes.
+
+2020-04-28  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Update.
+	* python/py-cmd.c (gdbpy_initialize_commands): Add COMMAND_TUI.
+	(cmdpy_init): Allow class_tui.
+
+2020-04-28 Mark Williams <mark@myosotissp.com>
+
+	PR gdb/24480
+	* dwarf2read.c: Add missing assingments to list_in_scope when
+	start_symtab was already called.
+
+2020-04-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/25881
+	* dwarf2/read.c (offset_map_type): Use
+	gdb:hash_enum<sect_offset> as hash function.
+
 2020-04-28  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (process_structure_scope): Add symbol for struct decl

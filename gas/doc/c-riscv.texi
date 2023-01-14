@@ -42,6 +42,22 @@ Don't generate position-independent code (default)
 @cindex @samp{-march=ISA} option, RISC-V
 @item -march=ISA
 Select the base isa, as specified by ISA.  For example -march=rv32ima.
+If this option and the architecture attributes aren’t set, then assembler
+will check the default configure setting --with-arch=ISA.
+
+@cindex @samp{-misa-spec=ISAspec} option, RISC-V
+@item -misa-spec=ISAspec
+Select the default isa spec version.  If the version of ISA isn't set
+by -march, then assembler helps to set the version according to
+the default chosen spec.  If this option isn't set, then assembler will
+check the default configure setting --with-isa-spec=ISAspec.
+
+@cindex @samp{-mpriv-spec=PRIVspec} option, RISC-V
+@item -mpriv-spec=PRIVspec
+Select the privileged spec version.  We can decide whether the CSR is valid or
+not according to the chosen spec.  If this option and the privilege attributes
+aren't set, then assembler will check the default configure setting
+--with-priv-spec=PRIVspec.
 
 @cindex @samp{-mabi=ABI} option, RISC-V
 @item -mabi=ABI

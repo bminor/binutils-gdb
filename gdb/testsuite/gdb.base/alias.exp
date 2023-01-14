@@ -65,7 +65,7 @@ gdb_test "show print elements" "Limit .* is 50\[.\]" "verify spe"
 gdb_test_no_output "alias set pr elms = set p elem"
 gdb_test_no_output "set pr elms 51"
 gdb_test "show print elements" "Limit .* is 51\[.\]" "verify set pr elms"
-gdb_test "help set print" "set print elms .*"
+gdb_test "help set print" "set print elements, set print elms, spe .*"
 
 # Verify alias command detects a non existing prefix.
 gdb_test "alias assigne imprime limite-elements = set print elements" \
@@ -116,3 +116,12 @@ gdb_test "show print elements" "Limit .* is 56\[.\]" "verify 56"
 
 gdb_test_no_output "set print max-elements 57"
 gdb_test "show print elements" "Limit .* is 57\[.\]" "verify 57"
+
+# Test aliases having a common prefix.
+gdb_test_no_output "alias abcd  = backtrace"
+gdb_test_no_output "alias abcde = backtrace"
+gdb_test_no_output "alias fghij = backtrace"
+gdb_test_no_output "alias fghi  = backtrace"
+
+# Verify help aliases shows the user defined aliases
+gdb_test "help aliases" ".*abcd --.*.*abcde --.*"

@@ -1452,6 +1452,12 @@ _bfd_vms_lib_get_module (bfd *abfd, unsigned int modidx)
       break;
     }
   bfd_set_filename (res, newname);
+  free (newname);
+  if (bfd_get_filename (res) == NULL)
+    {
+      bfd_close (res);
+      return NULL;
+    }
 
   tdata->cache[modidx] = res;
 
@@ -1491,7 +1497,7 @@ bfd *
 _bfd_vms_lib_get_imagelib_file (bfd *el)
 {
   bfd *archive = el->my_archive;
-  const char *modname = el->filename;
+  const char *modname = bfd_get_filename (el);
   int modlen = strlen (modname);
   char *filename;
   int j;
@@ -1517,7 +1523,7 @@ _bfd_vms_lib_get_imagelib_file (bfd *el)
     {
       /* xgettext:c-format */
       _bfd_error_handler(_("could not open shared image '%s' from '%s'"),
-			 filename, archive->filename);
+			 filename, bfd_get_filename (archive));
       bfd_release (archive, filename);
       return NULL;
     }
@@ -2039,8 +2045,7 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
 	{
 	  if (storage > syms_max)
 	    {
-	      if (syms_max > 0)
-		free (syms);
+	      free (syms);
 	      syms_max = storage;
 	      syms = (asymbol **) bfd_malloc (syms_max);
 	      if (syms == NULL)
@@ -2091,10 +2096,8 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
   return TRUE;
 
  error_return:
-  if (syms_max > 0)
-    free (syms);
-  if (map != NULL)
-    free (map);
+  free (syms);
+  free (map);
   return FALSE;
 }
 
@@ -2152,7 +2155,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       unsigned int nl;
 
       modules[i].abfd = current;
-      modules[i].name = vms_get_module_name (current->filename, FALSE);
+      modules[i].name = vms_get_module_name (bfd_get_filename (current), FALSE);
       modules[i].ref = 1;
 
       /* FIXME: silently truncate long names ?  */

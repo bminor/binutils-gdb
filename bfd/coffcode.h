@@ -2666,8 +2666,7 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	}
 
 #ifdef TARG_AUX
-      if (p != NULL)
-	free (p);
+      free (p);
 #endif
     }
 

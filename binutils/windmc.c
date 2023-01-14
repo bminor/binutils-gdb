@@ -1161,12 +1161,9 @@ main (int argc, char **argv)
     }
   write_bin ();
 
-  if (mc_nodes_lang)
-    free (mc_nodes_lang);
-  if (mc_severity_codes)
-    free (mc_severity_codes);
-  if (mc_facility_codes)
-    free (mc_facility_codes);
+  free (mc_nodes_lang);
+  free (mc_severity_codes);
+  free (mc_facility_codes);
 
   xexit (0);
   return 0;

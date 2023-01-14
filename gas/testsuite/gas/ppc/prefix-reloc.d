@@ -1,5 +1,5 @@
-#as: -a64 -mfuture
-#objdump: -dr -Mfuture
+#as: -a64 -mpower10
+#objdump: -dr -Mpower10
 #name: Prefix insn relocations
 
 .*

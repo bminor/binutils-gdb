@@ -1598,9 +1598,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 		  if (elf_section_data (isec)->relocs != internal_relocs)
 		    free (internal_relocs);
 		error_ret_free_local:
-		  if (local_syms != NULL
-		      && (symtab_hdr->contents
-			  != (unsigned char *) local_syms))
+		  if (symtab_hdr->contents != (unsigned char *) local_syms)
 		    free (local_syms);
 		  return FALSE;
 		}
@@ -3013,13 +3011,10 @@ discover_functions (struct bfd_link_info *info)
 	  continue;
 	}
 
-      if (symtab_hdr->contents != NULL)
-	{
-	  /* Don't use cached symbols since the generic ELF linker
-	     code only reads local symbols, and we need globals too.  */
-	  free (symtab_hdr->contents);
-	  symtab_hdr->contents = NULL;
-	}
+      /* Don't use cached symbols since the generic ELF linker
+	 code only reads local symbols, and we need globals too.  */
+      free (symtab_hdr->contents);
+      symtab_hdr->contents = NULL;
       syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
 				   NULL, NULL, NULL);
       symtab_hdr->contents = (void *) syms;
@@ -4103,7 +4098,7 @@ sort_bfds (const void *a, const void *b)
   bfd *const *abfd1 = a;
   bfd *const *abfd2 = b;
 
-  return filename_cmp ((*abfd1)->filename, (*abfd2)->filename);
+  return filename_cmp (bfd_get_filename (*abfd1), bfd_get_filename (*abfd2));
 }
 
 static unsigned int
@@ -4123,9 +4118,9 @@ print_one_overlay_section (FILE *script,
 
       if (fprintf (script, "   %s%c%s (%s)\n",
 		   (sec->owner->my_archive != NULL
-		    ? sec->owner->my_archive->filename : ""),
+		    ? bfd_get_filename (sec->owner->my_archive) : ""),
 		   info->path_separator,
-		   sec->owner->filename,
+		   bfd_get_filename (sec->owner),
 		   sec->name) <= 0)
 	return -1;
       if (sec->segment_mark)
@@ -4137,9 +4132,9 @@ print_one_overlay_section (FILE *script,
 	      sec = call_fun->sec;
 	      if (fprintf (script, "   %s%c%s (%s)\n",
 			   (sec->owner->my_archive != NULL
-			    ? sec->owner->my_archive->filename : ""),
+			    ? bfd_get_filename (sec->owner->my_archive) : ""),
 			   info->path_separator,
-			   sec->owner->filename,
+			   bfd_get_filename (sec->owner),
 			   sec->name) <= 0)
 		return -1;
 	      for (call = call_fun->call_list; call; call = call->next)
@@ -4155,9 +4150,9 @@ print_one_overlay_section (FILE *script,
       if (sec != NULL
 	  && fprintf (script, "   %s%c%s (%s)\n",
 		      (sec->owner->my_archive != NULL
-		       ? sec->owner->my_archive->filename : ""),
+		       ? bfd_get_filename (sec->owner->my_archive) : ""),
 		      info->path_separator,
-		      sec->owner->filename,
+		      bfd_get_filename (sec->owner),
 		      sec->name) <= 0)
 	return -1;
 
@@ -4172,9 +4167,9 @@ print_one_overlay_section (FILE *script,
 	      if (sec != NULL
 		  && fprintf (script, "   %s%c%s (%s)\n",
 			      (sec->owner->my_archive != NULL
-			       ? sec->owner->my_archive->filename : ""),
+			       ? bfd_get_filename (sec->owner->my_archive) : ""),
 			      info->path_separator,
-			      sec->owner->filename,
+			      bfd_get_filename (sec->owner),
 			      sec->name) <= 0)
 		return -1;
 	      for (call = call_fun->call_list; call; call = call->next)
@@ -4335,18 +4330,19 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 
       qsort (bfd_arr, bfd_count, sizeof (*bfd_arr), sort_bfds);
       for (i = 1; i < bfd_count; ++i)
-	if (filename_cmp (bfd_arr[i - 1]->filename, bfd_arr[i]->filename) == 0)
+	if (filename_cmp (bfd_get_filename (bfd_arr[i - 1]),
+			  bfd_get_filename (bfd_arr[i])) == 0)
 	  {
 	    if (bfd_arr[i - 1]->my_archive == bfd_arr[i]->my_archive)
 	      {
 		if (bfd_arr[i - 1]->my_archive && bfd_arr[i]->my_archive)
 		  /* xgettext:c-format */
 		  info->callbacks->einfo (_("%s duplicated in %s\n"),
-					  bfd_arr[i]->filename,
-					  bfd_arr[i]->my_archive->filename);
+					  bfd_get_filename (bfd_arr[i]),
+					  bfd_get_filename (bfd_arr[i]->my_archive));
 		else
 		  info->callbacks->einfo (_("%s duplicated\n"),
-					  bfd_arr[i]->filename);
+					  bfd_get_filename (bfd_arr[i]));
 		ok = FALSE;
 	      }
 	  }

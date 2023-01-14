@@ -1,6 +1,6 @@
-#as: -a64 -mfuture
+#as: -a64 -mpower10
 #ld: -melf64ppc -shared --plt-align=0 --hash-style=gnu
-#objdump: -dr -Mfuture
+#objdump: -dr -Mpower10
 
 .*
 

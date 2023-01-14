@@ -776,7 +776,7 @@ set_thread_scheduling (int val)
   return blk.dbgext$l_stop_value;
 }
 
-/* Get next thead (after THR).  Start with 0.  */
+/* Get next thread (after THR).  Start with 0.  */
 
 static unsigned int
 thread_next (unsigned int thr)

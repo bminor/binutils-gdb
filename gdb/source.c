@@ -421,9 +421,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 void
 forget_cached_source_info (void)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	forget_cached_source_info_for_objfile (objfile);
@@ -1534,7 +1532,7 @@ info_line_command (const char *arg, int from_tty)
 
 	  /* If this is the only line, show the source code.  If it could
 	     not find the file, don't do anything special.  */
-	  if (sals.size () == 1)
+	  if (annotation_level > 0 && sals.size () == 1)
 	    annotate_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else

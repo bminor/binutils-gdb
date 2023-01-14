@@ -86,7 +86,7 @@ m2_print_type (struct type *type, const char *varstring,
       return;
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_SET:
       m2_short_set(type, stream, show, level);
@@ -163,8 +163,8 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "TYPE ");
-  if (!TYPE_NAME (SYMBOL_TYPE (new_symbol))
-      || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
+  if (!SYMBOL_TYPE (new_symbol)->name ()
+      || strcmp ((SYMBOL_TYPE (new_symbol))->name (),
 		 new_symbol->linkage_name ()) != 0)
     fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
   else
@@ -178,8 +178,8 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
 void
 m2_type_name (struct type *type, struct ui_file *stream)
 {
-  if (TYPE_NAME (type) != NULL)
-    fputs_filtered (TYPE_NAME (type), stream);
+  if (type->name () != NULL)
+    fputs_filtered (type->name (), stream);
 }
 
 /* m2_range - displays a Modula-2 subrange type.  */
@@ -211,9 +211,9 @@ static void
 m2_typedef (struct type *type, struct ui_file *stream, int show,
 	    int level, const struct type_print_options *flags)
 {
-  if (TYPE_NAME (type) != NULL)
+  if (type->name () != NULL)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (type->name (), stream);
       fputs_filtered (" = ", stream);
     }
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
@@ -282,9 +282,9 @@ m2_procedure (struct type *type, struct ui_file *stream,
   fprintf_filtered (stream, "PROCEDURE ");
   m2_type_name (type, stream);
   if (TYPE_TARGET_TYPE (type) == NULL
-      || TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
-      int i, len = TYPE_NFIELDS (type);
+      int i, len = type->num_fields ();
 
       fprintf_filtered (stream, " (");
       for (i = 0; i < len; i++)
@@ -311,7 +311,7 @@ m2_print_bounds (struct type *type,
 {
   struct type *target = TYPE_TARGET_TYPE (type);
 
-  if (TYPE_NFIELDS(type) == 0)
+  if (type->num_fields () == 0)
     return;
 
   if (print_high)
@@ -341,17 +341,17 @@ m2_is_long_set (struct type *type)
   int len, i;
   struct type *range;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
 
       /* check if all fields of the RECORD are consecutive sets.  */
 
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
 	  if (TYPE_FIELD_TYPE (type, i) == NULL)
 	    return 0;
-	  if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) != TYPE_CODE_SET)
+	  if (TYPE_FIELD_TYPE (type, i)->code () != TYPE_CODE_SET)
 	    return 0;
 	  if (TYPE_FIELD_NAME (type, i) != NULL
 	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
@@ -376,7 +376,7 @@ static int
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_CHAR:
       if (TYPE_LENGTH (type) < sizeof (LONGEST))
@@ -407,9 +407,9 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
   LONGEST l1, l2;
   LONGEST h1, h2;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
@@ -434,15 +434,15 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 {
   struct type *of_type;
   int i;
-  int len = TYPE_NFIELDS (type);
+  int len = type->num_fields ();
   LONGEST low;
   LONGEST high;
 
   if (m2_is_long_set (type))
     {
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  if (show == 0)
 	    return 1;
 	  fputs_filtered (" = ", stream);
@@ -482,7 +482,7 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 int
 m2_is_unbounded_array (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       /*
        *  check if we have a structure with exactly two fields named
@@ -490,13 +490,13 @@ m2_is_unbounded_array (struct type *type)
        *  type of _m2_contents is a pointer.  The TYPE_TARGET_TYPE
        *  of the pointer determines the unbounded ARRAY OF type.
        */
-      if (TYPE_NFIELDS (type) != 2)
+      if (type->num_fields () != 2)
 	return 0;
       if (strcmp (TYPE_FIELD_NAME (type, 0), "_m2_contents") != 0)
 	return 0;
       if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
 	return 0;
-      if (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) != TYPE_CODE_PTR)
+      if (TYPE_FIELD_TYPE (type, 0)->code () != TYPE_CODE_PTR)
 	return 0;
       return 1;
     }
@@ -530,11 +530,11 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		  int level, const struct type_print_options *flags)
 {
   /* Print the tag if it exists.  */
-  if (TYPE_NAME (type) != NULL)
+  if (type->name () != NULL)
     {
-      if (!startswith (TYPE_NAME (type), "$$"))
+      if (!startswith (type->name (), "$$"))
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  if (show > 0)
 	    fprintf_filtered (stream, " = ");
 	}
@@ -542,19 +542,19 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
   wrap_here ("    ");
   if (show < 0)
     {
-      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD ... END ");
-      else if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      else if (type->code () == TYPE_CODE_UNION)
 	fprintf_filtered (stream, "CASE ... END ");
     }
   else if (show > 0)
     {
       int i;
-      int len = TYPE_NFIELDS (type);
+      int len = type->num_fields ();
 
-      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD\n");
-      else if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      else if (type->code () == TYPE_CODE_UNION)
 	/* i18n: Do not translate "CASE" and "OF".  */
 	fprintf_filtered (stream, _("CASE <variant> OF\n"));
 
@@ -595,13 +595,13 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
   if (show < 0)
     {
       /* If we just printed a tag name, no need to print anything else.  */
-      if (TYPE_NAME (type) == NULL)
+      if (type->name () == NULL)
 	fprintf_filtered (stream, "(...)");
     }
-  else if (show > 0 || TYPE_NAME (type) == NULL)
+  else if (show > 0 || type->name () == NULL)
     {
       fprintf_filtered (stream, "(");
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       lastval = 0;
       for (i = 0; i < len; i++)
 	{

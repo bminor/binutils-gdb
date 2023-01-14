@@ -3230,11 +3230,8 @@ nios2_insert_arg (char **parsed_args, const char *insert, int num,
 static void
 nios2_free_arg (char **parsed_args, int num ATTRIBUTE_UNUSED, int start)
 {
-  if (parsed_args[start])
-    {
-      free (parsed_args[start]);
-      parsed_args[start] = NULL;
-    }
+  free (parsed_args[start]);
+  parsed_args[start] = NULL;
 }
 
 /* This function swaps the pseudo-op for a real op.  */

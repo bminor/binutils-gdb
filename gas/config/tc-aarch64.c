@@ -6149,6 +6149,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_EXCEPTION:
+	case AARCH64_OPND_UNDEFINED:
 	  po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp,
 						       imm_reg_type));
 	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
@@ -7745,11 +7746,12 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
   switch (opnd)
     {
     case AARCH64_OPND_EXCEPTION:
+    case AARCH64_OPND_UNDEFINED:
       if (unsigned_overflow (value, 16))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("immediate out of range"));
       insn = get_aarch64_insn (buf);
-      insn |= encode_svc_imm (value);
+      insn |= (opnd == AARCH64_OPND_EXCEPTION) ? encode_svc_imm (value) : value;
       put_aarch64_insn (buf, insn);
       break;
 
@@ -8267,8 +8269,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
   /* Free the allocated the struct aarch64_inst.
      N.B. currently there are very limited number of fix-up types actually use
      this field, so the impact on the performance should be minimal .  */
-  if (fixP->tc_fix_data.inst != NULL)
-    free (fixP->tc_fix_data.inst);
+  free (fixP->tc_fix_data.inst);
 
   return;
 }
@@ -9555,8 +9556,7 @@ aarch64_elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
     }
   else
     {
-      if (destelf->size != NULL)
-	free (destelf->size);
+      free (destelf->size);
       destelf->size = NULL;
     }
   S_SET_SIZE (dest, S_GET_SIZE (src));

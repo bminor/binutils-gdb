@@ -35,23 +35,35 @@ gdb_test "ptype z1" " = complex double"
 gdb_test "ptype z2" " = complex float"
 gdb_test "ptype z3" " = complex long double"
 
-gdb_test "p \$_cimag (z1)" " = 4.5"
-gdb_test "ptype \$" " = double"
+with_test_prefix "double imaginary" {
+    gdb_test "p \$_cimag (z1)" " = 4.5"
+    gdb_test "ptype \$" " = double"
+}
 
-gdb_test "p \$_cimag (z2)" " = -5.5"
-gdb_test "ptype \$" " = float"
+with_test_prefix "float imaginary" {
+    gdb_test "p \$_cimag (z2)" " = -5.5"
+    gdb_test "ptype \$" " = float"
+}
 
-gdb_test "p \$_cimag (z3)" " = 6.5"
-gdb_test "ptype \$" " = long double"
+with_test_prefix "long double imaginary" {
+    gdb_test "p \$_cimag (z3)" " = 6.5"
+    gdb_test "ptype \$" " = long double"
+}
 
-gdb_test "p \$_creal (z1)" " = 1.5"
-gdb_test "ptype \$" " = double"
+with_test_prefix "double real" {
+    gdb_test "p \$_creal (z1)" " = 1.5"
+    gdb_test "ptype \$" " = double"
+}
 
-gdb_test "p \$_creal (z2)" " = 2.5"
-gdb_test "ptype \$" " = float"
+with_test_prefix "float real" {
+    gdb_test "p \$_creal (z2)" " = 2.5"
+    gdb_test "ptype \$" " = float"
+}
 
-gdb_test "p \$_creal (z3)" " = 3.5"
-gdb_test "ptype \$" " = long double"
+with_test_prefix "long double real" {
+    gdb_test "p \$_creal (z3)" " = 3.5"
+    gdb_test "ptype \$" " = long double"
+}
 
 gdb_test "p \$_cimag (d1)" "expected a complex number"
 gdb_test "p \$_cimag (f1)" "expected a complex number"

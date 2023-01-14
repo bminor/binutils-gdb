@@ -98,6 +98,14 @@ struct _bfd_riscv_elf_obj_tdata
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == RISCV_ELF_DATA)
 
+static bfd_boolean
+elfNN_riscv_mkobject (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct _bfd_riscv_elf_obj_tdata),
+				  RISCV_ELF_DATA);
+}
+
 #include "elf/common.h"
 #include "elf/internal.h"
 
@@ -2385,9 +2393,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (msg && r != bfd_reloc_dangerous)
 	info->callbacks->einfo (msg);
 
-      /* Free the unused `msg_buf` if needed.  */
-      if (msg_buf)
-	free (msg_buf);
+      /* Free the unused `msg_buf`.  */
+      free (msg_buf);
 
       /* We already reported the error via a callback, so don't try to report
 	 it again by returning false.  That leads to spurious errors.  */
@@ -2802,7 +2809,7 @@ riscv_merge_std_ext (bfd *ibfd,
   if (!riscv_i_or_e_p (ibfd, out_arch, out))
     return FALSE;
 
-  if (in->name[0] != out->name[0])
+  if (strcasecmp (in->name, out->name) != 0)
     {
       /* TODO: We might allow merge 'i' with 'e'.  */
       _bfd_error_handler
@@ -2975,13 +2982,17 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   riscv_parse_subset_t rpe_in;
   riscv_parse_subset_t rpe_out;
 
+  /* Only assembler needs to check the default version of ISA, so just set
+     the rpe_in.get_default_version and rpe_out.get_default_version to NULL.  */
   rpe_in.subset_list = &in_subsets;
   rpe_in.error_handler = _bfd_error_handler;
   rpe_in.xlen = &xlen_in;
+  rpe_in.get_default_version = NULL;
 
   rpe_out.subset_list = &out_subsets;
   rpe_out.error_handler = _bfd_error_handler;
   rpe_out.xlen = &xlen_out;
+  rpe_out.get_default_version = NULL;
 
   if (in_arch == NULL && out_arch == NULL)
     return NULL;
@@ -4161,15 +4172,16 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      symval = 0;
 	      sym_sec = bfd_und_section_ptr;
 	    }
-	  else if (h->root.u.def.section->output_section == NULL
-		   || (h->root.type != bfd_link_hash_defined
-		       && h->root.type != bfd_link_hash_defweak))
-	    continue;
-	  else
+	  else if ((h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
+		   && h->root.u.def.section != NULL
+		   && h->root.u.def.section->output_section != NULL)
 	    {
 	      symval = h->root.u.def.value;
 	      sym_sec = h->root.u.def.section;
 	    }
+	  else
+	    continue;
 
 	  if (h->type != STT_FUNC)
 	    reserve_size =
@@ -4362,6 +4374,7 @@ riscv_elf_obj_attrs_arg_type (int tag)
 #define elf_info_to_howto_rel		     NULL
 #define elf_info_to_howto		     riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section	     _bfd_riscv_relax_section
+#define bfd_elfNN_mkobject		     elfNN_riscv_mkobject
 
 #define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 

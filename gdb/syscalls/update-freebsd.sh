@@ -69,7 +69,7 @@ awk '
 }
 /\/\* [0-9]* is freebsd[0-9]* [a-z_]* \*\// {
     printf "  <syscall name=\"%s_%s\" number=\"%s\" alias=\"%s\"/>\n", $4, $5, $2, $5
-}' $1 >> freebsd.xml.tmp
+}' "$1" >> freebsd.xml.tmp
 
 cat >> freebsd.xml.tmp <<EOF
 </syscalls_info>

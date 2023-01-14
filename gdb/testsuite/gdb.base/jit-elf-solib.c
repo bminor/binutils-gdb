@@ -15,7 +15,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This simulates a JIT library.  The function is "renamed" after being
-   loaded into memory.  */
+/* This simulates a JIT library.  The function name is supplied during
+   compilation as a macro.  */
 
-int jit_function_XXXX() { return 42; }
+#ifndef FUNCTION_NAME
+#error "Must define the FUNCTION_NAME macro to set a jited function name"
+#endif
+
+int FUNCTION_NAME() { return 42; }

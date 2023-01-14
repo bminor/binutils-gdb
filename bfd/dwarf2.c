@@ -2420,8 +2420,7 @@ decode_line_info (struct comp_unit *unit)
 		    (_("DWARF error: mangled line number section"));
 		  bfd_set_error (bfd_error_bad_value);
 		line_fail:
-		  if (filename != NULL)
-		    free (filename);
+		  free (filename);
 		  goto fail;
 		}
 	      break;
@@ -2466,8 +2465,7 @@ decode_line_info (struct comp_unit *unit)
 		filenum = _bfd_safe_read_leb128 (abfd, line_ptr, &bytes_read,
 						 FALSE, line_end);
 		line_ptr += bytes_read;
-		if (filename)
-		  free (filename);
+		free (filename);
 		filename = concat_filename (table, filenum);
 		break;
 	      }
@@ -2513,8 +2511,7 @@ decode_line_info (struct comp_unit *unit)
 	    }
 	}
 
-      if (filename)
-	free (filename);
+      free (filename);
     }
 
   if (unit->line_offset == 0)
@@ -2529,10 +2526,8 @@ decode_line_info (struct comp_unit *unit)
       table->sequences = table->sequences->prev_sequence;
       free (seq);
     }
-  if (table->files != NULL)
-    free (table->files);
-  if (table->dirs != NULL)
-    free (table->dirs);
+  free (table->files);
+  free (table->dirs);
   return NULL;
 }
 
@@ -5146,34 +5141,22 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 	      free (each->line_table->dirs);
 	    }
 
-	  if (each->lookup_funcinfo_table)
-	    {
-	      free (each->lookup_funcinfo_table);
-	      each->lookup_funcinfo_table = NULL;
-	    }
+	  free (each->lookup_funcinfo_table);
+	  each->lookup_funcinfo_table = NULL;
 
 	  while (function_table)
 	    {
-	      if (function_table->file)
-		{
-		  free (function_table->file);
-		  function_table->file = NULL;
-		}
-	      if (function_table->caller_file)
-		{
-		  free (function_table->caller_file);
-		  function_table->caller_file = NULL;
-		}
+	      free (function_table->file);
+	      function_table->file = NULL;
+	      free (function_table->caller_file);
+	      function_table->caller_file = NULL;
 	      function_table = function_table->prev_func;
 	    }
 
 	  while (variable_table)
 	    {
-	      if (variable_table->file)
-		{
-		  free (variable_table->file);
-		  variable_table->file = NULL;
-		}
+	      free (variable_table->file);
+	      variable_table->file = NULL;
 	      variable_table = variable_table->prev_var;
 	    }
 	}

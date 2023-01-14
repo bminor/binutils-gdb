@@ -199,7 +199,8 @@ struct dump_list_entry
 
 /* A dynamic array of flags indicating for which sections a dump
    has been requested via command line switches.  */
-struct dump_data {
+struct dump_data
+{
   dump_type *          dump_sects;
   unsigned int         num_dump_sects;
 };
@@ -230,6 +231,7 @@ static bfd_boolean do_ctf = FALSE;
 static bfd_boolean do_arch = FALSE;
 static bfd_boolean do_notes = FALSE;
 static bfd_boolean do_archive_index = FALSE;
+static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
 
@@ -265,8 +267,10 @@ typedef struct filedata
   bfd_size_type        dynamic_size;
   size_t               dynamic_nent;
   Elf_Internal_Dyn *   dynamic_section;
+  Elf_Internal_Shdr *  dynamic_strtab_section;
   char *               dynamic_strings;
   unsigned long        dynamic_strings_length;
+  Elf_Internal_Shdr *  dynamic_symtab_section;
   unsigned long        num_dynamic_syms;
   Elf_Internal_Sym *   dynamic_symbols;
   bfd_vma              version_info[16];
@@ -4478,6 +4482,8 @@ static struct option options[] =
   {"relocs",	       no_argument, 0, 'r'},
   {"notes",	       no_argument, 0, 'n'},
   {"dynamic",	       no_argument, 0, 'd'},
+  {"lint",             no_argument, 0, 'L'},
+  {"enable-checks",    no_argument, 0, 'L'},
   {"arch-specific",    no_argument, 0, 'A'},
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
@@ -4525,7 +4531,7 @@ usage (FILE * stream)
   -e --headers           Equivalent to: -h -l -S\n\
   -s --syms              Display the symbol table\n\
      --symbols           An alias for --syms\n\
-  --dyn-syms             Display the dynamic symbol table\n\
+     --dyn-syms          Display the dynamic symbol table\n\
   -n --notes             Display the core notes (if present)\n\
   -r --relocs            Display the relocations (if present)\n\
   -u --unwind            Display the unwind info (if present)\n\
@@ -4534,6 +4540,7 @@ usage (FILE * stream)
   -A --arch-specific     Display architecture specific information (if any)\n\
   -c --archive-index     Display the symbol/file index in an archive\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
+  -L --lint|--enable-checks  Display warning messages for possible problems\n\
   -x --hex-dump=<number|name>\n\
                          Dump the contents of section <number|name> as bytes\n\
   -p --string-dump=<number|name>\n\
@@ -4662,7 +4669,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ADHILNR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4735,6 +4742,9 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case 'c':
 	  do_archive_index = TRUE;
+	  break;
+	case 'L':
+	  do_checks = TRUE;
 	  break;
 	case 'x':
 	  request_dump (dumpdata, HEX_DUMP);
@@ -4832,7 +4842,18 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
       && !do_histogram && !do_debugging && !do_arch && !do_notes
       && !do_section_groups && !do_archive_index
       && !do_dyn_syms)
-    usage (stderr);
+    {
+      if (do_checks)
+	{
+	  check_all = TRUE;
+	  do_dynamic = do_syms = do_reloc = do_unwind = do_sections = TRUE;
+	  do_segments = do_header = do_dump = do_version = TRUE;
+	  do_histogram = do_debugging = do_arch = do_notes = TRUE;
+	  do_section_groups = do_archive_index = do_dyn_syms = TRUE;
+	}
+      else
+	usage (stderr);
+    }
 }
 
 static const char *
@@ -5344,13 +5365,13 @@ process_program_headers (Filedata * filedata)
 	      filedata->dynamic_addr = sec->sh_offset;
 	      filedata->dynamic_size = sec->sh_size;
 
-	      if (filedata->dynamic_addr < segment->p_offset
-		  || filedata->dynamic_addr > segment->p_offset + segment->p_filesz)
-		warn (_("the .dynamic section is not contained"
-			" within the dynamic segment\n"));
-	      else if (filedata->dynamic_addr > segment->p_offset)
-		warn (_("the .dynamic section is not the first section"
-			" in the dynamic segment.\n"));
+	      /* The PT_DYNAMIC segment, which is used by the run-time
+		 loader,  should exactly match the .dynamic section.  */
+	      if (do_checks
+		  && (filedata->dynamic_addr != segment->p_offset
+		      || filedata->dynamic_size != segment->p_filesz))
+		warn (_("\
+the .dynamic section is not the same as the dynamic segment\n"));
 	    }
 
 	  /* PR binutils/17512: Avoid corrupt dynamic section info in the
@@ -6277,7 +6298,7 @@ process_section_headers (Filedata * filedata)
   while (0)
 
 #define CHECK_ENTSIZE(section, i, type)					\
-  CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	    \
+  CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	\
 			sizeof (Elf64_External_##type))
 
   for (i = 0, section = filedata->section_headers;
@@ -6286,8 +6307,11 @@ process_section_headers (Filedata * filedata)
     {
       char * name = SECTION_NAME (section);
 
-      if (section->sh_type == SHT_DYNSYM)
+      /* Run some sanity checks on the headers and
+	 possibly fill in some file data as well.  */
+      switch (section->sh_type)
 	{
+	case SHT_DYNSYM:
 	  if (filedata->dynamic_symbols != NULL)
 	    {
 	      error (_("File contains multiple dynamic symbol tables\n"));
@@ -6297,45 +6321,77 @@ process_section_headers (Filedata * filedata)
 	  CHECK_ENTSIZE (section, i, Sym);
 	  filedata->dynamic_symbols
 	    = GET_ELF_SYMBOLS (filedata, section, &filedata->num_dynamic_syms);
-	}
-      else if (section->sh_type == SHT_STRTAB
-	       && streq (name, ".dynstr"))
-	{
-	  if (filedata->dynamic_strings != NULL)
+	  filedata->dynamic_symtab_section = section;
+	  break;
+
+	case SHT_STRTAB:
+	  if (streq (name, ".dynstr"))
 	    {
-	      error (_("File contains multiple dynamic string tables\n"));
-	      continue;
+	      if (filedata->dynamic_strings != NULL)
+		{
+		  error (_("File contains multiple dynamic string tables\n"));
+		  continue;
+		}
+
+	      filedata->dynamic_strings
+		= (char *) get_data (NULL, filedata, section->sh_offset,
+				     1, section->sh_size, _("dynamic strings"));
+	      filedata->dynamic_strings_length
+		= filedata->dynamic_strings == NULL ? 0 : section->sh_size;
+	      filedata->dynamic_strtab_section = section;
 	    }
+	  break;
 
-	  filedata->dynamic_strings
-	    = (char *) get_data (NULL, filedata, section->sh_offset,
-				 1, section->sh_size, _("dynamic strings"));
-	  filedata->dynamic_strings_length
-	    = filedata->dynamic_strings == NULL ? 0 : section->sh_size;
-	}
-      else if (section->sh_type == SHT_SYMTAB_SHNDX)
-	{
-	  elf_section_list * entry = xmalloc (sizeof * entry);
+	case SHT_SYMTAB_SHNDX:
+	  {
+	    elf_section_list * entry = xmalloc (sizeof * entry);
 
-	  entry->hdr = section;
-	  entry->next = filedata->symtab_shndx_list;
-	  filedata->symtab_shndx_list = entry;
+	    entry->hdr = section;
+	    entry->next = filedata->symtab_shndx_list;
+	    filedata->symtab_shndx_list = entry;
+	  }
+	  break;
+
+	case SHT_SYMTAB:
+	  CHECK_ENTSIZE (section, i, Sym);
+	  break;
+
+	case SHT_GROUP:
+	  CHECK_ENTSIZE_VALUES (section, i, GRP_ENTRY_SIZE, GRP_ENTRY_SIZE);
+	  break;
+
+	case SHT_REL:
+	  CHECK_ENTSIZE (section, i, Rel);
+	  if (do_checks && section->sh_size == 0)
+	    warn (_("Section '%s': zero-sized relocation section\n"), name);
+	  break;
+
+	case SHT_RELA:
+	  CHECK_ENTSIZE (section, i, Rela);
+	  if (do_checks && section->sh_size == 0)
+	    warn (_("Section '%s': zero-sized relocation section\n"), name);
+	  break;
+
+	case SHT_NOTE:
+	case SHT_PROGBITS:
+	  /* Having a zero sized section is not illegal according to the
+	     ELF standard, but it might be an indication that something
+	     is wrong.  So issue a warning if we are running in lint mode.  */
+	  if (do_checks && section->sh_size == 0)
+	    warn (_("Section '%s': has a size of zero - is this intended ?\n"), name);
+	  break;
+
+	default:
+	  break;
 	}
-      else if (section->sh_type == SHT_SYMTAB)
-	CHECK_ENTSIZE (section, i, Sym);
-      else if (section->sh_type == SHT_GROUP)
-	CHECK_ENTSIZE_VALUES (section, i, GRP_ENTRY_SIZE, GRP_ENTRY_SIZE);
-      else if (section->sh_type == SHT_REL)
-	CHECK_ENTSIZE (section, i, Rel);
-      else if (section->sh_type == SHT_RELA)
-	CHECK_ENTSIZE (section, i, Rela);
-      else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_pubnames || do_debug_pubtypes
-		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
-		|| do_debug_str || do_debug_loc || do_debug_ranges
-		|| do_debug_addr || do_debug_cu_index || do_debug_links)
-	       && (const_strneq (name, ".debug_")
-                   || const_strneq (name, ".zdebug_")))
+
+      if ((do_debugging || do_debug_info || do_debug_abbrevs
+	   || do_debug_lines || do_debug_pubnames || do_debug_pubtypes
+	   || do_debug_aranges || do_debug_frames || do_debug_macinfo
+	   || do_debug_str || do_debug_loc || do_debug_ranges
+	   || do_debug_addr || do_debug_cu_index || do_debug_links)
+	  && (const_strneq (name, ".debug_")
+	      || const_strneq (name, ".zdebug_")))
 	{
           if (name[1] == 'z')
             name += sizeof (".zdebug_") - 1;
@@ -6954,8 +7010,7 @@ process_section_groups (Filedata * filedata)
 	  if (symtab_sec != sec)
 	    {
 	      symtab_sec = sec;
-	      if (symtab)
-		free (symtab);
+	      free (symtab);
 	      symtab = GET_ELF_SYMBOLS (filedata, symtab_sec, & num_syms);
 	    }
 
@@ -6984,8 +7039,7 @@ process_section_groups (Filedata * filedata)
 
 	      group_name = SECTION_NAME (filedata->section_headers + sym->st_shndx);
 	      strtab_sec = NULL;
-	      if (strtab)
-		free (strtab);
+	      free (strtab);
 	      strtab = NULL;
 	      strtab_size = 0;
 	    }
@@ -6995,8 +7049,7 @@ process_section_groups (Filedata * filedata)
 	      if (symtab_sec->sh_link >= filedata->file_header.e_shnum)
 		{
 		  strtab_sec = NULL;
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 		  strtab = NULL;
 		  strtab_size = 0;
 		}
@@ -7004,8 +7057,7 @@ process_section_groups (Filedata * filedata)
 		       != (sec = filedata->section_headers + symtab_sec->sh_link))
 		{
 		  strtab_sec = sec;
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 
 		  strtab = (char *) get_data (NULL, filedata, strtab_sec->sh_offset,
 					      1, strtab_sec->sh_size,
@@ -7113,17 +7165,14 @@ process_section_groups (Filedata * filedata)
 	      group->root = g;
 	    }
 
-	  if (start)
-	    free (start);
+	  free (start);
 
 	  group++;
 	}
     }
 
-  if (symtab)
-    free (symtab);
-  if (strtab)
-    free (strtab);
+  free (symtab);
+  free (strtab);
   return TRUE;
 }
 
@@ -7311,8 +7360,7 @@ process_ia64_vms_dynamic_relocs (Filedata * filedata)
 	}
     }
 
-  if (strtab != NULL)
-    free (strtab);
+  free (strtab);
 
   return res;
 }
@@ -7458,8 +7506,7 @@ process_relocs (Filedata * filedata)
 				    symtab, nsyms, strtab, strtablen,
 				    is_rela,
 				    symsec->sh_type == SHT_DYNSYM);
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 		  free (symtab);
 		}
 	      else
@@ -7985,19 +8032,15 @@ ia64_process_unwind (Filedata * filedata)
 	      && aux.table_len > 0)
 	    dump_ia64_unwind (filedata, & aux);
 
-	  if (aux.table)
-	    free ((char *) aux.table);
-	  if (aux.info)
-	    free ((char *) aux.info);
+	  free ((char *) aux.table);
+	  free ((char *) aux.info);
 	  aux.table = NULL;
 	  aux.info = NULL;
 	}
     }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -8367,16 +8410,13 @@ hppa_process_unwind (Filedata * filedata)
 		res = FALSE;
 	    }
 
-	  if (aux.table)
-	    free ((char *) aux.table);
+	  free ((char *) aux.table);
 	  aux.table = NULL;
 	}
     }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -8436,11 +8476,8 @@ arm_print_vma_and_name (Filedata *                 filedata,
 static void
 arm_free_section (struct arm_section *arm_sec)
 {
-  if (arm_sec->data != NULL)
-    free (arm_sec->data);
-
-  if (arm_sec->rela != NULL)
-    free (arm_sec->rela);
+  free (arm_sec->data);
+  free (arm_sec->rela);
 }
 
 /* 1) If SEC does not match the one cached in ARM_SEC, then free the current
@@ -9474,10 +9511,8 @@ arm_process_unwind (Filedata * filedata)
 	  }
       }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -10006,16 +10041,10 @@ get_num_dynamic_syms (Filedata * filedata)
     no_hash:
       if (num_of_syms == 0)
 	{
-	  if (filedata->buckets)
-	    {
-	      free (filedata->buckets);
-	      filedata->buckets = NULL;
-	    }
-	  if (filedata->chains)
-	    {
-	      free (filedata->chains);
-	      filedata->chains = NULL;
-	    }
+	  free (filedata->buckets);
+	  filedata->buckets = NULL;
+	  free (filedata->chains);
+	  filedata->chains = NULL;
 	  filedata->nbuckets = 0;
 	}
     }
@@ -10155,7 +10184,8 @@ get_num_dynamic_syms (Filedata * filedata)
 	      {
 		if (filedata->dynamic_info_DT_MIPS_XHASH)
 		  {
-		    if (filedata->mipsxlat[off] >= num_of_syms)
+		    if (off < filedata->ngnuchains
+			&& filedata->mipsxlat[off] >= num_of_syms)
 		      num_of_syms = filedata->mipsxlat[off] + 1;
 		  }
 		else
@@ -10172,21 +10202,12 @@ get_num_dynamic_syms (Filedata * filedata)
       if (num_of_syms == 0)
 	{
 	no_gnu_hash:
-	  if (filedata->mipsxlat)
-	    {
-	      free (filedata->mipsxlat);
-	      filedata->mipsxlat = NULL;
-	    }
-	  if (filedata->gnuchains)
-	    {
-	      free (filedata->gnuchains);
-	      filedata->gnuchains = NULL;
-	    }
-	  if (filedata->gnubuckets)
-	    {
-	      free (filedata->gnubuckets);
-	      filedata->gnubuckets = NULL;
-	    }
+	  free (filedata->mipsxlat);
+	  filedata->mipsxlat = NULL;
+	  free (filedata->gnuchains);
+	  filedata->gnuchains = NULL;
+	  free (filedata->gnubuckets);
+	  filedata->gnubuckets = NULL;
 	  filedata->ngnubuckets = 0;
 	  filedata->ngnuchains = 0;
 	}
@@ -10289,6 +10310,18 @@ process_dynamic_section (Filedata * filedata)
 		  section.sh_size = (num_of_syms
 				     * filedata->dynamic_info[DT_SYMENT]);
 		  section.sh_entsize = filedata->dynamic_info[DT_SYMENT];
+
+		  if (do_checks
+		      && filedata->dynamic_symtab_section != NULL
+		      && ((filedata->dynamic_symtab_section->sh_offset
+			   != section.sh_offset)
+			  || (filedata->dynamic_symtab_section->sh_size
+			      != section.sh_size)
+			  || (filedata->dynamic_symtab_section->sh_entsize
+			      != section.sh_entsize)))
+		    warn (_("\
+the .dynsym section doesn't match the DT_SYMTAB and DT_SYMENT tags\n"));
+
 		  section.sh_name = filedata->string_table_length;
 		  filedata->dynamic_symbols
 		    = GET_ELF_SYMBOLS (filedata, &section,
@@ -10326,6 +10359,15 @@ process_dynamic_section (Filedata * filedata)
 	    offset = offset_from_vma (filedata,
 				      filedata->dynamic_info[DT_STRTAB],
 				      str_tab_len);
+	    if (do_checks
+		&& filedata->dynamic_strtab_section
+		&& ((filedata->dynamic_strtab_section->sh_offset
+		     != (file_ptr) offset)
+		    || (filedata->dynamic_strtab_section->sh_size
+			!= str_tab_len)))
+	      warn (_("\
+the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
+
 	    filedata->dynamic_strings
 	      = (char *) get_data (NULL, filedata, offset, 1, str_tab_len,
 				   _("dynamic string table"));
@@ -14576,12 +14618,9 @@ free_debug_section (enum dwarf_section_display_enum debug)
   section->address = 0;
   section->size = 0;
 
-  if (section->reloc_info != NULL)
-    {
-      free (section->reloc_info);
-      section->reloc_info = NULL;
-      section->num_relocs = 0;
-    }
+  free (section->reloc_info);
+  section->reloc_info = NULL;
+  section->num_relocs = 0;
 }
 
 static bfd_boolean
@@ -16685,8 +16724,7 @@ process_mips_specific (Filedata * filedata)
 	    }
 
 	sgot_print_fail:
-	  if (data)
-	    free (data);
+	  free (data);
 	}
       return res;
     }
@@ -17318,8 +17356,7 @@ process_mips_specific (Filedata * filedata)
 	}
 
     got_print_fail:
-      if (data)
-	free (data);
+      free (data);
     }
 
   if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
@@ -17396,8 +17433,7 @@ process_mips_specific (Filedata * filedata)
 	}
       printf ("\n");
 
-      if (data)
-	free (data);
+      free (data);
       free (rels);
     }
 
@@ -17410,18 +17446,21 @@ process_nds32_specific (Filedata * filedata)
   Elf_Internal_Shdr *sect = NULL;
 
   sect = find_section (filedata, ".nds32_e_flags");
-  if (sect != NULL)
+  if (sect != NULL && sect->sh_size >= 4)
     {
-      unsigned int *flag;
+      unsigned char *buf;
+      unsigned int flag;
 
       printf ("\nNDS32 elf flags section:\n");
-      flag = get_data (NULL, filedata, sect->sh_offset, 1,
-		       sect->sh_size, _("NDS32 elf flags section"));
+      buf = get_data (NULL, filedata, sect->sh_offset, 1, 4,
+		      _("NDS32 elf flags section"));
 
-      if (! flag)
+      if (buf == NULL)
 	return FALSE;
 
-      switch ((*flag) & 0x3)
+      flag = byte_get (buf, 4);
+      free (buf);
+      switch (flag & 0x3)
 	{
 	case 0:
 	  printf ("(VEC_SIZE):\tNo entry.\n");
@@ -19666,11 +19705,8 @@ process_notes_at (Filedata *           filedata,
       if (! process_note (& inote, filedata))
 	res = FALSE;
 
-      if (temp != NULL)
-	{
-	  free (temp);
-	  temp = NULL;
-	}
+      free (temp);
+      temp = NULL;
     }
 
   free (pnotes);
@@ -20224,38 +20260,23 @@ process_object (Filedata * filedata)
   filedata->string_table = NULL;
   filedata->string_table_length = 0;
 
-  if (filedata->dump.dump_sects != NULL)
-    {
-      free (filedata->dump.dump_sects);
-      filedata->dump.dump_sects = NULL;
-      filedata->dump.num_dump_sects = 0;
-    }
+  free (filedata->dump.dump_sects);
+  filedata->dump.dump_sects = NULL;
+  filedata->dump.num_dump_sects = 0;
 
-  if (filedata->dynamic_strings)
-    {
-      free (filedata->dynamic_strings);
-      filedata->dynamic_strings = NULL;
-      filedata->dynamic_strings_length = 0;
-    }
+  free (filedata->dynamic_strings);
+  filedata->dynamic_strings = NULL;
+  filedata->dynamic_strings_length = 0;
 
-  if (filedata->dynamic_symbols)
-    {
-      free (filedata->dynamic_symbols);
-      filedata->dynamic_symbols = NULL;
-      filedata->num_dynamic_syms = 0;
-    }
+  free (filedata->dynamic_symbols);
+  filedata->dynamic_symbols = NULL;
+  filedata->num_dynamic_syms = 0;
 
-  if (filedata->dynamic_syminfo)
-    {
-      free (filedata->dynamic_syminfo);
-      filedata->dynamic_syminfo = NULL;
-    }
+  free (filedata->dynamic_syminfo);
+  filedata->dynamic_syminfo = NULL;
 
-  if (filedata->dynamic_section)
-    {
-      free (filedata->dynamic_section);
-      filedata->dynamic_section = NULL;
-    }
+  free (filedata->dynamic_section);
+  filedata->dynamic_section = NULL;
 
   while (filedata->symtab_shndx_list != NULL)
     {
@@ -20264,11 +20285,8 @@ process_object (Filedata * filedata)
       filedata->symtab_shndx_list = next;
     }
 
-  if (filedata->section_headers_groups)
-    {
-      free (filedata->section_headers_groups);
-      filedata->section_headers_groups = NULL;
-    }
+  free (filedata->section_headers_groups);
+  filedata->section_headers_groups = NULL;
 
   if (filedata->section_groups)
     {
@@ -20646,7 +20664,7 @@ process_file (char * file_name)
     }
   else
     {
-      if (do_archive_index)
+      if (do_archive_index && !check_all)
 	error (_("File %s is not an archive so its index cannot be displayed.\n"),
 	       file_name);
 
@@ -20712,9 +20730,14 @@ main (int argc, char ** argv)
   parse_args (& cmdline, argc, argv);
 
   if (optind < (argc - 1))
+    /* When displaying information for more than one file,
+       prefix the information with the file name.  */
     show_name = TRUE;
   else if (optind >= argc)
     {
+      /* Ensure that the warning is always displayed.  */
+      do_checks = TRUE;
+
       warn (_("Nothing to do.\n"));
       usage (stderr);
     }
@@ -20724,8 +20747,7 @@ main (int argc, char ** argv)
     if (! process_file (argv[optind++]))
       err = TRUE;
 
-  if (cmdline.dump_sects != NULL)
-    free (cmdline.dump_sects);
+  free (cmdline.dump_sects);
 
   free (dump_ctf_symtab_name);
   free (dump_ctf_strtab_name);

@@ -234,6 +234,11 @@ extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *);
 
 extern int ada_scan_number (const char *, int, LONGEST *, int *);
 
+extern struct value *ada_value_primitive_field (struct value *arg1,
+						int offset,
+						int fieldno,
+						struct type *arg_type);
+
 extern struct type *ada_parent_type (struct type *);
 
 extern int ada_is_ignored_field (struct type *, int);
@@ -276,11 +281,11 @@ extern struct type *ada_aligned_type (struct type *);
 extern const gdb_byte *ada_aligned_value_addr (struct type *,
 					       const gdb_byte *);
 
-extern int ada_is_fixed_point_type (struct type *);
+extern int ada_is_gnat_encoded_fixed_point_type (struct type *);
 
 extern int ada_is_system_address_type (struct type *);
 
-extern struct value *ada_delta (struct type *);
+extern struct value *gnat_encoded_fixed_point_delta (struct type *);
 
 extern struct value *ada_scaling_factor (struct type *);
 

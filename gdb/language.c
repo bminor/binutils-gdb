@@ -410,7 +410,7 @@ language_info (int quietly)
 int
 pointer_type (struct type *type)
 {
-  return TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
+  return type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
 }
 
 
@@ -671,9 +671,12 @@ default_word_break_characters (void)
 /* Print the index of array elements using the C99 syntax.  */
 
 void
-default_print_array_index (struct value *index_value, struct ui_file *stream,
+default_print_array_index (struct type *index_type, LONGEST index,
+			   struct ui_file *stream,
 			   const struct value_print_options *options)
 {
+  struct value *index_value = value_from_longest (index_type, index);
+
   fprintf_filtered (stream, "[");
   LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, "] = ");
@@ -710,12 +713,12 @@ bool
 default_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
+  while (type->code () == TYPE_CODE_REF)
     {
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
     }
-  return (TYPE_CODE (type)  == TYPE_CODE_STRING);
+  return (type->code ()  == TYPE_CODE_STRING);
 }
 
 /* See language.h.  */
@@ -981,7 +984,7 @@ language_bool_type (const struct language_defn *la,
 	{
 	  struct type *type = SYMBOL_TYPE (sym);
 
-	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	  if (type && type->code () == TYPE_CODE_BOOL)
 	    return type;
 	}
     }
@@ -999,7 +1002,7 @@ language_lookup_primitive_type_1 (const struct language_arch_info *lai,
 
   for (p = lai->primitive_type_vector; (*p) != NULL; p++)
     {
-      if (strcmp (TYPE_NAME (*p), name) == 0)
+      if (strcmp ((*p)->name (), name) == 0)
 	return p;
     }
   return NULL;
@@ -1037,10 +1040,11 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   gdbarch = TYPE_OWNER (type).gdbarch;
   symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
 
-  symbol->m_name = TYPE_NAME (type);
+  symbol->m_name = type->name ();
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;
+  SYMBOL_SECTION (symbol) = 0;
   SYMBOL_TYPE (symbol) = type;
   SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
   SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;

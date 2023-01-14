@@ -1090,7 +1090,7 @@ add_struct_fields (struct type *type, completion_list &output,
   const char *type_name = NULL;
 
   type = check_typedef (type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i),
@@ -1103,7 +1103,7 @@ add_struct_fields (struct type *type, completion_list &output,
 			     fieldname, namelen))
 		output.emplace_back (xstrdup (TYPE_FIELD_NAME (type, i)));
 	    }
-	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+	  else if (TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_UNION)
 	    {
 	      /* Recurse into anonymous unions.  */
 	      add_struct_fields (TYPE_FIELD_TYPE (type, i),
@@ -1120,7 +1120,7 @@ add_struct_fields (struct type *type, completion_list &output,
 	{
 	  if (!computed_type_name)
 	    {
-	      type_name = TYPE_NAME (type);
+	      type_name = type->name ();
 	      computed_type_name = 1;
 	    }
 	  /* Omit constructors from the completion list.  */
@@ -1156,13 +1156,13 @@ complete_expression (completion_tracker &tracker,
       for (;;)
 	{
 	  type = check_typedef (type);
-	  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+	  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	    break;
 	  type = TYPE_TARGET_TYPE (type);
 	}
 
-      if (TYPE_CODE (type) == TYPE_CODE_UNION
-	  || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_UNION
+	  || type->code () == TYPE_CODE_STRUCT)
 	{
 	  completion_list result;
 

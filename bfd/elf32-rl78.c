@@ -2552,11 +2552,8 @@ rl78_elf_relax_section
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-
-  if (free_contents != NULL)
-    free (free_contents);
+  free (free_relocs);
+  free (free_contents);
 
   if (shndx_buf != NULL)
     {
@@ -2564,8 +2561,7 @@ rl78_elf_relax_section
       free (shndx_buf);
     }
 
-  if (free_intsyms != NULL)
-    free (free_intsyms);
+  free (free_intsyms);
 
   return TRUE;
 }

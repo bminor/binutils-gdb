@@ -61,7 +61,7 @@ const char vtbl_ptr_name[] = "__vtbl_ptr_type";
 int
 cp_is_vtbl_ptr_type (struct type *type)
 {
-  const char *type_name = TYPE_NAME (type);
+  const char *type_name = type->name ();
 
   return (type_name != NULL && !strcmp (type_name, vtbl_ptr_name));
 }
@@ -74,25 +74,25 @@ cp_is_vtbl_member (struct type *type)
 {
   /* With older versions of g++, the vtbl field pointed to an array of
      structures.  Nowadays it points directly to the structure.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       type = TYPE_TARGET_TYPE (type);
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = TYPE_TARGET_TYPE (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT    /* if not using thunks */
-	      || TYPE_CODE (type) == TYPE_CODE_PTR)   /* if using thunks */
+	  if (type->code () == TYPE_CODE_STRUCT    /* if not using thunks */
+	      || type->code () == TYPE_CODE_PTR)   /* if using thunks */
 	    {
 	      /* Virtual functions tables are full of pointers
 	         to virtual functions.  */
 	      return cp_is_vtbl_ptr_type (type);
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)  /* if not using thunks */
+      else if (type->code () == TYPE_CODE_STRUCT)  /* if not using thunks */
 	{
 	  return cp_is_vtbl_ptr_type (type);
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_PTR)     /* if using thunks */
+      else if (type->code () == TYPE_CODE_PTR)     /* if using thunks */
 	{
 	  /* The type name of the thunk pointer is NULL when using
 	     dwarf2.  We could test for a pointer to a function, but
@@ -149,7 +149,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
     }
 
   fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
   /* First, print out baseclasses such that we don't print
@@ -191,7 +191,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->static_field_print
-	      && field_is_static (&TYPE_FIELD (type, i)))
+	      && field_is_static (&type->field (i)))
 	    continue;
 
 	  if (fields_seen)
@@ -207,7 +207,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (TYPE_NAME (type), stream);
+		  fputs_filtered (type->name (), stream);
 		  fputs_filtered (":", stream);
 		}
 	    }
@@ -225,7 +225,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	  if (field_is_static (&TYPE_FIELD (type, i)))
+	  if (field_is_static (&type->field (i)))
 	    {
 	      fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream,
@@ -256,7 +256,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	    }
 	  annotate_field_value ();
 
-	  if (!field_is_static (&TYPE_FIELD (type, i))
+	  if (!field_is_static (&type->field (i))
 	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
@@ -295,7 +295,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (field_is_static (&TYPE_FIELD (type, i)))
+	      else if (field_is_static (&type->field (i)))
 		{
 		  try
 		    {
@@ -411,7 +411,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
       LONGEST boffset = 0;
       int skip = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      const char *basename = TYPE_NAME (baseclass);
+      const char *basename = baseclass->name ();
       struct value *base_val = NULL;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -563,7 +563,7 @@ cp_print_static_field (struct type *type,
     }
 
   struct type *real_type = check_typedef (type);
-  if (TYPE_CODE (real_type) == TYPE_CODE_STRUCT)
+  if (real_type->code () == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
       CORE_ADDR addr = value_address (val);
@@ -591,7 +591,7 @@ cp_print_static_field (struct type *type,
       return;
     }
 
-  if (TYPE_CODE (real_type) == TYPE_CODE_ARRAY)
+  if (real_type->code () == TYPE_CODE_ARRAY)
     {
       struct type **first_dont_print;
       int i;
@@ -638,7 +638,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
 
   *self_p = check_typedef (*self_p);
   self = *self_p;
-  len = TYPE_NFIELDS (self);
+  len = self->num_fields ();
 
   for (i = TYPE_N_BASECLASSES (self); i < len; i++)
     {
@@ -708,7 +708,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
       const char *name;
 
       fputs_filtered (prefix, stream);
-      name = TYPE_NAME (self_type);
+      name = self_type->name ();
       if (name)
 	fputs_filtered (name, stream);
       else

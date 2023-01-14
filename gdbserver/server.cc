@@ -2957,7 +2957,7 @@ handle_v_run (char *own_buf)
       else if (p == next_p)
 	{
 	  /* Empty argument.  */
-	  new_argv.push_back (xstrdup ("''"));
+	  new_argv.push_back (xstrdup (""));
 	}
       else
 	{
@@ -3015,7 +3015,6 @@ handle_v_run (char *own_buf)
       if (*next_p)
 	next_p++;
     }
-  new_argv.push_back (NULL);
 
   if (new_program_name == NULL)
     {
@@ -3815,7 +3814,6 @@ captured_main (int argc, char *argv[])
       program_path.set (make_unique_xstrdup (next_arg[0]));
       for (i = 1; i < n; i++)
 	program_args.push_back (xstrdup (next_arg[i]));
-      program_args.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
       target_create_inferior (program_path.get (), program_args);

@@ -291,9 +291,9 @@ proc test_raw {} {
 proc test_pretty_arrays {} {
   global current_lang
 
-  set an_array_pretty "  \\{2,\[\r\n\]+  3,\[\r\n\]+  5\\}"
+  set an_array_pretty "\\{\[\r\n\]+  2,\[\r\n\]+  3,\[\r\n\]+  5\[\r\n\]+\\}"
   set an_array_with_repetition_pretty \
-    "  \\{1,\[\r\n\]+  3 <repeats 12 times>,\[\r\n\]+  5,\[\r\n\]+  5,\[\r\n\]+  5\\}"
+    "\\{\[\r\n\]+  1,\[\r\n\]+  3 <repeats 12 times>,\[\r\n\]+  5,\[\r\n\]+  5,\[\r\n\]+  5\[\r\n\]+\\}"
 
   check_var_with_bool_opt "pretty_arrays" "a_point_t"
   check_var_with_bool_opt "pretty_arrays" "a_point_t_pointer"
@@ -886,7 +886,7 @@ proc test_mixed {} {
 
   check_format_string "an_array" \
     "array_indexes=True, pretty_arrays=True" \
-    "  \\{\\\[0\\\] = 2,\[\r\n\]+  \\\[1\\\] = 3,\[\r\n\]+  \\\[2\\\] = 5\\}"
+    "\\{\[\r\n\]+  \\\[0\\\] = 2,\[\r\n\]+  \\\[1\\\] = 3,\[\r\n\]+  \\\[2\\\] = 5\[\r\n\]+\\}"
 
   check_format_string "a_struct_with_union" \
     "pretty_structs=True, unions=False" \

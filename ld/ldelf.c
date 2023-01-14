@@ -783,8 +783,7 @@ ldelf_parse_ld_so_conf_include (struct ldelf_ld_so_conf *info,
   ldelf_parse_ld_so_conf (info, pattern);
 #endif
 
-  if (newp)
-    free (newp);
+  free (newp);
 }
 
 static bfd_boolean

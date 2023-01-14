@@ -3048,9 +3048,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	}
     }
 
-  if (lit_table)
-    free (lit_table);
-
+  free (lit_table);
   input_section->reloc_done = TRUE;
 
   return TRUE;
@@ -3130,8 +3128,7 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
 
   if (!bfd_malloc_and_get_section (output_bfd, sxtlit, &contents))
     {
-      if (contents != 0)
-	free (contents);
+      free (contents);
       free (table);
       return -1;
     }
@@ -6295,8 +6292,7 @@ free_section_cache (section_cache_t *sec_cache)
     {
       release_contents (sec_cache->sec, sec_cache->contents);
       release_internal_relocs (sec_cache->sec, sec_cache->relocs);
-      if (sec_cache->ptbl)
-	free (sec_cache->ptbl);
+      free (sec_cache->ptbl);
     }
 }
 
@@ -6353,8 +6349,7 @@ section_cache_section (section_cache_t *sec_cache,
  err:
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
-  if (prop_table)
-    free (prop_table);
+  free (prop_table);
   return FALSE;
 }
 
@@ -6473,8 +6468,7 @@ init_ebb_constraint (ebb_constraint *c)
 static void
 free_ebb_constraint (ebb_constraint *c)
 {
-  if (c->actions)
-    free (c->actions);
+  free (c->actions);
 }
 
 
@@ -6708,8 +6702,7 @@ ebb_propose_action (ebb_constraint *c,
 
       for (i = 0; i < c->action_count; i++)
 	new_actions[i] = c->actions[i];
-      if (c->actions)
-	free (c->actions);
+      free (c->actions);
       c->actions = new_actions;
       c->action_allocated = new_allocated;
     }
@@ -6761,8 +6754,7 @@ pin_internal_relocs (asection *sec, Elf_Internal_Rela *internal_relocs)
 static void
 release_internal_relocs (asection *sec, Elf_Internal_Rela *internal_relocs)
 {
-  if (internal_relocs
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 }
 
@@ -6780,8 +6772,7 @@ retrieve_contents (bfd *abfd, asection *sec, bfd_boolean keep_memory)
     {
       if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 	{
-	  if (contents)
-	    free (contents);
+	  free (contents);
 	  return NULL;
 	}
       if (keep_memory)
@@ -6801,7 +6792,7 @@ pin_contents (asection *sec, bfd_byte *contents)
 static void
 release_contents (asection *sec, bfd_byte *contents)
 {
-  if (contents && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 }
 
@@ -7886,10 +7877,8 @@ compute_text_actions (bfd *abfd,
  error_return:
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
-  if (prop_table)
-    free (prop_table);
-  if (reloc_opcodes)
-    free (reloc_opcodes);
+  free (prop_table);
+  free (reloc_opcodes);
 
   return ok;
 }
@@ -8489,10 +8478,11 @@ build_xlate_map (asection *sec, xtensa_relax_info *relax_info)
 static void
 free_xlate_map (xlate_map_t *map)
 {
-  if (map && map->entry)
-    free (map->entry);
   if (map)
-    free (map);
+    {
+      free (map->entry);
+      free (map);
+    }
 }
 
 
@@ -8676,8 +8666,7 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	}
     }
 
-  if (xmap)
-    free_xlate_map (xmap);
+  free_xlate_map (xmap);
 
   return ok;
 }
@@ -8889,8 +8878,7 @@ compute_removed_literals (bfd *abfd,
 #endif /* DEBUG */
 
  error_return:
-  if (prop_table)
-    free (prop_table);
+  free (prop_table);
   free_section_cache (&target_sec_cache);
 
   release_contents (sec, contents);
@@ -9670,37 +9658,44 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  switch (r_type)
 		    {
 		    case R_XTENSA_DIFF8:
+		      diff_mask = 0x7f;
 		      diff_value =
 			bfd_get_signed_8 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF16:
+		      diff_mask = 0x7fff;
 		      diff_value =
 			bfd_get_signed_16 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF32:
+		      diff_mask = 0x7fffffff;
 		      diff_value =
 			bfd_get_signed_32 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF8:
 		    case R_XTENSA_NDIFF8:
+		      diff_mask = 0xff;
 		      diff_value =
 			bfd_get_8 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF16:
 		    case R_XTENSA_NDIFF16:
+		      diff_mask = 0xffff;
 		      diff_value =
 			bfd_get_16 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF32:
 		    case R_XTENSA_NDIFF32:
+		      diff_mask = 0xffffffff;
 		      diff_value =
 			bfd_get_32 (abfd, &contents[old_source_offset]);
 		      break;
 		    }
 
 		  if (r_type >= R_XTENSA_NDIFF8
-		      && r_type <= R_XTENSA_NDIFF32)
-		    diff_value = -diff_value;
+		      && r_type <= R_XTENSA_NDIFF32
+		      && diff_value)
+		    diff_value |= ~diff_mask;
 
 		  new_end_offset = offset_with_removed_text_map
 		    (&target_relax_info->action_list,
@@ -9710,43 +9705,40 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  switch (r_type)
 		    {
 		    case R_XTENSA_DIFF8:
-		      diff_mask = 0x7f;
 		      bfd_put_signed_8 (abfd, diff_value,
 				 &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF16:
-		      diff_mask = 0x7fff;
 		      bfd_put_signed_16 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF32:
-		      diff_mask = 0x7fffffff;
 		      bfd_put_signed_32 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF8:
 		    case R_XTENSA_NDIFF8:
-		      diff_mask = 0xff;
 		      bfd_put_8 (abfd, diff_value,
 				 &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF16:
 		    case R_XTENSA_NDIFF16:
-		      diff_mask = 0xffff;
 		      bfd_put_16 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF32:
 		    case R_XTENSA_NDIFF32:
-		      diff_mask = 0xffffffff;
 		      bfd_put_32 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    }
 
-		  /* Check for overflow. Sign bits must be all zeroes or all ones */
-		  if ((diff_value & ~diff_mask) != 0 &&
-		      (diff_value & ~diff_mask) != (-1 & ~diff_mask))
+		  /* Check for overflow. Sign bits must be all zeroes or
+		     all ones.  When sign bits are all ones diff_value
+		     may not be zero.  */
+		  if (((diff_value & ~diff_mask) != 0
+		       && (diff_value & ~diff_mask) != ~diff_mask)
+		      || (diff_value && (bfd_vma) diff_value == ~diff_mask))
 		    {
 		      (*link_info->callbacks->reloc_dangerous)
 			(link_info, _("overflow after relaxation"),

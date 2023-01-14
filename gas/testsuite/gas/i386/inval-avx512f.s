@@ -317,3 +317,4 @@ _start:
 	vcvtneps2bf16 (%eax){1to4}, %xmm1
 	vcvtneps2bf16 (%eax){1to8}, %xmm1
 	vcvtneps2bf16 (%eax){1to16}, %xmm1
+	.p2align 4

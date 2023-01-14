@@ -267,7 +267,7 @@ csky_vector_type (struct gdbarch *gdbarch)
 			       init_vector_type (bt->builtin_int8, 16));
 
   TYPE_VECTOR (t) = 1;
-  TYPE_NAME (t) = "builtin_type_vec128i";
+  t->set_name ("builtin_type_vec128i");
 
   return t;
 }

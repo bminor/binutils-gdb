@@ -507,14 +507,14 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		    || section_is_dwz)
 		  {
 		    struct dwz_file *dwz
-		      = dwarf2_get_dwz_file (dwarf2_per_objfile);
+		      = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
 
 		    body = dwz->read_string (objfile, str_offset);
 		  }
 		else
-		  body = dwarf2_per_objfile->str.read_string (objfile,
-							      str_offset,
-							      "DW_FORM_strp");
+		  body = dwarf2_per_objfile->per_bfd->str.read_string (objfile,
+								       str_offset,
+								       "DW_FORM_strp");
 	      }
 
 	    is_define = (macinfo_type == DW_MACRO_define
@@ -644,7 +644,8 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
 	    if (macinfo_type == DW_MACRO_import_sup)
 	      {
-		struct dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+		struct dwz_file *dwz
+		  = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
 
 		dwz->macro.read (objfile);
 

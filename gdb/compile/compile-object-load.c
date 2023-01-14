@@ -452,7 +452,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
   gdb_ptr_type = check_typedef (gdb_ptr_type);
-  if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
+  if (gdb_ptr_type->code () != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_type_from_ptr = check_typedef (TYPE_TARGET_TYPE (gdb_ptr_type));
 
@@ -464,14 +464,14 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       return gdb_type;
     }
 
-  if (TYPE_CODE (gdb_type) != TYPE_CODE_PTR)
+  if (gdb_type->code () != TYPE_CODE_PTR)
     error (_("Invalid type code %d of symbol \"%s\" "
 	     "in compiled module \"%s\"."),
-	   TYPE_CODE (gdb_type_from_ptr), COMPILE_I_EXPR_VAL,
+	   gdb_type_from_ptr->code (), COMPILE_I_EXPR_VAL,
 	   objfile_name (objfile));
   
   retval = gdb_type_from_ptr;
-  switch (TYPE_CODE (gdb_type_from_ptr))
+  switch (gdb_type_from_ptr->code ())
     {
     case TYPE_CODE_ARRAY:
       gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_type_from_ptr);
@@ -481,7 +481,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
     default:
       error (_("Invalid type code %d of symbol \"%s\" "
 	       "in compiled module \"%s\"."),
-	     TYPE_CODE (gdb_type_from_ptr), COMPILE_I_EXPR_PTR_TYPE,
+	     gdb_type_from_ptr->code (), COMPILE_I_EXPR_PTR_TYPE,
 	     objfile_name (objfile));
     }
   if (!types_deeply_equal (gdb_type_from_ptr,
@@ -505,21 +505,21 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
   struct type *regsp_type, *regs_type;
 
   /* No register parameter present.  */
-  if (TYPE_NFIELDS (func_type) == 0)
+  if (func_type->num_fields () == 0)
     return NULL;
 
   regsp_type = check_typedef (TYPE_FIELD_TYPE (func_type, 0));
-  if (TYPE_CODE (regsp_type) != TYPE_CODE_PTR)
+  if (regsp_type->code () != TYPE_CODE_PTR)
     error (_("Invalid type code %d of first parameter of function \"%s\" "
 	     "in compiled module \"%s\"."),
-	   TYPE_CODE (regsp_type), GCC_FE_WRAPPER_FUNCTION,
+	   regsp_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
   regs_type = check_typedef (TYPE_TARGET_TYPE (regsp_type));
-  if (TYPE_CODE (regs_type) != TYPE_CODE_STRUCT)
+  if (regs_type->code () != TYPE_CODE_STRUCT)
     error (_("Invalid type code %d of dereferenced first parameter "
 	     "of function \"%s\" in compiled module \"%s\"."),
-	   TYPE_CODE (regs_type), GCC_FE_WRAPPER_FUNCTION,
+	   regs_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
   return regs_type;
@@ -534,7 +534,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
   struct gdbarch *gdbarch = target_gdbarch ();
   int fieldno;
 
-  for (fieldno = 0; fieldno < TYPE_NFIELDS (regs_type); fieldno++)
+  for (fieldno = 0; fieldno < regs_type->num_fields (); fieldno++)
     {
       const char *reg_name = TYPE_FIELD_NAME (regs_type, fieldno);
       ULONGEST reg_bitpos = TYPE_FIELD_BITPOS (regs_type, fieldno);
@@ -555,10 +555,10 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
 	       reg_name, pulongest (reg_bitpos), pulongest (reg_bitsize));
       reg_offset = reg_bitpos / 8;
 
-      if (TYPE_CODE (reg_type) != TYPE_CODE_INT
-	  && TYPE_CODE (reg_type) != TYPE_CODE_PTR)
+      if (reg_type->code () != TYPE_CODE_INT
+	  && reg_type->code () != TYPE_CODE_PTR)
 	error (_("Invalid register \"%s\" type code %d"), reg_name,
-	       TYPE_CODE (reg_type));
+	       reg_type->code ());
 
       regnum = compile_register_name_demangle (gdbarch, reg_name);
 
@@ -604,7 +604,7 @@ compile_object_load (const compile_file_names &file_names,
   gdb::unique_xmalloc_ptr<char> filename
     (tilde_expand (file_names.object_file ()));
 
-  gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget, -1));
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)
     error (_("\"%s\": could not open as compiled module: %s"),
           filename.get (), bfd_errmsg (bfd_get_error ()));
@@ -646,10 +646,10 @@ compile_object_load (const compile_file_names &file_names,
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
   func_type = SYMBOL_TYPE (func_sym);
-  if (TYPE_CODE (func_type) != TYPE_CODE_FUNC)
+  if (func_type->code () != TYPE_CODE_FUNC)
     error (_("Invalid type code %d of function \"%s\" in compiled "
 	     "module \"%s\"."),
-	   TYPE_CODE (func_type), GCC_FE_WRAPPER_FUNCTION,
+	   func_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
   switch (scope)
@@ -670,10 +670,10 @@ compile_object_load (const compile_file_names &file_names,
     default:
       internal_error (__FILE__, __LINE__, _("invalid scope %d"), scope);
     }
-  if (TYPE_NFIELDS (func_type) != expect_parameters)
+  if (func_type->num_fields () != expect_parameters)
     error (_("Invalid %d parameters of function \"%s\" in compiled "
 	     "module \"%s\"."),
-	   TYPE_NFIELDS (func_type), GCC_FE_WRAPPER_FUNCTION,
+	   func_type->num_fields (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
   if (!types_deeply_equal (expect_return_type, TYPE_TARGET_TYPE (func_type)))
     error (_("Invalid return type of function \"%s\" in compiled "

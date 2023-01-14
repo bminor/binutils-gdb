@@ -3037,8 +3037,7 @@ elf32_rx_relax_section (bfd *		       abfd,
   return TRUE;
 
  error_return:
-  if (free_contents != NULL)
-    free (free_contents);
+  free (free_contents);
 
   if (shndx_buf != NULL)
     {
@@ -3046,8 +3045,7 @@ elf32_rx_relax_section (bfd *		       abfd,
       free (shndx_buf);
     }
 
-  if (free_intsyms != NULL)
-    free (free_intsyms);
+  free (free_intsyms);
 
   return FALSE;
 }

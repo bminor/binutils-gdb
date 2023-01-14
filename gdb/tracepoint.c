@@ -942,7 +942,7 @@ collection_list::collect_symbol (struct symbol *sym,
 	}
       /* A struct may be a C++ class with static fields, go to general
 	 expression handling.  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
+      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT)
 	treat_as_expr = 1;
       else
 	add_memrange (gdbarch, memrange_absolute, offset, len, scope);
@@ -954,7 +954,7 @@ collection_list::collect_symbol (struct symbol *sym,
       add_local_register (gdbarch, reg, scope);
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
+      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_FLT &&
 	  len > register_size (gdbarch, reg))
 	add_local_register (gdbarch, reg + 1, scope);
       break;
@@ -4098,8 +4098,8 @@ one or more \"collect\" commands, to specify what to collect\n\
 while single-stepping.\n\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com_alias ("ws", "while-stepping", class_alias, 0);
-  add_com_alias ("stepping", "while-stepping", class_alias, 0);
+  add_com_alias ("ws", "while-stepping", class_trace, 0);
+  add_com_alias ("stepping", "while-stepping", class_trace, 0);
 
   add_com ("collect", class_trace, collect_pseudocommand, _("\
 Specify one or more data items to be collected at a tracepoint.\n\

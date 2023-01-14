@@ -131,7 +131,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	    return {};
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
-	  classname = TYPE_NAME (type);
+	  classname = type->name ();
 	  nested = name;
 	}
       else
@@ -308,7 +308,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 
   parent_type = check_typedef (parent_type);
 
-  switch (TYPE_CODE (parent_type))
+  switch (parent_type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:

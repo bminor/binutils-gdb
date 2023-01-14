@@ -61,9 +61,7 @@ static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 void
 print_symbol_bcache_statistics (void)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
@@ -78,64 +76,63 @@ print_symbol_bcache_statistics (void)
 void
 print_objfile_statistics (void)
 {
-  struct program_space *pspace;
   int i, linetables, blockvectors;
 
-  ALL_PSPACES (pspace)
-  for (objfile *objfile : pspace->objfiles ())
-    {
-      QUIT;
-      printf_filtered (_("Statistics for '%s':\n"), objfile_name (objfile));
-      if (OBJSTAT (objfile, n_stabs) > 0)
-	printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
-			 OBJSTAT (objfile, n_stabs));
-      if (objfile->per_bfd->n_minsyms > 0)
-	printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
-			 objfile->per_bfd->n_minsyms);
-      if (OBJSTAT (objfile, n_psyms) > 0)
-	printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			 OBJSTAT (objfile, n_psyms));
-      if (OBJSTAT (objfile, n_syms) > 0)
-	printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
-			 OBJSTAT (objfile, n_syms));
-      if (OBJSTAT (objfile, n_types) > 0)
-	printf_filtered (_("  Number of \"types\" defined: %d\n"),
-			 OBJSTAT (objfile, n_types));
-      if (objfile->sf)
-	objfile->sf->qf->print_stats (objfile);
-      i = linetables = 0;
-      for (compunit_symtab *cu : objfile->compunits ())
-	{
-	  for (symtab *s : compunit_filetabs (cu))
-	    {
-	      i++;
-	      if (SYMTAB_LINETABLE (s) != NULL)
-		linetables++;
-	    }
-	}
-      blockvectors = std::distance (objfile->compunits ().begin (),
-				    objfile->compunits ().end ());
-      printf_filtered (_("  Number of symbol tables: %d\n"), i);
-      printf_filtered (_("  Number of symbol tables with line tables: %d\n"),
-		       linetables);
-      printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"),
-		       blockvectors);
+  for (struct program_space *pspace : program_spaces)
+    for (objfile *objfile : pspace->objfiles ())
+      {
+	QUIT;
+	printf_filtered (_("Statistics for '%s':\n"), objfile_name (objfile));
+	if (OBJSTAT (objfile, n_stabs) > 0)
+	  printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
+			   OBJSTAT (objfile, n_stabs));
+	if (objfile->per_bfd->n_minsyms > 0)
+	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
+			   objfile->per_bfd->n_minsyms);
+	if (OBJSTAT (objfile, n_psyms) > 0)
+	  printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
+			   OBJSTAT (objfile, n_psyms));
+	if (OBJSTAT (objfile, n_syms) > 0)
+	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
+			   OBJSTAT (objfile, n_syms));
+	if (OBJSTAT (objfile, n_types) > 0)
+	  printf_filtered (_("  Number of \"types\" defined: %d\n"),
+			   OBJSTAT (objfile, n_types));
+	if (objfile->sf)
+	  objfile->sf->qf->print_stats (objfile);
+	i = linetables = 0;
+	for (compunit_symtab *cu : objfile->compunits ())
+	  {
+	    for (symtab *s : compunit_filetabs (cu))
+	      {
+		i++;
+		if (SYMTAB_LINETABLE (s) != NULL)
+		  linetables++;
+	      }
+	  }
+	blockvectors = std::distance (objfile->compunits ().begin (),
+				      objfile->compunits ().end ());
+	printf_filtered (_("  Number of symbol tables: %d\n"), i);
+	printf_filtered (_("  Number of symbol tables with line tables: %d\n"),
+			 linetables);
+	printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"),
+			 blockvectors);
 
-      if (OBJSTAT (objfile, sz_strtab) > 0)
-	printf_filtered (_("  Space used by string tables: %d\n"),
-			 OBJSTAT (objfile, sz_strtab));
-      printf_filtered (_("  Total memory used for objfile obstack: %s\n"),
-		       pulongest (obstack_memory_used (&objfile
-						       ->objfile_obstack)));
-      printf_filtered (_("  Total memory used for BFD obstack: %s\n"),
-		       pulongest (obstack_memory_used (&objfile->per_bfd
-						       ->storage_obstack)));
-      printf_filtered
-	(_("  Total memory used for psymbol cache: %d\n"),
-	 objfile->partial_symtabs->psymbol_cache.memory_used ());
-      printf_filtered (_("  Total memory used for string cache: %d\n"),
-		       objfile->per_bfd->string_cache.memory_used ());
-    }
+	if (OBJSTAT (objfile, sz_strtab) > 0)
+	  printf_filtered (_("  Space used by string tables: %d\n"),
+			   OBJSTAT (objfile, sz_strtab));
+	printf_filtered (_("  Total memory used for objfile obstack: %s\n"),
+			 pulongest (obstack_memory_used (&objfile
+							 ->objfile_obstack)));
+	printf_filtered (_("  Total memory used for BFD obstack: %s\n"),
+			 pulongest (obstack_memory_used (&objfile->per_bfd
+							 ->storage_obstack)));
+	printf_filtered
+	  (_("  Total memory used for psymbol cache: %d\n"),
+	   objfile->partial_symtabs->psymbol_cache.memory_used ());
+	printf_filtered (_("  Total memory used for string cache: %d\n"),
+			 objfile->per_bfd->string_cache.memory_used ());
+      }
 }
 
 static void
@@ -559,7 +556,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 
   if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
     {
-      if (TYPE_NAME (SYMBOL_TYPE (symbol)))
+      if (SYMBOL_TYPE (symbol)->name ())
 	{
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
 			 &type_print_raw_options);
@@ -567,9 +564,9 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       else
 	{
 	  fprintf_filtered (outfile, "%s %s = ",
-			 (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_ENUM
+			 (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_ENUM
 			  ? "enum"
-		     : (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
+		     : (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_STRUCT
 			? "struct" : "union")),
 			    symbol->linkage_name ());
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
@@ -586,7 +583,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  /* Print details of types, except for enums where it's clutter.  */
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), symbol->print_name (),
 			 outfile,
-			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
+			 SYMBOL_TYPE (symbol)->code () != TYPE_CODE_ENUM,
 			 depth,
 			 &type_print_raw_options);
 	  fprintf_filtered (outfile, "; ");
@@ -762,14 +759,12 @@ maintenance_print_msymbols (const char *args, int from_tty)
 static void
 maintenance_print_objfiles (const char *regexp, int from_tty)
 {
-  struct program_space *pspace;
-
   dont_repeat ();
 
   if (regexp)
     re_comp (regexp);
 
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
@@ -784,14 +779,12 @@ maintenance_print_objfiles (const char *regexp, int from_tty)
 static void
 maintenance_info_symtabs (const char *regexp, int from_tty)
 {
-  struct program_space *pspace;
-
   dont_repeat ();
 
   if (regexp)
     re_comp (regexp);
 
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
@@ -896,9 +889,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 static void
 maintenance_check_symtabs (const char *ignore, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
@@ -944,7 +935,6 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 static void
 maintenance_expand_symtabs (const char *args, int from_tty)
 {
-  struct program_space *pspace;
   char *regexp = NULL;
 
   /* We use buildargv here so that we handle spaces in the regexp
@@ -964,7 +954,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
   if (regexp)
     re_comp (regexp);
 
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	if (objfile->sf)
@@ -1065,14 +1055,12 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 static void
 maintenance_info_line_tables (const char *regexp, int from_tty)
 {
-  struct program_space *pspace;
-
   dont_repeat ();
 
   if (regexp != NULL)
     re_comp (regexp);
 
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	for (compunit_symtab *cust : objfile->compunits ())

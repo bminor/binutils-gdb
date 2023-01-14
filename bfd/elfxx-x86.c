@@ -575,8 +575,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
 				"in read-only section `%pA'\n"),
 			      sec->owner, h->root.root.string, sec);
 
-      if ((info->warn_shared_textrel && bfd_link_pic (info))
-	  || info->error_textrel)
+      if (bfd_link_textrel_check (info))
 	/* xgettext:c-format */
 	info->callbacks->einfo (_("%P: %pB: warning: relocation against `%s' "
 				  "in read-only section `%pA'\n"),
@@ -1117,8 +1116,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		      && (info->flags & DF_TEXTREL) == 0)
 		    {
 		      info->flags |= DF_TEXTREL;
-		      if ((info->warn_shared_textrel && bfd_link_pic (info))
-			  || info->error_textrel)
+		      if (bfd_link_textrel_check (info))
 			/* xgettext:c-format */
 			info->callbacks->einfo
 			  (_("%P: %pB: warning: relocation "
@@ -2451,8 +2449,7 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
     count = n;
 
   for (j = 0; plts[j].name != NULL; j++)
-    if (plts[j].contents != NULL)
-      free (plts[j].contents);
+    free (plts[j].contents);
 
   free (dynrelbuf);
 

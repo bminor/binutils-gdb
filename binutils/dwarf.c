@@ -98,6 +98,7 @@ int do_debug_cu_index;
 int do_wide;
 int do_debug_links;
 int do_follow_links;
+bfd_boolean do_checks;
 
 int dwarf_cutoff_level = -1;
 unsigned long dwarf_start_die;
@@ -2008,7 +2009,7 @@ read_and_print_leb128 (unsigned char *        data,
   int status;
   dwarf_vma val = read_leb128 (data, end, is_signed, bytes_read, &status);
   if (status != 0)
-    report_leb_status (status);
+    report_leb_status (status, __FILE__, __LINE__);
   else
     printf ("%s", dwarf_vmatoa (is_signed ? "d" : "u", val));
 }
@@ -3739,6 +3740,10 @@ display_formatted_table (unsigned char *                   data,
   const char * table_name = is_dir ? N_("Directory Table") : N_("File Name Table");
   
   SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+  if (do_checks && format_count > 5)
+    warn (_("Unexpectedly large number of columns in the %s (%u)\n"),
+	  table_name, format_count);
+
   format_start = data;
   for (formati = 0; formati < format_count; formati++)
     {
@@ -3752,17 +3757,18 @@ display_formatted_table (unsigned char *                   data,
     }
 
   READ_ULEB (data_count, data, end);
-  if (data == end)
-    {
-      warn (_("%s: Corrupt entry count\n"), table_name);
-      return data;
-    }
-
   if (data_count == 0)
     {
       printf (_("\n The %s is empty.\n"), table_name);
       return data;
     }
+  else if (data == end)
+    {
+      warn (_("%s: Corrupt entry count - expected %s but none found\n"),
+	    table_name, dwarf_vmatoa ("x", data_count));
+      return data;
+    }
+
   else if (format_count == 0)
     {
       warn (_("%s: format count is zero, but the table is not empty\n"),
@@ -4343,6 +4349,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip directories format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+	      if (do_checks && format_count > 1)
+		warn (_("Unexpectedly large number of columns in the directory name table (%u)\n"),
+		      format_count);
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -4357,8 +4366,11 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  break;
 		}
 
-	      directory_table = (unsigned char **)
-		xmalloc (n_directories * sizeof (unsigned char *));
+	      if (n_directories == 0)
+		directory_table = NULL;
+	      else
+		directory_table = (unsigned char **)
+		  xmalloc (n_directories * sizeof (unsigned char *));
 
 	      for (entryi = 0; entryi < n_directories; entryi++)
 		{
@@ -4411,6 +4423,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip files format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+	      if (do_checks && format_count > 5)
+		warn (_("Unexpectedly large number of columns in the file name table (%u)\n"),
+		      format_count);
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -4419,14 +4434,17 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		}
 
 	      READ_ULEB (n_files, data, end);
-	      if (data == end)
+	      if (data == end && n_files > 0)
 		{
 		  warn (_("Corrupt file name list\n"));
 		  break;
 		}
 
-	      file_table = (File_Entry *) xcalloc (1, n_files
-						      * sizeof (File_Entry));
+	      if (n_files == 0)
+		file_table = NULL;
+	      else
+		file_table = (File_Entry *) xcalloc (1, n_files
+						     * sizeof (File_Entry));
 
 	      for (entryi = 0; entryi < n_files; entryi++)
 		{
@@ -4582,7 +4600,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	  /* Print the Compilation Unit's name and a header.  */
 	  if (file_table == NULL)
-	    ;
+	    printf (_("CU: No directory table\n"));
 	  else if (directory_table == NULL)
 	    printf (_("CU: %s:\n"), file_table[0].name);
 	  else
@@ -4610,7 +4628,10 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		printf ("%s:\n", file_table[0].name);
 	    }
 
-	  printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	  if (n_files > 0)
+	    printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	  else
+	    printf (_("CU: Empty file name table\n"));
 	  saved_linfo = linfo;
 	}
 
@@ -6923,6 +6944,7 @@ display_debug_ranges (struct dwarf_section *section,
   int is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
   /* Initialize it due to a false compiler warning.  */
   unsigned char address_size = 0;
+  dwarf_vma last_offset = 0;
 
   if (bytes == 0)
     {
@@ -7077,6 +7099,15 @@ display_debug_ranges (struct dwarf_section *section,
 		(unsigned long) offset, i);
 	  continue;
 	}
+
+      /* If multiple DWARF entities reference the same range then we will
+         have multiple entries in the `range_entries' list for the same
+         offset.  Thanks to the sort above these will all be consecutive in
+         the `range_entries' list, so we can easily ignore duplicates
+         here.  */
+      if (i > 0 && last_offset == offset)
+        continue;
+      last_offset = offset;
 
       if (dwarf_check != 0 && i > 0)
 	{
@@ -7378,7 +7409,8 @@ regname_internal_riscv (unsigned int regno)
 	 document.  */
       switch (regno)
 	{
-#define DECLARE_CSR(NAME,VALUE,CLASS) case VALUE + 4096: name = #NAME; break;
+#define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
+  case VALUE + 4096: name = #NAME; break;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 

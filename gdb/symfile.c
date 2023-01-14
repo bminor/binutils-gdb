@@ -717,12 +717,11 @@ default_symfile_offsets (struct objfile *objfile,
    It assumes that object files do not have segments, and fully linked
    files have a single segment.  */
 
-struct symfile_segment_data *
+symfile_segment_data_up
 default_symfile_segments (bfd *abfd)
 {
   int num_sections, i;
   asection *sect;
-  struct symfile_segment_data *data;
   CORE_ADDR low, high;
 
   /* Relocatable files contain enough information to position each
@@ -745,13 +744,12 @@ default_symfile_segments (bfd *abfd)
   low = bfd_section_vma (sect);
   high = low + bfd_section_size (sect);
 
-  data = XCNEW (struct symfile_segment_data);
-  data->num_segments = 1;
-  data->segment_bases = XCNEW (CORE_ADDR);
-  data->segment_sizes = XCNEW (CORE_ADDR);
+  symfile_segment_data_up data (new symfile_segment_data);
 
   num_sections = bfd_count_sections (abfd);
-  data->segment_info = XCNEWVEC (int, num_sections);
+
+  /* All elements are initialized to 0 (map to no segment).  */
+  data->segment_info.resize (num_sections);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
@@ -769,8 +767,7 @@ default_symfile_segments (bfd *abfd)
       data->segment_info[i] = 1;
     }
 
-  data->segment_bases[0] = low;
-  data->segment_sizes[0] = high - low;
+  data->segments.emplace_back (low, high - low);
 
   return data;
 }
@@ -1278,7 +1275,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
       gdb_flush (gdb_stdout);
     }
 
-  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget, -1));
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget));
 
   if (abfd == NULL)
     {
@@ -2042,7 +2039,7 @@ generic_load (const char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename.get (), gnutarget, -1));
+  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename.get (), gnutarget));
   if (loadfile_bfd == NULL)
     perror_with_name (filename.get ());
 
@@ -2453,7 +2450,7 @@ reread_symbols (void)
 	 a `shared library' on AIX is also an archive), then you should
 	 stat on the archive name, not member name.  */
       if (objfile->obfd->my_archive)
-	res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
+	res = stat (bfd_get_filename (objfile->obfd->my_archive), &new_statbuf);
       else
 	res = stat (objfile_name (objfile), &new_statbuf);
       if (res != 0)
@@ -2527,7 +2524,7 @@ reread_symbols (void)
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
-	    gdb_bfd_ref_ptr temp (gdb_bfd_open (obfd_filename, gnutarget, -1));
+	    gdb_bfd_ref_ptr temp (gdb_bfd_open (obfd_filename, gnutarget));
 	    objfile->obfd = temp.release ();
 	    if (objfile->obfd == NULL)
 	      error (_("Can't open %s to read symbols."), obfd_filename);
@@ -2546,6 +2543,11 @@ reread_symbols (void)
 	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile->objfile_obstack, 0);
 	  objfile->sections = NULL;
+	  objfile->section_offsets.clear ();
+	  objfile->sect_index_bss = -1;
+	  objfile->sect_index_data = -1;
+	  objfile->sect_index_rodata = -1;
+	  objfile->sect_index_text = -1;
 	  objfile->compunit_symtabs = NULL;
 	  objfile->template_symbols = NULL;
 	  objfile->static_links.reset (nullptr);
@@ -2599,6 +2601,9 @@ reread_symbols (void)
 	     again.  */
 
 	  objfiles_changed ();
+
+	  /* Recompute section offsets and section indices.  */
+	  objfile->sf->sym_offsets (objfile, {});
 
 	  read_symbols (objfile, 0);
 
@@ -3399,8 +3404,7 @@ enum ovly_index
 static void
 simple_free_overlay_table (void)
 {
-  if (cache_ovly_table)
-    xfree (cache_ovly_table);
+  xfree (cache_ovly_table);
   cache_novlys = 0;
   cache_ovly_table = NULL;
   cache_ovly_table_base = 0;
@@ -3621,7 +3625,7 @@ symfile_relocate_debug_section (struct objfile *objfile,
   return (*objfile->sf->sym_relocate) (objfile, sectp, buf);
 }
 
-struct symfile_segment_data *
+symfile_segment_data_up
 get_symfile_segment_data (bfd *abfd)
 {
   const struct sym_fns *sf = find_sym_fns (abfd);
@@ -3630,15 +3634,6 @@ get_symfile_segment_data (bfd *abfd)
     return NULL;
 
   return sf->sym_segments (abfd);
-}
-
-void
-free_symfile_segment_data (struct symfile_segment_data *data)
-{
-  xfree (data->segment_bases);
-  xfree (data->segment_sizes);
-  xfree (data->segment_info);
-  xfree (data);
 }
 
 /* Given:
@@ -3673,13 +3668,13 @@ symfile_map_offsets_to_segments (bfd *abfd,
   /* If we do not have segment mappings for the object file, we
      can not relocate it by segments.  */
   gdb_assert (data != NULL);
-  gdb_assert (data->num_segments > 0);
+  gdb_assert (data->segments.size () > 0);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
       int which = data->segment_info[i];
 
-      gdb_assert (0 <= which && which <= data->num_segments);
+      gdb_assert (0 <= which && which <= data->segments.size ());
 
       /* Don't bother computing offsets for sections that aren't
          loaded as part of any segment.  */
@@ -3691,7 +3686,7 @@ symfile_map_offsets_to_segments (bfd *abfd,
       if (which > num_segment_bases)
         which = num_segment_bases;
 
-      offsets[i] = segment_bases[which - 1] - data->segment_bases[which - 1];
+      offsets[i] = segment_bases[which - 1] - data->segments[which - 1].base;
     }
 
   return 1;
@@ -3703,17 +3698,14 @@ symfile_find_segment_sections (struct objfile *objfile)
   bfd *abfd = objfile->obfd;
   int i;
   asection *sect;
-  struct symfile_segment_data *data;
 
-  data = get_symfile_segment_data (objfile->obfd);
+  symfile_segment_data_up data
+    = get_symfile_segment_data (objfile->obfd);
   if (data == NULL)
     return;
 
-  if (data->num_segments != 1 && data->num_segments != 2)
-    {
-      free_symfile_segment_data (data);
-      return;
-    }
+  if (data->segments.size () != 1 && data->segments.size () != 2)
+    return;
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
@@ -3736,8 +3728,6 @@ symfile_find_segment_sections (struct objfile *objfile)
 	    objfile->sect_index_bss = sect->index;
 	}
     }
-
-  free_symfile_segment_data (data);
 }
 
 /* Listen for free_objfile events.  */
@@ -3906,8 +3896,8 @@ on its own."), &cmdlist);
 			_("Commands for debugging overlays."), &overlaylist,
 			"overlay ", 0, &cmdlist);
 
-  add_com_alias ("ovly", "overlay", class_alias, 1);
-  add_com_alias ("ov", "overlay", class_alias, 1);
+  add_com_alias ("ovly", "overlay", class_support, 1);
+  add_com_alias ("ov", "overlay", class_support, 1);
 
   add_cmd ("map-overlay", class_support, map_overlay_command,
 	   _("Assert that an overlay section is mapped."), &overlaylist);

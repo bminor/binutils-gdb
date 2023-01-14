@@ -330,8 +330,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
  end:
   free (upper_name);
   free (lower_name);
-  if (buf)
-    free (buf);
+  free (buf);
   return lower;
 }
 EOF
@@ -848,7 +847,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_NEW_VERS_PATTERN-NULL},
   ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL},
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_PRINT_SYMBOL-NULL}
 };
 EOF
 # 

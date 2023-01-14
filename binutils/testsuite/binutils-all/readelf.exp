@@ -506,4 +506,15 @@ if {![binutils_assemble $srcdir/$subdir/dwo.s tmpdir/dwo.o]} then {
     readelf_test {--debug-dump=links} $tempfile readelf.k2  {}
 }
 
+if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
+    unresolved "readelf --enable-checks (failed to assemble zero-sec.s)"
+} else {
+    if ![is_remote host] {
+	set tempfile tmpdir/zero-sec.o
+    } else {
+	set tempfile [remote_download host tmpdir/zero-sec.o]
+    }
+
+    readelf_test {--enable-checks --sections --wide} $tempfile zero-sec.r {}
+}
 

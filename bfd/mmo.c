@@ -2083,8 +2083,7 @@ mmo_scan (bfd *abfd)
 
   /* Free whatever resources we took.  */
   for (i = 0; i < sizeof (file_names) / sizeof (file_names[0]); i++)
-    if (file_names[i])
-      free (file_names[i]);
+    free (file_names[i]);
   return ! error;
 }
 

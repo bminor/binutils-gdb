@@ -1230,15 +1230,13 @@ ft32_elf_relax_section
 
     }
 
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
+  free (free_relocs);
 
   return TRUE;
 }

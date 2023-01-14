@@ -81,7 +81,7 @@ lm32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return ((regnum >= SIM_LM32_R0_REGNUM) && (regnum <= SIM_LM32_RA_REGNUM))
       || (regnum == SIM_LM32_PC_REGNUM);
   else if (group == system_reggroup)
-    return ((regnum >= SIM_LM32_EA_REGNUM) && (regnum <= SIM_LM32_BA_REGNUM))
+    return ((regnum >= SIM_LM32_BA_REGNUM) && (regnum <= SIM_LM32_EA_REGNUM))
       || ((regnum >= SIM_LM32_EID_REGNUM) && (regnum <= SIM_LM32_IP_REGNUM));
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
@@ -258,7 +258,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       ULONGEST val;
 
       /* Promote small integer types to int.  */
-      switch (TYPE_CODE (arg_type))
+      switch (arg_type->code ())
 	{
 	case TYPE_CODE_INT:
 	case TYPE_CODE_BOOL:
@@ -309,15 +309,15 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
   ULONGEST l;
   CORE_ADDR return_buffer;
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 4)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION
+      && type->code () != TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 4)
     {
       /* Return value is returned in a single register.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
       store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, l);
     }
-  else if ((TYPE_CODE (type) == TYPE_CODE_INT) && (TYPE_LENGTH (type) == 8))
+  else if ((type->code () == TYPE_CODE_INT) && (TYPE_LENGTH (type) == 8))
     {
       /* 64-bit values are returned in a register pair.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
@@ -368,7 +368,7 @@ lm32_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  enum type_code code = TYPE_CODE (valtype);
+  enum type_code code = valtype->code ();
 
   if (code == TYPE_CODE_STRUCT
       || code == TYPE_CODE_UNION

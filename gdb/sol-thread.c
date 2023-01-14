@@ -969,38 +969,6 @@ ps_pdmodel (struct ps_prochandle *ph, int *data_model)
 
   return PS_OK;
 }
-
-#if (defined(__i386__) || defined(__x86_64__)) && defined (sun)
-
-/* Reads the local descriptor table of a LWP.
-
-   This function is necessary on x86-solaris only.  Without it, the loading
-   of libthread_db would fail because of ps_lgetLDT being undefined.  */
-
-ps_err_e
-ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid, struct ssd *pldt)	/* ARI: editCase function */
-{
-  /* NOTE: only used on Solaris, therefore OK to refer to procfs.c.  */
-  struct ssd *ret;
-
-  /* FIXME: can't I get the process ID from the prochandle or
-     something?  */
-
-  if (inferior_ptid.pid () <= 0 || lwpid <= 0)
-    return PS_BADLID;
-
-  ret = procfs_find_LDT_entry (ptid_t (inferior_ptid.pid (),
-			       lwpid, 0));
-  if (ret)
-    {
-      memcpy (pldt, ret, sizeof (struct ssd));
-      return PS_OK;
-    }
-  else
-    /* LDT not found.  */
-    return PS_ERR;
-}
-#endif
 
 
 /* Convert PTID to printable form.  */

@@ -50,7 +50,7 @@ proc return_1 { type } {
     gdb_test "print ${type}_resultval == testval.${type}_testval" ".* = 1" \
 	    "${type} value returned successfully"
     gdb_test "print ${type}_resultval != ${type}_returnval" ".* = 1" \
-	    "validate result value not equal to program return value"
+	    "validate result value not equal to program return value, ${type}"
 }
 
 proc return_void { } {

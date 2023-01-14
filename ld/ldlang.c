@@ -155,8 +155,6 @@ static int lang_sizing_iteration = 0;
 #define outside_symbol_address(q) \
   ((q)->value + outside_section_address (q->section))
 
-#define SECTION_NAME_MAP_LENGTH (16)
-
 /* CTF sections smaller than this are not compressed: compression of
    dictionaries this small doesn't gain much, and this lets consumers mmap the
    sections directly out of the ELF file and use them with no decompression
@@ -234,7 +232,7 @@ input_statement_is_archive_path (const char *file_spec, char *sep,
 
       if (sep != file_spec)
 	{
-	  const char *aname = f->the_bfd->my_archive->filename;
+	  const char *aname = bfd_get_filename (f->the_bfd->my_archive);
 	  *sep = 0;
 	  match = name_match (file_spec, aname) == 0;
 	  *sep = link_info.path_separator;
@@ -296,7 +294,7 @@ walk_wild_file_in_exclude_list (struct name_list *exclude_list,
       else if (file->the_bfd != NULL
 	       && file->the_bfd->my_archive != NULL
 	       && name_match (list_tmp->name,
-			      file->the_bfd->my_archive->filename) == 0)
+			      bfd_get_filename (file->the_bfd->my_archive)) == 0)
 	return TRUE;
     }
 
@@ -2778,7 +2776,7 @@ wild_sort (lang_wild_statement_type *wild,
 	    }
 	  else
 	    {
-	      ln = ls->section->owner->filename;
+	      ln = bfd_get_filename (ls->section->owner);
 	      la = FALSE;
 	    }
 
@@ -2793,7 +2791,7 @@ wild_sort (lang_wild_statement_type *wild,
 	      if (fa)
 		fn = file->filename;
 	      if (la)
-		ln = ls->section->owner->filename;
+		ln = bfd_get_filename (ls->section->owner);
 
 	      i = filename_cmp (fn, ln);
 	      if (i > 0)
@@ -2988,7 +2986,7 @@ check_excluded_libs (bfd *abfd)
   while (lib)
     {
       int len = strlen (lib->name);
-      const char *filename = lbasename (abfd->filename);
+      const char *filename = lbasename (bfd_get_filename (abfd));
 
       if (strcmp (lib->name, "ALL") == 0)
 	{
@@ -4619,7 +4617,7 @@ print_input_statement (lang_input_statement_type *statm)
 /* Print all symbols defined in a particular section.  This is called
    via bfd_link_hash_traverse, or by print_all_symbols.  */
 
-static bfd_boolean
+bfd_boolean
 print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
 {
   asection *sec = (asection *) ptr;
@@ -4683,7 +4681,7 @@ print_all_symbols (asection *sec)
 
   /* Print the symbols.  */
   for (i = 0; i < ud->map_symbol_def_count; i++)
-    print_one_symbol (entries[i], sec);
+    ldemul_print_symbol (entries[i], sec);
 
   obstack_free (&map_obstack, entries);
 }
@@ -4747,7 +4745,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
       && i->output_section->owner == link_info.output_bfd)
     {
       if (link_info.reduce_memory_overheads)
-	bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
+	bfd_link_hash_traverse (link_info.hash, ldemul_print_symbol, i);
       else
 	print_all_symbols (i);
 
@@ -6938,11 +6936,12 @@ lang_check (void)
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (link_info.output_bfd));
 	}
-      else if (bfd_count_sections (input_bfd))
-	{
-	  /* If the input bfd has no contents, it shouldn't set the
-	     private data of the output bfd.  */
 
+      /* If the input bfd has no contents, it shouldn't set the
+	 private data of the output bfd.  */
+      else if ((input_bfd->flags & DYNAMIC) != 0
+	       || bfd_count_sections (input_bfd) != 0)
+	{
 	  bfd_error_handler_type pfn = NULL;
 
 	  /* If we aren't supposed to warn about mismatched input

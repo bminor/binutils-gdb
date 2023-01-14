@@ -484,7 +484,7 @@ void
 md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 		 fragS * fragP)
 {
-  char *buf = fragP->fr_literal + fragP->fr_fix;
+  char *buf = &fragP->fr_literal[0] + fragP->fr_fix;
   expressionS exp;
   fixS *fixP;
 

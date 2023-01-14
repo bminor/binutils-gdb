@@ -1295,15 +1295,15 @@ show_system_call_allowed (const char *args, int from_tty)
 }
 
 void
-initialize_remote_fileio (struct cmd_list_element *remote_set_cmdlist,
-			  struct cmd_list_element *remote_show_cmdlist)
+initialize_remote_fileio (struct cmd_list_element **remote_set_cmdlist,
+			  struct cmd_list_element **remote_show_cmdlist)
 {
   add_cmd ("system-call-allowed", no_class,
 	   set_system_call_allowed,
 	   _("Set if the host system(3) call is allowed for the target."),
-	   &remote_set_cmdlist);
+	   remote_set_cmdlist);
   add_cmd ("system-call-allowed", no_class,
 	   show_system_call_allowed,
 	   _("Show if the host system(3) call is allowed for the target."),
-	   &remote_show_cmdlist);
+	   remote_show_cmdlist);
 }

@@ -51,8 +51,8 @@ go_print_type (struct type *type, const char *varstring,
     type = check_typedef (type);
 
   /* Print the type of "abc" as "string", not char[4].  */
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR)
+  if (type->code () == TYPE_CODE_ARRAY
+      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR)
     {
       fputs_filtered ("string", stream);
       return;

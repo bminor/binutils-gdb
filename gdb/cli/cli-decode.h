@@ -249,9 +249,6 @@ struct cmd_list_element
     int *suppress_notification = nullptr;
   };
 
-extern void help_cmd_list (struct cmd_list_element *, enum command_class,
-			   const char *, int, struct ui_file *);
-
 /* Functions that implement commands about CLI commands.  */
 
 extern void help_cmd (const char *, struct ui_file *);

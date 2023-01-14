@@ -120,13 +120,22 @@ _bfd_real_fopen (const char *filename, const char *modes)
 
   if (filelen > MAX_PATH - 1)
     {
-      FILE *file;
-      char* fullpath = (char *) malloc (filelen + 8);
+      FILE * file;
+      char * fullpath = (char *) malloc (filelen + 8);
+      int    i;
 
       /* Add a Microsoft recommended prefix that
 	 will allow the extra-long path to work.  */
       strcpy (fullpath, "\\\\?\\");
       strcat (fullpath, filename);
+
+      /* Convert any UNIX style path separators into the DOS form.  */
+      for (i = 0; fullpath[i]; i++)
+        {
+          if (IS_UNIX_DIR_SEPARATOR (fullpath[i]))
+	    fullpath[i] = '\\';
+        }
+
       file = close_on_exec (fopen (fullpath, modes));
       free (fullpath);
       return file;
@@ -486,8 +495,9 @@ bfd_get_file_size (bfd *abfd)
       struct areltdata *adata = (struct areltdata *) abfd->arelt_data;
       archive_size = adata->parsed_size;
       /* If the archive is compressed we can't compare against file size.  */
-      if (memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
-		  "Z\012", 2) == 0)
+      if (adata->arch_header != NULL
+	  && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
+		     "Z\012", 2) == 0)
 	return archive_size;
       abfd = abfd->my_archive;
     }
@@ -653,8 +663,7 @@ memory_bclose (struct bfd *abfd)
 {
   struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
 
-  if (bim->buffer != NULL)
-    free (bim->buffer);
+  free (bim->buffer);
   free (bim);
   abfd->iostream = NULL;
 

@@ -40,9 +40,10 @@ if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable [list debug f90 
 clean_restart $testfile
 
 gdb_load_shlib $libfile
+load_lib fortran.exp
 
-if ![runto MAIN__] then {
-    perror "couldn't run to breakpoint MAIN__"
+if ![fortran_runto_main] then {
+    perror "couldn't run to main"
     continue
 }
 

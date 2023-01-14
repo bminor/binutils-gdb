@@ -86,6 +86,10 @@ if OMP_SUPPORT
 TLS_TEST_C_CFLAGS = -fopenmp
 endif
 
+# Since GCC 10 defaults to -fno-common, add -fcommon to common tests to
+# force common behavior.
+COMMON_TEST_C_CFLAGS = -fcommon
+
 # 'make clean' is good about deleting some intermediate files (such as
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
@@ -737,18 +741,24 @@ check_PROGRAMS += common_test_1
 common_test_1_SOURCES = common_test_1.c
 common_test_1_DEPENDENCIES = gcctestdir/ld
 common_test_1_LDADD =
+common_test_1.o: common_test_1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
 check_PROGRAMS += common_test_2
 common_test_2_SOURCES = common_test_1.c
 common_test_2_DEPENDENCIES = common_test_2.so common_test_3.so gcctestdir/ld
 common_test_2_LDFLAGS = -Wl,-R,.
 common_test_2_LDADD = common_test_2.so common_test_3.so
+common_test_2.o: common_test_2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_2_pic.o: common_test_2.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_2.so: common_test_2_pic.o common_test_3.so gcctestdir/ld
 	$(LINK) -shared common_test_2_pic.o common_test_3.so
+common_test_3.o: common_test_3.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_3_pic.o: common_test_3.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_3.so: common_test_3_pic.o ver_test_2.script gcctestdir/ld
 	$(LINK) -shared common_test_3_pic.o -Wl,--version-script,$(srcdir)/ver_test_2.script
 
@@ -1032,11 +1042,11 @@ if TLS_GNU2_DIALECT
 
 check_PROGRAMS += tls_shared_gnu2_gd_to_ie_test
 
-tls_test_gnu2.o: tls_test.cc
+tls_test_gnu2.o: tls_test.cc gcctestdir/as
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-tls_test_file2_gnu2.o: tls_test_file2.cc
+tls_test_file2_gnu2.o: tls_test_file2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-tls_test_c_gnu2.o: tls_test_c.c
+tls_test_c_gnu2.o: tls_test_c.c gcctestdir/as
 	$(COMPILE) -c -fpic -mtls-dialect=gnu2 $(TLS_TEST_C_CFLAGS) -o $@ $<
 tls_test_gnu2_shared2.so: tls_test_file2_gnu2.o gcctestdir/ld
 	$(CXXLINK) -shared tls_test_file2_gnu2.o
@@ -1200,6 +1210,17 @@ x86_64_indirect_jump_to_direct1.o: x86_64_indirect_jump_to_direct1.s
 x86_64_indirect_jump_to_direct1: x86_64_indirect_jump_to_direct1.o gcctestdir/ld
 	gcctestdir/ld -o $@ $<
 x86_64_indirect_jump_to_direct1.stdout: x86_64_indirect_jump_to_direct1
+	$(TEST_OBJDUMP) -dw $< > $@
+
+check_SCRIPTS += x86_64_gd_to_le.sh
+check_DATA += x86_64_gd_to_le.stdout
+MOSTLYCLEANFILES += x86_64_gd_to_le
+
+x86_64_gd_to_le.o: x86_64_gd_to_le.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_gd_to_le: x86_64_gd_to_le.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_gd_to_le.stdout: x86_64_gd_to_le
 	$(TEST_OBJDUMP) -dw $< > $@
 
 check_SCRIPTS += x86_64_overflow_pc32.sh
@@ -2461,6 +2482,11 @@ plugin_test.so: plugin_test.o gcctestdir/ld
 plugin_test.o: plugin_test.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
+plugin_common_test_1.o: plugin_common_test_1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+plugin_common_test_2.o: plugin_common_test_2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+
 two_file_test_main.o.syms: two_file_test_main.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 two_file_test_1.o.syms: two_file_test_1.o
@@ -3245,6 +3271,10 @@ incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	@sleep 1
 	cp -f common_test_1_v2.o common_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie common_test_1_tmp.o
+common_test_1_v1.o: common_test_1_v1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+common_test_1_v2.o: common_test_1_v2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
 check_PROGRAMS += incremental_comdat_test_1
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld

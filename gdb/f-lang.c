@@ -268,7 +268,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       type = value_type (arg1);
-      switch (TYPE_CODE (type))
+      switch (type->code ())
 	{
 	case TYPE_CODE_FLT:
 	  {
@@ -292,9 +292,9 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       type = value_type (arg1);
-      if (TYPE_CODE (type) != TYPE_CODE (value_type (arg2)))
+      if (type->code () != value_type (arg2)->code ())
 	error (_("non-matching types for parameters to MOD ()"));
-      switch (TYPE_CODE (type))
+      switch (type->code ())
 	{
 	case TYPE_CODE_FLT:
 	  {
@@ -325,7 +325,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
 	type = value_type (arg1);
-	if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	if (type->code () != TYPE_CODE_FLT)
 	  error (_("argument to CEILING must be of type float"));
 	double val
 	  = target_float_to_host_double (value_contents (arg1),
@@ -340,7 +340,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
 	type = value_type (arg1);
-	if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	if (type->code () != TYPE_CODE_FLT)
 	  error (_("argument to FLOOR must be of type float"));
 	double val
 	  = target_float_to_host_double (value_contents (arg1),
@@ -356,10 +356,10 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
 	type = value_type (arg1);
-	if (TYPE_CODE (type) != TYPE_CODE (value_type (arg2)))
+	if (type->code () != value_type (arg2)->code ())
 	  error (_("non-matching types for parameters to MODULO ()"));
         /* MODULO(A, P) = A - FLOOR (A / P) * P */
-	switch (TYPE_CODE (type))
+	switch (type->code ())
 	  {
 	  case TYPE_CODE_INT:
 	    {
@@ -399,7 +399,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = value_type (arg1);
 
-      switch (TYPE_CODE (type))
+      switch (type->code ())
         {
           case TYPE_CODE_STRUCT:
           case TYPE_CODE_UNION:
@@ -412,7 +412,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
         return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 				   TYPE_LENGTH (type));
       return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-				 TYPE_LENGTH (TYPE_TARGET_TYPE(type)));
+				 TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
     }
 
   /* Should be unreachable.  */
@@ -425,9 +425,9 @@ static bool
 f_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  return (TYPE_CODE (type) == TYPE_CODE_STRING
-	  || (TYPE_CODE (type) == TYPE_CODE_ARRAY
-	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR));
+  return (type->code () == TYPE_CODE_STRING
+	  || (type->code () == TYPE_CODE_ARRAY
+	      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
 }
 
 /* Special expression lengths for Fortran.  */
@@ -745,7 +745,7 @@ build_fortran_types (struct gdbarch *gdbarch)
   builtin_f_type->builtin_complex_s16
     = init_complex_type ("complex*16", builtin_f_type->builtin_real_s8);
 
-  if (TYPE_CODE (builtin_f_type->builtin_real_s16) == TYPE_CODE_ERROR)
+  if (builtin_f_type->builtin_real_s16->code () == TYPE_CODE_ERROR)
     builtin_f_type->builtin_complex_s32
       = arch_type (gdbarch, TYPE_CODE_ERROR, 256, "complex*32");
   else
@@ -802,7 +802,7 @@ fortran_argument_convert (struct value *value, bool is_artificial)
 struct type *
 fortran_preserve_arg_pointer (struct value *arg, struct type *type)
 {
-  if (TYPE_CODE (value_type (arg)) == TYPE_CODE_PTR)
+  if (value_type (arg)->code () == TYPE_CODE_PTR)
     return value_type (arg);
   return type;
 }

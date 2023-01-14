@@ -2526,10 +2526,8 @@ ecoff_directive_def (int ignore ATTRIBUTE_UNUSED)
     as_warn (_("empty symbol name in .def; ignored"));
   else
     {
-      if (coff_sym_name != (char *) NULL)
-	free (coff_sym_name);
-      if (coff_tag != (char *) NULL)
-	free (coff_tag);
+      free (coff_sym_name);
+      free (coff_tag);
 
       coff_sym_name = xstrdup (name);
       coff_type = type_info_init;

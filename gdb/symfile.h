@@ -80,25 +80,31 @@ typedef std::vector<other_sections> section_addr_info;
    each BFD section belongs to.  */
 struct symfile_segment_data
 {
-  /* How many segments are present in this file.  If there are
+  struct segment
+  {
+    segment (CORE_ADDR base, CORE_ADDR size)
+      : base (base), size (size)
+    {}
+
+    /* The original base address the segment.  */
+    CORE_ADDR base;
+
+    /* The memory size of the segment.  */
+    CORE_ADDR size;
+  };
+
+  /* The segments present in this file.  If there are
      two, the text segment is the first one and the data segment
      is the second one.  */
-  int num_segments;
+  std::vector<segment> segments;
 
-  /* If NUM_SEGMENTS is greater than zero, the original base address
-     of each segment.  */
-  CORE_ADDR *segment_bases;
-
-  /* If NUM_SEGMENTS is greater than zero, the memory size of each
-     segment.  */
-  CORE_ADDR *segment_sizes;
-
-  /* If NUM_SEGMENTS is greater than zero, this is an array of entries
-     recording which segment contains each BFD section.
-     SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
+  /* This is an array of entries recording which segment contains each BFD
+     section.  SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
      S, or zero if it is not in any segment.  */
-  int *segment_info;
+  std::vector<int> segment_info;
 };
+
+using symfile_segment_data_up = std::unique_ptr<symfile_segment_data>;
 
 /* Callback for quick_symbol_functions->map_symbol_filenames.  */
 
@@ -360,7 +366,7 @@ struct sym_fns
      the segments of ABFD.  Each segment is a unit of the file
      which may be relocated independently.  */
 
-  struct symfile_segment_data *(*sym_segments) (bfd *abfd);
+  symfile_segment_data_up (*sym_segments) (bfd *abfd);
 
   /* This function should read the linetable from the objfile when
      the line table cannot be read while processing the debugging
@@ -401,7 +407,7 @@ extern void default_symfile_offsets (struct objfile *objfile,
 /* The default version of sym_fns.sym_segments for readers that don't
    do anything special.  */
 
-extern struct symfile_segment_data *default_symfile_segments (bfd *abfd);
+extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
 
 /* The default version of sym_fns.sym_relocate for readers that don't
    do anything special.  */
@@ -530,8 +536,7 @@ extern int symfile_map_offsets_to_segments (bfd *,
 					    const struct symfile_segment_data *,
 					    section_offsets &,
 					    int, const CORE_ADDR *);
-struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);
-void free_symfile_segment_data (struct symfile_segment_data *data);
+symfile_segment_data_up get_symfile_segment_data (bfd *abfd);
 
 extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 

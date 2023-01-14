@@ -668,7 +668,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 
   switch (fixP->fx_r_type)
     {
-    case R_XGATE_PCREL_9:
+    case BFD_RELOC_XGATE_PCREL_9:
       if (value < -512 || value > 511)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value %ld too large for 9-bit PC-relative branch."),
@@ -685,7 +685,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
       value &= mask;
       number_to_chars_bigendian (where, (opcode | value), 2);
       break;
-    case R_XGATE_PCREL_10:
+    case BFD_RELOC_XGATE_PCREL_10:
       if (value < -1024 || value > 1023)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value %ld too large for 10-bit PC-relative branch."),
@@ -1336,10 +1336,10 @@ xgate_parse_operand (struct xgate_opcode *opcode,
 	{
 	  if (*op_constraint == '9')
 	    fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
-			 R_XGATE_PCREL_9);
+			 BFD_RELOC_XGATE_PCREL_9);
 	  else if (*op_constraint == 'a')
 	    fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
-			 R_XGATE_PCREL_10);
+			 BFD_RELOC_XGATE_PCREL_10);
 	}
       else
 	as_fatal (_("Operand `%x' not recognized in fixup8."),

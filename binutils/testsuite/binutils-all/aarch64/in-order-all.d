@@ -10,7 +10,7 @@ Disassembly of section \.func1:
 
 .+ <v1>:
 [^:]+:	8b010000 	add	x0, x0, x1
-[^:]+:	00000000 	\.inst	0x00000000 ; undefined
+[^:]+:	00000000 	udf	#0
 
 Disassembly of section \.func2:
 
@@ -25,12 +25,12 @@ Disassembly of section \.func3:
 [^:]+:	8b010000 	add	x0, x0, x1
 [^:]+:	8b010000 	add	x0, x0, x1
 [^:]+:	8b010000 	add	x0, x0, x1
-[^:]+:	00000000 	\.inst	0x00000000 ; undefined
+[^:]+:	00000000 	udf	#0
 
 Disassembly of section \.rodata:
 
 .+ <\.rodata>:
-[^:]+:	00000000 	\.inst	0x00000000 ; undefined
+[^:]+:	00000000 	udf	#0
 
 Disassembly of section .global:
 

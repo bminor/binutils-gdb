@@ -1,3 +1,34 @@
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Output Styling): Don't mention completion styling.
+	(Editing): Don't mention readline completion styling.
+
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Output Styling): Mention completion styling.
+	(Editing): Mention readline completion styling.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Attach): Update exec-file-mismatch description to
+	mention build IDs.
+	(Separate Debug Files): Add "build id" anchor.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Help): Document the help and apropos changes.
+	(Aliases): Document new meaning of -a abbreviation flag.
+
+2020-05-05  Kamil Rytarowski  <n54@gmx.com>
+
+	* gdb.texinfo (info proc, info proc cmdline, info proc cwd)
+	(info proc exe, info proc mappings, info proc stat): Mention
+	NetBSD support.
+
+2020-04-28  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Commands In Python): Document gdb.COMMAND_TUI.
+
 2020-04-27  Tom Tromey  <tromey@adacore.com>
 
 	* python.texi (Types In Python): Mention missing fields.  Add

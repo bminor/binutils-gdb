@@ -55,26 +55,37 @@ proc check_set { t l r new add } {
 	}
     }
 
-    set supported 1
+    set supported_l 1
     set test "${prefix}; print old l, expecting ${l}"
     gdb_test_multiple "print l" "$test"  {
-	-re " = <optimized out>\r\n$gdb_prompt $" {
+	-re -wrap " = <optimized out>" {
 	    unsupported $test
-	    set supported 0
+	    set supported_l 0
 	}
-	-re " = ${l}\r\n$gdb_prompt $" {
+	-re -wrap " = ${l}" {
 	    pass $test
 	}
     }
-    if { $supported } {
-	gdb_test "print r" " = ${r}" \
-	    "${prefix}; print old r, expecting ${r}"
+
+    set test "${prefix}; print old r, expecting ${r}"
+    gdb_test_multiple "print r" "$test"  {
+	-re -wrap " = <optimized out>" {
+	    unsupported $test
+	}
+	-re -wrap " = ${r}" {
+	    pass $test
+	}
+    }
+
+    if { $supported_l } {
 	gdb_test_no_output "set variable l = 4" \
 	    "${prefix}; setting l to 4"
 	gdb_test "print l" " = ${new}" \
 	    "${prefix}; print new l, expecting ${new}"
-	gdb_test "next" "return l \\+ r;" \
-	    "${prefix}; next over add call"
+    }
+    gdb_test "next" "return l \\+ r;" \
+	"${prefix}; next over add call"
+    if { $supported_l } {
 	gdb_test "print l" " = ${add}" \
 	    "${prefix}; print incremented l, expecting ${add}"
     }
@@ -101,20 +112,29 @@ proc up_set { t l r new } {
     gdb_test "up" "l = add_${t} .l, r.;" \
 	"${prefix}; up"
 
-    set supported 1
+    set supported_l 1
     set test "${prefix}; print old l, expecting ${l}"
     gdb_test_multiple "print l" "$test"  {
-	-re " = <optimized out>\r\n$gdb_prompt $" {
+	-re -wrap " = <optimized out>" {
 	    unsupported $test
-	    set supported 0
+	    set supported_l 0
 	}
-	-re " = ${l}\r\n$gdb_prompt $" {
+	-re -wrap " = ${l}" {
 	    pass $test
 	}
     }
-    if { $supported } {
-	gdb_test "print r" " = ${r}" \
-	    "${prefix}; print old r, expecting ${r}"
+
+    set test "${prefix}; print old r, expecting ${r}"
+    gdb_test_multiple "print r" "$test"  {
+	-re -wrap " = <optimized out>" {
+	    unsupported $test
+	}
+	-re -wrap " = ${r}" {
+	    pass $test
+	}
+    }
+
+    if { $supported_l } {
 	gdb_test_no_output "set variable l = 4" \
 	    "${prefix}; set l to 4"
 	gdb_test "print l" " = ${new}" \

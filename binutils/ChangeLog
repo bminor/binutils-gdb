@@ -1,3 +1,152 @@
+2020-05-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/ar.exp (many_files): New test.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* addr2line.c: Replace "if (x) free (x)" with "free (x)" throughout.
+	* dlltool.c: Likewise.
+	* elfcomm.c: Likewise.
+	* rddbg.c: Likewise.
+	* readelf.c: Likewise.
+	* stabs.c: Likewise.
+	* windmc.c: Likewise.
+	* windres.c: Likewise.
+	* wrstabs.c: Likewise.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Bounds check mipsxlat array
+	access.
+
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* dwarf.c: Updated since DECLARE_CSR is changed.
+
+2020-05-19  H.J. Lu  <hjl.tools@gmail.com>
+
+	PR binutils/25809
+	* readelf.c (process_program_headers): Warn if the PT_DYNAMIC
+	segment doesn't match the .dynamic section and checks are
+	enabled.
+	(struct filedata): Add dynamic_symtab_section and
+	dynamic_strtab_section fields.
+	(process_section_headers): Set dynamic_symtab_section to the
+	.dynsym section.  Set dynamic_strtab_section to the .dynstr
+	section.
+	(process_dynamic_section): Warn if the .dynsym section doesn't
+	match DT_SYMTAB and DT_SYMENT or the .dynstr section doesn't
+	DT_STRTAB and DT_STRSZ.  But only if checks are enabled.
+
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ar.c (map_over_members, get_pos_bfd, delete_members, move_members),
+	(replace_members): Use bfd_get_filename rather than accessing
+	bfd->filename directly.
+	* arsup.c (map_over_list, ar_delete, ar_replace, ar_extract): Likewise.
+	* binemul.c (do_ar_emul_append): Likewise.
+	* coffgrok.c (coff_grok): Likewise.
+
+2020-05-18  Stafford Horne  <shorne@gmail.com>
+
+	* MAINTAINERS (OR1K): Add myself as maintainer.
+
+2020-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/binutils.texi: Mention 'entry address' in the set-start and
+	adjust-start options descriptions.
+
+2020-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (do_checks): New global variable.
+	(display_formatted_table): Warn about an unexpected number of
+	columns in the table, if checks are enabled.  Do not complain
+	about the lack of data following the number of entries in the
+	table if the table is empty.
+	(display_debug_lines_decoded): Only warn about an unexpected
+	number of columns in a table if checks are enabled.
+	* dwarf.h (do_checks): Add a prototype.
+	* elfcomm.c (error): Remove weak attribute.
+	(warn): Likewise.
+	* readelf.c (do_checks): Delete.
+	(warn): Delete.
+	(process_section_headers): Only warn about empty sections if
+	checks are enabled.
+
+2020-05-04  Fangrui Song   <maskray@google.com>
+
+	* objcopy.c (copy_object): Allow empty section.
+	* testsuite/binutils-all/update-section.exp: Add test.
+
+2020-05-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 25917
+	* dwarf.c (display_debug_lines_decoded): Warn if encountering a
+	supicious number of entries for DWARF-5 format directory and file
+	name tables.  Do not display file name table header if the table
+	is empty.  Do not allocate space for empty tables.
+
+2020-05-04  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_nds32_specific): Check size of .nds32_e_flags
+	section.  Don't assume endian of host matches nds32 target.  Free
+	buffer.
+
+2020-05-01  Alan Modra  <amodra@gmail.com>
+	    Haim Shimonovich  <Haim.Shimonovich@ceva-dsp.com>
+
+	* objdump.c (disassemble_bytes): Don't scan for zeros when
+	disassembling zeros.  Translate "resuming at file offset" message.
+	Formatting.  Replace some signed variables with unsigned.
+
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/binutils-all/aarch64/in-order-all.d: Update to use new
+	disassembly.
+	* testsuite/binutils-all/aarch64/out-of-order-all.d: Likewise.
+
+2020-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/lib/binutils-common.exp (check_pie_support): New
+	proc.
+
+2020-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf.c (display_debug_ranges): Ignore duplicate entries in
+	range_entries for the same offset.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (warn): New function - like elfcomm.c version but only
+	produces output if warnings are enabled.
+	(struct options): Add --lint and --enable-checks.
+	(usage): Add entry for --lint.
+	(parse_args): Handle -L.  If checks are enabled but no dumps have
+	been selected then enable all dumps.
+	(process_section_headers): Replace long if-then-else sequence with
+	a switch.  Add warning messages for empty SHT_REL, SHT_RELA and
+	SHT_PROGBITS sections.
+	(process_file): Do not complain if the file is an archive and lint
+	mode has been enabled.
+	* elfcomm.c (error): Make the function weak.
+	(warn): Likewise.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+	* dwarf.h (report_leb_status): Add file name and line number
+	parameters.  Include them in the diagnostic output.
+	(READ_ULEB): Pass file and line number to report_leb_status.
+	(READ_SLEB): Likewise.
+	* dwarf.c (read_and_print_leb128): Pass file and line number to
+	report_leb_status.
+	* testsuite/binutils-all/readelf.exp: Add test of new feature.
+	* testsuite/binutils-all/zero-sec.s: New test source file.
+	* testsuite/binutils-all/zero-sec.r: Expected output from new
+	test.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2020-04-26  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_num_dynamic_syms): Check DT_MIPS_XHASH was

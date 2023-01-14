@@ -1434,12 +1434,13 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
  	  if (psymtab_language == language_cplus)
  	    {
 	      std::string name (namestring, p - namestring);
-	      std::string new_name = cp_canonicalize_string (name.c_str ());
-	      if (!new_name.empty ())
+	      gdb::unique_xmalloc_ptr<char> new_name
+		= cp_canonicalize_string (name.c_str ());
+	      if (new_name != nullptr)
 		{
-		  sym_len = new_name.length ();
+		  sym_len = strlen (new_name.get ());
 		  sym_name = obstack_strdup (&objfile->objfile_obstack,
-					     new_name);
+					     new_name.get ());
 		}
 	    }
 

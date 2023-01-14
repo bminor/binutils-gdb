@@ -595,7 +595,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   struct fn_field *method = &f[signature_id];
   const char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
   const char *physname = TYPE_FN_FIELD_PHYSNAME (f, signature_id);
-  const char *newname = TYPE_NAME (type);
+  const char *newname = type->name ();
 
   /* Does the form of physname indicate that it is the full mangled name
      of a constructor (not just the args)?  */
@@ -1276,9 +1276,7 @@ get_symbol_cache (struct program_space *pspace)
 static void
 set_symbol_cache_size (unsigned int new_size)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache = symbol_cache_key.get (pspace);
 
@@ -1526,9 +1524,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 static void
 maintenance_print_symbol_cache (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache;
 
@@ -1552,9 +1548,7 @@ maintenance_print_symbol_cache (const char *args, int from_tty)
 static void
 maintenance_flush_symbol_cache (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       symbol_cache_flush (pspace);
     }
@@ -1597,9 +1591,7 @@ symbol_cache_stats (struct symbol_cache *cache)
 static void
 maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache;
 
@@ -1838,9 +1830,9 @@ demangle_for_lookup (const char *name, enum language lang,
 
       /* If we were given a non-mangled name, canonicalize it
 	 according to the language (so far only for C++).  */
-      std::string canon = cp_canonicalize_string (name);
-      if (!canon.empty ())
-	return storage.swap_string (canon);
+      gdb::unique_xmalloc_ptr<char> canon = cp_canonicalize_string (name);
+      if (canon != nullptr)
+	return storage.set_malloc_ptr (std::move (canon));
     }
   else if (lang == language_d)
     {
@@ -1925,7 +1917,7 @@ lookup_language_this (const struct language_defn *lang,
 
   if (symbol_lookup_debug > 1)
     {
-      struct objfile *objfile = lookup_objfile_from_block (block);
+      struct objfile *objfile = block_objfile (block);
 
       fprintf_unfiltered (gdb_stdlog,
 			  "lookup_language_this (%s, %s (objfile %s))",
@@ -1974,14 +1966,14 @@ check_field (struct type *type, const char *name,
   /* The type may be a stub.  */
   type = check_typedef (type);
 
-  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
+  for (i = type->num_fields () - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
 	  is_a_field_of_this->type = type;
-	  is_a_field_of_this->field = &TYPE_FIELD (type, i);
+	  is_a_field_of_this->field = &type->field (i);
 	  return 1;
 	}
     }
@@ -2020,7 +2012,8 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 
   if (symbol_lookup_debug)
     {
-      struct objfile *objfile = lookup_objfile_from_block (block);
+      struct objfile *objfile = (block == nullptr
+				 ? nullptr : block_objfile (block));
 
       fprintf_unfiltered (gdb_stdlog,
 			  "lookup_symbol_aux (%s, %s (objfile %s), %s, %s)\n",
@@ -2070,11 +2063,11 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
-	  if (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+	  if (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
 	    t = TYPE_TARGET_TYPE (t);
 
-	  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-	      && TYPE_CODE (t) != TYPE_CODE_UNION)
+	  if (t->code () != TYPE_CODE_STRUCT
+	      && t->code () != TYPE_CODE_UNION)
 	    error (_("Internal error: `%s' is not an aggregate"),
 		   langdef->la_name_of_this);
 
@@ -2165,32 +2158,6 @@ lookup_local_symbol (const char *name,
 
 /* See symtab.h.  */
 
-struct objfile *
-lookup_objfile_from_block (const struct block *block)
-{
-  if (block == NULL)
-    return NULL;
-
-  block = block_global_block (block);
-  /* Look through all blockvectors.  */
-  for (objfile *obj : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *cust : obj->compunits ())
-	if (block == BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
-					GLOBAL_BLOCK))
-	  {
-	    if (obj->separate_debug_objfile_backlink)
-	      obj = obj->separate_debug_objfile_backlink;
-
-	    return obj;
-	  }
-    }
-
-  return NULL;
-}
-
-/* See symtab.h.  */
-
 struct symbol *
 lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 			const struct block *block,
@@ -2200,7 +2167,8 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 
   if (symbol_lookup_debug > 1)
     {
-      struct objfile *objfile = lookup_objfile_from_block (block);
+      struct objfile *objfile = (block == nullptr
+				 ? nullptr : block_objfile (block));
 
       fprintf_unfiltered (gdb_stdlog,
 			  "lookup_symbol_in_block (%s, %s (objfile %s), %s)",
@@ -2490,7 +2458,8 @@ lookup_symbol_in_static_block (const char *name,
 
   if (symbol_lookup_debug)
     {
-      struct objfile *objfile = lookup_objfile_from_block (static_block);
+      struct objfile *objfile = (block == nullptr
+				 ? nullptr : block_objfile (block));
 
       fprintf_unfiltered (gdb_stdlog,
 			  "lookup_symbol_in_static_block (%s, %s (objfile %s),"
@@ -2712,7 +2681,14 @@ lookup_global_symbol (const char *name,
 	return { sym, global_block };
     }
 
-  struct objfile *objfile = lookup_objfile_from_block (block);
+  struct objfile *objfile = nullptr;
+  if (block != nullptr)
+    {
+      objfile = block_objfile (block);
+      if (objfile->separate_debug_objfile_backlink != nullptr)
+	objfile = objfile->separate_debug_objfile_backlink;
+    }
+
   block_symbol bs
     = lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
   if (better_symbol (sym, bs.symbol, domain) == sym)
@@ -4660,7 +4636,7 @@ global_symbol_searcher::add_matching_symbols
 			      members.  We only want to skip enums
 			      here.  */
 			   && !(SYMBOL_CLASS (sym) == LOC_CONST
-				&& (TYPE_CODE (SYMBOL_TYPE (sym))
+				&& (SYMBOL_TYPE (sym)->code ()
 				    == TYPE_CODE_ENUM))
 			   && (!treg.has_value ()
 			       || treg_matches_sym_type_name (*treg, sym)))
@@ -4866,7 +4842,7 @@ symbol_to_info_string (struct symbol *sym, int block,
 	 For the struct printing case below, things are worse, we force
 	 printing of the ";" in this function, which is going to be wrong
 	 for languages that don't require a ";" between statements.  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
+      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_TYPEDEF)
 	typedef_print (SYMBOL_TYPE (sym), sym, &tmp_stream);
       else
 	type_print (SYMBOL_TYPE (sym), "", &tmp_stream, -1);
@@ -5284,7 +5260,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
 
 /*  See symtab.h.  */
 
-void
+bool
 completion_list_add_name (completion_tracker &tracker,
 			  language symbol_language,
 			  const char *symname,
@@ -5296,7 +5272,7 @@ completion_list_add_name (completion_tracker &tracker,
 
   /* Clip symbols that cannot match.  */
   if (!compare_symbol_name (symname, symbol_language, lookup_name, match_res))
-    return;
+    return false;
 
   /* Refresh SYMNAME from the match string.  It's potentially
      different depending on language.  (E.g., on Ada, the match may be
@@ -5320,6 +5296,8 @@ completion_list_add_name (completion_tracker &tracker,
     tracker.add_completion (std::move (completion),
 			    &match_res.match_for_lcd, text, word);
   }
+
+  return true;
 }
 
 /* completion_list_add_name wrapper for struct symbol.  */
@@ -5330,9 +5308,10 @@ completion_list_add_symbol (completion_tracker &tracker,
 			    const lookup_name_info &lookup_name,
 			    const char *text, const char *word)
 {
-  completion_list_add_name (tracker, sym->language (),
-			    sym->natural_name (),
-			    lookup_name, text, word);
+  if (!completion_list_add_name (tracker, sym->language (),
+				 sym->natural_name (),
+				 lookup_name, text, word))
+    return;
 
   /* C++ function symbols include the parameters within both the msymbol
      name and the symbol name.  The problem is that the msymbol name will
@@ -5349,10 +5328,10 @@ completion_list_add_symbol (completion_tracker &tracker,
       /* The call to canonicalize returns the empty string if the input
 	 string is already in canonical form, thanks to this we don't
 	 remove the symbol we just added above.  */
-      std::string str
+      gdb::unique_xmalloc_ptr<char> str
 	= cp_canonicalize_string_no_typedefs (sym->natural_name ());
-      if (!str.empty ())
-	tracker.remove_completion (str.c_str ());
+      if (str != nullptr)
+	tracker.remove_completion (str.get ());
     }
 }
 
@@ -5492,11 +5471,11 @@ completion_list_add_fields (completion_tracker &tracker,
   if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     {
       struct type *t = SYMBOL_TYPE (sym);
-      enum type_code c = TYPE_CODE (t);
+      enum type_code c = t->code ();
       int j;
 
       if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
-	for (j = TYPE_N_BASECLASSES (t); j < TYPE_NFIELDS (t); j++)
+	for (j = TYPE_N_BASECLASSES (t); j < t->num_fields (); j++)
 	  if (TYPE_FIELD_NAME (t, j))
 	    completion_list_add_name (tracker, sym->language (),
 				      TYPE_FIELD_NAME (t, j),
@@ -5509,7 +5488,7 @@ completion_list_add_fields (completion_tracker &tracker,
 bool
 symbol_is_function_or_method (symbol *sym)
 {
-  switch (TYPE_CODE (SYMBOL_TYPE (sym)))
+  switch (SYMBOL_TYPE (sym)->code ())
     {
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
@@ -5609,7 +5588,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
+		  && SYMBOL_TYPE (sym)->code () == code))
 	    completion_list_add_symbol (tracker, sym,
 					lookup_name,
 					text, word);
@@ -5760,7 +5739,7 @@ default_collect_symbol_completion_matches_break_on
 					    sym_text, word);
 	      }
 	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
+		     && SYMBOL_TYPE (sym)->code () == code)
 	      completion_list_add_symbol (tracker, sym, lookup_name,
 					  sym_text, word);
 	  }
@@ -6362,42 +6341,6 @@ initialize_ordinary_address_classes (void)
 }
 
 
-
-/* Initialize the symbol SYM, and mark it as being owned by an objfile.  */
-
-void
-initialize_objfile_symbol (struct symbol *sym)
-{
-  SYMBOL_OBJFILE_OWNED (sym) = 1;
-  SYMBOL_SECTION (sym) = -1;
-}
-
-/* Allocate and initialize a new 'struct symbol' on OBJFILE's
-   obstack.  */
-
-struct symbol *
-allocate_symbol (struct objfile *objfile)
-{
-  struct symbol *result = new (&objfile->objfile_obstack) symbol ();
-
-  initialize_objfile_symbol (result);
-
-  return result;
-}
-
-/* Allocate and initialize a new 'struct template_symbol' on OBJFILE's
-   obstack.  */
-
-struct template_symbol *
-allocate_template_symbol (struct objfile *objfile)
-{
-  struct template_symbol *result;
-
-  result = new (&objfile->objfile_obstack) template_symbol ();
-  initialize_objfile_symbol (result);
-
-  return result;
-}
 
 /* See symtab.h.  */
 

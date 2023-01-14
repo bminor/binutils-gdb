@@ -443,8 +443,7 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
     }
 
  alloc_failure:
-  if (array)
-    free (array);
+  free (array);
 
   /* Assign positions to the strings we want to keep.  */
   sec_size = 1;

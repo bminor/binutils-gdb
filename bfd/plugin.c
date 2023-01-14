@@ -197,7 +197,7 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
   while (iobfd->my_archive
 	 && !bfd_is_thin_archive (iobfd->my_archive))
     iobfd = iobfd->my_archive;
-  file->name = iobfd->filename;
+  file->name = bfd_get_filename (iobfd);
 
   if (!iobfd->iostream && !bfd_open_file (iobfd))
     return 0;
@@ -273,7 +273,8 @@ try_load_plugin (const char *pname,
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
-      _bfd_error_handler ("%s\n", dlerror ());
+      _bfd_error_handler ("Failed to load plugin '%s', reason: %s\n",
+			  pname, dlerror ());
       return 0;
     }
 

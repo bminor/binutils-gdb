@@ -273,6 +273,18 @@ enum report_method
   RM_DIAGNOSE,
 };
 
+/* How to handle DT_TEXTREL.  */
+
+enum textrel_check_method
+{
+  textrel_check_none,
+  textrel_check_warning,
+  textrel_check_error
+};
+
+#define bfd_link_textrel_check(info) \
+  (info->textrel_check != textrel_check_none)
+
 typedef enum {with_flags, without_flags} flag_type;
 
 /* A section flag list.  */
@@ -410,11 +422,8 @@ struct bfd_link_info
      should be created.  1 for DWARF2 tables, 2 for compact tables.  */
   unsigned int eh_frame_hdr_type: 2;
 
-  /* TRUE if we should warn when adding a DT_TEXTREL to a shared object.  */
-  unsigned int warn_shared_textrel: 1;
-
-  /* TRUE if we should error when adding a DT_TEXTREL.  */
-  unsigned int error_textrel: 1;
+  /* What to do with DT_TEXTREL in output.  */
+  ENUM_BITFIELD (textrel_check_method) textrel_check: 2;
 
   /* TRUE if .hash section should be created.  */
   unsigned int emit_hash: 1;

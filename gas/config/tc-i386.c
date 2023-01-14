@@ -4591,13 +4591,10 @@ insert_lfence_before (void)
       return;
     }
 
-  /* Output or/not/shl and lfence before ret/lret/iret.  */
+  /* Output or/not/shl and lfence before near ret.  */
   if (lfence_before_ret != lfence_before_ret_none
       && (i.tm.base_opcode == 0xc2
-	  || i.tm.base_opcode == 0xc3
-	  || i.tm.base_opcode == 0xca
-	  || i.tm.base_opcode == 0xcb
-	  || i.tm.base_opcode == 0xcf))
+	  || i.tm.base_opcode == 0xc3))
     {
       if (last_insn.kind != last_insn_other
 	  && last_insn.seg == now_seg)
@@ -4608,17 +4605,10 @@ insert_lfence_before (void)
 	  return;
 	}
 
-      /* lret or iret.  */
-      bfd_boolean lret = (i.tm.base_opcode | 0x5) == 0xcf;
-      bfd_boolean has_rexw = i.prefix[REX_PREFIX] & REX_W;
-      char prefix = 0x0;
-      /* Default operand size for far return is 32 bits,
-	 64 bits for near return.  */
       /* Near ret ingore operand size override under CPU64.  */
-      if ((!lret && flag_code == CODE_64BIT) || has_rexw)
-	prefix = 0x48;
-      else if (i.prefix[DATA_PREFIX])
-	prefix = 0x66;
+      char prefix = flag_code == CODE_64BIT
+		    ? 0x48
+		    : i.prefix[DATA_PREFIX] ? 0x66 : 0x0;
 
       if (lfence_before_ret == lfence_before_ret_not)
 	{

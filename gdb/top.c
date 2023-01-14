@@ -174,7 +174,7 @@ static const char *previous_repeat_arguments;
    whatever) can issue its own commands and also send along commands
    from the user, and have the user not notice that the user interface
    is issuing commands too.  */
-int server_command;
+bool server_command;
 
 /* Timeout limit for response from target.  */
 
@@ -1782,12 +1782,11 @@ quit_force (int *exit_arg, int from_tty)
     {
       if (write_history_p && history_filename)
 	{
-	  struct ui *ui;
 	  int save = 0;
 
 	  /* History is currently shared between all UIs.  If there's
 	     any UI with a terminal, save history.  */
-	  ALL_UIS (ui)
+	  for (ui *ui : all_uis ())
 	    {
 	      if (input_interactive_p (ui))
 		{

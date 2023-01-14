@@ -1,3 +1,514 @@
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/align-branch-9.d: Updated for PECOFF.
+	* testsuite/gas/i386/inval-avx512f.s: Add .p2align for PECOFF.
+	* testsuite/gas/i386/inval-avx512f.l: Updated.
+
+2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-z13.d: Add regexp checks for vector
+	load/store instruction variants with alignment hints.
+	* testsuite/gas/s390/zarch-z13.s: Emit new vector load/store
+	instruction variants with alignment hints.
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* config/tc-xgate.c (md_apply_fix): Check BFD_RELOC_XGATE_PCREL_X
+	instead of R_XGATE_PCREL_X.
+	(xgate_parse_operand): Replace R_XGATE_PCREL_X with
+	BFD_RELOC_XGATE_PCREL_X.
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* config/tc-visium.c (md_convert_frag): Replace fragP->fr_literal
+	with &fragP->fr_literal[0].
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* config/tc-vax.c (md_estimate_size_before_relax): Replace
+	fragP->fr_literal with &fragP->fr_literal[0].
+	(md_convert_frag): Likewise.
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* config/tc-v850.c (md_convert_frag): Replace fragP->fr_literal
+	with &fragP->fr_literal[0].
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* config/tc-crx.c (getreg_image): Change argument type to int.
+	(md_convert_frag): Replace fragP->fr_literal with
+	&fragP->fr_literal[0].
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
+	* onfig/tc-score.c (s3_do_macro_bcmp): Replace overlapping
+	sprintf with memmove.
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-mcore.c (md_convert_frag): Replace fragP->fr_literal
+	with &fragP->fr_literal[0].
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26041
+	* config/tc-cr16.c (md_assemble): Use memmove to concatenate
+	2 overlapping strings.
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-cr16.c (md_convert_frag): Replace fragP->fr_literal
+	with &fragP->fr_literal[0].
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-csky.c (md_convert_frag): Replace fragp->fr_literal
+	with &fragp->fr_literal[0].
+	* config/tc-microblaze.c (md_apply_fix): Likewise.
+	* config/tc-sh.c (md_convert_frag): Likewise.
+
+2020-05-24  Jim Wilson  <jimw@sifive.com>
+
+	PR 26025
+	* config/tc-riscv.c (riscv_pre_output_hook): Change s type from const
+	asection to segT.  New locals seg and subseg.  Call subseg_set before
+	fix_new_exp.  Call subseg_set after loop to restore original values.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* atof-generic.c: Replace "if (x) free (x)" with "free (x)"
+	throughout.
+	* config/obj-elf.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* ecoff.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+	* testsuite/gas/all/test-gen.c: Likewise.
+
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.s: Updated.
+	* config/tc-riscv.c (default_arch_with_ext, default_isa_spec):
+	Static variables which are used to set the ISA extensions. You can
+	use -march (or ELF build attributes) and -misa-spec to set them,
+	respectively.
+	(ext_version_hash): The hash table used to handle the extensions
+	with versions.
+	(init_ext_version_hash): Initialize the ext_version_hash according
+	to riscv_ext_version_table.
+	(riscv_get_default_ext_version): The callback function of
+	riscv_parse_subset_t.  According to the choosed ISA spec,
+	get the default version for the specific extension.
+	(riscv_set_arch): Set the callback function.
+	(enum options, struct option md_longopts): Add new option -misa-spec.
+	(md_parse_option): Do not call riscv_set_arch for -march.  We will
+	call it later in riscv_after_parse_args.  Call riscv_get_isa_spec_class
+	to set default_isa_spec class.
+	(riscv_after_parse_args): Call init_ext_version_hash to initialize the
+	ext_version_hash, and then call riscv_set_arch to set the architecture
+	with versions according to default_arch_with_ext.
+	* testsuite/gas/riscv/attribute-02.d: Set 0p0 as default version for
+	x extensions.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: New testcase.  For i-ext, we
+	already set it's version to 2p1 by march, so no need to use the default
+	2p2 version.  For m-ext, we do not set the version by -march and ELF arch
+	attribute, so set the default 2p0 to it.  For zicsr, it is not defined in
+	ISA spec 2p2, so set 0p0 to it.
+	* testsuite/gas/riscv/attribute-10.d: New testcase.  The version of
+	zicsr is 2p0 according to ISA spec 20191213.
+	* config/tc-riscv.c (DEFAULT_RISCV_ARCH_WITH_EXT)
+	(DEFAULT_RISCV_ISA_SPEC): Default configure option settings.
+	You can set them by configure options --with-arch and
+	--with-isa-spec, respectively.
+	(riscv_set_default_isa_spec): New function used to set the
+	default ISA spec.
+	(md_parse_option): Call riscv_set_default_isa_spec rather than
+	call riscv_get_isa_spec_class directly.
+	(riscv_after_parse_args): If the -isa-spec is not set, then we
+	set the default ISA spec according to DEFAULT_RISCV_ISA_SPEC by
+	calling riscv_set_default_isa_spec.
+	* testsuite/gas/riscv/attribute-01.d: Add -misa-spec=2.2, since
+	the --with-isa-spec may be set to different ISA spec.
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* configure.ac: Add configure options, --with-arch and
+	--with-isa-spec.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/tc-riscv.c (default_priv_spec): Static variable which is
+	used to check if the CSR is valid for the chosen privilege spec. You
+	can use -mpriv-spec to set it.
+	(enum reg_class): We now get the CSR address from csr_extra_hash rather
+	than reg_names_hash.  Therefore, move RCLASS_CSR behind RCLASS_MAX.
+	(riscv_init_csr_hashes): Only need to initialize one hash table
+	csr_extra_hash.
+	(riscv_csr_class_check): Change the return type to void.  Don't check
+	the ISA dependency if -mcsr-check isn't set.
+	(riscv_csr_version_check): New function.  Check and find the CSR address
+	from csr_extra_hash, according to default_priv_spec.  Report warning
+	for the invalid CSR if -mcsr-check is set.
+	(reg_csr_lookup_internal): Updated.
+	(reg_lookup_internal): Likewise.
+	(md_begin): Updated since DECLARE_CSR and DECLARE_CSR_ALIAS are changed.
+	(enum options, struct option md_longopts): Add new GAS option -mpriv-spec.
+	(md_parse_option): Call riscv_set_default_priv_version to set
+	default_priv_spec.
+	(riscv_after_parse_args): If -mpriv-spec isn't set, then set the default
+	privilege spec to the newest one.
+	(enum riscv_csr_class, struct riscv_csr_extra): Move them to
+	include/opcode/riscv.h.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: This test case just want
+	to check the ISA dependency for CSR, so fix the spec version by adding
+	-mpriv-spec=1.11.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l: Likewise.  There are some
+	version warnings for the test case.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.d: New test case.
+	Check whether the CSR is valid when privilege version 1.9 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: New test case.
+	Check whether the CSR is valid when privilege version 1.9.1 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.d: New test case.
+	Check whether the CSR is valid when privilege version 1.10 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.d: New test case.
+	Check whether the CSR is valid when privilege version 1.11 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
+	* config/tc-riscv.c (DEFAULT_RISCV_ISA_SPEC): Default configure option
+	setting.  You can set it by configure option --with-priv-spec.
+	(riscv_set_default_priv_spec): New function used to set the default
+	privilege spec.
+	(md_parse_option): Call riscv_set_default_priv_spec rather than
+	call riscv_get_priv_spec_class directly.
+	(riscv_after_parse_args): If -mpriv-spec isn't set, then we set the
+	default privilege spec according to DEFAULT_RISCV_PRIV_SPEC by
+	calling riscv_set_default_priv_spec.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Add -mpriv-spec=1.11, since
+	the --with-priv-spec may be set to different privilege spec.
+	* testsuite/gas/riscv/priv-reg.d: Likewise.
+	* configure.ac: Add configure option --with-priv-spec.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/tc-riscv.c (explicit_attr): Rename explicit_arch_attr to
+	explicit_attr.  Set it to TRUE if any ELF attribute is found.
+	(riscv_set_default_priv_spec): Try to set the default_priv_spec if
+	the priv attributes are set.
+	(md_assemble): Set the default_priv_spec according to the priv
+	attributes when we start to assemble instruction.
+	(riscv_write_out_attrs): Rename riscv_write_out_arch_attr to
+	riscv_write_out_attrs.  Update the arch and priv attributes.  If we
+	don't set the corresponding ELF attributes, then try to output the
+	default ones.
+	(riscv_set_public_attributes): If any ELF attribute or -march-attr
+	options is set (explicit_attr is TRUE), then call riscv_write_out_attrs
+	to update the arch and priv attributes.
+	(s_riscv_attribute): Make sure all arch and priv attributes are set
+	before any instruction.
+	* testsuite/gas/riscv/attribute-01.d: Update the priv attributes if any
+	ELF attribute or -march-attr is set.  If the priv attributes are not
+	set, then try to update them by the default setting (-mpriv-spec or
+	--with-priv-spec).
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* testsuite/gas/riscv/attribute-08.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: Likewise.
+	* testsuite/gas/riscv/attribute-10.d: Likewise.
+	* testsuite/gas/riscv/attribute-unknown.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.  Also, the priv spec
+	set by priv attributes must be supported.
+	* testsuite/gas/riscv/attribute-05.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.d: Likewise.  Updated
+	priv attributes according to the -mpriv-spec option.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.d: Likewise.
+	* testsuite/gas/riscv/priv-reg.d: Removed.
+	* testsuite/gas/riscv/priv-reg-version-1p9.d: New test case.  Dump the
+	CSR according to the priv spec 1.9.
+	* testsuite/gas/riscv/priv-reg-version-1p9p1.d: New test case.  Dump the
+	CSR according to the priv spec 1.9.1.
+	* testsuite/gas/riscv/priv-reg-version-1p10.d: New test case.  Dump the
+	CSR according to the priv spec 1.10.
+	* testsuite/gas/riscv/priv-reg-version-1p11.d: New test case.  Dump the
+	CSR according to the priv spec 1.11.
+	* config/tc-riscv.c (md_show_usage): Add descriptions about
+	the new GAS options.
+	* doc/c-riscv.texi: Likewise.
+
+2020-05-19  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power9.s <dcbf, dcbfl, dcbflp>: Add tests.
+	* testsuite/gas/ppc/power9.d: Likewise.
+	* testsuite/gas/ppc/power10.s <dcbf, dcbfps, dcbstps, hwsync, lwsync,
+	pause_short, phwsync, plwsync, ptesync, stcisync, stncisync, stsync,
+	sync, wait, waitrsv>: Add tests.
+	* testsuite/gas/ppc/power10.d: Likewise.
+
+2020-05-19  Alexander Fedotov  <alfedotov@gmail.com>
+
+	PR 25992
+	* config/tc-arm.c : Add arm_ext_v8r feature.
+	(it_fsm_post_encode): Check arm_ext_v8r feature.
+	(get_aeabi_cpu_arch_from_fset): Check arm_ext_v8r feature.
+
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* write.c (write_contents): Use bfd_get_filename rather than
+	accessing bfd->filename directly.  Use bfd_section_name rather
+	than accessing section->name directly.
+
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (local_symbol_make): Init all of lsy_flags.
+
+2020-05-18  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (resolve_symbol_value): Invoke LOCAL_SYMBOL_CHECK
+	before looking at add_symbol->sy_flags.
+
+2020-05-18  Hongtao Liu  <hongtao.liu@intel.com>
+
+	* config/tc-i386.c: Not handle lret/iret.
+	* testsuite/gas/i386/lfence-ret-a.d: Adjust testcase.
+	* testsuite/gas/i386/lfence-ret-b.d: Ditto.
+	* testsuite/gas/i386/lfence-ret-c.d: Ditto.
+	* testsuite/gas/i386/lfence-ret-d.d: Ditto.
+	* testsuite/gas/i386/lfence-ret.s: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-a.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-b.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-c.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-d.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-e.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret.s: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret.e: Deleted.
+
+2020-05-15  Alan Modra  <amodra@gmail.com>
+	    Alex Coplan  <alex.coplan@arm.com>
+
+	* symbols.c (struct local_symbol): Update comment.
+	(resolve_symbol_value): For resolved symbols equated to other
+	symbols, verify that the referenced symbol is not a local_symbol
+	before accessing sy_value.  Don't leave symbol loops during
+	finalize_syms resolution.
+	* testsuite/gas/all/assign-bad-recursive.d: New test.
+	* testsuite/gas/all/assign-bad-recursive.l: Error output for test.
+	* testsuite/gas/all/assign-bad-recursive.s: Assembly for test.
+	* testsuite/gas/all/gas.exp: Run it.
+
+2020-05-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/scalarquad.d,
+	* testsuite/gas/ppc/scalarquad.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/rightmost.d,
+	* testsuite/gas/ppc/rightmost.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/xvtlsbb.d,
+	* testsuite/gas/ppc/xvtlsbb.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/stringop.d,
+	* testsuite/gas/ppc/stringop.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/set_bool.d,
+	* testsuite/gas/ppc/set_bool.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/bitmanip.d,
+	* testsuite/gas/ppc/bitmanip.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/genpcv.d,
+	* testsuite/gas/ppc/genpcv.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/maskmanip.d,
+	* testsuite/gas/ppc/maskmanip.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner  <bergner@linux.ibm.com>
+
+	* config/tc-ppc.c (pre_defined_registers): Add accumulators.
+	(md_assemble): Check acc specified in correct operand.
+	* testsuite/gas/ppc/outerprod.d,
+	* testsuite/gas/ppc/outerprod.s,
+	* testsuite/gas/ppc/vsx4.d,
+	* testsuite/gas/ppc/vsx4.s: New tests.
+	* testsuite/gas/ppc/ppc.exp: Run them.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/simd_perm.d,
+	* testsuite/gas/ppc/simd_perm.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/int128.d,
+	* testsuite/gas/ppc/int128.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/vsx_32byte.d,
+	* testsuite/gas/ppc/vsx_32byte.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/vec_mul.s,
+	* testsuite/gas/ppc/vec_mul.d: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/byte_rev.d,
+	* testsuite/gas/ppc/byte_rev.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power10.d: Add paste. tests.
+	* testsuite/gas/ppc/power10.s: Likewise.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power10.s: New test.
+	* testsuite/gas/ppc/power10.d: Likewise.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Update for PPC_OPCODE_POWER10
+	renaming.
+	* testsuite/gas/ppc/prefix-align.d: Use -mpower10/-Mpower10 in
+	place of -mfuture/-Mfuture.
+	* testsuite/gas/ppc/prefix-pcrel.d: Likewise.
+	* testsuite/gas/ppc/prefix-reloc.d: Likewise.
+
+2020-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2020-05-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 25927
+	* doc/as.texi (Preprocessing): Replace cross reference to not
+	existant document with a URL to the equivalent page in the GCC
+	manual.
+
+2020-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (out_dir_and_file_list): Add comments describing the
+	construction of a DWARF-5 directory name table.
+	* testsuite/gas/elf/pr25917.d: Update expected output.
+
+2020-05-05  Gunther Nikl <gnikl@justmail.de>
+
+	* config/tc-rx.c (elf_flags): Initialize for non-linux targets.
+	(md_parse_option): Remove initialization of elf_flags.
+
+2020-05-04  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR gas/25863
+	* config/tc-arm.c (do_mve_vmull): Fix scalar and NEON parsing of vmul.
+	* testsuite/gas/arm/mve-scalar-vmult-it.d: New test.
+	* testsuite/gas/arm/mve-scalar-vmult-it.s: New test.
+
+2020-05-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 25917
+	* dwarf2dbg.c (out_dir_and_file_list): Check for the directory
+	table's existence before looking at its entries.
+	Also do not emit a default directory entry if there are no
+	directories in use.
+
+	* testsuite/gas/elf/pr25917.s: New test source file.
+	* testsuite/gas/elf/pr25917.d: New test driver.
+	* testsuite/gas/elf/elf.exp (run_elf_list_test): Run the new test.
+
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.c (fix_insn): Implement for
+	AARCH64_OPND_UNDEFINED.
+	(parse_operands): Implement for AARCH64_OPND_UNDEFINED.
+	* testsuite/gas/aarch64/udf.s: New.
+	* testsuite/gas/aarch64/udf.d: New.
+	* testsuite/gas/aarch64/udf-invalid.s: New.
+	* testsuite/gas/aarch64/udf-invalid.l: New.
+	* testsuite/gas/aarch64/udf-invalid.d: New.
+
+2020-04-30  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* config/tc-rx.c (elf_flags): Reset default value.
+	(md_parse_option): For rx-elf Initialize elf_flags with RX_ABI.
+
+2020-04-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (XTENSA_MARCH_EARLIEST): Define macro as 0
+	if it's not defined.
+	(microarch_earliest): New static variable.
+	(xg_translate_idioms): Translate "simcall" to "simcall 0" when
+	simcall opcode has mandatory parameter.
+	(xg_init_global_config): Initialize microarch_earliest.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22699
+	* config/tc-sh.c (build_Mytes): Change operand type IMM0_8 to
+	IMM0_8S and add support for IMM0_8U.
+	* testsuite/gas/sh/sh4a.s: Add test of a logical insn using an
+	unsigned 8-bit immediate.
+	* testsuite/gas/sh/sh4a.d: Extended expected disassembly.
+	* testsuite/gas/sh/sh4al-dsp.d: Update expected disassembly.
+
 2020-04-27  Tamar Christina  <tamar.christina@arm.com>
 
 	* NEWS: Add news entry for big-obj.

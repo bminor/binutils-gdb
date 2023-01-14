@@ -225,7 +225,7 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 	  if (head->archive_pass)
 	    continue;
 
-	  filename = head->filename;
+	  filename = bfd_get_filename (head);
 	  if (filename == NULL)
 	    {
 	      /* Some archive formats don't get the filenames filled in
@@ -1282,7 +1282,7 @@ get_pos_bfd (bfd **contents, enum pos default_pos, const char *default_posname)
   else
     {
       for (; *after_bfd; after_bfd = &(*after_bfd)->archive_next)
-	if (FILENAME_CMP ((*after_bfd)->filename, realposname) == 0)
+	if (FILENAME_CMP (bfd_get_filename (*after_bfd), realposname) == 0)
 	  {
 	    if (realpos == pos_after)
 	      after_bfd = &(*after_bfd)->archive_next;
@@ -1321,7 +1321,7 @@ delete_members (bfd *arch, char **files_to_delete)
       while (*current_ptr_ptr)
 	{
 	  if (FILENAME_CMP (normalize (*files_to_delete, arch),
-			    (*current_ptr_ptr)->filename) == 0)
+			    bfd_get_filename (*current_ptr_ptr)) == 0)
 	    {
 	      ++match_count;
 	      if (counted_name_mode
@@ -1376,7 +1376,7 @@ move_members (bfd *arch, char **files_to_move)
 	{
 	  bfd *current_ptr = *current_ptr_ptr;
 	  if (FILENAME_CMP (normalize (*files_to_move, arch),
-			    current_ptr->filename) == 0)
+			    bfd_get_filename (current_ptr)) == 0)
 	    {
 	      /* Move this file to the end of the list - first cut from
 		 where it is.  */
@@ -1398,7 +1398,8 @@ move_members (bfd *arch, char **files_to_move)
 	  current_ptr_ptr = &((*current_ptr_ptr)->archive_next);
 	}
       /* xgettext:c-format */
-      fatal (_("no entry %s in archive %s!"), *files_to_move, arch->filename);
+      fatal (_("no entry %s in archive %s!"), *files_to_move,
+	     bfd_get_filename (arch));
 
     next_file:;
     }
@@ -1428,7 +1429,7 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 	      /* For compatibility with existing ar programs, we
 		 permit the same file to be added multiple times.  */
 	      if (FILENAME_CMP (normalize (*files_to_move, arch),
-				normalize (current->filename, arch)) == 0
+				normalize (bfd_get_filename (current), arch)) == 0
 		  && current->arelt_data != NULL)
 		{
 		  if (newer_only)
@@ -1444,14 +1445,14 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 		      if (bfd_stat_arch_elt (current, &asbuf) != 0)
 			/* xgettext:c-format */
 			fatal (_("internal stat error on %s"),
-			       current->filename);
+			       bfd_get_filename (current));
 
 		      if (fsbuf.st_mtime <= asbuf.st_mtime)
 			goto next_file;
 		    }
 
 		  after_bfd = get_pos_bfd (&arch->archive_next, pos_after,
-					   current->filename);
+					   bfd_get_filename (current));
 		  if (ar_emul_replace (after_bfd, *files_to_move,
 				       target, verbose))
 		    {

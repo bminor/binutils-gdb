@@ -23,7 +23,7 @@
 #include "dwarf2/expr.h"
 
 struct symbol_computed_ops;
-struct objfile;
+struct dwarf2_per_objfile;
 struct dwarf2_per_cu_data;
 struct dwarf2_loclist_baton;
 struct agent_expr;
@@ -61,7 +61,8 @@ struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					struct frame_info *frame,
 					const gdb_byte *data,
 					size_t size,
-					struct dwarf2_per_cu_data *per_cu);
+					dwarf2_per_cu_data *per_cu,
+					dwarf2_per_objfile *per_objfile);
 
 /* A chain of addresses that might be needed to resolve a dynamic
    property.  */
@@ -146,6 +147,9 @@ struct dwarf2_locexpr_baton
      directly.  */
   bool is_reference;
 
+  /* The objfile that was used when creating this.  */
+  dwarf2_per_objfile *per_objfile;
+
   /* The compilation unit containing the symbol whose location
      we're computing.  */
   struct dwarf2_per_cu_data *per_cu;
@@ -162,6 +166,9 @@ struct dwarf2_loclist_baton
 
   /* Length of the location list.  */
   size_t size;
+
+  /* The objfile that was used when creating this.  */
+  dwarf2_per_objfile *per_objfile;
 
   /* The compilation unit containing the symbol whose location
      we're computing.  */

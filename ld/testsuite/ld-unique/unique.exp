@@ -208,7 +208,7 @@ if {![ld_link "$CC $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/u
 }
 
 # Create shared library containing unique symbol with reference.
-if {![ld_link $ld "tmpdir/libunique_shared_ref.so" "-shared tmpdir/unique_shared.o tmpdir/unique_empty.o"] } {
+if {![ld_link $ld "tmpdir/libunique_shared_ref.so" "-shared -z notext tmpdir/unique_shared.o tmpdir/unique_empty.o"] } {
     fail "Could not create a shared library containing an unique symbol with reference"
     set fails [expr $fails + 1]
 }

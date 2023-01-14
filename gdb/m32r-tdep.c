@@ -690,7 +690,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
-      typecode = TYPE_CODE (type);
+      typecode = type->code ();
       len = TYPE_LENGTH (type);
 
       memset (valbuf, 0, sizeof (valbuf));

@@ -733,39 +733,45 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 /* Show all the settings in a list of show commands.  */
 
 void
-cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
+cmd_show_list (struct cmd_list_element *list, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
 
   ui_out_emit_tuple tuple_emitter (uiout, "showlist");
   for (; list != NULL; list = list->next)
     {
+      /* We skip show command aliases to avoid showing duplicated values.  */
+
       /* If we find a prefix, run its list, prefixing our output by its
          prefix (with "show " skipped).  */
-      if (list->prefixlist && !list->abbrev_flag)
+      if (list->prefixlist && list->cmd_pointer == nullptr)
 	{
 	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");
 	  const char *new_prefix = strstr (list->prefixname, "show ") + 5;
 
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string ("prefix", new_prefix);
-	  cmd_show_list (*list->prefixlist, from_tty, new_prefix);
+	  cmd_show_list (*list->prefixlist, from_tty);
 	}
-      else
+      else if (list->theclass != no_set_class && list->cmd_pointer == nullptr)
 	{
-	  if (list->theclass != no_set_class)
-	    {
-	      ui_out_emit_tuple option_emitter (uiout, "option");
+	  ui_out_emit_tuple option_emitter (uiout, "option");
 
-	      uiout->text (prefix);
-	      uiout->field_string ("name", list->name);
-	      uiout->text (":  ");
-	      if (list->type == show_cmd)
-		do_show_command (NULL, from_tty, list);
-	      else
-		cmd_func (list, NULL, from_tty);
-	    }
+	  {
+	    /* If we find a prefix, output it (with "show " skipped).  */
+	    const char *prefixname
+	      = (list->prefix == nullptr ? ""
+		 : strstr (list->prefix->prefixname, "show ") + 5);
+	    uiout->text (prefixname);
+	  }
+	  uiout->field_string ("name", list->name);
+	  uiout->text (":  ");
+	  if (list->type == show_cmd)
+	    do_show_command (NULL, from_tty, list);
+	  else
+	    cmd_func (list, NULL, from_tty);
 	}
     }
 }
+
 

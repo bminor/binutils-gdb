@@ -61,9 +61,9 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
   corename = elf_tdata (core_bfd)->core->program;
   if (corename != NULL)
     {
-      const char* execname = strrchr (exec_bfd->filename, '/');
+      const char* execname = strrchr (bfd_get_filename (exec_bfd), '/');
 
-      execname = execname ? execname + 1 : exec_bfd->filename;
+      execname = execname ? execname + 1 : bfd_get_filename (exec_bfd);
 
       if (strcmp (execname, corename) != 0)
 	return FALSE;

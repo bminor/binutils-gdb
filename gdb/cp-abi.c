@@ -273,10 +273,8 @@ set_cp_abi_as_auto_default (const char *short_name)
 		    _("Cannot find C++ ABI \"%s\" to set it as auto default."),
 		    short_name);
 
-  if (auto_cp_abi.longname != NULL)
-    xfree ((char *) auto_cp_abi.longname);
-  if (auto_cp_abi.doc != NULL)
-    xfree ((char *) auto_cp_abi.doc);
+  xfree ((char *) auto_cp_abi.longname);
+  xfree ((char *) auto_cp_abi.doc);
 
   auto_cp_abi = *abi;
 

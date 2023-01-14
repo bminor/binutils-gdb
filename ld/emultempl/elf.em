@@ -620,11 +620,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       return FALSE;
 
     case OPTION_BUILD_ID:
-      if (ldelf_emit_note_gnu_build_id != NULL)
-	{
-	  free ((char *) ldelf_emit_note_gnu_build_id);
-	  ldelf_emit_note_gnu_build_id = NULL;
-	}
+      free ((char *) ldelf_emit_note_gnu_build_id);
+      ldelf_emit_note_gnu_build_id = NULL;
       if (optarg == NULL)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))
@@ -806,11 +803,11 @@ fragment <<EOF
       else if (strcmp (optarg, "nocommon") == 0)
 	link_info.elf_stt_common = no_elf_stt_common;
       else if (strcmp (optarg, "text") == 0)
-	link_info.error_textrel = TRUE;
+	link_info.textrel_check = textrel_check_error;
       else if (strcmp (optarg, "notext") == 0)
-	link_info.error_textrel = FALSE;
+	link_info.textrel_check = textrel_check_none;
       else if (strcmp (optarg, "textoff") == 0)
-	link_info.error_textrel = FALSE;
+	link_info.textrel_check = textrel_check_none;
 EOF
 fi
 
@@ -903,6 +900,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_NEW_VERS_PATTERN-NULL},
   ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL},
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_PRINT_SYMBOL-NULL}
 };
 EOF

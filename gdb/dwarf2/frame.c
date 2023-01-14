@@ -166,8 +166,8 @@ struct comp_unit
   auto_obstack obstack;
 };
 
-static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc,
-						 CORE_ADDR *out_offset);
+static struct dwarf2_fde *dwarf2_frame_find_fde
+  (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile);
 
 static int dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch, int regnum,
 				       int eh_frame_p);
@@ -237,7 +237,11 @@ register %s (#%d) at %s"),
 
 class dwarf_expr_executor : public dwarf_expr_context
 {
- public:
+public:
+
+  dwarf_expr_executor (dwarf2_per_objfile *per_objfile)
+    : dwarf_expr_context (per_objfile)
+  {}
 
   struct frame_info *this_frame;
 
@@ -311,19 +315,18 @@ class dwarf_expr_executor : public dwarf_expr_context
 
 static CORE_ADDR
 execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
-		  CORE_ADDR offset, struct frame_info *this_frame,
-		  CORE_ADDR initial, int initial_in_stack_memory)
+		  struct frame_info *this_frame, CORE_ADDR initial,
+		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile)
 {
   CORE_ADDR result;
 
-  dwarf_expr_executor ctx;
+  dwarf_expr_executor ctx (per_objfile);
   scoped_value_mark free_values;
 
   ctx.this_frame = this_frame;
   ctx.gdbarch = get_frame_arch (this_frame);
   ctx.addr_size = addr_size;
   ctx.ref_addr_size = -1;
-  ctx.offset = offset;
 
   ctx.push_address (initial, initial_in_stack_memory);
   ctx.eval (exp, len);
@@ -883,13 +886,15 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 		       const gdb_byte **cfa_end_out)
 {
   struct dwarf2_fde *fde;
-  CORE_ADDR text_offset;
+  dwarf2_per_objfile *per_objfile;
   CORE_ADDR pc1 = pc;
 
   /* Find the correct FDE.  */
-  fde = dwarf2_frame_find_fde (&pc1, &text_offset);
+  fde = dwarf2_frame_find_fde (&pc1, &per_objfile);
   if (fde == NULL)
     error (_("Could not compute CFA; needed to translate this expression"));
+
+  gdb_assert (per_objfile != nullptr);
 
   dwarf2_frame_state fs (pc1, fde->cie);
 
@@ -898,14 +903,15 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
-		       fde->cie->end, gdbarch, pc, &fs, text_offset);
+		       fde->cie->end, gdbarch, pc, &fs,
+		       per_objfile->objfile->text_section_offset ());
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs,
-		       text_offset);
+		       per_objfile->objfile->text_section_offset ());
 
   /* Calculate the CFA.  */
   switch (fs.regs.cfa_how)
@@ -923,7 +929,7 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
       }
 
     case CFA_EXP:
-      *text_offset_out = text_offset;
+      *text_offset_out = per_objfile->objfile->text_section_offset ();
       *cfa_start_out = fs.regs.cfa_exp;
       *cfa_end_out = fs.regs.cfa_exp + fs.regs.cfa_exp_len;
       return 0;
@@ -956,8 +962,8 @@ struct dwarf2_frame_cache
   /* Target address size in bytes.  */
   int addr_size;
 
-  /* The .text offset.  */
-  CORE_ADDR text_offset;
+  /* The dwarf2_per_objfile from which this frame description came.  */
+  dwarf2_per_objfile *per_objfile;
 
   /* If not NULL then this frame is the bottom frame of a TAILCALL_FRAME
      sequence.  If NULL then it is a normal case with no TAILCALL_FRAME
@@ -1003,8 +1009,9 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR pc1 = get_frame_address_in_block (this_frame);
 
   /* Find the correct FDE.  */
-  fde = dwarf2_frame_find_fde (&pc1, &cache->text_offset);
+  fde = dwarf2_frame_find_fde (&pc1, &cache->per_objfile);
   gdb_assert (fde != NULL);
+  gdb_assert (cache->per_objfile != nullptr);
 
   /* Allocate and initialize the frame state.  */
   struct dwarf2_frame_state fs (pc1, fde->cie);
@@ -1018,7 +1025,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   execute_cfa_program (fde, fde->cie->initial_instructions,
 		       fde->cie->end, gdbarch,
 		       get_frame_address_in_block (this_frame), &fs,
-		       cache->text_offset);
+		       cache->per_objfile->objfile->text_section_offset ());
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
@@ -1034,8 +1041,9 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
       && entry_pc < fde->initial_location + fde->address_range)
     {
       /* Decode the insns in the FDE up to the entry PC.  */
-      instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
-				   entry_pc, &fs, cache->text_offset);
+      instr = execute_cfa_program
+	(fde, fde->instructions, fde->end, gdbarch, entry_pc, &fs,
+	 cache->per_objfile->objfile->text_section_offset ());
 
       if (fs.regs.cfa_how == CFA_REG_OFFSET
 	  && (dwarf_reg_to_regnum (gdbarch, fs.regs.cfa_reg)
@@ -1051,7 +1059,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, instr, fde->end, gdbarch,
 		       get_frame_address_in_block (this_frame), &fs,
-		       cache->text_offset);
+		       cache->per_objfile->objfile->text_section_offset ());
 
   try
     {
@@ -1069,8 +1077,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	case CFA_EXP:
 	  cache->cfa =
 	    execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
-			      cache->addr_size, cache->text_offset,
-			      this_frame, 0, 0);
+			      cache->addr_size, this_frame, 0, 0,
+			      cache->per_objfile);
 	  break;
 
 	default:
@@ -1270,8 +1278,9 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
 			       cache->reg[regnum].loc.exp.len,
-			       cache->addr_size, cache->text_offset,
-			       this_frame, cache->cfa, 1);
+			       cache->addr_size,
+			       this_frame, cache->cfa, 1,
+			       cache->per_objfile);
       return frame_unwind_got_memory (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
@@ -1281,8 +1290,9 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_VAL_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
 			       cache->reg[regnum].loc.exp.len,
-			       cache->addr_size, cache->text_offset,
-			       this_frame, cache->cfa, 1);
+			       cache->addr_size,
+			       this_frame, cache->cfa, 1,
+			       cache->per_objfile);
       return frame_unwind_got_constant (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_UNSPECIFIED:
@@ -1650,7 +1660,7 @@ set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
    initial location associated with it into *PC.  */
 
 static struct dwarf2_fde *
-dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
+dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     {
@@ -1682,8 +1692,9 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
       if (it != fde_table->end ())
         {
           *pc = (*it)->initial_location + offset;
-	  if (out_offset)
-	    *out_offset = offset;
+	  if (out_per_objfile != nullptr)
+	    *out_per_objfile = get_dwarf2_per_objfile (objfile);
+
           return *it;
         }
     }
@@ -2101,21 +2112,21 @@ decode_frame_entry (struct gdbarch *gdbarch,
     case ALIGN4:
       complaint (_("\
 Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
 
     case ALIGN8:
       complaint (_("\
 Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
 
     default:
       complaint (_("Corrupt data in %s:%s"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
     }
 

@@ -1995,7 +1995,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	      newsym = bfd_make_empty_symbol (input_bfd);
 	      if (!newsym)
 		return FALSE;
-	      newsym->name = input_bfd->filename;
+	      newsym->name = bfd_get_filename (input_bfd);
 	      newsym->value = 0;
 	      newsym->flags = BSF_LOCAL | BSF_FILE;
 	      newsym->section = sec;
@@ -2661,13 +2661,11 @@ default_indirect_link_order (bfd *output_bfd,
 				  new_contents, loc, input_section->size))
     goto error_return;
 
-  if (contents != NULL)
-    free (contents);
+  free (contents);
   return TRUE;
 
  error_return:
-  if (contents != NULL)
-    free (contents);
+  free (contents);
   return FALSE;
 }
 
@@ -2894,10 +2892,8 @@ _bfd_handle_already_linked (asection *sec,
 	      (_("%pB: duplicate section `%pA' has different contents\n"),
 	       sec->owner, sec);
 
-	  if (sec_contents)
-	    free (sec_contents);
-	  if (l_sec_contents)
-	    free (l_sec_contents);
+	  free (sec_contents);
+	  free (l_sec_contents);
 	}
       break;
     }

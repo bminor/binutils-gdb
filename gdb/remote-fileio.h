@@ -37,8 +37,8 @@ extern void remote_fileio_reset (void);
 
 /* Called from _initialize_remote ().  */
 extern void initialize_remote_fileio (
-  struct cmd_list_element *remote_set_cmdlist,
-  struct cmd_list_element *remote_show_cmdlist);
+  struct cmd_list_element **remote_set_cmdlist,
+  struct cmd_list_element **remote_show_cmdlist);
 
 /* Unpack a struct fio_stat.  */
 extern void remote_fileio_to_host_stat (struct fio_stat *fst,

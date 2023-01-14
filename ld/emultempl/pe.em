@@ -884,11 +884,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE;
       break;
     case OPTION_BUILD_ID:
-      if (emit_build_id != NULL)
-	{
-	  free ((char *) emit_build_id);
-	  emit_build_id = NULL;
-	}
+      free ((char *) emit_build_id);
+      emit_build_id = NULL;
       if (optarg == NULL)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))
@@ -1338,7 +1335,7 @@ gld_${EMULATION_NAME}_after_open (void)
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 
       for (a = link_info.input_bfds; a; a = a->link.next)
-	printf ("*%s\n",a->filename);
+	printf ("*%s\n", bfd_get_filename (a));
     }
 #endif
 
@@ -1523,7 +1520,6 @@ gld_${EMULATION_NAME}_after_open (void)
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
 			const char *other_bfd_filename;
-			char *n;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];
 
@@ -1550,9 +1546,9 @@ gld_${EMULATION_NAME}_after_open (void)
 			  continue;
 
 			/* Rename this implib to match the other one.  */
-			n = xmalloc (strlen (other_bfd_filename) + 1);
-			strcpy (n, other_bfd_filename);
-			bfd_set_filename (is->the_bfd->my_archive, n);
+			if (!bfd_set_filename (is->the_bfd->my_archive,
+					       other_bfd_filename))
+			  einfo ("%F%P: %pB: %E\n", is->the_bfd);
 		      }
 
 		    free (relocs);
@@ -1599,7 +1595,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		       members, so look for the first element with a .dll
 		       extension, and use that for the remainder of the
 		       comparisons.  */
-		    pnt = strrchr (is3->the_bfd->filename, '.');
+		    pnt = strrchr (bfd_get_filename (is3->the_bfd), '.');
 		    if (pnt != NULL && filename_cmp (pnt, ".dll") == 0)
 		      break;
 		  }
@@ -1616,12 +1612,12 @@ gld_${EMULATION_NAME}_after_open (void)
 		      {
 			/* Skip static members, ie anything with a .obj
 			   extension.  */
-			pnt = strrchr (is2->the_bfd->filename, '.');
+			pnt = strrchr (bfd_get_filename (is2->the_bfd), '.');
 			if (pnt != NULL && filename_cmp (pnt, ".obj") == 0)
 			  continue;
 
-			if (filename_cmp (is3->the_bfd->filename,
-					  is2->the_bfd->filename))
+			if (filename_cmp (bfd_get_filename (is3->the_bfd),
+					  bfd_get_filename (is2->the_bfd)))
 			  {
 			    is_ms_arch = 0;
 			    break;
@@ -1633,7 +1629,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	    /* This fragment might have come from an .obj file in a Microsoft
 	       import, and not an actual import record. If this is the case,
 	       then leave the filename alone.  */
-	    pnt = strrchr (is->the_bfd->filename, '.');
+	    pnt = strrchr (bfd_get_filename (is->the_bfd), '.');
 
 	    if (is_ms_arch && (filename_cmp (pnt, ".dll") == 0))
 	      {
@@ -1655,13 +1651,14 @@ gld_${EMULATION_NAME}_after_open (void)
 		else /* sentinel */
 		  seq = 'c';
 
-		new_name = xmalloc (strlen (is->the_bfd->filename) + 3);
-		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
-		bfd_set_filename (is->the_bfd, new_name);
-
-		new_name = xmalloc (strlen (is->filename) + 3);
-		sprintf (new_name, "%s.%c", is->filename, seq);
-		is->filename = new_name;
+		new_name
+		  = xmalloc (strlen (bfd_get_filename (is->the_bfd)) + 3);
+		sprintf (new_name, "%s.%c",
+			 bfd_get_filename (is->the_bfd), seq);
+		is->filename = bfd_set_filename (is->the_bfd, new_name);
+		free (new_name);
+		if (!is->filename)
+		  einfo ("%F%P: %pB: %E\n", is->the_bfd);
 	      }
 	  }
       }
@@ -2380,6 +2377,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* new_vers_pattern.  */
   NULL,	/* extra_map_file_text.  */
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_PRINT_SYMBOL-NULL}
 };
 EOF

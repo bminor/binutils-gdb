@@ -276,7 +276,7 @@ val_print_scalar_type_p (struct type *type)
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
     }
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRUCT:
@@ -323,9 +323,9 @@ valprint_check_validity (struct ui_file *stream,
       return 0;
     }
 
-  if (TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_ARRAY)
+  if (type->code () != TYPE_CODE_UNION
+      && type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_ARRAY)
     {
       if (value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
@@ -338,7 +338,7 @@ valprint_check_validity (struct ui_file *stream,
       if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * embedded_offset,
 					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
-	  const int is_ref = TYPE_CODE (type) == TYPE_CODE_REF;
+	  const int is_ref = type->code () == TYPE_CODE_REF;
 	  int ref_is_addressable = 0;
 
 	  if (is_ref)
@@ -408,7 +408,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+  if (elttype->code () == TYPE_CODE_FUNC)
     {
       /* Try to print what function it points to.  */
       print_function_pointer_address (options, gdbarch, address, stream);
@@ -440,11 +440,6 @@ generic_val_print_array (struct value *val,
 
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the array high bound"));
-
-      if (options->prettyformat_arrays)
-	{
-	  print_spaces_filtered (2 + 2 * recurse, stream);
-	}
 
       fputs_filtered (decorations->array_start, stream);
       value_print_array_elements (val, stream, recurse, options, 0);
@@ -532,7 +527,7 @@ generic_val_print_ref (struct type *type,
 				    TARGET_CHAR_BIT * TYPE_LENGTH (type));
   const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
 			       || options->deref_ref);
-  const int type_is_defined = TYPE_CODE (elttype) != TYPE_CODE_UNDEF;
+  const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;
   const gdb_byte *valaddr = value_contents_for_printing (original_value);
 
   if (must_coerce_ref && type_is_defined)
@@ -592,7 +587,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
   unsigned int i;
   unsigned int len;
 
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   for (i = 0; i < len; i++)
     {
       QUIT;
@@ -830,7 +825,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = value_type (val);
 
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       generic_val_print_array (val, stream, recurse, options, decorations);
@@ -929,7 +924,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_METHODPTR:
     default:
       error (_("Unhandled type code %d in symbol table."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -1048,7 +1043,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (TYPE_CODE (value_type (val)) == TYPE_CODE_INTERNAL_FUNCTION)
+  if (value_type (val)->code () == TYPE_CODE_INTERNAL_FUNCTION)
     {
       fprintf_styled (stream, metadata_style.style (),
 		      _("<internal function %s>"),
@@ -1140,7 +1135,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
   const gdb_byte *valaddr = (value_contents_for_printing (original_value)
 			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
-  int field, nfields = TYPE_NFIELDS (type);
+  int field, nfields = type->num_fields ();
   struct gdbarch *gdbarch = get_type_arch (type);
   struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 
@@ -1175,7 +1170,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	      fprintf_filtered (stream, " %ps=",
 				styled_string (variable_name_style.style (),
 					       TYPE_FIELD_NAME (type, field)));
-	      if (TYPE_CODE (field_type) == TYPE_CODE_ENUM)
+	      if (field_type->code () == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else
 		print_longest (stream, 'd', 0, field_val);
@@ -1856,14 +1851,10 @@ maybe_print_array_index (struct type *index_type, LONGEST index,
                          struct ui_file *stream,
 			 const struct value_print_options *options)
 {
-  struct value *index_value;
-
   if (!options->print_array_indexes)
     return; 
     
-  index_value = value_from_longest (index_type, index);
-
-  LA_PRINT_ARRAY_INDEX (index_value, stream, options);
+  LA_PRINT_ARRAY_INDEX (index_type, index, stream, options);
 }
 
 /* See valprint.h.  */
@@ -1876,7 +1867,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 {
   unsigned int things_printed = 0;
   unsigned len;
-  struct type *elttype, *index_type, *base_index_type;
+  struct type *elttype, *index_type;
   unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
@@ -1884,43 +1875,26 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
   LONGEST low_bound, high_bound;
-  LONGEST low_pos, high_pos;
 
   struct type *type = check_typedef (value_type (val));
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = type_length_units (check_typedef (elttype));
   index_type = TYPE_INDEX_TYPE (type);
+  if (index_type->code () == TYPE_CODE_RANGE)
+    index_type = TYPE_TARGET_TYPE (index_type);
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
-      if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
-	base_index_type = TYPE_TARGET_TYPE (index_type);
-      else
-	base_index_type = index_type;
-
-      /* Non-contiguous enumerations types can by used as index types
-	 in some languages (e.g. Ada).  In this case, the array length
-	 shall be computed from the positions of the first and last
-	 literal in the enumeration type, and not from the values
-	 of these literals.  */
-      if (!discrete_position (base_index_type, low_bound, &low_pos)
-	  || !discrete_position (base_index_type, high_bound, &high_pos))
-	{
-	  warning (_("unable to get positions in array, use bounds instead"));
-	  low_pos = low_bound;
-	  high_pos = high_bound;
-	}
-
-      /* The array length should normally be HIGH_POS - LOW_POS + 1.
-         But we have to be a little extra careful, because some languages
-	 such as Ada allow LOW_POS to be greater than HIGH_POS for
-	 empty arrays.  In that situation, the array length is just zero,
-	 not negative!  */
-      if (low_pos > high_pos)
+      /* The array length should normally be HIGH_BOUND - LOW_BOUND +
+         1.  But we have to be a little extra careful, because some
+         languages such as Ada allow LOW_BOUND to be greater than
+         HIGH_BOUND for empty arrays.  In that situation, the array
+         length is just zero, not negative!  */
+      if (low_bound > high_bound)
 	len = 0;
       else
-	len = high_pos - low_pos + 1;
+	len = high_bound - low_bound + 1;
     }
   else
     {
@@ -1944,6 +1918,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	    }
 	  else
 	    fprintf_filtered (stream, ", ");
+	}
+      else if (options->prettyformat_arrays)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
       maybe_print_array_index (index_type, i + low_bound,
@@ -1988,6 +1967,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   annotate_array_section_end ();
   if (i < len)
     fprintf_filtered (stream, "...");
+  if (options->prettyformat_arrays)
+    {
+      fprintf_filtered (stream, "\n");
+      print_spaces_filtered (2 * recurse, stream);
+    }
 }
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the

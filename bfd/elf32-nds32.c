@@ -4862,7 +4862,7 @@ nds32_elf_output_symbol_hook (struct bfd_link_info *info,
       if (bfd_is_const_section (input_sec))
 	source = input_sec->name;
       else
-	source = input_sec->owner->filename;
+	source = bfd_get_filename (input_sec->owner);
 
       fprintf (sym_ld_script, "\t%s = 0x%08lx;\t /* %s */\n",
 	       h->root.root.string,
@@ -5047,7 +5047,7 @@ patch_tls_desc_to_ie (bfd_byte *contents, Elf_Internal_Rela *rel, bfd *ibfd)
 
   if (!rz)
     {
-      printf ("%s: %s @ 0x%08x\n", __func__, ibfd->filename,
+      printf ("%s: %s @ 0x%08x\n", __func__, bfd_get_filename (ibfd),
 	      (int) rel->r_offset);
       BFD_ASSERT(0); /* Unsupported pattern.  */
     }
@@ -6816,6 +6816,10 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_version;
   flagword out_fpu_config;
   flagword in_fpu_config;
+
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
 
   /* TODO: Revise to use object-attributes instead.  */
   if (!nds32_check_vec_size (ibfd))
@@ -12568,15 +12572,13 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
     }
 
  finish:
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 
-  if (isymbuf != NULL && symtab_hdr->contents != (bfd_byte *) isymbuf)
+  if (symtab_hdr->contents != (bfd_byte *) isymbuf)
     free (isymbuf);
 
   return result;
@@ -13469,7 +13471,7 @@ elf32_nds32_check_relax_group (bfd *abfd, asection *asec)
     }
   while (FALSE);
 
-  if ((relocs != NULL) && (elf_section_data (asec)->relocs != relocs))
+  if (elf_section_data (asec)->relocs != relocs)
     free (relocs);
 
   if ((min_id != relax_group_ptr->min_id)
@@ -13608,7 +13610,7 @@ elf32_nds32_unify_relax_group (bfd *abfd, asection *asec)
     }
   while (FALSE);
 
-  if (relocs != NULL && elf_section_data (asec)->relocs != relocs)
+  if (elf_section_data (asec)->relocs != relocs)
     free (relocs);
 
   return result;
@@ -14034,15 +14036,13 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
   if (incontents)
     contents = NULL;
 
-  if (internal_relocs != NULL
-      && elf_section_data (insec)->relocs != internal_relocs)
+  if (elf_section_data (insec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (contents != NULL
-      && elf_section_data (insec)->this_hdr.contents != contents)
+  if (elf_section_data (insec)->this_hdr.contents != contents)
     free (contents);
 
-  if (local_syms != NULL && symtab_hdr->contents != (bfd_byte *) local_syms)
+  if (symtab_hdr->contents != (bfd_byte *) local_syms)
     free (local_syms);
 
   if (chain.next)

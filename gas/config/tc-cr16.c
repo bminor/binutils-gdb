@@ -642,7 +642,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, fragS *fragP)
 {
   /* 'opcode' points to the start of the instruction, whether
      we need to change the instruction's fixed encoding.  */
-  char *opcode = fragP->fr_literal + fragP->fr_fix;
+  char *opcode = &fragP->fr_literal[0] + fragP->fr_fix;
   bfd_reloc_code_real_type reloc;
 
   subseg_change (sec, 0);
@@ -2560,8 +2560,11 @@ md_assemble (char *op)
   if (streq ("cinv", op))
     {
      /* Validate the cinv options.  */
+      unsigned int op_len, param_len;
       check_cinv_options (param);
-      strcat (op, param);
+      op_len = strlen (op);
+      param_len = strlen (param) + 1;
+      memmove (op + op_len, param, param_len);
     }
 
   /* MAPPING - SHIFT INSN, if imm4/imm16 positive values

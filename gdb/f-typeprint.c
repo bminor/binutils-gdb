@@ -65,21 +65,21 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
   enum type_code code;
 
   f_type_print_base (type, stream, show, level);
-  code = TYPE_CODE (type);
+  code = type->code ();
   if ((varstring != NULL && *varstring != '\0')
       /* Need a space if going to print stars or brackets; but not if we
 	 will print just a type name.  */
       || ((show > 0
-	   || TYPE_NAME (type) == 0)
+	   || type->name () == 0)
           && (code == TYPE_CODE_FUNC
 	      || code == TYPE_CODE_METHOD
 	      || code == TYPE_CODE_ARRAY
 	      || ((code == TYPE_CODE_PTR
 		   || code == TYPE_CODE_REF)
-		  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
-		      || (TYPE_CODE (TYPE_TARGET_TYPE (type))
+		  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
+		      || (TYPE_TARGET_TYPE (type)->code ()
 			  == TYPE_CODE_METHOD)
-		      || (TYPE_CODE (TYPE_TARGET_TYPE (type))
+		      || (TYPE_TARGET_TYPE (type)->code ()
 			  == TYPE_CODE_ARRAY))))))
     fputs_filtered (" ", stream);
   f_type_print_varspec_prefix (type, stream, show, 0);
@@ -114,12 +114,12 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
@@ -178,12 +178,12 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       arrayprint_recurse_level++;
@@ -207,7 +207,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	  print_rank_only = true;
 	}
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
+      if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY)
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
@@ -233,7 +233,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	    }
 	}
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_ARRAY)
+      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_ARRAY)
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
@@ -254,7 +254,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_FUNC:
       {
-	int i, nfields = TYPE_NFIELDS (type);
+	int i, nfields = type->num_fields ();
 
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     passed_a_ptr, 0,
@@ -332,21 +332,21 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
   /* When SHOW is zero or less, and there is a valid type name, then always
      just print the type name directly from the type.  */
 
-  if ((show <= 0) && (TYPE_NAME (type) != NULL))
+  if ((show <= 0) && (type->name () != NULL))
     {
       const char *prefix = "";
-      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      if (type->code () == TYPE_CODE_UNION)
 	prefix = "Type, C_Union :: ";
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT)
 	prefix = "Type ";
-      fprintfi_filtered (level, stream, "%s%s", prefix, TYPE_NAME (type));
+      fprintfi_filtered (level, stream, "%s%s", prefix, type->name ());
       return;
     }
 
-  if (TYPE_CODE (type) != TYPE_CODE_TYPEDEF)
+  if (type->code () != TYPE_CODE_TYPEDEF)
     type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_TYPEDEF:
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
@@ -376,7 +376,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       {
 	gdbarch *gdbarch = get_type_arch (type);
 	struct type *void_type = builtin_f_type (gdbarch)->builtin_void;
-	fprintfi_filtered (level, stream, "%s", TYPE_NAME (void_type));
+	fprintfi_filtered (level, stream, "%s", void_type->name ());
       }
       break;
 
@@ -399,7 +399,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          through as TYPE_CODE_INT since dbxstclass.h is so
          C-oriented, we must change these to "character" from "char".  */
 
-      if (strcmp (TYPE_NAME (type), "char") == 0)
+      if (strcmp (type->name (), "char") == 0)
 	fprintfi_filtered (level, stream, "character");
       else
 	goto default_case;
@@ -420,17 +420,17 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      if (type->code () == TYPE_CODE_UNION)
 	fprintfi_filtered (level, stream, "Type, C_Union :: ");
       else
 	fprintfi_filtered (level, stream, "Type ");
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (type->name (), stream);
       /* According to the definition,
          we only print structure elements in case show > 0.  */
       if (show > 0)
 	{
 	  fputs_filtered ("\n", stream);
-	  for (index = 0; index < TYPE_NFIELDS (type); index++)
+	  for (index = 0; index < type->num_fields (); index++)
 	    {
 	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
 				 show - 1, level + 4);
@@ -442,12 +442,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      fputs_filtered ("\n", stream);
 	    }
 	  fprintfi_filtered (level, stream, "End Type ");
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	}
       break;
 
     case TYPE_CODE_MODULE:
-      fprintfi_filtered (level, stream, "module %s", TYPE_NAME (type));
+      fprintfi_filtered (level, stream, "module %s", type->name ());
       break;
 
     default_case:
@@ -456,10 +456,10 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          such as fundamental types.  For these, just print whatever
          the type name is, as recorded in the type itself.  If there
          is no type name, then complain.  */
-      if (TYPE_NAME (type) != NULL)
-	fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
+      if (type->name () != NULL)
+	fprintfi_filtered (level, stream, "%s", type->name ());
       else
-	error (_("Invalid type code (%d) in symbol table."), TYPE_CODE (type));
+	error (_("Invalid type code (%d) in symbol table."), type->code ());
       break;
     }
 

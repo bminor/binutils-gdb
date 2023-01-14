@@ -763,8 +763,8 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      store_unsigned_integer (param_val, 4, byte_order,
 				      struct_end - struct_ptr);
 	    }
-	  else if (TYPE_CODE (type) == TYPE_CODE_INT
-		   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	  else if (type->code () == TYPE_CODE_INT
+		   || type->code () == TYPE_CODE_ENUM)
 	    {
 	      /* Integer value store, right aligned.  "unpack_long"
 		 takes care of any sign-extension problems.  */
@@ -773,7 +773,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				      unpack_long (type,
 						   value_contents (arg)));
 	    }
-	  else if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	  else if (type->code () == TYPE_CODE_FLT)
             {
 	      /* Floating point value store, right aligned.  */
 	      param_len = align_up (TYPE_LENGTH (type), 4);
@@ -876,7 +876,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static int
 hppa64_integral_or_pointer_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_BOOL:
@@ -903,7 +903,7 @@ hppa64_integral_or_pointer_p (const struct type *type)
 static int
 hppa64_floating_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_FLT:
       {
@@ -1064,8 +1064,8 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* If we are passing a function pointer, make sure we pass a function
          descriptor instead of the function entry address.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
-          && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+      if (type->code () == TYPE_CODE_PTR
+          && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC)
         {
 	  ULONGEST codeptr, fptr;
 
@@ -1144,7 +1144,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
       /* The value always lives in the right hand end of the register
 	 (or register pair)?  */
       int b;
-      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
+      int reg = type->code () == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
       int part = TYPE_LENGTH (type) % 4;
       /* The left hand register contains only part of the value,
 	 transfer that first so that the rest can be xfered as entire

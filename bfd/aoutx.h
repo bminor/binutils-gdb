@@ -1945,7 +1945,24 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
   PUT_WORD (abfd, g->address, natptr->r_address);
 
   BFD_ASSERT (g->howto != NULL);
-  r_length = g->howto->size ;	/* Size as a power of two.  */
+
+  switch (bfd_get_reloc_size (g->howto))
+    {
+    default:
+      _bfd_error_handler (_("%pB: unsupported AOUT relocation size: %d"),
+			  abfd, bfd_get_reloc_size (g->howto));
+      bfd_set_error (bfd_error_bad_value);
+      return;
+    case 1:
+    case 2:
+    case 4:
+      r_length = g->howto->size;	/* Size as a power of two.  */
+      break;
+    case 8:
+      r_length = 3;
+      break;
+    }
+
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
   r_baserel = (g->howto->type & 8) != 0;
@@ -2669,7 +2686,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   bfd_size_type filelen, funclen;
   char *buf;
 
-  *filename_ptr = abfd->filename;
+  *filename_ptr = bfd_get_filename (abfd);
   *functionname_ptr = NULL;
   *line_ptr = 0;
   if (disriminator_ptr)
@@ -2799,8 +2816,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   else
     funclen = strlen (bfd_asymbol_name (func));
 
-  if (adata (abfd).line_buf != NULL)
-    free (adata (abfd).line_buf);
+  free (adata (abfd).line_buf);
 
   if (filelen + funclen == 0)
     adata (abfd).line_buf = buf = NULL;
@@ -2882,7 +2898,7 @@ NAME (aout, bfd_free_cached_info) (bfd *abfd)
       || abfd->tdata.aout_data == NULL)
     return TRUE;
 
-#define BFCI_FREE(x) if (x != NULL) { free (x); x = NULL; }
+#define BFCI_FREE(x) do { free (x); x = NULL; } while (0)
   BFCI_FREE (obj_aout_symbols (abfd));
 #ifdef USE_MMAP
   obj_aout_external_syms (abfd) = 0;
@@ -3803,13 +3819,16 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	int r_baserel;
 	int r_jmptable;
 	int r_relative;
-	int r_length;
+	unsigned int r_length;
 
 	r_pcrel = (int) howto->pc_relative;
 	r_baserel = (howto->type & 8) != 0;
 	r_jmptable = (howto->type & 16) != 0;
 	r_relative = (howto->type & 32) != 0;
-	r_length = howto->size;
+	if (bfd_get_reloc_size (howto) != 8)
+	  r_length = howto->size;	/* Size as a power of two.  */
+	else
+	  r_length = 3;
 
 	PUT_WORD (flaginfo->output_bfd, p->offset, srel.r_address);
 	if (bfd_header_big_endian (flaginfo->output_bfd))
@@ -4826,7 +4845,8 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
      discarding such symbols.  */
   if (strip != strip_all
       && (strip != strip_some
-	  || bfd_hash_lookup (flaginfo->info->keep_hash, input_bfd->filename,
+	  || bfd_hash_lookup (flaginfo->info->keep_hash,
+			      bfd_get_filename (input_bfd),
 			      FALSE, FALSE) != NULL)
       && discard != discard_all)
     {
@@ -4834,7 +4854,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
       H_PUT_8 (output_bfd, 0, outsym->e_other);
       H_PUT_16 (output_bfd, 0, outsym->e_desc);
       strtab_index = add_to_stringtab (output_bfd, flaginfo->strtab,
-				       input_bfd->filename, FALSE);
+				       bfd_get_filename (input_bfd), FALSE);
       if (strtab_index == (bfd_size_type) -1)
 	return FALSE;
       PUT_WORD (output_bfd, strtab_index, outsym->e_strx);
@@ -5596,26 +5616,15 @@ NAME (aout, final_link) (bfd *abfd,
 	}
     }
 
-  if (aout_info.contents != NULL)
-    {
-      free (aout_info.contents);
-      aout_info.contents = NULL;
-    }
-  if (aout_info.relocs != NULL)
-    {
-      free (aout_info.relocs);
-      aout_info.relocs = NULL;
-    }
-  if (aout_info.symbol_map != NULL)
-    {
-      free (aout_info.symbol_map);
-      aout_info.symbol_map = NULL;
-    }
-  if (aout_info.output_syms != NULL)
-    {
-      free (aout_info.output_syms);
-      aout_info.output_syms = NULL;
-    }
+  free (aout_info.contents);
+  aout_info.contents = NULL;
+  free (aout_info.relocs);
+  aout_info.relocs = NULL;
+  free (aout_info.symbol_map);
+  aout_info.symbol_map = NULL;
+  free (aout_info.output_syms);
+  aout_info.output_syms = NULL;
+
   if (includes_hash_initialized)
     {
       bfd_hash_table_free (&aout_info.includes.root);
@@ -5658,14 +5667,10 @@ NAME (aout, final_link) (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (aout_info.contents != NULL)
-    free (aout_info.contents);
-  if (aout_info.relocs != NULL)
-    free (aout_info.relocs);
-  if (aout_info.symbol_map != NULL)
-    free (aout_info.symbol_map);
-  if (aout_info.output_syms != NULL)
-    free (aout_info.output_syms);
+  free (aout_info.contents);
+  free (aout_info.relocs);
+  free (aout_info.symbol_map);
+  free (aout_info.output_syms);
   if (includes_hash_initialized)
     bfd_hash_table_free (&aout_info.includes.root);
   return FALSE;

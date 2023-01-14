@@ -169,7 +169,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
      saved by the called function.  */
   arg = value_coerce_to_target (arg);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
@@ -184,7 +184,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 	   if the value was not previously in memory - in some cases
 	   we should clearly be allowing this, but how?  */
 	new_value = value_cast (TYPE_TARGET_TYPE (type), arg);
-	new_value = value_ref (new_value, TYPE_CODE (type));
+	new_value = value_ref (new_value, type->code ());
 	return new_value;
       }
     case TYPE_CODE_INT:
@@ -260,20 +260,20 @@ find_function_addr (struct value *function,
      part of it.  */
 
   /* Determine address to call.  */
-  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-      || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+  if (ftype->code () == TYPE_CODE_FUNC
+      || ftype->code () == TYPE_CODE_METHOD)
     funaddr = value_address (function);
-  else if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+  else if (ftype->code () == TYPE_CODE_PTR)
     {
       funaddr = value_as_address (function);
       ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
-      if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+      if (ftype->code () == TYPE_CODE_FUNC
+	  || ftype->code () == TYPE_CODE_METHOD)
 	funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
 						      current_top_target ());
     }
-  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-      || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+  if (ftype->code () == TYPE_CODE_FUNC
+      || ftype->code () == TYPE_CODE_METHOD)
     {
       if (TYPE_GNU_IFUNC (ftype))
 	{
@@ -303,7 +303,7 @@ find_function_addr (struct value *function,
       else
 	value_type = TYPE_TARGET_TYPE (ftype);
     }
-  else if (TYPE_CODE (ftype) == TYPE_CODE_INT)
+  else if (ftype->code () == TYPE_CODE_INT)
     {
       /* Handle the case of functions lacking debugging info.
          Their values are characters since their addresses are char.  */
@@ -438,7 +438,7 @@ get_call_return_value (struct call_return_meta_info *ri)
   thread_info *thr = inferior_thread ();
   bool stack_temporaries = thread_stack_temporaries_enabled_p (thr);
 
-  if (TYPE_CODE (ri->value_type) == TYPE_CODE_VOID)
+  if (ri->value_type->code () == TYPE_CODE_VOID)
     retval = allocate_value (ri->value_type);
   else if (ri->struct_return_p)
     {
@@ -827,7 +827,7 @@ call_function_by_hand_dummy (struct value *function,
 
   values_type = check_typedef (values_type);
 
-  if (args.size () < TYPE_NFIELDS (ftype))
+  if (args.size () < ftype->num_fields ())
     error (_("Too few arguments in function call."));
 
   /* A holder for the inferior status.
@@ -1025,9 +1025,9 @@ call_function_by_hand_dummy (struct value *function,
 
       /* FIXME drow/2002-05-31: Should just always mark methods as
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
-      if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+      if (ftype->code () == TYPE_CODE_METHOD)
 	prototyped = 1;
-      if (TYPE_TARGET_TYPE (ftype) == NULL && TYPE_NFIELDS (ftype) == 0
+      if (TYPE_TARGET_TYPE (ftype) == NULL && ftype->num_fields () == 0
 	  && default_return_type != NULL)
 	{
 	  /* Calling a no-debug function with the return type
@@ -1042,12 +1042,12 @@ call_function_by_hand_dummy (struct value *function,
 	  */
 	  prototyped = 1;
 	}
-      else if (i < TYPE_NFIELDS (ftype))
+      else if (i < ftype->num_fields ())
 	prototyped = TYPE_PROTOTYPED (ftype);
       else
 	prototyped = 0;
 
-      if (i < TYPE_NFIELDS (ftype))
+      if (i < ftype->num_fields ())
 	param_type = TYPE_FIELD_TYPE (ftype, i);
       else
 	param_type = NULL;
@@ -1062,11 +1062,11 @@ call_function_by_hand_dummy (struct value *function,
       auto info = language_pass_by_reference (param_type);
       if (!info.copy_constructible)
 	error (_("expression cannot be evaluated because the type '%s' "
-		 "is not copy constructible"), TYPE_NAME (param_type));
+		 "is not copy constructible"), param_type->name ());
 
       if (!info.destructible)
 	error (_("expression cannot be evaluated because the type '%s' "
-		 "is not destructible"), TYPE_NAME (param_type));
+		 "is not destructible"), param_type->name ());
 
       if (info.trivially_copyable)
 	continue;
@@ -1091,14 +1091,14 @@ call_function_by_hand_dummy (struct value *function,
 	  value *copy_ctor;
 	  value *cctor_args[2] = { clone_ptr, original_arg };
 	  find_overload_match (gdb::make_array_view (cctor_args, 2),
-			       TYPE_NAME (param_type), METHOD,
+			       param_type->name (), METHOD,
 			       &clone_ptr, nullptr, &copy_ctor, nullptr,
 			       nullptr, 0, EVAL_NORMAL);
 
 	  if (copy_ctor == nullptr)
 	    error (_("expression cannot be evaluated because a copy "
 		     "constructor for the type '%s' could not be found "
-		     "(maybe inlined?)"), TYPE_NAME (param_type));
+		     "(maybe inlined?)"), param_type->name ());
 
 	  call_function_by_hand (copy_ctor, default_return_type,
 				 gdb::make_array_view (cctor_args, 2));
@@ -1130,7 +1130,7 @@ call_function_by_hand_dummy (struct value *function,
 	  if (dtor_name == nullptr)
 	    error (_("expression cannot be evaluated because a destructor "
 		     "for the type '%s' could not be found "
-		     "(maybe inlined?)"), TYPE_NAME (param_type));
+		     "(maybe inlined?)"), param_type->name ());
 
 	  value *dtor
 	    = find_function_in_inferior (dtor_name, 0);

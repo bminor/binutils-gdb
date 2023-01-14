@@ -1112,7 +1112,7 @@ bfd_ecoff_debug_accumulate_other (void * handle,
   fdr.issBase = output_symhdr->issMax;
   fdr.cbSs = 0;
   fdr.rss = ecoff_add_string (ainfo, info, output_debug, &fdr,
-			      input_bfd->filename);
+			      bfd_get_filename (input_bfd));
   if (fdr.rss == -1)
     return FALSE;
   fdr.isymBase = output_symhdr->isymMax;
@@ -1464,12 +1464,10 @@ ecoff_write_symhdr (bfd *abfd,
       != swap->external_hdr_size)
     goto error_return;
 
-  if (buff != NULL)
-    free (buff);
+  free (buff);
   return TRUE;
  error_return:
-  if (buff != NULL)
-    free (buff);
+  free (buff);
   return FALSE;
 }
 
@@ -1685,13 +1683,11 @@ bfd_ecoff_write_accumulated_debug (void * handle,
   if (bfd_bwrite (debug->external_ext, amt, abfd) != amt)
     goto error_return;
 
-  if (space != NULL)
-    free (space);
+  free (space);
   return TRUE;
 
  error_return:
-  if (space != NULL)
-    free (space);
+  free (space);
   return FALSE;
 }
 
@@ -2320,12 +2316,11 @@ lookup_line (bfd *abfd,
 
       if (len != 0)
 	{
-	  if (line_info->find_buffer != NULL)
-	    free (line_info->find_buffer);
+	  free (line_info->find_buffer);
 	  buffer = (char *) bfd_malloc ((bfd_size_type) len);
+	  line_info->find_buffer = buffer;
 	  if (buffer == NULL)
 	    return FALSE;
-	  line_info->find_buffer = buffer;
 	}
 
       if (function_name != NULL)

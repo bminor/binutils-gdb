@@ -242,7 +242,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	       maximally-aligned array of the correct size.  */
 
 	    fputs_unfiltered ("  ", stream);
-	    switch (TYPE_CODE (regtype))
+	    switch (regtype->code ())
 	      {
 	      case TYPE_CODE_PTR:
 		fprintf_filtered (stream, "__gdb_uintptr %s",

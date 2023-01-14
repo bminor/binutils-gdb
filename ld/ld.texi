@@ -1358,9 +1358,9 @@ Specifying zero will override any default non-zero sized
 @item text
 @itemx notext
 @itemx textoff
-Report an error if DT_TEXTREL is set, i.e., if the binary has dynamic
-relocations in read-only sections.  Don't report an error if
-@samp{notext} or @samp{textoff}.
+Report an error if DT_TEXTREL is set, i.e., if the position-independent
+or shared object has dynamic relocations in read-only sections.  Don't
+report an error if @samp{notext} or @samp{textoff}.
 
 @item undefs
 Do not report unresolved symbol references from regular object files,
@@ -2404,9 +2404,10 @@ The address will only be changed if it not explicitly specified; that
 is, if the @code{SECTIONS} command does not specify a start address for
 the section (@pxref{SECTIONS}).
 
-@kindex --warn-shared-textrel
-@item --warn-shared-textrel
-Warn if the linker adds a DT_TEXTREL to a shared object.
+@kindex --warn-textrel
+@item --warn-textrel
+Warn if the linker adds DT_TEXTREL to a position-independent executable
+or shared object.
 
 @kindex --warn-alternate-em
 @item --warn-alternate-em

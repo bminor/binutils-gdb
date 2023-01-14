@@ -1901,11 +1901,8 @@ m32c_elf_relax_section
 
     } /* next relocation */
 
-  if (free_relocs != NULL)
-    {
-      free (free_relocs);
-      free_relocs = NULL;
-    }
+  free (free_relocs);
+  free_relocs = NULL;
 
   if (free_contents != NULL)
     {
@@ -1931,7 +1928,7 @@ m32c_elf_relax_section
       /* Cache the symbols for elf_link_input_bfd.  */
       else
 	{
-	symtab_hdr->contents = NULL /* (unsigned char *) intsyms*/;
+	  symtab_hdr->contents = NULL /* (unsigned char *) intsyms*/;
 	}
 
       free_intsyms = NULL;
@@ -1940,17 +1937,14 @@ m32c_elf_relax_section
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
+  free (free_relocs);
+  free (free_contents);
   if (shndx_buf != NULL)
     {
       shndx_hdr->contents = NULL;
       free (shndx_buf);
     }
-  if (free_intsyms != NULL)
-    free (free_intsyms);
+  free (free_intsyms);
   return FALSE;
 }
 

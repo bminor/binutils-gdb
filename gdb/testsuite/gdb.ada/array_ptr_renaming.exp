@@ -33,7 +33,7 @@ gdb_test "print nt(1)" " = 10"
 # representation with GNAT (fat pointers).  In this case, GDB "forgets" that
 # it's dealing with an access and prints directly the array contents.  This
 # should be fixed some day.
-setup_kfail "gdb/NNNN" *-*-*
+setup_kfail "gdb/25883" *-*-*
 gdb_test "print ntp"     " = \\(access pack\\.table_type\\) $hex.*"
 gdb_test "print ntp.all" " = \\(3 => 30, 40\\)"
 gdb_test "print ntp(3)"  " = 30"

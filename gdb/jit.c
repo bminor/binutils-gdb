@@ -655,7 +655,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   for (gdb_block &gdb_block_iter : stab->blocks)
     {
       struct block *new_block = allocate_block (&objfile->objfile_obstack);
-      struct symbol *block_name = allocate_symbol (objfile);
+      struct symbol *block_name = new (&objfile->objfile_obstack) symbol;
       struct type *block_type = arch_type (objfile->arch (),
 					   TYPE_CODE_VOID,
 					   TARGET_CHAR_BIT,

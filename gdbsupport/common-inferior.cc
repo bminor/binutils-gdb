@@ -24,3 +24,102 @@
 /* See common-inferior.h.  */
 
 bool startup_with_shell = true;
+
+/* See common-inferior.h.  */
+
+std::string
+construct_inferior_arguments (gdb::array_view<char * const> argv)
+{
+  std::string result;
+
+  if (startup_with_shell)
+    {
+#ifdef __MINGW32__
+      /* This holds all the characters considered special to the
+	 Windows shells.  */
+      static const char special[] = "\"!&*|[]{}<>?`~^=;, \t\n";
+      static const char quote = '"';
+#else
+      /* This holds all the characters considered special to the
+	 typical Unix shells.  We include `^' because the SunOS
+	 /bin/sh treats it as a synonym for `|'.  */
+      static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+      static const char quote = '\'';
+#endif
+      for (int i = 0; i < argv.size (); ++i)
+	{
+	  if (i > 0)
+	    result += ' ';
+
+	  /* Need to handle empty arguments specially.  */
+	  if (argv[i][0] == '\0')
+	    {
+	      result += quote;
+	      result += quote;
+	    }
+	  else
+	    {
+#ifdef __MINGW32__
+	      bool quoted = false;
+
+	      if (strpbrk (argv[i], special))
+		{
+		  quoted = true;
+		  result += quote;
+		}
+#endif
+	      for (char *cp = argv[i]; *cp; ++cp)
+		{
+		  if (*cp == '\n')
+		    {
+		      /* A newline cannot be quoted with a backslash (it
+			 just disappears), only by putting it inside
+			 quotes.  */
+		      result += quote;
+		      result += '\n';
+		      result += quote;
+		    }
+		  else
+		    {
+#ifdef __MINGW32__
+		      if (*cp == quote)
+#else
+		      if (strchr (special, *cp) != NULL)
+#endif
+			result += '\\';
+		      result += *cp;
+		    }
+		}
+#ifdef __MINGW32__
+	      if (quoted)
+		result += quote;
+#endif
+	    }
+	}
+    }
+  else
+    {
+      /* In this case we can't handle arguments that contain spaces,
+	 tabs, or newlines -- see breakup_args().  */
+      for (char *arg : argv)
+	{
+	  char *cp = strchr (arg, ' ');
+	  if (cp == NULL)
+	    cp = strchr (arg, '\t');
+	  if (cp == NULL)
+	    cp = strchr (arg, '\n');
+	  if (cp != NULL)
+	    error (_("can't handle command-line "
+		     "argument containing whitespace"));
+	}
+
+      for (int i = 0; i < argv.size (); ++i)
+	{
+	  if (i > 0)
+	    result += " ";
+	  result += argv[i];
+	}
+    }
+
+  return result;
+}

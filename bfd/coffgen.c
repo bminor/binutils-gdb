@@ -544,11 +544,8 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   for (; erel < erel_end; erel += relsz, irel++)
     bfd_coff_swap_reloc_in (abfd, (void *) erel, (void *) irel);
 
-  if (free_external != NULL)
-    {
-      free (free_external);
-      free_external = NULL;
-    }
+  free (free_external);
+  free_external = NULL;
 
   if (cache && free_internal != NULL)
     {
@@ -566,10 +563,8 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   return internal_relocs;
 
  error_return:
-  if (free_external != NULL)
-    free (free_external);
-  if (free_internal != NULL)
-    free (free_internal);
+  free (free_external);
+  free (free_internal);
   return NULL;
 }
 
@@ -1818,19 +1813,19 @@ coff_get_normalized_symtab (bfd *abfd)
       symbol_ptr = internal_ptr;
       internal_ptr->is_sym = TRUE;
 
+      /* PR 17512: Prevent buffer overrun.  */
+      if (symbol_ptr->u.syment.n_numaux > (raw_end - raw_src) / symesz)
+	{
+	  bfd_release (abfd, internal);
+	  return NULL;
+	}
+
       for (i = 0;
 	   i < symbol_ptr->u.syment.n_numaux;
 	   i++)
 	{
 	  internal_ptr++;
 	  raw_src += symesz;
-
-	  /* PR 17512: Prevent buffer overrun.  */
-	  if (raw_src >= raw_end || internal_ptr >= internal_end)
-	    {
-	      bfd_release (abfd, internal);
-	      return NULL;
-	    }
 
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,

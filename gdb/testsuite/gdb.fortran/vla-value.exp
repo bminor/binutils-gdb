@@ -21,7 +21,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     return -1
 }
 
-if ![runto_main] {
+if ![fortran_runto_main] {
     untested "could not run to main"
     return -1
 }
@@ -129,8 +129,8 @@ gdb_test "print vla1(9, 9, 9)" "no such vector element \\\(vector not allocated\
 # Try to assign VLA to user variable
 clean_restart ${testfile}
 
-if ![runto MAIN__] then {
-    perror "couldn't run to breakpoint MAIN__"
+if ![fortran_runto_main] then {
+    perror "couldn't run to main"
     continue
 }
 gdb_breakpoint [gdb_get_line_number "vla2-allocated"]

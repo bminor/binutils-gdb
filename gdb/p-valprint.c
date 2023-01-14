@@ -82,7 +82,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
   int want_space = 0;
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       {
@@ -93,16 +93,12 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	    len = high_bound - low_bound + 1;
 	    elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	    eltlen = TYPE_LENGTH (elttype);
-	    if (options->prettyformat_arrays)
-	      {
-		print_spaces_filtered (2 + 2 * recurse, stream);
-	      }
 	    /* If 's' format is used, try to print out as string.
 	       If no format is given, print as string if element type
 	       is of TYPE_CODE_CHAR and element size is 1,2 or 4.  */
 	    if (options->format == 's'
 		|| ((eltlen == 1 || eltlen == 2 || eltlen == 4)
-		    && TYPE_CODE (elttype) == TYPE_CODE_CHAR
+		    && elttype->code () == TYPE_CODE_CHAR
 		    && options->format == 0))
 	      {
 		/* If requested, look for the first null char and only print
@@ -171,7 +167,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
     print_unpacked_pointer:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+      if (elttype->code () == TYPE_CODE_FUNC)
 	{
 	  /* Try to print what function it points to.  */
 	  print_address_demangle (options, gdbarch, addr, stream, demangle);
@@ -187,10 +183,10 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
       /* For a pointer to char or unsigned char, also print the string
 	 pointed to, unless pointer is null.  */
       if (((TYPE_LENGTH (elttype) == 1
-	   && (TYPE_CODE (elttype) == TYPE_CODE_INT
-	      || TYPE_CODE (elttype) == TYPE_CODE_CHAR))
-	  || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
-	      && TYPE_CODE (elttype) == TYPE_CODE_CHAR))
+	   && (elttype->code () == TYPE_CODE_INT
+               || elttype->code () == TYPE_CODE_CHAR))
+           || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+               && elttype->code () == TYPE_CODE_CHAR))
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
 	{
@@ -401,7 +397,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
     default:
       error (_("Invalid pascal type code %d in symbol table."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -421,15 +417,15 @@ pascal_value_print (struct value *val, struct ui_file *stream,
 
      Object pascal: if it is a member pointer, we will take care
      of that when we print it.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      || TYPE_CODE (type) == TYPE_CODE_REF)
+  if (type->code () == TYPE_CODE_PTR
+      || type->code () == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
-	  && TYPE_NAME (type) == NULL
-	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
-	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
+      if (type->code () == TYPE_CODE_PTR
+	  && type->name () == NULL
+	  && TYPE_TARGET_TYPE (type)->name () != NULL
+	  && strcmp (TYPE_TARGET_TYPE (type)->name (), "char") == 0)
 	{
 	  /* Print nothing.  */
 	}
@@ -473,7 +469,7 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  const char *type_name = TYPE_NAME (type);
+  const char *type_name = type->name ();
 
   return (type_name != NULL
 	  && strcmp (type_name, pascal_vtbl_ptr_name) == 0);
@@ -485,15 +481,15 @@ pascal_object_is_vtbl_ptr_type (struct type *type)
 int
 pascal_object_is_vtbl_member (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       type = TYPE_TARGET_TYPE (type);
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = TYPE_TARGET_TYPE (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT	/* If not using
+	  if (type->code () == TYPE_CODE_STRUCT	/* If not using
 							   thunks.  */
-	      || TYPE_CODE (type) == TYPE_CODE_PTR)	/* If using thunks.  */
+	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */
 	    {
 	      /* Virtual functions tables are full of pointers
 	         to virtual functions.  */
@@ -528,7 +524,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
   struct type *type = check_typedef (value_type (val));
 
   fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
   /* Print out baseclasses such that we don't print
@@ -557,7 +553,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	{
 	  /* If requested, skip printing of static fields.  */
 	  if (!options->pascal_static_field_print
-	      && field_is_static (&TYPE_FIELD (type, i)))
+	      && field_is_static (&type->field (i)))
 	    continue;
 	  if (fields_seen)
 	    fprintf_filtered (stream, ", ");
@@ -568,7 +564,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (TYPE_NAME (type), stream);
+		  fputs_filtered (type->name (), stream);
 		  fputs_filtered (": ", stream);
 		}
 	    }
@@ -586,7 +582,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	  if (field_is_static (&TYPE_FIELD (type, i)))
+	  if (field_is_static (&type->field (i)))
 	    {
 	      fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream,
@@ -601,7 +597,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	  fputs_filtered (" = ", stream);
 	  annotate_field_value ();
 
-	  if (!field_is_static (&TYPE_FIELD (type, i))
+	  if (!field_is_static (&type->field (i))
 	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
@@ -640,7 +636,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (field_is_static (&TYPE_FIELD (type, i)))
+	      else if (field_is_static (&type->field (i)))
 		{
 		  /* struct value *v = value_static_field (type, i);
 		     v4.17 specific.  */
@@ -714,7 +710,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
     {
       LONGEST boffset = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      const char *basename = TYPE_NAME (baseclass);
+      const char *basename = baseclass->name ();
       int skip = 0;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -830,7 +826,7 @@ pascal_object_print_static_field (struct value *val,
       return;
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print, addr;
       int i;

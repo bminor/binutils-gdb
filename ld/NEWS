@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add a command-line option for ELF linker, --warn-textrel, to warn that
+  DT_TEXTREL is set in a position-independent executable or shared object.
+
 * Add command-line options --enable-non-contiguous-regions and
   --enable-non-contiguous-regions-warnings.
 

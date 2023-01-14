@@ -15,6 +15,11 @@
 
 standard_testfile .c psym-external-decl-2.c
 
+get_compiler_info
+if { [test_compiler_info "clang-*"] } {
+    return -1
+}
+
 set srcfiles [list $srcfile $srcfile2]
 
 if { [build_executable_from_specs \

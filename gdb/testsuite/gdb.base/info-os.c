@@ -48,6 +48,8 @@ thread_proc (void *args)
 {
   pthread_mutex_lock (&mutex);
   pthread_mutex_unlock (&mutex);
+
+  return NULL;
 }
 
 int

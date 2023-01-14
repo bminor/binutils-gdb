@@ -1,6 +1,6 @@
-#as: -mfuture
-#objdump: -dr -Mfuture
-#name: POWERXX alignment of labels test
+#as: -mpower10
+#objdump: -dr -Mpower10
+#name: POWER10 alignment of labels test
 
 .*
 

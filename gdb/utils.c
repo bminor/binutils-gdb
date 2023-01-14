@@ -74,6 +74,7 @@
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
 #include "cli-out.h"
+#include "gdbsupport/gdb-safe-ctype.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -469,18 +470,6 @@ demangler_warning (const char *file, int line, const char *string, ...)
   va_end (ap);
 }
 
-/* Dummy functions to keep add_prefix_cmd happy.  */
-
-static void
-set_internal_problem_cmd (const char *args, int from_tty)
-{
-}
-
-static void
-show_internal_problem_cmd (const char *args, int from_tty)
-{
-}
-
 /* When GDB reports an internal problem (error or warning) it gives
    the user the opportunity to quit GDB and/or create a core file of
    the current debug session.  This function registers a few commands
@@ -515,19 +504,17 @@ add_internal_problem_command (struct internal_problem *problem)
   show_doc = xstrprintf (_("Show what GDB does when %s is detected."),
 			 problem->name);
 
-  add_prefix_cmd (problem->name,
-		  class_maintenance, set_internal_problem_cmd, set_doc,
-		  set_cmd_list,
-		  concat ("maintenance set ", problem->name, " ",
-			  (char *) NULL),
-		  0/*allow-unknown*/, &maintenance_set_cmdlist);
+  add_basic_prefix_cmd (problem->name, class_maintenance, set_doc,
+			set_cmd_list,
+			concat ("maintenance set ", problem->name, " ",
+				(char *) NULL),
+			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd (problem->name,
-		  class_maintenance, show_internal_problem_cmd, show_doc,
-		  show_cmd_list,
-		  concat ("maintenance show ", problem->name, " ",
-			  (char *) NULL),
-		  0/*allow-unknown*/, &maintenance_show_cmdlist);
+  add_show_prefix_cmd (problem->name, class_maintenance, show_doc,
+		       show_cmd_list,
+		       concat ("maintenance show ", problem->name, " ",
+			       (char *) NULL),
+		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   if (problem->user_settable_should_quit)
     {
@@ -1039,7 +1026,7 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);
-	      if (isdigit (c) && c != '8' && c != '9')
+	      if (ISDIGIT (c) && c != '8' && c != '9')
 		{
 		  (*string_ptr)++;
 		  i *= 8;
@@ -2009,7 +1996,7 @@ puts_debug (char *prefix, char *string, char *suffix)
       switch (ch)
 	{
 	default:
-	  if (isprint (ch))
+	  if (gdb_isprint (ch))
 	    fputc_unfiltered (ch, gdb_stdlog);
 
 	  else
@@ -2274,8 +2261,7 @@ n_spaces (int n)
 
   if (n > max_spaces)
     {
-      if (spaces)
-	xfree (spaces);
+      xfree (spaces);
       spaces = (char *) xmalloc (n + 1);
       for (t = spaces + n; t != spaces;)
 	*--t = ' ';
@@ -2331,7 +2317,7 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
 static bool
 valid_identifier_name_char (int ch)
 {
-  return (isalnum (ch) || ch == '_');
+  return (ISALNUM (ch) || ch == '_');
 }
 
 /* Skip to end of token, or to END, whatever comes first.  Input is
@@ -2341,7 +2327,7 @@ static const char *
 cp_skip_operator_token (const char *token, const char *end)
 {
   const char *p = token;
-  while (p != end && !isspace (*p) && *p != '(')
+  while (p != end && !ISSPACE (*p) && *p != '(')
     {
       if (valid_identifier_name_char (*p))
 	{
@@ -2395,9 +2381,9 @@ cp_skip_operator_token (const char *token, const char *end)
 static void
 skip_ws (const char *&string1, const char *&string2, const char *end_str2)
 {
-  while (isspace (*string1))
+  while (ISSPACE (*string1))
     string1++;
-  while (string2 < end_str2 && isspace (*string2))
+  while (string2 < end_str2 && ISSPACE (*string2))
     string2++;
 }
 
@@ -2459,8 +2445,8 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
   while (1)
     {
       if (skip_spaces
-	  || ((isspace (*string1) && !valid_identifier_name_char (*string2))
-	      || (isspace (*string2) && !valid_identifier_name_char (*string1))))
+	  || ((ISSPACE (*string1) && !valid_identifier_name_char (*string2))
+	      || (ISSPACE (*string2) && !valid_identifier_name_char (*string1))))
 	{
 	  skip_ws (string1, string2, end_str2);
 	  skip_spaces = false;
@@ -2493,7 +2479,7 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	  if (match_for_lcd != NULL && abi_start != string1)
 	    match_for_lcd->mark_ignored_range (abi_start, string1);
 
-	  while (isspace (*string1))
+	  while (ISSPACE (*string1))
 	    string1++;
 	}
 
@@ -2518,9 +2504,9 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	  string1++;
 	  string2++;
 
-	  while (isspace (*string1))
+	  while (ISSPACE (*string1))
 	    string1++;
-	  while (string2 < end_str2 && isspace (*string2))
+	  while (string2 < end_str2 && ISSPACE (*string2))
 	    string2++;
 	  continue;
 	}
@@ -2614,14 +2600,14 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
-	  && (tolower ((unsigned char) *string1)
-	      != tolower ((unsigned char) *string2)))
+	  && (TOLOWER ((unsigned char) *string1)
+	      != TOLOWER ((unsigned char) *string2)))
 	break;
 
       /* If we see any non-whitespace, non-identifier-name character
 	 (any of "()<>*&" etc.), then skip spaces the next time
 	 around.  */
-      if (!isspace (*string1) && !valid_identifier_name_char (*string1))
+      if (!ISSPACE (*string1) && !valid_identifier_name_char (*string1))
 	skip_spaces = true;
 
       string1++;
@@ -2742,16 +2728,16 @@ strcmp_iw_ordered (const char *string1, const char *string2)
 
       while (*string1 != '\0' && *string2 != '\0')
 	{
-	  while (isspace (*string1))
+	  while (ISSPACE (*string1))
 	    string1++;
-	  while (isspace (*string2))
+	  while (ISSPACE (*string2))
 	    string2++;
 
 	  switch (case_pass)
 	  {
 	    case case_sensitive_off:
-	      c1 = tolower ((unsigned char) *string1);
-	      c2 = tolower ((unsigned char) *string2);
+	      c1 = TOLOWER ((unsigned char) *string1);
+	      c2 = TOLOWER ((unsigned char) *string2);
 	      break;
 	    case case_sensitive_on:
 	      c1 = *string1;
@@ -2939,17 +2925,17 @@ string_to_core_addr (const char *my_string)
 {
   CORE_ADDR addr = 0;
 
-  if (my_string[0] == '0' && tolower (my_string[1]) == 'x')
+  if (my_string[0] == '0' && TOLOWER (my_string[1]) == 'x')
     {
       /* Assume that it is in hex.  */
       int i;
 
       for (i = 2; my_string[i] != '\0'; i++)
 	{
-	  if (isdigit (my_string[i]))
+	  if (ISDIGIT (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 16);
-	  else if (isxdigit (my_string[i]))
-	    addr = (tolower (my_string[i]) - 'a' + 0xa) + (addr * 16);
+	  else if (ISXDIGIT (my_string[i]))
+	    addr = (TOLOWER (my_string[i]) - 'a' + 0xa) + (addr * 16);
 	  else
 	    error (_("invalid hex \"%s\""), my_string);
 	}
@@ -2961,7 +2947,7 @@ string_to_core_addr (const char *my_string)
 
       for (i = 0; my_string[i] != '\0'; i++)
 	{
-	  if (isdigit (my_string[i]))
+	  if (ISDIGIT (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 10);
 	  else
 	    error (_("invalid decimal \"%s\""), my_string);
