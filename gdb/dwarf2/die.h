@@ -33,6 +33,36 @@ struct die_info
     return NULL;
   }
 
+  /* Return the address base of the compile unit, which, if exists, is
+     stored either at the attribute DW_AT_GNU_addr_base, or
+     DW_AT_addr_base.  */
+  gdb::optional<ULONGEST> addr_base ()
+  {
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == DW_AT_addr_base
+	  || attrs[i].name == DW_AT_GNU_addr_base)
+	{
+	  /* If both exist, just use the first one.  */
+	  return DW_UNSND (&attrs[i]);
+	}
+    return gdb::optional<ULONGEST> ();
+  }
+
+  /* Return range lists base of the compile unit, which, if exists, is
+     stored either at the attribute DW_AT_rnglists_base or
+     DW_AT_GNU_ranges_base.  */
+  ULONGEST ranges_base ()
+  {
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == DW_AT_rnglists_base
+	  || attrs[i].name == DW_AT_GNU_ranges_base)
+	{
+	  /* If both exist, just use the first one.  */
+	  return DW_UNSND (&attrs[i]);
+	}
+    return 0;
+  }
+
 
   /* DWARF-2 tag for this DIE.  */
   ENUM_BITFIELD(dwarf_tag) tag : 16;

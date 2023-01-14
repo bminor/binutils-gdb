@@ -1248,6 +1248,20 @@ skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
     evaluate_subexp (NULL_TYPE, exp, pos, noside);
 }
 
+/* Return true if type is integral or reference to integral */
+
+static bool
+is_integral_or_integral_reference (struct type *type)
+{
+  if (is_integral_type (type))
+    return true;
+
+  type = check_typedef (type);
+  return (type != nullptr
+	  && TYPE_IS_REFERENCE (type)
+	  && is_integral_type (TYPE_TARGET_TYPE (type)));
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2208,10 +2222,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
-	       && is_integral_type (value_type (arg2)))
+	       && is_integral_or_integral_reference (value_type (arg2)))
 	return value_ptradd (arg1, value_as_long (arg2));
       else if (ptrmath_type_p (exp->language_defn, value_type (arg2))
-	       && is_integral_type (value_type (arg1)))
+	       && is_integral_or_integral_reference (value_type (arg1)))
 	return value_ptradd (arg2, value_as_long (arg1));
       else
 	{
@@ -2234,7 +2248,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return value_from_longest (type, value_ptrdiff (arg1, arg2));
 	}
       else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
-	       && is_integral_type (value_type (arg2)))
+	       && is_integral_or_integral_reference (value_type (arg2)))
 	return value_ptradd (arg1, - value_as_long (arg2));
       else
 	{

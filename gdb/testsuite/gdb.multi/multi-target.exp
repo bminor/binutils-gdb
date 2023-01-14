@@ -33,8 +33,13 @@ if { [prepare_for_testing "failed to prepare" ${binfile} "${srcfile}" \
     return
 }
 
-proc connect_target_extended_remote {binfile} {
+# Keep a list of (inferior ID, spawn ID).
+set server_spawn_ids [list]
+
+proc connect_target_extended_remote {binfile num} {
     set res [gdbserver_start "--multi" ""]
+    global server_spawn_ids server_spawn_id
+    lappend server_spawn_ids $num $server_spawn_id
     set gdbserver_gdbport [lindex $res 1]
     return [gdb_target_cmd "extended-remote" $gdbserver_gdbport]
 }
@@ -58,7 +63,7 @@ proc add_inferior {num target binfile {gcorefile ""}} {
     }
 
     if {$target == "extended-remote"} {
-	if {[connect_target_extended_remote $binfile]} {
+	if {[connect_target_extended_remote $binfile $num]} {
 	    return 0
 	}
     }
@@ -99,12 +104,25 @@ proc next_live_inferior {inf} {
     return $inf
 }
 
+# Clean up the server_spawn_ids.
+proc cleanup_gdbservers { } {
+    global server_spawn_id
+    global server_spawn_ids
+    foreach { inferior_id spawn_id } $server_spawn_ids {
+	set server_spawn_id $spawn_id
+	gdb_test "inferior $inferior_id"
+	gdbserver_exit 0
+    }
+    set server_spawn_ids [list]
+}
+
 # Return true on success, false otherwise.
 
 proc setup {non-stop} {
     global gcorefile gcore_created
     global binfile
 
+    cleanup_gdbservers
     clean_restart ${binfile}
 
     # multi-target depends on target running in non-stop mode.  Force
@@ -448,3 +466,5 @@ with_test_prefix "info-inferiors" {
 	test_info_inferiors $multi_process
     }
 }
+
+cleanup_gdbservers

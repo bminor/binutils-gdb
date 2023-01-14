@@ -1978,6 +1978,10 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	     inferior.  */
 	  linux_target->low_new_fork (lp, new_pid);
 	}
+      else if (event == PTRACE_EVENT_CLONE)
+	{
+	  linux_target->low_new_clone (lp, new_pid);
+	}
 
       if (event == PTRACE_EVENT_FORK
 	  && linux_fork_checkpointing_p (lp->ptid.pid ()))

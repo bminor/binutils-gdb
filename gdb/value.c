@@ -3962,7 +3962,7 @@ creal_internal_fn (struct gdbarch *gdbarch,
   type *ctype = check_typedef (value_type (cval));
   if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
-  return value_from_component (cval, TYPE_TARGET_TYPE (ctype), 0);
+  return value_real_part (cval);
 }
 
 /* Implementation of the convenience function $_cimag.  Extracts the
@@ -3981,8 +3981,7 @@ cimag_internal_fn (struct gdbarch *gdbarch,
   type *ctype = check_typedef (value_type (cval));
   if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
-  return value_from_component (cval, TYPE_TARGET_TYPE (ctype),
-			       TYPE_LENGTH (TYPE_TARGET_TYPE (ctype)));
+  return value_imaginary_part (cval);
 }
 
 #if GDB_SELF_TEST

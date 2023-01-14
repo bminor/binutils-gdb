@@ -114,12 +114,12 @@ proc build_executable_from_fission_assembler { testname executable sources optio
 # static void func (void) {}
 #
 
-proc function_range { func src } {
+proc function_range { func src {options {debug}} } {
     global decimal gdb_prompt
 
     set exe [standard_temp_file func_addr[pid].x]
 
-    gdb_compile $src $exe executable {debug}
+    gdb_compile $src $exe executable $options
 
     gdb_exit
     gdb_start
@@ -1452,6 +1452,11 @@ namespace eval Dwarf {
 	    proc DW_LNS_advance_line {offset} {
 		_op .byte 3
 		_op .sleb128 ${offset}
+	    }
+
+	    proc DW_LNS_set_file {num} {
+		_op .byte 4
+		_op .sleb128 ${num}
 	    }
 
 	    foreach statement $statements {

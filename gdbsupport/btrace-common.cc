@@ -173,7 +173,8 @@ btrace_data_append (struct btrace_data *dst,
 	    size = src->variant.pt.size + dst->variant.pt.size;
 	    data = (gdb_byte *) xmalloc (size);
 
-	    memcpy (data, dst->variant.pt.data, dst->variant.pt.size);
+	    if (dst->variant.pt.size > 0)
+	      memcpy (data, dst->variant.pt.data, dst->variant.pt.size);
 	    memcpy (data + dst->variant.pt.size, src->variant.pt.data,
 		    src->variant.pt.size);
 

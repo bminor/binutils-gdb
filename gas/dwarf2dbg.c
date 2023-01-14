@@ -30,7 +30,6 @@
 
 #include "as.h"
 #include "safe-ctype.h"
-#include "bignum.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>

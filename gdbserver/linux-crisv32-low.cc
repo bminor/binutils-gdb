@@ -20,6 +20,81 @@
 #include "linux-low.h"
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the CRIS architecture.  */
+
+class crisv32_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
+};
+
+/* The singleton target ops object.  */
+
+static crisv32_target the_crisv32_target;
+
+bool
+crisv32_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+crisv32_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
+
+bool
+crisv32_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+crisv32_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+crisv32_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
+
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);
 extern const struct target_desc *tdesc_crisv32;
@@ -58,28 +133,27 @@ static int cris_regmap[] = {
 static const unsigned short cris_breakpoint = 0xe938;
 #define cris_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-cris_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+crisv32_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = cris_breakpoint_len;
   return (const gdb_byte *) &cris_breakpoint;
 }
 
-static int
-cris_breakpoint_at (CORE_ADDR where)
+bool
+crisv32_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn,
-			   cris_breakpoint_len);
+  read_memory (where, (unsigned char *) &insn, cris_breakpoint_len);
   if (insn == cris_breakpoint)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
 static void
@@ -115,23 +189,23 @@ cris_write_data_breakpoint (struct regcache *regcache,
     }
 }
 
-static int
-cris_supports_z_point_type (char z_type)
+bool
+crisv32_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
-static int
-cris_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		   int len, struct raw_breakpoint *bp)
+int
+crisv32_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int bp;
   unsigned long bp_ctrl;
@@ -202,9 +276,9 @@ cris_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return 0;
 }
 
-static int
-cris_remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int len,
-		   struct raw_breakpoint *bp)
+int
+crisv32_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int bp;
   unsigned long bp_ctrl;
@@ -285,8 +359,8 @@ cris_remove_point (enum raw_bkpt_type type, CORE_ADDR addr, int len,
   return 0;
 }
 
-static int
-cris_stopped_by_watchpoint (void)
+bool
+crisv32_target::low_stopped_by_watchpoint ()
 {
   unsigned long exs;
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
@@ -296,8 +370,8 @@ cris_stopped_by_watchpoint (void)
   return (((exs & 0xff00) >> 8) == 0xc);
 }
 
-static CORE_ADDR
-cris_stopped_data_address (void)
+CORE_ADDR
+crisv32_target::low_stopped_data_address ()
 {
   unsigned long eda;
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
@@ -346,18 +420,10 @@ cris_store_gregset (struct regcache *regcache, const void *buf)
     }
 }
 
-static void
-cris_arch_setup (void)
+void
+crisv32_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_crisv32;
-}
-
-/* Support for hardware single step.  */
-
-static int
-cris_supports_hardware_single_step (void)
-{
-  return 1;
 }
 
 static struct regset_info cris_regsets[] = {
@@ -380,56 +446,22 @@ static struct usrregs_info cris_usrregs_info =
     cris_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &cris_usrregs_info,
     &cris_regsets_info
   };
 
-static const struct regs_info *
-cris_regs_info (void)
+const regs_info *
+crisv32_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-struct linux_target_ops the_low_target = {
-  cris_arch_setup,
-  cris_regs_info,
-  NULL,
-  NULL,
-  NULL, /* fetch_register */
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
-  NULL, /* breakpoint_kind_from_pc */
-  cris_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  0,
-  cris_breakpoint_at,
-  cris_supports_z_point_type,
-  cris_insert_point,
-  cris_remove_point,
-  cris_stopped_by_watchpoint,
-  cris_stopped_data_address,
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
-  NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  cris_supports_hardware_single_step,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_crisv32_target;
 
 void
 initialize_low_arch (void)

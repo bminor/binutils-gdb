@@ -1,3 +1,46 @@
+2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Don't
+	enable on *-*-solaris*.
+
+2020-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/25662
+	* objcopy.c (copy_object): When copying PE format files set the
+	timestamp field in the pe_data structure if the preserve_dates
+	flag is set.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test) Use
+	--preserve-dates in place of the -p option, in order to make its
+	effect more obvious.
+
+2020-03-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Only
+	clear_xfail hppa*-*-*elf*.  Revert mips xfails.
+
+2020-03-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Move xfails
+	from here to calls.  Remove "m8*-*-*" entry.  Don't xfail tic54x
+	but do xfail spu, mipstx39 and mips-sgi-irix for the executable
+	test.  Pass "-p" to objcopy for the executable test.
+
+2020-03-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	PR binutils/25662
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Add argument to
+	specify whether an object file or executable should be built and tested.
+	Change test names to report whether an object file or executable is
+	being tested.
+	* testsuite/binutils-all/pr25662.ld: New test.
+	* testsuite/binutils-all/pr25662.s: New test.
+
+2020-03-27  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_archive): Don't double free qualified_name.
+	Don't break out of loop with "negative" archive_file_size, just
+	set file offset to max.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_archive): Prevent endless loop.

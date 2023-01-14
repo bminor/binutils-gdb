@@ -1588,7 +1588,7 @@ mmo_scan (bfd *abfd)
   unsigned int lineno = 1;
   bfd_boolean error = FALSE;
   bfd_vma vma = 0;
-  asection *sec = bfd_make_section_old_way (abfd, MMO_TEXT_SECTION_NAME);
+  asection *sec = NULL;
   asection *non_spec_sec = NULL;
   bfd_vma non_spec_vma = 0;
   bfd_size_type nbytes_read = 0;
@@ -1646,6 +1646,8 @@ mmo_scan (bfd *abfd)
 		goto error_return;
 
 	      vma &= ~3;
+	      if (sec == NULL)
+		sec = bfd_make_section_old_way (abfd, MMO_TEXT_SECTION_NAME);
 	      mmo_xore_32 (sec, vma, bfd_get_32 (abfd, buf));
 	      vma += 4;
 	      lineno++;
@@ -2038,6 +2040,8 @@ mmo_scan (bfd *abfd)
       else
 	{
 	  /* This wasn't a lopcode, so store it in the current section.  */
+	  if (sec == NULL)
+	    sec = bfd_make_section_old_way (abfd, MMO_TEXT_SECTION_NAME);
 	  mmo_xore_32 (sec, vma & ~3, bfd_get_32 (abfd, buf));
 	  vma += 4;
 	  vma &= ~3;

@@ -1206,6 +1206,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_VP2INTERSECT_FLAGS, 0 },
   { STRING_COMMA_LEN (".enqcmd"), PROCESSOR_UNKNOWN,
     CPU_ENQCMD_FLAGS, 0 },
+  { STRING_COMMA_LEN (".serialize"), PROCESSOR_UNKNOWN,
+    CPU_SERIALIZE_FLAGS, 0 },
   { STRING_COMMA_LEN (".rdpru"), PROCESSOR_UNKNOWN,
     CPU_RDPRU_FLAGS, 0 },
   { STRING_COMMA_LEN (".mcommit"), PROCESSOR_UNKNOWN,
@@ -1255,6 +1257,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_bf16"), CPU_ANY_AVX512_BF16_FLAGS },
   { STRING_COMMA_LEN ("noavx512_vp2intersect"), CPU_ANY_SHSTK_FLAGS },
   { STRING_COMMA_LEN ("noenqcmd"), CPU_ANY_ENQCMD_FLAGS },
+  { STRING_COMMA_LEN ("noserialize"), CPU_ANY_SERIALIZE_FLAGS },
 };
 
 #ifdef I386COFF

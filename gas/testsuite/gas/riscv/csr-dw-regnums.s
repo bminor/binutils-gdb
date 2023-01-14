@@ -192,6 +192,7 @@ _start:
 	.cfi_offset mhpmcounter29h, 11892
 	.cfi_offset mhpmcounter30h, 11896
 	.cfi_offset mhpmcounter31h, 11900
+	.cfi_offset mcountinhibit, 3200
 	.cfi_offset mhpmevent3, 3212
 	.cfi_offset mhpmevent4, 3216
 	.cfi_offset mhpmevent5, 3220
@@ -227,7 +228,10 @@ _start:
 	.cfi_offset tdata3, 7820
 	.cfi_offset dcsr, 7872
 	.cfi_offset dpc, 7876
-	.cfi_offset dscratch, 7880
+	.cfi_offset dscratch0, 7880
+	.cfi_offset dscratch1, 7884
+
+	# dropped in the current 1.11 priv spec.
 	.cfi_offset hstatus, 2048
 	.cfi_offset hedeleg, 2056
 	.cfi_offset hideleg, 2060
@@ -244,12 +248,13 @@ _start:
 	.cfi_offset mibound, 3596
 	.cfi_offset mdbase, 3600
 	.cfi_offset mdbound, 3604
-	.cfi_offset mucounteren, 3200
 	.cfi_offset mscounteren, 3204
 	.cfi_offset mhcounteren, 3208
 	.cfi_offset ubadaddr, 268
 	.cfi_offset sbadaddr, 1292
 	.cfi_offset sptbr, 1536
 	.cfi_offset mbadaddr, 3340
+	.cfi_offset mucounteren, 3200
+	.cfi_offset dscratch, 7880
 	nop
 	.cfi_endproc

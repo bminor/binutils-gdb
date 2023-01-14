@@ -19,6 +19,55 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Linux target op definitions for the SH architecture.  */
+
+class sh_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static sh_target the_sh_target;
+
+bool
+sh_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+sh_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+sh_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
+
 /* Defined in auto-generated file reg-sh.c.  */
 void init_registers_sh (void);
 extern const struct target_desc *tdesc_sh;
@@ -46,51 +95,43 @@ static int sh_regmap[] = {
  REG_FPREG0*4+48,  REG_FPREG0*4+52,  REG_FPREG0*4+56,  REG_FPREG0*4+60,
 };
 
-static int
-sh_cannot_store_register (int regno)
+bool
+sh_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-sh_cannot_fetch_register (int regno)
+bool
+sh_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 /* Correct in either endianness, obviously.  */
 static const unsigned short sh_breakpoint = 0xc3c3;
 #define sh_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-sh_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+sh_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = sh_breakpoint_len;
   return (const gdb_byte *) &sh_breakpoint;
 }
 
-static int
-sh_breakpoint_at (CORE_ADDR where)
+bool
+sh_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn, 2);
+  read_memory (where, (unsigned char *) &insn, 2);
   if (insn == sh_breakpoint)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
-}
-
-/* Support for hardware single step.  */
-
-static int
-sh_supports_hardware_single_step (void)
-{
-  return 1;
+  return false;
 }
 
 /* Provide only a fill function for the general register set.  ps_lgetregs
@@ -123,62 +164,28 @@ static struct usrregs_info sh_usrregs_info =
     sh_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &sh_usrregs_info,
     &sh_regsets_info
   };
 
-static const struct regs_info *
-sh_regs_info (void)
+const regs_info *
+sh_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-static void
-sh_arch_setup (void)
+void
+sh_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_sh;
 }
 
-struct linux_target_ops the_low_target = {
-  sh_arch_setup,
-  sh_regs_info,
-  sh_cannot_fetch_register,
-  sh_cannot_store_register,
-  NULL, /* fetch_register */
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
-  NULL, /* breakpoint_kind_from_pc */
-  sh_sw_breakpoint_from_kind,
-  NULL,
-  0,
-  sh_breakpoint_at,
-  NULL, /* supports_z_point_type */
-  NULL, /* insert_point */
-  NULL, /* remove_point */
-  NULL, /* stopped_by_watchpoint */
-  NULL, /* stopped_data_address */
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
-  NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  sh_supports_hardware_single_step,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_sh_target;
 
 void
 initialize_low_arch (void)

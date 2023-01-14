@@ -1,3 +1,1983 @@
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-low.h (struct linux_target_ops): Remove.
+	(the_low_target): Remove.
+	* linux-x86-low.cc (the_low_target): Remove.
+	* linux-aarch64-low.cc (the_low_target): Ditto.
+	* linux-arm-low.cc (the_low_target): Ditto.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-cris-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-ia64-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (the_low_target): Ditto.
+	* linux-nios2-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-riscv-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'get_ipa_tdesc_idx' linux target op and let a concrete
+	linux target define the op by overriding the declaration in
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <get_ipa_tdesc_idx>: Remove.
+	* linux-low.cc (linux_process_target::get_ipa_tdesc_idx): Remove.
+	* linux-x86-low.cc (class x86_target) <get_ipa_tdesc_idx>: Declare.
+	(x86_get_ipa_tdesc_idx): Turn into...
+	(x86_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <get_ipa_tdesc_idx>: Declare.
+	(ppc_get_ipa_tdesc_idx): Turn into...
+	(ppc_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <get_ipa_tdesc_idx>: Declare.
+	(s390_get_ipa_tdesc_idx): Turn into...
+	(s390_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'get_syscall_trapinfo' linux target op into a method
+	of process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <get_syscall_trapinfo>
+	<gdb_catch_this_syscall>
+	<low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	* linux-low.cc (get_syscall_trapinfo): Turn into...
+	(linux_process_target::get_syscall_trapinfo): ...this.
+	(linux_process_target::low_get_syscall_trapinfo): Define.
+	(gdb_catch_this_syscall_p): Turn into...
+	(linux_process_target::gdb_catch_this_syscall): ...this.
+	(linux_process_target::low_supports_catch_syscall): Define.
+
+	Update the callers below.
+
+	(linux_process_target::wait_1)
+	(linux_process_target::supports_catch_syscall)
+
+	* linux-x86-low.cc (class x86_target) <low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(x86_target::low_supports_catch_syscall): Define.
+	(x86_get_syscall_trapinfo): Turn into...
+	(x86_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(aarch64_target::low_supports_catch_syscall): Define.
+	(aarch64_get_syscall_trapinfo): Turn into...
+	(aarch64_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(arm_target::low_supports_catch_syscall): Define.
+	(arm_get_syscall_trapinfo): Turn into...
+	(arm_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (the_low_target): Remove the op field.
+	* linux-s390-low.cc (the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'supports_hardware_single_step' linux target op and
+	override the process_stratum_target's op definition in
+	linux_process_target to return true.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <finish_step_over>
+	<maybe_hw_step>: Declare.
+	* linux-low.cc (can_hardware_single_step): Remove.
+	(maybe_hw_step): Turn into...
+	(linux_process_target::maybe_hw_step): ...this.
+	(finish_step_over): Turn into...
+	(linux_process_target::finish_step_over): ...this.
+	(linux_process_target::supports_hardware_single_step): Update
+	to return true.
+
+	Update the callers below.
+
+	(linux_process_target::single_step)
+	(linux_process_target::resume_one_lwp_throw)
+
+	* linux-arm-low.cc (class arm_target)
+	<supports_hardware_single_step>: Declare.
+	(arm_supports_hardware_single_step): Turn into...
+	(arm_target::supports_hardware_single_step): ...this.
+	(the_low_target): Remove the op field.
+	* linux-x86-low.cc (x86_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (aarch64_supports_hardware_single_step):
+	Remove.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (bfin_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (cris_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (m32r_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (m68k_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (ppc_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (s390_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (sh_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (tic6x_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (tile_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (xtensa_supports_hardware_single_step):
+	Remove.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'supports_range_stepping' linux target op into a method
+	of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <low_supports_range_stepping>: Declare.
+	* linux-low.cc (linux_process_target::low_supports_range_stepping):
+	Define.
+	(linux_process_target::supports_range_stepping): Update the call
+	site.
+	* linux-x86-low.cc (class x86_target)
+	<low_supports_range_stepping>: Declare.
+	(x86_supports_range_stepping): Turn into...
+	(x86_target::low_supports_range_stepping): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_supports_range_stepping>: Declare.
+	(aarch64_supports_range_stepping): Turn into...
+	(aarch64_target::low_supports_range_stepping): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'emit_ops' linux target ops and let the concrete
+	linux target define the op by overriding the declaration of
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <emit_ops>: Remove.
+	* linux-low.cc (linux_process_target::emit_ops): Remove.
+	* linux-x86-low.cc (class x86_target) <emit_ops>: Declare.
+	(x86_emit_ops): Turn into...
+	(x86_target::emit_ops): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <emit_ops>: Declare.
+	(aarch64_emit_ops): Turn into...
+	(aarch64_target::emit_ops): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <emit_ops>: Declare.
+	(ppc_emit_ops): Turn into...
+	(ppc_target::emit_ops): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <emit_ops>: Declare.
+	(s390_emit_ops): Turn into...
+	(s390_target::emit_ops): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'install_fast_tracepoint_jump_pad' and
+	'get_min_fast_tracepoint_insn_len' linux target ops to let the
+	concrete linux target define the ops by overriding the declarations
+	of process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Remove.
+	* linux-low.cc (linux_process_target::supports_fast_tracepoints)
+	(linux_process_target::install_fast_tracepoint_jump_pad)
+	(linux_process_target::get_min_fast_tracepoint_insn_len): Remove.
+	* linux-x86-low.cc (class x86_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(x86_target::supports_fast_tracepoints): Define.
+	(x86_install_fast_tracepoint_jump_pad): Turn into...
+	(x86_target::install_fast_tracepoint_jump_pad): ...this.
+	(x86_get_min_fast_tracepoint_insn_len): Turn into...
+	(x86_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(aarch64_target::supports_fast_tracepoints): Define.
+	(aarch64_install_fast_tracepoint_jump_pad): Turn into...
+	(aarch64_target::install_fast_tracepoint_jump_pad): ...this.
+	(aarch64_get_min_fast_tracepoint_insn_len): Turn into...
+	(aarch64_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(ppc_target::supports_fast_tracepoints): Define.
+	(ppc_install_fast_tracepoint_jump_pad): Turn into...
+	(ppc_target::install_fast_tracepoint_jump_pad): ...this.
+	(ppc_get_min_fast_tracepoint_insn_len): Turn into...
+	(ppc_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(s390_target::supports_fast_tracepoints): Define.
+	(s390_install_fast_tracepoint_jump_pad): Turn into...
+	(s390_target::install_fast_tracepoint_jump_pad): ...this.
+	(s390_get_min_fast_tracepoint_insn_len): Turn into...
+	(s390_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'get_thread_area' linux target op into a method of
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <stuck_in_jump_pad>
+	<linux_fast_tracepoint_collecting>
+	<low_get_thread_area>: Declare.
+	* linux-low.cc (supports_fast_tracepoints): Remove.
+	(linux_fast_tracepoint_collecting): Turn into...
+	(linux_process_target::linux_fast_tracepoint_collecting): ...this.
+	(linux_process_target::low_get_thread_area): Define.
+	(stuck_in_jump_pad_callback): Turn into...
+	(linux_process_target::stuck_in_jump_pad): ...this.
+
+	Update the caller below.
+
+	(linux_process_target::stabilize_threads)
+
+	* linux-x86-low.cc (class x86_target) <low_get_thread_area>:
+	Declare.
+	(x86_get_thread_area): Turn into...
+	(x86_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <low_get_thread_area>:
+	Declare.
+	(aarch64_get_thread_area): Turn into...
+	(aarch64_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <low_get_thread_area>:
+	Declare.
+	(ppc_get_thread_area): Turn into...
+	(ppc_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <low_get_thread_area>:
+	Declare.
+	(s390_get_thread_area): Turn into...
+	(s390_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remote the 'supports_tracepoints' linux target op and let the
+	concrete linux target define it by overriding the op declared in
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <supports_tracepoints>: Remove.
+	* linux-low.cc (linux_process_target::supports_tracepoints): Remove.
+	* linux-x86-low.cc (class x86_target) <supports_tracepoints>:
+	Declare.
+	(x86_supports_tracepoints): Turn into...
+	(x86_target::supports_tracepoints): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<supports_tracepoints>: Declare.
+	(aarch64_supports_tracepoints): Turn into...
+	(aarch64_target::supports_tracepoints): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <supports_tracepoints>:
+	Declare.
+	(ppc_supports_tracepoints): Turn into...
+	(ppc_target::supports_tracepoints): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <supports_tracepoints>:
+	Declare.
+	(s390_supports_tracepoints): Turn into...
+	(s390_target::supports_tracepoints): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'process_qsupported' linux target op and let a concrete
+	linux target define the op by overriding the op declaration in
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <process_qsupported>: Remove.
+	* linux-low.cc (linux_process_target::process_qsupported): Remove.
+	* linux-x86-low.cc (class x86_target) <process_qsupported>: Declare.
+	(x86_linux_process_qsupported): Turn into...
+	(x86_target::process_qsupported): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (the_low_target): Remove the op
+	field.
+	* linux-arm-low.cc (the_low_target): Ditto.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'prepare_to_resume' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <low_prepare_to_resume>: Declare.
+	* linux-low.cc (linux_process_target::low_prepare_to_resume):
+	Define.
+
+	Update the callers below:
+
+	(linux_process_target::resume_one_lwp_throw)
+	(linux_process_target::low_prepare_to_resume)
+
+	* linux-x86-low.cc (class x86_target) <low_prepare_to_resume>:
+	Declare.
+	(x86_target::low_prepare_to_resume): Define.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_prepare_to_resume>: Declare.
+	(aarch64_target::low_prepare_to_resume): Define.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <low_prepare_to_resume>:
+	Declare.
+	(arm_prepare_to_resume): Turn into...
+	(arm_target::low_prepare_to_resume): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <low_prepare_to_resume>:
+	Declare.
+	(mips_linux_prepare_to_resume): Turn into...
+	(mips_target::low_prepare_to_resume): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'new_process', 'delete_process', 'new_thread',
+	'delete_thread', and 'new_fork' linux target ops into methods
+	of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <add_linux_process>
+	<add_lwp>
+	<delete_lwp>
+	<attach_lwp>
+	<detach_one_lwp>
+	<check_zombie_leaders>
+	<filter_exit_event>
+	<low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	* linux-low.cc (delete_lwp): Turn into...
+	(linux_process_target::delete_lwp): ...this.
+	(linux_process_target::low_delete_thread): Define.
+	(linux_add_process): Turn into...
+	(linux_process_target::add_linux_process): ...this.
+	(linux_process_target::low_new_process): Define.
+	(linux_process_target::low_delete_process): Define.
+	(linux_process_target::low_new_fork): Define.
+	(add_lwp): Turn into...
+	(linux_process_target::add_lwp): ...this.
+	(linux_process_target::low_new_thread): Define.
+	(linux_attach_lwp): Turn into...
+	(linux_process_target::attach_lwp): ...this.
+	(linux_detach_one_lwp): Turn into...
+	(linux_process_target::detach_one_lwp): ...this.
+	(linux_detach_lwp_callback): Remove and inline...
+	(linux_process_target::detach): ...here.
+	(check_zombie_leaders): Turn into...
+	(linux_process_target::check_zombie_leaders): ...this.
+	(filter_exit_event): Turn into...
+	(linux_process_target::filter_exit_event): ...this.
+
+	Update the callers below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::create_inferior)
+	(attach_proc_task_lwp_callback)
+	(linux_process_target::attach)
+	(linux_process_target::detach)
+	(linux_process_target::mourn)
+	* thread-db.cc (attach_thread)
+
+	* linux-x86-low.cc (class x86_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(x86_linux_new_process): Turn into...
+	(x86_target::low_new_process): ...this.
+	(x86_linux_delete_process): Turn into...
+	(x86_target::low_delete_process): ...this.
+	(x86_target::low_new_thread): Define.
+	(x86_target::low_delete_thread): Define.
+	(x86_linux_new_fork): Turn into...
+	(x86_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(aarch64_linux_new_process): Turn into...
+	(aarch64_target::low_new_process): ...this.
+	(aarch64_linux_delete_process): Turn into...
+	(aarch64_target::low_delete_process): ...this.
+	(aarch64_target::low_new_thread): Define.
+	(aarch64_target::low_delete_thread): Define.
+	(aarch64_linux_new_fork): Turn into...
+	(aarch64_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(arm_new_process): Turn into...
+	(arm_target::low_new_process): ...this.
+	(arm_delete_process): Turn into...
+	(arm_target::low_delete_process): ...this.
+	(arm_new_thread): Turn into...
+	(arm_target::low_new_thread): ...this.
+	(arm_delete_thread): Turn into...
+	(arm_target::low_delete_thread): ...this.
+	(arm_new_fork): Turn into...
+	(arm_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(mips_linux_new_process): Turn into...
+	(mips_target::low_new_process): ...this.
+	(mips_linux_delete_process): Turn into...
+	(mips_target::low_delete_process): ...this.
+	(mips_linux_new_thread): Turn into...
+	(mips_target::low_new_thread): ...this.
+	(mips_linux_delete_thread): Turn into...
+	(mips_target::low_delete_thread): ...this.
+	(mips_linux_new_fork): Turn into...
+	(mips_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'siginfo_fixup' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <siginfo_fixup>
+	<low_siginfo_fixup>: Declare.
+	* linux-low.cc (siginfo_fixup): Turn into...
+	(linux_process_target::siginfo_fixup): ...this.
+	(linux_process_target::low_siginfo_fixup): Define.
+	* linux-x86-low.cc (class x86_target) <low_siginfo_fixup>: Declare.
+	(x86_siginfo_fixup): Turn into...
+	(x86_target::low_siginfo_fixup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target):
+	<low_siginfo_fixup>: Declare.
+	(aarch64_linux_siginfo_fixup): Turn into...
+	(aarch64_target::low_siginfo_fixup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'collect_ptrace_register' and 'supply_ptrace_register'
+	linux target ops into methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <low_collect_ptrace_register>
+	<low_store_ptrace_register>: Declare.
+	* linux-low.cc (linux_process_target::low_collect_ptrace_register)
+	(linux_process_target::low_supply_ptrace_register): Define.
+
+	Update the callers below.
+
+	(linux_process_target::fetch_register)
+	(linux_process_target::store_register)
+
+	* linux-x86-low.cc (the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (the_low_target): Ditto.
+	* linux-arm-low.cc (the_low_target): Ditto.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (class mips_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(mips_collect_ptrace_register): Turn into ...
+	(mips_target::low_collect_ptrace_register): ...this.
+	(mips_supply_ptrace_register): Turn into...
+	(mips_target::low_supply_ptrace_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(ppc_collect_ptrace_register): Turn into ...
+	(ppc_target::low_collect_ptrace_register): ...this.
+	(ppc_supply_ptrace_register): Turn into ...
+	(ppc_target::low_supply_ptrace_register): ...this.
+	(ppc_fill_gregset): Update for the calls to
+	low_collect_ptrace_register.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(s390_collect_ptrace_register): Turn into ...
+	(s390_target::low_collect_ptrace_register): ...this.
+	(s390_supply_ptrace_register): Turn into ...
+	(s390_target::low_supply_ptrace_register): ...this.
+	(s390_fill_gregset): Update for the calls to
+	low_collect_ptrace_register.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'stopped_by_watchpoint' and 'stopped_data_address' linux
+	target ops into methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <check_stopped_by_watchpoint>
+	<low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	* linux-low.cc (check_stopped_by_watchpoint): Turn into...
+	(linux_process_target::check_stopped_by_watchpoint): ...this.
+	(linux_process_target::low_stopped_by_watchpoint): Define.
+	(linux_process_target::low_stopped_data_address): Define.
+	* linux-x86-low.cc (class x86_target) <low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	(x86_stopped_by_watchpoint): Turn into...
+	(x86_target::low_stopped_by_watchpoint): ...this.
+	(x86_stopped_data_address): Turn into...
+	(x86_target::low_stopped_data_address): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	(aarch64_stopped_by_watchpoint): Turn into...
+	(aarch64_target::low_stopped_by_watchpoint): ...this.
+	(aarch64_stopped_data_address): Turn into...
+	(aarch64_target::low_stopped_data_address): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target) <low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	(arm_stopped_by_watchpoint): Turn into...
+	(arm_target::low_stopped_by_watchpoint): ...this.
+	(arm_stopped_data_address): Turn into...
+	(arm_target::low_stopped_data_address): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	(cris_stopped_by_watchpoint): Turn into...
+	(crisv32_target::low_stopped_by_watchpoint): ...this.
+	(cris_stopped_data_address): Turn into...
+	(crisv32_target::low_stopped_data_address): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target) <low_stopped_by_watchpoint>
+	<low_stopped_data_address>: Declare.
+	(mips_stopped_by_watchpoint): Turn into...
+	(mips_target::low_stopped_by_watchpoint): ...this.
+	(mips_stopped_data_address): Turn into...
+	(mips_target::low_stopped_data_address): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Remove the op fields.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'insert_point' and 'remove_point' linux target ops into
+	methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	* linux-low.cc (linux_process_target::low_insert_point)
+	(linux_process_target::low_remove_point): Define.
+	(linux_process_target::insert_point)
+	(linux_process_target::remove_point): Update for calls to
+	low_insert_point and low_remove_point.
+	* linux-x86-low.cc (class x86_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(x86_insert_point): Turn into...
+	(x86_target::low_insert_point): ...this.
+	(x86_remove_point): Turn into...
+	(x86_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(aarch64_insert_point): Turn into...
+	(aarch64_target::low_insert_point): ...this.
+	(aarch64_remove_point): Turn into...
+	(aarch64_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(arm_insert_point): Turn into...
+	(arm_target::low_insert_point): ...this.
+	(arm_remove_point): Turn into...
+	(arm_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (class crisv32_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(crisv32_insert_point): Turn into...
+	(crisv32_target::low_insert_point): ...this.
+	(crisv32_remove_point): Turn into...
+	(crisv32_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(mips_insert_point): Turn into...
+	(mips_target::low_insert_point): ...this.
+	(mips_remove_point): Turn into...
+	(mips_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target) <low_insert_point>
+	<low_remove_point>: Declare.
+	(ppc_insert_point): Turn into...
+	(ppc_target::low_insert_point): ...this.
+	(ppc_remove_point): Turn into...
+	(ppc_target::low_remove_point): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Remove the op fields.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'supports_z_point_type' linux target op and let the
+	concrete linux target define it by overriding the op declared in
+	process_stratum_target.
+
+	* linux-low.cc (linux_process_target::supports_z_point_type):
+	Remove.
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <supports_z_point_type>: Remove.
+	* linux-x86-low.cc (class x86_target) <supports_z_point_type>:
+	Declare.
+	(x86_supports_z_point_type): Turn into...
+	(x86_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<supports_z_point_type>: Declare.
+	(aarch64_supports_z_point_type): Turn into...
+	(aarch64_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <supports_z_point_type>:
+	Declare.
+	(arm_supports_z_point_type): Turn into...
+	(arm_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<supports_z_point_type>: Declare.
+	(cris_supports_z_point_type): Turn into...
+	(crisv32_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <supports_z_point_type>:
+	Declare.
+	(mips_supports_z_point_type): Turn into...
+	(mips_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <supports_z_point_type>:
+	Declare.
+	(ppc_supports_z_point_type): Turn into...
+	(ppc_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <supports_z_point_type>:
+	Declare.
+	(s390_supports_z_point_type): Turn into...
+	(s390_target::supports_z_point_type): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Remove the op field.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'breakpoint_at' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <low_breakpoint_at>: Declare.
+
+	Update the callers below:
+
+	* linux-low.cc (linux_process_target::save_stop_reason)
+	(linux_process_target::thread_still_has_status_pending)
+	(linux_process_target::wait_1)
+
+	* linux-x86-low.cc (class x86_target)
+	<low_breakpoint_at>: Declare.
+	(x86_breakpoint_at): Turn into...
+	(x86_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_breakpoint_at>: Declare.
+	(aarch64_breakpoint_at): Turn into...
+	(aarch64_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target)
+	<low_breakpoint_at>: Declare.
+	(arm_target::low_breakpoint_at): Define.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target)
+	<low_breakpoint_at>: Declare.
+	(bfin_breakpoint_at): Turn into...
+	(bfin_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target)
+	<low_breakpoint_at>: Declare.
+	(cris_breakpoint_at): Turn into...
+	(cris_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_breakpoint_at>: Declare.
+	(crisv32_breakpoint_at): Turn into...
+	(crisv32_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target)
+	<low_breakpoint_at>: Declare.
+	(ia64_target::low_breakpoint_at): Define.
+	* linux-m32r-low.cc (class m32r_target)
+	<low_breakpoint_at>: Declare.
+	(m32r_breakpoint_at): Turn into...
+	(m32r_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target)
+	<low_breakpoint_at>: Declare.
+	(m68k_breakpoint_at): Turn into...
+	(m68k_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target)
+	<low_breakpoint_at>: Declare.
+	(mips_breakpoint_at): Turn into...
+	(mips_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target)
+	<low_breakpoint_at>: Declare.
+	(nios2_breakpoint_at): Turn into...
+	(nios2_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_breakpoint_at>: Declare.
+	(ppc_breakpoint_at): Turn into...
+	(ppc_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target)
+	<low_breakpoint_at>: Declare.
+	(riscv_breakpoint_at): Turn into...
+	(riscv_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target)
+	<low_breakpoint_at>: Declare.
+	(s390_breakpoint_at): Turn into...
+	(s390_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target)
+	<low_breakpoint_at>: Declare.
+	(sh_breakpoint_at): Turn into...
+	(sh_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target)
+	<low_breakpoint_at>: Declare.
+	(sparc_breakpoint_at): Turn into...
+	(sparc_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target)
+	<low_breakpoint_at>: Declare.
+	(tic6x_breakpoint_at): Turn into...
+	(tic6x_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target)
+	<low_breakpoint_at>: Declare.
+	(tile_breakpoint_at): Turn into...
+	(tile_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<low_breakpoint_at>: Declare.
+	(xtensa_breakpoint_at): Turn into...
+	(xtensa_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'decr_pc_after_break' linux_target_ops field into
+	a method of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops)
+	<decr_pc_after_break>: Remove.
+	(class linux_process_target) <low_decr_pc_after_break>: New method
+	declaration.
+	* linux-low.cc (linux_process_target::low_decr_pc_after_break):
+	New method implementation.
+
+	Update the users below.
+
+	(linux_process_target::save_stop_reason)
+	(linux_process_target::wait_1)
+	* linux-x86-low.cc (class x86_target) <low_decr_pc_after_break>:
+	New declaration.
+	(x86_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-bfin-low.cc (class bfin_target) <low_decr_pc_after_break>:
+	New declaration.
+	(bfin_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-m68k-low.cc (class m68k_target) <low_decr_pc_after_break>:
+	New declaration.
+	(m68k_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-s390-low.cc (class s390_target) <low_decr_pc_after_break>:
+	New declaration.
+	(s390_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-aarch64-low.cc (the_low_target): Remove the field.
+	* linux-arm-low.cc (the_low_target): Remove the field.
+	* linux-cris-low.cc (the_low_target): Remove the field.
+	* linux-crisv32-low.cc (the_low_target): Remove the field.
+	* linux-m32r-low.cc (the_low_target): Remove the field.
+	* linux-mips-low.cc (the_low_target): Remove the field.
+	* linux-nios2-low.cc (the_low_target): Remove the field.
+	* linux-ppc-low.cc (the_low_target): Remove the field.
+	* linux-riscv-low.cc (the_low_target): Remove the field.
+	* linux-sh-low.cc (the_low_target): Remove the field.
+	* linux-sparc-low.cc (the_low_target): Remove the field.
+	* linux-tic6x-low.cc (the_low_target): Remove the field.
+	* linux-tile-low.cc (the_low_target): Remove the field.
+	* linux-xtensa-low.cc (the_low_target): Remove the field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'supports_software_single_step' linux target op and let
+	the concrete linux target define it by overriding the op in
+	process_stratum_target.
+	Turn the 'get_next_pcs' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <supports_software_single_step>:
+	Remove.
+	<low_get_next_pcs>: Declare.
+	* linux-low.cc (can_software_single_step): Remove.
+	(linux_process_target::low_get_next_pcs): Define.
+	(linux_process_target::supports_software_single_step): Remove.
+
+	Update the callers below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::wait_1)
+	(linux_process_target::install_software_single_step_breakpoints)
+	(linux_process_target::single_step)
+	(linux_process_target::thread_needs_step_over)
+	(linux_process_target::proceed_one_lwp)
+	(linux_process_target::supports_range_stepping)
+
+	* linux-x86-low.cc (the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (the_low_target): Ditto.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-cris-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (the_low_target): Ditto.
+	* linux-nios2-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-riscv-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+	* linux-arm-low.cc (class arm_target) <low_get_next_pcs>
+	<supports_software_single_step>: Declare.
+	(arm_target::supports_software_single_step): Define.
+	(arm_gdbserver_get_next_pcs): Turn into...
+	(arm_target::low_get_next_pcs): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'sw_breakpoint_from_kind' linux target op, and let
+	the concrete linux target define it by overriding the op
+	in process_stratum_target.
+
+	* linux-low.cc (linux_process_target::sw_breakpoint_from_kind):
+	Remove.
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <sw_breakpoint_from_kind>: Remove.
+	* linux-x86-low.cc (class x86_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(x86_sw_breakpoint_from_kind): Turn into...
+	(x86_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(aarch64_sw_breakpoint_from_kind): Turn into...
+	(aarch64_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(arm_target::sw_breakpoint_from_kind): Define.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(bfin_sw_breakpoint_from_kind): Turn into...
+	(bfin_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(cris_sw_breakpoint_from_kind): Turn into...
+	(cris_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(cris_sw_breakpoint_from_kind): Turn into...
+	(crisv32_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(ia64_target::sw_breakpoint_from_kind): Define.
+	* linux-m32r-low.cc (class m32r_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(m32r_sw_breakpoint_from_kind): Turn into...
+	(m32r_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(m68k_sw_breakpoint_from_kind): Turn into...
+	(m68k_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(mips_sw_breakpoint_from_kind): Turn into...
+	(mips_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(nios2_sw_breakpoint_from_kind): Turn into...
+	(nios2_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(ppc_sw_breakpoint_from_kind): Turn into...
+	(ppc_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(riscv_sw_breakpoint_from_kind): Turn into...
+	(riscv_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(s390_sw_breakpoint_from_kind): Turn into...
+	(s390_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(sh_sw_breakpoint_from_kind): Turn into...
+	(sh_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(sparc_sw_breakpoint_from_kind): Turn into...
+	(sparc_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(tic6x_sw_breakpoint_from_kind): Turn into...
+	(tic6x_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(tile_sw_breakpoint_from_kind): Turn into...
+	(tile_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(xtensa_sw_breakpoint_from_kind): Turn into...
+	(xtensa_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Remove the 'breakpoint_kind_from_pc' and
+	'breakpoint_kind_from_current_state' linux target ops, and let the
+	concrete linux target define them by overriding the ops of
+	process_stratum_target.
+
+	* linux-low.cc (linux_process_target::breakpoint_kind_from_pc):
+	Remove.
+	(linux_process_target::breakpoint_kind_from_current_state): Remove.
+	* linux-low.h (struct linux_target_ops): Remove ops.
+	(class linux_process_target) <breakpoint_kind_from_pc>: Remove.
+	<breakpoint_kind_from_current_state>: Remove.
+	* linux-x86-low.cc (the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-cris-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (the_low_target): Ditto.
+	* linux-nios2-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<breakpoint_kind_from_pc>
+	<breakpoint_kind_from_current_state>: Declare.
+	(aarch64_breakpoint_kind_from_pc): Turn into...
+	(aarch64_target::breakpoint_kind_from_pc): ...this.
+	(aarch64_breakpoint_kind_from_current_state): Turn into...
+	(aarch64_target::breakpoint_kind_from_current_state): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target):
+	<breakpoint_kind_from_pc>
+	<breakpoint_kind_from_current_state>: Declare.
+	(arm_target::breakpoint_kind_from_pc): Define.
+	(arm_target::breakpoint_kind_from_current_state): Define.
+	(the_low_target): Remove the op fields.
+	* linux-riscv-low.cc (class riscv_target):
+	<breakpoint_kind_from_pc>: Declare.
+	(riscv_breakpoint_kind_from_pc): Turn into...
+	(riscv_target::breakpoint_kind_from_pc): ...this.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'get_pc' and 'set_pc' linux target ops into methods
+	of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	* linux-low.cc (supports_breakpoints): Turn into...
+	(linux_process_target::low_supports_breakpoints): ...this.
+	(linux_process_target::low_get_pc): Define.
+	(linux_process_target::low_set_pc): Define.
+
+	Update the callers below.
+
+	(linux_process_target::get_pc)
+	(linux_process_target::save_stop_reason)
+	(linux_process_target::maybe_move_out_of_jump_pad)
+	(linux_process_target::wait_1)
+	(linux_process_target::resume_one_lwp_throw)
+	(linux_process_target::resume)
+	(linux_process_target::proceed_all_lwps)
+	(linux_process_target::read_pc)
+	(linux_process_target::write_pc)
+
+	* linux-x86-low.cc (class linux_process_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(x86_target::low_supports_breakpoints): Define.
+	(x86_get_pc): Turn into...
+	(x86_target::low_get_pc): ...this.
+	(x86_set_pc): Turn into...
+	(x86_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(arm_target::low_supports_breakpoints)
+	(arm_target::low_get_pc)
+	(arm_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (class bfin_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(bfin_target::low_supports_breakpoints)
+	(bfin_target::low_get_pc)
+	(bfin_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-cris-low.cc (class cris_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(cris_target::low_supports_breakpoints)
+	(cris_target::low_get_pc)
+	(cris_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(crisv32_target::low_supports_breakpoints)
+	(crisv32_target::low_get_pc)
+	(crisv32_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-m32r-low.cc (class m32r_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(m32r_target::low_supports_breakpoints)
+	(m32r_target::low_get_pc)
+	(m32r_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-m68k-low.cc (class m68k_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(m68k_target::low_supports_breakpoints)
+	(m68k_target::low_get_pc)
+	(m68k_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-nios2-low.cc (class nios2_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(nios2_target::low_supports_breakpoints)
+	(nios2_target::low_get_pc)
+	(nios2_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-sh-low.cc (class sh_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(sh_target::low_supports_breakpoints)
+	(sh_target::low_get_pc)
+	(sh_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(xtensa_target::low_supports_breakpoints)
+	(xtensa_target::low_get_pc)
+	(xtensa_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-sparc-low.cc (class sparc_target)
+	<low_supports_breakpoints>
+	<low_get_pc>: Declare.
+	(sparc_target::low_supports_breakpoints)
+	(sparc_target::low_get_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-tile-low.cc (class tile_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(tile_target::low_supports_breakpoints)
+	(tile_target::low_get_pc)
+	(tile_target::low_set_pc): Define.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(aarch64_target::low_supports_breakpoints): Define.
+	(aarch64_get_pc): Turn into...
+	(aarch64_target::low_get_pc): ...this.
+	(aarch64_set_pc): Turn into...
+	(aarch64_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(mips_target::low_supports_breakpoints): Define.
+	(mips_get_pc): Turn into...
+	(mips_target::low_get_pc): ...this.
+	(mips_set_pc): Turn into...
+	(mips_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(ppc_target::low_supports_breakpoints): Define.
+	(ppc_get_pc): Turn into...
+	(ppc_target::low_get_pc): ...this.
+	(ppc_set_pc): Turn into...
+	(ppc_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-riscv-low.cc (class riscv_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(riscv_target::low_supports_breakpoints): Define.
+	(riscv_get_pc): Turn into...
+	(riscv_target::low_get_pc): ...this.
+	(riscv_set_pc): Turn into...
+	(riscv_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(s390_target::low_supports_breakpoints): Define.
+	(s390_get_pc): Turn into...
+	(s390_target::low_get_pc): ...this.
+	(s390_set_pc): Turn into...
+	(s390_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-tic6x-low.cc (class tic6x_target)
+	<low_supports_breakpoints>
+	<low_get_pc>
+	<low_set_pc>: Declare.
+	(tic6x_target::low_supports_breakpoints): Define.
+	(tic6x_get_pc): Turn into...
+	(tic6x_target::low_get_pc): ...this.
+	(tic6x_set_pc): Turn into...
+	(tic6x_target::low_set_pc): ...this.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn some more static methods in linux-low into private methods
+	of linux_process_target.
+
+	* linux-low.cc (get_pc): Turn into...
+	(linux_process_target::get_pc): ...this.
+	(save_stop_reason): Turn into...
+	(linux_process_target::save_stop_reason): ...this.
+	(thread_still_has_status_pending_p): Turn into...
+	(linux_process_target::thread_still_has_status_pending): ...this.
+	(status_pending_p_callback): Turn into...
+	(linux_process_target::status_pending_p_callback): ...this.
+	(resume_stopped_resumed_lwps): Turn into...
+	(linux_process_target::resume_stopped_resumed_lwps): ...this.
+	(install_software_single_step_breakpoints): Turn into...
+	(linux_process_target::install_software_single_step_breakpoints):
+	...this.
+	(single_step): Turn into...
+	(linux_process_target::single_step): ...this.
+	(linux_resume_one_lwp_throw): Turn into...
+	(linux_process_target::resume_one_lwp_throw): ...this.
+	(linux_resume_one_lwp): Turn into...
+	(linux_process_target::resume_one_lwp): ...this.
+	(resume_status_pending_p): Turn into...
+	(linux_process_target::resume_status_pending): ...this.
+	(need_step_over_p): Turn into...
+	(linux_process_target::thread_needs_step_over): ...this.
+	(linux_resume_one_thread): Turn into...
+	(linux_process_target::resume_one_thread): ...this.
+	(proceed_one_lwp): Turn into...
+	(linux_process_target::proceed_one_lwp): ...this.
+	(unsuspend_and_proceed_one_lwp): Turn into...
+	(linux_process_target::unsuspend_and_proceed_one_lwp): ...this.
+
+	Update the calls/references to the above functions below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::filter_event)
+	(linux_process_target::wait_for_event_filtered)
+	(linux_process_target::wait_1)
+	(linux_process_target::move_out_of_jump_pad)
+	(linux_process_target::start_step_over)
+	(linux_process_target::resume)
+	(linux_process_target::proceed_all_lwps)
+	(regsets_store_inferior_registers)
+	(linux_process_target::store_register)
+
+	* linux-low.h (class linux_process_target)
+	<get_pc>
+	<save_stop_reason>
+	<thread_still_has_status_pending>
+	<status_pending_p_callback>
+	<resume_stopped_resumed_lwps>
+	<install_software_single_step_breakpoints>
+	<single_step>
+	<resume_one_lwp_throw>
+	<resume_one_lwp>
+	<resume_status_pending>
+	<thread_needs_step_over>
+	<resume_one_thread>
+	<proceed_one_lwp>
+	<unsuspend_and_proceed_one_lwp>: Declare.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'fetch_register' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <fetch_register>: Remove.
+	(class linux_process_target) <low_fetch_register>: Declare.
+	* linux-x86-low.cc (the_low_target)
+	* linux-aarch64-low.cc (the_low_target)
+	* linux-arm-low.cc (the_low_target)
+	* linux-bfin-low.cc (the_low_target)
+	* linux-cris-low.cc (the_low_target)
+	* linux-crisv32-low.cc (the_low_target)
+	* linux-m32r-low.cc (the_low_target)
+	* linux-m68k-low.cc (the_low_target)
+	* linux-nios2-low.cc (the_low_target)
+	* linux-ppc-low.cc (the_low_target)
+	* linux-s390-low.cc (the_low_target)
+	* linux-sh-low.cc (the_low_target)
+	* linux-sparc-low.cc (the_low_target)
+	* linux-tic6x-low.cc (the_low_target)
+	* linux-tile-low.cc (the_low_target)
+	* linux-xtensa-low.cc (the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <low_fetch_register>:
+	Declare.
+	(ia64_fetch_register): Turn into...
+	(ia64_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <low_fetch_register>:
+	Declare.
+	(mips_fetch_register): Turn into...
+	(mips_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <low_fetch_register>:
+	Declare.
+	(riscv_fetch_register): Turn into...
+	(riscv_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::fetch_registers)
+	(linux_process_target::low_fetch_register)
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'cannot_fetch_register' and 'cannot_store_register'
+	linux target ops into methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the low target ops.
+	(class linux_process_target) <fetch_register>
+	<store_register>
+	<usr_fetch_inferior_registers>
+	<usr_store_inferior_registers>
+	<low_cannot_fetch_register>
+	<low_cannot_fetch_register> Declare.
+	* linux-low.cc (fetch_register): Turn into...
+	(linux_process_target::fetch_register): ...this.
+	(store_register): Turn into ...
+	(linux_process_target::store_register): ...this.
+	(usr_fetch_inferior_registers): Turn into...
+	(linux_process_target::usr_fetch_inferior_registers): ...this.
+	(usr_store_inferior_registers): Turn into...
+	(linux_process_target::usr_store_inferior_registers): ...this.
+	* linux-x86-low.cc (class x86_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(x86_cannot_store_register): Turn into...
+	(x86_target::low_cannot_store_register): ...this.
+	(x86_cannot_fetch_register): Turn into...
+	(x86_target::low_cannot_fetch_register): ...this.
+	(the_low_target): Remove the target op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(aarch64_target::low_cannot_fetch_register)
+	(aarch64_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(arm_cannot_fetch_register): Turn into...
+	(arm_target::low_cannot_fetch_register): ...this.
+	(arm_cannot_store_register): Turn into...
+	(arm_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (class bfin_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(bfin_cannot_fetch_register): Turn into...
+	(bfin_target::low_cannot_fetch_register): ...this.
+	(bfin_cannot_store_register): Turn into...
+	(bfin_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-cris-low.cc (class cris_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(cris_cannot_fetch_register): Turn into...
+	(cris_target::low_cannot_fetch_register): ...this.
+	(cris_cannot_store_register): Turn into...
+	(cris_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(crisv32_target::low_cannot_fetch_register)
+	(crisv32_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-ia64-low.cc (class ia64_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(ia64_cannot_fetch_register): Turn into...
+	(ia64_target::low_cannot_fetch_register): ...this.
+	(ia64_cannot_store_register): Turn into...
+	(ia64_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-m32r-low.cc (class m32r_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(m32r_cannot_fetch_register): Turn into...
+	(m32r_target::low_cannot_fetch_register): ...this.
+	(m32r_cannot_store_register): Turn into...
+	(m32r_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-m68k-low.cc (class m68k_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(m68k_cannot_fetch_register): Turn into...
+	(m68k_target::low_cannot_fetch_register): ...this.
+	(m68k_cannot_store_register): Turn into...
+	(m68k_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(mips_cannot_fetch_register): Turn into...
+	(mips_target::low_cannot_fetch_register): ...this.
+	(mips_cannot_store_register): Turn into...
+	(mips_target::low_cannot_store_register): ...this.
+	(get_usrregs_info): Inline at the call sites in
+	low_cannot_fetch_register and low_cannot_store_register,
+	and remove.
+	(the_low_target): Remove the op fields.
+	* linux-nios2-low.cc (class nios2_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(nios2_cannot_fetch_register): Turn into...
+	(nios2_target::low_cannot_fetch_register): ...this.
+	(nios2_cannot_store_register): Turn into...
+	(nios2_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(ppc_cannot_fetch_register): Turn into...
+	(ppc_target::low_cannot_fetch_register): ...this.
+	(ppc_cannot_store_register): Turn into...
+	(ppc_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-riscv-low.cc (class riscv_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(riscv_target::low_cannot_fetch_register)
+	(riscv_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(s390_cannot_fetch_register): Turn into...
+	(s390_target::low_cannot_fetch_register): ...this.
+	(s390_cannot_store_register): Turn into...
+	(s390_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-sh-low.cc (class sh_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(sh_cannot_fetch_register): Turn into...
+	(sh_target::low_cannot_fetch_register): ...this.
+	(sh_cannot_store_register): Turn into...
+	(sh_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-sparc-low.cc (class sparc_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(sparc_cannot_fetch_register): Turn into...
+	(sparc_target::low_cannot_fetch_register): ...this.
+	(sparc_cannot_store_register): Turn into...
+	(sparc_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-tic6x-low.cc (class tic6x_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(tic6x_cannot_fetch_register): Turn into...
+	(tic6x_target::low_cannot_fetch_register): ...this.
+	(tic6x_cannot_store_register): Turn into...
+	(tic6x_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-tile-low.cc (class tile_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(tile_cannot_fetch_register): Turn into...
+	(tile_target::low_cannot_fetch_register): ...this.
+	(tile_cannot_store_register): Turn into...
+	(tile_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(xtensa_target::low_cannot_fetch_register)
+	(xtensa_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'regs_info' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <regs_info>: Remove.
+	(class linux_process_target) <get_regs_info>: Define.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::fetch_registers)
+	(linux_process_target::store_registers)
+	* proc-service.cc (gregset_info)
+
+	* linux-x86-low.cc (class x86_target) <get_regs_info>: Declare.
+	(x86_linux_regs_info): Turn into ...
+	(x86_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <get_regs_info>:
+	Declare.
+	(aarch64_regs_info): Turn into ...
+	(aarch64_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <get_regs_info>: Declare.
+	(arm_regs_info): Turn into ...
+	(arm_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <get_regs_info>: Declare.
+	(bfin_regs_info): Turn into ...
+	(bfin_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <get_regs_info>: Declare.
+	(cris_regs_info): Turn into ...
+	(cris_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target) <get_regs_info>:
+	Declare.
+	(crisv32_regs_info): Turn into ...
+	(crisv32_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <get_regs_info>: Declare.
+	(ia64_regs_info): Turn into ...
+	(ia64_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (class m32r_target) <get_regs_info>: Declare.
+	(m32r_regs_info): Turn into ...
+	(m32r_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <get_regs_info>: Declare.
+	(m68k_regs_info): Turn into ...
+	(m68k_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <get_regs_info>: Declare.
+	(mips_regs_info): Turn into ...
+	(mips_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	(get_usrregs_info): Update the call to the op.
+	* linux-nios2-low.cc (class nios2_target) <get_regs_info>: Declare.
+	(nios2_regs_info): Turn into ...
+	(nios2_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <get_regs_info>: Declare.
+	(ppc_regs_info): Turn into ...
+	(ppc_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <get_regs_info>: Declare.
+	(riscv_regs_info): Turn into ...
+	(riscv_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <get_regs_info>: Declare.
+	(s390_regs_info): Turn into ...
+	(s390_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	(s390_collect_ptrace_register)
+	(s390_supply_ptrace_register)
+	(s390_fill_gregset): Update the call to the op.
+	* linux-sh-low.cc (class sh_target) <get_regs_info>: Declare.
+	(sh_regs_info): Turn into ...
+	(sh_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <get_regs_info>: Declare.
+	(sparc_regs_info): Turn into ...
+	(sparc_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <get_regs_info>: Declare.
+	(tic6x_regs_info): Turn into ...
+	(tic6x_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <get_regs_info>: Declare.
+	(tile_regs_info): Turn into ...
+	(tile_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target) <get_regs_info>:
+	Declare.
+	(xtensa_regs_info): Turn into ...
+	(xtensa_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn the 'arch_setup' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <arch_setup>: Delete.
+	(class linux_process_target) <arch_setup_thread>
+	<low_arch_setup>: New declarations.
+	* linux-low.cc (linux_arch_setup): Delete.
+	(linux_arch_setup_thread): Turn into...
+	(linux_process_target::arch_setup_thread): ... this.
+
+	Update the callers below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::post_create_inferior)
+	(linux_process_target::filter_event)
+
+	* linux-x86-low.cc (class x86_target) <low_arch_setup>: New
+	declaration.
+	(x86_linux_update_xmltarget): Turn into...
+	(x86_target::update_xmltarget): ...this.
+	(x86_linux_process_qsupported): Update the call to
+	x86_linux_update_xmltarget.
+	(x86_arch_setup): Turn into ...
+	(x86_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <low_arch_setup>: New
+	declaration.
+	(aarch64_arch_setup): Turn into ...
+	(aarch64_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <low_arch_setup>: New
+	declaration.
+	(arm_arch_setup): Turn into ...
+	(arm_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <low_arch_setup>: New
+	declaration.
+	(bfin_arch_setup): Turn into ...
+	(bfin_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <low_arch_setup>: New
+	declaration.
+	(cris_arch_setup): Turn into ...
+	(cris_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target) <low_arch_setup>: New
+	declaration.
+	(crisv32_arch_setup): Turn into ...
+	(crisv32_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <low_arch_setup>: New
+	declaration.
+	(ia64_arch_setup): Turn into ...
+	(ia64_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (class m32r_target) <low_arch_setup>: New
+	declaration.
+	(m32r_arch_setup): Turn into ...
+	(m32r_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <low_arch_setup>: New
+	declaration.
+	(m68k_arch_setup): Turn into ...
+	(m68k_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <low_arch_setup>: New
+	declaration.
+	(mips_arch_setup): Turn into ...
+	(mips_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target) <low_arch_setup>: New
+	declaration.
+	(nios2_arch_setup): Turn into ...
+	(nios2_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <low_arch_setup>: New
+	declaration.
+	(ppc_arch_setup): Turn into ...
+	(ppc_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <low_arch_setup>: New
+	declaration.
+	(riscv_arch_setup): Turn into ...
+	(riscv_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <low_arch_setup>: New
+	declaration.
+	(s390_arch_setup): Turn into ...
+	(s390_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target) <low_arch_setup>: New
+	declaration.
+	(sh_arch_setup): Turn into ...
+	(sh_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <low_arch_setup>: New
+	declaration.
+	(sparc_arch_setup): Turn into ...
+	(sparc_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <low_arch_setup>: New
+	declaration.
+	(tic6x_arch_setup): Turn into ...
+	(tic6x_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <low_arch_setup>: New
+	declaration.
+	(tile_arch_setup): Turn into ...
+	(tile_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target) <low_arch_setup>: New
+	declaration.
+	(xtensa_arch_setup): Turn into ...
+	(xtensa_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-low.h (the_linux_target): New extern declaration.
+	* linux-low.cc (initialize_low): Use 'the_linux_target' to set
+	'the_target'.
+	(the_linux_target): Remove.
+	* linux-x86-low.cc (class x86_target): New class.
+	(the_x86_target): New static object.
+	(the_linux_target): Define as pointer to the_x86_target.
+	* linux-aarch64-low.cc (class aarch64_target): New class.
+	(the_aarch64_target): New static object.
+	(the_linux_target): Define as pointer to the_aarch64_target.
+	* linux-arm-low.cc (class arm_target): New class.
+	(the_arm_target): New static object.
+	(the_linux_target): Define as pointer to the_arm_target.
+	* linux-bfin-low.cc (class bfin_target): New class.
+	(the_bfin_target): New static object.
+	(the_linux_target): Define as pointer to the_bfin_target.
+	* linux-cris-low.cc (class cris_target): New class.
+	(the_cris_target): New static object.
+	(the_linux_target): Define as pointer to the_cris_target.
+	* linux-crisv32-low.cc (class crisv32_target): New class.
+	(the_crisv32_target): New static object.
+	(the_linux_target): Define as pointer to the_crisv32_target.
+	* linux-ia64-low.cc (class ia64_target): New class.
+	(the_ia64_target): New static object.
+	(the_linux_target): Define as pointer to the_ia64_target.
+	* linux-m32r-low.cc (class m32r_target): New class.
+	(the_m32r_target): New static object.
+	(the_linux_target): Define as pointer to the_m32r_target.
+	* linux-m68k-low.cc (class m68k_target): New class.
+	(the_m68k_target): New static object.
+	(the_linux_target): Define as pointer to the_m68k_target.
+	* linux-mips-low.cc (class mips_target): New class.
+	(the_mips_target): New static object.
+	(the_linux_target): Define as pointer to the_mips_target.
+	* linux-nios2-low.cc (class nios2_target): New class.
+	(the_nios2_target): New static object.
+	(the_linux_target): Define as pointer to the_nios2_target.
+	* linux-ppc-low.cc (class ppc_target): New class.
+	(the_ppc_target): New static object.
+	(the_linux_target): Define as pointer to the_ppc_target.
+	* linux-riscv-low.cc (class riscv_target): New class.
+	(the_riscv_target): New static object.
+	(the_linux_target): Define as pointer to the_riscv_target.
+	* linux-s390-low.cc (class s390_target): New class.
+	(the_s390_target): New static object.
+	(the_linux_target): Define as pointer to the_s390_target.
+	* linux-sh-low.cc (class sh_target): New class.
+	(the_sh_target): New static object.
+	(the_linux_target): Define as pointer to the_sh_target.
+	* linux-sparc-low.cc (class sparc_target): New class.
+	(the_sparc_target): New static object.
+	(the_linux_target): Define as pointer to the_sparc_target.
+	* linux-tic6x-low.cc (class tic6x_target): New class.
+	(the_tic6x_target): New static object.
+	(the_linux_target): Define as pointer to the_tic6x_target.
+	* linux-tile-low.cc (class tile_target): New class.
+	(the_tile_target): New static object.
+	(the_linux_target): Define as pointer to the_tile_target.
+	* linux-xtensa-low.cc (class xtensa_target): New class.
+	(the_xtensa_target): New static object.
+	(the_linux_target): Define as pointer to the_xtensa_target.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Turn some static functions in linux-low.cc into private methods of
+	linux_process_target.
+
+	* linux-low.cc (handle_extended_wait): Turn into ...
+	(linux_process_target::handle_extended_wait): ...this.  Call
+	'mourn' on 'this' object instead of 'the_target'.
+	(maybe_move_out_of_jump_pad): Turn into...
+	(linux_process_target::maybe_move_out_of_jump_pad): ...this.
+	(linux_low_filter_event): Turn into...
+	(linux_process_target::filter_event): ...this.
+	(linux_wait_for_event_filtered): Turn into...
+	(linux_process_target::wait_for_event_filtered): ...this.
+	(linux_wait_for_event): Turn into...
+	(linux_process_target::wait_for_event): ...this.
+	(linux_wait_1): Turn into...
+	(linux_process_target::wait_1): ...this.
+	(wait_for_sigstop): Turn into...
+	(linux_process_target::wait_for_sigstop): ...this.
+	(move_out_of_jump_pad_callback): Turn into...
+	(linux_process_target::move_out_of_jump_pad): ...this.
+	(stop_all_lwps): Turn into...
+	(linux_process_target::stop_all_lwps): ...this.
+	(start_step_over): Turn into...
+	(linux_process_target::start_step_over): ...this.
+	(complete_ongoing_step_over): Turn into...
+	(linux_process_target::complete_ongoing_step_over): ...this.
+	(proceed_all_lwps): Turn into...
+	(linux_process_target::proceed_all_lwps): ...this.
+	(unstop_all_lwps): Turn into...
+	(linux_process_target::unstop_all_lwps): ...this.
+
+	* linux-low.h (class linux_process_target)
+	<handle_extended_wait>
+	<maybe_move_out_of_jump_pad>
+	filter_event>
+	<wait_for_event_filtered>
+	<wait_for_event>
+	<wait_1>
+	<wait_for_sigstop>
+	<move_out_of_jump_pad>
+	<stop_all_lwps>
+	<start_step_over>
+	<complete_ongoing_step_over>
+	<proceed_all_lwps>
+	<unstop_all_lwps>: Declare.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::attach): Update.
+	(linux_process_target::stabilize_threads): Ditto.
+	(linux_process_target::wait): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-low.h (struct linux_target_ops): Update the comment for
+	'cannot_store_register' to return 0 or 1.
+	* linux-ppc-low.cc (ppc_cannot_store_register): Return 1 instead
+	of 2.
+
 2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	* config.in: Re-generate.

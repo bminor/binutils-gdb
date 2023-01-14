@@ -811,16 +811,11 @@ generic_value_print_complex (struct value *val, struct ui_file *stream,
 {
   fprintf_filtered (stream, "%s", decorations->complex_prefix);
 
-  struct type *type = check_typedef (value_type (val));
-  struct value *real_part
-    = value_from_component (val, TYPE_TARGET_TYPE (type), 0);
+  struct value *real_part = value_real_part (val);
   value_print_scalar_formatted (real_part, options, 0, stream);
   fprintf_filtered (stream, "%s", decorations->complex_infix);
 
-  struct value *imag_part
-    = value_from_component (val, TYPE_TARGET_TYPE (type),
-			    TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
-
+  struct value *imag_part = value_imaginary_part (val);
   value_print_scalar_formatted (imag_part, options, 0, stream);
   fprintf_filtered (stream, "%s", decorations->complex_suffix);
 }

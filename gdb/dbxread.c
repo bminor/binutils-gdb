@@ -268,7 +268,7 @@ static void read_ofile_symtab (struct objfile *, legacy_psymtab *);
 static void dbx_read_symtab (legacy_psymtab *self,
 			     struct objfile *objfile);
 
-static void dbx_psymtab_to_symtab_1 (legacy_psymtab *, struct objfile *);
+static void dbx_expand_psymtab (legacy_psymtab *, struct objfile *);
 
 static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
 
@@ -1909,7 +1909,7 @@ start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
     XOBNEW (&objfile->objfile_obstack, struct symloc);
   LDSYMOFF (result) = ldsymoff;
   result->legacy_read_symtab = dbx_read_symtab;
-  result->legacy_expand_psymtab = dbx_psymtab_to_symtab_1;
+  result->legacy_expand_psymtab = dbx_expand_psymtab;
   SYMBOL_SIZE (result) = symbol_size;
   SYMBOL_OFFSET (result) = symbol_table_offset;
   STRING_OFFSET (result) = string_table_offset;
@@ -2057,7 +2057,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
          is not empty, but we don't realize that.  Fixing that without slowing
          things down might be tricky.  */
 
-      discard_psymtab (objfile, pst);
+      objfile->partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;
@@ -2066,12 +2066,12 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 }
 
 static void
-dbx_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
+dbx_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 {
   gdb_assert (!pst->readin);
 
   /* Read in all partial symtabs on which this one is dependent.  */
-  pst->read_dependencies (objfile);
+  pst->expand_dependencies (objfile);
 
   if (LDSYMLEN (pst))		/* Otherwise it's a dummy.  */
     {

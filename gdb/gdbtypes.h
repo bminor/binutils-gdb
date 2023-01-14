@@ -803,6 +803,10 @@ struct main_type
 
     struct range_bounds *bounds;
 
+    /* If this is a scalar type, then this is its corresponding
+       complex type.  */
+    struct type *complex_type;
+
   } flds_bnds;
 
   /* * Slot to point to additional language-specific fields of this
@@ -1841,8 +1845,7 @@ extern struct type *init_float_type (struct objfile *, int, const char *,
 				     const struct floatformat **,
 				     enum bfd_endian = BFD_ENDIAN_UNKNOWN);
 extern struct type *init_decfloat_type (struct objfile *, int, const char *);
-extern struct type *init_complex_type (struct objfile *, const char *,
-				       struct type *);
+extern struct type *init_complex_type (const char *, struct type *);
 extern struct type *init_pointer_type (struct objfile *, int, const char *,
 				       struct type *);
 
@@ -1858,8 +1861,6 @@ extern struct type *arch_boolean_type (struct gdbarch *, int, int,
 extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 				     const struct floatformat **);
 extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
-extern struct type *arch_complex_type (struct gdbarch *, const char *,
-				       struct type *);
 extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);
 

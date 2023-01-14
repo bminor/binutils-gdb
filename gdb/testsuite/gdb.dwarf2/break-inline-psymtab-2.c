@@ -19,7 +19,7 @@ extern int foo (void);
 
 int a;
 
-static inline int
+static inline int __attribute__((always_inline))
 bar (void)
 {
   a = 2;

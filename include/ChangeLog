@@ -1,3 +1,23 @@
+2020-04-02  Jan W. Jagersma  <jwjagersma@gmail.com>
+
+	* coff/go32exe.h: Remove file.
+	* coff/internal.h (struct internal_filehdr): Remove field
+	go32stub.  Remove flag F_GO32STUB.
+
+2020-04-01  Martin Liska  <mliska@suse.cz>
+	    Maciej W. Rozycki <macro@linux-mips.org>
+
+	PR lto/94249
+	* plugin-api.h: Fix a typo.
+
+2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Update CSR to 1.11.
+
+2020-03-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_BSDFLAGS): Define.
+
 2020-03-24  Martin Liska  <mliska@suse.cz>
 
 	PR lto/94249

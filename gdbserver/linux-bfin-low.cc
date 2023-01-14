@@ -23,6 +23,63 @@
 #include "linux-low.h"
 #include <asm/ptrace.h>
 
+/* Linux target op definitions for the BFIN architecture.  */
+
+class bfin_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static bfin_target the_bfin_target;
+
+bool
+bfin_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+bfin_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+bfin_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
+
+int
+bfin_target::low_decr_pc_after_break ()
+{
+  return 2;
+}
+
 /* Defined in auto-generated file reg-bfin.c.  */
 void init_registers_bfin (void);
 extern const struct target_desc *tdesc_bfin;
@@ -42,14 +99,14 @@ static int bfin_regmap[] =
 
 #define bfin_num_regs ARRAY_SIZE (bfin_regmap)
 
-static int
-bfin_cannot_store_register (int regno)
+bool
+bfin_target::low_cannot_store_register (int regno)
 {
   return (regno >= bfin_num_regs);
 }
 
-static int
-bfin_cannot_fetch_register (int regno)
+bool
+bfin_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= bfin_num_regs);
 }
@@ -57,42 +114,34 @@ bfin_cannot_fetch_register (int regno)
 #define bfin_breakpoint_len 2
 static const gdb_byte bfin_breakpoint[bfin_breakpoint_len] = {0xa1, 0x00};
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-bfin_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+bfin_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = bfin_breakpoint_len;
   return bfin_breakpoint;
 }
 
-static int
-bfin_breakpoint_at (CORE_ADDR where)
+bool
+bfin_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[bfin_breakpoint_len];
 
   read_inferior_memory(where, insn, bfin_breakpoint_len);
   if (insn[0] == bfin_breakpoint[0]
       && insn[1] == bfin_breakpoint[1])
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
-static void
-bfin_arch_setup (void)
+void
+bfin_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_bfin;
-}
-
-/* Support for hardware single step.  */
-
-static int
-bfin_supports_hardware_single_step (void)
-{
-  return 1;
 }
 
 static struct usrregs_info bfin_usrregs_info =
@@ -101,56 +150,21 @@ static struct usrregs_info bfin_usrregs_info =
     bfin_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &bfin_usrregs_info,
   };
 
-static const struct regs_info *
-bfin_regs_info (void)
+const regs_info *
+bfin_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-struct linux_target_ops the_low_target = {
-  bfin_arch_setup,
-  bfin_regs_info,
-  bfin_cannot_fetch_register,
-  bfin_cannot_store_register,
-  NULL, /* fetch_register */
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
-  NULL, /* breakpoint_kind_from_pc */
-  bfin_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  2,
-  bfin_breakpoint_at,
-  NULL, /* supports_z_point_type */
-  NULL, /* insert_point */
-  NULL, /* remove_point */
-  NULL, /* stopped_by_watchpoint */
-  NULL, /* stopped_data_address */
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
-  NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  bfin_supports_hardware_single_step,
-};
+/* The linux target ops object.  */
 
+linux_process_target *the_linux_target = &the_bfin_target;
 
 void
 initialize_low_arch (void)

@@ -30,10 +30,59 @@
 # define NFPREG 33
 #endif
 
-/* Implementation of linux_target_ops method "arch_setup".  */
+/* Linux target op definitions for the RISC-V architecture.  */
 
-static void
-riscv_arch_setup ()
+class riscv_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static riscv_target the_riscv_target;
+
+bool
+riscv_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+riscv_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
+
+/* Implementation of linux target ops method "low_arch_setup".  */
+
+void
+riscv_target::low_arch_setup ()
 {
   static const char *expedite_regs[] = { "sp", "pc", NULL };
 
@@ -145,31 +194,37 @@ static struct regs_info riscv_regs =
     &riscv_regsets_info,
   };
 
-/* Implementation of linux_target_ops method "regs_info".  */
+/* Implementation of linux target ops method "get_regs_info".  */
 
-static const struct regs_info *
-riscv_regs_info ()
+const regs_info *
+riscv_target::get_regs_info ()
 {
   return &riscv_regs;
 }
 
-/* Implementation of linux_target_ops method "fetch_register".  */
+/* Implementation of linux target ops method "low_fetch_register".  */
 
-static int
-riscv_fetch_register (struct regcache *regcache, int regno)
+bool
+riscv_target::low_fetch_register (regcache *regcache, int regno)
 {
   const struct target_desc *tdesc = regcache->tdesc;
 
   if (regno != find_regno (tdesc, "zero"))
-    return 0;
+    return false;
   supply_register_zeroed (regcache, regno);
-  return 1;
+  return true;
 }
 
-/* Implementation of linux_target_ops method "get_pc".  */
+bool
+riscv_target::low_supports_breakpoints ()
+{
+  return true;
+}
 
-static CORE_ADDR
-riscv_get_pc (struct regcache *regcache)
+/* Implementation of linux target ops method "low_get_pc".  */
+
+CORE_ADDR
+riscv_target::low_get_pc (regcache *regcache)
 {
   elf_gregset_t regset;
 
@@ -179,10 +234,10 @@ riscv_get_pc (struct regcache *regcache)
     return linux_get_pc_32bit (regcache);
 }
 
-/* Implementation of linux_target_ops method "set_pc".  */
+/* Implementation of linux target ops method "low_set_pc".  */
 
-static void
-riscv_set_pc (struct regcache *regcache, CORE_ADDR newpc)
+void
+riscv_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 {
   elf_gregset_t regset;
 
@@ -196,10 +251,10 @@ riscv_set_pc (struct regcache *regcache, CORE_ADDR newpc)
 static const uint16_t riscv_ibreakpoint[] = { 0x0073, 0x0010 };
 static const uint16_t riscv_cbreakpoint = 0x9002;
 
-/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".  */
+/* Implementation of target ops method "breakpoint_kind_from_pc".  */
 
-static int
-riscv_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+int
+riscv_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   union
     {
@@ -215,10 +270,10 @@ riscv_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
     return sizeof (riscv_cbreakpoint);
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-riscv_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+riscv_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = kind;
   switch (kind)
@@ -230,10 +285,10 @@ riscv_sw_breakpoint_from_kind (int kind, int *size)
     }
 }
 
-/* Implementation of linux_target_ops method "breakpoint_at".  */
+/* Implementation of linux target ops method "low_breakpoint_at".  */
 
-static int
-riscv_breakpoint_at (CORE_ADDR pc)
+bool
+riscv_target::low_breakpoint_at (CORE_ADDR pc)
 {
   union
     {
@@ -248,27 +303,14 @@ riscv_breakpoint_at (CORE_ADDR pc)
 	      && target_read_memory (pc + sizeof (buf.insn), buf.bytes,
 				     sizeof (buf.insn)) == 0
 	      && buf.insn == riscv_ibreakpoint[1])))
-    return 1;
+    return true;
   else
-    return 0;
+    return false;
 }
 
-/* RISC-V/Linux target operations.  */
-struct linux_target_ops the_low_target =
-{
-  riscv_arch_setup,
-  riscv_regs_info,
-  NULL, /* cannot_fetch_register */
-  NULL, /* cannot_store_register */
-  riscv_fetch_register,
-  riscv_get_pc,
-  riscv_set_pc,
-  riscv_breakpoint_kind_from_pc,
-  riscv_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  0,    /* decr_pc_after_break */
-  riscv_breakpoint_at,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_riscv_target;
 
 /* Initialize the RISC-V/Linux target.  */
 

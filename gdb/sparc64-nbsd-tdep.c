@@ -249,6 +249,8 @@ sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  nbsd_init_abi (info, gdbarch);
+
   tdep->gregset = &sparc64nbsd_gregset;
   tdep->sizeof_gregset = 160;
 

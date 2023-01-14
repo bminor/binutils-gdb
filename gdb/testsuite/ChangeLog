@@ -1,3 +1,116 @@
+2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/25325
+	* gdb.cp/typed-enum.cc: New test.
+	* gdb.cp/typed-enum.exp: New file.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-inline-small-func-lbls.c: New file.
+	* gdb.dwarf2/dw2-inline-small-func.c: New file.
+	* gdb.dwarf2/dw2-inline-small-func.exp: New file.
+	* gdb.dwarf2/dw2-inline-small-func.h: New file.
+	* gdb.opt/inline-small-func.c: New file.
+	* gdb.opt/inline-small-func.exp: New file.
+	* gdb.opt/inline-small-func.h: New file.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/dwarf.exp (Dwarf::lines::program::DW_LNS_set_file): New
+	function.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/dwarf.exp (function_range): Allow compiler options to be
+	specified.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/break-inline-psymtab-2.c (bar): Add
+	__attribute__((always_inline)).
+	* gdb.dwarf2/break-inline-psymtab.exp: Don't use -O2.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdbserver-support.exp (gdbserver_exit): Factor out of ...
+	(gdbserver_gdb_exit): ... here.  Add timeout warning.
+	* gdb.multi/multi-target.exp (server_spawn_ids): New global var.
+	(connect_target_extended_remote): Append new server_spawn_id to
+	server_spawn_ids.
+	(cleanup): New proc.
+	(setup, <toplevel>): Call cleanup.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/main-psymtab.exp: New file.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/mixed-lang-stack.exp: Accept new complex printing style.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/complex-parts.exp: Add type tests.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/complex-parts.exp: Add arithmetic tests.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.compile/compile.exp: Update.
+	* gdb.compile/compile-cplus.exp: Update.
+	* gdb.base/varargs.exp: Update.
+	* gdb.base/floatn.exp: Update.
+	* gdb.base/endianity.exp: Update.
+	* gdb.base/callfuncs.exp (do_function_calls): Update.
+	* gdb.base/funcargs.exp (complex_args, complex_integral_args)
+	(complex_float_integral_args): Update.
+	* gdb.base/complex.exp: Update.
+	* gdb.base/complex-parts.exp: Update.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.rust/union.rs: New file.
+	* gdb.rust/union.exp: New file.
+	* gdb.rust/simple.rs (Union, Union2): Move to union.rs.
+	(main): Update.
+	* gdb.rust/simple.exp: Move union tests to union.exp.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.rust/simple.rs (main): Remove "y0".
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.multi/stop-all-on-exit.c: New test.
+	* gdb.multi/stop-all-on-exit.exp: New file.
+
+2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/24789
+	* gdb.cp/misc.cc: Add integer reference variable.
+	* gdb.cp/misc.exp: Add test.
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.server/stop-reply-no-thread.exp: Enhance the test
+	scenario to cover execution until the end and also the case
+
+2020-03-31  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/c-linkage-name.exp: Fix test-case comment.  Set language to
+	c.  Use "maint info symtabs" to check symtab expansion.
+
+2020-03-30  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/c-linkage-name.exp: Use readnow call to mark a test
+	unsupported.
+	(verify_psymtab_expanded): Move ...
+	* lib/gdb.exp (verify_psymtab_expanded): ... here.  Add unsupported
+	test.
+	(readnow): New proc.
+
 2020-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/mixed-lang-stack.exp: Replace two hard coded address

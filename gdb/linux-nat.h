@@ -164,6 +164,10 @@ public:
   virtual void low_new_fork (struct lwp_info *parent, pid_t child_pid)
   {}
 
+  /* The method to call, if any, when a new clone event is detected.  */
+  virtual void low_new_clone (struct lwp_info *parent, pid_t child_lwp)
+  {}
+
   /* The method to call, if any, when a process is no longer
      attached.  */
   virtual void low_forget_process (pid_t pid)

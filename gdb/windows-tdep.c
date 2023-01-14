@@ -932,21 +932,20 @@ is_linked_with_cygwin_dll (bfd *abfd)
   /* Find the virtual address of the .idata section.  We must subtract this
      from the RVAs (relative virtual addresses) to obtain an offset in the
      section. */
-  bfd_vma idata_addr =
-    pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_vma idata_addr
+    = pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
 
-  /* Map the section's data.  */
-  bfd_size_type idata_size;
-  const gdb_byte *const idata_contents
-    = gdb_bfd_map_section (idata_section, &idata_size);
-  if (idata_contents == nullptr)
+  /* Get the section's data.  */
+  gdb::byte_vector idata_contents;
+  if (!gdb_bfd_get_full_section_contents (abfd, idata_section, &idata_contents))
     {
       warning (_("Failed to get content of .idata section."));
       return false;
     }
 
-  const gdb_byte *iter = idata_contents;
-  const gdb_byte *end = idata_contents + idata_size;
+  size_t idata_size = idata_contents.size ();
+  const gdb_byte *iter = idata_contents.data ();
+  const gdb_byte *end = idata_contents.data () + idata_size;
   const pe_import_directory_entry null_dir_entry = { 0 };
 
   /* Iterate through all directory entries.  */
@@ -984,14 +983,14 @@ is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       const gdb_byte *name = &idata_contents[name_addr - idata_addr];
 
       /* Make sure we don't overshoot the end of the section with the streq.  */
-      if (name + sizeof(CYGWIN_DLL_NAME) > end)
+      if (name + sizeof (CYGWIN_DLL_NAME) > end)
 	continue;
 
       /* Finally, check if this is the dll name we are looking for.  */
       if (streq ((const char *) name, CYGWIN_DLL_NAME))
 	return true;
 
-      iter += sizeof(pe_import_directory_entry);
+      iter += sizeof (pe_import_directory_entry);
     }
 
     return false;

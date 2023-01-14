@@ -2058,29 +2058,36 @@ windows_add_all_dlls (void)
 	return;
     }
 
-#ifdef __x86_64__
   char system_dir[__PMAX];
   char syswow_dir[__PMAX];
   size_t system_dir_len = 0;
+  bool convert_syswow_dir = false;
+#ifdef __x86_64__
   if (wow64_process)
-    {
-      UINT len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
-      /* Error check.  */
-      gdb_assert (len != 0);
-      /* Check that we have passed a large enough buffer.  */
-      gdb_assert (len < sizeof (system_dir));
-
-      len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
-      /* Error check.  */
-      gdb_assert (len != 0);
-      /* Check that we have passed a large enough buffer.  */
-      gdb_assert (len < sizeof (syswow_dir));
-
-      strcat (system_dir, "\\");
-      strcat (syswow_dir, "\\");
-      system_dir_len = strlen (system_dir);
-    }
 #endif
+    {
+      /* This fails on 32bit Windows because it has no SysWOW64 directory,
+	 and in this case a path conversion isn't necessary.  */
+      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
+      if (len > 0)
+	{
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (syswow_dir));
+
+	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
+	  /* Error check.  */
+	  gdb_assert (len != 0);
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (system_dir));
+
+	  strcat (system_dir, "\\");
+	  strcat (syswow_dir, "\\");
+	  system_dir_len = strlen (system_dir);
+
+	  convert_syswow_dir = true;
+	}
+
+    }
   for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
@@ -2103,12 +2110,11 @@ windows_add_all_dlls (void)
 #else
       name = dll_name;
 #endif
-#ifdef __x86_64__
-      /* Convert the DLL path of WOW64 processes returned by
+      /* Convert the DLL path of 32bit processes returned by
 	 GetModuleFileNameEx from the 64bit system directory to the
 	 32bit syswow64 directory if necessary.  */
       std::string syswow_dll_path;
-      if (wow64_process
+      if (convert_syswow_dir
 	  && strncasecmp (name, system_dir, system_dir_len) == 0
 	  && strchr (name + system_dir_len, '\\') == nullptr)
 	{
@@ -2116,7 +2122,6 @@ windows_add_all_dlls (void)
 	  syswow_dll_path += name + system_dir_len;
 	  name = syswow_dll_path.c_str();
 	}
-#endif
 
       solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
       solib_end = solib_end->next;

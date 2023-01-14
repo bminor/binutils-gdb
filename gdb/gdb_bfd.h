@@ -21,6 +21,7 @@
 #define GDB_BFD_H
 
 #include "registry.h"
+#include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_ref_ptr.h"
 
 DECLARE_REGISTRY (bfd);
@@ -180,5 +181,13 @@ int gdb_bfd_count_sections (bfd *abfd);
    otherwise.  */
 
 int gdb_bfd_requires_relocations (bfd *abfd);
+
+/* Alternative to bfd_get_full_section_contents that returns the section
+   contents in *CONTENTS, instead of an allocated buffer.
+
+   Return true on success, false otherwise.  */
+
+bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
+					gdb::byte_vector *contents);
 
 #endif /* GDB_BFD_H */

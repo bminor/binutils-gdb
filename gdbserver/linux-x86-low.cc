@@ -92,6 +92,107 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 #define ARCH_GET_GS 0x1004
 #endif
 
+/* Linux target op definitions for the x86 architecture.
+   This is initialized assuming an amd64 target.
+   'low_arch_setup' will correct it for i386 or amd64 targets.  */
+
+class x86_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+  void process_qsupported (char **features, int count) override;
+
+  bool supports_tracepoints () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
+  struct emit_ops *emit_ops () override;
+
+  int get_ipa_tdesc_idx () override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
+
+  /* collect_ptrace_register/supply_ptrace_register are not needed in the
+     native i386 case (no registers smaller than an xfer unit), and are not
+     used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
+
+  /* Need to fix up i386 siginfo if host is amd64.  */
+  bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+			  int direction) override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+
+  bool low_supports_range_stepping () override;
+
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+
+private:
+
+  /* Update all the target description of all processes; a new GDB
+     connected, and it may or not support xml target descriptions.  */
+  void update_xmltarget ();
+};
+
+/* The singleton target ops object.  */
+
+static x86_target the_x86_target;
+
 /* Per-process arch-specific data we want to keep.  */
 
 struct arch_process_info
@@ -234,8 +335,8 @@ ps_get_thread_area (struct ps_prochandle *ph,
    don't read anything from the address, and treat it as opaque; it's
    the address itself that we assume is unique per-thread.  */
 
-static int
-x86_get_thread_area (int lwpid, CORE_ADDR *addr)
+int
+x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
 #ifdef __x86_64__
   int use_64bit = is_64bit_tdesc ();
@@ -278,23 +379,23 @@ x86_get_thread_area (int lwpid, CORE_ADDR *addr)
 
 
 
-static int
-x86_cannot_store_register (int regno)
+bool
+x86_target::low_cannot_store_register (int regno)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
-    return 0;
+    return false;
 #endif
 
   return regno >= I386_NUM_REGS;
 }
 
-static int
-x86_cannot_fetch_register (int regno)
+bool
+x86_target::low_cannot_fetch_register (int regno)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
-    return 0;
+    return false;
 #endif
 
   return regno >= I386_NUM_REGS;
@@ -467,8 +568,14 @@ static struct regset_info x86_regsets[] =
   NULL_REGSET
 };
 
-static CORE_ADDR
-x86_get_pc (struct regcache *regcache)
+bool
+x86_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+x86_target::low_get_pc (regcache *regcache)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -488,8 +595,8 @@ x86_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+x86_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -506,20 +613,27 @@ x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
       supply_register_by_name (regcache, "eip", &newpc);
     }
 }
+
+int
+x86_target::low_decr_pc_after_break ()
+{
+  return 1;
+}
+
 
 static const gdb_byte x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
 
-static int
-x86_breakpoint_at (CORE_ADDR pc)
+bool
+x86_target::low_breakpoint_at (CORE_ADDR pc)
 {
   unsigned char c;
 
-  the_target->read_memory (pc, &c, 1);
+  read_memory (pc, &c, 1);
   if (c == 0xCC)
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /* Low-level function vector.  */
@@ -535,8 +649,8 @@ struct x86_dr_low_type x86_dr_low =
 
 /* Breakpoint/Watchpoint support.  */
 
-static int
-x86_supports_z_point_type (char z_type)
+bool
+x86_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -544,15 +658,15 @@ x86_supports_z_point_type (char z_type)
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
-static int
-x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+x86_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
 
@@ -576,9 +690,9 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     }
 }
 
-static int
-x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+x86_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
 
@@ -601,15 +715,15 @@ x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
     }
 }
 
-static int
-x86_stopped_by_watchpoint (void)
+bool
+x86_target::low_stopped_by_watchpoint ()
 {
   struct process_info *proc = current_process ();
   return x86_dr_stopped_by_watchpoint (&proc->priv->arch_private->debug_reg_state);
 }
 
-static CORE_ADDR
-x86_stopped_data_address (void)
+CORE_ADDR
+x86_target::low_stopped_data_address ()
 {
   struct process_info *proc = current_process ();
   CORE_ADDR addr;
@@ -621,8 +735,8 @@ x86_stopped_data_address (void)
 
 /* Called when a new process is created.  */
 
-static struct arch_process_info *
-x86_linux_new_process (void)
+arch_process_info *
+x86_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
 
@@ -633,16 +747,30 @@ x86_linux_new_process (void)
 
 /* Called when a process is being deleted.  */
 
-static void
-x86_linux_delete_process (struct arch_process_info *info)
+void
+x86_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
-/* Target routine for linux_new_fork.  */
+void
+x86_target::low_new_thread (lwp_info *lwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_new_thread (lwp);
+}
 
-static void
-x86_linux_new_fork (struct process_info *parent, struct process_info *child)
+void
+x86_target::low_delete_thread (arch_lwp_info *alwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_delete_thread (alwp);
+}
+
+/* Target routine for new_fork.  */
+
+void
+x86_target::low_new_fork (process_info *parent, process_info *child)
 {
   /* These are allocated by linux_add_process.  */
   gdb_assert (parent->priv != NULL
@@ -667,6 +795,13 @@ x86_linux_new_fork (struct process_info *parent, struct process_info *child)
   *child->priv->arch_private = *parent->priv->arch_private;
 }
 
+void
+x86_target::low_prepare_to_resume (lwp_info *lwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_prepare_to_resume (lwp);
+}
+
 /* See nat/x86-dregs.h.  */
 
 struct x86_debug_reg_state *
@@ -689,8 +824,8 @@ x86_debug_reg_state (pid_t pid)
    from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
-static int
-x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+bool
+x86_target::low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
@@ -707,7 +842,7 @@ x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 					     FIXUP_X32);
 #endif
 
-  return 0;
+  return false;
 }
 
 static int use_xml;
@@ -871,8 +1006,8 @@ x86_linux_read_description (void)
 /* Update all the target description of all processes; a new GDB
    connected, and it may or not support xml target descriptions.  */
 
-static void
-x86_linux_update_xmltarget (void)
+void
+x86_target::update_xmltarget ()
 {
   struct thread_info *saved_thread = current_thread;
 
@@ -881,13 +1016,13 @@ x86_linux_update_xmltarget (void)
      release the current regcache objects.  */
   regcache_release ();
 
-  for_each_process ([] (process_info *proc) {
+  for_each_process ([this] (process_info *proc) {
     int pid = proc->pid;
 
     /* Look up any thread of this process.  */
     current_thread = find_any_thread_of_pid (pid);
 
-    the_low_target.arch_setup ();
+    low_arch_setup ();
   });
 
   current_thread = saved_thread;
@@ -896,8 +1031,8 @@ x86_linux_update_xmltarget (void)
 /* Process qSupported query, "xmlRegisters=".  Update the buffer size for
    PTRACE_GETREGSET.  */
 
-static void
-x86_linux_process_qsupported (char **features, int count)
+void
+x86_target::process_qsupported (char **features, int count)
 {
   int i;
 
@@ -928,7 +1063,7 @@ x86_linux_process_qsupported (char **features, int count)
 	  free (copy);
 	}
     }
-  x86_linux_update_xmltarget ();
+  update_xmltarget ();
 }
 
 /* Common for x86/x86-64.  */
@@ -961,8 +1096,8 @@ static struct regs_info i386_linux_regs_info =
     &x86_regsets_info
   };
 
-static const struct regs_info *
-x86_linux_regs_info (void)
+const regs_info *
+x86_target::get_regs_info ()
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -975,17 +1110,23 @@ x86_linux_regs_info (void)
 /* Initialize the target description for the architecture of the
    inferior.  */
 
-static void
-x86_arch_setup (void)
+void
+x86_target::low_arch_setup ()
 {
   current_process ()->tdesc = x86_linux_read_description ();
+}
+
+bool
+x86_target::low_supports_catch_syscall ()
+{
+  return true;
 }
 
 /* Fill *SYSNO and *SYSRET with the syscall nr trapped and the syscall return
    code.  This should only be called if LWP got a SYSCALL_SIGTRAP.  */
 
-static void
-x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+void
+x86_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -1000,10 +1141,10 @@ x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
     collect_register_by_name (regcache, "orig_eax", sysno);
 }
 
-static int
-x86_supports_tracepoints (void)
+bool
+x86_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
 static void
@@ -1412,19 +1553,26 @@ i386_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   return 0;
 }
 
-static int
-x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-				      CORE_ADDR collector,
-				      CORE_ADDR lockaddr,
-				      ULONGEST orig_size,
-				      CORE_ADDR *jump_entry,
-				      CORE_ADDR *trampoline,
-				      ULONGEST *trampoline_size,
-				      unsigned char *jjump_pad_insn,
-				      ULONGEST *jjump_pad_insn_size,
-				      CORE_ADDR *adjusted_insn_addr,
-				      CORE_ADDR *adjusted_insn_addr_end,
-				      char *err)
+bool
+x86_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
+int
+x86_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					      CORE_ADDR tpaddr,
+					      CORE_ADDR collector,
+					      CORE_ADDR lockaddr,
+					      ULONGEST orig_size,
+					      CORE_ADDR *jump_entry,
+					      CORE_ADDR *trampoline,
+					      ULONGEST *trampoline_size,
+					      unsigned char *jjump_pad_insn,
+					      ULONGEST *jjump_pad_insn_size,
+					      CORE_ADDR *adjusted_insn_addr,
+					      CORE_ADDR *adjusted_insn_addr_end,
+					      char *err)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -1453,8 +1601,8 @@ x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 /* Return the minimum instruction length for fast tracepoints on x86/x86-64
    architectures.  */
 
-static int
-x86_get_min_fast_tracepoint_insn_len (void)
+int
+x86_target::get_min_fast_tracepoint_insn_len ()
 {
   static int warned_about_fast_tracepoints = 0;
 
@@ -2802,8 +2950,8 @@ struct emit_ops i386_emit_ops =
   };
 
 
-static struct emit_ops *
-x86_emit_ops (void)
+emit_ops *
+x86_target::emit_ops ()
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -2813,32 +2961,23 @@ x86_emit_ops (void)
     return &i386_emit_ops;
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-x86_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+x86_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = x86_breakpoint_len;
   return x86_breakpoint;
 }
 
-static int
-x86_supports_range_stepping (void)
+bool
+x86_target::low_supports_range_stepping ()
 {
-  return 1;
+  return true;
 }
 
-/* Implementation of linux_target_ops method "supports_hardware_single_step".
- */
-
-static int
-x86_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
-static int
-x86_get_ipa_tdesc_idx (void)
+int
+x86_target::get_ipa_tdesc_idx ()
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
@@ -2853,53 +2992,9 @@ x86_get_ipa_tdesc_idx (void)
   return i386_get_ipa_tdesc_idx (tdesc);
 }
 
-/* This is initialized assuming an amd64 target.
-   x86_arch_setup will correct it for i386 or amd64 targets.  */
+/* The linux target ops object.  */
 
-struct linux_target_ops the_low_target =
-{
-  x86_arch_setup,
-  x86_linux_regs_info,
-  x86_cannot_fetch_register,
-  x86_cannot_store_register,
-  NULL, /* fetch_register */
-  x86_get_pc,
-  x86_set_pc,
-  NULL, /* breakpoint_kind_from_pc */
-  x86_sw_breakpoint_from_kind,
-  NULL,
-  1,
-  x86_breakpoint_at,
-  x86_supports_z_point_type,
-  x86_insert_point,
-  x86_remove_point,
-  x86_stopped_by_watchpoint,
-  x86_stopped_data_address,
-  /* collect_ptrace_register/supply_ptrace_register are not needed in the
-     native i386 case (no registers smaller than an xfer unit), and are not
-     used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
-  NULL,
-  NULL,
-  /* need to fix up i386 siginfo if host is amd64 */
-  x86_siginfo_fixup,
-  x86_linux_new_process,
-  x86_linux_delete_process,
-  x86_linux_new_thread,
-  x86_linux_delete_thread,
-  x86_linux_new_fork,
-  x86_linux_prepare_to_resume,
-  x86_linux_process_qsupported,
-  x86_supports_tracepoints,
-  x86_get_thread_area,
-  x86_install_fast_tracepoint_jump_pad,
-  x86_emit_ops,
-  x86_get_min_fast_tracepoint_insn_len,
-  x86_supports_range_stepping,
-  NULL, /* breakpoint_kind_from_current_state */
-  x86_supports_hardware_single_step,
-  x86_get_syscall_trapinfo,
-  x86_get_ipa_tdesc_idx,
-};
+linux_process_target *the_linux_target = &the_x86_target;
 
 void
 initialize_low_arch (void)

@@ -7929,19 +7929,34 @@ _bfd_elf_fixup_group_sections (bfd *ibfd, asection *discarded)
 		elf_section_flags (s->output_section) &= ~SHF_GROUP;
 		elf_group_name (s->output_section) = NULL;
 	      }
-	    /* Conversely, if the member section is not being output
-	       but the SHT_GROUP section is, then adjust its size.  */
-	    else if (s->output_section == discarded
-		     && isec->output_section != discarded)
+	    else
 	      {
 		struct bfd_elf_section_data *elf_sec = elf_section_data (s);
-		removed += 4;
-		if (elf_sec->rel.hdr != NULL
-		    && (elf_sec->rel.hdr->sh_flags & SHF_GROUP) != 0)
-		  removed += 4;
-		if (elf_sec->rela.hdr != NULL
-		    && (elf_sec->rela.hdr->sh_flags & SHF_GROUP) != 0)
-		  removed += 4;
+		if (s->output_section == discarded
+		    && isec->output_section != discarded)
+		  {
+		    /* Conversely, if the member section is not being
+		       output but the SHT_GROUP section is, then adjust
+		       its size.  */
+		    removed += 4;
+		    if (elf_sec->rel.hdr != NULL
+			&& (elf_sec->rel.hdr->sh_flags & SHF_GROUP) != 0)
+		      removed += 4;
+		    if (elf_sec->rela.hdr != NULL
+			&& (elf_sec->rela.hdr->sh_flags & SHF_GROUP) != 0)
+		      removed += 4;
+		  }
+		else
+		  {
+		    /* Also adjust for zero-sized relocation member
+		       section.  */
+		    if (elf_sec->rel.hdr != NULL
+			&& elf_sec->rel.hdr->sh_size == 0)
+		      removed += 4;
+		    if (elf_sec->rela.hdr != NULL
+			&& elf_sec->rela.hdr->sh_size == 0)
+		      removed += 4;
+		  }
 	      }
 	    s = elf_next_in_group (s);
 	    if (s == first)

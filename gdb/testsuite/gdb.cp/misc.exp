@@ -110,3 +110,11 @@ gdb_test "print (int)false" "\\$\[0-9\]* = 0" "(int)false"
 
 gdb_test "print 'misc.cc'::v_bool" " = true" \
     "expression using block qualifier"
+
+# pointer arithmetic
+gdb_test "print *(v_bool_array + number_ref)" "\\$\[0-9\]* = false" \
+    "pointer addition with integer reference"
+gdb_test "print *(number_ref + v_bool_array)" "\\$\[0-9\]* = false" \
+    "pointer addition with integer reference"
+gdb_test "print *(v_bool_array - number_ref)" "\\$\[0-9\]* = false" \
+    "pointer subtraction with integer reference"

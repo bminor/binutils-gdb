@@ -284,8 +284,7 @@ extern struct value *ada_delta (struct type *);
 
 extern struct value *ada_scaling_factor (struct type *);
 
-extern int ada_which_variant_applies (struct type *, struct type *,
-				      const gdb_byte *);
+extern int ada_which_variant_applies (struct type *, struct value *);
 
 extern struct type *ada_to_fixed_type (struct type *, const gdb_byte *,
 				       CORE_ADDR, struct value *,

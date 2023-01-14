@@ -1,3 +1,439 @@
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (read_base_type) <DW_ATE_complex_float>: Handle
+	TYPE_CODE_ERROR.
+
+2020-04-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-tdep.c: Include "gdbarch.h".
+	Define enum with NetBSD signal numbers.
+	(nbsd_gdb_signal_from_target, nbsd_gdb_signal_to_target): New.
+	* alpha-nbsd-tdep.c (alphanbsd_init_abi): Call nbsd_init_abi().
+	* amd64-nbsd-tdep.c (amd64nbsd_init_abi): Likewise.
+	* arm-nbsd-tdep.c (arm_netbsd_elf_init_abi): Likewise.
+	* hppa-nbsd-tdep.c (hppanbsd_init_abi): Likewise.
+	* i386-nbsd-tdep.c (i386nbsd_init_abi): Likewise.
+	* mips-nbsd-tdep.c (nbsd_init_abi): Likewise.
+	* ppc-nbsd-tdep.c (ppcnbsd_init_abi): Likewise.
+	* sh-nbsd-tdep.c (shnbsd_init_abi): Likewise.
+	* sparc-nbsd-tdep.c (sparc32nbsd_init_abi): Likewise.
+	* sparc64-nbsd-tdep.c (sparc64nbsd_init_abi): Likewise.
+	* vax-nbsd-tdep.c (vaxnbsd_elf_init_abi): Likewise.
+
+2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/25325
+	* dwarf2/read.c (read_enumeration_type): Fix typed enum attributes.
+
+2020-04-03  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/loc.c (disassemble_dwarf_expression) <DW_OP_const_type>:
+	Read constant block.
+
+2020-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb_bfd.h: Include gdbsupport/byte-vector.h.
+	(gdb_bfd_get_full_section_contents): New declaration.
+	* gdb_bfd.c (gdb_bfd_get_full_section_contents): New function.
+	* windows-tdep.c (is_linked_with_cygwin_dll): Use
+	gdb_bfd_get_full_section_contents.
+
+2020-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* exec.c (build_section_table): Replace internal_error with
+	gdb_assert.
+	(section_table_xfer_memory_partial): Likewise.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+	* psymtab.c (lookup_partial_symbol): Likewise.
+	* utils.c (wrap_here): Likewise.
+
+2020-04-02  Tom Tromey  <tromey@adacore.com>
+
+	* f-lang.c (build_fortran_types): Use arch_type to initialize
+	builtin_complex_s32 in the TYPE_CODE_ERROR case.
+
+2020-04-02  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (partial_die_info::read): Do not create a vector
+	of attributes.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Bernd Edlinger <bernd.edlinger@hotmail.de>
+	    Tom Tromey  <tromey@adacore.com>
+
+	* buildsym.c (buildsym_compunit::record_line): Remove
+	deduplication code.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	PR ada/24671
+	* dwarf2/read.c (dw2_map_matching_symbols): Handle -readnow.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (dwarf2_gdb_index_functions,
+	dwarf2_debug_names_functions): Init lookup_global_symbol_language with
+	NULL.
+	* psymtab.c (psym_lookup_global_symbol_language): New function.
+	(psym_functions): Init psym_lookup_global_symbol_language with
+	psym_lookup_global_symbol_language.
+	* symfile-debug.c (debug_sym_quick_functions): Init
+	lookup_global_symbol_language with NULL.
+	* symfile.c (set_initial_language): Remove fixme comment.
+	* symfile.h (struct quick_symbol_functions): Add
+	lookup_global_symbol_language.
+	* symtab.c (find_quick_global_symbol_language): New function.
+	(find_main_name): Use find_quick_global_symbol_language.
+
+2020-04-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* windows-tdep.c (is_linked_with_cygwin_dll): Fix style.
+
+2020-04-01  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* buildsym.c (record_line): Fix undefined behavior and preserve
+	lines at eof.
+
+2020-04-01  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* buildsym.c (record_line): Fix the resizing condition.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* value.h (value_literal_complex): Add comment.
+	* valops.c (value_literal_complex): Refer to value.h.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* c-exp.y (FLOAT_KEYWORD, COMPLEX): New tokens.
+	(scalar_type): New rule, from typebase.
+	(typebase): Use scalar_type.  Recognize complex types.
+	(field_name): Handle FLOAT_KEYWORD.
+	(ident_tokens): Add _Complex and __complex__.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	PR exp/25299:
+	* valarith.c (promotion_type, complex_binop): New functions.
+	(scalar_binop): Handle complex numbers.  Use promotion_type.
+	(value_pos, value_neg, value_complement): Handle complex numbers.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* c-exp.y (COMPLEX_INT, COMPLEX_FLOAT): New tokens.
+	(exp) <COMPLEX_INT, COMPLEX_FLOAT>: New rules.
+	(parse_number): Handle complex numbers.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* c-valprint.c (c_decorations): Change complex suffix to "i".
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_value_print_complex): Use accessors.
+	* value.h (value_real_part, value_imaginary_part): Declare.
+	* valops.c (value_real_part, value_imaginary_part): New
+	functions.
+	* value.c (creal_internal_fn, cimag_internal_fn): Use accessors.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* stabsread.c (rs6000_builtin_type, read_sun_floating_type)
+	(read_range_type): Update.
+	* mdebugread.c (basic_type): Update.
+	* go-lang.c (build_go_types): Use init_complex_type.
+	* gdbtypes.h (struct main_type) <complex_type>: New member.
+	(init_complex_type): Update.
+	(arch_complex_type): Don't declare.
+	* gdbtypes.c (init_complex_type): Remove "objfile" parameter.
+	Make name if none given.  Use alloc_type_copy.  Look for cached
+	complex type.
+	(arch_complex_type): Remove.
+	(gdbtypes_post_init): Use init_complex_type.
+	* f-lang.c (build_fortran_types): Use init_complex_type.
+	* dwarf2/read.c (read_base_type): Update.
+	* d-lang.c (build_d_types): Use init_complex_type.
+	* ctfread.c (read_base_type): Update.
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (stop_all_threads): Update assertion, plus when
+	stopping threads, take into account that we might be trying
+	to stop an all-stop target.
+	(stop_waiting): Call 'stop_all_threads' if there exists a
+	non-stop target.
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (exists_non_stop_target): New function declaration.
+	* target.c (exists_non_stop_target): New function.
+
+2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/24789
+	* eval.c (is_integral_or_integral_reference): New function.
+	(evaluate_subexp_standard): Allow integer references in
+	pointer arithmetic.
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* remote.c (remote_target::remote_parse_stop_reply): Remove the
+	check for no ptid in the stop reply when the target is non-stop.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
+	* symtab.h (class lookup_name_info) <lookup_name_info>: Change
+	"name" parameter to rvalue reference.  Initialize m_name_holder.
+	<lookup_name_info>: New overloads.
+	<name>: Return gdb::string_view.
+	<c_str>: New method.
+	<make_ignore_params>: Update.
+	<search_name_hash>: Update.
+	<language_lookup_name>: Return const char *.
+	<m_name>: Change type.
+	* symtab.c (demangle_for_lookup_info::demangle_for_lookup_info)
+	(demangle_for_lookup_info::demangle_for_lookup_info): Update.
+	(lookup_name_info::match_any): Update.
+	* psymtab.c (match_partial_symbol, lookup_partial_symbol):
+	Update.
+	* minsyms.c (linkage_name_str): Update.
+	* language.c (default_symbol_name_matcher): Update.
+	* dwarf2/read.c (mapped_index_base::find_name_components_bounds):
+	Update.
+	* ada-lang.c (ada_fold_name): Change parameter to string_view.
+	(ada_lookup_name_info::ada_lookup_name_info): Update.
+	(literal_symbol_name_matcher): Update.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
+	* psymtab.c (psymtab_search_name): Remove function.
+	(psym_lookup_symbol): Create search name and lookup name here.
+	(lookup_partial_symbol): Remove "name" parameter; add
+	lookup_name.
+	(psym_expand_symtabs_for_function): Update.
+
+2020-03-31  Joel Jones  <joelkevinjones@gmail.com>
+
+	PR tui/25597:
+	* python/py-tui.c: Include gdb_curses.h inside of #ifdef TUI.
+
+2020-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/abbrev.c (abbrev_table::read): Conditionally call
+	memcpy.
+
+2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* features/riscv/32bit-csr.xml: Regenerated.
+	* features/riscv/64bit-csr.xml: Regenerated.
+
+2020-03-30  Tom Tromey  <tromey@adacore.com>
+
+	* ada-valprint.c (print_variant_part): Update.
+	* ada-lang.h (ada_which_variant_applies): Update.
+	* ada-lang.c (ada_which_variant_applies): Remove outer_type and
+	outer_valaddr parameters; replace with "outer" value parameter.
+	(to_fixed_variant_branch_type): Update.
+
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* ppc-linux-nat.c: Include <algorithm>, <unordered_map>, and
+	<list>.  Remove inclusion of observable.h.
+	(PPC_DEBUG_CURRENT_VERSION): Move up define.
+	(struct arch_lwp_info): New struct.
+	(class ppc_linux_dreg_interface): New class.
+	(struct ppc_linux_process_info): New struct.
+	(struct ppc_linux_nat_target) <low_delete_thread, low_new_fork>
+	<low_new_clone, low_forget_process, low_prepare_to_resume>
+	<copy_thread_dreg_state, mark_thread_stale>
+	<mark_debug_registers_changed, register_hw_breakpoint>
+	<clear_hw_breakpoint, register_wp, clear_wp>
+	<can_use_watchpoint_cond_accel, calculate_dvc, check_condition>
+	<num_memory_accesses, get_trigger_type>
+	<create_watchpoint_request, hwdebug_point_cmp>
+	<init_arch_lwp_info, get_arch_lwp_info>
+	<low_stopped_by_watchpoint, low_stopped_data_address>: Declare as
+	methods.
+	<struct ptid_hash>: New inner struct.
+	<m_dreg_interface, m_process_info, m_installed_hw_bps>: Declare
+	members.
+	(saved_dabr_value, hwdebug_info, max_slots_number)
+	(struct hw_break_tuple, struct thread_points, ppc_threads)
+	(have_ptrace_hwdebug_interface)
+	(hwdebug_find_thread_points_by_tid)
+	(hwdebug_insert_point, hwdebug_remove_point): Remove.
+	(ppc_linux_nat_target::can_use_hw_breakpoint): Use
+	m_dreg_interface, remove call to PTRACE_SET_DEBUGREG.
+	(ppc_linux_nat_target::region_ok_for_hw_watchpoint): Add comment,
+	use m_dreg_interface.
+	(hwdebug_point_cmp): Change to...
+	(ppc_linux_nat_target::hwdebug_point_cmp): ...this method.  Use
+	reference arguments instead of pointers.
+	(ppc_linux_nat_target::ranged_break_num_registers): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::insert_hw_breakpoint): Add comment, use
+	m_dreg_interface.  Call register_hw_breakpoint.
+	(ppc_linux_nat_target::remove_hw_breakpoint): Add comment, use
+	m_dreg_interface.  Call clear_hw_breakpoint.
+	(get_trigger_type): Change to...
+	(ppc_linux_nat_target::get_trigger_type): ...this method.  Add
+	comment.
+	(ppc_linux_nat_target::insert_mask_watchpoint): Update comment,
+	use m_dreg_interface.  Call register_hw_breakpoint.
+	(ppc_linux_nat_target::remove_mask_watchpoint): Update comment,
+	use m_dreg_interface.  Call clear_hw_breakpoint.
+	(can_use_watchpoint_cond_accel): Change to...
+	(ppc_linux_nat_target::can_use_watchpoint_cond_accel): ...this
+	method.  Update comment, use m_dreg_interface and
+	m_process_info.
+	(calculate_dvc): Change to...
+	(ppc_linux_nat_target::calculate_dvc): ...this method.  Use
+	m_dreg_interface.
+	(num_memory_accesses): Change to...
+	(ppc_linux_nat_target::num_memory_accesses): ...this method.
+	(check_condition): Change to...
+	(ppc_linux_nat_target::check_condition): ...this method.
+	(ppc_linux_nat_target::can_accel_watchpoint_condition): Update
+	comment, use m_dreg_interface.
+	(create_watchpoint_request): Change to...
+	(ppc_linux_nat_target::create_watchpoint_request): ...this
+	method.  Use m_dreg_interface.
+	(ppc_linux_nat_target::insert_watchpoint): Add comment, use
+	m_dreg_interface.  Call register_hw_breakpoint or register_wp.
+	(ppc_linux_nat_target::remove_watchpoint): Add comment, use
+	m_dreg_interface.  Call clear_hw_breakpoint or clear_wp.
+	(ppc_linux_nat_target::low_forget_process)
+	(ppc_linux_nat_target::low_new_fork)
+	(ppc_linux_nat_target::low_new_clone)
+	(ppc_linux_nat_target::low_delete_thread)
+	(ppc_linux_nat_target::low_prepare_to_resume): New methods.
+	(ppc_linux_nat_target::low_new_thread): Remove previous logic,
+	only call mark_thread_stale.
+	(ppc_linux_thread_exit): Remove.
+	(ppc_linux_nat_target::stopped_data_address): Change to...
+	(ppc_linux_nat_target::low_stopped_data_address): This. Add
+	comment, use m_dreg_interface and m_thread_hw_breakpoints.
+	(ppc_linux_nat_target::stopped_by_watchpoint): Change to...
+	(ppc_linux_nat_target::stopped_by_watchpoint): This.  Add
+	comment.  Call low_stopped_data_address.
+	(ppc_linux_nat_target::watchpoint_addr_within_range): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::masked_watch_num_registers): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::copy_thread_dreg_state)
+	(ppc_linux_nat_target::mark_thread_stale)
+	(ppc_linux_nat_target::mark_debug_registers_changed)
+	(ppc_linux_nat_target::register_hw_breakpoint)
+	(ppc_linux_nat_target::clear_hw_breakpoint)
+	(ppc_linux_nat_target::register_wp)
+	(ppc_linux_nat_target::clear_wp)
+	(ppc_linux_nat_target::init_arch_lwp_info)
+	(ppc_linux_nat_target::get_arch_lwp_info): New methods.
+	(_initialize_ppc_linux_nat): Remove observer callback.
+
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_nat_target::store_registers)
+	(ppc_linux_nat_target::auxv_parse)
+	(ppc_linux_nat_target::read_description)
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset):
+	Move up.
+
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-nat.h (low_new_clone): New method.
+	* linux-nat.c (linux_handle_extended_wait): Call low_new_clone.
+
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dbxread.c (dbx_psymtab_to_symtab_1): Rename to...
+	(dbx_expand_psymtab): ... this.
+	(start_psymtab): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Rename to...
+	(mdebug_expand_psymtab): ... this.
+	(parse_partial_symbols): Update.
+	(new_psymtab): Update.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Rename to...
+	(xcoff_expand_psymtab): ... this.
+	(xcoff_start_psymtab): Update.
+
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* psympriv.h (partial_symtab) <read_dependencies>: Rename to...
+	<expand_dependencies>: ... this.
+	* psymtab.c (partial_symtab::read_dependencies): Rename to...
+	(partial_symtab::expand_dependencies): ... this.
+	* dwarf2/read.c (dwarf2_include_psymtab) <expand_psymtab>:
+	Update.
+	(dwarf2_psymtab::expand_psymtab): Update.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Update.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
+
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* psympriv.h (discard_psymtab): Remove.
+	* dbxread.c (dbx_end_psymtab): Update.
+	* xcoffread.c (xcoff_end_psymtab): Update.
+
+2020-03-28  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/attribute.h (struct attribute) <form_is_constant>: Update
+	comment.
+
+2020-03-28  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_attribute_reprocess): Fix formatting.
+
+2020-03-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-nat.c (windows_add_all_dlls): Fix system dll paths.
+
+2020-03-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_FREEBSD_BSDFLAGS.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (handle_data_member_location, dwarf2_add_field)
+	(mark_common_block_symbol_computed, read_tag_string_type)
+	(attr_to_dynamic_prop, read_subrange_type): Update.
+	(dwarf2_get_ref_die_offset, dwarf2_get_attr_constant_value): Move
+	to be methods on struct attribute.
+	(skip_one_die, process_imported_unit_die, read_namespace_alias)
+	(read_call_site_scope, partial_die_info::read)
+	(partial_die_info::read, lookup_die_type, follow_die_ref):
+	Update.
+	* dwarf2/attribute.c (attribute::get_ref_die_offset): New method,
+	from dwarf2_get_ref_die_offset.
+	(attribute::constant_value): New method, from
+	dwarf2_get_attr_constant_value.
+	* dwarf2/attribute.h (struct attribute) <get_ref_die_offset>:
+	Declare method.
+	<constant_value>: New method.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf_unit_type_name, dwarf_tag_name)
+	(dwarf_attr_name, dwarf_form_name, dwarf_bool_name)
+	(dwarf_type_encoding_name): Move to stringify.c.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/stringify.c.
+	* dwarf2/stringify.c: New file.
+	* dwarf2/stringify.h: New file.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/die.h (struct die_info) <addr_base, ranges_base>:
+	Rewrite.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/die.h (struct die_info) <addr_base, ranges_base>: New
+	methods.
+	* dwarf2/read.c (lookup_addr_base): Move to die.h.
+	(lookup_ranges_base): Likewise.
+	(read_cutu_die_from_dwo, read_full_die_1): Update.
+
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (read_import_statement, read_file_scope)

@@ -560,9 +560,7 @@ print_variant_part (struct value *value, int field_num,
 {
   struct type *type = value_type (value);
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
-  int which = ada_which_variant_applies (var_type,
-					 value_type (outer_value),
-					 value_contents (outer_value));
+  int which = ada_which_variant_applies (var_type, outer_value);
 
   if (which < 0)
     return 0;

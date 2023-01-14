@@ -49,6 +49,112 @@
 #include <sys/reg.h>
 #endif
 
+/* Linux target op definitions for the AArch64 architecture.  */
+
+class aarch64_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+  bool supports_tracepoints () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
+  struct emit_ops *emit_ops () override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
+
+  bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+			  int direction) override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+
+  bool low_supports_range_stepping () override;
+
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+};
+
+/* The singleton target ops object.  */
+
+static aarch64_target the_aarch64_target;
+
+bool
+aarch64_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+aarch64_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
+
+void
+aarch64_target::low_prepare_to_resume (lwp_info *lwp)
+{
+  aarch64_linux_prepare_to_resume (lwp);
+}
+
 /* Per-process arch-specific data we want to keep.  */
 
 struct arch_process_info
@@ -154,10 +260,16 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 		   &pauth_regset[1]);
 }
 
-/* Implementation of linux_target_ops method "get_pc".  */
+bool
+aarch64_target::low_supports_breakpoints ()
+{
+  return true;
+}
 
-static CORE_ADDR
-aarch64_get_pc (struct regcache *regcache)
+/* Implementation of linux target ops method "low_get_pc".  */
+
+CORE_ADDR
+aarch64_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 8)
     return linux_get_pc_64bit (regcache);
@@ -165,10 +277,10 @@ aarch64_get_pc (struct regcache *regcache)
     return linux_get_pc_32bit (regcache);
 }
 
-/* Implementation of linux_target_ops method "set_pc".  */
+/* Implementation of linux target ops method "low_set_pc".  */
 
-static void
-aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+aarch64_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   if (register_size (regcache->tdesc, 0) == 8)
     linux_set_pc_64bit (regcache, pc);
@@ -183,21 +295,20 @@ aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
    (aarch64_default_breakpoint).  */
 static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 
-/* Implementation of linux_target_ops method "breakpoint_at".  */
+/* Implementation of linux target ops method "low_breakpoint_at".  */
 
-static int
-aarch64_breakpoint_at (CORE_ADDR where)
+bool
+aarch64_target::low_breakpoint_at (CORE_ADDR where)
 {
   if (is_64bit_tdesc ())
     {
       gdb_byte insn[aarch64_breakpoint_len];
 
-      the_target->read_memory (where, (unsigned char *) &insn,
-			       aarch64_breakpoint_len);
+      read_memory (where, (unsigned char *) &insn, aarch64_breakpoint_len);
       if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
-	return 1;
+	return true;
 
-      return 0;
+      return false;
     }
   else
     return arm_breakpoint_at (where);
@@ -234,10 +345,10 @@ aarch64_get_debug_reg_state (pid_t pid)
   return &proc->priv->arch_private->debug_reg_state;
 }
 
-/* Implementation of linux_target_ops method "supports_z_point_type".  */
+/* Implementation of target ops method "supports_z_point_type".  */
 
-static int
-aarch64_supports_z_point_type (char z_type)
+bool
+aarch64_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -246,20 +357,20 @@ aarch64_supports_z_point_type (char z_type)
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
-/* Implementation of linux_target_ops method "insert_point".
+/* Implementation of linux target ops method "low_insert_point".
 
    It actually only records the info of the to-be-inserted bp/wp;
    the actual insertion will happen when threads are resumed.  */
 
-static int
-aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		      int len, struct raw_breakpoint *bp)
+int
+aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -301,14 +412,14 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Implementation of linux_target_ops method "remove_point".
+/* Implementation of linux target ops method "low_remove_point".
 
    It actually only records the info of the to-be-removed bp/wp,
    the actual removal will be done when threads are resumed.  */
 
-static int
-aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		      int len, struct raw_breakpoint *bp)
+int
+aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -347,10 +458,10 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Implementation of linux_target_ops method "stopped_data_address".  */
+/* Implementation of linux target ops method "low_stopped_data_address".  */
 
-static CORE_ADDR
-aarch64_stopped_data_address (void)
+CORE_ADDR
+aarch64_target::low_stopped_data_address ()
 {
   siginfo_t siginfo;
   int pid, i;
@@ -409,15 +520,12 @@ aarch64_stopped_data_address (void)
   return (CORE_ADDR) 0;
 }
 
-/* Implementation of linux_target_ops method "stopped_by_watchpoint".  */
+/* Implementation of linux target ops method "low_stopped_by_watchpoint".  */
 
-static int
-aarch64_stopped_by_watchpoint (void)
+bool
+aarch64_target::low_stopped_by_watchpoint ()
 {
-  if (aarch64_stopped_data_address () != 0)
-    return 1;
-  else
-    return 0;
+  return (low_stopped_data_address () != 0);
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -430,10 +538,11 @@ ps_get_thread_area (struct ps_prochandle *ph,
 				     is_64bit_tdesc ());
 }
 
-/* Implementation of linux_target_ops method "siginfo_fixup".  */
+/* Implementation of linux target ops method "low_siginfo_fixup".  */
 
-static int
-aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+bool
+aarch64_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+				   int direction)
 {
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
@@ -445,16 +554,16 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 	aarch64_siginfo_from_compat_siginfo (native,
 					     (struct compat_siginfo *) inf);
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
-/* Implementation of linux_target_ops method "new_process".  */
+/* Implementation of linux target ops method "low_new_process".  */
 
-static struct arch_process_info *
-aarch64_linux_new_process (void)
+arch_process_info *
+aarch64_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
 
@@ -463,19 +572,31 @@ aarch64_linux_new_process (void)
   return info;
 }
 
-/* Implementation of linux_target_ops method "delete_process".  */
+/* Implementation of linux target ops method "low_delete_process".  */
 
-static void
-aarch64_linux_delete_process (struct arch_process_info *info)
+void
+aarch64_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
-/* Implementation of linux_target_ops method "linux_new_fork".  */
+void
+aarch64_target::low_new_thread (lwp_info *lwp)
+{
+  aarch64_linux_new_thread (lwp);
+}
 
-static void
-aarch64_linux_new_fork (struct process_info *parent,
-			struct process_info *child)
+void
+aarch64_target::low_delete_thread (arch_lwp_info *arch_lwp)
+{
+  aarch64_linux_delete_thread (arch_lwp);
+}
+
+/* Implementation of linux target ops method "low_new_fork".  */
+
+void
+aarch64_target::low_new_fork (process_info *parent,
+			      process_info *child)
 {
   /* These are allocated by linux_add_process.  */
   gdb_assert (parent->priv != NULL
@@ -503,10 +624,10 @@ aarch64_linux_new_fork (struct process_info *parent,
 /* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
 #define AARCH64_HWCAP_PACA (1 << 30)
 
-/* Implementation of linux_target_ops method "arch_setup".  */
+/* Implementation of linux target ops method "low_arch_setup".  */
 
-static void
-aarch64_arch_setup (void)
+void
+aarch64_target::low_arch_setup ()
 {
   unsigned int machine;
   int is_elf64;
@@ -604,10 +725,10 @@ static struct regs_info regs_info_aarch64_sve =
     &aarch64_sve_regsets_info,
   };
 
-/* Implementation of linux_target_ops method "regs_info".  */
+/* Implementation of linux target ops method "get_regs_info".  */
 
-static const struct regs_info *
-aarch64_regs_info (void)
+const regs_info *
+aarch64_target::get_regs_info ()
 {
   if (!is_64bit_tdesc ())
     return &regs_info_aarch32;
@@ -618,13 +739,13 @@ aarch64_regs_info (void)
   return &regs_info_aarch64;
 }
 
-/* Implementation of linux_target_ops method "supports_tracepoints".  */
+/* Implementation of target ops method "supports_tracepoints".  */
 
-static int
-aarch64_supports_tracepoints (void)
+bool
+aarch64_target::supports_tracepoints ()
 {
   if (current_thread == NULL)
-    return 1;
+    return true;
   else
     {
       /* We don't support tracepoints on aarch32 now.  */
@@ -632,10 +753,10 @@ aarch64_supports_tracepoints (void)
     }
 }
 
-/* Implementation of linux_target_ops method "get_thread_area".  */
+/* Implementation of linux target ops method "low_get_thread_area".  */
 
-static int
-aarch64_get_thread_area (int lwpid, CORE_ADDR *addrp)
+int
+aarch64_target::low_get_thread_area (int lwpid, CORE_ADDR *addrp)
 {
   struct iovec iovec;
   uint64_t reg;
@@ -651,10 +772,16 @@ aarch64_get_thread_area (int lwpid, CORE_ADDR *addrp)
   return 0;
 }
 
-/* Implementation of linux_target_ops method "get_syscall_trapinfo".  */
+bool
+aarch64_target::low_supports_catch_syscall ()
+{
+  return true;
+}
 
-static void
-aarch64_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+/* Implementation of linux target ops method "low_get_syscall_trapinfo".  */
+
+void
+aarch64_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -1861,23 +1988,23 @@ static const struct aarch64_insn_visitor visitor =
   aarch64_ftrace_insn_reloc_others,
 };
 
-/* Implementation of linux_target_ops method
+bool
+aarch64_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
+/* Implementation of target ops method
    "install_fast_tracepoint_jump_pad".  */
 
-static int
-aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
-					  CORE_ADDR tpaddr,
-					  CORE_ADDR collector,
-					  CORE_ADDR lockaddr,
-					  ULONGEST orig_size,
-					  CORE_ADDR *jump_entry,
-					  CORE_ADDR *trampoline,
-					  ULONGEST *trampoline_size,
-					  unsigned char *jjump_pad_insn,
-					  ULONGEST *jjump_pad_insn_size,
-					  CORE_ADDR *adjusted_insn_addr,
-					  CORE_ADDR *adjusted_insn_addr_end,
-					  char *err)
+int
+aarch64_target::install_fast_tracepoint_jump_pad
+  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+   char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -2978,35 +3105,35 @@ static struct emit_ops aarch64_emit_ops_impl =
   aarch64_emit_ge_got,
 };
 
-/* Implementation of linux_target_ops method "emit_ops".  */
+/* Implementation of target ops method "emit_ops".  */
 
-static struct emit_ops *
-aarch64_emit_ops (void)
+emit_ops *
+aarch64_target::emit_ops ()
 {
   return &aarch64_emit_ops_impl;
 }
 
-/* Implementation of linux_target_ops method
+/* Implementation of target ops method
    "get_min_fast_tracepoint_insn_len".  */
 
-static int
-aarch64_get_min_fast_tracepoint_insn_len (void)
+int
+aarch64_target::get_min_fast_tracepoint_insn_len ()
 {
   return 4;
 }
 
-/* Implementation of linux_target_ops method "supports_range_stepping".  */
+/* Implementation of linux target ops method "low_supports_range_stepping".  */
 
-static int
-aarch64_supports_range_stepping (void)
+bool
+aarch64_target::low_supports_range_stepping ()
 {
-  return 1;
+  return true;
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-aarch64_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+aarch64_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   if (is_64bit_tdesc ())
     {
@@ -3017,10 +3144,10 @@ aarch64_sw_breakpoint_from_kind (int kind, int *size)
     return arm_sw_breakpoint_from_kind (kind, size);
 }
 
-/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".  */
+/* Implementation of target ops method "breakpoint_kind_from_pc".  */
 
-static int
-aarch64_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+int
+aarch64_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   if (is_64bit_tdesc ())
     return aarch64_breakpoint_len;
@@ -3028,11 +3155,11 @@ aarch64_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_pc (pcptr);
 }
 
-/* Implementation of the linux_target_ops method
+/* Implementation of the target ops method
    "breakpoint_kind_from_current_state".  */
 
-static int
-aarch64_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+int
+aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   if (is_64bit_tdesc ())
     return aarch64_breakpoint_len;
@@ -3040,53 +3167,9 @@ aarch64_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
-/* Support for hardware single step.  */
+/* The linux target ops object.  */
 
-static int
-aarch64_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
-struct linux_target_ops the_low_target =
-{
-  aarch64_arch_setup,
-  aarch64_regs_info,
-  NULL, /* cannot_fetch_register */
-  NULL, /* cannot_store_register */
-  NULL, /* fetch_register */
-  aarch64_get_pc,
-  aarch64_set_pc,
-  aarch64_breakpoint_kind_from_pc,
-  aarch64_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  0,    /* decr_pc_after_break */
-  aarch64_breakpoint_at,
-  aarch64_supports_z_point_type,
-  aarch64_insert_point,
-  aarch64_remove_point,
-  aarch64_stopped_by_watchpoint,
-  aarch64_stopped_data_address,
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  aarch64_linux_siginfo_fixup,
-  aarch64_linux_new_process,
-  aarch64_linux_delete_process,
-  aarch64_linux_new_thread,
-  aarch64_linux_delete_thread,
-  aarch64_linux_new_fork,
-  aarch64_linux_prepare_to_resume,
-  NULL, /* process_qsupported */
-  aarch64_supports_tracepoints,
-  aarch64_get_thread_area,
-  aarch64_install_fast_tracepoint_jump_pad,
-  aarch64_emit_ops,
-  aarch64_get_min_fast_tracepoint_insn_len,
-  aarch64_supports_range_stepping,
-  aarch64_breakpoint_kind_from_current_state,
-  aarch64_supports_hardware_single_step,
-  aarch64_get_syscall_trapinfo,
-};
+linux_process_target *the_linux_target = &the_aarch64_target;
 
 void
 initialize_low_arch (void)

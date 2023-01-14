@@ -237,7 +237,7 @@ if {$skip_struct_object} {
 	" = \\{0, 0, 7, 0, 0\\}"
 
     gdb_test_no_output "compile code struct_object.complexfield = 7 + 5i"
-    gdb_test "print struct_object.complexfield" " = 7 \\+ 5 \\* I"
+    gdb_test "print struct_object.complexfield" " = 7 \\+ 5i"
 
     gdb_test_no_output "compile code struct_object.boolfield = 1"
     gdb_test "print struct_object.boolfield" " = true"

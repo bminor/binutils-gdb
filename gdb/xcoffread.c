@@ -1821,12 +1821,12 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 }
 
 static void
-xcoff_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
+xcoff_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 {
   gdb_assert (!pst->readin);
 
   /* Read in all partial symtabs on which this one is dependent.  */
-  pst->read_dependencies (objfile);
+  pst->expand_dependencies (objfile);
 
   if (((struct symloc *) pst->read_symtab_private)->numsyms != 0)
     {
@@ -1974,7 +1974,7 @@ xcoff_start_psymtab (struct objfile *objfile,
     XOBNEW (&objfile->objfile_obstack, struct symloc);
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->legacy_read_symtab = xcoff_read_symtab;
-  result->legacy_expand_psymtab = xcoff_psymtab_to_symtab_1;
+  result->legacy_expand_psymtab = xcoff_expand_psymtab;
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
@@ -2050,7 +2050,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       /* Empty psymtabs happen as a result of header files which don't have
          any symbols in them.  There can be a lot of them.  */
 
-      discard_psymtab (objfile, pst);
+      objfile->partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;

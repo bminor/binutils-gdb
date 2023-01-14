@@ -249,9 +249,8 @@ CODE_FRAGMENT
 .     library.  *}
 .  bfd *plugin_dummy_bfd;
 .
-.  {* Currently my_archive is tested before adding origin to
-.     anything. I believe that this can become always an add of
-.     origin, with origin set to 0 for non archive files.  *}
+.  {* The offset of this bfd in the file, typically 0 if it is not
+.     contained in an archive.  *}
 .  ufile_ptr origin;
 .
 .  {* The origin in the archive of the proxy entry.  This will

@@ -150,6 +150,7 @@ bfd_get_file_window (bfd *abfd,
 	  offset += abfd->origin;
 	  abfd = abfd->my_archive;
 	}
+      offset += abfd->origin;
 
       /* Seek into the file, to ensure it is open if cacheable.  */
       if (abfd->iostream == NULL

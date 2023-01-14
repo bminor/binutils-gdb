@@ -54,6 +54,117 @@
 #define PTRACE_SETHBPREGS 30
 #endif
 
+/* Linux target op definitions for the ARM architecture.  */
+
+class arm_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_software_single_step () override;
+
+  bool supports_z_point_type (char z_type) override;
+
+  bool supports_hardware_single_step () override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
+
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+};
+
+/* The singleton target ops object.  */
+
+static arm_target the_arm_target;
+
+bool
+arm_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+arm_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+arm_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
+
+int
+arm_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  return arm_breakpoint_kind_from_pc (pcptr);
+}
+
+int
+arm_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  return arm_breakpoint_kind_from_current_state (pcptr);
+}
+
+const gdb_byte *
+arm_target::sw_breakpoint_from_kind (int kind, int *size)
+{
+  return arm_sw_breakpoint_from_kind (kind, size);
+}
+
+bool
+arm_target::low_breakpoint_at (CORE_ADDR pc)
+{
+  return arm_breakpoint_at (pc);
+}
+
 /* Information describing the hardware breakpoint capabilities.  */
 static struct
 {
@@ -149,14 +260,14 @@ static struct arm_get_next_pcs_ops get_next_pcs_ops = {
   arm_linux_get_next_pcs_fixup,
 };
 
-static int
-arm_cannot_store_register (int regno)
+bool
+arm_target::low_cannot_store_register (int regno)
 {
   return (regno >= arm_num_regs);
 }
 
-static int
-arm_cannot_fetch_register (int regno)
+bool
+arm_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= arm_num_regs);
 }
@@ -475,8 +586,8 @@ update_registers_callback (thread_info *thread, int watch, int i)
     linux_stop_lwp (lwp);
 }
 
-static int
-arm_supports_z_point_type (char z_type)
+bool
+arm_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -485,17 +596,17 @@ arm_supports_z_point_type (char z_type)
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
       /* Leave the handling of sw breakpoints with the gdb client.  */
-      return 0;
+      return false;
     }
 }
 
 /* Insert hardware break-/watchpoint.  */
-static int
-arm_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int len, struct raw_breakpoint *bp)
+int
+arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -538,9 +649,9 @@ arm_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 }
 
 /* Remove hardware break-/watchpoint.  */
-static int
-arm_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int len, struct raw_breakpoint *bp)
+int
+arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -583,51 +694,51 @@ arm_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 }
 
 /* Return whether current thread is stopped due to a watchpoint.  */
-static int
-arm_stopped_by_watchpoint (void)
+bool
+arm_target::low_stopped_by_watchpoint ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
   siginfo_t siginfo;
 
   /* We must be able to set hardware watchpoints.  */
   if (arm_linux_get_hw_watchpoint_count () == 0)
-    return 0;
+    return false;
 
   /* Retrieve siginfo.  */
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, lwpid_of (current_thread), 0, &siginfo);
   if (errno != 0)
-    return 0;
+    return false;
 
   /* This must be a hardware breakpoint.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return 0;
+    return false;
 
   /* If we are in a positive slot then we're looking at a breakpoint and not
      a watchpoint.  */
   if (siginfo.si_errno >= 0)
-    return 0;
+    return false;
 
   /* Cache stopped data address for use by arm_stopped_data_address.  */
   lwp->arch_private->stopped_data_address
     = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
 
-  return 1;
+  return true;
 }
 
 /* Return data address that triggered watchpoint.  Called only if
-   arm_stopped_by_watchpoint returned true.  */
-static CORE_ADDR
-arm_stopped_data_address (void)
+   low_stopped_by_watchpoint returned true.  */
+CORE_ADDR
+arm_target::low_stopped_data_address ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
   return lwp->arch_private->stopped_data_address;
 }
 
 /* Called when a new process is created.  */
-static struct arch_process_info *
-arm_new_process (void)
+arch_process_info *
+arm_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
   return info;
@@ -635,15 +746,15 @@ arm_new_process (void)
 
 /* Called when a process is being deleted.  */
 
-static void
-arm_delete_process (struct arch_process_info *info)
+void
+arm_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
 /* Called when a new thread is detected.  */
-static void
-arm_new_thread (struct lwp_info *lwp)
+void
+arm_target::low_new_thread (lwp_info *lwp)
 {
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
   int i;
@@ -658,14 +769,14 @@ arm_new_thread (struct lwp_info *lwp)
 
 /* Function to call when a thread is being deleted.  */
 
-static void
-arm_delete_thread (struct arch_lwp_info *arch_lwp)
+void
+arm_target::low_delete_thread (arch_lwp_info *arch_lwp)
 {
   xfree (arch_lwp);
 }
 
-static void
-arm_new_fork (struct process_info *parent, struct process_info *child)
+void
+arm_target::low_new_fork (process_info *parent, process_info *child)
 {
   struct arch_process_info *parent_proc_info;
   struct arch_process_info *child_proc_info;
@@ -710,8 +821,8 @@ arm_new_fork (struct process_info *parent, struct process_info *child)
 
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
-static void
-arm_prepare_to_resume (struct lwp_info *lwp)
+void
+arm_target::low_prepare_to_resume (lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   int pid = lwpid_of (thread);
@@ -877,8 +988,8 @@ arm_read_description (void)
   return arm_linux_read_description (ARM_FP_TYPE_NONE);
 }
 
-static void
-arm_arch_setup (void)
+void
+arm_target::low_arch_setup ()
 {
   int tid = lwpid_of (current_thread);
   int gpregs[18];
@@ -899,10 +1010,16 @@ arm_arch_setup (void)
     have_ptrace_getregset = 0;
 }
 
+bool
+arm_target::supports_software_single_step ()
+{
+  return true;
+}
+
 /* Fetch the next possible PCs after the current instruction executes.  */
 
-static std::vector<CORE_ADDR>
-arm_gdbserver_get_next_pcs (struct regcache *regcache)
+std::vector<CORE_ADDR>
+arm_target::low_get_next_pcs (regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
 
@@ -919,16 +1036,22 @@ arm_gdbserver_get_next_pcs (struct regcache *regcache)
 
 /* Support for hardware single step.  */
 
-static int
-arm_supports_hardware_single_step (void)
+bool
+arm_target::supports_hardware_single_step ()
 {
-  return 0;
+  return false;
 }
 
-/* Implementation of linux_target_ops method "get_syscall_trapinfo".  */
+bool
+arm_target::low_supports_catch_syscall ()
+{
+  return true;
+}
 
-static void
-arm_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+/* Implementation of linux target ops method "low_get_syscall_trapinfo".  */
+
+void
+arm_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
 {
   if (arm_is_thumb_mode ())
     collect_register_by_name (regcache, "r7", sysno);
@@ -939,7 +1062,7 @@ arm_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
 
       collect_register_by_name (regcache, "pc", &pc);
 
-      if (the_target->read_memory (pc - 4, (unsigned char *) &insn, 4))
+      if (read_memory (pc - 4, (unsigned char *) &insn, 4))
 	*sysno = UNKNOWN_SYSCALL;
       else
 	{
@@ -992,8 +1115,8 @@ static struct regs_info regs_info_arm =
     &arm_regsets_info
   };
 
-static const struct regs_info *
-arm_regs_info (void)
+const regs_info *
+arm_target::get_regs_info ()
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
@@ -1005,44 +1128,9 @@ arm_regs_info (void)
   return &regs_info_arm;
 }
 
-struct linux_target_ops the_low_target = {
-  arm_arch_setup,
-  arm_regs_info,
-  arm_cannot_fetch_register,
-  arm_cannot_store_register,
-  NULL, /* fetch_register */
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
-  arm_breakpoint_kind_from_pc,
-  arm_sw_breakpoint_from_kind,
-  arm_gdbserver_get_next_pcs,
-  0,
-  arm_breakpoint_at,
-  arm_supports_z_point_type,
-  arm_insert_point,
-  arm_remove_point,
-  arm_stopped_by_watchpoint,
-  arm_stopped_data_address,
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
-  arm_new_process,
-  arm_delete_process,
-  arm_new_thread,
-  arm_delete_thread,
-  arm_new_fork,
-  arm_prepare_to_resume,
-  NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
-  NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
-  NULL, /* supports_range_stepping */
-  arm_breakpoint_kind_from_current_state,
-  arm_supports_hardware_single_step,
-  arm_get_syscall_trapinfo,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_arm_target;
 
 void
 initialize_low_arch (void)

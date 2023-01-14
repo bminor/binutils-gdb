@@ -23,6 +23,47 @@
 #include <sys/reg.h>
 #endif
 
+/* Linux target op definitions for the IA64 architecture.  */
+
+class ia64_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static ia64_target the_ia64_target;
+
+const gdb_byte *
+ia64_target::sw_breakpoint_from_kind (int kind, int *size)
+{
+  gdb_assert_no_reached ("target op sw_breakpoint_from_kind is not "
+			 "implemented by this target");
+}
+
+bool
+ia64_target::low_breakpoint_at (CORE_ADDR pc)
+{
+  gdb_assert_no_reached ("linux target op low_breakpoint_at is not "
+			 "implemented by this target");
+}
+
 /* Defined in auto-generated file reg-ia64.c.  */
 void init_registers_ia64 (void);
 extern const struct target_desc *tdesc_ia64;
@@ -266,16 +307,16 @@ static int ia64_regmap[] =
     -1,
   };
 
-static int
-ia64_cannot_store_register (int regno)
+bool
+ia64_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-ia64_cannot_fetch_register (int regno)
+bool
+ia64_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 /* GDB register numbers.  */
@@ -283,8 +324,8 @@ ia64_cannot_fetch_register (int regno)
 #define IA64_FR0_REGNUM		128
 #define IA64_FR1_REGNUM		129
 
-static int
-ia64_fetch_register (struct regcache *regcache, int regnum)
+bool
+ia64_target::low_fetch_register (regcache *regcache, int regnum)
 {
   /* r0 cannot be fetched but is always zero.  */
   if (regnum == IA64_GR0_REGNUM)
@@ -293,7 +334,7 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (zero) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, zero);
-      return 1;
+      return true;
     }
 
   /* fr0 cannot be fetched but is always zero.  */
@@ -303,7 +344,7 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (f_zero) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, f_zero);
-      return 1;
+      return true;
     }
 
   /* fr1 cannot be fetched but is always one (1.0).  */
@@ -314,10 +355,10 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (f_one) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, f_one);
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 static struct usrregs_info ia64_usrregs_info =
@@ -326,32 +367,27 @@ static struct usrregs_info ia64_usrregs_info =
     ia64_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &ia64_usrregs_info
   };
 
-static const struct regs_info *
-ia64_regs_info (void)
+const regs_info *
+ia64_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-static void
-ia64_arch_setup (void)
+void
+ia64_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_ia64;
 }
 
+/* The linux target ops object.  */
 
-struct linux_target_ops the_low_target = {
-  ia64_arch_setup,
-  ia64_regs_info,
-  ia64_cannot_fetch_register,
-  ia64_cannot_store_register,
-  ia64_fetch_register,
-};
+linux_process_target *the_linux_target = &the_ia64_target;
 
 void
 initialize_low_arch (void)

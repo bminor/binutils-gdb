@@ -243,6 +243,8 @@ enum
   CpuMOVDIR64B,
   /* ENQCMD instruction required */
   CpuENQCMD,
+  /* SERIALIZE instruction required */
+  CpuSERIALIZE,
   /* RDPRU instruction required */
   CpuRDPRU,
   /* MCOMMIT instruction required */
@@ -378,6 +380,7 @@ typedef union i386_cpu_flags
       unsigned int cpumovdiri:1;
       unsigned int cpumovdir64b:1;
       unsigned int cpuenqcmd:1;
+      unsigned int cpuserialize:1;
       unsigned int cpurdpru:1;
       unsigned int cpumcommit:1;
       unsigned int cpusev_es:1;

@@ -21,9 +21,15 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "python-internal.h"
-#include "gdb_curses.h"
 
 #ifdef TUI
+
+/* Note that Python's public headers may define HAVE_NCURSES_H, so if
+   we unconditionally include this (outside the #ifdef above), then we
+   can get a compile error when ncurses is not in fact installed.  See
+   PR tui/25597; or the upstream Python bug
+   https://bugs.python.org/issue20768.  */
+#include "gdb_curses.h"
 
 #include "tui/tui-data.h"
 #include "tui/tui-io.h"

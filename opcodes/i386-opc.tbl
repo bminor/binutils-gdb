@@ -4076,3 +4076,9 @@ mcommit, 0, 0xf30f01fa, None, 3, CpuMCOMMIT, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_
 rdpru, 0, 0x0f01fd, None, 3, CpuRDPRU, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // RDPRU instruction end
+
+// SERIALIZE instruction.
+
+serialize, 0, 0x0f01e8, None, 3, CpuSERIALIZE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// SERIALIZE instruction end.

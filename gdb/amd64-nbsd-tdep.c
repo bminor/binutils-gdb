@@ -106,6 +106,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch,
 		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
+  nbsd_init_abi (info, gdbarch);
 
   tdep->jb_pc_offset = 7 * 8;
 

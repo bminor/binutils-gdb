@@ -28,6 +28,7 @@
 #define GDB_DWARF2_ATTRIBUTE_H
 
 #include "dwarf2.h"
+#include "gdbtypes.h"
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
@@ -58,7 +59,7 @@ struct attribute
 
   /* Return non-zero if ATTR's value falls in the 'constant' class, or
      zero otherwise.  When this function returns true, you can apply
-     dwarf2_get_attr_constant_value to it.
+     the constant_value method to it.
 
      However, note that for some attributes you must check
      attr_form_is_section_offset before using this test.  DW_FORM_data4
@@ -69,8 +70,8 @@ struct attribute
      section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
      taken as section offsets, not constants.
 
-     DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
-     cannot handle that.  */
+     DW_FORM_data16 is not considered as constant_value cannot handle
+     that.  */
 
   bool form_is_constant () const;
 
@@ -83,6 +84,17 @@ struct attribute
      if so return true else false.  */
 
   bool form_is_block () const;
+
+  /* Return DIE offset of this attribute.  Return 0 with complaint if
+     the attribute is not of the required kind.  */
+
+  sect_offset get_ref_die_offset () const;
+
+  /* Return the constant value held by this attribute.  Return
+     DEFAULT_VALUE if the value held by the attribute is not
+     constant.  */
+
+  LONGEST constant_value (int default_value) const;
 
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;

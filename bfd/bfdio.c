@@ -201,6 +201,7 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
       offset += abfd->origin;
       abfd = abfd->my_archive;
     }
+  offset += abfd->origin;
 
   /* If this is an archive element, don't read past the end of
      this element.  */
@@ -270,6 +271,7 @@ bfd_tell (bfd *abfd)
       offset += abfd->origin;
       abfd = abfd->my_archive;
     }
+  offset += abfd->origin;
 
   if (abfd->iovec == NULL)
     return 0;
@@ -330,6 +332,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
       offset += abfd->origin;
       abfd = abfd->my_archive;
     }
+  offset += abfd->origin;
 
   if (abfd->iovec == NULL)
     {
@@ -522,6 +525,7 @@ bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
       offset += abfd->origin;
       abfd = abfd->my_archive;
     }
+  offset += abfd->origin;
 
   if (abfd->iovec == NULL)
     {

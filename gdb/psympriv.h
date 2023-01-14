@@ -134,7 +134,7 @@ struct partial_symtab
   virtual void expand_psymtab (struct objfile *) = 0;
 
   /* Ensure that all the dependencies are read in.  */
-  void read_dependencies (struct objfile *);
+  void expand_dependencies (struct objfile *);
 
   /* Return true if the symtab corresponding to this psymtab has been
      readin.  */
@@ -421,12 +421,6 @@ extern void add_psymbol_to_list (gdb::string_view name,
 extern void init_psymbol_list (struct objfile *objfile, int total_symbols);
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
-
-static inline void
-discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
-{
-  objfile->partial_symtabs->discard_psymtab (pst);
-}
 
 /* Used when recording partial symbol tables.  On destruction,
    discards any partial symbol tables that have been built.  However,

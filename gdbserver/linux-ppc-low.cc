@@ -44,6 +44,72 @@
 #define PPC_LI(insn)	(PPC_SEXT (PPC_FIELD (insn, 6, 24), 24) << 2)
 #define PPC_BD(insn)	(PPC_SEXT (PPC_FIELD (insn, 16, 14), 14) << 2)
 
+/* Linux target op definitions for the PowerPC architecture.  */
+
+class ppc_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+
+  void low_collect_ptrace_register (regcache *regcache, int regno,
+				    char *buf) override;
+
+  void low_supply_ptrace_register (regcache *regcache, int regno,
+				   const char *buf) override;
+
+  bool supports_tracepoints () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
+  struct emit_ops *emit_ops () override;
+
+  int get_ipa_tdesc_idx () override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+};
+
+/* The singleton target ops object.  */
+
+static ppc_target the_ppc_target;
+
 /* Holds the AT_HWCAP auxv entry.  */
 
 static unsigned long ppc_hwcap;
@@ -143,8 +209,8 @@ ppc_check_regset (int tid, int regset_id, int regsetsize)
   return 0;
 }
 
-static int
-ppc_cannot_store_register (int regno)
+bool
+ppc_target::low_cannot_store_register (int regno)
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
@@ -152,25 +218,26 @@ ppc_cannot_store_register (int regno)
   /* Some kernels do not allow us to store fpscr.  */
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE)
       && regno == find_regno (tdesc, "fpscr"))
-    return 2;
+    return true;
 #endif
 
   /* Some kernels do not allow us to store orig_r3 or trap.  */
   if (regno == find_regno (tdesc, "orig_r3")
       || regno == find_regno (tdesc, "trap"))
-    return 2;
+    return true;
 
-  return 0;
+  return false;
 }
 
-static int
-ppc_cannot_fetch_register (int regno)
+bool
+ppc_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static void
-ppc_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
+void
+ppc_target::low_collect_ptrace_register (regcache *regcache, int regno,
+					 char *buf)
 {
   memset (buf, 0, sizeof (long));
 
@@ -195,9 +262,9 @@ ppc_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
     perror_with_name ("Unexpected byte order");
 }
 
-static void
-ppc_supply_ptrace_register (struct regcache *regcache,
-			    int regno, const char *buf)
+void
+ppc_target::low_supply_ptrace_register (regcache *regcache, int regno,
+					const char *buf)
 {
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
@@ -220,8 +287,14 @@ ppc_supply_ptrace_register (struct regcache *regcache,
     perror_with_name ("Unexpected byte order");
 }
 
-static CORE_ADDR
-ppc_get_pc (struct regcache *regcache)
+bool
+ppc_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+ppc_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -237,8 +310,8 @@ ppc_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-ppc_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+ppc_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -263,27 +336,27 @@ static int ppc_regmap_adjusted;
 static const unsigned int ppc_breakpoint = 0x7d821008;
 #define ppc_breakpoint_len 4
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-ppc_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+ppc_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = ppc_breakpoint_len;
   return (const gdb_byte *) &ppc_breakpoint;
 }
 
-static int
-ppc_breakpoint_at (CORE_ADDR where)
+bool
+ppc_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn, 4);
+  read_memory (where, (unsigned char *) &insn, 4);
   if (insn == ppc_breakpoint)
-    return 1;
+    return true;
   /* If necessary, recognize more trap instructions here.  GDB only uses
      the one.  */
 
-  return 0;
+  return false;
 }
 
 /* Implement supports_z_point_type target-ops.
@@ -292,27 +365,27 @@ ppc_breakpoint_at (CORE_ADDR where)
    Handling software breakpoint at server side, so tracepoints
    and breakpoints can be inserted at the same location.  */
 
-static int
-ppc_supports_z_point_type (char z_type)
+bool
+ppc_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
-      return 1;
+      return true;
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
     default:
-      return 0;
+      return false;
     }
 }
 
-/* Implement insert_point target-ops.
+/* Implement the low_insert_point linux target op.
    Returns 0 on success, -1 on failure and 1 on unsupported.  */
 
-static int
-ppc_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+ppc_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -328,12 +401,12 @@ ppc_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     }
 }
 
-/* Implement remove_point target-ops.
+/* Implement the low_remove_point linux target op.
    Returns 0 on success, -1 on failure and 1 on unsupported.  */
 
-static int
-ppc_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+ppc_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   switch (type)
     {
@@ -356,14 +429,19 @@ static void ppc_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
+  ppc_target *my_ppc_target = (ppc_target *) the_linux_target;
+
   for (i = 0; i < 32; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 
   for (i = 71; i < 73; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 }
 
 /* Program Priority Register regset fill function.  */
@@ -729,14 +807,6 @@ ppc_store_evrregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "spefscr", &regset->spefscr);
 }
 
-/* Support for hardware single step.  */
-
-static int
-ppc_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct regset_info ppc_regsets[] = {
   /* List the extra register sets before GENERAL_REGS.  That way we will
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
@@ -791,21 +861,21 @@ static struct regsets_info ppc_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &ppc_usrregs_info,
     &ppc_regsets_info
   };
 
-static const struct regs_info *
-ppc_regs_info (void)
+const regs_info *
+ppc_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-static void
-ppc_arch_setup (void)
+void
+ppc_target::low_arch_setup ()
 {
   const struct target_desc *tdesc;
   struct regset_info *regset;
@@ -967,12 +1037,12 @@ ppc_arch_setup (void)
       }
 }
 
-/* Implementation of linux_target_ops method "supports_tracepoints".  */
+/* Implementation of target ops method "supports_tracepoints".  */
 
-static int
-ppc_supports_tracepoints (void)
+bool
+ppc_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
 /* Get the thread area address.  This is used to recognize which
@@ -980,8 +1050,8 @@ ppc_supports_tracepoints (void)
    don't read anything from the address, and treat it as opaque; it's
    the address itself that we assume is unique per-thread.  */
 
-static int
-ppc_get_thread_area (int lwpid, CORE_ADDR *addr)
+int
+ppc_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
   struct lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   struct thread_info *thr = get_lwp_thread (lwp);
@@ -1508,22 +1578,29 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
   *to += 4;
 }
 
+bool
+ppc_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
 /* Implement install_fast_tracepoint_jump_pad of target_ops.
    See target.h for details.  */
 
-static int
-ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-				      CORE_ADDR collector,
-				      CORE_ADDR lockaddr,
-				      ULONGEST orig_size,
-				      CORE_ADDR *jump_entry,
-				      CORE_ADDR *trampoline,
-				      ULONGEST *trampoline_size,
-				      unsigned char *jjump_pad_insn,
-				      ULONGEST *jjump_pad_insn_size,
-				      CORE_ADDR *adjusted_insn_addr,
-				      CORE_ADDR *adjusted_insn_addr_end,
-				      char *err)
+int
+ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					      CORE_ADDR tpaddr,
+					      CORE_ADDR collector,
+					      CORE_ADDR lockaddr,
+					      ULONGEST orig_size,
+					      CORE_ADDR *jump_entry,
+					      CORE_ADDR *trampoline,
+					      ULONGEST *trampoline_size,
+					      unsigned char *jjump_pad_insn,
+					      ULONGEST *jjump_pad_insn_size,
+					      CORE_ADDR *adjusted_insn_addr,
+					      CORE_ADDR *adjusted_insn_addr_end,
+					      char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -1717,8 +1794,8 @@ ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 
 /* Returns the minimum instruction length for installing a tracepoint.  */
 
-static int
-ppc_get_min_fast_tracepoint_insn_len (void)
+int
+ppc_target::get_min_fast_tracepoint_insn_len ()
 {
   return 4;
 }
@@ -3298,10 +3375,10 @@ static struct emit_ops ppc64v2_emit_ops_impl =
 
 #endif
 
-/* Implementation of linux_target_ops method "emit_ops".  */
+/* Implementation of target ops method "emit_ops".  */
 
-static struct emit_ops *
-ppc_emit_ops (void)
+emit_ops *
+ppc_target::emit_ops ()
 {
 #ifdef __powerpc64__
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
@@ -3317,10 +3394,10 @@ ppc_emit_ops (void)
   return &ppc_emit_ops_impl;
 }
 
-/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+/* Implementation of target ops method "get_ipa_tdesc_idx".  */
 
-static int
-ppc_get_ipa_tdesc_idx (void)
+int
+ppc_target::get_ipa_tdesc_idx ()
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
@@ -3370,45 +3447,9 @@ ppc_get_ipa_tdesc_idx (void)
   return 0;
 }
 
-struct linux_target_ops the_low_target = {
-  ppc_arch_setup,
-  ppc_regs_info,
-  ppc_cannot_fetch_register,
-  ppc_cannot_store_register,
-  NULL, /* fetch_register */
-  ppc_get_pc,
-  ppc_set_pc,
-  NULL, /* breakpoint_kind_from_pc */
-  ppc_sw_breakpoint_from_kind,
-  NULL,
-  0,
-  ppc_breakpoint_at,
-  ppc_supports_z_point_type,
-  ppc_insert_point,
-  ppc_remove_point,
-  NULL,
-  NULL,
-  ppc_collect_ptrace_register,
-  ppc_supply_ptrace_register,
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  ppc_supports_tracepoints,
-  ppc_get_thread_area,
-  ppc_install_fast_tracepoint_jump_pad,
-  ppc_emit_ops,
-  ppc_get_min_fast_tracepoint_insn_len,
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  ppc_supports_hardware_single_step,
-  NULL, /* get_syscall_trapinfo */
-  ppc_get_ipa_tdesc_idx,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_ppc_target;
 
 void
 initialize_low_arch (void)

@@ -42,6 +42,49 @@
 #define sparc_num_regs \
   (SPARC_R_REGS_NUM + SPARC_F_REGS_NUM + SPARC_CONTROL_REGS_NUM)
 
+/* Linux target op definitions for the SPARC architecture.  */
+
+class sparc_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  /* No low_set_pc is needed.  */
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static sparc_target the_sparc_target;
+
+bool
+sparc_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+sparc_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_64bit (regcache);
+}
+
 /* Each offset is multiplied by 8, because of the register size.
    These offsets apply to the buffer sent/filled by ptrace.
    Additionally, the array elements order corresponds to the .dat file, and the
@@ -102,14 +145,14 @@ static const struct regs_range_t fpregs_ranges[] = {
 void init_registers_sparc64 (void);
 extern const struct target_desc *tdesc_sparc64;
 
-static int
-sparc_cannot_store_register (int regno)
+bool
+sparc_target::low_cannot_store_register (int regno)
 {
   return (regno >= sparc_num_regs || sparc_regmap[regno] == -1);
 }
 
-static int
-sparc_cannot_fetch_register (int regno)
+bool
+sparc_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= sparc_num_regs || sparc_regmap[regno] == -1);
 }
@@ -228,33 +271,33 @@ static const gdb_byte sparc_breakpoint[INSN_SIZE] = {
 };
 #define sparc_breakpoint_len INSN_SIZE
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const unsigned char *
-sparc_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+sparc_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = sparc_breakpoint_len;
   return sparc_breakpoint;
 }
 
-static int
-sparc_breakpoint_at (CORE_ADDR where)
+bool
+sparc_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[INSN_SIZE];
 
-  the_target->read_memory (where, (unsigned char *) insn, sizeof (insn));
+  read_memory (where, (unsigned char *) insn, sizeof (insn));
 
   if (memcmp (sparc_breakpoint, insn, sizeof (insn)) == 0)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only
      uses TRAP Always.  */
 
-  return 0;
+  return false;
 }
 
-static void
-sparc_arch_setup (void)
+void
+sparc_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_sparc64;
 }
@@ -284,37 +327,22 @@ static struct usrregs_info sparc_usrregs_info =
     NULL
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &sparc_usrregs_info,
     &sparc_regsets_info
   };
 
-static const struct regs_info *
-sparc_regs_info (void)
+const regs_info *
+sparc_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-struct linux_target_ops the_low_target = {
-  sparc_arch_setup,
-  sparc_regs_info,
-  sparc_cannot_fetch_register,
-  sparc_cannot_store_register,
-  NULL, /* fetch_register */
-  linux_get_pc_64bit,
-  /* No sparc_set_pc is needed.  */
-  NULL,
-  NULL, /* breakpoint_kind_from_pc */
-  sparc_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  0,
-  sparc_breakpoint_at,
-  NULL,  /* supports_z_point_type */
-  NULL, NULL, NULL, NULL,
-  NULL, NULL
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_sparc_target;
 
 void
 initialize_low_arch (void)

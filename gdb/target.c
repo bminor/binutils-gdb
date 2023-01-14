@@ -3931,6 +3931,26 @@ target_is_non_stop_p (void)
 	      && target_always_non_stop_p ()));
 }
 
+/* See target.h.  */
+
+bool
+exists_non_stop_target ()
+{
+  if (target_is_non_stop_p ())
+    return true;
+
+  scoped_restore_current_thread restore_thread;
+
+  for (inferior *inf : all_inferiors ())
+    {
+      switch_to_inferior_no_thread (inf);
+      if (target_is_non_stop_p ())
+	return true;
+    }
+
+  return false;
+}
+
 /* Controls if targets can report that they always run in non-stop
    mode.  This is just for maintainers to use when debugging gdb.  */
 enum auto_boolean target_non_stop_enabled = AUTO_BOOLEAN_AUTO;

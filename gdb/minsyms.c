@@ -467,7 +467,7 @@ linkage_name_str (const lookup_name_info &lookup_name)
   if (current_language->la_language == language_ada)
     return lookup_name.ada ().lookup_name ().c_str ();
 
-  return lookup_name.name ().c_str ();
+  return lookup_name.c_str ();
 }
 
 /* See minsyms.h.  */

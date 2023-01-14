@@ -51,6 +51,67 @@
 
 #define s390_num_regs 52
 
+/* Linux target op definitions for the S/390 architecture.  */
+
+class s390_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  bool supports_z_point_type (char z_type) override;
+
+  bool supports_tracepoints () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
+  void low_collect_ptrace_register (regcache *regcache, int regno,
+				    char *buf) override;
+
+  void low_supply_ptrace_register (regcache *regcache, int regno,
+				   const char *buf) override;
+
+  struct emit_ops *emit_ops () override;
+
+  int get_ipa_tdesc_idx () override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+};
+
+/* The singleton target ops object.  */
+
+static s390_target the_s390_target;
+
 static int s390_regmap[] = {
   PT_PSWMASK, PT_PSWADDR,
 
@@ -140,23 +201,24 @@ static int s390_regmap_3264[] = {
 #endif
 
 
-static int
-s390_cannot_fetch_register (int regno)
+bool
+s390_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-s390_cannot_store_register (int regno)
+bool
+s390_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static void
-s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
+void
+s390_target::low_collect_ptrace_register (regcache *regcache, int regno,
+					  char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -198,12 +260,12 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
     collect_register (regcache, regno, buf);
 }
 
-static void
-s390_supply_ptrace_register (struct regcache *regcache,
-			     int regno, const char *buf)
+void
+s390_target::low_supply_ptrace_register (regcache *regcache, int regno,
+					 const char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -261,7 +323,7 @@ static void
 s390_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
 
   for (i = 0; i < usr->num_regs; i++)
@@ -270,8 +332,8 @@ s390_fill_gregset (struct regcache *regcache, void *buf)
 	  || usr->regmap[i] > PT_ACR15)
 	continue;
 
-      s390_collect_ptrace_register (regcache, i,
-				    (char *) buf + usr->regmap[i]);
+      ((s390_target *) the_linux_target)->low_collect_ptrace_register
+	(regcache, i, (char *) buf + usr->regmap[i]);
     }
 }
 
@@ -424,17 +486,23 @@ static struct regset_info s390_regsets[] = {
 static const gdb_byte s390_breakpoint[] = { 0, 1 };
 #define s390_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-s390_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+s390_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = s390_breakpoint_len;
   return s390_breakpoint;
 }
 
-static CORE_ADDR
-s390_get_pc (struct regcache *regcache)
+bool
+s390_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+s390_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -450,8 +518,8 @@ s390_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
+void
+s390_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -465,6 +533,12 @@ s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
       unsigned long pc = newpc;
       supply_register_by_name (regcache, "pswa", &pc);
     }
+}
+
+int
+s390_target::low_decr_pc_after_break ()
+{
+  return s390_breakpoint_len;
 }
 
 /* Determine the word size for the given PID, in bytes.  */
@@ -509,8 +583,8 @@ s390_check_regset (int pid, int regset, int regsize)
 static int have_hwcap_s390_high_gprs = 0;
 static int have_hwcap_s390_vx = 0;
 
-static void
-s390_arch_setup (void)
+void
+s390_target::low_arch_setup ()
 {
   const struct target_desc *tdesc;
   struct regset_info *regset;
@@ -627,8 +701,8 @@ s390_arch_setup (void)
 }
 
 
-static int
-s390_breakpoint_at (CORE_ADDR pc)
+bool
+s390_target::low_breakpoint_at (CORE_ADDR pc)
 {
   unsigned char c[s390_breakpoint_len];
   read_inferior_memory (pc, c, s390_breakpoint_len);
@@ -637,26 +711,18 @@ s390_breakpoint_at (CORE_ADDR pc)
 
 /* Breakpoint/Watchpoint support.  */
 
-/* The "supports_z_point_type" linux_target_ops method.  */
+/* The "supports_z_point_type" target ops method.  */
 
-static int
-s390_supports_z_point_type (char z_type)
+bool
+s390_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
-}
-
-/* Support for hardware single step.  */
-
-static int
-s390_supports_hardware_single_step (void)
-{
-  return 1;
 }
 
 static struct usrregs_info s390_usrregs_info =
@@ -672,7 +738,7 @@ static struct regsets_info s390_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &s390_usrregs_info,
@@ -699,8 +765,8 @@ static struct regs_info regs_info_3264 =
     &s390_regsets_info_3264
   };
 
-static const struct regs_info *
-s390_regs_info (void)
+const regs_info *
+s390_target::get_regs_info ()
 {
   if (have_hwcap_s390_high_gprs)
     {
@@ -713,21 +779,21 @@ s390_regs_info (void)
       return &regs_info_3264;
 #endif
     }
-  return &regs_info;
+  return &myregs_info;
 }
 
-/* The "supports_tracepoints" linux_target_ops method.  */
+/* The "supports_tracepoints" target ops method.  */
 
-static int
-s390_supports_tracepoints (void)
+bool
+s390_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
-/* Implementation of linux_target_ops method "get_thread_area".  */
+/* Implementation of linux target ops method "low_get_thread_area".  */
 
-static int
-s390_get_thread_area (int lwpid, CORE_ADDR *addrp)
+int
+s390_target::low_get_thread_area (int lwpid, CORE_ADDR *addrp)
 {
   CORE_ADDR res = ptrace (PTRACE_PEEKUSER, lwpid, (long) PT_ACR0, (long) 0);
 #ifdef __s390x__
@@ -1197,23 +1263,23 @@ s390_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, int is_64)
   return 0;
 }
 
-/* Implementation of linux_target_ops method
+bool
+s390_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
+/* Implementation of target ops method
    "install_fast_tracepoint_jump_pad".  */
 
-static int
-s390_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
-				       CORE_ADDR tpaddr,
-				       CORE_ADDR collector,
-				       CORE_ADDR lockaddr,
-				       ULONGEST orig_size,
-				       CORE_ADDR *jump_entry,
-				       CORE_ADDR *trampoline,
-				       ULONGEST *trampoline_size,
-				       unsigned char *jjump_pad_insn,
-				       ULONGEST *jjump_pad_insn_size,
-				       CORE_ADDR *adjusted_insn_addr,
-				       CORE_ADDR *adjusted_insn_addr_end,
-				       char *err)
+int
+s390_target::install_fast_tracepoint_jump_pad
+  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+   char *err)
 {
   int i;
   int64_t loffset;
@@ -1367,11 +1433,11 @@ s390_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   return 0;
 }
 
-/* Implementation of linux_target_ops method
+/* Implementation of target ops method
    "get_min_fast_tracepoint_insn_len".  */
 
-static int
-s390_get_min_fast_tracepoint_insn_len (void)
+int
+s390_target::get_min_fast_tracepoint_insn_len ()
 {
   /* We only support using 6-byte jumps to reach the tracepoint code.
      If the tracepoint buffer were allocated sufficiently close (64kiB)
@@ -1381,10 +1447,10 @@ s390_get_min_fast_tracepoint_insn_len (void)
   return 6;
 }
 
-/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+/* Implementation of target ops method "get_ipa_tdesc_idx".  */
 
-static int
-s390_get_ipa_tdesc_idx (void)
+int
+s390_target::get_ipa_tdesc_idx ()
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
@@ -2775,10 +2841,10 @@ static struct emit_ops s390x_emit_ops =
   };
 #endif
 
-/* The "emit_ops" linux_target_ops method.  */
+/* The "emit_ops" target ops method.  */
 
-static struct emit_ops *
-s390_emit_ops (void)
+emit_ops *
+s390_target::emit_ops ()
 {
 #ifdef __s390x__
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
@@ -2790,45 +2856,9 @@ s390_emit_ops (void)
     return &s390_emit_ops_impl;
 }
 
-struct linux_target_ops the_low_target = {
-  s390_arch_setup,
-  s390_regs_info,
-  s390_cannot_fetch_register,
-  s390_cannot_store_register,
-  NULL, /* fetch_register */
-  s390_get_pc,
-  s390_set_pc,
-  NULL, /* breakpoint_kind_from_pc */
-  s390_sw_breakpoint_from_kind,
-  NULL,
-  s390_breakpoint_len,
-  s390_breakpoint_at,
-  s390_supports_z_point_type,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  s390_collect_ptrace_register,
-  s390_supply_ptrace_register,
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  s390_supports_tracepoints,
-  s390_get_thread_area,
-  s390_install_fast_tracepoint_jump_pad,
-  s390_emit_ops,
-  s390_get_min_fast_tracepoint_insn_len,
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  s390_supports_hardware_single_step,
-  NULL, /* get_syscall_trapinfo */
-  s390_get_ipa_tdesc_idx,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_s390_target;
 
 void
 initialize_low_arch (void)

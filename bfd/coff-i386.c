@@ -31,10 +31,6 @@
 #include "coff/pe.h"
 #endif
 
-#ifdef COFF_GO32_EXE
-#include "coff/go32exe.h"
-#endif
-
 #ifndef bfd_pe_print_pdata
 #define bfd_pe_print_pdata	NULL
 #endif
@@ -663,23 +659,21 @@ const bfd_target
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
+#ifndef COFF_CHECK_FORMAT
+#define COFF_CHECK_FORMAT coff_object_p
+#endif
+#ifndef COFF_WRITE_CONTENTS
+#define COFF_WRITE_CONTENTS coff_write_object_contents
+#endif
+
 /* Note that we allow an object file to be treated as a core file as well.  */
 
-#ifdef COFF_CHECK_FORMAT
   {				/* bfd_check_format */
     _bfd_dummy_target,
     COFF_CHECK_FORMAT,
     bfd_generic_archive_p,
     COFF_CHECK_FORMAT
   },
-#else
-  {
-    _bfd_dummy_target,
-    coff_object_p,
-    bfd_generic_archive_p,
-    coff_object_p
-  },
-#endif
   {				/* bfd_set_format */
     _bfd_bool_bfd_false_error,
     coff_mkobject,
@@ -688,7 +682,7 @@ const bfd_target
   },
   {				/* bfd_write_contents */
     _bfd_bool_bfd_false_error,
-    coff_write_object_contents,
+    COFF_WRITE_CONTENTS,
     _bfd_write_archive_contents,
     _bfd_bool_bfd_false_error
   },

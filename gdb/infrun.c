@@ -4711,7 +4711,7 @@ stop_all_threads (void)
   int pass;
   int iterations = 0;
 
-  gdb_assert (target_is_non_stop_p ());
+  gdb_assert (exists_non_stop_target ());
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog, "infrun: stop_all_threads\n");
@@ -4742,6 +4742,17 @@ stop_all_threads (void)
 	     to tell the target to stop.  */
 	  for (thread_info *t : all_non_exited_threads ())
 	    {
+	      /* For a single-target setting with an all-stop target,
+		 we would not even arrive here.  For a multi-target
+		 setting, until GDB is able to handle a mixture of
+		 all-stop and non-stop targets, simply skip all-stop
+		 targets' threads.  This should be fine due to the
+		 protection of 'check_multi_target_resumption'.  */
+
+	      switch_to_thread_no_regs (t);
+	      if (!target_is_non_stop_p ())
+		continue;
+
 	      if (t->executing)
 		{
 		  /* If already stopping, don't request a stop again.
@@ -4753,7 +4764,6 @@ stop_all_threads (void)
 					    "infrun:   %s executing, "
 					    "need stop\n",
 					    target_pid_to_str (t->ptid).c_str ());
-		      switch_to_thread_no_regs (t);
 		      target_stop (t->ptid);
 		      t->stop_requested = 1;
 		    }
@@ -7894,9 +7904,9 @@ stop_waiting (struct execution_control_state *ecs)
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 
-  /* If all-stop, but the target is always in non-stop mode, stop all
+  /* If all-stop, but there exists a non-stop target, stop all
      threads now that we're presenting the stop to the user.  */
-  if (!non_stop && target_is_non_stop_p ())
+  if (!non_stop && exists_non_stop_target ())
     stop_all_threads ();
 }
 

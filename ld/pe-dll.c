@@ -1211,8 +1211,10 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   memset (edata_d, 0, edata_sz);
 
-  if (pe_data (abfd)->insert_timestamp)
+  if (pe_data (abfd)->timestamp == -1)
     H_PUT_32 (abfd, time (0), edata_d + 4);
+  else
+    H_PUT_32 (abfd, pe_data (abfd)->timestamp, edata_d + 4);
 
   if (pe_def_file->version_major != -1)
     {

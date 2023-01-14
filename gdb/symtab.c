@@ -1790,7 +1790,7 @@ demangle_for_lookup_info::demangle_for_lookup_info
   if (lookup_name.ignore_parameters () && lang == language_cplus)
     {
       gdb::unique_xmalloc_ptr<char> without_params
-	= cp_remove_params_if_any (lookup_name.name ().c_str (),
+	= cp_remove_params_if_any (lookup_name.c_str (),
 				   lookup_name.completion_mode ());
 
       if (without_params != NULL)
@@ -1803,9 +1803,9 @@ demangle_for_lookup_info::demangle_for_lookup_info
     }
 
   if (lookup_name.match_type () == symbol_name_match_type::SEARCH_NAME)
-    m_demangled_name = lookup_name.name ();
+    m_demangled_name = lookup_name.c_str ();
   else
-    m_demangled_name = demangle_for_lookup (lookup_name.name ().c_str (),
+    m_demangled_name = demangle_for_lookup (lookup_name.c_str (),
 					    lang, storage);
 }
 
@@ -1816,7 +1816,7 @@ lookup_name_info::match_any ()
 {
   /* Lookup any symbol that "" would complete.  I.e., this matches all
      symbol names.  */
-  static const lookup_name_info lookup_name ({}, symbol_name_match_type::FULL,
+  static const lookup_name_info lookup_name ("", symbol_name_match_type::FULL,
 					     true);
 
   return lookup_name;
@@ -2558,6 +2558,33 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 			  result.symbol != NULL ? " (via quick fns)" : "");
     }
   return result;
+}
+
+/* Find the language for partial symbol with NAME.  */
+
+static enum language
+find_quick_global_symbol_language (const char *name, const domain_enum domain)
+{
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      if (objfile->sf && objfile->sf->qf
+	  && objfile->sf->qf->lookup_global_symbol_language)
+	continue;
+      return language_unknown;
+    }
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      bool symbol_found_p;
+      enum language lang
+	= objfile->sf->qf->lookup_global_symbol_language (objfile, name, domain,
+							  &symbol_found_p);
+      if (!symbol_found_p)
+	continue;
+      return lang;
+    }
+
+  return language_unknown;
 }
 
 /* Private data to be used with lookup_symbol_global_iterator_cb.  */
@@ -6144,6 +6171,16 @@ find_main_name (void)
 
   /* The languages above didn't identify the name of the main procedure.
      Fallback to "main".  */
+
+  /* Try to find language for main in psymtabs.  */
+  enum language lang
+    = find_quick_global_symbol_language ("main", VAR_DOMAIN);
+  if (lang != language_unknown)
+    {
+      set_main_name ("main", lang);
+      return;
+    }
+
   set_main_name ("main", language_unknown);
 }
 

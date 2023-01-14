@@ -1,3 +1,82 @@
+2020-04-02  Lili Cui  <lili.cui@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .serialize.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document serialize.
+	* testsuite/gas/i386/i386.exp: Run serialize tests
+	* testsuite/gas/i386/serialize.d: Likewise.
+	* testsuite/gas/i386/x86-64-serialize.d: Likewise.
+	* testsuite/gas/i386/serialize.s: Likewise.
+
+2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/gas/elf/section12a.d: Use notarget instead of xfail.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section16a.d: Likewise.
+	* testsuite/gas/elf/section16b.d: Likewise.
+
+2020-04-02  Gunther Nikl  <gnikl@justmail.de>
+
+	* config/tc-m68k.c (m68k_ip): Fix range check for index register
+	with a suppressed address register.
+
+2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25756
+	* config/tc-i386.h (TC_FORCE_RELOCATION_ABS): New.
+	* testsuite/gas/i386/localpic.s: Add a test for relocation
+	against local absolute symbol.
+	* testsuite/gas/i386/x86-64-localpic.s: Likewise.
+	* testsuite/gas/i386/localpic.d: Updated.
+	* testsuite/gas/i386/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d: Likewise.
+
+2020-04-01  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gas/25732
+	* testsuite/gas/i386/solaris/x86-64-branch-2.d: New file.
+	* testsuite/gas/i386/solaris/x86-64-branch-3.d: New file.
+	* testsuite/gas/i386/solaris/x86-64-jump.d: Incorporate changes to
+	testsuite/gas/i386/x86-64-jump.d.
+	* gas/testsuite/gas/i386/solaris/x86-64-mpx-branch-1.d:
+	Incorporate changes to
+	gas/testsuite/gas/i386/x86-64-mpx-branch-1.d.
+	* testsuite/gas/i386/solaris/x86-64-mpx-branch-2.d : Incorporate
+	changes to testsuite/gas/i386/x86-64-mpx-branch-2.d.
+	* testsuite/gas/i386/x86-64-branch-2.d: Skip on *-*-solaris*.
+	* testsuite/gas/i386/x86-64-branch-3.d: Likewise.
+
+2020-03-31  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	PR 25611
+	PR 25614
+	* dwarf2dbg.c: Do not include "bignum.h".
+
+2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/alias-csr.d: Move this to priv-reg-pseudo.
+	* testsuite/gas/riscv/alias-csr.s: Likewise.
+	* testsuite/gas/riscv/no-aliases-csr.d: Move this
+	to priv-reg-pseudo-noalias.
+	* testsuite/gas/riscv/bad-csr.d: Rename to priv-reg-fail-nonexistent.
+	* testsuite/gas/riscv/bad-csr.l: Likewise.
+	* testsuite/gas/riscv/bad-csr.s: Likewise.
+	* testsuite/gas/riscv/satp.d: Removed.  Already included in priv-reg.
+	* testsuite/gas/riscv/satp.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-pseudo.d: New testcase for all pseudo
+	csr instruction, including alias-csr testcase.
+	* testsuite/gas/riscv/priv-reg-pseudo.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-pseudo-noalias.d: New testcase for all
+	pseudo instruction with objdump -Mno-aliases.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.d: New testcase.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.s: Likewise.
+	* testsuite/gas/riscv/priv-reg.d: Update CSR to 1.11.
+	* testsuite/gas/riscv/priv-reg.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.s: Likewise.
+
 2020-03-25  J.W. Jagersma  <jwjagersma@gmail.com>
 
 	* config/obj-coff.c (obj_coff_section): Set the bss flag on

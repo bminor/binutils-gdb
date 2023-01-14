@@ -150,6 +150,9 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   arm_netbsd_init_abi_common (info, gdbarch);
+
+  nbsd_init_abi (info, gdbarch);
+
   if (tdep->fp_model == ARM_FLOAT_AUTO)
     tdep->fp_model = ARM_FLOAT_SOFT_VFP;
 

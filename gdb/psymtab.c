@@ -39,7 +39,8 @@
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
-						     const char *, int,
+						     const lookup_name_info &,
+						     int,
 						     domain_enum);
 
 static const char *psymtab_to_fullname (struct partial_symtab *ps);
@@ -482,9 +483,12 @@ psym_lookup_symbol (struct objfile *objfile,
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
+  lookup_name_info psym_lookup_name = lookup_name.make_ignore_params ();
+
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (!ps->readin_p () && lookup_partial_symbol (objfile, ps, name,
+      if (!ps->readin_p () && lookup_partial_symbol (objfile, ps,
+						     psym_lookup_name,
 						     psymtab_index, domain))
 	{
 	  struct symbol *sym, *with_opaque = NULL;
@@ -515,6 +519,36 @@ psym_lookup_symbol (struct objfile *objfile,
     }
 
   return stab_best;
+}
+
+/* Psymtab version of lookup_global_symbol_language.  See its definition in
+   the definition of quick_symbol_functions in symfile.h.  */
+
+static enum language
+psym_lookup_global_symbol_language (struct objfile *objfile, const char *name,
+				    domain_enum domain, bool *symbol_found_p)
+{
+  *symbol_found_p = false;
+  if (objfile->sf == NULL)
+    return language_unknown;
+
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
+  for (partial_symtab *ps : require_partial_symbols (objfile, true))
+    {
+      struct partial_symbol *psym;
+      if (ps->readin_p ())
+	continue;
+
+      psym = lookup_partial_symbol (objfile, ps, lookup_name, 1, domain);
+      if (psym)
+	{
+	  *symbol_found_p = true;
+	  return psym->ginfo.language ();
+	}
+    }
+
+  return language_unknown;
 }
 
 /* Returns true if PSYM matches LOOKUP_NAME.  */
@@ -574,8 +608,7 @@ match_partial_symbol (struct objfile *objfile,
 	  gdb_assert (center < top);
 
 	  enum language lang = (*center)->ginfo.language ();
-	  const char *lang_ln
-	    = name.language_lookup_name (lang).c_str ();
+	  const char *lang_ln = name.language_lookup_name (lang);
 
 	  if (ordered_compare ((*center)->ginfo.search_name (),
 			       lang_ln) >= 0)
@@ -612,42 +645,14 @@ match_partial_symbol (struct objfile *objfile,
   return NULL;
 }
 
-/* Returns the name used to search psymtabs.  Unlike symtabs, psymtabs do
-   not contain any method/function instance information (since this would
-   force reading type information while reading psymtabs).  Therefore,
-   if NAME contains overload information, it must be stripped before searching
-   psymtabs.  */
-
-static gdb::unique_xmalloc_ptr<char>
-psymtab_search_name (const char *name)
-{
-  switch (current_language->la_language)
-    {
-    case language_cplus:
-      {
-	if (strchr (name, '('))
-	  {
-	    gdb::unique_xmalloc_ptr<char> ret = cp_remove_params (name);
-
-	    if (ret)
-	      return ret;
-	  }
-      }
-      break;
-
-    default:
-      break;
-    }
-
-  return make_unique_xstrdup (name);
-}
-
-/* Look, in partial_symtab PST, for symbol whose natural name is NAME.
-   Check the global symbols if GLOBAL, the static symbols if not.  */
+/* Look, in partial_symtab PST, for symbol whose natural name is
+   LOOKUP_NAME.  Check the global symbols if GLOBAL, the static
+   symbols if not.  */
 
 static struct partial_symbol *
 lookup_partial_symbol (struct objfile *objfile,
-		       struct partial_symtab *pst, const char *name,
+		       struct partial_symtab *pst,
+		       const lookup_name_info &lookup_name,
 		       int global, domain_enum domain)
 {
   struct partial_symbol **start, **psym;
@@ -657,10 +662,6 @@ lookup_partial_symbol (struct objfile *objfile,
 
   if (length == 0)
     return NULL;
-
-  gdb::unique_xmalloc_ptr<char> search_name = psymtab_search_name (name);
-
-  lookup_name_info lookup_name (search_name.get (), symbol_name_match_type::FULL);
 
   start = (global ?
 	   &objfile->partial_symtabs->global_psymbols[pst->globals_offset] :
@@ -682,11 +683,11 @@ lookup_partial_symbol (struct objfile *objfile,
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
-	  if (!(center < top))
-	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consistency check"));
+
+	  gdb_assert (center < top);
+
 	  if (strcmp_iw_ordered ((*center)->ginfo.search_name (),
-				 search_name.get ()) >= 0)
+				 lookup_name.c_str ()) >= 0)
 	    {
 	      top = center;
 	    }
@@ -695,9 +696,8 @@ lookup_partial_symbol (struct objfile *objfile,
 	      bottom = center + 1;
 	    }
 	}
-      if (!(top == bottom))
-	internal_error (__FILE__, __LINE__,
-			_("failed internal consistency check"));
+
+      gdb_assert (top == bottom);
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
@@ -1044,14 +1044,17 @@ static void
 psym_expand_symtabs_for_function (struct objfile *objfile,
 				  const char *func_name)
 {
+  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
+
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
       if (ps->readin_p ())
 	continue;
 
-      if ((lookup_partial_symbol (objfile, ps, func_name, 1, VAR_DOMAIN)
+      if ((lookup_partial_symbol (objfile, ps, lookup_name, 1, VAR_DOMAIN)
 	   != NULL)
-	  || (lookup_partial_symbol (objfile, ps, func_name, 0, VAR_DOMAIN)
+	  || (lookup_partial_symbol (objfile, ps, lookup_name, 0, VAR_DOMAIN)
 	      != NULL))
 	psymtab_to_symtab (objfile, ps);
     }
@@ -1448,6 +1451,7 @@ const struct quick_symbol_functions psym_functions =
   psym_forget_cached_source_info,
   psym_map_symtabs_matching_filename,
   psym_lookup_symbol,
+  psym_lookup_global_symbol_language,
   psym_print_stats,
   psym_dump,
   psym_expand_symtabs_for_function,
@@ -1706,7 +1710,7 @@ partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
 /* See psympriv.h.  */
 
 void
-partial_symtab::read_dependencies (struct objfile *objfile)
+partial_symtab::expand_dependencies (struct objfile *objfile)
 {
   for (int i = 0; i < number_of_dependencies; ++i)
     {

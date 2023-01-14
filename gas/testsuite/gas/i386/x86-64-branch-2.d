@@ -1,6 +1,7 @@
 #as: -J
 #objdump: -dwr
 #name: x86-64 branch 2
+#notarget: *-*-solaris*
 
 .*: +file format .*
 

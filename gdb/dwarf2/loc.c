@@ -4082,6 +4082,12 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]>",
 			      phex_nz (to_underlying (type_die), 0));
+
+	    int n = *data++;
+	    fprintf_filtered (stream, " %d byte block:", n);
+	    for (int i = 0; i < n; ++i)
+	      fprintf_filtered (stream, " %02x", data[i]);
+	    data += n;
 	  }
 	  break;
 

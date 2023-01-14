@@ -2774,6 +2774,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 		     file_alignment, section_alignment);
 	}
+
+      if (preserve_dates
+	  && bfd_get_flavour (ibfd) == bfd_target_coff_flavour
+	  && bfd_pei_p (ibfd))
+	pe->timestamp = pe_data (ibfd)->coff.timestamp;
     }
 
   if (isympp)

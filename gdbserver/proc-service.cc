@@ -42,7 +42,7 @@ static struct regset_info *
 gregset_info (void)
 {
   int i = 0;
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const regs_info *regs_info = the_linux_target->get_regs_info ();
   struct regsets_info *regsets_info = regs_info->regsets_info;
 
   while (regsets_info->regsets[i].size != -1)

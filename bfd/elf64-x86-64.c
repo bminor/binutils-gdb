@@ -196,9 +196,6 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	FALSE)
 };
 
-/* Set if a relocation is converted from a GOTPCREL relocation.  */
-#define R_X86_64_converted_reloc_bit (1 << 7)
-
 #define X86_PCREL_TYPE_P(TYPE)		\
   (   ((TYPE) == R_X86_64_PC8)		\
    || ((TYPE) == R_X86_64_PC16)		\
@@ -1509,6 +1506,8 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   bfd_boolean no_overflow;
   bfd_boolean relocx;
   bfd_boolean to_reloc_pc32;
+  bfd_boolean abs_symbol;
+  bfd_boolean local_ref;
   asection *tsec;
   bfd_signed_vma raddend;
   unsigned int opcode;
@@ -1516,6 +1515,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   unsigned int r_type = *r_type_p;
   unsigned int r_symndx;
   bfd_vma roff = irel->r_offset;
+  bfd_vma abs_relocation;
 
   if (roff < (r_type == R_X86_64_REX_GOTPCRELX ? 3 : 2))
     return TRUE;
@@ -1559,6 +1559,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 		   || no_overflow
 		   || is_pic);
 
+  abs_symbol = FALSE;
+  abs_relocation = 0;
+
   /* Get the symbol referred to by the reloc.  */
   if (h == NULL)
     {
@@ -1569,8 +1572,13 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       if (isym->st_shndx == SHN_UNDEF)
 	return TRUE;
 
+      local_ref = TRUE;
       if (isym->st_shndx == SHN_ABS)
-	tsec = bfd_abs_section_ptr;
+	{
+	  tsec = bfd_abs_section_ptr;
+	  abs_symbol = TRUE;
+	  abs_relocation = isym->st_value;
+	}
       else if (isym->st_shndx == SHN_COMMON)
 	tsec = bfd_com_section_ptr;
       else if (isym->st_shndx == SHN_X86_64_LCOMMON)
@@ -1586,8 +1594,10 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	 GOTPCRELX relocations since we need to modify REX byte.
 	 It is OK convert mov with R_X86_64_GOTPCREL to
 	 R_X86_64_PC32.  */
-      bfd_boolean local_ref;
       struct elf_x86_link_hash_entry *eh = elf_x86_hash_entry (h);
+
+      abs_symbol = ABS_SYMBOL_P (h);
+      abs_relocation = h->root.u.def.value;
 
       /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
       local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
@@ -1728,6 +1738,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 
       if (opcode == 0x8b)
 	{
+	  if (abs_symbol && local_ref)
+	    to_reloc_pc32 = FALSE;
+
 	  if (to_reloc_pc32)
 	    {
 	      /* Convert "mov foo@GOTPCREL(%rip), %reg" to
@@ -1788,6 +1801,21 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	  r_type = (rex & REX_W) != 0 ? R_X86_64_32S : R_X86_64_32;
 
 	rewrite_modrm_rex:
+	  if (abs_relocation)
+	    {
+	      /* Check if R_X86_64_32S/R_X86_64_32 fits.  */
+	      if (r_type == R_X86_64_32S)
+		{
+		  if ((abs_relocation + 0x80000000) > 0xffffffff)
+		    return TRUE;
+		}
+	      else
+		{
+		  if (abs_relocation > 0xffffffff)
+		    return TRUE;
+		}
+	    }
+
 	  bfd_put_8 (abfd, modrm, contents + roff - 1);
 
 	  if (rex)
@@ -1879,6 +1907,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       const char *name;
       bfd_boolean size_reloc;
       bfd_boolean converted_reloc;
+      bfd_boolean no_dynreloc;
 
       r_symndx = htab->r_sym (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1983,6 +2012,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    converted = TRUE;
 	}
 
+      if (!_bfd_elf_x86_valid_reloc_p (sec, info, htab, rel, h, isym,
+				       symtab_hdr, &no_dynreloc))
+	return FALSE;
+
       if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
 				       symtab_hdr, sym_hashes,
 				       &r_type, GOT_UNKNOWN,
@@ -2029,12 +2062,26 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	    switch (r_type)
 	      {
-	      default: tls_type = GOT_NORMAL; break;
-	      case R_X86_64_TLSGD: tls_type = GOT_TLS_GD; break;
-	      case R_X86_64_GOTTPOFF: tls_type = GOT_TLS_IE; break;
+	      default:
+		tls_type = GOT_NORMAL;
+		if (h)
+		  {
+		    if (ABS_SYMBOL_P (h))
+		      tls_type = GOT_ABS;
+		  }
+		else if (isym->st_shndx == SHN_ABS)
+		  tls_type = GOT_ABS;
+		break;
+	      case R_X86_64_TLSGD:
+		tls_type = GOT_TLS_GD;
+		break;
+	      case R_X86_64_GOTTPOFF:
+		tls_type = GOT_TLS_IE;
+		break;
 	      case R_X86_64_GOTPC32_TLSDESC:
 	      case R_X86_64_TLSDESC_CALL:
-		tls_type = GOT_TLS_GDESC; break;
+		tls_type = GOT_TLS_GDESC;
+		break;
 	      }
 
 	    if (h != NULL)
@@ -2245,8 +2292,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  size_reloc = FALSE;
 	do_size:
-	  if (NEED_DYNAMIC_RELOCATION_P (info, TRUE, h, sec, r_type,
-					 htab->pointer_r_type))
+	  if (!no_dynreloc
+	      && NEED_DYNAMIC_RELOCATION_P (info, TRUE, h, sec, r_type,
+					    htab->pointer_r_type))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -2880,7 +2928,14 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      base_got->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 
-		  if (bfd_link_pic (info))
+		  /* NB: GOTPCREL relocations against local absolute
+		     symbol store relocation value in the GOT slot
+		     without relative relocation.  */
+		  if (bfd_link_pic (info)
+		      && !(sym->st_shndx == SHN_ABS
+			   && (r_type == R_X86_64_GOTPCREL
+			       || r_type == R_X86_64_GOTPCRELX
+			       || r_type == R_X86_64_REX_GOTPCRELX)))
 		    relative_reloc = TRUE;
 		}
 	    }
@@ -3175,7 +3230,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 				    && (X86_PCREL_TYPE_P (r_type)
 					|| X86_SIZE_TYPE_P (r_type)));
 
-	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type,
+	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type, sec,
 					     need_copy_reloc_in_pie,
 					     resolved_to_zero, FALSE))
 	    {

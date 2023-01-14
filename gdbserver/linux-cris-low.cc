@@ -20,6 +20,55 @@
 #include "linux-low.h"
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the CRIS architecture.  */
+
+class cris_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static cris_target the_cris_target;
+
+bool
+cris_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+cris_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+cris_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
+
 /* Defined in auto-generated file reg-cris.c.  */
 void init_registers_cris (void);
 extern const struct target_desc *tdesc_cris;
@@ -41,20 +90,20 @@ static int cris_regmap[] = {
 
 };
 
-static int
-cris_cannot_store_register (int regno)
+bool
+cris_target::low_cannot_store_register (int regno)
 {
   if (cris_regmap[regno] == -1)
-    return 1;
+    return true;
 
   return (regno >= cris_num_regs);
 }
 
-static int
-cris_cannot_fetch_register (int regno)
+bool
+cris_target::low_cannot_fetch_register (int regno)
 {
   if (cris_regmap[regno] == -1)
-    return 1;
+    return true;
 
   return (regno >= cris_num_regs);
 }
@@ -62,32 +111,31 @@ cris_cannot_fetch_register (int regno)
 static const unsigned short cris_breakpoint = 0xe938;
 #define cris_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-cris_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+cris_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = cris_breakpoint_len;
   return (const gdb_byte *) &cris_breakpoint;
 }
 
-static int
-cris_breakpoint_at (CORE_ADDR where)
+bool
+cris_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn,
-			   cris_breakpoint_len);
+  read_memory (where, (unsigned char *) &insn, cris_breakpoint_len);
   if (insn == cris_breakpoint)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
-static void
-cris_arch_setup (void)
+void
+cris_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_cris;
 }
@@ -98,32 +146,21 @@ static struct usrregs_info cris_usrregs_info =
     cris_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &cris_usrregs_info,
   };
 
-static const struct regs_info *
-cris_regs_info (void)
+const regs_info *
+cris_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-struct linux_target_ops the_low_target = {
-  cris_arch_setup,
-  cris_regs_info,
-  cris_cannot_fetch_register,
-  cris_cannot_store_register,
-  NULL, /* fetch_register */
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
-  NULL, /* breakpoint_kind_from_pc */
-  cris_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
-  0,
-  cris_breakpoint_at,
-};
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_cris_target;
 
 void
 initialize_low_arch (void)

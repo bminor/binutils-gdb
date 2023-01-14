@@ -575,6 +575,7 @@
 #define MASK_CUSTOM3_RD_RS1  0x707f
 #define MATCH_CUSTOM3_RD_RS1_RS2 0x707b
 #define MASK_CUSTOM3_RD_RS1_RS2  0x707f
+/* Support CSR to priv spec 1.11.  */
 #define CSR_USTATUS 0x0
 #define CSR_UIE 0x4
 #define CSR_UTVEC 0x5
@@ -655,6 +656,7 @@
 #define CSR_SIDELEG 0x103
 #define CSR_SIE 0x104
 #define CSR_STVEC 0x105
+/* scounteren is present int priv spec 1.10.  */
 #define CSR_SCOUNTEREN 0x106
 #define CSR_SSCRATCH 0x140
 #define CSR_SEPC 0x141
@@ -667,17 +669,20 @@
 #define CSR_MIMPID 0xf13
 #define CSR_MHARTID 0xf14
 #define CSR_MSTATUS 0x300
+/* misa is 0xf10 in 1.9, but 0x301 in 1.9.1.  */
 #define CSR_MISA 0x301
 #define CSR_MEDELEG 0x302
 #define CSR_MIDELEG 0x303
 #define CSR_MIE 0x304
 #define CSR_MTVEC 0x305
+/* mcounteren is present in priv spec 1.10.  */
 #define CSR_MCOUNTEREN 0x306
 #define CSR_MSCRATCH 0x340
 #define CSR_MEPC 0x341
 #define CSR_MCAUSE 0x342
 #define CSR_MTVAL 0x343
 #define CSR_MIP 0x344
+/* pmpcfg0 to pmpcfg3, pmpaddr0 to pmpaddr15 are present in priv spec 1.10.  */
 #define CSR_PMPCFG0 0x3a0
 #define CSR_PMPCFG1 0x3a1
 #define CSR_PMPCFG2 0x3a2
@@ -760,6 +765,8 @@
 #define CSR_MHPMCOUNTER29H 0xb9d
 #define CSR_MHPMCOUNTER30H 0xb9e
 #define CSR_MHPMCOUNTER31H 0xb9f
+/* mcountinhibit is present in priv spec 1.11.  */
+#define CSR_MCOUNTINHIBIT 0x320
 #define CSR_MHPMEVENT3 0x323
 #define CSR_MHPMEVENT4 0x324
 #define CSR_MHPMEVENT5 0x325
@@ -795,8 +802,10 @@
 #define CSR_TDATA3 0x7a3
 #define CSR_DCSR 0x7b0
 #define CSR_DPC 0x7b1
-#define CSR_DSCRATCH 0x7b2
-/* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
+/* dscratch0 and dscratch1 are present in priv spec 1.11.  */
+#define CSR_DSCRATCH0 0x7b2
+#define CSR_DSCRATCH1 0x7b3
+/* These registers are present in priv spec 1.9.1, but are dropped in 1.10.  */
 #define CSR_HSTATUS 0x200
 #define CSR_HEDELEG 0x202
 #define CSR_HIDELEG 0x203
@@ -807,16 +816,15 @@
 #define CSR_HCAUSE 0x242
 #define CSR_HBADADDR 0x243
 #define CSR_HIP 0x244
-/* CSR_MISA is 0xf10 in 1.9, but 0x301 in 1.9.1.  */
 #define CSR_MBASE 0x380
 #define CSR_MBOUND 0x381
 #define CSR_MIBASE 0x382
 #define CSR_MIBOUND 0x383
 #define CSR_MDBASE 0x384
 #define CSR_MDBOUND 0x385
-#define CSR_MUCOUNTEREN 0x320
 #define CSR_MSCOUNTEREN 0x321
 #define CSR_MHCOUNTEREN 0x322
+
 #define CAUSE_MISALIGNED_FETCH 0x0
 #define CAUSE_FAULT_FETCH 0x1
 #define CAUSE_ILLEGAL_INSTRUCTION 0x2
@@ -1301,6 +1309,7 @@ DECLARE_CSR(mhpmcounter28h, CSR_MHPMCOUNTER28H, CSR_CLASS_I_32)
 DECLARE_CSR(mhpmcounter29h, CSR_MHPMCOUNTER29H, CSR_CLASS_I_32)
 DECLARE_CSR(mhpmcounter30h, CSR_MHPMCOUNTER30H, CSR_CLASS_I_32)
 DECLARE_CSR(mhpmcounter31h, CSR_MHPMCOUNTER31H, CSR_CLASS_I_32)
+DECLARE_CSR(mcountinhibit, CSR_MCOUNTINHIBIT, CSR_CLASS_I)
 DECLARE_CSR(mhpmevent3, CSR_MHPMEVENT3, CSR_CLASS_I)
 DECLARE_CSR(mhpmevent4, CSR_MHPMEVENT4, CSR_CLASS_I)
 DECLARE_CSR(mhpmevent5, CSR_MHPMEVENT5, CSR_CLASS_I)
@@ -1336,7 +1345,8 @@ DECLARE_CSR(tdata2, CSR_TDATA2, CSR_CLASS_I)
 DECLARE_CSR(tdata3, CSR_TDATA3, CSR_CLASS_I)
 DECLARE_CSR(dcsr, CSR_DCSR, CSR_CLASS_I)
 DECLARE_CSR(dpc, CSR_DPC, CSR_CLASS_I)
-DECLARE_CSR(dscratch, CSR_DSCRATCH, CSR_CLASS_I)
+DECLARE_CSR(dscratch0, CSR_DSCRATCH0, CSR_CLASS_I)
+DECLARE_CSR(dscratch1, CSR_DSCRATCH1, CSR_CLASS_I)
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 DECLARE_CSR(hstatus, CSR_HSTATUS, CSR_CLASS_I)
 DECLARE_CSR(hedeleg, CSR_HEDELEG, CSR_CLASS_I)
@@ -1354,7 +1364,6 @@ DECLARE_CSR(mibase, CSR_MIBASE, CSR_CLASS_I)
 DECLARE_CSR(mibound, CSR_MIBOUND, CSR_CLASS_I)
 DECLARE_CSR(mdbase, CSR_MDBASE, CSR_CLASS_I)
 DECLARE_CSR(mdbound, CSR_MDBOUND, CSR_CLASS_I)
-DECLARE_CSR(mucounteren, CSR_MUCOUNTEREN, CSR_CLASS_I)
 DECLARE_CSR(mscounteren, CSR_MSCOUNTEREN, CSR_CLASS_I)
 DECLARE_CSR(mhcounteren, CSR_MHCOUNTEREN, CSR_CLASS_I)
 #endif
@@ -1367,6 +1376,10 @@ DECLARE_CSR_ALIAS(sbadaddr, CSR_STVAL, CSR_CLASS_I)
 DECLARE_CSR_ALIAS(sptbr, CSR_SATP, CSR_CLASS_I)
 /* Mbadaddr is 0x343 in 1.9.1, but 0x343 is mtval in 1.10.  */
 DECLARE_CSR_ALIAS(mbadaddr, CSR_MTVAL, CSR_CLASS_I)
+/* Mucounteren is 0x320 in 1.10, but 0x320 is mcountinhibit in 1.11.  */
+DECLARE_CSR_ALIAS(mucounteren, CSR_MCOUNTINHIBIT, CSR_CLASS_I)
+/* Dscratch is 0x7b2 in 1.10, but 0x7b2 is dscratch0 in 1.11.  */
+DECLARE_CSR_ALIAS(dscratch, CSR_DSCRATCH0, CSR_CLASS_I)
 #endif
 #ifdef DECLARE_CAUSE
 DECLARE_CAUSE("misaligned fetch", CAUSE_MISALIGNED_FETCH)

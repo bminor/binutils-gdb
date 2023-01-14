@@ -80,15 +80,6 @@ struct ParametrizedStruct<T> {
     value: T
 }
 
-union Union {
-    f1: i8,
-    f2: u8,
-}
-
-pub union Union2 {
-    pub name: [u8; 1],
-}
-
 struct StringAtOffset {
     pub field1: &'static str,
     pub field2: i32,
@@ -144,7 +135,6 @@ fn main () {
 
     let field1 = 77;
     let field2 = 88;
-    let y0 = HiBob { field1, field2 };
 
     let univariant = Univariant::Foo {a : 1};
     let univariant_anon = UnivariantAnon::Foo(1);
@@ -185,12 +175,9 @@ fn main () {
         value: 0,
     };
 
-    let u = Union { f2: 255 };
     let simplelayout = SimpleLayout { f1: 8, f2: 9 };
 
     let empty_enum_value: EmptyEnum;
-
-    let u2 = Union2 { name: [1] };
 
     let nonzero_offset = EnumWithNonzeroOffset { a: Some(1), b: None };
 

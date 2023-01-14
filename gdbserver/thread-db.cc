@@ -221,7 +221,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   if (debug_threads)
     debug_printf ("Attaching to thread %ld (LWP %d)\n",
 		  (unsigned long) ti_p->ti_tid, ti_p->ti_lid);
-  err = linux_attach_lwp (ptid);
+  err = the_linux_target->attach_lwp (ptid);
   if (err != 0)
     {
       std::string reason = linux_ptrace_attach_fail_reason_string (ptid, err);

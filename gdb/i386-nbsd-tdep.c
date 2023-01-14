@@ -377,6 +377,8 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Obviously NetBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
 
+  nbsd_init_abi (info, gdbarch);
+
   /* NetBSD has a different `struct reg'.  */
   tdep->gregset_reg_offset = i386nbsd_r_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (i386nbsd_r_reg_offset);

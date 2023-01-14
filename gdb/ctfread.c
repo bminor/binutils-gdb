@@ -553,7 +553,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
 	{
 	  struct type *t
 	    = ctf_init_float_type (of, cet.cte_bits / 2, NULL, name);
-	  type = init_complex_type (of, name, t);
+	  type = init_complex_type (name, t);
 	}
     }
   else

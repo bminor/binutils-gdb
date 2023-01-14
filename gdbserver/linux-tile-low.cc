@@ -23,6 +23,55 @@
 #include <arch/abi.h>
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the TILE-Gx architecture.  */
+
+class tile_target : public linux_process_target
+{
+public:
+
+  const regs_info *get_regs_info () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+protected:
+
+  void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
+};
+
+/* The singleton target ops object.  */
+
+static tile_target the_tile_target;
+
+bool
+tile_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+tile_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_64bit (regcache);
+}
+
+void
+tile_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_64bit (regcache, pc);
+}
+
 /* Defined in auto-generated file reg-tilegx.c.  */
 void init_registers_tilegx (void);
 extern const struct target_desc *tdesc_tilegx;
@@ -46,52 +95,52 @@ static int tile_regmap[] =
   56
 };
 
-static int
-tile_cannot_fetch_register (int regno)
+bool
+tile_target::low_cannot_fetch_register (int regno)
 {
   if (regno >= 0 && regno < 56)
-    return 0;
+    return false;
   else if (regno == 64)
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }
 
-static int
-tile_cannot_store_register (int regno)
+bool
+tile_target::low_cannot_store_register (int regno)
 {
   if (regno >= 0 && regno < 56)
-    return 0;
+    return false;
   else if (regno == 64)
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }
 
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
 #define tile_breakpoint_len 8
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-tile_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+tile_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = tile_breakpoint_len;
   return (const gdb_byte *) &tile_breakpoint;
 }
 
-static int
-tile_breakpoint_at (CORE_ADDR where)
+bool
+tile_target::low_breakpoint_at (CORE_ADDR where)
 {
   uint64_t insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn, 8);
+  read_memory (where, (unsigned char *) &insn, 8);
   if (insn == tile_breakpoint)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
 static void
@@ -134,21 +183,21 @@ static struct usrregs_info tile_usrregs_info =
     tile_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &tile_usrregs_info,
     &tile_regsets_info,
   };
 
-static const struct regs_info *
-tile_regs_info (void)
+const regs_info *
+tile_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
-static void
-tile_arch_setup (void)
+void
+tile_target::low_arch_setup ()
 {
   int pid = pid_of (current_thread);
   unsigned int machine;
@@ -164,53 +213,9 @@ tile_arch_setup (void)
     current_process ()->tdesc = tdesc_tilegx;
 }
 
-/* Support for hardware single step.  */
+/* The linux target ops object.  */
 
-static int
-tile_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
-
-struct linux_target_ops the_low_target =
-{
-  tile_arch_setup,
-  tile_regs_info,
-  tile_cannot_fetch_register,
-  tile_cannot_store_register,
-  NULL,
-  linux_get_pc_64bit,
-  linux_set_pc_64bit,
-  NULL, /* breakpoint_kind_from_pc */
-  tile_sw_breakpoint_from_kind,
-  NULL,
-  0,
-  tile_breakpoint_at,
-  NULL, /* supports_z_point_type */
-  NULL, /* insert_point */
-  NULL, /* remove_point */
-  NULL, /* stopped_by_watchpoint */
-  NULL, /* stopped_data_address */
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
-  NULL, /* prepare_to_resume */
-  NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
-  NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
-  NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
-  tile_supports_hardware_single_step,
-};
+linux_process_target *the_linux_target = &the_tile_target;
 
 void
 initialize_low_arch (void)
