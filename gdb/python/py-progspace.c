@@ -504,12 +504,17 @@ pspace_to_pspace_object (struct program_space *pspace)
   return gdbpy_ref<>::new_reference (result);
 }
 
-int
-gdbpy_initialize_pspace (void)
+void _initialize_py_progspace ();
+void
+_initialize_py_progspace ()
 {
   pspy_pspace_data_key
     = register_program_space_data_with_cleanup (NULL, py_free_pspace);
+}
 
+int
+gdbpy_initialize_pspace (void)
+{
   if (PyType_Ready (&pspace_object_type) < 0)
     return -1;
 

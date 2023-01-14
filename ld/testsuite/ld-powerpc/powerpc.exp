@@ -172,6 +172,7 @@ set ppcelftests {
     {"relocatable relaxing large" "-melf32ppc -r --relax" "" "-a32" "relax.s big.s"
      {{objdump -dr relaxrl.d}}
      "rrelax"}
+    {"build empty shared library" "-shared" "" "" "empty.s" {} "empty.so"}
 }
 
 set ppc64elftests {
@@ -487,3 +488,5 @@ run_dump_test "non-contiguous-powerpc"
 
 run_dump_test "tprel32"
 run_dump_test "tprelbad"
+
+run_dump_test "undefweak"

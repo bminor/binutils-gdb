@@ -100,6 +100,19 @@ if ![runto_main] {
 # field names, all of which are stored in the .debug_str section.
 gdb_test "p global_var" " = \\{aa = 0, bb = 0, cc = 0\\}"
 
+# Verify that the executable actually contains a .debug_str section, before
+# trying to remove it.  This can be missing with target boards
+# cc-with-dwz-m.exp and cc-with-gnu-debuglink.exp.  Handle this by
+# skipping the remainder of the test-case.
+set debug_str_section "${binfile}-debug-str"
+set args "--dump-section .debug_str=debug_str_section $binfile"
+set result [remote_exec host "[gdb_find_objcopy] $args"]
+set status [lindex $result 0]
+set output [lindex $result 1]
+if { $status == 0 && ![string equal $output ""] } {
+    return -1
+}
+
 # Now copy the executable, and remove the .debug_str section.  This
 # creates an executable with an invalid DWARF configuration.  GDB
 # should give an error when trying to read the debug information from
@@ -115,28 +128,32 @@ if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
 # executable we're going to get an error, which we check for below.
 clean_restart
 
+set line1 "Reading symbols from \[^\r\n\]+"
+set dwarf_error "Dwarf Error: DW_FORM_strp used without required section"
+
 # This pattern is hit when GDB does not use -readnow (i.e. the default
 # behaviour).
 set pattern1 \
     [multi_line \
-        "Reading symbols from \[^\r\n\]+" \
-        "Dwarf Error: DW_FORM_strp used without required section" \
+         $line1 \
+         $dwarf_error \
         "\\(No debugging symbols \[^\r\n\]+\\)"]
 
 # This pattern is hit when GDB does use -readnow (e.g. running with
 # --target_board=readnow).
 set pattern2 \
     [multi_line \
-        "Reading symbols from \[^\r\n\]+" \
+        $line1 \
         "Expanding full symbols from \[^\r\n\]+" \
-        "Dwarf Error: DW_FORM_strp used without required section"]
+        $dwarf_error]
+
+# This pattern is hit when gcc adds an index (e.g. running with
+# --target_board=cc-with-gdb-index).
+set pattern3 \
+    [multi_line \
+        $line1 \
+        $dwarf_error]
 
 # Load the executable, we expect an error from the DWARF parser.
-gdb_test_multiple "file $binfile_no_debug_str" "file $testfile" {
-    -wrap -re $pattern1 {
-       pass $gdb_test_name
-    }
-    -re -wrap "$pattern2" {
-       pass $gdb_test_name
-    }
-}
+gdb_test "file $binfile_no_debug_str" "($pattern1|$pattern2|$pattern3)" \
+    "file $testfile"

@@ -49,7 +49,7 @@ struct altivec_regs {
    work on N independant bits of data.  This is only for the
    instructions that actually move data around.  */
 
-#if (WITH_HOST_BYTE_ORDER == BIG_ENDIAN)
+#if (HOST_BYTE_ORDER == BIG_ENDIAN)
 #define AV_BINDEX(x)	((x) & 15)
 #define AV_HINDEX(x)	((x) & 7)
 #else

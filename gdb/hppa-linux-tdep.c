@@ -174,9 +174,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  sp = pc - pcoffs[attempt];
 	}
       else
-      {
 	return 0;
-      }
     }
 
   /* sp + sfoffs[try] points to a struct rt_sigframe, which contains
@@ -311,6 +309,7 @@ hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 }
 
 static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
+  "hppa linux sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   hppa_linux_sigtramp_frame_this_id,
@@ -373,8 +372,8 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
 	{
 	  CORE_ADDR addr, endaddr;
 
-	  addr = obj_section_addr (osect);
-	  endaddr = obj_section_endaddr (osect);
+	  addr = osect->addr ();
+	  endaddr = osect->endaddr ();
 
 	  while (addr < endaddr)
 	    {

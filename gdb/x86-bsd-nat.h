@@ -27,18 +27,23 @@ extern size_t x86bsd_xsave_len;
 
 /* A prototype *BSD/x86 target.  */
 
+#ifdef HAVE_PT_GETDBREGS
 template<typename BaseTarget>
 class x86bsd_nat_target : public x86_nat_target<BaseTarget>
 {
   using base_class = x86_nat_target<BaseTarget>;
 public:
-#ifdef HAVE_PT_GETDBREGS
   void mourn_inferior () override
   {
     x86_cleanup_dregs ();
     base_class::mourn_inferior ();
   }
-#endif /* HAVE_PT_GETDBREGS */
 };
+#else /* !HAVE_PT_GETDBREGS */
+template<typename BaseTarget>
+class x86bsd_nat_target : public BaseTarget
+{
+};
+#endif /* HAVE_PT_GETDBREGS */
 
 #endif /* x86-bsd-nat.h */

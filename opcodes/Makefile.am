@@ -60,6 +60,7 @@ BUILD_LIB_DEPS = @BUILD_LIB_DEPS@
 HFILES = \
 	aarch64-asm.h aarch64-dis.h aarch64-opc.h aarch64-tbl.h \
 	bpf-desc.h bpf-opc.h \
+	cris-desc.h cris-opc.h \
 	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
@@ -108,6 +109,7 @@ TARGET_LIBOPCODES_CFILES = \
 	cgen-opc.c \
 	cr16-dis.c \
 	cr16-opc.c \
+	cris-desc.c \
 	cris-dis.c \
 	cris-opc.c \
 	crx-dis.c \
@@ -361,7 +363,8 @@ CLEANFILES = \
 
 CGENDIR = @cgendir@
 CPUDIR = $(srcdir)/../cpu
-CGEN = "`if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi` -l ${cgendir}/guile.scm -s"
+GUILE = `if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`
+CGEN = "$(GUILE) -l ${cgendir}/guile.scm -s"
 CGENFLAGS = -v
 
 CGENDEPS = \
@@ -371,10 +374,11 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt or1k xc16x xstormy16
+CGEN_CPUS = cris epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt or1k xc16x xstormy16
 
 if CGEN_MAINT
 BPF_DEPS = stamp-bpf
+CRIS_DEPS = stamp-cris
 EPIPHANY_DEPS = stamp-epiphany
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
@@ -390,6 +394,7 @@ XC16X_DEPS = stamp-xc16x
 XSTORMY16_DEPS = stamp-xstormy16
 else
 BPF_DEPS =
+CRIS_DEPS =
 EPIPHANY_DEPS =
 FR30_DEPS =
 FRV_DEPS =
@@ -430,6 +435,15 @@ $(srcdir)/bpf-desc.h $(srcdir)/bpf-desc.c $(srcdir)/bpf-opc.h \
 stamp-bpf: $(CGENDEPS) $(CPUDIR)/bpf.cpu $(CPUDIR)/bpf.opc
 	$(MAKE) run-cgen arch=bpf prefix=bpf \
 		archfile=$(CPUDIR)/bpf.cpu opcfile=$(CPUDIR)/bpf.opc
+
+$(srcdir)/cris-desc.h $(srcdir)/cris-desc.c $(srcdir)/cris-opc.h: $(CRIS_DEPS)
+	@true
+
+stamp-cris: $(CGENDEPS) $(CPUDIR)/cris.cpu
+	$(SHELL) $(srcdir)/cgen.sh desc $(srcdir) $(CGEN) \
+	  $(CGENDIR) "$(CGENFLAGS)" cris cris $(CPUDIR)/cris.cpu /dev/null \
+	  "$(options)" "$(extrafiles)"
+	touch $@
 
 $(srcdir)/epiphany-desc.h $(srcdir)/epiphany-desc.c $(srcdir)/epiphany-opc.h \
 		$(srcdir)/epiphany-opc.c $(srcdir)/epiphany-ibld.c \

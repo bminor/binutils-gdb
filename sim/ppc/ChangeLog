@@ -1,3 +1,318 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (RESERVED_CFLAGS): Delete.
+	* configure.ac: Delete sim-reserved-bits.
+	* std-config.h (WITH_RESERVED_BITS): Delete.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Add -W flags from ../m4/sim_ac_option_warnings.m4.
+	Run compile tests against each flag.
+	* configure: Regenerate.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* main.c (sim_io_error): Add comment
+	* sim_calls.c (sim_io_error): Likewise.  Change "" to " ".
+	(error): Likewise.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (INLINE_CFLAGS): Change to $(SIM_INLINE).
+	* configure.ac: Delete sim-inline logic.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Replace ALL_INLINE with ALL_C_INLINE and
+	PSIM_INLINE_LOCALS with INLINE_LOCALS.
+	* inline.h: Likewise.
+	* options.c: Likewise.
+	* std-config.h: Likewise.  Include sim-inline.h explicitly.
+	(REVEAL_MODULE): Define to H_REVEALS_MODULE.
+	(INLINE_MODULE): Define to C_REVEALS_MODULE.
+	(PSIM_INLINE_LOCALS): Delete.
+	(ALL_INLINE): Delete.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Move intl vars to ../arch-subdir.mk.in.
+	* configure.ac: Delete ZW_GNU_GETTEXT_SISTER_DIR call.
+	* config.in, configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete toolchain vars.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (LIBS): Add $(COMMON_LIBS).
+	(ZLIB): Use $(zlibdir).
+	* configure.ac: Delete AM_ZLIB & AC_PLUGINS calls.
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (WERROR_CFLAGS): Delete.
+	* configure.ac: Delete werror configure option.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Include ../arch-subdir.mk.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h: Delete sim-signal.h include.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (ENDIAN_CFLAGS): Delete.
+	* configure.ac: Delete sim-endian.
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* igen.c (gen_semantics_h): Rename PAGE_SIZE to MPC860C0_PAGE_SIZE.
+	* ppc-instructions: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_EXEEXT call.
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete sim-assert logic.
+	* config.in, configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* altivec.igen: Change BIG_ENDIAN to BFD_ENDIAN_BIG.
+	* configure.ac: Change LITTLE_ENDIAN, BIG_ENDIAN, & 0 to
+	BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG, & BFD_ENDIAN_UNKNOWN respectively.
+	* emul_generic.c: Likewise.
+	* options.c (options_byte_order): Likewise.  Change int to bfd_endian.
+	* psim.c (current_target_byte_order): Change type to bfd_endian.
+	(psim_create): Change LITTLE_ENDIAN & BIG_ENDIAN to BFD_ENDIAN_LITTLE
+	& BFD_ENDIAN_BIG respectively.
+	* sim-endian-n.h: Likewise.
+	* sim-endian.c: Likewise.
+	* std-config.h: Include bfd.h.
+	(LITTLE_ENDIAN, BIG_ENDIAN): Delete.
+	(HOST_BYTE_ORDER): Change to BFD_ENDIAN_BIG & BFD_ENDIAN_LITTLE.
+	(WITH_TARGET_BYTE_ORDER): Change to BFD_ENDIAN_UNKNOWN.
+	(current_target_byte_order): Change type to bfd_endian.
+	(CURRENT_TARGET_BYTE_ORDER): Compare to BFD_ENDIAN_UNKNOWN.
+	* vm.c (vm_synchronize_context): Change LITTLE_ENDIAN & BIG_ENDIAN to
+	BFD_ENDIAN_LITTLE & BFD_ENDIAN_BIG respectively.
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h (__attribute__): Delete.
+	* misc.h (__attribute__): Likewise.
+	Include ansidecl.h.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.h: Include ansidecl.h.
+	(cpu_error): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_3.
+	* device.h (device_error): Change __attribute__ ((format (printf...
+	to ATTRIBUTE_PRINTF_2.
+	* lf.h: Include ansidecl.h.
+	(lf_printf): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_2.
+	* sim_callbacks.h (sim_io_printf_filtered): Change __attribute__
+	((format (printf... to ATTRIBUTE_PRINTF_1.
+	* tree.h (tree_parse): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_2.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* double.c: Include ansidecls.h.
+	* dp-bit.c: Change __attribute__ ((packed)) to ATTRIBUTE_PACKED.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h (NORETURN): Delete.
+	* sim_callbacks.h: Include ansidecl.h.  Change NORETURN to
+	ATTRIBUTE_NORETURN.
+	* sim_calls.c: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h (UNUSED): Delete.
+	* gen-icache.c (print_icache_extraction): Change UNUSED to
+	ATTRIBUTE_UNUSED.
+	* idecode_expression.h: Likewise.  Include ansidecl.h.
+	* inline.h: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h: Delete CONCAT* and XCONCAT* macros.
+	* corefile.c: Include symcat.h.
+	* idecode_fields.h: Likewise.
+	* sim-endian.c: Likewise.
+	* vm.c: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* device.h (device_add_boolean_property): Rename bool arg to boolean.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (HOSTENDIAN_CFLAGS): Delete.
+	* configure.ac: Delete sim-hostendian logic.
+	* altivec_registers.h (WITH_HOST_BYTE_ORDER): Rename to ...
+	(HOST_BYTE_ORDER): ... this.
+	* options.c: Likewise.
+	* sim-endian.c: Likewise.
+	* psim.c (current_host_byte_order): Delete.
+	(CURRENT_HOST_BYTE_ORDER): Rename to ...
+	(HOST_BYTE_ORDER): ... this.
+	* sim-endian-n.h: Likewise.
+	* sim-endian.h: Delete all custom endian include & define logic.
+	* std-config.h (WITH_HOST_BYTE_ORDER): Delete.
+	(LITTLE_ENDIAN): Define fallback.
+	(BIG_ENDIAN): Likewise.
+	(HOST_BYTE_ORDER): Define based on WORDS_BIGENDIAN.
+	(current_host_byte_order, CURRENT_HOST_BYTE_ORDER): Delete.
+	* config.in, configure: Regenerate.
+
+2021-06-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMMON_OBJS_NAMES, +COMMON_OBJS): New variables.
+	(LIB_OBJ): Replace version.o with $(COMMON_OBJS).
+	(version.c, version.o): Delete rules.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Add $(EXEEXT) to run and psim.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete ALIGNMENT_CFLAGS.
+	* configure.ac: Delete sim-alignment.
+	* configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete calls to ACX_PKGVERSION & ACX_BUGURL.
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete sim-stdio & sim-trace.
+	* debug.h: Define TRACE_* defines.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_STRUCT_*, AC_TYPE_*, AC_CHECK_FUNCS,
+	AC_CHECK_HEADERS, and AC_HEADER_DIRENT calls.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete sim-env configure option.
+	* defs.h: Include ../config.h.  Undefine PACKAGE* defines.
+	* std-config.h (ALL_ENVIRONMENT): Define.
+	* config.in, configure: Regenerate.
+
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h (NULL): Delete.
+	* gen-itable.c (NULL): Likewise.
+	* gen-model.c (NULL): Likewise.
+	* ld-cache.c (NULL): Likewise.
+	* ld-decode.c (NULL): Likewise.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (WERROR_CFLAGS): Add -Wno-format for mingw32 hosts.
+	* configure: Regenerate.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* emul_generic.c (emul_write_status): Rename errno to err.
+	(emul_write2_status): Likewise.
+	* emul_generic.h (emul_write_status, emul_write2_status): Likewise.
+	* emul_netbsd.c (errno): Delete.
+	* emul_unix.c (errno): Delete.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (INCLUDES): Add -I../..
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gentmap): Pass -DUSE_CONFIG_H.
+	* basics.h, debug.c, filter_filename.c, inline.c, sim-endian.c,
+	words.h: Replace config.h include with defs.h.
+	* defs.h: New file.
+
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (WERROR_CFLAGS): Define.
+	(STD_CFLAGS): Add $(WERROR_CFLAGS).
+	* configure.ac: Add --enable-werror.
+	* device.c (device_full_name): Delete full_name variable.
+	(device_clean): Delete system variable.
+	* emul_chirp.c (chirp_emul_getprop): Cast vars to unsigned long.
+	(chirp_emul_seek): Likewise.
+	* hw_glue.c (hw_glue_init_address): Use %zu format.
+	* hw_ide.c (hw_ide_io_read_buffer): Cast vars to unsigned long.
+	(hw_ide_io_write_buffer): Likewise.
+	* hw_init.c (update_for_binary_section): Cast vars to unsigned long.
+	* hw_phb.c (hw_phb_dma_read_buffer): Likewise.
+	(hw_phb_dma_write_buffer): Likewise.
+	* hw_shm.c (hw_shm_init_data): Delete d variable.
+	(hw_shm_attach_address_callback): Delete shm variable.
+	* igen.c (gen_semantics_c): Include tree.h.
+	* interrupts.c (alignment_interrupt): Cast vars to unsigned long.
+	* ld-insn.c (dump_insn_field): Cast vars to unsigned long.
+	* main.c (main): Add const to argv.
+	* options.c (print_options): Cast var to int.
+	* ppc-instructions: Add %s to format.  Delete shifted variable.  Add
+	parenthesis to binary operations.
+	* psim.c (find_arg): Add const to return and argv.
+	(is_num): Add const to string.
+	(psim_options): Add const to return and argv, and p & param.
+	(psim_command): Add const to argv, device, and media.
+	(psim_stack): Add const to argv and envp.
+	* psim.h: Add const to psim_options, psim_command, and psim_stack.
+	* tree.c (parse_reg_property): Delete & from sizeof.
+	* vm.c (om_virtual_to_real): Const vars to long.
+	* vm_n.h (vm_data_map_read_N): Change format to %zu.
+	(vm_data_map_write_N): Likewise.
+	* configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Update path.
+	* gdb-sim.c: Update include path.
+	* main.c: Likewise.
+	* psim.h: Likewise.
+	* sim_calls.c: Likewise.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* mon.c: Update includes.
+	* emul_unix.c: Update includes.
+	(do_unix_gettimeofday): Update condition.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (stamp-vals, stamp-map): New targets.
+	(targ-vals.h, targ-map.c): Update.
+	(clean): Remove files.
+
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
 	* emul_unix.c: Include time.h.

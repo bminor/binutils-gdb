@@ -32,13 +32,15 @@
 # INCGNU: A list of -I.... include paths that should be passed to the
 #        compiler, these are where the gnulib headers can be found.
 
-ifndef GNULIB_BUILDDIR
-$(error missing GNULIB_BUILDDIR)
+# Packages must define the relative path to gnulib's parent dir.
+ifndef GNULIB_PARENT_DIR
+$(error missing GNULIB_PARENT_DIR)
 endif
 
-LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
+LIBGNU = $(GNULIB_PARENT_DIR)/gnulib/import/libgnu.a
 LIBGNU_EXTRA_LIBS = @FREXPL_LIBM@ @FREXP_LIBM@ @INET_NTOP_LIB@ \
                     @LIBTHREAD@ @LIB_GETLOGIN@ @LIB_GETRANDOM@ \
                     @LIB_HARD_LOCALE@ @LIB_MBRTOWC@ \
-                    @LIB_SETLOCALE_NULL@ @LIBINTL@
-INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
+                    @LIB_SETLOCALE_NULL@ @LIBINTL@ @LIB_SELECT@ @LIBSOCKET@
+INCGNU = -I$(srcdir)/$(GNULIB_PARENT_DIR)/gnulib/import \
+         -I$(GNULIB_PARENT_DIR)/gnulib/import

@@ -30,10 +30,6 @@
 #include "ld-insn.h"
 #include "ld-cache.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 
 enum
 {

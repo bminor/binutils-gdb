@@ -253,13 +253,13 @@ typedef union
   struct
     {
 #ifndef FLOAT_BIT_ORDER_MISMATCH
-      unsigned int sign:1 __attribute__ ((packed));
-      unsigned int exp:EXPBITS __attribute__ ((packed));
-      fractype fraction:FRACBITS __attribute__ ((packed));
+      unsigned int sign:1 ATTRIBUTE_PACKED;
+      unsigned int exp:EXPBITS ATTRIBUTE_PACKED;
+      fractype fraction:FRACBITS ATTRIBUTE_PACKED;
 #else
-      fractype fraction:FRACBITS __attribute__ ((packed));
-      unsigned int exp:EXPBITS __attribute__ ((packed));
-      unsigned int sign:1 __attribute__ ((packed));
+      fractype fraction:FRACBITS ATTRIBUTE_PACKED;
+      unsigned int exp:EXPBITS ATTRIBUTE_PACKED;
+      unsigned int sign:1 ATTRIBUTE_PACKED;
 #endif
     }
   bits;

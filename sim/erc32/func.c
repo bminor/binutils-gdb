@@ -16,7 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
@@ -1056,7 +1058,7 @@ bfd_load (const char *fname)
 	    section_size = bfd_section_size (section);
 
 	    if (sis_verbose)
-		printf("\nsection %s at 0x%08lx (0x%lx bytes)",
+		printf("\nsection %s at 0x%08" BFD_VMA_FMT "x (0x%lx bytes)",
 		       section_name, section_address, section_size);
 
 	    /* Text, data or lit */

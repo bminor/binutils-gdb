@@ -756,7 +756,8 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
     return ENOMEM;
 
   if ((fp->ctf_names.ctn_readonly
-       = ctf_hash_create (pop[CTF_K_INTEGER] +
+       = ctf_hash_create (pop[CTF_K_UNKNOWN] +
+			  pop[CTF_K_INTEGER] +
 			  pop[CTF_K_FLOAT] +
 			  pop[CTF_K_FUNCTION] +
 			  pop[CTF_K_TYPEDEF] +
@@ -800,6 +801,7 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
 
       switch (kind)
 	{
+	case CTF_K_UNKNOWN:
 	case CTF_K_INTEGER:
 	case CTF_K_FLOAT:
 	  /* Names are reused by bit-fields, which are differentiated by their

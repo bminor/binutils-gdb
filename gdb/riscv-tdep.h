@@ -34,6 +34,7 @@ enum
   RISCV_FP_REGNUM = 8,		/* Frame Pointer.  */
   RISCV_A0_REGNUM = 10,		/* First argument.  */
   RISCV_A1_REGNUM = 11,		/* Second argument.  */
+  RISCV_A7_REGNUM = 17,		/* Seventh argument.  */
   RISCV_PC_REGNUM = 32,		/* Program Counter.  */
 
   RISCV_NUM_INTEGER_REGS = 32,
@@ -53,7 +54,11 @@ enum
 
   RISCV_PRIV_REGNUM = 4161,
 
-  RISCV_LAST_REGNUM = RISCV_PRIV_REGNUM
+  RISCV_V0_REGNUM,
+
+  RISCV_V31_REGNUM = RISCV_V0_REGNUM + 31,
+
+  RISCV_LAST_REGNUM = RISCV_V31_REGNUM
 };
 
 /* RiscV DWARF register numbers.  */
@@ -63,6 +68,8 @@ enum
   RISCV_DWARF_REGNUM_X31 = 31,
   RISCV_DWARF_REGNUM_F0 = 32,
   RISCV_DWARF_REGNUM_F31 = 63,
+  RISCV_DWARF_REGNUM_V0 = 96,
+  RISCV_DWARF_REGNUM_V31 = 127,
   RISCV_DWARF_FIRST_CSR = 4096,
   RISCV_DWARF_LAST_CSR = 8191,
 };
@@ -96,6 +103,9 @@ struct gdbarch_tdep
   int duplicate_frm_regnum = -1;
   int duplicate_fcsr_regnum = -1;
 
+  /* Return the expected next PC assuming FRAME is stopped at a syscall
+     instruction.  */
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
 };
 
 

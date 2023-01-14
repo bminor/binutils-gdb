@@ -166,10 +166,9 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
 
   restore_infcall_suspend_state (dummy->caller_state);
 
-  iterate_over_breakpoints ([dummy] (breakpoint* bp)
-    {
-      return pop_dummy_frame_bpt (bp, dummy);
-    });
+  for (breakpoint *bp : all_breakpoints_safe ())
+    if (pop_dummy_frame_bpt (bp, dummy))
+      break;
 
   /* restore_infcall_control_state frees inf_state,
      all that remains is to pop *dummy_ptr.  */
@@ -379,6 +378,7 @@ dummy_frame_this_id (struct frame_info *this_frame,
 
 const struct frame_unwind dummy_frame_unwind =
 {
+  "dummy",
   DUMMY_FRAME,
   default_frame_unwind_stop_reason,
   dummy_frame_this_id,
@@ -408,8 +408,7 @@ fprint_dummy_frames (struct ui_file *file)
     {
       gdb_print_host_address (s, file);
       fprintf_unfiltered (file, ":");
-      fprintf_unfiltered (file, " id=");
-      fprint_frame_id (file, s->id.id);
+      fprintf_unfiltered (file, " id=%s", s->id.id.to_string ().c_str ());
       fprintf_unfiltered (file, ", ptid=%s",
 			  target_pid_to_str (s->id.thread->ptid).c_str ());
       fprintf_unfiltered (file, "\n");
@@ -439,5 +438,5 @@ _initialize_dummy_frame ()
 	   _("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
-  gdb::observers::inferior_created.attach (cleanup_dummy_frames);
+  gdb::observers::inferior_created.attach (cleanup_dummy_frames, "dummy-frame");
 }

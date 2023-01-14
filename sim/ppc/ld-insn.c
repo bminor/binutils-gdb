@@ -828,7 +828,7 @@ dump_insn_field(insn_field *field,
 		int indent)
 {
 
-  printf("(insn_field*)0x%x\n", (unsigned)field);
+  printf("(insn_field*)0x%lx\n", (unsigned long)field);
 
   dumpf(indent, "(first %d)\n", field->first);
 

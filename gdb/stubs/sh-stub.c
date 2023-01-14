@@ -418,10 +418,10 @@ retry:
 
       if (ch == '#')
 	{
- 	  ch = getDebugChar ();
- 	  xmitcsum = hex (ch) << 4;
- 	  ch = getDebugChar ();
- 	  xmitcsum += hex (ch);
+	  ch = getDebugChar ();
+	  xmitcsum = hex (ch) << 4;
+	  ch = getDebugChar ();
+	  xmitcsum += hex (ch);
 
 	  if (checksum != xmitcsum)
 	    {
@@ -437,7 +437,7 @@ retry:
 		  putDebugChar (buffer[0]);
 		  putDebugChar (buffer[1]);
 
- 		  return &buffer[3];
+		  return &buffer[3];
 		}
 
 	      return &buffer[0];

@@ -19,8 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,9 +31,7 @@
 #include <assert.h>
 #include <setjmp.h>
 #include <signal.h>
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
 #include "libiberty.h"
 #include "bfd.h"

@@ -31,10 +31,6 @@
 
 #include "gen-model.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 
 void
 gen_model_h (lf *file, insn_table *table)

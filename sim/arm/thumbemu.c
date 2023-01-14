@@ -18,6 +18,9 @@
 instruction into its corresponding ARM instruction, and using the
 existing ARM simulator.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #ifndef MODET			/* required for the Thumb instruction support */
 #if 1
 #error "MODET needs to be defined for the Thumb world to work"

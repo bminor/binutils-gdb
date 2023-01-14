@@ -251,6 +251,12 @@ set aix52tests {
      "" {aix-toc-1a.s aix-toc-1b.s}
      {{objdump -dr aix-toc-1-SIZE.dd}}
      "aix-toc-1.so"}
+
+    {"Negative relocation test 1" "-shared -bE:aix-neg-reloc.ex"
+	"" {aix-neg-reloc.s}
+	{{objdump -dr aix-neg-reloc-SIZE.d}}
+	"aix-neg-reloc.so"}
+
 }
 
 foreach test $aix52tests {

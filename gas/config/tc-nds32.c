@@ -97,7 +97,6 @@ static int optimize_for_space = 0;
 static int label_exist = 0;
 /* Flag to save state in omit_fp region.  */
 static int in_omit_fp = 0;
-extern struct nds32_keyword keyword_gpr[];
 /* Tag there is relax relocation having to link.  */
 static bool relaxing = false;
 /* ICT model.  */
@@ -3255,8 +3254,8 @@ do_pseudo_push_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("l.%c $ta,%s", size, argv[0]);
@@ -3287,8 +3286,8 @@ do_pseudo_pop_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 3)
     {
-      strncpy (location, argv[2], 8);
-      location[7] = '\0';
+      strncpy (location, argv[2], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   if ((pv & 0x3) == 0x3) /* double-word */
@@ -3310,8 +3309,8 @@ do_pseudo_pusha (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("la $ta,%s", argv[0]);
@@ -3327,8 +3326,8 @@ do_pseudo_pushi (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("li $ta,%s", argv[0]);
@@ -4601,7 +4600,7 @@ nds32_asm_parse_operand (struct nds32_asm_desc *pdesc ATTRIBUTE_UNUSED,
 void
 md_begin (void)
 {
-  struct nds32_keyword *k;
+  const struct nds32_keyword *k;
   relax_info_t *relax_info;
   int flags = 0;
 
@@ -4615,7 +4614,7 @@ md_begin (void)
 
   /* Initial general purpose registers hash table.  */
   nds32_gprs_hash = str_htab_create ();
-  for (k = keyword_gpr; k->name; k++)
+  for (k = nds32_keyword_gpr; k->name; k++)
     str_hash_insert (nds32_gprs_hash, k->name, k, 0);
 
   /* Initial branch hash table.  */
@@ -7826,8 +7825,7 @@ nds32_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* cvt_frag_to_fill () has called output_leb128 () for us.  */
 	  break;
 	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("expression too complex"));
+	  as_bad_subtract (fixP);
 	  return;
 	}
     }

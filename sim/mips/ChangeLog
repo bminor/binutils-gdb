@@ -1,3 +1,237 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_RESERVED_BITS call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_PATH_X call.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_CHECK_LIB calls.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-signal.h.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (dotrace): Make comment const.
+	* sim-main.h (dotrace):  Likewise.  Add ATTRIBUTE_PRINTF.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_monitor): Change ap type to address_word*.
+	(_P, P): New macros.  Rewrite dynamic printf logic to use these.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904sio.c (tx3904sio_fifo_push): Change next_buf to
+	unsigned_1.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904irc.c (tx3904irc_io_write_buffer): Initialize
+	register_value to 0.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Change %lx to %x and PRIx macros.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to AC_CHECK_FUNCS.
+	* config.in, configure: Regenerate.
+
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Replace $(IGEN) with $(IGEN_RUN) and ../igen/igen
+	with $(IGEN).
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c [!HAVE_DV_SOCKSER] (sockser_addr): Define to NULL.
+
+2021-05-22  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* interp.c (sim_open): Add shadow mappings from 32-bit
+	address space to 64-bit sign-extended address space.
+
+2021-05-22  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* interp.c (sim_create_inferior): Only truncate sign extension
+	bits for 32-bit target models.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Switch to sim_state_alloc_extra.
+	* micromips.igen: Change SD to mips_sim_state.
+	* micromipsrun.c (sim_engine_run): Likewise.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(watch_options_install): Delete.
+	(struct swatch): Delete.
+	(struct sim_state): Delete.
+	(struct mips_sim_state): New struct.
+	(MIPS_SIM_STATE): Define.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Replace config.h include with defs.h.
+	* cp1.c, dsp.c, dv-tx3904cpu.c, dv-tx3904irc.c, dv-tx3904sio.c,
+	dv-tx3904tmr.c, m16run.c, mdmx.c, micromipsrun.c, sim-main.c:
+	Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Update include path.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904sio.c: Include stdlib.h.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (hw_extra_devices): Inline contents into
+	SIM_AC_OPTION_HARDWARE and delete.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_IGEN_OBJ): Change @mips_igen_engine@ to engine.o.
+	(MIPS_EXTRA_LIB, SIM_EXTRA_LIBS): Delete.
+	* configure.ac (mips_igen_engine, mips_extra_libs): Delete.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* mdmx.c (qh_acc): Change 2nd AccAddAQH to AccAddLQH.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* cp1.c (store_fcr): Mark static.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (hw_enabled): Delete.
+	(SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (interp.o, m16run.o, micromipsrun.o, multi-run.o):
+	Remove.
+	(SIM_EXTRA_DEPS): New variable.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.

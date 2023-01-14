@@ -56,7 +56,7 @@ print_varobj (struct varobj *var, enum print_values print_values,
     {
       std::string exp = varobj_get_expression (var);
 
-      uiout->field_string ("exp", exp.c_str ());
+      uiout->field_string ("exp", exp);
     }
   uiout->field_signed ("numchild", varobj_get_num_children (var));
   
@@ -64,12 +64,12 @@ print_varobj (struct varobj *var, enum print_values print_values,
     {
       std::string val = varobj_get_value (var);
 
-      uiout->field_string ("value", val.c_str ());
+      uiout->field_string ("value", val);
     }
 
   std::string type = varobj_get_type (var);
   if (!type.empty ())
-    uiout->field_string ("type", type.c_str ());
+    uiout->field_string ("type", type);
 
   thread_id = varobj_get_thread_id (var);
   if (thread_id > 0)
@@ -236,7 +236,7 @@ mi_cmd_var_set_format (const char *command, char **argv, int argc)
  
   /* Report the value in the new format.  */
   std::string val = varobj_get_value (var);
-  uiout->field_string ("value", val.c_str ());
+  uiout->field_string ("value", val);
 }
 
 void
@@ -423,7 +423,7 @@ mi_cmd_var_info_type (const char *command, char **argv, int argc)
   var = varobj_get_handle (argv[0]);
 
   std::string type_name = varobj_get_type (var);
-  uiout->field_string ("type", type_name.c_str ());
+  uiout->field_string ("type", type_name);
 }
 
 void
@@ -461,7 +461,7 @@ mi_cmd_var_info_expression (const char *command, char **argv, int argc)
   uiout->field_string ("lang", lang->natural_name ());
 
   std::string exp = varobj_get_expression (var);
-  uiout->field_string ("exp", exp.c_str ());
+  uiout->field_string ("exp", exp);
 }
 
 void
@@ -545,13 +545,13 @@ mi_cmd_var_evaluate_expression (const char *command, char **argv, int argc)
     {
       std::string val = varobj_get_formatted_value (var, format);
 
-      uiout->field_string ("value", val.c_str ());
+      uiout->field_string ("value", val);
     }
   else
     {
       std::string val = varobj_get_value (var);
 
-      uiout->field_string ("value", val.c_str ());
+      uiout->field_string ("value", val);
     }
 }
 
@@ -582,7 +582,7 @@ mi_cmd_var_assign (const char *command, char **argv, int argc)
 	     "expression to variable object"));
 
   std::string val = varobj_get_value (var);
-  uiout->field_string ("value", val.c_str ());
+  uiout->field_string ("value", val);
 }
 
 /* Helper for mi_cmd_var_update - update each VAR.  */
@@ -692,7 +692,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	    {
 	      std::string val = varobj_get_value (r.varobj);
 
-	      uiout->field_string ("value", val.c_str ());
+	      uiout->field_string ("value", val);
 	    }
 	  uiout->field_string ("in_scope", "true");
 	  break;
@@ -701,7 +701,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  break;
 	case VAROBJ_INVALID:
 	  uiout->field_string ("in_scope", "invalid");
- 	  break;
+	  break;
 	}
 
       if (r.status != VAROBJ_INVALID)
@@ -716,7 +716,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	{
 	  std::string type_name = varobj_get_type (r.varobj);
 
-	  uiout->field_string ("new_type", type_name.c_str ());
+	  uiout->field_string ("new_type", type_name);
 	}
 
       if (r.type_changed || r.children_changed)

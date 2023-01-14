@@ -409,7 +409,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	addr = b + *rB;
 	j = addr & 0xf;
 	for (i = 0; i < 16; i++)
-	  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    (*vS).b[AV_BINDEX(i)] = j++;
 	  else
 	    (*vS).b[AV_BINDEX(15 - i)] = j++;
@@ -424,7 +424,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	addr = b + *rB;
 	j = 0x10 - (addr & 0xf);
 	for (i = 0; i < 16; i++)
-	  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    (*vS).b[AV_BINDEX(i)] = j++;
 	  else
 	    (*vS).b[AV_BINDEX(15 - i)] = j++;
@@ -437,7 +437,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	if (RA_is_0) b = 0;
 	else         b = *rA;
 	EA = (b + *rB) & ~0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
 	  (*vS).w[0] = MEM(unsigned, EA + 0, 4);
 	  (*vS).w[1] = MEM(unsigned, EA + 4, 4);
 	  (*vS).w[2] = MEM(unsigned, EA + 8, 4);
@@ -456,7 +456,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	if (RA_is_0) b = 0;
 	else         b = *rA;
 	EA = (b + *rB) & ~0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
 	  (*vS).w[0] = MEM(unsigned, EA + 0, 4);
 	  (*vS).w[1] = MEM(unsigned, EA + 4, 4);
 	  (*vS).w[2] = MEM(unsigned, EA + 8, 4);
@@ -496,7 +496,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	else         b = *rA;
 	EA = b + *rB;
 	eb = EA & 0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	  STORE(EA, 1, (*vS).b[eb]);
 	else
 	  STORE(EA, 1, (*vS).b[15-eb]);
@@ -510,7 +510,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	else         b = *rA;
 	EA = (b + *rB) & ~1;
 	eb = EA & 0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	  STORE(EA, 2, (*vS).h[eb/2]);
 	else
 	  STORE(EA, 2, (*vS).h[7-eb]);
@@ -524,7 +524,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	else         b = *rA;
 	EA = (b + *rB) & ~3;
 	eb = EA & 0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	  STORE(EA, 4, (*vS).w[eb/4]);
 	else
 	  STORE(EA, 4, (*vS).w[3-(eb/4)]);
@@ -536,7 +536,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	if (RA_is_0) b = 0;
 	else         b = *rA;
 	EA = (b + *rB) & ~0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
 	  STORE(EA + 0, 4, (*vS).w[0]);
 	  STORE(EA + 4, 4, (*vS).w[1]);
 	  STORE(EA + 8, 4, (*vS).w[2]);
@@ -555,7 +555,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	if (RA_is_0) b = 0;
 	else         b = *rA;
 	EA = (b + *rB) & ~0xf;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
 	  STORE(EA + 0, 4, (*vS).w[0]);
 	  STORE(EA + 4, 4, (*vS).w[1]);
 	  STORE(EA + 8, 4, (*vS).w[2]);
@@ -1915,7 +1915,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	sh = (*vB).b[0] & 7;	/* don't bother checking everything */
 	carry = 0;
 	for (j = 3; j >= 0; j--) {
-	  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    i = j;
 	  else
 	    i = (j + 2) % 4;
@@ -1951,7 +1951,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 
 0.4,6.VS,11.VA,16.VB,21.1036:VX:av:vslo %VD, %VA, %VB:Vector Shift Left by Octet
 	int i, sh;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	  sh = ((*vB).b[AV_BINDEX(15)] >> 3) & 0xf;
 	else
 	  sh = ((*vB).b[AV_BINDEX(0)] >> 3) & 0xf;
@@ -2040,7 +2040,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 	sh = (*vB).b[0] & 7;	/* don't bother checking everything */
 	carry = 0;
 	for (j = 0; j < 4; j++) {
-	  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    i = j;
 	  else
 	    i = (j + 2) % 4;
@@ -2098,7 +2098,7 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 
 0.4,6.VS,11.VA,16.VB,21.1100:VX:av:vsro %VD, %VA, %VB:Vector Shift Right Octet
 	int i, sh;
-	if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	  sh = ((*vB).b[AV_BINDEX(15)] >> 3) & 0xf;
 	else
 	  sh = ((*vB).b[AV_BINDEX(0)] >> 3) & 0xf;

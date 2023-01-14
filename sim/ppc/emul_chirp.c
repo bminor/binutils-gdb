@@ -533,7 +533,7 @@ chirp_emul_getprop(os_emul_data *data,
 	break;
       case ihandle_property:
 	TRACE(trace_os_emul, ("getprop - ihandle=0x%lx(0x%lx`%s')\n",
-			      BE2H_cell(*(unsigned_cell*)prop->array),
+			      (unsigned long)BE2H_cell(*(unsigned_cell*)prop->array),
 			      (unsigned long)device_find_ihandle_property(phandle, name),
 			      ihandle_name(device_find_ihandle_property(phandle, name))));
 	break;
@@ -1143,7 +1143,8 @@ chirp_emul_seek(os_emul_data *data,
 			(unsigned long)args.ihandle,
 			(unsigned long)ihandle,
 			ihandle_name(ihandle),
-			args.pos_hi, args.pos_lo));
+			(unsigned long)args.pos_hi,
+			(unsigned long)args.pos_lo));
   if (ihandle == NULL) {
     /* OpenFirmware doesn't define this error */
     error("chirp: invalid ihandle passed to seek method");

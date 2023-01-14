@@ -40,8 +40,6 @@ SIM_OBJS = \
 	trace.o \
 	$(ENDLIST)
 
-LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = m32c
@@ -58,14 +56,11 @@ m32c.c : m32c.opc opc2c
 	$(OPC2C) -l m32c.out $(srcdir)/m32c.opc > m32c.c.tmp
 	mv m32c.c.tmp m32c.c
 
-opc2c : opc2c.o safe-fgets.o
+opc2c : opc2c.o
 	$(LINK_FOR_BUILD) $^
 
 encodings:
 	grep '/\* [01]' $(srcdir)/r8c.opc | sort
 
-opc2c.o : opc2c.c safe-fgets.h
+opc2c.o : opc2c.c
 	$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
-
-safe-fgets.o : safe-fgets.c safe-fgets.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/safe-fgets.c

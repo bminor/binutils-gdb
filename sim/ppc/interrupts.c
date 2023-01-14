@@ -262,7 +262,7 @@ alignment_interrupt(cpu *processor,
 
   case USER_ENVIRONMENT:
   case VIRTUAL_ENVIRONMENT:
-    cpu_error(processor, cia, "alignment interrupt - ra=0x%lx", ra);
+    cpu_error(processor, cia, "alignment interrupt - ra=0x%lx", (unsigned long)ra);
     
   case OPERATING_ENVIRONMENT:
     DAR = (spreg)ra;

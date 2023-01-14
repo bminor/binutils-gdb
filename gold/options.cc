@@ -341,6 +341,27 @@ General_options::parse_V(const char*, const char*, Command_line*)
 }
 
 void
+General_options::parse_Bno_symbolic(const char*, const char*,
+				    Command_line*)
+{
+  this->bsymbolic_ = BSYMBOLIC_NONE;
+}
+
+void
+General_options::parse_Bsymbolic_functions(const char*, const char*,
+					   Command_line*)
+{
+  this->bsymbolic_ = BSYMBOLIC_FUNCTIONS;
+}
+
+void
+General_options::parse_Bsymbolic(const char*, const char*,
+				 Command_line*)
+{
+  this->bsymbolic_ = BSYMBOLIC_ALL;
+}
+
+void
 General_options::parse_defsym(const char*, const char* arg,
 			      Command_line* cmdline)
 {
@@ -987,7 +1008,8 @@ namespace gold
 {
 
 General_options::General_options()
-  : printed_version_(false),
+  : bsymbolic_(BSYMBOLIC_NONE),
+    printed_version_(false),
     execstack_status_(EXECSTACK_FROM_INPUT),
     icf_status_(ICF_NONE),
     static_(false),

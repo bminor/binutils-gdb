@@ -20,6 +20,8 @@
     
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "hw-main.h"
@@ -479,7 +481,8 @@ cycle_to_string (sim_cpu *cpu, signed64 t, int flags)
 {
   char time_buf[32];
   char cycle_buf[32];
-  static char buf[64];
+  /* Big enough to handle 64-bit t, time_buf, and cycle_buf.  */
+  static char buf[128];
 
   time_buf[0] = 0;
   cycle_buf[0] = 0;
@@ -500,10 +503,7 @@ cycle_to_string (sim_cpu *cpu, signed64 t, int flags)
     sprintf (cycle_buf, " cycle%s",
              (t > 1 ? "s" : ""));
 
-  if (t < LONG_MAX)
-    sprintf (buf, "%9lu%s%s", (unsigned long) t, cycle_buf, time_buf);
-  else
-    sprintf (buf, "%" PRIi64 "%s%s", t, cycle_buf, time_buf);
+  sprintf (buf, "%9" PRIi64 "%s%s", t, cycle_buf, time_buf);
   return buf;
 }
 

@@ -19,8 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -36,6 +37,7 @@
 #include "cpu.h"
 #include "mem.h"
 #include "load.h"
+#include "trace.h"
 
 static disassembler_ftype rl78_disasm_fn = NULL;
 
@@ -138,6 +140,8 @@ load_file_and_line (const char *filename, int lineno)
       int i;
       struct stat s;
       const char *found_filename, *slash;
+      FILE *file;
+      size_t ret;
 
       found_filename = filename;
       while (1)
@@ -155,9 +159,9 @@ load_file_and_line (const char *filename, int lineno)
       files = f;
       f->filename = xstrdup (filename);
       f->data = (char *) xmalloc (s.st_size + 2);
-      FILE *file = fopen (found_filename, "rb");
-      fread (f->data, 1, s.st_size, file);
-      f->data[s.st_size] = 0;
+      file = fopen (found_filename, "rb");
+      ret = fread (f->data, 1, s.st_size, file);
+      f->data[ret] = 0;
       fclose (file);
 
       f->nlines = 1;

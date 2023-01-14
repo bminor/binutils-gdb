@@ -1,3 +1,22 @@
+2021-05-28  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* addb.s: Add special case reg,<@reg+ / @reg- / @+reg / @-reg>.
+	* andb.s: Likewise.
+	* cmpb.s: Likewise.
+	* orb.s: Likewise.
+	* subb.s: Likewise.
+	* xorb.s: Likewise.
+	* movb.s: Add special case reg,<@reg+ / @reg- / @+reg / @-reg>
+	          @reg+,@reg+ / @-reg,@-reg.
+	@ movw.s: Likewise.
+	@ movl.s: Likewise.
+
+2021-05-04  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* movb.s: Add special case predec test.
+	* movw.s: Likewise.
+	* movl.s: Likewise.
+
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* allinsn.exp (arch): Delete.

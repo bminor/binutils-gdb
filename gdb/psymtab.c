@@ -87,96 +87,6 @@ psymbol_functions::require_partial_symbols (struct objfile *objfile)
   return m_partial_symtabs->range ();
 }
 
-/* Helper function for psym_map_symtabs_matching_filename that
-   expands the symtabs and calls the iterator.  */
-
-static bool
-partial_map_expand_apply (struct objfile *objfile,
-			  const char *name,
-			  const char *real_path,
-			  struct partial_symtab *pst,
-			  gdb::function_view<bool (symtab *)> callback)
-{
-  struct compunit_symtab *last_made = objfile->compunit_symtabs;
-
-  /* Shared psymtabs should never be seen here.  Instead they should
-     be handled properly by the caller.  */
-  gdb_assert (pst->user == NULL);
-
-  /* Don't visit already-expanded psymtabs.  */
-  if (pst->readin_p (objfile))
-    return 0;
-
-  /* This may expand more than one symtab, and we want to iterate over
-     all of them.  */
-  psymtab_to_symtab (objfile, pst);
-
-  return iterate_over_some_symtabs (name, real_path, objfile->compunit_symtabs,
-				    last_made, callback);
-}
-
-/*  Psymtab version of map_symtabs_matching_filename.  See its definition in
-    the definition of quick_symbol_functions in symfile.h.  */
-
-bool
-psymbol_functions::map_symtabs_matching_filename
-  (struct objfile *objfile,
-   const char *name,
-   const char *real_path,
-   gdb::function_view<bool (symtab *)> callback)
-{
-  const char *name_basename = lbasename (name);
-
-  for (partial_symtab *pst : require_partial_symbols (objfile))
-    {
-      /* Anonymous psymtabs don't have a file name.  */
-      if (pst->anonymous)
-	continue;
-
-      if (compare_filenames_for_search (pst->filename, name))
-	{
-	  while (pst->user)
-	    pst = pst->user;
-
-	  if (partial_map_expand_apply (objfile, name, real_path,
-					pst, callback))
-	    return true;
-	  continue;
-	}
-
-      /* Before we invoke realpath, which can get expensive when many
-	 files are involved, do a quick comparison of the basenames.  */
-      if (! basenames_may_differ
-	  && FILENAME_CMP (name_basename, lbasename (pst->filename)) != 0)
-	continue;
-
-      if (compare_filenames_for_search (psymtab_to_fullname (pst), name))
-	{
-	  if (partial_map_expand_apply (objfile, name, real_path,
-					pst, callback))
-	    return true;
-	  continue;
-	}
-
-      /* If the user gave us an absolute path, try to find the file in
-	 this symtab and use its absolute path.  */
-      if (real_path != NULL)
-	{
-	  gdb_assert (IS_ABSOLUTE_PATH (real_path));
-	  gdb_assert (IS_ABSOLUTE_PATH (name));
-	  if (filename_cmp (psymtab_to_fullname (pst), real_path) == 0)
-	    {
-	      if (partial_map_expand_apply (objfile, name, real_path,
-					    pst, callback))
-		return true;
-	      continue;
-	    }
-	}
-    }
-
-  return false;
-}
-
 /* Find which partial symtab contains PC and SECTION starting at psymtab PST.
    We may find a different psymtab than PST.  See FIND_PC_SECT_PSYMTAB.  */
 
@@ -975,33 +885,9 @@ psymbol_functions::dump (struct objfile *objfile)
 	  printf_filtered ("%s at ",
 			   psymtab->filename);
 	  gdb_print_host_address (psymtab, gdb_stdout);
-	  printf_filtered (", ");
-	  wrap_here ("  ");
+	  printf_filtered ("\n");
 	}
       printf_filtered ("\n\n");
-    }
-}
-
-/* Psymtab version of expand_symtabs_for_function.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-void
-psymbol_functions::expand_symtabs_for_function (struct objfile *objfile,
-						const char *func_name)
-{
-  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
-  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
-
-  for (partial_symtab *ps : require_partial_symbols (objfile))
-    {
-      if (ps->readin_p (objfile))
-	continue;
-
-      if ((lookup_partial_symbol (objfile, ps, lookup_name, 1, VAR_DOMAIN)
-	   != NULL)
-	  || (lookup_partial_symbol (objfile, ps, lookup_name, 0, VAR_DOMAIN)
-	      != NULL))
-	psymtab_to_symtab (objfile, ps);
     }
 }
 
@@ -1013,28 +899,6 @@ psymbol_functions::expand_all_symtabs (struct objfile *objfile)
 {
   for (partial_symtab *psymtab : require_partial_symbols (objfile))
     psymtab_to_symtab (objfile, psymtab);
-}
-
-/* Psymtab version of expand_symtabs_with_fullname.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-void
-psymbol_functions::expand_symtabs_with_fullname (struct objfile *objfile,
-						 const char *fullname)
-{
-  for (partial_symtab *p : require_partial_symbols (objfile))
-    {
-      /* Anonymous psymtabs don't have a name of a source file.  */
-      if (p->anonymous)
-	continue;
-
-      /* psymtab_to_fullname tries to open the file which is slow.
-	 Don't call it if we know the basenames don't match.  */
-      if ((basenames_may_differ
-	   || filename_cmp (lbasename (fullname), lbasename (p->filename)) == 0)
-	  && filename_cmp (fullname, psymtab_to_fullname (p)) == 0)
-	psymtab_to_symtab (objfile, p);
-    }
 }
 
 /* Psymtab version of map_symbol_filenames.  See its definition in
@@ -1089,61 +953,31 @@ psymtab_to_fullname (struct partial_symtab *ps)
      to handle cases like the file being moved.  */
   if (ps->fullname == NULL)
     {
-      gdb::unique_xmalloc_ptr<char> fullname;
-      scoped_fd fd = find_and_open_source (ps->filename, ps->dirname,
-					   &fullname);
+      gdb::unique_xmalloc_ptr<char> fullname
+	= find_source_or_rewrite (ps->filename, ps->dirname);
       ps->fullname = fullname.release ();
-
-      if (fd.get () < 0)
-	{
-	  /* rewrite_source_path would be applied by find_and_open_source, we
-	     should report the pathname where GDB tried to find the file.  */
-
-	  if (ps->dirname == NULL || IS_ABSOLUTE_PATH (ps->filename))
-	    fullname.reset (xstrdup (ps->filename));
-	  else
-	    fullname.reset (concat (ps->dirname, SLASH_STRING,
-				    ps->filename, (char *) NULL));
-
-	  ps->fullname = rewrite_source_path (fullname.get ()).release ();
-	  if (ps->fullname == NULL)
-	    ps->fullname = fullname.release ();
-	}
     }
 
   return ps->fullname;
 }
 
-/* Psymtab version of map_matching_symbols.  See its definition in
+/* Psymtab version of expand_matching_symbols.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
 void
-psymbol_functions::map_matching_symbols
+psymbol_functions::expand_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
-  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
-
   for (partial_symtab *ps : require_partial_symbols (objfile))
     {
       QUIT;
-      if (ps->readin_p (objfile)
-	  || match_partial_symbol (objfile, ps, global, name, domain,
+      if (!ps->readin_p (objfile)
+	  && match_partial_symbol (objfile, ps, global, name, domain,
 				   ordered_compare))
-	{
-	  struct compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
-	  const struct block *block;
-
-	  if (cust == NULL)
-	    continue;
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-	  if (!iterate_over_symbols_terminated (block, name,
-						domain, callback))
-	    return;
-	}
+	psymtab_to_symtab (objfile, ps);
     }
 }
 
@@ -1279,6 +1113,9 @@ psymbol_functions::expand_symtabs_matching
   if (lookup_name != nullptr)
     psym_lookup_name = lookup_name->make_ignore_params ();
 
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+
   for (partial_symtab *ps : m_partial_symtabs->range ())
     {
       QUIT;
@@ -1306,7 +1143,7 @@ psymbol_functions::expand_symtabs_matching
 	    continue;
 	}
 
-      if ((symbol_matcher == NULL && lookup_name == NULL)
+      if (lookup_name == nullptr
 	  || recursively_search_psymtabs (ps, objfile, search_flags,
 					  domain, search,
 					  *psym_lookup_name,
@@ -1331,6 +1168,24 @@ bool
 psymbol_functions::has_symbols (struct objfile *objfile)
 {
   return m_partial_symtabs->psymtabs != NULL;
+}
+
+/* See quick_symbol_functions::has_unexpanded_symtabs in quick-symbol.h.  */
+
+bool
+psymbol_functions::has_unexpanded_symtabs (struct objfile *objfile)
+{
+  for (partial_symtab *psymtab : require_partial_symbols (objfile))
+    {
+      /* Is this already expanded?  */
+      if (psymtab->readin_p (objfile))
+	continue;
+
+      /* It has not yet been expanded.  */
+      return true;
+    }
+
+  return false;
 }
 
 /* Helper function for psym_find_compunit_symtab_by_address that fills
@@ -1614,52 +1469,39 @@ psymtab_storage::discard_psymtab (struct partial_symtab *pst)
 
 
 
-/* We need to pass a couple of items to the addrmap_foreach function,
-   so use a struct.  */
-
-struct dump_psymtab_addrmap_data
-{
-  struct objfile *objfile;
-  struct partial_symtab *psymtab;
-  struct ui_file *outfile;
-
-  /* Non-zero if the previously printed addrmap entry was for PSYMTAB.
-     If so, we want to print the next one as well (since the next addrmap
-     entry defines the end of the range).  */
-  int previous_matched;
-};
-
 /* Helper function for dump_psymtab_addrmap to print an addrmap entry.  */
 
 static int
-dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
+dump_psymtab_addrmap_1 (struct objfile *objfile,
+			struct partial_symtab *psymtab,
+			struct ui_file *outfile,
+			int *previous_matched,
+			CORE_ADDR start_addr,
+			void *obj)
 {
-  struct dump_psymtab_addrmap_data *data
-    = (struct dump_psymtab_addrmap_data *) datap;
-  struct gdbarch *gdbarch = data->objfile->arch ();
+  struct gdbarch *gdbarch = objfile->arch ();
   struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
   const char *psymtab_address_or_end = NULL;
 
   QUIT;
 
-  if (data->psymtab == NULL
-      || data->psymtab == addrmap_psymtab)
+  if (psymtab == NULL
+      || psymtab == addrmap_psymtab)
     psymtab_address_or_end = host_address_to_string (addrmap_psymtab);
-  else if (data->previous_matched)
+  else if (*previous_matched)
     psymtab_address_or_end = "<ends here>";
 
-  if (data->psymtab == NULL
-      || data->psymtab == addrmap_psymtab
-      || data->previous_matched)
+  if (psymtab == NULL
+      || psymtab == addrmap_psymtab
+      || *previous_matched)
     {
-      fprintf_filtered (data->outfile, "  %s%s %s\n",
-			data->psymtab != NULL ? "  " : "",
+      fprintf_filtered (outfile, "  %s%s %s\n",
+			psymtab != NULL ? "  " : "",
 			paddress (gdbarch, start_addr),
 			psymtab_address_or_end);
     }
 
-  data->previous_matched = (data->psymtab == NULL
-			    || data->psymtab == addrmap_psymtab);
+  *previous_matched = psymtab == NULL || psymtab == addrmap_psymtab;
 
   return 0;
 }
@@ -1673,20 +1515,24 @@ dump_psymtab_addrmap (struct objfile *objfile,
 		      struct partial_symtab *psymtab,
 		      struct ui_file *outfile)
 {
-  struct dump_psymtab_addrmap_data addrmap_dump_data;
-
   if ((psymtab == NULL
        || psymtab->psymtabs_addrmap_supported)
       && partial_symtabs->psymtabs_addrmap != NULL)
     {
-      addrmap_dump_data.objfile = objfile;
-      addrmap_dump_data.psymtab = psymtab;
-      addrmap_dump_data.outfile = outfile;
-      addrmap_dump_data.previous_matched = 0;
+      /* Non-zero if the previously printed addrmap entry was for
+	 PSYMTAB.  If so, we want to print the next one as well (since
+	 the next addrmap entry defines the end of the range).  */
+      int previous_matched = 0;
+
+      auto callback = [&] (CORE_ADDR start_addr, void *obj)
+      {
+	return dump_psymtab_addrmap_1 (objfile, psymtab, outfile,
+				       &previous_matched, start_addr, obj);
+      };
+
       fprintf_filtered (outfile, "%sddress map:\n",
 			psymtab == NULL ? "Entire a" : "  A");
-      addrmap_foreach (partial_symtabs->psymtabs_addrmap,
-		       dump_psymtab_addrmap_1, &addrmap_dump_data);
+      addrmap_foreach (partial_symtabs->psymtabs_addrmap, callback);
     }
 }
 

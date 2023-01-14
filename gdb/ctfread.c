@@ -462,14 +462,14 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
   ctf_dict_t *fp = ccp->fp;
   struct symbol *sym = nullptr;
 
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
+  const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr)
     {
       sym = new (&objfile->objfile_obstack) symbol;
       OBJSTAT (objfile, n_syms++);
 
       sym->set_language (language_c, &objfile->objfile_obstack);
-      sym->compute_and_set_names (name.get (), true, objfile->per_bfd);
+      sym->compute_and_set_names (name, false, objfile->per_bfd);
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 
@@ -487,6 +487,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    break;
 	  case CTF_K_FUNCTION:
 	    SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	    set_symbol_address (objfile, sym, sym->linkage_name ());
 	    break;
 	  case CTF_K_CONST:
 	    if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
@@ -525,7 +526,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
   ctf_dict_t *fp = ccp->fp;
   ctf_encoding_t cet;
   struct type *type = nullptr;
-  char *name;
+  const char *name;
   uint32_t kind;
 
   if (ctf_type_encoding (fp, tid, &cet))
@@ -535,16 +536,14 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
       return nullptr;
     }
 
-  gdb::unique_xmalloc_ptr<char> copied_name (ctf_type_aname_raw (fp, tid));
-  if (copied_name == nullptr || strlen (copied_name.get ()) == 0)
+  name = ctf_type_name_raw (fp, tid);
+  if (name == nullptr || strlen (name) == 0)
     {
       name = ctf_type_aname (fp, tid);
       if (name == nullptr)
 	complaint (_("ctf_type_aname read_base_type failed - %s"),
 		   ctf_errmsg (ctf_errno (fp)));
     }
-  else
-    name = obstack_strdup (&of->objfile_obstack, copied_name.get ());
 
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_INTEGER)
@@ -623,9 +622,9 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type = alloc_type (of);
 
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
-  if (name != nullptr && strlen (name.get ()) != 0)
-    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
+  const char *name = ctf_type_name_raw (fp, tid);
+  if (name != nullptr && strlen (name) != 0)
+    type->set_name (name);
 
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_UNION)
@@ -682,10 +681,6 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type = alloc_type (of);
 
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
-  if (name != nullptr && strlen (name.get ()) != 0)
-    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
-
   type->set_code (TYPE_CODE_FUNC);
   ctf_func_type_info (fp, tid, &cfi);
   rettype = fetch_tid_type (ccp, cfi.ctc_return);
@@ -734,9 +729,9 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type = alloc_type (of);
 
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
-  if (name != nullptr && strlen (name.get ()) != 0)
-    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
+  const char *name = ctf_type_name_raw (fp, tid);
+  if (name != nullptr && strlen (name) != 0)
+    type->set_name (name);
 
   type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
@@ -972,9 +967,9 @@ read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type = alloc_type (of);
 
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
-  if (name != NULL && strlen (name.get()) != 0)
-    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
+  const char *name = ctf_type_name_raw (fp, tid);
+  if (name != nullptr && strlen (name) != 0)
+    type->set_name (name);
 
   kind = ctf_type_kind_forwarded (fp, tid);
   if (kind == CTF_K_UNION)
@@ -1017,9 +1012,9 @@ read_type_record (struct ctf_context *ccp, ctf_id_t tid)
 	break;
       case CTF_K_TYPEDEF:
 	{
-	  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
+	  const char *name = ctf_type_name_raw (fp, tid);
 	  btid = ctf_type_reference (fp, tid);
-	  type = read_typedef_type (ccp, tid, btid, name.get ());
+	  type = read_typedef_type (ccp, tid, btid, name);
 	}
 	break;
       case CTF_K_VOLATILE:
@@ -1155,10 +1150,10 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
       case CTF_K_UNION:
       case CTF_K_ENUM:
 	if (type == nullptr)
-	{
-	  complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
-	  type = objfile_type (ccp->of)->builtin_error;
-	}
+	  {
+	    complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
+	    type = objfile_type (ccp->of)->builtin_error;
+	  }
 	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
 	SYMBOL_TYPE (sym) = type;
@@ -1444,7 +1439,6 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
   short section = -1;
 
   ccp = (struct ctf_context *) arg;
-  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (ccp->fp, tid));
 
   domain_enum domain = UNDEF_DOMAIN;
   enum address_class aclass = LOC_UNDEF;
@@ -1486,10 +1480,11 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 	return 0;
     }
 
-  if (name == nullptr || strlen (name.get ()) == 0)
+  const char *name = ctf_type_name_raw (ccp->fp, tid);
+  if (name == nullptr || strlen (name) == 0)
     return 0;
 
-  ccp->pst->add_psymbol (name.get (), true,
+  ccp->pst->add_psymbol (name, false,
 			 domain, aclass, section,
 			 psymbol_placement::GLOBAL,
 			 0, language_c, ccp->partial_symtabs, ccp->of);
@@ -1545,7 +1540,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
 	else
 	  continue;
 	}
-      gdb::unique_xmalloc_ptr<char> tname (ctf_type_aname_raw (cfp, tid));
+      const char *tname = ctf_type_name_raw (cfp, tid);
       uint32_t kind = ctf_type_kind (cfp, tid);
       address_class aclass;
       domain_enum tdomain;
@@ -1568,7 +1563,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
       else
 	aclass = LOC_TYPEDEF;
 
-      pst->add_psymbol (tname.get (), true,
+      pst->add_psymbol (tname, false,
 			tdomain, aclass, -1,
 			psymbol_placement::STATIC,
 			0, language_c, partial_symtabs, of);

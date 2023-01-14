@@ -2161,6 +2161,7 @@ ia64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
  
 static const struct frame_unwind ia64_frame_unwind =
 {
+  "ia64 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   &ia64_frame_this_id,
@@ -2348,6 +2349,7 @@ ia64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind ia64_sigtramp_frame_unwind =
 {
+  "ia64 sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   ia64_sigtramp_frame_this_id,
@@ -2859,7 +2861,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
       void *buf = NULL;
 
       text_sec = objfile->sections + SECT_OFF_TEXT (objfile);
-      ip = obj_section_addr (text_sec);
+      ip = text_sec->addr ();
       ret = ia64_find_unwind_table (objfile, ip, &di, &buf);
       if (ret >= 0)
 	{
@@ -3006,6 +3008,7 @@ ia64_libunwind_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind ia64_libunwind_frame_unwind =
 {
+  "ia64 libunwind",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   ia64_libunwind_frame_this_id,
@@ -3094,6 +3097,7 @@ ia64_libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind ia64_libunwind_sigtramp_frame_unwind =
 {
+  "ia64 libunwind sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   ia64_libunwind_sigtramp_frame_this_id,
@@ -3432,10 +3436,8 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 
       if (osect < faddr_sect->objfile->sections_end)
 	{
-	  CORE_ADDR addr, endaddr;
-
-	  addr = obj_section_addr (osect);
-	  endaddr = obj_section_endaddr (osect);
+	  CORE_ADDR addr = osect->addr ();
+	  CORE_ADDR endaddr = osect->endaddr ();
 
 	  while (addr < endaddr)
 	    {
@@ -3515,10 +3517,8 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 
       if (osect < faddr_sect->objfile->sections_end)
 	{
-	  CORE_ADDR addr, endaddr;
-
-	  addr = obj_section_addr (osect);
-	  endaddr = obj_section_endaddr (osect);
+	  CORE_ADDR addr = osect->addr ();
+	  CORE_ADDR endaddr = osect->endaddr ();
 
 	  while (addr < endaddr)
 	    {

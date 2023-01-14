@@ -1438,7 +1438,7 @@ being discussed.
 
 As the system wide and home directory initialization files are
 processed before most command line options, changes to settings
-(e.g. @samp{set complaints}) can affect subsequent processing of
+(e.g.@: @samp{set complaints}) can affect subsequent processing of
 command line options and operands.
 
 The following sections describe where @value{GDBN} looks for the early
@@ -1449,7 +1449,7 @@ are searched for.
 
 @value{GDBN} initially looks for an early initialization file in the
 users home directory@footnote{On DOS/Windows systems, the home
-directory is the one pointed to by the @code{HOME} environment
+directory is the one pointed to by the @env{HOME} environment
 variable.}.  There are a number of locations that @value{GDBN} will
 search in the home directory, these locations are searched in order
 and @value{GDBN} will load the first file that it finds, and
@@ -1524,7 +1524,7 @@ Options,,Choosing Modes}.
 After loading the system wide initialization files @value{GDBN} will
 look for an initialization file in the users home
 directory@footnote{On DOS/Windows systems, the home directory is the
-one pointed to by the @code{HOME} environment variable.}.  There are a
+one pointed to by the @env{HOME} environment variable.}.  There are a
 number of locations that @value{GDBN} will search in the home
 directory, these locations are searched in order and @value{GDBN} will
 load the first file that it finds, and subsequent locations will not
@@ -1615,7 +1615,7 @@ just use the @code{shell} command.
 @itemx !@var{command-string}
 Invoke a standard shell to execute @var{command-string}.
 Note that no space is needed between @code{!} and @var{command-string}.
-On GNU and Unix systems, the environment variable @code{SHELL}, if it
+On GNU and Unix systems, the environment variable @env{SHELL}, if it
 exists, determines which shell to run.  Otherwise @value{GDBN} uses
 the default shell (@file{/bin/sh} on GNU and Unix systems,
 @file{cmd.exe} on MS-Windows, @file{COMMAND.COM} on MS-DOS, etc.).
@@ -2525,7 +2525,7 @@ is used to pass the arguments, so that you may use normal conventions
 (such as wildcard expansion or variable substitution) in describing
 the arguments.
 In Unix systems, you can control which shell is used with the
-@code{SHELL} environment variable.  If you do not define @code{SHELL},
+@env{SHELL} environment variable.  If you do not define @env{SHELL},
 @value{GDBN} uses the default shell (@file{/bin/sh}).  You can disable
 use of any shell with the @code{set startup-with-shell} command (see
 below for details).
@@ -2671,7 +2671,7 @@ which indicates the shell or the wrapper specified with
 caused by something odd in your shell's non-interactive mode
 initialization file---such as @file{.cshrc} for C-shell,
 $@file{.zshenv} for the Z shell, or the file specified in the
-@samp{BASH_ENV} environment variable for BASH.
+@env{BASH_ENV} environment variable for BASH.
 
 @anchor{set auto-connect-native-target}
 @kindex set auto-connect-native-target
@@ -2786,8 +2786,8 @@ The arguments to your program can be specified by the arguments of the
 @code{run} command.
 They are passed to a shell, which expands wildcard characters and
 performs redirection of I/O, and thence to your program.  Your
-@code{SHELL} environment variable (if it exists) specifies what shell
-@value{GDBN} uses.  If you do not define @code{SHELL}, @value{GDBN} uses
+@env{SHELL} environment variable (if it exists) specifies what shell
+@value{GDBN} uses.  If you do not define @env{SHELL}, @value{GDBN} uses
 the default shell (@file{/bin/sh} on Unix).
 
 On non-Unix systems, the program is usually invoked directly by
@@ -2827,9 +2827,9 @@ environment without having to start @value{GDBN} over again.
 @table @code
 @kindex path
 @item path @var{directory}
-Add @var{directory} to the front of the @code{PATH} environment variable
+Add @var{directory} to the front of the @env{PATH} environment variable
 (the search path for executables) that will be passed to your program.
-The value of @code{PATH} used by @value{GDBN} does not change.
+The value of @env{PATH} used by @value{GDBN} does not change.
 You may specify several directory names, separated by whitespace or by a
 system-dependent separator character (@samp{:} on Unix, @samp{;} on
 MS-DOS and MS-Windows).  If @var{directory} is already in the path, it
@@ -2846,7 +2846,7 @@ use @samp{.} instead, it refers to the directory where you executed the
 
 @kindex show paths
 @item show paths
-Display the list of search paths for executables (the @code{PATH}
+Display the list of search paths for executables (the @env{PATH}
 environment variable).
 
 @kindex show environment
@@ -2904,11 +2904,11 @@ Environment variables that are unset by the user are also unset on
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
-the shell indicated by your @code{SHELL} environment variable if it
-exists (or @code{/bin/sh} if not).  If your @code{SHELL} variable
+the shell indicated by your @env{SHELL} environment variable if it
+exists (or @code{/bin/sh} if not).  If your @env{SHELL} variable
 names a shell that runs an initialization file when started
 non-interactively---such as @file{.cshrc} for C-shell, $@file{.zshenv}
-for the Z shell, or the file specified in the @samp{BASH_ENV}
+for the Z shell, or the file specified in the @env{BASH_ENV}
 environment variable for BASH---any variables you set in that file
 affect your program.  You may wish to move setting of environment
 variables to files that are only run when you sign on, such as
@@ -7926,15 +7926,14 @@ instruction-history} command.
 @kindex record function-call-history
 @kindex rec function-call-history
 @item record function-call-history
-Prints the execution history at function granularity. It prints one
-line for each sequence of instructions that belong to the same
-function giving the name of that function, the source lines
-for this instruction sequence (if the @code{/l} modifier is
-specified), and the instructions numbers that form the sequence (if
-the @code{/i} modifier is specified).  The function names are indented
-to reflect the call stack depth if the @code{/c} modifier is
-specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be
-given together.
+Prints the execution history at function granularity.  For each sequence
+of instructions that belong to the same function, it prints the name of
+that function, the source lines for this instruction sequence (if the
+@code{/l} modifier is specified), and the instructions numbers that form
+the sequence (if the @code{/i} modifier is specified).  The function names
+are indented to reflect the call stack depth if the @code{/c} modifier is
+specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be given
+together.
 
 @smallexample
 (@value{GDBP}) @b{list 1, 10}
@@ -7954,7 +7953,7 @@ given together.
 3  bar     inst 11,13   at foo.c:9,10
 @end smallexample
 
-By default, ten lines are printed.  This can be changed using the
+By default, ten functions are printed.  This can be changed using the
 @code{set record function-call-history-size} command.  Functions are
 printed in execution order.  There are several ways to specify what
 to print:
@@ -7970,10 +7969,10 @@ function number @var{func}.  If @var{n} is preceded with @code{-},
 prints @var{n} functions before function number @var{func}.
 
 @item record function-call-history
-Prints ten more functions after the last ten-line print.
+Prints ten more functions after the last ten-function print.
 
 @item record function-call-history -
-Prints ten more functions before the last ten-line print.
+Prints ten more functions before the last ten-function print.
 
 @item record function-call-history @var{begin}, @var{end}
 Prints functions beginning with function number @var{begin} until
@@ -7984,12 +7983,12 @@ This command may not be available for all recording methods.
 
 @item set record function-call-history-size @var{size}
 @itemx set record function-call-history-size unlimited
-Define how many lines to print in the
+Define how many functions to print in the
 @code{record function-call-history} command.  The default value is 10.
-A size of @code{unlimited} means unlimited lines.
+A size of @code{unlimited} means unlimited functions.
 
 @item show record function-call-history-size
-Show how many lines to print in the
+Show how many functions to print in the
 @code{record function-call-history} command.
 @end table
 
@@ -9267,7 +9266,7 @@ ex +@var{number} file
 The optional numeric value +@var{number} specifies the number of the line in
 the file where to start editing.}.
 By default, it is @file{@value{EDITOR}}, but you can change this
-by setting the environment variable @code{EDITOR} before using
+by setting the environment variable @env{EDITOR} before using
 @value{GDBN}.  For example, to configure @value{GDBN} to use the
 @code{vi} editor, you could use these commands with the @code{sh} shell:
 @smallexample
@@ -9414,7 +9413,7 @@ first look up would not have occurred, but all of the remaining steps
 would be similar.
 
 When searching for source files on MS-DOS and MS-Windows, where
-absolute paths start with a drive letter (e.g.
+absolute paths start with a drive letter (e.g.@:
 @file{C:/project/foo.c}), @value{GDBN} will remove the drive letter
 from the file name before appending it to a search directory from
 @dfn{source path}; for instance if the executable references the
@@ -9879,8 +9878,8 @@ The default value is the empty string.
 
 If it is necessary to specify more than one disassembler option, then
 multiple options can be placed together into a comma separated list.
-Currently this command is only supported on targets ARM, MIPS, PowerPC
-and S/390.
+Currently this command is only supported on targets ARC, ARM, MIPS,
+PowerPC and S/390.
 
 @kindex show disassembler-options
 @item show disassembler-options
@@ -18885,6 +18884,21 @@ types.
 This command shows the current setting of typedef display when
 printing classes.
 
+@kindex set print type hex
+@item set print type hex
+@itemx set print type hex on
+@itemx set print type hex off
+
+When @value{GDBN} prints sizes and offsets of struct members, it can use
+either the decimal or hexadecimal notation.  You can select one or the
+other either by passing the appropriate flag to @code{ptype}, or by using
+the @command{set print type hex} command.
+
+@kindex show print type hex
+@item show print type hex
+This command shows whether the sizes and offsets of struct members are
+printed in decimal or hexadecimal notation.
+
 @kindex info address
 @cindex address of a symbol
 @item info address @var{symbol}
@@ -18997,6 +19011,14 @@ exists in case you change the default with @command{set print type typedefs}.
 Print the offsets and sizes of fields in a struct, similar to what the
 @command{pahole} tool does.  This option implies the @code{/tm} flags.
 
+@item x
+Use hexadecimal notation when printing offsets and sizes of fields in a
+struct.
+
+@item d
+Use decimal notation when printing offsets and sizes of fields in a
+struct.
+
 For example, given the following declarations:
 
 @smallexample
@@ -19037,14 +19059,14 @@ Issuing a @kbd{ptype /o struct tuv} command would print:
 
 @smallexample
 (@value{GDBP}) ptype /o struct tuv
-/* offset    |  size */  type = struct tuv @{
-/*    0      |     4 */    int a1;
-/* XXX  4-byte hole  */
-/*    8      |     8 */    char *a2;
-/*   16      |     4 */    int a3;
+/* offset      |    size */  type = struct tuv @{
+/*      0      |       4 */    int a1;
+/* XXX  4-byte hole      */
+/*      8      |       8 */    char *a2;
+/*     16      |       4 */    int a3;
 
-                           /* total size (bytes):   24 */
-                         @}
+                               /* total size (bytes):   24 */
+                             @}
 @end smallexample
 
 Notice the format of the first column of comments.  There, you can
@@ -19059,34 +19081,34 @@ It is also possible to print offsets inside an union:
 
 @smallexample
 (@value{GDBP}) ptype /o union qwe
-/* offset    |  size */  type = union qwe @{
-/*                24 */    struct tuv @{
-/*    0      |     4 */        int a1;
-/* XXX  4-byte hole  */
-/*    8      |     8 */        char *a2;
-/*   16      |     4 */        int a3;
-
-                               /* total size (bytes):   24 */
-                           @} fff1;
-/*                40 */    struct xyz @{
-/*    0      |     4 */        int f1;
-/*    4      |     1 */        char f2;
-/* XXX  3-byte hole  */
-/*    8      |     8 */        void *f3;
-/*   16      |    24 */        struct tuv @{
-/*   16      |     4 */            int a1;
-/* XXX  4-byte hole  */
-/*   24      |     8 */            char *a2;
-/*   32      |     4 */            int a3;
+/* offset      |    size */  type = union qwe @{
+/*                    24 */    struct tuv @{
+/*      0      |       4 */        int a1;
+/* XXX  4-byte hole      */
+/*      8      |       8 */        char *a2;
+/*     16      |       4 */        int a3;
 
                                    /* total size (bytes):   24 */
-                               @} f4;
+                               @} fff1;
+/*                    40 */    struct xyz @{
+/*      0      |       4 */        int f1;
+/*      4      |       1 */        char f2;
+/* XXX  3-byte hole      */
+/*      8      |       8 */        void *f3;
+/*     16      |      24 */        struct tuv @{
+/*     16      |       4 */            int a1;
+/* XXX  4-byte hole      */
+/*     24      |       8 */            char *a2;
+/*     32      |       4 */            int a3;
+
+                                       /* total size (bytes):   24 */
+                                   @} f4;
+
+                                   /* total size (bytes):   40 */
+                               @} fff2;
 
                                /* total size (bytes):   40 */
-                           @} fff2;
-
-                           /* total size (bytes):   40 */
-                         @}
+                             @}
 @end smallexample
 
 In this case, since @code{struct tuv} and @code{struct xyz} occupy the
@@ -19099,20 +19121,20 @@ bitfields:
 
 @smallexample
 (@value{GDBP}) ptype /o struct tyu
-/* offset    |  size */  type = struct tyu @{
-/*    0:31   |     4 */    int a1 : 1;
-/*    0:28   |     4 */    int a2 : 3;
-/*    0: 5   |     4 */    int a3 : 23;
-/*    3: 3   |     1 */    signed char a4 : 2;
-/* XXX  3-bit hole   */
-/* XXX  4-byte hole  */
-/*    8      |     8 */    int64_t a5;
-/*   16: 0   |     4 */    int a6 : 5;
-/*   16: 5   |     8 */    int64_t a7 : 3;
-"/* XXX  7-byte padding  */
+/* offset      |    size */  type = struct tyu @{
+/*      0:31   |       4 */    int a1 : 1;
+/*      0:28   |       4 */    int a2 : 3;
+/*      0: 5   |       4 */    int a3 : 23;
+/*      3: 3   |       1 */    signed char a4 : 2;
+/* XXX  3-bit hole       */
+/* XXX  4-byte hole      */
+/*      8      |       8 */    int64_t a5;
+/*     16: 0   |       4 */    int a6 : 5;
+/*     16: 5   |       8 */    int64_t a7 : 3;
+/* XXX  7-byte padding   */
 
-                           /* total size (bytes):   24 */
-                         @}
+                               /* total size (bytes):   24 */
+                             @}
 @end smallexample
 
 Note how the offset information is now extended to also include the
@@ -19312,20 +19334,36 @@ preprocessor macros.
 
 
 @kindex info sources
-@item info sources
-Print the names of all source files in your program for which there is
-debugging information, organized into two lists: files whose symbols
-have already been read, and files whose symbols will be read when needed.
+@item info sources @r{[}-dirname | -basename@r{]} @r{[}--@r{]} @r{[}@var{regexp}@r{]}
 
-@item info sources [-dirname | -basename] [--] [@var{regexp}]
-Like @samp{info sources}, but only print the names of the files
-matching the provided @var{regexp}.
-By default, the @var{regexp} is used to match anywhere in the filename.
-If @code{-dirname}, only files having a dirname matching @var{regexp} are shown.
-If  @code{-basename}, only files having a basename matching @var{regexp}
-are shown.
-The matching is case-sensitive, except on operating systems that
-have case-insensitive filesystem (e.g., MS-Windows).
+
+With no options @samp{info sources} prints the names of all source
+files in your program for which there is debugging information.  The
+source files are presented based on a list of object files
+(executables and libraries) currently loaded into @value{GDBN}.  For
+each object file all of the associated source files are listed.
+
+Each source file will only be printed once for each object file, but a
+single source file can be repeated in the output if it is part of
+multiple object files.
+
+If the optional @var{regexp} is provided, then only source files that
+match the regular expression will be printed.  The matching is
+case-sensitive, except on operating systems that have case-insensitive
+filesystem (e.g., MS-Windows). @samp{--} can be used before
+@var{regexp} to prevent @value{GDBN} interpreting @var{regexp} as a
+command option (e.g. if @var{regexp} starts with @samp{-}).
+
+By default, the @var{regexp} is used to match anywhere in the
+filename.  If @code{-dirname}, only files having a dirname matching
+@var{regexp} are shown.  If @code{-basename}, only files having a
+basename matching @var{regexp} are shown.
+
+It is possible that an object file may be printed in the list with no
+associated source files.  This can happen when either no source files
+match @var{regexp}, or, the object file was compiled without debug
+information and so @value{GDBN} is unable to find any source file
+names.
 
 @kindex info functions
 @item info functions [-q] [-n]
@@ -20504,15 +20542,15 @@ will print to the console.
 
 @value{GDBN} needs to find @value{NGCC} for the inferior being debugged
 which may not be obvious for remote targets of different architecture
-than where @value{GDBN} is running.  Environment variable @code{PATH} on
+than where @value{GDBN} is running.  Environment variable @env{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
 target architecture and operating system.  This search can be overriden
-by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+by @code{set compile-gcc} @value{GDBN} command below.  @env{PATH} is
 taken from shell that executed @value{GDBN}, it is not the value set by
 @value{GDBN} command @code{set environment}).  @xref{Environment}.
 
 
-Specifically @code{PATH} is searched for binaries matching regular expression
+Specifically @env{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
 debugged.  @var{arch} is processor name --- multiarch is supported, so for
 example both @code{i386} and @code{x86_64} targets look for pattern
@@ -20523,7 +20561,7 @@ pattern @code{linux(-gnu)?}.
 On Posix hosts the compiler driver @value{GDBN} needs to find also
 shared library @file{libcc1.so} from the compiler.  It is searched in
 default shared library search path (overridable with usual environment
-variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+variable @env{LD_LIBRARY_PATH}), unrelated to @env{PATH} or @code{set
 compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
 according to the installation of the found compiler --- as possibly
 specified by the @code{set compile-gcc} command.
@@ -20586,7 +20624,7 @@ Use @var{filename} as the program to be debugged.  It is read for its
 symbols and for the contents of pure memory.  It is also the program
 executed when you use the @code{run} command.  If you do not specify a
 directory and the file is not found in the @value{GDBN} working directory,
-@value{GDBN} uses the environment variable @code{PATH} as a list of
+@value{GDBN} uses the environment variable @env{PATH} as a list of
 directories to search, just as the shell does when looking for a program
 to run.  You can change the value of this variable, for both @value{GDBN}
 and your program, using the @code{path} command.
@@ -20609,13 +20647,13 @@ has on both executable file and the symbol table.
 @kindex exec-file
 @item exec-file @r{[} @var{filename} @r{]}
 Specify that the program to be run (but not the symbol table) is found
-in @var{filename}.  @value{GDBN} searches the environment variable @code{PATH}
+in @var{filename}.  @value{GDBN} searches the environment variable @env{PATH}
 if necessary to locate your program.  Omitting @var{filename} means to
 discard information on the executable file.
 
 @kindex symbol-file
 @item symbol-file @r{[} @var{filename} @r{[} -o @var{offset} @r{]]}
-Read symbol table information from file @var{filename}.  @code{PATH} is
+Read symbol table information from file @var{filename}.  @env{PATH} is
 searched when necessary.  Use the @code{file} command to get both symbol
 table and program to run from the same file.
 
@@ -25795,16 +25833,16 @@ This is the file where @value{GDBN} reads an initial command history
 list, and where it writes the command history from this session when it
 exits.  You can access this list through history expansion or through
 the history command editing characters listed below.  This file defaults
-to the value of the environment variable @code{GDBHISTFILE}, or to
+to the value of the environment variable @env{GDBHISTFILE}, or to
 @file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
 is not set.
 
-The @code{GDBHISTFILE} environment variable is read after processing
+The @env{GDBHISTFILE} environment variable is read after processing
 any @value{GDBN} initialization files (@pxref{Startup}) and after
 processing any commands passed using command line options (for
 example, @code{-ex}).
 
-If the @var{fname} argument is not given, or if the @code{GDBHISTFILE}
+If the @var{fname} argument is not given, or if the @env{GDBHISTFILE}
 is the empty string then @value{GDBN} will neither try to load an
 existing history file, nor will it try to save the history on exit.
 
@@ -25835,7 +25873,7 @@ are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
 either a negative number or the empty string, then the number of commands
 @value{GDBN} keeps in the history list is unlimited.
 
-The @code{GDBHISTSIZE} environment variable is read after processing
+The @env{GDBHISTSIZE} environment variable is read after processing
 any @value{GDBN} initialization files (@pxref{Startup}) and after
 processing any commands passed using command line options (for
 example, @code{-ex}).
@@ -25932,7 +25970,7 @@ following line.
 
 Normally @value{GDBN} knows the size of the screen from the terminal
 driver software.  For example, on Unix @value{GDBN} uses the termcap data base
-together with the value of the @code{TERM} environment variable and the
+together with the value of the @env{TERM} environment variable and the
 @code{stty rows} and @code{stty cols} settings.  If this is not correct,
 you can override it with the @code{set height} and @code{set
 width} commands:
@@ -28349,6 +28387,7 @@ enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands}, and
 * TUI Overview::                TUI overview
 * TUI Keys::                    TUI key bindings
 * TUI Single Key Mode::         TUI single key mode
+* TUI Mouse Support::           TUI mouse support
 * TUI Commands::                TUI-specific commands
 * TUI Configuration::           TUI configuration variables
 @end menu
@@ -28637,6 +28676,23 @@ this mode is by typing @kbd{q} or @kbd{C-x s}.
 If @value{GDBN} was built with Readline 8.0 or later, the TUI
 SingleKey keymap will be named @samp{SingleKey}.  This can be used in
 @file{.inputrc} to add additional bindings to this keymap.
+
+@node TUI Mouse Support
+@section TUI Mouse Support
+@cindex TUI mouse support
+
+If the curses library supports the mouse, the TUI supports mouse
+actions.
+
+The mouse wheel scrolls the appropriate window under the mouse cursor.
+
+The TUI itself does not directly support copying/pasting with the
+mouse.  However, on Unix terminals, you can typically press and hold
+the @key{SHIFT} key on your keyboard to temporarily bypass
+@value{GDBN}'s TUI and access the terminal's native mouse copy/paste
+functionality (commonly, click-drag-release or double-click to select
+text, middle-click to paste).  This copy/paste works with the
+terminal's selection buffer, as opposed to the TUI's buffer.
 
 @node TUI Commands
 @section TUI-specific Commands
@@ -28949,7 +29005,7 @@ gdb} argument, then Emacs sets your current working directory to where
 your program resides.  If you only specify the file name, then Emacs
 sets your current working directory to the directory associated
 with the previous buffer.  In this case, @value{GDBN} may find your
-program by searching your environment's @code{PATH} variable, but on
+program by searching your environment's @env{PATH} variable, but on
 some operating systems it might not find the source.  So, although the
 @value{GDBN} input and output session proceeds normally, the auxiliary
 buffer does not display the current source and line of execution.
@@ -29633,7 +29689,7 @@ to keep using them until they are modified to use the latest MI version.
 
 Since @code{--interpreter=mi} always points to the latest MI version, it is
 recommended that front ends request a specific version of MI when launching
-@value{GDBN} (e.g. @code{--interpreter=mi2}) to make sure they get an
+@value{GDBN} (e.g.@: @code{--interpreter=mi2}) to make sure they get an
 interpreter with the MI version they expect.
 
 The following table gives a summary of the released versions of the MI
@@ -30154,9 +30210,16 @@ number of the parent breakpoint.  The second digit is the number of the
 location within that breakpoint.
 
 @item enabled
-This indicates whether the location is enabled, in which case the
-value is @samp{y}, or disabled, in which case the value is @samp{n}.
-Note that this is not the same as the field @code{enable}.
+There are three possible values, with the following meanings:
+@table @code
+@item y
+The location is enabled.
+@item n
+The location is disabled by the user.
+@item N
+The location is disabled because the breakpoint condition is invalid
+at this location.
+@end table
 
 @item addr
 The address of this location as an hexidecimal number.
@@ -30502,13 +30565,16 @@ times="0"@}
 @subsubheading Synopsis
 
 @smallexample
- -break-condition @var{number} @var{expr}
+ -break-condition [ --force ] @var{number} [ @var{expr} ]
 @end smallexample
 
 Breakpoint @var{number} will stop the program only if the condition in
 @var{expr} is true.  The condition becomes part of the
 @samp{-break-list} output (see the description of the @samp{-break-list}
-command below).
+command below).  If the @samp{--force} flag is passed, the condition
+is forcibly defined even when it is invalid for all locations of
+breakpoint @var{number}.  If the @var{expr} argument is omitted,
+breakpoint @var{number} becomes unconditional.
 
 @subsubheading @value{GDBN} Command
 
@@ -30674,7 +30740,7 @@ N.A.
 
 @smallexample
  -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ] [ --qualified ]
-    [ -c @var{condition} ] [ -i @var{ignore-count} ]
+    [ -c @var{condition} ] [ --force-condition ] [ -i @var{ignore-count} ]
     [ -p @var{thread-id} ] [ @var{location} ]
 @end smallexample
 
@@ -30730,6 +30796,9 @@ Create a tracepoint.  @xref{Tracepoints}.  When this parameter
 is used together with @samp{-h}, a fast tracepoint is created.
 @item -c @var{condition}
 Make the breakpoint conditional on @var{condition}.
+@item --force-condition
+Forcibly define the breakpoint even if the condition is invalid at
+all of the breakpoint locations.
 @item -i @var{ignore-count}
 Initialize the @var{ignore-count}.
 @item -p @var{thread-id}
@@ -30799,7 +30868,7 @@ times="0"@}]@}
 
 @smallexample
  -dprintf-insert [ -t ] [ -f ] [ -d ] [ --qualified ]
-    [ -c @var{condition} ] [ -i @var{ignore-count} ]
+    [ -c @var{condition} ] [--force-condition] [ -i @var{ignore-count} ]
     [ -p @var{thread-id} ] [ @var{location} ] [ @var{format} ]
     [ @var{argument} ]
 @end smallexample
@@ -30824,6 +30893,9 @@ cannot be parsed.
 Create a disabled breakpoint.
 @item -c @var{condition}
 Make the breakpoint conditional on @var{condition}.
+@item --force-condition
+Forcibly define the breakpoint even if the condition is invalid at
+all of the breakpoint locations.
 @item -i @var{ignore-count}
 Set the ignore count of the breakpoint (@pxref{Conditions, ignore count})
 to @var{ignore-count}.
@@ -35586,18 +35658,75 @@ The @value{GDBN} equivalent is @samp{info source}
 
 
 @subheading The @code{-file-list-exec-source-files} Command
+@kindex info sources
 @findex -file-list-exec-source-files
 
 @subsubheading Synopsis
 
 @smallexample
- -file-list-exec-source-files
+ -file-list-exec-source-files @r{[} @var{--group-by-objfile} @r{]}
+                              @r{[} @var{--dirname} @r{|} @var{--basename} @r{]}
+                              @r{[} -- @r{]}
+                              @r{[} @var{regexp} @r{]}
 @end smallexample
 
-List the source files for the current executable.
+This command returns information about the source files @value{GDBN}
+knows about, it will output both the filename and fullname (absolute
+file name) of a source file, though the fullname can be elided if this
+information is not known to @value{GDBN}.
 
-It will always output both the filename and fullname (absolute file
-name) of a source file.
+With no arguments this command returns a list of source files.  Each
+source file is represented by a tuple with the fields; @var{file},
+@var{fullname}, and @var{debug-fully-read}.  The @var{file} is the
+display name for the file, while @var{fullname} is the absolute name
+of the file.  The @var{fullname} field can be elided if the absolute
+name of the source file can't be computed.  The field
+@var{debug-fully-read} will be a string, either @code{true} or
+@code{false}.  When @code{true}, this indicates the full debug
+information for the compilation unit describing this file has been
+read in.  When @code{false}, the full debug information has not yet
+been read in.  While reading in the full debug information it is
+possible that @value{GDBN} could become aware of additional source
+files.
+
+The optional @var{regexp} can be used to filter the list of source
+files returned.  The @var{regexp} will be matched against the full
+source file name.  The matching is case-sensitive, except on operating
+systems that have case-insensitive filesystem (e.g.,
+MS-Windows).  @samp{--} can be used before @var{regexp} to prevent
+@value{GDBN} interpreting @var{regexp} as a command option (e.g.@: if
+@var{regexp} starts with @samp{-}).
+
+If @code{--dirname} is provided, then @var{regexp} is matched only
+against the directory name of each source file.  If @code{--basename}
+is provided, then @var{regexp} is matched against the basename of each
+source file.  Only one of @code{--dirname} or @code{--basename} may be
+given, and if either is given then @var{regexp} is required.
+
+If @code{--group-by-objfile} is used then the format of the results is
+changed.  The results will now be a list of tuples, with each tuple
+representing an object file (executable or shared library) loaded into
+@value{GDBN}.  The fields of these tuples are; @var{filename},
+@var{debug-info}, and @var{sources}.  The @var{filename} is the
+absolute name of the object file, @var{debug-info} is a string with
+one of the following values:
+
+@table @code
+@item none
+This object file has no debug information.
+@item partially-read
+This object file has debug information, but it is not fully read in
+yet.  When it is read in later, GDB might become aware of additional
+source files.
+@item fully-read
+This object file has debug information, and this information is fully
+read into GDB.  The list of source files is complete.
+@end table
+
+The @var{sources} is a list or tuples, with each tuple describing a
+single source file with the same fields as described previously.  The
+@var{sources} list can be empty for object files that have no debug
+information.
 
 @subsubheading @value{GDBN} Command
 
@@ -35606,13 +35735,66 @@ The @value{GDBN} equivalent is @samp{info sources}.
 
 @subsubheading Example
 @smallexample
-(gdb)
+(@value{GDBP})
 -file-list-exec-source-files
-^done,files=[
-@{file=foo.c,fullname=/home/foo.c@},
-@{file=/home/bar.c,fullname=/home/bar.c@},
-@{file=gdb_could_not_find_fullpath.c@}]
-(gdb)
+^done,files=[@{file="foo.c",fullname="/home/foo.c",debug-fully-read="true"@},
+             @{file="/home/bar.c",fullname="/home/bar.c",debug-fully-read="true"@},
+             @{file="gdb_could_not_find_fullpath.c",debug-fully-read="true"@}]
+(@value{GDBP})
+-file-list-exec-source-files
+^done,files=[@{file="test.c",
+              fullname="/tmp/info-sources/test.c",
+              debug-fully-read="true"@},
+             @{file="/usr/include/stdc-predef.h",
+              fullname="/usr/include/stdc-predef.h",
+              debug-fully-read="true"@},
+             @{file="header.h",
+              fullname="/tmp/info-sources/header.h",
+              debug-fully-read="true"@},
+             @{file="helper.c",
+              fullname="/tmp/info-sources/helper.c",
+              debug-fully-read="true"@}]
+(@value{GDBP})
+-file-list-exec-source-files -- \\.c
+^done,files=[@{file="test.c",
+              fullname="/tmp/info-sources/test.c",
+              debug-fully-read="true"@},
+             @{file="helper.c",
+              fullname="/tmp/info-sources/helper.c",
+              debug-fully-read="true"@}]
+(@value{GDBP})
+-file-list-exec-source-files --group-by-objfile
+^done,files=[@{filename="/tmp/info-sources/test.x",
+              debug-info="fully-read",
+              sources=[@{file="test.c",
+                        fullname="/tmp/info-sources/test.c",
+                        debug-fully-read="true"@},
+                       @{file="/usr/include/stdc-predef.h",
+                        fullname="/usr/include/stdc-predef.h",
+                        debug-fully-read="true"@},
+                       @{file="header.h",
+                        fullname="/tmp/info-sources/header.h",
+                        debug-fully-read="true"@}]@},
+             @{filename="/lib64/ld-linux-x86-64.so.2",
+              debug-info="none",
+              sources=[]@},
+             @{filename="system-supplied DSO at 0x7ffff7fcf000",
+              debug-info="none",
+              sources=[]@},
+             @{filename="/tmp/info-sources/libhelper.so",
+              debug-info="fully-read",
+              sources=[@{file="helper.c",
+                        fullname="/tmp/info-sources/helper.c",
+                        debug-fully-read="true"@},
+                       @{file="/usr/include/stdc-predef.h",
+                        fullname="/usr/include/stdc-predef.h",
+                        debug-fully-read="true"@},
+                       @{file="header.h",
+                        fullname="/tmp/info-sources/header.h",
+                        debug-fully-read="true"@}]@},
+             @{filename="/lib64/libc.so.6",
+              debug-info="none",
+              sources=[]@}]
 @end smallexample
 
 @subheading The @code{-file-list-shared-libraries} Command
@@ -38892,6 +39074,10 @@ buffer.
 @item maint show btrace pt skip-pad
 Control whether @value{GDBN} will skip PAD packets when computing the
 packet history.
+
+@kindex maint info jit
+@item maint info jit
+Print information about JIT code objects loaded in the current inferior.
 
 @kindex set displaced-stepping
 @kindex show displaced-stepping
@@ -45949,7 +46135,7 @@ ARM targets.
 It should contain registers @samp{r0} through @samp{r13}, @samp{sp},
 @samp{lr}, @samp{pc}, and @samp{cpsr}.
 
-For M-profile targets (e.g. Cortex-M3), the @samp{org.gnu.gdb.arm.core}
+For M-profile targets (e.g.@: Cortex-M3), the @samp{org.gnu.gdb.arm.core}
 feature is replaced by @samp{org.gnu.gdb.arm.m-profile}.  It should contain
 registers @samp{r0} through @samp{r13}, @samp{sp}, @samp{lr}, @samp{pc},
 and @samp{xpsr}.
@@ -46311,6 +46497,14 @@ expectation is that these registers will be in the fpu feature if the
 target has floating point hardware, but can be moved into the csr
 feature if the target has the floating point control registers, but no
 other floating point hardware.
+
+The @samp{org.gnu.gdb.riscv.vector} feature is optional.  If present,
+it should contain registers @samp{v0} through @samp{v31}, all of which
+must be the same size.  These requirements are based on the v0.10
+draft vector extension, as the vector extension is not yet final.  In
+the event that the register set of the vector extension changes for
+the final specification, the requirements given here could change for
+future releases of @value{GDBN}.
 
 @node RX Features
 @subsection RX Features
@@ -46897,7 +47091,7 @@ Backtrace: display the program stack.
 Display the value of an expression.
 
 @item c
-Continue running your program (after stopping, e.g. at a breakpoint).
+Continue running your program (after stopping, e.g.@: at a breakpoint).
 
 @item next
 Execute next program line (after stopping); step @emph{over} any

@@ -766,7 +766,7 @@ hw_ide_io_read_buffer(device *me,
     *(unsigned8*)dest = controller->reg[reg];
     break;
   default:
-    device_error(me, "bus-error at address 0x%lx", addr);
+    device_error(me, "bus-error at address 0x%lx", (unsigned long)addr);
     break;
   }
   return nr_bytes;
@@ -820,7 +820,7 @@ hw_ide_io_write_buffer(device *me,
     controller->reg[reg] = *(unsigned8*)source;
     break;
   default:
-    device_error(me, "bus-error at 0x%lx", addr);
+    device_error(me, "bus-error at 0x%lx", (unsigned long)addr);
     break;
   }
   return nr_bytes;

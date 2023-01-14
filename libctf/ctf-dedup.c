@@ -352,7 +352,7 @@ make_set_element (ctf_dynhash_t *set, const void *key)
   if ((element = ctf_dynhash_lookup (set, key)) == NULL)
     {
       if ((element = ctf_dynset_create (htab_hash_string,
-					ctf_dynset_eq_string,
+					htab_eq_string,
 					NULL)) == NULL)
 	return NULL;
 
@@ -376,7 +376,7 @@ ctf_dedup_atoms_init (ctf_dict_t *fp)
   if (!fp->ctf_dedup_atoms_alloc)
     {
       if ((fp->ctf_dedup_atoms_alloc
-	   = ctf_dynset_create (htab_hash_string, ctf_dynset_eq_string,
+	   = ctf_dynset_create (htab_hash_string, htab_eq_string,
 				free)) == NULL)
 	return ctf_set_errno (fp, ENOMEM);
     }
@@ -584,8 +584,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       whaterr = N_("error updating citers");				\
       if (!citers)							\
 	if ((citers = ctf_dynset_create (htab_hash_string,		\
-					  ctf_dynset_eq_string,		\
-					  NULL)) == NULL)		\
+					 htab_eq_string,		\
+					 NULL)) == NULL)		\
 	  goto oom;							\
       if (ctf_dynset_cinsert (citers, hval) < 0)			\
 	goto oom;							\
@@ -1063,10 +1063,6 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 
   if (tp->ctt_name == 0 || !name || name[0] == '\0')
     name = NULL;
-
-  /* Treat the unknown kind just like the unimplemented type.  */
-  if (kind == CTF_K_UNKNOWN)
-    return "00000000000000000000";
 
   /* Decorate the name appropriately for the namespace it appears in: forwards
      appear in the namespace of their referent.  */
@@ -1660,7 +1656,7 @@ ctf_dedup_init (ctf_dict_t *fp)
 
   if ((d->cd_conflicting_types
        = ctf_dynset_create (htab_hash_string,
-			    ctf_dynset_eq_string, NULL)) == NULL)
+			    htab_eq_string, NULL)) == NULL)
     goto oom;
 
   return 0;
@@ -1818,7 +1814,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
   const void *k;
   ctf_dynset_t *to_mark = NULL;
 
-  if ((to_mark = ctf_dynset_create (htab_hash_string, ctf_dynset_eq_string,
+  if ((to_mark = ctf_dynset_create (htab_hash_string, htab_eq_string,
 				    NULL)) == NULL)
     goto err_no;
 
@@ -2075,8 +2071,6 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
   switch (ctf_type_kind_unsliced (fp, type))
     {
     case CTF_K_UNKNOWN:
-      /* Just skip things of unknown kind.  */
-      return 0;
     case CTF_K_FORWARD:
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
@@ -2357,7 +2351,7 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
   void *k;
 
   if ((already_visited = ctf_dynset_create (htab_hash_string,
-					    ctf_dynset_eq_string,
+					    htab_eq_string,
 					    NULL)) == NULL)
     return ctf_set_errno (output, ENOMEM);
 
@@ -2702,9 +2696,11 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   switch (kind)
     {
     case CTF_K_UNKNOWN:
-      /* These are types that CTF cannot encode, marked as such by the compile.
-	 We intentionally do not re-emit these.  */
-      new_type = 0;
+      /* These are types that CTF cannot encode, marked as such by the
+	 compiler.  */
+      errtype = _("unknown type");
+      if ((new_type = ctf_add_unknown (target, isroot, name)) == CTF_ERR)
+	goto err_target;
       break;
     case CTF_K_FORWARD:
       /* This will do nothing if the type to which this forwards already exists,

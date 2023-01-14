@@ -747,7 +747,7 @@ tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   s = find_pc_section (start_pc);
   end_pc = start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES;
   if (s != NULL)
-    end_pc = std::min (end_pc, obj_section_endaddr (s));
+    end_pc = std::min (end_pc, s->endaddr ());
 
   /* Otherwise, try to skip prologue the hard way.  */
   return tilegx_analyze_prologue (gdbarch,
@@ -905,6 +905,7 @@ tilegx_frame_base_address (struct frame_info *this_frame, void **this_cache)
 }
 
 static const struct frame_unwind tilegx_frame_unwind = {
+  "tilegx prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   tilegx_frame_this_id,

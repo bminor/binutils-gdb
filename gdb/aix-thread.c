@@ -433,13 +433,13 @@ pdc_read_regs (pthdb_user_t user,
 	  if (!ptrace64aix (PTT_READ_SPRS, tid, 
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
-      	  memcpy (&context->msr, &sprs64, sizeof(sprs64));
+	  memcpy (&context->msr, &sprs64, sizeof(sprs64));
 	}
       else
 	{
 	  if (!ptrace32 (PTT_READ_SPRS, tid, (uintptr_t) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
-      	  memcpy (&context->msr, &sprs32, sizeof(sprs32));
+	  memcpy (&context->msr, &sprs32, sizeof(sprs32));
 	}
     }  
   return 0;
@@ -707,14 +707,14 @@ get_signaled_thread (void)
   tid_t ktid = 0;
 
   while (1)
-  {
-    if (getthrds (inferior_ptid.pid (), &thrinf, 
-	  	  sizeof (thrinf), &ktid, 1) != 1)
-      break;
+    {
+      if (getthrds (inferior_ptid.pid (), &thrinf,
+		    sizeof (thrinf), &ktid, 1) != 1)
+	break;
 
-    if (thrinf.ti_cursig == SIGTRAP)
-      return thrinf.ti_tid;
-  }
+      if (thrinf.ti_cursig == SIGTRAP)
+	return thrinf.ti_tid;
+    }
 
   /* Didn't find any thread stopped on a SIGTRAP signal.  */
   return 0;
@@ -1839,11 +1839,12 @@ void
 _initialize_aix_thread ()
 {
   /* Notice when object files get loaded and unloaded.  */
-  gdb::observers::new_objfile.attach (new_objfile);
+  gdb::observers::new_objfile.attach (new_objfile, "aix-thread");
 
   /* Add ourselves to inferior_created event chain.
      This is needed to enable the thread target on "attach".  */
-  gdb::observers::inferior_created.attach (aix_thread_inferior_created);
+  gdb::observers::inferior_created.attach (aix_thread_inferior_created,
+					   "aix-thread");
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			   _("Set debugging of AIX thread module."),

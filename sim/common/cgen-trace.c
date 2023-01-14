@@ -17,13 +17,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <errno.h>
 #include <stdlib.h>
+#include "diagnostics.h"
 #include "dis-asm.h"
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim-fpu.h"
+#include "sim/callback.h"
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 16
@@ -182,11 +186,11 @@ cgen_trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 }
 
 void
-cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
+cgen_trace_extract (SIM_CPU *cpu, IADDR pc, const char *name, ...)
 {
   va_list args;
   int printed_one_p = 0;
-  char *fmt;
+  const char *fmt;
 
   va_start (args, name);
 
@@ -196,7 +200,7 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
   do {
     int type,ival;
 
-    fmt = va_arg (args, char *);
+    fmt = va_arg (args, const char *);
 
     if (fmt)
       {
@@ -208,7 +212,10 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
 	  {
 	  case 'x' :
 	    ival = va_arg (args, int);
+	    DIAGNOSTIC_PUSH
+	    DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
 	    trace_printf (CPU_STATE (cpu), cpu, fmt, ival);
+	    DIAGNOSTIC_POP
 	    break;
 	  default :
 	    abort ();
@@ -221,7 +228,7 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
 }
 
 void
-cgen_trace_result (SIM_CPU *cpu, char *name, int type, ...)
+cgen_trace_result (SIM_CPU *cpu, const char *name, int type, ...)
 {
   va_list args;
 
@@ -267,7 +274,7 @@ cgen_trace_result (SIM_CPU *cpu, char *name, int type, ...)
    This is only for tracing semantic code.  */
 
 void
-cgen_trace_printf (SIM_CPU *cpu, char *fmt, ...)
+cgen_trace_printf (SIM_CPU *cpu, const char *fmt, ...)
 {
   va_list args;
 
@@ -340,8 +347,8 @@ sim_disasm_perror_memory (int status, bfd_vma memaddr,
     /* Actually, address between memaddr and memaddr + len was
        out of bounds.  */
     info->fprintf_func (info->stream,
-			"Address 0x%x is out of bounds.",
-			(int) memaddr);
+			"Address 0x%" BFD_VMA_FMT "x is out of bounds.",
+			memaddr);
 }
 
 /* Disassemble using the CGEN opcode table.
@@ -384,7 +391,7 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 
   if (length != insn_length)
   {
-    sim_io_error (sd, "unable to read address %x", pc);
+    sim_io_error (sd, "unable to read address %" PRIxTA, pc);
   }
 
   /* If the entire insn will fit into an integer, then do it. Otherwise, just

@@ -1,3 +1,194 @@
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* mem.c: Delete HAVE_SYS_SELECT_H.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
+2021-06-02  John Baldwin  <jhb@FreeBSD.org>
+
+	* m32c.opc: Include defs.h.
+	* r8c.opc: Likewise.
+
+2021-05-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c (open): Rename to ...
+	(is_open): ... this.
+	(sim_open, sim_close): Rename open to is_open.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* int.c, misc.c, opc2c.c, reg.c, srcdest.c: Include defs.h.
+	* gdb-if.c, load.c, main.c, mem.c, syscalls.c, trace.c: Replace
+	config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Update include path.
+	* syscalls.c: Likewise.
+
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* mem.c: Include errno.h.
+	(mem_put_byte): Print a warning when the write call fails.
+	(mem_put_blk): Declare local buf pointer and use it.
+	(mem_get_byte): Return 0 when the read call fails.
+	(mem_get_blk): Declare local buf pointer and use it.
+	* trace.c (load_file_and_line): Declare ret.
+	Assign fread to ret and use to index f->data.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* m32c.opc: Add scope braces around a few segments.
+	* r8c.opc: Likewise.
+
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete safe-fgets.
+	* opc2c.c: Delete safe-fgets.h include.
+	(main): Replace safe_fgets with getline.
+	* safe-fgets.c, safe-fgets.h: Removed.
+
+2021-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Include libiberty.h.
+	(sim_do_command): Rewrite to use buildargv.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* load.c (m32c_load): Use BFD_VMA_FMT and drop casts.
+
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* m32c.opc: Include ansidecl.h.
+	(AU): Delete.
+	* opc2c.c (dump_lines): Change AU to ATTRIBUTE_UNUSED.
+	* r8c.opc: Include ansidecl.h.
+	(AU): Delete.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (LIBS): Remove
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Define.
+	* syscalls.c: Change syscall.h include to targ-vals.h.
+	(m32c_syscall): Add TARGET_ prefix to all SYS_ constants.
+	* syscall.h: Removed.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Set ASAN_OPTIONS when running opc2c.

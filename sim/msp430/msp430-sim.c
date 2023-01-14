@@ -19,7 +19,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,6 +30,7 @@
 #include <assert.h>
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "targ-vals.h"
 
@@ -109,6 +112,9 @@ sim_open (SIM_OPEN_KIND kind,
   char c;
 
   /* Initialise the simulator.  */
+
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {

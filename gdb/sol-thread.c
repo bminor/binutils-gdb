@@ -1190,7 +1190,7 @@ _initialize_sol_thread ()
 	   _("Show info on Solaris user threads."), &maintenanceinfolist);
 
   /* Hook into new_objfile notification.  */
-  gdb::observers::new_objfile.attach (sol_thread_new_objfile);
+  gdb::observers::new_objfile.attach (sol_thread_new_objfile, "sol-thread");
   return;
 
  die:

@@ -31,9 +31,10 @@ aarch64_mte_get_tag_granules (CORE_ADDR addr, size_t len, size_t granule_size)
   /* Start address */
   CORE_ADDR s_addr = align_down (addr, granule_size);
   /* End address */
-  CORE_ADDR e_addr = align_down (addr + len, granule_size);
+  CORE_ADDR e_addr = align_down (addr + len - 1, granule_size);
 
-  /* We always have at least 1 granule.  */
+  /* We always have at least 1 granule because len is non-zero at this
+     point.  */
   return 1 + (e_addr - s_addr) / granule_size;
 }
 

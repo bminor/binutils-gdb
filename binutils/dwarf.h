@@ -128,11 +128,13 @@ enum dwarf_section_display_enum
 struct dwarf_section
 {
   /* A debug section has a different name when it's stored compressed
-     or not.  COMPRESSED_NAME and UNCOMPRESSED_NAME are the two
+     or not.  XCOFF DWARF section also have a special name.
+     COMPRESSED_NAME, UNCOMPRESSED_NAME and XCOFF_NAME are the three
      possibilities.  NAME is set to whichever one is used for this
      input file, as determined by load_debug_section().  */
   const char *                     uncompressed_name;
   const char *                     compressed_name;
+  const char *                     xcoff_name;
   const char *                     name;
   /* If non-NULL then FILENAME is the name of the separate debug info
      file containing the section.  */
@@ -264,12 +266,12 @@ extern unsigned char * get_build_id (void *);
 #endif
 
 static inline void
-report_leb_status (int status, const char *file, unsigned long lnum)
+report_leb_status (int status)
 {
   if ((status & 1) != 0)
-    error (_("%s:%lu: end of data encountered whilst reading LEB\n"), file, lnum);
+    error (_("end of data encountered whilst reading LEB\n"));
   else if ((status & 2) != 0)
-    error (_("%s:%lu: read LEB value is too large to store in destination variable\n"), file, lnum);
+    error (_("read LEB value is too large to store in destination variable\n"));
 }
 
 #define SKIP_ULEB(start, end)					\
@@ -302,7 +304,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status, __FILE__, __LINE__);		\
+      report_leb_status (_status);				\
     }								\
   while (0)
 
@@ -318,6 +320,6 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status, __FILE__, __LINE__);		\
+      report_leb_status (_status);				\
     }								\
   while (0)

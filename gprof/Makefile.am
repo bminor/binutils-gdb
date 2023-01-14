@@ -84,7 +84,8 @@ info_TEXINFOS = gprof.texi
 gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
 
-AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc \
+		   --no-split
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
 
 config.texi:
@@ -101,5 +102,11 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	       mv -f $@.T$$$$ $@) || \
 	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
+
+html-local: doc/gprof/index.html
+doc/gprof/index.html: gprof.texi $(gprof_TEXINFOS)
+	$(MKDIR_P) doc
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/gprof.texi -o doc/gprof
 
 MAINTAINERCLEANFILES = gprof.info

@@ -1,5 +1,13 @@
 -*- text -*-
 
+* Add -z indirect-extern-access/-z noindirect-extern-access to x86 ELF
+  linker to control canonical function pointers and copy relocation.
+
+* Add --max-cache-size=SIZE to set the the maximum cache size to SIZE
+  bytes.
+
+Changes in 2.37:
+
 * arm-symbianelf support removed.
 
 * Add -z report-relative-reloc to x86 ELF linker to report dynamic
@@ -7,6 +15,8 @@
 
 * Add -z start-stop-gc to disable special treatment of __start_*/__stop_*
   references when --gc-sections.
+
+* Add -Bno-symbolic to cancel -Bsymbolic and -Bsymbolic-functions.
 
 Changes in 2.36:
 

@@ -491,6 +491,7 @@ extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t, const char *,
 				      size_t);
 extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t, const char *,
 				     size_t);
+extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
 extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int);

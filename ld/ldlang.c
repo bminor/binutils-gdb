@@ -2639,6 +2639,9 @@ lang_add_section (lang_statement_list_type *ptr,
     case noalloc_section:
       flags &= ~SEC_ALLOC;
       break;
+    case readonly_section:
+      flags |= SEC_READONLY;
+      break;
     case noload_section:
       flags &= ~SEC_LOAD;
       flags |= SEC_NEVER_LOAD;
@@ -4231,6 +4234,9 @@ map_input_to_output_sections
 	      break;
 	    case noalloc_section:
 	      flags = SEC_HAS_CONTENTS;
+	      break;
+	    case readonly_section:
+	      flags |= SEC_READONLY;
 	      break;
 	    case noload_section:
 	      if (bfd_get_flavour (link_info.output_bfd)

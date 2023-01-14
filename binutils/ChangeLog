@@ -1,3 +1,538 @@
+2021-07-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2021-07-14  Clément Chigot  <clement.chigot@atos.net>
+
+	* dwarf.h (struct dwarf_section): Add XCOFF name.
+	* dwarf.c (struct dwarf_section_display): Update.
+	* objdump.c (load_debug_section): Add XCOFF name handler.
+	(dump_dwarf_section): Likewise.
+
+2021-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2021-07-10  Alan Modra  <amodra@gmail.com>
+
+	PR 28069
+	* dwarf.c (display_discr_list): Remove assertions.  Delete "end"
+	parameter, use initial "data" pointer as the end.  Formatting.
+	Don't count down bytes as they are read.
+	(read_and_display_attr_value): Adjust display_discr_list call.
+	(read_and_print_leb128): Don't pass __FILE__ and __LINE__ to
+	report_leb_status.
+	* dwarf.h (report_leb_status): Don't report file and line
+	numbers.  Delete file and lnum parameters,
+	(READ_ULEB, READ_SLEB): Adjust.
+
+2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.ac: Check for strnlen declaration.
+	* configure, config.in: Regenerate.
+
+2021-07-05  Alan Modra  <amodra@gmail.com>
+
+	PR 28047
+	* dwarf.c (get_type_abbrev_from_form): Add cu_end parameter.
+	Check DW_FORM_ref1 etc. arg against cu_end rather than end of
+	section.  Adjust all callers.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+	* README-how-to-make-a-release: Update.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-07-02  Alan Modra  <amodra@gmail.com>
+
+	PR 28048
+	* dwarf.c (get_type_signedness): Don't run off end of buffer
+	printing DW_FORM_string attribute.
+
+2021-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 28029
+	* testsuite/binutils-all/debuginfod.exp: Replace -wK with -wk.
+
+2021-07-01  Andrei Homescu  <ah@immunant.com>
+
+	* readelf.c (process_archive): Reset file position to the
+	beginning when calling process_object for thin archive members.
+	* testsuite/binutils-all/readelf.exp: Add test.
+	* testsuite/binutils-all/readelf.h.thin: New file.
+
+2021-06-30  Tom Tromey  <tom@tromey.com>
+
+	* dwarf.c (read_and_display_attr_value): Handle
+	DW_FORM_implicit_const.
+
+2021-06-30  Richard Henderson  <richard.henderson@linaro.org>
+
+	* dwarf.c (display_debug_frames): Both DW_CFA_def_cfa_sf
+	and DW_CFA_def_cfa_offset_sf have a signed offset.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_lines_decoded): Use memcpy rather than
+	strncpy when trimming file name length to MAX_FILENAME_LENGTH.
+	Don't make an unnecessary copy when length is good.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (print_gnu_property_note): Handle
+	GNU_PROPERTY_UINT32_AND_LO, GNU_PROPERTY_UINT32_AND_HI,
+	GNU_PROPERTY_UINT32_OR_LO and GNU_PROPERTY_UINT32_OR_HI.
+
+2021-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_note_type): Add support for NT_GO_BUILDID.
+
+2021-06-15  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (locate_dynamic_section, is_pie): New functions.
+	(get_file_type): Replace e_type parameter with filedata.  Call
+	is_pie for ET_DYN.  Update all callers.
+	(process_program_headers): Use local variables dynamic_addr and
+	dynamic_size, updating filedata on exit from function.  Set
+	dynamic_size of 1 to indicate no dynamic section or segment.
+	Update tests of dynamic_size throughout.
+	* testsuite/binutils-all/x86-64/pr27708.dump: Update expected output.
+
+2021-06-14  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dwarf.c (struct abbrev_attr): Change type of implicit_const.
+	(add_abbrev_attr): Likewise.
+	(process_abbrev_set): Likewise.
+	(display_debug_abbrev): Adjust to above change.
+
+2021-06-12  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_file_header): Don't clear section_headers.
+
+2021-06-12  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_section_headers): Don't test e_shoff here, leave
+	that to get_32bit_section_headers or get_64bit_section_headers.
+	(process_object): Throw away section header read to print file
+	header extension.
+
+2021-06-11  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (struct filedata): Move archive_file_offset and
+	archive_file_size earlier.
+	(free_filedata): Clear using memset.
+
+2021-06-11  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (GET_ELF_SYMBOLS): Delete.  Replace with..
+	(get_elf_symbols): ..this new function throughout.
+	(get_32bit_section_headers): Don't free section_headers.
+	(get_64bit_section_headers): Likewise.
+	(get_section_headers): New function, use throughout in place of
+	32bit and 64bit variants.
+	(get_dynamic_section): Similarly.
+	(process_section_headers): Don't free filedata memory here.
+	(get_file_header): Don't get section headers here..
+	(process_object): ..Read them here instead.  Don't exit without
+	freeing filedata memory.
+
+2021-06-09  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Remove Daniel Jacobwitz from the maintainers list.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* dwarf.c (display_debug_aranges): Add u suffix to constant.
+
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* objdump (usage): Add missing \n.
+
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (parse_args): Call dwarf_select_sections_all on
+	--debug-dump without optarg.
+	(usage): Associate -w and --debug-dump options closely.
+	Split up help message.  Remove extraneous blank lines around
+	ctf help.
+	* objdump.c (usage): Similarly.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: Correct CFC0
+	operand disassembly.
+	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: Use `mips:3000'
+	machine for disassembly.
+	* testsuite/binutils-all/mips/mips-xpa-virt-2.d: Likewise.
+	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: Likewise.
+	* testsuite/binutils-all/mips/mips-xpa-virt-4.d: Likewise.
+
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* readelf.c (decode_x86_feature_2): Revert commit 50c95a739c9.
+
+2021-05-27  Alan Modra  <amodra@gmail.com>
+
+	* readelf (usage): Order -w letters to match --debug-dump= and
+	move common '=' for --debug-dump out of brackets.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* readelf.c (decode_x86_feature_2): Support
+	GNU_PROPERTY_X86_FEATURE_2_CODE16.
+
+2021-05-23  Tiezhu Yang  <yangtiezhu@loongson.cn>
+
+	* readelf.c (get_machine_name): Change Loongson Loongarch to
+	LoongArch.
+
+2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* readelf.c (get_note_type): Add missing NT_ARM_* entries.
+
+2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* readelf.c (get_note_type): Handle NT_MEMTAG note types.
+
+2021-05-19  Eli Schwartz  <eschwartz@archlinux.org>
+
+	* dwarf.c (ENABLE_CHECKING): Define to 0 if not previously set.
+
+2021-05-19  Alan Modra  <amodra@gmail.com>
+
+	PR 27884
+	* dwarf.c (get_type_abbrev_from_form): Replace cu_offset_return
+	param with map_return, and return map for DW_FORM_ref_addr.
+	(get_type_signedness): Adjust calls to get_type_abbrev_from_form.
+	Pass returned cu map start and end to recursive call.
+	(read_and_display_attr_value): Similarly.
+
+2021-05-19  Alan Modra  <amodra@gmail.com>
+
+	PR 27879
+	* sysdump.c (getBARRAY): Sanity check size against max.
+	(getINT): Avoid UB shift left.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (process_cu_tu_index): Avoid pointer UB.  Use _mul_overflow.
+	Delete dead code.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_gdb_index): Avoid pointer UB and overflow in
+	length calculations.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_names): Complain when header length is
+	too small.  Avoid pointer UB.  Sanity check augmentation string,
+	CU table, TU table and foreign TU table sizes.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_frames): Delete initial_length_size.
+	Avoid pointer UB.  Constrain data reads to length given in header.
+	Sanity check cie header length.  Only skip up to next FDE on
+	finding augmentation data too long.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (read_cie): Add more sanity checks to ensure data
+	pointer is not bumped past end.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_ranges): Delete initial_length_size.
+	Correct fallback size calculated on finding a reloc.  Constrain
+	data reads to length given in header.  Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_rnglists_list): Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_str_offsets): Constrain reads to length
+	given in header.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_aranges): Delete initial_length_size.
+	Use end_ranges to constrain data reads to header length.  Avoid
+	pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_loc_list): Avoid pointer UB.  Correct check
+	before reading uleb length.  Warn on excess length.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_macro): Print strings that might not
+	be zero terminated with %*s.  Don't bump curr if unterminated.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (get_line_filename_and_dirname): Delete initial_length_size.
+	Simplify length sanity check, and check for too small lengths.
+	Constrain data reads to header length.  Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_macinfo): Print strings that might not
+	be zero terminated with %*s.  Don't bump curr if unterminated.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_pubnames_worker): Delete initial_length_size.
+	Simplify length check.  Constrain reads to length given by header.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_lines_decoded): Don't use strnlen when
+	we have already checked for NUL termination.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (read_debug_line_header): Delete initial_length_size.
+	Avoid pointer UB.  Keep within length specified by header.
+	Delete dead code.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (process_debug_info): Always do the first CU length
+	scan for sanity checks.  Remove initial_length_size var and
+	instead calculate end_cu.  Use end_cu to limit data reads.
+	Delete now dead code checking length.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Assert only when ENABLE_CHECKING.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	* bucomm.h (_mul_overflow): Define.
+	* dwarf.c (get_encoded_value): Avoid pointer UB.
+
+2021-05-13  Alan Modra  <amodra@gmail.com>
+
+	PR 27861
+	* dwarf.c (display_debug_str_offsets): Sanity check dwarf5
+	header length.
+
+2021-05-13  Alan Modra  <amodra@gmail.com>
+
+	PR 27860
+	* dwarf.c (display_debug_frames): Sanity check cie_off before
+	attempting to read cie.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (process_extended_line_op): Don't bump data pointer past
+	end when strnlen doesn't find string terminator.
+	(decode_location_expression): Remove dead code.
+	(skip_attr_bytes): Remove const from end param.  Ensure data
+	pointer doesn't pass end.
+	(get_type_signedness): Remove const from end param.
+	(read_and_display_attr_value): Ensure data pointer doesn't pass end.
+	(display_debug_lines_raw, display_debug_lines_decoded): Likewise.
+	(display_debug_pubnames_worker): Likewise.
+	(display_debug_pubnames_worker): Use SAFE_BYTE_GET_AND INC rather
+	than blindly incrementing data pointer.
+	(display_debug_addr, display_debug_str_offsets): Likewise.  Don't
+	compare pointers, compare lengths.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Define.
+	(SAFE_BYTE_GET, SAFE_BYTE_GET_AND_INC): Define using the above.
+	(SAFE_SIGNED_BYTE_GET, SAFE_SIGNED_BYTE_GET_AND_INC): Likewise.
+	(display_discr_list): Use SAFE_BYTE_GET_AND_INC rather than
+	SAFE_BYTE_GET followed by increment.
+	(process_debug_info): Likewise, and test bytes remaining before
+	incrementing section_begin rather than using pointer comparison.
+	(display_debug_names): Pass lvalue as SAFE_BYTE_GET PTR.
+	(process_cu_tu_index): Likewise for SAFE_BYTE_GET_AND_INC.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (dwarf_vmatoa64, SAFE_BYTE_GET64, add64): Delete.
+	(skip_attr_bytes): Replace use of SAFE_BYTE_GET64 with
+	SAFE_BYTE_GET_AND_INC.
+	(read_and_display_attr_value): Likewise.  Print using dwarf_vmatoa.
+	(process_debug_info, process_cu_tu_index): Likewise.
+	* elfcomm.c (byte_put, byte_put_little_endian, byte_put_big_endian),
+	(byte_get, byte_get_little_endian, byte_get_big_endian),
+	(byte_get_signed): Make size param unsigned.  Remove code dealing
+	with 4-byte elf_vma.
+	(byte_get_64): Delete.
+	* elfcomm.h  (byte_put, byte_put_little_endian, byte_put_big_endian),
+	(byte_get, byte_get_little_endian, byte_get_big_endian),
+	(byte_get_signed): Update prototypes.
+	(byte_get_64): Delete.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 27836
+	* dwarf.c (display_debug_frames): Don't compare pointers derived
+	from user input.  Test offset against bounds instead.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 27853
+	* dwarf.c (display_formatted_table): Test for data >= end rather
+	than data == end.
+	(process_extended_line_op): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 27849
+	* dwarf.c (fetch_indexed_string): Correct length sanity checks.
+	Sanity check section size for version and padding too.  Correct
+	index sanity check.  Handle multiple tables in .debug_str_offsets.
+
+2021-05-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* dwarf.c (process_abbrev_set): Properly parenthesize before
+	casting to unsigned long.
+
+2021-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27845
+	* dwarf.c (process_abbrev_set): Replace start and end parameters
+	with section, abbrev_base, abbrev_size, abbrev_offset.  Update
+	all callers.  Sanity check parameters correctly and emit warnings
+	here rather than..
+	(process_debug_info): ..here.
+
+2021-05-10  Thomas Wolff  <towo@towo.net>
+
+	PR 4356
+	PR 26865
+	PR 27594
+	* windres.c (quot): Revert previous delta.  Do not use double
+	quotes when spaces are detected in options.
+	* doc/binutils.texi (windres): Remove suggestion that the
+	--preprocessor option can take arguments.
+
+2021-05-10  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (SAFE_BYTE_GET): Check bounds by subtracting amount from
+	END rather than adding amount to PTR.
+	(SAFE_SIGNED_BYTE_GET, SAFE_BYTE_GET64): Likewise.
+
+2021-05-09  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (eq_string): Delete.
+	(create_symbol_htab): Use htab_eq_string.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-how-to-make-a-release: Update html & pdf entries.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/Makefile.am (html-local, binutils/index.html): New targets.
+	* doc/Makefile.in: Regenerate.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): Add --no-split.
+	* doc/Makefile.in: Regenerate.
+
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (no_processor_specific_unwind): New function.
+	(process_unwind): Use no_processor_specific_unwind for X86
+	targets.
+
+2021-05-07  Michael Forney <mforney@mforney.org>
+
+	* dwarf.c: Don't omit second operand of '?' operator.
+
+2021-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 27796
+	* dwarf.c (load_debug_sup_file): Allocate memory for filename in
+	.debug_sup section.
+
+2021-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 27594
+	* doc/binutils.texi (windres): Correct the description of the
+	default value of the --preprocessor argument.
+
+2021-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 27779
+	* dwarf.c (parse_gnu_debuglink): Reject empty names.
+	(parse_gnu_debugaltlink): Likewise.
+
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
+	* od-xcoff.c (dump_xcoff32_symbols): Adapt to new
+	aux structures.
+
+2021-04-21  Nick Lott  <nick.lott@gmail.com>
+
+	PR 27672
+	* readelf.c (sym_base): New variable.
+	(enum print_mode): Add more modes.
+	(print_vma): Add suport for new modes.
+	(options): Add sym-base.
+	(usage): Add sym-base.
+	(parse_args): Add support for --sym-base.
+	(print_dynamic_symbol_size): New function.
+	(print_dynamic_symbol): Use new function.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
+2021-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n64t.d:
+	Adjust expected output to allow for named section symbols.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-o32t.d:
+	Likewise.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+	* testsuite/binutils-all/readelf.ss-64-unused: Likewise.
+	* testsuite/binutils-all/readelf.ss-tmips: Likewise.
+	* testsuite/binutils-all/readelf.ss-unused: Likewise.
+
+2021-04-21  Luo Longjun  <luolongjun@huawei.com>
+
+	* readelf.c (print_dynamic_symbol): Print the section name for
+	section symbols without a name of their own.
+
+2021-04-20  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* MAINTAINERS: Remove Martin Schwidefsky as s390 maintainer and
+	add him to Past Maintainers.
+	Update my email address.
+
+2021-04-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 21702
+	* arsup.c (ar_addmod): Enable plugin support, if available.
+
+2021-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* rename.c: (get_stat_atime_ns): Add prototype.
+	(get_stat_mtime_ns): Add prototype.
+
 2021-04-16  Alan Modra  <amodra@gmail.com>
 
 	PR 27725

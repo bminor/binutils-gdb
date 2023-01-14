@@ -325,6 +325,7 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
       defentry->by_object = 1;
       if (h->type == bfd_link_hash_defined
 	  && h->u.def.section->output_section != NULL
+	  && !bfd_is_abs_section (h->u.def.section)
 	  && !h->linker_def)
 	ret = false;
     }

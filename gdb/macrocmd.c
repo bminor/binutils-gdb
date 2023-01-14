@@ -455,14 +455,17 @@ _initialize_macrocmd ()
      the various commands for working with preprocessor macros.  */
   add_basic_prefix_cmd ("macro", class_info,
 			_("Prefix for commands dealing with C preprocessor macros."),
-			&macrolist, "macro ", 0, &cmdlist);
+			&macrolist, 0, &cmdlist);
 
-  add_cmd ("expand", no_class, macro_expand_command, _("\
+  cmd_list_element *macro_expand_cmd
+    = add_cmd ("expand", no_class, macro_expand_command, _("\
 Fully expand any C/C++ preprocessor macro invocations in EXPRESSION.\n\
 Show the expanded expression."),
-	   &macrolist);
-  add_alias_cmd ("exp", "expand", no_class, 1, &macrolist);
-  add_cmd ("expand-once", no_class, macro_expand_once_command, _("\
+	       &macrolist);
+  add_alias_cmd ("exp", macro_expand_cmd, no_class, 1, &macrolist);
+
+  cmd_list_element *macro_expand_once_cmd
+    = add_cmd ("expand-once", no_class, macro_expand_once_command, _("\
 Expand C/C++ preprocessor macro invocations appearing directly in EXPRESSION.\n\
 Show the expanded expression.\n\
 \n\
@@ -473,8 +476,8 @@ introduces further macro invocations, those are left unexpanded.\n\
 `macro expand-once' helps you see how a particular macro expands,\n\
 whereas `macro expand' shows you how all the macros involved in an\n\
 expression work together to yield a pre-processed expression."),
-	   &macrolist);
-  add_alias_cmd ("exp1", "expand-once", no_class, 1, &macrolist);
+	       &macrolist);
+  add_alias_cmd ("exp1", macro_expand_once_cmd, no_class, 1, &macrolist);
 
   add_info ("macro", info_macro_command,
 	    _("Show the definition of MACRO, and it's source location.\n\

@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-style.h"
 #include "source-cache.h"
@@ -167,7 +168,7 @@ void
 cli_style_option::do_set_value (const char *ignore, int from_tty,
 				struct cmd_list_element *cmd)
 {
-  cli_style_option *cso = (cli_style_option *) get_cmd_context (cmd);
+  cli_style_option *cso = (cli_style_option *) cmd->context ();
   cso->changed.notify ();
 }
 
@@ -180,7 +181,7 @@ do_show (const char *what, struct ui_file *file,
 	 struct cmd_list_element *cmd,
 	 const char *value)
 {
-  cli_style_option *cso = (cli_style_option *) get_cmd_context (cmd);
+  cli_style_option *cso = (cli_style_option *) cmd->context ();
   fputs_filtered (_("The "), file);
   fprintf_styled (file, cso->style (), _("\"%s\" style"), cso->name ());
   fprintf_filtered (file, _(" %s is: %s\n"), what, value);
@@ -225,39 +226,50 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 					struct cmd_list_element **show_list,
 					bool skip_intensity)
 {
-  m_set_prefix = std::string ("set style ") + m_name + " ";
-  m_show_prefix = std::string ("show style ") + m_name + " ";
-
   add_basic_prefix_cmd (m_name, no_class, prefix_doc, &m_set_list,
-			m_set_prefix.c_str (), 0, set_list);
+			0, set_list);
   add_show_prefix_cmd (m_name, no_class, prefix_doc, &m_show_list,
-		       m_show_prefix.c_str (), 0, show_list);
+		       0, show_list);
+  set_show_commands commands;
 
-  add_setshow_enum_cmd ("foreground", theclass, cli_colors,
-			&m_foreground,
-			_("Set the foreground color for this property."),
-			_("Show the foreground color for this property."),
-			nullptr,
-			do_set_value,
-			do_show_foreground,
-			&m_set_list, &m_show_list, (void *) this);
-  add_setshow_enum_cmd ("background", theclass, cli_colors,
-			&m_background,
-			_("Set the background color for this property."),
-			_("Show the background color for this property."),
-			nullptr,
-			do_set_value,
-			do_show_background,
-			&m_set_list, &m_show_list, (void *) this);
+  commands = add_setshow_enum_cmd
+    ("foreground", theclass, cli_colors,
+     &m_foreground,
+     _("Set the foreground color for this property."),
+     _("Show the foreground color for this property."),
+     nullptr,
+     do_set_value,
+     do_show_foreground,
+     &m_set_list, &m_show_list);
+  commands.set->set_context (this);
+  commands.show->set_context (this);
+
+  commands = add_setshow_enum_cmd
+    ("background", theclass, cli_colors,
+     &m_background,
+     _("Set the background color for this property."),
+     _("Show the background color for this property."),
+     nullptr,
+     do_set_value,
+     do_show_background,
+     &m_set_list, &m_show_list);
+  commands.set->set_context (this);
+  commands.show->set_context (this);
+
   if (!skip_intensity)
-    add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
-			  &m_intensity,
-			  _("Set the display intensity for this property."),
-			  _("Show the display intensity for this property."),
-			  nullptr,
-			  do_set_value,
-			  do_show_intensity,
-			  &m_set_list, &m_show_list, (void *) this);
+    {
+      commands = add_setshow_enum_cmd
+	("intensity", theclass, cli_intensities,
+	 &m_intensity,
+	 _("Set the display intensity for this property."),
+	 _("Show the display intensity for this property."),
+	 nullptr,
+	 do_set_value,
+	 do_show_intensity,
+	 &m_set_list, &m_show_list);
+      commands.set->set_context (this);
+      commands.show->set_context (this);
+    }
 }
 
 static cmd_list_element *style_set_list;
@@ -297,11 +309,11 @@ _initialize_cli_style ()
   add_basic_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_set_list, "set style ", 0, &setlist);
+		  &style_set_list, 0, &setlist);
   add_show_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_show_list, "show style ", 0, &showlist);
+		  &style_show_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("enabled", no_class, &cli_styling, _("\
 Set whether CLI styling is enabled."), _("\

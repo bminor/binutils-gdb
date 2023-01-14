@@ -17,6 +17,8 @@
  
     */
 
+#include "ansidecl.h"
+
 /* Additional, and optional expressions.  */
 #ifdef WITH_ALTIVEC
 #include "altivec_expression.h"
@@ -314,7 +316,7 @@ do { \
 
 #define FPSCR_BEGIN \
 { \
-  fpscreg old_fpscr UNUSED = FPSCR
+  fpscreg old_fpscr ATTRIBUTE_UNUSED = FPSCR
 
 #define FPSCR_END(Rc) { \
   /* always update VX */ \

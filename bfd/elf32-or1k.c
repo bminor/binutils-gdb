@@ -30,10 +30,14 @@
 #define N_ONES(X)	(((bfd_vma)2 << (X)) - 1)
 
 #define PLT_ENTRY_SIZE 16
+#define PLT_ENTRY_SIZE_LARGE (6*4)
+#define PLT_MAX_INSN_COUNT 6
 
 #define OR1K_MOVHI(D)		(0x18000000 | (D << 21))
 #define OR1K_ADRP(D)		(0x08000000 | (D << 21))
 #define OR1K_LWZ(D,A)		(0x84000000 | (D << 21) | (A << 16))
+#define OR1K_ADD(D,A,B)		(0xE0000000 | (D << 21) | (A << 16) | (B << 11))
+#define OR1K_ORI(D,A)		(0xA8000000 | (D << 21) | (A << 16))
 #define OR1K_ORI0(D)		(0xA8000000 | (D << 21))
 #define OR1K_JR(B)		(0x44000000 | (B << 11))
 #define OR1K_NOP		0x15000000
@@ -808,6 +812,20 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 0,			/* Source Mask.  */
 	 0x03ffffff,		/* Dest Mask.  */
 	 true),			/* PC relative offset?  */
+
+  HOWTO (R_OR1K_GOT_AHI16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_GOT_AHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to Or1k ELF reloc types.  */
@@ -871,6 +889,7 @@ static const struct or1k_reloc_map or1k_reloc_map[] =
   { BFD_RELOC_OR1K_TLS_IE_LO13,	R_OR1K_TLS_IE_LO13 },
   { BFD_RELOC_OR1K_SLO13,	R_OR1K_SLO13 },
   { BFD_RELOC_OR1K_PLTA26,	R_OR1K_PLTA26 },
+  { BFD_RELOC_OR1K_GOT_AHI16,	R_OR1K_GOT_AHI16 },
 };
 
 /* tls_type is a mask used to track how each symbol is accessed,
@@ -892,6 +911,8 @@ struct elf_or1k_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
+  /* For calculating PLT size.  */
+  bfd_vma plt_index;
   /* Track type of TLS access.  */
   unsigned char tls_type;
 };
@@ -916,8 +937,19 @@ struct elf_or1k_link_hash_table
 {
   struct elf_link_hash_table root;
 
+  bfd_vma plt_count;
   bool saw_plta;
 };
+
+static size_t
+elf_or1k_plt_entry_size (bfd_vma plt_index)
+{
+  bfd_vma plt_reloc;
+
+  plt_reloc = plt_index * sizeof (Elf32_External_Rela);
+
+  return (plt_reloc > 0xffff) ? PLT_ENTRY_SIZE_LARGE : PLT_ENTRY_SIZE;
+}
 
 /* Get the ELF linker hash table from a link_info structure.  */
 #define or1k_elf_hash_table(p) \
@@ -1111,6 +1143,7 @@ or1k_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
   switch (howto->type)
     {
     case R_OR1K_AHI16:
+    case R_OR1K_GOT_AHI16:
     case R_OR1K_GOTOFF_AHI16:
     case R_OR1K_TLS_IE_AHI16:
     case R_OR1K_TLS_LE_AHI16:
@@ -1262,6 +1295,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
   asection *sgot, *splt;
   bfd_vma plt_base, got_base, got_sym_value;
   bool ret_val = true;
+  bool saw_gotha = false;
 
   if (htab == NULL)
     return false;
@@ -1373,6 +1407,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_OR1K_GOT_AHI16:
 	case R_OR1K_GOT16:
 	case R_OR1K_GOT_PG21:
 	case R_OR1K_GOT_LO13:
@@ -1464,8 +1499,19 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    /* The GOT_PG21 and GOT_LO13 relocs are pc-relative,
 	       while the GOT16 reloc is GOT relative.  */
 	    relocation = got_base + off;
-	    if (r_type == R_OR1K_GOT16)
+	    if (r_type == R_OR1K_GOT16
+		|| r_type == R_OR1K_GOT_AHI16)
 	      relocation -= got_sym_value;
+
+	    if (r_type == R_OR1K_GOT_AHI16)
+	      saw_gotha = true;
+
+	    /* If we have a R_OR1K_GOT16 followed by a R_OR1K_GOT_AHI16
+	       relocation we assume the code is doing the right thing to avoid
+	       overflows.  Here we mask the lower 16-bit of the relocation to
+	       avoid overflow validation failures.  */
+	    if (r_type == R_OR1K_GOT16 && saw_gotha)
+	      relocation &= 0xffff;
 
 	  /* Addend should be zero.  */
 	  if (rel->r_addend != 0)
@@ -1497,6 +1543,18 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_OR1K_INSN_REL_26:
+	  /* For a non-shared link, these will reference plt or call the
+	     version of actual object.  */
+	  if (bfd_link_pic (info) && !SYMBOL_CALLS_LOCAL (info, h))
+	    {
+	      _bfd_error_handler
+		(_("%pB: pc-relative relocation against dynamic symbol %s"),
+		 input_bfd, name);
+	      ret_val = false;
+	      bfd_set_error (bfd_error_bad_value);
+	    }
+	  break;
+
 	case R_OR1K_PCREL_PG21:
 	case R_OR1K_LO13:
 	case R_OR1K_SLO13:
@@ -1990,6 +2048,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	    }
 	  break;
 
+	case R_OR1K_GOT_AHI16:
 	case R_OR1K_GOT16:
 	case R_OR1K_GOT_PG21:
 	case R_OR1K_GOT_LO13:
@@ -2192,33 +2251,46 @@ or1k_elf_check_relocs (bfd *abfd,
 }
 
 static void
-or1k_write_plt_entry (bfd *output_bfd, bfd_byte *contents, unsigned insn1,
-		      unsigned insn2, unsigned insn3, unsigned insnj)
+or1k_write_plt_entry (bfd *output_bfd, bfd_byte *contents, unsigned insnj,
+		      unsigned insns[], size_t insn_count)
 {
   unsigned nodelay = elf_elfheader (output_bfd)->e_flags & EF_OR1K_NODELAY;
-  unsigned insn4;
+  unsigned output_insns[PLT_MAX_INSN_COUNT];
+
+  /* Copy instructions into the output buffer.  */
+  for (size_t i = 0; i < insn_count; i++)
+    output_insns[i] = insns[i];
 
   /* Honor the no-delay-slot setting.  */
-  if (insn3 == OR1K_NOP)
+  if (insns[insn_count-1] == OR1K_NOP)
     {
-      insn4 = insn3;
+      unsigned slot1, slot2;
+
       if (nodelay)
-	insn3 = insnj;
+	slot1 = insns[insn_count-2], slot2 = insnj;
       else
-	insn3 = insn2, insn2 = insnj;
+	slot1 = insnj, slot2 = insns[insn_count-2];
+
+      output_insns[insn_count-2] = slot1;
+      output_insns[insn_count-1] = slot2;
+      output_insns[insn_count]   = OR1K_NOP;
     }
   else
     {
+      unsigned slot1, slot2;
+
       if (nodelay)
-	insn4 = insnj;
+	slot1 = insns[insn_count-1], slot2 = insnj;
       else
-	insn4 = insn3, insn3 = insnj;
+	slot1 = insnj, slot2 = insns[insn_count-1];
+
+      output_insns[insn_count-1] = slot1;
+      output_insns[insn_count]   = slot2;
     }
 
-  bfd_put_32 (output_bfd, insn1, contents);
-  bfd_put_32 (output_bfd, insn2, contents + 4);
-  bfd_put_32 (output_bfd, insn3, contents + 8);
-  bfd_put_32 (output_bfd, insn4, contents + 12);
+  /* Write out the output buffer.  */
+  for (size_t i = 0; i < (insn_count+1); i++)
+    bfd_put_32 (output_bfd, output_insns[i], contents + (i*4));
 }
 
 /* Finish up the dynamic sections.  */
@@ -2285,7 +2357,8 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
       splt = htab->root.splt;
       if (splt && splt->size > 0)
 	{
-	  unsigned plt0, plt1, plt2;
+	  unsigned plt[PLT_MAX_INSN_COUNT];
+	  size_t plt_insn_count = 3;
 	  bfd_vma got_addr = sgot->output_section->vma + sgot->output_offset;
 
 	  /* Note we force 16 byte alignment on the .got, so that
@@ -2296,27 +2369,27 @@ or1k_elf_finish_dynamic_sections (bfd *output_bfd,
 	      bfd_vma pc = splt->output_section->vma + splt->output_offset;
 	      unsigned pa = ((got_addr >> 13) - (pc >> 13)) & 0x1fffff;
 	      unsigned po = got_addr & 0x1fff;
-	      plt0 = OR1K_ADRP(12) | pa;
-	      plt1 = OR1K_LWZ(15,12) | (po + 8);
-	      plt2 = OR1K_LWZ(12,12) | (po + 4);
+	      plt[0] = OR1K_ADRP(12) | pa;
+	      plt[1] = OR1K_LWZ(15,12) | (po + 8);
+	      plt[2] = OR1K_LWZ(12,12) | (po + 4);
 	    }
 	  else if (bfd_link_pic (info))
 	    {
-	      plt0 = OR1K_LWZ(15, 16) | 8;	/* .got+8 */
-	      plt1 = OR1K_LWZ(12, 16) | 4;	/* .got+4 */
-	      plt2 = OR1K_NOP;
+	      plt[0] = OR1K_LWZ(15, 16) | 8;	/* .got+8 */
+	      plt[1] = OR1K_LWZ(12, 16) | 4;	/* .got+4 */
+	      plt[2] = OR1K_NOP;
 	    }
 	  else
 	    {
 	      unsigned ha = ((got_addr + 0x8000) >> 16) & 0xffff;
 	      unsigned lo = got_addr & 0xffff;
-	      plt0 = OR1K_MOVHI(12) | ha;
-	      plt1 = OR1K_LWZ(15,12) | (lo + 8);
-	      plt2 = OR1K_LWZ(12,12) | (lo + 4);
+	      plt[0] = OR1K_MOVHI(12) | ha;
+	      plt[1] = OR1K_LWZ(15,12) | (lo + 8);
+	      plt[2] = OR1K_LWZ(12,12) | (lo + 4);
 	    }
 
-	  or1k_write_plt_entry (output_bfd, splt->contents,
-				plt0, plt1, plt2, OR1K_JR(15));
+	  or1k_write_plt_entry (output_bfd, splt->contents, OR1K_JR(15),
+				plt, plt_insn_count);
 
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
 	}
@@ -2359,7 +2432,8 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   if (h->plt.offset != (bfd_vma) -1)
     {
-      unsigned int plt0, plt1, plt2;
+      unsigned int plt[PLT_MAX_INSN_COUNT];
+      size_t plt_insn_count = 3;
       asection *splt;
       asection *sgot;
       asection *srela;
@@ -2371,6 +2445,7 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
       bfd_vma got_offset;
       bfd_vma got_addr;
       Elf_Internal_Rela rela;
+      bool large_plt_entry;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -2388,9 +2463,12 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 	 corresponds to this symbol.  This is the index of this symbol
 	 in all the symbols for which we are making plt entries.  The
 	 first entry in the procedure linkage table is reserved.  */
-      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+      plt_index = ((struct elf_or1k_link_hash_entry *) h)->plt_index;
       plt_addr = plt_base_addr + h->plt.offset;
       plt_reloc = plt_index * sizeof (Elf32_External_Rela);
+
+      large_plt_entry = (elf_or1k_plt_entry_size (plt_index)
+			 == PLT_ENTRY_SIZE_LARGE);
 
       /* Get the offset into the .got table of the entry that
 	corresponds to this function.  Each .got entry is 4 bytes.
@@ -2403,27 +2481,57 @@ or1k_elf_finish_dynamic_symbol (bfd *output_bfd,
 	{
 	  unsigned pa = ((got_addr >> 13) - (plt_addr >> 13)) & 0x1fffff;
 	  unsigned po = (got_addr & 0x1fff);
-	  plt0 = OR1K_ADRP(12) | pa;
-	  plt1 = OR1K_LWZ(12,12) | po;
-	  plt2 = OR1K_ORI0(11) | plt_reloc;
+	  plt[0] = OR1K_ADRP(12) | pa;
+	  plt[1] = OR1K_LWZ(12,12) | po;
+	  plt[2] = OR1K_ORI0(11) | plt_reloc;
 	}
       else if (bfd_link_pic (info))
 	{
-	  plt0 = OR1K_LWZ(12,16) | got_offset;
-	  plt1 = OR1K_ORI0(11) | plt_reloc;
-	  plt2 = OR1K_NOP;
+	  if (large_plt_entry)
+	    {
+	      unsigned gotha = ((got_offset + 0x8000) >> 16) & 0xffff;
+	      unsigned got = got_offset & 0xffff;
+	      unsigned pltrelhi = (plt_reloc >> 16) & 0xffff;
+	      unsigned pltrello = plt_reloc & 0xffff;
+
+	      plt[0] = OR1K_MOVHI(12) | gotha;
+	      plt[1] = OR1K_ADD(12,12,16);
+	      plt[2] = OR1K_LWZ(12,12) | got;
+	      plt[3] = OR1K_MOVHI(11) | pltrelhi;
+	      plt[4] = OR1K_ORI(11,11) | pltrello;
+	      plt_insn_count = 5;
+	    }
+	  else
+	    {
+	      plt[0] = OR1K_LWZ(12,16) | got_offset;
+	      plt[1] = OR1K_ORI0(11) | plt_reloc;
+	      plt[2] = OR1K_NOP;
+	    }
 	}
       else
 	{
 	  unsigned ha = ((got_addr + 0x8000) >> 16) & 0xffff;
 	  unsigned lo = got_addr & 0xffff;
-	  plt0 = OR1K_MOVHI(12) | ha;
-	  plt1 = OR1K_LWZ(12,12) | lo;
-	  plt2 = OR1K_ORI0(11) | plt_reloc;
+	  plt[0] = OR1K_MOVHI(12) | ha;
+	  plt[1] = OR1K_LWZ(12,12) | lo;
+	  plt[2] = OR1K_ORI0(11) | plt_reloc;
+	}
+
+      /* For large code model we fixup the non-PIC PLT relocation instructions
+	 here.  */
+      if (large_plt_entry && !bfd_link_pic (info))
+	{
+	  unsigned pltrelhi = (plt_reloc >> 16) & 0xffff;
+	  unsigned pltrello = plt_reloc & 0xffff;
+
+	  plt[2] = OR1K_MOVHI(11) | pltrelhi;
+	  plt[3] = OR1K_ORI(11,11) | pltrello;
+	  plt[4] = OR1K_NOP;
+	  plt_insn_count = 5;
 	}
 
       or1k_write_plt_entry (output_bfd, splt->contents + h->plt.offset,
-			    plt0, plt1, plt2, OR1K_JR(12));
+			    OR1K_JR(12), plt, plt_insn_count);
 
       /* Fill in the entry in the global offset table.  We initialize it to
 	 point to the top of the plt.  This is done to lazy lookup the actual
@@ -2566,11 +2674,10 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (h->type == STT_FUNC
       || h->needs_plt)
     {
-      if (! bfd_link_pic (info)
-	  && !h->def_dynamic
-	  && !h->ref_dynamic
-	  && h->root.type != bfd_link_hash_undefweak
-	  && h->root.type != bfd_link_hash_undefined)
+      if (h->plt.refcount <= 0
+	  || (SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak)))
 	{
 	  /* This case can occur if we saw a PLT reloc in an input
 	     file, but the symbol was never referred to by a dynamic
@@ -2748,11 +2855,16 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
 	{
 	  asection *splt = htab->root.splt;
+	  bfd_vma plt_index;
+
+	  /* Track the index of our plt entry for use in calculating size.  */
+	  plt_index = htab->plt_count++;
+	  ((struct elf_or1k_link_hash_entry *) h)->plt_index = plt_index;
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
 	  if (splt->size == 0)
-	    splt->size = PLT_ENTRY_SIZE;
+	    splt->size = elf_or1k_plt_entry_size (plt_index);
 
 	  h->plt.offset = splt->size;
 
@@ -2769,7 +2881,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  splt->size += PLT_ENTRY_SIZE;
+	  splt->size += elf_or1k_plt_entry_size (plt_index);
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */

@@ -577,7 +577,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       int i;
 
       for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
-	if (!strcmp (sec_name, xcoff_dwsect_names[i].name))
+	if (!strcmp (sec_name, xcoff_dwsect_names[i].xcoff_name))
 	  {
 	    styp_flags = STYP_DWARF | xcoff_dwsect_names[i].flag;
 	    break;
@@ -1809,7 +1809,7 @@ coff_new_section_hook (bfd * abfd, asection * section)
 
       for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
 	if (strcmp (bfd_section_name (section),
-		    xcoff_dwsect_names[i].name) == 0)
+		    xcoff_dwsect_names[i].xcoff_name) == 0)
 	  {
 	    section->alignment_power = 0;
 	    sclass = C_DWARF;
@@ -1951,6 +1951,12 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
+      if (n.r_vaddr < 0x10000)
+	{
+	  _bfd_error_handler (_("%pB: overflow reloc count too small"), abfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return;
+	}
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
       section->rel_filepos += relsz;
     }

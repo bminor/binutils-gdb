@@ -19,7 +19,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +33,8 @@
 #include "simulator.h"
 #include "cpustate.h"
 #include "memory.h"
+
+#include "sim-signal.h"
 
 #define NO_SP 0
 #define SP_OK 1
@@ -8420,7 +8424,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  uint64_t value = (uint64_t) d;
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
-	  if (value != (1UL << 63))
+	  if (value != (1ULL << 63))
 	    RAISE_EXCEPTIONS (d, value, DOUBLE, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
@@ -8431,7 +8435,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  uint64_t value = (uint64_t) f;
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
-	  if (value != (1UL << 63))
+	  if (value != (1ULL << 63))
 	    RAISE_EXCEPTIONS (f, value, FLOAT, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);

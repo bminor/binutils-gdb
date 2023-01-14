@@ -260,7 +260,7 @@ i386_get_thread_context (windows_thread_info *th)
   BOOL ret;
 #ifdef __x86_64__
   if (wow64_process)
-    ret = win32_Wow64GetThreadContext (th->h, &th->wow64_context);
+    ret = Wow64GetThreadContext (th->h, &th->wow64_context);
   else
 #endif
     ret = GetThreadContext (th->h, &th->context);

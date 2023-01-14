@@ -175,6 +175,9 @@ proc test_fields {lang} {
     gdb_test "python print (len (gdb.parse_and_eval ('a_function').type.fields ()))" "2"
     gdb_test "python print (gdb.parse_and_eval ('a_function').type.fields ()\[0\].type)" "int"
     gdb_test "python print (gdb.parse_and_eval ('a_function').type.fields ()\[1\].type)" "char"
+
+    # Test calling `fields` on a non-aggregate type.
+    gdb_test "python gdb.lookup_type('int').fields()" "TypeError: Type is not a structure, union, enum, or function type.*"
   }
 }
 

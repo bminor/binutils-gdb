@@ -19,6 +19,7 @@ from perftest import perftest
 from perftest import measure
 from perftest import utils
 
+
 class GmonsterRuntoMain(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, name, run_names, binfile):
         super(GmonsterRuntoMain, self).__init__(name)
@@ -30,8 +31,7 @@ class GmonsterRuntoMain(perftest.TestCaseWithBasicMeasurements):
 
     def execute_test(self):
         for run in self.run_names:
-            this_run_binfile = "%s-%s" % (self.binfile,
-                                          utils.convert_spaces(run))
+            this_run_binfile = "%s-%s" % (self.binfile, utils.convert_spaces(run))
             utils.select_file(this_run_binfile)
             iteration = 5
             while iteration > 0:

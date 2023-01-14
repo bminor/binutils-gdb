@@ -1,3 +1,115 @@
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	Import from gcc mainline:
+	2021-03-31  Patrick Palka  <ppalka@redhat.com>
+
+	PR c++/88115
+	* demangle.h (enum demangle_component_type): Add
+	DEMANGLE_COMPONENT_VENDOR_EXPR.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* opcode/aarch64.h (aarch64_opcode_table): Mark const.
+
+2021-07-01  Richard Earnshaw  <rearnsha@arm.com>
+
+	PR gas/28031
+	* opcode/arm.h (FPU_ANY): Exclude XScale-related features.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (GNU_PROPERTY_UINT32_AND_LO): New.
+	(GNU_PROPERTY_UINT32_AND_HI): Likewise.
+	(GNU_PROPERTY_UINT32_OR_LO): Likewise.
+	(GNU_PROPERTY_UINT32_OR_HI): Likewise.
+
+2021-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (NT_GO_BUILDID): Define.
+
+2021-06-02  Shahab Vahedi  <shahab@synopsys.com>
+
+	* dis-asm.h (disassembler_options_arc): New prototype.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* opcode/mips.h (cpu_is_member): Remove code for MIPSr6 ISA
+	exclusion.
+	(opcode_is_member): Handle ISA level exclusion.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* opcode/mips.h (isa_is_member): New inline function, factored
+	out from...
+	(opcode_is_member): ... here.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* opcode/mips.h: Document `g' and `y' operand codes.
+	(mips_reg_operand_type): Add OP_REG_CONTROL enumeration
+	constant.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* opcode/mips.h: Complement change made to opcodes and remove
+	references to the `g' regular MIPS ISA operand code.
+
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_2_CODE16): Removed.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_2_CODE16): New.
+
+2021-05-23  Tiezhu Yang  <yangtiezhu@loongson.cn>
+
+	* elf/common.h (EM_LOONGARCH): Change Loongson Loongarch to
+	LoongArch.
+
+2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* elf/common.h (NT_MEMTAG): New constant.
+	(NT_MEMTAG_TYPE_AARCH_MTE): New constant.
+
+2021-05-07  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/internal.h (C_DWARF): New define.
+	* coff/xcoff.h (SSUBTYP_DWLOC, SSUBTYP_DWFRAME,
+	SSUBTYP_DWMAC): New defines.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* elf/or1k.h (elf_or1k_reloc_type): Define R_OR1K_GOT_AHI16 number.
+
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf.h (CTF_K_UNKNOWN): Document that it can be used for
+	nonrepresentable types, not just padding.
+	* ctf-api.h (ctf_add_unknown): New.
+
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/internal.h (union internal_auxent):
+	 Add x_sect structure.
+	* coff/rs6000.h (union external_auxent): Rework to
+	match official documentation.
+	* coff/rs6k64.h (union external_auxent): Likewise.
+	(_AUX_SECT): New define.
+
+2021-04-21  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27760
+	* coff/pe.h (IMAGE_DLLCHARACTERISTICS_APPCONTAINER): Define.
+	(IMAGE_DLLCHARACTERISTICS_GUARD_CF): Define.
+
 2021-04-16  Alan Modra  <amodra@gmail.com>
 
 	PR 27567

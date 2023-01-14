@@ -25,15 +25,15 @@ SIM_OBJS = \
 	simops.o
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = cr16_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h \
+SIM_EXTRA_DEPS = simops.h
+
+INCLUDE = cr16_sim.h $(srcroot)/include/sim/callback.h targ-vals.h \
 	$(srcroot)/include/gdb/sim-cr16.h
 
 # This selects the cr16 newlib/libgloss syscall definitions.
 NL_TARGET = -DNL_TARGET_cr16
 
 ## COMMON_POST_CONFIG_FRAG
-
-simops.o: simops.h
 
 simops.h: gencode
 	./gencode -h >$@

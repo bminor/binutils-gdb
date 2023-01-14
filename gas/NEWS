@@ -1,6 +1,12 @@
 -*- text -*-
 
+* Add support for Intel AVX512_FP16 instructions.
+
+Changes in 2.37:
+
 * arm-symbianelf support removed.
+
+* Add support for Realm Management Extension (RME) for AArch64.
 
 Changes in 2.36:
 

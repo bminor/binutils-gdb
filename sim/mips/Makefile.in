@@ -17,7 +17,7 @@ SIM_IGEN_OBJ = \
 	semantics.o \
 	idecode.o \
 	icache.o \
-	@mips_igen_engine@ \
+	engine.o \
 	irun.o \
 
 
@@ -59,8 +59,6 @@ SIM_MULTI_OBJ = @sim_multi_obj@ \
 		itable.o \
 		multi-run.o \
 
-MIPS_EXTRA_LIBS = @mips_extra_libs@
-
 SIM_OBJS = \
 	interp.o \
 	$(SIM_@sim_gen@_OBJ) \
@@ -71,6 +69,7 @@ SIM_OBJS = \
 	sim-main.o \
 	sim-resume.o \
 
+SIM_EXTRA_HW_DEVICES = tx3904cpu tx3904irc tx3904tmr tx3904sio
 
 # List of flags to always pass to $(CC).
 SIM_SUBTARGET=@SIM_SUBTARGET@
@@ -81,19 +80,12 @@ SIM_EXTRA_DISTCLEAN = distclean-extra
 
 all: $(SIM_@sim_gen@_ALL)
 
-SIM_EXTRA_LIBS = $(MIPS_EXTRA_LIBS)
+SIM_EXTRA_DEPS = itable.h
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
-
-interp.o: $(srcdir)/interp.c config.h sim-main.h itable.h
-
-m16run.o: sim-main.h m16_idecode.h m32_idecode.h m16run.c $(SIM_EXTRA_DEPS)
-
-micromipsrun.o: sim-main.h micromips16_idecode.h micromips32_idecode.h \
-		micromips_m32_idecode.h micromipsrun.c $(SIM_EXTRA_DEPS)
-
-multi-run.o: multi-include.h tmp-mach-multi
 
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
 IGEN_INSN=$(srcdir)/mips.igen
@@ -148,8 +140,8 @@ BUILT_SRC_FROM_IGEN = \
 
 $(BUILT_SRC_FROM_IGEN): tmp-igen
 
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -219,8 +211,8 @@ BUILT_SRC_FROM_M16 = \
 
 $(BUILT_SRC_FROM_M16): tmp-m16
 
-tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -255,7 +247,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m16_model.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m16_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m16_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -292,7 +284,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m32_model.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -345,8 +337,8 @@ BUILT_SRC_FROM_MICROMIPS = \
 
 $(BUILT_SRC_FROM_MICROMIPS): tmp-micromips
 
-tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -391,7 +383,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips16_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips16_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -436,7 +428,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -481,7 +473,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips_m32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips_m32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -503,7 +495,7 @@ SIM_MULTI_IGEN_CONFIGS = @sim_multi_igen_configs@
 
 $(BUILT_SRC_FROM_MULTI): tmp-multi
 tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi targ-vals.h
-tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
 	  p=`echo $${t} | sed -e 's/:.*//'` ; \
 	  m=`echo $${t} | sed -e 's/.*:\(.*\):.*/\1/'` ; \
@@ -521,7 +513,7 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	    m16*) e="-B 16 -H 15 -o $(M16_DC) -F 16" ;; \
 	    *) e="-B 32 -H 31 -o $(IGEN_DC) -F $${f}" ;; \
 	  esac; \
-	  $(IGEN) \
+	  $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		$${e} \
 		-I $(srcdir) \
@@ -573,8 +565,8 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						  $${p}_engine.c ; \
 	done
 	touch tmp-mach-multi
-tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \

@@ -1052,6 +1052,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 			   const struct btrace_data_bts *btrace,
 			   std::vector<unsigned int> &gaps)
 {
+ /* We may end up doing target calls that require the current thread to be TP,
+    for example reading memory through gdb_insn_length.  Make sure TP is the
+    current thread.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
+
   struct btrace_thread_info *btinfo;
   struct gdbarch *gdbarch;
   unsigned int blk;
@@ -1222,6 +1228,9 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	  break;
 
 	case ptev_enabled:
+	  if (event.status_update != 0)
+	    break;
+
 	  if (event.variant.enabled.resumed == 0 && !btinfo->functions.empty ())
 	    {
 	      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
@@ -1424,6 +1433,12 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 			  const struct btrace_data_pt *btrace,
 			  std::vector<unsigned int> &gaps)
 {
+ /* We may end up doing target calls that require the current thread to be TP,
+    for example reading memory through btrace_pt_readmem_callback.  Make sure
+    TP is the current thread.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
+
   struct btrace_thread_info *btinfo;
   struct pt_insn_decoder *decoder;
   struct pt_config config;
@@ -3438,29 +3453,26 @@ _initialize_btrace ()
 
   add_basic_prefix_cmd ("btrace", class_maintenance,
 			_("Branch tracing maintenance commands."),
-			&maint_btrace_cmdlist, "maintenance btrace ",
-			0, &maintenancelist);
+			&maint_btrace_cmdlist, 0, &maintenancelist);
 
   add_basic_prefix_cmd ("btrace", class_maintenance, _("\
 Set branch tracing specific variables."),
-			&maint_btrace_set_cmdlist, "maintenance set btrace ",
+			&maint_btrace_set_cmdlist,
 			0, &maintenance_set_cmdlist);
 
   add_basic_prefix_cmd ("pt", class_maintenance, _("\
 Set Intel Processor Trace specific variables."),
 			&maint_btrace_pt_set_cmdlist,
-			"maintenance set btrace pt ",
 			0, &maint_btrace_set_cmdlist);
 
   add_show_prefix_cmd ("btrace", class_maintenance, _("\
 Show branch tracing specific variables."),
-		       &maint_btrace_show_cmdlist, "maintenance show btrace ",
+		       &maint_btrace_show_cmdlist,
 		       0, &maintenance_show_cmdlist);
 
   add_show_prefix_cmd ("pt", class_maintenance, _("\
 Show Intel Processor Trace specific variables."),
 		       &maint_btrace_pt_show_cmdlist,
-		       "maintenance show btrace pt ",
 		       0, &maint_btrace_show_cmdlist);
 
   add_setshow_boolean_cmd ("skip-pad", class_maintenance,

@@ -26,7 +26,7 @@ if [mi_gdb_start] {
     continue
 }
 
-standard_testfile array.f
+standard_testfile array.f90
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable {debug f90}] != ""} {
@@ -36,7 +36,7 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
-mi_runto [fortran_main]
+mi_runto prog_array
 
 mi_create_varobj "array" "array" "create local variable array"
 

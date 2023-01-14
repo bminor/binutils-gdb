@@ -482,7 +482,8 @@ arrange_linetable (struct linetable *oldLineTb)
   newline = 0;
   if (oldLineTb->item[0].line != 0)
     for (newline = 0;
-    newline < oldLineTb->nitems && oldLineTb->item[newline].line; ++newline)
+	 newline < oldLineTb->nitems && oldLineTb->item[newline].line;
+	 ++newline)
       newLineTb->item[newline] = oldLineTb->item[newline];
 
   /* Now copy function lines one by one.  */
@@ -1165,20 +1166,20 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	     to 32(0x20). So we need to read the first function auxiliary entry
 	     which contains the size. */
 	  if (cs->c_naux > 1 && ISFCN (cs->c_type))
-	  {
-	    /* a function entry point.  */
+	    {
+	      /* a function entry point.  */
 
-	    fcn_start_addr = cs->c_value;
+	      fcn_start_addr = cs->c_value;
 
-	    /* save the function header info, which will be used
-	       when `.bf' is seen.  */
-	    fcn_cs_saved = *cs;
+	      /* save the function header info, which will be used
+		 when `.bf' is seen.  */
+	      fcn_cs_saved = *cs;
 
-	    /* Convert the auxent to something we can access.  */
-	    bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
-				  0, cs->c_naux, &fcn_aux_saved);
-	    continue;
-	  }
+	      /* Convert the auxent to something we can access.  */
+	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
+				    0, cs->c_naux, &fcn_aux_saved);
+	      continue;
+	    }
 	  /* Read the csect auxiliary header, which is always the last by
 	     convention. */
 	  bfd_coff_swap_aux_in (abfd,

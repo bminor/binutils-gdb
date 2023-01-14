@@ -21,12 +21,14 @@
 /* This file contains the main simulator decoding logic.  i.e. everything that
    is architecture specific.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <inttypes.h>
 #include <time.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 
 #include "opcode/riscv.h"
@@ -603,7 +605,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 static unsigned64
 mulhu (unsigned64 a, unsigned64 b)
 {
-#ifdef __GNUC__
+#ifdef HAVE___INT128
   return ((__int128)a * b) >> 64;
 #else
   uint64_t t;
@@ -789,13 +791,11 @@ execute_m (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   return pc;
 }
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 static sim_cia
 execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 {
   SIM_DESC sd = CPU_STATE (cpu);
+  struct riscv_sim_state *state = RISCV_SIM_STATE (sd);
   int rd = (iw >> OP_SH_RD) & OP_MASK_RD;
   int rs1 = (iw >> OP_SH_RS1) & OP_MASK_RS1;
   int rs2 = (iw >> OP_SH_RS2) & OP_MASK_RS2;
@@ -815,7 +815,7 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	sim_core_read_unaligned_4 (cpu, cpu->pc, read_map, cpu->regs[rs1]));
 
       /* Walk the reservation list to find an existing match.  */
-      amo_curr = sd->amo_reserved_list;
+      amo_curr = state->amo_reserved_list;
       while (amo_curr)
 	{
 	  if (amo_curr->addr == cpu->regs[rs1])
@@ -826,15 +826,15 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       /* No reservation exists, so add one.  */
       amo_curr = xmalloc (sizeof (*amo_curr));
       amo_curr->addr = cpu->regs[rs1];
-      amo_curr->next = sd->amo_reserved_list;
-      sd->amo_reserved_list = amo_curr;
+      amo_curr->next = state->amo_reserved_list;
+      state->amo_reserved_list = amo_curr;
       goto done;
     case MATCH_SC_W:
       TRACE_INSN (cpu, "%s %s, %s, (%s);", op->name, rd_name, rs2_name,
 		  rs1_name);
 
       /* Walk the reservation list to find a match.  */
-      amo_curr = amo_prev = sd->amo_reserved_list;
+      amo_curr = amo_prev = state->amo_reserved_list;
       while (amo_curr)
 	{
 	  if (amo_curr->addr == cpu->regs[rs1])
@@ -843,8 +843,8 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	      sim_core_write_unaligned_4 (cpu, cpu->pc, write_map,
 					  cpu->regs[rs1], cpu->regs[rs2]);
 	      store_rd (cpu, rd, 0);
-	      if (amo_curr == sd->amo_reserved_list)
-		sd->amo_reserved_list = amo_curr->next;
+	      if (amo_curr == state->amo_reserved_list)
+		state->amo_reserved_list = amo_curr->next;
 	      else
 		amo_prev->next = amo_curr->next;
 	      free (amo_curr);
@@ -881,19 +881,19 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       break;
     case MATCH_AMOMAX_D:
     case MATCH_AMOMAX_W:
-      tmp = MAX ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
+      tmp = max ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMAXU_D:
     case MATCH_AMOMAXU_W:
-      tmp = MAX ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
+      tmp = max ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMIN_D:
     case MATCH_AMOMIN_W:
-      tmp = MIN ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
+      tmp = min ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMINU_D:
     case MATCH_AMOMINU_W:
-      tmp = MIN ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
+      tmp = min ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOOR_D:
     case MATCH_AMOOR_W:

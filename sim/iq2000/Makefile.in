@@ -29,7 +29,7 @@ SIM_OBJS = \
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
-	arch.h cpuall.h $(srcdir)/../../opcodes/iq2000-desc.h
+	arch.h cpuall.h $(srcdir)/../../opcodes/iq2000-desc.h eng.h
 
 SIM_EXTRA_CFLAGS =
 
@@ -37,24 +37,22 @@ ALL_CPU_CFLAGS = -DHAVE_CPU_IQ2000BF -DHAVE_CPU_IQ10BF
 
 SIM_EXTRA_CLEAN = iq2000-clean
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
 
 arch = iq2000
 
-sim-if.o: $(srcdir)/sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
-
-arch.o: arch.c $(SIM_MAIN_DEPS)
-	$(CC) -c $(srcdir)/arch.c $(ALL_CFLAGS) -UHAVE_CPU_IQ10BF
-
-devices.o: $(srcdir)/devices.c $(SIM_MAIN_DEPS)
+arch.o: arch.c
+	$(COMPILE) -UHAVE_CPU_IQ10BF $(srcdir)/arch.c
+	$(POSTCOMPILE)
 
 # IQ2000 objs
 
 IQ2000BF_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
 	cpu.h decode.h eng.h
-
-iq2000.o: $(srcdir)/iq2000.c $(IQ2000BF_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop
@@ -65,22 +63,11 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
 	touch stamp-mloop
-mloop.o: mloop.c $(srcdir)/sem-switch.c $(IQ2000BF_INCLUDE_DEPS)
-
-cpu.o: $(srcdir)/cpu.c $(IQ2000BF_INCLUDE_DEPS)
-decode.o: $(srcdir)/decode.c $(IQ2000BF_INCLUDE_DEPS)
-sem.o: $(srcdir)/sem.c $(IQ2000BF_INCLUDE_DEPS)
-model.o: $(srcdir)/model.c $(IQ2000BF_INCLUDE_DEPS)
 
 iq2000-clean:
 	rm -f mloop.c eng.h stamp-mloop
 	rm -f tmp-*
 	rm -f stamp-arch stamp-cpu
-
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
 
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/iq2000.cpu Makefile
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=iq2000 \

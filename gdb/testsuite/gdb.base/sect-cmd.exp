@@ -58,26 +58,22 @@ if { $address1 == "" || $address2 == "" || $section_name == "" } {
 set saw_section_address_line false
 gdb_test_multiple "section $section_name $address1" \
     "set section $section_name to original address" {
-	-re ".*$address1 \- $address2 is $section_name.*" {
+	-re ".*$address1 \- $address2 is $section_name in \[^\r\n\]*" {
 	    set saw_section_address_line true
 	    exp_continue
 	}
 	-re "Section \[^\r\n\]+ not found\r\n" {
-	    fail "$gdb_test_name, saw not found marker"
+	    fail "$gdb_test_name (saw not found marker)"
 	    exp_continue
 	}
-	-re "$gdb_prompt $" {
+	-re -wrap "" {
 	    gdb_assert { $saw_section_address_line } $gdb_test_name
 	}
     }
 
 # Verify that GDB responds gracefully to a non-existent section name.
 #
-gdb_test_multiple "section FOOBARBAZ 0x1234" "" {
-    -re -wrap "Section FOOBARBAZ not found" {
-	pass $gdb_test_name
-    }
-}
+gdb_test "section FOOBARBAZ 0x1234" "Section FOOBARBAZ not found"
 
 # Check that GDB can still print the error message when the section
 # name is very long.  It used to be the case that GDB could only print
@@ -86,9 +82,6 @@ gdb_test_multiple "section FOOBARBAZ 0x1234" "" {
 #
 set long_sect_name \
     "A234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123"
-gdb_test_multiple "section $long_sect_name 0x1234" \
-    "non-existent too-long section disallowed" {
-	-re -wrap "Section $long_sect_name not found" {
-	    pass $gdb_test_name
-	}
-    }
+gdb_test "section $long_sect_name 0x1234" \
+    "Section $long_sect_name not found" \
+    "non-existent too-long section disallowed"

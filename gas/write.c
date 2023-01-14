@@ -69,16 +69,7 @@
 #endif
 
 #ifndef TC_VALIDATE_FIX_SUB
-#ifdef UNDEFINED_DIFFERENCE_OK
-/* The PA needs this for PIC code generation.  */
-#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
-  (md_register_arithmetic || (SEG) != reg_section)
-#else
-#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
-  ((md_register_arithmetic || (SEG) != reg_section)	\
-   && ((FIX)->fx_r_type == BFD_RELOC_GPREL32		\
-       || (FIX)->fx_r_type == BFD_RELOC_GPREL16))
-#endif
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) 0
 #endif
 
 #ifndef TC_LINKRELAX_FIXUP
@@ -908,6 +899,15 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
   dump_section_relocs (abfd, sec, stderr);
 }
 
+void
+as_bad_subtract (fixS *fixp)
+{
+  as_bad_where (fixp->fx_file, fixp->fx_line,
+		_("can't resolve %s - %s"),
+		fixp->fx_addsy ? S_GET_NAME (fixp->fx_addsy) : "0",
+		S_GET_NAME (fixp->fx_subsy));
+}
+
 /* fixup_segment()
 
    Go through all the fixS's in a segment and see which ones can be
@@ -1030,12 +1030,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("register value used as expression"));
 	      else
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			      fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-			      segment_name (add_symbol_segment),
-			      S_GET_NAME (fixP->fx_subsy),
-			      segment_name (sub_symbol_segment));
+		as_bad_subtract (fixP);
 	    }
 	  else if (sub_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (sub_symbol_segment)
@@ -1107,12 +1102,15 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      mask = 0;
 	      mask--;		/* Set all bits to one.  */
 	      mask <<= fixP->fx_size * 8 - (fixP->fx_signed ? 1 : 0);
-	      if ((add_number & mask) != 0 && (add_number & mask) != mask)
+	      if ((add_number & mask) != 0
+		  && (fixP->fx_signed
+		      ? (add_number & mask) != mask
+		      : (-add_number & mask) != 0))
 		{
 		  char buf[50], buf2[50];
-		  sprint_value (buf, fragP->fr_address + fixP->fx_where);
+		  bfd_sprintf_vma (stdoutput, buf, fragP->fr_address + fixP->fx_where);
 		  if (add_number > 1000)
-		    sprint_value (buf2, add_number);
+		    bfd_sprintf_vma (stdoutput, buf2, add_number);
 		  else
 		    sprintf (buf2, "%ld", (long) add_number);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -2866,7 +2864,9 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			  if (flag_warn_displacement)
 			    {
 			      char buf[50];
-			      sprint_value (buf, (addressT) lie->addnum);
+
+			      bfd_sprintf_vma (stdoutput, buf,
+					       (addressT) lie->addnum);
 			      as_warn_where (fragP->fr_file, fragP->fr_line,
 					     _(".word %s-%s+%s didn't fit"),
 					     S_GET_NAME (lie->add),

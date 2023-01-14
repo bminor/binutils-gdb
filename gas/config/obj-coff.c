@@ -1379,6 +1379,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
   /* This is pretty horrible, but we have to set *punt correctly in
      order to call SA_SET_SYM_ENDNDX correctly.  */
   if (! symbol_used_in_reloc_p (symp)
+      && S_GET_STORAGE_CLASS (symp) != C_DWARF
       && ((symbol_get_bfdsym (symp)->flags & BSF_SECTION_SYM) != 0
 	  || (! (S_IS_EXTERNAL (symp) || S_IS_WEAK (symp))
 	      && ! symbol_get_tc (symp)->output
@@ -1483,8 +1484,18 @@ coff_adjust_section_syms (bfd *abfd ATTRIBUTE_UNUSED,
   secsym = section_symbol (sec);
   /* This is an estimate; we'll plug in the real value using
      SET_SECTION_RELOCS later */
+#ifdef OBJ_XCOFF
+  if (S_GET_STORAGE_CLASS (secsym) == C_DWARF)
+    SA_SET_SECT_NRELOC (secsym, nrelocs);
+  else
+    {
+      SA_SET_SCN_NRELOC (secsym, nrelocs);
+      SA_SET_SCN_NLINNO (secsym, nlnno);
+    }
+#else
   SA_SET_SCN_NRELOC (secsym, nrelocs);
   SA_SET_SCN_NLINNO (secsym, nlnno);
+#endif
 }
 
 void
@@ -1754,7 +1765,11 @@ coff_frob_section (segT sec)
       S_SET_STORAGE_CLASS (secsym, sclass);
       S_SET_NUMBER_AUXILIARY (secsym, 1);
       SF_SET_STATICS (secsym);
+#ifdef OBJ_XCOFF
+      SA_SET_SECT_SCNLEN (secsym, size);
+#else
       SA_SET_SCN_SCNLEN (secsym, size);
+#endif
     }
   /* FIXME: These should be in a "stabs.h" file, or maybe as.h.  */
 #ifndef STAB_SECTION_NAME

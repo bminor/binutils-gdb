@@ -618,6 +618,10 @@ set build_tests {
   {"Build libdl2k.so with --export-dynamic-symbol-list=dl2.list and -Bsymbolic"
    "-shared -Wl,--export-dynamic-symbol-list=dl2.list,-Bsymbolic" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2k.so"}
+  # Check that -Bno-symbolic cancels -Bsymbolic.
+  {"Build libdl2l.so with -Bsymbolic -Bno-symbolic and --export-dynamic-symbol=foo"
+   "-shared -Wl,-Bsymbolic,-Bno-symbolic,--export-dynamic-symbol=foo" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2l.so"}
   {"Build libdl4a.so with --dynamic-list=dl4.list"
    "-shared -Wl,--dynamic-list=dl4.list" "-fPIC"
    {dl4.c dl4xxx.c} {} "libdl4a.so"}
@@ -1028,6 +1032,9 @@ set run_tests [list \
     [list "Run with libdl2k.so" \
      "-Wl,--no-as-needed tmpdir/libdl2k.so" "" \
      {dl2main.c} "dl2k" "dl2a.out" ] \
+    [list "Run with libdl2l.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2l.so" "" \
+     {dl2main.c} "dl2l" "dl2b.out" ] \
     [list "Run with libdl4a.so" \
      "-Wl,--no-as-needed tmpdir/libdl4a.so" "" \
      {dl4main.c} "dl4a" "dl4a.out" "-fPIC"] \

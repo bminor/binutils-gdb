@@ -588,6 +588,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	85 c3 [ 	]*testl[ 	]+%eax,%ebx
  *[0-9a-f]+:	85 d8 [ 	]*testl[ 	]+%ebx,%eax
  *[0-9a-f]+:	85 18 [ 	]*testl[ 	]+%ebx,\(%eax\)
+ *[0-9a-f]+:	f1[ 	]+int1[ 	]+
 [ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovpl -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnpl -0x6f6f6f70\(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovpw -0x6f6f6f70\(%eax\),%dx

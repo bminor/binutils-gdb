@@ -1280,13 +1280,7 @@ update_static_array_size (struct type *type)
       int stride;
       struct type *element_type;
 
-      /* If the array itself doesn't provide a stride value then take
-	 whatever stride the range provides.  Don't update BIT_STRIDE as
-	 we don't want to place the stride value from the range into this
-	 arrays bit size field.  */
-      stride = TYPE_FIELD_BITSIZE (type, 0);
-      if (stride == 0)
-	stride = range_type->bit_stride ();
+      stride = type->bit_stride ();
 
       if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	low_bound = high_bound = 0;
@@ -1897,11 +1891,10 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
     return NULL;
 }
 
-/* Store in *MAX the largest number representable by unsigned integer type
-   TYPE.  */
+/* Return the largest number representable by unsigned integer type TYPE.  */
 
-void
-get_unsigned_type_max (struct type *type, ULONGEST *max)
+ULONGEST
+get_unsigned_type_max (struct type *type)
 {
   unsigned int n;
 
@@ -1911,7 +1904,7 @@ get_unsigned_type_max (struct type *type, ULONGEST *max)
 
   /* Written this way to avoid overflow.  */
   n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
-  *max = ((((ULONGEST) 1 << (n - 1)) - 1) << 1) | 1;
+  return ((((ULONGEST) 1 << (n - 1)) - 1) << 1) | 1;
 }
 
 /* Store in *MIN, *MAX the smallest and largest numbers representable by
@@ -1929,6 +1922,21 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
   n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
   *min = -((ULONGEST) 1 << (n - 1));
   *max = ((ULONGEST) 1 << (n - 1)) - 1;
+}
+
+/* Return the largest value representable by pointer type TYPE. */
+
+CORE_ADDR
+get_pointer_type_max (struct type *type)
+{
+  unsigned int n;
+
+  type = check_typedef (type);
+  gdb_assert (type->code () == TYPE_CODE_PTR);
+  gdb_assert (TYPE_LENGTH (type) <= sizeof (CORE_ADDR));
+
+  n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  return ((((CORE_ADDR) 1 << (n - 1)) - 1) << 1) | 1;
 }
 
 /* Internal routine called by TYPE_VPTR_FIELDNO to return the value of
@@ -4792,11 +4800,13 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
 		       REFERENCE_SEE_THROUGH_BADNESS));
   if (overload_debug)
-  /* Debugging only.  */
-    fprintf_filtered (gdb_stderr,
-		      "------ Arg is %s [%d], parm is %s [%d]\n",
-		      arg->name (), arg->code (),
-		      parm->name (), parm->code ());
+    {
+      /* Debugging only.  */
+      fprintf_filtered (gdb_stderr,
+			"------ Arg is %s [%d], parm is %s [%d]\n",
+			arg->name (), arg->code (),
+			parm->name (), parm->code ());
+    }
 
   /* x -> y means arg of type x being supplied for parameter of type y.  */
 
@@ -5829,7 +5839,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   gdb_assert (type->code () == TYPE_CODE_FLAGS);
   gdb_assert (type->num_fields () + 1 <= type_bitsize);
   gdb_assert (start_bitpos >= 0 && start_bitpos < type_bitsize);
-  gdb_assert (nr_bits >= 1 && nr_bits <= type_bitsize);
+  gdb_assert (nr_bits >= 1 && (start_bitpos + nr_bits) <= type_bitsize);
   gdb_assert (name != NULL);
 
   TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
@@ -6091,7 +6101,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_string
     = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
-    = arch_type (gdbarch, TYPE_CODE_BOOL, TARGET_CHAR_BIT, "bool");
+    = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "bool");
 
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */

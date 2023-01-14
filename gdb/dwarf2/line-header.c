@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf2/comp-unit.h"
+#include "dwarf2/comp-unit-head.h"
 #include "dwarf2/leb.h"
 #include "dwarf2/line-header.h"
 #include "dwarf2/read.h"
@@ -94,25 +94,6 @@ line_header::file_file_name (int file) const
 
       return make_unique_xstrdup (fake_name);
     }
-}
-
-gdb::unique_xmalloc_ptr<char>
-line_header::file_full_name (int file, const char *comp_dir) const
-{
-  /* Is the file number a valid index into the line header's file name
-     table?  Remember that file numbers start with one, not zero.  */
-  if (is_valid_file_index (file))
-    {
-      gdb::unique_xmalloc_ptr<char> relative = file_file_name (file);
-
-      if (IS_ABSOLUTE_PATH (relative.get ()) || comp_dir == NULL)
-	return relative;
-      return gdb::unique_xmalloc_ptr<char> (concat (comp_dir, SLASH_STRING,
-						    relative.get (),
-						    (char *) NULL));
-    }
-  else
-    return file_file_name (file);
 }
 
 static void

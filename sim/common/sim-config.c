@@ -19,6 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "sim-assert.h"
@@ -167,8 +169,6 @@ sim_config (SIM_DESC sd)
     current_target_byte_order = prefered_target_byte_order;
   if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
     current_target_byte_order = WITH_TARGET_BYTE_ORDER;
-  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
-    current_target_byte_order = WITH_DEFAULT_TARGET_BYTE_ORDER;
 
   /* verify the target byte order */
   if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_UNKNOWN)
@@ -251,8 +251,9 @@ sim_config (SIM_DESC sd)
 #endif
   if (current_alignment == 0)
     current_alignment = WITH_ALIGNMENT;
+  /* If the port hasn't specified an alignment, default to not enforcing.  */
   if (current_alignment == 0)
-    current_alignment = WITH_DEFAULT_ALIGNMENT;
+    current_alignment = NONSTRICT_ALIGNMENT;
 
   /* verify the alignment */
   if (CURRENT_ALIGNMENT == 0)
@@ -299,9 +300,6 @@ sim_config_print (SIM_DESC sd)
   sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER = %s\n",
-		 config_byte_order_to_a (WITH_DEFAULT_TARGET_BYTE_ORDER));
-
   sim_io_printf (sd, "HOST_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (HOST_BYTE_ORDER));
 
@@ -328,11 +326,6 @@ sim_config_print (SIM_DESC sd)
 
   sim_io_printf (sd, "WITH_ALIGNMENT = %s\n",
 		 config_alignment_to_a (WITH_ALIGNMENT));
-
-#if defined (WITH_DEFAULT_ALIGNMENT)
-  sim_io_printf (sd, "WITH_DEFAULT_ALIGNMENT = %s\n",
-		 config_alignment_to_a (WITH_DEFAULT_ALIGNMENT));
-#endif
 
 #if defined (WITH_XOR_ENDIAN)
   sim_io_printf (sd, "WITH_XOR_ENDIAN = %d\n", WITH_XOR_ENDIAN);

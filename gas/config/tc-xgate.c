@@ -660,7 +660,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("Expression too complex."));
+    as_bad_subtract (fixP);
 
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
   opcode = bfd_getl16 (where);

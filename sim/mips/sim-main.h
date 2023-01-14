@@ -475,30 +475,12 @@ struct _sim_cpu {
 extern void mips_sim_close (SIM_DESC sd, int quitting);
 #define SIM_CLOSE_HOOK(...) mips_sim_close (__VA_ARGS__)
 
-/* MIPS specific simulator watch config */
-
-void watch_options_install (SIM_DESC sd);
-
-struct swatch {
-  sim_event *pc;
-  sim_event *clock;
-  sim_event *cycles;
-};
-
-
 /* FIXME: At present much of the simulator is still static */
-struct sim_state {
-
-  struct swatch watch;
-
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
+struct mips_sim_state {
   /* microMIPS ISA mode.  */
   int isa_mode;
-
-  sim_state_base base;
 };
-
+#define MIPS_SIM_STATE(sd) ((struct mips_sim_state *) STATE_ARCH_DATA (sd))
 
 
 /* Status information: */
@@ -983,7 +965,7 @@ address_word micromips_instruction_decode (SIM_DESC sd, sim_cpu * cpu,
 					   int instruction_size);
 
 #if WITH_TRACE_ANY_P
-void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...);
+void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, const char *comment, ...) ATTRIBUTE_PRINTF (7, 8);
 extern FILE *tracefh;
 #else
 #define dotrace(sd, cpu, tracefh, type, address, width, comment, ...)

@@ -202,7 +202,7 @@ const struct target_desc *
 riscv_linux_nat_target::read_description ()
 {
   const struct riscv_gdbarch_features features
-    = riscv_linux_read_features (inferior_ptid.lwp ());
+    = riscv_linux_read_features (inferior_ptid.pid ());
   return riscv_lookup_target_description (features);
 }
 

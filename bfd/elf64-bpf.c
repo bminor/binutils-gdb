@@ -589,16 +589,17 @@ elf64_bpf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 }
 
 /* A generic howto special function for installing BPF relocations.
-   This function will be called by the assembler (via bfd_install_relocation).
+   This function will be called by the assembler (via bfd_install_relocation),
+   and by various get_relocated_section_contents functions.
    At link time, bpf_elf_relocate_section will resolve the final relocations.
 
    BPF instructions are always big endian, and this approach avoids problems in
    bfd_install_relocation.  */
 
 static bfd_reloc_status_type
-bpf_elf_generic_reloc (bfd * abfd, arelent *reloc_entry, asymbol *symbol,
+bpf_elf_generic_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 		       void *data, asection *input_section,
-		       bfd *output_bfd,
+		       bfd *output_bfd ATTRIBUTE_UNUSED,
 		       char **error_message ATTRIBUTE_UNUSED)
 {
 
@@ -607,7 +608,15 @@ bpf_elf_generic_reloc (bfd * abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_byte *where;
 
   /* Sanity check that the address is in range.  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (reloc_entry->howto->type == R_BPF_INSN_64)
+    {
+      bfd_size_type end = bfd_get_section_limit_octets (abfd, input_section);
+      if (reloc_entry->address > end
+	  || end - reloc_entry->address < 16)
+	return bfd_reloc_outofrange;
+    }
+  else if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd, input_section,
+				       reloc_entry->address))
     return bfd_reloc_outofrange;
 
   /*  Get the symbol value.  */
@@ -640,15 +649,15 @@ bpf_elf_generic_reloc (bfd * abfd, arelent *reloc_entry, asymbol *symbol,
 	 instructions, and the upper 32 bits placed at the very end of the
 	 instruction. that is, there are 32 unused bits between them. */
 
-      bfd_put_32 (output_bfd, (relocation & 0xFFFFFFFF), where + 4);
-      bfd_put_32 (output_bfd, (relocation >> 32), where + 12);
+      bfd_put_32 (abfd, (relocation & 0xFFFFFFFF), where + 4);
+      bfd_put_32 (abfd, (relocation >> 32), where + 12);
     }
   else
     {
       /* For other kinds of relocations, the relocated value simply goes
 	 BITPOS bits from the start of the entry. This is always a multiple
 	 of 8, i.e. whole bytes.  */
-      bfd_put (reloc_entry->howto->bitsize, output_bfd, relocation,
+      bfd_put (reloc_entry->howto->bitsize, abfd, relocation,
 	       where + reloc_entry->howto->bitpos / 8);
     }
 

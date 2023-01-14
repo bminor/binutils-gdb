@@ -95,6 +95,24 @@ struct ada_resolvable
 			bool parse_completion,
 			innermost_block_tracker *tracker,
 			struct type *context_type) = 0;
+
+  /* Possibly replace this object with some other expression object.
+     This is like 'resolve', but can return a replacement.
+
+     The default implementation calls 'resolve' and wraps this object
+     in a function call if that call returns true.  OWNER is a
+     reference to the unique pointer that owns the 'this'; it can be
+     'move'd from to construct the replacement.
+
+     This should either return a new object, or OWNER -- never
+     nullptr.  */
+
+  virtual operation_up replace (operation_up &&owner,
+				struct expression *exp,
+				bool deprocedure_p,
+				bool parse_completion,
+				innermost_block_tracker *tracker,
+				struct type *context_type);
 };
 
 /* In Ada, some generic operations must be wrapped with a handler that
@@ -722,6 +740,35 @@ public:
 private:
 
   operation_up m_val;
+};
+
+/* A character constant expression.  This is a separate operation so
+   that it can participate in resolution, so that TYPE'(CST) can
+   work correctly for enums with character enumerators.  */
+class ada_char_operation : public long_const_operation,
+			   public ada_resolvable
+{
+public:
+
+  using long_const_operation::long_const_operation;
+
+  bool resolve (struct expression *exp,
+		bool deprocedure_p,
+		bool parse_completion,
+		innermost_block_tracker *tracker,
+		struct type *context_type) override
+  {
+    /* This should never be called, because this class also implements
+       'replace'.  */
+    gdb_assert_not_reached ("unexpected call");
+  }
+
+  operation_up replace (operation_up &&owner,
+			struct expression *exp,
+			bool deprocedure_p,
+			bool parse_completion,
+			innermost_block_tracker *tracker,
+			struct type *context_type) override;
 };
 
 } /* namespace expr */

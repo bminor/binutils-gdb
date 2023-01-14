@@ -28,8 +28,10 @@ std::list<thread_info *> all_threads;
 
 struct thread_info *current_thread;
 
-/* The current working directory used to start the inferior.  */
-static const char *current_inferior_cwd = NULL;
+/* The current working directory used to start the inferior.
+
+   Empty if not specified.  */
+static std::string current_inferior_cwd;
 
 struct thread_info *
 add_thread (ptid_t thread_id, void *target_data)
@@ -235,20 +237,16 @@ switch_to_process (process_info *proc)
 
 /* See gdbsupport/common-inferior.h.  */
 
-const char *
+const std::string &
 get_inferior_cwd ()
 {
   return current_inferior_cwd;
 }
 
-/* See gdbsupport/common-inferior.h.  */
+/* See inferiors.h.  */
 
 void
-set_inferior_cwd (const char *cwd)
+set_inferior_cwd (std::string cwd)
 {
-  xfree ((void *) current_inferior_cwd);
-  if (cwd != NULL)
-    current_inferior_cwd = xstrdup (cwd);
-  else
-    current_inferior_cwd = NULL;
+  current_inferior_cwd = std::move (cwd);
 }

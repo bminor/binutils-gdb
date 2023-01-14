@@ -381,9 +381,11 @@ initialization and in cleanup, but not much else.
 
 Your program will write the profile data into a file called @file{gmon.out}
 just before exiting.  If there is already a file called @file{gmon.out},
-its contents are overwritten.  There is currently no way to tell the
-program to write the profile data under a different name, but you can rename
-the file afterwards if you are concerned that it may be overwritten.
+its contents are overwritten.  You can rename the file afterwards if you
+are concerned that it may be overwritten.  If your system libc allows you
+may be able to write the profile data under a different name.  Set the
+GMON_OUT_PREFIX environment variable; this name will be appended with
+the PID of the running program.
 
 In order to write the @file{gmon.out} file properly, your program must exit
 normally: by returning from @code{main} or by calling @code{exit}.  Calling

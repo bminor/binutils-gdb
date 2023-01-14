@@ -243,7 +243,6 @@ or_b_imm8_rdpredec:
 	fail
 .L5:
 
-
 .endif
 
 or_b_reg8_reg8:
@@ -343,6 +342,18 @@ or_b_reg8_rdpostinc:
 	beq	.L7
 	fail
 .L7:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	r0l, r1l
+	mov.b	@er0, r1h
+	or.b	r0l, @er0+
+	inc.b	r1l
+	or.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L27
+	fail
+.L27:
 
 or_b_reg8_rdpostdec:
 	mov	#byte_dest, er0
@@ -381,6 +392,18 @@ or_b_reg8_rdpostdec:
 	beq	.L8
 	fail
 .L8:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	r0l, r1l
+	mov.b	@er0, r1h
+	or.b	r0l, @er0-
+	dec.b	r1l
+	or.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L28
+	fail
+.L28:
 
 or_b_reg8_rdpreinc:
 	mov	#byte_dest, er0
@@ -419,6 +442,18 @@ or_b_reg8_rdpreinc:
 	beq	.L9
 	fail
 .L9:
+	;; special case same register
+	mov.l	#pre_byte, er0
+	mov.b	r0l, r1l
+	mov.b	@byte_dest, r1h
+	or.b	r0l, @+er0
+	inc.b	r1l
+	or.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L29
+	fail
+.L29:
 
 or_b_reg8_rdpredec:
 	mov	#byte_dest, er0
@@ -457,6 +492,18 @@ or_b_reg8_rdpredec:
 	beq	.L10
 	fail
 .L10:
+	;; special case same register
+	mov.l	#post_byte, er0
+	mov.b	r0l, r1l
+	mov.b	@byte_dest, r1h
+	or.b	r0l, @-er0
+	dec.b	r1l
+	or.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L30
+	fail
+.L30:
 
 .endif
 

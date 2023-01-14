@@ -258,6 +258,20 @@ _bfd_dummy_target (bfd *ignore_abfd ATTRIBUTE_UNUSED)
 #define SSIZE_MAX ((size_t) -1 >> 1)
 #endif
 
+/*
+INTERNAL_FUNCTION
+	bfd_malloc
+
+SYNOPSIS
+	extern void * bfd_malloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+DESCRIPTION
+	Returns a pointer to an allocated block of memory that is at least
+	SIZE bytes long.  If SIZE is 0 then it will be treated as if it were
+	1.  If SIZE is too big then NULL will be returned.
+	
+	Returns NULL upon error and sets bfd_error.
+*/
 void *
 bfd_malloc (bfd_size_type size)
 {
@@ -272,13 +286,36 @@ bfd_malloc (bfd_size_type size)
       return NULL;
     }
 
-  ptr = malloc (sz);
-  if (ptr == NULL && sz != 0)
+  ptr = malloc (sz ? sz : 1);
+  if (ptr == NULL)
     bfd_set_error (bfd_error_no_memory);
 
   return ptr;
 }
 
+/*
+INTERNAL_FUNCTION
+	bfd_realloc
+
+SYNOPSIS
+	extern void * bfd_realloc (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+DESCRIPTION
+	Returns a pointer to an allocated block of memory that is at least
+	SIZE bytes long.  If SIZE is 0 then it will be treated as if it were
+	1.  If SIZE is too big then NULL will be returned.
+	
+	If MEM is not NULL then it must point to an allocated block of memory.
+	If this block is large enough then MEM may be used as the return
+	value for this function, but this is not guaranteed.
+
+	If MEM is not returned then the first N bytes in the returned block
+	will be identical to the first N bytes in region pointed to by MEM,
+	where N is the lessor of SIZE and the length of the region of memory
+	currently addressed by MEM.
+
+	Returns NULL upon error and sets bfd_error.
+*/
 void *
 bfd_realloc (void *ptr, bfd_size_type size)
 {
@@ -296,37 +333,85 @@ bfd_realloc (void *ptr, bfd_size_type size)
       return NULL;
     }
 
-  ret = realloc (ptr, sz);
+  /* The behaviour of realloc(0) is implementation defined,
+     but for this function we always allocate memory.  */
+  ret = realloc (ptr, sz ? sz : 1);
 
-  if (ret == NULL && sz != 0)
+  if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
 
   return ret;
 }
 
-/* Reallocate memory using realloc.
-   If this fails the pointer is freed before returning.  */
+/*
+INTERNAL_FUNCTION
+	bfd_realloc_or_free
 
+SYNOPSIS
+	extern void * bfd_realloc_or_free (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+DESCRIPTION
+	Returns a pointer to an allocated block of memory that is at least
+	SIZE bytes long.  If SIZE is 0 then no memory will be allocated,
+	MEM will be freed, and NULL will be returned.  This will not cause
+	bfd_error to be set.
+
+	If SIZE is too big then NULL will be returned and bfd_error will be
+	set. 
+	
+	If MEM is not NULL then it must point to an allocated block of memory.
+	If this block is large enough then MEM may be used as the return
+	value for this function, but this is not guaranteed.
+
+	If MEM is not returned then the first N bytes in the returned block
+	will be identical to the first N bytes in region pointed to by MEM,
+	where N is the lessor of SIZE and the length of the region of memory
+	currently addressed by MEM.
+*/
 void *
 bfd_realloc_or_free (void *ptr, bfd_size_type size)
 {
-  void *ret = bfd_realloc (ptr, size);
+  void *ret;
 
+  /* The behaviour of realloc(0) is implementation defined, but
+     for this function we treat it is always freeing the memory.  */
+  if (size == 0)
+    {
+      free (ptr);
+      return NULL;
+    }
+      
+  ret = bfd_realloc (ptr, size);
   if (ret == NULL)
     free (ptr);
 
   return ret;
 }
 
-/* Allocate memory using malloc and clear it.  */
+/*
+INTERNAL_FUNCTION
+	bfd_zmalloc
 
+SYNOPSIS
+	extern void * bfd_zmalloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+DESCRIPTION
+	Returns a pointer to an allocated block of memory that is at least
+	SIZE bytes long.  If SIZE is 0 then it will be treated as if it were
+	1.  If SIZE is too big then NULL will be returned.
+	
+	Returns NULL upon error and sets bfd_error.
+
+	If NULL is not returned then the allocated block of memory will
+	have been cleared.
+*/
 void *
 bfd_zmalloc (bfd_size_type size)
 {
   void *ptr = bfd_malloc (size);
 
-  if (ptr != NULL && size > 0)
-    memset (ptr, 0, (size_t) size);
+  if (ptr != NULL)
+    memset (ptr, 0, size ? (size_t) size : 1);
 
   return ptr;
 }
@@ -1085,28 +1170,26 @@ _bfd_read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
   return result;
 }
 
-/* Read in a LEB128 encoded value from ABFD starting at DATA.
+/* Read in a LEB128 encoded value from ABFD starting at *PTR.
    If SIGN is true, return a signed LEB128 value.
-   If LENGTH_RETURN is not NULL, return in it the number of bytes read.
+   *PTR is incremented by the number of bytes read.
    No bytes will be read at address END or beyond.  */
 
 bfd_vma
 _bfd_safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		       bfd_byte *data,
-		       unsigned int *length_return,
+		       bfd_byte **ptr,
 		       bool sign,
 		       const bfd_byte * const end)
 {
   bfd_vma result = 0;
-  unsigned int num_read = 0;
   unsigned int shift = 0;
   unsigned char byte = 0;
+  bfd_byte *data = *ptr;
 
   while (data < end)
     {
       byte = bfd_get_8 (abfd, data);
       data++;
-      num_read++;
       if (shift < 8 * sizeof (result))
 	{
 	  result |= ((bfd_vma) (byte & 0x7f)) << shift;
@@ -1116,8 +1199,7 @@ _bfd_safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
 	break;
     }
 
-  if (length_return != NULL)
-    *length_return = num_read;
+  *ptr = data;
 
   if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
     result |= -((bfd_vma) 1 << shift);

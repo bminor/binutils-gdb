@@ -113,6 +113,8 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	    return
 	}
 
+	set target_is_native [gdb_is_target_native]
+
 	# Set the follow-exec mode.
 	#
 	gdb_test_no_output "set follow-exec-mode $mode"
@@ -147,8 +149,18 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	#
 	if {$mode == "same"} {
 	    set expected_re "\\* 1.*process.*"
+	} elseif { $mode == "new" } {
+	    # If using the native target, we want to specifically check that the
+	    # process target, which was automatically pushed when running, was
+	    # automatically unpushed from inferior 1 on exec.  Use a
+	    # different regexp that verifies the Connection field is empty.
+	    if { $target_is_native } {
+		set expected_re "  1.*<null> +[string_to_regexp $binfile].*\r\n\\* 2.*process.*$testfile2 .*"
+	    } else {
+		set expected_re "  1.*null.*$testfile.*\r\n\\* 2.*process.*$testfile2 .*"
+	    }
 	} else {
-	    set expected_re "  1.*null.*$testfile.*\r\n\\* 2.*process.*$testfile2 .*"
+	    error "Invalid mode: $mode"
 	}
 
 	# Check that the inferior list is correct:

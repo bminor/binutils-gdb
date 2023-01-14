@@ -284,7 +284,7 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
     {
       ops = serial_interface_lookup ("terminal");
       if (!ops)
- 	ops = serial_interface_lookup ("hardwire");
+	ops = serial_interface_lookup ("hardwire");
     }
 
   if (!ops)
@@ -671,13 +671,13 @@ Use <CR>~. or <CR>~^D to break out."));
 
   add_basic_prefix_cmd ("serial", class_maintenance, _("\
 Set default serial/parallel port configuration."),
-			&serial_set_cmdlist, "set serial ",
+			&serial_set_cmdlist,
 			0/*allow-unknown*/,
 			&setlist);
 
   add_show_prefix_cmd ("serial", class_maintenance, _("\
 Show default serial/parallel port configuration."),
-		       &serial_show_cmdlist, "show serial ",
+		       &serial_show_cmdlist,
 		       0/*allow-unknown*/,
 		       &showlist);
 

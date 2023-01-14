@@ -20,33 +20,32 @@ import copy
 
 # A FrameDecorator that just returns gdb.Frame.pc () from 'function'.
 # We want to ensure that GDB correctly handles this case.
-class Function_Returns_Address (FrameDecorator):
-
+class Function_Returns_Address(FrameDecorator):
     def __init__(self, fobj):
-        super (Function_Returns_Address, self).__init__ (fobj)
+        super(Function_Returns_Address, self).__init__(fobj)
         self._fobj = fobj
 
-    def function (self):
-        frame = self.inferior_frame ()
-        return frame.pc ()
+    def function(self):
+        frame = self.inferior_frame()
+        return frame.pc()
 
-class Frame_Filter ():
 
-    def __init__ (self):
+class Frame_Filter:
+    def __init__(self):
         self.name = "function_returns_address"
         self.priority = 100
         self.enabled = True
-        gdb.frame_filters [self.name] = self
+        gdb.frame_filters[self.name] = self
 
-    def filter (self, frame_iter):
+    def filter(self, frame_iter):
         # Python 3.x moved the itertools.imap functionality to map(),
         # so check if it is available.
         if hasattr(itertools, "imap"):
-            frame_iter = itertools.imap (Function_Returns_Address,
-                                         frame_iter)
+            frame_iter = itertools.imap(Function_Returns_Address, frame_iter)
         else:
             frame_iter = map(Function_Returns_Address, frame_iter)
 
         return frame_iter
+
 
 Frame_Filter()

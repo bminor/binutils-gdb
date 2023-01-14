@@ -179,10 +179,7 @@ tui_rl_other_window (int count, int key)
 
   win_info = tui_next_win (tui_win_with_focus ());
   if (win_info)
-    {
-      tui_set_win_focus_to (win_info);
-      keypad (TUI_CMD_WIN->handle.get (), win_info != TUI_CMD_WIN);
-    }
+    tui_set_win_focus_to (win_info);
   return 0;
 }
 
@@ -507,6 +504,10 @@ tui_disable (void)
   tui_remove_hooks ();
   rl_startup_hook = 0;
   rl_already_prompted = 0;
+
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (0, NULL);
+#endif
 
   /* Leave curses and restore previous gdb terminal setting.  */
   endwin ();

@@ -49,7 +49,7 @@ proc fortran_int8 {} {
     } elseif {[test_compiler_info {gcc-*}]} {
 	return "integer\\(kind=8\\)"
     } elseif {[test_compiler_info {clang-*}]} {
-	return "integer*8"
+	return "integer\\*8"
     } elseif {[test_compiler_info {icc-*}]} {
 	return "INTEGER\\(8\\)"
     } else {

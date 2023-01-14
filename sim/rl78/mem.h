@@ -29,6 +29,8 @@ extern unsigned char memory[];
 
 void init_mem (void);
 
+void mem_set_mirror (int rom_base, int ram_base, int length);
+
 /* Pass the amount of bytes, like 2560 for 2.5k  */
 void mem_ram_size (int ram_bytes);
 void mem_rom_size (int rom_bytes);

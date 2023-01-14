@@ -826,7 +826,7 @@ struct aarch64_opcode
 typedef struct aarch64_opcode aarch64_opcode;
 
 /* Table describing all the AArch64 opcodes.  */
-extern aarch64_opcode aarch64_opcode_table[];
+extern const aarch64_opcode aarch64_opcode_table[];
 
 /* Opcode flags.  */
 #define F_ALIAS (1 << 0)

@@ -41,19 +41,10 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../common ../.. ../../config])
 
-SIM_AC_COMMON
-
 ... target specific additions ...
 
 SIM_AC_OUTPUT
 --- snip ---
-
-SIM_AC_COMMON:
-
-- invokes the autoconf macros most often used by the simulators
-- defines --enable/--with options usable by all simulators
-- initializes sim_link_files/sim_link_links as the set of symbolic links
-  to set up
 
 SIM_AC_OUTPUT:
 
@@ -180,7 +171,7 @@ got one to hand):
 	$  cd /tmp/$$
 	$  cvs checkout sim-no-testsuite libgloss-no-testsuite newlib-no-testsuite
 
-Configure things for an arbitrary simulator target (I've d10v for
+Configure things for an arbitrary simulator target (d10v is used here for
 convenience):
 
 	$  mkdir /tmp/$$/build
@@ -192,9 +183,10 @@ In the sim/ directory rebuild the headers:
 	$  cd sim/
 	$  make nltvals
 
-To add a new target:
+If the target uses the common syscall table (libgloss/syscall.h), then you're
+all set!  If the target has a custom syscall table, you need to declare it:
 
-	devo/sim/common/gennltvals.sh
+	devo/sim/common/gennltvals.py
 
 		Add your new processor target (you'll need to grub
 		around to find where your syscall.h lives).
@@ -277,8 +269,8 @@ Environment Simulation
 
 The simplest simulator doesn't include environment support -- it merely
 simulates the Instruction Set Architecture (ISA).  Once you're ready to move
-on to the next level, call the common macro in your configure.ac:
-SIM_AC_OPTION_ENVIRONMENT
+on to the next level, it's time to start handling the --env option.  It's
+enabled by default for all ports already.
 
 This will support for the user, virtual, and operating environments.  See the
 sim-config.h header for a more detailed description of them.  The former are
@@ -293,7 +285,7 @@ Userspace System Calls
 By default, the libgloss userspace is simulated.  That means the system call
 numbers and calling convention matches that of libgloss.  Simulating other
 userspaces (such as Linux) is pretty straightforward, but let's first focus
-on the basics.  The basic API is covered in include/gdb/callback.h.
+on the basics.  The basic API is covered in include/sim/callback.h.
 
 When an instruction is simulated that invokes the system call method (such as
 forcing a hardware trap or exception), your simulator code should set up the
@@ -395,8 +387,8 @@ Hardware Devices
 ================
 
 The simplest simulator doesn't include hardware device support.  Once you're
-ready to move on to the next level, call the common macro in your configure.ac:
-SIM_AC_OPTION_HARDWARE(yes,,devone devtwo devthree)
+ready to move on to the next level, declare in your Makefile.in:
+SIM_EXTRA_HW_DEVICES = devone devtwo devthree
 
 The basic hardware API is documented in common/hw-device.h.
 

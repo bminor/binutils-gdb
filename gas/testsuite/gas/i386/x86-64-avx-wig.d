@@ -58,7 +58,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 ca 5e d4       	vdivss %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e3 c9 41 d4 07    	vdppd  \$0x7,%xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e3 cd 40 d4 07    	vdpps  \$0x7,%ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c4 e3 f9 17 e1 07    	vextractps \$0x7,%xmm4,%rcx
+ +[a-f0-9]+:	c4 e3 f9 17 e1 07    	vextractps \$0x7,%xmm4,%ecx
  +[a-f0-9]+:	c4 e1 cd 7c d4       	vhaddpd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cf 7c d4       	vhaddps %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cd 7d d4       	vhsubpd %ymm4,%ymm6,%ymm2
@@ -157,10 +157,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 c9 65 d4       	vpcmpgtw %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e3 f9 63 f4 07    	vpcmpistri \$0x7,%xmm4,%xmm6
  +[a-f0-9]+:	c4 e3 f9 62 f4 07    	vpcmpistrm \$0x7,%xmm4,%xmm6
- +[a-f0-9]+:	c4 e3 f9 14 c0 00    	vpextrb \$0x0,%xmm0,%rax
+ +[a-f0-9]+:	c4 e3 f9 14 c0 00    	vpextrb \$0x0,%xmm0,%eax
  +[a-f0-9]+:	c4 e3 f9 14 00 00    	vpextrb \$0x0,%xmm0,\(%rax\)
- +[a-f0-9]+:	c4 e1 f9 c5 c0 00    	vpextrw \$0x0,%xmm0,%rax
- +[a-f0-9]+:	c4 e3 f9 15 c0 00    	vpextrw \$0x0,%xmm0,%rax
+ +[a-f0-9]+:	c4 e1 f9 c5 c0 00    	vpextrw \$0x0,%xmm0,%eax
+ +[a-f0-9]+:	c4 e3 f9 15 c0 00    	vpextrw \$0x0,%xmm0,%eax
  +[a-f0-9]+:	c4 e3 f9 15 00 00    	vpextrw \$0x0,%xmm0,\(%rax\)
  +[a-f0-9]+:	c4 e2 c9 02 d4       	vphaddd %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 03 d4       	vphaddsw %xmm4,%xmm6,%xmm2
@@ -169,9 +169,9 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 c9 06 d4       	vphsubd %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 07 d4       	vphsubsw %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 05 d4       	vphsubw %xmm4,%xmm6,%xmm2
- +[a-f0-9]+:	c4 e3 f9 20 c0 00    	vpinsrb \$0x0,%rax,%xmm0,%xmm0
+ +[a-f0-9]+:	c4 e3 f9 20 c0 00    	vpinsrb \$0x0,%eax,%xmm0,%xmm0
  +[a-f0-9]+:	c4 e3 f9 20 00 00    	vpinsrb \$0x0,\(%rax\),%xmm0,%xmm0
- +[a-f0-9]+:	c4 e1 f9 c4 c0 00    	vpinsrw \$0x0,%rax,%xmm0,%xmm0
+ +[a-f0-9]+:	c4 e1 f9 c4 c0 00    	vpinsrw \$0x0,%eax,%xmm0,%xmm0
  +[a-f0-9]+:	c4 e1 f9 c4 00 00    	vpinsrw \$0x0,\(%rax\),%xmm0,%xmm0
  +[a-f0-9]+:	c4 e2 c9 04 d4       	vpmaddubsw %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e1 c9 f5 d4       	vpmaddwd %xmm4,%xmm6,%xmm2

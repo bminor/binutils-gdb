@@ -23,21 +23,23 @@ if sys.version_info[0] > 2:
     basestring = str
     long = int
 
+
 class MpxBound128Printer:
     """Adds size field to a mpx __gdb_builtin_type_bound128 type."""
 
-    def __init__ (self, val):
+    def __init__(self, val):
         self.val = val
 
-    def to_string (self):
+    def to_string(self):
         upper = self.val["ubound"]
         lower = self.val["lbound"]
-        size  = (long) ((upper) - (lower))
+        size = (long)((upper) - (lower))
         if size > -1:
             size = size + 1
-        result = '{lbound = %s, ubound = %s} : size %s' % (lower, upper, size)
+        result = "{lbound = %s, ubound = %s} : size %s" % (lower, upper, size)
         return result
 
-gdb.printing.add_builtin_pretty_printer ('mpx_bound128',
-                                         '^builtin_type_bound128',
-                                         MpxBound128Printer)
+
+gdb.printing.add_builtin_pretty_printer(
+    "mpx_bound128", "^builtin_type_bound128", MpxBound128Printer
+)

@@ -445,6 +445,7 @@ SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
 TEXIDIR = $(srcdir)/../../texinfo/fsf
 info_TEXINFOS = bfd.texi
 bfd_TEXINFOS = $(DOCFILES) bfdsumm.texi
+AM_MAKEINFOFLAGS = --no-split
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 AM_CPPFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../intl -I../../intl
@@ -764,7 +765,7 @@ dvi-am: $(DVIS)
 
 html: html-am
 
-html-am: $(HTMLS)
+html-am: $(HTMLS) html-local
 
 info: info-am
 
@@ -915,12 +916,12 @@ uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
 .PHONY: all all-am check check-am clean clean-aminfo clean-generic \
 	clean-libtool cscopelist-am ctags-am dist-info distclean \
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	html-am html-local info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
 	mostlyclean-aminfo mostlyclean-generic mostlyclean-libtool pdf \
 	pdf-am ps ps-am tags-am uninstall uninstall-am \
@@ -1166,6 +1167,11 @@ bfdver.texi: $(srcdir)/Makefile.in
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install: install-info
+
+html-local: bfd/index.html
+bfd/index.html: bfd.texi $(bfd_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/bfd.texi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

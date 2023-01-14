@@ -98,10 +98,6 @@ extern int getdirentries(int fd, char *buf, int nbytes, long *basep);
 #undef HAVE_GETDIRENTRIES
 #endif
 
-#if (BSD < 199306) /* here BSD as just a bug */
-extern int errno;
-#endif
-
 #ifndef STATIC_INLINE_EMUL_NETBSD
 #define STATIC_INLINE_EMUL_NETBSD STATIC_INLINE
 #endif
@@ -767,8 +763,7 @@ do_gettimeofday(os_emul_data *emul,
   unsigned_word tz_addr = cpu_registers(processor)->gpr[arg0+1];
   struct timeval t;
   struct timezone tz;
-  int status = gettimeofday((t_addr != 0 ? &t : NULL),
-			    (tz_addr != 0 ? &tz : NULL));
+  int status = gettimeofday(&t, (tz_addr != 0 ? &tz : NULL));
   int err = errno;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])

@@ -151,3 +151,4 @@ run_dump_test "rop-checks"
 
 run_dump_test "dcbt"
 run_dump_test "pr27676"
+run_dump_test "raw"

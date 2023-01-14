@@ -26,7 +26,6 @@
 #include <machine/reg.h>
 
 #include "fbsd-nat.h"
-#include "aarch64-tdep.h"
 #include "aarch64-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
@@ -38,22 +37,6 @@ struct aarch64_fbsd_nat_target final : public fbsd_nat_target
 
 static aarch64_fbsd_nat_target the_aarch64_fbsd_nat_target;
 
-/* Determine if PT_GETREGS fetches REGNUM.  */
-
-static bool
-getregs_supplies (int regnum)
-{
-  return (regnum >= AARCH64_X0_REGNUM && regnum <= AARCH64_CPSR_REGNUM);
-}
-
-/* Determine if PT_GETFPREGS fetches REGNUM.  */
-
-static bool
-getfpregs_supplies (int regnum)
-{
-  return (regnum >= AARCH64_V0_REGNUM && regnum <= AARCH64_FPCR_REGNUM);
-}
-
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
@@ -61,29 +44,10 @@ void
 aarch64_fbsd_nat_target::fetch_registers (struct regcache *regcache,
 					  int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache->ptid ());
-
-  if (regnum == -1 || getregs_supplies (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
-
-      regcache->supply_regset (&aarch64_fbsd_gregset, regnum, &regs,
-			       sizeof (regs));
-    }
-
-  if (regnum == -1 || getfpregs_supplies (regnum))
-    {
-      struct fpreg fpregs;
-
-      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
-
-      regcache->supply_regset (&aarch64_fbsd_fpregset, regnum, &fpregs,
-			       sizeof (fpregs));
-    }
+  fetch_register_set<struct reg> (regcache, regnum, PT_GETREGS,
+				  &aarch64_fbsd_gregset);
+  fetch_register_set<struct fpreg> (regcache, regnum, PT_GETFPREGS,
+				    &aarch64_fbsd_fpregset);
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
@@ -93,35 +57,10 @@ void
 aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
 					  int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache->ptid ());
-
-  if (regnum == -1 || getregs_supplies (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
-
-      regcache->collect_regset (&aarch64_fbsd_gregset, regnum, &regs,
-			       sizeof (regs));
-
-      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't write registers"));
-    }
-
-  if (regnum == -1 || getfpregs_supplies (regnum))
-    {
-      struct fpreg fpregs;
-
-      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
-
-      regcache->collect_regset (&aarch64_fbsd_fpregset, regnum, &fpregs,
-				sizeof (fpregs));
-
-      if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
-    }
+  store_register_set<struct reg> (regcache, regnum, PT_GETREGS, PT_SETREGS,
+				  &aarch64_fbsd_gregset);
+  store_register_set<struct fpreg> (regcache, regnum, PT_GETFPREGS,
+				    PT_SETFPREGS, &aarch64_fbsd_fpregset);
 }
 
 void _initialize_aarch64_fbsd_nat ();

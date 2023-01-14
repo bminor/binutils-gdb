@@ -22,10 +22,11 @@
    specific simulator.  Normally this file will be kept small and the target
    details will live in other files.
 
-   For more specific details on these functions, see the gdb/remote-sim.h
-   header file.  */
+   For more specific details on these functions, see the sim/sim.h header
+   file.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "sim-options.h"
@@ -80,6 +81,10 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   char c;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Set default options before parsing user options.  */
+  current_alignment = STRICT_ALIGNMENT;
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

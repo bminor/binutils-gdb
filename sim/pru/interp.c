@@ -18,17 +18,20 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include "bfd.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "libiberty.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "pru.h"
 
@@ -742,6 +745,10 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   char c;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  current_alignment = STRICT_ALIGNMENT;
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

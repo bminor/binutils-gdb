@@ -40,6 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    (Originally, this code was in interp.c)
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 
 #include <stdlib.h>
@@ -421,7 +424,7 @@ store_fcr(sim_cpu *cpu,
     }
 }
 
-void
+static void
 update_fcsr (sim_cpu *cpu,
 	     address_word cia,
 	     sim_fpu_status status)

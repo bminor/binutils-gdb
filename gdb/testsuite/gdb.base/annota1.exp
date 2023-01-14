@@ -126,8 +126,8 @@ gdb_test_multiple "info break" "breakpoint info" {
 #
 #exp_internal 1
 set binexp [string_to_regexp $binfile]
-gdb_test_multiple "run" "run until main breakpoint" {
-    -re [join { "\r\n\032\032post-prompt\r\nStarting program: $binexp " \
+
+set run_re [join [list "\r\n\032\032post-prompt\r\nStarting program: $binexp " \
 		    "\(\(\r\nReading \[^\r\n\]+\)|\(\r\nwarning: File transfers from remote targets can be slow\[^\r\n\]+\)\)*" \
 		    "\(\r\nwarning: Skipping \[^\r\n\]+ .gdb_index section in \[^\r\n\]+\r\nDo \"set use-deprecated-index-sections on\" before the file is read\r\nto use the section anyway\\.\)?" \
 		    "\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n" \
@@ -146,7 +146,10 @@ gdb_test_multiple "run" "run until main breakpoint" {
 		    "\032\032frame-source-end\r\n\r\n\r\n" \
 		    "\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n" \
 		    "\032\032frame-end\r\n\r\n" \
-		    "\032\032stopped.*$gdb_prompt$" } ] {
+		    "\032\032stopped.*$gdb_prompt$" ] "" ]
+
+gdb_test_multiple "run" "run until main breakpoint" {
+    -re $run_re {
 	pass $gdb_test_name
     }
 }

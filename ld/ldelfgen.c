@@ -171,12 +171,15 @@ compare_link_order (const void *a, const void *b)
   else if (apos > bpos)
     return 1;
 
-  /* The only way we should get matching LMAs is when the first of two
-     sections has zero size.  */
-  if (asec->size < bsec->size)
-    return -1;
-  else if (asec->size > bsec->size)
-    return 1;
+  if (! bfd_link_relocatable (&link_info))
+    {
+      /* The only way we should get matching LMAs is when
+	 the first of the two sections has zero size.  */
+      if (asec->size < bsec->size)
+	return -1;
+      else if (asec->size > bsec->size)
+	return 1;
+    }
 
   /* If they are both zero size then they almost certainly have the same
      VMA and thus are not ordered with respect to each other.  Test VMA

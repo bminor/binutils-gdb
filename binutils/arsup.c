@@ -180,7 +180,11 @@ ar_open (char *name, int t)
 	  bfd *element;
 	  bfd *ibfd;
 
+#if BFD_SUPPORTS_PLUGINS	  
+	  ibfd = bfd_openr (name, "plugin");
+#else
 	  ibfd = bfd_openr (name, NULL);
+#endif
 
 	  if (!ibfd)
 	    {

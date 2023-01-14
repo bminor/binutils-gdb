@@ -127,37 +127,6 @@ struct entry_info
   unsigned initialized : 1;
 };
 
-/* Sections in an objfile.  The section offsets are stored in the
-   OBJFILE.  */
-
-struct obj_section
-{
-  /* BFD section pointer */
-  struct bfd_section *the_bfd_section;
-
-  /* Objfile this section is part of.  */
-  struct objfile *objfile;
-
-  /* True if this "overlay section" is mapped into an "overlay region".  */
-  int ovly_mapped;
-};
-
-/* Relocation offset applied to S.  */
-#define obj_section_offset(s)						\
-  (((s)->objfile->section_offsets)[gdb_bfd_section_index ((s)->objfile->obfd, (s)->the_bfd_section)])
-
-/* The memory address of section S (vma + offset).  */
-#define obj_section_addr(s)				      		\
-  (bfd_section_vma (s->the_bfd_section)					\
-   + obj_section_offset (s))
-
-/* The one-passed-the-end memory address of section S
-   (vma + size + offset).  */
-#define obj_section_endaddr(s)						\
-  (bfd_section_vma (s->the_bfd_section)					\
-   + bfd_section_size ((s)->the_bfd_section)				\
-   + obj_section_offset (s))
-
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
     if (osect->the_bfd_section == NULL)					\
@@ -411,29 +380,7 @@ private:
 
 /* A range adapter wrapping separate_debug_iterator.  */
 
-class separate_debug_range
-{
-public:
-
-  explicit separate_debug_range (struct objfile *objfile)
-    : m_objfile (objfile)
-  {
-  }
-
-  separate_debug_iterator begin ()
-  {
-    return separate_debug_iterator (m_objfile);
-  }
-
-  separate_debug_iterator end ()
-  {
-    return separate_debug_iterator (nullptr);
-  }
-
-private:
-
-  struct objfile *m_objfile;
-};
+typedef iterator_range<separate_debug_iterator> separate_debug_range;
 
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
@@ -476,51 +423,28 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
-  typedef next_adapter<struct compunit_symtab> compunits_range;
-
   /* A range adapter that makes it possible to iterate over all
      compunits in one objfile.  */
 
-  compunits_range compunits ()
+  compunit_symtab_range compunits ()
   {
-    return compunits_range (compunit_symtabs);
+    return compunit_symtab_range (compunit_symtabs);
   }
 
   /* A range adapter that makes it possible to iterate over all
      minimal symbols of an objfile.  */
 
-  class msymbols_range
-  {
-  public:
-
-    explicit msymbols_range (struct objfile *objfile)
-      : m_objfile (objfile)
-    {
-    }
-
-    minimal_symbol_iterator begin () const
-    {
-      return minimal_symbol_iterator (m_objfile->per_bfd->msymbols.get ());
-    }
-
-    minimal_symbol_iterator end () const
-    {
-      return minimal_symbol_iterator
-	(m_objfile->per_bfd->msymbols.get ()
-	 + m_objfile->per_bfd->minimal_symbol_count);
-    }
-
-  private:
-
-    struct objfile *m_objfile;
-  };
+  typedef iterator_range<minimal_symbol_iterator> msymbols_range;
 
   /* Return a range adapter for iterating over all minimal
      symbols.  */
 
   msymbols_range msymbols ()
   {
-    return msymbols_range (this);
+    auto start = minimal_symbol_iterator (per_bfd->msymbols.get ());
+    auto end = minimal_symbol_iterator (per_bfd->msymbols.get ()
+					+ per_bfd->minimal_symbol_count);
+    return msymbols_range (start, end);
   }
 
   /* Return a range adapter for iterating over all the separate debug
@@ -528,7 +452,9 @@ public:
 
   separate_debug_range separate_debug_objfiles ()
   {
-    return separate_debug_range (this);
+    auto start = separate_debug_iterator (this);
+    auto end = separate_debug_iterator (nullptr);
+    return separate_debug_range (start, end);
   }
 
   CORE_ADDR text_section_offset () const
@@ -565,13 +491,30 @@ public:
 
   bool has_partial_symbols ();
 
+  /* Return true if this objfile has any unexpanded symbols.  A return
+     value of false indicates either, that this objfile has all its
+     symbols fully expanded (i.e. fully read in), or that this objfile has
+     no symbols at all (i.e. no debug information).  */
+  bool has_unexpanded_symtabs ();
+
   /* See quick_symbol_functions.  */
   struct symtab *find_last_source_symtab ();
 
   /* See quick_symbol_functions.  */
   void forget_cached_source_info ();
 
-  /* See quick_symbol_functions.  */
+  /* Expand and iterate over each "partial" symbol table in OBJFILE
+     where the source file is named NAME.
+
+     If NAME is not absolute, a match after a '/' in the symbol table's
+     file name will also work, REAL_PATH is NULL then.  If NAME is
+     absolute then REAL_PATH is non-NULL absolute file name as resolved
+     via gdb_realpath from NAME.
+
+     If a match is found, the "partial" symbol table is expanded.
+     Then, this calls iterate_over_some_symtabs (or equivalent) over
+     all newly-created symbol tables, passing CALLBACK to it.
+     The result of this call is returned.  */
   bool map_symtabs_matching_filename
     (const char *name, const char *real_path,
      gdb::function_view<bool (symtab *)> callback);
@@ -595,20 +538,24 @@ public:
   /* See quick_symbol_functions.  */
   void dump ();
 
-  /* See quick_symbol_functions.  */
+  /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
+     the corresponding symbol tables are loaded.  */
   void expand_symtabs_for_function (const char *func_name);
 
   /* See quick_symbol_functions.  */
   void expand_all_symtabs ();
 
-  /* See quick_symbol_functions.  */
+  /* Read all symbol tables associated with OBJFILE which have
+     symtab_to_fullname equal to FULLNAME.
+     This is for the purposes of examining code only, e.g., expand_line_sal.
+     The routine may ignore debug info that is known to not be useful with
+     code, e.g., DW_TAG_type_unit for dwarf debug info.  */
   void expand_symtabs_with_fullname (const char *fullname);
 
   /* See quick_symbol_functions.  */
-  void map_matching_symbols
+  void expand_matching_symbols
     (const lookup_name_info &name, domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare);
 
   /* See quick_symbol_functions.  */
@@ -643,6 +590,27 @@ public:
   /* See quick_symbol_functions.  */
   void require_partial_symbols (bool verbose);
 
+  /* Return the relocation offset applied to SECTION.  */
+  CORE_ADDR section_offset (bfd_section *section) const
+  {
+    /* The section's owner can be nullptr if it is one of the _bfd_std_section
+       section.  */
+    gdb_assert (section->owner == nullptr || section->owner == this->obfd);
+
+    int idx = gdb_bfd_section_index (this->obfd, section);
+    return this->section_offsets[idx];
+  }
+
+  /* Set the relocation offset applied to SECTION.  */
+  void set_section_offset (bfd_section *section, CORE_ADDR offset)
+  {
+    /* The section's owner can be nullptr if it is one of the _bfd_std_section
+       section.  */
+    gdb_assert (section->owner == nullptr || section->owner == this->obfd);
+
+    int idx = gdb_bfd_section_index (this->obfd, section);
+    this->section_offsets[idx] = offset;
+  }
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -814,6 +782,47 @@ struct objfile_deleter
 /* A unique pointer that holds an objfile.  */
 
 typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
+
+
+/* Sections in an objfile.  The section offsets are stored in the
+   OBJFILE.  */
+
+struct obj_section
+{
+  /* Relocation offset applied to the section.  */
+  CORE_ADDR offset () const
+  {
+    return this->objfile->section_offset (this->the_bfd_section);
+  }
+
+  /* Set the relocation offset applied to the section.  */
+  void set_offset (CORE_ADDR offset)
+  {
+    this->objfile->set_section_offset (this->the_bfd_section, offset);
+  }
+
+  /* The memory address of the section (vma + offset).  */
+  CORE_ADDR addr () const
+  {
+    return bfd_section_vma (this->the_bfd_section) + this->offset ();
+  }
+
+  /* The one-passed-the-end memory address of the section
+     (vma + size + offset).  */
+  CORE_ADDR endaddr () const
+  {
+    return this->addr () + bfd_section_size (this->the_bfd_section);
+  }
+
+  /* BFD section pointer */
+  struct bfd_section *the_bfd_section;
+
+  /* Objfile this section is part of.  */
+  struct objfile *objfile;
+
+  /* True if this "overlay section" is mapped into an "overlay region".  */
+  int ovly_mapped;
+};
 
 /* Declarations for functions defined in objfiles.c */
 

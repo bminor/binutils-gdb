@@ -3740,8 +3740,14 @@ elf_xtensa_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
   int offset;
   unsigned int size;
 
+  if (elf_tdata (abfd) == NULL
+      || elf_tdata (abfd)->core == NULL)
+    return false;
+
   /* The size for Xtensa is variable, so don't try to recognize the format
      based on the size.  Just assume this is GNU/Linux.  */
+  if (note == NULL || note->descsz < 28)
+    return false;
 
   /* pr_cursig */
   elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
@@ -3757,7 +3763,6 @@ elf_xtensa_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
 					  size, note->descpos + offset);
 }
-
 
 static bool
 elf_xtensa_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)

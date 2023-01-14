@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "auto-load.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "inferior.h"
@@ -95,7 +96,7 @@ python_on_normal_stop (struct bpstats *bs, int print_frame)
   if (inferior_ptid == null_ptid)
     return;
 
-  stop_signal = inferior_thread ()->suspend.stop_signal;
+  stop_signal = inferior_thread ()->stop_signal ();
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
@@ -424,6 +425,23 @@ infpy_get_num (PyObject *self, void *closure)
   INFPY_REQUIRE_VALID (inf);
 
   return gdb_py_object_from_longest (inf->inferior->num).release ();
+}
+
+/* Return the connection number of the given inferior, or None if a
+   connection does not exist.  */
+
+static PyObject *
+infpy_get_connection_num (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  process_stratum_target *target = inf->inferior->process_target ();
+  if (target == nullptr)
+    Py_RETURN_NONE;
+
+  return gdb_py_object_from_longest (target->connection_number).release ();
 }
 
 static PyObject *
@@ -891,6 +909,14 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 	  inferior_to_inferior_object (current_inferior ()).release ());
 }
 
+void _initialize_py_inferior ();
+void
+_initialize_py_inferior ()
+{
+  infpy_inf_data_key =
+    register_inferior_data_with_cleanup (NULL, py_free_inferior);
+}
+
 int
 gdbpy_initialize_inferior (void)
 {
@@ -901,21 +927,27 @@ gdbpy_initialize_inferior (void)
 			      (PyObject *) &inferior_object_type) < 0)
     return -1;
 
-  infpy_inf_data_key =
-    register_inferior_data_with_cleanup (NULL, py_free_inferior);
-
-  gdb::observers::new_thread.attach (add_thread_object);
-  gdb::observers::thread_exit.attach (delete_thread_object);
-  gdb::observers::normal_stop.attach (python_on_normal_stop);
-  gdb::observers::target_resumed.attach (python_on_resume);
-  gdb::observers::inferior_call_pre.attach (python_on_inferior_call_pre);
-  gdb::observers::inferior_call_post.attach (python_on_inferior_call_post);
-  gdb::observers::memory_changed.attach (python_on_memory_change);
-  gdb::observers::register_changed.attach (python_on_register_change);
-  gdb::observers::inferior_exit.attach (python_inferior_exit);
-  gdb::observers::new_objfile.attach (python_new_objfile);
-  gdb::observers::inferior_added.attach (python_new_inferior);
-  gdb::observers::inferior_removed.attach (python_inferior_deleted);
+  gdb::observers::new_thread.attach (add_thread_object, "py-inferior");
+  gdb::observers::thread_exit.attach (delete_thread_object, "py-inferior");
+  gdb::observers::normal_stop.attach (python_on_normal_stop, "py-inferior");
+  gdb::observers::target_resumed.attach (python_on_resume, "py-inferior");
+  gdb::observers::inferior_call_pre.attach (python_on_inferior_call_pre,
+					    "py-inferior");
+  gdb::observers::inferior_call_post.attach (python_on_inferior_call_post,
+					     "py-inferior");
+  gdb::observers::memory_changed.attach (python_on_memory_change,
+					 "py-inferior");
+  gdb::observers::register_changed.attach (python_on_register_change,
+					   "py-inferior");
+  gdb::observers::inferior_exit.attach (python_inferior_exit, "py-inferior");
+  /* Need to run after auto-load's new_objfile observer, so that
+     auto-loaded pretty-printers are available.  */
+  gdb::observers::new_objfile.attach
+    (python_new_objfile, "py-inferior",
+     { &auto_load_new_objfile_observer_token });
+  gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
+  gdb::observers::inferior_removed.attach (python_inferior_deleted,
+					   "py-inferior");
 
   membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)
@@ -928,6 +960,8 @@ gdbpy_initialize_inferior (void)
 static gdb_PyGetSetDef inferior_object_getset[] =
 {
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
+  { "connection_num", infpy_get_connection_num, NULL,
+    "ID of inferior's connection, as assigned by GDB.", NULL },
   { "pid", infpy_get_pid, NULL, "PID of inferior, as assigned by the OS.",
     NULL },
   { "was_attached", infpy_get_was_attached, NULL,

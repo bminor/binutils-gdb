@@ -144,7 +144,11 @@ proc check_history { hist } {
 	lappend hist_lines "    $idx  $h"
 	incr idx
     }
-    set pattern [eval multi_line $hist_lines]
+    if { [llength $hist_lines] == 1 } {
+	set pattern [lindex $hist_lines 0]
+    } else {
+	set pattern [eval multi_line $hist_lines]
+    }
 
     # Check the history.
     gdb_test "show commands" "$pattern.*"

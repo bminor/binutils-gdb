@@ -23,8 +23,12 @@
 #ifndef SIM_CORE_C
 #define SIM_CORE_C
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 #include "libiberty.h"
 
 #if (WITH_HW)
@@ -454,7 +458,7 @@ sim_core_translate (sim_core_mapping *mapping,
 
 
 #if EXTERN_SIM_CORE_P
-/* See include/gdb/remote-sim.h.  */
+/* See include/sim/sim.h.  */
 char *
 sim_memory_map (SIM_DESC sd)
 {

@@ -29,8 +29,7 @@ class obsd_nat_target : public inf_ptrace_target
   void update_thread_list () override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
-#ifdef PT_GET_PROCESS_STATE
-  void follow_fork (bool, bool) override;
+  void follow_fork (inferior *inf, ptid_t, target_waitkind, bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
 
@@ -39,7 +38,6 @@ class obsd_nat_target : public inf_ptrace_target
   void post_startup_inferior (ptid_t) override;
 
   void post_attach (int) override;
-#endif
 };
 
 #endif /* obsd-nat.h */

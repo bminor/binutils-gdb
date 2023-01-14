@@ -127,6 +127,10 @@ int hppa_fix_adjustable (struct fix *);
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
+/* The PA needs this for PIC code generation.  */
+#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
+  (md_register_arithmetic || (SEG) != reg_section)
+
 #ifdef OBJ_SOM
 /* If a symbol is imported, but never used, then the symbol should
    *not* end up in the symbol table.  Likewise for absolute symbols

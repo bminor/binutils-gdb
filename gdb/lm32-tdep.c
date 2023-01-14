@@ -28,9 +28,6 @@
 #include "remote.h"
 #include "gdbcore.h"
 #include "gdb/sim-lm32.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
-#include "sim-regno.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "trad-frame.h"
@@ -458,6 +455,7 @@ lm32_frame_prev_register (struct frame_info *this_frame,
 }
 
 static const struct frame_unwind lm32_frame_unwind = {
+  "lm32 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   lm32_frame_this_id,

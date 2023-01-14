@@ -1,3 +1,382 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_RESERVED_BITS.
+	(sim_reserved_bits): Delete.
+	* m4/sim_ac_option_reserved_bits.m4: Delete first arg.  Define
+	WITH_RESERVED_BITS.
+	* m4/sim_ac_output.m4 (sim_reserved_bits): Delete.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Remove [true] from m32r SIM_TARGET call.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Remove [true] from cris, frv, iq2000, and lm32
+	SIM_TARGET calls.  Include frv/acinclude.m4.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_SCACHE.
+	(sim_scache): Delete.
+	* m4/sim_ac_option_scache.m4: Delete first arg.  Define WITH_SCACHE.
+	* m4/sim_ac_output.m4 (sim_scache): Delete.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Remove [true] from bfin SIM_TARGET call.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim_default_model): Delete.
+	* m4/sim_ac_output.m4 (sim_default_model): Likewise.
+	* configure, Makefile.in: Regenerate.
+	* m4/sim_ac_option_default_model.m4: Removed.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_option_warnings.m4: Add -Wunused-but-set-parameter.
+	* configure: Regenerate.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_option_warnings.m4: Add -Wno-error=maybe-uninitialized.
+	* configure: Regenerate.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move TERMCAP and READLINE variables from
+	erc32/Makefile.in.
+	* configure.ac: Remove [true] from erc32 SIM_TARGET call.
+	* m4/sim_ac_platform.m4: Check for cygwin, termcap, and readline.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move SDL_CFLAGS & SDL_LIBS from bfin/Makefile.in.
+	* m4/sim_ac_platform.m4: Call PKG_CHECK_MODULES and export SDL_CFLAGS
+	and SDL_LIBS.
+	* m4/sim_ac_toolchain.m4: Call PKG_PROG_PKG_CONFIG.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_BUILD_TARGET): Simplify sed script.
+	* configure: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Update rx SIM_TARGET call.  Include rx/acinclude.m4.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (SUBDIRS): Add $(SIM_SUBDIRS).
+	* configure.ac (SIM_SUBDIRS): Define.
+	(SIM_COMMON_BUILD): New conditional.
+	(SIM_BUILD_TARGET): Update to take a 2nd arg.
+	(SIM_TARGET): Update to take a 4th arg.  Update callers.
+	(sim_bitsize, sim_float, sim_scache, sim_default_model,
+	sim_reserved_bits): Define.
+	* m4/sim_ac_output.m4 (SIM_COMMON_BUILD): New conditional.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move sim-hw settings from common/Make-common.in.
+	* configure.ac: Call SIM_AC_OPTION_HARDWARE.
+	* m4/sim_ac_option_hardware.m4: Use AM_CONDITIONAL for SIM_ENABLE_HW.
+	* m4/sim_ac_output.m4: Do not require SIM_AC_OPTION_HARDWARE.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Change SIM_AC_OPTION_HARDWARE to
+	SIM_EXTRA_HW_DEVICES.
+	* m4/sim_ac_option_hardware.m4: Remove first argument, and change
+	configure option to a boolean.  Delete device list.
+	* m4/sim_ac_output.m4: Delete sim_hw variables.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING (SIM_AC_COMMON): Delete mention.
+	* m4/sim_ac_common.m4: Removed.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in (MAINT): Define.
+	* m4/sim_ac_common.m4: Delete AM_MAINTAINER_MODE call.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in (CGEN_MAINT, CGENDIR): Define.
+	* configure.ac: Call SIM_AC_OPTION_CGEN_MAINT.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (AM_CPPFLAGS): Add $(SIM_INLINE).
+	* arch-subdir.mk.in (SIM_INLINE): Define.
+	* configure.ac: Call SIM_AC_OPTION_INLINE.
+	* m4/sim_ac_common.m4: Delete SIM_AC_OPTION_INLINE call.
+	* m4/sim_ac_option_inline.m4: Output SIM_INLINE.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in (DTC): Define.
+	* m4/sim_ac_toolchain.m4: Call AC_CHECK_TOOL.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move intl vars from common/Make-common.in.
+	* m4/sim_ac_common.m4: Move ZW_GNU_GETTEXT_SISTER_DIR call ...
+	* m4/sim_ac_platform.m4: ... here.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move dependency vars from common/Make-common.in.
+	* configure.ac (SIM_BUILD_TARGET): New macro.
+	(SIM_TARGET): Call SIM_BUILD_TARGET.
+	(example): Change AC_CONFIG_SUBDIRS to SIM_BUILD_TARGET.
+	* m4/sim_ac_common.m4: Delete AC_PROG_CC & AC_PROG_INSTALL require,
+	and delete ZW_CREATE_DEPDIR & ZW_PROG_COMPILER_DEPENDENCIES.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move toolchain vars from common/Make-common.in.
+	* m4/sim_ac_common.m4: Delete SIM_AC_TOOLCHAIN call.  Require
+	AC_PROG_CC and AC_PROG_INSTALL.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in (zlibdir): New variable.
+	(@PLUGINS_TRUE@LIBDL): New variable.
+	* m4/sim_ac_common.m4: Move bfd dep calls ...
+	* m4/sim_ac_platform.m4: ... here.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in (COMMON_LIBS): New variable.
+	* m4/sim_ac_common.m4: Delete AC_CHECK_LIB calls.
+	* m4/sim_ac_option_hardware.m4: Likewise.
+	* m4/sim_ac_platform.m4: Call AC_CHECK_LIB.
+	* config.h.in, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (AM_CFLAGS): New variable.
+	* arch-subdir.mk.in (WARN_CFLAGS, WERROR_CFLAGS): New variables.
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* m4/sim_ac_output.m4: Delete SIM_AC_OPTION_WARNINGS require.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_option_warnings.m4: Delete 1st arg to macro.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Output arch-subdir.mk.
+	* Makefile.in, configure: Regenerate.
+	* arch-subdir.mk.in: New file.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN.
+	* m4/sim_ac_option_endian.m4: Delete wire & default arguments.
+	* m4/sim_ac_output.m4: Delete sim_alignment & sim_endian.
+	* aclocal.m4, Makefile.in, config.h.in, configure: Regenerate.
+
+2021-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/Make-common.in (COMPILE, libsim.a, run$(EXEEXT),
+	gentmap.o, gentmap): Make rules silent.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Delete AC_EXEEXT call.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Delete AC_CONFIG_HEADERS call.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_option_hardware.m4: Delete AC_DEFINE_UNQUOTED call.
+	Add -DHAVE_DV_SOCKSER to sim_hw_cflags.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Regenerate.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call AM_SILENT_RULES.
+	* Makefile.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_platform.m4: Delete sys/select.h.
+	* config.h.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ALIGNMENT.
+	* m4/sim_ac_option_alignment.m4: Delete wire and default alignment.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Define PKGVERSION & REPORT_BUGS_TO.
+	* m4/sim_ac_common.m4: Delete calls to ACX_PKGVERSION & ACX_BUGURL.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_DEBUG, SIM_AC_OPTION_STDIO,
+	SIM_AC_OPTION_TRACE, and SIM_AC_OPTION_PROFILE.
+	* m4/sim_ac_common.m4: Delete calls to SIM_AC_OPTION_DEBUG,
+	SIM_AC_OPTION_STDIO, SIM_AC_OPTION_TRACE, and SIM_AC_OPTION_PROFILE.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Replace --enable-sim-debug, --enable-sim-stdio,
+	--enable-sim-trace, and --enable-sim-profile with calls to
+	SIM_AC_OPTION_DEBUG, SIM_AC_OPTION_STDIO, SIM_AC_OPTION_TRACE, and
+	SIM_AC_OPTION_PROFILE.
+	* m4/sim_ac_option_debug.m4: New file.
+	* m4/sim_ac_option_profile.m4: New file.
+	* m4/sim_ac_option_stdio.m4: New file.
+	* m4/sim_ac_option_trace.m4: New file.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_platform.m4: Check more headers, funcs, structs, and
+	types.
+	* config.h.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ENVIRONMENT.
+	* m4/sim_ac_common.m4: Delete call to SIM_AC_OPTION_ENVIRONMENT.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ASSERT.
+	* m4/sim_ac_common.m4: Delete call to SIM_AC_OPTION_ASSERT.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call AC_CONFIG_HEADERS and SIM_AC_PLATFORM.
+	* m4/sim_ac_common.m4: Delete calls to AC_CHECK_HEADERS_ONCE,
+	AC_CHECK_FUNCS_ONCE, AC_CHECK_MEMBERS, AC_CHECK_TYPES, and
+	AC_TYPE_SIGNAL.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+	* config.h.in: New file.
+	* m4/sim_ac_platform.m4: New file.
+
+2021-06-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am: Include common/local.mk.
+	(SIM_ALL_RECURSIVE_DEPS): Define.
+	(all-recursive): New rule.
+	* Makefile.in: Regenerated.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (pkginclude_HEADERS): Define.
+	* Makefile.in: Regenerated.
+
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Check for __int128 type.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Update callback.h path.
+
+2021-05-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete mention of SIM_AC_OPTION_ENVIRONMENT.
+
+2021-05-12  Luis Machado  <luis.machado@linaro.org>
+
+	* d10v/interp.c (sim_create_inferior): Fix memset call.
+
+2021-05-07  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* Makefile.in: Rebuild.
+
+2021-05-04  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.am (AM_CPPFLAGS): New variable.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_toolchain.m4 (SIM_AC_TOOLCHAIN): Define AR_FOR_BUILD and
+	RANLIB_FOR_BUILD.
+	* configure, Makefile.in: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (AC_CHECK_FUNCS_ONCE): Add strsignal.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING (nltvals.def): Update to gennltvals.py.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_output.m4 (SIM_AC_OUTPUT): Require SIM_AC_OPTION_HARDWARE.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* m4/sim_ac_option_hardware.m4 (SIM_AC_OPTION_HARDWARE): Replace [$1]
+	with yes.  Delete test [$2].  Change [$3] to [$1].  Update comments.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Don't check for sys/time.h
+	or sys/times.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Don't check for make.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* m4/sim_ac_option_warnings.m4 (SIM_AC_OPTION_WARNINGS): Use
+	-Werror when probing for supported warning flags.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Change AC_CHECK_HEADERS to
+	AC_CHECK_HEADERS_ONCE, merge calls, and sort args.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Change AC_CHECK_FUNCS to AC_CHECK_FUNCS_ONCE,
+	merge calls, and sort args.
+
 2021-04-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Add --example-sims option.

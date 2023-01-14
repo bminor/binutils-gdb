@@ -39,7 +39,7 @@ struct hw_event *hw_event_queue_schedule_tracef
  hw_event_callback *handler,
  void *data,
  const char *fmt,
- ...) __attribute__ ((format (printf, 5, 6)));
+ ...) ATTRIBUTE_NULL_PRINTF (5, 6);
 
 struct hw_event *hw_event_queue_schedule_vtracef
 (struct hw *me,
@@ -47,7 +47,7 @@ struct hw_event *hw_event_queue_schedule_vtracef
  hw_event_callback *handler,
  void *data,
  const char *fmt,
- va_list ap);
+ va_list ap) ATTRIBUTE_NULL_PRINTF (5, 0);
 
 
 void hw_event_queue_deschedule

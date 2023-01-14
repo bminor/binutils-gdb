@@ -730,7 +730,8 @@ typedef std::string (gdbarch_memtag_to_string_ftype) (struct gdbarch *gdbarch, s
 extern std::string gdbarch_memtag_to_string (struct gdbarch *gdbarch, struct value *tag);
 extern void set_gdbarch_memtag_to_string (struct gdbarch *gdbarch, gdbarch_memtag_to_string_ftype *memtag_to_string);
 
-/* Return true if ADDRESS contains a tag and false otherwise. */
+/* Return true if ADDRESS contains a tag and false otherwise.  ADDRESS
+   must be either a pointer or a reference type. */
 
 typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, struct value *address);
 extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address);
@@ -1781,24 +1782,22 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: NULL (ZERO).  */
-  const struct bfd_arch_info *bfd_arch_info;
+  gdbarch_info ()
+    /* Ensure the union is zero-initialized.  Relies on the fact that there's
+       no member larger than TDESC_DATA.  */
+    : tdesc_data ()
+  {}
 
-  /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  enum bfd_endian byte_order;
+  const struct bfd_arch_info *bfd_arch_info = nullptr;
 
-  enum bfd_endian byte_order_for_code;
+  enum bfd_endian byte_order = BFD_ENDIAN_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
-  bfd *abfd;
+  enum bfd_endian byte_order_for_code = BFD_ENDIAN_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
+  bfd *abfd = nullptr;
+
   union
     {
-      /* Architecture-specific information.  The generic form for targets
-	 that have extra requirements.  */
-      struct gdbarch_tdep_info *tdep_info;
-
       /* Architecture-specific target description data.  Numerous targets
 	 need only this, so give them an easy way to hold it.  */
       struct tdesc_arch_data *tdesc_data;
@@ -1809,11 +1808,9 @@ struct gdbarch_info
       int *id;
     };
 
-  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
-  enum gdb_osabi osabi;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
-  const struct target_desc *target_desc;
+  const struct target_desc *target_desc = nullptr;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1887,8 +1884,8 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
 /* Helper function.  Find an architecture matching info.
 
-   INFO should be initialized using gdbarch_info_init, relevant fields
-   set, and then finished using gdbarch_info_fill.
+   INFO should have relevant fields set, and then finished using
+   gdbarch_info_fill.
 
    Returns the corresponding architecture, or NULL if no matching
    architecture was found.  */

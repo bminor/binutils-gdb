@@ -18,6 +18,9 @@
     
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "hw-main.h"
 

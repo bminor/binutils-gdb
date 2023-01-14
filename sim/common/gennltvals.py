@@ -37,12 +37,13 @@ from typing import Iterable, List, TextIO
 
 PROG = Path(__file__).name
 
-# Unfortunately, each newlib/libgloss port has seen fit to define their own
+# Unfortunately, many newlib/libgloss ports have seen fit to define their own
 # syscall.h file.  This means that system call numbers can vary for each port.
 # Support for all this crud is kept here, rather than trying to get too fancy.
 # If you want to try to improve this, please do, but don't break anything.
-# Note that there is a standard syscall.h file (libgloss/syscall.h) now which
-# hopefully more targets can use.
+#
+# If a target isn't listed here, it gets the standard syscall.h file (see
+# libgloss/syscall.h) which hopefully new targets will use.
 #
 # NB: New ports should use libgloss, not newlib.
 TARGET_DIRS = {
@@ -51,29 +52,10 @@ TARGET_DIRS = {
     'i960': 'libgloss/i960',
     'mcore': 'libgloss/mcore',
     'riscv': 'libgloss/riscv/machine',
+    'sh': 'newlib/libc/sys/sh/sys',
     'v850': 'libgloss/v850/sys',
 }
-TARGETS = {
-    'bfin',
-    'cr16',
-    'd10v',
-    'fr30',
-    'frv',
-    'i960',
-    'lm32',
-    'm32r',
-    'mcore',
-    'mn10200',
-    'mn10300',
-    'msp430',
-    'pru',
-    'riscv',
-    'sparc',
-    'v850',
-}
 
-# Make sure TARGET_DIRS doesn't gain any typos.
-assert not set(TARGET_DIRS) - TARGETS
 
 # The header for the generated def file.
 FILE_HEADER = f"""\
@@ -97,11 +79,9 @@ def gentvals(output: TextIO, cpp: str, srctype: str, srcdir: Path,
         fullpath = srcdir / header
         assert fullpath.exists(), f'{fullpath} does not exist'
 
-    if target is None:
-        print(f'#ifdef {srctype}_defs', file=output)
-    else:
+    if target is not None:
         print(f'#ifdef NL_TARGET_{target}', file=output)
-        print(f'#ifdef {srctype}_defs', file=output)
+    print(f'#ifdef {srctype}_defs', file=output)
 
     print('\n'.join(f'/* from {x} */' for x in headers), file=output)
 
@@ -131,13 +111,13 @@ def gentvals(output: TextIO, cpp: str, srctype: str, srcdir: Path,
         if line.startswith('DEFVAL '):
             print(line[6:].rstrip(), file=output)
 
+    print(f'#undef {srctype}_defs', file=output)
     if target is None:
         print(f'/* end {srctype} target macros */', file=output)
-        print('#endif', file=output)
     else:
         print(f'/* end {target} {srctype} target macros */', file=output)
         print('#endif', file=output)
-        print('#endif', file=output)
+    print('#endif', file=output)
 
 
 def gen_common(output: TextIO, newlib: Path, cpp: str):
@@ -157,10 +137,13 @@ def gen_common(output: TextIO, newlib: Path, cpp: str):
 
 def gen_targets(output: TextIO, newlib: Path, cpp: str):
     """Generate the target-specific lists."""
-    for target in sorted(TARGETS):
-        subdir = TARGET_DIRS.get(target, 'libgloss')
+    for target, subdir in sorted(TARGET_DIRS.items()):
         gentvals(output, cpp, 'sys', newlib / subdir, ('syscall.h',),
                  r'SYS_[_a-zA-Z0-9]*', target=target)
+
+    # Then output the common syscall targets.
+    gentvals(output, cpp, 'sys', newlib / 'libgloss', ('syscall.h',),
+             r'SYS_[_a-zA-Z0-9]*')
 
 
 def gen(output: TextIO, newlib: Path, cpp: str):

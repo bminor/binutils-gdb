@@ -18,11 +18,14 @@
     
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "hw-main.h"
 #include "sim-assert.h"
 #include "sim-events.h"
+#include "sim-signal.h"
 
 #include <unistd.h>
 #include <fcntl.h>

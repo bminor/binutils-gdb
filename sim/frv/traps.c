@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define WANT_CPU frvbf
 #define WANT_CPU_FRVBF
 
@@ -25,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "sim-fpu.h"
+#include "sim-signal.h"
+#include "sim/callback.h"
 
 #include "bfd.h"
 #include "libiberty.h"
@@ -272,7 +277,8 @@ frv_mtrap (SIM_CPU *current_cpu)
 
   /* Check the status of media exceptions in MSR0.  */
   SI msr = GET_MSR (0);
-  if (GET_MSR_AOVF (msr) || GET_MSR_MTT (msr) && STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+  if (GET_MSR_AOVF (msr)
+      || (GET_MSR_MTT (msr) && STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550))
     frv_queue_program_interrupt (current_cpu, FRV_MP_EXCEPTION);
 }
 
@@ -280,14 +286,14 @@ frv_mtrap (SIM_CPU *current_cpu)
 void
 frv_break (SIM_CPU *current_cpu)
 {
-  IADDR pc;
   SIM_DESC sd = CPU_STATE (current_cpu);
 
   if (STATE_ENVIRONMENT (sd) != OPERATING_ENVIRONMENT)
     {
       /* Invalidate the insn cache because the debugger will presumably
 	 replace the breakpoint insn with the real one.  */
-      sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
+      sim_engine_halt (sd, current_cpu, NULL, NULL_CIA, sim_stopped,
+		       SIM_SIGTRAP);
     }
 
   frv_queue_break_interrupt (current_cpu);
@@ -919,8 +925,8 @@ frvbf_commit (SIM_CPU *current_cpu, SI target_index, BI is_float)
     NE_flag = GET_NE_FLAG (NE_flags, target_index);
   else
     {
-      NE_flag =
-	hi_available && NE_flags[0] != 0 || lo_available && NE_flags[1] != 0;
+      NE_flag = (hi_available && NE_flags[0] != 0)
+		|| (lo_available && NE_flags[1] != 0);
     }
 
   /* Always clear the appropriate NE flags.  */

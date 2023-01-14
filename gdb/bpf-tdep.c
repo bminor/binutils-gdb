@@ -184,6 +184,7 @@ bpf_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind bpf_frame_unwind =
 {
+  "bpf prologue",
   NORMAL_FRAME,
   bpf_frame_unwind_stop_reason,
   bpf_frame_this_id,
@@ -370,7 +371,7 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 void _initialize_bpf_tdep ();
 void
-_initialize_bpf_tdep (void)
+_initialize_bpf_tdep ()
 {
   register_gdbarch_init (bfd_arch_bpf, bpf_gdbarch_init);
 

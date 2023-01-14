@@ -33,6 +33,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "block.h"
+#include "filenames.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -99,6 +100,31 @@ objfile::has_partial_symbols ()
   return retval;
 }
 
+/* See objfiles.h.  */
+bool
+objfile::has_unexpanded_symtabs ()
+{
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->has_unexpanded_symtabs (%s)\n",
+		      objfile_debug_name (this));
+
+  bool result = false;
+  for (const auto &iter : qf)
+    {
+      if (iter->has_unexpanded_symtabs (this))
+	{
+	  result = true;
+	  break;
+	}
+    }
+
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->has_unexpanded_symtabs (%s) = %d\n",
+		      objfile_debug_name (this), (result ? 1 : 0));
+
+  return result;
+}
+
 struct symtab *
 objfile::find_last_source_symtab ()
 {
@@ -146,13 +172,51 @@ objfile::map_symtabs_matching_filename
 		      real_path ? real_path : NULL,
 		      host_address_to_string (&callback));
 
-  bool retval = false;
+  bool retval = true;
+  const char *name_basename = lbasename (name);
+
+  auto match_one_filename = [&] (const char *filename, bool basenames)
+  {
+    if (compare_filenames_for_search (filename, name))
+      return true;
+    if (basenames && FILENAME_CMP (name_basename, filename) == 0)
+      return true;
+    if (real_path != nullptr && IS_ABSOLUTE_PATH (filename)
+	&& IS_ABSOLUTE_PATH (real_path))
+      return filename_cmp (filename, real_path) == 0;
+    return false;
+  };
+
+  compunit_symtab *last_made = this->compunit_symtabs;
+
+  auto on_expansion = [&] (compunit_symtab *symtab)
+  {
+    /* The callback to iterate_over_some_symtabs returns false to keep
+       going and true to continue, so we have to invert the result
+       here, for expand_symtabs_matching.  */
+    bool result = !iterate_over_some_symtabs (name, real_path,
+					      this->compunit_symtabs,
+					      last_made,
+					      callback);
+    last_made = this->compunit_symtabs;
+    return result;
+  };
+
   for (const auto &iter : qf)
     {
-      retval = (iter->map_symtabs_matching_filename
-		(this, name, real_path, callback));
-      if (retval)
-	break;
+      if (!iter->expand_symtabs_matching (this,
+					  match_one_filename,
+					  nullptr,
+					  nullptr,
+					  on_expansion,
+					  (SEARCH_GLOBAL_BLOCK
+					   | SEARCH_STATIC_BLOCK),
+					  UNDEF_DOMAIN,
+					  ALL_DOMAIN))
+	{
+	  retval = false;
+	  break;
+	}
     }
 
   if (debug_symfile)
@@ -160,7 +224,9 @@ objfile::map_symtabs_matching_filename
 		      "qf->map_symtabs_matching_filename (...) = %d\n",
 		      retval);
 
-  return retval;
+  /* We must re-invert the return value here to match the caller's
+     expectations.  */
+  return !retval;
 }
 
 struct compunit_symtab *
@@ -259,8 +325,19 @@ objfile::expand_symtabs_for_function (const char *func_name)
 		      "qf->expand_symtabs_for_function (%s, \"%s\")\n",
 		      objfile_debug_name (this), func_name);
 
+  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
+
   for (const auto &iter : qf)
-    iter->expand_symtabs_for_function (this, func_name);
+    iter->expand_symtabs_matching (this,
+				   nullptr,
+				   &lookup_name,
+				   nullptr,
+				   nullptr,
+				   (SEARCH_GLOBAL_BLOCK
+				    | SEARCH_STATIC_BLOCK),
+				   VAR_DOMAIN,
+				   ALL_DOMAIN);
 }
 
 void
@@ -282,27 +359,40 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 		      "qf->expand_symtabs_with_fullname (%s, \"%s\")\n",
 		      objfile_debug_name (this), fullname);
 
+  const char *basename = lbasename (fullname);
+  auto file_matcher = [&] (const char *filename, bool basenames)
+  {
+    return filename_cmp (basenames ? basename : fullname, filename) == 0;
+  };
+
   for (const auto &iter : qf)
-    iter->expand_symtabs_with_fullname (this, fullname);
+    iter->expand_symtabs_matching (this,
+				   file_matcher,
+				   nullptr,
+				   nullptr,
+				   nullptr,
+				   (SEARCH_GLOBAL_BLOCK
+				    | SEARCH_STATIC_BLOCK),
+				   UNDEF_DOMAIN,
+				   ALL_DOMAIN);
 }
 
 void
-objfile::map_matching_symbols
+objfile::expand_matching_symbols
   (const lookup_name_info &name, domain_enum domain,
    int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
-		      "qf->map_matching_symbols (%s, %s, %d, %s)\n",
+		      "qf->expand_matching_symbols (%s, %s, %d, %s)\n",
 		      objfile_debug_name (this),
 		      domain_name (domain), global,
 		      host_address_to_string (ordered_compare));
 
   for (const auto &iter : qf)
-    iter->map_matching_symbols (this, name, domain, global,
-				callback, ordered_compare);
+    iter->expand_matching_symbols (this, name, domain, global,
+				   ordered_compare);
 }
 
 bool
@@ -315,6 +405,9 @@ objfile::expand_symtabs_matching
    domain_enum domain,
    enum search_domain kind)
 {
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
 		      "qf->expand_symtabs_matching (%s, %s, %s, %s, %s)\n",

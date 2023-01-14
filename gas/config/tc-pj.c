@@ -404,6 +404,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_PJ_CODE_DIR32:
+    case BFD_RELOC_PJ_CODE_REL32:
       *buf++ = val >> 24;
       *buf++ = val >> 16;
       *buf++ = val >> 8;
@@ -439,10 +440,6 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	  *buf++ = val >> 8;
 	}
       break;
-
-    case BFD_RELOC_PJ_CODE_REL32:
-      fixP->fx_done = 0;
-      return;
 
     default:
       abort ();

@@ -17,8 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-DTC = @DTC@
-
 dtbdir = @datadir@/gdb/dtb
 
 SIM_OBJS = \
@@ -34,7 +32,7 @@ SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
 all: moxie-gdb.dtb
 
-moxie-gdb.dtb: @MAINTAINER_MODE_TRUE@ moxie-gdb.dts
+moxie-gdb.dtb: $(MAINT) moxie-gdb.dts
 	@echo Regenerating moxie-gdb.dtb
 	if test "x$(DTC)" != x; then \
 	  $(DTC) -O dtb -o moxie-gdb.dtb ${srcdir}/moxie-gdb.dts || exit 1; \

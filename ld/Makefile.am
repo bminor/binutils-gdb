@@ -134,7 +134,7 @@ noinst_TEXINFOS = ldint.texi
 man_MANS = ld.1
 
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
-		   -I $(top_srcdir)/../libiberty
+		   -I $(top_srcdir)/../libiberty --no-split
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
@@ -1081,6 +1081,7 @@ install-data-local: install-bfdpluginLTLIBRARIES
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
+	rm -f $(DESTDIR)$(bfdplugindir)/libdep.dll.a
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
@@ -1092,6 +1093,12 @@ diststuff: info $(EXTRA_DIST)
 # But info isn't a direct target. Make info-recursive to depend on
 # ld.1 to support parallel build.
 info-recursive: ld.1
+
+html-local: doc/ld/index.html
+doc/ld/index.html: ld.texi $(ld_TEXINFOS)
+	$(MKDIR_P) doc
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/ld.texi -o doc/ld
 
 DISTCLEANFILES = site.exp development.exp enablings.exp site.bak stringify.sed
 distclean-local:

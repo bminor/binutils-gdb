@@ -64,7 +64,7 @@ emul_read_gpr64(cpu *processor,
 {
   unsigned32 hi;
   unsigned32 lo;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
     hi = cpu_registers(processor)->gpr[g];
     lo = cpu_registers(processor)->gpr[g+1];
   }
@@ -83,7 +83,7 @@ emul_write_gpr64(cpu *processor,
 {
   unsigned32 hi = EXTRACTED64(val, 0, 31);
   unsigned32 lo = EXTRACTED64(val, 32, 63);
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
     cpu_registers(processor)->gpr[g] = hi;
     cpu_registers(processor)->gpr[g+1] = lo;
   }
@@ -120,10 +120,10 @@ emul_read_string(char *dest,
 INLINE_EMUL_GENERIC void
 emul_write_status(cpu *processor,
 		  int status,
-		  int errno)
+		  int err)
 {
-  if (status == -1 && errno != 0) {
-    cpu_registers(processor)->gpr[3] = errno;
+  if (status == -1 && err != 0) {
+    cpu_registers(processor)->gpr[3] = err;
     CR_SET(0, cr_i_summary_overflow);
   }
   else {
@@ -137,10 +137,10 @@ INLINE_EMUL_GENERIC void
 emul_write2_status(cpu *processor,
 		   int status1,
 		   int status2,
-		   int errno)
+		   int err)
 {
-  if (status1 == -1 && errno != 0) {
-    cpu_registers(processor)->gpr[3] = errno;
+  if (status1 == -1 && err != 0) {
+    cpu_registers(processor)->gpr[3] = err;
     CR_SET(0, cr_i_summary_overflow);
   }
   else {

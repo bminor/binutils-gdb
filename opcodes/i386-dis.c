@@ -50,7 +50,6 @@ static void oappend (const char *);
 static void append_seg (void);
 static void OP_indirE (int, int);
 static void print_operand_value (char *, int, bfd_vma);
-static void OP_E_register (int, int);
 static void OP_E_memory (int, int);
 static void print_displacement (char *, bfd_vma);
 static void OP_E (int, int);
@@ -115,8 +114,7 @@ static void XMM_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 
 static void MOVSXD_Fixup (int, int);
-
-static void OP_Mask (int, int);
+static void DistinctDest_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -161,6 +159,11 @@ static int rex_used;
 /* Flags for prefixes which we somehow handled when printing the
    current instruction.  */
 static int used_prefixes;
+
+/* Flags for EVEX bits which we somehow handled when printing the
+   current instruction.  */
+#define EVEX_b_used 1
+static int evex_used;
 
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
@@ -243,11 +246,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EvS { OP_E, v_swap_mode }
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
-#define Edqw { OP_E, dqw_mode }
-#define Edqb { OP_E, dqb_mode }
 #define Edb { OP_E, db_mode }
 #define Edw { OP_E, dw_mode }
-#define Edqd { OP_E, dqd_mode }
 #define Eq { OP_E, q_mode }
 #define indirEv { OP_indirE, indir_v_mode }
 #define indirEp { OP_indirE, f_mode }
@@ -355,26 +355,27 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMd { OP_EM, d_mode }
 #define EMx { OP_EM, x_mode }
 #define EXbwUnit { OP_EX, bw_unit_mode }
+#define EXb { OP_EX, b_mode }
 #define EXw { OP_EX, w_mode }
 #define EXd { OP_EX, d_mode }
 #define EXdS { OP_EX, d_swap_mode }
+#define EXwS { OP_EX, w_swap_mode }
 #define EXq { OP_EX, q_mode }
 #define EXqS { OP_EX, q_swap_mode }
+#define EXdq { OP_EX, dq_mode }
 #define EXx { OP_EX, x_mode }
+#define EXxh { OP_EX, xh_mode }
 #define EXxS { OP_EX, x_swap_mode }
 #define EXxmm { OP_EX, xmm_mode }
 #define EXymm { OP_EX, ymm_mode }
 #define EXtmm { OP_EX, tmm_mode }
 #define EXxmmq { OP_EX, xmmq_mode }
+#define EXxmmqh { OP_EX, evex_half_bcst_xmmqh_mode }
 #define EXEvexHalfBcstXmmq { OP_EX, evex_half_bcst_xmmq_mode }
-#define EXxmm_mb { OP_EX, xmm_mb_mode }
-#define EXxmm_mw { OP_EX, xmm_mw_mode }
-#define EXxmm_md { OP_EX, xmm_md_mode }
-#define EXxmm_mq { OP_EX, xmm_mq_mode }
 #define EXxmmdw { OP_EX, xmmdw_mode }
 #define EXxmmqd { OP_EX, xmmqd_mode }
+#define EXxmmqdh { OP_EX, evex_half_bcst_xmmqdh_mode }
 #define EXymmq { OP_EX, ymmq_mode }
-#define EXVexWdqScalar { OP_EX, vex_scalar_w_dq_mode }
 #define EXEvexXGscat { OP_EX, evex_x_gscat_mode }
 #define EXEvexXNoBcst { OP_EX, evex_x_nobcst_mode }
 #define MS { OP_MS, v_mode }
@@ -387,10 +388,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define XMM0 { XMM_Fixup, 0 }
 #define FXSAVE { FXSAVE_Fixup, 0 }
 
-#define Vex { OP_VEX, vex_mode }
-#define VexW { OP_VexW, vex_mode }
-#define VexScalar { OP_VEX, vex_scalar_mode }
-#define VexScalarR { OP_VexR, vex_scalar_mode }
+#define Vex { OP_VEX, x_mode }
+#define VexW { OP_VexW, x_mode }
+#define VexScalar { OP_VEX, scalar_mode }
+#define VexScalarR { OP_VexR, scalar_mode }
 #define VexGatherD { OP_VEX, vex_vsib_d_w_dq_mode }
 #define VexGatherQ { OP_VEX, vex_vsib_q_w_dq_mode }
 #define VexGdq { OP_VEX, dq_mode }
@@ -406,7 +407,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxEVexR64 { OP_Rounding, evex_rounding_64_mode }
 #define EXxEVexS { OP_Rounding, evex_sae_mode }
 
-#define XMask { OP_Mask, mask_mode }
 #define MaskG { OP_G, mask_mode }
 #define MaskE { OP_E, mask_mode }
 #define MaskBDE { OP_E, mask_bd_mode }
@@ -464,6 +464,8 @@ enum
   w_mode,
   /* double word operand  */
   d_mode,
+  /* word operand with operand swapped  */
+  w_swap_mode,
   /* double word operand with operand swapped */
   d_swap_mode,
   /* quad word operand */
@@ -484,6 +486,9 @@ enum
   /* Similar to x_mode, but with operands swapped and disabled broadcast
      in EVEX.  */
   x_swap_mode,
+  /* 16-byte XMM, 32-byte YMM or 64-byte ZMM operand.  In EVEX with
+     broadcast of 16bit enabled.  */
+  xh_mode,
   /* 16-byte XMM operand */
   xmm_mode,
   /* XMM, XMM or YMM register operand, or quad word, xmmword or ymmword
@@ -492,18 +497,16 @@ enum
   xmmq_mode,
   /* Same as xmmq_mode, but broadcast is allowed.  */
   evex_half_bcst_xmmq_mode,
-  /* XMM register or byte memory operand */
-  xmm_mb_mode,
-  /* XMM register or word memory operand */
-  xmm_mw_mode,
-  /* XMM register or double word memory operand */
-  xmm_md_mode,
-  /* XMM register or quad word memory operand */
-  xmm_mq_mode,
+  /* XMM, XMM or YMM register operand, or quad word, xmmword or ymmword
+     memory operand (depending on vector length).  16bit broadcast.  */
+  evex_half_bcst_xmmqh_mode,
   /* 16-byte XMM, word, double word or quad word operand.  */
   xmmdw_mode,
   /* 16-byte XMM, double word, quad word operand or xmm word operand.  */
   xmmqd_mode,
+  /* 16-byte XMM, double word, quad word operand or xmm word operand.
+     16bit broadcast.  */
+  evex_half_bcst_xmmqdh_mode,
   /* 32-byte YMM operand */
   ymm_mode,
   /* quad word, ymmword or zmmword memory operand.  */
@@ -522,10 +525,9 @@ enum
   v_bnd_mode,
   /* like v_bnd_mode in 32bit, no RIP-rel in 64bit mode.  */
   v_bndmk_mode,
-  /* operand size depends on REX prefixes.  */
+  /* operand size depends on REX.W / VEX.W.  */
   dq_mode,
-  /* registers like dq_mode, memory like w_mode, displacements like
-     v_mode without considering Intel64 ISA.  */
+  /* Displacements like v_mode without considering Intel64 ISA.  */
   dqw_mode,
   /* bounds operand */
   bnd_mode,
@@ -542,16 +544,10 @@ enum
   z_mode,
   /* 16-byte operand */
   o_mode,
-  /* registers like dq_mode, memory like b_mode.  */
-  dqb_mode,
   /* registers like d_mode, memory like b_mode.  */
   db_mode,
   /* registers like d_mode, memory like w_mode.  */
   dw_mode,
-  /* registers like dq_mode, memory like d_mode.  */
-  dqd_mode,
-  /* normal vex mode */
-  vex_mode,
 
   /* Operand size depends on the VEX.W bit, with VSIB dword indices.  */
   vex_vsib_d_w_dq_mode,
@@ -562,10 +558,6 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
-  /* like vex_mode, ignore vector length.  */
-  vex_scalar_mode,
-  /* Operand size depends on the VEX.W bit, ignore vector length.  */
-  vex_scalar_w_dq_mode,
 
   /* Static rounding.  */
   evex_rounding_mode,
@@ -865,7 +857,7 @@ enum
   MOD_EVEX_0F387B_W_0,
   MOD_EVEX_0F387C,
   MOD_EVEX_0F38C6,
-  MOD_EVEX_0F38C7
+  MOD_EVEX_0F38C7,
 };
 
 enum
@@ -1102,6 +1094,48 @@ enum
   PREFIX_EVEX_0F389B,
   PREFIX_EVEX_0F38AA,
   PREFIX_EVEX_0F38AB,
+
+  PREFIX_EVEX_0F3A08_W_0,
+  PREFIX_EVEX_0F3A0A_W_0,
+  PREFIX_EVEX_0F3A26,
+  PREFIX_EVEX_0F3A27,
+  PREFIX_EVEX_0F3A56,
+  PREFIX_EVEX_0F3A57,
+  PREFIX_EVEX_0F3A66,
+  PREFIX_EVEX_0F3A67,
+  PREFIX_EVEX_0F3AC2,
+
+  PREFIX_EVEX_MAP5_10,
+  PREFIX_EVEX_MAP5_11,
+  PREFIX_EVEX_MAP5_1D,
+  PREFIX_EVEX_MAP5_2A,
+  PREFIX_EVEX_MAP5_2C,
+  PREFIX_EVEX_MAP5_2D,
+  PREFIX_EVEX_MAP5_2E,
+  PREFIX_EVEX_MAP5_2F,
+  PREFIX_EVEX_MAP5_51,
+  PREFIX_EVEX_MAP5_58,
+  PREFIX_EVEX_MAP5_59,
+  PREFIX_EVEX_MAP5_5A_W_0,
+  PREFIX_EVEX_MAP5_5A_W_1,
+  PREFIX_EVEX_MAP5_5B_W_0,
+  PREFIX_EVEX_MAP5_5B_W_1,
+  PREFIX_EVEX_MAP5_5C,
+  PREFIX_EVEX_MAP5_5D,
+  PREFIX_EVEX_MAP5_5E,
+  PREFIX_EVEX_MAP5_5F,
+  PREFIX_EVEX_MAP5_78,
+  PREFIX_EVEX_MAP5_79,
+  PREFIX_EVEX_MAP5_7A,
+  PREFIX_EVEX_MAP5_7B,
+  PREFIX_EVEX_MAP5_7C,
+  PREFIX_EVEX_MAP5_7D_W_0,
+
+  PREFIX_EVEX_MAP6_13,
+  PREFIX_EVEX_MAP6_56,
+  PREFIX_EVEX_MAP6_57,
+  PREFIX_EVEX_MAP6_D6,
+  PREFIX_EVEX_MAP6_D7,
 };
 
 enum
@@ -1183,7 +1217,9 @@ enum
 {
   EVEX_0F = 0,
   EVEX_0F38,
-  EVEX_0F3A
+  EVEX_0F3A,
+  EVEX_MAP5,
+  EVEX_MAP6,
 };
 
 enum
@@ -1479,7 +1515,6 @@ enum
   EVEX_W_0F12_P_3,
   EVEX_W_0F16_P_0_M_1,
   EVEX_W_0F16_P_1,
-  EVEX_W_0F2A_P_3,
   EVEX_W_0F51_P_1,
   EVEX_W_0F51_P_3,
   EVEX_W_0F58_P_1,
@@ -1524,7 +1559,6 @@ enum
   EVEX_W_0F7A_P_2,
   EVEX_W_0F7A_P_3,
   EVEX_W_0F7B_P_2,
-  EVEX_W_0F7B_P_3,
   EVEX_W_0F7E_P_1,
   EVEX_W_0F7F_P_1,
   EVEX_W_0F7F_P_2,
@@ -1613,6 +1647,22 @@ enum
   EVEX_W_0F3A43_L_n,
   EVEX_W_0F3A70,
   EVEX_W_0F3A72,
+
+  EVEX_W_MAP5_5A,
+  EVEX_W_MAP5_5B,
+  EVEX_W_MAP5_78_P_0,
+  EVEX_W_MAP5_78_P_2,
+  EVEX_W_MAP5_79_P_0,
+  EVEX_W_MAP5_79_P_2,
+  EVEX_W_MAP5_7A_P_2,
+  EVEX_W_MAP5_7A_P_3,
+  EVEX_W_MAP5_7B_P_2,
+  EVEX_W_MAP5_7C_P_0,
+  EVEX_W_MAP5_7C_P_2,
+  EVEX_W_MAP5_7D,
+
+  EVEX_W_MAP6_13_P_0,
+  EVEX_W_MAP6_13_P_2,
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -1673,6 +1723,7 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
+   "XH" => print 'h' if EVEX.W=0, EVEX.W=1 is not a valid encoding (for FP16)
    "XV" => print "{vex3}" pseudo prefix
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
 	   being false, or no operand at all in 64bit mode, or if suffix_always
@@ -1965,7 +2016,7 @@ static const struct dis386 dis386[] = {
   { "outG",		{ indirDX, zAX }, 0 },
   /* f0 */
   { Bad_Opcode },	/* lock prefix */
-  { "icebp",		{ XX }, 0 },
+  { "int1",		{ XX }, 0 },
   { Bad_Opcode },	/* repne */
   { Bad_Opcode },	/* repz */
   { "hlt",		{ XX }, 0 },
@@ -2205,8 +2256,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "xaddS",		{ Evh1, Gv }, 0 },
   { PREFIX_TABLE (PREFIX_0FC2) },
   { MOD_TABLE (MOD_0FC3) },
-  { "pinsrw",		{ MX, Edqw, Ib }, PREFIX_OPCODE },
-  { "pextrw",		{ Gdq, MS, Ib }, PREFIX_OPCODE },
+  { "pinsrw",		{ MX, Edw, Ib }, PREFIX_OPCODE },
+  { "pextrw",		{ Gd, MS, Ib }, PREFIX_OPCODE },
   { "shufpX",		{ XM, EXx, Ib }, PREFIX_OPCODE },
   { REG_TABLE (REG_0FC7) },
   /* c8 */
@@ -2555,12 +2606,12 @@ static const char *att_names_mask[] = {
   "%k0", "%k1", "%k2", "%k3", "%k4", "%k5", "%k6", "%k7"
 };
 
-static const char *names_rounding[] =
+static const char *const names_rounding[] =
 {
-  "{rn-sae}",
-  "{rd-sae}",
-  "{ru-sae}",
-  "{rz-sae}"
+  "{rn-",
+  "{rd-",
+  "{ru-",
+  "{rz-"
 };
 
 static const struct dis386 reg_table[][8] = {
@@ -3620,9 +3671,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F10 */
   {
     { "vmovups",	{ XM, EXx }, 0 },
-    { "vmovss",		{ XMScalar, VexScalarR, EXxmm_md }, 0 },
+    { "vmovss",		{ XMScalar, VexScalarR, EXd }, 0 },
     { "vmovupd",	{ XM, EXx }, 0 },
-    { "vmovsd",		{ XMScalar, VexScalarR, EXxmm_mq }, 0 },
+    { "vmovsd",		{ XMScalar, VexScalarR, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F11 */
@@ -3659,31 +3710,31 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F2C */
   {
     { Bad_Opcode },
-    { "vcvttss2si",	{ Gdq, EXxmm_md, EXxEVexS }, 0 },
+    { "vcvttss2si",	{ Gdq, EXd, EXxEVexS }, 0 },
     { Bad_Opcode },
-    { "vcvttsd2si",	{ Gdq, EXxmm_mq, EXxEVexS }, 0 },
+    { "vcvttsd2si",	{ Gdq, EXq, EXxEVexS }, 0 },
   },
 
   /* PREFIX_VEX_0F2D */
   {
     { Bad_Opcode },
-    { "vcvtss2si",	{ Gdq, EXxmm_md, EXxEVexR }, 0 },
+    { "vcvtss2si",	{ Gdq, EXd, EXxEVexR }, 0 },
     { Bad_Opcode },
-    { "vcvtsd2si",	{ Gdq, EXxmm_mq, EXxEVexR }, 0 },
+    { "vcvtsd2si",	{ Gdq, EXq, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F2E */
   {
-    { "vucomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
+    { "vucomisX",	{ XMScalar, EXd, EXxEVexS }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "vucomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
+    { "vucomisX",	{ XMScalar, EXq, EXxEVexS }, PREFIX_OPCODE },
   },
 
   /* PREFIX_VEX_0F2F */
   {
-    { "vcomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
+    { "vcomisX",	{ XMScalar, EXd, EXxEVexS }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "vcomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
+    { "vcomisX",	{ XMScalar, EXq, EXxEVexS }, PREFIX_OPCODE },
   },
 
   /* PREFIX_VEX_0F41_L_1_M_1_W_0 */
@@ -3799,45 +3850,45 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F51 */
   {
     { "vsqrtps",	{ XM, EXx }, 0 },
-    { "vsqrtss",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vsqrtss",	{ XMScalar, VexScalar, EXd }, 0 },
     { "vsqrtpd",	{ XM, EXx }, 0 },
-    { "vsqrtsd",	{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vsqrtsd",	{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F52 */
   {
     { "vrsqrtps",	{ XM, EXx }, 0 },
-    { "vrsqrtss",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vrsqrtss",	{ XMScalar, VexScalar, EXd }, 0 },
   },
 
   /* PREFIX_VEX_0F53 */
   {
     { "vrcpps",		{ XM, EXx }, 0 },
-    { "vrcpss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vrcpss",		{ XMScalar, VexScalar, EXd }, 0 },
   },
 
   /* PREFIX_VEX_0F58 */
   {
     { "vaddps",		{ XM, Vex, EXx }, 0 },
-    { "vaddss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vaddss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vaddpd",		{ XM, Vex, EXx }, 0 },
-    { "vaddsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vaddsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F59 */
   {
     { "vmulps",		{ XM, Vex, EXx }, 0 },
-    { "vmulss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vmulss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vmulpd",		{ XM, Vex, EXx }, 0 },
-    { "vmulsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vmulsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F5A */
   {
     { "vcvtps2pd",	{ XM, EXxmmq }, 0 },
-    { "vcvtss2sd",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vcvtss2sd",	{ XMScalar, VexScalar, EXd }, 0 },
     { "vcvtpd2ps%XY",{ XMM, EXx }, 0 },
-    { "vcvtsd2ss",	{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vcvtsd2ss",	{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F5B */
@@ -3850,33 +3901,33 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F5C */
   {
     { "vsubps",		{ XM, Vex, EXx }, 0 },
-    { "vsubss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vsubss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vsubpd",		{ XM, Vex, EXx }, 0 },
-    { "vsubsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vsubsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F5D */
   {
     { "vminps",		{ XM, Vex, EXx }, 0 },
-    { "vminss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vminss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vminpd",		{ XM, Vex, EXx }, 0 },
-    { "vminsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vminsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F5E */
   {
     { "vdivps",		{ XM, Vex, EXx }, 0 },
-    { "vdivss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vdivss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vdivpd",		{ XM, Vex, EXx }, 0 },
-    { "vdivsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vdivsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F5F */
   {
     { "vmaxps",		{ XM, Vex, EXx }, 0 },
-    { "vmaxss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
+    { "vmaxss",		{ XMScalar, VexScalar, EXd }, 0 },
     { "vmaxpd",		{ XM, Vex, EXx }, 0 },
-    { "vmaxsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vmaxsd",		{ XMScalar, VexScalar, EXq }, 0 },
   },
 
   /* PREFIX_VEX_0F6F */
@@ -4015,9 +4066,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0FC2 */
   {
     { "vcmpps",		{ XM, Vex, EXx, CMP }, 0 },
-    { "vcmpss",		{ XMScalar, VexScalar, EXxmm_md, CMP }, 0 },
+    { "vcmpss",		{ XMScalar, VexScalar, EXd, CMP }, 0 },
     { "vcmppd",		{ XM, Vex, EXx, CMP }, 0 },
-    { "vcmpsd",		{ XMScalar, VexScalar, EXxmm_mq, CMP }, 0 },
+    { "vcmpsd",		{ XMScalar, VexScalar, EXq, CMP }, 0 },
   },
 
   /* PREFIX_VEX_0FD0 */
@@ -4185,7 +4236,7 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_63 */
   {
     { "arpl", { Ew, Gw }, 0 },
-    { "movs", { { OP_G, movsxd_mode }, { MOVSXD_Fixup, movsxd_mode } }, 0 },
+    { "movs", { Gv, { MOVSXD_Fixup, movsxd_mode } }, 0 },
   },
 
   /* X86_64_6D */
@@ -4710,10 +4761,10 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pextrb",	{ Edqb, XM, Ib }, PREFIX_DATA },
-    { "pextrw",	{ Edqw, XM, Ib }, PREFIX_DATA },
+    { "pextrb",	{ Edb, XM, Ib }, PREFIX_DATA },
+    { "pextrw",	{ Edw, XM, Ib }, PREFIX_DATA },
     { "pextrK",	{ Edq, XM, Ib }, PREFIX_DATA },
-    { "extractps", { Edqd, XM, Ib }, PREFIX_DATA },
+    { "extractps", { Ed, XM, Ib }, PREFIX_DATA },
     /* 18 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -4724,7 +4775,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 20 */
-    { "pinsrb",	{ XM, Edqb, Ib }, PREFIX_DATA },
+    { "pinsrb",	{ XM, Edb, Ib }, PREFIX_DATA },
     { "insertps", { XM, EXd, Ib }, PREFIX_DATA },
     { "pinsrK",	{ XM, Edq, Ib }, PREFIX_DATA },
     { Bad_Opcode },
@@ -6321,13 +6372,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* 98 */
     { "vfmadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* a0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6339,13 +6390,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* a8 */
     { "vfmadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* b0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6357,13 +6408,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* b8 */
     { "vfmadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* c0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6451,8 +6502,8 @@ static const struct dis386 vex_table[][256] = {
     /* 08 */
     { "vroundps",	{ XM, EXx, Ib }, PREFIX_DATA },
     { "vroundpd",	{ XM, EXx, Ib }, PREFIX_DATA },
-    { "vroundss",	{ XMScalar, VexScalar, EXxmm_md, Ib }, PREFIX_DATA },
-    { "vroundsd",	{ XMScalar, VexScalar, EXxmm_mq, Ib }, PREFIX_DATA },
+    { "vroundss",	{ XMScalar, VexScalar, EXd, Ib }, PREFIX_DATA },
+    { "vroundsd",	{ XMScalar, VexScalar, EXq, Ib }, PREFIX_DATA },
     { "vblendps",	{ XM, Vex, EXx, Ib }, PREFIX_DATA },
     { "vblendpd",	{ XM, Vex, EXx, Ib }, PREFIX_DATA },
     { "vpblendw",	{ XM, Vex, EXx, Ib }, PREFIX_DATA },
@@ -6559,12 +6610,12 @@ static const struct dis386 vex_table[][256] = {
     /* 68 */
     { "vfmaddps", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
     { "vfmaddpd", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
-    { "vfmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, PREFIX_DATA },
-    { "vfmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfmaddss",	{ XMScalar, VexScalar, EXd, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfmaddsd",	{ XMScalar, VexScalar, EXq, XMVexScalarI4 }, PREFIX_DATA },
     { "vfmsubps", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
     { "vfmsubpd", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
-    { "vfmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, PREFIX_DATA },
-    { "vfmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfmsubss",	{ XMScalar, VexScalar, EXd, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfmsubsd",	{ XMScalar, VexScalar, EXq, XMVexScalarI4 }, PREFIX_DATA },
     /* 70 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6577,12 +6628,12 @@ static const struct dis386 vex_table[][256] = {
     /* 78 */
     { "vfnmaddps", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
     { "vfnmaddpd", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
-    { "vfnmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, PREFIX_DATA },
-    { "vfnmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfnmaddss",	{ XMScalar, VexScalar, EXd, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfnmaddsd",	{ XMScalar, VexScalar, EXq, XMVexScalarI4 }, PREFIX_DATA },
     { "vfnmsubps", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
     { "vfnmsubpd", { XM, Vex, EXx, XMVexI4 }, PREFIX_DATA },
-    { "vfnmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, PREFIX_DATA },
-    { "vfnmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfnmsubss",	{ XMScalar, VexScalar, EXd, XMVexScalarI4 }, PREFIX_DATA },
+    { "vfnmsubsd",	{ XMScalar, VexScalar, EXq, XMVexScalarI4 }, PREFIX_DATA },
     /* 80 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6823,7 +6874,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F7E_P_1 */
   {
-    { "vmovq",		{ XMScalar, EXxmm_mq }, 0 },
+    { "vmovq",		{ XMScalar, EXq }, 0 },
   },
 
   /* VEX_LEN_0F7E_P_2 */
@@ -6873,12 +6924,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FC4 */
   {
-    { "vpinsrw",	{ XM, Vex, Edqw, Ib }, PREFIX_DATA },
+    { "vpinsrw",	{ XM, Vex, Edw, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0FC5 */
   {
-    { "vpextrw",	{ Gdq, XS, Ib }, PREFIX_DATA },
+    { "vpextrw",	{ Gd, XS, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0FD6 */
@@ -7035,12 +7086,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A14 */
   {
-    { "vpextrb",	{ Edqb, XM, Ib }, PREFIX_DATA },
+    { "vpextrb",	{ Edb, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A15 */
   {
-    { "vpextrw",	{ Edqw, XM, Ib }, PREFIX_DATA },
+    { "vpextrw",	{ Edw, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A16  */
@@ -7050,7 +7101,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A17 */
   {
-    { "vextractps",	{ Edqd, XM, Ib }, PREFIX_DATA },
+    { "vextractps",	{ Ed, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A18 */
@@ -7067,7 +7118,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A20 */
   {
-    { "vpinsrb",	{ XM, Vex, Edqb, Ib }, PREFIX_DATA },
+    { "vpinsrb",	{ XM, Vex, Edb, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A21 */
@@ -7543,11 +7594,11 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3818 */
-    { "vbroadcastss",	{ XM, EXxmm_md }, PREFIX_DATA },
+    { "vbroadcastss",	{ XM, EXd }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3819_L_1 */
-    { "vbroadcastsd",	{ XM, EXxmm_mq }, PREFIX_DATA },
+    { "vbroadcastsd",	{ XM, EXq }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F381A_M_0_L_1 */
@@ -7619,11 +7670,11 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3858 */
-    { "vpbroadcastd", { XM, EXxmm_md }, PREFIX_DATA },
+    { "vpbroadcastd", { XM, EXd }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3859 */
-    { "vpbroadcastq",	{ XM, EXxmm_mq }, PREFIX_DATA },
+    { "vpbroadcastq", { XM, EXq }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F385A_M_0_L_0 */
@@ -7651,11 +7702,11 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3878 */
-    { "vpbroadcastb",	{ XM, EXxmm_mb }, PREFIX_DATA },
+    { "vpbroadcastb",	{ XM, EXb }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3879 */
-    { "vpbroadcastw",	{ XM, EXxmm_mw }, PREFIX_DATA },
+    { "vpbroadcastw",	{ XM, EXw }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F38CF */
@@ -8609,6 +8660,7 @@ ckprefix (void)
   prefixes = 0;
   used_prefixes = 0;
   rex_used = 0;
+  evex_used = 0;
   last_lock_prefix = -1;
   last_repz_prefix = -1;
   last_repnz_prefix = -1;
@@ -9277,6 +9329,12 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	case 0x3:
 	  vex_table_index = EVEX_0F3A;
 	  break;
+	case 0x5:
+	  vex_table_index = EVEX_MAP5;
+	  break;
+	case 0x6:
+	  vex_table_index = EVEX_MAP6;
+	  break;
 	}
 
       /* The second byte after 0x62.  */
@@ -9322,7 +9380,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  /* In 16/32-bit mode silently ignore following bits.  */
 	  rex &= ~REX_B;
 	  vex.r = 1;
-	  vex.v = 1;
 	}
 
       need_vex = 1;
@@ -9691,6 +9748,21 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		       || dp->op[0].bytemode == vex_vsib_q_w_dq_mode)
 		      && (vex.mask_register_specifier == 0 || vex.zeroing))
 		    oappend ("/(bad)");
+		}
+	    }
+
+	  /* Check whether rounding control was enabled for an insn not
+	     supporting it.  */
+	  if (modrm.mod == 3 && vex.b && !(evex_used & EVEX_b_used))
+	    {
+	      for (i = 0; i < MAX_OPERANDS; ++i)
+		{
+		  obufp = op_out[i];
+		  if (*obufp)
+		    continue;
+		  oappend (names_rounding[vex.ll]);
+		  oappend ("bad}");
+		  break;
 		}
 	    }
 	}
@@ -10462,28 +10534,46 @@ putop (const char *in_template, int sizeflag)
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'H':
-	  if (intel_syntax)
-	    break;
-	  if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS
-	      || (prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+	  if (l == 0)
 	    {
-	      used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
-	      *obufp++ = ',';
-	      *obufp++ = 'p';
+	      if (intel_syntax)
+	        break;
+	      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS
+	          || (prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+		{
+	          used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
+	          *obufp++ = ',';
+	          *obufp++ = 'p';
 
-	      /* Set active_seg_prefix even if not set in 64-bit mode
-		 because here it is a valid branch hint. */
-	      if (prefixes & PREFIX_DS)
-		{
-		  active_seg_prefix = PREFIX_DS;
-		  *obufp++ = 't';
-		}
-	      else
-		{
-		  active_seg_prefix = PREFIX_CS;
-		  *obufp++ = 'n';
+		  /* Set active_seg_prefix even if not set in 64-bit mode
+		     because here it is a valid branch hint. */
+		  if (prefixes & PREFIX_DS)
+		    {
+		      active_seg_prefix = PREFIX_DS;
+		      *obufp++ = 't';
+		    }
+		  else
+		    {
+		      active_seg_prefix = PREFIX_CS;
+		      *obufp++ = 'n';
+		    }
 		}
 	    }
+	  else if (l == 1 && last[0] == 'X')
+	    {
+	      if (vex.w == 0)
+		*obufp++ = 'h';
+	      else
+		{
+		  *obufp++ = '{';
+		  *obufp++ = 'b';
+		  *obufp++ = 'a';
+		  *obufp++ = 'd';
+		  *obufp++ = '}';
+		}
+	    }
+	  else
+	    abort ();
 	  break;
 	case 'K':
 	  USED_REX (REX_W);
@@ -10967,27 +11057,37 @@ print_displacement (char *buf, bfd_vma disp)
 static void
 intel_operand_size (int bytemode, int sizeflag)
 {
-  if (vex.b
-      && (bytemode == x_mode
-	  || bytemode == evex_half_bcst_xmmq_mode))
+  if (vex.b)
     {
-      if (vex.w)
-	oappend ("QWORD PTR ");
-      else
-	oappend ("DWORD PTR ");
+      switch (bytemode)
+	{
+	case x_mode:
+	case evex_half_bcst_xmmq_mode:
+	  if (vex.w)
+	    oappend ("QWORD PTR ");
+	  else
+	    oappend ("DWORD PTR ");
+	  break;
+	case xh_mode:
+	case evex_half_bcst_xmmqh_mode:
+	case evex_half_bcst_xmmqdh_mode:
+	  oappend ("WORD PTR ");
+	  break;
+	default:
+	  abort ();
+	}
       return;
     }
   switch (bytemode)
     {
     case b_mode:
     case b_swap_mode:
-    case dqb_mode:
     case db_mode:
       oappend ("BYTE PTR ");
       break;
     case w_mode:
+    case w_swap_mode:
     case dw_mode:
-    case dqw_mode:
       oappend ("WORD PTR ");
       break;
     case indir_v_mode:
@@ -11044,7 +11144,6 @@ intel_operand_size (int bytemode, int sizeflag)
       break;
     case d_mode:
     case d_swap_mode:
-    case dqd_mode:
       oappend ("DWORD PTR ");
       break;
     case q_mode:
@@ -11068,6 +11167,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("TBYTE PTR ");
       break;
     case x_mode:
+    case xh_mode:
     case x_swap_mode:
     case evex_x_gscat_mode:
     case evex_x_nobcst_mode:
@@ -11099,6 +11199,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("YMMWORD PTR ");
       break;
     case xmmq_mode:
+    case evex_half_bcst_xmmqh_mode:
     case evex_half_bcst_xmmq_mode:
       if (!need_vex)
 	abort ();
@@ -11113,66 +11214,6 @@ intel_operand_size (int bytemode, int sizeflag)
 	  break;
 	case 512:
 	  oappend ("YMMWORD PTR ");
-	  break;
-	default:
-	  abort ();
-	}
-      break;
-    case xmm_mb_mode:
-      if (!need_vex)
-	abort ();
-
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	case 512:
-	  oappend ("BYTE PTR ");
-	  break;
-	default:
-	  abort ();
-	}
-      break;
-    case xmm_mw_mode:
-      if (!need_vex)
-	abort ();
-
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	case 512:
-	  oappend ("WORD PTR ");
-	  break;
-	default:
-	  abort ();
-	}
-      break;
-    case xmm_md_mode:
-      if (!need_vex)
-	abort ();
-
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	case 512:
-	  oappend ("DWORD PTR ");
-	  break;
-	default:
-	  abort ();
-	}
-      break;
-    case xmm_mq_mode:
-      if (!need_vex)
-	abort ();
-
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	case 512:
-	  oappend ("QWORD PTR ");
 	  break;
 	default:
 	  abort ();
@@ -11198,6 +11239,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	}
       break;
     case xmmqd_mode:
+    case evex_half_bcst_xmmqdh_mode:
       if (!need_vex)
 	abort ();
 
@@ -11252,15 +11294,6 @@ intel_operand_size (int bytemode, int sizeflag)
     case o_mode:
       oappend ("OWORD PTR ");
       break;
-    case vex_scalar_w_dq_mode:
-      if (!need_vex)
-	abort ();
-
-      if (vex.w)
-	oappend ("QWORD PTR ");
-      else
-	oappend ("DWORD PTR ");
-      break;
     case vex_vsib_d_w_dq_mode:
     case vex_vsib_q_w_dq_mode:
       if (!need_vex)
@@ -11295,20 +11328,13 @@ intel_operand_size (int bytemode, int sizeflag)
 }
 
 static void
-OP_E_register (int bytemode, int sizeflag)
+print_register (unsigned int reg, unsigned int rexmask, int bytemode, int sizeflag)
 {
-  int reg = modrm.rm;
   const char **names;
 
-  USED_REX (REX_B);
-  if ((rex & REX_B))
+  USED_REX (rexmask);
+  if (rex & rexmask)
     reg += 8;
-
-  if ((sizeflag & SUFFIX_ALWAYS)
-      && (bytemode == b_swap_mode
-	  || bytemode == bnd_swap_mode
-	  || bytemode == v_swap_mode))
-    swap_operand ();
 
   switch (bytemode)
     {
@@ -11363,9 +11389,6 @@ OP_E_register (int bytemode, int sizeflag)
     case v_mode:
     case v_swap_mode:
     case dq_mode:
-    case dqb_mode:
-    case dqd_mode:
-    case dqw_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
@@ -11430,43 +11453,40 @@ OP_E_memory (int bytemode, int sizeflag)
 
   if (vex.evex)
     {
-      /* In EVEX, if operand doesn't allow broadcast, vex.b should be 0.  */
-      if (vex.b
-	  && bytemode != x_mode
-	  && bytemode != evex_half_bcst_xmmq_mode)
-	{
-	  BadOp ();
-	  return;
-	}
       switch (bytemode)
 	{
-	case dqw_mode:
 	case dw_mode:
-	case xmm_mw_mode:
+	case w_mode:
+	case w_swap_mode:
 	  shift = 1;
 	  break;
-	case dqb_mode:
 	case db_mode:
-	case xmm_mb_mode:
+	case b_mode:
 	  shift = 0;
 	  break;
 	case dq_mode:
 	  if (address_mode != mode_64bit)
 	    {
-	case dqd_mode:
-	case xmm_md_mode:
 	case d_mode:
 	case d_swap_mode:
 	      shift = 2;
 	      break;
 	    }
 	    /* fall through */
-	case vex_scalar_w_dq_mode:
 	case vex_vsib_d_w_dq_mode:
 	case vex_vsib_q_w_dq_mode:
 	case evex_x_gscat_mode:
 	  shift = vex.w ? 3 : 2;
 	  break;
+	case xh_mode:
+	case evex_half_bcst_xmmqh_mode:
+	case evex_half_bcst_xmmqdh_mode:
+	  if (vex.b)
+	    {
+	      shift = vex.w ? 2 : 1;
+	      break;
+	    }
+	  /* Fall through.  */
 	case x_mode:
 	case evex_half_bcst_xmmq_mode:
 	  if (vex.b)
@@ -11497,10 +11517,12 @@ OP_E_memory (int bytemode, int sizeflag)
 	    }
 	  /* Make necessary corrections to shift for modes that need it.  */
 	  if (bytemode == xmmq_mode
+	      || bytemode == evex_half_bcst_xmmqh_mode
 	      || bytemode == evex_half_bcst_xmmq_mode
 	      || (bytemode == ymmq_mode && vex.length == 128))
 	    shift -= 1;
-	  else if (bytemode == xmmqd_mode)
+	  else if (bytemode == xmmqd_mode
+	           || bytemode == evex_half_bcst_xmmqdh_mode)
 	    shift -= 2;
 	  else if (bytemode == xmmdw_mode)
 	    shift -= 3;
@@ -11511,7 +11533,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	case xmm_mode:
 	  shift = 4;
 	  break;
-	case xmm_mq_mode:
 	case q_mode:
 	case q_swap_mode:
 	  shift = 3;
@@ -11731,8 +11752,13 @@ OP_E_memory (int bytemode, int sizeflag)
 		      *obufp = '\0';
 		    }
 		  if (haveindex)
-		    oappend (address_mode == mode_64bit && !addr32flag
-			     ? indexes64[vindex] : indexes32[vindex]);
+		    {
+		      if (address_mode == mode_64bit || vindex < 16)
+			oappend (address_mode == mode_64bit && !addr32flag
+				 ? indexes64[vindex] : indexes32[vindex]);
+		      else
+			oappend ("(bad)");
+		    }
 		  else
 		    oappend (address_mode == mode_64bit && !addr32flag
 			     ? index64 : index32);
@@ -11879,11 +11905,35 @@ OP_E_memory (int bytemode, int sizeflag)
 	  oappend (scratchbuf);
 	}
     }
-  if (vex.b
-      && (bytemode == x_mode
-	  || bytemode == evex_half_bcst_xmmq_mode))
+  if (vex.b)
     {
-      if (vex.w
+      evex_used |= EVEX_b_used;
+      if (bytemode == xh_mode)
+        {
+          if (vex.w)
+            {
+              abort ();
+            }
+          else
+            {
+              switch (vex.length)
+                {
+                case 128:
+                  oappend ("{1to8}");
+                  break;
+                case 256:
+                  oappend ("{1to16}");
+                  break;
+                case 512:
+                  oappend ("{1to32}");
+                  break;
+                default:
+                  abort ();
+                }
+            }
+        }
+      else if (vex.w
+	  || bytemode == evex_half_bcst_xmmqdh_mode
 	  || bytemode == evex_half_bcst_xmmq_mode)
 	{
 	  switch (vex.length)
@@ -11901,7 +11951,8 @@ OP_E_memory (int bytemode, int sizeflag)
 	      abort ();
 	    }
 	}
-      else
+      else if (bytemode == x_mode
+	  || bytemode == evex_half_bcst_xmmqh_mode)
 	{
 	  switch (vex.length)
 	    {
@@ -11918,6 +11969,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	      abort ();
 	    }
 	}
+      else
+	/* If operand doesn't allow broadcast, vex.b should be 0.  */
+	oappend ("{bad}");
     }
 }
 
@@ -11929,7 +11983,15 @@ OP_E (int bytemode, int sizeflag)
   codep++;
 
   if (modrm.mod == 3)
-    OP_E_register (bytemode, sizeflag);
+    {
+      if ((sizeflag & SUFFIX_ALWAYS)
+	  && (bytemode == b_swap_mode
+	      || bytemode == bnd_swap_mode
+	      || bytemode == v_swap_mode))
+	swap_operand ();
+
+      print_register (modrm.rm, REX_B, bytemode, sizeflag);
+    }
   else
     OP_E_memory (bytemode, sizeflag);
 }
@@ -11937,97 +11999,13 @@ OP_E (int bytemode, int sizeflag)
 static void
 OP_G (int bytemode, int sizeflag)
 {
-  int add = 0;
-  const char **names;
-  USED_REX (REX_R);
-  if (rex & REX_R)
-    add += 8;
-  switch (bytemode)
+  if (vex.evex && !vex.r && address_mode == mode_64bit)
     {
-    case b_mode:
-      if (modrm.reg & 4)
-	USED_REX (0);
-      if (rex)
-	oappend (names8rex[modrm.reg + add]);
-      else
-	oappend (names8[modrm.reg + add]);
-      break;
-    case w_mode:
-      oappend (names16[modrm.reg + add]);
-      break;
-    case d_mode:
-    case db_mode:
-    case dw_mode:
-      oappend (names32[modrm.reg + add]);
-      break;
-    case q_mode:
-      oappend (names64[modrm.reg + add]);
-      break;
-    case bnd_mode:
-      if (modrm.reg > 0x3)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      oappend (names_bnd[modrm.reg]);
-      break;
-    case v_mode:
-    case dq_mode:
-    case dqb_mode:
-    case dqd_mode:
-    case dqw_mode:
-    case movsxd_mode:
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	oappend (names64[modrm.reg + add]);
-      else if (bytemode != v_mode && bytemode != movsxd_mode)
-	oappend (names32[modrm.reg + add]);
-      else
-	{
-	  if (sizeflag & DFLAG)
-	    oappend (names32[modrm.reg + add]);
-	  else
-	    oappend (names16[modrm.reg + add]);
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      break;
-    case va_mode:
-      names = (address_mode == mode_64bit
-	       ? names64 : names32);
-      if (!(prefixes & PREFIX_ADDR))
-	{
-	  if (address_mode == mode_16bit)
-	    names = names16;
-	}
-      else
-	{
-	  /* Remove "addr16/addr32".  */
-	  all_prefixes[last_addr_prefix] = 0;
-	  names = (address_mode != mode_32bit
-		       ? names32 : names16);
-	  used_prefixes |= PREFIX_ADDR;
-	}
-      oappend (names[modrm.reg + add]);
-      break;
-    case m_mode:
-      if (address_mode == mode_64bit)
-	oappend (names64[modrm.reg + add]);
-      else
-	oappend (names32[modrm.reg + add]);
-      break;
-    case mask_bd_mode:
-    case mask_mode:
-      if ((modrm.reg + add) > 0x7)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      oappend (names_mask[modrm.reg + add]);
-      break;
-    default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      break;
+      oappend ("(bad)");
+      return;
     }
+
+  print_register (modrm.reg, REX_R, bytemode, sizeflag);
 }
 
 static bfd_vma
@@ -12619,21 +12597,12 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
+print_vector_reg (unsigned int reg, int bytemode)
 {
-  int reg = modrm.reg;
   const char **names;
 
-  USED_REX (REX_R);
-  if (rex & REX_R)
-    reg += 8;
-  if (vex.evex)
-    {
-      if (!vex.r)
-	reg += 16;
-    }
-
   if (bytemode == xmmq_mode
+      || bytemode == evex_half_bcst_xmmqh_mode
       || bytemode == evex_half_bcst_xmmq_mode)
     {
       switch (vex.length)
@@ -12653,7 +12622,6 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     names = names_ymm;
   else if (bytemode == tmm_mode)
     {
-      modrm.reg = reg;
       if (reg >= 8)
 	{
 	  oappend ("(bad)");
@@ -12663,7 +12631,15 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     }
   else if (need_vex
 	   && bytemode != xmm_mode
-	   && bytemode != scalar_mode)
+	   && bytemode != scalar_mode
+	   && bytemode != xmmdw_mode
+	   && bytemode != xmmqd_mode
+	   && bytemode != evex_half_bcst_xmmqdh_mode
+	   && bytemode != w_swap_mode
+	   && bytemode != b_mode
+	   && bytemode != w_mode
+	   && bytemode != d_mode
+	   && bytemode != q_mode)
     {
       switch (vex.length)
 	{
@@ -12691,6 +12667,26 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   else
     names = names_xmm;
   oappend (names[reg]);
+}
+
+static void
+OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
+{
+  unsigned int reg = modrm.reg;
+
+  USED_REX (REX_R);
+  if (rex & REX_R)
+    reg += 8;
+  if (vex.evex)
+    {
+      if (!vex.r)
+	reg += 16;
+    }
+
+  if (bytemode == tmm_mode)
+    modrm.reg = reg;
+
+  print_vector_reg (reg, bytemode);
 }
 
 static void
@@ -12768,11 +12764,13 @@ static void
 OP_EX (int bytemode, int sizeflag)
 {
   int reg;
-  const char **names;
 
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
+
+  if (bytemode == dq_mode)
+    bytemode = vex.w ? q_mode : d_mode;
 
   if (modrm.mod != 3)
     {
@@ -12793,70 +12791,15 @@ OP_EX (int bytemode, int sizeflag)
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
+	  || bytemode == w_swap_mode
 	  || bytemode == d_swap_mode
 	  || bytemode == q_swap_mode))
     swap_operand ();
 
-  if (need_vex
-      && bytemode != xmm_mode
-      && bytemode != xmmdw_mode
-      && bytemode != xmmqd_mode
-      && bytemode != xmm_mb_mode
-      && bytemode != xmm_mw_mode
-      && bytemode != xmm_md_mode
-      && bytemode != xmm_mq_mode
-      && bytemode != xmmq_mode
-      && bytemode != evex_half_bcst_xmmq_mode
-      && bytemode != ymm_mode
-      && bytemode != tmm_mode
-      && bytemode != vex_scalar_w_dq_mode)
-    {
-      switch (vex.length)
-	{
-	case 128:
-	  names = names_xmm;
-	  break;
-	case 256:
-	  names = names_ymm;
-	  break;
-	case 512:
-	  names = names_zmm;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else if (bytemode == xmmq_mode
-	   || bytemode == evex_half_bcst_xmmq_mode)
-    {
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	  names = names_xmm;
-	  break;
-	case 512:
-	  names = names_ymm;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else if (bytemode == tmm_mode)
-    {
-      modrm.rm = reg;
-      if (reg >= 8)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      names = names_tmm;
-    }
-  else if (bytemode == ymm_mode)
-    names = names_ymm;
-  else
-    names = names_xmm;
-  oappend (names[reg]);
+  if (bytemode == tmm_mode)
+    modrm.rm = reg;
+
+  print_vector_reg (reg, bytemode);
 }
 
 static void
@@ -13345,13 +13288,21 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   reg = vex.register_specifier;
   vex.register_specifier = 0;
   if (address_mode != mode_64bit)
-    reg &= 7;
+    {
+      if (vex.evex && !vex.v)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
+
+      reg &= 7;
+    }
   else if (vex.evex && !vex.v)
     reg += 16;
 
   switch (bytemode)
     {
-    case vex_scalar_mode:
+    case scalar_mode:
       oappend (names_xmm[reg]);
       return;
 
@@ -13420,7 +13371,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     case 128:
       switch (bytemode)
 	{
-	case vex_mode:
+	case x_mode:
 	  names = names_xmm;
 	  break;
 	case dq_mode:
@@ -13446,7 +13397,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     case 256:
       switch (bytemode)
 	{
-	case vex_mode:
+	case x_mode:
 	  names = names_ymm;
 	  break;
 	case mask_bd_mode:
@@ -13690,74 +13641,92 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
   switch (bytemode)
     {
     case movsxd_mode:
-      if (intel_syntax)
+      if (!intel_syntax)
 	{
-	  *p++ = 'x';
-	  *p++ = 'd';
-	  goto skip;
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
+	    {
+	      *p++ = 'l';
+	      *p++ = 'q';
+	      break;
+	    }
 	}
 
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	{
-	  *p++ = 'l';
-	  *p++ = 'q';
-	}
-      else
-	{
-	  *p++ = 'x';
-	  *p++ = 'd';
-	}
+      *p++ = 'x';
+      *p++ = 'd';
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       break;
     }
 
- skip:
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);
 }
 
 static void
-OP_Mask (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
+DistinctDest_Fixup (int bytemode, int sizeflag)
 {
-  if (!vex.evex
-      || (bytemode != mask_mode && bytemode != mask_bd_mode))
-    abort ();
+  unsigned int reg = vex.register_specifier;
+  unsigned int modrm_reg = modrm.reg;
+  unsigned int modrm_rm = modrm.rm;
 
-  USED_REX (REX_R);
-  if ((rex & REX_R) != 0 || !vex.r)
+  /* Calc destination register number.  */
+  if (rex & REX_R)
+    modrm_reg += 8;
+  if (!vex.r)
+    modrm_reg += 16;
+
+  /* Calc src1 register number.  */
+  if (address_mode != mode_64bit)
+    reg &= 7;
+  else if (vex.evex && !vex.v)
+    reg += 16;
+
+  /* Calc src2 register number.  */
+  if (modrm.mod == 3)
     {
-      BadOp ();
-      return;
+      if (rex & REX_B)
+        modrm_rm += 8;
+      if (rex & REX_X)
+        modrm_rm += 16;
     }
 
-  oappend (names_mask [modrm.reg]);
+  /* Destination and source registers must be distinct, output bad if
+     dest == src1 or dest == src2.  */
+  if (modrm_reg == reg
+      || (modrm.mod == 3
+	  && modrm_reg == modrm_rm))
+    {
+      oappend ("(bad)");
+    }
+  else
+    OP_XMM (bytemode, sizeflag);
 }
 
 static void
 OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (modrm.mod == 3 && vex.b)
-    switch (bytemode)
-      {
-      case evex_rounding_64_mode:
-	if (address_mode != mode_64bit)
-	  {
-	    oappend ("(bad)");
-	    break;
-	  }
-	/* Fall through.  */
-      case evex_rounding_mode:
-	oappend (names_rounding[vex.ll]);
-	break;
-      case evex_sae_mode:
-	oappend ("{sae}");
-	break;
-      default:
-	abort ();
-	break;
-      }
+  if (modrm.mod != 3 || !vex.b)
+    return;
+
+  switch (bytemode)
+    {
+    case evex_rounding_64_mode:
+      if (address_mode != mode_64bit || !vex.w)
+        return;
+      /* Fall through.  */
+    case evex_rounding_mode:
+      evex_used |= EVEX_b_used;
+      oappend (names_rounding[vex.ll]);
+      break;
+    case evex_sae_mode:
+      evex_used |= EVEX_b_used;
+      oappend ("{");
+      break;
+    default:
+      abort ();
+    }
+  oappend ("sae}");
 }

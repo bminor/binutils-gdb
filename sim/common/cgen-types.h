@@ -31,10 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_HAVE_ADDR_RANGE
 
 #ifdef __GNUC__
-#define HAVE_LONGLONG
 #undef DI_FN_SUPPORT
 #else
-#undef HAVE_LONGLONG
 #define DI_FN_SUPPORT
 #endif
 
@@ -56,8 +54,8 @@ typedef enum mode_type {
 #define MAX_TARGET_MODES ((int) MODE_TARGET_MAX)
 #define MAX_MODES ((int) MODE_MAX)
 
-extern const char * const mode_names[];
-#define MODE_NAME(m) (mode_names[m])
+extern const char * const cgen_mode_names[];
+#define MODE_NAME(m) (cgen_mode_names[m])
 
 typedef void VOID;
 typedef unsigned char BI;
@@ -68,7 +66,6 @@ typedef unsigned8 UQI;
 typedef unsigned16 UHI;
 typedef unsigned32 USI;
 
-#ifdef HAVE_LONGLONG
 typedef signed64 DI;
 typedef unsigned64 UDI;
 #define GETLODI(di) ((SI) (di))
@@ -76,21 +73,6 @@ typedef unsigned64 UDI;
 #define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (val)))
 #define SETHIDI(di, val) ((di) = (((di) & 0xffffffffLL) | (((DI) (val)) << 32)))
 #define MAKEDI(hi, lo) ((((DI) (SI) (hi)) << 32) | ((UDI) (USI) (lo)))
-#else
-/* DI mode support if "long long" doesn't exist.
-   At one point CGEN supported K&R C compilers, and ANSI C compilers without
-   "long long".  One can argue the various merits of keeping this in or
-   throwing it out.  I went to the trouble of adding it so for the time being
-   I'm leaving it in.  */
-typedef struct { SI hi,lo; } DI;
-typedef DI UDI;
-#define GETLODI(di) ((di).lo)
-#define GETHIDI(di) ((di).hi)
-#define SETLODI(di, val) ((di).lo = (val))
-#define SETHIDI(di, val) ((di).hi = (val))
-extern DI make_struct_di (SI, SI);
-#define MAKEDI(hi, lo) (make_struct_di ((hi), (lo)))
-#endif
 
 /* These are used to record extracted raw data from an instruction, among other
    things.  It must be a host data type, and not a target one.  */

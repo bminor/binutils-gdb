@@ -520,7 +520,7 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
-/* See nbsd-tdep.h.  */
+/* See netbsd-tdep.h.  */
 
 void
 nbsd_info_proc_mappings_header (int addr_bit)
@@ -607,7 +607,7 @@ nbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
   internal_error (__FILE__, __LINE__, _("nbsd_get_sycall_number called"));
 }
 
-/* See nbsd-tdep.h.  */
+/* See netbsd-tdep.h.  */
 
 void
 nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

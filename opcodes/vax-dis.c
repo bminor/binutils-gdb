@@ -490,7 +490,7 @@ print_insn_vax (bfd_vma memaddr, disassemble_info *info)
 
   while (*argp)
     {
-      arg += print_insn_arg (argp, arg, memaddr + arg - buffer, info);
+      arg += print_insn_arg (argp, arg, memaddr + (arg - buffer), info);
       argp += 2;
       if (*argp)
 	(*info->fprintf_func) (info->stream, ",");

@@ -279,6 +279,10 @@ struct elf_x86_link_hash_entry
   /* TRUE if symbol is defined by linker.  */
   unsigned int linker_def : 1;
 
+  /* TRUE if symbol is referenced by a non-GOT/non-PLT relocation in a
+     relocatable object file without indirect external access marker.  */
+  unsigned int non_got_ref_without_indirect_extern_access : 1;
+
   /* TRUE if symbol is referenced by R_386_GOTOFF relocation.  This is
      only used by i386.  */
   unsigned int gotoff_ref : 1;

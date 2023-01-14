@@ -18,13 +18,13 @@ import gdb
 
 class MyBP(gdb.Breakpoint):
     def stop(self):
-        print('MyBP.stop was invoked!')
+        print("MyBP.stop was invoked!")
         # Don't make this breakpoint stop
         return False
 
 
 try:
-    bp = MyBP('does_not_exist', gdb.BP_WATCHPOINT)
+    bp = MyBP("does_not_exist", gdb.BP_WATCHPOINT)
 except RuntimeError:
     pass
 else:

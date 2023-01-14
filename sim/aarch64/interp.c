@@ -19,7 +19,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdio.h>
 #include <assert.h>
 #include <signal.h>
@@ -29,8 +31,8 @@
 
 #include "ansidecl.h"
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 #include "gdb/signals.h"
 #include "gdb/sim-aarch64.h"
 
@@ -327,6 +329,11 @@ sim_open (SIM_OPEN_KIND                  kind,
     return sd;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* We use NONSTRICT_ALIGNMENT as the default because AArch64 only enforces
+     4-byte alignment, even for 8-byte reads/writes.  The common core does not
+     support this, so we opt for non-strict alignment instead.  */
+  current_alignment = NONSTRICT_ALIGNMENT;
 
   /* Perform the initialization steps one by one.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK

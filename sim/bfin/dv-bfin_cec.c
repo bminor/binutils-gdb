@@ -18,9 +18,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
+#include <strings.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "devices.h"
 #include "dv-bfin_cec.h"
 #include "dv-bfin_evt.h"

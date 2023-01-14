@@ -586,11 +586,3 @@ crisv32f_h_prefixreg_v32_set (SIM_CPU *current_cpu, SI newval)
 {
   SET_H_PREFIXREG_V32 (newval);
 }
-
-/* Record trace results for INSN.  */
-
-void
-crisv32f_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

@@ -1,3 +1,47 @@
+2021-07-20  Alan Modra  <amodra@gmail.com>
+
+	PR gold/28106
+	PR gold/27815
+	* gc.h (gc_process_relocs): Use static_cast in Section_id constructor.
+
+2021-07-17  Michael Krasnyk  <michael.krasnyk@gmail.com>
+
+	PR gold/28098
+	* reloc.cc (Track_relocs::advance): Skip R_*_NONE relocation entries
+	with r_sym of zero without counting in advance method.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/gold.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-05-25  Alan Modra  <amodra@gmail.com>
+
+	PR gold/27815
+	* gc.h (gc_process_relocs): Use cast in Section_id constructor.
+
+2021-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR gold/27815
+	* gc.h (gc_process_relocs): Use nullptr in Section_id constructor.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
+	PR 27834
+	* options.cc (General_options::General_options): Init bsymbolic_.
+
+2021-05-04  Fangrui Song  <maskray@google.com>
+
+	PR 27834
+	* options.h (General_options): Make -Bsymbolic and
+	-Bsymbolic-functions special and adjust the help messages. Add
+	enum Bsymbolic_kind and -Bno-symbolic.
+	* options.cc (General_options): Define parse_Bno_symbolic,
+	parse_Bsymbolic_functions, and parse_Bsymbolic.
+
 2021-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR gold/27625

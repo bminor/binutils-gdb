@@ -616,7 +616,7 @@ init_w32_command_list (void)
       add_basic_prefix_cmd
 	("w32", class_info,
 	 _("Print information specific to Win32 debugging."),
-	 &info_w32_cmdlist, "info w32 ", 0, &infolist);
+	 &info_w32_cmdlist, 0, &infolist);
       w32_prefix_command_valid = 1;
     }
 }
@@ -761,10 +761,10 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
   type->set_is_unsigned (true);
 
   for (i = 0; i < count; i++)
-  {
-    TYPE_FIELD_NAME (type, i) = values[i].name;
-    SET_FIELD_ENUMVAL (type->field (i), values[i].value);
-  }
+    {
+      TYPE_FIELD_NAME (type, i) = values[i].name;
+      SET_FIELD_ENUMVAL (type->field (i), values[i].value);
+    }
 
   return type;
 }
@@ -1212,10 +1212,11 @@ _initialize_windows_tdep ()
     = gdbarch_data_register_post_init (init_windows_gdbarch_data);
 
   init_w32_command_list ();
-  add_cmd ("thread-information-block", class_info, display_tib,
-	   _("Display thread information block."),
-	   &info_w32_cmdlist);
-  add_alias_cmd ("tib", "thread-information-block", class_info, 1,
+  cmd_list_element *info_w32_thread_information_block_cmd
+    = add_cmd ("thread-information-block", class_info, display_tib,
+	       _("Display thread information block."),
+	       &info_w32_cmdlist);
+  add_alias_cmd ("tib", info_w32_thread_information_block_cmd, class_info, 1,
 		 &info_w32_cmdlist);
 
   add_setshow_boolean_cmd ("show-all-tib", class_maintenance,

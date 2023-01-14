@@ -36,13 +36,6 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  /* ... simulator specific members ... */
-  sim_state_base base;
-};
-
 extern void step_once (SIM_CPU *);
 extern void initialize_cpu (SIM_DESC, SIM_CPU *);
 

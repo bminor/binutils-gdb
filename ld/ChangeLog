@@ -1,3 +1,389 @@
+2021-07-26  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-x86-64/x86-64.exp (Build textrel-1): Use --warn-textrel.
+
+2021-07-06  Michael Matz  <matz@suse.de>
+
+	PR ld/28021
+	* testsuite/ld-riscv-elf/relax-twice.ver: New.
+	* testsuite/ld-riscv-elf/relax-twice-1.s: New.
+	* testsuite/ld-riscv-elf/relax-twice-2.s: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp
+	(run_relax_twice_test): New, and call it.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3a.d: New testcase.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3a.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3b.d: New testcase.
+	Should report error since the %pcrel_lo with addend refers to
+	%got_pcrel_hi.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3b.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3c.d: New testcase.
+	Should report error since the %got_pcrel_hi with addend.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3c.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3.ld: Likewise.
+
+2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27998
+	* testsuite/ld-i386/i386.exp: Run PR ld/27998 tests.
+	* testsuite/ld-i386/pr27998a.d: New file.
+	* testsuite/ld-i386/pr27998a.s: Likewise.
+	* testsuite/ld-i386/pr27998b.d: Likewise.
+	* testsuite/ld-i386/pr27998b.s: Likewise.
+
+2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/textrel-1.err: New file.
+	* testsuite/ld-x86-64/textrel-1a.s: Likewise.
+	* testsuite/ld-x86-64/textrel-1b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run textrel-1 tests.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/property-and-1.d: Skip am33_2.0, hppa-hpux
+	and mn10300.
+	Pass --generate-missing-build-notes=no to assembler.  Allow
+	other note sections for xtensa.
+	* testsuite/ld-elf/property-and-2.d: Likewise.
+	* testsuite/ld-elf/property-and-3.d: Likewise.
+	* testsuite/ld-elf/property-and-4.d: Likewise.
+	* testsuite/ld-elf/property-or-1.d: Likewise.
+	* testsuite/ld-elf/property-or-2.d: Likewise.
+	* testsuite/ld-elf/property-or-3.d: Likewise.
+	* testsuite/ld-elf/property-or-4.d: Likewise.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texi: Move -z unique-symbol after -z undefs.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/property-and-1.d: New file.
+	* testsuite/ld-elf/property-and-1.s: Likewise.
+	* testsuite/ld-elf/property-and-2.d: Likewise.
+	* testsuite/ld-elf/property-and-2.s: Likewise.
+	* testsuite/ld-elf/property-and-3.d: Likewise.
+	* testsuite/ld-elf/property-and-3.s: Likewise.
+	* testsuite/ld-elf/property-and-4.d: Likewise.
+	* testsuite/ld-elf/property-and-empty.s: Likewise.
+	* testsuite/ld-elf/property-or-1.d: Likewise.
+	* testsuite/ld-elf/property-or-1.s: Likewise.
+	* testsuite/ld-elf/property-or-2.d: Likewise.
+	* testsuite/ld-elf/property-or-2.s: Likewise.
+	* testsuite/ld-elf/property-or-3.d: Likewise.
+	* testsuite/ld-elf/property-or-3.s: Likewise.
+	* testsuite/ld-elf/property-or-4.d: Likewise.
+	* testsuite/ld-elf/property-or-empty.s: Likewise.
+
+2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27973
+	* testsuite/ld-x86-64/x86-64.exp: Pass $NOPIE_LDFLAGS and
+	$NOPIE_CFLAGS to protected-func-1 without PIE.
+
+2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27973
+	* testsuite/ld-x86-64/x86-64.exp: Run protected function tests.
+	* testsuite/ld-x86-64/protected-func-1.h: New file.
+	* testsuite/ld-x86-64/protected-func-1a.s: Likewise.
+	* testsuite/ld-x86-64/protected-func-1b.c: Likewise.
+
+2021-06-17  Fangrui Song  <maskray@google.com>
+
+	* ldlex.h (enum option_values): Add OPTION_NO_PIE.
+	* lexsup.c (struct ld_options): Add -no-pie.
+	(parse_args): Handle -no-pie.
+	* ld.texi: Document -no-pie.
+
+2021-06-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-pie/vaddr-0.d: Update expected output.
+
+2021-06-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27952
+	* ldelf.c (ldelf_after_open): Error on input PIEs too.
+
+2021-06-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 27666
+	* testsuite/ld-sparc/sparc.exp: Do not run the sparctests or
+	sparc64tests for Solaris2 targets.
+
+2021-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 2589
+	* ld.texi (link-time runtime library search path): Mention
+	plugin library path.  Correct order of search.
+
+2021-05-31  Nelson Chu  <nelson.chu@sifive.com>
+	    Lifang Xia  <lifang_xia@c-sky.com>
+
+	PR 27566
+	* emultempl/riscvelf.em (after_allocation): Call
+	riscv_set_data_segment_info to set data segment phase before relaxing.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+	* testsuite/ld-riscv-elf/relro-relax-lui.d: New testcase.
+	* testsuite/ld-riscv-elf/relro-relax-lui.s: Likewise.
+	* testsuite/ld-riscv-elf/relro-relax-pcrel.d: Likewise.
+	* testsuite/ld-riscv-elf/relro-relax-pcrel.s: Likewise.
+
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* testsuite/ld-i386/pcrel16-2.d: xfail.
+	* testsuite/ld-x86-64/pcrel16-2.d: Likewise.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* testsuite/ld-i386/code16.d: New file.
+	* testsuite/ld-i386/code16.t: Likewise.
+	* testsuite/ld-x86-64/code16.d: Likewise.
+	* testsuite/ld-x86-64/code16.t: Likewise.
+	* testsuite/ld-i386/i386.exp: Run code16.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/ilp32-12.d: New file.
+	* testsuite/ld-x86-64/ilp32-12.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run ilp32-12.
+
+2021-05-14  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2a.d: Renamed from
+	pcrel-lo-addend-2.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2a.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2b.d: New testcase.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2b.s: Likewise.
+
+2021-05-13  Fangrui Song  <maskray@google.com>
+
+	PR 27834
+	* ldlex.h (enum option_values): Add OPTION_NO_SYMBOLIC.
+	* lexsup.c (ld_options): Add -Bno-symbolic.
+	(parse_args): Handle -Bno-symbolic.
+	* ld.texi: Document -Bno-symbolic.
+	* NEWS: Mention -Bno-symbolic.
+	* testsuite/ld-elf/shared.exp: Add a test.
+
+2021-05-12  Richard Earnshaw  <rearnsha@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (farcall test for v8-m.mainline):
+	Correct expected output.
+
+2021-05-11  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-x86-64/rela.d: Fix regexp not to presume a specific
+	address layout, so it works for e.g. --target=x86-64-elf.
+
+2021-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 27113
+	* Makefile.am (install-data-local): Also delete libdep.dll.a if it
+	is present.
+	* Makefile.in: Regenerate.
+
+2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* testsuite/ld-elf/group8a.d: Remove pru from XFAIL list.
+	* testsuite/ld-elf/group8b.d: Ditto.
+	* testsuite/ld-elf/group9a.d: Ditto.
+	* testsuite/ld-elf/group9b.d: Ditto.
+	* testsuite/ld-elf/pr12851.d: Ditto.
+	* testsuite/ld-elf/pr22677.d: Ditto.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Remove
+	pru from list.
+
+2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* scripttempl/pru.sc (.resource_table): Add ALIGN directive.
+	Use symbols for memory sizes.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (html-local, doc/ld/index.html): New targets.
+	* Makefile.in: Regenerate.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (AM_MAKEINFOFLAGS): Add --no-split.
+	* Makefile.in: Regenerate.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-x86-64/rela.d: New.
+	* testsuite/ld-x86-64/x86-64.exp: Run new test.
+
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* ldelfgen.c (compare_link_order): Ignore section size when
+	performing a relocateable link.
+
+2021-05-07  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (update_definedness): Don't return false for absolute
+	symbols.
+	* ldmain.c (multiple_definition): Print "warning: " in message
+	when not a hard error.
+
+2021-05-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr27825-1.d: Correct xfail.
+	* testsuite/ld-elf/pr27825-2.d: Likewise.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 27746
+	testsuite/ld-or1k/or1k.exp (or1kplttests): Add tests for linking
+	along with gotha() relocations.
+	testsuite/ld-or1k/gotha1.dd: New file.
+	testsuite/ld-or1k/gotha1.s: New file.
+	testsuite/ld-or1k/gotha2.dd: New file.
+	testsuite/ld-or1k/gotha2.s: New file
+	testsuite/ld-or1k/pltlib.s (x): Define size to avoid link
+	failure.
+
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/ld-ctf/ctf.exp: Use -gctf, not -gt.
+	* testsuite/lib/ld-lib.exp: Likewise.
+	* testsuite/ld-ctf/nonrepresentable-1.c: New test for nonrepresentable types.
+	* testsuite/ld-ctf/nonrepresentable-2.c: Likewise.
+	* testsuite/ld-ctf/nonrepresentable.d: Likewise.
+	* testsuite/ld-ctf/array.d: Larger type section.
+	* testsuite/ld-ctf/data-func-conflicted.d: Likewise.
+	* testsuite/ld-ctf/enums.d: Likewise.
+	* testsuite/ld-ctf/conflicting-enums.d: Don't compare types.
+	* testsuite/ld-ctf/cross-tu-cyclic-conflicting.d: Changed type order.
+	* testsuite/ld-ctf/cross-tu-noncyclic.d: Likewise.
+	* testsuite/ld-ctf/slice.d: Adjust for improved slice emission.
+
+2021-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27825
+	* testsuite/ld-elf/pr27825-1.d: New file.
+	* testsuite/ld-elf/pr27825-1a.s: Likewise.
+	* testsuite/ld-elf/pr27825-1b.s: Likewise.
+	* testsuite/ld-elf/pr27825-2.d: Likewise.
+	* testsuite/ld-elf/pr27825-2a.s: Likewise.
+	* testsuite/ld-elf/pr27825-2b.s: Likewise.
+
+2021-05-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/empty.s: New file.
+	* testsuite/ld-powerpc/undefweak.d,
+	* testsuite/ld-powerpc/undefweak.s: New testcase.
+	* testsuite/ld-powerpc/powerpc.exp: Run it.
+
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-s390/tlspic_64.rd: Adjust expected output for
+	named section symbols.
+
+2021-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/anno-sym.s: New test source file.
+	* testsuite/ld-elf/anno-sym.d: New test driver.
+	* testsuite/ld-elf/anno-sym.l: New test error output.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-i386/pcrel16-2.s, testsuite/ld-i386/pcrel16-2.d,
+	testsuite/ld-x86-64/pcrel16-2.d: New.
+	* testsuite/ld-i386/i386.exp: Run new test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2021-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27771
+	* testsuite/ld-bootstrap/bootstrap.exp: Create a symbolic link
+	to tmpdir/ldscripts only if it doesn't exist.
+
+2021-04-22  Jan Beulich  <jbeulich@suse.com>
+
+	PR ld/26659
+	* testsuite/ld-pe/pr26659-weak-undef-sym.d: Relax for Cygwin.
+
+2021-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-aarch64/variant_pcs-now.d: Adjust expected output
+	to allow for named section symbols.
+	* testsuite/ld-aarch64/variant_pcs-r.d: Likewise.
+	* testsuite/ld-aarch64/variant_pcs-shared.d: Likewise.
+	* testsuite/ld-alpha/tlsbin.rd: Likewise.
+	* testsuite/ld-alpha/tlsbinr.rd: Likewise.
+	* testsuite/ld-alpha/tlspic.rd: Likewise.
+	* testsuite/ld-arm/rodata-merge-map.sym: Likewise.
+	* testsuite/ld-arm/script-type.sym: Likewise.
+	* testsuite/ld-cris/libdso-2.d: Likewise.
+	* testsuite/ld-cris/pr16044.d: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-ia64/tlsbin.rd: Likewise.
+	* testsuite/ld-ia64/tlspic.rd: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-n64t.d: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-o32t.d: Likewise.
+	* testsuite/ld-mmix/bspec1.d: Likewise.
+	* testsuite/ld-mmix/bspec2.d: Likewise.
+	* testsuite/ld-mmix/local1.d: Likewise.
+	* testsuite/ld-mmix/local3.d: Likewise.
+	* testsuite/ld-mmix/local5.d: Likewise.
+	* testsuite/ld-mmix/local7.d: Likewise.
+	* testsuite/ld-mmix/undef-3.d: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+	* testsuite/ld-powerpc/tlstocso.r: Likewise.
+	* testsuite/ld-s390/tlsbin.rd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+	* testsuite/ld-s390/tlspic.rd: Likewise.
+	* testsuite/ld-s390/tlspic_64.rd: Likewise.
+	* testsuite/ld-sparc/gotop32.rd: Likewise.
+	* testsuite/ld-sparc/gotop64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic64.rd: Likewise.
+	* testsuite/ld-sparc/tlssunpic32.rd: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.rd: Likewise.
+	* testsuite/ld-tic6x/common.d: Likewise.
+	* testsuite/ld-tic6x/shlib-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+
+2021-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	PR binutils/21700
+	* testsuite/ld-powerpc/aix52.exp: Add new test.
+	* testsuite/ld-powerpc/aix-neg-reloc-32.d: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc-64.d: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc.ex: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc.s: New test.
+
 2021-04-13  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texi (Options): Add note about the effect of --as-needed on

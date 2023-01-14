@@ -93,7 +93,7 @@ struct value *
 expression::evaluate (struct type *expect_type, enum noside noside)
 {
   gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
-  if (target_has_execution ()
+  if (target_has_execution () && inferior_ptid != null_ptid
       && language_defn->la_language == language_cplus
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))
     stack_temporaries.emplace (inferior_thread ());
@@ -872,6 +872,8 @@ structop_base_operation::evaluate_funcall
      (struct type *expect_type, struct expression *exp, enum noside noside,
       const std::vector<operation_up> &args)
 {
+  /* Allocate space for the function call arguments, Including space for a
+     `this' pointer at the start.  */
   std::vector<value *> vals (args.size () + 1);
   /* First, evaluate the structure into vals[0].  */
   enum exp_opcode op = opcode ();
@@ -918,9 +920,13 @@ structop_base_operation::evaluate_funcall
 	}
     }
 
+  /* Evaluate the arguments.  The '+ 1' here is to allow for the `this'
+     pointer we placed into vals[0].  */
   for (int i = 0; i < args.size (); ++i)
     vals[i + 1] = args[i]->evaluate_with_coercion (exp, noside);
-  gdb::array_view<value *> arg_view = vals;
+
+  /* The array view includes the `this' pointer.  */
+  gdb::array_view<value *> arg_view (vals);
 
   int static_memfuncp;
   value *callee;
@@ -941,7 +947,7 @@ structop_base_operation::evaluate_funcall
     {
       struct value *temp = vals[0];
 
-      callee = value_struct_elt (&temp, &vals[1], tstr,
+      callee = value_struct_elt (&temp, arg_view, tstr,
 				 &static_memfuncp,
 				 op == STRUCTOP_STRUCT
 				 ? "structure" : "structure pointer");
@@ -1126,7 +1132,7 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 struct value *arg1, const char *string)
 {
-  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+  struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
@@ -1182,7 +1188,7 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
       }
   }
 
-  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+  struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure pointer");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));

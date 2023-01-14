@@ -276,7 +276,7 @@ extern bool ext_lang_auto_load_enabled (const struct extension_language_defn *);
 /* Wrappers for each extension language API function that iterate over all
    extension languages.  */
 
-extern void finish_ext_lang_initialization (void);
+extern void ext_lang_initialization (void);
 
 extern void eval_ext_lang_from_control_command (struct command_line *cmd);
 

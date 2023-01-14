@@ -708,7 +708,7 @@ opencl_structop_operation::evaluate (struct type *expect_type,
 				 noside);
   else
     {
-      struct value *v = value_struct_elt (&arg1, NULL,
+      struct value *v = value_struct_elt (&arg1, {},
 					  std::get<1> (m_storage).c_str (),
 					  NULL, "structure");
 

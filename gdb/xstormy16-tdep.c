@@ -562,8 +562,8 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	{
 	  CORE_ADDR addr, endaddr;
 
-	  addr = obj_section_addr (osect);
-	  endaddr = obj_section_endaddr (osect);
+	  addr = osect->addr ();
+	  endaddr = osect->endaddr ();
 
 	  for (; addr < endaddr; addr += 2 * xstormy16_inst_size)
 	    {
@@ -736,6 +736,7 @@ xstormy16_frame_base_address (struct frame_info *this_frame, void **this_cache)
 }
 
 static const struct frame_unwind xstormy16_frame_unwind = {
+  "xstormy16 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   xstormy16_frame_this_id,

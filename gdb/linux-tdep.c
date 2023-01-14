@@ -1804,7 +1804,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   char filename[100];
   /* The basename of the executable.  */
   const char *basename;
-  const char *infargs;
   /* Temporary buffer.  */
   char *tmpstr;
   /* The valid states of a process, according to the Linux kernel.  */
@@ -1848,12 +1847,12 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   strncpy (p->pr_fname, basename, sizeof (p->pr_fname) - 1);
   p->pr_fname[sizeof (p->pr_fname) - 1] = '\0';
 
-  infargs = get_inferior_args ();
+  const std::string &infargs = current_inferior ()->args ();
 
   /* The arguments of the program.  */
   std::string psargs = fname.get ();
-  if (infargs != NULL)
-    psargs = psargs + " " + infargs;
+  if (!infargs.empty ())
+    psargs += ' ' + infargs;
 
   strncpy (p->pr_psargs, psargs.c_str (), sizeof (p->pr_psargs) - 1);
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
@@ -2017,7 +2016,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   thread_info *signalled_thr = gcore_find_signalled_thread ();
   gdb_signal stop_signal;
   if (signalled_thr != nullptr)
-    stop_signal = signalled_thr->suspend.stop_signal;
+    stop_signal = signalled_thr->stop_signal ();
   else
     stop_signal = GDB_SIGNAL_0;
 
@@ -2694,9 +2693,12 @@ _initialize_linux_tdep ()
     gdbarch_data_register_pre_init (init_linux_gdbarch_data);
 
   /* Observers used to invalidate the cache when needed.  */
-  gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);
-  gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf);
-  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf);
+  gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf,
+					"linux-tdep");
+  gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf,
+					    "linux-tdep");
+  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf,
+					 "linux-tdep");
 
   add_setshow_boolean_cmd ("use-coredump-filter", class_files,
 			   &use_coredump_filter, _("\

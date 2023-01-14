@@ -32,6 +32,7 @@
 #endif
 
 #include "cpu.h"
+#include "symcat.h"
 
 /* OEA vs VEA
 
@@ -627,9 +628,9 @@ om_virtual_to_real(om_map *map,
       TRACE(trace_vm,
 	    ("ea=0x%lx - htab search %d - htab=0x%lx hash=0x%lx mask=0x%lx pteg=0x%lx\n",
 	     (long)ea, current_hash,
-	     map->real_address_of_page_table,
-	     page_hash,
-	     map->page_table_hash_mask,
+	     (long)map->real_address_of_page_table,
+	     (long)page_hash,
+	     (long)map->page_table_hash_mask,
 	     (long)real_address_of_pte_group));
       for (real_address_of_pte_0 = real_address_of_pte_group;
 	   real_address_of_pte_0 < (real_address_of_pte_group
@@ -973,8 +974,8 @@ vm_synchronize_context(vm *virtual,
   if (WITH_XOR_ENDIAN) {
     int i = 1;
     unsigned mask;
-    if ((little_endian && CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
-	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN))
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG))
       mask = 0;
     else
       mask = WITH_XOR_ENDIAN - 1;
@@ -987,8 +988,8 @@ vm_synchronize_context(vm *virtual,
   }
   else {
     /* don't allow the processor to change endian modes */
-    if ((little_endian && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN)
-	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER != BIG_ENDIAN))
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER != BFD_ENDIAN_BIG))
       cpu_error(processor, cia, "attempt to change hardwired byte order");
   }
 }

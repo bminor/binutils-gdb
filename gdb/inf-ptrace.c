@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "command.h"
 #include "inferior.h"
-#include "inflow.h"
 #include "terminal.h"
 #include "gdbcore.h"
 #include "regcache.h"

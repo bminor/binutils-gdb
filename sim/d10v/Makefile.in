@@ -26,15 +26,15 @@ SIM_OBJS = \
 	endian.o
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = d10v_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h endian.c \
+SIM_EXTRA_DEPS = simops.h
+
+INCLUDE = d10v_sim.h $(srcroot)/include/sim/callback.h targ-vals.h endian.c \
 	$(srcroot)/include/gdb/sim-d10v.h
 
 # This selects the d10v newlib/libgloss syscall definitions.
 NL_TARGET = -DNL_TARGET_d10v
 
 ## COMMON_POST_CONFIG_FRAG
-
-simops.o: simops.h
 
 simops.h: gencode
 	./gencode -h >$@

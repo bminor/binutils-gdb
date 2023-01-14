@@ -335,10 +335,6 @@ struct bfd_link_info
   /* TRUE if BFD should pre-bind symbols in a shared object.  */
   unsigned int symbolic: 1;
 
-  /* TRUE if executable should not contain copy relocs.
-     Setting this true may result in a non-sharable text segment.  */
-  unsigned int nocopyreloc: 1;
-
   /* TRUE if BFD should export all symbols in the dynamic symbol table
      of an executable, rather than only those used.  */
   unsigned int export_dynamic: 1;
@@ -652,6 +648,25 @@ struct bfd_link_info
   /* How many spare .dynamic DT_NULL entries should be added?  */
   unsigned int spare_dynamic_tags;
 
+  /* GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS control:
+       > 1: Turn on by -z indirect-extern-access or by backend.
+      == 1: Turn on by an input.
+         0: Turn off.
+       < 0: Turn on if it is set on any inputs or let backend to
+	    decide.  */
+  int indirect_extern_access;
+
+  /* Non-zero if executable should not contain copy relocs.
+       > 1: Implied by indirect_extern_access.
+      == 1: Turn on by -z nocopyreloc.
+         0: Turn off.
+    Setting this to non-zero may result in a non-sharable text
+    segment.  */
+  int nocopyreloc;
+
+  /* Pointer to the GNU_PROPERTY_1_NEEDED property in memory.  */
+  bfd_byte *needed_1_p;
+
   /* May be used to set DT_FLAGS for ELF. */
   bfd_vma flags;
 
@@ -682,6 +697,13 @@ struct bfd_link_info
 
   /* The version information.  */
   struct bfd_elf_version_tree *version_info;
+
+  /* Size of cache.  Backend can use it to keep strace cache size.   */
+  bfd_size_type cache_size;
+
+  /* The maximum cache size.  Backend can use cache_size and and
+     max_cache_size to decide if keep_memory should be honored.  */
+  bfd_size_type max_cache_size;
 };
 
 /* Some forward-definitions used by some callbacks.  */

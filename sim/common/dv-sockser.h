@@ -34,8 +34,6 @@ int dv_sockser_write (SIM_DESC, unsigned char);
 int dv_sockser_write_buffer (SIM_DESC, const unsigned char *, unsigned);
 int dv_sockser_read (SIM_DESC);
 
-SIM_RC dv_sockser_install (SIM_DESC);
-
 #else
 
 /* If dv-sockser isn't available, provide stub functions.  */

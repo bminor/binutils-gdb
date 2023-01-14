@@ -9,8 +9,8 @@ Contents of the .eh_frame section:
   Augmentation data:     1b
   DW_CFA_def_cfa: r1 ofs 0
 
-0+14 0+14 0+18 FDE cie=0+ pc=0+280..0+318
-  DW_CFA_advance_loc: 96 to 0+2e0
+0+14 0+14 0+18 FDE cie=0+ pc=0+280..0+314
+  DW_CFA_advance_loc: 128 to 0+300
   DW_CFA_offset_extended_sf: r65 at cfa\+8
   DW_CFA_advance_loc: 16 to .*
   DW_CFA_restore_extended: r65

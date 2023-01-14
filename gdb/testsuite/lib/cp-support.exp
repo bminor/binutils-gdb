@@ -245,6 +245,7 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table
 			   { in_ptype_arg /r } { recursive_qid 0 } } {
     global gdb_prompt
     set wsopt "\[\r\n\t \]*"
+    set hwsopt "\[\t \]*"
 
     if {$recursive_qid == 0} {
 	# The test name defaults to the command, but without the
@@ -306,23 +307,40 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table
 			    "$in_tag\\((int|void|)\\);"]
 
     # Partial regexp for parsing the struct/class header.
-    set regexp_header "(struct|class)${wsopt}(\[^ \t\]*)${wsopt}"
-    append regexp_header "(\\\[with .*\\\]${wsopt})?((:\[^\{\]*)?)${wsopt}\{"
+    set regexp_header "(struct|class)${hwsopt}(\[^ \t\]*)${hwsopt}"
+    append regexp_header "(\\\[with .*\\\]${hwsopt})?((:\[^\{\]*)?)${hwsopt}\{"
     if {$recursive_qid == 0} {
 	# Actually do the ptype.
-
 	# For processing the output of ptype, we must get to the prompt.
-	set the_regexp "type = ${regexp_header}"
-	append the_regexp "(.*)\}${wsopt}(\[^\r\n\]*)\[\r\n\]+$gdb_prompt $"
 	set parse_okay 0
+	set state 0
+	set actual_body ""
 	gdb_test_multiple "$in_command" "$in_testname // parse failed" {
-	    -re $the_regexp {
-		set parse_okay          1
+	    -re "type = ${regexp_header}" {
+		if { $state == 0 } { set state 1 } else { set state -1 }
 		set actual_key          $expect_out(1,string)
 		set actual_tag          $expect_out(2,string)
 		set actual_base_string  $expect_out(4,string)
-		set actual_body         $expect_out(6,string)
-		set actual_tail         $expect_out(7,string)
+		exp_continue
+	    }
+	    -re "^\r\n\}${hwsopt}(\[^\r\n\]*)(?=\r\n)" {
+		if { $state == 1 } { set state 2 } else { set state -2 }
+		set actual_tail $expect_out(1,string)
+		exp_continue
+	    }
+	    -re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
+		if { $state != 1 } { set $state -3 }
+		if { $actual_body == "" } {
+		    set actual_body $expect_out(1,string)
+		} else {
+		    append actual_body "\n$expect_out(1,string)"
+		}
+		exp_continue
+	    }
+	    -re -wrap "" {
+		if { $state == 2 } {
+		    set parse_okay 1
+		}
 	    }
 	}
     } else {

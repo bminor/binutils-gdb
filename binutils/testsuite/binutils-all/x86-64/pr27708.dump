@@ -1,5 +1,5 @@
 
-Elf file type is DYN (Shared object file)
+Elf file type is DYN (Position-Independent Executable file)
 Entry point 0x5f0
 There are 11 program headers, starting at offset 64
 

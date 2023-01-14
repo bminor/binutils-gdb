@@ -80,4 +80,12 @@ void *xmalloc (size_t);
 
 void *xrealloc (void *, size_t);
 
+#if __GNUC__ >= 7
+#define _mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
+#else
+/* Assumes unsigned values.  Careful!  Args evaluated multiple times.  */
+#define _mul_overflow(a, b, res) \
+  ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
+#endif
+
 #endif /* _BUCOMM_H */

@@ -21,7 +21,9 @@
 #ifndef _DEBUG_C_
 #define _DEBUG_C_
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "basics.h"
 
 #include <stdlib.h>

@@ -7448,7 +7448,9 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
       break;
     case SHT_MIPS_DWARF:
       if (! startswith (name, ".debug_")
-	  && ! startswith (name, ".zdebug_"))
+         && ! startswith (name, ".gnu.debuglto_.debug_")
+         && ! startswith (name, ".zdebug_")
+         && ! startswith (name, ".gnu.debuglto_.zdebug_"))
 	return false;
       break;
     case SHT_MIPS_SYMBOL_LIB:
@@ -7669,7 +7671,9 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_entsize = sizeof (Elf_External_ABIFlags_v0);
     }
   else if (startswith (name, ".debug_")
-	   || startswith (name, ".zdebug_"))
+	   || startswith (name, ".gnu.debuglto_.debug_")
+	   || startswith (name, ".zdebug_")
+	   || startswith (name, ".gnu.debuglto_.zdebug_"))
     {
       hdr->sh_type = SHT_MIPS_DWARF;
 

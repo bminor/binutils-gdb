@@ -428,7 +428,6 @@ PRINTF_WHERE_LIKE (as_warn_where);
 
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   signal_init (void);
-void   sprint_value (char *, addressT);
 int    had_errors (void);
 int    had_warnings (void);
 void   as_warn_value_out_of_range (const char *, offsetT, offsetT, offsetT,

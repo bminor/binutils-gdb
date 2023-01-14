@@ -255,3 +255,51 @@ delete_breakpoints
 gdb_unload
 gdb_test "python print (a\[0\].is_valid())" "False" "test symbol non-validity"
 gdb_test_no_output "python a = None" "test symbol destructor"
+
+# Test gdb.Symbol domain categories
+gdb_test "python print (gdb.SYMBOL_UNDEF_DOMAIN)" \
+    "0" "test gdb.SYMBOL_UNDEF_DOMAIN"
+gdb_test "python print (gdb.SYMBOL_VAR_DOMAIN)" \
+    "1" "test gdb.SYMBOL_VAR_DOMAIN"
+gdb_test "python print (gdb.SYMBOL_STRUCT_DOMAIN)" \
+    "2" "test gdb.SYMBOL_STRUCT_DOMAIN"
+gdb_test "python print (gdb.SYMBOL_MODULE_DOMAIN)" \
+    "3" "test gdb.SYMBOL_MODULE_DOMAIN"
+gdb_test "python print (gdb.SYMBOL_LABEL_DOMAIN)" \
+    "4" "test gdb.SYMBOL_LABEL_DOMAIN"
+gdb_test "python print (gdb.SYMBOL_COMMON_BLOCK_DOMAIN)" \
+    "5" "test gdb.SYMBOL_COMMON_BLOCK_DOMAIN"
+
+# Test gdb.Symbol address class categories
+gdb_test "python print (gdb.SYMBOL_LOC_UNDEF)" \
+    "0" "test gdb.SYMBOL_LOC_UNDEF"
+gdb_test "python print (gdb.SYMBOL_LOC_CONST)" \
+    "1" "test gdb.SYMBOL_LOC_CONST"
+gdb_test "python print (gdb.SYMBOL_LOC_STATIC)" \
+    "2" "test gdb.SYMBOL_LOC_STATIC"
+gdb_test "python print (gdb.SYMBOL_LOC_REGISTER)" \
+    "3" "test gdb.SYMBOL_LOC_REGISTER"
+gdb_test "python print (gdb.SYMBOL_LOC_ARG)" \
+    "4" "test gdb.SYMBOL_LOC_ARG"
+gdb_test "python print (gdb.SYMBOL_LOC_REF_ARG)" \
+    "5" "test gdb.SYMBOL_LOC_REF_ARG"
+gdb_test "python print (gdb.SYMBOL_LOC_REGPARM_ADDR)" \
+    "6" "test gdb.SYMBOL_LOC_REGPARM_ADDR"
+gdb_test "python print (gdb.SYMBOL_LOC_LOCAL)" \
+    "7" "test gdb.SYMBOL_LOC_LOCAL"
+gdb_test "python print (gdb.SYMBOL_LOC_TYPEDEF)" \
+    "8" "test gdb.SYMBOL_LOC_TYPEDEF"
+gdb_test "python print (gdb.SYMBOL_LOC_LABEL)" \
+    "9" "test gdb.SYMBOL_LOC_LABEL"
+gdb_test "python print (gdb.SYMBOL_LOC_BLOCK)" \
+    "10" "test gdb.SYMBOL_LOC_BLOCK"
+gdb_test "python print (gdb.SYMBOL_LOC_CONST_BYTES)" \
+    "11" "test gdb.SYMBOL_LOC_CONST_BYTES"
+gdb_test "python print (gdb.SYMBOL_LOC_UNRESOLVED)" \
+    "12" "test gdb.SYMBOL_LOC_UNRESOLVED"
+gdb_test "python print (gdb.SYMBOL_LOC_OPTIMIZED_OUT)" \
+    "13" "test gdb.SYMBOL_LOC_OPTIMIZED_OUT"
+gdb_test "python print (gdb.SYMBOL_LOC_COMPUTED)" \
+    "14" "test gdb.SYMBOL_LOC_COMPUTED"
+gdb_test "python print (gdb.SYMBOL_LOC_COMMON_BLOCK)" \
+    "15" "test gdb.SYMBOL_LOC_COMMON_BLOCK"

@@ -1,3 +1,174 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_RESERVED_BITS call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* simops.c: Include sim-signal.h.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* interp.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete calls to AC_CHECK_FUNCS_ONCE and
+	AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Replace $(IGEN) with $(IGEN_RUN) and ../igen/igen
+	with $(IGEN).
+
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove chown.
+	* simops.c (OP_10007E0): Remove HAVE_CHOWN check.
+	* config.in, configure: Regenerate.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* simops.c (OP_10007E0): Add (void*) casts to argv & envp.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c, simops.c: Include defs.h.
+	* sim-main.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* interp.c (sim_open): Adjust format string specifier.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (INCLUDE): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (interp.o, simops.o, semantics.o): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_FUNCS to AC_CHECK_FUNCS_ONCE and
+	delete time.
+	* configure: Regenerate.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.

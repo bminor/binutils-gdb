@@ -1,3 +1,282 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+	* acinclude.m4: New file.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_SCACHE call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Change to SIM_FRV_TRAPDUMP_FLAGS.
+	* configure.ac: Change sim-trapdump to sim-frv-trapdump.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_DEFAULT_MODEL call.
+	* sim-if.c (sim_open): Set STATE_MODEL_NAME.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Rename to ...
+	(frv_sim_machs): ... this.
+	* sim-if.c (frv_sim_machs): New decl.
+	(sim_open): Set STATE_MACH.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Mark const.
+
+2021-06-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.c (frvbf_record_trace_results): Delete function.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Mark backend_data const.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_ENGINE_RESTART_HOOK): Delete 0.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* interrupts.c: Include cgen-mem.h.
+	* profile-fr400.c (acc_use_is_media_p4): Disable function.
+	* reset.c: Include cgen-mem.h.
+	* sim-if.c (print_frv_misc_cpu): Delete.
+	* sim-main.h (FRV_SIM_MAIN_H): Add ifdef guard.
+	(frvbf_model_branch): New prototype.
+	(frvbf_perform_writeback): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* profile.c (wait_for_flush): Change %p to %x.
+	* sim-if.c (sim_open): Change %lx to %x.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (frv_break): Delete pc and pass down NULL_CIA.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* profile.c (frvbf_model_insn_after): Change return to void.
+	(enforce_full_fr_latency, post_wait_for_FR, post_wait_for_FRdouble,
+	post_wait_for_ACC, post_wait_for_CCR, post_wait_for_SPR,
+	post_wait_for_fdiv, post_wait_for_fsqrt,
+	post_wait_for_float): Likewise.
+	* profile.h (post_wait_for_FR, post_wait_for_FRdouble,
+	post_wait_for_ACC, post_wait_for_CCR, post_wait_for_SPR,
+	post_wait_for_fdiv, post_wait_for_fsqrt, post_wait_for_float,
+	post_wait_for_media): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* frv.c (frvbf_shift_left_arith_saturate): Add braces to if statement.
+	* profile-fr500.c (adjust_float_register_busy): Likewise.
+	* profile-fr550.c (adjust_float_register_busy): Likewise.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (CGEN_MAINT): Delete.
+	* configure.ac: Delete SIM_AC_OPTION_CGEN_MAINT call.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interrupts.c: Include sim-signal.h.
+	* traps.c: Likewise.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* sim-if.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c: Include sim/callback.h.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+	* sim-if.c (sim_open): Set current_alignment.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete cgen_init call.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* cache.h (frv_cache_unlock): New prototype.
+	* frv-sim.h (frvbf_media_average): Likewise.
+	(frv_queue_data_access_exception_interrupt): Likewise.
+	(frv_queue_division_exception_interrupt): Likewise.
+	(frvbf_check_acc_range): Likewise.
+	(frvbf_check_swap_address): Likewise.
+	(frvbf_*_multiple_*): Rename prototypes to ...
+	(frvbf_*_quad_*): ... these.
+	* profile-fr500.c (use_is_cc_complex): Put #if 0 around.
+	* profile-fr550.c (use_is_ccr_complex): Likewise.
+	* profile.h (frv_ref_SI): New prototype.
+	* registers.h (frv_check_spr_read_access): Likewise.
+	(frv_check_spr_write_access): Likewise.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* cache.c (non_cache_access): Add parentheses.
+	* memory.c (fr500_check_data_read_address): Likewise.
+	(fr550_check_data_read_address): Likewise.
+	(fr500_check_readwrite_address): Likewise.
+	(fr550_check_readwrite_address): Likewise.
+	(fr500_check_insn_read_address): Likewise.
+	(fr500_check_write_address): Likewise.
+	(fr550_check_write_address): Likewise.
+	* traps.c (frv_mtrap): Likewise.
+	(frvbf_commit): Likewise.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (struct sim_state): Delete.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* cache.c, frv.c, interrupts.c, memory.c, options.c, pipeline.c,
+	profile-fr400.c, profile-fr450.c, profile-fr500.c, profile-fr550.c,
+	profile.c, registers.c, reset.c, sim-if.c, traps.c: Include defs.h.
+	* sim-main.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete arguments.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (arch.o, devices.o, frv.o, traps.o, pipeline.o)
+	(interrupts.o, memory.o, cache.o, options.o, reset.o)
+	(registers.o, profile.o, profile-fr400.o, profile-fr450.o)
+	(profile-fr500.o, profile-fr550.o, sim-if.o, mloop.o, cpu.o)
+	(decode.o, sem.o, model.o): Remove.
+	(SIM_EXTRA_DEPS): Add eng.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* traps.c (frvbf_check_acc_range): Add missing return value.

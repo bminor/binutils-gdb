@@ -5,10 +5,21 @@ AC_INIT([sim], [0],
   [https://sourceware.org/bugzilla/enter_bug.cgi?product=gdb&component=sim],
   [], [https://sourceware.org/gdb/wiki/Sim/])
 
+dnl Probably should unify PKGVERSION with PACKAGE_* settings from AC_INIT.
+ACX_PKGVERSION([SIM])
+AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
+dnl PACKAGE_BUGREPORT is provided by AC_INIT.
+ACX_BUGURL([$PACKAGE_BUGREPORT])
+AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
+
+AC_CONFIG_HEADERS([config.h])
+
 SIM_AC_TOOLCHAIN
+SIM_AC_PLATFORM
 
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 
 # If a cpu ever has more than one simulator to choose from, use
 # --enable-sim=... to choose.
@@ -37,14 +48,57 @@ dnl used when installing files to see if they need to be suffixed.
 SIM_PRIMARY_TARGET=
 AC_SUBST(SIM_PRIMARY_TARGET)
 
-m4_define([SIM_TARGET], [
+SIM_SUBDIRS=
+AC_SUBST(SIM_SUBDIRS)
+
+dnl Used by common/Make-common.in to see which configure script created it.
+SIM_COMMON_BUILD_TRUE=
+SIM_COMMON_BUILD_FALSE='#'
+AC_SUBST(SIM_COMMON_BUILD_TRUE)
+AC_SUBST(SIM_COMMON_BUILD_FALSE)
+
+AC_CONFIG_FILES(Make-common.sim:common/Make-common.in)
+dnl Build a particular arch subdir.
+dnl arg[1] is the arch subdir name.
+dnl arg[2] is whether the arch has a dedicated configure script.
+m4_define([SIM_BUILD_TARGET], [dnl
+  m4_if($2, [true], [dnl
+    AC_CONFIG_SUBDIRS($1)
+  ], [dnl
+    AC_CONFIG_FILES($1/Makefile.sim:$1/Makefile.in)
+    AC_CONFIG_COMMANDS([$1/Makefile],
+[sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/$1:
+		p
+	}' \
+	<Make-common.sim >$1/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >$1/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r $1/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r $1/Makesim2.tmp' \
+	<$1/Makefile.sim >$1/Makefile
+ rm -f $1/Makesim1.tmp $1/Makesim2.tmp
+])
+    AS_VAR_APPEND([SIM_SUBDIRS], [" $1"])
+  ])
+  dnl Create the depdirs for ports until we can convert them to automake.
+  AC_CONFIG_COMMANDS([depdir-$1],
+		     [$SHELL $ac_aux_dir/mkinstalldirs $1/$DEPDIR],
+		     [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR])
+])
+dnl Enable a particular arch subdir.
+dnl arg[1] is the matching target triple.
+dnl arg[2] is the arch subdir name.
+dnl arg[3] is whether the arch has a dedicated configure script.
+dnl arg[4] is any additional shell code to run for this arch.
+m4_define([SIM_TARGET], [dnl
   case "${targ}" in
     all|$1)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=$2
       fi
-      AC_CONFIG_SUBDIRS($2)
-      $3
+      SIM_BUILD_TARGET($2, $3)
+      $4
       ;;
   esac
 ])
@@ -61,11 +115,12 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([arm*-*-*], [arm])
     SIM_TARGET([avr*-*-*], [avr])
     SIM_TARGET([bfin-*-*], [bfin])
-    SIM_TARGET([bpf-*-*], [bpf])
+    SIM_TARGET([bpf-*-*], [bpf], [true])
     SIM_TARGET([cr16*-*-*], [cr16])
     SIM_TARGET([cris-*-* | crisv32-*-*], [cris])
     SIM_TARGET([d10v-*-*], [d10v])
     SIM_TARGET([frv-*-*], [frv])
+    SIM_TARGET([ft32-*-*], [ft32])
     SIM_TARGET([h8300*-*-*], [h8300])
     SIM_TARGET([iq2000-*-*], [iq2000])
     SIM_TARGET([lm32-*-*], [lm32])
@@ -74,27 +129,54 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
     SIM_TARGET([mcore-*-*], [mcore])
     SIM_TARGET([microblaze-*-*], [microblaze])
-    SIM_TARGET([mips*-*-*], [mips], [sim_igen=yes])
-    SIM_TARGET([mn10300*-*-*], [mn10300], [sim_igen=yes])
+    SIM_TARGET([mips*-*-*], [mips], [true], [sim_igen=yes])
+    SIM_TARGET([mn10300*-*-*], [mn10300], [true], [sim_igen=yes])
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
-    SIM_TARGET([or1k-*-* | or1knd-*-*], [or1k])
+    SIM_TARGET([or1k-*-* | or1knd-*-*], [or1k], [true])
     SIM_TARGET([pru*-*-*], [pru])
-    SIM_TARGET([riscv*-*-*], [riscv])
+    SIM_TARGET([riscv*-*-*], [riscv], [true])
     SIM_TARGET([rl78-*-*], [rl78])
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
     SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32])
-    SIM_TARGET([powerpc*-*-*], [ppc])
-    SIM_TARGET([ft32-*-*], [ft32])
-    SIM_TARGET([v850*-*-*], [v850], [sim_igen=yes])
+    SIM_TARGET([powerpc*-*-*], [ppc], [true])
+    SIM_TARGET([v850*-*-*], [v850], [true], [sim_igen=yes])
   done
 
   if test "x${enable_example_sims}" = xyes; then
-    AC_CONFIG_SUBDIRS(example-synacor)
+    SIM_BUILD_TARGET([example-synacor])
   fi
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 
-AC_CONFIG_FILES([Makefile])
+dnl Standard (and optional) simulator options.
+dnl Eventually all simulators will support these.
+SIM_AC_OPTION_ALIGNMENT
+SIM_AC_OPTION_ASSERT
+SIM_AC_OPTION_CGEN_MAINT
+SIM_AC_OPTION_DEBUG
+SIM_AC_OPTION_ENDIAN
+SIM_AC_OPTION_ENVIRONMENT
+SIM_AC_OPTION_HARDWARE
+SIM_AC_OPTION_INLINE
+SIM_AC_OPTION_PROFILE
+SIM_AC_OPTION_RESERVED_BITS
+SIM_AC_OPTION_SCACHE
+SIM_AC_OPTION_STDIO
+SIM_AC_OPTION_TRACE
+SIM_AC_OPTION_WARNINGS
+
+dnl These are unfortunate.  They are conditionally called by other sim macros
+dnl but always used by common/Make-common.in.  So we have to subst here even
+dnl when the rest of the code is in the respective macros.  Once we merge the
+dnl respective SIM_AC_OPTION_xxx call above, we can drop these.
+AC_SUBST(sim_bitsize)
+AC_SUBST(sim_float)
+
+dnl Some arches have unique configure flags.
+m4_include([frv/acinclude.m4])
+m4_include([rx/acinclude.m4])
+
+AC_CONFIG_FILES([arch-subdir.mk Makefile])
 AC_OUTPUT

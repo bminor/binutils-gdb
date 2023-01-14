@@ -404,8 +404,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 	    bfd *abfd = objfile->obfd;
 	    asection *asec = objsec->the_bfd_section;
 	    bfd_vma align = (bfd_vma) 1 << bfd_section_alignment (asec);
-	    bfd_vma start = obj_section_addr (objsec) & -align;
-	    bfd_vma end = (obj_section_endaddr (objsec) + align - 1) & -align;
+	    bfd_vma start = objsec->addr () & -align;
+	    bfd_vma end = (objsec->endaddr () + align - 1) & -align;
 
 	    /* Match if either the entire memory region lies inside the
 	       section (i.e. a mapping covering some pages of a large
@@ -479,7 +479,7 @@ objfile_find_memory_regions (struct target_ops *self,
 	    int size = bfd_section_size (isec);
 	    int ret;
 
-	    ret = (*func) (obj_section_addr (objsec), size, 
+	    ret = (*func) (objsec->addr (), size,
 			   1, /* All sections will be readable.  */
 			   (flags & SEC_READONLY) == 0, /* Writable.  */
 			   (flags & SEC_CODE) != 0, /* Executable.  */
@@ -586,11 +586,11 @@ gcore_find_signalled_thread ()
 {
   thread_info *curr_thr = inferior_thread ();
   if (curr_thr->state != THREAD_EXITED
-      && curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
+      && curr_thr->stop_signal () != GDB_SIGNAL_0)
     return curr_thr;
 
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
-    if (thr->suspend.stop_signal != GDB_SIGNAL_0)
+    if (thr->stop_signal () != GDB_SIGNAL_0)
       return thr;
 
   /* Default to the current thread, unless it has exited.  */
@@ -604,10 +604,11 @@ void _initialize_gcore ();
 void
 _initialize_gcore ()
 {
-  add_com ("generate-core-file", class_files, gcore_command, _("\
+  cmd_list_element *generate_core_file_cmd
+    = add_com ("generate-core-file", class_files, gcore_command, _("\
 Save a core file with the current state of the debugged process.\n\
 Usage: generate-core-file [FILENAME]\n\
 Argument is optional filename.  Default filename is 'core.PROCESS_ID'."));
 
-  add_com_alias ("gcore", "generate-core-file", class_files, 1);
+  add_com_alias ("gcore", generate_core_file_cmd, class_files, 1);
 }

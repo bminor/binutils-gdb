@@ -122,4 +122,7 @@ foreach_with_prefix scenario {all minimal} {
 
     gdb_test "print multi_access.all" \
 	" = \\(\\(8, 13, 21, 34, 55\\), \\(1, 1, 2, 3, 5\\)\\)"
+
+    gdb_test "print confused_array(red, green)" " = 2"
+    gdb_test "print confused_array(green, red)" " = 6"
 }

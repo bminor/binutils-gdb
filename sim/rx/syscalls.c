@@ -18,21 +18,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "gdb/callback.h"
+#include "sim/callback.h"
 
 #include "cpu.h"
 #include "mem.h"
 #include "syscalls.h"
-
-#include "syscall.h"
+#include "targ-vals.h"
 
 /* The current syscall callbacks we're using.  */
 static struct host_callback_struct *callbacks;
@@ -146,10 +146,10 @@ rx_syscall (int id)
   argp = 0;
   stackp = 4;
   if (trace)
-    printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, id <= SYS_link ? callnames[id] : "unknown");
+    printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, id <= TARGET_SYS_link ? callnames[id] : "unknown");
   switch (id)
     {
-    case SYS_exit:
+    case TARGET_SYS_exit:
       {
 	int ec = arg ();
 	if (verbose)
@@ -158,7 +158,7 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_open:
+    case TARGET_SYS_open:
       {
 	int oflags, cflags;
 	int path = arg ();
@@ -200,7 +200,7 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_close:
+    case TARGET_SYS_close:
       {
 	int fd = arg ();
 
@@ -216,7 +216,7 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_read:
+    case TARGET_SYS_read:
       {
 	int fd = arg ();
 	int addr = arg ();
@@ -236,7 +236,7 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_write:
+    case TARGET_SYS_write:
       {
 	int fd = arg ();
 	int addr = arg ();
@@ -259,11 +259,11 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_getpid:
+    case TARGET_SYS_getpid:
       put_reg (1, 42);
       break;
 
-    case SYS_gettimeofday:
+    case TARGET_SYS_gettimeofday:
       {
 	int tvaddr = arg ();
 	struct timeval tv;
@@ -278,7 +278,7 @@ rx_syscall (int id)
       }
       break;
 
-    case SYS_kill:
+    case TARGET_SYS_kill:
       {
 	int pid = arg ();
 	int sig = arg ();

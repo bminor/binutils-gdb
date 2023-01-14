@@ -676,7 +676,7 @@ FILE-SPEC is one of:\n\
 FUNCTION-SPEC is one of:\n\
        -fu|-function FUNCTION-NAME\n\
        -rfu|-rfunction FUNCTION-NAME-REGULAR-EXPRESSION"),
-		  &skiplist, "skip ", 1, &cmdlist);
+		  &skiplist, 1, &cmdlist);
 
   c = add_cmd ("file", class_breakpoint, skip_file_command, _("\
 Ignore a file while stepping.\n\

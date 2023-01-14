@@ -30,6 +30,11 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
     return -1
 }
 
+clean_restart
+if {[skip_tui_tests]} {
+    return
+}
+
 # Copy the Python script to where the tests are being run.
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]

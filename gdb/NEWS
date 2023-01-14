@@ -1,7 +1,12 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 10
+*** Changes since GDB 11
+
+*** Changes in GDB 11
+
+* The 'set disassembler-options' command now supports specifying options
+  for the ARC target.
 
 * GDB now supports general memory tagging functionality if the underlying
   architecture supports the proper primitives and hooks.  Currently this is
@@ -30,6 +35,46 @@
     function name as a complete fully-qualified name.  This is the
     equivalent of the CLI's "break -qualified" and "dprintf
     -qualified".
+
+ ** '-break-insert --force-condition' and '-dprintf-insert --force-condition'
+
+    The MI -break-insert and -dprintf-insert commands now support a
+    '--force-condition' flag to forcibly define a condition even when
+    the condition is invalid at all locations of the breakpoint.  This
+    is equivalent to the '-force-condition' flag of the CLI's "break"
+    command.
+
+ ** '-break-condition --force'
+
+    The MI -break-condition command now supports a '--force' flag to
+    forcibly define a condition even when the condition is invalid at
+    all locations of the selected breakpoint.  This is equivalent to
+    the '-force' flag of the CLI's "cond" command.
+
+ ** '-file-list-exec-source-files [--group-by-objfile]
+ 	                          [--basename | --dirname]
+                                  [--] [REGEXP]'
+
+    The existing -file-list-exec-source-files command now takes an
+    optional REGEXP which is used to filter the source files that are
+    included in the results.
+
+    By default REGEXP is matched against the full filename of the
+    source file. When one of --basename or --dirname is given then
+    REGEXP is only matched against the specified part of the full
+    source filename.
+
+    When the optional --group-by-objfile flag is used the output
+    format is changed, the results are now a list of object files
+    (executable and libraries) with the source files that are
+    associated with each object file.
+
+    The results from -file-list-exec-source-files now include a
+    'debug-fully-read' field which takes the value 'true' or 'false'.
+    A 'true' value indicates the source file is from a compilation
+    unit that has had its debug information fully read in by GDB, a
+    value of 'false' indicates GDB has only performed a partial scan
+    of the debug information so far.
 
 * GDB now supports core file debugging for x86_64 Cygwin programs.
 
@@ -60,6 +105,23 @@
   and "-eiex" that allow options (that would normally appear in a
   gdbearlyinit file) to be passed on the command line.
 
+* For RISC-V targets, the target feature "org.gnu.gdb.riscv.vector" is
+  now understood by GDB, and can be used to describe the vector
+  registers of a target.  The precise requirements of this register
+  feature are documented in the GDB manual.
+
+* TUI improvements
+
+  ** TUI windows now support mouse actions.  The mouse wheel scrolls
+     the appropriate window.
+
+  ** Key combinations that do not have a specific action on the
+     focused window are passed to GDB.  For example, you now can use
+     Ctrl-Left/Ctrl-Right to move between words in the command window
+     regardless of which window is in focus.  Previously you would
+     need to focus on the command window for such key combinations to
+     work.
+
 * New commands
 
 set debug event-loop
@@ -83,6 +145,9 @@ maintenance flush dcache
 maintenance info target-sections
   Print GDB's internal target sections table.
 
+maintenance info jit
+  Print the JIT code objects in the inferior known to GDB.
+
 memory-tag show-logical-tag POINTER
   Print the logical tag for POINTER.
 memory-tag with-logical-tag POINTER TAG
@@ -100,6 +165,27 @@ show startup-quietly
   command line.  This command needs to be added to an early
   initialization file (e.g. ~/.config/gdb/gdbearlyinit) in order to
   affect GDB.
+
+set print type hex on|off
+show print type hex
+  When 'on', the 'ptype' command uses hexadecimal notation to print sizes
+  and offsets of struct members.  When 'off', decimal notation is used.
+
+set python ignore-environment on|off
+show python ignore-environment
+  When 'on', this causes GDB's builtin Python to ignore any
+  environment variables that would otherwise affect how Python
+  behaves.  This command needs to be added to an early initialization
+  file (e.g. ~/.config/gdb/gdbearlyinit) in order to affect GDB.
+
+set python dont-write-bytecode auto|on|off
+show python dont-write-bytecode
+  When 'on', this causes GDB's builtin Python to not write any
+  byte-code (.pyc files) to disk.  This command needs to be added to
+  an early initialization file (e.g. ~/.config/gdb/gdbearlyinit) in
+  order to affect GDB.  When 'off' byte-code will always be written.
+  When set to 'auto' (the default) Python will check the
+  PYTHONDONTWRITEBYTECODE environment variable.
 
 * Changed commands
 
@@ -145,6 +231,19 @@ maintenance info sections
   line flag.  It is now possible to filter which sections are printed
   even when -all-objects is passed.
 
+ptype[/FLAGS] TYPE | EXPRESSION
+  The 'ptype' command has two new flags.  When '/x' is set, hexadecimal
+  notation is used when printing sizes and offsets of struct members.
+  When '/d' is set, decimal notation is used when printing sizes and
+  offsets of struct members.  Default behavior is given by 'show print
+  type hex'.
+
+info sources
+  The info sources command output has been restructured.  The results
+  are now based around a list of objfiles (executable and libraries),
+  and for each objfile the source files that are part of that objfile
+  are listed.
+
 * Removed targets and native configurations
 
 ARM Symbian			arm*-*-symbianelf*
@@ -156,6 +255,40 @@ qMemTags
 QMemTags
   Request the remote to store the specified allocation tags to the requested
   memory range.
+
+* Guile API
+
+  ** Improved support for rvalue reference values:
+     TYPE_CODE_RVALUE_REF is now exported as part of the API and the
+     value-referenced-value procedure now handles rvalue reference
+     values.
+
+  ** New procedures for obtaining value variants:
+     value-reference-value, value-rvalue-reference-value and
+     value-const-value.
+
+  ** Temporary breakpoints can now be created with make-breakpoint and
+     tested for using breakpoint-temporary?.
+
+* Python API
+
+  ** Inferior objects now contain a read-only 'connection_num' attribute that
+     gives the connection number as seen in 'info connections' and
+     'info inferiors'.
+
+  ** New method gdb.Frame.level() which returns the stack level of the
+     frame object.
+
+  ** New method gdb.PendingFrame.level() which returns the stack level
+     of the frame object.
+
+  ** When hitting a catchpoint, the Python API will now emit a
+     gdb.BreakpointEvent rather than a gdb.StopEvent.  The
+     gdb.Breakpoint attached to the event will have type BP_CATCHPOINT.
+
+  ** Python TUI windows can now receive mouse click events.  If the
+     Window object implements the click method, it is called for each
+     mouse click event in this window.
 
 *** Changes in GDB 10
 
@@ -299,6 +432,7 @@ alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
 BPF				bpf-unknown-none
+Z80				z80-unknown-*
 
 * Python API
 

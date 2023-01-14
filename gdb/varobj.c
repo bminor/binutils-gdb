@@ -1844,10 +1844,12 @@ varobj::~varobj ()
     }
 #endif
 
+  /* This must be deleted before the root object, because Python-based
+     destructors need access to some components.  */
+  delete var->dynamic;
+
   if (is_root_p (var))
     delete var->root;
-
-  delete var->dynamic;
 }
 
 /* Return the type of the value that's stored in VAR,

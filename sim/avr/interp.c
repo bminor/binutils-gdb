@@ -17,17 +17,19 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <string.h>
 
 #include "bfd.h"
 #include "libiberty.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 
 /* As AVR is a 8/16 bits processor, define handy types.  */
 typedef unsigned short int word;
@@ -726,13 +728,13 @@ decode (unsigned int pc)
 static void
 do_call (SIM_CPU *cpu, unsigned int npc)
 {
-  SIM_DESC sd = CPU_STATE (cpu);
+  const struct avr_sim_state *state = AVR_SIM_STATE (CPU_STATE (cpu));
   unsigned int sp = read_word (REG_SP);
 
   /* Big endian!  */
   sram[sp--] = cpu->pc;
   sram[sp--] = cpu->pc >> 8;
-  if (sd->avr_pc22)
+  if (state->avr_pc22)
     {
       sram[sp--] = cpu->pc >> 16;
       cpu->cycles++;
@@ -892,9 +894,9 @@ step_once (SIM_CPU *cpu)
 	/* Fall through */
       case OP_ret:
 	{
-	  SIM_DESC sd = CPU_STATE (cpu);
+	  const struct avr_sim_state *state = AVR_SIM_STATE (CPU_STATE (cpu));
 	  unsigned int sp = read_word (REG_SP);
-	  if (sd->avr_pc22)
+	  if (state->avr_pc22)
 	    {
 	      cpu->pc = sram[++sp] << 16;
 	      cpu->cycles++;
@@ -1680,8 +1682,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  struct bfd *abfd, char * const *argv)
 {
   int i;
-  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_DESC sd = sim_state_alloc_extra (kind, cb, sizeof (struct avr_sim_state));
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  current_alignment = STRICT_ALIGNMENT;
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -1751,6 +1757,7 @@ SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *env)
 {
+  struct avr_sim_state *state = AVR_SIM_STATE (sd);
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;
 
@@ -1762,7 +1769,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   sim_pc_set (cpu, addr);
 
   if (abfd != NULL)
-    sd->avr_pc22 = (bfd_get_mach (abfd) >= bfd_mach_avr6);
+    state->avr_pc22 = (bfd_get_mach (abfd) >= bfd_mach_avr6);
 
   return SIM_RC_OK;
 }

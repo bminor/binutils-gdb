@@ -348,6 +348,7 @@ struct internal_aouthdr
 #define C_BINCL         108	/* Marks beginning of include file */
 #define C_EINCL         109	/* Marks ending of include file */
 #define C_AIX_WEAKEXT   111	/* AIX definition of C_WEAKEXT.  */
+#define C_DWARF         112	/* DWARF symbol  */
 
 #define C_NULL_VALUE	0x00de1e00    /* Value for a C_NULL deleted entry.  */
 
@@ -659,6 +660,12 @@ union internal_auxent
 /* 		14	??? */
 #define	XMC_TC0	15		/* Read-write TOC anchor */
 #define XMC_TD	16		/* Read-write data in TOC */
+
+  struct
+  {
+    long x_scnlen;              /* Section length */
+    long x_nreloc;              /* Number of relocation entries */
+  } x_sect;
 };
 
 /********************** RELOCATION DIRECTIVES **********************/

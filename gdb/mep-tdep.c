@@ -2053,6 +2053,7 @@ mep_frame_prev_register (struct frame_info *this_frame,
 
 
 static const struct frame_unwind mep_frame_unwind = {
+  "mep prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   mep_frame_this_id,

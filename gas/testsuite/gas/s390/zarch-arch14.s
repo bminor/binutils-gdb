@@ -19,6 +19,7 @@ foo:
 	vcnf	%v15,%v17,13,12
 	rdp	%r6,%r9,%r11
 	rdp	%r6,%r9,%r11,13
-	lpswey	-10000(%r6),253
+	lpswey	-10000(%r6)
 	lbear	4000(%r6)
 	stbear	4000(%r6)
+	qpaci	4095(%r5)

@@ -1,3 +1,152 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete TERMCAP_LIB, READLINE_LIB, and READLINE_CFLAGS.
+	* aclocal.m4, configure, configure.ac: Removed.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interf.c (sim_open) [F_GETFL]: Only set termsave.
+	(sim_close) [F_SETFL]: Only call fcntl.
+	* sis.c (main) [F_GETFL]: Only set termsave.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c [HAVE_TERMIOS_H]: Include termios.h and declare ioc1,
+	ioc2, iocold1, & iocold2.
+	(init_stdio) [HAVE_TERMIOS_H]: Only call tcsetattr.
+	(restore_stdio) [HAVE_TERMIOS_H]: Likewise.
+	(port_init) [HAVE_TERMIOS_H]: Only call tcgetattr.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c (uart_rx): Change caddr_t to void*.
+	(uart_intr): Likewise.
+	(wdog_intr): Likewise.
+	(rtc_intr): Likewise.
+	(gpt_intr): Likewise.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Add $(EXEEXT) to sis.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c, exec.c, float.c, func.c, help.c, interf.c, sis.c: Replace
+	config.h include with defs.h.
+	* sis.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interf.c: Update include path.
+	* sis.h: Likewise.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* func.c (bfd_load): Use BFD_VMA_FMT.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* Makefile.in (READLINE_SRC, READLINE_CFLAGS): Add.

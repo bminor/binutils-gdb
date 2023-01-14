@@ -244,7 +244,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	   the future.  */
 	m_uiout->text (" <");
 	if (!omit_fname)
-	  m_uiout->field_string ("func-name", name.c_str (),
+	  m_uiout->field_string ("func-name", name,
 				 function_name_style.style ());
 	/* For negative offsets, avoid displaying them as +-N; the sign of
 	   the offset takes the place of the "+" here.  */
@@ -1139,11 +1139,10 @@ void _initialize_disasm ();
 void
 _initialize_disasm ()
 {
-  struct cmd_list_element *cmd;
-
   /* Add the command that controls the disassembler options.  */
-  cmd = add_setshow_string_noescape_cmd ("disassembler-options", no_class,
-					 &prospective_options, _("\
+  set_show_commands set_show_disas_opts
+    = add_setshow_string_noescape_cmd ("disassembler-options", no_class,
+				       &prospective_options, _("\
 Set the disassembler options.\n\
 Usage: set disassembler-options OPTION [,OPTION]...\n\n\
 See: 'show disassembler-options' for valid option values."), _("\
@@ -1151,5 +1150,5 @@ Show the disassembler options."), NULL,
 					 set_disassembler_options_sfunc,
 					 show_disassembler_options_sfunc,
 					 &setlist, &showlist);
-  set_cmd_completer (cmd, disassembler_options_completer);
+  set_cmd_completer (set_show_disas_opts.set, disassembler_options_completer);
 }

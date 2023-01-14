@@ -50,7 +50,7 @@ eval_op_m2_high (struct type *expect_type, struct expression *exp,
 
 	  type = type->field (1).type ();
 	  /* i18n: Do not translate the "_m2_high" part!  */
-	  arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
+	  arg1 = value_struct_elt (&temp, {}, "_m2_high", NULL,
 				   _("unbounded structure "
 				     "missing _m2_high field"));
 
@@ -83,7 +83,7 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
 	error (_("internal error: unbounded "
 		 "array structure is unknown"));
       /* i18n: Do not translate the "_m2_contents" part!  */
-      arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
+      arg1 = value_struct_elt (&temp, {}, "_m2_contents", NULL,
 			       _("unbounded structure "
 				 "missing _m2_contents field"));
 	  

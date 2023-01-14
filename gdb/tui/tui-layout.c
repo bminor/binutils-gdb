@@ -169,11 +169,9 @@ find_layout (tui_layout_split *layout)
 /* Function to set the layout. */
 
 static void
-tui_apply_layout (struct cmd_list_element *command,
-		  const char *args, int from_tty)
+tui_apply_layout (const char *args, int from_tty, cmd_list_element *command)
 {
-  tui_layout_split *layout
-    = (tui_layout_split *) get_cmd_context (command);
+  tui_layout_split *layout = (tui_layout_split *) command->context ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -858,7 +856,7 @@ This layout was created using:\n\
 		 name, name, spec.c_str ()));
 
   cmd = add_cmd (name, class_tui, nullptr, doc.get (), &layout_list);
-  set_cmd_context (cmd, layout);
+  cmd->set_context (layout);
   /* There is no API to set this.  */
   cmd->func = tui_apply_layout;
   cmd->destroyer = destroy_layout;
@@ -1022,7 +1020,7 @@ _initialize_tui_layout ()
   add_basic_prefix_cmd ("layout", class_tui, _("\
 Change the layout of windows.\n\
 Usage: layout prev | next | LAYOUT-NAME"),
-			&layout_list, "layout ", 0, &cmdlist);
+			&layout_list, 0, &cmdlist);
 
   add_cmd ("next", class_tui, tui_next_layout_command,
 	   _("Apply the next TUI layout."),

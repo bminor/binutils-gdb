@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This selects the newlib/libgloss syscall definitions.
+NL_TARGET = -DNL_TARGET_sh
+
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = \
@@ -23,10 +26,12 @@ SIM_OBJS = \
 	table.o
 SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CLEAN = sh-clean
+SIM_EXTRA_DEPS = table.c code.c ppi.c
+
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
-
-interp.o: interp.c code.c table.c ppi.c $(srcroot)/include/gdb/sim-sh.h
 
 code.c: gencode
 	./gencode -x >code.c

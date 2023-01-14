@@ -992,7 +992,7 @@ valpy_getitem (PyObject *self, PyObject *key)
       scoped_value_mark free_values;
 
       if (field)
-	res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
+	res_val = value_struct_elt (&tmp, {}, field.get (), NULL,
 				    "struct/class/union");
       else if (bitpos >= 0)
 	res_val = value_struct_elt_bitpos (&tmp, bitpos, field_type,

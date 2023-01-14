@@ -1,3 +1,7 @@
+2021-06-14  Michael Forney  <mforney@mforney.org>
+
+	* configure: Regenerate.
+
 2021-02-04  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac (LIBINTL): Transform into -L/-lintl form.

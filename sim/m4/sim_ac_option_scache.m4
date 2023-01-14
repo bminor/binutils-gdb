@@ -12,23 +12,19 @@ dnl GNU General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
-dnl
-dnl The argument is the default cache size if none is specified.
 AC_DEFUN([SIM_AC_OPTION_SCACHE],
-[
-default_sim_scache="ifelse([$1],,0,[$1])"
+[dnl
+AC_MSG_CHECKING([for sim cache size])
+sim_scache="16384"
 AC_ARG_ENABLE(sim-scache,
 [AS_HELP_STRING([--enable-sim-scache=size],
 		[Specify simulator execution cache size])],
 [case "${enableval}" in
-  yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
-  no)	sim_scache="-DWITH_SCACHE=0" ;;
-  [[0-9]]*) sim_scache="-DWITH_SCACHE=${enableval}";;
-  *)	AC_MSG_ERROR("Bad value $enableval passed to --enable-sim-scache");
-	sim_scache="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_scache" != x""; then
-  echo "Setting scache size = $sim_scache" 6>&1
-fi],[sim_scache="-DWITH_SCACHE=${default_sim_scache}"])
+  yes)	;;
+  no)	sim_scache="0";;
+  [[0-9]]*) sim_scache="${enableval}";;
+  *)	AC_MSG_ERROR("Bad value $enableval passed to --enable-sim-scache");;
+esac])
+AC_DEFINE_UNQUOTED([WITH_SCACHE], [$sim_scache], [Sim cache szie])
+AC_MSG_RESULT($sim_scache)
 ])
-AC_SUBST(sim_scache)

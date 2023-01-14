@@ -4,6 +4,12 @@ dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 # Keep these includes in sync with the aclocal_m4_deps list in
 # Makefile.in.
 
+dnl NB: When possible, try to avoid explicit includes of ../config/ files.
+dnl They're normally found by aclocal automatically and recorded in aclocal.m4.
+dnl However, some are kept here explicitly to silence harmless warnings from
+dnl aclocal when it finds AM_xxx macros via local search paths instead of
+dnl system search paths.
+
 m4_include(acx_configure_dir.m4)
 
 # This gets GDB_AC_TRANSFORM.
@@ -21,47 +27,16 @@ m4_include(../gdbsupport/selftest.m4)
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
 m4_include(../bfd/bfd.m4)
 
-dnl This gets the standard macros.
-m4_include(../config/acinclude.m4)
-
-dnl This gets GCC_ENABLE.
-sinclude(../config/enable.m4)
-
-dnl This gets AC_PLUGINS, needed by ACX_LARGEFILE.
-m4_include(../config/plugins.m4)
-
-dnl For ACX_LARGEFILE.
-m4_include(../config/largefile.m4)
-
-dnl For AM_SET_LEADING_DOT.
-m4_include(../config/lead-dot.m4)
-
-dnl This gets autoconf bugfixes.
-m4_include(../config/override.m4)
-
-dnl For ZW_GNU_GETTEXT_SISTER_DIR.
-m4_include(../config/gettext-sister.m4)
-
-dnl For AC_LIB_HAVE_LINKFLAGS.
-m4_include(../config/lib-ld.m4)
-m4_include(../config/lib-prefix.m4)
-m4_include(../config/lib-link.m4)
-
-dnl For ACX_PKGVERSION and ACX_BUGURL.
-m4_include(../config/acx.m4)
-
-dnl for TCL definitions
-m4_include(../config/tcl.m4)
-
-dnl For dependency tracking macros.
-m4_include([../config/depstand.m4])
-
 dnl For AM_LC_MESSAGES
 m4_include([../config/lcmessage.m4])
 
 dnl For AM_LANGINFO_CODESET.
 m4_include([../config/codeset.m4])
 
+dnl We need to explicitly include these before iconv.m4 to avoid warnings.
+m4_include([../config/lib-ld.m4])
+m4_include([../config/lib-prefix.m4])
+m4_include([../config/lib-link.m4])
 m4_include([../config/iconv.m4])
 
 m4_include([../config/zlib.m4])
@@ -75,8 +50,6 @@ dnl For GDB_AC_PTRACE.
 m4_include(../gdbsupport/ptrace.m4)
 
 m4_include(ax_cxx_compile_stdcxx.m4)
-
-m4_include([../config/ax_pthread.m4])
 
 dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 
 dnl Version 1.3 (2001/03/02)

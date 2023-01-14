@@ -1609,7 +1609,7 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
       /* If the cache hasn't been created yet, avoid creating one.  */
       cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
- 	printf_filtered ("  empty, no stats available\n");
+	printf_filtered ("  empty, no stats available\n");
       else
 	symbol_cache_stats (cache);
     }
@@ -1698,8 +1698,7 @@ fixup_section (struct general_symbol_info *ginfo,
 	  if (fallback == -1)
 	    fallback = idx;
 
-	  if (obj_section_addr (s) - offset <= addr
-	      && addr < obj_section_endaddr (s) - offset)
+	  if (s->addr () - offset <= addr && addr < s->endaddr () - offset)
 	    {
 	      ginfo->set_section_index (idx);
 	      return;
@@ -4200,48 +4199,131 @@ operator_chars (const char *p, const char **end)
 }
 
 
-/* What part to match in a file name.  */
+/* See class declaration.  */
 
-struct filename_partial_match_opts
+info_sources_filter::info_sources_filter (match_on match_type,
+                                          const char *regexp)
+  : m_match_type (match_type),
+    m_regexp (regexp)
 {
-  /* Only match the directory name part.   */
-  bool dirname = false;
+  /* Setup the compiled regular expression M_C_REGEXP based on M_REGEXP.  */
+  if (m_regexp != nullptr && *m_regexp != '\0')
+    {
+      gdb_assert (m_regexp != nullptr);
 
-  /* Only match the basename part.  */
-  bool basename = false;
-};
+      int cflags = REG_NOSUB;
+#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
+      cflags |= REG_ICASE;
+#endif
+      m_c_regexp.emplace (m_regexp, cflags, _("Invalid regexp"));
+    }
+}
 
-/* Data structure to maintain printing state for output_source_filename.  */
+/* See class declaration.  */
+
+bool
+info_sources_filter::matches (const char *fullname) const
+{
+  /* Does it match regexp?  */
+  if (m_c_regexp.has_value ())
+    {
+      const char *to_match;
+      std::string dirname;
+
+      switch (m_match_type)
+        {
+        case match_on::DIRNAME:
+          dirname = ldirname (fullname);
+          to_match = dirname.c_str ();
+          break;
+        case match_on::BASENAME:
+          to_match = lbasename (fullname);
+          break;
+        case match_on::FULLNAME:
+          to_match = fullname;
+          break;
+	default:
+	  gdb_assert_not_reached ("bad m_match_type");
+        }
+
+      if (m_c_regexp->exec (to_match, 0, NULL, 0) != 0)
+        return false;
+    }
+
+  return true;
+}
+
+/* Data structure to maintain the state used for printing the results of
+   the 'info sources' command.  */
 
 struct output_source_filename_data
 {
-  /* Output only filenames matching REGEXP.  */
-  std::string regexp;
-  gdb::optional<compiled_regex> c_regexp;
-  /* Possibly only match a part of the filename.  */
-  filename_partial_match_opts partial_match;
+  /* Create an object for displaying the results of the 'info sources'
+     command to UIOUT.  FILTER must remain valid and unchanged for the
+     lifetime of this object as this object retains a reference to FILTER.  */
+  output_source_filename_data (struct ui_out *uiout,
+			       const info_sources_filter &filter)
+    : m_filter (filter),
+      m_uiout (uiout)
+  { /* Nothing.  */ }
 
+  DISABLE_COPY_AND_ASSIGN (output_source_filename_data);
 
-  /* Cache of what we've seen so far.  */
-  struct filename_seen_cache *filename_seen_cache;
+  /* Reset enough state of this object so we can match against a new set of
+     files.  The existing regular expression is retained though.  */
+  void reset_output ()
+  {
+    m_first = true;
+    m_filename_seen_cache.clear ();
+  }
 
-  /* Flag of whether we're printing the first one.  */
-  int first;
-
-  /* Worker for sources_info.  Force line breaks at ,'s.
-     NAME is the name to print.  */
-  void output (const char *name);
+  /* Worker for sources_info, outputs the file name formatted for either
+     cli or mi (based on the current_uiout).  In cli mode displays
+     FULLNAME with a comma separating this name from any previously
+     printed name (line breaks are added at the comma).  In MI mode
+     outputs a tuple containing DISP_NAME (the files display name),
+     FULLNAME, and EXPANDED_P (true when this file is from a fully
+     expanded symtab, otherwise false).  */
+  void output (const char *disp_name, const char *fullname, bool expanded_p);
 
   /* An overload suitable for use as a callback to
      quick_symbol_functions::map_symbol_filenames.  */
   void operator() (const char *filename, const char *fullname)
   {
-    output (fullname != nullptr ? fullname : filename);
+    /* The false here indicates that this file is from an unexpanded
+       symtab.  */
+    output (filename, fullname, false);
   }
+
+  /* Return true if at least one filename has been printed (after a call to
+     output) since either this object was created, or the last call to
+     reset_output.  */
+  bool printed_filename_p () const
+  {
+    return !m_first;
+  }
+
+private:
+
+  /* Flag of whether we're printing the first one.  */
+  bool m_first = true;
+
+  /* Cache of what we've seen so far.  */
+  filename_seen_cache m_filename_seen_cache;
+
+  /* How source filename should be filtered.  */
+  const info_sources_filter &m_filter;
+
+  /* The object to which output is sent.  */
+  struct ui_out *m_uiout;
 };
 
+/* See comment in class declaration above.  */
+
 void
-output_source_filename_data::output (const char *name)
+output_source_filename_data::output (const char *disp_name,
+				     const char *fullname,
+				     bool expanded_p)
 {
   /* Since a single source file can result in several partial symbol
      tables, we need to avoid printing it more than once.  Note: if
@@ -4252,41 +4334,51 @@ output_source_filename_data::output (const char *name)
      situation.  I'm not sure whether this can also happen for
      symtabs; it doesn't hurt to check.  */
 
-  /* Was NAME already seen?  */
-  if (filename_seen_cache->seen (name))
-    {
-      /* Yes; don't print it again.  */
-      return;
-    }
+  /* Was NAME already seen?  If so, then don't print it again.  */
+  if (m_filename_seen_cache.seen (fullname))
+    return;
 
-  /* Does it match regexp?  */
-  if (c_regexp.has_value ())
-    {
-      const char *to_match;
-      std::string dirname;
+  /* If the filter rejects this file then don't print it.  */
+  if (!m_filter.matches (fullname))
+    return;
 
-      if (partial_match.dirname)
-	{
-	  dirname = ldirname (name);
-	  to_match = dirname.c_str ();
-	}
-      else if (partial_match.basename)
-	to_match = lbasename (name);
-      else
-	to_match = name;
-
-      if (c_regexp->exec (to_match, 0, NULL, 0) != 0)
-	return;
-    }
+  ui_out_emit_tuple ui_emitter (m_uiout, nullptr);
 
   /* Print it and reset *FIRST.  */
-  if (! first)
-    printf_filtered (", ");
-  first = 0;
+  if (!m_first)
+    m_uiout->text (", ");
+  m_first = false;
 
   wrap_here ("");
-  fputs_styled (name, file_name_style.style (), gdb_stdout);
+  if (m_uiout->is_mi_like_p ())
+    {
+      m_uiout->field_string ("file", disp_name, file_name_style.style ());
+      if (fullname != nullptr)
+	m_uiout->field_string ("fullname", fullname,
+			       file_name_style.style ());
+      m_uiout->field_string ("debug-fully-read",
+			     (expanded_p ? "true" : "false"));
+    }
+  else
+    {
+      if (fullname == nullptr)
+	fullname = disp_name;
+      m_uiout->field_string ("fullname", fullname,
+			     file_name_style.style ());
+    }
 }
+
+/* For the 'info sources' command, what part of the file names should we be
+   matching the user supplied regular expression against?  */
+
+struct filename_partial_match_opts
+{
+  /* Only match the directory name part.   */
+  bool dirname = false;
+
+  /* Only match the basename part.  */
+  bool basename = false;
+};
 
 using isrc_flag_option_def
   = gdb::option::flag_option_def<filename_partial_match_opts>;
@@ -4316,31 +4408,6 @@ make_info_sources_options_def_group (filename_partial_match_opts *isrc_opts)
   return {{info_sources_option_defs}, isrc_opts};
 }
 
-/* Prints the header message for the source files that will be printed
-   with the matching info present in DATA.  SYMBOL_MSG is a message
-   that tells what will or has been done with the symbols of the
-   matching source files.  */
-
-static void
-print_info_sources_header (const char *symbol_msg,
-			   const struct output_source_filename_data *data)
-{
-  puts_filtered (symbol_msg);
-  if (!data->regexp.empty ())
-    {
-      if (data->partial_match.dirname)
-	printf_filtered (_("(dirname matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-      else if (data->partial_match.basename)
-	printf_filtered (_("(basename matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-      else
-	printf_filtered (_("(filename matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-    }
-  puts_filtered ("\n");
-}
-
 /* Completer for "info sources".  */
 
 static void
@@ -4354,71 +4421,116 @@ info_sources_command_completer (cmd_list_element *ignore,
     return;
 }
 
-static void
-info_sources_command (const char *args, int from_tty)
+/* See symtab.h.  */
+
+void
+info_sources_worker (struct ui_out *uiout,
+		     bool group_by_objfile,
+		     const info_sources_filter &filter)
 {
-  struct output_source_filename_data data;
+  output_source_filename_data data (uiout, filter);
 
-  if (!have_full_symbols () && !have_partial_symbols ())
-    {
-      error (_("No symbol table is loaded.  Use the \"file\" command."));
-    }
+  ui_out_emit_list results_emitter (uiout, "files");
+  gdb::optional<ui_out_emit_tuple> output_tuple;
+  gdb::optional<ui_out_emit_list> sources_list;
 
-  filename_seen_cache filenames_seen;
-
-  auto group = make_info_sources_options_def_group (&data.partial_match);
-
-  gdb::option::process_options
-    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
-
-  if (args != NULL && *args != '\000')
-    data.regexp = args;
-
-  data.filename_seen_cache = &filenames_seen;
-  data.first = 1;
-
-  if (data.partial_match.dirname && data.partial_match.basename)
-    error (_("You cannot give both -basename and -dirname to 'info sources'."));
-  if ((data.partial_match.dirname || data.partial_match.basename)
-      && data.regexp.empty ())
-     error (_("Missing REGEXP for 'info sources'."));
-
-  if (data.regexp.empty ())
-    data.c_regexp.reset ();
-  else
-    {
-      int cflags = REG_NOSUB;
-#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
-      cflags |= REG_ICASE;
-#endif
-      data.c_regexp.emplace (data.regexp.c_str (), cflags,
-			     _("Invalid regexp"));
-    }
-
-  print_info_sources_header
-    (_("Source files for which symbols have been read in:\n"), &data);
+  gdb_assert (group_by_objfile || uiout->is_mi_like_p ());
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (group_by_objfile)
+	{
+	  output_tuple.emplace (uiout, nullptr);
+	  uiout->field_string ("filename", objfile_name (objfile));
+	  uiout->text (":\n");
+	  bool debug_fully_readin = !objfile->has_unexpanded_symtabs ();
+	  if (uiout->is_mi_like_p ())
+	    {
+	      const char *debug_info_state;
+	      if (objfile_has_symbols (objfile))
+		{
+		  if (debug_fully_readin)
+		    debug_info_state = "fully-read";
+		  else
+		    debug_info_state = "partially-read";
+		}
+	      else
+		debug_info_state = "none";
+	      current_uiout->field_string ("debug-info", debug_info_state);
+	    }
+	  else
+	    {
+	      if (!debug_fully_readin)
+		uiout->text ("(Full debug information has not yet been read "
+			     "for this file.)\n");
+	      if (!objfile_has_symbols (objfile))
+		uiout->text ("(Objfile has no debug information.)\n");
+	      uiout->text ("\n");
+	    }
+	  sources_list.emplace (uiout, "sources");
+	}
+
       for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *s : compunit_filetabs (cu))
 	    {
+	      const char *file = symtab_to_filename_for_display (s);
 	      const char *fullname = symtab_to_fullname (s);
-
-	      data.output (fullname);
+	      data.output (file, fullname, true);
 	    }
 	}
+
+      if (group_by_objfile)
+	{
+	  objfile->map_symbol_filenames (data, true /* need_fullname */);
+	  if (data.printed_filename_p ())
+	    uiout->text ("\n\n");
+	  data.reset_output ();
+	  sources_list.reset ();
+	  output_tuple.reset ();
+	}
     }
-  printf_filtered ("\n\n");
 
-  print_info_sources_header
-    (_("Source files for which symbols will be read in on demand:\n"), &data);
+  if (!group_by_objfile)
+    {
+      data.reset_output ();
+      map_symbol_filenames (data, true /*need_fullname*/);
+    }
+}
 
-  filenames_seen.clear ();
-  data.first = 1;
-  map_symbol_filenames (data, true /*need_fullname*/);
-  printf_filtered ("\n");
+/* Implement the 'info sources' command.  */
+
+static void
+info_sources_command (const char *args, int from_tty)
+{
+  if (!have_full_symbols () && !have_partial_symbols ())
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
+
+  filename_partial_match_opts match_opts;
+  auto group = make_info_sources_options_def_group (&match_opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
+
+  if (match_opts.dirname && match_opts.basename)
+    error (_("You cannot give both -basename and -dirname to 'info sources'."));
+
+  const char *regex = nullptr;
+  if (args != NULL && *args != '\000')
+    regex = args;
+
+  if ((match_opts.dirname || match_opts.basename) && regex == nullptr)
+    error (_("Missing REGEXP for 'info sources'."));
+
+  info_sources_filter::match_on match_type;
+  if (match_opts.dirname)
+    match_type = info_sources_filter::match_on::DIRNAME;
+  else if (match_opts.basename)
+    match_type = info_sources_filter::match_on::BASENAME;
+  else
+    match_type = info_sources_filter::match_on::FULLNAME;
+
+  info_sources_filter filter (match_type, regex);
+  info_sources_worker (current_uiout, true, filter);
 }
 
 /* Compare FILE against all the entries of FILENAMES.  If BASENAMES is
@@ -5637,55 +5749,55 @@ default_collect_symbol_completion_matches_break_on
   if (mode == complete_symbol_mode::LINESPEC)
     sym_text = text;
   else
-  {
-    const char *p;
-    char quote_found;
-    const char *quote_pos = NULL;
+    {
+      const char *p;
+      char quote_found;
+      const char *quote_pos = NULL;
 
-    /* First see if this is a quoted string.  */
-    quote_found = '\0';
-    for (p = text; *p != '\0'; ++p)
-      {
-	if (quote_found != '\0')
-	  {
-	    if (*p == quote_found)
-	      /* Found close quote.  */
-	      quote_found = '\0';
-	    else if (*p == '\\' && p[1] == quote_found)
-	      /* A backslash followed by the quote character
-		 doesn't end the string.  */
-	      ++p;
-	  }
-	else if (*p == '\'' || *p == '"')
-	  {
-	    quote_found = *p;
-	    quote_pos = p;
-	  }
-      }
-    if (quote_found == '\'')
-      /* A string within single quotes can be a symbol, so complete on it.  */
-      sym_text = quote_pos + 1;
-    else if (quote_found == '"')
-      /* A double-quoted string is never a symbol, nor does it make sense
-	 to complete it any other way.  */
-      {
-	return;
-      }
-    else
-      {
-	/* It is not a quoted string.  Break it based on the characters
-	   which are in symbols.  */
-	while (p > text)
-	  {
-	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
-		|| p[-1] == ':' || strchr (break_on, p[-1]) != NULL)
-	      --p;
-	    else
-	      break;
-	  }
-	sym_text = p;
-      }
-  }
+      /* First see if this is a quoted string.  */
+      quote_found = '\0';
+      for (p = text; *p != '\0'; ++p)
+	{
+	  if (quote_found != '\0')
+	    {
+	      if (*p == quote_found)
+		/* Found close quote.  */
+		quote_found = '\0';
+	      else if (*p == '\\' && p[1] == quote_found)
+		/* A backslash followed by the quote character
+		   doesn't end the string.  */
+		++p;
+	    }
+	  else if (*p == '\'' || *p == '"')
+	    {
+	      quote_found = *p;
+	      quote_pos = p;
+	    }
+	}
+      if (quote_found == '\'')
+	/* A string within single quotes can be a symbol, so complete on it.  */
+	sym_text = quote_pos + 1;
+      else if (quote_found == '"')
+	/* A double-quoted string is never a symbol, nor does it make sense
+	   to complete it any other way.  */
+	{
+	  return;
+	}
+      else
+	{
+	  /* It is not a quoted string.  Break it based on the characters
+	     which are in symbols.  */
+	  while (p > text)
+	    {
+	      if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
+		  || p[-1] == ':' || strchr (break_on, p[-1]) != NULL)
+		--p;
+	      else
+		break;
+	    }
+	  sym_text = p;
+	}
+    }
 
   lookup_name_info lookup_name (sym_text, name_match_type, true);
 
@@ -5874,46 +5986,46 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
   if (mode == complete_symbol_mode::LINESPEC)
     sym_text = text;
   else
-  {
-    const char *p;
-    char quote_found;
-    const char *quote_pos = NULL;
+    {
+      const char *p;
+      char quote_found;
+      const char *quote_pos = NULL;
 
-    /* First see if this is a quoted string.  */
-    quote_found = '\0';
-    for (p = text; *p != '\0'; ++p)
-      {
-	if (quote_found != '\0')
-	  {
-	    if (*p == quote_found)
-	      /* Found close quote.  */
-	      quote_found = '\0';
-	    else if (*p == '\\' && p[1] == quote_found)
-	      /* A backslash followed by the quote character
-		 doesn't end the string.  */
-	      ++p;
-	  }
-	else if (*p == '\'' || *p == '"')
-	  {
-	    quote_found = *p;
-	    quote_pos = p;
-	  }
-      }
-    if (quote_found == '\'')
-      /* A string within single quotes can be a symbol, so complete on it.  */
-      sym_text = quote_pos + 1;
-    else if (quote_found == '"')
-      /* A double-quoted string is never a symbol, nor does it make sense
-	 to complete it any other way.  */
-      {
-	return;
-      }
-    else
-      {
-	/* Not a quoted string.  */
-	sym_text = language_search_unquoted_string (text, p);
-      }
-  }
+      /* First see if this is a quoted string.  */
+      quote_found = '\0';
+      for (p = text; *p != '\0'; ++p)
+	{
+	  if (quote_found != '\0')
+	    {
+	      if (*p == quote_found)
+		/* Found close quote.  */
+		quote_found = '\0';
+	      else if (*p == '\\' && p[1] == quote_found)
+		/* A backslash followed by the quote character
+		   doesn't end the string.  */
+		++p;
+	    }
+	  else if (*p == '\'' || *p == '"')
+	    {
+	      quote_found = *p;
+	      quote_pos = p;
+	    }
+	}
+      if (quote_found == '\'')
+	/* A string within single quotes can be a symbol, so complete on it.  */
+	sym_text = quote_pos + 1;
+      else if (quote_found == '"')
+	/* A double-quoted string is never a symbol, nor does it make sense
+	   to complete it any other way.  */
+	{
+	  return;
+	}
+      else
+	{
+	  /* Not a quoted string.  */
+	  sym_text = language_search_unquoted_string (text, p);
+	}
+    }
 
   lookup_name_info lookup_name (sym_text, name_match_type, true);
 
@@ -6778,7 +6890,8 @@ Print information about all types matching REGEXP, or all types if no\n\
 REGEXP is given.  The optional flag -q disables printing of headers."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
-  const auto info_sources_opts = make_info_sources_options_def_group (nullptr);
+  const auto info_sources_opts
+    = make_info_sources_options_def_group (nullptr);
 
   static std::string info_sources_help
     = gdb::option::build_help (_("\
@@ -6799,8 +6912,7 @@ Options:\n\
 
   add_basic_prefix_cmd ("module", class_info, _("\
 Print information about modules."),
-			&info_module_cmdlist, "info module ",
-			0, &infolist);
+			&info_module_cmdlist, 0, &infolist);
 
   c = add_cmd ("functions", class_info, info_module_functions_command, _("\
 Display functions arranged by modules.\n\
@@ -6898,15 +7010,17 @@ If zero then the symbol cache is disabled."),
 	   _("Print symbol cache statistics for each program space."),
 	   &maintenanceprintlist);
 
-  add_cmd ("symbol-cache", class_maintenance,
-	   maintenance_flush_symbol_cache,
-	   _("Flush the symbol cache for each program space."),
-	   &maintenanceflushlist);
-  c = add_alias_cmd ("flush-symbol-cache", "flush symbol-cache",
+  cmd_list_element *maintenance_flush_symbol_cache_cmd
+    = add_cmd ("symbol-cache", class_maintenance,
+	       maintenance_flush_symbol_cache,
+	       _("Flush the symbol cache for each program space."),
+	       &maintenanceflushlist);
+  c = add_alias_cmd ("flush-symbol-cache", maintenance_flush_symbol_cache_cmd,
 		     class_maintenance, 0, &maintenancelist);
   deprecate_cmd (c, "maintenancelist flush symbol-cache");
 
-  gdb::observers::executable_changed.attach (symtab_observer_executable_changed);
-  gdb::observers::new_objfile.attach (symtab_new_objfile_observer);
-  gdb::observers::free_objfile.attach (symtab_free_objfile_observer);
+  gdb::observers::executable_changed.attach (symtab_observer_executable_changed,
+					     "symtab");
+  gdb::observers::new_objfile.attach (symtab_new_objfile_observer, "symtab");
+  gdb::observers::free_objfile.attach (symtab_free_objfile_observer, "symtab");
 }

@@ -33,13 +33,11 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
+struct avr_sim_state {
   /* If true, the pc needs more than 2 bytes.  */
   int avr_pc22;
-
-  sim_state_base base;
 };
+
+#define AVR_SIM_STATE(sd) ((struct avr_sim_state *) STATE_ARCH_DATA (sd))
 
 #endif

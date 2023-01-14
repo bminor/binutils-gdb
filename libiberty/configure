@@ -2460,9 +2460,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-
 # This works around the fact that libtool configuration may change LD
 # for this particular configuration, but some shells, instead of
 # keeping the changes in LD private, export them just because LD is
@@ -6731,6 +6728,22 @@ if test -z "${setobjs}"; then
     ac_cv_func_getpagesize=yes
     ;;
 
+  hppa*-*-hpux*)
+    # Replace system snprintf and vsnprintf with libiberty implementations.
+    case " $LIBOBJS " in
+  *" snprintf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
+ ;;
+esac
+
+    case " $LIBOBJS " in
+  *" vsnprintf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS vsnprintf.$ac_objext"
+ ;;
+esac
+
+    ;;
+
   *-*-mingw32*)
     # Under mingw32, sys_nerr and sys_errlist exist, but they are
     # macros, so the test below won't find them.
@@ -7192,11 +7205,11 @@ else
 fi
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-int *p;
+extern int $v [];
 int
 main ()
 {
-extern int $v []; p = $v;
+if ($v [0]) return 1;
   ;
   return 0;
 }

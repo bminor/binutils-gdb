@@ -21,8 +21,6 @@ dnl one afterwards.  The two pieces of the common fragment are inserted into
 dnl the target's fragment at the appropriate points.
 AC_DEFUN([SIM_AC_OUTPUT],
 [dnl
-AC_REQUIRE([SIM_AC_OPTION_WARNINGS])dnl
-
 dnl Make @cgen_breaks@ non-null only if the sim uses CGEN.
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
@@ -47,16 +45,14 @@ AC_CONFIG_COMMANDS([stamp-h], [echo > stamp-h])
 dnl These are unfortunate.  They are conditionally called by other sim macros
 dnl but always used by common/Make-common.in.  So we have to subst here even
 dnl when the rest of the code is in the respective macros.
-AC_SUBST(sim_alignment)
 AC_SUBST(sim_bitsize)
-AC_SUBST(sim_endian)
 AC_SUBST(sim_float)
-AC_SUBST(sim_scache)
-AC_SUBST(sim_default_model)
-AC_SUBST(sim_hw_cflags)
-AC_SUBST(sim_hw_objs)
-AC_SUBST(sim_hw)
-AC_SUBST(sim_reserved_bits)
+
+dnl Used by common/Make-common.in to see which configure script created it.
+SIM_COMMON_BUILD_TRUE='#'
+SIM_COMMON_BUILD_FALSE=
+AC_SUBST(SIM_COMMON_BUILD_TRUE)
+AC_SUBST(SIM_COMMON_BUILD_FALSE)
 
 AC_OUTPUT
 ])

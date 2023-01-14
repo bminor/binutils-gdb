@@ -1,3 +1,197 @@
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Change to
+	@SIM_RX_CYCLE_ACCURATE_FLAGS@.
+	* configure.ac: Delete most content.  Moved sim-rx-cycle-accurate
+	to ...
+	* acinclude.m4: ... here.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Rename sim_cycle_accurate_flags to
+	sim_rx_cycle_accurate_flags.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Set to @sim_cycle_accurate_flags@.
+	* configure.ac: Move CYCLE_ACCURATE define from AC_DEFINE to
+	AC_SUBST.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* README.txt: Change cycle-stats to sim-profile.
+	* configure.ac: Delete cycle-stats.
+	* mem.c: Change CYCLE_STATS to WITH_PROFILE
+	* rx.c: Likewise.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* err.c: Include defs.h.
+	* fpu.c, gdb-if.c, load.c, main.c, mem.c, misc.c, reg.c, rx.c,
+	syscalls.c, trace.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Update include path.
+	* load.h: Likewise.
+	* syscalls.c: Likewise.
+
+2021-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Include libiberty.h.
+	(sim_do_command): Rewrite to use buildargv.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* load.c (rx_load): Use BFD_VMA_FMT and drop casts.
+
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* trace.c (op_printf): Likewise.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* load.c (rx_load): Cast size to long.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (LIBS): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (err.o, fpu.o, gdb-if.o, load.o, main.o, mem.o)
+	(misc.o, reg.o, rx.o, syscalls.o, trace.o): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_CHECK_HEADERS_ONCE.
+	* main.c: Delete HAVE_GETOPT_H.
+	* config.in, configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Define.
+	(syscalls.o): Delete syscall.h.
+	* syscalls.c: Change syscall.h include to targ-vals.h.
+	(rx_syscall): Add TARGET_ prefix to all SYS_ constants.
+	* syscall.h: Removed.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-09  Luis Machado  <luis.machado@linaro.org>
 
 	* fpu.c (rxfp_itof): Initialize structure.

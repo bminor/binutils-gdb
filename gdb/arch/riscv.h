@@ -46,13 +46,20 @@ struct riscv_gdbarch_features
      that there are no f-registers.  No other value is valid.  */
   int flen = 0;
 
+  /* The size of the v-registers in bytes.  The value 0 indicates a target
+     with no vector registers.  The minimum value for a standard compliant
+     target should be 16, but GDB doesn't currently mind, and will accept
+     any vector size.  */
+  int vlen = 0;
+
   /* When true this target is RV32E.  */
   bool embedded = false;
 
   /* Equality operator.  */
   bool operator== (const struct riscv_gdbarch_features &rhs) const
   {
-    return (xlen == rhs.xlen && flen == rhs.flen && embedded == rhs.embedded);
+    return (xlen == rhs.xlen && flen == rhs.flen
+	    && embedded == rhs.embedded && vlen == rhs.vlen);
   }
 
   /* Inequality operator.  */
@@ -66,7 +73,8 @@ struct riscv_gdbarch_features
   {
     std::size_t val = ((embedded ? 1 : 0) << 10
 		       | (xlen & 0x1f) << 5
-		       | (flen & 0x1f) << 0);
+		       | (flen & 0x1f) << 0
+		       | (vlen & 0xfff) << 11);
     return val;
   }
 };

@@ -18,11 +18,15 @@
 
 /* The control space devices */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
 #include <sys/fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
@@ -233,7 +237,9 @@ static char     wbufa[UARTBUF], wbufb[UARTBUF];
 static unsigned wnuma;
 static unsigned wnumb;
 static FILE    *f1in, *f1out, *f2in, *f2out;
+#ifdef HAVE_TERMIOS_H
 static struct termios ioc1, ioc2, iocold1, iocold2;
+#endif
 static int      f1open = 0, f2open = 0;
 
 static char     uarta_sreg, uarta_hreg, uartb_sreg, uartb_hreg;
@@ -270,17 +276,17 @@ static void	write_uart (uint32 addr, uint32 data);
 static void	flush_uart (void);
 static void	uarta_tx (void);
 static void	uartb_tx (void);
-static void	uart_rx (caddr_t arg);
-static void	uart_intr (caddr_t arg);
+static void	uart_rx (void *arg);
+static void	uart_intr (void *arg);
 static void	uart_irq_start (void);
-static void	wdog_intr (caddr_t arg);
+static void	wdog_intr (void *arg);
 static void	wdog_start (void);
-static void	rtc_intr (caddr_t arg);
+static void	rtc_intr (void *arg);
 static void	rtc_start (void);
 static uint32	rtc_counter_read (void);
 static void	rtc_scaler_set (uint32 val);
 static void	rtc_reload_set (uint32 val);
-static void	gpt_intr (caddr_t arg);
+static void	gpt_intr (void *arg);
 static void	gpt_start (void);
 static uint32	gpt_counter_read (void);
 static void	gpt_scaler_set (uint32 val);
@@ -924,10 +930,12 @@ init_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
+#ifdef HAVE_TERMIOS_H
     if (!ifd1)
 	tcsetattr(0, TCSANOW, &ioc1);
     if (!ifd2)
 	tcsetattr(0, TCSANOW, &ioc2);
+#endif
 }
 
 void
@@ -935,10 +943,12 @@ restore_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
+#ifdef HAVE_TERMIOS_H
     if (!ifd1)
 	tcsetattr(0, TCSANOW, &iocold1);
     if (!ifd2)
 	tcsetattr(0, TCSANOW, &iocold2);
+#endif
 }
 
 #define DO_STDIO_READ( _fd_, _buf_, _len_ )          \
@@ -977,11 +987,13 @@ port_init(void)
 	if (sis_verbose)
 	    printf("serial port A on stdin/stdout\n");
         if (!dumbio) {
+#ifdef HAVE_TERMIOS_H
             tcgetattr(ifd1, &ioc1);
             iocold1 = ioc1;
             ioc1.c_lflag &= ~(ICANON | ECHO);
             ioc1.c_cc[VMIN] = 0;
             ioc1.c_cc[VTIME] = 0;
+#endif
         }
 	f1open = 1;
     }
@@ -1006,11 +1018,13 @@ port_init(void)
 	if (sis_verbose)
 	    printf("serial port B on stdin/stdout\n");
         if (!dumbio) {
+#ifdef HAVE_TERMIOS_H
             tcgetattr(ifd2, &ioc2);
             iocold2 = ioc2;
             ioc2.c_lflag &= ~(ICANON | ECHO);
             ioc2.c_cc[VMIN] = 0;
             ioc2.c_cc[VTIME] = 0;
+#endif
         }
 	f2open = 1;
     }
@@ -1260,7 +1274,7 @@ uartb_tx(void)
 }
 
 static void
-uart_rx(caddr_t arg)
+uart_rx(void *arg)
 {
     int32           rsize;
     char            rxd;
@@ -1302,7 +1316,7 @@ uart_rx(caddr_t arg)
 }
 
 static void
-uart_intr(caddr_t arg)
+uart_intr(void *arg)
 {
     read_uart(0xE8);		/* Check for UART interrupts every 1000 clk */
     flush_uart();		/* Flush UART ports      */
@@ -1325,7 +1339,7 @@ uart_irq_start(void)
 /* Watch-dog */
 
 static void
-wdog_intr(caddr_t arg)
+wdog_intr(void *arg)
 {
     if (wdog_status == disabled) {
 	wdog_status = stopped;
@@ -1363,7 +1377,7 @@ wdog_start(void)
 
 
 static void
-rtc_intr(caddr_t arg)
+rtc_intr(void *arg)
 {
     if (rtc_counter == 0) {
 
@@ -1414,7 +1428,7 @@ rtc_reload_set(uint32 val)
 }
 
 static void
-gpt_intr(caddr_t arg)
+gpt_intr(void *arg)
 {
     if (gpt_counter == 0) {
 	mec_irq(12);

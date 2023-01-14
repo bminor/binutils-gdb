@@ -722,6 +722,47 @@ compile_object_load (const compile_file_names &file_names,
 	  sym->value = 0;
 	  continue;
 	}
+      if (strcmp (sym->name, ".TOC.") == 0)
+	{
+	  /* Handle the .TOC. symbol as the linker would do.  Set the .TOC.
+	     sections value to 0x8000 (see bfd/elf64-ppc.c TOC_BASE_OFF);
+	     point the symbol section at the ".toc" section;
+	     and pass the toc->vma value into bfd_set_gp_value().
+	     If the .toc section is not found, use the first section
+	     with the SEC_ALLOC flag set.  In the unlikely case that
+	     we still do not have a section identified, fall back to using
+	     the "*ABS*" section.  */
+	  asection *toc_fallback = bfd_get_section_by_name(abfd.get(), ".toc");
+	  if (toc_fallback == NULL)
+	    {
+	      for (asection *tsect = abfd->sections; tsect != nullptr;
+		   tsect = tsect->next)
+		 {
+		    if (bfd_section_flags (tsect) & SEC_ALLOC)
+		       {
+			  toc_fallback = tsect;
+			  break;
+		       }
+		 }
+	    }
+
+	  if (toc_fallback == NULL)
+	    /*  If we've gotten here, we have not found a section usable
+		as a backup for the .toc section.  In this case, use the
+		absolute (*ABS*) section.  */
+	     toc_fallback = bfd_abs_section_ptr;
+
+	  sym->section = toc_fallback;
+	  sym->value = 0x8000;
+	  bfd_set_gp_value(abfd.get(), toc_fallback->vma);
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
+				sym->name,
+				paddress (target_gdbarch (), sym->value));
+	  continue;
+	}
+
       bmsym = lookup_minimal_symbol (sym->name, NULL, NULL);
       switch (bmsym.minsym == NULL
 	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))

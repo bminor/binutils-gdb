@@ -2041,6 +2041,8 @@ e60000000055 vcnf VRR_VV0UU2 " " arch14 zarch
 
 b98B rdp RRF_RURR2 " " arch14 zarch optparm
 
-eb0000000071 lpswey SIY_URD " " arch14 zarch
+eb0000000071 lpswey SIY_RD " " arch14 zarch
 b200 lbear S_RD " " arch14 zarch
 b201 stbear S_RD " " arch14 zarch
+
+b28f qpaci S_RD " " arch14 zarch

@@ -34,12 +34,12 @@ if {![runto ${srcfile}:$line]} {
 gdb_test "print u" " = union::Union {f1: -1, f2: 255}"
 
 gdb_test_sequence "ptype/o Union" "" {
-    "/\\* offset    |  size \\*/  type = union union::Union {"
-    "/\\*                 1 \\*/    f1: i8,"
-    "/\\*                 1 \\*/    f2: u8,"
+    "/\\* offset      |    size \\*/  type = union union::Union {"
+    "/\\*                     1 \\*/    f1: i8,"
+    "/\\*                     1 \\*/    f2: u8,"
     ""
-    "                           /\\* total size \\(bytes\\):    1 \\*/"
-    "                         }"
+    "                               /\\* total size \\(bytes\\):    1 \\*/"
+    "                             }"
 }
 
 gdb_test "print u2" " = union::Union2 {name: \\\[1\\\]}"

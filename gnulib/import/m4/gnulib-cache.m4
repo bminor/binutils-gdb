@@ -40,13 +40,17 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  chown \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
+#  ffs \
 #  fnmatch-gnu \
 #  frexpl \
+#  gendocs \
 #  getcwd \
+#  getline \
 #  gettimeofday \
 #  gitlog-to-changelog \
 #  glob \
@@ -59,10 +63,12 @@
 #  mkdir \
 #  mkdtemp \
 #  mkostemp \
+#  netdb \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
 #  rename \
+#  select \
 #  setenv \
 #  signal-h \
 #  strchrnul \
@@ -82,13 +88,17 @@ gl_LOCAL_DIR([])
 gl_MODULES([
   alloca
   canonicalize-lgpl
+  chown
   count-one-bits
   dirent
   dirfd
   errno
+  ffs
   fnmatch-gnu
   frexpl
+  gendocs
   getcwd
+  getline
   gettimeofday
   gitlog-to-changelog
   glob
@@ -101,10 +111,12 @@ gl_MODULES([
   mkdir
   mkdtemp
   mkostemp
+  netdb
   pathmax
   rawmemchr
   readlink
   rename
+  select
   setenv
   signal-h
   strchrnul

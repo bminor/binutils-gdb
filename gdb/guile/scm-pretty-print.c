@@ -818,20 +818,28 @@ ppscm_print_children (SCM printer, enum display_hint hint,
       gdb::unique_xmalloc_ptr<char> name
 	= gdbscm_scm_to_c_string (scm_name);
 
-      /* Print initial "{".  For other elements, there are three cases:
+      /* Print initial "=" to separate print_string_repr output and
+	 children.  For other elements, there are three cases:
 	 1. Maps.  Print a "," after each value element.
 	 2. Arrays.  Always print a ",".
 	 3. Other.  Always print a ",".  */
       if (i == 0)
 	{
-	 if (printed_nothing)
-	   fputs_filtered ("{", stream);
-	 else
-	   fputs_filtered (" = {", stream);
-       }
-
+	  if (!printed_nothing)
+	    fputs_filtered (" = ", stream);
+	}
       else if (! is_map || i % 2 == 0)
 	fputs_filtered (pretty ? "," : ", ", stream);
+
+      /* Skip printing children if max_depth has been reached.  This check
+	 is performed after print_string_repr and the "=" separator so that
+	 these steps are not skipped if the variable is located within the
+	 permitted depth.  */
+      if (val_print_check_max_depth (stream, recurse, options, language))
+	goto done;
+      else if (i == 0)
+	/* Print initial "{" to bookend children.  */
+	fputs_filtered ("{", stream);
 
       /* In summary mode, we just want to print "= {...}" if there is
 	 a value.  */
@@ -990,12 +998,6 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
       goto done;
     }
   gdb_assert (ppscm_is_pretty_printer_worker (printer));
-
-  if (val_print_check_max_depth (stream, recurse, options, language))
-    {
-      result = EXT_LANG_RC_OK;
-      goto done;
-    }
 
   /* If we are printing a map, we want some special formatting.  */
   hint = ppscm_get_display_hint_enum (printer);

@@ -15,51 +15,20 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl --enable-sim-endian={yes,no,big,little} is for simulators
 dnl that support both big and little endian targets.
-dnl arg[1] is hardwired target endianness.
-dnl arg[2] is default target endianness.
 AC_DEFUN([SIM_AC_OPTION_ENDIAN],
-[
-wire_endian="[$1]"
-default_endian="[$2]"
+[dnl
+AC_MSG_CHECKING([whether to force sim endianness])
+sim_endian=
 AC_ARG_ENABLE(sim-endian,
 [AS_HELP_STRING([--enable-sim-endian=endian],
 		[Specify target byte endian orientation])],
 [case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-  yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	 else
-	  if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	   else
-	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	 else
-	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	   else
-	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi],
-[if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-else
-  if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-  else
-    sim_endian=
-  fi
-fi])dnl
-])
-AC_SUBST(sim_endian)
+  b*|B*) sim_endian="BFD_ENDIAN_BIG";;
+  l*|L*) sim_endian="BFD_ENDIAN_LITTLE";;
+  yes | no) ;;
+  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian");;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_TARGET_BYTE_ORDER],
+		   [${sim_endian:-BFD_ENDIAN_UNKNOWN}], [Sim endian settings])
+AC_MSG_RESULT([${sim_alignment:-no}])
+])dnl

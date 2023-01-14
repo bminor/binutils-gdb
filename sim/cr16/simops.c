@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program. If not, see <http://www.gnu.org/licenses/>.  */
 
-
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <signal.h>
 #include <errno.h>
@@ -29,11 +29,10 @@
 #endif
 #include <string.h>
 #include <time.h>
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "simops.h"
 #include "targ-vals.h"
 

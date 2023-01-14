@@ -99,11 +99,6 @@ extern int strcmp_iw_ordered (const char *, const char *);
 
 extern bool streq (const char *, const char *);
 
-/* A variant of streq that is suitable for use as an htab
-   callback.  */
-
-extern int streq_hash (const void *, const void *);
-
 extern int subset_compare (const char *, const char *);
 
 /* Compare C strings for std::sort.  */
@@ -310,6 +305,15 @@ struct htab_deleter
 
 /* A unique_ptr wrapper for htab_t.  */
 typedef std::unique_ptr<htab, htab_deleter> htab_up;
+
+/* A wrapper for 'delete' that can used as a hash table entry deletion
+   function.  */
+template<typename T>
+void
+htab_delete_entry (void *ptr)
+{
+  delete (T *) ptr;
+}
 
 extern void init_page_info (void);
 

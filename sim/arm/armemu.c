@@ -15,6 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "armdefs.h"
 #include "armemu.h"
 #include "armos.h"
@@ -5457,7 +5460,10 @@ Handle_Store_Double (ARMul_State * state, ARMword instr)
     addr = base;
 
   /* The address must be aligned on a 8 byte boundary.  */
-  if (addr & 0x7)
+  if (state->is_v6 && (addr & 0x3) == 0)
+    /* Word alignment is enough for v6.  */
+    ;
+  else if (addr & 0x7)
     {
 #ifdef ABORTS
       ARMul_DATAABORT (addr);

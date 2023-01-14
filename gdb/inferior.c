@@ -31,7 +31,6 @@
 #include "symfile.h"
 #include "gdbsupport/environ.h"
 #include "cli/cli-utils.h"
-#include "continuations.h"
 #include "arch-utils.h"
 #include "target-descriptions.h"
 #include "readline/tilde.h"
@@ -42,7 +41,7 @@
 
 DEFINE_REGISTRY (inferior, REGISTRY_ACCESS_FIELD)
 
-struct inferior *inferior_list = NULL;
+intrusive_list<inferior> inferior_list;
 static int highest_inferior_num;
 
 /* See inferior.h.  */
@@ -74,9 +73,8 @@ inferior::~inferior ()
 {
   inferior *inf = this;
 
-  discard_all_inferior_continuations (inf);
+  m_continuations.clear ();
   inferior_free_data (inf);
-  xfree (inf->args);
   target_desc_info_free (inf->tdesc_info);
 }
 
@@ -91,19 +89,54 @@ inferior::inferior (int pid_)
   m_target_stack.push (get_dummy_target ());
 }
 
-void
-inferior::set_tty (const char *terminal_name)
+/* See inferior.h.  */
+
+int
+inferior::unpush_target (struct target_ops *t)
 {
-  if (terminal_name != nullptr && *terminal_name != '\0')
-    m_terminal = make_unique_xstrdup (terminal_name);
-  else
-    m_terminal = NULL;
+  /* If unpushing the process stratum target from the inferior while threads
+     exist in the inferior, ensure that we don't leave any threads of the
+     inferior in the target's "resumed with pending wait status" list.
+
+     See also the comment in set_thread_exited.  */
+  if (t->stratum () == process_stratum)
+    {
+      process_stratum_target *proc_target = as_process_stratum_target (t);
+
+      for (thread_info *thread : this->non_exited_threads ())
+	proc_target->maybe_remove_resumed_with_pending_wait_status (thread);
+    }
+
+  return m_target_stack.unpush (t);
 }
 
-const char *
+void
+inferior::set_tty (std::string terminal_name)
+{
+  m_terminal = std::move (terminal_name);
+}
+
+const std::string &
 inferior::tty ()
 {
-  return m_terminal.get ();
+  return m_terminal;
+}
+
+void
+inferior::add_continuation (std::function<void ()> &&cont)
+{
+  m_continuations.emplace_front (std::move (cont));
+}
+
+void
+inferior::do_all_continuations ()
+{
+  while (!m_continuations.empty ())
+    {
+      auto iter = m_continuations.begin ();
+      (*iter) ();
+      m_continuations.erase (iter);
+    }
 }
 
 struct inferior *
@@ -111,16 +144,7 @@ add_inferior_silent (int pid)
 {
   inferior *inf = new inferior (pid);
 
-  if (inferior_list == NULL)
-    inferior_list = inf;
-  else
-    {
-      inferior *last;
-
-      for (last = inferior_list; last->next != NULL; last = last->next)
-	;
-      last->next = inf;
-    }
+  inferior_list.push_back (*inf);
 
   gdb::observers::inferior_added.notify (inf);
 
@@ -148,27 +172,27 @@ add_inferior (int pid)
   return inf;
 }
 
+/* See inferior.h.  */
+
 void
-delete_inferior (struct inferior *todel)
+inferior::clear_thread_list (bool silent)
 {
-  struct inferior *inf, *infprev;
+  thread_list.clear_and_dispose ([=] (thread_info *thr)
+    {
+      set_thread_exited (thr, silent);
+      if (thr->deletable ())
+	delete thr;
+    });
+  ptid_thread_map.clear ();
+}
 
-  infprev = NULL;
+void
+delete_inferior (struct inferior *inf)
+{
+  inf->clear_thread_list (true);
 
-  for (inf = inferior_list; inf; infprev = inf, inf = inf->next)
-    if (inf == todel)
-      break;
-
-  if (!inf)
-    return;
-
-  for (thread_info *tp : inf->threads_safe ())
-    delete_thread_silent (tp);
-
-  if (infprev)
-    infprev->next = inf->next;
-  else
-    inferior_list = inf->next;
+  auto it = inferior_list.iterator_to (*inf);
+  inferior_list.erase (it);
 
   gdb::observers::inferior_removed.notify (inf);
 
@@ -183,24 +207,9 @@ delete_inferior (struct inferior *todel)
    exit of its threads.  */
 
 static void
-exit_inferior_1 (struct inferior *inftoex, int silent)
+exit_inferior_1 (struct inferior *inf, int silent)
 {
-  struct inferior *inf;
-
-  for (inf = inferior_list; inf; inf = inf->next)
-    if (inf == inftoex)
-      break;
-
-  if (!inf)
-    return;
-
-  for (thread_info *tp : inf->threads_safe ())
-    {
-      if (silent)
-	delete_thread_silent (tp);
-      else
-	delete_thread (tp);
-    }
+  inf->clear_thread_list (silent);
 
   gdb::observers::inferior_exit.notify (inf);
 
@@ -367,22 +376,14 @@ have_live_inferiors (void)
 void
 prune_inferiors (void)
 {
-  inferior *ss;
-
-  ss = inferior_list;
-  while (ss)
+  for (inferior *inf : all_inferiors_safe ())
     {
-      if (!ss->deletable ()
-	  || !ss->removable
-	  || ss->pid != 0)
-	{
-	  ss = ss->next;
-	  continue;
-	}
+      if (!inf->deletable ()
+	  || !inf->removable
+	  || inf->pid != 0)
+	continue;
 
-      inferior *ss_next = ss->next;
-      delete_inferior (ss);
-      ss = ss_next;
+      delete_inferior (inf);
     }
 }
 
@@ -514,7 +515,7 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       uiout->field_string ("target-id", inferior_pid_to_str (inf->pid));
 
       std::string conn = uiout_field_connection (inf->process_target ());
-      uiout->field_string ("connection-id", conn.c_str ());
+      uiout->field_string ("connection-id", conn);
 
       if (inf->pspace->exec_filename != nullptr)
 	uiout->field_string ("exec", inf->pspace->exec_filename.get ());
@@ -732,7 +733,6 @@ add_inferior_with_spaces (void)
   struct address_space *aspace;
   struct program_space *pspace;
   struct inferior *inf;
-  struct gdbarch_info info;
 
   /* If all inferiors share an address space on this system, this
      doesn't really return a new address space; otherwise, it
@@ -745,7 +745,7 @@ add_inferior_with_spaces (void)
 
   /* Setup the inferior's initial arch, based on information obtained
      from the global "set ..." options.  */
-  gdbarch_info_init (&info);
+  gdbarch_info info;
   inf->gdbarch = gdbarch_find_by_info (info);
   /* The "set ..." options reject invalid settings, so we should
      always have a valid arch by now.  */

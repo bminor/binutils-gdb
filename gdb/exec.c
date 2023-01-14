@@ -201,7 +201,7 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 	}
       catch (const gdb_exception_error &err)
 	{
-	  if (!exception_print_same (prev_err, err))
+	  if (prev_err != err)
 	    warning ("%s", err.what ());
 	}
     }
@@ -636,8 +636,7 @@ program_space::add_target_sections (struct objfile *objfile)
       if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
 
-      m_target_sections.emplace_back (obj_section_addr (osect),
-				      obj_section_endaddr (osect),
+      m_target_sections.emplace_back (osect->addr (), osect->endaddr (),
 				      osect->the_bfd_section, (void *) objfile);
     }
 }
@@ -679,10 +678,10 @@ program_space::remove_target_sections (void *owner)
 /* See exec.h.  */
 
 void
-exec_on_vfork ()
+exec_on_vfork (inferior *vfork_child)
 {
-  if (!current_program_space->target_sections ().empty ())
-    current_inferior ()->push_target (&exec_ops);
+  if (!vfork_child->pspace->target_sections ().empty ())
+    vfork_child->push_target (&exec_ops);
 }
 
 

@@ -268,6 +268,14 @@ typedef struct nds32_field
 		char **, int64_t *);
 } field_t;
 
+extern const field_t *nds32_field_table[NDS32_CORE_COUNT];
+extern opcode_t *nds32_opcode_table[NDS32_CORE_COUNT];
+extern const keyword_t **nds32_keyword_table[NDS32_CORE_COUNT];
+extern struct nds32_opcode nds32_opcodes[];
+extern const field_t nds32_operand_fields[];
+extern const keyword_t *nds32_keywords[];
+extern const keyword_t nds32_keyword_gpr[];
+
 extern void nds32_assemble (nds32_asm_desc_t *, nds32_asm_insn_t *, char *);
 extern void nds32_asm_init (nds32_asm_desc_t *, int);
 

@@ -2298,8 +2298,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
 	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			_("Difference of symbols in different sections is not supported"));
+	  as_bad_subtract (fixp);
 	  return NULL;
 	}
     }

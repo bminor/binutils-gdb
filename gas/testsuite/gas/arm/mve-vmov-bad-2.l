@@ -1,5 +1,5 @@
 [^:]*: Assembler messages:
-[^:]*:3: Error: General purpose registers may not be the same -- `vmov r0,r0,q0\[2\],q0\[0\]'
+[^:]*:3: Error: Destination registers may not be the same -- `vmov r0,r0,q0\[2\],q0\[0\]'
 [^:]*:4: Error: r13 not allowed here -- `vmov sp,r0,q0\[2\],q0\[0\]'
 [^:]*:5: Error: r13 not allowed here -- `vmov r0,sp,q0\[2\],q0\[0\]'
 [^:]*:6: Error: r15 not allowed here -- `vmov pc,r0,q0\[2\],q0\[0\]'

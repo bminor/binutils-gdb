@@ -71,6 +71,8 @@ TEXIDIR = $(srcdir)/../../texinfo/fsf
 info_TEXINFOS = bfd.texi
 bfd_TEXINFOS = $(DOCFILES) bfdsumm.texi
 
+AM_MAKEINFOFLAGS = --no-split
+
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 
 AM_CPPFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
@@ -366,5 +368,10 @@ MAINTAINERCLEANFILES = $(DOCFILES)
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install: install-info
+
+html-local: bfd/index.html
+bfd/index.html: bfd.texi $(bfd_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/bfd.texi
 
 MAINTAINERCLEANFILES += bfd.info

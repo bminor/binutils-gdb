@@ -383,6 +383,9 @@ mi_cmd_exec_interrupt (const char *command, char **argv, int argc)
     {
       struct inferior *inf = find_inferior_id (current_context->thread_group);
 
+      scoped_disable_commit_resumed disable_commit_resumed
+	("interrupting all threads of thread group");
+
       iterate_over_threads (interrupt_thread_callback, &inf->pid);
     }
   else
@@ -738,12 +741,12 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      uiout->field_string ("id", pid->c_str ());
+      uiout->field_string ("id", *pid);
       uiout->field_string ("type", "process");
       if (cmd)
-	uiout->field_string ("description", cmd->c_str ());
+	uiout->field_string ("description", *cmd);
       if (user)
-	uiout->field_string ("user", user->c_str ());
+	uiout->field_string ("user", *user);
       if (cores)
 	output_cores (uiout, "cores", cores->c_str ());
 
@@ -762,9 +765,9 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 		  const std::string *tid = get_osdata_column (child, "tid");
 		  const std::string *tcore = get_osdata_column (child, "core");
 
-		  uiout->field_string ("id", tid->c_str ());
+		  uiout->field_string ("id", *tid);
 		  if (tcore)
-		    uiout->field_string ("core", tcore->c_str ());
+		    uiout->field_string ("core", *tcore);
 		}
 	    }
 	}
@@ -1470,7 +1473,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
       std::string data = bin2hex (read_result.data.get (),
 				  (read_result.end - read_result.begin)
 				  * unit_size);
-      uiout->field_string ("contents", data.c_str ());
+      uiout->field_string ("contents", data);
     }
 }
 
@@ -2670,7 +2673,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	    if (target_read_memory (r.start, data.data (), r.length) == 0)
 	      {
 		std::string data_str = bin2hex (data.data (), r.length);
-		uiout->field_string ("contents", data_str.c_str ());
+		uiout->field_string ("contents", data_str);
 	      }
 	    else
 	      uiout->field_skip ("contents");
@@ -2737,21 +2740,23 @@ void _initialize_mi_main ();
 void
 _initialize_mi_main ()
 {
-  struct cmd_list_element *c;
-
-  add_setshow_boolean_cmd ("mi-async", class_run,
-			   &mi_async_1, _("\
+  set_show_commands mi_async_cmds
+    = add_setshow_boolean_cmd ("mi-async", class_run,
+			       &mi_async_1, _("\
 Set whether MI asynchronous mode is enabled."), _("\
 Show whether MI asynchronous mode is enabled."), _("\
 Tells GDB whether MI should be in asynchronous mode."),
-			   set_mi_async_command,
-			   show_mi_async_command,
-			   &setlist,
-			   &showlist);
+			       set_mi_async_command,
+			       show_mi_async_command,
+			       &setlist, &showlist);
 
   /* Alias old "target-async" to "mi-async".  */
-  c = add_alias_cmd ("target-async", "mi-async", class_run, 0, &setlist);
-  deprecate_cmd (c, "set mi-async");
-  c = add_alias_cmd ("target-async", "mi-async", class_run, 0, &showlist);
-  deprecate_cmd (c, "show mi-async");
+  cmd_list_element *set_target_async_cmd
+    = add_alias_cmd ("target-async", mi_async_cmds.set, class_run, 0, &setlist);
+  deprecate_cmd (set_target_async_cmd, "set mi-async");
+
+  cmd_list_element *show_target_async_cmd
+    = add_alias_cmd ("target-async", mi_async_cmds.show, class_run, 0,
+		     &showlist);
+  deprecate_cmd (show_target_async_cmd, "show mi-async");
 }

@@ -15,9 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Need to be before general includes, to pick up e.g. _GNU_SOURCE.  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "defs.h"
 
 #include <signal.h>
 #include <stdlib.h>
@@ -25,11 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <string.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
+#include "sim/callback.h"
 
 #include "bfd.h"
+#include "environ.h"
 
-#ifdef HAVE_ENVIRON
-extern char **environ;
+#ifndef HAVE_STRSIGNAL
+/* While libiberty provides a fallback, it doesn't provide a prototype.  */
+extern const char *strsignal (int);
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -88,11 +90,12 @@ main (int argc, char **argv)
       abort ();
     }
 
-  /* We can't set the endianness in the callback structure until
-     sim_config is called, which happens in sim_open.  */
-  default_callback.target_endian
-    = (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-       ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
+  /* We can't set the endianness in the callback structure until sim_config is
+     called, which happens in sim_open.  If it's still the default, switch it.
+     Don't use CURRENT_TARGET_BYTE_ORDER as all its internal processing already
+     happened in sim_config.  */
+  if (default_callback.target_endian == BFD_ENDIAN_UNKNOWN)
+    default_callback.target_endian = current_target_byte_order;
 
   /* Was there a program to run?  */
   prog_argv = STATE_PROG_ARGV (sd);
@@ -128,11 +131,7 @@ main (int argc, char **argv)
     exit (1);
 
   /* Prepare the program for execution.  */
-#ifdef HAVE_ENVIRON
   sim_create_inferior (sd, prog_bfd, prog_argv, environ);
-#else
-  sim_create_inferior (sd, prog_bfd, prog_argv, NULL);
-#endif
 
   /* To accommodate relative file paths, chdir to sysroot now.  We
      mustn't do this until BFD has opened the program, else we wouldn't

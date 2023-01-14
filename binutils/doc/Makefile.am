@@ -52,7 +52,8 @@ info_TEXINFOS = binutils.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc \
+		   --no-split
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 		    -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
@@ -173,6 +174,11 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' \
 	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
+
+html-local: binutils/index.html
+binutils/index.html: binutils.texi $(binutils_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/binutils.texi
 
 # Maintenance
 

@@ -176,6 +176,7 @@ decode_micromips_operand (const char *p)
     case 'b': REG (5, 16, GP);
     case 'c': HINT (10, 16);
     case 'd': REG (5, 11, GP);
+    case 'g': REG (5, 16, CONTROL);
     case 'h': HINT (5, 11);
     case 'i': HINT (16, 0);
     case 'j': SINT (16, 0);
@@ -548,15 +549,15 @@ const struct mips_opcode micromips_opcodes[] =
 {"ceil.l.s",		"T,S",		0x5400133b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
 {"ceil.w.d",		"T,S",		0x54005b3b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
 {"ceil.w.s",		"T,S",		0x54001b3b, 0xfc00ffff,	WR_1|RD_2|FP_S,		0,		I1,		0,	0 },
-{"cfc1",		"t,G",		0x5400103b, 0xfc00ffff,	WR_1|RD_C1,		0,		I1,		0,	0 },
+{"cfc1",		"t,g",		0x5400103b, 0xfc00ffff,	WR_1|RD_C1,		0,		I1,		0,	0 },
 {"cfc1",		"t,S",		0x5400103b, 0xfc00ffff,	WR_1|RD_C1,		0,		I1,		0,	0 },
-{"cfc2",		"t,G",		0x0000cd3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I1,		0,	0 },
+{"cfc2",		"t,g",		0x0000cd3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I1,		0,	0 },
 {"clo",			"t,s",		0x00004b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I1,		0,	0 },
 {"clz",			"t,s",		0x00005b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I1,		0,	0 },
 {"cop2",		"C",		0x00000002, 0xfc000007,	CP,			0,		I1,		0,	0 },
-{"ctc1",		"t,G",		0x5400183b, 0xfc00ffff,	RD_1|WR_CC,		0,		I1,		0,	0 },
+{"ctc1",		"t,g",		0x5400183b, 0xfc00ffff,	RD_1|WR_CC,		0,		I1,		0,	0 },
 {"ctc1",		"t,S",		0x5400183b, 0xfc00ffff,	RD_1|WR_CC,		0,		I1,		0,	0 },
-{"ctc2",		"t,G",		0x0000dd3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I1,		0,	0 },
+{"ctc2",		"t,g",		0x0000dd3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I1,		0,	0 },
 {"cvt.d.l",		"T,S",		0x5400537b, 0xfc00ffff,	WR_1|RD_2|FP_D,		0,		I1,		0,	0 },
 {"cvt.d.s",		"T,S",		0x5400137b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
 {"cvt.d.w",		"T,S",		0x5400337b, 0xfc00ffff,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	0 },
@@ -633,8 +634,8 @@ const struct mips_opcode micromips_opcodes[] =
 {"dmtgc0",		"t,G,H",	0x580006fc, 0xfc00c7ff,	RD_1|WR_C0|WR_CC,	0,		0,		IVIRT64, 0 },
 {"dmfc1",		"t,S",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I3,		0,	0 },
 {"dmfc1",		"t,G",		0x5400243b, 0xfc00ffff,	WR_1|RD_2|FP_S|LC,	0,		I3,		0,	0 },
-{"dmtc1",		"t,G",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I3,		0,	0 },
 {"dmtc1",		"t,S",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I3,		0,	0 },
+{"dmtc1",		"t,G",		0x54002c3b, 0xfc00ffff,	RD_1|WR_2|FP_S|CM,	0,		I3,		0,	0 },
 {"dmfc2",		"t,G",		0x00006d3c, 0xfc00ffff,	WR_1|RD_C2,		0,		I3,		0,	0 },
 /*{"dmfc2",		"t,G,H",	0x58000283, 0xfc001fff,	WR_1|RD_C2,		0,		I3,		0,	0 },*/
 {"dmtc2",		"t,G",		0x00007d3c, 0xfc00ffff,	RD_1|WR_C2|WR_CC,	0,		I3,		0,	0 },

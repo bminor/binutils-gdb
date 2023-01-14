@@ -4796,18 +4796,14 @@ build_module_list (bfd *abfd)
       bfd_size_type size = bfd_section_size (dmt);
       unsigned char *ptr, *end;
 
-      ptr = (unsigned char *) bfd_alloc (abfd, size);
-      if (! ptr)
-	return NULL;
-
-      if (! bfd_get_section_contents (abfd, dmt, ptr, 0, size))
+      if (! bfd_malloc_and_get_section (abfd, dmt, &ptr))
 	return NULL;
 
       vms_debug2 ((2, "DMT\n"));
 
       end = ptr + size;
 
-      while (ptr < end)
+      while (end - ptr >= DBG_S_C_DMT_HEADER_SIZE)
 	{
 	  /* Each header declares a module with its start offset and size
 	     of debug info in the DST section, as well as the count of
@@ -4825,7 +4821,7 @@ build_module_list (bfd *abfd)
 	     As a consequence, the actual debug info in the DST section is
 	     shared and can be parsed multiple times; that doesn't seem to
 	     cause problems in practice.  */
-	  while (count-- > 0)
+	  while (count-- > 0 && end - ptr >= DBG_S_C_DMT_PSECT_SIZE)
 	    {
 	      int start = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_START);
 	      int length = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_LENGTH);
@@ -4842,6 +4838,7 @@ build_module_list (bfd *abfd)
 			   start, length));
 	    }
 	}
+      free (ptr);
     }
   else
     {
@@ -5443,7 +5440,7 @@ alpha_vms_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *section)
 {
   alpha_vms_slurp_relocs (abfd);
 
-  return (section->reloc_count + 1) * sizeof (arelent *);
+  return (section->reloc_count + 1L) * sizeof (arelent *);
 }
 
 /* Convert relocations from VMS (external) form into BFD internal

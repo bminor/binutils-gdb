@@ -24,6 +24,7 @@
 #include "basics.h"
 #include "device_table.h"
 #include "corefile.h"
+#include "symcat.h"
 
 typedef struct _core_mapping core_mapping;
 struct _core_mapping {

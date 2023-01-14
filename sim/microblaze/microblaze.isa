@@ -110,6 +110,7 @@ INSTRUCTION(addi,
 	    INST_TYPE_RD_RA_IMM,
             CARRY = C_calc(RA, IMM, 0);
 	    RD = RA + IMM;
+	    TRACE_REGISTER (cpu, "r%i = r%i + %i", rd, ra, IMM);
 	    C_wr(CARRY);
 	    PC += INST_SIZE)
 

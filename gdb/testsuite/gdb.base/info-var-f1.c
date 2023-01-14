@@ -15,6 +15,14 @@
 
 #include "info-var.h"
 
+/* Some array variables.  */
+int * const foo_1[3];
+const int *foo_2[3];
+int *foo_3[3];
+int const foo_4[3];
+const int foo_5[3];
+int foo_6[3];
+
 static int f1_var = -3;
 
 int

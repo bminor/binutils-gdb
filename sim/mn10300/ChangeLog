@@ -1,3 +1,197 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_RESERVED_BITS call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-signal.h.
+	* op_utils.c, sim-main.h: Likewise.
+	* mn10300_sim.h: Delete sim-signal.h include.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* interp.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300_sim.h (u642dw, dw2u64): Change INLINE to INLINE2.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete all to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300.igen: Change abort to sim_engine_abort.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_ENGINE_HALT_HOOK): Delete 0.
+
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Replace $(IGEN) with $(IGEN_RUN) and ../igen/igen
+	with $(IGEN).
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c [!SIGTRAP] (SIGTRAP): Define to 5.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-mn103cpu.c, dv-mn103int.c, dv-mn103iop.c, dv-mn103ser.c,
+	dv-mn103tim.c, op_utils.c: Include defs.h.
+	* interp.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* mn10300_sim.h: Update include path.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* op_utils.c: Delete sys/times.h include.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (INCLUDE): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (interp.o): Remove.
+	(idecode.o op_utils.o semantics.o): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_CHECK_FUNCS & AC_CHECK_HEADERS calls.
+	* op_utils.c: Delete utime.h include.
+	* config.in, configure: Regenerate.
+
 2021-04-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* Makefile.in: (tmp-igen) Only pass mn10300.igen to igen.

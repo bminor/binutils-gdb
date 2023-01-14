@@ -28,7 +28,7 @@ namespace gdb
 namespace observers
 {
 
-unsigned int observer_debug;
+bool observer_debug = false;
 
 #define DEFINE_OBSERVABLE(name) decltype (name) name (# name)
 
@@ -92,12 +92,12 @@ void _initialize_observer ();
 void
 _initialize_observer ()
 {
-  add_setshow_zuinteger_cmd ("observer", class_maintenance,
-			     &gdb::observers::observer_debug, _("\
+  add_setshow_boolean_cmd ("observer", class_maintenance,
+			   &gdb::observers::observer_debug, _("\
 Set observer debugging."), _("\
 Show observer debugging."), _("\
 When non-zero, observer debugging is enabled."),
-			     NULL,
-			     show_observer_debug,
-			     &setdebuglist, &showdebuglist);
+			   NULL,
+			   show_observer_debug,
+			   &setdebuglist, &showdebuglist);
 }

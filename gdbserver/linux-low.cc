@@ -60,13 +60,6 @@
 #endif
 #include "nat/linux-namespaces.h"
 
-#ifdef HAVE_PERSONALITY
-# include <sys/personality.h>
-# if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#  define ADDR_NO_RANDOMIZE 0x0040000
-# endif
-#endif
-
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -2608,7 +2601,7 @@ linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
 	  if (debug_threads)
 	    {
 	      debug_printf ("LLW: waitpid %ld received %s\n",
-			    (long) ret, status_to_str (*wstatp));
+			    (long) ret, status_to_str (*wstatp).c_str ());
 	    }
 
 	  /* Filter all events.  IOW, leave all events pending.  We'll
@@ -6231,11 +6224,7 @@ linux_process_target::core_of_thread (ptid_t ptid)
 bool
 linux_process_target::supports_disable_randomization ()
 {
-#ifdef HAVE_PERSONALITY
   return true;
-#else
-  return false;
-#endif
 }
 
 bool

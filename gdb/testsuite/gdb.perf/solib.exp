@@ -84,6 +84,6 @@ PerfTest::assemble {
 } {
     global SOLIB_COUNT
 
-    gdb_test_no_output "python SolibLoadUnload\($SOLIB_COUNT\).run()"
+    gdb_test_python_run "SolibLoadUnload\($SOLIB_COUNT\)"
     return 0
 }

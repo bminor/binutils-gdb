@@ -352,7 +352,7 @@
 #define EM_ARC_COMPACT3	255	/* Synopsys ARCv2.3 32-bit */
 #define EM_KVX		256	/* Kalray VLIW core of the MPPA processor family */
 #define EM_65816	257	/* WDC 65816/65C816 */
-#define EM_LOONGARCH	258	/* Loongson Loongarch */
+#define EM_LOONGARCH	258	/* LoongArch */
 #define EM_KF32		259	/* ChipON KungFu32 */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
@@ -685,6 +685,12 @@
 /* The range 0xff000000 to 0xffffffff is set aside for notes that don't
    originate from any particular operating system.  */
 #define NT_GDB_TDESC	0xff000000	/* Contains copy of GDB's target description XML.  */
+#define NT_MEMTAG	0xff000001	/* Contains a copy of the memory tags.  */
+
+/* NT_MEMTAG record types.  */
+
+/* ARM-specific NT_MEMTAG types.  */
+#define NT_MEMTAG_TYPE_AARCH_MTE  0x400	/* MTE memory tags for AArch64.  */
 
 /* Note segments for core files on dir-style procfs systems.  */
 
@@ -742,6 +748,7 @@
 
 #define NT_VERSION	1		/* Contains a version string.  */
 #define NT_ARCH		2		/* Contains an architecture string.  */
+#define NT_GO_BUILDID	4		/* Contains GO buildid data.  */
 
 /* Values for notes in non-core files using name "GNU".  */
 
@@ -774,6 +781,23 @@
 /* Values used in GNU .note.gnu.property notes (NT_GNU_PROPERTY_TYPE_0).  */
 #define GNU_PROPERTY_STACK_SIZE			1
 #define GNU_PROPERTY_NO_COPY_ON_PROTECTED	2
+
+/* A 4-byte unsigned integer property: A bit is set if it is set in all
+   relocatable inputs.  */
+#define GNU_PROPERTY_UINT32_AND_LO	0xb0000000
+#define GNU_PROPERTY_UINT32_AND_HI	0xb0007fff
+
+/* A 4-byte unsigned integer property: A bit is set if it is set in any
+   relocatable inputs.  */
+#define GNU_PROPERTY_UINT32_OR_LO	0xb0008000
+#define GNU_PROPERTY_UINT32_OR_HI	0xb000ffff
+
+/* The needed properties by the object file.  */
+#define GNU_PROPERTY_1_NEEDED		GNU_PROPERTY_UINT32_OR_LO
+
+/* Set if the object file requires canonical function pointers and
+   cannot be used with copy relocation.  */
+#define GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS	(1U << 0)
 
 /* Processor-specific semantics, lo */
 #define GNU_PROPERTY_LOPROC  0xc0000000

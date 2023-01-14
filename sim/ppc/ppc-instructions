@@ -331,7 +331,7 @@ void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
 	  }
 	}
 	if (busy->vscr_busy)
-	  TRACE(trace_model, ("VSCR Register is now available.\n", spr_name(busy->spr_busy)));
+	  TRACE(trace_model, ("VSCR Register %s is now available.\n", spr_name(busy->spr_busy)));
 
 # Trace making registers busy
 void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_mask, unsigned32 fp_mask, unsigned32 cr_mask
@@ -1537,7 +1537,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
@@ -1579,7 +1579,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
@@ -1610,7 +1610,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
@@ -3315,7 +3315,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	unsigned64 mask;
 	int n = MASKED(*rB, 59, 63);
 	signed32 source = (signed32)*rS; /* signed to keep sign bit */
-	signed32 shifted = source >> n;
 	int S = (MASKED(*rS,32,32) != 0);
 	signed64 r = ((unsigned64) source);
 	r = ((unsigned64) source) << 32 | (unsigned32) source;
@@ -3324,7 +3323,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 		mask = (unsigned64) MASK64(n+32,63);
 	else
 		mask = (unsigned64) 0;
-	*rA = (signed_word) (r & mask | ((signed64) -1*S) & ~mask); /* if 64bit will sign extend */
+	*rA = (signed_word) ((r & mask) | (((signed64) -1*S) & ~mask)); /* if 64bit will sign extend */
 	if (S && (MASKED(r & ~mask,32,63)!=0))
 	  XER |= xer_carry;
 	else

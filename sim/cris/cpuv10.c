@@ -490,11 +490,3 @@ crisv10f_h_prefixreg_pre_v32_set (SIM_CPU *current_cpu, SI newval)
 {
   CPU (h_prefixreg_pre_v32) = newval;
 }
-
-/* Record trace results for INSN.  */
-
-void
-crisv10f_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

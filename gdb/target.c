@@ -52,6 +52,7 @@
 #include <unordered_map>
 #include "target-connection.h"
 #include "valprint.h"
+#include "cli/cli-decode.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -837,7 +838,7 @@ target_log_command (const char *p)
 static void
 open_target (const char *args, int from_tty, struct cmd_list_element *command)
 {
-  auto *ti = static_cast<target_info *> (get_cmd_context (command));
+  auto *ti = static_cast<target_info *> (command->context ());
   target_open_ftype *func = target_factories[ti];
 
   if (targetdebug)
@@ -872,10 +873,10 @@ The first argument is the type or protocol of the target machine.\n\
 Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
-			  &targetlist, "target ", 0, &cmdlist);
+			  &targetlist, 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
-  set_cmd_context (c, (void *) &t);
-  set_cmd_sfunc (c, open_target);
+  c->set_context ((void *) &t);
+  c->func = open_target;
   if (completer != NULL)
     set_cmd_completer (c, completer);
 }
@@ -891,8 +892,8 @@ add_deprecated_target_alias (const target_info &tinfo, const char *alias)
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
   c = add_cmd (alias, no_class, tinfo.doc, &targetlist);
-  set_cmd_sfunc (c, open_target);
-  set_cmd_context (c, (void *) &tinfo);
+  c->func = open_target;
+  c->set_context ((void *) &tinfo);
   alt = xstrprintf ("target %s", tinfo.shortname);
   deprecate_cmd (c, alt);
 }
@@ -1214,7 +1215,7 @@ target_stack::unpush (target_ops *t)
   m_stack[stratum] = NULL;
 
   if (m_top == stratum)
-    m_top = t->beneath ()->stratum ();
+    m_top = this->find_beneath (t)->stratum ();
 
   /* Finally close the target, if there are no inferiors
      referencing this target still.  Note we do this after unchaining,
@@ -2700,8 +2701,9 @@ target_program_signals (gdb::array_view<const unsigned char> program_signals)
 }
 
 static void
-default_follow_fork (struct target_ops *self, bool follow_child,
-		     bool detach_fork)
+default_follow_fork (struct target_ops *self, inferior *child_inf,
+		     ptid_t child_ptid, target_waitkind fork_kind,
+		     bool follow_child, bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
@@ -2711,19 +2713,34 @@ default_follow_fork (struct target_ops *self, bool follow_child,
 /* See target.h.  */
 
 void
-target_follow_fork (bool follow_child, bool detach_fork)
+target_follow_fork (inferior *child_inf, ptid_t child_ptid,
+		    target_waitkind fork_kind, bool follow_child,
+		    bool detach_fork)
 {
   target_ops *target = current_inferior ()->top_target ();
 
-  return target->follow_fork (follow_child, detach_fork);
+  /* Check consistency between CHILD_INF, CHILD_PTID, FOLLOW_CHILD and
+     DETACH_FORK.  */
+  if (child_inf != nullptr)
+    {
+      gdb_assert (follow_child || !detach_fork);
+      gdb_assert (child_inf->pid == child_ptid.pid ());
+    }
+  else
+    gdb_assert (!follow_child && detach_fork);
+
+  return target->follow_fork (child_inf, child_ptid, fork_kind, follow_child,
+			      detach_fork);
 }
 
-/* Target wrapper for follow exec hook.  */
+/* See target.h.  */
 
 void
-target_follow_exec (struct inferior *inf, const char *execd_pathname)
+target_follow_exec (inferior *follow_inf, ptid_t ptid,
+		    const char *execd_pathname)
 {
-  current_inferior ()->top_target ()->follow_exec (inf, execd_pathname);
+  current_inferior ()->top_target ()->follow_exec (follow_inf, ptid,
+						   execd_pathname);
 }
 
 static void
@@ -3118,13 +3135,9 @@ static std::vector<fileio_fh_t> fileio_fhandles;
    list each time a new file is opened.  */
 static int lowest_closed_fd;
 
-/* Invalidate the target associated with open handles that were open
-   on target TARG, since we're about to close (and maybe destroy) the
-   target.  The handles remain open from the client's perspective, but
-   trying to do anything with them other than closing them will fail
-   with EIO.  */
+/* See target.h.  */
 
-static void
+void
 fileio_handles_invalidate_target (target_ops *targ)
 {
   for (fileio_fh_t &fh : fileio_fhandles)
@@ -3734,7 +3747,8 @@ debug_target::info () const
 void
 target_close (struct target_ops *targ)
 {
-  gdb_assert (!current_inferior ()->target_is_pushed (targ));
+  for (inferior *inf : all_inferiors ())
+    gdb_assert (!inf->target_is_pushed (targ));
 
   fileio_handles_invalidate_target (targ);
 

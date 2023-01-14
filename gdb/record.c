@@ -785,24 +785,31 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 			    set_record_call_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 
-  c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
+  cmd_list_element *record_cmd
+    = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Start recording."),
-		      &record_cmdlist, "record ", 0, &cmdlist);
-  set_cmd_completer (c, filename_completer);
+		      &record_cmdlist, 0, &cmdlist);
+  set_cmd_completer (record_cmd, filename_completer);
 
-  add_com_alias ("rec", "record", class_obscure, 1);
-  add_basic_prefix_cmd ("record", class_support,
-			_("Set record options."), &set_record_cmdlist,
-			"set record ", 0, &setlist);
-  add_alias_cmd ("rec", "record", class_obscure, 1, &setlist);
-  add_show_prefix_cmd ("record", class_support,
-		       _("Show record options."), &show_record_cmdlist,
-		       "show record ", 0, &showlist);
-  add_alias_cmd ("rec", "record", class_obscure, 1, &showlist);
-  add_prefix_cmd ("record", class_support, info_record_command,
-		  _("Info record options."), &info_record_cmdlist,
-		  "info record ", 0, &infolist);
-  add_alias_cmd ("rec", "record", class_obscure, 1, &infolist);
+  add_com_alias ("rec", record_cmd, class_obscure, 1);
+
+  cmd_list_element *set_record_cmd
+    = add_basic_prefix_cmd ("record", class_support,
+			    _("Set record options."), &set_record_cmdlist,
+			    0, &setlist);
+  add_alias_cmd ("rec", set_record_cmd, class_obscure, 1, &setlist);
+
+  cmd_list_element *show_record_cmd
+    = add_show_prefix_cmd ("record", class_support,
+			   _("Show record options."), &show_record_cmdlist,
+			   0, &showlist);
+  add_alias_cmd ("rec", show_record_cmd, class_obscure, 1, &showlist);
+
+  cmd_list_element *info_record_cmd
+    = add_prefix_cmd ("record", class_support, info_record_command,
+		      _("Info record options."), &info_record_cmdlist,
+		      0, &infolist);
+  add_alias_cmd ("rec", info_record_cmd, class_obscure, 1, &infolist);
 
   c = add_cmd ("save", class_obscure, cmd_record_save,
 	       _("Save the execution log to a file.\n\
@@ -811,26 +818,31 @@ Default filename is 'gdb_record.PROCESS_ID'."),
 	       &record_cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_cmd ("delete", class_obscure, cmd_record_delete,
-	   _("Delete the rest of execution log and start recording it anew."),
-	   &record_cmdlist);
-  add_alias_cmd ("d", "delete", class_obscure, 1, &record_cmdlist);
-  add_alias_cmd ("del", "delete", class_obscure, 1, &record_cmdlist);
+  cmd_list_element *record_delete_cmd
+    =  add_cmd ("delete", class_obscure, cmd_record_delete,
+		_("Delete the rest of execution log and start recording it \
+anew."),
+	    &record_cmdlist);
+  add_alias_cmd ("d", record_delete_cmd, class_obscure, 1, &record_cmdlist);
+  add_alias_cmd ("del", record_delete_cmd, class_obscure, 1, &record_cmdlist);
 
-  add_cmd ("stop", class_obscure, cmd_record_stop,
-	   _("Stop the record/replay target."),
-	   &record_cmdlist);
-  add_alias_cmd ("s", "stop", class_obscure, 1, &record_cmdlist);
+  cmd_list_element *record_stop_cmd
+    = add_cmd ("stop", class_obscure, cmd_record_stop,
+	       _("Stop the record/replay target."),
+	       &record_cmdlist);
+  add_alias_cmd ("s", record_stop_cmd, class_obscure, 1, &record_cmdlist);
 
   add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _("\
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
-		  &record_goto_cmdlist, "record goto ", 1, &record_cmdlist);
+		  &record_goto_cmdlist, 1, &record_cmdlist);
 
-  add_cmd ("begin", class_obscure, cmd_record_goto_begin,
-	   _("Go to the beginning of the execution log."),
-	   &record_goto_cmdlist);
-  add_alias_cmd ("start", "begin", class_obscure, 1, &record_goto_cmdlist);
+  cmd_list_element *record_goto_begin_cmd
+    = add_cmd ("begin", class_obscure, cmd_record_goto_begin,
+	       _("Go to the beginning of the execution log."),
+	       &record_goto_cmdlist);
+  add_alias_cmd ("start", record_goto_begin_cmd, class_obscure, 1,
+		 &record_goto_cmdlist);
 
   add_cmd ("end", class_obscure, cmd_record_goto_end,
 	   _("Go to the end of the execution log."),

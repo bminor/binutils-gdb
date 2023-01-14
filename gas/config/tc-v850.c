@@ -3447,8 +3447,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	    value -= S_GET_VALUE (fixP->fx_subsy);
 	  else
 	    /* We don't actually support subtracting a symbol.  */
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("expression too complex"));
+	    as_bad_subtract (fixP);
 	}
       fixP->fx_addnumber = value;
     }

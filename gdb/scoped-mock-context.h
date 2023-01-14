@@ -44,16 +44,14 @@ struct scoped_mock_context
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-  scoped_restore_tmpl<thread_info *> restore_thread_list
-    {&mock_inferior.thread_list, &mock_thread};
-
-  /* Add the mock inferior to the inferior list so that look ups by
-     target+ptid can find it.  */
-  scoped_restore_tmpl<inferior *> restore_inferior_list
-    {&inferior_list, &mock_inferior};
-
   explicit scoped_mock_context (gdbarch *gdbarch)
   {
+    /* Add the mock inferior to the inferior list so that look ups by
+       target+ptid can find it.  */
+    inferior_list.push_back (mock_inferior);
+
+    mock_inferior.thread_list.push_back (mock_thread);
+    mock_inferior.ptid_thread_map[mock_ptid] = &mock_thread;
     mock_inferior.gdbarch = gdbarch;
     mock_inferior.aspace = mock_pspace.aspace;
     mock_inferior.pspace = &mock_pspace;
@@ -72,6 +70,7 @@ struct scoped_mock_context
 
   ~scoped_mock_context ()
   {
+    inferior_list.erase (inferior_list.iterator_to (mock_inferior));
     pop_all_targets_at_and_above (process_stratum);
   }
 };

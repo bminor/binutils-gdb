@@ -81,18 +81,30 @@ gdb_test "info breakpoint \$bpnum" \
     "stop only in thread $thread_num" \
     "info breakpoint shows watchpoint is thread-specific"
 
+# Uncomment to see additional information.
+#gdb_test "set debug infrun 1"
+
 for {set i 1} {$i <= 5} {incr i} {
     set watchpoint "Watchpoint triggered iteration $i"
     set check "Check thread that triggered iteration $i"
 
     set test $watchpoint
+    set seen_watchpoint 0
     gdb_test_multiple "continue" $test {
-	-re "infrun:" {
-	    # Avoid timeouts when debugging GDB.
+	-re "Hardware access \\(read/write\\) watchpoint .*: shared_var" {
+	    set seen_watchpoint 1
 	    exp_continue
 	}
-	-re "Hardware access \\(read/write\\) watchpoint .*: shared_var.*$gdb_prompt $" {
-	    pass $test
+	-re "$gdb_prompt " {
+	    if { $seen_watchpoint } {
+		pass $test
+	    } else {
+		fail $test
+	    }
+	}
+	-re "\\\[infrun\\\] " {
+	    # Avoid timeouts when debugging GDB.
+	    exp_continue
 	}
     }
     gdb_test "thread" ".*Current thread is $thread_num .*" $check

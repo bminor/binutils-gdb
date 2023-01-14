@@ -40,6 +40,9 @@ static int
 count_decodable_bits (const CGEN_INSN *insn)
 {
   unsigned mask = CGEN_INSN_BASE_MASK (insn);
+#if GCC_VERSION >= 3004
+  return __builtin_popcount (mask);
+#else
   int bits = 0;
   unsigned m;
 
@@ -49,6 +52,7 @@ count_decodable_bits (const CGEN_INSN *insn)
 	++bits;
     }
   return bits;
+#endif
 }
 
 /* Add an instruction to the hash chain.  */

@@ -1922,6 +1922,7 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
    accepts the frame.  */
 
 static const struct frame_unwind arc_frame_unwind = {
+  "arc prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   arc_frame_this_id,
@@ -1937,6 +1938,7 @@ static const struct frame_unwind arc_frame_unwind = {
    context.  */
 
 static const struct frame_unwind arc_sigtramp_frame_unwind = {
+  "arc sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   arc_sigtramp_frame_this_id,
@@ -2434,10 +2436,12 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      arc_disassembler_options = NULL;
 	      break;
 	    }
-	  set_gdbarch_disassembler_options (gdbarch,
-					    &arc_disassembler_options);
 	}
     }
+
+  set_gdbarch_disassembler_options (gdbarch, &arc_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_arc ());
 
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
@@ -2495,7 +2499,7 @@ _initialize_arc_tdep ()
   add_show_prefix_cmd ("arc", class_maintenance,
 		       _("ARC-specific maintenance commands for printing GDB "
 			 "internal state."),
-		       &maintenance_print_arc_list, "maintenance print arc ",
+		       &maintenance_print_arc_list,
 		       0, &maintenanceprintlist);
 
   add_cmd ("arc-instruction", class_maintenance,

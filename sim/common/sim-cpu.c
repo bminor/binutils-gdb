@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 
 #include "sim-main.h"
@@ -45,7 +48,7 @@ sim_cpu_alloc (SIM_DESC sd)
   int extra_bytes = 0;
 
 #ifdef CGEN_ARCH
-  extra_bytes += cgen_cpu_max_extra_bytes ();
+  extra_bytes += cgen_cpu_max_extra_bytes (sd);
 #endif
 
   return zalloc (sizeof (sim_cpu) + extra_bytes);

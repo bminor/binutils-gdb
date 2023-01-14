@@ -177,11 +177,18 @@ reloc_processing (arelent *relent,
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
 
-  if (reloc->r_symndx > 0)
+  if (reloc->r_symndx == -1)
+    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+  else if (reloc->r_symndx >= 0 && reloc->r_symndx < obj_conv_table_size (abfd))
     relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];
   else
-    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: warning: illegal symbol index %ld in relocs"),
+	 abfd, reloc->r_symndx);
+      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+    }
   relent->addend = reloc->r_offset;
   relent->address -= section->vma;
 }

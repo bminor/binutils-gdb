@@ -60,6 +60,7 @@ SIM_RC sim_analyze_program (SIM_DESC sd, const char *prog_name,
    write the program sections at LMA interpreted as a virtual address.
    This is still accommodated for backward compatibility reasons. */
 
+typedef struct host_callback_struct host_callback;
 typedef int sim_write_fn (SIM_DESC sd, SIM_ADDR mem,
 			  const unsigned char *buf, int length);
 struct bfd *sim_load_file (SIM_DESC sd, const char *myname,
@@ -68,14 +69,8 @@ struct bfd *sim_load_file (SIM_DESC sd, const char *myname,
 			   int lma_p, sim_write_fn do_load);
 
 /* Internal version of sim_do_command, include formatting */
-void sim_do_commandf (SIM_DESC sd, const char *fmt, ...);
-
-
-/* These are defined in callback.c as cover functions to the vprintf
-   callbacks.  */
-
-void sim_cb_printf (host_callback *, const char *, ...);
-void sim_cb_eprintf (host_callback *, const char *, ...);
+void sim_do_commandf (SIM_DESC sd, const char *fmt, ...)
+    ATTRIBUTE_PRINTF (2, 3);
 
 
 /* sim-basics.h defines a number of enumerations, convert each of them

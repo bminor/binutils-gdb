@@ -133,7 +133,7 @@ public:
 
   void post_attach (int) override;
 
-  void follow_fork (bool, bool) override;
+  void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
 
   std::vector<static_tracepoint_marker>
     static_tracepoint_markers_by_strid (const char *id) override;
@@ -293,9 +293,6 @@ extern enum tribool have_ptrace_getregset;
   for ((LP) = lwp_list;							\
        (LP) != NULL;							\
        (LP) = (LP)->next)
-
-/* Attempt to initialize libthread_db.  */
-void check_for_thread_db (void);
 
 /* Called from the LWP layer to inform the thread_db layer that PARENT
    spawned CHILD.  Both LWPs are currently stopped.  This function

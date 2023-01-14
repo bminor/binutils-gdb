@@ -619,17 +619,22 @@ del_objfile_symbols (struct objfile *objfile, void *datum)
     }
 }
 
-int
-gdbpy_initialize_symbols (void)
+void _initialize_py_symbol ();
+void
+_initialize_py_symbol ()
 {
-  if (PyType_Ready (&symbol_object_type) < 0)
-    return -1;
-
   /* Register an objfile "free" callback so we can properly
      invalidate symbol when an object file that is about to be
      deleted.  */
   sympy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, del_objfile_symbols);
+}
+
+int
+gdbpy_initialize_symbols (void)
+{
+  if (PyType_Ready (&symbol_object_type) < 0)
+    return -1;
 
   if (PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNDEF", LOC_UNDEF) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST",
@@ -668,6 +673,8 @@ gdbpy_initialize_symbols (void)
 				  VAR_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_STRUCT_DOMAIN",
 				  STRUCT_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LABEL_DOMAIN",
+				  LABEL_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_MODULE_DOMAIN",
 				  MODULE_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_COMMON_BLOCK_DOMAIN",

@@ -639,6 +639,9 @@ tui_redisplay_readline (void)
 static void
 tui_prep_terminal (int notused1)
 {
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (ALL_MOUSE_EVENTS, NULL);
+#endif
 }
 
 /* Readline callback to restore the terminal.  It is called once each
@@ -646,6 +649,9 @@ tui_prep_terminal (int notused1)
 static void
 tui_deprep_terminal (void)
 {
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (0, NULL);
+#endif
 }
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
@@ -940,16 +946,48 @@ tui_initialize_io (void)
 #endif
 }
 
+/* Dispatch the correct tui function based upon the mouse event.  */
+
+#ifdef NCURSES_MOUSE_VERSION
+
+static void
+tui_dispatch_mouse_event ()
+{
+  MEVENT mev;
+  if (getmouse (&mev) != OK)
+    return;
+
+  for (tui_win_info *wi : all_tui_windows ())
+    if (mev.x > wi->x && mev.x < wi->x + wi->width - 1
+	&& mev.y > wi->y && mev.y < wi->y + wi->height - 1)
+      {
+	if ((mev.bstate & BUTTON1_CLICKED) != 0
+	    || (mev.bstate & BUTTON2_CLICKED) != 0
+	    || (mev.bstate & BUTTON3_CLICKED) != 0)
+	  {
+	    int button = (mev.bstate & BUTTON1_CLICKED) != 0 ? 1
+	      :         ((mev.bstate & BUTTON2_CLICKED) != 0 ? 2
+			 : 3);
+	    wi->click (mev.x - wi->x - 1, mev.y - wi->y - 1, button);
+	  }
+#ifdef BUTTON5_PRESSED
+	else if ((mev.bstate & BUTTON4_PRESSED) != 0)
+	  wi->backward_scroll (3);
+	else if ((mev.bstate & BUTTON5_PRESSED) != 0)
+	  wi->forward_scroll (3);
+#endif
+	break;
+      }
+}
+
+#endif
+
 /* Dispatch the correct tui function based upon the control
    character.  */
 static unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
   struct tui_win_info *win_info = tui_win_with_focus ();
-
-  /* Handle the CTRL-L refresh for each window.  */
-  if (ch == '\f')
-    tui_refresh_all_win ();
 
   /* If no window has the focus, or if the focus window can't scroll,
      just pass the character through.  */
@@ -977,8 +1015,6 @@ tui_dispatch_ctrl_char (unsigned int ch)
       break;
     case KEY_LEFT:
       win_info->right_scroll (1);
-      break;
-    case '\f':
       break;
     default:
       /* We didn't recognize the character as a control character, so pass it
@@ -1030,6 +1066,24 @@ tui_inject_newline_into_command_window ()
     }
 }
 
+/* If we're passing an escape sequence to readline, this points to a
+   string holding the remaining characters of the sequence to pass.
+   We advance the pointer one character at a time until '\0' is
+   reached.  */
+static const char *cur_seq = nullptr;
+
+/* Set CUR_SEQ to point at the current sequence to pass to readline,
+   setup to call the input handler again so we complete the sequence
+   shortly, and return the first character to start the sequence.  */
+
+static int
+start_sequence (const char *seq)
+{
+  call_stdin_event_handler_again_p = 1;
+  cur_seq = seq + 1;
+  return seq[0];
+}
+
 /* Main worker for tui_getc.  Get a character from the command window.
    This is called from the readline package, but wrapped in a
    try/catch by tui_getc.  */
@@ -1047,11 +1101,115 @@ tui_getc_1 (FILE *fp)
   tui_readline_output (0, 0);
 #endif
 
-  ch = gdb_wgetch (w);
+  /* We enable keypad mode so that curses's wgetch processes mouse
+     escape sequences.  In keypad mode, wgetch also processes the
+     escape sequences for keys such as up/down etc. and returns KEY_UP
+     / KEY_DOWN etc.  When we have the focus on the command window
+     though, we want to pass the raw up/down etc. escape codes to
+     readline so readline understands them.  */
+  if (cur_seq != nullptr)
+    {
+      ch = *cur_seq++;
+
+      /* If we've reached the end of the string, we're done with the
+	 sequence.  Otherwise, setup to get back here again for
+	 another character.  */
+      if (*cur_seq == '\0')
+	cur_seq = nullptr;
+      else
+	call_stdin_event_handler_again_p = 1;
+      return ch;
+    }
+  else
+    ch = gdb_wgetch (w);
 
   /* Handle prev/next/up/down here.  */
   ch = tui_dispatch_ctrl_char (ch);
-  
+
+#ifdef NCURSES_MOUSE_VERSION
+  if (ch == KEY_MOUSE)
+    {
+      tui_dispatch_mouse_event ();
+      return 0;
+    }
+#endif
+
+  /* Translate curses keys back to escape sequences so that readline
+     can understand them.  We do this irrespective of which window has
+     the focus.  If e.g., we're focused on a non-command window, then
+     the up/down keys will already have been filtered by
+     tui_dispatch_ctrl_char.  Keys that haven't been intercepted will
+     be passed down to readline.  */
+  if (current_ui->command_editing)
+    {
+      /* For the standard arrow keys + home/end, hardcode sequences
+	 readline understands.  See bind_arrow_keys_internal in
+	 readline/readline.c.  */
+      switch (ch)
+	{
+	case KEY_UP:
+	  return start_sequence ("\033[A");
+	case KEY_DOWN:
+	  return start_sequence ("\033[B");
+	case KEY_RIGHT:
+	  return start_sequence ("\033[C");
+	case KEY_LEFT:
+	  return start_sequence ("\033[D");
+	case KEY_HOME:
+	  return start_sequence ("\033[H");
+	case KEY_END:
+	  return start_sequence ("\033[F");
+
+	/* del and ins are unfortunately not hardcoded in readline for
+	   all systems.  */
+
+	case KEY_DC: /* del */
+#ifdef __MINGW32__
+	  return start_sequence ("\340S");
+#else
+	  return start_sequence ("\033[3~");
+#endif
+
+	case KEY_IC: /* ins */
+#if defined __MINGW32__
+	  return start_sequence ("\340R");
+#else
+	  return start_sequence ("\033[2~");
+#endif
+	}
+
+      /* Keycodes above KEY_MAX are not garanteed to be stable.
+	 Compare keyname instead.  */
+      if (ch >= KEY_MAX)
+	{
+	  auto name = gdb::string_view (keyname (ch));
+
+	  /* The following sequences are hardcoded in readline as
+	     well.  */
+
+	  /* ctrl-arrow keys */
+	  if (name == "kLFT5") /* ctrl-left */
+	    return start_sequence ("\033[1;5D");
+	  else if (name == "kRIT5") /* ctrl-right */
+	    return start_sequence ("\033[1;5C");
+	  else if (name == "kDC5") /* ctrl-del */
+	    return start_sequence ("\033[3;5~");
+
+	  /* alt-arrow keys */
+	  else if (name == "kLFT3") /* alt-left */
+	    return start_sequence ("\033[1;3D");
+	  else if (name == "kRIT3") /* alt-right */
+	    return start_sequence ("\033[1;3C");
+	}
+    }
+
+  /* Handle the CTRL-L refresh for each window.  */
+  if (ch == '\f')
+    {
+      tui_refresh_all_win ();
+      return ch;
+    }
+
   if (ch == KEY_BACKSPACE)
     return '\b';
 
@@ -1079,6 +1237,13 @@ tui_getc_1 (FILE *fp)
 	  ungetch (ch_pending);
 	  call_stdin_event_handler_again_p = 1;
 	}
+    }
+
+  if (ch > 0xff)
+    {
+      /* Readline doesn't understand non-8-bit curses keys, filter
+	 them out.  */
+      return 0;
     }
 
   return ch;

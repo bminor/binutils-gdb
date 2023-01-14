@@ -693,12 +693,17 @@ objfile_to_objfile_object (struct objfile *objfile)
   return gdbpy_ref<>::new_reference (result);
 }
 
-int
-gdbpy_initialize_objfile (void)
+void _initialize_py_objfile ();
+void
+_initialize_py_objfile ()
 {
   objfpy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, py_free_objfile);
+}
 
+int
+gdbpy_initialize_objfile (void)
+{
   if (PyType_Ready (&objfile_object_type) < 0)
     return -1;
 

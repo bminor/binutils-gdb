@@ -1916,6 +1916,7 @@ csky_frame_prev_register (struct frame_info *this_frame,
    unwinder.  */
 
 static const struct frame_unwind csky_unwind_cache = {
+  "cski prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   csky_frame_this_id,
@@ -1999,6 +2000,7 @@ csky_stub_prev_register (struct frame_info *this_frame,
 }
 
 static frame_unwind csky_stub_unwind = {
+  "csky stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   csky_stub_this_id,

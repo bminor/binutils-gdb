@@ -90,6 +90,11 @@
 #define ARM_EXT2_CDE7	     0x40000000 /* Using CDE coproc 7.	   */
 #define ARM_EXT2_V8R	     0x80000000	/* Arm V8R.	               */
 
+#define ARM_EXT3_PACBTI	     0x00000001 /* Arm v8-M Mainline Pointer
+					   Authentication and Branch
+					   Target Identification
+					   Extension.  */
+
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
 #define ARM_CEXT_MAVERICK    0x00000002	/* Use Cirrus/DSP coprocessor.	   */
@@ -196,6 +201,8 @@
 #define ARM_AEXT_V8_1M_MAIN	 ARM_AEXT_V8M_MAIN
 #define ARM_AEXT2_V8_1M_MAIN	(ARM_AEXT2_V8M_MAIN | ARM_EXT2_V8_1M_MAIN     \
 						    | ARM_EXT2_FP16_INST)
+
+#define ARM_AEXT3_V8_1M_MAIN_PACBTI	(ARM_AEXT2_V8M_MAIN | ARM_EXT3_PACBTI)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
@@ -383,7 +390,7 @@
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
 #define FPU_NONE	ARM_FEATURE_LOW (0, 0)
 #define ARM_ANY		ARM_FEATURE (-1, -1 & ~ (ARM_EXT2_MVE | ARM_EXT2_MVE_FP), 0)	/* Any basic core.  */
-#define FPU_ANY		ARM_FEATURE_COPROC (-1) /* Any FPU.  */
+#define FPU_ANY		ARM_FEATURE_COPROC (-1 & ~(ARM_CEXT_XSCALE | ARM_CEXT_IWMMXT | ARM_CEXT_IWMMXT2)) /* Any FPU.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
    ISA is Thumb-2.  */
@@ -427,7 +434,7 @@
    and use macro ARM_FEATURE to initialize the feature set variable.  */
 typedef struct
 {
-  unsigned long core[2];
+  unsigned long core[3];
   unsigned long coproc;
 } arm_feature_set;
 
@@ -435,23 +442,27 @@ typedef struct
 #define ARM_CPU_HAS_FEATURE(CPU,FEAT) \
   (((CPU).core[0] & (FEAT).core[0]) != 0 \
    || ((CPU).core[1] & (FEAT).core[1]) != 0 \
+   || ((CPU).core[2] & (FEAT).core[2]) != 0 \
    || ((CPU).coproc & (FEAT).coproc) != 0)
 
 /* Tests whether the features of A are a subset of B.  */
 #define ARM_FSET_CPU_SUBSET(A,B) \
   (((A).core[0] & (B).core[0]) == (A).core[0] \
    && ((A).core[1] & (B).core[1]) == (A).core[1] \
+   && ((A).core[2] & (B).core[2]) == (A).core[2] \
    && ((A).coproc & (B).coproc) == (A).coproc)
 
 #define ARM_CPU_IS_ANY(CPU) \
   ((CPU).core[0] == ((arm_feature_set)ARM_ANY).core[0] \
-   && (CPU).core[1] == ((arm_feature_set)ARM_ANY).core[1])
+   && (CPU).core[1] == ((arm_feature_set)ARM_ANY).core[1] \
+   && (CPU).core[2] == ((arm_feature_set)ARM_ANY).core[2])
 
 #define ARM_MERGE_FEATURE_SETS(TARG,F1,F2)		\
   do							\
     {							\
       (TARG).core[0] = (F1).core[0] | (F2).core[0];	\
       (TARG).core[1] = (F1).core[1] | (F2).core[1];	\
+      (TARG).core[2] = (F1).core[2] | (F2).core[2];	\
       (TARG).coproc = (F1).coproc | (F2).coproc;	\
     }							\
   while (0)
@@ -461,6 +472,7 @@ typedef struct
     {							\
       (TARG).core[0] = (F1).core[0] &~ (F2).core[0];	\
       (TARG).core[1] = (F1).core[1] &~ (F2).core[1];	\
+      (TARG).core[2] = (F1).core[2] &~ (F2).core[2];	\
       (TARG).coproc = (F1).coproc &~ (F2).coproc;	\
     }							\
   while (0)
@@ -468,17 +480,24 @@ typedef struct
 #define ARM_FEATURE_EQUAL(T1,T2)		\
   (   (T1).core[0] == (T2).core[0]		\
    && (T1).core[1] == (T2).core[1]		\
+   && (T1).core[2] == (T2).core[2]		\
    && (T1).coproc  == (T2).coproc)
 
 #define ARM_FEATURE_ZERO(T)			\
-  ((T).core[0] == 0 && (T).core[1] == 0 && (T).coproc == 0)
+  ((T).core[0] == 0				\
+   && (T).core[1] == 0				\
+   && (T).core[2] == 0				\
+   && (T).coproc == 0)
 
 #define ARM_FEATURE_CORE_EQUAL(T1, T2)		\
-  ((T1).core[0] == (T2).core[0] && (T1).core[1] == (T2).core[1])
+  ((T1).core[0] == (T2).core[0]			\
+   && (T1).core[1] == (T2).core[1]		\
+   && (T1).core[2] == (T2).core[2])
 
 #define ARM_FEATURE_LOW(core, coproc) {{(core), 0}, (coproc)}
 #define ARM_FEATURE_CORE(core1, core2) {{(core1), (core2)}, 0}
 #define ARM_FEATURE_CORE_LOW(core) {{(core), 0}, 0}
 #define ARM_FEATURE_CORE_HIGH(core) {{0, (core)}, 0}
+#define ARM_FEATURE_CORE_HIGH_HIGH(core) {{0, 0, (core)}, 0}
 #define ARM_FEATURE_COPROC(coproc) {{0, 0}, (coproc)}
 #define ARM_FEATURE(core1, core2, coproc) {{(core1), (core2)}, (coproc)}

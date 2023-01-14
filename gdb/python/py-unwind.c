@@ -27,9 +27,30 @@
 #include "python-internal.h"
 #include "regcache.h"
 #include "valprint.h"
+#include "user-regs.h"
 
-#define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
-  { fprintf_unfiltered (gdb_stdlog, args); }
+/* Debugging of Python unwinders.  */
+
+static bool pyuw_debug;
+
+/* Implementation of "show debug py-unwind".  */
+
+static void
+show_pyuw_debug (struct ui_file *file, int from_tty,
+		 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Python unwinder debugging is %s.\n"), value);
+}
+
+/* Print a "py-unwind" debug statement.  */
+
+#define pyuw_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (pyuw_debug, "py-unwind", fmt, ##__VA_ARGS__)
+
+/* Print "py-unwind" enter/exit debug statements.  */
+
+#define PYUW_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (pyuw_debug, "py-unwind")
 
 struct pending_frame_object
 {
@@ -96,8 +117,6 @@ extern PyTypeObject pending_frame_object_type
 extern PyTypeObject unwind_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
 
-static unsigned int pyuw_debug = 0;
-
 static struct gdbarch_data *pyuw_gdbarch_data;
 
 /* Convert gdb.Value instance to inferior's pointer.  Return 1 on success,
@@ -163,8 +182,7 @@ unwind_infopy_str (PyObject *self)
   unwind_info_object *unwind_info = (unwind_info_object *) self;
   string_file stb;
 
-  stb.puts ("Frame ID: ");
-  fprint_frame_id (&stb, unwind_info->frame_id);
+  stb.printf ("Frame ID: %s", unwind_info->frame_id.to_string ().c_str ());
   {
     const char *sep = "";
     struct value_print_options opts;
@@ -248,6 +266,26 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
       PyErr_SetString (PyExc_ValueError, "Bad register");
       return NULL;
     }
+
+  /* If REGNUM identifies a user register then *maybe* we can convert this
+     to a real (i.e. non-user) register.  The maybe qualifier is because we
+     don't know what user registers each target might add, however, the
+     following logic should work for the usual style of user registers,
+     where the read function just forwards the register read on to some
+     other register with no adjusting the value.  */
+  if (regnum >= gdbarch_num_cooked_regs (pending_frame->gdbarch))
+    {
+      struct value *user_reg_value
+	= value_of_user_reg (regnum, pending_frame->frame_info);
+      if (VALUE_LVAL (user_reg_value) == lval_register)
+	regnum = VALUE_REGNUM (user_reg_value);
+      if (regnum >= gdbarch_num_cooked_regs (pending_frame->gdbarch))
+	{
+	  PyErr_SetString (PyExc_ValueError, "Bad register");
+	  return NULL;
+	}
+    }
+
   {
     struct value *value;
     size_t data_size;
@@ -425,6 +463,23 @@ pending_framepy_architecture (PyObject *self, PyObject *args)
   return gdbarch_to_arch_object (pending_frame->gdbarch);
 }
 
+/* Implementation of PendingFrame.level (self) -> Integer.  */
+
+static PyObject *
+pending_framepy_level (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  if (pending_frame->frame_info == NULL)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       "Attempting to read stack level from stale PendingFrame");
+      return NULL;
+    }
+  int level = frame_relative_level (pending_frame->frame_info);
+  return gdb_py_object_from_longest (level).release ();
+}
+
 /* frame_unwind.this_id method.  */
 
 static void
@@ -432,12 +487,7 @@ pyuw_this_id (struct frame_info *this_frame, void **cache_ptr,
 	      struct frame_id *this_id)
 {
   *this_id = ((cached_frame_info *) *cache_ptr)->frame_id;
-  if (pyuw_debug >= 1)
-    {
-      fprintf_unfiltered (gdb_stdlog, "%s: frame_id: ", __FUNCTION__);
-      fprint_frame_id (gdb_stdlog, *this_id);
-      fprintf_unfiltered (gdb_stdlog, "\n");
-    }
+  pyuw_debug_printf ("frame_id: %s", this_id->to_string ().c_str ());
 }
 
 /* frame_unwind.prev_register.  */
@@ -446,12 +496,14 @@ static struct value *
 pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
 		    int regnum)
 {
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
+
   cached_frame_info *cached_frame = (cached_frame_info *) *cache_ptr;
   cached_reg_t *reg_info = cached_frame->reg;
   cached_reg_t *reg_info_end = reg_info + cached_frame->reg_count;
 
-  TRACE_PY_UNWIND (1, "%s (frame=%p,...,reg=%d)\n", __FUNCTION__, this_frame,
-		   regnum);
+  pyuw_debug_printf ("frame=%d, reg=%d",
+		     frame_relative_level (this_frame), regnum);
   for (; reg_info < reg_info_end; ++reg_info)
     {
       if (regnum == reg_info->num)
@@ -467,14 +519,17 @@ static int
 pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 	      void **cache_ptr)
 {
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
+
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
   cached_frame_info *cached_frame;
 
   gdbpy_enter enter_py (gdbarch, current_language);
 
-  TRACE_PY_UNWIND (3, "%s (SP=%s, PC=%s)\n", __FUNCTION__,
-		   paddress (gdbarch, get_frame_sp (this_frame)),
-		   paddress (gdbarch, get_frame_pc (this_frame)));
+  pyuw_debug_printf ("frame=%d, sp=%s, pc=%s",
+		     frame_relative_level (this_frame),
+		     paddress (gdbarch, get_frame_sp (this_frame)),
+		     paddress (gdbarch, get_frame_pc (this_frame)));
 
   /* Create PendingFrame instance to pass to sniffers.  */
   pending_frame_object *pfo = PyObject_New (pending_frame_object,
@@ -501,33 +556,56 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
     }
   gdbpy_ref<> pyo_execute (PyObject_GetAttrString (gdb_python_module,
 						   "_execute_unwinders"));
-  if (pyo_execute == NULL)
+  if (pyo_execute == nullptr)
     {
       gdbpy_print_stack ();
       return 0;
     }
 
-  gdbpy_ref<> pyo_unwind_info
+  /* A (gdb.UnwindInfo, str) tuple, or None.  */
+  gdbpy_ref<> pyo_execute_ret
     (PyObject_CallFunctionObjArgs (pyo_execute.get (),
 				   pyo_pending_frame.get (), NULL));
-  if (pyo_unwind_info == NULL)
+  if (pyo_execute_ret == nullptr)
     {
       /* If the unwinder is cancelled due to a Ctrl-C, then propagate
 	 the Ctrl-C as a GDB exception instead of swallowing it.  */
       gdbpy_print_stack_or_quit ();
       return 0;
     }
-  if (pyo_unwind_info == Py_None)
+  if (pyo_execute_ret == Py_None)
     return 0;
 
+  /* Verify the return value of _execute_unwinders is a tuple of size 2.  */
+  gdb_assert (PyTuple_Check (pyo_execute_ret.get ()));
+  gdb_assert (PyTuple_GET_SIZE (pyo_execute_ret.get ()) == 2);
+
+  if (pyuw_debug)
+    {
+      PyObject *pyo_unwinder_name = PyTuple_GET_ITEM (pyo_execute_ret.get (), 1);
+      gdb::unique_xmalloc_ptr<char> name
+	= python_string_to_host_string (pyo_unwinder_name);
+
+      /* This could happen if the user passed something else than a string
+	 as the unwinder's name.  */
+      if (name == nullptr)
+	{
+	  gdbpy_print_stack ();
+	  name = make_unique_xstrdup ("<failed to get unwinder name>");
+	}
+
+      pyuw_debug_printf ("frame claimed by unwinder %s", name.get ());
+    }
+
   /* Received UnwindInfo, cache data.  */
-  if (PyObject_IsInstance (pyo_unwind_info.get (),
+  PyObject *pyo_unwind_info = PyTuple_GET_ITEM (pyo_execute_ret.get (), 0);
+  if (PyObject_IsInstance (pyo_unwind_info,
 			   (PyObject *) &unwind_info_object_type) <= 0)
     error (_("A Unwinder should return gdb.UnwindInfo instance."));
 
   {
     unwind_info_object *unwind_info =
-      (unwind_info_object *) pyo_unwind_info.get ();
+      (unwind_info_object *) pyo_unwind_info;
     int reg_count = unwind_info->saved_regs->size ();
 
     cached_frame
@@ -566,7 +644,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 static void
 pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
 {
-  TRACE_PY_UNWIND (3, "%s: enter", __FUNCTION__);
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
   cached_frame_info *cached_frame = (cached_frame_info *) cache;
 
   for (int i = 0; i < cached_frame->reg_count; i++)
@@ -602,6 +680,7 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
       struct frame_unwind *unwinder
 	  = GDBARCH_OBSTACK_ZALLOC (newarch, struct frame_unwind);
 
+      unwinder->name = "python";
       unwinder->type = NORMAL_FRAME;
       unwinder->stop_reason = default_frame_unwind_stop_reason;
       unwinder->this_id = pyuw_this_id;
@@ -614,29 +693,35 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
     }
 }
 
+void _initialize_py_unwind ();
+void
+_initialize_py_unwind ()
+{
+  add_setshow_boolean_cmd
+      ("py-unwind", class_maintenance, &pyuw_debug,
+	_("Set Python unwinder debugging."),
+	_("Show Python unwinder debugging."),
+	_("When on, Python unwinder debugging is enabled."),
+	NULL,
+	show_pyuw_debug,
+	&setdebuglist, &showdebuglist);
+  pyuw_gdbarch_data
+    = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
+}
+
 /* Initialize unwind machinery.  */
 
 int
 gdbpy_initialize_unwind (void)
 {
-  int rc;
-  add_setshow_zuinteger_cmd
-      ("py-unwind", class_maintenance, &pyuw_debug,
-	_("Set Python unwinder debugging."),
-	_("Show Python unwinder debugging."),
-	_("When non-zero, Python unwinder debugging is enabled."),
-	NULL,
-	NULL,
-	&setdebuglist, &showdebuglist);
-  pyuw_gdbarch_data
-      = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
-  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch);
+  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch,
+					       "py-unwind");
 
   if (PyType_Ready (&pending_frame_object_type) < 0)
     return -1;
-  rc = gdb_pymodule_addobject (gdb_module, "PendingFrame",
-      (PyObject *) &pending_frame_object_type);
-  if (rc)
+  int rc = gdb_pymodule_addobject (gdb_module, "PendingFrame",
+				   (PyObject *) &pending_frame_object_type);
+  if (rc != 0)
     return rc;
 
   if (PyType_Ready (&unwind_info_object_type) < 0)
@@ -659,6 +744,8 @@ static PyMethodDef pending_frame_object_methods[] =
     pending_framepy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n"
     "The architecture for this PendingFrame." },
+  { "level", pending_framepy_level, METH_NOARGS,
+    "The stack level of this frame." },
   {NULL}  /* Sentinel */
 };
 

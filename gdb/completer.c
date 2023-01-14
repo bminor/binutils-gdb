@@ -88,14 +88,6 @@ public:
     return htab_hash_string (m_name.get ());
   }
 
-  /* A static function that can be passed to the htab hash system to be
-     used as a callback that deletes an item from the hash.  */
-  static void deleter (void *arg)
-  {
-    completion_hash_entry *entry = (completion_hash_entry *) arg;
-    delete entry;
-  }
-
 private:
 
   /* The symbol name stored in this hash entry.  */
@@ -258,14 +250,6 @@ filename_completer_handle_brkchars (struct cmd_list_element *ignore,
     (gdb_completer_file_name_break_characters);
 }
 
-/* Possible values for the found_quote flags word used by the completion
-   functions.  It says what kind of (shell-like) quoting we found anywhere
-   in the line. */
-#define RL_QF_SINGLE_QUOTE      0x01
-#define RL_QF_DOUBLE_QUOTE      0x02
-#define RL_QF_BACKSLASH         0x04
-#define RL_QF_OTHER_QUOTE       0x08
-
 /* Find the bounds of the current word for completion purposes, and
    return a pointer to the end of the word.  This mimics (and is a
    modified version of) readline's _rl_find_completion_word internal
@@ -292,7 +276,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 			     int *qc, int *dp,
 			     const char *line_buffer)
 {
-  int scan, end, found_quote, delimiter, pass_next, isbrk;
+  int scan, end, delimiter, pass_next, isbrk;
   char quote_char;
   const char *brkchars;
   int point = strlen (line_buffer);
@@ -309,7 +293,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
     }
 
   end = point;
-  found_quote = delimiter = 0;
+  delimiter = 0;
   quote_char = '\0';
 
   brkchars = info->word_break_characters;
@@ -319,8 +303,6 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
       /* We have a list of characters which can be used in pairs to
 	 quote substrings for the completer.  Try to find the start of
 	 an unclosed quoted substring.  */
-      /* FOUND_QUOTE is set so we know what kind of quotes we
-	 found.  */
       for (scan = pass_next = 0;
 	   scan < end;
 	   scan++)
@@ -338,7 +320,6 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	  if (quote_char != '\'' && line_buffer[scan] == '\\')
 	    {
 	      pass_next = 1;
-	      found_quote |= RL_QF_BACKSLASH;
 	      continue;
 	    }
 
@@ -359,13 +340,6 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 	      /* Found start of a quoted substring.  */
 	      quote_char = line_buffer[scan];
 	      point = scan + 1;
-	      /* Shell-like quoting conventions.  */
-	      if (quote_char == '\'')
-		found_quote |= RL_QF_SINGLE_QUOTE;
-	      else if (quote_char == '"')
-		found_quote |= RL_QF_DOUBLE_QUOTE;
-	      else
-		found_quote |= RL_QF_OTHER_QUOTE;
 	    }
 	}
     }
@@ -1428,7 +1402,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	  if (result_list)
 	    {
 	      if (reason != handle_brkchars)
-		complete_on_cmdlist (*result_list->prefixlist, tracker, p,
+		complete_on_cmdlist (*result_list->subcommands, tracker, p,
 				     word, ignore_help_classes);
 	    }
 	  else
@@ -1456,12 +1430,12 @@ complete_line_internal_1 (completion_tracker &tracker,
 	    {
 	      /* The command is followed by whitespace; we need to
 		 complete on whatever comes after command.  */
-	      if (c->prefixlist)
+	      if (c->is_prefix ())
 		{
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
 		  if (reason != handle_brkchars)
-		    complete_on_cmdlist (*c->prefixlist, tracker, p, word,
+		    complete_on_cmdlist (*c->subcommands, tracker, p, word,
 					 ignore_help_classes);
 
 		  /* Ensure that readline does the right thing
@@ -1524,7 +1498,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	{
 	  /* There is non-whitespace beyond the command.  */
 
-	  if (c->prefixlist && !c->allow_unknown)
+	  if (c->is_prefix () && !c->allow_unknown)
 	    {
 	      /* It is an unrecognized subcommand of a prefix command,
 		 e.g. "info adsfkdj".  */
@@ -1593,7 +1567,7 @@ completion_tracker::discard_completions ()
   m_entries_hash.reset (nullptr);
 
   /* A callback used by the hash table to compare new entries with existing
-     entries.  We can't use the standard streq_hash function here as the
+     entries.  We can't use the standard htab_eq_string function here as the
      key to our hash is just a single string, while the values we store in
      the hash are a struct containing multiple strings.  */
   static auto entry_eq_func
@@ -1618,10 +1592,11 @@ completion_tracker::discard_completions ()
 	return entry->hash_name ();
       };
 
-  m_entries_hash.reset (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-					   entry_hash_func, entry_eq_func,
-					   completion_hash_entry::deleter,
-					   xcalloc, xfree));
+  m_entries_hash.reset
+    (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+			entry_hash_func, entry_eq_func,
+			htab_delete_entry<completion_hash_entry>,
+			xcalloc, xfree));
 }
 
 /* See completer.h.  */

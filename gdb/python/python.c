@@ -129,8 +129,7 @@ PyObject *gdbpy_gdb_memory_error;
 static script_sourcer_func gdbpy_source_script;
 static objfile_script_sourcer_func gdbpy_source_objfile_script;
 static objfile_script_executor_func gdbpy_execute_objfile_script;
-static void gdbpy_finish_initialization
-  (const struct extension_language_defn *);
+static void gdbpy_initialize (const struct extension_language_defn *);
 static int gdbpy_initialized (const struct extension_language_defn *);
 static void gdbpy_eval_from_control_command
   (const struct extension_language_defn *, struct command_line *cmd);
@@ -162,7 +161,7 @@ const struct extension_language_script_ops python_extension_script_ops =
 
 const struct extension_language_ops python_extension_ops =
 {
-  gdbpy_finish_initialization,
+  gdbpy_initialize,
   gdbpy_initialized,
 
   gdbpy_eval_from_control_command,
@@ -1579,6 +1578,80 @@ python_command (const char *arg, int from_tty)
 
 #endif /* HAVE_PYTHON */
 
+/* When this is turned on before Python is initialised then Python will
+   ignore any environment variables related to Python.  This is equivalent
+   to passing `-E' to the python program.  */
+static bool python_ignore_environment = false;
+
+/* Implement 'show python ignore-environment'.  */
+
+static void
+show_python_ignore_environment (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Python's ignore-environment setting is %s.\n"),
+		    value);
+}
+
+/* Implement 'set python ignore-environment'.  This sets Python's internal
+   flag no matter when the command is issued, however, if this is used
+   after Py_Initialize has been called then most of the environment will
+   already have been read.  */
+
+static void
+set_python_ignore_environment (const char *args, int from_tty,
+			       struct cmd_list_element *c)
+{
+#ifdef HAVE_PYTHON
+  Py_IgnoreEnvironmentFlag = python_ignore_environment ? 1 : 0;
+#endif
+}
+
+/* When this is turned on before Python is initialised then Python will
+   not write `.pyc' files on import of a module.  */
+static enum auto_boolean python_dont_write_bytecode = AUTO_BOOLEAN_AUTO;
+
+/* Implement 'show python dont-write-bytecode'.  */
+
+static void
+show_python_dont_write_bytecode (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c, const char *value)
+{
+  if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
+    {
+      const char *auto_string
+	= (python_ignore_environment
+	   || getenv ("PYTHONDONTWRITEBYTECODE") == nullptr) ? "off" : "on";
+
+      fprintf_filtered (file,
+			_("Python's dont-write-bytecode setting is %s (currently %s).\n"),
+			value, auto_string);
+    }
+  else
+    fprintf_filtered (file, _("Python's dont-write-bytecode setting is %s.\n"),
+		      value);
+}
+
+/* Implement 'set python dont-write-bytecode'.  This sets Python's internal
+   flag no matter when the command is issued, however, if this is used
+   after Py_Initialize has been called then many modules could already
+   have been imported and their byte code written out.  */
+
+static void
+set_python_dont_write_bytecode (const char *args, int from_tty,
+				struct cmd_list_element *c)
+{
+#ifdef HAVE_PYTHON
+  if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
+    Py_DontWriteBytecodeFlag
+      = (!python_ignore_environment
+	 && getenv ("PYTHONDONTWRITEBYTECODE") != nullptr) ? 1 : 0;
+  else
+    Py_DontWriteBytecodeFlag
+      = python_dont_write_bytecode == AUTO_BOOLEAN_TRUE ? 1 : 0;
+#endif /* HAVE_PYTHON */
+}
+
 
 
 /* Lists for 'set python' commands.  */
@@ -1813,8 +1886,9 @@ void _initialize_python ();
 void
 _initialize_python ()
 {
-  add_com ("python-interactive", class_obscure,
-	   python_interactive_command,
+  cmd_list_element *python_interactive_cmd
+    =	add_com ("python-interactive", class_obscure,
+		 python_interactive_command,
 #ifdef HAVE_PYTHON
 	   _("\
 Start an interactive Python prompt.\n\
@@ -1836,7 +1910,7 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
-  add_com_alias ("pi", "python-interactive", class_obscure, 1);
+  add_com_alias ("pi", python_interactive_cmd, class_obscure, 1);
 
   python_cmd_element = add_com ("python", class_obscure, python_command,
 #ifdef HAVE_PYTHON
@@ -1858,18 +1932,16 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
-  add_com_alias ("py", "python", class_obscure, 1);
+  add_com_alias ("py", python_cmd_element, class_obscure, 1);
 
   /* Add set/show python print-stack.  */
   add_basic_prefix_cmd ("python", no_class,
 			_("Prefix command for python preference settings."),
-			&user_show_python_list, "show python ", 0,
-			&showlist);
+			&user_show_python_list, 0, &showlist);
 
   add_show_prefix_cmd ("python", no_class,
 		       _("Prefix command for python preference settings."),
-		       &user_set_python_list, "set python ", 0,
-		       &setlist);
+		       &user_set_python_list, 0, &setlist);
 
   add_setshow_enum_cmd ("print-stack", no_class, python_excp_enums,
 			&gdbpy_should_print_stack, _("\
@@ -1882,20 +1954,39 @@ message == an error message without a stack will be printed."),
 			&user_set_python_list,
 			&user_show_python_list);
 
-#ifdef HAVE_PYTHON
-  if (!do_start_initialization () && PyErr_Occurred ())
-    gdbpy_print_stack ();
-#endif /* HAVE_PYTHON */
+  add_setshow_boolean_cmd ("ignore-environment", no_class,
+			   &python_ignore_environment, _("\
+Set whether the Python interpreter should ignore environment variables."), _(" \
+Show whether the Python interpreter showlist ignore environment variables."), _(" \
+When enabled GDB's Python interpreter will ignore any Python related\n	\
+flags in the environment.  This is equivalent to passing `-E' to a\n	\
+python executable."),
+			   set_python_ignore_environment,
+			   show_python_ignore_environment,
+			   &user_set_python_list,
+			   &user_show_python_list);
+
+  add_setshow_auto_boolean_cmd ("dont-write-bytecode", no_class,
+				&python_dont_write_bytecode, _("\
+Set whether the Python interpreter should ignore environment variables."), _(" \
+Show whether the Python interpreter showlist ignore environment variables."), _(" \
+When enabled GDB's Python interpreter will ignore any Python related\n	\
+flags in the environment.  This is equivalent to passing `-E' to a\n	\
+python executable."),
+				set_python_dont_write_bytecode,
+				show_python_dont_write_bytecode,
+				&user_set_python_list,
+				&user_show_python_list);
 }
 
 #ifdef HAVE_PYTHON
 
-/* Helper function for gdbpy_finish_initialization.  This does the
-   work and then returns false if an error has occurred and must be
-   displayed, or true on success.  */
+/* Helper function for gdbpy_initialize.  This does the work and then
+   returns false if an error has occurred and must be displayed, or true on
+   success.  */
 
 static bool
-do_finish_initialization (const struct extension_language_defn *extlang)
+do_initialize (const struct extension_language_defn *extlang)
 {
   PyObject *m;
   PyObject *sys_path;
@@ -1953,18 +2044,19 @@ do_finish_initialization (const struct extension_language_defn *extlang)
   return gdb_pymodule_addobject (m, "gdb", gdb_python_module) >= 0;
 }
 
-/* Perform the remaining python initializations.
-   These must be done after GDB is at least mostly initialized.
-   E.g., The "info pretty-printer" command needs the "info" prefix
-   command installed.
-   This is the extension_language_ops.finish_initialization "method".  */
+/* Perform Python initialization.  This will be called after GDB has
+   performed all of its own initialization.  This is the
+   extension_language_ops.initialize "method".  */
 
 static void
-gdbpy_finish_initialization (const struct extension_language_defn *extlang)
+gdbpy_initialize (const struct extension_language_defn *extlang)
 {
+  if (!do_start_initialization () && PyErr_Occurred ())
+    gdbpy_print_stack ();
+
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  if (!do_finish_initialization (extlang))
+  if (!do_initialize (extlang))
     {
       gdbpy_print_stack ();
       warning (_("internal error: Unhandled Python exception"));

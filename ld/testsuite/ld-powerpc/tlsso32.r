@@ -73,7 +73,7 @@ Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entry:
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
-.* SECTION +LOCAL +DEFAULT +6 
+.* SECTION +LOCAL +DEFAULT +6.*
 .* TLS +GLOBAL +DEFAULT +UND gd
 .* TLS +GLOBAL +DEFAULT +8 le0
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
@@ -89,6 +89,17 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
+.* SECTION +LOCAL +DEFAULT +1 \.hash
+.* SECTION +LOCAL +DEFAULT +2 \.dynsym
+.* SECTION +LOCAL +DEFAULT +3 \.dynstr
+.* SECTION +LOCAL +DEFAULT +4 \.rela\.dyn
+.* SECTION +LOCAL +DEFAULT +5 \.rela\.plt
+.* SECTION +LOCAL +DEFAULT +6 \.text
+.* SECTION +LOCAL +DEFAULT +7 \.tdata
+.* SECTION +LOCAL +DEFAULT +8 \.tbss
+.* SECTION +LOCAL +DEFAULT +9 \.dynamic
+.* SECTION +LOCAL +DEFAULT +10 \.got
+.* SECTION +LOCAL +DEFAULT +11 \.plt
 .* FILE +LOCAL +DEFAULT +ABS .*
 .* NOTYPE +LOCAL +DEFAULT +ABS TLSMARK
 .* TLS +LOCAL +DEFAULT +7 gd4

@@ -17,22 +17,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/times.h>
 #include <sys/param.h>
 #include <unistd.h>
 #include "bfd.h"
 #include "libiberty.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-options.h"
 #include "sim-io.h"
+#include "sim-signal.h"
+#include "targ-vals.h"
 
 typedef int word;
 typedef unsigned int uword;
@@ -932,13 +935,13 @@ sim_engine_run (SIM_DESC sd,
 	        cpu.asregs.sregs[3] = inum;
 		switch (inum)
 		  {
-		  case 0x1: /* SYS_exit */
+		  case TARGET_SYS_exit:
 		    {
 		      sim_engine_halt (sd, scpu, NULL, pc, sim_exited,
 				       cpu.asregs.regs[2]);
 		      break;
 		    }
-		  case 0x2: /* SYS_open */
+		  case TARGET_SYS_open:
 		    {
 		      char fname[1024];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
@@ -951,7 +954,7 @@ sim_engine_run (SIM_DESC sd,
 		      cpu.asregs.regs[2] = fd;
 		      break;
 		    }
-		  case 0x4: /* SYS_read */
+		  case TARGET_SYS_read:
 		    {
 		      int fd = cpu.asregs.regs[2];
 		      unsigned len = (unsigned) cpu.asregs.regs[4];
@@ -962,7 +965,7 @@ sim_engine_run (SIM_DESC sd,
 		      free (buf);
 		      break;
 		    }
-		  case 0x5: /* SYS_write */
+		  case TARGET_SYS_write:
 		    {
 		      char *str;
 		      /* String length is at 0x12($fp) */
@@ -975,7 +978,7 @@ sim_engine_run (SIM_DESC sd,
 		      cpu.asregs.regs[2] = count;
 		      break;
 		    }
-		  case 0x7: /* SYS_unlink */
+		  case TARGET_SYS_unlink:
 		    {
 		      char fname[1024];
 		      int fd;
@@ -1195,6 +1198,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

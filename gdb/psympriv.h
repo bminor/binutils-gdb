@@ -503,13 +503,11 @@ struct psymbol_functions : public quick_symbol_functions
 
   bool has_symbols (struct objfile *objfile) override;
 
+  bool has_unexpanded_symtabs (struct objfile *objfile) override;
+
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;
 
   void forget_cached_source_info (struct objfile *objfile) override;
-
-  bool map_symtabs_matching_filename
-    (struct objfile *objfile, const char *name, const char *real_path,
-     gdb::function_view<bool (symtab *)> callback) override;
 
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
@@ -520,20 +518,13 @@ struct psymbol_functions : public quick_symbol_functions
 
   void dump (struct objfile *objfile) override;
 
-  void expand_symtabs_for_function (struct objfile *objfile,
-				    const char *func_name) override;
-
   void expand_all_symtabs (struct objfile *objfile) override;
 
-  void expand_symtabs_with_fullname (struct objfile *objfile,
-				     const char *fullname) override;
-
-  void map_matching_symbols
+  void expand_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
      domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
   bool expand_symtabs_matching

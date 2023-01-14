@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <windows.h>
 #include <imagehlp.h>
-#include <psapi.h>
 #ifdef __CYGWIN__
 #include <wchar.h>
 #include <sys/cygwin.h>
@@ -75,92 +74,15 @@
 
 using namespace windows_nat;
 
-#define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
-#define DebugActiveProcessStop		dyn_DebugActiveProcessStop
-#define DebugBreakProcess		dyn_DebugBreakProcess
-#define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
-#define EnumProcessModules		dyn_EnumProcessModules
-#define EnumProcessModulesEx		dyn_EnumProcessModulesEx
-#define GetModuleInformation		dyn_GetModuleInformation
-#define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
-#define OpenProcessToken		dyn_OpenProcessToken
-#define GetConsoleFontSize		dyn_GetConsoleFontSize
-#define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
-#define Wow64SuspendThread		dyn_Wow64SuspendThread
-#define Wow64GetThreadContext		dyn_Wow64GetThreadContext
-#define Wow64SetThreadContext		dyn_Wow64SetThreadContext
-#define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
-
-typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
-						   PTOKEN_PRIVILEGES,
-						   DWORD, PTOKEN_PRIVILEGES,
-						   PDWORD);
-static AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
-
-typedef BOOL WINAPI (DebugActiveProcessStop_ftype) (DWORD);
-static DebugActiveProcessStop_ftype *DebugActiveProcessStop;
-
-typedef BOOL WINAPI (DebugBreakProcess_ftype) (HANDLE);
-static DebugBreakProcess_ftype *DebugBreakProcess;
-
-typedef BOOL WINAPI (DebugSetProcessKillOnExit_ftype) (BOOL);
-static DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
-
-typedef BOOL WINAPI (EnumProcessModules_ftype) (HANDLE, HMODULE *, DWORD,
-						LPDWORD);
-static EnumProcessModules_ftype *EnumProcessModules;
-
-#ifdef __x86_64__
-typedef BOOL WINAPI (EnumProcessModulesEx_ftype) (HANDLE, HMODULE *, DWORD,
-						  LPDWORD, DWORD);
-static EnumProcessModulesEx_ftype *EnumProcessModulesEx;
-#endif
-
-typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
-						  LPMODULEINFO, DWORD);
-static GetModuleInformation_ftype *GetModuleInformation;
-
-typedef BOOL WINAPI (LookupPrivilegeValueA_ftype) (LPCSTR, LPCSTR, PLUID);
-static LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
-
-typedef BOOL WINAPI (OpenProcessToken_ftype) (HANDLE, DWORD, PHANDLE);
-static OpenProcessToken_ftype *OpenProcessToken;
-
-typedef BOOL WINAPI (GetCurrentConsoleFont_ftype) (HANDLE, BOOL,
-						   CONSOLE_FONT_INFO *);
-static GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
-
-typedef COORD WINAPI (GetConsoleFontSize_ftype) (HANDLE, DWORD);
-static GetConsoleFontSize_ftype *GetConsoleFontSize;
-
-#ifdef __x86_64__
-typedef DWORD WINAPI (Wow64SuspendThread_ftype) (HANDLE);
-static Wow64SuspendThread_ftype *Wow64SuspendThread;
-
-typedef BOOL WINAPI (Wow64GetThreadContext_ftype) (HANDLE, PWOW64_CONTEXT);
-static Wow64GetThreadContext_ftype *Wow64GetThreadContext;
-
-typedef BOOL WINAPI (Wow64SetThreadContext_ftype) (HANDLE,
-						   const WOW64_CONTEXT *);
-static Wow64SetThreadContext_ftype *Wow64SetThreadContext;
-
-typedef BOOL WINAPI (Wow64GetThreadSelectorEntry_ftype) (HANDLE, DWORD,
-							 PLDT_ENTRY);
-static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
-#endif
-
 #undef STARTUPINFO
 #undef CreateProcess
 #undef GetModuleFileNameEx
 
 #ifndef __CYGWIN__
 # define __PMAX	(MAX_PATH + 1)
-  typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE, LPSTR, DWORD);
-  static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
+# define GetModuleFileNameEx GetModuleFileNameExA
 # define STARTUPINFO STARTUPINFOA
 # define CreateProcess CreateProcessA
-# define GetModuleFileNameEx_name "GetModuleFileNameExA"
-# define bad_GetModuleFileNameEx bad_GetModuleFileNameExA
 #else
 # define __PMAX	PATH_MAX
 /* The starting and ending address of the cygwin1.dll text segment.  */
@@ -168,13 +90,9 @@ static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
   static CORE_ADDR cygwin_load_end;
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
-    typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE,
-						      LPWSTR, DWORD);
-    static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
+#   define GetModuleFileNameEx GetModuleFileNameExW
 #   define STARTUPINFO STARTUPINFOW
 #   define CreateProcess CreateProcessW
-#   define GetModuleFileNameEx_name "GetModuleFileNameExW"
-#   define bad_GetModuleFileNameEx bad_GetModuleFileNameExW
 #endif
 
 static int have_saved_context;	/* True if we've saved context from a
@@ -869,38 +787,13 @@ windows_make_so (const char *name, LPVOID load_addr)
   return so;
 }
 
-static bool windows_add_dll (LPVOID);
-
 /* See nat/windows-nat.h.  */
 
 void
-windows_nat::handle_load_dll ()
+windows_nat::handle_load_dll (const char *dll_name, LPVOID base)
 {
-  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  const char *dll_name;
-
-  /* Try getting the DLL name via the lpImageName field of the event.
-     Note that Microsoft documents this fields as strictly optional,
-     in the sense that it might be NULL.  And the first DLL event in
-     particular is explicitly documented as "likely not pass[ed]"
-     (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
-  dll_name = get_image_name (current_process_handle,
-			     event->lpImageName, event->fUnicode);
-  /* If the DLL name could not be gleaned via lpImageName, try harder
-     by enumerating all the DLLs loaded into the inferior, looking for
-     one that is loaded at base address = lpBaseOfDll. */
-  if (dll_name != nullptr)
-    {
-
-      solib_end->next = windows_make_so (dll_name, event->lpBaseOfDll);
-      solib_end = solib_end->next;
-    }
-  else if (event->lpBaseOfDll != nullptr
-	   && windows_add_dll (event->lpBaseOfDll))
-    dll_name = solib_end->so_name;
-
-  if (dll_name == nullptr)
-    return;
+  solib_end->next = windows_make_so (dll_name, base);
+  solib_end = solib_end->next;
 
   lm_info_windows *li = (lm_info_windows *) solib_end->lm_info;
 
@@ -1723,7 +1616,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       CloseHandle (current_event.u.LoadDll.hFile);
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
-      catch_errors (handle_load_dll);
+      catch_errors (dll_loaded_event);
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
       thread_id = current_event.dwThreadId;
@@ -1903,145 +1796,6 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	    kill ();
 	}
     }
-}
-
-/* Iterate over all DLLs currently mapped by our inferior, and
-   add them to our list of solibs.  */
-
-static void
-windows_add_all_dlls (void)
-{
-  windows_add_dll (NULL);
-}
-
-/* Iterate over all DLLs currently mapped by our inferior, looking for
-   a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
-   list of solibs and return 'true'; otherwise do nothing and return
-   'false'.  LOAD_ADDR NULL means add all DLLs to the list of solibs;
-   this is used when the inferior finishes its initialization, and all
-   the DLLs it statically depends on are presumed loaded.  */
-
-static bool
-windows_add_dll (LPVOID load_addr)
-{
-  HMODULE dummy_hmodule;
-  DWORD cb_needed;
-  HMODULE *hmodules;
-  int i;
-
-#ifdef __x86_64__
-  if (wow64_process)
-    {
-      if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
-				sizeof (HMODULE), &cb_needed,
-				LIST_MODULES_32BIT) == 0)
-	return false;
-    }
-  else
-#endif
-    {
-      if (EnumProcessModules (current_process_handle, &dummy_hmodule,
-			      sizeof (HMODULE), &cb_needed) == 0)
-	return false;
-    }
-
-  if (cb_needed < 1)
-    return false;
-
-  hmodules = (HMODULE *) alloca (cb_needed);
-#ifdef __x86_64__
-  if (wow64_process)
-    {
-      if (EnumProcessModulesEx (current_process_handle, hmodules,
-				cb_needed, &cb_needed,
-				LIST_MODULES_32BIT) == 0)
-	return false;
-    }
-  else
-#endif
-    {
-      if (EnumProcessModules (current_process_handle, hmodules,
-			      cb_needed, &cb_needed) == 0)
-	return false;
-    }
-
-  char system_dir[__PMAX];
-  char syswow_dir[__PMAX];
-  size_t system_dir_len = 0;
-  bool convert_syswow_dir = false;
-#ifdef __x86_64__
-  if (wow64_process)
-#endif
-    {
-      /* This fails on 32bit Windows because it has no SysWOW64 directory,
-	 and in this case a path conversion isn't necessary.  */
-      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
-      if (len > 0)
-	{
-	  /* Check that we have passed a large enough buffer.  */
-	  gdb_assert (len < sizeof (syswow_dir));
-
-	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
-	  /* Error check.  */
-	  gdb_assert (len != 0);
-	  /* Check that we have passed a large enough buffer.  */
-	  gdb_assert (len < sizeof (system_dir));
-
-	  strcat (system_dir, "\\");
-	  strcat (syswow_dir, "\\");
-	  system_dir_len = strlen (system_dir);
-
-	  convert_syswow_dir = true;
-	}
-
-    }
-  for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
-    {
-      MODULEINFO mi;
-#ifdef __USEWIDE
-      wchar_t dll_name[__PMAX];
-      char dll_name_mb[__PMAX];
-#else
-      char dll_name[__PMAX];
-#endif
-      const char *name;
-      if (GetModuleInformation (current_process_handle, hmodules[i],
-				&mi, sizeof (mi)) == 0)
-	continue;
-
-      if (GetModuleFileNameEx (current_process_handle, hmodules[i],
-			       dll_name, sizeof (dll_name)) == 0)
-	continue;
-#ifdef __USEWIDE
-      wcstombs (dll_name_mb, dll_name, __PMAX);
-      name = dll_name_mb;
-#else
-      name = dll_name;
-#endif
-      /* Convert the DLL path of 32bit processes returned by
-	 GetModuleFileNameEx from the 64bit system directory to the
-	 32bit syswow64 directory if necessary.  */
-      std::string syswow_dll_path;
-      if (convert_syswow_dir
-	  && strncasecmp (name, system_dir, system_dir_len) == 0
-	  && strchr (name + system_dir_len, '\\') == nullptr)
-	{
-	  syswow_dll_path = syswow_dir;
-	  syswow_dll_path += name + system_dir_len;
-	  name = syswow_dll_path.c_str();
-	}
-
-      /* Record the DLL if either LOAD_ADDR is NULL or the address
-	 at which the DLL was loaded is equal to LOAD_ADDR.  */
-      if (!(load_addr != nullptr && mi.lpBaseOfDll != load_addr))
-	{
-	  solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
-	  solib_end = solib_end->next;
-	  if (load_addr != nullptr)
-	    return true;
-	}
-    }
-  return load_addr == nullptr ? true : false;
 }
 
 void
@@ -2799,14 +2553,16 @@ windows_nat_target::create_inferior (const char *exec_file,
   PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags = 0;
-  const char *inferior_tty = current_inferior ()->tty ();
+  const std::string &inferior_tty = current_inferior ()->tty ();
 
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));
 
-  const char *inferior_cwd = get_inferior_cwd ();
+  const char *inferior_cwd = current_inferior ()->cwd ().c_str ();
   std::string expanded_infcwd;
-  if (inferior_cwd != NULL)
+  if (*inferior_cwd == '\0')
+    inferior_cwd = nullptr;
+  else
     {
       expanded_infcwd = gdb_tilde_expand (inferior_cwd);
       /* Mirror slashes on inferior's cwd.  */
@@ -2846,7 +2602,7 @@ windows_nat_target::create_inferior (const char *exec_file,
     {
       sh = get_shell ();
       if (cygwin_conv_path (CCP_POSIX_TO_WIN_W, sh, shell, __PMAX) < 0)
-      	error (_("Error starting executable via shell: %d"), errno);
+	error (_("Error starting executable via shell: %d"), errno);
 #ifdef __USEWIDE
       len = sizeof (L" -c 'exec  '") + mbstowcs (NULL, exec_file, 0)
 	    + mbstowcs (NULL, allargs, 0) + 2;
@@ -2898,14 +2654,14 @@ windows_nat_target::create_inferior (const char *exec_file,
       w32_env = NULL;
     }
 
-  if (inferior_tty == nullptr)
+  if (inferior_tty.empty ())
     tty = ostdin = ostdout = ostderr = -1;
   else
     {
-      tty = open (inferior_tty, O_RDWR | O_NOCTTY);
+      tty = open (inferior_tty.c_str (), O_RDWR | O_NOCTTY);
       if (tty < 0)
 	{
-	  print_sys_errmsg (inferior_tty, errno);
+	  print_sys_errmsg (inferior_tty.c_str (), errno);
 	  ostdin = ostdout = ostderr = -1;
 	}
       else
@@ -2971,18 +2727,18 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
   /* If not all the standard streams are redirected by the command
      line, use INFERIOR_TTY for those which aren't.  */
-  if (inferior_tty != nullptr
+  if (!inferior_tty.empty ()
       && !(fd_inp >= 0 && fd_out >= 0 && fd_err >= 0))
     {
       SECURITY_ATTRIBUTES sa;
       sa.nLength = sizeof(sa);
       sa.lpSecurityDescriptor = 0;
       sa.bInheritHandle = TRUE;
-      tty = CreateFileA (inferior_tty, GENERIC_READ | GENERIC_WRITE,
+      tty = CreateFileA (inferior_tty.c_str (), GENERIC_READ | GENERIC_WRITE,
 			 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
       if (tty == INVALID_HANDLE_VALUE)
 	warning (_("Warning: Failed to open TTY %s, error %#x."),
-		 inferior_tty, (unsigned) GetLastError ());
+		 inferior_tty.c_str (), (unsigned) GetLastError ());
     }
   if (redirected || tty != INVALID_HANDLE_VALUE)
     {
@@ -3432,6 +3188,15 @@ Show whether to display kernel exceptions in child process."), NULL,
   add_cmd ("selector", class_info, display_selectors,
 	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
+
+  if (!initialize_loadable ())
+    {
+      /* This will probably fail on Windows 9x/Me.  Let the user know
+	 that we're missing some functionality.  */
+      warning(_("\
+cannot automatically find executable file or library to read symbols.\n\
+Use \"file\" or \"dll\" command to load executable/libraries directly."));
+    }
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
@@ -3530,155 +3295,4 @@ _initialize_check_for_gdb_ini ()
 	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}
     }
-}
-
-/* Define dummy functions which always return error for the rare cases where
-   these functions could not be found.  */
-static BOOL WINAPI
-bad_DebugActiveProcessStop (DWORD w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_DebugBreakProcess (HANDLE w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_DebugSetProcessKillOnExit (BOOL w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_EnumProcessModules (HANDLE w, HMODULE *x, DWORD y, LPDWORD z)
-{
-  return FALSE;
-}
-
-#ifdef __USEWIDE
-static DWORD WINAPI
-bad_GetModuleFileNameExW (HANDLE w, HMODULE x, LPWSTR y, DWORD z)
-{
-  return 0;
-}
-#else
-static DWORD WINAPI
-bad_GetModuleFileNameExA (HANDLE w, HMODULE x, LPSTR y, DWORD z)
-{
-  return 0;
-}
-#endif
-
-static BOOL WINAPI
-bad_GetModuleInformation (HANDLE w, HMODULE x, LPMODULEINFO y, DWORD z)
-{
-  return FALSE;
-}
-
-static BOOL WINAPI
-bad_OpenProcessToken (HANDLE w, DWORD x, PHANDLE y)
-{
-  return FALSE;
-}
-
-static BOOL WINAPI
-bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
-{
-  f->nFont = 0;
-  return 1;
-}
-static COORD WINAPI
-bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
-{
-  COORD size;
-  size.X = 8;
-  size.Y = 12;
-  return size;
-}
- 
-/* Load any functions which may not be available in ancient versions
-   of Windows.  */
-
-void _initialize_loadable ();
-void
-_initialize_loadable ()
-{
-  HMODULE hm = NULL;
-
-#define GPA(m, func)					\
-  func = (func ## _ftype *) GetProcAddress (m, #func)
-
-  hm = LoadLibrary ("kernel32.dll");
-  if (hm)
-    {
-      GPA (hm, DebugActiveProcessStop);
-      GPA (hm, DebugBreakProcess);
-      GPA (hm, DebugSetProcessKillOnExit);
-      GPA (hm, GetConsoleFontSize);
-      GPA (hm, DebugActiveProcessStop);
-      GPA (hm, GetCurrentConsoleFont);
-#ifdef __x86_64__
-      GPA (hm, Wow64SuspendThread);
-      GPA (hm, Wow64GetThreadContext);
-      GPA (hm, Wow64SetThreadContext);
-      GPA (hm, Wow64GetThreadSelectorEntry);
-#endif
-    }
-
-  /* Set variables to dummy versions of these processes if the function
-     wasn't found in kernel32.dll.  */
-  if (!DebugBreakProcess)
-    DebugBreakProcess = bad_DebugBreakProcess;
-  if (!DebugActiveProcessStop || !DebugSetProcessKillOnExit)
-    {
-      DebugActiveProcessStop = bad_DebugActiveProcessStop;
-      DebugSetProcessKillOnExit = bad_DebugSetProcessKillOnExit;
-    }
-  if (!GetConsoleFontSize)
-    GetConsoleFontSize = bad_GetConsoleFontSize;
-  if (!GetCurrentConsoleFont)
-    GetCurrentConsoleFont = bad_GetCurrentConsoleFont;
-
-  /* Load optional functions used for retrieving filename information
-     associated with the currently debugged process or its dlls.  */
-  hm = LoadLibrary ("psapi.dll");
-  if (hm)
-    {
-      GPA (hm, EnumProcessModules);
-#ifdef __x86_64__
-      GPA (hm, EnumProcessModulesEx);
-#endif
-      GPA (hm, GetModuleInformation);
-      GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
-	GetProcAddress (hm, GetModuleFileNameEx_name);
-    }
-
-  if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)
-    {
-      /* Set variables to dummy versions of these processes if the function
-	 wasn't found in psapi.dll.  */
-      EnumProcessModules = bad_EnumProcessModules;
-      GetModuleInformation = bad_GetModuleInformation;
-      GetModuleFileNameEx = bad_GetModuleFileNameEx;
-      /* This will probably fail on Windows 9x/Me.  Let the user know
-	 that we're missing some functionality.  */
-      warning(_("\
-cannot automatically find executable file or library to read symbols.\n\
-Use \"file\" or \"dll\" command to load executable/libraries directly."));
-    }
-
-  hm = LoadLibrary ("advapi32.dll");
-  if (hm)
-    {
-      GPA (hm, OpenProcessToken);
-      GPA (hm, LookupPrivilegeValueA);
-      GPA (hm, AdjustTokenPrivileges);
-      /* Only need to set one of these since if OpenProcessToken fails nothing
-	 else is needed.  */
-      if (!OpenProcessToken || !LookupPrivilegeValueA
-	  || !AdjustTokenPrivileges)
-	OpenProcessToken = bad_OpenProcessToken;
-    }
-
-#undef GPA
 }

@@ -72,9 +72,6 @@ private:
   /* The intensity.  */
   const char *m_intensity;
 
-  /* Storage for prefixes needed when registering the commands.  */
-  std::string m_show_prefix;
-  std::string m_set_prefix;
   /* Storage for command lists needed when registering
      subcommands.  */
   struct cmd_list_element *m_set_list = nullptr;

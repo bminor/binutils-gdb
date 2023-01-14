@@ -49,13 +49,17 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  chown \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
+#  ffs \
 #  fnmatch-gnu \
 #  frexpl \
+#  gendocs \
 #  getcwd \
+#  getline \
 #  gettimeofday \
 #  gitlog-to-changelog \
 #  glob \
@@ -68,10 +72,12 @@
 #  mkdir \
 #  mkdtemp \
 #  mkostemp \
+#  netdb \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
 #  rename \
+#  select \
 #  setenv \
 #  signal-h \
 #  strchrnul \
@@ -179,6 +185,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/builtin-expect.m4 \
 	$(top_srcdir)/import/m4/canonicalize.m4 \
 	$(top_srcdir)/import/m4/chdir-long.m4 \
+	$(top_srcdir)/import/m4/chown.m4 \
 	$(top_srcdir)/import/m4/clock_time.m4 \
 	$(top_srcdir)/import/m4/close.m4 \
 	$(top_srcdir)/import/m4/closedir.m4 \
@@ -203,6 +210,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/fcntl.m4 \
 	$(top_srcdir)/import/m4/fcntl_h.m4 \
 	$(top_srcdir)/import/m4/fdopendir.m4 \
+	$(top_srcdir)/import/m4/ffs.m4 \
 	$(top_srcdir)/import/m4/filenamecat.m4 \
 	$(top_srcdir)/import/m4/flexmember.m4 \
 	$(top_srcdir)/import/m4/float_h.m4 \
@@ -217,7 +225,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/getcwd-abort-bug.m4 \
 	$(top_srcdir)/import/m4/getcwd-path-max.m4 \
 	$(top_srcdir)/import/m4/getcwd.m4 \
+	$(top_srcdir)/import/m4/getdelim.m4 \
 	$(top_srcdir)/import/m4/getdtablesize.m4 \
+	$(top_srcdir)/import/m4/getline.m4 \
 	$(top_srcdir)/import/m4/getlogin.m4 \
 	$(top_srcdir)/import/m4/getlogin_r.m4 \
 	$(top_srcdir)/import/m4/getpagesize.m4 \
@@ -264,6 +274,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/msvc-inval.m4 \
 	$(top_srcdir)/import/m4/msvc-nothrow.m4 \
 	$(top_srcdir)/import/m4/multiarch.m4 \
+	$(top_srcdir)/import/m4/netdb_h.m4 \
 	$(top_srcdir)/import/m4/netinet_in_h.m4 \
 	$(top_srcdir)/import/m4/nocrash.m4 \
 	$(top_srcdir)/import/m4/off_t.m4 \
@@ -284,9 +295,12 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/rewinddir.m4 \
 	$(top_srcdir)/import/m4/rmdir.m4 \
 	$(top_srcdir)/import/m4/save-cwd.m4 \
+	$(top_srcdir)/import/m4/select.m4 \
 	$(top_srcdir)/import/m4/setenv.m4 \
 	$(top_srcdir)/import/m4/setlocale_null.m4 \
 	$(top_srcdir)/import/m4/signal_h.m4 \
+	$(top_srcdir)/import/m4/socketlib.m4 \
+	$(top_srcdir)/import/m4/sockets.m4 \
 	$(top_srcdir)/import/m4/socklen.m4 \
 	$(top_srcdir)/import/m4/sockpfaf.m4 \
 	$(top_srcdir)/import/m4/ssize_t.m4 \
@@ -304,10 +318,12 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/strerror.m4 \
 	$(top_srcdir)/import/m4/strerror_r.m4 \
 	$(top_srcdir)/import/m4/string_h.m4 \
+	$(top_srcdir)/import/m4/strings_h.m4 \
 	$(top_srcdir)/import/m4/strnlen.m4 \
 	$(top_srcdir)/import/m4/strstr.m4 \
 	$(top_srcdir)/import/m4/strtok_r.m4 \
 	$(top_srcdir)/import/m4/sys_random_h.m4 \
+	$(top_srcdir)/import/m4/sys_select_h.m4 \
 	$(top_srcdir)/import/m4/sys_socket_h.m4 \
 	$(top_srcdir)/import/m4/sys_stat_h.m4 \
 	$(top_srcdir)/import/m4/sys_time_h.m4 \
@@ -355,7 +371,7 @@ am_libgnu_a_OBJECTS = openat-proc.$(OBJEXT) basename-lgpl.$(OBJEXT) \
 	malloc/scratch_buffer_grow.$(OBJEXT) \
 	malloc/scratch_buffer_grow_preserve.$(OBJEXT) \
 	malloc/scratch_buffer_set_array_size.$(OBJEXT) \
-	setlocale_null.$(OBJEXT) stat-time.$(OBJEXT) \
+	setlocale_null.$(OBJEXT) sockets.$(OBJEXT) stat-time.$(OBJEXT) \
 	strnlen1.$(OBJEXT) sys_socket.$(OBJEXT) tempname.$(OBJEXT) \
 	glthread/threadlib.$(OBJEXT) unistd.$(OBJEXT) \
 	dup-safer.$(OBJEXT) fd-safer.$(OBJEXT) pipe-safer.$(OBJEXT) \
@@ -548,6 +564,7 @@ GNULIB_FDATASYNC = @GNULIB_FDATASYNC@
 GNULIB_FDOPEN = @GNULIB_FDOPEN@
 GNULIB_FDOPENDIR = @GNULIB_FDOPENDIR@
 GNULIB_FFLUSH = @GNULIB_FFLUSH@
+GNULIB_FFS = @GNULIB_FFS@
 GNULIB_FFSL = @GNULIB_FFSL@
 GNULIB_FFSLL = @GNULIB_FFSLL@
 GNULIB_FGETC = @GNULIB_FGETC@
@@ -585,6 +602,7 @@ GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
 GNULIB_FUTIMENS = @GNULIB_FUTIMENS@
 GNULIB_FWRITE = @GNULIB_FWRITE@
+GNULIB_GETADDRINFO = @GNULIB_GETADDRINFO@
 GNULIB_GETC = @GNULIB_GETC@
 GNULIB_GETCHAR = @GNULIB_GETCHAR@
 GNULIB_GETCWD = @GNULIB_GETCWD@
@@ -768,6 +786,7 @@ GNULIB_POWF = @GNULIB_POWF@
 GNULIB_PREAD = @GNULIB_PREAD@
 GNULIB_PRINTF = @GNULIB_PRINTF@
 GNULIB_PRINTF_POSIX = @GNULIB_PRINTF_POSIX@
+GNULIB_PSELECT = @GNULIB_PSELECT@
 GNULIB_PTHREAD_SIGMASK = @GNULIB_PTHREAD_SIGMASK@
 GNULIB_PTSNAME = @GNULIB_PTSNAME@
 GNULIB_PTSNAME_R = @GNULIB_PTSNAME_R@
@@ -808,6 +827,7 @@ GNULIB_RPMATCH = @GNULIB_RPMATCH@
 GNULIB_SCANDIR = @GNULIB_SCANDIR@
 GNULIB_SCANF = @GNULIB_SCANF@
 GNULIB_SECURE_GETENV = @GNULIB_SECURE_GETENV@
+GNULIB_SELECT = @GNULIB_SELECT@
 GNULIB_SEND = @GNULIB_SEND@
 GNULIB_SENDTO = @GNULIB_SENDTO@
 GNULIB_SETENV = @GNULIB_SETENV@
@@ -990,16 +1010,20 @@ HAVE_DECL_FDOPENDIR = @HAVE_DECL_FDOPENDIR@
 HAVE_DECL_FLOORF = @HAVE_DECL_FLOORF@
 HAVE_DECL_FLOORL = @HAVE_DECL_FLOORL@
 HAVE_DECL_FPURGE = @HAVE_DECL_FPURGE@
+HAVE_DECL_FREEADDRINFO = @HAVE_DECL_FREEADDRINFO@
 HAVE_DECL_FREXPL = @HAVE_DECL_FREXPL@
 HAVE_DECL_FSEEKO = @HAVE_DECL_FSEEKO@
 HAVE_DECL_FTELLO = @HAVE_DECL_FTELLO@
+HAVE_DECL_GAI_STRERROR = @HAVE_DECL_GAI_STRERROR@
 HAVE_DECL_GCVT = @HAVE_DECL_GCVT@
+HAVE_DECL_GETADDRINFO = @HAVE_DECL_GETADDRINFO@
 HAVE_DECL_GETDELIM = @HAVE_DECL_GETDELIM@
 HAVE_DECL_GETDOMAINNAME = @HAVE_DECL_GETDOMAINNAME@
 HAVE_DECL_GETLINE = @HAVE_DECL_GETLINE@
 HAVE_DECL_GETLOADAVG = @HAVE_DECL_GETLOADAVG@
 HAVE_DECL_GETLOGIN = @HAVE_DECL_GETLOGIN@
 HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
+HAVE_DECL_GETNAMEINFO = @HAVE_DECL_GETNAMEINFO@
 HAVE_DECL_GETPAGESIZE = @HAVE_DECL_GETPAGESIZE@
 HAVE_DECL_GETUSERSHELL = @HAVE_DECL_GETUSERSHELL@
 HAVE_DECL_IMAXABS = @HAVE_DECL_IMAXABS@
@@ -1032,6 +1056,7 @@ HAVE_DECL_SNPRINTF = @HAVE_DECL_SNPRINTF@
 HAVE_DECL_SQRTL = @HAVE_DECL_SQRTL@
 HAVE_DECL_STRDUP = @HAVE_DECL_STRDUP@
 HAVE_DECL_STRERROR_R = @HAVE_DECL_STRERROR_R@
+HAVE_DECL_STRNCASECMP = @HAVE_DECL_STRNCASECMP@
 HAVE_DECL_STRNDUP = @HAVE_DECL_STRNDUP@
 HAVE_DECL_STRNLEN = @HAVE_DECL_STRNLEN@
 HAVE_DECL_STRSIGNAL = @HAVE_DECL_STRSIGNAL@
@@ -1070,6 +1095,7 @@ HAVE_FCNTL = @HAVE_FCNTL@
 HAVE_FDATASYNC = @HAVE_FDATASYNC@
 HAVE_FDOPENDIR = @HAVE_FDOPENDIR@
 HAVE_FEATURES_H = @HAVE_FEATURES_H@
+HAVE_FFS = @HAVE_FFS@
 HAVE_FFSL = @HAVE_FFSL@
 HAVE_FFSLL = @HAVE_FFSLL@
 HAVE_FMA = @HAVE_FMA@
@@ -1155,6 +1181,7 @@ HAVE_MODFF = @HAVE_MODFF@
 HAVE_MODFL = @HAVE_MODFL@
 HAVE_MSVC_INVALID_PARAMETER_HANDLER = @HAVE_MSVC_INVALID_PARAMETER_HANDLER@
 HAVE_NANOSLEEP = @HAVE_NANOSLEEP@
+HAVE_NETDB_H = @HAVE_NETDB_H@
 HAVE_NETINET_IN_H = @HAVE_NETINET_IN_H@
 HAVE_NEWLOCALE = @HAVE_NEWLOCALE@
 HAVE_OPENAT = @HAVE_OPENAT@
@@ -1169,6 +1196,7 @@ HAVE_POSIX_OPENPT = @HAVE_POSIX_OPENPT@
 HAVE_POSIX_SIGNALBLOCKING = @HAVE_POSIX_SIGNALBLOCKING@
 HAVE_POWF = @HAVE_POWF@
 HAVE_PREAD = @HAVE_PREAD@
+HAVE_PSELECT = @HAVE_PSELECT@
 HAVE_PTHREAD_SIGMASK = @HAVE_PTHREAD_SIGMASK@
 HAVE_PTSNAME = @HAVE_PTSNAME@
 HAVE_PTSNAME_R = @HAVE_PTSNAME_R@
@@ -1216,9 +1244,11 @@ HAVE_SQRTL = @HAVE_SQRTL@
 HAVE_STDINT_H = @HAVE_STDINT_H@
 HAVE_STPCPY = @HAVE_STPCPY@
 HAVE_STPNCPY = @HAVE_STPNCPY@
+HAVE_STRCASECMP = @HAVE_STRCASECMP@
 HAVE_STRCASESTR = @HAVE_STRCASESTR@
 HAVE_STRCHRNUL = @HAVE_STRCHRNUL@
 HAVE_STRERRORNAME_NP = @HAVE_STRERRORNAME_NP@
+HAVE_STRINGS_H = @HAVE_STRINGS_H@
 HAVE_STRPBRK = @HAVE_STRPBRK@
 HAVE_STRPTIME = @HAVE_STRPTIME@
 HAVE_STRSEP = @HAVE_STRSEP@
@@ -1226,6 +1256,7 @@ HAVE_STRTOD = @HAVE_STRTOD@
 HAVE_STRTOLD = @HAVE_STRTOLD@
 HAVE_STRTOLL = @HAVE_STRTOLL@
 HAVE_STRTOULL = @HAVE_STRTOULL@
+HAVE_STRUCT_ADDRINFO = @HAVE_STRUCT_ADDRINFO@
 HAVE_STRUCT_RANDOM_DATA = @HAVE_STRUCT_RANDOM_DATA@
 HAVE_STRUCT_SIGACTION_SA_SIGACTION = @HAVE_STRUCT_SIGACTION_SA_SIGACTION@
 HAVE_STRUCT_SOCKADDR_STORAGE = @HAVE_STRUCT_SOCKADDR_STORAGE@
@@ -1239,6 +1270,7 @@ HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
 HAVE_SYS_LOADAVG_H = @HAVE_SYS_LOADAVG_H@
 HAVE_SYS_PARAM_H = @HAVE_SYS_PARAM_H@
 HAVE_SYS_RANDOM_H = @HAVE_SYS_RANDOM_H@
+HAVE_SYS_SELECT_H = @HAVE_SYS_SELECT_H@
 HAVE_SYS_SOCKET_H = @HAVE_SYS_SOCKET_H@
 HAVE_SYS_TIME_H = @HAVE_SYS_TIME_H@
 HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
@@ -1322,6 +1354,7 @@ LIBOBJS = @LIBOBJS@
 LIBPMULTITHREAD = @LIBPMULTITHREAD@
 LIBPTHREAD = @LIBPTHREAD@
 LIBS = @LIBS@
+LIBSOCKET = @LIBSOCKET@
 LIBSTDTHREAD = @LIBSTDTHREAD@
 LIBTHREAD = @LIBTHREAD@
 LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
@@ -1330,6 +1363,7 @@ LIB_GETRANDOM = @LIB_GETRANDOM@
 LIB_HARD_LOCALE = @LIB_HARD_LOCALE@
 LIB_MBRTOWC = @LIB_MBRTOWC@
 LIB_SCHED_YIELD = @LIB_SCHED_YIELD@
+LIB_SELECT = @LIB_SELECT@
 LIB_SETLOCALE_NULL = @LIB_SETLOCALE_NULL@
 LIMITS_H = @LIMITS_H@
 LN_S = @LN_S@
@@ -1359,14 +1393,17 @@ NEXT_AS_FIRST_DIRECTIVE_INTTYPES_H = @NEXT_AS_FIRST_DIRECTIVE_INTTYPES_H@
 NEXT_AS_FIRST_DIRECTIVE_LIMITS_H = @NEXT_AS_FIRST_DIRECTIVE_LIMITS_H@
 NEXT_AS_FIRST_DIRECTIVE_LOCALE_H = @NEXT_AS_FIRST_DIRECTIVE_LOCALE_H@
 NEXT_AS_FIRST_DIRECTIVE_MATH_H = @NEXT_AS_FIRST_DIRECTIVE_MATH_H@
+NEXT_AS_FIRST_DIRECTIVE_NETDB_H = @NEXT_AS_FIRST_DIRECTIVE_NETDB_H@
 NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H = @NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H@
 NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H = @NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H@
 NEXT_AS_FIRST_DIRECTIVE_STDDEF_H = @NEXT_AS_FIRST_DIRECTIVE_STDDEF_H@
 NEXT_AS_FIRST_DIRECTIVE_STDINT_H = @NEXT_AS_FIRST_DIRECTIVE_STDINT_H@
 NEXT_AS_FIRST_DIRECTIVE_STDIO_H = @NEXT_AS_FIRST_DIRECTIVE_STDIO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
+NEXT_AS_FIRST_DIRECTIVE_STRINGS_H = @NEXT_AS_FIRST_DIRECTIVE_STRINGS_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H@
+NEXT_AS_FIRST_DIRECTIVE_SYS_SELECT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_SELECT_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H@
@@ -1387,14 +1424,17 @@ NEXT_INTTYPES_H = @NEXT_INTTYPES_H@
 NEXT_LIMITS_H = @NEXT_LIMITS_H@
 NEXT_LOCALE_H = @NEXT_LOCALE_H@
 NEXT_MATH_H = @NEXT_MATH_H@
+NEXT_NETDB_H = @NEXT_NETDB_H@
 NEXT_NETINET_IN_H = @NEXT_NETINET_IN_H@
 NEXT_SIGNAL_H = @NEXT_SIGNAL_H@
 NEXT_STDDEF_H = @NEXT_STDDEF_H@
 NEXT_STDINT_H = @NEXT_STDINT_H@
 NEXT_STDIO_H = @NEXT_STDIO_H@
 NEXT_STDLIB_H = @NEXT_STDLIB_H@
+NEXT_STRINGS_H = @NEXT_STRINGS_H@
 NEXT_STRING_H = @NEXT_STRING_H@
 NEXT_SYS_RANDOM_H = @NEXT_SYS_RANDOM_H@
+NEXT_SYS_SELECT_H = @NEXT_SYS_SELECT_H@
 NEXT_SYS_SOCKET_H = @NEXT_SYS_SOCKET_H@
 NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
 NEXT_SYS_TIME_H = @NEXT_SYS_TIME_H@
@@ -1496,6 +1536,8 @@ REPLACE_FTELL = @REPLACE_FTELL@
 REPLACE_FTELLO = @REPLACE_FTELLO@
 REPLACE_FTRUNCATE = @REPLACE_FTRUNCATE@
 REPLACE_FUTIMENS = @REPLACE_FUTIMENS@
+REPLACE_GAI_STRERROR = @REPLACE_GAI_STRERROR@
+REPLACE_GETADDRINFO = @REPLACE_GETADDRINFO@
 REPLACE_GETCWD = @REPLACE_GETCWD@
 REPLACE_GETDELIM = @REPLACE_GETDELIM@
 REPLACE_GETDOMAINNAME = @REPLACE_GETDOMAINNAME@
@@ -1586,6 +1628,7 @@ REPLACE_POPEN = @REPLACE_POPEN@
 REPLACE_POSIX_MEMALIGN = @REPLACE_POSIX_MEMALIGN@
 REPLACE_PREAD = @REPLACE_PREAD@
 REPLACE_PRINTF = @REPLACE_PRINTF@
+REPLACE_PSELECT = @REPLACE_PSELECT@
 REPLACE_PTHREAD_SIGMASK = @REPLACE_PTHREAD_SIGMASK@
 REPLACE_PTSNAME = @REPLACE_PTSNAME@
 REPLACE_PTSNAME_R = @REPLACE_PTSNAME_R@
@@ -1611,6 +1654,7 @@ REPLACE_RMDIR = @REPLACE_RMDIR@
 REPLACE_ROUND = @REPLACE_ROUND@
 REPLACE_ROUNDF = @REPLACE_ROUNDF@
 REPLACE_ROUNDL = @REPLACE_ROUNDL@
+REPLACE_SELECT = @REPLACE_SELECT@
 REPLACE_SETENV = @REPLACE_SETENV@
 REPLACE_SETLOCALE = @REPLACE_SETLOCALE@
 REPLACE_SETSTATE = @REPLACE_SETSTATE@
@@ -1773,18 +1817,19 @@ noinst_LTLIBRARIES =
 # No GNU Make output.
 EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	assure.h attribute.h basename-lgpl.h btowc.c \
-	canonicalize-lgpl.c chdir-long.c chdir-long.h cloexec.h \
-	close.c closedir.c dirent-private.h count-one-bits.h \
-	ctype.in.h dirent.in.h dirfd.c dirname.h dup.c dup2.c \
-	eloop-threshold.h errno.in.h error.c error.h exitfail.h \
-	fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c filename.h \
-	filenamecat.h flexmember.h float.c float.in.h itold.c \
-	fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h fpucw.h free.c \
-	frexp.c frexp.c frexpl.c fstat.c stat-w32.c stat-w32.h \
-	at-func.c fstatat.c getcwd.c getcwd-lgpl.c getdtablesize.c \
-	getlogin_r.c getrandom.c gettimeofday.c \
-	$(top_srcdir)/import/extra/gitlog-to-changelog glob.c \
-	glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
+	canonicalize-lgpl.c chdir-long.c chdir-long.h chown.c \
+	fchown-stub.c cloexec.h close.c closedir.c dirent-private.h \
+	count-one-bits.h ctype.in.h dirent.in.h dirfd.c dirname.h \
+	dup.c dup2.c eloop-threshold.h errno.in.h error.c error.h \
+	exitfail.h fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c \
+	ffs.c filename.h filenamecat.h flexmember.h float.c float.in.h \
+	itold.c fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h \
+	fpucw.h free.c frexp.c frexp.c frexpl.c fstat.c stat-w32.c \
+	stat-w32.h at-func.c fstatat.c \
+	$(top_srcdir)/import/extra/gendocs.sh getcwd.c getcwd-lgpl.c \
+	getdelim.c getdtablesize.c getline.c getlogin_r.c getrandom.c \
+	gettimeofday.c $(top_srcdir)/import/extra/gitlog-to-changelog \
+	glob.c glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
 	glob.in.h hard-locale.h inet_ntop.c intprops.h inttypes.in.h \
 	isblank.c float+.h isnan.c isnand-nolibm.h isnand.c float+.h \
 	isnan.c isnanl-nolibm.h isnanl.c cdefs.h libc-config.h \
@@ -1796,22 +1841,23 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	mbtowc-impl.h mbtowc.c memchr.c memchr.valgrind memmem.c \
 	memmem.c str-two-way.h mempcpy.c memrchr.c mkdir.c mkdtemp.c \
 	mkostemp.c msvc-inval.c msvc-inval.h msvc-nothrow.c \
-	msvc-nothrow.h netinet_in.in.h open.c openat.c openat.h \
-	dirent-private.h opendir.c pathmax.h pipe.c rawmemchr.c \
-	rawmemchr.valgrind dirent-private.h readdir.c readlink.c \
-	realloc.c rename.c dirent-private.h rewinddir.c rmdir.c \
-	same-inode.h save-cwd.h malloc/scratch_buffer.h \
-	scratch_buffer.h setenv.c setlocale-lock.c setlocale_null.h \
-	windows-initguard.h signal.in.h _Noreturn.h arg-nonnull.h \
-	c++defs.h warn-on-use.h stat-w32.c stat-w32.h stat.c \
-	stat-time.h stdalign.in.h stdbool.in.h stddef.in.h stdint.in.h \
-	stdio.in.h stdlib.in.h strchrnul.c strchrnul.valgrind strdup.c \
-	streq.h strerror.c strerror-override.c strerror-override.h \
-	strerror_r.c string.in.h strnlen.c strstr.c str-two-way.h \
-	strstr.c strtok_r.c sys_random.in.h sys_socket.in.h \
-	sys_stat.in.h sys_time.in.h sys_types.in.h sys_uio.in.h \
-	tempname.h time.in.h time_r.c unistd.in.h unistd--.h \
-	unistd-safer.h unsetenv.c \
+	msvc-nothrow.h netdb.in.h netinet_in.in.h open.c openat.c \
+	openat.h dirent-private.h opendir.c pathmax.h pipe.c \
+	rawmemchr.c rawmemchr.valgrind dirent-private.h readdir.c \
+	readlink.c realloc.c rename.c dirent-private.h rewinddir.c \
+	rmdir.c same-inode.h save-cwd.h malloc/scratch_buffer.h \
+	scratch_buffer.h select.c setenv.c setlocale-lock.c \
+	setlocale_null.h windows-initguard.h signal.in.h _Noreturn.h \
+	arg-nonnull.h c++defs.h warn-on-use.h w32sock.h stat-w32.c \
+	stat-w32.h stat.c stat-time.h stdalign.in.h stdbool.in.h \
+	stddef.in.h stdint.in.h stdio.in.h stdlib.in.h strchrnul.c \
+	strchrnul.valgrind strdup.c streq.h strerror.c \
+	strerror-override.c strerror-override.h strerror_r.c \
+	string.in.h strings.in.h strnlen.c strstr.c str-two-way.h \
+	strstr.c strtok_r.c sys_random.in.h sys_select.in.h \
+	sys_socket.in.h sys_stat.in.h sys_time.in.h sys_types.in.h \
+	sys_uio.in.h tempname.h time.in.h time_r.c unistd.in.h \
+	unistd--.h unistd-safer.h unsetenv.c \
 	$(top_srcdir)/import/extra/update-copyright verify.h \
 	wchar.in.h wctype.in.h windows-initguard.h windows-mutex.c \
 	windows-mutex.h windows-once.c windows-once.h \
@@ -1820,25 +1866,27 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	wmemchr-impl.h wmemchr.c wmempcpy.c xalloc-oversized.h
 BUILT_SOURCES = $(ALLOCA_H) arpa/inet.h ctype.h dirent.h $(ERRNO_H) \
 	fcntl.h $(FLOAT_H) $(FNMATCH_H) $(GLOB_H) inttypes.h \
-	$(LIMITS_H) locale.h math.h $(NETINET_IN_H) signal.h \
+	$(LIMITS_H) locale.h math.h netdb.h $(NETINET_IN_H) signal.h \
 	$(STDALIGN_H) $(STDBOOL_H) $(STDDEF_H) $(STDINT_H) stdio.h \
-	stdlib.h string.h sys/random.h sys/socket.h sys/stat.h \
-	sys/time.h sys/types.h sys/uio.h time.h unistd.h wchar.h \
-	wctype.h
+	stdlib.h string.h strings.h sys/random.h sys/select.h \
+	sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h \
+	time.h unistd.h wchar.h wctype.h
 SUFFIXES = 
 MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	arpa/inet.h-t ctype.h ctype.h-t dirent.h dirent.h-t errno.h \
 	errno.h-t fcntl.h fcntl.h-t float.h float.h-t fnmatch.h \
 	fnmatch.h-t glob.h glob.h-t inttypes.h inttypes.h-t limits.h \
-	limits.h-t locale.h locale.h-t math.h math.h-t netinet/in.h \
-	netinet/in.h-t signal.h signal.h-t stdalign.h stdalign.h-t \
-	stdbool.h stdbool.h-t stddef.h stddef.h-t stdint.h stdint.h-t \
-	stdio.h stdio.h-t stdlib.h stdlib.h-t string.h string.h-t \
-	sys/random.h sys/random.h-t sys/socket.h sys/socket.h-t \
-	sys/stat.h sys/stat.h-t sys/time.h sys/time.h-t sys/types.h \
-	sys/types.h-t sys/uio.h sys/uio.h-t time.h time.h-t unistd.h \
-	unistd.h-t wchar.h wchar.h-t wctype.h wctype.h-t
-MOSTLYCLEANDIRS = arpa netinet sys sys sys sys
+	limits.h-t locale.h locale.h-t math.h math.h-t netdb.h \
+	netdb.h-t netinet/in.h netinet/in.h-t signal.h signal.h-t \
+	stdalign.h stdalign.h-t stdbool.h stdbool.h-t stddef.h \
+	stddef.h-t stdint.h stdint.h-t stdio.h stdio.h-t stdlib.h \
+	stdlib.h-t string.h string.h-t strings.h strings.h-t \
+	sys/random.h sys/random.h-t sys/select.h sys/select.h-t \
+	sys/socket.h sys/socket.h-t sys/stat.h sys/stat.h-t sys/time.h \
+	sys/time.h-t sys/types.h sys/types.h-t sys/uio.h sys/uio.h-t \
+	time.h time.h-t unistd.h unistd.h-t wchar.h wchar.h-t wctype.h \
+	wctype.h-t
+MOSTLYCLEANDIRS = arpa netinet sys sys sys sys sys
 CLEANFILES = 
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = 
@@ -1854,17 +1902,18 @@ libgnu_a_SOURCES = openat-priv.h openat-proc.c basename-lgpl.c \
 	malloc/scratch_buffer_grow.c \
 	malloc/scratch_buffer_grow_preserve.c \
 	malloc/scratch_buffer_set_array_size.c setlocale_null.c \
-	stat-time.c strnlen1.h strnlen1.c sys_socket.c tempname.c \
-	glthread/threadlib.c unistd.c dup-safer.c fd-safer.c \
-	pipe-safer.c wctype-h.c
+	sockets.h sockets.c stat-time.c strnlen1.h strnlen1.c \
+	sys_socket.c tempname.c glthread/threadlib.c unistd.c \
+	dup-safer.c fd-safer.c pipe-safer.c wctype-h.c
 libgnu_a_LIBADD = $(gl_LIBOBJS) @ALLOCA@
 libgnu_a_DEPENDENCIES = $(gl_LIBOBJS) @ALLOCA@
 EXTRA_libgnu_a_SOURCES = alloca.c btowc.c canonicalize-lgpl.c \
-	chdir-long.c close.c closedir.c dirfd.c dup.c dup2.c error.c \
-	fchdir.c fcntl.c fdopendir.c float.c itold.c fnmatch.c \
-	fnmatch_loop.c fnmatch.c free.c frexp.c frexp.c frexpl.c \
-	fstat.c stat-w32.c at-func.c fstatat.c getcwd.c getcwd-lgpl.c \
-	getdtablesize.c getlogin_r.c getrandom.c gettimeofday.c glob.c \
+	chdir-long.c chown.c fchown-stub.c close.c closedir.c dirfd.c \
+	dup.c dup2.c error.c fchdir.c fcntl.c fdopendir.c ffs.c \
+	float.c itold.c fnmatch.c fnmatch_loop.c fnmatch.c free.c \
+	frexp.c frexp.c frexpl.c fstat.c stat-w32.c at-func.c \
+	fstatat.c getcwd.c getcwd-lgpl.c getdelim.c getdtablesize.c \
+	getline.c getlogin_r.c getrandom.c gettimeofday.c glob.c \
 	glob_pattern_p.c globfree.c inet_ntop.c isblank.c isnan.c \
 	isnand.c isnan.c isnanl.c lstat.c malloc.c \
 	lc-charset-dispatch.c mbrtowc.c mbtowc-lock.c mbsinit.c \
@@ -1872,11 +1921,11 @@ EXTRA_libgnu_a_SOURCES = alloca.c btowc.c canonicalize-lgpl.c \
 	memmem.c mempcpy.c memrchr.c mkdir.c mkdtemp.c mkostemp.c \
 	msvc-inval.c msvc-nothrow.c open.c openat.c opendir.c pipe.c \
 	rawmemchr.c readdir.c readlink.c realloc.c rename.c \
-	rewinddir.c rmdir.c setenv.c setlocale-lock.c stat-w32.c \
-	stat.c strchrnul.c strdup.c strerror.c strerror-override.c \
-	strerror_r.c strnlen.c strstr.c strstr.c strtok_r.c time_r.c \
-	unsetenv.c windows-mutex.c windows-once.c windows-recmutex.c \
-	windows-rwlock.c wmemchr.c wmempcpy.c
+	rewinddir.c rmdir.c select.c setenv.c setlocale-lock.c \
+	stat-w32.c stat.c strchrnul.c strdup.c strerror.c \
+	strerror-override.c strerror_r.c strnlen.c strstr.c strstr.c \
+	strtok_r.c time_r.c unsetenv.c windows-mutex.c windows-once.c \
+	windows-recmutex.c windows-rwlock.c wmemchr.c wmempcpy.c
 
 # Use this preprocessor expression to decide whether #include_next works.
 # Do not rely on a 'configure'-time test for this, since the expression
@@ -1994,6 +2043,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btowc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canonicalize-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chdir-long.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chown.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/close.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/closedir.Po@am__quote@
@@ -2007,11 +2057,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exitfail.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fchdir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fchown-stub.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcntl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fd-hook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fd-safer-flag.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fd-safer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdopendir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filenamecat-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/float.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fnmatch.Po@am__quote@
@@ -2023,7 +2075,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fstatat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getcwd-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getcwd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getdelim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getdtablesize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getlogin_r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getprogname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getrandom.Po@am__quote@
@@ -2074,9 +2128,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rewinddir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rmdir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/save-cwd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/select.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setenv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setlocale-lock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/setlocale_null.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stat-time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stat-w32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stat.Po@am__quote@
@@ -2948,6 +3004,32 @@ math.h: math.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(
 	} > $@-t && \
 	mv $@-t $@
 
+# We need the following in order to create <netdb.h> when the system
+# doesn't have one that works with the given compiler.
+netdb.h: netdb.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_NETDB_H''@|$(NEXT_NETDB_H)|g' \
+	      -e 's|@''HAVE_NETDB_H''@|$(HAVE_NETDB_H)|g' \
+	      -e 's/@''GNULIB_GETADDRINFO''@/$(GNULIB_GETADDRINFO)/g' \
+	      -e 's|@''HAVE_STRUCT_ADDRINFO''@|$(HAVE_STRUCT_ADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_FREEADDRINFO''@|$(HAVE_DECL_FREEADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_GAI_STRERROR''@|$(HAVE_DECL_GAI_STRERROR)|g' \
+	      -e 's|@''HAVE_DECL_GETADDRINFO''@|$(HAVE_DECL_GETADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_GETNAMEINFO''@|$(HAVE_DECL_GETNAMEINFO)|g' \
+	      -e 's|@''REPLACE_GAI_STRERROR''@|$(REPLACE_GAI_STRERROR)|g' \
+	      -e 's|@''REPLACE_GETADDRINFO''@|$(REPLACE_GETADDRINFO)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/netdb.in.h; \
+	} > $@-t && \
+	mv $@-t $@
+
 # We need the following in order to create <netinet/in.h> when the system
 # doesn't have one.
 @GL_GENERATE_NETINET_IN_H_TRUE@netinet/in.h: netinet_in.in.h $(top_builddir)/config.status
@@ -3432,6 +3514,28 @@ string.h: string.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H
 	} > $@-t && \
 	mv $@-t $@
 
+# We need the following in order to create <strings.h> when the system
+# doesn't have one that works with the given compiler.
+strings.h: strings.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''HAVE_STRINGS_H''@|$(HAVE_STRINGS_H)|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_STRINGS_H''@|$(NEXT_STRINGS_H)|g' \
+	      -e 's/@''GNULIB_FFS''@/$(GNULIB_FFS)/g' \
+	      -e 's|@''HAVE_FFS''@|$(HAVE_FFS)|g' \
+	      -e 's|@''HAVE_STRCASECMP''@|$(HAVE_STRCASECMP)|g' \
+	      -e 's|@''HAVE_DECL_STRNCASECMP''@|$(HAVE_DECL_STRNCASECMP)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/strings.in.h; \
+	} > $@-t && \
+	mv $@-t $@
+
 # We need the following in order to create <sys/random.h> when the system
 # doesn't have one.
 sys/random.h: sys_random.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
@@ -3453,6 +3557,30 @@ sys/random.h: sys_random.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_N
 	      < $(srcdir)/sys_random.in.h; \
 	} > $@-t && \
 	mv -f $@-t $@
+
+# We need the following in order to create <sys/select.h> when the system
+# doesn't have one that works with the given compiler.
+sys/select.h: sys_select.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_at)$(MKDIR_P) sys
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_SELECT_H''@|$(NEXT_SYS_SELECT_H)|g' \
+	      -e 's|@''HAVE_SYS_SELECT_H''@|$(HAVE_SYS_SELECT_H)|g' \
+	      -e 's/@''GNULIB_PSELECT''@/$(GNULIB_PSELECT)/g' \
+	      -e 's/@''GNULIB_SELECT''@/$(GNULIB_SELECT)/g' \
+	      -e 's|@''HAVE_WINSOCK2_H''@|$(HAVE_WINSOCK2_H)|g' \
+	      -e 's|@''HAVE_PSELECT''@|$(HAVE_PSELECT)|g' \
+	      -e 's|@''REPLACE_PSELECT''@|$(REPLACE_PSELECT)|g' \
+	      -e 's|@''REPLACE_SELECT''@|$(REPLACE_SELECT)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/sys_select.in.h; \
+	} > $@-t && \
+	mv $@-t $@
 
 # We need the following in order to create <sys/socket.h> when the system
 # doesn't have one that works with the given compiler.

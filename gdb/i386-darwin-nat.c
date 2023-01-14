@@ -479,7 +479,6 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
     {
       /* Attaching to a process.  Let's figure out what kind it is.  */
       x86_thread_state_t gp_regs;
-      struct gdbarch_info info;
       unsigned int gp_count = x86_THREAD_STATE_COUNT;
       kern_return_t ret;
 
@@ -491,7 +490,7 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 	  return;
 	}
 
-      gdbarch_info_init (&info);
+      gdbarch_info info;
       gdbarch_info_fill (&info);
       info.byte_order = gdbarch_byte_order (target_gdbarch ());
       info.osabi = GDB_OSABI_DARWIN;

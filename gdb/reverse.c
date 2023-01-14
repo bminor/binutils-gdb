@@ -326,38 +326,39 @@ void _initialize_reverse ();
 void
 _initialize_reverse ()
 {
-  add_com ("reverse-step", class_run, reverse_step, _("\
+  cmd_list_element *reverse_step_cmd
+   = add_com ("reverse-step", class_run, reverse_step, _("\
 Step program backward until it reaches the beginning of another source line.\n\
-Argument N means do this N times (or till program stops for another reason).")
-	   );
-  add_com_alias ("rs", "reverse-step", class_run, 1);
+Argument N means do this N times (or till program stops for another reason)."));
+  add_com_alias ("rs", reverse_step_cmd, class_run, 1);
 
-  add_com ("reverse-next", class_run, reverse_next, _("\
+  cmd_list_element *reverse_next_cmd
+    = add_com ("reverse-next", class_run, reverse_next, _("\
 Step program backward, proceeding through subroutine calls.\n\
 Like the \"reverse-step\" command as long as subroutine calls do not happen;\n\
 when they do, the call is treated as one instruction.\n\
-Argument N means do this N times (or till program stops for another reason).")
-	   );
-  add_com_alias ("rn", "reverse-next", class_run, 1);
+Argument N means do this N times (or till program stops for another reason)."));
+  add_com_alias ("rn", reverse_next_cmd, class_run, 1);
 
-  add_com ("reverse-stepi", class_run, reverse_stepi, _("\
+  cmd_list_element *reverse_stepi_cmd
+    = add_com ("reverse-stepi", class_run, reverse_stepi, _("\
 Step backward exactly one instruction.\n\
-Argument N means do this N times (or till program stops for another reason).")
-	   );
-  add_com_alias ("rsi", "reverse-stepi", class_run, 0);
+Argument N means do this N times (or till program stops for another reason)."));
+  add_com_alias ("rsi", reverse_stepi_cmd, class_run, 0);
 
-  add_com ("reverse-nexti", class_run, reverse_nexti, _("\
+  cmd_list_element *reverse_nexti_cmd
+    = add_com ("reverse-nexti", class_run, reverse_nexti, _("\
 Step backward one instruction, but proceed through called subroutines.\n\
-Argument N means do this N times (or till program stops for another reason).")
-	   );
-  add_com_alias ("rni", "reverse-nexti", class_run, 0);
+Argument N means do this N times (or till program stops for another reason)."));
+  add_com_alias ("rni", reverse_nexti_cmd, class_run, 0);
 
-  add_com ("reverse-continue", class_run, reverse_continue, _("\
+  cmd_list_element *reverse_continue_cmd
+    = add_com ("reverse-continue", class_run, reverse_continue, _("\
 Continue program being debugged but run it in reverse.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
 the breakpoint won't break until the Nth time it is reached)."));
-  add_com_alias ("rc", "reverse-continue", class_run, 0);
+  add_com_alias ("rc", reverse_continue_cmd, class_run, 0);
 
   add_com ("reverse-finish", class_run, reverse_finish, _("\
 Execute backward until just before selected stack frame is called."));

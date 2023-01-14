@@ -17,6 +17,9 @@
  
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "m16_idecode.h"
 #include "m32_idecode.h"

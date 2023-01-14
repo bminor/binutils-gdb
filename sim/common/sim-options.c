@@ -17,7 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include <string.h>
 #include <stdlib.h>
@@ -28,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-io.h"
 #include "sim-assert.h"
 #include "version.h"
+#include "hashtab.h"
 
 #include "bfd.h"
 
@@ -235,6 +238,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	    case USER_ENVIRONMENT: type = "user"; break;
 	    case VIRTUAL_ENVIRONMENT: type = "virtual"; break;
 	    case OPERATING_ENVIRONMENT: type = "operating"; break;
+	    default: abort ();
 	    }
 	  sim_io_eprintf (sd, "Simulator compiled for the %s environment only.\n",
 			  type);
@@ -283,6 +287,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	case FORCED_ALIGNMENT:
 	  sim_io_eprintf (sd, "Simulator compiled for forced alignment only.\n");
 	  break;
+	default: abort ();
 	}
       return SIM_RC_FAIL;
 
@@ -416,34 +421,26 @@ standard_install (SIM_DESC sd)
 /* Return non-zero if arg is a duplicate argument.
    If ARG is NULL, initialize.  */
 
-#define ARG_HASH_SIZE 97
-#define ARG_HASH(a) ((256 * (unsigned char) a[0] + (unsigned char) a[1]) % ARG_HASH_SIZE)
-
 static int
 dup_arg_p (const char *arg)
 {
-  int hash;
-  static const char **arg_table = NULL;
+  static htab_t arg_table = NULL;
+  void **slot;
 
   if (arg == NULL)
     {
       if (arg_table == NULL)
-	arg_table = (const char **) xmalloc (ARG_HASH_SIZE * sizeof (char *));
-      memset (arg_table, 0, ARG_HASH_SIZE * sizeof (char *));
+	arg_table = htab_create_alloc (10, htab_hash_string,
+				       htab_eq_string, NULL,
+				       xcalloc, free);
+      htab_empty (arg_table);
       return 0;
     }
 
-  hash = ARG_HASH (arg);
-  while (arg_table[hash] != NULL)
-    {
-      if (strcmp (arg, arg_table[hash]) == 0)
-	return 1;
-      /* We assume there won't be more than ARG_HASH_SIZE arguments so we
-	 don't check if the table is full.  */
-      if (++hash == ARG_HASH_SIZE)
-	hash = 0;
-    }
-  arg_table[hash] = arg;
+  slot = htab_find_slot (arg_table, arg, INSERT);
+  if (*slot != NULL)
+    return 1;
+  *slot = (void *) arg;
   return 0;
 }
 

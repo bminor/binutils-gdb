@@ -6,7 +6,7 @@ Symbol table '.symtab' contains 9 entries:
  +2: 0+0 +0 +SECTION +LOCAL +DEFAULT +2 (|\.data)
  +3: 0+0 +0 +SECTION +LOCAL +DEFAULT +3 (|\.bss)
  +4: 0+0 +0 +SECTION +LOCAL +DEFAULT +7 (|AAA)
- +5: 0+0 +0 +SECTION +LOCAL +DEFAULT +4 (|\.reginfo)
+ +5: 0+0 +0 +SECTION +LOCAL +DEFAULT +4 (|\.reginfo|\.MIPS.options)
  +6: 0+0 +0 +SECTION +LOCAL +DEFAULT +5 (|\.MIPS\.abiflags)
  +7: 0+0 +0 +SECTION +LOCAL +DEFAULT +6 (|\.pdr)
  +8: 0+0 +0 +SECTION +LOCAL +DEFAULT +8 (|\.gnu\.attributes)

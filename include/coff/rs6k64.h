@@ -144,54 +144,59 @@ struct external_syment
 
 union external_auxent
 {
-    struct {
-    	union {
-	    struct {
-		char x_lnno[4]; 	/* declaration line number */
-		char x_size[2]; 	/* str/union/array size */
-	    } x_lnsz;
-	    struct {
-		char x_lnnoptr[8];/* ptr to fcn line */
-		char x_fsize[4];	 /* size of function */
-		char x_endndx[4];	 /* entry ndx past block end */
-	    } x_fcn;
- 	} x_fcnary;
-    } x_sym;
-         
-    struct {
-        union {
-            char x_fname[E_FILNMLEN];
-            struct {
-	        char x_zeroes[4];
-                char x_offset[4];
-	        char x_pad[6];
-            } x_n;
-        } x_n;
-        unsigned char x_ftype[1];
-        unsigned char x_resv[2];
-    } x_file;
+  struct {
+    char x_lnno[4]; 	/* declaration line number */
+    char x_pad[13];
+    char x_auxtype[1];
+  } x_sym;
 
-    struct {
-	char x_exptr[8];
-	char x_fsize[4];
-	char x_endndx[4];
-	char x_pad[1];
-    } x_except;
+  struct {
+    char x_lnnoptr[8];/* ptr to fcn line */
+    char x_fsize[4];	 /* size of function */
+    char x_endndx[4];	 /* entry ndx past block end */
+    char x_pad[1];
+    char x_auxtype[1];
+  } x_fcn;
 
-    struct {
-	    unsigned char x_scnlen_lo[4];
-	    unsigned char x_parmhash[4];
-	    unsigned char x_snhash[2];
-	    unsigned char x_smtyp[1];
-	    unsigned char x_smclas[1];
-	    unsigned char x_scnlen_hi[4];
-	    unsigned char x_pad[1];
-    } x_csect;	
+  struct {
+    union {
+      char x_fname[E_FILNMLEN];
+      struct {
+	char x_zeroes[4];
+	char x_offset[4];
+	char x_pad[6];
+      } x_n;
+    } x_n;
+    unsigned char x_ftype[1];
+    unsigned char x_resv[2];
+    char x_auxtype[1];
+  } x_file;
 
-    struct {
-	char x_pad[17];
-	char x_auxtype[1];
-    } x_auxtype;
+  struct {
+    char x_exptr[8];
+    char x_fsize[4];
+    char x_endndx[4];
+    char x_pad[1];
+    char x_auxtype[1];
+  } x_except;
+
+  struct {
+    char x_scnlen_lo[4];
+    char x_parmhash[4];
+    char x_snhash[2];
+    char x_smtyp[1];
+    char x_smclas[1];
+    char x_scnlen_hi[4];
+    char x_pad[1];
+    char x_auxtype[1];
+  } x_csect;
+
+  struct {
+    char x_scnlen[8];
+    char x_nreloc[8];
+    char x_pad[1];
+    char x_auxtype[1];
+  } x_sect;
 };
 
 #define	SYMENT	struct external_syment
@@ -207,6 +212,7 @@ union external_auxent
 #define _AUX_SYM        253
 #define _AUX_FILE       252
 #define _AUX_CSECT      251
+#define _AUX_SECT       250
 
 /********************** RELOCATION DIRECTIVES **********************/
 

@@ -18,8 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -96,7 +97,7 @@ compare_symbols (const PTR ap, const PTR bp)
 
 static char opbuf[1000];
 
-static int
+static int ATTRIBUTE_PRINTF (2, 3)
 op_printf (char *buf, char *fmt, ...)
 {
   int ret;

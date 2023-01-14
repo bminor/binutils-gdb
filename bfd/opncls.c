@@ -89,6 +89,8 @@ _bfd_new_bfd (void)
       return NULL;
     }
 
+  nbfd->archive_plugin_fd = -1;
+
   return nbfd;
 }
 
@@ -1030,6 +1032,8 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
   ret = objalloc_alloc ((struct objalloc *) abfd->memory, ul_size);
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
+  else
+    abfd->alloc_size += size;
   return ret;
 }
 

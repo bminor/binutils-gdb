@@ -1025,18 +1025,11 @@ create_symbol2redef_htab (void)
 			    xcalloc, free);
 }
 
-/* There is htab_hash_string but no htab_eq_string. Makes sense.  */
-
-static int
-eq_string (const void *s1, const void *s2)
-{
-  return strcmp ((const char *) s1, (const char *) s2) == 0;
-}
-
 static htab_t
 create_symbol_htab (void)
 {
-  return htab_create_alloc (16, htab_hash_string, eq_string, NULL, xcalloc, free);
+  return htab_create_alloc (16, htab_hash_string, htab_eq_string, NULL,
+			    xcalloc, free);
 }
 
 static void

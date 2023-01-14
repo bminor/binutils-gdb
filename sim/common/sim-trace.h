@@ -142,9 +142,6 @@ enum {
 #define WITH_TRACE_SYSCALL_P	WITH_TRACE_P (TRACE_SYSCALL_IDX)
 #define WITH_TRACE_REGISTER_P	WITH_TRACE_P (TRACE_REGISTER_IDX)
 #define WITH_TRACE_DEBUG_P	WITH_TRACE_P (TRACE_DEBUG_IDX)
-
-/* Tracing install handler.  */
-MODULE_INSTALL_FN trace_install;
 
 /* Struct containing all system and cpu trace data.
 
@@ -333,8 +330,7 @@ extern void trace_prefix (SIM_DESC sd,
 			  const char *file_name,
 			  int line_nr,
 			  const char *fmt,
-			  ...)
-       __attribute__((format (printf, 8, 9)));
+			  ...) ATTRIBUTE_PRINTF (8, 9);
 
 /* Generic trace print, assumes trace_prefix() has been called */
 
@@ -342,8 +338,7 @@ extern void trace_generic (SIM_DESC sd,
 			   sim_cpu *cpu,
 			   int trace_idx,
 			   const char *fmt,
-			   ...)
-     __attribute__((format (printf, 4, 5)));
+			   ...) ATTRIBUTE_PRINTF (4, 5);
 
 /* Disassemble the specified address.  */
 
@@ -655,9 +650,10 @@ do { \
 
 
 extern void trace_printf (SIM_DESC, sim_cpu *, const char *, ...)
-     __attribute__((format (printf, 3, 4)));
+    ATTRIBUTE_PRINTF (3, 4);
 
-extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list);
+extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list)
+    ATTRIBUTE_PRINTF (3, 0);
 
 /* Debug support.
    This is included here because there isn't enough of it to justify
@@ -676,6 +672,6 @@ int trace_load_symbols (SIM_DESC);
 bfd_vma trace_sym_value (SIM_DESC, const char *name);
 
 extern void sim_debug_printf (sim_cpu *, const char *, ...)
-     __attribute__((format (printf, 2, 3)));
+    ATTRIBUTE_PRINTF (2, 3);
 
 #endif /* SIM_TRACE_H */

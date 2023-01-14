@@ -33,6 +33,7 @@
 */
 
 #include <functional>
+#include <string>
 
 class ptid_t
 {
@@ -123,6 +124,12 @@ public:
 	       to filter.  */
 	    || *this == filter);
   }
+
+  /* Return a string representation of the ptid.
+
+     This is only meant to be used in debug messages.  */
+
+  std::string to_string () const;
 
   /* Make a null ptid.  */
 

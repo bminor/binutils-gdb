@@ -16,7 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
@@ -217,7 +219,9 @@ main(int argc, char **argv)
     dinfo.endian = BFD_ENDIAN_BIG;
 #endif
 
+#ifdef F_GETFL
     termsave = fcntl(0, F_GETFL, 0);
+#endif
     using_history();
     init_signals();
     ebase.simtime = 0;

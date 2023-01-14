@@ -25,7 +25,8 @@ Disassembly of section .text:
 .*:	e6 f1 00 0c d4 55 [	 ]*vcnf	%v15,%v17,13,12
 .*:	b9 8b 90 6b [	 ]*rdp	%r6,%r9,%r11
 .*:	b9 8b 9d 6b [	 ]*rdp	%r6,%r9,%r11,13
-.*:	eb fd 68 f0 fd 71 [	 ]*lpswey	-10000\(%r6\),253
+.*:	eb 00 68 f0 fd 71 [	 ]*lpswey	-10000\(%r6\)
 .*:	b2 00 6f a0 [	 ]*lbear	4000\(%r6\)
 .*:	b2 01 6f a0 [	 ]*stbear	4000\(%r6\)
+.*:	b2 8f 5f ff [	 ]*qpaci	4095\(%r5\)
 .*:	07 07 [	 ]*nopr	%r7

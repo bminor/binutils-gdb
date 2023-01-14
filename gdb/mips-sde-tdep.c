@@ -164,6 +164,7 @@ mips_sde_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind mips_sde_frame_unwind =
 {
+  "mips sde sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   mips_sde_frame_this_id,

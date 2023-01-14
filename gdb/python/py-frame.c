@@ -79,10 +79,8 @@ frame_object_to_frame_info (PyObject *obj)
 static PyObject *
 frapy_str (PyObject *self)
 {
-  string_file strfile;
-
-  fprint_frame_id (&strfile, ((frame_object *) self)->frame_id);
-  return PyString_FromString (strfile.c_str ());
+  const frame_id &fid = ((frame_object *) self)->frame_id;
+  return PyString_FromString (fid.to_string ().c_str ());
 }
 
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.
@@ -579,6 +577,27 @@ frapy_select (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* The stack frame level for this frame.  */
+
+static PyObject *
+frapy_level (PyObject *self, PyObject *args)
+{
+  struct frame_info *fi;
+
+  try
+    {
+      FRAPY_REQUIRE_VALID (self, fi);
+
+      return gdb_py_object_from_longest (frame_relative_level (fi)).release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* Implementation of gdb.newest_frame () -> gdb.Frame.
    Returns the newest frame object.  */
 
@@ -750,6 +769,8 @@ Return the frame's symtab and line." },
 Return the value of the variable in this frame." },
   { "select", frapy_select, METH_NOARGS,
     "Select this frame as the user's current frame." },
+  { "level", frapy_level, METH_NOARGS,
+    "The stack level of this frame." },
   {NULL}  /* Sentinel */
 };
 

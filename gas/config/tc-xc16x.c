@@ -283,13 +283,12 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *rel;
   bfd_reloc_code_real_type r_type;
 
-  if (fixp->fx_addsy && fixp->fx_subsy)
+  if (fixp->fx_subsy)
     {
       if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
 	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			_("Difference of symbols in different sections is not supported"));
+	  as_bad_subtract (fixp);
 	  return NULL;
 	}
     }

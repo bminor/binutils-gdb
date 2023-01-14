@@ -1278,7 +1278,7 @@ else
   WINDMC_FOR_BUILD="\$(WINDMC)"
 fi
 
-AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 
 # We must set the default linker to the linker used by gcc for the correct
@@ -2811,6 +2811,9 @@ case " ${configdirs} " in
     ;;
   *\ gdbserver\ *)
     configdirs="${configdirs} gnulib gdbsupport"
+    ;;
+  *\ sim\ *)
+    configdirs="${configdirs} gnulib"
     ;;
 esac
 

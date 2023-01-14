@@ -574,14 +574,14 @@ enum cmdarg_kind
 
   /* Option type -ix.  */
   CMDARG_INIT_FILE,
-    
+
   /* Option type -iex.  */
   CMDARG_INIT_COMMAND,
 
-  /* Option type -sx.  */
+  /* Option type -eix.  */
   CMDARG_EARLYINIT_FILE,
 
-  /* Option type -sex.  */
+  /* Option type -eiex.  */
   CMDARG_EARLYINIT_COMMAND
 };
 
@@ -1039,7 +1039,7 @@ captured_main_1 (struct captured_main_args *context)
   gdb::alternate_signal_stack signal_stack;
 
   /* Initialize all files.  */
-  gdb_init (gdb_program_name);
+  gdb_init ();
 
   /* Process early init files and early init options from the command line.  */
   if (!inhibit_gdbinit)
@@ -1052,6 +1052,9 @@ captured_main_1 (struct captured_main_args *context)
     }
   execute_cmdargs (&cmdarg_vec, CMDARG_EARLYINIT_FILE,
 		   CMDARG_EARLYINIT_COMMAND, &ret);
+
+  /* Initialize the extension languages.  */
+  ext_lang_initialization ();
 
   /* Recheck if we're starting up quietly after processing the startup
      scripts and commands.  */

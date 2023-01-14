@@ -617,8 +617,6 @@ extern int ctf_hash_eq_string (const void *, const void *);
 extern int ctf_hash_eq_type_key (const void *, const void *);
 extern int ctf_hash_eq_type_id_key (const void *, const void *);
 
-extern int ctf_dynset_eq_string (const void *, const void *);
-
 typedef void (*ctf_hash_free_fun) (void *);
 
 typedef void (*ctf_hash_iter_f) (void *key, void *value, void *arg);

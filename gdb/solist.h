@@ -163,6 +163,8 @@ struct target_so_ops
   void (*handle_event) (void);
 };
 
+using so_list_range = next_range<so_list>;
+
 /* Free the memory associated with a (so_list *).  */
 void free_so (struct so_list *so);
 

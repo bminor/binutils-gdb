@@ -1,4 +1,5 @@
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <signal.h>
 #include <errno.h>
@@ -10,6 +11,7 @@
 #include <string.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "simops.h"
 #include "targ-vals.h"
 

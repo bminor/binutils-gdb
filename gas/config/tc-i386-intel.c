@@ -606,7 +606,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
   /* Handle vector operations.  */
   if (*input_line_pointer == '{')
     {
-      char *end = check_VecOperations (input_line_pointer, NULL);
+      char *end = check_VecOperations (input_line_pointer);
       if (end)
 	input_line_pointer = end;
       else

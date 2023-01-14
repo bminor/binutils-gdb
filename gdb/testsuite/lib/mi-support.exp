@@ -663,6 +663,34 @@ proc mi_gdb_load { arg } {
     return 0
 }
 
+# Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
+# Based on readnow from lib/gdb.exp.
+
+proc mi_readnow { args } {
+    global mi_gdb_prompt
+
+    if { [llength $args] == 1 } {
+	set re [lindex $args 0]
+    } else {
+	set re ""
+    }
+
+    set readnow_p 0
+    set cmd "maint print objfiles $re"
+    send_gdb "$cmd\n"
+    gdb_expect {
+	-re ".gdb_index: faked for ..readnow.." {
+	    # Record that we've seen the above pattern.
+	    set readnow_p 1
+	    exp_continue
+	}
+	-re "\\^done\r\n$mi_gdb_prompt$" {
+	}
+    }
+
+    return $readnow_p
+}
+
 # mi_gdb_test COMMAND PATTERN MESSAGE [IPATTERN] -- send a command to gdb; 
 #   test the result.
 #

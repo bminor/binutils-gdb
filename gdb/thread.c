@@ -177,17 +177,28 @@ clear_thread_inferior_resources (struct thread_info *tp)
   clear_inline_frame_state (tp);
 }
 
-/* Set the TP's state as exited.  */
+/* See gdbthread.h.  */
 
-static void
+void
 set_thread_exited (thread_info *tp, bool silent)
 {
   /* Dead threads don't need to step-over.  Remove from chain.  */
-  if (tp->step_over_next != NULL)
+  if (thread_is_in_step_over_chain (tp))
     global_thread_step_over_chain_remove (tp);
 
   if (tp->state != THREAD_EXITED)
     {
+      process_stratum_target *proc_target = tp->inf->process_target ();
+
+      /* Some targets unpush themselves from the inferior's target stack before
+         clearing the inferior's thread list (which marks all threads as exited,
+         and therefore leads to this function).  In this case, the inferior's
+         process target will be nullptr when we arrive here.
+
+         See also the comment in inferior::unpush_target.  */
+      if (proc_target != nullptr)
+	proc_target->maybe_remove_resumed_with_pending_wait_status (tp);
+
       gdb::observers::thread_exit.notify (tp, silent);
 
       /* Tag it as exited.  */
@@ -195,6 +206,14 @@ set_thread_exited (thread_info *tp, bool silent)
 
       /* Clear breakpoints, etc. associated with this thread.  */
       clear_thread_inferior_resources (tp);
+
+      /* Remove from the ptid_t map.  We don't want for
+	 find_thread_ptid to find exited threads.  Also, the target
+	 may reuse the ptid for a new thread, and there can only be
+	 one value per key; adding a new thread with the same ptid_t
+	 would overwrite the exited thread's ptid entry.  */
+      size_t nr_deleted = tp->inf->ptid_thread_map.erase (tp->ptid);
+      gdb_assert (nr_deleted == 1);
     }
 }
 
@@ -203,17 +222,8 @@ init_thread_list (void)
 {
   highest_thread_num = 0;
 
-  for (thread_info *tp : all_threads_safe ())
-    {
-      inferior *inf = tp->inf;
-
-      if (tp->deletable ())
-	delete tp;
-      else
-	set_thread_exited (tp, 1);
-
-      inf->thread_list = NULL;
-    }
+  for (inferior *inf : all_inferiors ())
+    inf->clear_thread_list (true);
 }
 
 /* Allocate a new thread of inferior INF with target id PTID and add
@@ -224,21 +234,12 @@ new_thread (struct inferior *inf, ptid_t ptid)
 {
   thread_info *tp = new thread_info (inf, ptid);
 
-  if (inf->thread_list == NULL)
-    inf->thread_list = tp;
-  else
-    {
-      struct thread_info *last;
+  inf->thread_list.push_back (*tp);
 
-      for (last = inf->thread_list; last->next != NULL; last = last->next)
-	gdb_assert (ptid != last->ptid
-		    || last->state == THREAD_EXITED);
+  /* A thread with this ptid should not exist in the map yet.  */
+  gdb_assert (inf->ptid_thread_map.find (ptid) == inf->ptid_thread_map.end ());
 
-      gdb_assert (ptid != last->ptid
-		  || last->state == THREAD_EXITED);
-
-      last->next = tp;
-    }
+  inf->ptid_thread_map[ptid] = tp;
 
   return tp;
 }
@@ -298,7 +299,7 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
   /* Nothing to follow yet.  */
   memset (&this->pending_follow, 0, sizeof (this->pending_follow));
   this->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-  this->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  this->m_suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 }
 
 thread_info::~thread_info ()
@@ -316,68 +317,54 @@ thread_info::deletable () const
   return refcount () == 0 && !is_current_thread (this);
 }
 
-/* Add TP to the end of the step-over chain LIST_P.  */
+/* See gdbthread.h.  */
 
-static void
-step_over_chain_enqueue (struct thread_info **list_p, struct thread_info *tp)
+void
+thread_info::set_resumed (bool resumed)
 {
-  gdb_assert (tp->step_over_next == NULL);
-  gdb_assert (tp->step_over_prev == NULL);
+  if (resumed == m_resumed)
+    return;
 
-  if (*list_p == NULL)
-    {
-      *list_p = tp;
-      tp->step_over_prev = tp->step_over_next = tp;
-    }
-  else
-    {
-      struct thread_info *head = *list_p;
-      struct thread_info *tail = head->step_over_prev;
+  process_stratum_target *proc_target = this->inf->process_target ();
 
-      tp->step_over_prev = tail;
-      tp->step_over_next = head;
-      head->step_over_prev = tp;
-      tail->step_over_next = tp;
-    }
+  /* If we transition from resumed to not resumed, we might need to remove
+     the thread from the resumed threads with pending statuses list.  */
+  if (!resumed)
+    proc_target->maybe_remove_resumed_with_pending_wait_status (this);
+
+  m_resumed = resumed;
+
+  /* If we transition from not resumed to resumed, we might need to add
+     the thread to the resumed threads with pending statuses list.  */
+  if (resumed)
+    proc_target->maybe_add_resumed_with_pending_wait_status (this);
 }
 
 /* See gdbthread.h.  */
 
 void
-thread_step_over_chain_remove (thread_info **list_p, thread_info *tp)
+thread_info::set_pending_waitstatus (const target_waitstatus &ws)
 {
-  gdb_assert (tp->step_over_next != NULL);
-  gdb_assert (tp->step_over_prev != NULL);
+  gdb_assert (!this->has_pending_waitstatus ());
 
-  if (*list_p == tp)
-    {
-      if (tp == tp->step_over_next)
-	*list_p = NULL;
-      else
-	*list_p = tp->step_over_next;
-    }
+  m_suspend.waitstatus = ws;
+  m_suspend.waitstatus_pending_p = 1;
 
-  tp->step_over_prev->step_over_next = tp->step_over_next;
-  tp->step_over_next->step_over_prev = tp->step_over_prev;
-  tp->step_over_prev = tp->step_over_next = NULL;
+  process_stratum_target *proc_target = this->inf->process_target ();
+  proc_target->maybe_add_resumed_with_pending_wait_status (this);
 }
 
 /* See gdbthread.h.  */
 
-thread_info *
-thread_step_over_chain_next (thread_info *chain_head, thread_info *tp)
+void
+thread_info::clear_pending_waitstatus ()
 {
-  thread_info *next = tp->step_over_next;
+  gdb_assert (this->has_pending_waitstatus ());
 
-  return next == chain_head ? NULL : next;
-}
+  process_stratum_target *proc_target = this->inf->process_target ();
+  proc_target->maybe_remove_resumed_with_pending_wait_status (this);
 
-/* See gdbthread.h.  */
-
-struct thread_info *
-global_thread_step_over_chain_next (struct thread_info *tp)
-{
-  return thread_step_over_chain_next (global_thread_step_over_chain_head, tp);
+  m_suspend.waitstatus_pending_p = 0;
 }
 
 /* See gdbthread.h.  */
@@ -385,24 +372,17 @@ global_thread_step_over_chain_next (struct thread_info *tp)
 int
 thread_is_in_step_over_chain (struct thread_info *tp)
 {
-  return (tp->step_over_next != NULL);
+  return tp->step_over_list_node.is_linked ();
 }
 
 /* See gdbthread.h.  */
 
 int
-thread_step_over_chain_length (thread_info *tp)
+thread_step_over_chain_length (const thread_step_over_list &l)
 {
-  if (tp == nullptr)
-    return 0;
-
-  gdb_assert (thread_is_in_step_over_chain (tp));
-
   int num = 1;
 
-  for (thread_info *iter = tp->step_over_next;
-       iter != tp;
-       iter = iter->step_over_next)
+  for (const thread_info &thread ATTRIBUTE_UNUSED : l)
     ++num;
 
   return num;
@@ -416,29 +396,16 @@ global_thread_step_over_chain_enqueue (struct thread_info *tp)
   infrun_debug_printf ("enqueueing thread %s in global step over chain",
 		       target_pid_to_str (tp->ptid).c_str ());
 
-  step_over_chain_enqueue (&global_thread_step_over_chain_head, tp);
+  gdb_assert (!thread_is_in_step_over_chain (tp));
+  global_thread_step_over_list.push_back (*tp);
 }
 
 /* See gdbthread.h.  */
 
 void
-global_thread_step_over_chain_enqueue_chain (thread_info *chain_head)
+global_thread_step_over_chain_enqueue_chain (thread_step_over_list &&list)
 {
-  gdb_assert (chain_head->step_over_next != nullptr);
-  gdb_assert (chain_head->step_over_prev != nullptr);
-
-  if (global_thread_step_over_chain_head == nullptr)
-    global_thread_step_over_chain_head = chain_head;
-  else
-    {
-      thread_info *global_last = global_thread_step_over_chain_head->step_over_prev;
-      thread_info *chain_last = chain_head->step_over_prev;
-
-      chain_last->step_over_next = global_thread_step_over_chain_head;
-      global_last->step_over_next = chain_head;
-      global_thread_step_over_chain_head->step_over_prev = chain_last;
-      chain_head->step_over_prev = global_last;
-    }
+  global_thread_step_over_list.splice (std::move (list));
 }
 
 /* See gdbthread.h.  */
@@ -449,7 +416,9 @@ global_thread_step_over_chain_remove (struct thread_info *tp)
   infrun_debug_printf ("removing thread %s from global step over chain",
 		       target_pid_to_str (tp->ptid).c_str ());
 
-  thread_step_over_chain_remove (&global_thread_step_over_chain_head, tp);
+  gdb_assert (thread_is_in_step_over_chain (tp));
+  auto it = global_thread_step_over_list.iterator_to (*tp);
+  global_thread_step_over_list.erase (it);
 }
 
 /* Delete the thread referenced by THR.  If SILENT, don't notify
@@ -462,29 +431,18 @@ delete_thread_1 (thread_info *thr, bool silent)
 {
   gdb_assert (thr != nullptr);
 
-  struct thread_info *tp, *tpprev = NULL;
+  set_thread_exited (thr, silent);
 
-  for (tp = thr->inf->thread_list; tp; tpprev = tp, tp = tp->next)
-    if (tp == thr)
-      break;
-
-  if (!tp)
-    return;
-
-  set_thread_exited (tp, silent);
-
-  if (!tp->deletable ())
+  if (!thr->deletable ())
     {
        /* Will be really deleted some other time.  */
        return;
      }
 
-  if (tpprev)
-    tpprev->next = tp->next;
-  else
-    tp->inf->thread_list = tp->next;
+  auto it = thr->inf->thread_list.iterator_to (*thr);
+  thr->inf->thread_list.erase (it);
 
-  delete tp;
+  delete thr;
 }
 
 /* See gdbthread.h.  */
@@ -539,11 +497,11 @@ find_thread_ptid (inferior *inf, ptid_t ptid)
 {
   gdb_assert (inf != nullptr);
 
-  for (thread_info *tp : inf->non_exited_threads ())
-    if (tp->ptid == ptid)
-      return tp;
-
-  return NULL;
+  auto it = inf->ptid_thread_map.find (ptid);
+  if (it != inf->ptid_thread_map.end ())
+    return it->second;
+  else
+    return nullptr;
 }
 
 /* See gdbthread.h.  */
@@ -629,7 +587,10 @@ in_thread_list (process_stratum_target *targ, ptid_t ptid)
 thread_info *
 first_thread_of_inferior (inferior *inf)
 {
-  return inf->thread_list;
+  if (inf->thread_list.empty ())
+    return nullptr;
+
+  return &inf->thread_list.front ();
 }
 
 thread_info *
@@ -810,7 +771,13 @@ thread_change_ptid (process_stratum_target *targ,
   inf->pid = new_ptid.pid ();
 
   tp = find_thread_ptid (inf, old_ptid);
+  gdb_assert (tp != nullptr);
+
+  int num_erased = inf->ptid_thread_map.erase (old_ptid);
+  gdb_assert (num_erased == 1);
+
   tp->ptid = new_ptid;
+  inf->ptid_thread_map[new_ptid] = tp;
 
   gdb::observers::thread_ptid_changed.notify (targ, old_ptid, new_ptid);
 }
@@ -821,7 +788,7 @@ void
 set_resumed (process_stratum_target *targ, ptid_t ptid, bool resumed)
 {
   for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    tp->resumed = resumed;
+    tp->set_resumed (resumed);
 }
 
 /* Helper for set_running, that marks one thread either running or
@@ -841,7 +808,7 @@ set_running_thread (struct thread_info *tp, bool running)
       /* If the thread is now marked stopped, remove it from
 	 the step-over queue, so that we don't try to resume
 	 it until the user wants it to.  */
-      if (tp->step_over_next != NULL)
+      if (thread_is_in_step_over_chain (tp))
 	global_thread_step_over_chain_remove (tp);
     }
 
@@ -884,7 +851,7 @@ set_executing_thread (thread_info *thr, bool executing)
 {
   thr->executing = executing;
   if (executing)
-    thr->suspend.stop_pc = ~(CORE_ADDR) 0;
+    thr->set_stop_pc (~(CORE_ADDR) 0);
 }
 
 void
@@ -1184,8 +1151,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	    }
 	  else
 	    {
-	      uiout->field_string ("target-id",
-				   thread_target_id_str (tp).c_str ());
+	      uiout->field_string ("target-id", thread_target_id_str (tp));
 	    }
 
 	  if (tp->state == THREAD_RUNNING)
@@ -1427,7 +1393,11 @@ show_thread_that_caused_stop (void)
 int
 show_inferior_qualified_tids (void)
 {
-  return (inferior_list->next != NULL || inferior_list->num != 1);
+  auto inf = inferior_list.begin ();
+  if (inf->num != 1)
+    return true;
+  ++inf;
+  return inf != inferior_list.end ();
 }
 
 /* See gdbthread.h.  */
@@ -1977,7 +1947,7 @@ print_selected_thread_frame (struct ui_out *uiout,
 	  uiout->text ("[Switching to thread ");
 	  uiout->field_string ("new-thread-id", print_thread_id (tp));
 	  uiout->text (" (");
-	  uiout->text (target_pid_to_str (inferior_ptid).c_str ());
+	  uiout->text (target_pid_to_str (inferior_ptid));
 	  uiout->text (")]");
 	}
     }
@@ -2019,7 +1989,7 @@ update_threads_executing (void)
 
       /* If the process has no threads, then it must be we have a
 	 process-exit event pending.  */
-      if (inf->thread_list == NULL)
+      if (inf->thread_list.empty ())
 	{
 	  targ->threads_executing = true;
 	  return;
@@ -2134,10 +2104,13 @@ Options:\n\
   c = add_info ("threads", info_threads_command, info_threads_help.c_str ());
   set_cmd_completer_handle_brkchars (c, info_threads_command_completer);
 
-  add_prefix_cmd ("thread", class_run, thread_command, _("\
+  cmd_list_element *thread_cmd
+    = add_prefix_cmd ("thread", class_run, thread_command, _("\
 Use this command to switch between threads.\n\
 The new thread ID must be currently known."),
-		  &thread_cmd_list, "thread ", 1, &cmdlist);
+		      &thread_cmd_list, 1, &cmdlist);
+
+  add_com_alias ("t", thread_cmd, class_run, 1);
 
 #define THREAD_APPLY_OPTION_HELP "\
 Prints per-inferior thread number and target system's thread id\n\
@@ -2160,7 +2133,7 @@ THREAD_APPLY_OPTION_HELP),
 
   c = add_prefix_cmd ("apply", class_run, thread_apply_command,
 		      thread_apply_help.c_str (),
-		      &thread_apply_list, "thread apply ", 1,
+		      &thread_apply_list, 1,
 		      &thread_cmd_list);
   set_cmd_completer_handle_brkchars (c, thread_apply_command_completer);
 
@@ -2203,8 +2176,6 @@ Find threads that match a regular expression.\n\
 Usage: thread find REGEXP\n\
 Will display thread ids whose name, target ID, or extra info matches REGEXP."),
 	   &thread_cmd_list);
-
-  add_com_alias ("t", "thread", class_run, 1);
 
   add_setshow_boolean_cmd ("thread-events", no_class,
 			   &print_thread_events, _("\

@@ -31,15 +31,14 @@ extern void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
 
 typedef unsigned HOST_WIDEST_INT elf_vma;
 
-extern void (*byte_put) (unsigned char *, elf_vma, int);
-extern void byte_put_little_endian (unsigned char *, elf_vma, int);
-extern void byte_put_big_endian (unsigned char *, elf_vma, int);
+extern void (*byte_put) (unsigned char *, elf_vma, unsigned int);
+extern void byte_put_little_endian (unsigned char *, elf_vma, unsigned int);
+extern void byte_put_big_endian (unsigned char *, elf_vma, unsigned int);
 
-extern elf_vma (*byte_get) (const unsigned char *, int);
-extern elf_vma byte_get_signed (const unsigned char *, int);
-extern elf_vma byte_get_little_endian (const unsigned char *, int);
-extern elf_vma byte_get_big_endian (const unsigned char *, int);
-extern void byte_get_64 (const unsigned char *, elf_vma *, elf_vma *);
+extern elf_vma (*byte_get) (const unsigned char *, unsigned int);
+extern elf_vma byte_get_signed (const unsigned char *, unsigned int);
+extern elf_vma byte_get_little_endian (const unsigned char *, unsigned int);
+extern elf_vma byte_get_big_endian (const unsigned char *, unsigned int);
 
 #define BYTE_PUT(field, val)	byte_put (field, val, sizeof (field))
 #define BYTE_GET(field)		byte_get (field, sizeof (field))

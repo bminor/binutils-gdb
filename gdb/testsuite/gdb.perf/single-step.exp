@@ -51,7 +51,7 @@ PerfTest::assemble {
 } {
     global SINGLE_STEP_COUNT
 
-    gdb_test_no_output "python SingleStep\(${SINGLE_STEP_COUNT}\).run()"
+    gdb_test_python_run "SingleStep\(${SINGLE_STEP_COUNT}\)"
     # Terminate the loop.
     gdb_test "set variable flag = 0"
     return 0

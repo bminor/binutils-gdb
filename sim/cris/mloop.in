@@ -42,6 +42,8 @@ case "x$1" in
 xsupport)
 
 cat <<EOF
+#include <stdlib.h>
+
 /* It seems we don't have a templated header file corresponding to
    cris-tmpl.c, so we have to get out declarations the hackish way.  */
 extern void @cpu@_specific_init (SIM_CPU *current_cpu);

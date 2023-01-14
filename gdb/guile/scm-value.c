@@ -476,6 +476,7 @@ gdbscm_value_referenced_value (SCM self)
 	  res_val = value_ind (value);
 	  break;
 	case TYPE_CODE_REF:
+	case TYPE_CODE_RVALUE_REF:
 	  res_val = coerce_ref (value);
 	  break;
 	default:
@@ -483,6 +484,56 @@ gdbscm_value_referenced_value (SCM self)
 		   " neither a pointer nor a reference"));
 	}
 
+      return vlscm_scm_from_value (res_val);
+    });
+}
+
+static SCM
+gdbscm_reference_value (SCM self, enum type_code refcode)
+{
+  value_smob *v_smob
+    = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  struct value *value = v_smob->value;
+
+  return gdbscm_wrap ([=]
+    {
+      scoped_value_mark free_values;
+
+      struct value *res_val = value_ref (value, refcode);
+      return vlscm_scm_from_value (res_val);
+    });
+}
+
+/* (value-reference-value <gdb:value>) -> <gdb:value> */
+
+static SCM
+gdbscm_value_reference_value (SCM self)
+{
+  return gdbscm_reference_value (self, TYPE_CODE_REF);
+}
+
+/* (value-rvalue-reference-value <gdb:value>) -> <gdb:value> */
+
+static SCM
+gdbscm_value_rvalue_reference_value (SCM self)
+{
+  return gdbscm_reference_value (self, TYPE_CODE_RVALUE_REF);
+}
+
+/* (value-const-value <gdb:value>) -> <gdb:value> */
+
+static SCM
+gdbscm_value_const_value (SCM self)
+{
+  value_smob *v_smob
+    = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  struct value *value = v_smob->value;
+
+  return gdbscm_wrap ([=]
+    {
+      scoped_value_mark free_values;
+
+      struct value *res_val = make_cv_value (1, 0, value);
       return vlscm_scm_from_value (res_val);
     });
 }
@@ -643,7 +694,7 @@ gdbscm_value_field (SCM self, SCM field_scm)
 
       struct value *tmp = v_smob->value;
 
-      struct value *res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
+      struct value *res_val = value_struct_elt (&tmp, {}, field.get (), NULL,
 						"struct/class/union");
 
       return vlscm_scm_from_value (res_val);
@@ -1350,6 +1401,21 @@ result in the value referenced.\n\
 For example, for a value which is a reference to an 'int' pointer ('int *'),\n\
 value-dereference will result in a value of type 'int' while\n\
 value-referenced-value will result in a value of type 'int *'." },
+
+  { "value-reference-value", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_value_reference_value),
+    "\
+Return a <gdb:value> object which is a reference to the given value." },
+
+  { "value-rvalue-reference-value", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_value_rvalue_reference_value),
+    "\
+Return a <gdb:value> object which is an rvalue reference to the given value." },
+
+  { "value-const-value", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_value_const_value),
+    "\
+Return a <gdb:value> object which is a 'const' version of the given value." },
 
   { "value-field", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_field),
     "\

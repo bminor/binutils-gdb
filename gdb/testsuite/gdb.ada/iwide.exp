@@ -25,8 +25,29 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional
 
 clean_restart ${testfile}
 
-set bp_location [gdb_get_line_number "BREAK" ${testdir}/p.adb]
-runto "p.adb:$bp_location"
+set bp_location p.adb:[gdb_get_line_number "BREAK" ${testdir}/p.adb]
+
+# Workaround gcc PR101575.
+#runto "$bp_location"
+gdb_breakpoint "$bp_location"
+gdb_run_cmd
+set re "Breakpoint $decimal, p \\(\\) at .*:$decimal.*"
+set re_xfail "Breakpoint $decimal, p__P5b.0 \\(\\) at .*:$decimal.*"
+set ok 1
+gdb_test_multiple "" "Runto to $bp_location" {
+    -re -wrap $re {
+	if { $ok } {
+	    pass $gdb_test_name
+	} else {
+	    xfail $gdb_test_name
+	}
+    }
+    -re -wrap $re_xfail {
+	set ok 0
+	send_gdb "continue\n"
+	exp_continue
+    }
+}
 
 gdb_test "print My_Drawable" \
          "= \\(center => \\(x => 1, y => 2\\), radius => 3\\)"

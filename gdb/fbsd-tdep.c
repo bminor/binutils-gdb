@@ -75,6 +75,63 @@ enum
     FREEBSD_SIGRTMAX = 126,
   };
 
+/* Constants for values of si_code as defined in FreeBSD's
+   <sys/signal.h>.  */
+
+#define	FBSD_SI_USER		0x10001
+#define	FBSD_SI_QUEUE		0x10002
+#define	FBSD_SI_TIMER		0x10003
+#define	FBSD_SI_ASYNCIO		0x10004
+#define	FBSD_SI_MESGQ		0x10005
+#define	FBSD_SI_KERNEL		0x10006
+#define	FBSD_SI_LWP		0x10007
+
+#define	FBSD_ILL_ILLOPC		1
+#define	FBSD_ILL_ILLOPN		2
+#define	FBSD_ILL_ILLADR		3
+#define	FBSD_ILL_ILLTRP		4
+#define	FBSD_ILL_PRVOPC		5
+#define	FBSD_ILL_PRVREG		6
+#define	FBSD_ILL_COPROC		7
+#define	FBSD_ILL_BADSTK		8
+
+#define	FBSD_BUS_ADRALN		1
+#define	FBSD_BUS_ADRERR		2
+#define	FBSD_BUS_OBJERR		3
+#define	FBSD_BUS_OOMERR		100
+
+#define	FBSD_SEGV_MAPERR	1
+#define	FBSD_SEGV_ACCERR	2
+#define	FBSD_SEGV_PKUERR	100
+
+#define	FBSD_FPE_INTOVF		1
+#define	FBSD_FPE_INTDIV		2
+#define	FBSD_FPE_FLTDIV		3
+#define	FBSD_FPE_FLTOVF		4
+#define	FBSD_FPE_FLTUND		5
+#define	FBSD_FPE_FLTRES		6
+#define	FBSD_FPE_FLTINV		7
+#define	FBSD_FPE_FLTSUB		8
+
+#define	FBSD_TRAP_BRKPT		1
+#define	FBSD_TRAP_TRACE		2
+#define	FBSD_TRAP_DTRACE	3
+#define	FBSD_TRAP_CAP		4
+
+#define	FBSD_CLD_EXITED		1
+#define	FBSD_CLD_KILLED		2
+#define	FBSD_CLD_DUMPED		3
+#define	FBSD_CLD_TRAPPED	4
+#define	FBSD_CLD_STOPPED	5
+#define	FBSD_CLD_CONTINUED	6
+
+#define	FBSD_POLL_IN		1
+#define	FBSD_POLL_OUT		2
+#define	FBSD_POLL_MSG		3
+#define	FBSD_POLL_ERR		4
+#define	FBSD_POLL_PRI		5
+#define	FBSD_POLL_HUP		6
+
 /* FreeBSD kernels 12.0 and later include a copy of the
    'ptrace_lwpinfo' structure returned by the PT_LWPINFO ptrace
    operation in an ELF core note (NT_FREEBSD_PTLWPINFO) for each LWP.
@@ -577,7 +634,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
-  if (info->suspend.stop_signal != GDB_SIGNAL_0
+  if (info->stop_signal () != GDB_SIGNAL_0
       && info->ptid.pid () == inferior_ptid.pid ())
     return 1;
 
@@ -627,9 +684,9 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
       const char *fname = lbasename (get_exec_file (0));
       std::string psargs = fname;
 
-      const char *infargs = get_inferior_args ();
-      if (infargs != NULL)
-	psargs = psargs + " " + infargs;
+      const std::string &infargs = current_inferior ()->args ();
+      if (!infargs.empty ())
+	psargs += ' ' + infargs;
 
       note_data.reset (elfcore_write_prpsinfo (obfd, note_data.release (),
 					       note_size, fname,
@@ -651,7 +708,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
      In case there's more than one signalled thread, prefer the
      current thread, if it is signalled.  */
   curr_thr = inferior_thread ();
-  if (curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
+  if (curr_thr->stop_signal () != GDB_SIGNAL_0)
     signalled_thr = curr_thr;
   else
     {
@@ -660,7 +717,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 	signalled_thr = curr_thr;
     }
 
-  enum gdb_signal stop_signal = signalled_thr->suspend.stop_signal;
+  enum gdb_signal stop_signal = signalled_thr->stop_signal ();
   gcore_elf_build_thread_register_notes (gdbarch, signalled_thr, stop_signal,
 					 obfd, &note_data, note_size);
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
@@ -1988,6 +2045,220 @@ fbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+/* Return description of signal code or nullptr.  */
+
+static const char *
+fbsd_signal_cause (enum gdb_signal siggnal, int code)
+{
+  /* Signal-independent causes.  */
+  switch (code)
+    {
+    case FBSD_SI_USER:
+      return _("Sent by kill()");
+    case FBSD_SI_QUEUE:
+      return _("Sent by sigqueue()");
+    case FBSD_SI_TIMER:
+      return _("Timer expired");
+    case FBSD_SI_ASYNCIO:
+      return _("Asynchronous I/O request completed");
+    case FBSD_SI_MESGQ:
+      return _("Message arrived on empty message queue");
+    case FBSD_SI_KERNEL:
+      return _("Sent by kernel");
+    case FBSD_SI_LWP:
+      return _("Sent by thr_kill()");
+    }
+
+  switch (siggnal)
+    {
+    case GDB_SIGNAL_ILL:
+      switch (code)
+	{
+	case FBSD_ILL_ILLOPC:
+	  return _("Illegal opcode");
+	case FBSD_ILL_ILLOPN:
+	  return _("Illegal operand");
+	case FBSD_ILL_ILLADR:
+	  return _("Illegal addressing mode");
+	case FBSD_ILL_ILLTRP:
+	  return _("Illegal trap");
+	case FBSD_ILL_PRVOPC:
+	  return _("Privileged opcode");
+	case FBSD_ILL_PRVREG:
+	  return _("Privileged register");
+	case FBSD_ILL_COPROC:
+	  return _("Coprocessor error");
+	case FBSD_ILL_BADSTK:
+	  return _("Internal stack error");
+	}
+      break;
+    case GDB_SIGNAL_BUS:
+      switch (code)
+	{
+	case FBSD_BUS_ADRALN:
+	  return _("Invalid address alignment");
+	case FBSD_BUS_ADRERR:
+	  return _("Address not present");
+	case FBSD_BUS_OBJERR:
+	  return _("Object-specific hardware error");
+	case FBSD_BUS_OOMERR:
+	  return _("Out of memory");
+	}
+      break;
+    case GDB_SIGNAL_SEGV:
+      switch (code)
+	{
+	case FBSD_SEGV_MAPERR:
+	  return _("Address not mapped to object");
+	case FBSD_SEGV_ACCERR:
+	  return _("Invalid permissions for mapped object");
+	case FBSD_SEGV_PKUERR:
+	  return _("PKU violation");
+	}
+      break;
+    case GDB_SIGNAL_FPE:
+      switch (code)
+	{
+	case FBSD_FPE_INTOVF:
+	  return _("Integer overflow");
+	case FBSD_FPE_INTDIV:
+	  return _("Integer divide by zero");
+	case FBSD_FPE_FLTDIV:
+	  return _("Floating point divide by zero");
+	case FBSD_FPE_FLTOVF:
+	  return _("Floating point overflow");
+	case FBSD_FPE_FLTUND:
+	  return _("Floating point underflow");
+	case FBSD_FPE_FLTRES:
+	  return _("Floating point inexact result");
+	case FBSD_FPE_FLTINV:
+	  return _("Invalid floating point operation");
+	case FBSD_FPE_FLTSUB:
+	  return _("Subscript out of range");
+	}
+      break;
+    case GDB_SIGNAL_TRAP:
+      switch (code)
+	{
+	case FBSD_TRAP_BRKPT:
+	  return _("Breakpoint");
+	case FBSD_TRAP_TRACE:
+	  return _("Trace trap");
+	case FBSD_TRAP_DTRACE:
+	  return _("DTrace-induced trap");
+	case FBSD_TRAP_CAP:
+	  return _("Capability violation");
+	}
+      break;
+    case GDB_SIGNAL_CHLD:
+      switch (code)
+	{
+	case FBSD_CLD_EXITED:
+	  return _("Child has exited");
+	case FBSD_CLD_KILLED:
+	  return _("Child has terminated abnormally");
+	case FBSD_CLD_DUMPED:
+	  return _("Child has dumped core");
+	case FBSD_CLD_TRAPPED:
+	  return _("Traced child has trapped");
+	case FBSD_CLD_STOPPED:
+	  return _("Child has stopped");
+	case FBSD_CLD_CONTINUED:
+	  return _("Stopped child has continued");
+	}
+      break;
+    case GDB_SIGNAL_POLL:
+      switch (code)
+	{
+	case FBSD_POLL_IN:
+	  return _("Data input available");
+	case FBSD_POLL_OUT:
+	  return _("Output buffers available");
+	case FBSD_POLL_MSG:
+	  return _("Input message available");
+	case FBSD_POLL_ERR:
+	  return _("I/O error");
+	case FBSD_POLL_PRI:
+	  return _("High priority input available");
+	case FBSD_POLL_HUP:
+	  return _("Device disconnected");
+	}
+      break;
+    }
+
+  return nullptr;
+}
+
+/* Report additional details for a signal stop.  */
+
+static void
+fbsd_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
+			 enum gdb_signal siggnal)
+{
+  LONGEST code, mqd, pid, status, timerid, uid;
+
+  try
+    {
+      code = parse_and_eval_long ("$_siginfo.si_code");
+      pid = parse_and_eval_long ("$_siginfo.si_pid");
+      uid = parse_and_eval_long ("$_siginfo.si_uid");
+      status = parse_and_eval_long ("$_siginfo.si_status");
+      timerid = parse_and_eval_long ("$_siginfo._reason._timer.si_timerid");
+      mqd = parse_and_eval_long ("$_siginfo._reason._mesgq.si_mqd");
+    }
+  catch (const gdb_exception_error &e)
+    {
+      return;
+    }
+
+  const char *meaning = fbsd_signal_cause (siggnal, code);
+  if (meaning == nullptr)
+    return;
+
+  uiout->text (".\n");
+  uiout->field_string ("sigcode-meaning", meaning);
+
+  switch (code)
+    {
+    case FBSD_SI_USER:
+    case FBSD_SI_QUEUE:
+    case FBSD_SI_LWP:
+      uiout->text (" from pid ");
+      uiout->field_string ("sending-pid", plongest (pid));
+      uiout->text (" and user ");
+      uiout->field_string ("sending-uid", plongest (uid));
+      return;
+    case FBSD_SI_TIMER:
+      uiout->text (": timerid ");
+      uiout->field_string ("timerid", plongest (timerid));
+      return;
+    case FBSD_SI_MESGQ:
+      uiout->text (": message queue ");
+      uiout->field_string ("message-queue", plongest (mqd));
+      return;
+    case FBSD_SI_ASYNCIO:
+      return;
+    }
+
+  if (siggnal == GDB_SIGNAL_CHLD)
+    {
+      uiout->text (": pid ");
+      uiout->field_string ("child-pid", plongest (pid));
+      uiout->text (", uid ");
+      uiout->field_string ("child-uid", plongest (uid));
+      if (code == FBSD_CLD_EXITED)
+	{
+	  uiout->text (", exit status ");
+	  uiout->field_string ("exit-status", plongest (status));
+	}
+      else
+	{
+	  uiout->text (", signal ");
+	  uiout->field_string ("signal", plongest (status));
+	}
+    }
+}
+
 /* To be called from GDB_OSABI_FREEBSD handlers. */
 
 void
@@ -2002,6 +2273,7 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_get_siginfo_type (gdbarch, fbsd_get_siginfo_type);
   set_gdbarch_gdb_signal_from_target (gdbarch, fbsd_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch, fbsd_gdb_signal_to_target);
+  set_gdbarch_report_signal_info (gdbarch, fbsd_report_signal_info);
   set_gdbarch_skip_solib_resolver (gdbarch, fbsd_skip_solib_resolver);
 
   /* `catch syscall' */

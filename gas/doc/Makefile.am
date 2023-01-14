@@ -36,7 +36,8 @@ info_TEXINFOS = as.texi
 as_TEXINFOS = asconfig.texi $(CPU_DOCS)
 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc \
+		   --no-split
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
@@ -131,5 +132,10 @@ as.1: $(srcdir)/as.texi asconfig.texi $(CPU_DOCS)
 	        mv -f $@.T$$$$ $@) || \
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f as.pod
+
+html-local: as/index.html
+as/index.html: as.texi $(as_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/as.texi
 
 MAINTAINERCLEANFILES += as.info

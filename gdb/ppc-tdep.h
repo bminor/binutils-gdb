@@ -426,6 +426,8 @@ extern int ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
 extern CORE_ADDR ppc_insn_d_field (unsigned int insn);
 
 extern CORE_ADDR ppc_insn_ds_field (unsigned int insn);
+extern CORE_ADDR ppc_insn_prefix_dform (unsigned int insn1,
+					unsigned int insn2);
 
 extern int ppc_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

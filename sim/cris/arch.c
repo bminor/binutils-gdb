@@ -24,7 +24,7 @@ This file is part of the GNU simulators.
 #include "sim-main.h"
 #include "bfd.h"
 
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const cris_sim_machs[] =
 {
 #ifdef HAVE_CPU_CRISV10F
   & crisv10_mach,

@@ -5345,12 +5345,15 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
     }
   else
     {
+      char imm_buf[128];
+
+      sprintf (imm_buf, "%" BFD_VMA_FMT "x", imm);
       abfd = stub_entry->target_section->owner;
       _bfd_error_handler
-	(_("%pB: error: erratum 843419 immediate 0x%" BFD_VMA_FMT "x "
+	(_("%pB: error: erratum 843419 immediate 0x%s "
 	   "out of range for ADR (input file too large) and "
 	   "--fix-cortex-a53-843419=adr used.  Run the linker with "
-	   "--fix-cortex-a53-843419=full instead"), abfd, imm);
+	   "--fix-cortex-a53-843419=full instead"), abfd, imm_buf);
       bfd_set_error (bfd_error_bad_value);
       /* This function is called inside a hashtable traversal and the error
 	 handlers called above turn into non-fatal errors.  Which means this
@@ -8012,34 +8015,42 @@ elfNN_aarch64_maybe_function_sym (const asymbol *sym, asection *sec,
 				  bfd_vma *code_off)
 {
   bfd_size_type size;
+  elf_symbol_type * elf_sym = (elf_symbol_type *) sym;
 
   if ((sym->flags & (BSF_SECTION_SYM | BSF_FILE | BSF_OBJECT
 		     | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC)) != 0
       || sym->section != sec)
     return 0;
 
+  size = (sym->flags & BSF_SYNTHETIC) ? 0 : elf_sym->internal_elf_sym.st_size;
+  
   if (!(sym->flags & BSF_SYNTHETIC))
-    switch (ELF_ST_TYPE (((elf_symbol_type *) sym)->internal_elf_sym.st_info))
+    switch (ELF_ST_TYPE (elf_sym->internal_elf_sym.st_info))
       {
-	case STT_FUNC:
 	case STT_NOTYPE:
+	  /* Ignore symbols created by the annobin plugin for gcc and clang.
+	     These symbols are hidden, local, notype and have a size of 0.  */
+	  if (size == 0
+	      && sym->flags & BSF_LOCAL
+	      && ELF_ST_VISIBILITY (elf_sym->internal_elf_sym.st_other) == STV_HIDDEN)
+	    return 0;
+	  /* Fall through.  */
+	case STT_FUNC:
+	  /* FIXME: Allow STT_GNU_IFUNC as well ?  */
 	  break;
 	default:
 	  return 0;
       }
-
+  
   if ((sym->flags & BSF_LOCAL)
       && bfd_is_aarch64_special_symbol_name (sym->name,
 					     BFD_AARCH64_SPECIAL_SYM_TYPE_ANY))
     return 0;
 
   *code_off = sym->value;
-  size = 0;
-  if (!(sym->flags & BSF_SYNTHETIC))
-    size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-  if (size == 0)
-    size = 1;
-  return size;
+
+  /* Do not return 0 for the function's size.  */
+  return size ? size : 1;
 }
 
 static bool

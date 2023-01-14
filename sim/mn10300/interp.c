@@ -1,4 +1,6 @@
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 
 #include "sim-main.h"
@@ -7,6 +9,7 @@
 
 #include "bfd.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -91,6 +94,9 @@ sim_open (SIM_OPEN_KIND kind,
   SIM_DESC sd = sim_state_alloc (kind, cb);
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -462,6 +468,9 @@ mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
 
   if(exception == 0 && State.exc_suspended > 0)
     {
+#ifndef SIGTRAP
+# define SIGTRAP 5
+#endif
       if(State.exc_suspended != SIGTRAP) /* warn not for breakpoints */
          sim_io_eprintf(sd, "Warning, resuming but ignoring pending exception signal (%d)\n",
   		       State.exc_suspended); 

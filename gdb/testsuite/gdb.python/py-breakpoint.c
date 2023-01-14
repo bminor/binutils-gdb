@@ -39,12 +39,26 @@ int add (int i)
   return i + i;  /* Break at function add.  */
 }
 
+void
+do_throw ()
+{
+  throw 123;
+}
 
 int main (int argc, char *argv[])
 {
   int foo = 5;
   int bar = 42;
   int i;
+
+  try
+    {
+      do_throw ();
+    }
+  catch (...)
+    {
+      /* Nothing.  */
+    }
 
   for (i = 0; i < 10; i++)
     {

@@ -104,6 +104,8 @@ static char *mips_flags_frag;
 #define FP  30
 #define RA  31
 
+#define FCSR 31
+
 #define ILLEGAL_REG (32)
 
 #define AT  mips_opts.at
@@ -5048,6 +5050,7 @@ convert_reg_type (const struct mips_opcode *opcode,
       return RTYPE_ACC;
 
     case OP_REG_COPRO:
+    case OP_REG_CONTROL:
       if (opcode->name[strlen (opcode->name) - 1] == '0')
 	return RTYPE_NUM | RTYPE_CP0;
       return RTYPE_NUM;
@@ -13835,18 +13838,18 @@ macro (struct mips_cl_insn *ip, char *str)
        * or is there a reason for it?
        */
       start_noreorder ();
-      macro_build (NULL, "cfc1", "t,G", op[2], RA);
-      macro_build (NULL, "cfc1", "t,G", op[2], RA);
+      macro_build (NULL, "cfc1", "t,g", op[2], FCSR);
+      macro_build (NULL, "cfc1", "t,g", op[2], FCSR);
       macro_build (NULL, "nop", "");
       expr1.X_add_number = 3;
       macro_build (&expr1, "ori", "t,r,i", AT, op[2], BFD_RELOC_LO16);
       expr1.X_add_number = 2;
       macro_build (&expr1, "xori", "t,r,i", AT, AT, BFD_RELOC_LO16);
-      macro_build (NULL, "ctc1", "t,G", AT, RA);
+      macro_build (NULL, "ctc1", "t,g", AT, FCSR);
       macro_build (NULL, "nop", "");
       macro_build (NULL, mask == M_TRUNCWD ? "cvt.w.d" : "cvt.w.s", "D,S",
 		   op[0], op[1]);
-      macro_build (NULL, "ctc1", "t,G", op[2], RA);
+      macro_build (NULL, "ctc1", "t,g", op[2], FCSR);
       macro_build (NULL, "nop", "");
       end_noreorder ();
       break;

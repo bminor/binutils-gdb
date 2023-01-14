@@ -1,3 +1,8 @@
+2021-05-24  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* readline/support/config.guess: Import from upstream.
+	* readline/support/config.sub: Likewise.
+
 2021-03-02  Tom Tromey  <tom@tromey.com>
 
 	* readline/signals.c (_rl_handle_signal): Add missing check for

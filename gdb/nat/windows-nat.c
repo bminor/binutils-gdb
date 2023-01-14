@@ -45,6 +45,29 @@ bool wow64_process = false;
 bool ignore_first_breakpoint = false;
 #endif
 
+AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
+DebugActiveProcessStop_ftype *DebugActiveProcessStop;
+DebugBreakProcess_ftype *DebugBreakProcess;
+DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
+EnumProcessModules_ftype *EnumProcessModules;
+#ifdef __x86_64__
+EnumProcessModulesEx_ftype *EnumProcessModulesEx;
+#endif
+GetModuleInformation_ftype *GetModuleInformation;
+GetModuleFileNameExA_ftype *GetModuleFileNameExA;
+GetModuleFileNameExW_ftype *GetModuleFileNameExW;
+LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
+OpenProcessToken_ftype *OpenProcessToken;
+GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
+GetConsoleFontSize_ftype *GetConsoleFontSize;
+#ifdef __x86_64__
+Wow64SuspendThread_ftype *Wow64SuspendThread;
+Wow64GetThreadContext_ftype *Wow64GetThreadContext;
+Wow64SetThreadContext_ftype *Wow64SetThreadContext;
+Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
+#endif
+GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
+
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
 #define DEBUG_EVENTS(fmt, ...) \
@@ -97,7 +120,13 @@ windows_thread_info::resume ()
   suspended = 0;
 }
 
-const char *
+/* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
+   determines what sort of string is read from the inferior.  Returns
+   the name of the DLL, or NULL on error.  If a name is returned, it
+   is stored in a static buffer which is valid until the next call to
+   get_image_name.  */
+
+static const char *
 get_image_name (HANDLE h, void *address, int unicode)
 {
 #ifdef __CYGWIN__
@@ -310,6 +339,168 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
 #undef DEBUG_EXCEPTION_SIMPLE
 }
 
+/* Iterate over all DLLs currently mapped by our inferior, looking for
+   a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
+   list of solibs; otherwise do nothing.  LOAD_ADDR NULL means add all
+   DLLs to the list of solibs; this is used when the inferior finishes
+   its initialization, and all the DLLs it statically depends on are
+   presumed loaded.  */
+
+static void
+windows_add_dll (LPVOID load_addr)
+{
+  HMODULE dummy_hmodule;
+  DWORD cb_needed;
+  HMODULE *hmodules;
+  int i;
+
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
+				sizeof (HMODULE), &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, &dummy_hmodule,
+			      sizeof (HMODULE), &cb_needed) == 0)
+	return;
+    }
+
+  if (cb_needed < 1)
+    return;
+
+  hmodules = (HMODULE *) alloca (cb_needed);
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, hmodules,
+				cb_needed, &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, hmodules,
+			      cb_needed, &cb_needed) == 0)
+	return;
+    }
+
+  char system_dir[MAX_PATH];
+  char syswow_dir[MAX_PATH];
+  size_t system_dir_len = 0;
+  bool convert_syswow_dir = false;
+#ifdef __x86_64__
+  if (wow64_process)
+#endif
+    {
+      /* This fails on 32bit Windows because it has no SysWOW64 directory,
+	 and in this case a path conversion isn't necessary.  */
+      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
+      if (len > 0)
+	{
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (syswow_dir));
+
+	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
+	  /* Error check.  */
+	  gdb_assert (len != 0);
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (system_dir));
+
+	  strcat (system_dir, "\\");
+	  strcat (syswow_dir, "\\");
+	  system_dir_len = strlen (system_dir);
+
+	  convert_syswow_dir = true;
+	}
+
+    }
+  for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
+    {
+      MODULEINFO mi;
+#ifdef __USEWIDE
+      wchar_t dll_name[MAX_PATH];
+      char dll_name_mb[MAX_PATH];
+#else
+      char dll_name[MAX_PATH];
+#endif
+      const char *name;
+      if (GetModuleInformation (current_process_handle, hmodules[i],
+				&mi, sizeof (mi)) == 0)
+	continue;
+
+      if (GetModuleFileNameEx (current_process_handle, hmodules[i],
+			       dll_name, sizeof (dll_name)) == 0)
+	continue;
+#ifdef __USEWIDE
+      wcstombs (dll_name_mb, dll_name, MAX_PATH);
+      name = dll_name_mb;
+#else
+      name = dll_name;
+#endif
+      /* Convert the DLL path of 32bit processes returned by
+	 GetModuleFileNameEx from the 64bit system directory to the
+	 32bit syswow64 directory if necessary.  */
+      std::string syswow_dll_path;
+      if (convert_syswow_dir
+	  && strncasecmp (name, system_dir, system_dir_len) == 0
+	  && strchr (name + system_dir_len, '\\') == nullptr)
+	{
+	  syswow_dll_path = syswow_dir;
+	  syswow_dll_path += name + system_dir_len;
+	  name = syswow_dll_path.c_str();
+	}
+
+      /* Record the DLL if either LOAD_ADDR is NULL or the address
+	 at which the DLL was loaded is equal to LOAD_ADDR.  */
+      if (!(load_addr != nullptr && mi.lpBaseOfDll != load_addr))
+	{
+	  handle_load_dll (name, mi.lpBaseOfDll);
+	  if (load_addr != nullptr)
+	    return;
+	}
+    }
+}
+
+/* See nat/windows-nat.h.  */
+
+void
+dll_loaded_event ()
+{
+  gdb_assert (current_event.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT);
+
+  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
+  const char *dll_name;
+
+  /* Try getting the DLL name via the lpImageName field of the event.
+     Note that Microsoft documents this fields as strictly optional,
+     in the sense that it might be NULL.  And the first DLL event in
+     particular is explicitly documented as "likely not pass[ed]"
+     (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
+  dll_name = get_image_name (current_process_handle,
+			     event->lpImageName, event->fUnicode);
+  /* If the DLL name could not be gleaned via lpImageName, try harder
+     by enumerating all the DLLs loaded into the inferior, looking for
+     one that is loaded at base address = lpBaseOfDll. */
+  if (dll_name != nullptr)
+    handle_load_dll (dll_name, event->lpBaseOfDll);
+  else if (event->lpBaseOfDll != nullptr)
+    windows_add_dll (event->lpBaseOfDll);
+}
+
+/* See nat/windows-nat.h.  */
+
+void
+windows_add_all_dlls ()
+{
+  windows_add_dll (nullptr);
+}
+
 /* See nat/windows-nat.h.  */
 
 bool
@@ -385,6 +576,126 @@ wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
   BOOL result = WaitForDebugEvent (event, timeout);
   if (result)
     last_wait_event = *event;
+  return result;
+}
+
+/* Define dummy functions which always return error for the rare cases where
+   these functions could not be found.  */
+template<typename... T>
+BOOL WINAPI
+bad (T... args)
+{
+  return FALSE;
+}
+
+template<typename... T>
+DWORD WINAPI
+bad (T... args)
+{
+  return 0;
+}
+
+static BOOL WINAPI
+bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
+{
+  f->nFont = 0;
+  return 1;
+}
+
+static COORD WINAPI
+bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
+{
+  COORD size;
+  size.X = 8;
+  size.Y = 12;
+  return size;
+}
+ 
+/* See windows-nat.h.  */
+
+bool
+initialize_loadable ()
+{
+  bool result = true;
+  HMODULE hm = NULL;
+
+#define GPA(m, func)					\
+  func = (func ## _ftype *) GetProcAddress (m, #func)
+
+  hm = LoadLibrary (TEXT ("kernel32.dll"));
+  if (hm)
+    {
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, DebugBreakProcess);
+      GPA (hm, DebugSetProcessKillOnExit);
+      GPA (hm, GetConsoleFontSize);
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, GetCurrentConsoleFont);
+#ifdef __x86_64__
+      GPA (hm, Wow64SuspendThread);
+      GPA (hm, Wow64GetThreadContext);
+      GPA (hm, Wow64SetThreadContext);
+      GPA (hm, Wow64GetThreadSelectorEntry);
+#endif
+      GPA (hm, GenerateConsoleCtrlEvent);
+    }
+
+  /* Set variables to dummy versions of these processes if the function
+     wasn't found in kernel32.dll.  */
+  if (!DebugBreakProcess)
+    DebugBreakProcess = bad;
+  if (!DebugActiveProcessStop || !DebugSetProcessKillOnExit)
+    {
+      DebugActiveProcessStop = bad;
+      DebugSetProcessKillOnExit = bad;
+    }
+  if (!GetConsoleFontSize)
+    GetConsoleFontSize = bad_GetConsoleFontSize;
+  if (!GetCurrentConsoleFont)
+    GetCurrentConsoleFont = bad_GetCurrentConsoleFont;
+
+  /* Load optional functions used for retrieving filename information
+     associated with the currently debugged process or its dlls.  */
+  hm = LoadLibrary (TEXT ("psapi.dll"));
+  if (hm)
+    {
+      GPA (hm, EnumProcessModules);
+#ifdef __x86_64__
+      GPA (hm, EnumProcessModulesEx);
+#endif
+      GPA (hm, GetModuleInformation);
+      GPA (hm, GetModuleFileNameExA);
+      GPA (hm, GetModuleFileNameExW);
+    }
+
+  if (!EnumProcessModules || !GetModuleInformation
+      || !GetModuleFileNameExA || !GetModuleFileNameExW)
+    {
+      /* Set variables to dummy versions of these processes if the function
+	 wasn't found in psapi.dll.  */
+      EnumProcessModules = bad;
+      GetModuleInformation = bad;
+      GetModuleFileNameExA = bad;
+      GetModuleFileNameExW = bad;
+
+      result = false;
+    }
+
+  hm = LoadLibrary (TEXT ("advapi32.dll"));
+  if (hm)
+    {
+      GPA (hm, OpenProcessToken);
+      GPA (hm, LookupPrivilegeValueA);
+      GPA (hm, AdjustTokenPrivileges);
+      /* Only need to set one of these since if OpenProcessToken fails nothing
+	 else is needed.  */
+      if (!OpenProcessToken || !LookupPrivilegeValueA
+	  || !AdjustTokenPrivileges)
+	OpenProcessToken = bad;
+    }
+
+#undef GPA
+
   return result;
 }
 

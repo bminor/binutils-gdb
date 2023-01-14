@@ -201,7 +201,7 @@ get_register_operand (unsigned char fragment, char *buffer)
     {
       if ((fragment & 0x1F) == current_reg->opcode)
 	{
-	  strncpy (buffer, current_reg->name, OPERAND_BUFFER_LEN);
+	  strncpy (buffer, current_reg->name, OPERAND_BUFFER_LEN - 1);
 	  buffer[OPERAND_BUFFER_LEN - 1] = 0;
 	  return 1;
 	}
@@ -694,6 +694,9 @@ print_insn_tic30 (bfd_vma pc, disassemble_info *info)
   unsigned long insn_word;
   struct instruction insn = { 0, NULL, NULL };
   bfd_vma bufaddr = pc - info->buffer_vma;
+
+  if (bufaddr + 3 >= info->buffer_length)
+    return -1;
 
   /* Obtain the current instruction word from the buffer.  */
   insn_word = (((unsigned) *(info->buffer + bufaddr) << 24)

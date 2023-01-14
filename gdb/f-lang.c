@@ -1511,7 +1511,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 	arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, EVAL_NORMAL);
     }
 
-  value *elt = value_struct_elt (&arg1, NULL, str, NULL, "structure");
+  value *elt = value_struct_elt (&arg1, {}, str, NULL, "structure");
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
@@ -1685,11 +1685,11 @@ _initialize_f_language ()
 
   add_basic_prefix_cmd ("fortran", no_class,
 			_("Prefix command for changing Fortran-specific settings."),
-			&set_fortran_list, "set fortran ", 0, &setlist);
+			&set_fortran_list, 0, &setlist);
 
   add_show_prefix_cmd ("fortran", no_class,
 		       _("Generic command for showing Fortran-specific settings."),
-		       &show_fortran_list, "show fortran ", 0, &showlist);
+		       &show_fortran_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("repack-array-slices", class_vars,
 			   &repack_array_slices, _("\

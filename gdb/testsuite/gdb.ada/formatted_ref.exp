@@ -90,7 +90,30 @@ proc test_p_op1_equals_op2 {op1 op2} {
 
 clean_restart ${testfile}
 
-runto defs.adb:[gdb_get_line_number "marker here" ${testdir}/defs.adb ]
+set bp_location \
+    defs.adb:[gdb_get_line_number "marker here" ${testdir}/defs.adb]
+
+# Workaround gcc PR101575.
+#runto $bp_location
+gdb_breakpoint "$bp_location"
+gdb_run_cmd
+set re "Breakpoint $decimal, defs.f1 \\(.*\\) at .*:$decimal.*"
+set re_xfail "Breakpoint $decimal, defs__struct1IP \\(\\) at .*:$decimal.*"
+set ok 1
+gdb_test_multiple "" "Runto to $bp_location" {
+    -re -wrap $re {
+	if { $ok } {
+	    pass $gdb_test_name
+	} else {
+	    xfail $gdb_test_name
+	}
+    }
+    -re -wrap $re_xfail {
+	set ok 0
+	send_gdb "continue\n"
+	exp_continue
+    }
+}
 
 set s1_address  [get_address "s1"]
 

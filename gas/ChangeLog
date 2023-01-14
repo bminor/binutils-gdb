@@ -1,3 +1,1031 @@
+2021-07-14  Alan Modra  <amodra@gmail.com>
+
+	* write.c (TC_VALIDATE_FIX_SUB): Default to 0.
+	* config/tc-hppa.h (TC_VALIDATE_FIX_SUB): Define.
+	* config/tc-microblaze.h (TC_VALIDATE_FIX_SUB): Define.
+	* config/tc-alpha.h (TC_VALIDATE_FIX_SUB): Define for ECOFF.
+	* config/tc-ppc.h (TC_VALIDATE_FIX_SUB): Don't define for ELF.
+	Do define for XCOFF.
+
+2021-07-14  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (ppc_change_debug_section): Update to
+	match new name's field.
+
+2021-07-12  Tucker  <tuckkern@sourceware@gmail.com>
+
+	PR 28054
+	* config/obj-elf.c (obj_elf_change_section): Set the
+	SEF_ELF_OCTETS flag on debug sections.
+
+2021-06-07  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-arch14.d: Add qpaci.
+	* testsuite/gas/s390/zarch-arch14.s: Add qpaci.
+
+2021-07-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 28051
+	* config/tc-i386.c (offset_in_range): Reformat error messages in
+	order to fix problems when translating.
+	(md_assemble): Likewise.
+	* messages.c (as_internal_value_out_of_range): Likewise.
+	* read.c (emit_expr_with_reloc): Likewise.
+	* testsuite/gas/all/overflow.l Change expected output format.
+	* po/gas.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-07-02  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-nds32.c (nds32_keyword_gpr): Don't declare.
+	(md_begin): Constify k.
+
+2021-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-nds32.c: Change all references of keyword_gpr to
+	nds32_keyword_gpr.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/tc-microblaze.c (md_begin): Make opcode const.  Rename
+	opcodes to microblaze_opcodes.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/tc-aarch64.c (struct templates): Make opcode const.
+	(md_assemble): Likewise.
+	(fill_instruction_hash_table): Likewise.
+
+2021-06-24  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (md_assemble): Update ppc_current_csect
+	alignment when finding prefixed instructions.
+
+2021-06-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-pj.c (md_apply_fix): Apply PJ_CODE_REL32 relocs.
+	* testsuite/gas/pj/ops.s: Update jsr, ret, getstatic,
+	putstatic, getfield, putfield, invokevirtual, invokespecial,
+	invokestatic, invokeinterface, goto_w, jsr_w assembly.  Delete
+	version 1 picojava opcodes.
+	* testsuite/gas/pj/ops.d: Match expected output.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-z80.c (signed_overflow, unsigned_overflow): Avoid UB.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/raw.s: Use 0 as pli constant.
+	* testsuite/gas/ppc/raw.d: Update to suit.
+
+2021-06-18  Jan Beulich  <jbeulich@suse.com>
+
+	* expr.c (symbol_lookup_or_make): New.
+	(operand): Use it.
+	* testsuite/gas/elf/startof.s, testsuite/gas/elf/startof.d: New.
+	* testsuite/gas/elf/elf.exp: Run new test.
+
+2021-06-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 27904
+	* config/tc-aarch64.c (ldst_lo12_determine_real_reloc_type):
+	Generate a syntax error message if the reloc qualifier does not
+	match the instruction's size.
+
+2021-06-17  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (md_begin): Create bss section with dummy
+	symbol.
+	(ppc_frob_symbol): Output XTY_CM for bss csects.
+	(ppc_fix_adjustable): Adjust condition to avoid bss csects.
+
+2021-06-17  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (md_apply_fix): Adjust addend to nullify
+	section contents for BFD_RELOC_PPC_TLSM or
+	BFD_RELOC_PPC64_TLSM.
+	* testsuite/gas/ppc/xcoff-tlsm-32.d: New test.
+	* testsuite/gas/ppc/xcoff-tlsm-64.d: New test.
+	* testsuite/gas/ppc/xcoff-tlsm.s: New test.
+	* testsuite/gas/ppc/aix.exp: Run new tests.
+
+2021-06-16  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (parse_one_float): New.
+	(s_float_space, float_cons): Use it.
+	* testsuite/gas/all/float.s: Add .dc.*, .dcb.*, and .ds.* cases.
+
+2021-06-16  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (emit_expr_with_reloc): Adjust overflow check. Drop
+	hibit local variable.
+	* write.c (fixup_segment): Differentiate signed and non-signed
+	relocs in overflow check.
+	* testsuite/gas/all/overflow.s,
+	testsuite/gas/all/overflow.l: New.
+	* testsuite/gas/all/gas.exp: Run new test.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (md_show_usage): Split ELF and PE/COFF parts
+	of object format controlling option. Add Mach-O to the latter.
+	* testsuite/gas/i386/i386.exp (gas_bfd64_check): Adjust
+	accordingly.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (disp16, disp32, disp32s): Delete.
+	(optimize_disp, i386_finalize_displacement): Use
+	operand_type_and_not.
+	(build_modrm_byte): Likewise. Eliminate local variable newdisp.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (offset_in_range): Bail early when mask would
+	cover all bits anyway.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Generalize disp32 part of
+	the BFD64-only logic to also apply to non-64-bit code.
+	(i386_finalize_displacement): Use extend_to_32bit_address for
+	non-64-bit code. Drop now redundant O_constant checks.
+	* testsuite/gas/i386/disp-imm-32.s,
+	testsuite/gas/i386/disp-imm-32.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (offset_in_range): Replace uses of
+	bfd_sprintf_vma.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (offset_in_range): Adjust conditional.
+	* testsuite/gas/i386/disp-imm-16.s,
+	testsuite/gas/i386/disp-imm-16.l,
+	testsuite/gas/i386/disp-imm-64.s,
+	testsuite/gas/i386/disp-imm-64.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_att_operand): Re-introduce (now
+	properly named) parens_not_balanced.
+	* testsuite/gas/i386/sib.s: Add more cases.
+	* testsuite/gas/i386/sib.d, testsuite/gas/i386/sib-intel.d:
+	Adjust expectations.
+
+2021-06-14  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (emit_expr_with_reloc): Fold three as_warn().
+
+2021-06-14  Jan Beulich  <jbeulich@suse.com>
+
+	* doc/internals.texi (TC_ADDRESS_BYTES): Mention generic default.
+	* read.c (potable, cons_worker): Drop TC_ADDRESS_BYTES
+	conditional.
+
+2021-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_cons): Handle GOT/PLT relocations only
+	if needed.
+	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Always define.
+
+2021-06-11  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Call riscv_set_rvc
+	and riscv_set_rve both for -march and elf attributes.
+	(riscv_after_parse_args): Likewise.
+
+2021-06-10  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-arm.c (do_bfloat_vfma): Rename index to idx.
+	(do_vusdot): Likewise.
+	(do_vsudot): Likewise.
+	(check_cde_operand): Likewise.
+	(do_vdot): Likewise.
+
+2021-06-10  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-arm.c (reg_expected_msgs): Add REG_TYPE_ZR entry.
+
+2021-06-10  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_encoding): Suppress LEA conversion
+	when it would grow code size in 16-bit mode.
+	* testsuite/gas/i386/lea16-optimize.d: Adjust expectations.
+	* testsuite/gas/i386/lea16-optimize2.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/quoted.d, testsuite/gas/i386/wrap32-text.d:
+	Adjust expectations.
+	* testsuite/gas/i386/wrap32-data.d: Likewise. Correct name.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_imm): Use fits_in_unsigned_word
+	and fits_in_unsigned_long.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Use fits_in_unsigned_word
+	and fits_in_unsigned_long. Combine if()s.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Write back updated value.
+	* testsuite/gas/i386/lea16.s, testsuite/gas/i386/lea64.s: New
+	cases.
+	* testsuite/gas/i386/lea16-optimize.d,
+	testsuite/gas/i386/lea64.d, testsuite/gas/i386/lea64-optimize.d:
+	Adjust expectations.
+	* testsuite/gas/i386/lea16.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Drop redundant masking.
+	Re-order.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_att_operand): Re-write handling of
+	vector operations operand suffix.
+	* testsuite/gas/i386/unary.s: Add more cases.
+	* testsuite/gas/i386/unary.d: Adjust expectations.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (parse_operands): Reduce scope of
+	paren_not_balanced, to match the new in_quotes. Skip over quoted
+	regions of operands.
+	(i386_att_operand): Remove (mis-named) parens_balanced. Respect
+	double quote.
+	* testsuite/gas/i386/unary.s: Add more cases.
+	* testsuite/gas/i386/unary.d: Adjust expectations.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (digit_chars, is_digit_char): Delete.
+	(md_begin): Fold digit and lower-case letter handling.
+	(starts_memory_operand): Permit more characters.
+	* testsuite/gas/i386/unary.s, testsuite/gas/i386/unary.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (starts_memory_operand): New.
+	(i386_att_operand): Use it.
+	* testsuite/gas/i386/quoted.s, testsuite/gas/i386/quoted.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_att_operand): Flip checking for '*' and
+	start-of-expression. Don't permit '*' when one was already seen.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (parse_operands): Don't check for matched
+	square brackets.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (check_VecOperations): Remove 2nd parameter.
+	(i386_att_operand): Adjust calls to check_VecOperations.
+	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_immediate): Don't call check_VecOperations.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (extend_to_32bit_address): New.
+	(x86_cons, i386_finalize_immediate, md_apply_fix): Use it.
+	(signed_cons): Use object_64bit.
+	* testsuite/gas/i386/wrap32.s, testsuite/gas/i386/wrap32-data.d,
+	testsuite/gas/i386/wrap32-text.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 1202
+	* testsuite/gas/mcore/allinsn.d: Correct loopt expected output.
+
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/raw.s,
+	* testsuite/gas/ppc/raw.d: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/c0.d: New test.
+	* testsuite/gas/mips/mips1@c0.d: New test.
+	* testsuite/gas/mips/mips2@c0.d: New test.
+	* testsuite/gas/mips/mips3@c0.d: New test.
+	* testsuite/gas/mips/mips4@c0.d: New test.
+	* testsuite/gas/mips/mips5@c0.d: New test.
+	* testsuite/gas/mips/mips32@c0.d: New test.
+	* testsuite/gas/mips/mips64@c0.d: New test.
+	* testsuite/gas/mips/r3000@c0.d: New test.
+	* testsuite/gas/mips/r3900@c0.d: New test.
+	* testsuite/gas/mips/r4000@c0.d: New test.
+	* testsuite/gas/mips/vr5400@c0.d: New test.
+	* testsuite/gas/mips/r5900@c0.d: New test.
+	* testsuite/gas/mips/sb1@c0.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@c0.d: New test.
+	* testsuite/gas/mips/octeon@c0.d: New test.
+	* testsuite/gas/mips/xlr@c0.d: New test.
+	* testsuite/gas/mips/c1.d: New test.
+	* testsuite/gas/mips/mips1@c1.d: New test.
+	* testsuite/gas/mips/mips2@c1.d: New test.
+	* testsuite/gas/mips/mips3@c1.d: New test.
+	* testsuite/gas/mips/mips4@c1.d: New test.
+	* testsuite/gas/mips/mips5@c1.d: New test.
+	* testsuite/gas/mips/mips32@c1.d: New test.
+	* testsuite/gas/mips/mips64@c1.d: New test.
+	* testsuite/gas/mips/mipsr6@c1.d: New test.
+	* testsuite/gas/mips/r3000@c1.d: New test.
+	* testsuite/gas/mips/r3900@c1.d: New test.
+	* testsuite/gas/mips/r4000@c1.d: New test.
+	* testsuite/gas/mips/vr5400@c1.d: New test.
+	* testsuite/gas/mips/r5900@c1.d: New test.
+	* testsuite/gas/mips/sb1@c1.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@c1.d: New test.
+	* testsuite/gas/mips/octeon@c1.d: New test.
+	* testsuite/gas/mips/xlr@c1.d: New test.
+	* testsuite/gas/mips/c2.d: New test.
+	* testsuite/gas/mips/vr5400@c2.d: New test.
+	* testsuite/gas/mips/r5900@c2.d: New test.
+	* testsuite/gas/mips/octeon@c2.d: New test.
+	* testsuite/gas/mips/c3.d: New test.
+	* testsuite/gas/mips/mips1@c3.d: New test.
+	* testsuite/gas/mips/mips2@c3.d: New test.
+	* testsuite/gas/mips/mips32@c3.d: New test.
+	* testsuite/gas/mips/r3000@c3.d: New test.
+	* testsuite/gas/mips/r3900@c3.d: New test.
+	* testsuite/gas/mips/c0.l: New test stderr output.
+	* testsuite/gas/mips/c2.l: New test stderr output.
+	* testsuite/gas/mips/c3.l: New test stderr output.
+	* testsuite/gas/mips/c0.s: New test source.
+	* testsuite/gas/mips/c1.s: New test source.
+	* testsuite/gas/mips/c2.s: New test source.
+	* testsuite/gas/mips/c3.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/mips.exp: Run RFE test across all ISAs.
+	* testsuite/gas/mips/rfe.d: Update for ISA exclusions.
+	* testsuite/gas/mips/mips1@rfe.d: New test.
+	* testsuite/gas/mips/mips2@rfe.d: New test.
+	* testsuite/gas/mips/r3000@rfe.d: New test.
+	* testsuite/gas/mips/r3900@rfe.d: New test.
+	* testsuite/gas/mips/rfe.l: New test stderr output.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/mips.exp: Run coprocessor tests across all
+	ISAs.
+	* testsuite/gas/mips/cp0b.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0bl.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0c.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0m.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3b.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3bl.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3m.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3d.d: Update for ISA exclusions.
+	* testsuite/gas/mips/mips1@cp0b.d: New test.
+	* testsuite/gas/mips/mips2@cp0b.d: New test.
+	* testsuite/gas/mips/mips3@cp0b.d: New test.
+	* testsuite/gas/mips/r3000@cp0b.d: New test.
+	* testsuite/gas/mips/r3900@cp0b.d: New test.
+	* testsuite/gas/mips/r4000@cp0b.d: New test.
+	* testsuite/gas/mips/r5900@cp0b.d: New test.
+	* testsuite/gas/mips/mips2@cp0bl.d: New test.
+	* testsuite/gas/mips/mips3@cp0bl.d: New test.
+	* testsuite/gas/mips/r3900@cp0bl.d: New test.
+	* testsuite/gas/mips/r4000@cp0bl.d: New test.
+	* testsuite/gas/mips/r5900@cp0bl.d: New test.
+	* testsuite/gas/mips/mips1@cp0c.d: New test.
+	* testsuite/gas/mips/mips2@cp0c.d: New test.
+	* testsuite/gas/mips/mips3@cp0c.d: New test.
+	* testsuite/gas/mips/mips4@cp0c.d: New test.
+	* testsuite/gas/mips/mips5@cp0c.d: New test.
+	* testsuite/gas/mips/r3000@cp0c.d: New test.
+	* testsuite/gas/mips/r3900@cp0c.d: New test.
+	* testsuite/gas/mips/r4000@cp0c.d: New test.
+	* testsuite/gas/mips/vr5400@cp0c.d: New test.
+	* testsuite/gas/mips/r5900@cp0c.d: New test.
+	* testsuite/gas/mips/mips1@cp0m.d: New test.
+	* testsuite/gas/mips/r3000@cp0m.d: New test.
+	* testsuite/gas/mips/octeon@cp2.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2b.d: New test.
+	* testsuite/gas/mips/vr5400@cp2b.d: New test.
+	* testsuite/gas/mips/octeon@cp2b.d: New test.
+	* testsuite/gas/mips/mips1@cp2bl.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2bl.d: New test.
+	* testsuite/gas/mips/r3000@cp2bl.d: New test.
+	* testsuite/gas/mips/vr5400@cp2bl.d: New test.
+	* testsuite/gas/mips/octeon@cp2bl.d: New test.
+	* testsuite/gas/mips/vr5400@cp2m.d: New test.
+	* testsuite/gas/mips/r5900@cp2m.d: New test.
+	* testsuite/gas/mips/octeon@cp2m.d: New test.
+	* testsuite/gas/mips/mips1@cp2d.d: New test.
+	* testsuite/gas/mips/r3000@cp2d.d: New test.
+	* testsuite/gas/mips/r3900@cp2d.d: New test.
+	* testsuite/gas/mips/vr5400@cp2d.d: New test.
+	* testsuite/gas/mips/r5900@cp2d.d: New test.
+	* testsuite/gas/mips/octeon@cp2d.d: New test.
+	* testsuite/gas/mips/mips1@cp2-64.d: New test.
+	* testsuite/gas/mips/mips2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r3@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r5@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r6@cp2-64.d: New test.
+	* testsuite/gas/mips/r3000@cp2-64.d: New test.
+	* testsuite/gas/mips/r3900@cp2-64.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips1@cp3.d: New test.
+	* testsuite/gas/mips/mips2@cp3.d: New test.
+	* testsuite/gas/mips/mips32@cp3.d: New test.
+	* testsuite/gas/mips/r3000@cp3.d: New test.
+	* testsuite/gas/mips/r3900@cp3.d: New test.
+	* testsuite/gas/mips/mips1@cp3b.d: New test.
+	* testsuite/gas/mips/mips2@cp3b.d: New test.
+	* testsuite/gas/mips/mips32@cp3b.d: New test.
+	* testsuite/gas/mips/r3000@cp3b.d: New test.
+	* testsuite/gas/mips/r3900@cp3b.d: New test.
+	* testsuite/gas/mips/mips2@cp3bl.d: New test.
+	* testsuite/gas/mips/mips32@cp3bl.d: New test.
+	* testsuite/gas/mips/r3900@cp3bl.d: New test.
+	* testsuite/gas/mips/mips1@cp3m.d: New test.
+	* testsuite/gas/mips/mips2@cp3m.d: New test.
+	* testsuite/gas/mips/r3000@cp3m.d: New test.
+	* testsuite/gas/mips/r3900@cp3m.d: New test.
+	* testsuite/gas/mips/mips2@cp3d.d: New test.
+	* testsuite/gas/mips/cp0b.l: New test stderr output.
+	* testsuite/gas/mips/cp0bl.l: New test stderr output.
+	* testsuite/gas/mips/cp0c.l: New test stderr output.
+	* testsuite/gas/mips/cp0m.l: New test stderr output.
+	* testsuite/gas/mips/cp2.l: New test stderr output.
+	* testsuite/gas/mips/cp2-64.l: New test stderr output.
+	* testsuite/gas/mips/cp2b.l: New test stderr output.
+	* testsuite/gas/mips/cp2bl.l: New test stderr output.
+	* testsuite/gas/mips/cp2m.l: New test stderr output.
+	* testsuite/gas/mips/cp2d.l: New test stderr output.
+	* testsuite/gas/mips/cp3.l: New test stderr output.
+	* testsuite/gas/mips/cp3b.l: New test stderr output.
+	* testsuite/gas/mips/cp3bl.l: New test stderr output.
+	* testsuite/gas/mips/cp3m.l: New test stderr output.
+	* testsuite/gas/mips/cp3d.l: New test stderr output.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/mips32@isa-override-1.d: Update for LDC3
+	instruction removal.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/cp0b.d: New test.
+	* testsuite/gas/mips/cp0bl.d: New test.
+	* testsuite/gas/mips/cp2b.d: New test.
+	* testsuite/gas/mips/micromips@cp2b.d: New test.
+	* testsuite/gas/mips/cp2bl.d: New test.
+	* testsuite/gas/mips/micromips@cp2bl.d: New test.
+	* testsuite/gas/mips/cp3b.d: New test.
+	* testsuite/gas/mips/cp3bl.d: New test.
+	* testsuite/gas/mips/cp0b.s: New test source.
+	* testsuite/gas/mips/cp0bl.s: New test source.
+	* testsuite/gas/mips/cp2b.s: New test source.
+	* testsuite/gas/mips/cp2bl.s: New test source.
+	* testsuite/gas/mips/cp3b.s: New test source.
+	* testsuite/gas/mips/cp3bl.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/rfe.d: New test.
+	* testsuite/gas/mips/rfe.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/cp1-names-r3900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+	* testsuite/gas/mips/branch-misc-3.d: Update disassembly
+	according to changes to opcodes.
+	* testsuite/gas/mips/cp1-names-r3000.d: Likewise.
+	* testsuite/gas/mips/cp1-names-r4000.d: Likewise.
+	* testsuite/gas/mips/relax-swap1-mips1.d: Likewise.
+	* testsuite/gas/mips/relax-swap1-mips2.d: Likewise.
+	* testsuite/gas/mips/trunc.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/cp0c.d: New test.
+	* testsuite/gas/mips/cp0m.d: New test.
+	* testsuite/gas/mips/r3900@cp0m.d: New test.
+	* testsuite/gas/mips/cp2.d: New test.
+	* testsuite/gas/mips/micromips@cp2.d: New test.
+	* testsuite/gas/mips/cp2m.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2m.d: New test.
+	* testsuite/gas/mips/micromips@cp2m.d: New test.
+	* testsuite/gas/mips/cp2d.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2d.d: New test.
+	* testsuite/gas/mips/micromips@cp2d.d: New test.
+	* testsuite/gas/mips/cp2-64.d: New test.
+	* testsuite/gas/mips/micromips@cp2-64.d: New test.
+	* testsuite/gas/mips/cp3.d: New test.
+	* testsuite/gas/mips/cp3m.d: New test.
+	* testsuite/gas/mips/cp3d.d: New test.
+	* testsuite/gas/mips/cp0c.s: New test source.
+	* testsuite/gas/mips/cp0m.s: New test source.
+	* testsuite/gas/mips/cp2.s: New test source.
+	* testsuite/gas/mips/cp2m.s: New test source.
+	* testsuite/gas/mips/cp2d.s: New test source.
+	* testsuite/gas/mips/cp2-64.s: New test source.
+	* testsuite/gas/mips/cp3.s: New test source.
+	* testsuite/gas/mips/cp3m.s: New test source.
+	* testsuite/gas/mips/cp3d.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* tc-mips.c (convert_reg_type) <OP_REG_CONTROL>: New case.
+	(macro) <M_TRUNCWS, M_TRUNCWD>: Use the `g' rather than `G'
+	operand code.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/cp0-names-r3900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run it.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/gas/mips/micromips.d: Update disassembly according
+	to "dmtc1" entry fix with opcodes.
+	* testsuite/gas/mips/micromips-compact.d: Likewise.
+	* testsuite/gas/mips/micromips-insn32.d: Likewise.
+	* testsuite/gas/mips/micromips-noinsn32.d: Likewise.
+	* testsuite/gas/mips/micromips-trap.d: Likewise.
+	* testsuite/gas/mips/micromips@isa-override-1.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* config/tc-mips.c (FCSR): New macro.
+	(macro) <M_TRUNCWS, M_TRUNCWD>: Use it in place of RA.
+
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* config/tc-i386.c (set_code_flag): Revert commit 50c95a739c9.
+	(set_16bit_gcc_code_flag): Likewise.
+	(x86_cleanup): Likewise.
+	* testsuite/gas/i386/code16-2.d: Updated.
+	* testsuite/gas/i386/x86-64-code16-2.d: Likewise.
+
+2021-05-27  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/vsx.d <xxmr, xxlnot>: Add tests.
+	* testsuite/gas/ppc/vsx.s: Likewise.
+
+2021-05-27  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-nds32.c (do_pseudo_push_bhwd, do_pseudo_pop_bhwd),
+	(do_pseudo_pusha, do_pseudo_pushi): Avoid fortify strncpy bound
+	error.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* config/tc-i386.c (set_code_flag): Update x86_feature_2_used
+	with GNU_PROPERTY_X86_FEATURE_2_CODE16 for .code16 in ELF
+	object.
+	(set_16bit_gcc_code_flag): Likewise.
+	(x86_cleanup): Always generate the GNU property note if
+	x86_feature_2_used isn't 0.
+	* testsuite/gas/i386/code16-2.d: New file.
+	* testsuite/gas/i386/code16-2.s: Likewise.
+	* testsuite/gas/i386/x86-64-code16-2.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run code16-2 and x86-64-code16-2.
+
+2021-05-26  Sebastien Villemot  <sebastien@debian.org>
+
+	PR gas/27906
+	* doc/c-i386.texi: Replace movsb with movsxb as an alias for
+	movsbq.
+
+2021-05-26  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Set
+	check_unknown_prefixed_ext to true for assembler.
+
+2021-05-25  Tamar Christina  <tamar.christina@arm.com>
+
+	PR gas/25235
+	* config/tc-arm.c (md_convert_frag): Set LSB when Thumb symbol.
+	(relax_adr): Thumb symbols 4 bytes.
+	* testsuite/gas/arm/pr25235.d: New test.
+	* testsuite/gas/arm/pr25235.s: New test.
+
+2021-05-24  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 25212
+	* config/tc-riscv.c (riscv_set_abi_by_arch): If -mabi isn't set, we
+	will choose ilp32e abi for rv32e.  Besides, report errors for the
+	invalid march and mabi combinations.
+	* testsuite/gas/riscv/mabi-attr-rv32e.s: New testcase.  Only accept
+	ilp32e abi for rve extension.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64f.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64f.l: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.l: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.q: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.q: Likewise.
+	Renamed all mabi testcases to their march-mabi settings.
+
+2021-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 25599
+	* config/tc-ia64.c (emit_one_bundle): Expand comment for HP-UX
+	adjustment.  Add assertion.
+	* testsuite/gas/ia64/reloc-mlx.d: Pass when slot 2 specified
+	for PCREL60B.
+
+2021-05-20  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* config/tc-z80.c (emit_data_val): Warn on constant overflow.
+	(signed_overflow): New function.
+	(unsigned_overflow): New function.
+	(is_overflow): Use new functions.
+	(md_apply_fix): Use signed_overflow.
+	* testsuite/gas/z80/ez80_adl_suf.d: Fix test.
+	* testsuite/gas/z80/ez80_isuf.s: Likewise.
+	* testsuite/gas/z80/ez80_z80_suf.d: Likewise.
+
+2021-05-20  Nicolas Boulenguez  <nicolas@debian.org>
+
+	PR 27888
+	* Makefile.am (ZLIB): Define.
+	(as_new_LDADD): Add it.
+	* Makefile.in: Regenerate.
+
+2021-05-17  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-arm.c (do_mve_mov): Only reject vmov if we're moving
+	into the same GPR twice.
+	* testsuite/gas/arm/mve-vmov-bad-2.l: Tweak error message.
+	* testsuite/gas/arm/mve-vmov-3.d: New test.
+	* testsuite/gas/arm/mve-vmov-3.s: New test.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/dwarf-5-file0.d: Update.
+	* testsuite/gas/i386/dwarf5-line-1.d: Update.
+
+2021-05-11  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 27823
+	* config/tc-z80.c (emit_ld_r_m): Report an illegal load
+	instruction.
+	* testsuite/gas/z80/ill_ops.s: New test source file.
+	* testsuite/gas/z80/ill_ops.d: New test driver.
+	* testsuite/gas/z80/ill_ops.l: New test error output.
+
+2021-05-10  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 27415
+	* config/tc-z80.c (emit_data_val): Add support for 8-bit and
+	24-bit shifts.
+	* testsuite/gas/z80/z80_reloc.a: Update tests.
+	* testsuite/gas/z80/z80_reloc.d: Update expected disassembly.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/Makefile.am (html-local, as/index.html): New targets.
+	* doc/Makefile.in: Regenerate.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): Add --no-split.
+	* doc/Makefile.in: Regenerate.
+
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 3136
+	* config/obj-elf.c (elf_pseudo_table): Add entry for .bss.
+	(obj_elf_bss): New function.  Change to the .bss section.
+	Support an optional subsection number.
+	(obj_elf_change_section): Call obj_elf_section_change_hook.
+	(obj_elf_section): Likewise.
+	(obj_elf_data): Likewise.
+	(obj_elf_text): Likewise.
+	(obj_elf_struct): Likewise.
+	(obj_elf_subsection): Likewise.
+	(obj_elf_previous): Likewise.
+	* config/obj-elf.h (obj_elf_bss): Prototype.
+	* doc/as.texi (Bss): New node.
+
+2021-05-07  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/obj-coff.c (coff_frob_symbol): Don't skip C_DWARF.
+	(coff_adjust_section_syms): Use corrext auxent for C_DWARF.
+	(coff_frob_section): Likewise.
+	* config/obj-coff.h (SA_GET_SECT_SCNLEN,
+	SA_GET_SECT_NRELOC, SA_SET_SECT_SCNLEN,
+	SA_SET_SECT_NRELOC) New defines.
+	(SET_SECTION_RELOCS): Adjust for C_DWARF.
+	* config/tc-ppc.c (ppc_frob_symbol): Don't skip C_DWARF.
+	(ppc_adjust_symtab): Reorder C_DWARF symbols.
+	* testsuite/gas/ppc/aix.exp: New tests.
+	* testsuite/gas/ppc/xcoff-dwsect-2-32.d: New test.
+	* testsuite/gas/ppc/xcoff-dwsect-2-64.d: New test.
+	* testsuite/gas/ppc/xcoff-dwsect-2.s: New test.
+
+	* config/tc-ppc.c (ppc_function): Update comment for
+	fifth argument.
+	(ppc_frob_symbol): Remove ppc_last_function check.
+	Make sure coff_last_function is reset.
+	Correctly set fsize when not provided in .function.
+	* testsuite/gas/ppc/aix.exp: New tests.
+	* testsuite/gas/ppc/xcoff-function-1-32.d: New test.
+	* testsuite/gas/ppc/xcoff-function-1-64.d: New test.
+	* testsuite/gas/ppc/xcoff-function-1.s: New test.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/rela.s, testsuite/gas/i386/rela.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (output_disp): Use disps field instead of
+	imms one.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_finalize_immediate): Move register
+	check ...
+	(i386_immediate): ... here.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_imm): Drop redundant masking.
+	Re-arrange operand type accumulation.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* testsuite/gas/or1k/reloc-1.s: Add test for new relocation.
+	* testsuite/gas/or1k/reloc-1.d: Add test result for new
+	relocation.
+
+2021-05-03  Christoph Muellner <cmuellner@gcc.gnu.org>
+
+	PR 27764
+	* testsuite/gas/riscv/a-ext-64.d: New testcase.
+	* testsuite/gas/riscv/a-ext-64.s: Likewise.
+	* testsuite/gas/riscv/a-ext.d: Likewise.
+	* testsuite/gas/riscv/a-ext.s: Likewise.
+
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Adjust surrounding
+	#if.
+	* testsuite/gas/i386/secrel.s: Convert some .secrel32 to .long.
+	Add two further .long and an .equ.
+	* testsuite/gas/i386/secrel.d: Adjust expecations.
+
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/secrel.d, testsuite/gas/i386/secrel.s:
+	Convert Windows to UNIX EOL.
+
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (lex_got): Adjust surrounding #if. Fold TE_PE
+	variant into ELF one.
+
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section25.s: Don't start directives in first
+	column.
+	* testsuite/gas/elf/section26.s: Likewise.
+
+2021-04-29  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/i386.exp: Move x86-64-rip-2 invocation.
+	* testsuite/gas/i386/lea64.d,
+	testsuite/gas/i386/lea64-optimize.d: Allow for COFF relocs.
+	* testsuite/gas/i386/x86-64-rip-inval-1.s,
+	testsuite/gas/i386/x86-64-rip-inval-2.s. Add .end.
+
+2021-04-29  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_validate_fix): Change return type to
+	int. Short-circuit BFD_RELOC_SIZE* handling.
+	(tc_gen_reloc): New local variable sym. Extend logic when
+	processing BFD_RELOC_SIZE*.
+	* config/tc-i386.f (i386_validate_fix): Change return type to
+	int.
+	(TC_VALIDATE_FIX): Proceed to SKIP when i386_validate_fix()
+	returns zero.
+	* testsuite/gas/i386/size-5.s, testsuite/gas/i386/size-5a.d,
+	testsuite/gas/i386/size-5b.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-04-29  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Use section size for section
+	symbols when resolving BFD_RELOC_SIZE*.
+	* testsuite/gas/i386/size-2.s: Add section size cases.
+	* testsuite/gas/i386/size-2.d,
+	testsuite/gas/i386/x86-64-size-2.d: Adjust expectations.
+
+2021-04-28  Jan Beulich  <jbeulich@suse.com>
+            H.J. Lu  <hjl.tools@gmail.com>
+
+	PR gas/27763
+	* config/tc-i386.c (output_jump): Also mark 2-byte relocs as
+	signed for XBEGIN. Also mark 4-byte relocs as signed for 64-bit.
+	(output_disp): Also mark 4-byte relocs as signed for 64-bit.
+	(md_estimate_size_before_relax): Move local variable fixP. Set
+	it from fix_new() return values. Mark 4-byte relocs as signed
+	for 64-bit.
+	* testsuite/gas/i386/pcrel64.s, testsuite/gas/i386/pcrel64.l,
+	* testsuite/gas/i386/x86-64-rip-2.s,
+	* testsuite/gas/i386/x86-64-rip-2.d,
+	* testsuite/gas/i386/x86-64-rip-inval-1.s,
+	* testsuite/gas/i386/x86-64-rip-inval-1.l,
+	* testsuite/gas/i386/x86-64-rip-inval-2.s,
+	* testsuite/gas/i386/x86-64-rip-inval-2.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (optimize_encoding): Add () to silence GCC 5.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Check IS_ELF for
+	BFD_RELOC_SIZE*.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Limit BFD_RELOC_SIZE32
+	overflow check to 64-bit objects.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (want_disp32): Also check for SIZE32.
+	(optimize_encoding): Handle LEA.
+	* testsuite/gas/i386/lea.s, testsuite/gas/i386/lea.d,
+	testsuite/gas/i386/lea.e, testsuite/gas/i386/lea-optimize.d:
+	Add many more forms.
+	* testsuite/gas/i386/lea16.s, testsuite/gas/i386/lea16-optimize.d,
+	testsuite/gas/i386/lea64.s, testsuite/gas/i386/lea64.d,
+	testsuite/gas/i386/lea64.e, testsuite/gas/i386/lea64-optimize.d:
+	New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (md_apply_fix): Mark BFD_RELOC_X86_64_32S as
+	signed.
+	* testsuite/gas/i386/x86-64-addr32-bad.s,
+	testsuite/gas/i386/x86-64-addr32-bad.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-04-23  Eric Botcazou<ebotcazou@adacore.com>
+
+	* testsuite/gas/elf/section25.d: Run it everywhere.
+	* testsuite/gas/elf/section26.d: Likewise.
+	* testsuite/gas/elf/section26.s: Add test for .persistent.bss.
+
+2021-04-23  Jérôme Gardou  <jerome.gardou@gmail.com>
+
+	* config/obj-coff-seh.c (obj_coff_seh_pushframe): Allow an
+	optional "code" argument.
+
+2021-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (want_disp32): New.
+	(md_assemble): Use it.
+	(optimize_disp): Likewise.
+	(build_modrm_byte): Likewise.
+
+2021-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_finalize_displacement): Move Disp32S
+	check ...
+	(md_assemble): ... here.
+
+2021-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Move down BFD64 section.
+	Move up setting of disp32.
+
+2021-04-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (pe): Don't truncate expression value.
+	(i386_finalize_displacement): Likewise.
+
+2021-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/aarch64/dwarf.d: Adjust expected output to allow
+	for named section symbols.
+	* testsuite/gas/arm/thumbver.d: Likewise.
+	* testsuite/gas/bfin/loop_temps.d: Likewise.
+	* testsuite/gas/elf/section2.e-arc: Likewise.
+	* testsuite/gas/elf/section2.e-arm: Likewise.
+	* testsuite/gas/elf/section2.e-csky: Likewise.
+	* testsuite/gas/elf/section2.e-m32r: Likewise.
+	* testsuite/gas/elf/section2.e-mips: Likewise.
+	* testsuite/gas/elf/section2.e-msp430: Likewise.
+	* testsuite/gas/elf/section2.e-riscv: Likewise.
+	* testsuite/gas/elf/section2.e-rl78: Likewise.
+	* testsuite/gas/elf/section2.e-rx: Likewise.
+	* testsuite/gas/elf/section2.e-score: Likewise.
+	* testsuite/gas/elf/section2.e-tic6x: Likewise.
+	* testsuite/gas/elf/section2.e-unused: Likewise.
+	* testsuite/gas/elf/section2.e-v850: Likewise.
+	* testsuite/gas/elf/section2.e-xtensa: Likewise.
+	* testsuite/gas/ia64/alias-ilp32.d: Likewise.
+	* testsuite/gas/ia64/alias.d: Likewise.
+	* testsuite/gas/ia64/global.d: Likewise.
+	* testsuite/gas/microblaze/relax_size.elf: Likewise.
+	* testsuite/gas/microblaze/relax_size2.elf: Likewise.
+	* testsuite/gas/mips/global-local-symtab-sort-n64t.d: Likewise.
+	* testsuite/gas/mips/global-local-symtab-sort-o32t.d: Likewise.
+	* testsuite/gas/mmix/bspec-1.d: Likewise.
+	* testsuite/gas/mmix/byte-1.d: Likewise.
+	* testsuite/gas/mmix/comment-1.d: Likewise.
+	* testsuite/gas/mmix/loc-1.d: Likewise.
+	* testsuite/gas/mmix/loc-2.d: Likewise.
+	* testsuite/gas/mmix/loc-3.d: Likewise.
+	* testsuite/gas/mmix/loc-4.d: Likewise.
+	* testsuite/gas/mmix/loc-5.d: Likewise.
+	* testsuite/gas/tic6x/scomm-directive-4.d: Likewise.
+
+2021-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	PR binutils/21700
+	* config/tc-ppc.c (ppc_get_csect_to_adjust): New function.
+	(ppc_fix_adjustable): Manage fx_subsy part.
+	(tc_gen_reloc): Create second relocation when both
+	fx_addsy and fx_subsy are provided.
+	* config/tc-ppc.h (RELOC_EXPANSION_POSSIBLE): New define.
+	(MAX_RELOC_EXPANSION): Likewise.
+	(TC_FORCE_RELOCATION_SUB_SAME): Likewise
+	(UNDEFINED_DIFFERENCE_OK): Likewise
+	* testsuite/gas/all/gas.exp: Skip difference between two
+	undefined symbols test.
+
+2021-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/all/gas.exp: Add rs6000*-*-aix* to the list of
+	targets which should skip the undefined symbols test.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update news.
+	* testsuite/gas/aarch64/rme.d: Update test.
+	* testsuite/gas/aarch64/rme.s: Update test.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/rme.d: Update test.
+	* testsuite/gas/aarch64/rme.s: Update test.
+
+2021-04-19  Jan Beulich  <jbeulich@suse.com>
+
+	* as.h (sprint_value): Delete.
+	* messages.c (sprint_value): Likewise.
+	* config/tc-i386.c (offset_in_range): Use bfd_sprintf_vma in
+	place of sprint_value.
+	* config/tc-s390.c (s390_insert_operand): Likewise.
+	* doc/internals.texi (sprint_value): Delete section.
+	* write.c (fixup_segment): Likewise.
+	(relax_segment): Likewise.
+
 2021-04-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* testsuite/gas/aarch64/rme-invalid.d: New test.

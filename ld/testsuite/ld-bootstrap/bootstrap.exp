@@ -55,14 +55,17 @@ if [check_plugin_api_available] {
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
 # new ld, ld3.  ld2 and ld3 should be identical.
 set test_flags {"" "strip" "--static" "-Wl,--traditional-format"
-		"-Wl,--no-keep-memory" "-Wl,--relax"}
+		"-Wl,--no-keep-memory" "-Wl,--relax"
+		"-Wl,--max-cache-size=-1"}
 if { [istarget "powerpc-*-*"] } {
     lappend test_flags "-Wl,--ppc476-workaround"
 }
 
 set gcc_B_opt_save $gcc_B_opt
 
-catch "exec ln -s ../ldscripts tmpdir/ldscripts" status
+if {![file exists tmpdir/ldscripts]} then {
+    catch "exec ln -s ../ldscripts tmpdir/ldscripts" status
+}
 foreach ldexe {ld1 ld2 ld3} {
     if {![file isdirectory tmpdir/gcc$ldexe]} then {
 	catch "exec mkdir tmpdir/gcc$ldexe" status
@@ -213,8 +216,7 @@ foreach flags $test_flags {
 	|| [istarget "*-*-winnt*"]
 	|| [istarget "*-*-mingw*"]
 	|| [istarget "*-*-interix*"]
-	|| [istarget "*-*-beospe*"]
-	|| [istarget "*-*-netbsdpe*"]} {
+	|| [istarget "*-*-beospe*"]} {
 	# Trim off the date present in PE binaries by only looking
 	#   at the ends of the files
 	# Although this works, a way to set the date would be better.

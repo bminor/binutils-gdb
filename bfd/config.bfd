@@ -48,11 +48,6 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- openrisc-*-* | or32-*-*)
-    echo "*** Configuration $targ is obsolete." >&2
-    echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
-    exit 1
-    ;;
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -73,6 +68,7 @@ case $targ in
  *-sony-* | \
  *-tandem-* | \
  *-*-ieee* | \
+ *-*-netbsdpe* | \
  *-*-netware* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
@@ -141,6 +137,8 @@ case $targ in
  mips*-dec-* | \
  mips*-sgi-* | \
  mips*el-*-rtems* | \
+ openrisc-*-* | \
+ or32-*-* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
@@ -615,10 +613,6 @@ case "${targ}" in
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec"
     targ64_selvecs="x86_64_elf64_vec l1om_elf64_vec k1om_elf64_vec"
-    ;;
-  i[3-7]86-*-netbsdpe*)
-    targ_defvec=i386_pe_vec
-    targ_selvecs="i386_pe_vec i386_pei_vec i386_elf32_vec iamcu_elf32_vec"
     ;;
   i[3-7]86-*-openbsd*)
     targ_defvec=i386_elf32_vec
@@ -1279,13 +1273,14 @@ case "${targ}" in
     ;;
 
   sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+    # PR 27666: Do not include sparc_elf32_vec here.
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs=sparc_elf32_vec
     ;;
 #ifdef BFD64
   sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
+    # PR 27666: Do not include sparc_elf32_vec or sparc_elf64_vec here.
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs="sparc_elf64_sol2_vec sparc_elf32_vec sparc_elf64_vec"
+    targ_selvecs="sparc_elf64_sol2_vec"
     want64=true
     ;;
   sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)

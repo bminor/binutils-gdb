@@ -1,4 +1,5 @@
 # mach(): m32r m32rx
+# sim: --environment virtual
 # output(): pass\n
 
 	.include "testutils.inc"

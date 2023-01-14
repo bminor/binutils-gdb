@@ -1,9 +1,8 @@
-#include "config.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>
 #include "ansidecl.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "opcode/d10v.h"
 #include "bfd.h"
 
@@ -21,7 +20,7 @@
 
 extern int d10v_debug;
 
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 #include "sim-config.h"
 #include "sim-types.h"
 
@@ -444,7 +443,6 @@ while (0)
 
 extern uint8 *dmem_addr (SIM_DESC, SIM_CPU *, uint16 offset);
 extern uint8 *imem_addr (SIM_DESC, SIM_CPU *, uint32);
-extern bfd_vma decode_pc (void);
 
 #define	RB(x)	(*(dmem_addr (sd, cpu, x)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))

@@ -16,6 +16,7 @@
 import gdb
 import itertools
 
+
 class FrameIterator(object):
     """A gdb.Frame iterator.  Iterates over gdb.Frames or objects that
     conform to that interface."""

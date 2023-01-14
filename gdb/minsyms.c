@@ -60,6 +60,53 @@
 #include <mutex>
 #endif
 
+/* Return true if MINSYM is a cold clone symbol.
+   Recognize f.i. these symbols (mangled/demangled):
+   - _ZL3foov.cold
+     foo() [clone .cold]
+   - _ZL9do_rpo_vnP8functionP8edge_defP11bitmap_headbb.cold.138
+     do_rpo_vn(function*, edge_def*, bitmap_head*, bool, bool)	\
+       [clone .cold.138].  */
+
+static bool
+msymbol_is_cold_clone (minimal_symbol *minsym)
+{
+  const char *name = minsym->natural_name ();
+  size_t name_len = strlen (name);
+  if (name_len < 1)
+    return false;
+
+  const char *last = &name[name_len - 1];
+  if (*last != ']')
+    return false;
+
+  const char *suffix = " [clone .cold";
+  size_t suffix_len = strlen (suffix);
+  const char *found = strstr (name, suffix);
+  if (found == nullptr)
+    return false;
+
+  const char *start = &found[suffix_len];
+  if (*start == ']')
+    return true;
+
+  if (*start != '.')
+    return false;
+
+  const char *p;
+  for (p = start + 1; p <= last; ++p)
+    {
+      if (*p >= '0' && *p <= '9')
+	continue;
+      break;
+    }
+
+  if (p == last)
+    return true;
+
+  return false;
+}
+
 /* See minsyms.h.  */
 
 bool
@@ -89,6 +136,11 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
 	  }
 	return false;
       }
+    case mst_file_text:
+      /* Ignore function symbol that is not a function entry.  */
+      if (msymbol_is_cold_clone (minsym))
+	return false;
+      /* fallthru */
     default:
       if (func_address_p != NULL)
 	*func_address_p = msym_addr;
@@ -635,9 +687,9 @@ frob_address (struct objfile *objfile, CORE_ADDR *pc)
 
   ALL_OBJFILE_OSECTIONS (objfile, iter)
     {
-      if (*pc >= obj_section_addr (iter) && *pc < obj_section_endaddr (iter))
+      if (*pc >= iter->addr () && *pc < iter->endaddr ())
 	{
-	  *pc -= obj_section_offset (iter);
+	  *pc -= iter->offset ();
 	  return 1;
 	}
     }
@@ -1564,12 +1616,12 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
   obj_section = minsym.obj_section ();
   if (iter != past_the_end
       && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter)
-	  < obj_section_endaddr (obj_section)))
+	  < obj_section->endaddr ()))
     result = MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter);
   else
     /* We got the start address from the last msymbol in the objfile.
        So the end address is the end of the section.  */
-    result = obj_section_endaddr (obj_section);
+    result = obj_section->endaddr ();
 
   return result;
 }

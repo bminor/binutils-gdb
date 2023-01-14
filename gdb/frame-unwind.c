@@ -127,10 +127,13 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 
   try
     {
+      frame_debug_printf ("trying unwinder \"%s\"", unwinder->name);
       res = unwinder->sniffer (unwinder, this_frame, this_cache);
     }
   catch (const gdb_exception &ex)
     {
+      frame_debug_printf ("caught exception: %s", ex.message->c_str ());
+
       /* Catch all exceptions, caused by either interrupt or error.
 	 Reset *THIS_CACHE, unless something reinitialized the frame
 	 cache meanwhile, in which case THIS_FRAME/THIS_CACHE are now
@@ -153,9 +156,13 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
     }
 
   if (res)
-    return 1;
+    {
+      frame_debug_printf ("yes");
+      return 1;
+    }
   else
     {
+      frame_debug_printf ("no");
       /* Don't set *THIS_CACHE to NULL here, because sniffer has to do
 	 so.  */
       frame_cleanup_after_sniffer (this_frame);
@@ -171,6 +178,9 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 void
 frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+  frame_debug_printf ("this_frame=%d", frame_relative_level (this_frame));
+
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_unwind_table *table
     = (struct frame_unwind_table *) gdbarch_data (gdbarch, frame_unwind_data);

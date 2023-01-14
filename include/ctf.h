@@ -405,7 +405,8 @@ union
    CTF_INFO_VLEN() will extract the number of elements in the list, and
    the type of each element is shown in the comments below. */
 
-#define CTF_K_UNKNOWN	0	/* Unknown type (used for padding).  */
+#define CTF_K_UNKNOWN	0	/* Unknown type (used for padding and
+				   unrepresentable types).  */
 #define CTF_K_INTEGER	1	/* Variant data is CTF_INT_DATA (see below).  */
 #define CTF_K_FLOAT	2	/* Variant data is CTF_FP_DATA (see below).  */
 #define CTF_K_POINTER	3	/* ctt_type is referenced type.  */

@@ -34,11 +34,6 @@
 
 #include "gen-itable.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-
 
 typedef struct _itable_info
 {

@@ -302,9 +302,9 @@ static void
 rust_val_print_str (struct ui_file *stream, struct value *val,
 		    const struct value_print_options *options)
 {
-  struct value *base = value_struct_elt (&val, NULL, "data_ptr", NULL,
+  struct value *base = value_struct_elt (&val, {}, "data_ptr", NULL,
 					 "slice");
-  struct value *len = value_struct_elt (&val, NULL, "length", NULL, "slice");
+  struct value *len = value_struct_elt (&val, {}, "length", NULL, "slice");
 
   val_print_string (TYPE_TARGET_TYPE (value_type (base)), "UTF-8",
 		    value_as_address (base), value_as_long (len), stream,
@@ -386,7 +386,8 @@ rust_language::val_print_struct
 	  fputs_filtered (": ", stream);
 	}
 
-      value_print_inner (value_field (val, i), stream, recurse + 1, &opts);
+      common_val_print (value_field (val, i), stream, recurse + 1, &opts,
+			this);
     }
 
   if (options->prettyformat)
@@ -464,7 +465,8 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
 			  styled_string (variable_name_style.style (),
 					 TYPE_FIELD_NAME (variant_type, j)));
 
-      value_print_inner (value_field (val, j), stream, recurse + 1, &opts);
+      common_val_print (value_field (val, j), stream, recurse + 1, &opts,
+			this);
     }
 
   if (is_tuple)
@@ -1028,7 +1030,7 @@ rust_range (struct type *expect_type, struct expression *exp,
 
   if (low != NULL)
     {
-      struct value *start = value_struct_elt (&result, NULL, "start", NULL,
+      struct value *start = value_struct_elt (&result, {}, "start", NULL,
 					      "range");
 
       value_assign (start, low);
@@ -1036,7 +1038,7 @@ rust_range (struct type *expect_type, struct expression *exp,
 
   if (high != NULL)
     {
-      struct value *end = value_struct_elt (&result, NULL, "end", NULL,
+      struct value *end = value_struct_elt (&result, {}, "end", NULL,
 					    "range");
 
       value_assign (end, high);
@@ -1174,8 +1176,8 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	{
 	  struct value *len;
 
-	  base = value_struct_elt (&lhs, NULL, "data_ptr", NULL, "slice");
-	  len = value_struct_elt (&lhs, NULL, "length", NULL, "slice");
+	  base = value_struct_elt (&lhs, {}, "data_ptr", NULL, "slice");
+	  len = value_struct_elt (&lhs, {}, "length", NULL, "slice");
 	  low_bound = 0;
 	  high_bound = value_as_long (len);
 	}
@@ -1398,7 +1400,7 @@ eval_op_rust_structop (struct type *expect_type, struct expression *exp,
 
       try
 	{
-	  result = value_struct_elt (&lhs, NULL, field_name,
+	  result = value_struct_elt (&lhs, {}, field_name,
 				     NULL, "structure");
 	}
       catch (const gdb_exception_error &except)
@@ -1409,7 +1411,7 @@ eval_op_rust_structop (struct type *expect_type, struct expression *exp,
 	}
     }
   else
-    result = value_struct_elt (&lhs, NULL, field_name, NULL, "structure");
+    result = value_struct_elt (&lhs, {}, field_name, NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value_zero (value_type (result), VALUE_LVAL (result));
   return result;
@@ -1455,7 +1457,7 @@ rust_aggregate_operation::evaluate (struct type *expect_type,
       if (noside == EVAL_NORMAL)
 	{
 	  const char *fieldname = item.first.c_str ();
-	  value *field = value_struct_elt (&result, nullptr, fieldname,
+	  value *field = value_struct_elt (&result, {}, fieldname,
 					   nullptr, "structure");
 	  value_assign (field, val);
 	}
@@ -1574,7 +1576,7 @@ rust_language::print_type (struct type *type, const char *varstring,
 			   struct ui_file *stream, int show, int level,
 			   const struct type_print_options *flags) const
 {
-  print_offset_data podata;
+  print_offset_data podata (flags);
   rust_internal_print_type (type, varstring, stream, show, level,
 			    flags, false, &podata);
 }

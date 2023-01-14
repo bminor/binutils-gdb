@@ -197,18 +197,33 @@ gdb_test_multiple "continue" $test {
 gdb_test_no_output "delete $second_breakpoint"
 
 #test exited event.
+proc get_process_id {test} {
+    global gdb_prompt
+    gdb_test_multiple "info proc" $test {
+	-re "process (\\d+).*$gdb_prompt $" {
+	    set process_id $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+    return ${process_id}
+}
+
+set process_id [get_process_id "get inferior 1 process id"]
 gdb_test "continue" ".*event type: continue.*
 .*clear_objfiles\[\r\n\]*progspace: .*py-events.*
 .*event type: exit.*
 .*exit code: 12.*
 .*exit inf: 1.*
+.*exit pid: $process_id.*
 dir ok: True.*" "Inferior 1 terminated."
 
 gdb_test "inferior 2" ".*Switching to inferior 2.*"
+set process_id [get_process_id "get inferior 2 process id"]
 gdb_test "continue" ".*event type: continue.*
 .*event type: exit.*
 .*exit code: 12.*
 .*exit inf: 2.*
+.*exit pid: $process_id.*
 dir ok: True.*" "Inferior 2 terminated."
 
 
@@ -235,3 +250,29 @@ gdb_test "python print(count)" 2 "check for before_prompt event"
 
 gdb_test_no_output "xxz" "run a canned sequence"
 gdb_test "python print(count)" 4 "check for before_prompt event again"
+
+# Test evaluating expressions from within an inferior exit event handler.  This
+# used to cause a crash when expression were evaluated as C++.
+gdb_test_no_output "set language c++"
+
+gdb_test_multiline "add exited listener" \
+    "python" "" \
+    "def increment_foo(_):" "" \
+    "  gdb.execute('set \$_foo=\$_foo+1')" "" \
+    "gdb.events.exited.connect(increment_foo)" "" \
+    "end" ""
+gdb_test "set \$_foo=0" "" "initialize foo variable"
+gdb_test "print \$_foo" "= 0" "check foo initialized"
+
+with_test_prefix "inferior run exit" {
+    gdb_run_cmd
+    gdb_test "" "exited with code.*" "run to exit"
+    gdb_test "print \$_foo" "= 1" "check foo after run"
+}
+
+with_test_prefix "inferior continue exit" {
+    gdb_start_cmd
+    gdb_test "" "Temporary breakpoint .* main .*" "stop on a frame"
+    gdb_test "continue" "exited with code.*" "continue to exit"
+    gdb_test "print \$_foo" "= 2" "check foo after start continue"
+}

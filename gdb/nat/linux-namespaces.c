@@ -771,15 +771,15 @@ mnsh_maybe_mourn_peer (void)
 
 #define mnsh_send_open(helper, filename, flags, mode) \
   mnsh_send_message (helper->sock, MNSH_REQ_OPEN, -1, flags, mode, \
-    		     filename, strlen (filename) + 1)
+		     filename, strlen (filename) + 1)
 
 #define mnsh_send_unlink(helper, filename) \
   mnsh_send_message (helper->sock, MNSH_REQ_UNLINK, -1, 0, 0, \
-    		     filename, strlen (filename) + 1)
+		     filename, strlen (filename) + 1)
 
 #define mnsh_send_readlink(helper, filename) \
   mnsh_send_message (helper->sock, MNSH_REQ_READLINK, -1, 0, 0, \
-    		     filename, strlen (filename) + 1)
+		     filename, strlen (filename) + 1)
 
 /* Receive a message from the helper.  Issue an assertion failure if
    the message isn't a correctly-formatted MNSH_RET_INT.  Set RESULT

@@ -17,12 +17,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define WANT_CPU
 #define WANT_CPU_IQ2000BF
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
+#include "targ-vals.h"
 #include <stdlib.h>
 
 enum
@@ -30,29 +35,6 @@ enum
   GPR0_REGNUM = 0,
   NR_GPR = 32,
   PC_REGNUM = 32
-};
-
-enum libgloss_syscall
-{
-  SYS_exit = 1,
-  SYS_open = 2, 
-  SYS_close = 3, 
-  SYS_read = 4,
-  SYS_write = 5, 
-  SYS_lseek = 6, 
-  SYS_unlink = 7,
-  SYS_getpid = 8,
-  SYS_kill = 9,
-  SYS_fstat = 10, 
-  SYS_argvlen = 12, 
-  SYS_argv = 13,
-  SYS_chdir = 14, 
-  SYS_stat = 15, 
-  SYS_chmod = 16, 
-  SYS_utime = 17,
-  SYS_time = 18,
-  SYS_gettimeofday = 19,
-  SYS_times = 20
 };
 
 /* Read a null terminated string from memory, return in a buffer */
@@ -98,7 +80,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
 	  exit (1);
 	}
 
-    case SYS_write:
+    case TARGET_SYS_write:
       buf = zalloc (PARM3);
       sim_read (CPU_STATE (current_cpu), CPU2DATA(PARM2), buf, PARM3);
       SET_H_GR (ret_reg,
@@ -107,18 +89,18 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 
-    case SYS_lseek:
+    case TARGET_SYS_lseek:
       SET_H_GR (ret_reg,
 		sim_io_lseek (CPU_STATE (current_cpu),
 			      PARM1, PARM2, PARM3));
       break;
 	    
-    case SYS_exit:
+    case TARGET_SYS_exit:
       sim_engine_halt (CPU_STATE (current_cpu), current_cpu,
 		       NULL, pc, sim_exited, PARM1);
       break;
 
-    case SYS_read:
+    case TARGET_SYS_read:
       buf = zalloc (PARM3);
       SET_H_GR (ret_reg,
 		sim_io_read (CPU_STATE (current_cpu),
@@ -127,7 +109,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 	    
-    case SYS_open:
+    case TARGET_SYS_open:
       buf = fetch_str (current_cpu, pc, PARM1);
       SET_H_GR (ret_reg,
 		sim_io_open (CPU_STATE (current_cpu),
@@ -135,12 +117,12 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       free (buf);
       break;
 
-    case SYS_close:
+    case TARGET_SYS_close:
       SET_H_GR (ret_reg,
 		sim_io_close (CPU_STATE (current_cpu), PARM1));
       break;
 
-    case SYS_time:
+    case TARGET_SYS_time:
       SET_H_GR (ret_reg, time (0));
       break;
 

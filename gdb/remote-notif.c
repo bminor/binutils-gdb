@@ -110,7 +110,7 @@ remote_async_get_pending_events_handler (gdb_client_data data)
 {
   remote_notif_state *notif_state = (remote_notif_state *) data;
   clear_async_event_handler (notif_state->get_pending_events_token);
-  gdb_assert (target_is_non_stop_p ());
+  gdb_assert (remote_target_is_non_stop_p (notif_state->remote));
   remote_notif_process (notif_state, NULL);
 }
 

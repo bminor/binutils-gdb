@@ -47,23 +47,32 @@ def get_update_list():
     """
     result = []
     for gdb_dir in (
-        'gdb', 'gdbserver', 'gdbsupport', 'gnulib', 'sim', 'include/gdb',
+        "gdb",
+        "gdbserver",
+        "gdbsupport",
+        "gnulib",
+        "sim",
+        "include/gdb",
     ):
         for root, dirs, files in os.walk(gdb_dir, topdown=True):
             for dirname in dirs:
                 reldirname = "%s/%s" % (root, dirname)
-                if (dirname in EXCLUDE_ALL_LIST
+                if (
+                    dirname in EXCLUDE_ALL_LIST
                     or reldirname in EXCLUDE_LIST
                     or reldirname in NOT_FSF_LIST
-                    or reldirname in BY_HAND):
+                    or reldirname in BY_HAND
+                ):
                     # Prune this directory from our search list.
                     dirs.remove(dirname)
             for filename in files:
                 relpath = "%s/%s" % (root, filename)
-                if (filename in EXCLUDE_ALL_LIST
+                if (
+                    filename in EXCLUDE_ALL_LIST
                     or relpath in EXCLUDE_LIST
                     or relpath in NOT_FSF_LIST
-                    or relpath in BY_HAND):
+                    or relpath in BY_HAND
+                ):
                     # Ignore this file.
                     pass
                 else:
@@ -80,15 +89,18 @@ def update_files(update_list):
     # all years should be collapsed to one single year interval,
     # even if there are "holes" in the list of years found in the
     # original copyright notice (OK'ed by the FSF, case [gnu.org #719834]).
-    os.environ['UPDATE_COPYRIGHT_USE_INTERVALS'] = '2'
+    os.environ["UPDATE_COPYRIGHT_USE_INTERVALS"] = "2"
 
     # Perform the update, and save the output in a string.
-    update_cmd = ['bash', 'gnulib/import/extra/update-copyright']
+    update_cmd = ["bash", "gnulib/import/extra/update-copyright"]
     update_cmd += update_list
 
-    p = subprocess.Popen(update_cmd, stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT,
-                         encoding=locale.getpreferredencoding())
+    p = subprocess.Popen(
+        update_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        encoding=locale.getpreferredencoding(),
+    )
     update_out = p.communicate()[0]
 
     # Process the output.  Typically, a lot of files do not have
@@ -100,7 +112,7 @@ def update_files(update_list):
     # short of looking at each file and seeing which notice is appropriate.
     # Too much work! (~4,000 files listed as of 2012-01-03).
     update_out = update_out.splitlines(keepends=False)
-    warning_string = ': warning: copyright statement not found'
+    warning_string = ": warning: copyright statement not found"
     warning_len = len(warning_string)
 
     for line in update_out:
@@ -134,11 +146,11 @@ def may_have_copyright_notice(filename):
     # so just open the file as a byte stream. We only need to search
     # for a pattern that should be the same regardless of encoding,
     # so that should be good enough.
-    fd = open(filename, 'rb')
+    fd = open(filename, "rb")
 
     lineno = 1
     for line in fd:
-        if b'Copyright' in line:
+        if b"Copyright" in line:
             return True
         lineno += 1
         if lineno > 50:
@@ -146,35 +158,40 @@ def may_have_copyright_notice(filename):
     return False
 
 
-def main ():
+def main():
     """The main subprogram."""
     root_dir = os.path.dirname(os.getcwd())
     os.chdir(root_dir)
 
-    if not (os.path.isdir('gdb') and
-            os.path.isfile("gnulib/import/extra/update-copyright")):
+    if not (
+        os.path.isdir("gdb") and os.path.isfile("gnulib/import/extra/update-copyright")
+    ):
         print("Error: This script must be called from the gdb directory.")
         sys.exit(1)
 
     update_list = get_update_list()
-    update_files (update_list)
+    update_files(update_list)
 
     # Remind the user that some files need to be updated by HAND...
 
     if MULTIPLE_COPYRIGHT_HEADERS:
         print()
-        print("\033[31m"
-              "REMINDER: Multiple copyright headers must be updated by hand:"
-              "\033[0m")
+        print(
+            "\033[31m"
+            "REMINDER: Multiple copyright headers must be updated by hand:"
+            "\033[0m"
+        )
         for filename in MULTIPLE_COPYRIGHT_HEADERS:
             print("  ", filename)
 
     if BY_HAND:
         print()
-        print("\033[31mREMINDER: The following files must be updated by hand." \
-              "\033[0m")
+        print(
+            "\033[31mREMINDER: The following files must be updated by hand." "\033[0m"
+        )
         for filename in BY_HAND:
             print("  ", filename)
+
 
 ############################################################################
 #
@@ -190,11 +207,11 @@ def main ():
 #
 # Filenames are relative to the root directory.
 EXCLUDE_LIST = (
-    'gdb/nat/glibc_thread_db.h',
-    'gdb/CONTRIBUTE',
-    'gnulib/import',
-    'gnulib/config.in',
-    'gnulib/Makefile.in',
+    "gdb/nat/glibc_thread_db.h",
+    "gdb/CONTRIBUTE",
+    "gnulib/import",
+    "gnulib/config.in",
+    "gnulib/Makefile.in",
 )
 
 # Files which should not be modified, either because they are
@@ -206,8 +223,14 @@ EXCLUDE_LIST = (
 # Eg: We want all files named COPYING to be left untouched.
 
 EXCLUDE_ALL_LIST = (
-    "COPYING", "COPYING.LIB", "CVS", "configure", "copying.c",
-    "fdl.texi", "gpl.texi", "aclocal.m4",
+    "COPYING",
+    "COPYING.LIB",
+    "CVS",
+    "configure",
+    "copying.c",
+    "fdl.texi",
+    "gpl.texi",
+    "aclocal.m4",
 )
 
 # The list of files to update by hand.
@@ -230,66 +253,166 @@ NOT_FSF_LIST = (
     "gdb/exc_request.defs",
     "gdb/gdbtk",
     "gdb/testsuite/gdb.gdbtk/",
-    "sim/arm/armemu.h", "sim/arm/armos.c", "sim/arm/gdbhost.c",
-    "sim/arm/dbg_hif.h", "sim/arm/dbg_conf.h", "sim/arm/communicate.h",
-    "sim/arm/armos.h", "sim/arm/armcopro.c", "sim/arm/armemu.c",
-    "sim/arm/kid.c", "sim/arm/thumbemu.c", "sim/arm/armdefs.h",
-    "sim/arm/armopts.h", "sim/arm/dbg_cp.h", "sim/arm/dbg_rdi.h",
-    "sim/arm/parent.c", "sim/arm/armsupp.c", "sim/arm/armrdi.c",
-    "sim/arm/bag.c", "sim/arm/armvirt.c", "sim/arm/main.c", "sim/arm/bag.h",
-    "sim/arm/communicate.c", "sim/arm/gdbhost.h", "sim/arm/armfpe.h",
+    "sim/arm/armemu.h",
+    "sim/arm/armos.c",
+    "sim/arm/gdbhost.c",
+    "sim/arm/dbg_hif.h",
+    "sim/arm/dbg_conf.h",
+    "sim/arm/communicate.h",
+    "sim/arm/armos.h",
+    "sim/arm/armcopro.c",
+    "sim/arm/armemu.c",
+    "sim/arm/kid.c",
+    "sim/arm/thumbemu.c",
+    "sim/arm/armdefs.h",
+    "sim/arm/armopts.h",
+    "sim/arm/dbg_cp.h",
+    "sim/arm/dbg_rdi.h",
+    "sim/arm/parent.c",
+    "sim/arm/armsupp.c",
+    "sim/arm/armrdi.c",
+    "sim/arm/bag.c",
+    "sim/arm/armvirt.c",
+    "sim/arm/main.c",
+    "sim/arm/bag.h",
+    "sim/arm/communicate.c",
+    "sim/arm/gdbhost.h",
+    "sim/arm/armfpe.h",
     "sim/arm/arminit.c",
-    "sim/common/cgen-fpu.c", "sim/common/cgen-fpu.h",
+    "sim/common/cgen-fpu.c",
+    "sim/common/cgen-fpu.h",
     "sim/common/cgen-accfp.c",
-    "sim/mips/m16run.c", "sim/mips/sim-main.c",
+    "sim/mips/m16run.c",
+    "sim/mips/sim-main.c",
     "sim/moxie/moxie-gdb.dts",
     # Not a single file in sim/ppc/ appears to be copyright FSF :-(.
-    "sim/ppc/filter.h", "sim/ppc/gen-support.h", "sim/ppc/ld-insn.h",
-    "sim/ppc/hw_sem.c", "sim/ppc/hw_disk.c", "sim/ppc/idecode_branch.h",
-    "sim/ppc/sim-endian.h", "sim/ppc/table.c", "sim/ppc/hw_core.c",
-    "sim/ppc/gen-support.c", "sim/ppc/gen-semantics.h", "sim/ppc/cpu.h",
-    "sim/ppc/sim_callbacks.h", "sim/ppc/RUN", "sim/ppc/Makefile.in",
-    "sim/ppc/emul_chirp.c", "sim/ppc/hw_nvram.c", "sim/ppc/dc-test.01",
-    "sim/ppc/hw_phb.c", "sim/ppc/hw_eeprom.c", "sim/ppc/bits.h",
-    "sim/ppc/hw_vm.c", "sim/ppc/cap.h", "sim/ppc/os_emul.h",
-    "sim/ppc/options.h", "sim/ppc/gen-idecode.c", "sim/ppc/filter.c",
-    "sim/ppc/corefile-n.h", "sim/ppc/std-config.h", "sim/ppc/ld-decode.h",
-    "sim/ppc/filter_filename.h", "sim/ppc/hw_shm.c",
-    "sim/ppc/pk_disklabel.c", "sim/ppc/dc-simple", "sim/ppc/misc.h",
-    "sim/ppc/device_table.h", "sim/ppc/ld-insn.c", "sim/ppc/inline.c",
-    "sim/ppc/emul_bugapi.h", "sim/ppc/hw_cpu.h", "sim/ppc/debug.h",
-    "sim/ppc/hw_ide.c", "sim/ppc/debug.c", "sim/ppc/gen-itable.h",
-    "sim/ppc/interrupts.c", "sim/ppc/hw_glue.c", "sim/ppc/emul_unix.c",
-    "sim/ppc/sim_calls.c", "sim/ppc/dc-complex", "sim/ppc/ld-cache.c",
-    "sim/ppc/registers.h", "sim/ppc/dc-test.02", "sim/ppc/options.c",
-    "sim/ppc/igen.h", "sim/ppc/registers.c", "sim/ppc/device.h",
-    "sim/ppc/emul_chirp.h", "sim/ppc/hw_register.c", "sim/ppc/hw_init.c",
-    "sim/ppc/sim-endian-n.h", "sim/ppc/filter_filename.c",
-    "sim/ppc/bits.c", "sim/ppc/idecode_fields.h", "sim/ppc/hw_memory.c",
-    "sim/ppc/misc.c", "sim/ppc/double.c", "sim/ppc/psim.h",
-    "sim/ppc/hw_trace.c", "sim/ppc/emul_netbsd.h", "sim/ppc/psim.c",
-    "sim/ppc/ppc-instructions", "sim/ppc/tree.h", "sim/ppc/README",
-    "sim/ppc/gen-icache.h", "sim/ppc/gen-model.h", "sim/ppc/ld-cache.h",
-    "sim/ppc/mon.c", "sim/ppc/corefile.h", "sim/ppc/vm.c",
-    "sim/ppc/INSTALL", "sim/ppc/gen-model.c", "sim/ppc/hw_cpu.c",
-    "sim/ppc/corefile.c", "sim/ppc/hw_opic.c", "sim/ppc/gen-icache.c",
-    "sim/ppc/events.h", "sim/ppc/os_emul.c", "sim/ppc/emul_generic.c",
-    "sim/ppc/main.c", "sim/ppc/hw_com.c", "sim/ppc/gen-semantics.c",
-    "sim/ppc/emul_bugapi.c", "sim/ppc/device.c", "sim/ppc/emul_generic.h",
-    "sim/ppc/tree.c", "sim/ppc/mon.h", "sim/ppc/interrupts.h",
-    "sim/ppc/cap.c", "sim/ppc/cpu.c", "sim/ppc/hw_phb.h",
-    "sim/ppc/device_table.c", "sim/ppc/lf.c", "sim/ppc/lf.c",
-    "sim/ppc/dc-stupid", "sim/ppc/hw_pal.c", "sim/ppc/ppc-spr-table",
-    "sim/ppc/emul_unix.h", "sim/ppc/words.h", "sim/ppc/basics.h",
-    "sim/ppc/hw_htab.c", "sim/ppc/lf.h", "sim/ppc/ld-decode.c",
-    "sim/ppc/sim-endian.c", "sim/ppc/gen-itable.c",
-    "sim/ppc/idecode_expression.h", "sim/ppc/table.h", "sim/ppc/dgen.c",
-    "sim/ppc/events.c", "sim/ppc/gen-idecode.h", "sim/ppc/emul_netbsd.c",
-    "sim/ppc/igen.c", "sim/ppc/vm_n.h", "sim/ppc/vm.h",
-    "sim/ppc/hw_iobus.c", "sim/ppc/inline.h",
+    "sim/ppc/filter.h",
+    "sim/ppc/gen-support.h",
+    "sim/ppc/ld-insn.h",
+    "sim/ppc/hw_sem.c",
+    "sim/ppc/hw_disk.c",
+    "sim/ppc/idecode_branch.h",
+    "sim/ppc/sim-endian.h",
+    "sim/ppc/table.c",
+    "sim/ppc/hw_core.c",
+    "sim/ppc/gen-support.c",
+    "sim/ppc/gen-semantics.h",
+    "sim/ppc/cpu.h",
+    "sim/ppc/sim_callbacks.h",
+    "sim/ppc/RUN",
+    "sim/ppc/Makefile.in",
+    "sim/ppc/emul_chirp.c",
+    "sim/ppc/hw_nvram.c",
+    "sim/ppc/dc-test.01",
+    "sim/ppc/hw_phb.c",
+    "sim/ppc/hw_eeprom.c",
+    "sim/ppc/bits.h",
+    "sim/ppc/hw_vm.c",
+    "sim/ppc/cap.h",
+    "sim/ppc/os_emul.h",
+    "sim/ppc/options.h",
+    "sim/ppc/gen-idecode.c",
+    "sim/ppc/filter.c",
+    "sim/ppc/corefile-n.h",
+    "sim/ppc/std-config.h",
+    "sim/ppc/ld-decode.h",
+    "sim/ppc/filter_filename.h",
+    "sim/ppc/hw_shm.c",
+    "sim/ppc/pk_disklabel.c",
+    "sim/ppc/dc-simple",
+    "sim/ppc/misc.h",
+    "sim/ppc/device_table.h",
+    "sim/ppc/ld-insn.c",
+    "sim/ppc/inline.c",
+    "sim/ppc/emul_bugapi.h",
+    "sim/ppc/hw_cpu.h",
+    "sim/ppc/debug.h",
+    "sim/ppc/hw_ide.c",
+    "sim/ppc/debug.c",
+    "sim/ppc/gen-itable.h",
+    "sim/ppc/interrupts.c",
+    "sim/ppc/hw_glue.c",
+    "sim/ppc/emul_unix.c",
+    "sim/ppc/sim_calls.c",
+    "sim/ppc/dc-complex",
+    "sim/ppc/ld-cache.c",
+    "sim/ppc/registers.h",
+    "sim/ppc/dc-test.02",
+    "sim/ppc/options.c",
+    "sim/ppc/igen.h",
+    "sim/ppc/registers.c",
+    "sim/ppc/device.h",
+    "sim/ppc/emul_chirp.h",
+    "sim/ppc/hw_register.c",
+    "sim/ppc/hw_init.c",
+    "sim/ppc/sim-endian-n.h",
+    "sim/ppc/filter_filename.c",
+    "sim/ppc/bits.c",
+    "sim/ppc/idecode_fields.h",
+    "sim/ppc/hw_memory.c",
+    "sim/ppc/misc.c",
+    "sim/ppc/double.c",
+    "sim/ppc/psim.h",
+    "sim/ppc/hw_trace.c",
+    "sim/ppc/emul_netbsd.h",
+    "sim/ppc/psim.c",
+    "sim/ppc/ppc-instructions",
+    "sim/ppc/tree.h",
+    "sim/ppc/README",
+    "sim/ppc/gen-icache.h",
+    "sim/ppc/gen-model.h",
+    "sim/ppc/ld-cache.h",
+    "sim/ppc/mon.c",
+    "sim/ppc/corefile.h",
+    "sim/ppc/vm.c",
+    "sim/ppc/INSTALL",
+    "sim/ppc/gen-model.c",
+    "sim/ppc/hw_cpu.c",
+    "sim/ppc/corefile.c",
+    "sim/ppc/hw_opic.c",
+    "sim/ppc/gen-icache.c",
+    "sim/ppc/events.h",
+    "sim/ppc/os_emul.c",
+    "sim/ppc/emul_generic.c",
+    "sim/ppc/main.c",
+    "sim/ppc/hw_com.c",
+    "sim/ppc/gen-semantics.c",
+    "sim/ppc/emul_bugapi.c",
+    "sim/ppc/device.c",
+    "sim/ppc/emul_generic.h",
+    "sim/ppc/tree.c",
+    "sim/ppc/mon.h",
+    "sim/ppc/interrupts.h",
+    "sim/ppc/cap.c",
+    "sim/ppc/cpu.c",
+    "sim/ppc/hw_phb.h",
+    "sim/ppc/device_table.c",
+    "sim/ppc/lf.c",
+    "sim/ppc/lf.c",
+    "sim/ppc/dc-stupid",
+    "sim/ppc/hw_pal.c",
+    "sim/ppc/ppc-spr-table",
+    "sim/ppc/emul_unix.h",
+    "sim/ppc/words.h",
+    "sim/ppc/basics.h",
+    "sim/ppc/hw_htab.c",
+    "sim/ppc/lf.h",
+    "sim/ppc/ld-decode.c",
+    "sim/ppc/sim-endian.c",
+    "sim/ppc/gen-itable.c",
+    "sim/ppc/idecode_expression.h",
+    "sim/ppc/table.h",
+    "sim/ppc/dgen.c",
+    "sim/ppc/events.c",
+    "sim/ppc/gen-idecode.h",
+    "sim/ppc/emul_netbsd.c",
+    "sim/ppc/igen.c",
+    "sim/ppc/vm_n.h",
+    "sim/ppc/vm.h",
+    "sim/ppc/hw_iobus.c",
+    "sim/ppc/inline.h",
     "sim/testsuite/sim/mips/mips32-dsp2.s",
 )
 
 if __name__ == "__main__":
     main()
-

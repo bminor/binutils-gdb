@@ -99,7 +99,7 @@ set float_register ".raw 0xdeadbeefdeadbeef."
 
 # 0: Initialize the (doubleword 1) portion of the VS0-VS31 registers.
 for {set i 0} {$i < 32} {incr i 1} {
-    gdb_test_no_output "set \$vs$i.v2_double\][0\] = 0"
+    gdb_test_no_output "set \$vs$i.v2_double\[0\] = 0"
 }
 
 # 1: Set F0~F31 registers and check if it reflects on VS0~VS31.

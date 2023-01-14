@@ -504,6 +504,10 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 static void
 darwin_solib_create_inferior_hook (int from_tty)
 {
+  /* Everything below only makes sense if we have a running inferior.  */
+  if (!target_has_execution ())
+    return;
+
   struct darwin_info *info = get_darwin_info ();
   CORE_ADDR load_addr;
 

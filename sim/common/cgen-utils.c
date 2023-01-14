@@ -17,9 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "bfd.h"
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "dis-asm.h"
 
 #define MEMOPS_DEFINE_INLINE
@@ -28,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SEMOPS_DEFINE_INLINE
 #include "cgen-ops.h"
 
-const char * const mode_names[] = {
+const char * const cgen_mode_names[] = {
   "VOID",
   "BI",
   "QI",
@@ -56,22 +59,22 @@ const char * const mode_names[] = {
 static const CGEN_IBASE virtual_insn_entries[] =
 {
   {
-    VIRTUAL_INSN_X_INVALID, "--invalid--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_INVALID, "--invalid--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_BEFORE, "--before--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_BEFORE, "--before--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_AFTER, "--after--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_AFTER, "--after--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_BEGIN, "--begin--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_BEGIN, "--begin--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_CHAIN, "--chain--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_CHAIN, "--chain--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_CTI_CHAIN, "--cti-chain--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_CTI_CHAIN, "--cti-chain--", NULL, 0, { V, {} }
   }
 };
 
@@ -87,41 +90,6 @@ const CGEN_INSN cgen_virtual_insn_table[] =
   { & virtual_insn_entries[5] }
 };
 
-/* Initialize cgen things.
-   This is called after sim_post_argv_init.  */
-
-void
-cgen_init (SIM_DESC sd)
-{
-  int i, c;
-
-  /* If no profiling or tracing has been enabled, run in fast mode.  */
-  {
-    int run_fast_p = 1;
-
-    for (c = 0; c < MAX_NR_PROCESSORS; ++c)
-      {
-	SIM_CPU *cpu = STATE_CPU (sd, c);
-
-	for (i = 0; i < MAX_PROFILE_VALUES; ++i)
-	  if (CPU_PROFILE_FLAGS (cpu) [i])
-	    {
-	      run_fast_p = 0;
-	      break;
-	    }
-	for (i = 0; i < MAX_TRACE_VALUES; ++i)
-	  if (CPU_TRACE_FLAGS (cpu) [i])
-	    {
-	      run_fast_p = 0;
-	      break;
-	    }
-	if (! run_fast_p)
-	  break;
-      }
-    STATE_RUN_FAST_P (sd) = run_fast_p;
-  }
-}
-
 /* Return the name of insn number I.  */
 
 const char *
@@ -133,14 +101,16 @@ cgen_insn_name (SIM_CPU *cpu, int i)
 /* Return the maximum number of extra bytes required for a SIM_CPU struct.  */
 
 int
-cgen_cpu_max_extra_bytes (void)
+cgen_cpu_max_extra_bytes (SIM_DESC sd)
 {
-  int i;
+  const SIM_MACH * const *machp;
   int extra = 0;
 
-  for (i = 0; sim_machs[i] != 0; ++i)
+  SIM_ASSERT (STATE_MACHS (sd) != NULL);
+
+  for (machp = STATE_MACHS (sd); *machp != NULL; ++machp)
     {
-      int size = IMP_PROPS_SIM_CPU_SIZE (MACH_IMP_PROPS (sim_machs[i]));
+      int size = IMP_PROPS_SIM_CPU_SIZE (MACH_IMP_PROPS (*machp));
       if (size > extra)
 	extra = size;
     }
@@ -148,17 +118,6 @@ cgen_cpu_max_extra_bytes (void)
 }
 
 #ifdef DI_FN_SUPPORT
-
-DI
-make_struct_di (hi, lo)
-     SI hi, lo;
-{
-  DI result;
-
-  result.hi = hi;
-  result.lo = lo;
-  return result;
-}
 
 DI
 ANDDI (a, b)
@@ -416,7 +375,7 @@ cgen_rtx_error (SIM_CPU *cpu, const char * msg)
 {
   SIM_DESC sd = CPU_STATE (cpu);
 
-  sim_io_printf (sd, msg);
+  sim_io_printf (sd, "%s", msg);
   sim_io_printf (sd, "\n");
 
   sim_engine_halt (sd, cpu, NULL, CPU_PC_GET (cpu), sim_stopped, SIM_SIGTRAP);

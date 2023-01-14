@@ -17,8 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -204,9 +208,11 @@ sim_engine_init (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_engine (SIM_DESC sd);
 
 SIM_RC
-sim_engine_install (SIM_DESC sd)
+sim_install_engine (SIM_DESC sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_module_add_init_fn (sd, sim_engine_init);

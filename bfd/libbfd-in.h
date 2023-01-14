@@ -110,12 +110,6 @@ struct areltdata
 
 extern void *bfd_malloc
   (bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc_or_free
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_zmalloc
-  (bfd_size_type) ATTRIBUTE_HIDDEN;
 
 static inline char *
 bfd_strdup (const char *str)
@@ -761,7 +755,7 @@ extern struct bfd_strtab_hash *_bfd_stringtab_init
 
 /* Create an XCOFF .debug section style string table.  */
 extern struct bfd_strtab_hash *_bfd_xcoff_stringtab_init
-  (void) ATTRIBUTE_HIDDEN;
+  (bool isxcoff64) ATTRIBUTE_HIDDEN;
 
 /* Free a string table.  */
 extern void _bfd_stringtab_free
@@ -894,12 +888,14 @@ extern bfd_vma _bfd_read_unsigned_leb128
 extern bfd_signed_vma _bfd_read_signed_leb128
   (bfd *, bfd_byte *, unsigned int *) ATTRIBUTE_HIDDEN;
 extern bfd_vma _bfd_safe_read_leb128
-  (bfd *, bfd_byte *, unsigned int *, bool, const bfd_byte * const)
-  ATTRIBUTE_HIDDEN;
+  (bfd *, bfd_byte **, bool, const bfd_byte * const) ATTRIBUTE_HIDDEN;
 extern bfd_byte * _bfd_write_unsigned_leb128
   (bfd_byte *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
 
 extern struct bfd_link_info *_bfd_get_link_info (bfd *);
+
+extern bool _bfd_link_keep_memory (struct bfd_link_info *)
+  ATTRIBUTE_HIDDEN;
 
 #if GCC_VERSION >= 7000
 #define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)

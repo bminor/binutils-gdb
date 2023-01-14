@@ -482,14 +482,16 @@ _initialize_cli_interp ()
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 
   /* If changing this, remember to update tui-interp.c as well.  */
-  gdb::observers::normal_stop.attach (cli_on_normal_stop);
-  gdb::observers::end_stepping_range.attach (cli_on_end_stepping_range);
-  gdb::observers::signal_received.attach (cli_on_signal_received);
-  gdb::observers::signal_exited.attach (cli_on_signal_exited);
-  gdb::observers::exited.attach (cli_on_exited);
-  gdb::observers::no_history.attach (cli_on_no_history);
-  gdb::observers::sync_execution_done.attach (cli_on_sync_execution_done);
-  gdb::observers::command_error.attach (cli_on_command_error);
+  gdb::observers::normal_stop.attach (cli_on_normal_stop, "cli-interp");
+  gdb::observers::end_stepping_range.attach (cli_on_end_stepping_range,
+					     "cli-interp");
+  gdb::observers::signal_received.attach (cli_on_signal_received, "cli-interp");
+  gdb::observers::signal_exited.attach (cli_on_signal_exited, "cli-interp");
+  gdb::observers::exited.attach (cli_on_exited, "cli-interp");
+  gdb::observers::no_history.attach (cli_on_no_history, "cli-interp");
+  gdb::observers::sync_execution_done.attach (cli_on_sync_execution_done,
+					      "cli-interp");
+  gdb::observers::command_error.attach (cli_on_command_error, "cli-interp");
   gdb::observers::user_selected_context_changed.attach
-    (cli_on_user_selected_context_changed);
+    (cli_on_user_selected_context_changed, "cli-interp");
 }

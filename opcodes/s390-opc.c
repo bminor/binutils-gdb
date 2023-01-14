@@ -442,6 +442,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RX_URRD      4, { U4_8,D_20,X_12,B_16,0,0 }        /* e.g. bc    */
 #define INSTR_SI_RD        4, { D_20,B_16,0,0,0,0 }              /* e.g. lpsw  */
 #define INSTR_SI_URD       4, { D_20,B_16,U8_8,0,0,0 }           /* e.g. cli   */
+#define INSTR_SIY_RD       6, { D20_20,B_16,0,0,0,0 }            /* e.g. lpswey*/
 #define INSTR_SIY_URD      6, { D20_20,B_16,U8_8,0,0,0 }         /* e.g. tmy   */
 #define INSTR_SIY_IRD      6, { D20_20,B_16,I8_8,0,0,0 }         /* e.g. asi   */
 #define INSTR_SIL_RDI      6, { D_20,B_16,I16_32,0,0,0 }         /* e.g. chhsi */
@@ -664,6 +665,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_RX_URRD      { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SI_RD        { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SI_URD       { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_SIY_RD       { 0xff, 0xff, 0x00, 0x00, 0x00, 0xff }
 #define MASK_SIY_URD      { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_SIY_IRD      { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_SIL_RDI      { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }

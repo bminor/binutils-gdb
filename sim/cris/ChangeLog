@@ -1,3 +1,290 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_SCACHE call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_DEFAULT_MODEL call.
+	* sim-if.c (sim_open): Set STATE_MODEL_NAME.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Rename to ...
+	(cris_sim_machs): ... this.
+	* sim-if.c (cris_sim_machs): New decl.
+	(sim_open): Set STATE_MACH.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (stamp-v10fcpu): Do not insert cgen-ops.h include.
+	(stamp-v32fcpu): Likewise.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Mark const.
+
+2021-06-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpuv10.c (crisv10f_record_trace_results): Delete function.
+	* cpuv32.c (crisv32f_record_trace_results): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* decodev10.c: Include cgen-mem.h.
+	* decodev32.c: Likewise.
+
+2021-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* cris-sim.h (cris_bmod_handler): Delete.
+	* traps.c (cris_dump_map): New prototype.
+	(cris_bmod_handler): Delete.
+	(h_supr_set_handler): Likewise.
+	(h_supr_get_handler): Likewise.
+
+2021-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (cris_getpid): New function.
+	(cris_set_callbacks): Assign cris_getpid.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c: Include sim-hw.h.
+	(cris_write_interp): Change buf to const.
+	(sim_open): Cast sp_init to unsigned char *.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (dump_statistics): Clean up sim_io_eprintf calls, and
+	replace raw abort with sim engine abort.
+	(cris_break_13_handler): Likewise.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (CGEN_MAINT): Delete.
+	* configure.ac: Delete SIM_AC_OPTION_CGEN_MAINT call.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c: Include sim-signal.h.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* sim-if.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c: Include sim/callback.h.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (rvdummy.o): Delete config.h.
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c: Include portability.h.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-rv.c: Delete HAVE_SYS_SELECT_H.
+	* rvdummy.c: Likewise.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete cgen_init call.
+
+2021-05-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* cris-desc.c, cris-desc.h, cris-opc.h: Moved to opcodes/.
+	* Makefile.in (SIM_OBJS): Delete cris-desc.o.
+	(SIM_EXTRA_DEPS): Delete cris-desc.h.
+	(cris-clean): Delete stamp-desc.
+	(stamps): Likewise.
+	(stamp-desc): Delete rule.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete "x" after PRI macros.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c: Include unistd.h.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (struct sim_state): Delete.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* cris-tmpl.c, crisv10f.c, crisv32f.c, dv-cris.c, dv-cris_900000xx.c,
+	dv-rv.c, traps.c: Include defs.h.
+	* rvdummy.c, sim-if.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c: Include environ.h.
+	(environ, GET_ENVIRON): Delete.
+	(sim_open): Replace my_environ with environ.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (cris_break_13_handler): Delete 2nd arg to time callback.
+	(cris_time): Change return to int64_t.  Delete 2nd arg.
+
+2021-05-04  Tom Tromey  <tromey@adacore.com>
+
+	* mloop.in: Include <stdlib.h>.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (cris_load_elf_file): Use BFD_VMA_FMT
+	(cris_handle_interpreter): Likewise.  Delete phaddr.
+	(sim_open): Use PRIx32.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-25  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (SIM_EXTRA_DEPS): Add engv32.h.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* rvdummy.c: Update includes.
+	* dv-rv.c: Update includes.
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (sim-if.o, dv-cris.o, dv-rv.o, arch.o, traps.o)
+	(devices.o, crisv10f.o, mloopv10f.o, cpuv10.o, decodev10.o)
+	(modelv10.o, crisv32f.o, mloopv32f.o, cpuv32.o, decodev32.o)
+	(modelv32.o): Remove.
+	(SIM_EXTRA_DEPS): Add engv10.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.

@@ -18,20 +18,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "gdb/callback.h"
+#include "sim/callback.h"
 
 #include "cpu.h"
 #include "mem.h"
 #include "syscalls.h"
-
-#include "syscall.h"
+#include "targ-vals.h"
 
 /* The current syscall callbacks we're using.  */
 static struct host_callback_struct *callbacks;
@@ -184,7 +185,7 @@ m32c_syscall (int id)
     printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, callnames[id]);
   switch (id)
     {
-    case SYS_exit:
+    case TARGET_SYS_exit:
       {
 	int ec = arg (2);
 	if (verbose)
@@ -193,7 +194,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_open:
+    case TARGET_SYS_open:
       {
 	int path = arg (PTRSZ);
 	int oflags = arg (2);
@@ -228,7 +229,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_close:
+    case TARGET_SYS_close:
       {
 	int fd = arg (2);
 
@@ -244,7 +245,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_read:
+    case TARGET_SYS_read:
       {
 	int fd = arg (2);
 	int addr = arg (PTRSZ);
@@ -264,7 +265,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_write:
+    case TARGET_SYS_write:
       {
 	int fd = arg (2);
 	int addr = arg (PTRSZ);
@@ -287,11 +288,11 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_getpid:
+    case TARGET_SYS_getpid:
       put_reg (r0, 42);
       break;
 
-    case SYS_gettimeofday:
+    case TARGET_SYS_gettimeofday:
       {
 	int tvaddr = arg (PTRSZ);
 	struct timeval tv;
@@ -306,7 +307,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case SYS_kill:
+    case TARGET_SYS_kill:
       {
 	int pid = arg (2);
 	int sig = arg (2);

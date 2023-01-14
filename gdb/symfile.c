@@ -415,7 +415,7 @@ relative_addr_info_to_section_offsets (section_offsets &section_offsets,
 
       osp = &addrs[i];
       if (osp->sectindex == -1)
-  	continue;
+	continue;
 
       /* Record all sections in offsets.  */
       /* The section_offsets in the objfile are here filled in using
@@ -3012,7 +3012,7 @@ pc_in_unmapped_range (CORE_ADDR pc, struct obj_section *section)
 
       /* We assume the LMA is relocated by the same offset as the VMA.  */
       bfd_vma size = bfd_section_size (bfd_section);
-      CORE_ADDR offset = obj_section_offset (section);
+      CORE_ADDR offset = section->offset ();
 
       if (bfd_section_lma (bfd_section) + offset <= pc
 	  && pc < bfd_section_lma (bfd_section) + offset + size)
@@ -3030,8 +3030,8 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
     {
-      if (obj_section_addr (section) <= pc
-	  && pc < obj_section_endaddr (section))
+      if (section->addr () <= pc
+	  && pc < section->endaddr ())
 	return 1;
     }
 
@@ -3044,10 +3044,10 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 static int
 sections_overlap (struct obj_section *a, struct obj_section *b)
 {
-  CORE_ADDR a_start = obj_section_addr (a);
-  CORE_ADDR a_end = obj_section_endaddr (a);
-  CORE_ADDR b_start = obj_section_addr (b);
-  CORE_ADDR b_end = obj_section_endaddr (b);
+  CORE_ADDR a_start = a->addr ();
+  CORE_ADDR a_end = a->endaddr ();
+  CORE_ADDR b_start = b->addr ();
+  CORE_ADDR b_end = b->endaddr ();
 
   return (a_start < b_end && b_start < a_end);
 }
@@ -3814,7 +3814,7 @@ _initialize_symfile ()
 {
   struct cmd_list_element *c;
 
-  gdb::observers::free_objfile.attach (symfile_free_objfile);
+  gdb::observers::free_objfile.attach (symfile_free_objfile, "symfile");
 
 #define READNOW_READNEVER_HELP \
   "The '-readnow' option will cause GDB to read the entire symbol file\n\
@@ -3863,12 +3863,13 @@ When OFFSET is provided, FILE must also be provided.  FILE can be provided\n\
 on its own."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_basic_prefix_cmd ("overlay", class_support,
-			_("Commands for debugging overlays."), &overlaylist,
-			"overlay ", 0, &cmdlist);
+  cmd_list_element *overlay_cmd
+    = add_basic_prefix_cmd ("overlay", class_support,
+			    _("Commands for debugging overlays."), &overlaylist,
+			    0, &cmdlist);
 
-  add_com_alias ("ovly", "overlay", class_support, 1);
-  add_com_alias ("ov", "overlay", class_support, 1);
+  add_com_alias ("ovly", overlay_cmd, class_support, 1);
+  add_com_alias ("ov", overlay_cmd, class_support, 1);
 
   add_cmd ("map-overlay", class_support, map_overlay_command,
 	   _("Assert that an overlay section is mapped."), &overlaylist);

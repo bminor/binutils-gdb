@@ -53,9 +53,7 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 
 #ifndef HAVE_TERMIOS_STRUCTURE
 #undef HAVE_SYS_TERMIOS_H
@@ -125,10 +123,6 @@ int getrusage();
 
 #include <stdlib.h>
 #include <time.h>
-
-#if defined(BSD) && !defined(errno) && (BSD < 199306)	/* here BSD as just a bug */
-extern int errno;
-#endif
 
 #ifndef STATIC_INLINE_EMUL_UNIX
 #define STATIC_INLINE_EMUL_UNIX STATIC_INLINE
@@ -820,7 +814,7 @@ do_unix_time(os_emul_data *emul,
 }
 #endif
 
-#if !defined(HAVE_GETTIMEOFDAY) || !defined(HAVE_SYS_TIME_H)
+#if !defined(HAVE_GETTIMEOFDAY)
 #define do_unix_gettimeofday 0
 #else
 static void

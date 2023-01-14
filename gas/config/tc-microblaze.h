@@ -51,6 +51,9 @@ extern bfd_reloc_code_real_type parse_cons_expression_microblaze
    || (FIX)->fx_r_type == BFD_RELOC_MICROBLAZE_64_GOTOFF	\
    || (FIX)->fx_r_type == BFD_RELOC_MICROBLAZE_32_GOTOFF)
 
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) \
+  (md_register_arithmetic || (SEG) != reg_section)
+
 #define tc_fix_adjustable(X)  tc_microblaze_fix_adjustable(X)
 extern int tc_microblaze_fix_adjustable (struct fix *);
 

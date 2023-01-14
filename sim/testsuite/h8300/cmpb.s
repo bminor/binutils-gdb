@@ -477,6 +477,17 @@ cmp_b_reg8_rdpostinc:
 	beq	.L9
 	fail
 .L9:
+	;; special case same register
+	mov.l	#byte_dst, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	inc.b	r1l
+	mov.b	r1l,@er0
+	cmp.b	r0l,@er0+
+	beq	.L19
+	fail
+.L19:
+	mov.b	r1h, @byte_dst
 
 cmp_b_reg8_rdpostdec:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -530,6 +541,17 @@ cmp_b_reg8_rdpostdec:
 	beq	.L10
 	fail
 .L10:
+	;; special case same register
+	mov.l	#byte_dst, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	dec.b	r1l
+	mov.b	r1l,@er0
+	cmp.b	r0l,@er0-
+	beq	.L20
+	fail
+.L20:
+	mov.b	r1h, @byte_dst
 
 cmp_b_reg8_rdpreinc:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -583,6 +605,17 @@ cmp_b_reg8_rdpreinc:
 	beq	.L11
 	fail
 .L11:
+	;; special case same register
+	mov.l	#pre_byte, er0
+	mov.b	@byte_dst, r1h
+	mov.b	r0l, r1l
+	inc.b	r1l
+	mov.b	r1l,@(1,er0)
+	cmp.b	r0l,@+er0
+	beq	.L21
+	fail
+.L21:
+	mov.b	r1h, @byte_dst
 
 cmp_b_reg8_rdpredec:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -636,6 +669,17 @@ cmp_b_reg8_rdpredec:
 	beq	.L12
 	fail
 .L12:
+	;; special case same register
+	mov.l	#post_byte, er0
+	mov.b	@byte_dst, r1h
+	mov.b	r0l, r1l
+	dec.b	r1l
+	mov.b	r1l,@(-1,er0)
+	cmp.b	r0l,@-er0
+	beq	.L22
+	fail
+.L22:
+	mov.b	r1h, @byte_dst
 
 cmp_b_rsind_rdind:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern

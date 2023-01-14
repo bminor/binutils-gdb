@@ -900,12 +900,17 @@ Do you need \"set solib-search-path\" or \"set sysroot\"?"),
 
    Uses a fairly simplistic heuristic approach where we check
    the file name against "/libpthread".  This can lead to false
-   positives, but this should be good enough in practice.  */
+   positives, but this should be good enough in practice.
+
+   As of glibc-2.34, functions formerly residing in libpthread have
+   been moved to libc, so "/libc." needs to be checked too.  (Matching
+   the "." will avoid matching libraries such as libcrypt.) */
 
 bool
 libpthread_name_p (const char *name)
 {
-  return (strstr (name, "/libpthread") != NULL);
+  return (strstr (name, "/libpthread") != NULL
+          || strstr (name, "/libc.") != NULL );
 }
 
 /* Return non-zero if SO is the libpthread shared library.  */
@@ -1556,17 +1561,19 @@ _initialize_solib ()
 {
   solib_data = gdbarch_data_register_pre_init (solib_init);
 
-  gdb::observers::free_objfile.attach (remove_user_added_objfile);
+  gdb::observers::free_objfile.attach (remove_user_added_objfile,
+				       "solib");
   gdb::observers::inferior_execd.attach ([] (inferior *inf)
     {
       solib_create_inferior_hook (0);
-    });
+    }, "solib");
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   _("Load shared object library symbols for files matching REGEXP."));
-  add_info ("sharedlibrary", info_sharedlibrary_command,
-	    _("Status of loaded shared object libraries."));
-  add_info_alias ("dll", "sharedlibrary", 1);
+  cmd_list_element *info_sharedlibrary_cmd
+    = add_info ("sharedlibrary", info_sharedlibrary_command,
+		_("Status of loaded shared object libraries."));
+  add_info_alias ("dll", info_sharedlibrary_cmd, 1);
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
 	   _("Unload all shared object library symbols."));
 
@@ -1583,20 +1590,21 @@ inferior.  Otherwise, symbols must be loaded manually, using \
 			   show_auto_solib_add,
 			   &setlist, &showlist);
 
-  add_setshow_optional_filename_cmd ("sysroot", class_support,
-				     &gdb_sysroot, _("\
+  set_show_commands sysroot_cmds
+    = add_setshow_optional_filename_cmd ("sysroot", class_support,
+					 &gdb_sysroot, _("\
 Set an alternate system root."), _("\
 Show the current system root."), _("\
 The system root is used to load absolute shared library symbol files.\n\
 For other (relative) files, you can add directories using\n\
 `set solib-search-path'."),
-				     gdb_sysroot_changed,
-				     NULL,
-				     &setlist, &showlist);
+					 gdb_sysroot_changed,
+					 NULL,
+					 &setlist, &showlist);
 
-  add_alias_cmd ("solib-absolute-prefix", "sysroot", class_support, 0,
+  add_alias_cmd ("solib-absolute-prefix", sysroot_cmds.set, class_support, 0,
 		 &setlist);
-  add_alias_cmd ("solib-absolute-prefix", "sysroot", class_support, 0,
+  add_alias_cmd ("solib-absolute-prefix", sysroot_cmds.show, class_support, 0,
 		 &showlist);
 
   add_setshow_optional_filename_cmd ("solib-search-path", class_support,

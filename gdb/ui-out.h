@@ -191,7 +191,11 @@ class ui_out
 			CORE_ADDR address);
   void field_string (const char *fldname, const char *string,
 		     const ui_file_style &style = ui_file_style ());
-  void field_string (const char *fldname, const std::string &string);
+  void field_string (const char *fldname, const std::string &string,
+		     const ui_file_style &style = ui_file_style ())
+  {
+    field_string (fldname, string.c_str (), style);
+  }
   void field_stream (const char *fldname, string_file &stream,
 		     const ui_file_style &style = ui_file_style ());
   void field_skip (const char *fldname);
@@ -203,6 +207,7 @@ class ui_out
 
   void spaces (int numspaces);
   void text (const char *string);
+  void text (const std::string &string) { text (string.c_str ()); }
 
   /* Output a printf-style formatted string.  In addition to the usual
      printf format specs, this supports a few GDB-specific

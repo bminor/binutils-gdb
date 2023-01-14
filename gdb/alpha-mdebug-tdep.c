@@ -333,7 +333,9 @@ alpha_mdebug_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-static const struct frame_unwind alpha_mdebug_frame_unwind = {
+static const struct frame_unwind alpha_mdebug_frame_unwind =
+{
+  "alpha mdebug",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   alpha_mdebug_frame_this_id,

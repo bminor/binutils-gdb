@@ -24,6 +24,8 @@ set options  {debug}
 set is64bitonly "no"
 set endian "auto"
 
+set formats {binary ihex srec tekhex  verilog}
+
 if [istarget "alpha*-*-*"] then {
     # SREC etc cannot handle 64-bit addresses.  Force the test
     # program into the low 31 bits of the address space.
@@ -466,6 +468,14 @@ if ![string compare $is64bitonly "no"] then {
   gdb_test "print intarray2\[4\] == 0" " = 1" "element 4 not changed, == 4"
 }
 
+
+# Test writing a file of each format to a directory that does not exist.
+
+foreach_with_prefix format $formats {
+    gdb_test "dump $format memory /tmp/non/existent/directory/file $array_start $array_end" \
+	"/tmp/non/existent/directory/file: No such file or directory." \
+	"dump to non-existent directory"
+}
 
 # Now start a fresh gdb session, and reload the saved value files.
 

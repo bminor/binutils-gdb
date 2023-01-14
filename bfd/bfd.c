@@ -276,9 +276,18 @@ CODE_FRAGMENT
 .  {* The number of sections.  *}
 .  unsigned int section_count;
 .
+.  {* The archive plugin file descriptor.  *}
+.  int archive_plugin_fd;
+.
+.  {* The number of opens on the archive plugin file descriptor.  *}
+.  unsigned int archive_plugin_fd_open_count;
+.
 .  {* A field used by _bfd_generic_link_add_archive_symbols.  This will
 .     be used only for archive elements.  *}
 .  int archive_pass;
+.
+.  {* The total size of memory from bfd_alloc.  *}
+.  bfd_size_type alloc_size;
 .
 .  {* Stuff only useful for object files:
 .     The start address.  *}
@@ -1849,6 +1858,24 @@ _bfd_set_gp_value (bfd *abfd, bfd_vma v)
     ecoff_data (abfd)->gp = v;
   else if (abfd->xvec->flavour == bfd_target_elf_flavour)
     elf_gp (abfd) = v;
+}
+
+/*
+FUNCTION
+	bfd_set_gp_value
+
+SYNOPSIS
+	void bfd_set_gp_value (bfd *abfd, bfd_vma v);
+
+DESCRIPTION
+	Allow external access to the fucntion to set the GP value.
+	This is specifically added for gdb-compile support.
+*/
+
+void
+bfd_set_gp_value (bfd *abfd, bfd_vma v)
+{
+  return _bfd_set_gp_value (abfd, v);
 }
 
 /*

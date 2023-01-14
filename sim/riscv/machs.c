@@ -18,7 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 
@@ -110,7 +111,7 @@ static const SIM_MACH rv128i_mach =
 #endif
 
 /* Order matters here.  */
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const riscv_sim_machs[] =
 {
 #if WITH_TARGET_WORD_BITSIZE >= 128
   &rv128i_mach,

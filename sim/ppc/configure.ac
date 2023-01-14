@@ -5,46 +5,6 @@ AC_CONFIG_MACRO_DIRS([../.. ../../config])
 AC_PROG_INSTALL
 AC_PROG_CC
 
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
-fi
-CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
-
-dnl We don't use gettext, but bfd does.  So we do the appropriate checks
-dnl to see if there are intl libraries we should link against.
-ALL_LINGUAS=
-ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
-
-
-AC_ARG_ENABLE(sim-alignment,
-[  --enable-sim-alignment=align		Specify strict or nonstrict alignment.],
-[case "${enableval}" in
-  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
-  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
-  *)				AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
-  echo "Setting alignment flags = $sim_alignment" 6>&1
-fi],[sim_alignment=""])dnl
-
-
-AC_MSG_CHECKING([whether to enable sim asserts])
-sim_assert="1"
-AC_ARG_ENABLE(sim-assert,
-[  --enable-sim-assert			Specify whether to perform random assertions.],
-[case "${enableval}" in
-  yes)	sim_assert="1";;
-  no)	sim_assert="0";;
-  *)	AC_MSG_ERROR([--enable-sim-assert does not take a value]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_ASSERT], [$sim_assert], [Sim assert settings])
-AC_MSG_RESULT($sim_assert)
-
-
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
 [case "${enableval}" in
@@ -117,39 +77,6 @@ fi],[sim_dup="-E"
 if test x"$silent" != x"yes"; then
   echo "Setting duplicate flags = $sim_dup" 6>&1
 fi])dnl
-
-
-AC_ARG_ENABLE(sim-endian,
-[  --enable-sim-endian=endian		Specify target byte endian orientation.],
-[case "${enableval}" in
-  yes)	case "$target" in
-	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
-	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
-	esac;;
-  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
-  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi],[sim_endian=""])dnl
-
-
-AC_MSG_CHECKING([default sim environment setting])
-sim_env="0"
-AC_ARG_ENABLE(sim-env,
-[  --enable-sim-env=env			Specify target environment (operating, virtual, user).],
-[case "${enableval}" in
-  operating | os | oea)	sim_env="OPERATING_ENVIRONMENT";;
-  virtual | vea)	sim_env="VIRTUAL_ENVIRONMENT";;
-  user | uea)		sim_env="USER_ENVIRONMENT";;
-  no)			sim_env="0";;
-  *)			AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-env]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_ENVIRONMENT], [$sim_env], [Sim default environment])
-AC_MSG_RESULT($sim_env)
 
 
 AC_ARG_ENABLE(sim-filter,
@@ -315,29 +242,6 @@ if test x"$silent" != x"yes" && test x"$sim_hostbitsize" != x""; then
 fi],[sim_hostbitsize=""])dnl
 
 
-AC_ARG_ENABLE(sim-hostendian,
-[  --enable-sim-hostendian=end		Specify host byte endian orientation.],
-[case "${enableval}" in
-  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
-  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
-  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-hostendian"); sim_hostendian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
-  echo "Setting hostendian flags = $sim_hostendian" 6>&1
-fi],[
-if test "x$cross_compiling" = "xno"; then
-  AC_C_BIGENDIAN
-  if test $ac_cv_c_bigendian = yes; then
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
-  else
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
-  fi
-else
-  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
-fi])dnl
-
-
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction-decode cache size and type.],
 [icache="-R"
@@ -362,41 +266,6 @@ if test x"$silent" != x"yes" && test x"$icache" != x""; then
 fi],[sim_icache="-CSRI 1024"
 if test x"$silent" != x"yes"; then
   echo "Setting instruction cache size to 1024 ($sim_icache)"
-fi])dnl
-
-
-AC_ARG_ENABLE(sim-inline,
-[  --enable-sim-inline=inlines		Specify which functions should be inlined.],
-[sim_inline=""
-case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0";;
-  0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS";;
-  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
-       new_flag=""
-       case "$x" in
-	 *_INLINE=*)	new_flag="-D$x";;
-	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
-       esac
-       if test x"$sim_inline" = x""; then
-	 sim_inline="$new_flag"
-       else
-	 sim_inline="$sim_inline $new_flag"
-       fi
-     done;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
-  echo "Setting inline flags = $sim_inline" 6>&1
-fi],[if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS"
-  if test x"$silent" != x"yes"; then
-    echo "Setting inline flags = $sim_inline" 6>&1
-  fi
-else
-  sim_inline=""
 fi])dnl
 
 
@@ -457,7 +326,7 @@ AC_ARG_ENABLE(sim-monitor,
   no)		sim_monitor="-DWITH_MON=0";;
   instruction)	sim_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
   memory)	sim_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
-  *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-mon"); sim_env="";;
+  *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-mon");;
 esac
 if test x"$silent" != x"yes" && test x"$sim_monitor" != x""; then
   echo "Setting monitor flags = $sim_monitor" 6>&1
@@ -507,18 +376,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-reserved-bits,
-[  --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.],
-[case "${enableval}" in
-  yes)	sim_reserved="-DWITH_RESERVED_BITS=1";;
-  no)	sim_reserved="-DWITH_RESERVED_BITS=0";;
-  *)	AC_MSG_ERROR("--enable-sim-reserved-bits does not take a value"); sim_reserved="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_reserved" != x""; then
-  echo "Setting reserved flags = $sim_reserved" 6>&1
-fi],[sim_reserved=""])dnl
-
-
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
@@ -532,19 +389,6 @@ fi],[sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5"
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi])dnl
-
-
-AC_MSG_CHECKING([for sim stdio debug behavior])
-sim_stdio=0
-AC_ARG_ENABLE(sim-stdio,
-[  --enable-sim-stdio			Specify whether to use stdio for console input/output.],
-[case "${enableval}" in
-  yes)	sim_stdio="DO_USE_STDIO";;
-  no)	sim_stdio="DONT_USE_STDIO";;
-  *)	AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-stdio]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_STDIO], [$sim_stdio], [How to route I/O])
-AC_MSG_RESULT($sim_stdio)
 
 
 AC_ARG_ENABLE(sim-switch,
@@ -574,29 +418,41 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi],[sim_timebase=""])dnl
 
 
-AC_MSG_CHECKING([for sim trace settings])
-sim_trace="1"
-AC_ARG_ENABLE(sim-trace,
-[  --enable-sim-trace			Specify whether tracing is supported.],
-[case "${enableval}" in
-  yes)	sim_trace="1";;
-  no)	sim_trace="0";;
-  *)	AC_MSG_ERROR([--enable-sim-trace does not take a value]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_TRACE], [$sim_trace], [Sim trace settings])
-AC_MSG_RESULT($sim_trace)
-
-
+dnl TODO: Switch to common $(WARN_CFLAGS).
+sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
+-Wno-unused -Wunused-value -Wunused-function
+-Wno-switch -Wno-char-subscripts
+-Wempty-body -Wunused-but-set-parameter
+-Wno-error=maybe-uninitialized
+-Wno-missing-declarations
+-Wno-missing-prototypes
+-Wdeclaration-after-statement -Wmissing-parameter-type
+-Wno-pointer-sign
+-Wold-style-declaration -Wold-style-definition
+"
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
-  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
+  yes)	;;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
-fi],[sim_warnings=""])dnl
+fi])dnl
+if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
+  AC_MSG_CHECKING(compiler warning flags)
+  build_warnings="${sim_warnings}"
+  sim_warnings=
+  for w in ${build_warnings}; do
+    dnl Check that GCC accepts it
+    saved_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -Werror $w"
+    AC_TRY_COMPILE([],[],sim_warnings="${sim_warnings} $w",)
+    CFLAGS="$saved_CFLAGS"
+  done
+  AC_MSG_RESULT(${sim_warnings})
+fi
 
 
 AC_ARG_ENABLE(sim-xor-endian,
@@ -611,21 +467,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
 fi],[sim_xor_endian=""])dnl
 
 
-ACX_PKGVERSION([GDB])
-ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
-AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
-AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
-
-AC_CANONICAL_SYSTEM
-AC_ARG_PROGRAM
-
-# BFD conditionally uses zlib, so we must link it in if libbfd does, by
-# using the same condition.
-AM_ZLIB
-
-# BFD uses libdl when when plugins enabled.
-AC_PLUGINS
-
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
@@ -638,23 +479,6 @@ esac
 
 AC_CONFIG_HEADER(config.h:config.in)
 
-AC_STRUCT_ST_BLKSIZE
-AC_STRUCT_ST_BLOCKS
-AC_STRUCT_ST_RDEV
-AC_STRUCT_TIMEZONE
-
-AC_TYPE_GETGROUPS
-AC_TYPE_MODE_T
-AC_TYPE_OFF_T
-AC_TYPE_PID_T
-AC_TYPE_SIGNAL
-AC_TYPE_SIZE_T
-AC_TYPE_UID_T
-
-AC_CHECK_FUNCS(access cfgetispeed cfgetospeed cfsetispeed cfsetospeed chdir chmod chown dup dup2 fchmod fchown fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getppid getrusage gettimeofday getuid ioctl kill link lseek lstat mkdir pipe readlink rmdir setreuid setregid stat sigprocmask stat symlink tcgetattr tcsetattr tcsendbreak tcdrain tcflush tcflow tcgetpgrp tcsetpgrp time umask unlink)
-
-AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h unistd.h sys/vfs.h sys/statfs.h)
-AC_HEADER_DIRENT
 
 dnl Figure out what type of termio/termios support there is
 sim_termio=""
@@ -816,7 +640,13 @@ else
   *) realsrcdir=../${srcdir};;
   esac
   saved_CFLAGS="${CFLAGS}"
-  CC="${CC_FOR_BUILD}" CFLAGS="${CFLAGS_FOR_BUILD}" \
+  # Put a plausible default for CC_FOR_BUILD in Makefile.
+  if test "x$cross_compiling" = "xno"; then
+    CC_FOR_BUILD='$(CC)'
+  else
+    CC_FOR_BUILD=gcc
+  fi
+  CC="${CC_FOR_BUILD}" CFLAGS="${CFLAGS_FOR_BUILD-${CFLAGS}}" \
   LDFLAGS="${LDFLAGS_FOR_BUILD}" \
   ${realsrcdir}/configure \
     --enable-languages=${enable_languages-all} \
@@ -827,15 +657,6 @@ else
   rm -rf $tempdir
 fi
 
-dnl Check for exe extension
-AC_EXEEXT
-
-AC_SUBST(CC_FOR_BUILD)
-AC_SUBST(CFLAGS_FOR_BUILD)
-AC_SUBST(CFLAGS)
-AR=${AR-ar}
-AC_SUBST(AR)
-AC_PROG_RANLIB
 AC_SUBST(sim_warnings)
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_config)
@@ -850,18 +671,13 @@ AC_SUBST(sim_hw_src)
 AC_SUBST(sim_hw_obj)
 AC_SUBST(sim_pk_src)
 AC_SUBST(sim_pk_obj)
-AC_SUBST(sim_inline)
-AC_SUBST(sim_endian)
 AC_SUBST(sim_xor_endian)
-AC_SUBST(sim_hostendian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_hostbitsize)
 AC_SUBST(sim_timebase)
-AC_SUBST(sim_alignment)
 AC_SUBST(sim_float)
-AC_SUBST(sim_reserved)
 AC_SUBST(sim_monitor)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)

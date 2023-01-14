@@ -302,6 +302,7 @@ m32r_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 }
 
 static const struct frame_unwind m32r_linux_sigtramp_frame_unwind = {
+  "m32r linux sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   m32r_linux_sigtramp_frame_this_id,

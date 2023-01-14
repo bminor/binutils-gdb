@@ -140,15 +140,6 @@ ctf_hash_eq_type_id_key (const void *a, const void *b)
     && (key_a->ctii_type == key_b->ctii_type);
 }
 
-/* Hash and eq functions for the dynset.  Most of these can just use the
-   underlying hashtab functions directly.   */
-
-int
-ctf_dynset_eq_string (const void *a, const void *b)
-{
-  return !strcmp((const char *) a, (const char *) b);
-}
-
 /* The dynhash, used for hashes whose size is not known at creation time. */
 
 /* Free a single ctf_helem with arbitrary key/value functions.  */

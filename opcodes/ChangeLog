@@ -1,3 +1,284 @@
+2021-07-26  Chenghua Xu  <xuchenghua@loongson.cn>
+
+	* mips-dis.c (mips_arch_choices): Correct gs264e bfd_mach.
+
+2021-06-07  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* s390-opc.txt: Add qpaci.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-07-02  Alan Modra  <amodra@gmail.com>
+
+	* nds32-dis.c (nds32_find_reg_keyword): Constify arg and return.
+	(nds32_parse_audio_ext, nds32_parse_opcode): Constify psys_reg.
+	(nds32_field_table, nds32_opcode_table, nds32_keyword_table),
+	(nds32_opcodes, nds32_operand_fields, nds32_keywords),
+	(nds32_keyword_gpr): Move declarations to..
+	* nds32-asm.h: ..here, constifying to match definitions.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (GUILE): New variable.
+	(CGEN): Use $(GUILE).
+	* Makefile.in: Regenerate.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* mep-asm.c (macros): Mark static & const.
+	(lookup_macro): Change return & m to const.
+	(expand_macro): Change mac to const.
+	(expand_string): Change pmacro to const.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* nds32-asm.c (operand_fields): Rename to ...
+	(nds32_operand_fields): ... this.
+	(keyword_gpr): Rename to ...
+	(nds32_keyword_gpr): ... this.
+	(keyword_usr, keyword_dxr, keyword_sr, keyword_cp, keyword_cpr,
+	keyword_fsr, keyword_fdr, keyword_abdim, keyword_abm,
+	keyword_dpref_st, keyword_cctl_lv, keyword_standby_st,
+	keyword_msync_st, keyword_im5_i, keyword_im5_m, keyword_accumulator,
+	keyword_aridx, keyword_aridx2, keyword_aridxi, keyword_aridxi_mx):
+	Mark static.
+	(keywords): Rename to ...
+	(nds32_keywords): ... this.
+	* nds32-dis.c: Rename operand_fields to nds32_operand_fields,
+	keywords to nds32_keywords, and keyword_gpr to nds32_keyword_gpr.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* z80-dis.c (opc_ed): Make const.
+	(pref_ed): Make p const.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* microblaze-dis.c (get_field_special): Make op const.
+	(read_insn_microblaze): Make opr & op const.  Rename opcodes to
+	microblaze_opcodes.
+	(print_insn_microblaze): Make op & pop const.
+	(get_insn_microblaze): Make op const.  Rename opcodes to
+	microblaze_opcodes.
+	(microblaze_get_target_address): Likewise.
+	* microblaze-opc.h (struct op_code_struct): Make const.
+	Rename opcodes to microblaze_opcodes.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* aarch64-gen.c (aarch64_opcode_table): Add const.
+	* aarch64-tbl.h (aarch64_opcode_table): Likewise.
+
+2021-06-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cgen-dis.c (count_decodable_bits): Use __builtin_popcount when
+	available.
+
+2021-06-22  Alan Modra  <amodra@gmail.com>
+
+	* pj-dis.c (print_insn_pj): Don't print trailing tab.  Do
+	print separator for pcrel insns.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* vax-dis.c (print_insn_vax): Avoid pointer overflow.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* tic30-dis.c (get_register_operand): Don't ask strncpy to fill
+	entire buffer.
+
+2021-06-17  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Move cell db*cyc to proper location
+	in table.
+
+2021-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 1202
+	* mcore-dis.c (print_insn_mcore): Correct loopt disassembly.
+	Use unsigned int for inst.
+
+2021-06-02  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-dis.c (arc_option_arg_t): New enumeration.
+	(arc_options): New variable.
+	(disassembler_options_arc): New function.
+	(print_arc_disassembler_options): Reimplement in terms of
+	"disassembler_options_arc".
+
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (lookup_powerpc): Test deprecated field when -Many.
+	Don't special case PPC_OPCODE_RAW.
+	(lookup_prefix): Likewise.
+	(lookup_vle, lookup_spe2): Similarly.  Add dialect parameter and..
+	(print_insn_powerpc): ..update caller.
+	* ppc-opc.c (EXT): Define.
+	(powerpc_opcodes): Mark extended mnemonics with EXT.
+	(prefix_opcodes, vle_opcodes): Likewise.
+	(XISEL, XISEL_MASK): Add cr field and simplify.
+	(powerpc_opcodes): Use XISEL with extended isel mnemonics and sort
+	all isel variants to where the base mnemonic belongs.  Sort dstt,
+	dststt and dssall.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Reorder legacy COP0, COP2,
+	COP3 opcode instructions.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Update exclusion list for
+	"ldc2", "ldc3", "lwc0", "lwc2", "lwc3", "sdc2", "sdc3", "swc0",
+	"swc2", "swc3", "cfc0", "ctc0", "bc2f", "bc2fl", "bc2t",
+	"bc2tl", "cfc2", "ctc2", "dmfc2", "dmtc2", "mfc2", "mtc2",
+	"bc3f", "bc3fl", "bc3t", "bc3tl", "cfc3", "ctc3", "mfc3",
+	"mtc3", "bc0f", "bc0fl", "bc0t", "bc0tl", "rfe", "c2", "c3",
+	"cop2", and "cop3" entries.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove "dmfc3" and "dmtc3"
+	entries and associated comments.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Move the "rfe" entry ahead
+	of "c0".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-dis.c (mips_cp1_names_mips): New variable.
+	(mips_arch_choices): Use it rather than `mips_cp1_names_numeric'
+	for "r3000", "r4000", "r4010", "vr4100", "vr4111", "vr4120",
+	"r4300", "r4400", "r4600", "r4650", "r5000", "vr5400", "vr5500",
+	"r5900", "r6000", "rm7000", "rm9000", "r8000", "r10000",
+	"r12000", "r14000", "r16000", "mips5", "loongson2e", and
+	"loongson2f".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-dis.c (print_reg) <OP_REG_COPRO>: Move control register
+	handling code over to...
+	<OP_REG_CONTROL>: ... this new case.
+	* mips-opc.c (decode_mips_operand) <'g', 'y'>: New cases.
+	(mips_builtin_opcodes): Update "cfc1", "ctc1", "cttc1", "cttc2",
+	"cfc0", "ctc0", "cfc2", "ctc2", "cfc3", and "ctc3" entries
+	replacing the `G' operand code with `g'.  Update "cftc1" and
+	"cftc2" entries replacing the `E' operand code with `y'.
+	* micromips-opc.c (decode_micromips_operand) <'g'>: New case.
+	(micromips_opcodes): Update "cfc1", "cfc2", "ctc1", and "ctc2"
+	entries replacing the `G' operand code with `g'.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-dis.c (mips_cp0_names_r3900): New variable.
+	(mips_arch_choices): Use it rather than `mips_cp0_names_numeric'
+	for "r3900".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Switch "cttc2", "mttc2",
+	and "mtthc2" to using the `G' rather than `g' operand code for
+	the coprocessor control register referred.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* micromips-opc.c (micromips_opcodes): Swap the two "dmtc1"
+	entries with each other.
+
+2021-05-27  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <xxmr, xxlnot>: New extended mnemonics.
+
+2021-05-25  Alan Modra  <amodra@gmail.com>
+
+	* cris-desc.c: Regenerate.
+	* cris-desc.h: Regenerate.
+	* cris-opc.h: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2021-05-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (HFILES): Add cris-desc.h & cris-opc.h.
+	(TARGET_LIBOPCODES_CFILES): Add cris-desc.c.
+	(CGEN_CPUS): Add cris.
+	(CRIS_DEPS): Define.
+	(stamp-cris): New rule.
+	* cgen.sh: Handle desc action.
+	* configure.ac (bfd_cris_arch): Add cris-desc.lo.
+	* Makefile.in, configure: Regenerate.
+
+2021-05-18  Job Noorman  <mtvec@pm.me>
+
+	PR 27814
+	* riscv-dis.c (riscv_get_disassembler): Get elf attributes only for
+	the elf objects.
+
+2021-05-17  Alex Coplan  <alex.coplan@arm.com>
+
+	* arm-dis.c (mve_opcodes): Fix disassembly of
+	MVE_VMOV2_GP_TO_VEC_LANE when idx == 1.
+	(is_mve_encoding_conflict): MVE vector loads should not match
+	when P = W = 0.
+	(is_mve_unpredictable): It's not unpredictable to use the same
+	source register twice (for MVE_VMOV2_GP_TO_VEC_LANE).
+
+2021-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 27840
+	* tic30-dis.c (print_insn_tic30): Prevent attempts to read beyond
+	the end of the code buffer.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* or1k-asm.c: Regenerate.
+
+2021-05-01  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_insn_xtensa): Fill in info->insn_type and
+	info->insn_info_valid.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (lea): Add Optimize.
+	* opcodes/i386-tbl.h: Re-generate.
+
+2020-04-23  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_xtensa_operand): For PC-relative operand
+	of l32r fetch and display referenced literal value.
+
+2021-04-23  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_insn_xtensa): Set info->bytes_per_chunk
+	to 4 for literal disassembly.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c: Add new registers (RPAOS, RPALOS, PAALLOS, PAALL) support
+	for TLBI instruction.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c: Add new register (CIPAPA, CIGDPAPA) support for
+	DC instruction.
+
+2021-04-19  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-asm.c (encode_asimd_fcvt): Add initializer for
+	"qualifier".
+	(convert_mov_to_movewide): Add initializer for "value".
+
 2021-04-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-opc.c: Add RME system registers.
@@ -164,7 +445,7 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (process_i386_opcode_modifier): New parameter
-	"space". 
+	"space".
 	(output_i386_opcode): New local variable "space". Adjust
 	process_i386_opcode_modifier() invocation.
 	(process_i386_opcodes): Adjust process_i386_opcode_modifier()

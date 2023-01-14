@@ -2921,6 +2921,7 @@ instruction.  */
   BFD_RELOC_PPC_VLE_SDAREL_HA16D,
   BFD_RELOC_PPC_16DX_HA,
   BFD_RELOC_PPC_REL16DX_HA,
+  BFD_RELOC_PPC_NEG,
   BFD_RELOC_PPC64_HIGHER,
   BFD_RELOC_PPC64_HIGHER_S,
   BFD_RELOC_PPC64_HIGHEST,
@@ -4999,6 +5000,7 @@ then it may be truncated to 8 bits.  */
   BFD_RELOC_OR1K_SLO13,
   BFD_RELOC_OR1K_GOTPC_HI16,
   BFD_RELOC_OR1K_GOTPC_LO16,
+  BFD_RELOC_OR1K_GOT_AHI16,
   BFD_RELOC_OR1K_GOT16,
   BFD_RELOC_OR1K_GOT_PG21,
   BFD_RELOC_OR1K_GOT_LO13,
@@ -6705,9 +6707,18 @@ struct bfd
   /* The number of sections.  */
   unsigned int section_count;
 
+  /* The archive plugin file descriptor.  */
+  int archive_plugin_fd;
+
+  /* The number of opens on the archive plugin file descriptor.  */
+  unsigned int archive_plugin_fd_open_count;
+
   /* A field used by _bfd_generic_link_add_archive_symbols.  This will
      be used only for archive elements.  */
   int archive_pass;
+
+  /* The total size of memory from bfd_alloc.  */
+  bfd_size_type alloc_size;
 
   /* Stuff only useful for object files:
      The start address.  */
@@ -7094,6 +7105,8 @@ bool bfd_set_start_address (bfd *abfd, bfd_vma vma);
 unsigned int bfd_get_gp_size (bfd *abfd);
 
 void bfd_set_gp_size (bfd *abfd, unsigned int i);
+
+void bfd_set_gp_value (bfd *abfd, bfd_vma v);
 
 bfd_vma bfd_scan_vma (const char *string, const char **end, int base);
 

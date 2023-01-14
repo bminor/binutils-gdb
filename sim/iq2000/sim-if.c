@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 
 #include <stdlib.h>
@@ -47,6 +50,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const iq2000_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -56,6 +61,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   char c;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = iq2000_sim_machs;
+  STATE_MODEL_NAME (sd) = "iq2000";
+  current_alignment = STRICT_ALIGNMENT;
+  current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -118,10 +129,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       }
     iq2000_cgen_init_dis (cd);
   }
-
-  /* Initialize various cgen things not done by common framework.
-     Must be done after iq2000_cgen_cpu_open.  */
-  cgen_init (sd);
 
   return sd;
 }

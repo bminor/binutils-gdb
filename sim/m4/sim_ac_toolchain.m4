@@ -24,23 +24,32 @@ AC_C_BIGENDIAN
 AC_ARG_PROGRAM
 AC_PROG_INSTALL
 
+AC_CHECK_TOOL(DTC, dtc)
+
 dnl Setup toolchain settings for build-time tools..
 if test "x$cross_compiling" = "xno"; then
+  : "${AR_FOR_BUILD:=\$(AR)}"
   : "${CC_FOR_BUILD:=\$(CC)}"
+  : "${RANLIB_FOR_BUILD:=\$(RANLIB)}"
   : "${CFLAGS_FOR_BUILD:=\$(CFLAGS)}"
   : "${LDFLAGS_FOR_BUILD:=\$(LDFLAGS)}"
 else
+  : "${AR_FOR_BUILD:=ar}"
   : "${CC_FOR_BUILD:=gcc}"
+  : "${RANLIB_FOR_BUILD:=ranlib}"
   : "${CFLAGS_FOR_BUILD:=-g -O}"
   : "${LDLFAGS_FOR_BUILD:=}"
 fi
+AC_SUBST(AR_FOR_BUILD)
 AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(RANLIB_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
 
 AC_SUBST(CFLAGS)
 AC_CHECK_TOOL(AR, ar)
 AC_PROG_RANLIB
+PKG_PROG_PKG_CONFIG
 
 # Require C11 or newer.  Autoconf-2.70 provides ac_cv_prog_cc_c11 when using
 # AC_PROG_CC, but we're still using Autoconf-2.69, and the newest it understands

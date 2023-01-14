@@ -102,7 +102,10 @@ typedef struct view_buffer
    pointer.  */
 typedef struct plugin_input_file
 {
+  /* The dummy BFD.  */
   bfd *abfd;
+  /* The original input BFD.  Non-NULL if it is an archive member.  */
+  bfd *ibfd;
   view_buffer_t view_buffer;
   char *name;
   int fd;
@@ -605,17 +608,25 @@ get_view (const void *handle, const void **viewp)
   return LDPS_OK;
 }
 
+/* Release plugin file descriptor.  */
+
+static void
+release_plugin_file_descriptor (plugin_input_file_t *input)
+{
+  if (input->fd != -1)
+    {
+      bfd_plugin_close_file_descriptor (input->ibfd, input->fd);
+      input->fd = -1;
+    }
+}
+
 /* Release the input file.  */
 static enum ld_plugin_status
 release_input_file (const void *handle)
 {
   plugin_input_file_t *input = (plugin_input_file_t *) handle;
   ASSERT (called_plugin);
-  if (input->fd != -1)
-    {
-      close (input->fd);
-      input->fd = -1;
-    }
+  release_plugin_file_descriptor (input);
   return LDPS_OK;
 }
 
@@ -1211,6 +1222,7 @@ plugin_object_p (bfd *ibfd)
 
   file.handle = input;
   input->abfd = abfd;
+  input->ibfd = ibfd->my_archive != NULL ? ibfd : NULL;
   input->view_buffer.addr = NULL;
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
@@ -1226,7 +1238,8 @@ plugin_object_p (bfd *ibfd)
     einfo (_("%F%P: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
-  if (input->fd != -1 && !bfd_plugin_target_p (ibfd->xvec))
+  if (input->fd != -1
+      && (!claimed || !bfd_plugin_target_p (ibfd->xvec)))
     {
       /* FIXME: fd belongs to us, not the plugin.  GCC plugin, which
 	 doesn't need fd after plugin_call_claim_file, doesn't use
@@ -1236,8 +1249,7 @@ plugin_object_p (bfd *ibfd)
 	 release_input_file after it is done, uses BFD plugin target
 	 vector.  This scheme doesn't work when a plugin needs fd and
 	 doesn't use BFD plugin target vector neither.  */
-      close (input->fd);
-      input->fd = -1;
+      release_plugin_file_descriptor (input);
     }
 
   if (claimed)

@@ -2954,7 +2954,7 @@ static const struct mopcode32 mve_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_GP_TO_VEC_LANE,
    0xec100f10, 0xffb01ff0,
-   "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
+   "vmov%c\t%13-15,22Q[3], %13-15,22Q[1], %0-3r, %16-19r"},
 
   /* Vector VMOV Vector lane to gpr.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
@@ -4652,6 +4652,23 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
+  /* Arm v8.1-M Mainline Pointer Authentication and Branch Target
+     Identification Extension.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af802d, 0xffffffff, "aut\tr12, lr, sp"},
+  {ARM_FEATURE_CORE_HIGH_HIGH (ARM_EXT3_PACBTI),
+   0xfb500f00, 0xfff00ff0, "autg%c\t%12-15r, %16-19r, %0-3r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af800f, 0xffffffff, "bti"},
+  {ARM_FEATURE_CORE_HIGH_HIGH (ARM_EXT3_PACBTI),
+   0xfb500f10, 0xfff00ff0, "bxaut%c\t%12-15r, %16-19r, %0-3r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af801d, 0xffffffff, "pac\tr12, lr, sp"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af800d, 0xffffffff, "pacbti\tr12, lr, sp"},
+  {ARM_FEATURE_CORE_HIGH_HIGH (ARM_EXT3_PACBTI),
+   0xfb60f000, 0xfff0f0f0, "pacg%c\t%8-11r, %16-19r, %0-3r"},
+
   /* Armv8.1-M Mainline and Armv8.1-M Mainline Security Extensions
      instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
@@ -5722,6 +5739,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return false;
 
+    case MVE_VLDRB_T1:
+    case MVE_VLDRH_T2:
+    case MVE_VLDRW_T7:
     case MVE_VSTRB_T5:
     case MVE_VSTRH_T6:
     case MVE_VSTRW_T7:
@@ -6656,7 +6676,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	    *unpredictable_code = UNPRED_R15;
 	    return true;
 	  }
-	else if (rt == rt2)
+	else if (rt == rt2 && matched_insn != MVE_VMOV2_GP_TO_VEC_LANE)
 	  {
 	    *unpredictable_code = UNPRED_GP_REGS_EQUAL;
 	    return true;

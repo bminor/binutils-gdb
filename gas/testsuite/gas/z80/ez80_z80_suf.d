@@ -1,4 +1,4 @@
-#as: -march=ez80
+#as: -march=ez80 --defsym VALUE=0x3456
 #objdump: -d
 #name: eZ80 instructions with sufficies in Z80 cpu mode
 #source: ez80_isuf.s

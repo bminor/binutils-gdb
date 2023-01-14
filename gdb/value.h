@@ -458,12 +458,6 @@ extern struct internalvar **deprecated_value_internalvar_hack (struct value *);
 extern struct frame_id *deprecated_value_next_frame_id_hack (struct value *);
 #define VALUE_NEXT_FRAME_ID(val) (*deprecated_value_next_frame_id_hack (val))
 
-/* Frame ID of frame to which a register value is relative.  This is
-   similar to VALUE_NEXT_FRAME_ID, above, but may not be assigned to. 
-   Note that VALUE_FRAME_ID effectively undoes the "next" operation
-   that was performed during the assignment to VALUE_NEXT_FRAME_ID.  */
-#define VALUE_FRAME_ID(val) (get_prev_frame_id_by_id (VALUE_NEXT_FRAME_ID (val)))
-
 /* Register number if the value is from a register.  */
 extern int *deprecated_value_regnum_hack (struct value *);
 #define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
@@ -826,7 +820,7 @@ extern struct value *value_neg (struct value *arg1);
 extern struct value *value_complement (struct value *arg1);
 
 extern struct value *value_struct_elt (struct value **argp,
-				       struct value **args,
+				       gdb::optional<gdb::array_view <value *>> args,
 				       const char *name, int *static_memfuncp,
 				       const char *err);
 

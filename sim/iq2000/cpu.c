@@ -58,11 +58,3 @@ iq2000bf_h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
 {
   SET_H_GR (regno, newval);
 }
-
-/* Record trace results for INSN.  */
-
-void
-iq2000bf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

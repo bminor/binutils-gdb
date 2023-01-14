@@ -18,9 +18,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-module.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 /* Generic implementation of sim_close that works with simulators that use
    sim-module for all custom runtime options.  */

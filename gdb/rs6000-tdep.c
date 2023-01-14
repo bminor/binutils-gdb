@@ -1065,9 +1065,12 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   else if ((insn & BP_MASK) == BP_INSN)
     regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch), from);
   else
-  /* Handle any other instructions that do not fit in the categories above.  */
-    regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
-				    from + offset);
+    {
+      /* Handle any other instructions that do not fit in the categories
+         above.  */
+      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				      from + offset);
+    }
 }
 
 /* Implementation of gdbarch_displaced_step_prepare.  */
@@ -1869,12 +1872,12 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  continue;
 	}
       else if ((op & 0xffff0000) == 0x38210000)
- 	{			/* addi r1,r1,SIMM */
- 	  fdata->frameless = 0;
- 	  fdata->offset += SIGNED_SHORT (op);
- 	  offset = fdata->offset;
- 	  continue;
- 	}
+	{			/* addi r1,r1,SIMM */
+	  fdata->frameless = 0;
+	  fdata->offset += SIGNED_SHORT (op);
+	  offset = fdata->offset;
+	  continue;
+	}
       /* Load up minimal toc pointer.  Do not treat an epilogue restore
 	 of r31 as a minimal TOC load.  */
       else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,...  */
@@ -1887,7 +1890,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	  /* move parameters from argument registers to local variable
 	     registers */
- 	}
+	}
       else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
 	       (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
 	       (((op >> 21) & 31) <= 10) &&
@@ -2078,7 +2081,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	    }
 
 	  continue;
-      	}
+	}
       /* Store gen register S at (r31+r0).
 	 Store param on stack when offset from SP bigger than 4 bytes.  */
       /* 000100 sssss 11111 00000 01100100000 */
@@ -3780,6 +3783,7 @@ rs6000_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind rs6000_frame_unwind =
 {
+  "rs6000 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   rs6000_frame_this_id,
@@ -3879,6 +3883,7 @@ rs6000_epilogue_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind rs6000_epilogue_frame_unwind =
 {
+  "rs6000 epilogue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   rs6000_epilogue_frame_this_id, rs6000_epilogue_frame_prev_register,
@@ -7257,7 +7262,6 @@ powerpc_set_soft_float (const char *args, int from_tty,
   struct gdbarch_info info;
 
   /* Update the architecture.  */
-  gdbarch_info_init (&info);
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
@@ -7266,7 +7270,6 @@ static void
 powerpc_set_vector_abi (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
-  struct gdbarch_info info;
   int vector_abi;
 
   for (vector_abi = POWERPC_VEC_AUTO;
@@ -7284,7 +7287,7 @@ powerpc_set_vector_abi (const char *args, int from_tty,
 		    powerpc_vector_abi_string);
 
   /* Update the architecture.  */
-  gdbarch_info_init (&info);
+  gdbarch_info info;
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
@@ -7368,6 +7371,14 @@ ppc_insn_ds_field (unsigned int insn)
   return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
 }
 
+CORE_ADDR
+ppc_insn_prefix_dform (unsigned int insn1, unsigned int insn2)
+{
+  /* result is 34-bits  */
+  return (CORE_ADDR) ((((insn1 & 0x3ffff) ^ 0x20000) - 0x20000) << 16)
+    | (CORE_ADDR)(insn2 & 0xffff);
+}
+
 /* Initialization code.  */
 
 void _initialize_rs6000_tdep ();
@@ -7402,11 +7413,11 @@ _initialize_rs6000_tdep ()
      commands.  */
   add_basic_prefix_cmd ("powerpc", no_class,
 			_("Various PowerPC-specific commands."),
-			&setpowerpccmdlist, "set powerpc ", 0, &setlist);
+			&setpowerpccmdlist, 0, &setlist);
 
   add_show_prefix_cmd ("powerpc", no_class,
 		       _("Various PowerPC-specific commands."),
-		       &showpowerpccmdlist, "show powerpc ", 0, &showlist);
+		       &showpowerpccmdlist, 0, &showlist);
 
   /* Add a command to allow the user to force the ABI.  */
   add_setshow_auto_boolean_cmd ("soft-float", class_support,

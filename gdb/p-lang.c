@@ -109,7 +109,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	    *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
 	  if (char_type)
 	    *char_type = TYPE_TARGET_TYPE (type->field (1).type ());
- 	  if (arrayname)
+	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 1);
 	 return 2;
 	};
@@ -135,7 +135,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	      if ((*char_type)->code () == TYPE_CODE_ARRAY)
 		*char_type = TYPE_TARGET_TYPE (*char_type);
 	    }
- 	  if (arrayname)
+	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 2);
 	 return 3;
 	};

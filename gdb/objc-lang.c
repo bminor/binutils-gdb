@@ -1319,9 +1319,10 @@ _initialize_objc_language ()
 	    _("All Objective-C selectors, or those matching REGEXP."));
   add_info ("classes", info_classes_command,
 	    _("All Objective-C classes, or those matching REGEXP."));
-  add_com ("print-object", class_vars, print_object_command, 
-	   _("Ask an Objective-C object to print itself."));
-  add_com_alias ("po", "print-object", class_vars, 1);
+  cmd_list_element *print_object_cmd
+    = add_com ("print-object", class_vars, print_object_command,
+	       _("Ask an Objective-C object to print itself."));
+  add_com_alias ("po", print_object_cmd, class_vars, 1);
 }
 
 static void 

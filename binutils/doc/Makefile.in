@@ -431,7 +431,8 @@ man_MANS = \
 info_TEXINFOS = binutils.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc \
+		   --no-split
 
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 		    -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
@@ -744,7 +745,7 @@ dvi-am: $(DVIS)
 
 html: html-am
 
-html-am: $(HTMLS)
+html-am: $(HTMLS) html-local
 
 info: info-am
 
@@ -897,7 +898,7 @@ uninstall-man: uninstall-man1
 .PHONY: all all-am check check-am clean clean-aminfo clean-generic \
 	clean-libtool cscopelist-am ctags-am dist-info distclean \
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
-	html-am info info-am info-local install install-am \
+	html-am html-local info info-am info-local install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-man1 \
@@ -1028,6 +1029,11 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' \
 	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
+
+html-local: binutils/index.html
+binutils/index.html: binutils.texi $(binutils_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/binutils.texi
 
 # Maintenance
 

@@ -82,12 +82,15 @@ proc vgdb_start { {active_at_startup 1} } {
 
     clean_restart $testfile
 
+    set_remotetimeout 4
+
     # Make sure we're disconnected, in case we're testing with the
     # native-extended-gdbserver board, where gdb_start/gdb_load spawn
     # gdbserver and connect to it.
     gdb_test "disconnect" ".*"
 
-    set vgdbcmd "target remote | vgdb --wait=1 --pid=$vgdbpid"
+    set vgdbcmd "target remote | vgdb --wait=2 --max-invoke-ms=2500 --pid=$vgdbpid"
+
     if { $active_at_startup } {
 	gdb_test "$vgdbcmd" " in \\.?_start .*" "target remote for vgdb"
     } else {

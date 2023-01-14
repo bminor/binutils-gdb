@@ -1,3 +1,6 @@
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "v850_sim.h"
@@ -194,6 +197,9 @@ sim_open (SIM_OPEN_KIND    kind,
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     return 0;
@@ -215,9 +221,9 @@ sim_open (SIM_OPEN_KIND    kind,
   /* Allocate core managed memory */
 
   /* "Mirror" the ROM addresses below 1MB. */
-  sim_do_commandf (sd, "memory region 0,0x100000,0x%lx", V850_ROM_SIZE);
+  sim_do_commandf (sd, "memory region 0,0x100000,0x%x", V850_ROM_SIZE);
   /* Chunk of ram adjacent to rom */
-  sim_do_commandf (sd, "memory region 0x100000,0x%lx", V850_LOW_END-0x100000);
+  sim_do_commandf (sd, "memory region 0x100000,0x%x", V850_LOW_END-0x100000);
   /* peripheral I/O region - mirror 1K across 4k (0x1000) */
   sim_do_command (sd, "memory region 0xfff000,0x1000,1024");
   /* similarly if in the internal RAM region */

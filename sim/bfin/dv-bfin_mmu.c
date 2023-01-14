@@ -18,7 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "sim-options.h"
@@ -277,7 +278,7 @@ enum {
   OPTION_MMU_SKIP_TABLES = OPTION_START,
 };
 
-const OPTION bfin_mmu_options[] =
+static const OPTION bfin_mmu_options[] =
 {
   { {"mmu-skip-cplbs", no_argument, NULL, OPTION_MMU_SKIP_TABLES },
       '\0', NULL, "Skip parsing of CPLB tables (big speed increase)",
@@ -300,6 +301,16 @@ bfin_mmu_option_handler (SIM_DESC sd, sim_cpu *current_cpu, int opt,
       sim_io_eprintf (sd, "Unknown Blackfin MMU option %d\n", opt);
       return SIM_RC_FAIL;
     }
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern MODULE_INIT_FN sim_install_bfin_mmu;
+
+SIM_RC
+sim_install_bfin_mmu (SIM_DESC sd)
+{
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+  return sim_add_option_table (sd, NULL, bfin_mmu_options);
 }
 
 #define MMU_STATE(cpu) DV_STATE_CACHED (cpu, mmu)

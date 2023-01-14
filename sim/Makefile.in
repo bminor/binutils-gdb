@@ -30,6 +30,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#
+# Copyright (C) 1997-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Parts of the common/ sim code that have been unified.
+# Most still lives in common/Make-common.in.
+
 # The IGEN simulator generator for GDB, the GNU Debugger.
 #
 # Copyright 2002-2021 Free Software Foundation, Inc.
@@ -81,6 +100,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -160,9 +180,13 @@ target_triplet = @target@
 check_PROGRAMS = $(am__EXEEXT_3)
 EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
 	testsuite/common/fpu-tst$(EXEEXT)
-@SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/libigen.a
-@SIM_ENABLE_IGEN_TRUE@am__append_2 = $(igen_IGEN_TOOLS)
+
+# This makes sure igen is available before building the arch-subdirs which
+# need to run the igen tool.
+@SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/igen$(EXEEXT)
+@SIM_ENABLE_IGEN_TRUE@am__append_2 = igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@am__append_3 = $(igen_IGEN_TOOLS)
+@SIM_ENABLE_IGEN_TRUE@am__append_4 = $(igen_IGEN_TOOLS)
 TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/bits32m31$(EXEEXT) \
 	testsuite/common/bits64m0$(EXEEXT) \
@@ -170,19 +194,52 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/alu-tst$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
+	$(top_srcdir)/../config/depstand.m4 \
+	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/pkg.m4 \
+	$(top_srcdir)/../config/plugins.m4 \
+	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
+	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
+	$(top_srcdir)/m4/sim_ac_option_alignment.m4 \
+	$(top_srcdir)/m4/sim_ac_option_assert.m4 \
+	$(top_srcdir)/m4/sim_ac_option_cgen_maint.m4 \
+	$(top_srcdir)/m4/sim_ac_option_debug.m4 \
+	$(top_srcdir)/m4/sim_ac_option_endian.m4 \
+	$(top_srcdir)/m4/sim_ac_option_environment.m4 \
+	$(top_srcdir)/m4/sim_ac_option_hardware.m4 \
+	$(top_srcdir)/m4/sim_ac_option_inline.m4 \
+	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
+	$(top_srcdir)/m4/sim_ac_option_reserved_bits.m4 \
+	$(top_srcdir)/m4/sim_ac_option_scache.m4 \
+	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
+	$(top_srcdir)/m4/sim_ac_option_trace.m4 \
+	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
+	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
+	$(top_srcdir)/frv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps)
+	$(am__configure_deps) $(pkginclude_HEADERS)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
-CONFIG_CLEAN_FILES =
+CONFIG_HEADER = config.h
+CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
+	arm/Makefile.sim avr/Makefile.sim bfin/Makefile.sim \
+	cr16/Makefile.sim cris/Makefile.sim d10v/Makefile.sim \
+	frv/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
+	iq2000/Makefile.sim lm32/Makefile.sim m32c/Makefile.sim \
+	m32r/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
+	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
+	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
+	sh/Makefile.sim erc32/Makefile.sim \
+	example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -190,9 +247,16 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
+common_libcommon_a_AR = $(AR) $(ARFLAGS)
+common_libcommon_a_LIBADD =
+am__dirstamp = $(am__leading_dot)dirstamp
+am_common_libcommon_a_OBJECTS =  \
+	common/common_libcommon_a-portability.$(OBJEXT) \
+	common/common_libcommon_a-sim-load.$(OBJEXT) \
+	common/common_libcommon_a-version.$(OBJEXT)
+common_libcommon_a_OBJECTS = $(am_common_libcommon_a_OBJECTS)
 igen_libigen_a_AR = $(AR) $(ARFLAGS)
 igen_libigen_a_LIBADD =
-am__dirstamp = $(am__leading_dot)dirstamp
 @SIM_ENABLE_IGEN_TRUE@am_igen_libigen_a_OBJECTS =  \
 @SIM_ENABLE_IGEN_TRUE@	igen/table.$(OBJEXT) igen/lf.$(OBJEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/misc.$(OBJEXT) \
@@ -226,6 +290,10 @@ am_igen_filter_OBJECTS =
 igen_filter_OBJECTS = $(am_igen_filter_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_filter_DEPENDENCIES = igen/filter-main.o \
 @SIM_ENABLE_IGEN_TRUE@	igen/libigen.a
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 am_igen_gen_OBJECTS =
 igen_gen_OBJECTS = $(am_igen_gen_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_gen_DEPENDENCIES = igen/gen-main.o \
@@ -293,24 +361,30 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
 am__v_CC_1 = 
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(igen_libigen_a_SOURCES) $(igen_filter_SOURCES) \
-	$(igen_gen_SOURCES) $(igen_igen_SOURCES) \
-	$(igen_ld_cache_SOURCES) $(igen_ld_decode_SOURCES) \
-	$(igen_ld_insn_SOURCES) $(igen_table_SOURCES) \
-	testsuite/common/alu-tst.c testsuite/common/bits-gen.c \
-	testsuite/common/bits32m0.c testsuite/common/bits32m31.c \
-	testsuite/common/bits64m0.c testsuite/common/bits64m63.c \
-	testsuite/common/fpu-tst.c
+SOURCES = $(common_libcommon_a_SOURCES) $(igen_libigen_a_SOURCES) \
+	$(igen_filter_SOURCES) $(igen_gen_SOURCES) \
+	$(igen_igen_SOURCES) $(igen_ld_cache_SOURCES) \
+	$(igen_ld_decode_SOURCES) $(igen_ld_insn_SOURCES) \
+	$(igen_table_SOURCES) testsuite/common/alu-tst.c \
+	testsuite/common/bits-gen.c testsuite/common/bits32m0.c \
+	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
+	testsuite/common/bits64m63.c testsuite/common/fpu-tst.c
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -324,6 +398,35 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(pkgincludedir)"
+HEADERS = $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -332,7 +435,8 @@ am__recursive_targets = \
   $(am__extra_recursive_targets)
 AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
 	cscope check recheck
-am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
+	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
 # *not* preserved.
@@ -378,33 +482,6 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -564,41 +641,65 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
+AR_FOR_BUILD = @AR_FOR_BUILD@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 CFLAGS = @CFLAGS@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
+CGEN_MAINT = @CGEN_MAINT@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 C_DIALECT = @C_DIALECT@
+DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
+DTC = @DTC@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+FGREP = @FGREP@
+GENCAT = @GENCAT@
+GMSGFMT = @GMSGFMT@
 GREP = @GREP@
+INCINTL = @INCINTL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INSTOBJEXT = @INSTOBJEXT@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
+LIPO = @LIPO@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NM = @NM@
+NMEDIT = @NMEDIT@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -607,17 +708,42 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGVERSION = @PKGVERSION@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
+RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
+READLINE_CFLAGS = @READLINE_CFLAGS@
+READLINE_LIB = @READLINE_LIB@
+REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
+REPORT_BUGS_TO = @REPORT_BUGS_TO@
+SDL_CFLAGS = @SDL_CFLAGS@
+SDL_LIBS = @SDL_LIBS@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIM_COMMON_BUILD_FALSE = @SIM_COMMON_BUILD_FALSE@
+SIM_COMMON_BUILD_TRUE = @SIM_COMMON_BUILD_TRUE@
+SIM_FRV_TRAPDUMP_FLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
+SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
+SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
+SIM_SUBDIRS = @SIM_SUBDIRS@
 STRIP = @STRIP@
+TERMCAP_LIB = @TERMCAP_LIB@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+WARN_CFLAGS = @WARN_CFLAGS@
+WERROR_CFLAGS = @WERROR_CFLAGS@
+XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -630,6 +756,8 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 builddir = @builddir@
+cgen = @cgen@
+cgendir = @cgendir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
@@ -648,6 +776,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_cv_dlopen_libs = @lt_cv_dlopen_libs@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -657,6 +786,10 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+sim_bitsize = @sim_bitsize@
+sim_float = @sim_float@
+sim_hw_cflags = @sim_hw_cflags@
+sim_hw_sockser = @sim_hw_sockser@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
@@ -668,20 +801,50 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+zlibdir = @zlibdir@
+zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
-SUBDIRS = @subdirs@
+SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
-noinst_LIBRARIES = $(am__append_1)
-CLEANFILES = testsuite/common/bits-gen testsuite/common/bits32m0.c \
+
+# NB: libcommon.a isn't used directly by ports.  We need a target for common
+# objects to be a part of, and ports use the individual objects directly.
+noinst_LIBRARIES = common/libcommon.a $(am__append_2)
+CLEANFILES = common/version.c common/version.c-stamp \
+	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = 
-MOSTLYCLEANFILES = core $(am__append_3) site-srcdir.exp testrun.log \
+MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
 	testrun.sum
+AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
+AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
+
+# Deps to add to the all-recursive target.  These are built before descending
+# into any subdirs.
+
+# This makes sure common parts are available before building the arch-subdirs
+# which will refer to these.
+SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_1)
+pkginclude_HEADERS = \
+	$(srcroot)/include/sim/callback.h \
+	$(srcroot)/include/sim/sim.h
+
+common_libcommon_a_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DSIM_COMMON_BUILD \
+	-I../bfd \
+	-I..
+
+common_libcommon_a_SOURCES = \
+	common/portability.c \
+	common/sim-load.c \
+	common/version.c
+
 @SIM_ENABLE_IGEN_TRUE@igen_libigen_a_SOURCES = \
 @SIM_ENABLE_IGEN_TRUE@	igen/table.c \
 @SIM_ENABLE_IGEN_TRUE@	igen/lf.c \
@@ -728,15 +891,17 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp
 testsuite_common_CPPFLAGS = \
 	-I$(srcdir)/common \
-	-I$(srcroot)/include
+	-I$(srcroot)/include \
+	-I../bfd
 
-all: all-recursive
+all: config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .log .o .obj .test .test$(EXEEXT) .trs
+.SUFFIXES: .c .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -758,7 +923,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
+$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -769,8 +934,94 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
 
+config.h: stamp-h1
+	@test -f $@ || rm -f stamp-h1
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
+
+stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
+	@rm -f stamp-h1
+	cd $(top_builddir) && $(SHELL) ./config.status config.h
+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
+	rm -f stamp-h1
+	touch $@
+
+distclean-hdr:
+	-rm -f config.h stamp-h1
+Make-common.sim: $(top_builddir)/config.status $(top_srcdir)/common/Make-common.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+aarch64/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/aarch64/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+arm/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/arm/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+avr/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/avr/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+bfin/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/bfin/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+cr16/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cr16/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+cris/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cris/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+d10v/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/d10v/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+frv/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/frv/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+ft32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/ft32/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+h8300/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/h8300/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+iq2000/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/iq2000/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+lm32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/lm32/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m32c/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32c/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m32r/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32r/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m68hc11/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m68hc11/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mcore/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/mcore/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+microblaze/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/microblaze/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+moxie/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/moxie/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+msp430/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/msp430/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+pru/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/pru/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+rl78/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rl78/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+rx/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rx/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+sh/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/sh/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+erc32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/erc32/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+example-synacor/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/example-synacor/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+common/$(am__dirstamp):
+	@$(MKDIR_P) common
+	@: > common/$(am__dirstamp)
+common/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) common/$(DEPDIR)
+	@: > common/$(DEPDIR)/$(am__dirstamp)
+common/common_libcommon_a-portability.$(OBJEXT):  \
+	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
+common/common_libcommon_a-sim-load.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/common_libcommon_a-version.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+
+common/libcommon.a: $(common_libcommon_a_OBJECTS) $(common_libcommon_a_DEPENDENCIES) $(EXTRA_common_libcommon_a_DEPENDENCIES) common/$(am__dirstamp)
+	$(AM_V_at)-rm -f common/libcommon.a
+	$(AM_V_AR)$(common_libcommon_a_AR) common/libcommon.a $(common_libcommon_a_OBJECTS) $(common_libcommon_a_LIBADD)
+	$(AM_V_at)$(RANLIB) common/libcommon.a
 igen/$(am__dirstamp):
 	@$(MKDIR_P) igen
 	@: > igen/$(am__dirstamp)
@@ -809,13 +1060,19 @@ igen/gen-engine.$(OBJEXT): igen/$(am__dirstamp) \
 igen/gen.$(OBJEXT): igen/$(am__dirstamp) \
 	igen/$(DEPDIR)/$(am__dirstamp)
 
-igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
-	$(AM_V_at)-rm -f igen/libigen.a
-	$(AM_V_AR)$(igen_libigen_a_AR) igen/libigen.a $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
-	$(AM_V_at)$(RANLIB) igen/libigen.a
+@SIM_ENABLE_IGEN_FALSE@igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_at)-rm -f igen/libigen.a
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_AR)$(igen_libigen_a_AR) igen/libigen.a $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_at)$(RANLIB) igen/libigen.a
 
 clean-checkPROGRAMS:
-	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
 
 igen/filter$(EXEEXT): $(igen_filter_OBJECTS) $(igen_filter_DEPENDENCIES) $(EXTRA_igen_filter_DEPENDENCIES) igen/$(am__dirstamp)
 	@rm -f igen/filter$(EXEEXT)
@@ -871,12 +1128,16 @@ testsuite/common/fpu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f common/*.$(OBJEXT)
 	-rm -f igen/*.$(OBJEXT)
 	-rm -f testsuite/common/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-portability.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-sim-load.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter_host.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/gen-engine.Po@am__quote@
@@ -917,6 +1178,88 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+common/common_libcommon_a-portability.o: common/portability.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-portability.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-portability.Tpo -c -o common/common_libcommon_a-portability.o `test -f 'common/portability.c' || echo '$(srcdir)/'`common/portability.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-portability.Tpo common/$(DEPDIR)/common_libcommon_a-portability.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/portability.c' object='common/common_libcommon_a-portability.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-portability.o `test -f 'common/portability.c' || echo '$(srcdir)/'`common/portability.c
+
+common/common_libcommon_a-portability.obj: common/portability.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-portability.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-portability.Tpo -c -o common/common_libcommon_a-portability.obj `if test -f 'common/portability.c'; then $(CYGPATH_W) 'common/portability.c'; else $(CYGPATH_W) '$(srcdir)/common/portability.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-portability.Tpo common/$(DEPDIR)/common_libcommon_a-portability.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/portability.c' object='common/common_libcommon_a-portability.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-portability.obj `if test -f 'common/portability.c'; then $(CYGPATH_W) 'common/portability.c'; else $(CYGPATH_W) '$(srcdir)/common/portability.c'; fi`
+
+common/common_libcommon_a-sim-load.o: common/sim-load.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-sim-load.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo -c -o common/common_libcommon_a-sim-load.o `test -f 'common/sim-load.c' || echo '$(srcdir)/'`common/sim-load.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo common/$(DEPDIR)/common_libcommon_a-sim-load.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/sim-load.c' object='common/common_libcommon_a-sim-load.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-sim-load.o `test -f 'common/sim-load.c' || echo '$(srcdir)/'`common/sim-load.c
+
+common/common_libcommon_a-sim-load.obj: common/sim-load.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-sim-load.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo -c -o common/common_libcommon_a-sim-load.obj `if test -f 'common/sim-load.c'; then $(CYGPATH_W) 'common/sim-load.c'; else $(CYGPATH_W) '$(srcdir)/common/sim-load.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo common/$(DEPDIR)/common_libcommon_a-sim-load.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/sim-load.c' object='common/common_libcommon_a-sim-load.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-sim-load.obj `if test -f 'common/sim-load.c'; then $(CYGPATH_W) 'common/sim-load.c'; else $(CYGPATH_W) '$(srcdir)/common/sim-load.c'; fi`
+
+common/common_libcommon_a-version.o: common/version.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-version.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-version.Tpo -c -o common/common_libcommon_a-version.o `test -f 'common/version.c' || echo '$(srcdir)/'`common/version.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-version.Tpo common/$(DEPDIR)/common_libcommon_a-version.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/version.c' object='common/common_libcommon_a-version.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-version.o `test -f 'common/version.c' || echo '$(srcdir)/'`common/version.c
+
+common/common_libcommon_a-version.obj: common/version.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-version.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-version.Tpo -c -o common/common_libcommon_a-version.obj `if test -f 'common/version.c'; then $(CYGPATH_W) 'common/version.c'; else $(CYGPATH_W) '$(srcdir)/common/version.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-version.Tpo common/$(DEPDIR)/common_libcommon_a-version.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/version.c' object='common/common_libcommon_a-version.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-version.obj `if test -f 'common/version.c'; then $(CYGPATH_W) 'common/version.c'; else $(CYGPATH_W) '$(srcdir)/common/version.c'; fi`
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+	-rm -rf igen/.libs igen/_libs
+	-rm -rf testsuite/common/.libs testsuite/common/_libs
+
+distclean-libtool:
+	-rm -f libtool config.lt
+install-pkgincludeHEADERS: $(pkginclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkgincludedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(pkgincludedir)" || exit $$?; \
+	done
+
+uninstall-pkgincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(pkgincludedir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -1250,9 +1593,12 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU check-TESTS
 check: check-recursive
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LIBRARIES) $(HEADERS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(pkgincludedir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1284,6 +1630,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f common/$(DEPDIR)/$(am__dirstamp)
+	-rm -f common/$(am__dirstamp)
 	-rm -f igen/$(DEPDIR)/$(am__dirstamp)
 	-rm -f igen/$(am__dirstamp)
 	-rm -f testsuite/common/$(DEPDIR)/$(am__dirstamp)
@@ -1295,15 +1643,16 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-checkPROGRAMS clean-generic clean-noinstLIBRARIES \
-	mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
-	distclean-generic distclean-tags
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags
 
 dvi: dvi-recursive
 
@@ -1317,7 +1666,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-pkgincludeHEADERS
 
 install-dvi: install-dvi-recursive
 
@@ -1348,13 +1697,14 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-recursive
 
@@ -1364,25 +1714,27 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-pkgincludeHEADERS
 
-.MAKE: $(am__recursive_targets) check-am install-am install-strip
+.MAKE: $(am__recursive_targets) all check-am install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-DEJAGNU check-TESTS check-am clean \
-	clean-checkPROGRAMS clean-cscope clean-generic \
+	clean-checkPROGRAMS clean-cscope clean-generic clean-libtool \
 	clean-noinstLIBRARIES cscope cscopelist-am ctags ctags-am \
 	distclean distclean-DEJAGNU distclean-compile \
-	distclean-generic distclean-tags dvi dvi-am html html-am info \
-	info-am install install-am install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-pkgincludeHEADERS \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	recheck tags tags-am uninstall uninstall-am \
+	uninstall-pkgincludeHEADERS
 
 .PRECIOUS: Makefile
 
@@ -1398,12 +1750,20 @@ nltvals:
 	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
-# This makes sure igen is available before building the arch-subdirs which
-# need to run the igen tool.
-@SIM_ENABLE_IGEN_TRUE@all-recursive: igen/igen$(EXEEXT)
+common/version.c: common/version.c-stamp ; @true
+common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/common/create-version.sh
+	$(AM_V_GEN)$(SHELL) $(srcdir)/common/create-version.sh $(srcroot)/gdb $@.tmp
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(@:-stamp=)
+	$(AM_V_at)touch $@
 
 # Alias for developers.
 @SIM_ENABLE_IGEN_TRUE@igen: igen/igen$(EXEEXT)
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_IGEN_TRUE@igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_at)-rm -f $@
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_AR)$(AR_FOR_BUILD) $(ARFLAGS) $@ $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_at)$(RANLIB_FOR_BUILD) $@
 
 @SIM_ENABLE_IGEN_TRUE@igen/igen$(EXEEXT): $(igen_igen_OBJECTS) $(igen_igen_DEPENDENCIES) igen/$(am__dirstamp)
 @SIM_ENABLE_IGEN_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(igen_igen_OBJECTS) $(igen_igen_LDADD)
@@ -1445,33 +1805,35 @@ testsuite/common/bits32m0$(EXEEXT): $(testsuite_common_bits32m0_OBJECTS) $(tests
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m0_OBJECTS) $(testsuite_common_bits32m0_LDADD)
 
 testsuite/common/bits32m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
-	$< 32 0 big > $@.tmp
-	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 32 0 big > $@.tmp
+	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 testsuite/common/bits32m31$(EXEEXT): $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_LDADD)
 
 testsuite/common/bits32m31.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
-	$< 32 31 little > $@.tmp
-	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 32 31 little > $@.tmp
+	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 testsuite/common/bits64m0$(EXEEXT): $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_LDADD)
 
 testsuite/common/bits64m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
-	$< 64 0 big > $@.tmp
-	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 64 0 big > $@.tmp
+	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 testsuite/common/bits64m63$(EXEEXT): $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_LDADD)
 
 testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
-	$< 64 63 little > $@.tmp
-	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 64 63 little > $@.tmp
+	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
+
+all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

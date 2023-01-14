@@ -294,7 +294,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       event_location_up location
 	= new_address_location (get_frame_pc (prev_frame), NULL, 0);
       create_breakpoint (python_gdbarch,
-			 location.get (), NULL, thread, NULL,
+			 location.get (), NULL, thread, NULL, false,
 			 0,
 			 1 /*temp_flag*/,
 			 bp_breakpoint,
@@ -342,7 +342,7 @@ bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
 /* Callback for `bpfinishpy_detect_out_scope'.  Triggers Python's
    `B->out_of_scope' function if B is a FinishBreakpoint out of its scope.  */
 
-static bool
+static void
 bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
 				struct breakpoint *bp_stopped)
 {
@@ -372,8 +372,6 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
 	    }
 	}
     }
-
-  return 0;
 }
 
 /* Attached to `stop' notifications, check if the execution has run
@@ -384,11 +382,8 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  iterate_over_breakpoints ([&] (breakpoint *bp)
-    {
-      return bpfinishpy_detect_out_scope_cb
-	(bp, bs == NULL ? NULL : bs->breakpoint_at);
-    });
+  for (breakpoint *bp : all_breakpoints_safe ())
+    bpfinishpy_detect_out_scope_cb (bp, bs == NULL ? NULL : bs->breakpoint_at);
 }
 
 /* Attached to `exit' notifications, triggers all the necessary out of
@@ -399,10 +394,8 @@ bpfinishpy_handle_exit (struct inferior *inf)
 {
   gdbpy_enter enter_py (target_gdbarch (), current_language);
 
-  iterate_over_breakpoints ([&] (breakpoint *bp)
-    {
-      return bpfinishpy_detect_out_scope_cb (bp, nullptr);
-    });
+  for (breakpoint *bp : all_breakpoints_safe ())
+    bpfinishpy_detect_out_scope_cb (bp, nullptr);
 }
 
 /* Initialize the Python finish breakpoint code.  */
@@ -417,8 +410,10 @@ gdbpy_initialize_finishbreakpoints (void)
 			      (PyObject *) &finish_breakpoint_object_type) < 0)
     return -1;
 
-  gdb::observers::normal_stop.attach (bpfinishpy_handle_stop);
-  gdb::observers::inferior_exit.attach (bpfinishpy_handle_exit);
+  gdb::observers::normal_stop.attach (bpfinishpy_handle_stop,
+				      "py-finishbreakpoint");
+  gdb::observers::inferior_exit.attach (bpfinishpy_handle_exit,
+					"py-finishbreakpoint");
 
   return 0;
 }

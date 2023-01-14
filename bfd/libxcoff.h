@@ -244,7 +244,10 @@ struct xcoff_dwsect_name {
   unsigned int flag;
 
   /* Corresponding XCOFF section name.  */
-  const char *name;
+  const char *xcoff_name;
+
+  /* Corresponding DWARF section name.  */
+  const char *dwarf_name;
 
   /* True if size must be prepended.  */
   bool def_size;
@@ -252,7 +255,7 @@ struct xcoff_dwsect_name {
 
 /* Number of entries in the array.  The number is known and public so that user
    can 'extend' this array by index.  */
-#define XCOFF_DWSECT_NBR_NAMES	8
+#define XCOFF_DWSECT_NBR_NAMES	11
 
 /* The dwarf sections array.  */
 extern const struct xcoff_dwsect_name

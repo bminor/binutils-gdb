@@ -17,20 +17,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/times.h>
 #include <sys/param.h>
 #include <unistd.h>
 #include "bfd.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "libiberty.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-base.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "sim-options.h"
 
@@ -1418,7 +1420,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
 		     char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
-  char ** avp;
+  char * const *avp;
   int nargs = 0;
   int nenv = 0;
   int s_length;

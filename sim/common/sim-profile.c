@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
@@ -454,7 +457,7 @@ profile_option_handler (SIM_DESC sd,
 
 /* Profiling output hooks.  */
 
-static void
+static void ATTRIBUTE_PRINTF (3, 0)
 profile_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
 {
   FILE *fp = PROFILE_FILE (CPU_PROFILE_DATA (cpu));
@@ -466,7 +469,7 @@ profile_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
     sim_io_evprintf (sd, fmt, ap);
 }
 
-__attribute__ ((format (printf, 3, 4)))
+ATTRIBUTE_PRINTF (3, 4)
 static void
 profile_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
 {
@@ -1149,7 +1152,7 @@ profile_info (SIM_DESC sd, int verbose)
 #if WITH_PROFILE_MODEL_P
 	      || PROFILE_FLAGS (data) [PROFILE_MODEL_IDX]
 #endif
-#if WITH_PROFILE_SCACHE_P && WITH_SCACHE
+#if WITH_PROFILE_SCACHE_P && WITH_SCACHE && defined(CGEN_ARCH)
 	      || PROFILE_FLAGS (data) [PROFILE_SCACHE_IDX]
 #endif
 #if WITH_PROFILE_PC_P
@@ -1187,7 +1190,7 @@ profile_info (SIM_DESC sd, int verbose)
 	profile_print_model (cpu, verbose);
 #endif
 
-#if WITH_PROFILE_SCACHE_P && WITH_SCACHE
+#if WITH_PROFILE_SCACHE_P && WITH_SCACHE && defined(CGEN_ARCH)
       if (PROFILE_FLAGS (data) [PROFILE_SCACHE_IDX])
 	scache_print_profile (cpu, verbose);
 #endif
@@ -1213,10 +1216,12 @@ profile_info (SIM_DESC sd, int verbose)
 
 }
 
-/* Install profiling support in the simulator.  */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_profile (SIM_DESC sd);
 
+/* Install profiling support in the simulator.  */
 SIM_RC
-profile_install (SIM_DESC sd)
+sim_install_profile (SIM_DESC sd)
 {
   int i;
 

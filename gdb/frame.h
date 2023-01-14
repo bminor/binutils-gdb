@@ -71,6 +71,7 @@
 
 #include "language.h"
 #include "cli/cli-option.h"
+#include "gdbsupport/common-debug.h"
 
 struct symtab_and_line;
 struct frame_unwind;
@@ -169,6 +170,9 @@ struct frame_id
      Caller of inlined function will have it zero, each more inner called frame
      will have it increasingly one, two etc.  Similarly for TAILCALL_FRAME.  */
   int artificial_depth;
+
+  /* Return a string representation of this frame id.  */
+  std::string to_string () const;
 };
 
 /* Save and restore the currently selected frame.  */
@@ -211,7 +215,17 @@ extern const struct frame_id outer_frame_id;
 
 /* Flag to control debugging.  */
 
-extern unsigned int frame_debug;
+extern bool frame_debug;
+
+/* Print a "frame" debug statement.  */
+
+#define frame_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (frame_debug, "frame", fmt, ##__VA_ARGS__)
+
+/* Print "frame" enter/exit debug statements.  */
+
+#define FRAME_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (frame_debug, "frame")
 
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
@@ -257,11 +271,6 @@ extern bool frame_id_artificial_p (frame_id l);
 
 /* Returns true when L and R identify the same frame.  */
 extern bool frame_id_eq (frame_id l, frame_id r);
-
-/* Write the internal representation of a frame ID on the specified
-   stream.  */
-extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
-
 
 /* Frame types.  Some are real, some are signal trampolines, and some
    are completely artificial (dummy).  */
@@ -384,10 +393,6 @@ extern struct frame_info *get_prev_frame_always (struct frame_info *);
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
-
-/* Given a frame's ID, find the previous frame's ID.  Returns null_frame_id
-   if the frame is not found.  */
-extern struct frame_id get_prev_frame_id_by_id (struct frame_id id);
 
 /* Base attributes of a frame: */
 

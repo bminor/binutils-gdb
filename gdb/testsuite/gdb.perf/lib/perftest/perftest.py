@@ -18,7 +18,8 @@ from __future__ import absolute_import
 import perftest.testresult as testresult
 import perftest.reporter as reporter
 from perftest.measure import Measure
-from perftest.measure import MeasurementCpuTime
+from perftest.measure import MeasurementPerfCounter
+from perftest.measure import MeasurementProcessTime
 from perftest.measure import MeasurementWallTime
 from perftest.measure import MeasurementVmSize
 
@@ -65,12 +66,16 @@ class TestCase(object):
         self.execute_test()
         self.measure.report(reporter.TextReporter(append), self.name)
 
+
 class TestCaseWithBasicMeasurements(TestCase):
     """Test case measuring CPU time, wall time and memory usage."""
 
     def __init__(self, name):
         result_factory = testresult.SingleStatisticResultFactory()
-        measurements = [MeasurementCpuTime(result_factory.create_result()),
-                        MeasurementWallTime(result_factory.create_result()),
-                        MeasurementVmSize(result_factory.create_result())]
-        super (TestCaseWithBasicMeasurements, self).__init__ (name, Measure(measurements))
+        measurements = [
+            MeasurementPerfCounter(result_factory.create_result()),
+            MeasurementProcessTime(result_factory.create_result()),
+            MeasurementWallTime(result_factory.create_result()),
+            MeasurementVmSize(result_factory.create_result()),
+        ]
+        super(TestCaseWithBasicMeasurements, self).__init__(name, Measure(measurements))

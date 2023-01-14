@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "ansidecl.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "opcode/mn10300.h"
 #include <limits.h>
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 #include "bfd.h"
 #include "sim-fpu.h"
+#include "sim-signal.h"
 
 extern SIM_DESC simulator;
 
@@ -158,7 +159,7 @@ sim_core_read_unaligned_4 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
 u642dw (sim_core_read_unaligned_8 (STATE_CPU (simulator, 0), \
 				   PC, read_map, (ADDR)))
 
-static INLINE dword
+static INLINE2 dword
 u642dw (unsigned64 dw)
 {
   dword r;
@@ -185,7 +186,7 @@ sim_core_write_unaligned_4 (STATE_CPU (simulator, 0), \
 sim_core_write_unaligned_8 (STATE_CPU (simulator, 0), \
 			    PC, write_map, (ADDR), dw2u64 (DATA))
 
-static INLINE unsigned64
+static INLINE2 unsigned64
 dw2u64 (dword data)
 {
   return data.low | (((unsigned64)data.high) << 32);

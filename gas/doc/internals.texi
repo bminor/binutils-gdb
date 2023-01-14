@@ -1106,7 +1106,8 @@ You may define this macro to generate a fixup for a data allocation pseudo-op.
 @item TC_ADDRESS_BYTES
 @cindex TC_ADDRESS_BYTES
 Define this macro to specify the number of bytes used to store an address.
-Used to implement @code{dc.a}.  The target must have a reloc for this size.
+Used to implement @code{dc.a}.  If not defined by the target, a default will
+be supplied.  Targets are assumed to have a reloc for this size.
 
 @item TC_INIT_FIX_DATA (@var{fixp})
 @cindex TC_INIT_FIX_DATA
@@ -1916,13 +1917,6 @@ used when problems are detected when reprocessing information saved away when
 processing some earlier part of the file.  For example, fixups are processed
 after all input has been read, but messages about fixups should refer to the
 original filename and line number that they are applicable to.
-@end deftypefun
-
-@deftypefun @{@} void sprint_value (char *@var{buf}, valueT @var{val})
-This function is helpful for converting a @code{valueT} value into printable
-format, in case it's wider than modes that @code{*printf} can handle.  If the
-type is narrow enough, a decimal number will be produced; otherwise, it will be
-in hexadecimal.  The value itself is not examined to make this determination.
 @end deftypefun
 
 @node Test suite

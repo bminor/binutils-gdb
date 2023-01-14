@@ -73,6 +73,120 @@ run_ld_link_tests [list \
     ] \
 ]
 
+run_cc_link_tests [list \
+    [list \
+	"Build indirect-extern-access-1.so" \
+	"-shared" \
+	"-fPIC" \
+	{ indirect-extern-access-1a.c } \
+	{} \
+	"indirect-extern-access-1.so" \
+    ] \
+    [list \
+	"Build indirect-extern-access-1a without PIE" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	 tmpdir/indirect-extern-access-1.so" \
+	"$NOPIE_CFLAGS" \
+	{ indirect-extern-access.S indirect-extern-access-1b.c } \
+	{{readelf -rn indirect-extern-access-1.rd}} \
+	"indirect-extern-access-1a" \
+    ] \
+    [list \
+	"Build indirect-extern-access-2.so" \
+	"-shared" \
+	"-fPIC" \
+	{ indirect-extern-access-2a.c } \
+	{} \
+	"indirect-extern-access-2.so" \
+    ] \
+    [list \
+	"Build indirect-extern-access-2a without PIE" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	 tmpdir/indirect-extern-access-2.so" \
+	"$NOPIE_CFLAGS" \
+	{ indirect-extern-access.S indirect-extern-access-1b.c } \
+	{{readelf -rn indirect-extern-access-2.rd}} \
+	"indirect-extern-access-2a" \
+    ] \
+    [list \
+	"Build indirect-extern-access-2b with PIE" \
+	"-pie -Wl,--no-as-needed  \
+	 tmpdir/indirect-extern-access-2.so" \
+	"-fpie" \
+	{ indirect-extern-access.S indirect-extern-access-2b.c } \
+	{{readelf -rn indirect-extern-access-3.rd}} \
+	"indirect-extern-access-2b" \
+    ] \
+    [list \
+	"Build pr28158.so" \
+	"-shared -Wl,-version-script,pr27128.t" \
+	"-fPIC" \
+	{ pr28158-1.c } \
+	{} \
+	"pr28158.so" \
+    ] \
+    [list \
+	"Build pr28158" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	 tmpdir/pr28158.so" \
+	"" \
+	{ pr28158-2.S } \
+	{{readelf {--dyn-syms -W} pr28158.rd} {nm -D pr28158.nd}} \
+	"pr28158" \
+    ] \
+]
+
+run_ld_link_exec_tests [list \
+    [list \
+	"Run indirect-extern-access-1a without PIE" \
+	"$NOPIE_LDFLAGS" \
+	"" \
+	{ indirect-extern-access.S indirect-extern-access-1b.c } \
+	"indirect-extern-access-1a" \
+	"pass.out" \
+	"$NOPIE_CFLAGS" \
+	"" \
+	"" \
+	"tmpdir/indirect-extern-access-1.so" \
+    ] \
+    [list \
+	"Run indirect-extern-access-1b with PIE" \
+	"-pie" \
+	"" \
+	{ indirect-extern-access.S indirect-extern-access-1b.c } \
+	"indirect-extern-access-1b" \
+	"pass.out" \
+	"-fpie" \
+	"" \
+	"" \
+	"tmpdir/indirect-extern-access-1.so" \
+    ] \
+    [list \
+	"Run indirect-extern-access-2a without PIE" \
+	"$NOPIE_LDFLAGS" \
+	"" \
+	{ indirect-extern-access.S indirect-extern-access-2b.c } \
+	"indirect-extern-access-2a" \
+	"pass.out" \
+	"$NOPIE_CFLAGS" \
+	"" \
+	"" \
+	"tmpdir/indirect-extern-access-2.so" \
+    ] \
+    [list \
+	"Run indirect-extern-access-2b with PIE" \
+	"-pie" \
+	"" \
+	{ indirect-extern-access.S indirect-extern-access-2b.c } \
+	"indirect-extern-access-2b" \
+	"pass.out" \
+	"-fpie" \
+	"" \
+	"" \
+	"tmpdir/indirect-extern-access-2.so" \
+    ] \
+]
+
 proc elfedit_test { options test output } {
     global ELFEDIT
     global READELF

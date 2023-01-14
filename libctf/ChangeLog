@@ -1,3 +1,37 @@
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-05-09  Alan Modra  <amodra@gmail.com>
+
+	* ctf-impl.h (ctf_dynset_eq_string): Don't declare.
+	* ctf-hash.c (ctf_dynset_eq_string): Delete function.
+	* ctf-dedup.c (make_set_element): Use htab_eq_string.
+	(ctf_dedup_atoms_init, ADD_CITER, ctf_dedup_init): Likewise.
+	(ctf_dedup_conflictify_unshared): Likewise.
+	(ctf_dedup_walk_output_mapping): Likewise.
+
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/lib/ctf-lib.exp: Use -gctf, not -gt.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-r.lk:
+	Hidden symbols now get into the symtypetab anyway.
+
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open.c (init_types): Unknown types may have names.
+	* ctf-types.c (ctf_type_resolve): CTF_K_UNKNOWN is as
+	non-representable as type ID 0.
+	(ctf_type_aname): Print unknown types.
+	* ctf-dedup.c (ctf_dedup_hash_type): Do not early-exit for
+	CTF_K_UNKNOWN types: they have real hash values now.
+	(ctf_dedup_rwalk_one_output_mapping): Treat CTF_K_UNKNOWN types
+	like other types with no referents: call the callback and do not
+	skip them.
+	(ctf_dedup_emit_type): Emit via...
+	* ctf-create.c (ctf_add_unknown): ... this new function.
+	* libctf.ver (LIBCTF_1.2): Add it.
+
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac: Check for dlsym, not dlopen.

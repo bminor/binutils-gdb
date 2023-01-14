@@ -45,13 +45,13 @@ typedef int nat_timer_t;
 /* For native 64-bit, clock_t in _sigchld is 64-bit.  */
 typedef long nat_clock_t;
 
-typedef union nat_sigval
+union nat_sigval_t
 {
   nat_int_t sival_int;
   nat_uptr_t sival_ptr;
-} nat_sigval_t;
+};
 
-typedef struct nat_siginfo
+struct nat_siginfo_t
 {
   int si_signo;
   int si_errno;
@@ -112,7 +112,7 @@ typedef struct nat_siginfo
       int _fd;
     } _sigpoll;
   } _sifields;
-} nat_siginfo_t;
+};
 
 #endif /* __ILP32__ */
 
@@ -133,13 +133,13 @@ struct compat_timeval
   int tv_usec;
 };
 
-typedef union compat_sigval
+union compat_sigval_t
 {
   compat_int_t sival_int;
   compat_uptr_t sival_ptr;
-} compat_sigval_t;
+};
 
-typedef struct compat_siginfo
+struct compat_siginfo_t
 {
   int si_signo;
   int si_errno;
@@ -201,12 +201,12 @@ typedef struct compat_siginfo
       int _fd;
     } _sigpoll;
   } _sifields;
-} compat_siginfo_t;
+};
 
 /* For x32, clock_t in _sigchld is 64bit aligned at 4 bytes.  */
 typedef long __attribute__ ((__aligned__ (4))) compat_x32_clock_t;
 
-typedef struct compat_x32_siginfo
+struct __attribute__ ((__aligned__ (8))) compat_x32_siginfo_t
 {
   int si_signo;
   int si_errno;
@@ -263,7 +263,7 @@ typedef struct compat_x32_siginfo
       int _fd;
     } _sigpoll;
   } _sifields;
-} compat_x32_siginfo_t __attribute__ ((__aligned__ (8)));
+};
 
 /* To simplify usage of siginfo fields.  */
 
@@ -578,20 +578,20 @@ amd64_linux_siginfo_fixup_common (siginfo_t *ptrace, gdb_byte *inf,
   if (mode == FIXUP_32)
     {
       if (direction == 0)
-	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, ptrace);
+	compat_siginfo_from_siginfo ((compat_siginfo_t *) inf, ptrace);
       else
-	siginfo_from_compat_siginfo (ptrace, (struct compat_siginfo *) inf);
+	siginfo_from_compat_siginfo (ptrace, (compat_siginfo_t *) inf);
 
       return 1;
     }
   else if (mode == FIXUP_X32)
     {
       if (direction == 0)
-	compat_x32_siginfo_from_siginfo ((struct compat_x32_siginfo *) inf,
+	compat_x32_siginfo_from_siginfo ((compat_x32_siginfo_t *) inf,
 					 ptrace);
       else
 	siginfo_from_compat_x32_siginfo (ptrace,
-					 (struct compat_x32_siginfo *) inf);
+					 (compat_x32_siginfo_t *) inf);
 
       return 1;
     }

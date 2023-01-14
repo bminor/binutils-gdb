@@ -1,3 +1,162 @@
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c (open): Rename to ...
+	(is_open): ... this.
+	(sim_open, sim_close): Rename open to is_open.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.c, gdb-if.c, load.c, main.c, mem.c, rl78.c, trace.c: Replace
+	config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Update path.
+	* gdb-if.c: Update include path.
+	* load.h: Likewise.
+
+2021-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Include libiberty.h.
+	(sim_do_command): Rewrite to use buildargv.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.c (trace_register_init): Add missing (void).
+	* gdb-if.c (rl78_signal_to_target, handle_step): Mark static.
+	(sim_do_command): Delete redundant for loop.
+	* mem.c (mirror_rom_base, mirror_ram_base, mirror_length): Mark static.
+	* mem.h (mem_set_mirror): New prototype.
+	* rl78.c (op_flags): Move psw decl to top of scope.
+	* trace.c: Include trace.h.
+	(load_file_and_line): Move file decl to top of scope.  Declare ret.
+	assign fread to ret and use to index f->data.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* load.c (rl78_load): Use BFD_VMA_FMT and drop casts.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (err.o, fpu.o, gdb-if.o, load.o, main.o, mem.o)
+	(reg.o, rl78.o): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_CHECK_HEADERS_ONCE.
+	* main.c: Delete HAVE_GETOPT_H.
+	* config.in, configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.

@@ -2720,8 +2720,11 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   PF (IMAGE_FILE_BYTES_REVERSED_LO, "little endian");
   PF (IMAGE_FILE_32BIT_MACHINE, "32 bit words");
   PF (IMAGE_FILE_DEBUG_STRIPPED, "debugging information removed");
+  PF (IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP, "copy to swap file if on removable media");
+  PF (IMAGE_FILE_NET_RUN_FROM_SWAP, "copy to swap file if on network media");
   PF (IMAGE_FILE_SYSTEM, "system file");
   PF (IMAGE_FILE_DLL, "DLL");
+  PF (IMAGE_FILE_UP_SYSTEM_ONLY, "run only on uniprocessor machine");
   PF (IMAGE_FILE_BYTES_REVERSED_HI, "big endian");
 #undef PF
 
@@ -2848,6 +2851,34 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   if (subsystem_name)
     fprintf (file, "\t(%s)", subsystem_name);
   fprintf (file, "\nDllCharacteristics\t%08x\n", i->DllCharacteristics);
+  if (i->DllCharacteristics)
+    {
+      unsigned short dllch = i->DllCharacteristics;
+      const char *indent = "\t\t\t\t\t";
+
+      if (dllch & IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA)
+	fprintf (file, "%sHIGH_ENTROPY_VA\n", indent);
+      if (dllch & IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE)
+	fprintf (file, "%sDYNAMIC_BASE\n", indent);
+      if (dllch & IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY)
+	fprintf (file, "%sFORCE_INTEGRITY\n", indent);
+      if (dllch & IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
+	fprintf (file, "%sNX_COMPAT\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_NO_ISOLATION)
+	fprintf (file, "%sNO_ISOLATION\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_NO_SEH)
+	fprintf (file, "%sNO_SEH\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_NO_BIND)
+	fprintf (file, "%sNO_BIND\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_APPCONTAINER)
+	fprintf (file, "%sAPPCONTAINER\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_WDM_DRIVER)
+	fprintf (file, "%sWDM_DRIVER\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_GUARD_CF)
+	fprintf (file, "%sGUARD_CF\n", indent);
+      if (dllch & IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE)
+	fprintf (file, "%sTERMINAL_SERVICE_AWARE\n", indent);
+    }
   fprintf (file, "SizeOfStackReserve\t");
   bfd_fprintf_vma (abfd, file, i->SizeOfStackReserve);
   fprintf (file, "\nSizeOfStackCommit\t");

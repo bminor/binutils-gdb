@@ -20,6 +20,8 @@
     
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "hw-main.h"
@@ -340,7 +342,7 @@ m68hc11sio_tx_poll (struct hw *me, void *data)
           break;
 
         case sio_stdio:
-          sim_io_write_stdout (sd, &controller->tx_char, 1);
+          sim_io_write_stdout (sd, (const char *)&controller->tx_char, 1);
           sim_io_flush_stdout (sd);
           break;
 

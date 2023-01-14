@@ -77,7 +77,7 @@ proc test_command_line_new_ui_pending_input {} {
     with_spawn_id $extra_spawn_id {
 	set test "initial prompt on extra console"
 	gdb_test_multiple "" $test {
-	    -re "$gdb_prompt $" {
+	    -re "\r\nprint 3\r\n$gdb_prompt " {
 		pass $test
 	    }
 	}

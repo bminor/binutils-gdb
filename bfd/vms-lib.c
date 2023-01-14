@@ -357,7 +357,7 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs,
 		    return false;
 		  kbn = (struct vms_kbn *)(kblk + koff);
 		  klen = bfd_getl16 (kbn->keylen);
-		  if (klen > sizeof (kblk) - koff)
+		  if (klen > sizeof (kblk) - sizeof (struct vms_kbn) - koff)
 		    return false;
 		  kvbn = bfd_getl32 (kbn->rfa.vbn);
 		  koff = bfd_getl16 (kbn->rfa.offset);

@@ -1,3 +1,255 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_DEFAULT_MODEL call.
+	* interp.c (sim_open): Set STATE_MODEL_NAME.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Set STATE_MACHS.
+	* machs.c (sim_machs): Rename to ...
+	(bfin_sim_machs): ... this.
+	* machs.h (bfin_sim_machs): New decl.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* machs.c (sim_machs): Mark const.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Change to $(SDL_CFLAGS) & $(SDL_LIBS).
+	* configure.ac: Delete PKG_PROG_PKG_CONFIG &
+	PKG_CHECK_MODULES calls.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (bfin_syscall): Set sc.arg5 & sc.arg6.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Change @MAINTAINER_MODE_TRUE@ to $(MAINT).
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_cec.c: Include sim-signal.h.
+	* sim-main.h: Delete sim-signal.h include.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* interp.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include portability.h.
+	(getuid, getgid, geteuid, getegid setuid, setgid): Delete.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+	* interp.c (sim_open): Set current_alignment.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete calls to AC_CHECK_FUNCS_ONCE and
+	AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
+2021-05-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_otp.c (bfin_otp_write_page): Shift data1 & data3 by 32-bits.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_otp.c (bfin_otp_write_page): Fix args to
+	bfin_otp_write_page_val2.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_otp.c (bfin_otp_write_page): Call bfin_otp_write_page_val2.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_cec.c: Include strings.h.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Call sim_state_alloc_extra.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+	(STATE_BOARD_DATA): Define.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c, devices.c, dv-bfin_cec.c, dv-bfin_ctimer.c,
+	dv-bfin_dma.c, dv-bfin_dmac.c, dv-bfin_ebiu_amc.c,
+	dv-bfin_ebiu_ddrc.c, dv-bfin_ebiu_sdc.c, dv-bfin_emac.c,
+	dv-bfin_eppi.c, dv-bfin_evt.c, dv-bfin_gpio.c, dv-bfin_gpio2.c,
+	dv-bfin_gptimer.c, dv-bfin_jtag.c, dv-bfin_mmu.c, dv-bfin_nfc.c,
+	dv-bfin_otp.c, dv-bfin_pfmon.c, dv-bfin_pint.c, dv-bfin_pll.c,
+	dv-bfin_ppi.c, dv-bfin_rtc.c, dv-bfin_sic.c, dv-bfin_spi.c,
+	dv-bfin_trace.c, dv-bfin_twi.c, dv-bfin_uart.c, dv-bfin_uart2.c,
+	dv-bfin_wdog.c, dv-bfin_wp.c, dv-eth_phy.c, gui.c, interp.c,
+	machs.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Update include path.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* interp.c (sim_open): Adjust format string specifier.
+
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c: Include ansidecl.h.
+	(illegal_instruction): Change __attribute__((noreturn)) to
+	ATTRIBUTE_NORETURN.
+	(illegal_instruction_combination, illegal_instruction_or_combination,
+	unhandled_instruction): Likewise.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_mmu.c (bfin_mmu_options): Mark static.
+	(sim_install_bfin_mmu): New function & prototype.
+	* interp.c (e_sim_add_option_table): Delete.
+	* machs.c (bfin_mach_options): Mark static.
+	(sim_install_bfin_mach): New function & prototype.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (INCLUDE): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_FUNCS to AC_CHECK_FUNCS_ONCE and
+	delete mmap & munmap.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (bfin_syscall): Delete CB_SYS_getpid handling.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.

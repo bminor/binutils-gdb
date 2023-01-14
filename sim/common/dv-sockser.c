@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FIXME: will obviously need to evolve.
    - connectionless sockets might be more appropriate.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 
 #include <string.h>
@@ -37,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 
 #ifndef __CYGWIN32__
@@ -222,8 +225,11 @@ dv_sockser_uninstall (SIM_DESC sd)
     }
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern MODULE_INIT_FN sim_install_dv_sockser;
+
 SIM_RC
-dv_sockser_install (SIM_DESC sd)
+sim_install_dv_sockser (SIM_DESC sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (sim_add_option_table (sd, NULL, sockser_options) != SIM_RC_OK)

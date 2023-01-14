@@ -29,9 +29,8 @@ main (int argc, char *argv[])
 }
 #else
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -47,13 +46,7 @@ main (int argc, char *argv[])
 #include <sys/types.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
 
 #include <errno.h>
 
@@ -61,6 +54,7 @@ main (int argc, char *argv[])
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 
 enum rv_command {

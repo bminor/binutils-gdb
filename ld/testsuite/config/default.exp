@@ -286,6 +286,10 @@ if ![info exists OBJCOPYFLAGS] then {
     set OBJCOPYFLAGS {}
 }
 
+if ![info exists RANLIB] then {
+    set RANLIB [findfile $base_dir/../binutils/ranlib]
+}
+
 if ![info exists READELF] then {
     set READELF [findfile $base_dir/../binutils/readelf]
 }

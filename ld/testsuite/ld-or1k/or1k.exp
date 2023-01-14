@@ -53,6 +53,14 @@ set or1kplttests {
      "" {plt1.s}
      {{objdump -dr plt1.x.dd}}
      "plt1.x"}
+    {"gotha exec plt" "tmpdir/libpltlib.so" ""
+     "" {gotha1.s}
+     {{objdump -dr gotha1.dd}}
+     "gotha1.x"}
+    {"gotha -fpic -shared" "-fpic -shared" ""
+     "" {gotha2.s}
+     {{objdump -dr gotha2.dd}}
+     "gotha2.x"}
 }
 
 # Not implemented yet

@@ -26,7 +26,9 @@
      4. Clear host exception bits.
  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sis.h"
 #include <fenv.h>
 

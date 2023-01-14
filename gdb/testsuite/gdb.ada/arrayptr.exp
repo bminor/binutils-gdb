@@ -49,10 +49,38 @@ foreach_with_prefix scenario {all minimal} {
 
     gdb_test "ptype string_access" "= access array \\(<>\\) of character"
 
-    gdb_test "print pa_ptr.all" \
-	" = \\(10, 20, 30, 40, 50, 60, 62, 63, -23, 42\\)"
+    set kfail_int128support_re \
+	"That operation is not available on integers of more than 8 bytes\\."
+    set kfail_packed_array_range_re \
+	"cannot subscript or call something of type `foo__packed_array_ptr'"
 
-    gdb_test "print pa_ptr(3)" " = 30"
+    gdb_test_multiple "print pa_ptr.all" "" {
+	-re -wrap " = \\(10, 20, 30, 40, 50, 60, 62, 63, -23, 42\\)" {
+	    pass $gdb_test_name
+	}
+	-re -wrap $kfail_int128support_re {
+	    kfail gdb/20991 $gdb_test_name
+	}
+    }
 
-    gdb_test "print pa_ptr.all(3)" " = 30"
+    gdb_test_multiple "print pa_ptr(3)" "" {
+	-re -wrap " = 30" {
+	    pass $gdb_test_name
+	}
+	-re -wrap $kfail_int128support_re {
+	    kfail gdb/20991 $gdb_test_name
+	}
+	-re -wrap $kfail_packed_array_range_re {
+	    kfail gdb/28115 $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple "print pa_ptr.all(3)" "" {
+	-re -wrap " = 30" {
+	    pass $gdb_test_name
+	}
+	-re -wrap $kfail_int128support_re {
+	    kfail gdb/20991 $gdb_test_name
+	}
+    }
 }

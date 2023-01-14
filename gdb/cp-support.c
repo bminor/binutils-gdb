@@ -2209,13 +2209,12 @@ void _initialize_cp_support ();
 void
 _initialize_cp_support ()
 {
-  add_basic_prefix_cmd ("cplus", class_maintenance,
-			_("C++ maintenance commands."),
-			&maint_cplus_cmd_list,
-			"maintenance cplus ",
-			0, &maintenancelist);
-  add_alias_cmd ("cp", "cplus",
-		 class_maintenance, 1,
+  cmd_list_element *maintenance_cplus
+    = add_basic_prefix_cmd ("cplus", class_maintenance,
+			    _("C++ maintenance commands."),
+			    &maint_cplus_cmd_list,
+			    0, &maintenancelist);
+  add_alias_cmd ("cp", maintenance_cplus, class_maintenance, 1,
 		 &maintenancelist);
 
   add_cmd ("first_component",

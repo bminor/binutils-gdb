@@ -18,11 +18,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-TERMCAP_LIB = @TERMCAP@
-
 READLINE_SRC = $(srcroot)/readline/readline
-READLINE_LIB = @READLINE@
-READLINE_CFLAGS = @READLINE_CFLAGS@
 
 SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
 SIM_RUN_OBJS = sis.o
@@ -36,15 +32,18 @@ SIM_EXTRA_CLEAN = clean-sis
 # behaviour of UART interrupt routines ...
 SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
 
 # `sis' doesn't need interf.o.
 SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
-all: sis
-sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) -o sis \
-	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
+all: sis$(EXEEXT)
+sis$(EXEEXT): sis.o $(SIS_OFILES) libsim.a $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
+	  sis.o $(SIS_OFILES) libsim.a $(EXTRA_LIBS)
 
 # Copy the files into directories where they will be run.
 install-sis: installdirs

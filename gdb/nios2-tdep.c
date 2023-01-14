@@ -249,15 +249,15 @@ nios2_setup_default (struct nios2_unwind_cache *cache)
   int i;
 
   for (i = 0; i < NIOS2_NUM_REGS; i++)
-  {
-    /* All registers start off holding their previous values.  */
-    cache->reg_value[i].reg    = i;
-    cache->reg_value[i].offset = 0;
+    {
+      /* All registers start off holding their previous values.  */
+      cache->reg_value[i].reg    = i;
+      cache->reg_value[i].offset = 0;
 
-    /* All registers start off not saved.  */
-    cache->reg_saved[i].basereg = -1;
-    cache->reg_saved[i].addr    = 0;
-  }
+      /* All registers start off not saved.  */
+      cache->reg_saved[i].basereg = -1;
+      cache->reg_saved[i].addr    = 0;
+    }
 }
 
 /* Initialize the unwind cache.  */
@@ -1244,16 +1244,16 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
       enum branch_condition cond;
 
       if (pc == current_pc)
-      {
-	/* When we reach the current PC we must save the current
-	   register state (for the backtrace) but keep analysing
-	   because there might be more to find out (eg. is this an
-	   exception handler).  */
-	memcpy (temp_value, value, sizeof (temp_value));
-	value = temp_value;
-	if (nios2_debug)
-	  fprintf_unfiltered (gdb_stdlog, "*");
-      }
+	{
+	  /* When we reach the current PC we must save the current
+	     register state (for the backtrace) but keep analysing
+	     because there might be more to find out (eg. is this an
+	     exception handler).  */
+	  memcpy (temp_value, value, sizeof (temp_value));
+	  value = temp_value;
+	  if (nios2_debug)
+	    fprintf_unfiltered (gdb_stdlog, "*");
+	}
 
       op = nios2_fetch_insn (gdbarch, pc, &insn);
 
@@ -1375,7 +1375,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  /* ORHI  rb, ra, uimm   (also used for MOVHI) */
 	  if (rb != 0)
 	    {
-  	      value[rb].reg    = (value[ra].reg == 0) ? 0 : -1;
+	      value[rb].reg    = (value[ra].reg == 0) ? 0 : -1;
 	      value[rb].offset = value[ra].offset | (uimm << 16);
 	    }
 	}
@@ -1979,6 +1979,7 @@ nios2_frame_base_address (struct frame_info *this_frame, void **this_cache)
 
 static const struct frame_unwind nios2_frame_unwind =
 {
+  "nios2 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   nios2_frame_this_id,
@@ -2079,6 +2080,7 @@ nios2_stub_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind nios2_stub_frame_unwind =
 {
+  "nios2 stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   nios2_stub_frame_this_id,

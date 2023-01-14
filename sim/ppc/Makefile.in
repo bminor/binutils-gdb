@@ -25,12 +25,12 @@ srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
 srcsim = $(srcdir)/..
 
+# Settings from top-level configure.
+include ../arch-subdir.mk
+
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-host_alias = @host_alias@
-target_alias = @target_alias@
-program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
@@ -53,62 +53,41 @@ includedir = @includedir@
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
 
-EXEEXT = @EXEEXT@
 SHELL = /bin/sh
 
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-
-AR = @AR@
-AR_FLAGS = rc
-CC = @CC@
-CFLAGS = @CFLAGS@
-CC_FOR_BUILD = @CC_FOR_BUILD@
-CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 BISON = bison
 MAKEINFO = makeinfo
-RANLIB = @RANLIB@
 
-INLINE_CFLAGS = @sim_inline@
-ENDIAN_CFLAGS = @sim_endian@
-HOSTENDIAN_CFLAGS = @sim_hostendian@
+INLINE_CFLAGS = $(SIM_INLINE)
 SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
 HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
 TIMEBASE_CFLAGS = @sim_timebase@
-ALIGNMENT_CFLAGS = @sim_alignment@
 FLOAT_CFLAGS = @sim_float@
-RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
 TERMIO_CFLAGS = @sim_termio@
 WARNING_CFLAGS = @sim_warnings@
 DEVZERO_CFLAGS = @sim_devzero@
 CONFIG_CFLAGS = \
-  $(ENDIAN_CFLAGS) \
-  $(HOSTENDIAN_CFLAGS) \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \
   $(HOSTBITSIZE_CFLAGS) \
   $(TIMEBASE_CFLAGS) \
-  $(ALIGNMENT_CFLAGS) \
   $(FLOAT_CFLAGS) \
-  $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \
   $(MODEL_CFLAGS) \
   $(TERMIO_CFLAGS) \
   $(DEVZERO_CFLAGS)
 SIM_FPU_CFLAGS = @sim_fpu_cflags@
 
-STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(INCLUDES) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
+STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(INCLUDES) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARNING_CFLAGS)
 
-LDFLAGS_FOR_BUILD	=
-LIBS = @LIBS@
+LIBS = $(COMMON_LIBS) @LIBS@
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
@@ -146,20 +125,16 @@ LIB_INCLUDES	= -I$(srcdir)/../../include
 BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
 
-INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
+INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES) -I../..
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
-ZLIB		= @zlibdir@ -lz
-
-LIBINTL = @LIBINTL@
-LIBINTL_DEP = @LIBINTL_DEP@
-INTL_CFLAGS = @INCINTL@
+ZLIB		= $(zlibdir) -lz
 
 
 TARGETLIB	= libsim.a
 
-all:	run $(TARGETLIB) $(GDB_OBJ)
+all:	run$(EXEEXT) $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
 	$(CC) -c $(STD_CFLAGS) $<
@@ -168,8 +143,8 @@ all:	run $(TARGETLIB) $(GDB_OBJ)
 # Headers outside sim/ppc.
 ANSIDECL_H = $(srcroot)/include/ansidecl.h
 BFD_H = ../../bfd/bfd.h
-GDB_CALLBACK_H = $(srcroot)/include/gdb/callback.h
-GDB_REMOTE_SIM_H = $(srcroot)/include/gdb/remote-sim.h
+GDB_CALLBACK_H = $(srcroot)/include/sim/callback.h
+GDB_REMOTE_SIM_H = $(srcroot)/include/sim/sim.h
 GDB_SIM_PPC_H = $(srcroot)/include/gdb/sim-ppc.h
 COMMON_SIM_BASE_H = $(srcroot)/sim/common/sim-base.h
 COMMON_SIM_BASICS_H = $(srcroot)/sim/common/sim-basics.h
@@ -494,6 +469,9 @@ MAIN_SRC = \
 	gdb-sim.c \
 	sim_calls.c
 
+COMMON_OBJS_NAMES = \
+	version.o
+COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
 # NOTE: semantics, idecode and psim put last so smaller files are compiled
 #       first
@@ -528,7 +506,7 @@ LIB_OBJ = \
 	support.o \
 	@sim_fpu@ \
 	psim.o \
-	version.o \
+	$(COMMON_OBJS) \
 	$(PACKAGE_OBJ) \
 	$(HW_OBJ) \
 	options.o
@@ -543,10 +521,10 @@ PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
 
 
-psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
+psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
-run: psim
+run$(EXEEXT): psim$(EXEEXT)
 	rm -f run$(EXEEXT)
 	ln psim$(EXEEXT) run$(EXEEXT)
 
@@ -554,12 +532,6 @@ $(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
-
-version.c: Makefile $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcroot)/sim/common/create-version.sh
-	$(SHELL) $(srcroot)/sim/common/create-version.sh $(srcroot)/gdb $@.tmp
-	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
-	touch $@
-version.o: version.c $(version_h)
 
 psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 
@@ -628,22 +600,26 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 # As a kludge, build the common stuff here for now.
 gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
 	$(LINK_FOR_BUILD) -I. -I../common -I$(srcdir)/../common \
-		$(srcdir)/../common/gentmap.c
+		$(srcdir)/../common/gentmap.c -DUSE_CONFIG_H
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def
 	cat $(srcdir)/../common/nltvals.def > tmp-vals.def
 	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.def targ-vals.def
 
-targ-vals.h: Makefile gentmap $(srcdir)/../../move-if-change
+targ-vals.h: stamp-vals ; @true
+stamp-vals: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-vals.h
 	./gentmap -h > tmp-vals.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.h targ-vals.h
+	@echo stamp > stamp-vals
 
-targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
+targ-map.c: stamp-map; @true
+stamp-map: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-map.c
 	./gentmap -c > tmp-map.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-map.c targ-map.c
+	@echo stamp > stamp-map
 
 callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
@@ -871,6 +847,7 @@ TAGS: $(BUILT_SRC)
 
 clean mostlyclean:
 	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG) gentmap
+	rm -f stamp-vals targ-vals.h stamp-map targ-map.c
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
@@ -889,6 +866,18 @@ config.status: configure
 	$(SHELL) ./config.status --recheck
 
 check:
+
+html:
+clean-html:
+install-html:
+
+info:
+clean-info:
+install-info:
+
+pdf:
+clean-pdf:
+install-pdf:
 
 install: installdirs
 	a=`basename "$$(pwd)"`; \

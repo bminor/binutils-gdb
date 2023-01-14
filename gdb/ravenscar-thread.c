@@ -714,15 +714,16 @@ _initialize_ravenscar ()
 {
   /* Notice when the inferior is created in order to push the
      ravenscar ops if needed.  */
-  gdb::observers::inferior_created.attach (ravenscar_inferior_created);
+  gdb::observers::inferior_created.attach (ravenscar_inferior_created,
+					   "ravenscar-thread");
 
   add_basic_prefix_cmd ("ravenscar", no_class,
 			_("Prefix command for changing Ravenscar-specific settings."),
-			&set_ravenscar_list, "set ravenscar ", 0, &setlist);
+			&set_ravenscar_list, 0, &setlist);
 
   add_show_prefix_cmd ("ravenscar", no_class,
 		       _("Prefix command for showing Ravenscar-specific settings."),
-		       &show_ravenscar_list, "show ravenscar ", 0, &showlist);
+		       &show_ravenscar_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("task-switching", class_obscure,
 			   &ravenscar_task_support, _("\

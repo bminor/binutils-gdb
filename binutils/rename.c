@@ -102,6 +102,9 @@ simple_copy (int fromfd, const char *to,
 # define STAT_TIMESPEC_NS(st, st_xtim) ((st)->st_xtim.st__tim.tv_nsec)
 #endif
 
+static inline long int get_stat_atime_ns (struct stat const *) ATTRIBUTE_UNUSED;
+static inline long int get_stat_mtime_ns (struct stat const *) ATTRIBUTE_UNUSED;
+
 /* Return the nanosecond component of *ST's access time.  */
 static inline long int
 get_stat_atime_ns (struct stat const *st ATTRIBUTE_UNUSED)
@@ -128,6 +131,7 @@ get_stat_mtime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 # endif
 }
 
+#if defined HAVE_UTIMENSAT
 /* Return *ST's access time.  */
 static inline struct timespec
 get_stat_atime (struct stat const *st)
@@ -155,6 +159,7 @@ get_stat_mtime (struct stat const *st)
   return t;
 #endif
 }
+#endif
 /* End FIXME.  */
 
 /* Set the times of the file DESTINATION to be the same as those in

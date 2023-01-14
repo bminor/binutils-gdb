@@ -411,7 +411,7 @@ clean-info:
 MAKEOVERRIDES=
 
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
-	cd $(top_builddir) && $(MAKE) data-directory/Makefile
+	cd .. && $(SHELL) ./config.status data-directory/Makefile
 
 # Disable implicit make rules.
 include $(srcdir)/../disable-implicit-rules.mk

@@ -19,7 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,7 +53,7 @@ typedef struct {
   unsigned char h;
 } RegBank;
 
-static void trace_register_init ();
+static void trace_register_init (void);
 
 /* This maps PSW to a pointer into memory[] */
 static RegBank *regbase_table[256];

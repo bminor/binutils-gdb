@@ -45,7 +45,6 @@
 
 # List of .dat files to create in ../regformats/
 WHICH = mips-linux mips-dsp-linux \
-	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
 	nios2-linux \
 	rs6000/powerpc-32 \
@@ -69,18 +68,11 @@ WHICH = mips-linux mips-dsp-linux \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
 
 # Record which registers should be sent to GDB by default after stop.
-aarch64-expedite = x29,sp,pc
-arm-expedite = r11,sp,pc
-i386-expedite = ebp,esp,eip
-amd64-expedite = rbp,rsp,rip
-x32-expedite = rbp,rsp,rip
 mips-expedite = r29,pc
 mips-dsp-expedite = r29,pc
 mips64-expedite = r29,pc
 mips64-dsp-expedite = r29,pc
-microblaze-expedite = r1,rpc
 nios2-linux-expedite = sp,pc
-or1k-expedite = r1,npc
 powerpc-expedite = r1,pc
 s390-linux32-expedite = r14,r15,pswa
 s390-linux32v1-expedite = r14,r15,pswa
@@ -170,7 +162,8 @@ XMLTOC = \
 	s390x-tevx-linux64.xml \
 	s390x-vx-linux64.xml \
 	s390-gs-linux64.xml \
-	s390x-gs-linux64.xml
+	s390x-gs-linux64.xml \
+	z80.xml
 
 TDESC_CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
 GDB = false
@@ -221,6 +214,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/32bit-mpx.xml \
 	i386/32bit-avx512.xml \
 	i386/32bit-pkeys.xml \
+	i386/32bit-segments.xml \
 	i386/64bit-avx512.xml \
 	i386/64bit-core.xml \
 	i386/64bit-mpx.xml \

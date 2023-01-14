@@ -17,7 +17,8 @@ dnl --enable-sim-inline is for users that wish to ramp up the simulator's
 dnl performance by inlining functions.
 dnl Default sims to no inlining.
 AC_DEFUN([SIM_AC_OPTION_INLINE],
-[
+[dnl
+AC_MSG_CHECKING([sim inline settings])
 sim_inline="-DDEFAULT_INLINE=m4_ifblank([$1],[0],[$1])"
 AC_ARG_ENABLE(sim-inline,
 [AS_HELP_STRING([--enable-sim-inline=inlines],
@@ -43,8 +44,8 @@ case "$enableval" in
        fi
      done;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
-  echo "Setting inline flags = $sim_inline" 6>&1
-fi])dnl
+])dnl
+AC_MSG_RESULT([$sim_inline])
+SIM_INLINE=$sim_inline
+AC_SUBST(SIM_INLINE)
 ])
-AC_SUBST(sim_inline)

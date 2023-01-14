@@ -401,18 +401,18 @@ go32_nat_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
   resume_is_step = step;
 
   if (siggnal != GDB_SIGNAL_0 && siggnal != GDB_SIGNAL_TRAP)
-  {
-    for (i = 0, resume_signal = -1;
-	 excepn_map[i].gdb_sig != GDB_SIGNAL_LAST; i++)
-      if (excepn_map[i].gdb_sig == siggnal)
-      {
-	resume_signal = excepn_map[i].djgpp_excepno;
-	break;
-      }
-    if (resume_signal == -1)
-      printf_unfiltered ("Cannot deliver signal %s on this platform.\n",
-			 gdb_signal_to_name (siggnal));
-  }
+    {
+      for (i = 0, resume_signal = -1;
+	   excepn_map[i].gdb_sig != GDB_SIGNAL_LAST; i++)
+	if (excepn_map[i].gdb_sig == siggnal)
+	  {
+	    resume_signal = excepn_map[i].djgpp_excepno;
+	    break;
+	  }
+      if (resume_signal == -1)
+	printf_unfiltered ("Cannot deliver signal %s on this platform.\n",
+			   gdb_signal_to_name (siggnal));
+    }
 }
 
 static char child_cwd[FILENAME_MAX];
@@ -872,14 +872,14 @@ device_mode (int fd, int raw_p)
     newmode &= ~0x20;
 
   if (oldmode & 0x80)	/* Only for character dev.  */
-  {
-    regs.x.ax = 0x4401;
-    regs.x.bx = fd;
-    regs.x.dx = newmode & 0xff;   /* Force upper byte zero, else it fails.  */
-    __dpmi_int (0x21, &regs);
-    if (regs.x.flags & 1)
-      return -1;
-  }
+    {
+      regs.x.ax = 0x4401;
+      regs.x.bx = fd;
+      regs.x.dx = newmode & 0xff;   /* Force upper byte zero, else it fails.  */
+      __dpmi_int (0x21, &regs);
+      if (regs.x.flags & 1)
+	return -1;
+    }
   return (oldmode & 0x20) == 0x20;
 }
 
@@ -909,24 +909,24 @@ go32_nat_target::terminal_info (const char *args, int from_tty)
 
 #if __DJGPP_MINOR__ > 2
   if (child_cmd.redirection)
-  {
-    int i;
-
-    for (i = 0; i < DBG_HANDLES; i++)
     {
-      if (child_cmd.redirection[i]->file_name)
-	printf_unfiltered ("\tFile handle %d is redirected to `%s'.\n",
-			   i, child_cmd.redirection[i]->file_name);
-      else if (_get_dev_info (child_cmd.redirection[i]->inf_handle) == -1)
-	printf_unfiltered
-	  ("\tFile handle %d appears to be closed by inferior.\n", i);
-      /* Mask off the raw/cooked bit when comparing device info words.  */
-      else if ((_get_dev_info (child_cmd.redirection[i]->inf_handle) & 0xdf)
-	       != (_get_dev_info (i) & 0xdf))
-	printf_unfiltered
-	  ("\tFile handle %d appears to be redirected by inferior.\n", i);
+      int i;
+
+      for (i = 0; i < DBG_HANDLES; i++)
+	{
+	  if (child_cmd.redirection[i]->file_name)
+	    printf_unfiltered ("\tFile handle %d is redirected to `%s'.\n",
+			       i, child_cmd.redirection[i]->file_name);
+	  else if (_get_dev_info (child_cmd.redirection[i]->inf_handle) == -1)
+	    printf_unfiltered
+	      ("\tFile handle %d appears to be closed by inferior.\n", i);
+	  /* Mask off the raw/cooked bit when comparing device info words.  */
+	  else if ((_get_dev_info (child_cmd.redirection[i]->inf_handle) & 0xdf)
+		   != (_get_dev_info (i) & 0xdf))
+	    printf_unfiltered
+	      ("\tFile handle %d appears to be redirected by inferior.\n", i);
+	}
     }
-  }
 #endif
 }
 
@@ -936,19 +936,19 @@ go32_nat_target::terminal_inferior ()
   /* Redirect standard handles as child wants them.  */
   errno = 0;
   if (redir_to_child (&child_cmd) == -1)
-  {
-    redir_to_debugger (&child_cmd);
-    error (_("Cannot redirect standard handles for program: %s."),
-	   safe_strerror (errno));
-  }
+    {
+      redir_to_debugger (&child_cmd);
+      error (_("Cannot redirect standard handles for program: %s."),
+	     safe_strerror (errno));
+    }
   /* Set the console device of the inferior to whatever mode
      (raw or cooked) we found it last time.  */
   if (terminal_is_ours)
-  {
-    if (inf_mode_valid)
-      device_mode (0, inf_terminal_mode);
-    terminal_is_ours = 0;
-  }
+    {
+      if (inf_mode_valid)
+	device_mode (0, inf_terminal_mode);
+      terminal_is_ours = 0;
+    }
 }
 
 void
@@ -957,25 +957,25 @@ go32_nat_target::terminal_ours ()
   /* Switch to cooked mode on the gdb terminal and save the inferior
      terminal mode to be restored when it is resumed.  */
   if (!terminal_is_ours)
-  {
-    inf_terminal_mode = device_mode (0, 0);
-    if (inf_terminal_mode != -1)
-      inf_mode_valid = 1;
-    else
-      /* If device_mode returned -1, we don't know what happens with
-	 handle 0 anymore, so make the info invalid.  */
-      inf_mode_valid = 0;
-    terminal_is_ours = 1;
-
-    /* Restore debugger's standard handles.  */
-    errno = 0;
-    if (redir_to_debugger (&child_cmd) == -1)
     {
-      redir_to_child (&child_cmd);
-      error (_("Cannot redirect standard handles for debugger: %s."),
-	     safe_strerror (errno));
+      inf_terminal_mode = device_mode (0, 0);
+      if (inf_terminal_mode != -1)
+	inf_mode_valid = 1;
+      else
+	/* If device_mode returned -1, we don't know what happens with
+	   handle 0 anymore, so make the info invalid.  */
+	inf_mode_valid = 0;
+      terminal_is_ours = 1;
+
+      /* Restore debugger's standard handles.  */
+      errno = 0;
+      if (redir_to_debugger (&child_cmd) == -1)
+	{
+	  redir_to_child (&child_cmd);
+	  error (_("Cannot redirect standard handles for debugger: %s."),
+		 safe_strerror (errno));
+	}
     }
-  }
 }
 
 void
@@ -2099,7 +2099,7 @@ _initialize_go32_nat ()
 
   add_basic_prefix_cmd ("dos", class_info, _("\
 Print information specific to DJGPP (aka MS-DOS) debugging."),
-			&info_dos_cmdlist, "info dos ", 0, &infolist);
+			&info_dos_cmdlist, 0, &infolist);
 
   add_cmd ("sysinfo", class_info, go32_sysinfo, _("\
 Display information about the target system, including CPU, OS, DPMI, etc."),

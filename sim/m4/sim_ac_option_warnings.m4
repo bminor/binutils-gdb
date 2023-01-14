@@ -15,7 +15,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl --enable-build-warnings is for developers of the simulator.
 dnl it enables extra GCC specific warnings.
-dnl arg[1] Enable -Werror by default? ("yes" or "no")
 AC_DEFUN([SIM_AC_OPTION_WARNINGS],
 [
 AC_ARG_ENABLE(werror,
@@ -26,24 +25,29 @@ AC_ARG_ENABLE(werror,
      *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
-# Enable -Werror by default when using gcc
+dnl Enable -Werror by default when using gcc
 if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
+  ERROR_ON_WARNING=yes
 fi
 
 WERROR_CFLAGS=""
-m4_if(m4_default([$1], [yes]), [yes], [dnl
-  if test "${ERROR_ON_WARNING}" = yes ; then
-    WERROR_CFLAGS="-Werror"
-  fi
-])dnl
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
 
-build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
--Wpointer-sign \
--Wno-unused -Wunused-value -Wunused-function \
--Wno-switch -Wno-char-subscripts -Wmissing-prototypes
--Wdeclaration-after-statement -Wempty-body -Wmissing-parameter-type \
--Wold-style-declaration -Wold-style-definition"
+dnl The options we'll try to enable.
+dnl NB: Kept somewhat in sync with gdbsupport/warnings.m4.
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
+-Wno-unused -Wunused-value -Wunused-function
+-Wno-switch -Wno-char-subscripts
+-Wempty-body -Wunused-but-set-parameter
+-Wno-error=maybe-uninitialized
+-Wmissing-declarations
+-Wmissing-prototypes
+-Wdeclaration-after-statement -Wmissing-parameter-type
+-Wpointer-sign
+-Wold-style-declaration -Wold-style-definition
+"
 
 # Enable -Wno-format by default when using gcc on mingw since many
 # GCC versions complain about %I64.
@@ -91,7 +95,7 @@ then
 	-Werr*) WERROR_CFLAGS=-Werror ;;
 	*) # Check that GCC accepts it
 	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $w"
+	    CFLAGS="$CFLAGS -Werror $w"
 	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
 	    CFLAGS="$saved_CFLAGS"
 	esac

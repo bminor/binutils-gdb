@@ -22,6 +22,8 @@
 #ifndef _LIBELF_H_
 #define _LIBELF_H_ 1
 
+#include <stdlib.h>
+
 #include "elf/common.h"
 #include "elf/external.h"
 #include "elf/internal.h"
@@ -2071,12 +2073,19 @@ struct elf_obj_tdata
      property.  */
   unsigned int has_no_copy_on_protected : 1;
 
+  /* Whether if the bfd contains the
+     GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS property.  */
+  unsigned int has_indirect_extern_access : 1;
+
   /* Irix 5 often screws up the symbol table, sorting local symbols
      after global symbols.  This flag is set if the symbol table in
      this BFD appears to be screwed up.  If it is, we ignore the
      sh_info field in the symbol table header, and always read all the
      symbols.  */
   unsigned int bad_symtab : 1;
+
+  /* Set if DT_FLAGS_1 has DF_1_PIE set.  */
+  unsigned int is_pie : 1;
 
   /* Information grabbed from an elf core file.  */
   struct core_elf_obj_tdata *core;
@@ -2133,6 +2142,8 @@ struct elf_obj_tdata
 #define elf_properties(bfd) (elf_tdata (bfd) -> properties)
 #define elf_has_no_copy_on_protected(bfd) \
   (elf_tdata(bfd) -> has_no_copy_on_protected)
+#define elf_has_indirect_extern_access(bfd) \
+  (elf_tdata(bfd) -> has_indirect_extern_access)
 
 extern void _bfd_elf_swap_verdef_in
   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
@@ -2477,6 +2488,9 @@ extern char *_bfd_elfcore_strndup
 
 extern Elf_Internal_Rela *_bfd_elf_link_read_relocs
   (bfd *, asection *, void *, Elf_Internal_Rela *, bool);
+extern Elf_Internal_Rela *_bfd_elf_link_info_read_relocs
+  (bfd *, struct bfd_link_info *, asection *, void *, Elf_Internal_Rela *,
+   bool);
 
 extern bool _bfd_elf_link_output_relocs
   (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
@@ -2825,6 +2839,8 @@ extern char *elfcore_write_aarch_hw_watch
 extern char *elfcore_write_aarch_sve
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_aarch_pauth
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_aarch_mte
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_arc_v2
   (bfd *, char *, int *, const void *, int);

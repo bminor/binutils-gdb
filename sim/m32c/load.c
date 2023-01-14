@@ -18,7 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -97,8 +99,8 @@ m32c_load (bfd * prog)
 
 	  base = bfd_section_lma (s);
 	  if (verbose)
-	    fprintf (stderr, "[load a=%08x s=%08x %s]\n",
-		     (int) base, (int) size, bfd_section_name (s));
+	    fprintf (stderr, "[load a=%08" BFD_VMA_FMT "x s=%08x %s]\n",
+		     base, (int) size, bfd_section_name (s));
 	  buf = (char *) malloc (size);
 	  bfd_get_section_contents (prog, s, buf, 0, size);
 	  mem_put_blk (base, buf, size);

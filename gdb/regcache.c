@@ -184,15 +184,18 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
   gdb_assert (gdbarch != NULL);
   m_descr = regcache_descr (gdbarch);
 
+  /* We don't zero-initialize the M_REGISTERS array, as the bytes it contains
+     aren't meaningful as long as the corresponding register status is not
+     REG_VALID.  */
   if (has_pseudo)
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers] ());
+      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers]);
       m_register_status.reset
 	(new register_status[m_descr->nr_cooked_registers] ());
     }
   else
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers] ());
+      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers]);
       m_register_status.reset
 	(new register_status[gdbarch_num_regs (gdbarch)] ());
     }
@@ -1261,6 +1264,33 @@ regcache::collect_regset (const struct regset *regset,
   transfer_regset (regset, nullptr, regnum, nullptr, (gdb_byte *) buf, size);
 }
 
+/* See regcache.h  */
+
+bool
+regcache_map_supplies (const struct regcache_map_entry *map, int regnum,
+		       struct gdbarch *gdbarch, size_t size)
+{
+  int offs = 0, count;
+
+  for (; (count = map->count) != 0; map++)
+    {
+      int regno = map->regno;
+      int slot_size = map->size;
+
+      if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
+	slot_size = register_size (gdbarch, regno);
+
+      if (regno != REGCACHE_MAP_SKIP && regnum >= regno
+	  && regnum < regno + count)
+	return offs + (regnum - regno + 1) * slot_size <= size;
+
+      offs += count * slot_size;
+      if (offs >= size)
+	return false;
+    }
+  return false;
+}
+
 /* See gdbsupport/common-regcache.h.  */
 
 bool
@@ -2035,15 +2065,19 @@ regcache_thread_ptid_changed ()
   /* Prepare two targets with one thread each, with the same ptid.  */
   scoped_mock_context<test_target_ops> target1 (arch);
   scoped_mock_context<test_target_ops> target2 (arch);
-  target2.mock_inferior.next = &target1.mock_inferior;
 
   ptid_t old_ptid (111, 222);
   ptid_t new_ptid (111, 333);
 
   target1.mock_inferior.pid = old_ptid.pid ();
   target1.mock_thread.ptid = old_ptid;
+  target1.mock_inferior.ptid_thread_map.clear ();
+  target1.mock_inferior.ptid_thread_map[old_ptid] = &target1.mock_thread;
+
   target2.mock_inferior.pid = old_ptid.pid ();
   target2.mock_thread.ptid = old_ptid;
+  target2.mock_inferior.ptid_thread_map.clear ();
+  target2.mock_inferior.ptid_thread_map[old_ptid] = &target2.mock_thread;
 
   gdb_assert (regcaches.empty ());
 
@@ -2084,25 +2118,28 @@ _initialize_regcache ()
   regcache_descr_handle
     = gdbarch_data_register_post_init (init_regcache_descr);
 
-  gdb::observers::target_changed.attach (regcache_observer_target_changed);
-  gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed);
+  gdb::observers::target_changed.attach (regcache_observer_target_changed,
+					 "regcache");
+  gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed,
+					      "regcache");
 
-  add_cmd ("register-cache", class_maintenance, reg_flush_command,
-	   _("Force gdb to flush its register and frame cache."),
-	   &maintenanceflushlist);
-  c = add_com_alias ("flushregs", "maintenance flush register-cache",
+  cmd_list_element *maintenance_flush_register_cache_cmd
+    = add_cmd ("register-cache", class_maintenance, reg_flush_command,
+	       _("Force gdb to flush its register and frame cache."),
+	       &maintenanceflushlist);
+  c = add_com_alias ("flushregs", maintenance_flush_register_cache_cmd,
 		     class_maintenance, 0);
   deprecate_cmd (c, "maintenance flush register-cache");
 
 #if GDB_SELF_TEST
   selftests::register_test ("get_thread_arch_aspace_regcache",
-  			    selftests::get_thread_arch_aspace_regcache_test);
+			    selftests::get_thread_arch_aspace_regcache_test);
   selftests::register_test ("registers_changed_ptid_all",
 			    selftests::registers_changed_ptid_all_test);
   selftests::register_test ("registers_changed_ptid_target",
-  			    selftests::registers_changed_ptid_target_test);
+			    selftests::registers_changed_ptid_target_test);
   selftests::register_test ("registers_changed_ptid_target_pid",
-  			    selftests::registers_changed_ptid_target_pid_test);
+			    selftests::registers_changed_ptid_target_pid_test);
   selftests::register_test ("registers_changed_ptid_target_ptid",
 			    selftests::registers_changed_ptid_target_ptid_test);
 

@@ -22,7 +22,8 @@
 
 /* TODO: support vendor query tables.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <math.h>
 #include <errno.h>
@@ -610,7 +611,7 @@ attach_cfi_regs (struct hw *me, struct cfi *cfi)
     if (cfi_cmdsets[i]->id == ival)
       cfi->cmdset = cfi_cmdsets[i];
   if (cfi->cmdset == NULL)
-    hw_abort (me, "cmdset %u not supported", ival);
+    hw_abort (me, "cmdset %" PRIiTC " not supported", ival);
 
   if (ret == 2)
     {

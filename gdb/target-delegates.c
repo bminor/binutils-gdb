@@ -56,10 +56,10 @@ struct dummy_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  void follow_fork (bool arg0, bool arg1) override;
+  void follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
-  void follow_exec (struct inferior *arg0, const char *arg1) override;
+  void follow_exec (inferior *arg0, ptid_t arg1, const char *arg2) override;
   int set_syscall_catchpoint (int arg0, bool arg1, int arg2, gdb::array_view<const int> arg3) override;
   void mourn_inferior () override;
   void pass_signals (gdb::array_view<const unsigned char> arg0) override;
@@ -231,10 +231,10 @@ struct debug_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  void follow_fork (bool arg0, bool arg1) override;
+  void follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
-  void follow_exec (struct inferior *arg0, const char *arg1) override;
+  void follow_exec (inferior *arg0, ptid_t arg1, const char *arg2) override;
   int set_syscall_catchpoint (int arg0, bool arg1, int arg2, gdb::array_view<const int> arg3) override;
   void mourn_inferior () override;
   void pass_signals (gdb::array_view<const unsigned char> arg0) override;
@@ -1519,26 +1519,32 @@ debug_target::remove_vfork_catchpoint (int arg0)
 }
 
 void
-target_ops::follow_fork (bool arg0, bool arg1)
+target_ops::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
-  this->beneath ()->follow_fork (arg0, arg1);
+  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3, arg4);
 }
 
 void
-dummy_target::follow_fork (bool arg0, bool arg1)
+dummy_target::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
-  default_follow_fork (this, arg0, arg1);
+  default_follow_fork (this, arg0, arg1, arg2, arg3, arg4);
 }
 
 void
-debug_target::follow_fork (bool arg0, bool arg1)
+debug_target::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->follow_fork (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->follow_fork (arg0, arg1);
+  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3, arg4);
   fprintf_unfiltered (gdb_stdlog, "<- %s->follow_fork (", this->beneath ()->shortname ());
-  target_debug_print_bool (arg0);
+  target_debug_print_inferior_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_bool (arg1);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_target_waitkind (arg2);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_bool (arg3);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_bool (arg4);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
@@ -1595,25 +1601,27 @@ debug_target::remove_exec_catchpoint (int arg0)
 }
 
 void
-target_ops::follow_exec (struct inferior *arg0, const char *arg1)
+target_ops::follow_exec (inferior *arg0, ptid_t arg1, const char *arg2)
 {
-  this->beneath ()->follow_exec (arg0, arg1);
+  this->beneath ()->follow_exec (arg0, arg1, arg2);
 }
 
 void
-dummy_target::follow_exec (struct inferior *arg0, const char *arg1)
+dummy_target::follow_exec (inferior *arg0, ptid_t arg1, const char *arg2)
 {
 }
 
 void
-debug_target::follow_exec (struct inferior *arg0, const char *arg1)
+debug_target::follow_exec (inferior *arg0, ptid_t arg1, const char *arg2)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->follow_exec (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->follow_exec (arg0, arg1);
+  this->beneath ()->follow_exec (arg0, arg1, arg2);
   fprintf_unfiltered (gdb_stdlog, "<- %s->follow_exec (", this->beneath ()->shortname ());
-  target_debug_print_struct_inferior_p (arg0);
+  target_debug_print_inferior_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_const_char_p (arg1);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_const_char_p (arg2);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

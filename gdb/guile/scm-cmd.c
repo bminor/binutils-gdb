@@ -291,10 +291,9 @@ cmdscm_destroyer (struct cmd_list_element *self, void *context)
 /* Called by gdb to invoke the command.  */
 
 static void
-cmdscm_function (struct cmd_list_element *command,
-		 const char *args, int from_tty)
+cmdscm_function (const char *args, int from_tty, cmd_list_element *command)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) get_cmd_context (command);
+  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
   SCM arg_scm, tty_scm, result;
 
   gdb_assert (c_smob != NULL);
@@ -383,7 +382,7 @@ cmdscm_completer (struct cmd_list_element *command,
 		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) get_cmd_context (command);
+  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
   SCM completer_result_scm;
   SCM text_scm, word_scm;
 
@@ -524,10 +523,10 @@ gdbscm_parse_command_name (const char *name,
 				 gdbscm_scm_from_c_string (name), msg);
     }
 
-  if (elt->prefixlist)
+  if (elt->is_prefix ())
     {
       xfree (prefix_text);
-      *base_list = elt->prefixlist;
+      *base_list = elt->subcommands;
       return result;
     }
 
@@ -766,7 +765,7 @@ gdbscm_register_command_x (SCM self)
 
 	  cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class,
 				NULL, c_smob->doc, &c_smob->sub_list,
-				c_smob->name, allow_unknown, cmd_list);
+				allow_unknown, cmd_list);
 	}
       else
 	{
@@ -788,7 +787,7 @@ gdbscm_register_command_x (SCM self)
   cmd->destroyer = cmdscm_destroyer;
 
   c_smob->command = cmd;
-  set_cmd_context (cmd, c_smob);
+  cmd->set_context (c_smob);
 
   if (gdbscm_is_true (c_smob->complete))
     {

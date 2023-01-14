@@ -296,21 +296,47 @@ ext_lang_auto_load_enabled (const struct extension_language_defn *extlang)
   return extlang->script_ops->auto_load_enabled (extlang);
 }
 
+
+/* RAII class used to temporarily return SIG to its default handler.  */
+
+template<int SIG>
+struct scoped_default_signal
+{
+  scoped_default_signal ()
+  { m_old_sig_handler = signal (SIG, SIG_DFL); }
+
+  ~scoped_default_signal ()
+  { signal (SIG, m_old_sig_handler); }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_default_signal);
+
+private:
+  /* The previous signal handler that needs to be restored.  */
+  sighandler_t m_old_sig_handler;
+};
+
+/* Class to temporarily return SIGINT to its default handler.  */
+
+using scoped_default_sigint = scoped_default_signal<SIGINT>;
+
 /* Functions that iterate over all extension languages.
    These only iterate over external extension languages, not including
    GDB's own extension/scripting language, unless otherwise indicated.  */
 
-/* Wrapper to call the extension_language_ops.finish_initialization "method"
-   for each compiled-in extension language.  */
+/* Wrapper to call the extension_language_ops.initialize "method" for each
+   compiled-in extension language.  */
 
 void
-finish_ext_lang_initialization (void)
+ext_lang_initialization (void)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {
       if (extlang->ops != nullptr
-	  && extlang->ops->finish_initialization != NULL)
-	extlang->ops->finish_initialization (extlang);
+	  && extlang->ops->initialize != NULL)
+	{
+	  scoped_default_sigint set_sigint_to_default_handler;
+	  extlang->ops->initialize (extlang);
+	}
     }
 }
 
@@ -900,5 +926,5 @@ void _initialize_extension ();
 void
 _initialize_extension ()
 {
-  gdb::observers::before_prompt.attach (ext_lang_before_prompt);
+  gdb::observers::before_prompt.attach (ext_lang_before_prompt, "extension");
 }

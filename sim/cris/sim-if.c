@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Based on the fr30 file, mixing in bits from the i960 and pruning of
    dead code.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "libiberty.h"
 #include "bfd.h"
 #include "elf-bfd.h"
@@ -28,18 +30,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include "sim-options.h"
+#include "sim-hw.h"
 #include "dis-asm.h"
-
-/* Apparently the autoconf bits are missing (though HAVE_ENVIRON is used
-   in other dirs; also lacking there).  Patch around it for major systems.  */
-#if defined (HAVE_ENVIRON) || defined (__GLIBC__)
-extern char **environ;
-#define GET_ENVIRON() environ
-#else
-char *missing_environ[] = { "SHELL=/bin/sh", "PATH=/bin:/usr/bin", NULL };
-#define GET_ENVIRON() missing_environ
-#endif
+#include "environ.h"
 
 /* Used with get_progbounds to find out how much memory is needed for the
    program.  We don't want to allocate more, since that could mask
@@ -257,14 +252,16 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       buf = xmalloc (phdr[i].p_filesz);
 
       if (verbose)
-	sim_io_printf (sd, "Loading segment at 0x%lx, size 0x%lx\n",
+	sim_io_printf (sd,
+		       "Loading segment at 0x%" BFD_VMA_FMT "x, size 0x%lx\n",
 		       lma, phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
 	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not read segment at 0x%lx, size 0x%lx\n",
+			  "%s: could not read segment at 0x%" BFD_VMA_FMT "x, "
+			  "size 0x%lx\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -273,7 +270,8 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       if (do_write (sd, lma, buf, phdr[i].p_filesz) != phdr[i].p_filesz)
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not load segment at 0x%lx, size 0x%lx\n",
+			  "%s: could not load segment at 0x%" BFD_VMA_FMT "x, "
+			  "size 0x%lx\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -481,7 +479,7 @@ aux_ent_entry (struct bfd *ebfd)
    interp_load_addr offset.  */
 
 static int
-cris_write_interp (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
 {
   return sim_write (sd, mem + interp_load_addr, buf, length);
 }
@@ -495,7 +493,6 @@ static bfd_boolean
 cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 {
   int i, n_hdrs;
-  bfd_vma phaddr;
   bfd_byte buf[4];
   char *interp = NULL;
   struct bfd *ibfd;
@@ -571,7 +568,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 memory area, so we go via a temporary area.  Luckily, the
 	 interpreter is supposed to be small, less than 0x40000
 	 bytes.  */
-      sim_do_commandf (sd, "memory region 0x%lx,0x%lx",
+      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,0x%lx",
 		       interp_load_addr, interpsiz);
 
       /* Now that memory for the interpreter is defined, load it.  */
@@ -610,6 +607,8 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
   free (interp);
   return ok;
 }
+
+extern const SIM_MACH * const cris_sim_machs[];
 
 /* Create an instance of the simulator.  */
 
@@ -657,6 +656,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
      releases (up to and including 2.95.3 (.4 in debian) or a bug in the
      standard ;-) that the rest of the elements won't be initialized.  */
   bfd_byte sp_init[4] = {0, 0, 0, 0};
+
+  /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = cris_sim_machs;
+  STATE_MODEL_NAME (sd) = "crisv32";
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -745,7 +749,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   if (abfd != NULL && !cris_bare_iron)
     {
       const char *name = bfd_get_filename (abfd);
-      char **my_environ = GET_ENVIRON ();
       /* We use these maps to give the same behavior as the old xsim
 	 simulator.  */
       USI envtop = 0x40000000;
@@ -762,8 +765,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       bfd_byte buf[4];
 
       /* Count in the environment as well. */
-      for (envc = 0; my_environ[envc] != NULL; envc++)
-	len += strlen (my_environ[envc]) + 1;
+      for (envc = 0; environ[envc] != NULL; envc++)
+	len += strlen (environ[envc]) + 1;
 
       for (i = 0; prog_argv[i] != NULL; my_argc++, i++)
 	len += strlen (prog_argv[i]) + 1;
@@ -847,10 +850,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
       for (i = 0; i < envc; i++, csp += 4)
 	{
-	  unsigned int strln = strlen (my_environ[i]) + 1;
+	  unsigned int strln = strlen (environ[i]) + 1;
 
-	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, my_environ[i], epp,
-				     strln)
+	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, environ[i], epp, strln)
 	      != strln)
 	    goto abandon_chip;
 
@@ -885,8 +887,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Allocate core managed memory if none specified by user.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, startmem, 1) == 0)
-    sim_do_commandf (sd, "memory region 0x%lx,0x%lx", startmem,
-		     endmem - startmem);
+    sim_do_commandf (sd, "memory region 0x%" PRIx32 ",0x%" PRIu32,
+		     startmem, endmem - startmem);
 
   /* Allocate simulator I/O managed memory if none specified by user.  */
   if (cris_have_900000xxif)
@@ -920,7 +922,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	CPU_CRIS_MISC_PROFILE (cpu)->flags = STATE_TRACE_FLAGS (sd)[0];
 
 	/* Set SP to the stack we allocated above.  */
-	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (char *) sp_init, 4);
+	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (unsigned char *) sp_init, 4);
 
 	/* Set the simulator environment data.  */
 	cpu->highest_mmapped_page = NULL;
@@ -945,10 +947,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     sim_profile_set_option (sd, "-model", PROFILE_MODEL_IDX, "on");
 #endif
   }
-
-  /* Initialize various cgen things not done by common framework.
-     Must be done after cris_cgen_cpu_open.  */
-  cgen_init (sd);
 
   cris_set_callbacks (callback);
 

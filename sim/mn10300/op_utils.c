@@ -1,17 +1,17 @@
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "targ-vals.h"
 
-#ifdef HAVE_UTIME_H
-#include <utime.h>
-#endif
 #include <time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/times.h>
 #include <sys/time.h>
 
 

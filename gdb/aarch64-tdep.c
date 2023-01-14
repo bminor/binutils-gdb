@@ -627,7 +627,6 @@ aarch64_analyze_prologue_test (void)
 {
   struct gdbarch_info info;
 
-  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_scan_arch ("aarch64");
 
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);
@@ -1117,6 +1116,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 /* AArch64 prologue unwinder.  */
 static frame_unwind aarch64_prologue_unwind =
 {
+  "aarch64 prologue",
   NORMAL_FRAME,
   aarch64_prologue_frame_unwind_stop_reason,
   aarch64_prologue_this_id,
@@ -1211,6 +1211,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 /* AArch64 stub unwinder.  */
 static frame_unwind aarch64_stub_unwind =
 {
+  "aarch64 stub",
   NORMAL_FRAME,
   aarch64_stub_frame_unwind_stop_reason,
   aarch64_stub_this_id,
@@ -3663,11 +3664,11 @@ When on, AArch64 specific debugging is enabled."),
 	  { \
 	    unsigned int mem_len = LENGTH; \
 	    if (mem_len) \
-	    { \
-	      MEMS =  XNEWVEC (struct aarch64_mem_r, mem_len);  \
-	      memcpy(&MEMS->len, &RECORD_BUF[0], \
-		     sizeof(struct aarch64_mem_r) * LENGTH); \
-	    } \
+	      { \
+		MEMS =  XNEWVEC (struct aarch64_mem_r, mem_len);  \
+		memcpy(&MEMS->len, &RECORD_BUF[0], \
+		       sizeof(struct aarch64_mem_r) * LENGTH); \
+	      } \
 	  } \
 	  while (0)
 
@@ -4559,7 +4560,6 @@ aarch64_process_record_test (void)
   struct gdbarch_info info;
   uint32_t ret;
 
-  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_scan_arch ("aarch64");
 
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);

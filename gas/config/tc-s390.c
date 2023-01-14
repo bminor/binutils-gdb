@@ -626,7 +626,7 @@ s390_insert_operand (unsigned char *insn,
 	      min <<= 1;
 	      max <<= 1;
 	    }
-	  sprint_value (buf, val);
+	  bfd_sprintf_vma (stdoutput, buf, val);
 	  if (file == (char *) NULL)
 	    as_bad (err, buf, (int) min, (int) max);
 	  else
@@ -2254,10 +2254,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   if (fixP->fx_subsy != NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line,
-		  _("cannot emit relocation %s against subsy symbol %s"),
-		  bfd_get_reloc_code_name (fixP->fx_r_type),
-		  S_GET_NAME (fixP->fx_subsy));
+    as_bad_subtract (fixP);
 
   if (fixP->fx_addsy != NULL)
     {

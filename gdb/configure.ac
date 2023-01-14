@@ -18,9 +18,8 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-m4_include(../config/debuginfod.m4)
-
 AC_INIT
+AC_CONFIG_MACRO_DIRS([../config])
 AC_CONFIG_SRCDIR([main.c])
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
@@ -42,6 +41,8 @@ AC_CANONICAL_HOST
 
 # Set target, target_cpu, target_vendor, and target_os.
 AC_CANONICAL_TARGET
+
+ACX_NONCANONICAL_TARGET
 
 AC_ARG_PROGRAM
 
@@ -1272,7 +1273,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([nlist.h machine/reg.h \
                   thread_db.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
-		  sys/resource.h sys/ptrace.h ptrace.h \
+		  sys/procctl.h sys/resource.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h \
 		  termios.h elf_hp.h])
 AC_CHECK_HEADERS(sys/user.h, [], [],
@@ -1361,39 +1362,6 @@ else
 if test "$ac_cv_func_setpgrp_void" = yes; then
   AC_DEFINE(SETPGRP_VOID, 1)
 fi
-fi
-
-# Assume we'll default to using the included libiberty regex.
-gdb_use_included_regex=yes
-
-# However, if the system regex is GNU regex, then default to *not*
-# using the included regex.
-AC_CACHE_CHECK(
-  [for GNU regex],
-  [gdb_cv_have_gnu_regex],
-  [AC_COMPILE_IFELSE(
-     [AC_LANG_PROGRAM(
-	[#include <gnu-versions.h>],
-	[#define REGEX_INTERFACE_VERSION 1
-	 #if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
-	 # error "Version mismatch"
-	 #endif]
-      )],
-     [gdb_cv_have_gnu_regex=yes],
-     [gdb_cv_have_gnu_regex=no]
-   )]
-)
-if test "$gdb_cv_have_gnu_regex" = yes; then
-  gdb_use_included_regex=no
-fi
-
-AC_ARG_WITH(included-regex,
-  AS_HELP_STRING([--without-included-regex], [don't use included regex; this is the default on systems with version 2 of the GNU C library (use with caution on other system)]),
-  gdb_with_regex=$withval,
-  gdb_with_regex=$gdb_use_included_regex)
-if test "$gdb_with_regex" = yes; then
-  AC_DEFINE(USE_INCLUDED_REGEX, 1,
-    [Define to 1 if the regex included in libiberty should be used.])
 fi
 
 # Check if <sys/proc.h> defines `struct thread' with a td_pcb member.
@@ -2203,7 +2171,6 @@ else
   LIBCTF=
   CTF_DEPS=
 fi
-AC_SUBST(ENABLE_LIBCTF)
 AC_SUBST(LIBCTF)
 AC_SUBST(CTF_DEPS)
 

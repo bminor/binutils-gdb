@@ -369,8 +369,8 @@ update_for_binary_section(bfd *abfd,
     mem_in[2] = section_vma;
     if (device_instance_call_method(memory, "claim", 3, mem_in, 1, mem_out) < 0)
       device_error(me, "failed to claim memory for section at 0x%lx (0x%lx",
-		   section_vma,
-		   section_size);
+		   (unsigned long)section_vma,
+		   (unsigned long)section_size);
     if (mem_out[0] != section_vma)
       device_error(me, "section address not as requested");
   }

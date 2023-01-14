@@ -18,6 +18,19 @@
 /* Define to the number of bits in type 'wint_t'. */
 #undef BITSIZEOF_WINT_T
 
+/* Define to 1 if chown fails to change ctime when at least one argument was
+   not -1. */
+#undef CHOWN_CHANGE_TIME_BUG
+
+/* Define if chown is not POSIX compliant regarding IDs of -1. */
+#undef CHOWN_FAILS_TO_HONOR_ID_OF_NEGATIVE_ONE
+
+/* Define if chown modifies symlinks. */
+#undef CHOWN_MODIFIES_SYMLINK
+
+/* Define to 1 if chown mishandles trailing slash. */
+#undef CHOWN_TRAILING_SLASH_BUG
+
 /* Define to 1 if using 'alloca.c'. */
 #undef C_ALLOCA
 
@@ -140,6 +153,9 @@
 /* Define to 1 when the gnulib module chdir should be tested. */
 #undef GNULIB_TEST_CHDIR
 
+/* Define to 1 when the gnulib module chown should be tested. */
+#undef GNULIB_TEST_CHOWN
+
 /* Define to 1 when the gnulib module cloexec should be tested. */
 #undef GNULIB_TEST_CLOEXEC
 
@@ -191,8 +207,14 @@
 /* Define to 1 when the gnulib module getcwd should be tested. */
 #undef GNULIB_TEST_GETCWD
 
+/* Define to 1 when the gnulib module getdelim should be tested. */
+#undef GNULIB_TEST_GETDELIM
+
 /* Define to 1 when the gnulib module getdtablesize should be tested. */
 #undef GNULIB_TEST_GETDTABLESIZE
+
+/* Define to 1 when the gnulib module getline should be tested. */
+#undef GNULIB_TEST_GETLINE
 
 /* Define to 1 when the gnulib module getlogin_r should be tested. */
 #undef GNULIB_TEST_GETLOGIN_R
@@ -281,6 +303,9 @@
 /* Define to 1 when the gnulib module rmdir should be tested. */
 #undef GNULIB_TEST_RMDIR
 
+/* Define to 1 when the gnulib module select should be tested. */
+#undef GNULIB_TEST_SELECT
+
 /* Define to 1 when the gnulib module setenv should be tested. */
 #undef GNULIB_TEST_SETENV
 
@@ -349,6 +374,9 @@
 /* Define to 1 if you have the `catgets' function. */
 #undef HAVE_CATGETS
 
+/* Define to 1 if you have the `chown' function. */
+#undef HAVE_CHOWN
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 
@@ -401,9 +429,21 @@
    */
 #undef HAVE_DECL_GETCWD
 
+/* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETC_UNLOCKED
+
+/* Define to 1 if you have the declaration of `getdelim', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDELIM
+
 /* Define to 1 if you have the declaration of `getdtablesize', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETDTABLESIZE
+
+/* Define to 1 if you have the declaration of `getline', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLINE
 
 /* Define to 1 if you have the declaration of `getlogin', and to 0 if you
    don't. */
@@ -503,6 +543,9 @@
 /* Define to 1 if you have the `fchdir' function. */
 #undef HAVE_FCHDIR
 
+/* Define to 1 if you have the `fchown' function. */
+#undef HAVE_FCHOWN
+
 /* Define to 1 if you have the `fcntl' function. */
 #undef HAVE_FCNTL
 
@@ -511,6 +554,9 @@
 
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
+
+/* Define to 1 if you have the `flockfile' function. */
+#undef HAVE_FLOCKFILE
 
 /* Define to 1 if you have the `fnmatch' function. */
 #undef HAVE_FNMATCH
@@ -527,12 +573,18 @@
 /* Define to 1 if you have the `fstatat' function. */
 #undef HAVE_FSTATAT
 
+/* Define to 1 if you have the `funlockfile' function. */
+#undef HAVE_FUNLOCKFILE
+
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
 
 /* Define to 1 if getcwd works, but with shorter paths than is generally
    tested with the replacement. */
 #undef HAVE_GETCWD_SHORTER
+
+/* Define to 1 if you have the `getdelim' function. */
+#undef HAVE_GETDELIM
 
 /* Define to 1 if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE
@@ -830,6 +882,9 @@
 
 /* Define to 1 if you have the <sys/random.h> header file. */
 #undef HAVE_SYS_RANDOM_H
+
+/* Define to 1 if you have the <sys/select.h> header file. */
+#undef HAVE_SYS_SELECT_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
@@ -1202,6 +1257,9 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'wchar_t'. */
 #undef WCHAR_T_SUFFIX
+
+/* Define if WSAStartup is needed. */
+#undef WINDOWS_SOCKETS
 
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'wint_t'. */

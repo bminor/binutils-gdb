@@ -130,9 +130,9 @@ thread_pool::set_thread_count (size_t num_threads)
 }
 
 std::future<void>
-thread_pool::post_task (std::function<void ()> func)
+thread_pool::post_task (std::function<void ()> &&func)
 {
-  std::packaged_task<void ()> t (func);
+  std::packaged_task<void ()> t (std::move (func));
   std::future<void> f = t.get_future ();
 
   if (m_thread_count == 0)

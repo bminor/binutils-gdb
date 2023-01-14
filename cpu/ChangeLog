@@ -1,3 +1,20 @@
+2021-07-05  Alan Modra  <amodra@gmail.com>
+
+	* mep.opc (macros): Make static and const.
+	(lookup_macro): Return and use const pointer.
+	(expand_macro): Make mac param const.
+	(expand_string): Make pmacro const.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* or1k.opc (or1k_imm16_relocs, parse_reloc): Define parse logic
+	for gotha() relocation.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* frv.opc: Replace bfd_boolean with bool, FALSE with false, and

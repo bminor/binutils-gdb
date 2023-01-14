@@ -1692,6 +1692,8 @@ value_copy (struct value *arg)
   val->embedded_offset = value_embedded_offset (arg);
   val->pointed_to_offset = arg->pointed_to_offset;
   val->modifiable = arg->modifiable;
+  val->stack = arg->stack;
+  val->initialized = arg->initialized;
   if (!value_lazy (val))
     {
       memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),
@@ -3950,23 +3952,22 @@ value_fetch_lazy_register (struct value *val)
     {
       struct gdbarch *gdbarch;
       struct frame_info *frame;
-      /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
-	 so that the frame level will be shown correctly.  */
-      frame = frame_find_by_id (VALUE_FRAME_ID (val));
+      frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (val));
+      frame = get_prev_frame_always (frame);
       regnum = VALUE_REGNUM (val);
       gdbarch = get_frame_arch (frame);
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ value_fetch_lazy "
-			  "(frame=%d,regnum=%d(%s),...) ",
+      string_file debug_file;
+      fprintf_unfiltered (&debug_file,
+			  "(frame=%d, regnum=%d(%s), ...) ",
 			  frame_relative_level (frame), regnum,
 			  user_reg_map_regnum_to_name (gdbarch, regnum));
 
-      fprintf_unfiltered (gdb_stdlog, "->");
+      fprintf_unfiltered (&debug_file, "->");
       if (value_optimized_out (new_val))
 	{
-	  fprintf_unfiltered (gdb_stdlog, " ");
-	  val_print_optimized_out (new_val, gdb_stdlog);
+	  fprintf_unfiltered (&debug_file, " ");
+	  val_print_optimized_out (new_val, &debug_file);
 	}
       else
 	{
@@ -3974,23 +3975,23 @@ value_fetch_lazy_register (struct value *val)
 	  const gdb_byte *buf = value_contents (new_val);
 
 	  if (VALUE_LVAL (new_val) == lval_register)
-	    fprintf_unfiltered (gdb_stdlog, " register=%d",
+	    fprintf_unfiltered (&debug_file, " register=%d",
 				VALUE_REGNUM (new_val));
 	  else if (VALUE_LVAL (new_val) == lval_memory)
-	    fprintf_unfiltered (gdb_stdlog, " address=%s",
+	    fprintf_unfiltered (&debug_file, " address=%s",
 				paddress (gdbarch,
 					  value_address (new_val)));
 	  else
-	    fprintf_unfiltered (gdb_stdlog, " computed");
+	    fprintf_unfiltered (&debug_file, " computed");
 
-	  fprintf_unfiltered (gdb_stdlog, " bytes=");
-	  fprintf_unfiltered (gdb_stdlog, "[");
+	  fprintf_unfiltered (&debug_file, " bytes=");
+	  fprintf_unfiltered (&debug_file, "[");
 	  for (i = 0; i < register_size (gdbarch, regnum); i++)
-	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
-	  fprintf_unfiltered (gdb_stdlog, "]");
+	    fprintf_unfiltered (&debug_file, "%02x", buf[i]);
+	  fprintf_unfiltered (&debug_file, "]");
 	}
 
-      fprintf_unfiltered (gdb_stdlog, " }\n");
+      frame_debug_printf ("%s", debug_file.c_str ());
     }
 
   /* Dispose of the intermediate values.  This prevents
@@ -4231,7 +4232,8 @@ void _initialize_values ();
 void
 _initialize_values ()
 {
-  add_cmd ("convenience", no_class, show_convenience, _("\
+  cmd_list_element *show_convenience_cmd
+    = add_cmd ("convenience", no_class, show_convenience, _("\
 Debugger convenience (\"$foo\") variables and functions.\n\
 Convenience variables are created when you assign them values;\n\
 thus, \"set $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\
@@ -4244,7 +4246,7 @@ A few convenience variables are given values automatically:\n\
 Convenience functions are defined via the Python API."
 #endif
 	   ), &showlist);
-  add_alias_cmd ("conv", "convenience", no_class, 1, &showlist);
+  add_alias_cmd ("conv", show_convenience_cmd, no_class, 1, &showlist);
 
   add_cmd ("values", no_set_class, show_values, _("\
 Elements of value history around item number IDX (or last ten)."),
@@ -4259,7 +4261,7 @@ VARIABLE is already initialized."));
 
   add_prefix_cmd ("function", no_class, function_command, _("\
 Placeholder command for showing help on convenience functions."),
-		  &functionlist, "function ", 0, &cmdlist);
+		  &functionlist, 0, &cmdlist);
 
   add_internal_function ("_isvoid", _("\
 Check whether an expression is void.\n\

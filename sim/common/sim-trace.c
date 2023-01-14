@@ -17,10 +17,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-fpu.h"
+#include "sim/callback.h"
 
 #include "bfd.h"
 #include "libiberty.h"
@@ -432,10 +436,12 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
   return SIM_RC_OK;
 }
 
-/* Install tracing support.  */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_trace (SIM_DESC sd);
 
+/* Install tracing support.  */
 SIM_RC
-trace_install (SIM_DESC sd)
+sim_install_trace (SIM_DESC sd)
 {
   int i;
 
@@ -889,7 +895,7 @@ dis_read (bfd_vma memaddr, bfd_byte *myaddr, unsigned int length,
   return 0;
 }
 
-static int
+static int ATTRIBUTE_PRINTF (2, 3)
 dis_printf (SIM_CPU *cpu, const char *fmt, ...)
 {
   SIM_DESC sd = CPU_STATE (cpu);

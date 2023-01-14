@@ -1,18 +1,22 @@
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <inttypes.h>
 #include <signal.h>
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 
 #include "gdb/sim-d10v.h"
 #include "gdb/signals.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
@@ -678,7 +682,7 @@ xfer_mem (SIM_DESC sd,
     {
       sim_io_printf
 	(sd,
-	 "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+	 "sim_%s %d bytes: 0x%08" PRIxTA " (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
 	 write_p ? "write" : "read",
 	 phys_size, virt, last_from,
 	 phys, last_to,
@@ -703,7 +707,9 @@ int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem (sd, addr, buffer, size, 1);
+  /* FIXME: We cast the const away, but it's safe because xfer_mem only reads
+     when write_p==1.  This is still ugly.  */
+  return xfer_mem (sd, addr, (void *) buffer, size, 1);
 }
 
 int
@@ -745,10 +751,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   struct simops *s;
   struct hash_entry *h;
   static int init_p = 0;
-  char **p;
+  char * const *p;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  current_alignment = STRICT_ALIGNMENT;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -1140,8 +1149,12 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   bfd_vma start_address;
 
-  /* reset all state information */
-  memset (&State.regs, 0, (uintptr_t)&State.mem - (uintptr_t)&State.regs);
+  /* Make sure we have the right structure for the following memset.  */
+  static_assert (offsetof (struct _state, regs) == 0,
+		 "State.regs is not at offset 0");
+
+  /* Reset state from the regs field until the mem field.  */
+  memset (&State, 0, (uintptr_t) &State.mem - (uintptr_t) &State.regs);
 
   /* There was a hack here to copy the values of argc and argv into r0
      and r1.  The values were also saved into some high memory that
@@ -1158,7 +1171,8 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
     start_address = 0xffc0 << 2;
 #ifdef DEBUG
   if (d10v_debug)
-    sim_io_printf (sd, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
+    sim_io_printf (sd, "sim_create_inferior:  PC=0x%" BFD_VMA_FMT "x\n",
+		   start_address);
 #endif
   {
     SIM_CPU *cpu = STATE_CPU (sd, 0);

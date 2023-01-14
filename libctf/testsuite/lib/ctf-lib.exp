@@ -197,10 +197,10 @@ proc run_lookup_test { name } {
 	set lookup_flags ""
 	if { $run_ld } {
 	    set lookup_output "tmpdir/out.so"
-	    set lookup_flags "-gt -fPIC $shared $opts(link_flags)"
+	    set lookup_flags "-gctf -fPIC $shared $opts(link_flags)"
 	} else {
 	    set lookup_output "tmpdir/out.o"
-	    set lookup_flags "-gt -fPIC -c"
+	    set lookup_flags "-gctf -fPIC -c"
 	}
 	if [board_info [target_info name] exists cflags] {
 	    append lookup_flags " [board_info [target_info name] cflags]"

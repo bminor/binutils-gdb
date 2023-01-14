@@ -25,6 +25,35 @@
 #include "bfdlink.h"
 
 static void
+simple_dummy_add_to_set (struct bfd_link_info * info ATTRIBUTE_UNUSED,
+			 struct bfd_link_hash_entry *entry ATTRIBUTE_UNUSED,
+			 bfd_reloc_code_real_type reloc ATTRIBUTE_UNUSED,
+			 bfd *abfd ATTRIBUTE_UNUSED,
+			 asection *sec ATTRIBUTE_UNUSED,
+			 bfd_vma value ATTRIBUTE_UNUSED)
+{
+}
+
+static  void
+simple_dummy_constructor (struct bfd_link_info * info ATTRIBUTE_UNUSED,
+			  bool constructor ATTRIBUTE_UNUSED,
+			  const char *name ATTRIBUTE_UNUSED,
+			  bfd *abfd ATTRIBUTE_UNUSED,
+			  asection *sec ATTRIBUTE_UNUSED,
+			  bfd_vma value ATTRIBUTE_UNUSED)
+{
+}
+
+static void
+simple_dummy_multiple_common (struct bfd_link_info * info ATTRIBUTE_UNUSED,
+			      struct bfd_link_hash_entry * entry ATTRIBUTE_UNUSED,
+			      bfd * abfd ATTRIBUTE_UNUSED,
+			      enum bfd_link_hash_type type ATTRIBUTE_UNUSED,
+			      bfd_vma size ATTRIBUTE_UNUSED)
+{
+}
+
+static void
 simple_dummy_warning (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 		      const char *warning ATTRIBUTE_UNUSED,
 		      const char *symbol ATTRIBUTE_UNUSED,
@@ -208,6 +237,9 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   abfd->link.next = NULL;
   link_info.hash = _bfd_generic_link_hash_table_create (abfd);
   link_info.callbacks = &callbacks;
+  /* Make sure that any fields not initialised below do not
+     result in a potential indirection via a random address.  */
+  memset (&callbacks, 0, sizeof callbacks);
   callbacks.warning = simple_dummy_warning;
   callbacks.undefined_symbol = simple_dummy_undefined_symbol;
   callbacks.reloc_overflow = simple_dummy_reloc_overflow;
@@ -215,6 +247,9 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   callbacks.unattached_reloc = simple_dummy_unattached_reloc;
   callbacks.multiple_definition = simple_dummy_multiple_definition;
   callbacks.einfo = simple_dummy_einfo;
+  callbacks.multiple_common = simple_dummy_multiple_common;
+  callbacks.constructor = simple_dummy_constructor;
+  callbacks.add_to_set = simple_dummy_add_to_set;
 
   memset (&link_order, 0, sizeof (link_order));
   link_order.next = NULL;

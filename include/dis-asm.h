@@ -315,6 +315,7 @@ extern void disassemble_init_powerpc (struct disassemble_info *);
 extern void disassemble_init_s390 (struct disassemble_info *);
 extern void disassemble_init_wasm32 (struct disassemble_info *);
 extern void disassemble_init_nds32 (struct disassemble_info *);
+extern const disasm_options_and_args_t *disassembler_options_arc (void);
 extern const disasm_options_and_args_t *disassembler_options_arm (void);
 extern const disasm_options_and_args_t *disassembler_options_mips (void);
 extern const disasm_options_and_args_t *disassembler_options_powerpc (void);

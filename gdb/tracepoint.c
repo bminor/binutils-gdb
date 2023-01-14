@@ -636,7 +636,6 @@ validate_actionline (const char *line, struct breakpoint *b)
   struct cmd_list_element *c;
   const char *tmp_p;
   const char *p;
-  struct bp_location *loc;
   struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
@@ -656,7 +655,7 @@ validate_actionline (const char *line, struct breakpoint *b)
   if (c == 0)
     error (_("`%s' is not a tracepoint action, or is ambiguous."), p);
 
-  if (cmd_cfunc_eq (c, collect_pseudocommand))
+  if (cmd_simple_func_eq (c, collect_pseudocommand))
     {
       int trace_string = 0;
 
@@ -682,7 +681,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* else fall thru, treat p as an expression and parse it!  */
 	    }
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (bp_location *loc : t->locations ())
 	    {
 	      p = tmp_p;
 	      expression_up exp = parse_exp_1 (&p, loc->address,
@@ -724,7 +723,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       while (p && *p++ == ',');
     }
 
-  else if (cmd_cfunc_eq (c, teval_pseudocommand))
+  else if (cmd_simple_func_eq (c, teval_pseudocommand))
     {
       do
 	{			/* Repeat over a comma-separated list.  */
@@ -732,7 +731,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	  p = skip_spaces (p);
 
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (bp_location *loc : t->locations ())
 	    {
 	      p = tmp_p;
 
@@ -751,7 +750,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       while (p && *p++ == ',');
     }
 
-  else if (cmd_cfunc_eq (c, while_stepping_pseudocommand))
+  else if (cmd_simple_func_eq (c, while_stepping_pseudocommand))
     {
       char *endp;
 
@@ -762,7 +761,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       p = endp;
     }
 
-  else if (cmd_cfunc_eq (c, end_actions_pseudocommand))
+  else if (cmd_simple_func_eq (c, end_actions_pseudocommand))
     ;
 
   else
@@ -1309,7 +1308,7 @@ encode_actions_1 (struct command_line *action,
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
-      if (cmd_cfunc_eq (cmd, collect_pseudocommand))
+      if (cmd_simple_func_eq (cmd, collect_pseudocommand))
 	{
 	  int trace_string = 0;
 
@@ -1465,7 +1464,7 @@ encode_actions_1 (struct command_line *action,
 	    }
 	  while (action_exp && *action_exp++ == ',');
 	}			/* if */
-      else if (cmd_cfunc_eq (cmd, teval_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, teval_pseudocommand))
 	{
 	  do
 	    {			/* Repeat over a comma-separated list.  */
@@ -1489,7 +1488,7 @@ encode_actions_1 (struct command_line *action,
 	    }
 	  while (action_exp && *action_exp++ == ',');
 	}			/* if */
-      else if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, while_stepping_pseudocommand))
 	{
 	  /* We check against nested while-stepping when setting
 	     breakpoint action, so no way to run into nested
@@ -1565,9 +1564,7 @@ process_tracepoint_on_disconnect (void)
 	}
       else
 	{
-	  struct bp_location *loc1;
-
-	  for (loc1 = b->loc; loc1; loc1 = loc1->next)
+	  for (bp_location *loc1 : b->locations ())
 	    {
 	      if (loc1->shlib_disabled)
 		{
@@ -1603,13 +1600,13 @@ start_tracing (const char *notes)
   int any_enabled = 0, num_to_download = 0;
   int ret;
 
-  std::vector<breakpoint *> tp_vec = all_tracepoints ();
+  auto tracepoint_range = all_tracepoints ();
 
   /* No point in tracing without any tracepoints...  */
-  if (tp_vec.empty ())
+  if (tracepoint_range.begin () == tracepoint_range.end ())
     error (_("No tracepoints defined, not starting trace"));
 
-  for (breakpoint *b : tp_vec)
+  for (breakpoint *b : tracepoint_range)
     {
       if (b->enable_state == bp_enabled)
 	any_enabled = 1;
@@ -1640,14 +1637,13 @@ start_tracing (const char *notes)
 
   target_trace_init ();
 
-  for (breakpoint *b : tp_vec)
+  for (breakpoint *b : tracepoint_range)
     {
       struct tracepoint *t = (struct tracepoint *) b;
-      struct bp_location *loc;
       int bp_location_downloaded = 0;
 
       /* Clear `inserted' flag.  */
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	loc->inserted = 0;
 
       if ((b->type == bp_fast_tracepoint
@@ -1657,7 +1653,7 @@ start_tracing (const char *notes)
 
       t->number_on_target = 0;
 
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	{
 	  /* Since tracepoint locations are never duplicated, `inserted'
 	     flag should be zero.  */
@@ -1671,7 +1667,7 @@ start_tracing (const char *notes)
 
       t->number_on_target = b->number;
 
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	if (loc->probe.prob != NULL)
 	  loc->probe.prob->set_semaphore (loc->probe.objfile,
 					  loc->gdbarch);
@@ -1750,14 +1746,12 @@ stop_tracing (const char *note)
 
   for (breakpoint *t : all_tracepoints ())
     {
-      struct bp_location *loc;
-
       if ((t->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
-      for (loc = t->loc; loc; loc = loc->next)
+      for (bp_location *loc : t->locations ())
 	{
 	  /* GDB can be totally absent in some disconnected trace scenarios,
 	     but we don't really care if this semaphore goes out of sync.
@@ -2273,7 +2267,7 @@ tfind_command_1 (const char *args, int from_tty)
     { /* TFIND with no args means find NEXT trace frame.  */
       if (traceframe_number == -1)
 	frameno = 0;	/* "next" is first one.  */
-	else
+      else
 	frameno = traceframe_number + 1;
     }
   else if (0 == strcmp (args, "-"))
@@ -2394,7 +2388,7 @@ tfind_line_command (const char *args, int from_tty)
   if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
     {
       if (start_pc == end_pc)
-  	{
+	{
 	  printf_filtered ("Line %d of \"%s\"",
 			   sal.line,
 			   symtab_to_filename_for_display (sal.symtab));
@@ -2409,16 +2403,18 @@ tfind_line_command (const char *args, int from_tty)
 	      && start_pc != end_pc)
 	    printf_filtered ("Attempting to find line %d instead.\n",
 			     sal.line);
-  	  else
+	  else
 	    error (_("Cannot find a good line."));
-  	}
+	}
       }
     else
-    /* Is there any case in which we get here, and have an address
-       which the user would want to see?  If we have debugging
-       symbols and no line numbers?  */
-    error (_("Line number %d is out of range for \"%s\"."),
-	   sal.line, symtab_to_filename_for_display (sal.symtab));
+      {
+	/* Is there any case in which we get here, and have an address
+	   which the user would want to see?  If we have debugging
+	   symbols and no line numbers?  */
+	error (_("Line number %d is out of range for \"%s\"."),
+	       sal.line, symtab_to_filename_for_display (sal.symtab));
+      }
 
   /* Find within range of stated line.  */
   if (args && *args)
@@ -2694,13 +2690,13 @@ trace_dump_actions (struct command_line *action,
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
-      if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
+      if (cmd_simple_func_eq (cmd, while_stepping_pseudocommand))
 	{
 	  gdb_assert (action->body_list_1 == nullptr);
 	  trace_dump_actions (action->body_list_0.get (),
 			      1, stepping_frame, from_tty);
 	}
-      else if (cmd_cfunc_eq (cmd, collect_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, collect_pseudocommand))
 	{
 	  /* Display the collected data.
 	     For the trap frame, display only what was collected at
@@ -2763,7 +2759,6 @@ struct bp_location *
 get_traceframe_location (int *stepping_frame_p)
 {
   struct tracepoint *t;
-  struct bp_location *tloc;
   struct regcache *regcache;
 
   if (tracepoint_number == -1)
@@ -2784,7 +2779,7 @@ get_traceframe_location (int *stepping_frame_p)
      locations, assume it is a direct hit rather than a while-stepping
      frame.  (FIXME this is not reliable, should record each frame's
      type.)  */
-  for (tloc = t->loc; tloc; tloc = tloc->next)
+  for (bp_location *tloc : t->locations ())
     if (tloc->address == regcache_read_pc (regcache))
       {
 	*stepping_frame_p = 0;
@@ -3678,7 +3673,7 @@ print_one_static_tracepoint_marker (int count,
      identifier!  */
   uiout->field_signed ("count", count);
 
-  uiout->field_string ("marker-id", marker.str_id.c_str ());
+  uiout->field_string ("marker-id", marker.str_id);
 
   uiout->field_fmt ("enabled", "%c",
 		    !tracepoints.empty () ? 'y' : 'n');
@@ -3735,7 +3730,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->text ("\n");
   uiout->text (extra_field_indent);
   uiout->text (_("Data: \""));
-  uiout->field_string ("extra-data", marker.extra.c_str ());
+  uiout->field_string ("extra-data", marker.extra);
   uiout->text ("\"\n");
 
   if (!tracepoints.empty ())
@@ -4046,7 +4041,7 @@ List target static tracepoints markers."));
   add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
 Select a trace frame.\n\
 No argument means forward by one frame; '-' means backward by one frame."),
-		  &tfindlist, "tfind ", 1, &cmdlist);
+		  &tfindlist, 1, &cmdlist);
 
   add_cmd ("outside", class_trace, tfind_outside_command, _("\
 Select a trace frame whose PC is outside the given range (exclusive).\n\
@@ -4075,11 +4070,11 @@ Select a trace frame by PC.\n\
 Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("end", class_trace, tfind_end_command, _("\
-De-select any trace frame and resume 'live' debugging."),
-	   &tfindlist);
+  cmd_list_element *tfind_end_cmd
+    = add_cmd ("end", class_trace, tfind_end_command, _("\
+De-select any trace frame and resume 'live' debugging."), &tfindlist);
 
-  add_alias_cmd ("none", "end", class_trace, 0, &tfindlist);
+  add_alias_cmd ("none", tfind_end_cmd, class_trace, 0, &tfindlist);
 
   add_cmd ("start", class_trace, tfind_start_command,
 	   _("Select the first trace frame in the trace buffer."),
@@ -4116,8 +4111,8 @@ one or more \"collect\" commands, to specify what to collect\n\
 while single-stepping.\n\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com_alias ("ws", "while-stepping", class_trace, 0);
-  add_com_alias ("stepping", "while-stepping", class_trace, 0);
+  add_com_alias ("ws", while_stepping_cmd_element, class_trace, 0);
+  add_com_alias ("stepping", while_stepping_cmd_element, class_trace, 0);
 
   add_com ("collect", class_trace, collect_pseudocommand, _("\
 Specify one or more data items to be collected at a tracepoint.\n\

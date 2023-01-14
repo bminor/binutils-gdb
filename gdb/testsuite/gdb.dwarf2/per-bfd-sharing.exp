@@ -18,6 +18,15 @@
 
 standard_testfile
 
+if { [build_executable "failed to prepare" $testfile $srcfile \
+	  {debug additional_flags=-Wl,--build-id}] == -1 } {
+    return
+}
+
+set has_index_section [exec_has_index_section $binfile]
+set uses_readnow [expr [string first "-readnow" $GDBFLAGS] != -1]
+set expecting_index_cache_use [expr !$has_index_section && !$uses_readnow]
+
 lassign [remote_exec host mktemp -d] ret cache_dir
 
 # The output of mktemp contains an end of line, remove it.
@@ -29,11 +38,6 @@ if { $ret != 0 } {
 }
 
 verbose -log "Index cache dir: $cache_dir"
-
-if { [build_executable "failed to prepare" $testfile $srcfile \
-	  {debug additional_flags=-Wl,--build-id}] == -1 } {
-    return
-}
 
 # Populate the index-cache.
 with_test_prefix "populate index cache" {
@@ -90,4 +94,16 @@ foreach_with_prefix first $methods {
 	    with_test_prefix "load third" { load_binary $third }
 	}
     }
+}
+
+lassign [remote_exec host sh "-c \"rm $cache_dir/*.gdb-index\""] ret
+if { $ret != 0 && $expecting_index_cache_use } {
+    fail "couldn't remove files in temporary cache dir"
+    return
+}
+
+lassign [remote_exec host rmdir "$cache_dir"] ret
+if { $ret != 0 } {
+    fail "couldn't remove temporary cache dir"
+    return
 }

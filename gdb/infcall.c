@@ -1026,8 +1026,8 @@ call_function_by_hand_dummy (struct value *function,
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (ftype->code () == TYPE_CODE_METHOD)
 	prototyped = 1;
-      if (TYPE_TARGET_TYPE (ftype) == NULL && ftype->num_fields () == 0
-	  && default_return_type != NULL)
+      else if (TYPE_TARGET_TYPE (ftype) == NULL && ftype->num_fields () == 0
+	       && default_return_type != NULL)
 	{
 	  /* Calling a no-debug function with the return type
 	     explicitly cast.  Assume the function is prototyped,

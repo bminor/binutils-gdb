@@ -2432,6 +2432,38 @@ csky_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
+/* Match symbol names created by tc-csky.c:make_mapping_symbol.  */
+
+static bool
+is_mapping_symbol_name (const char *name)
+{
+  return (name && name[0] == '$'
+	  && (name[1] == 't' || name[1] == 'd')
+	  && name[2] == 0);
+}
+
+/* Treat mapping symbols as special target symbols.  */
+
+static bool
+csky_elf_is_target_special_symbol (bfd *abfd ATTRIBUTE_UNUSED, asymbol *sym)
+{
+  return is_mapping_symbol_name (sym->name);
+}
+
+/* Exclude mapping symbols from being treated as function symbols by
+   objdump and nm.  */
+
+static bfd_size_type
+csky_elf_maybe_function_sym (const asymbol *sym, asection *sec,
+			     bfd_vma *code_off)
+{
+  if ((sym->flags & BSF_LOCAL) != 0
+      && is_mapping_symbol_name (sym->name))
+    return 0;
+
+  return _bfd_elf_maybe_function_sym (sym, sec, code_off);
+}
+
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
@@ -5293,6 +5325,8 @@ elf32_csky_obj_attrs_handle_unknown (bfd *abfd ATTRIBUTE_UNUSED,
 #define bfd_elf32_bfd_merge_private_bfd_data  csky_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags       csky_elf_set_private_flags
 #define elf_backend_copy_indirect_symbol      csky_elf_copy_indirect_symbol
+#define bfd_elf32_bfd_is_target_special_symbol csky_elf_is_target_special_symbol
+#define elf_backend_maybe_function_sym	      csky_elf_maybe_function_sym
 
 /* GC section related API.  */
 #define elf_backend_can_gc_sections           1

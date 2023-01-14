@@ -20,6 +20,11 @@
 #ifndef COMMON_COMMON_DEBUG_H
 #define COMMON_COMMON_DEBUG_H
 
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/preprocessor.h"
+
+#include <stdarg.h>
+
 /* Set to true to enable debugging of hardware breakpoint/
    watchpoint support code.  */
 
@@ -92,20 +97,39 @@ struct scoped_debug_start_end
 
      MODULE and FUNC are forwarded to debug_prefixed_printf.
 
-     START_MSG and END_MSG are the statements to print on construction and
-     destruction, respectively.  */
+     START_PREFIX and END_PREFIX are the statements to print on construction and
+     destruction, respectively.
+
+     If the FMT format string is non-nullptr, then a `: ` is appended to the
+     messages, followed by the rendering of that format string.  The format
+     string is rendered during construction and is re-used as is for the
+     message on exit.  */
 
   scoped_debug_start_end (bool &debug_enabled, const char *module,
-			  const char *func, const char *start_msg,
-			  const char *end_msg)
+			  const char *func, const char *start_prefix,
+			  const char *end_prefix, const char *fmt, ...)
+    ATTRIBUTE_NULL_PRINTF (7, 8)
     : m_debug_enabled (debug_enabled),
       m_module (module),
       m_func (func),
-      m_end_msg (end_msg)
+      m_end_prefix (end_prefix),
+      m_with_format (fmt != nullptr)
   {
     if (m_debug_enabled)
       {
-	debug_prefixed_printf (m_module, m_func, "%s", start_msg);
+	if (fmt != nullptr)
+	  {
+	    va_list args;
+	    va_start (args, fmt);
+	    m_msg = string_vprintf (fmt, args);
+	    va_end (args);
+
+	    debug_prefixed_printf (m_module, m_func, "%s: %s",
+				   start_prefix, m_msg->c_str ());
+	  }
+	else
+	  debug_prefixed_printf (m_module, m_func, "%s", start_prefix);
+
 	++debug_print_depth;
 	m_must_decrement_print_depth = true;
       }
@@ -123,7 +147,22 @@ struct scoped_debug_start_end
 
     if (m_debug_enabled)
       {
-	debug_prefixed_printf (m_module, m_func, "%s", m_end_msg);
+	if (m_with_format)
+	  {
+	    if (m_msg.has_value ())
+	      debug_prefixed_printf (m_module, m_func, "%s: %s",
+				     m_end_prefix, m_msg->c_str ());
+	    else
+	      {
+		/* A format string was passed to the constructor, but debug
+		   control variable wasn't set at the time, so we don't have the
+		   rendering of the format string.  */
+		debug_prefixed_printf (m_module, m_func, "%s: <%s debugging was not enabled on entry>",
+				       m_end_prefix, m_module);
+	      }
+	  }
+	else
+	  debug_prefixed_printf (m_module, m_func, "%s", m_end_prefix);
       }
   }
 
@@ -131,20 +170,25 @@ private:
   bool &m_debug_enabled;
   const char *m_module;
   const char *m_func;
-  const char *m_end_msg;
+  const char *m_end_prefix;
+
+  /* The result of formatting the format string in the constructor.  */
+  gdb::optional<std::string> m_msg;
+
+  /* True is a non-nullptr format was passed to the constructor.  */
+  bool m_with_format;
 
   /* This is used to handle the case where debugging is enabled during
      construction but not during destruction, or vice-versa.  We want to make
      sure there are as many increments are there are decrements.  */
-
   bool m_must_decrement_print_depth = false;
 };
 
 /* Helper to define a module-specific start/end debug macro.  */
 
-#define scoped_debug_start_end(debug_enabled, module, msg) \
+#define scoped_debug_start_end(debug_enabled, module, fmt, ...) \
   scoped_debug_start_end CONCAT(scoped_debug_start_end, __LINE__) \
-    (debug_enabled, module, __func__, "start: " msg, "end: " msg)
+    (debug_enabled, module, __func__, "start", "end", fmt, ##__VA_ARGS__)
 
 /* Helper to define a module-specific enter/exit debug macro.  This is a special
    case of `scoped_debug_start_end` where the start and end messages are "enter"
@@ -152,6 +196,6 @@ private:
 
 #define scoped_debug_enter_exit(debug_enabled, module) \
   scoped_debug_start_end CONCAT(scoped_debug_start_end, __LINE__) \
-    (debug_enabled, module, __func__, "enter", "exit")
+    (debug_enabled, module, __func__, "enter", "exit", nullptr)
 
 #endif /* COMMON_COMMON_DEBUG_H */

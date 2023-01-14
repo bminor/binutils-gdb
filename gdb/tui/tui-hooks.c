@@ -222,7 +222,7 @@ static void
 attach_or_detach (T &observable, typename T::func_type func, bool attach)
 {
   if (attach)
-    observable.attach (func, tui_observers_token);
+    observable.attach (func, tui_observers_token, "tui-hooks");
   else
     observable.detach (tui_observers_token);
 }
@@ -282,5 +282,5 @@ void
 _initialize_tui_hooks ()
 {
   /* Install the permanent hooks.  */
-  gdb::observers::new_objfile.attach (tui_new_objfile_hook);
+  gdb::observers::new_objfile.attach (tui_new_objfile_hook, "tui-hooks");
 }

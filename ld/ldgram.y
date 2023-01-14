@@ -96,8 +96,7 @@ static int error_index;
 %type <wildcard_list> section_name_list
 %type <flag_info_list> sect_flag_list
 %type <flag_info> sect_flags
-%type <name> memspec_opt casesymlist
-%type <name> memspec_at_opt
+%type <name> memspec_opt memspec_at_opt paren_script_name casesymlist
 %type <cname> wildcard_name
 %type <wildcard> section_name_spec filename_spec wildcard_maybe_exclude
 %token <bigint> INT
@@ -139,6 +138,7 @@ static int error_index;
 %token REGION_ALIAS
 %token LD_FEATURE
 %token NOLOAD DSECT COPY INFO OVERLAY
+%token READONLY
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
 %token SIZEOF ALIGNOF ADDR LOADADDR MAX_K MIN_K
@@ -905,6 +905,10 @@ nocrossref_list:
 		}
 	;
 
+paren_script_name:
+		{ ldlex_script (); } '(' NAME  { ldlex_popstate (); } ')'
+			{ $$ = $3; }
+
 mustbe_exp:		 { ldlex_expression (); }
 		exp
 			 { ldlex_popstate (); $$=$2;}
@@ -969,14 +973,14 @@ exp	:
 	|	SIZEOF_HEADERS
 			{ $$ = exp_nameop (SIZEOF_HEADERS,0); }
 
-	|	ALIGNOF '(' NAME ')'
-			{ $$ = exp_nameop (ALIGNOF,$3); }
-	|	SIZEOF '(' NAME ')'
-			{ $$ = exp_nameop (SIZEOF,$3); }
-	|	ADDR '(' NAME ')'
-			{ $$ = exp_nameop (ADDR,$3); }
-	|	LOADADDR '(' NAME ')'
-			{ $$ = exp_nameop (LOADADDR,$3); }
+	|	ALIGNOF paren_script_name
+			{ $$ = exp_nameop (ALIGNOF, $2); }
+	|	SIZEOF	paren_script_name
+			{ $$ = exp_nameop (SIZEOF, $2); }
+	|	ADDR	paren_script_name
+			{ $$ = exp_nameop (ADDR, $2); }
+	|	LOADADDR paren_script_name
+			{ $$ = exp_nameop (LOADADDR, $2); }
 	|	CONSTANT '(' NAME ')'
 			{ $$ = exp_nameop (CONSTANT,$3); }
 	|	ABSOLUTE '(' exp ')'
@@ -991,15 +995,16 @@ exp	:
 			{ $$ = exp_binop (DATA_SEGMENT_RELRO_END, $5, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
 			{ $$ = exp_unop (DATA_SEGMENT_END, $3); }
-	|	SEGMENT_START '(' NAME ',' exp ')'
+	|	SEGMENT_START { ldlex_script (); } '(' NAME
+			{ ldlex_popstate (); } ',' exp ')'
 			{ /* The operands to the expression node are
 			     placed in the opposite order from the way
 			     in which they appear in the script as
 			     that allows us to reuse more code in
 			     fold_binary.  */
 			  $$ = exp_binop (SEGMENT_START,
-					  $5,
-					  exp_nameop (NAME, $3)); }
+					  $7,
+					  exp_nameop (NAME, $4)); }
 	|	BLOCK '(' exp ')'
 			{ $$ = exp_unop (ALIGN_K,$3); }
 	|	NAME
@@ -1123,6 +1128,7 @@ type:
 	|  COPY    { sectype = noalloc_section; }
 	|  INFO    { sectype = noalloc_section; }
 	|  OVERLAY { sectype = noalloc_section; }
+	|  READONLY { sectype = readonly_section; }
 	;
 
 atype:
@@ -1184,13 +1190,17 @@ overlay_section:
 	|	overlay_section
 		NAME
 			{
-			  ldlex_script ();
 			  lang_enter_overlay_section ($2);
 			}
 		'{' statement_list_opt '}'
-			{ ldlex_popstate (); ldlex_expression (); }
+			{ ldlex_expression (); }
 		phdr_opt fill_opt
 			{
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
 			  ldlex_popstate ();
 			  lang_leave_overlay_section ($9, $8);
 			}

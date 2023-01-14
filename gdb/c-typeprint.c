@@ -171,7 +171,7 @@ c_print_type (struct type *type,
 	      int show, int level,
 	      const struct type_print_options *flags)
 {
-  struct print_offset_data podata;
+  struct print_offset_data podata (flags);
 
   c_print_type_1 (type, varstring, stream, show, level,
 		  current_language->la_language, flags, &podata);
@@ -188,7 +188,7 @@ c_print_type (struct type *type,
 	      enum language language,
 	      const struct type_print_options *flags)
 {
-  struct print_offset_data podata;
+  struct print_offset_data podata (flags);
 
   c_print_type_1 (type, varstring, stream, show, level, language, flags,
 		  &podata);
@@ -436,8 +436,8 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_ARRAY:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, language, flags,
-				   podata);
+				   stream, show, 0, need_post_space,
+				   language, flags, podata);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
@@ -1121,13 +1121,12 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       if (type->num_fields () == 0 && TYPE_NFN_FIELDS (type) == 0
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
+	  print_spaces_filtered_with_print_options (level + 4, stream, flags);
 	  if (type->is_stub ())
-	    fprintf_filtered (stream, _("%*s%p[<incomplete type>%p]\n"),
-			      level + 4, "",
+	    fprintf_filtered (stream, _("%p[<incomplete type>%p]\n"),
 			      metadata_style.style ().ptr (), nullptr);
 	  else
-	    fprintf_filtered (stream, _("%*s%p[<no data fields>%p]\n"),
-			      level + 4, "",
+	    fprintf_filtered (stream, _("%p[<no data fields>%p]\n"),
 			      metadata_style.style ().ptr (), nullptr);
 	}
 
@@ -1149,7 +1148,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       int len = type->num_fields ();
       vptr_fieldno = get_vptr_fieldno (type, &basetype);
 
-      struct print_offset_data local_podata;
+      struct print_offset_data local_podata (flags);
 
       for (int i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
@@ -1724,7 +1723,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		   int show, int level,
 		   const struct type_print_options *flags)
 {
-  struct print_offset_data podata;
+  struct print_offset_data podata (flags);
 
   c_type_print_base_1 (type, stream, show, level,
 		       current_language->la_language, flags, &podata);

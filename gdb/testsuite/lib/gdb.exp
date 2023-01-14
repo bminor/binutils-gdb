@@ -1432,6 +1432,68 @@ proc gdb_test_sequence { args } {
 }
 
 
+# Match output of COMMAND using RE.  Read output line-by-line.
+# Report pass/fail with MESSAGE.
+# For a command foo with output:
+#   (gdb) foo^M
+#   <line1>^M
+#   <line2>^M
+#   (gdb)
+# the portion matched using RE is:
+#  '<line1>^M
+#   <line2>^M
+#  '
+#
+# Optionally, additional -re-not <regexp> arguments can be specified, to
+# ensure that a regexp is not match by the COMMAND output.
+# Such an additional argument generates an additional PASS/FAIL of the form:
+#   PASS: test-case.exp: $message: pattern not matched: <regexp>
+
+proc gdb_test_lines { command message re args } {
+    set re_not [list]
+
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set arg [lindex $args $i]
+	if { $arg == "-re-not" } {
+	    incr i
+	    if { [llength $args] == $i } {
+		error "Missing argument for -re-not"
+		break
+	    }
+	    set arg [lindex $args $i]
+	    lappend re_not $arg
+	} else {
+	    error "Unhandled argument: $arg"
+	}
+    }
+
+    if { $message == ""} {
+	set message $command
+    }
+
+    set lines ""
+    gdb_test_multiple $command $message {
+	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
+	    set line $expect_out(1,string)
+	    if { $lines eq "" } {
+		append lines "$line"
+	    } else {
+		append lines "\r\n$line"
+	    }
+	    exp_continue
+	}
+	-re -wrap "" {
+	    append lines "\r\n"
+	}
+    }
+
+    gdb_assert { [regexp $re $lines] } $message
+
+    foreach re $re_not {
+	gdb_assert { ![regexp $re $lines] } "$message: pattern not matched: $re"
+    }
+}
+
 # Test that a command gives an error.  For pass or fail, return
 # a 1 to indicate that more tests can proceed.  However a timeout
 # is a serious error, generates a special fail message, and causes
@@ -1827,6 +1889,7 @@ proc default_gdb_exit {} {
 	remote_close host
     }
     unset gdb_spawn_id
+    unset ::gdb_tty_name
     unset inferior_spawn_id
 }
 
@@ -1955,6 +2018,38 @@ proc gdb_file_cmd { arg } {
     }
 }
 
+# The expect "spawn" function puts the tty name into the spawn_out
+# array; but dejagnu doesn't export this globally.  So, we have to
+# wrap spawn with our own function and poke in the built-in spawn
+# so that we can capture this value.
+#
+# If available, the TTY name is saved to the LAST_SPAWN_TTY_NAME global.
+# Otherwise, LAST_SPAWN_TTY_NAME is unset.
+
+proc spawn_capture_tty_name { args } {
+    set result [uplevel builtin_spawn $args]
+    upvar spawn_out spawn_out
+    if { [info exists spawn_out(slave,name)] } {
+	set ::last_spawn_tty_name $spawn_out(slave,name)
+    } else {
+	# If a process is spawned as part of a pipe line (e.g. passing
+	# -leaveopen to the spawn proc) then the spawned process is no
+	# assigned a tty and spawn_out(slave,name) will not be set.
+	# In that case we want to ensure that last_spawn_tty_name is
+	# not set.
+	#
+	# If the previous process spawned was also not assigned a tty
+	# (e.g. multiple processed chained in a pipeline) then
+	# last_spawn_tty_name will already be unset, so, if we don't
+	# use -nocomplain here we would otherwise get an error.
+	unset -nocomplain ::last_spawn_tty_name
+    }
+    return $result
+}
+
+rename spawn builtin_spawn
+rename spawn_capture_tty_name spawn
+
 # Default gdb_spawn procedure.
 
 proc default_gdb_spawn { } {
@@ -1992,6 +2087,7 @@ proc default_gdb_spawn { } {
     }
 
     set gdb_spawn_id $res
+    set ::gdb_tty_name $::last_spawn_tty_name
     return 0
 }
 
@@ -2770,7 +2866,7 @@ proc can_hardware_single_step {} {
 
     if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
 	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"]
-	 || [istarget "nios2-*-*"] } {
+	 || [istarget "nios2-*-*"] || [istarget "riscv*-*-linux*"] } {
 	return 0
     }
 
@@ -3066,6 +3162,53 @@ gdb_caching_proc skip_altivec_tests {
 
     verbose "$me:  returning $skip_vmx_tests" 2
     return $skip_vmx_tests
+}
+
+# Run a test on the power target to see if it supports ISA 3.1 instructions
+gdb_caching_proc skip_power_isa_3_1_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_power_isa_3_1_tests"
+
+    # Compile a test program containing ISA 3.1 instructions.
+    set src {
+	int main() {
+	asm volatile ("pnop"); // marker
+		asm volatile ("nop");
+		return 0;
+	    }
+	}
+
+    if {![gdb_simple_compile $me $src executable ]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "\n$me Power ISA 3.1 hardware not detected"
+            set skip_power_isa_3_1_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "\n$me: Power ISA 3.1 hardware detected"
+            set skip_power_isa_3_1_tests 0
+        }
+        default {
+          warning "\n$me: default case taken"
+            set skip_power_isa_3_1_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_power_isa_3_1_tests" 2
+    return $skip_power_isa_3_1_tests
 }
 
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so,
@@ -3865,6 +4008,27 @@ proc test_compiler_info { {compiler ""} } {
     return [string match $compiler $compiler_info]
 }
 
+# Return the gcc major version, or -1.
+# For gcc 4.8.5, the major version is 4.8.
+# For gcc 7.5.0, the major version 7.
+
+proc gcc_major_version { } {
+    global compiler_info
+    global decimal
+    if { ![test_compiler_info "gcc-*"] } {
+	return -1
+    }
+    set res [regexp gcc-($decimal)-($decimal)- $compiler_info \
+		 dummy_var major minor]
+    if { $res != 1 } {
+	return -1
+    }
+    if { $major >= 5} {
+	return $major
+    }
+    return $major.$minor
+}
+
 proc current_target_name { } {
     global target_info
     if [info exists target_info(target,name)] {
@@ -4098,7 +4262,9 @@ proc gdb_compile {source dest type options} {
 	    || [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
-	lappend new_options "additional_flags=-J${mod_path}"
+	if [test_compiler_info "gcc-*"] {
+	    lappend new_options "additional_flags=-J${mod_path}"
+	}
     }
 
     set shlib_found 0
@@ -5970,7 +6136,7 @@ proc exec_is_pie { executable } {
     if { $res != 0 } {
 	return -1
     }
-    set res [regexp -line {^[ \t]*Type:[ \t]*DYN \(Shared object file\)$} \
+    set res [regexp -line {^[ \t]*Type:[ \t]*DYN \((Position-Independent Executable|Shared object) file\)$} \
 		 $output]
     if { $res == 1 } {
 	return 1
@@ -7210,6 +7376,10 @@ proc capture_command_output { command prefix } {
 # being.
 
 proc multi_line { args } {
+    if { [llength $args] == 1 } {
+	set hint "forgot {*} before list argument?"
+	error "multi_line called with one argument ($hint)"
+    }
     return [join $args "\r\n"]
 }
 
@@ -7511,17 +7681,52 @@ proc readnow { args } {
     } else {
 	set re ""
     }
+
+    set readnow_p 0
+    # Given the listing from the following command can be very verbose, match
+    # the patterns line-by-line.  This prevents timeouts from waiting for
+    # too much data to come at once.
     set cmd "maint print objfiles $re"
-    gdb_test_multiple $cmd "" {
-	-re -wrap "\r\n.gdb_index: faked for \"readnow\"\r\n.*" {
-	    return 1
+    gdb_test_multiple $cmd "" -lbl {
+	-re "\r\n.gdb_index: faked for \"readnow\"" {
+	    # Record the we've seen the above pattern.
+	    set readnow_p 1
+	    exp_continue
 	}
 	-re -wrap "" {
-	    return 0
+	    # We don't care about any other input.
 	}
     }
 
-    return 0
+    return $readnow_p
+}
+
+# Return index name if symbols were read in using an index.
+# Otherwise, return "".
+
+proc have_index { objfile } {
+
+    set res ""
+    set cmd "maint print objfiles $objfile"
+    gdb_test_multiple $cmd "" -lbl {
+	-re "\r\n.gdb_index: faked for \"readnow\"" {
+	    set res ""
+	    exp_continue
+	}
+	-re "\r\n.gdb_index:" {
+	    set res "gdb_index"
+	    exp_continue
+	}
+	-re "\r\n.debug_names:" {
+	    set res "debug_names"
+	    exp_continue
+	}
+	-re -wrap "" {
+	    # We don't care about any other input.
+	}
+    }
+
+    return $res
 }
 
 # Return 1 if partial symbols are available.  Otherwise, return 0.
@@ -7567,12 +7772,15 @@ proc verify_psymtab_expanded { filename readin } {
 # Add a .gdb_index section to PROGRAM.
 # PROGRAM is assumed to be the output of standard_output_file.
 # Returns the 0 if there is a failure, otherwise 1.
+#
+# STYLE controls which style of index to add, if needed.  The empty
+# string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
-proc add_gdb_index { program } {
+proc add_gdb_index { program {style ""} } {
     global srcdir GDB env BUILD_DATA_DIRECTORY
     set contrib_dir "$srcdir/../contrib"
     set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
-    set result [catch "exec $contrib_dir/gdb-add-index.sh $program" output]
+    set result [catch "exec $contrib_dir/gdb-add-index.sh $style $program" output]
     if { $result != 0 } {
 	verbose -log "result is $result"
 	verbose -log "output is $output"
@@ -7586,8 +7794,11 @@ proc add_gdb_index { program } {
 # (.gdb_index/.debug_names).  Gdb doesn't support building an index from a
 # program already using one.  Return 1 if a .gdb_index was added, return 0
 # if it already contained an index, and -1 if an error occurred.
+#
+# STYLE controls which style of index to add, if needed.  The empty
+# string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
-proc ensure_gdb_index { binfile } {
+proc ensure_gdb_index { binfile {style ""} } {
     set testfile [file tail $binfile]
     set test "check if index present"
     gdb_test_multiple "mt print objfiles ${testfile}" $test {
@@ -7598,7 +7809,7 @@ proc ensure_gdb_index { binfile } {
 	    return 0
 	}
 	-re -wrap "Psymtabs.*" {
-	    if { [add_gdb_index $binfile] != "1" } {
+	    if { [add_gdb_index $binfile $style] != "1" } {
 		return -1
 	    }
 	    return 1
@@ -7705,13 +7916,6 @@ proc with_override { name override body } {
 # finalization function.
 proc tuiterm_env { } {
     load_lib tuiterm.exp
-
-    # Do initialization.
-    tuiterm_env_init
-
-    # Schedule finalization.
-    global gdb_finish_hooks
-    lappend gdb_finish_hooks tuiterm_env_finish
 }
 
 # Dejagnu has a version of note, but usage is not allowed outside of dejagnu.

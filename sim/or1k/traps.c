@@ -16,10 +16,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define WANT_CPU_OR1K32BF
 #define WANT_CPU
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "cgen-ops.h"
 
 /* Implement the sim invalid instruction function.  This will set the error
@@ -101,7 +105,7 @@ or1k32bf_fpu_error (CGEN_FPU* fpu, int status)
 	     per-instruction callbacks are not triggered which would allow
 	     us to track the PC.  This means we cannot track which
 	     instruction caused the FPU error.  */
-	  if (STATE_RUN_FAST_P (sd) == 1)
+	  if (!PROFILE_ANY_P (current_cpu) && !TRACE_ANY_P (current_cpu))
 	    sim_io_eprintf
 	      (sd, "WARNING: ignoring fpu error caught in fast mode.\n");
 	  else

@@ -24,7 +24,7 @@ This file is part of the GNU simulators.
 #include "sim-main.h"
 #include "bfd.h"
 
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const iq2000_sim_machs[] =
 {
 #ifdef HAVE_CPU_IQ2000BF
   & iq2000_mach,

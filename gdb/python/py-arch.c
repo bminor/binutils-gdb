@@ -271,12 +271,18 @@ archpy_register_groups (PyObject *self, PyObject *args)
   return gdbpy_new_reggroup_iterator (gdbarch);
 }
 
+void _initialize_py_arch ();
+void
+_initialize_py_arch ()
+{
+  arch_object_data = gdbarch_data_register_post_init (arch_object_data_init);
+}
+
 /* Initializes the Architecture class in the gdb module.  */
 
 int
 gdbpy_initialize_arch (void)
 {
-  arch_object_data = gdbarch_data_register_post_init (arch_object_data_init);
   arch_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&arch_object_type) < 0)
     return -1;

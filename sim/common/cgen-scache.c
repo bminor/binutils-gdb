@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define SCACHE_DEFINE_INLINE
 
 #include "sim-main.h"
@@ -172,8 +175,12 @@ scache_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
   return SIM_RC_OK;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_scache (SIM_DESC sd);
+
+/* Install the simulator cache into the simulator.  */
 SIM_RC
-scache_install (SIM_DESC sd)
+sim_install_scache (SIM_DESC sd)
 {
   sim_add_option_table (sd, NULL, scache_options);
   sim_module_add_init_fn (sd, scache_init);

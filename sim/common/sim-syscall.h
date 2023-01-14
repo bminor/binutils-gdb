@@ -20,6 +20,8 @@
 #ifndef SIM_SYSCALL_H
 #define SIM_SYSCALL_H
 
+struct cb_syscall;
+
 /* Perform a syscall on the behalf of the target program.  The error/result are
    normalized into a single value (like a lot of operating systems do).  If you
    want the split values, see the other function below.

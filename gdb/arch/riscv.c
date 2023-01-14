@@ -84,6 +84,12 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
   else if (features.flen == 8)
     regnum = create_feature_riscv_64bit_fpu (tdesc.get (), regnum);
 
+  /* Currently GDB only supports vector features coming from remote
+     targets.  We don't support creating vector features on native targets
+     (yet).  */
+  if (features.vlen != 0)
+    error (_("unable to create vector feature"));
+
   return tdesc;
 }
 

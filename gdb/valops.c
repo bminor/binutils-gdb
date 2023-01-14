@@ -44,14 +44,14 @@
 
 /* Local functions.  */
 
-static int typecmp (int staticp, int varargs, int nargs,
-		    struct field t1[], struct value *t2[]);
+static int typecmp (bool staticp, bool varargs, int nargs,
+		    struct field t1[], const gdb::array_view<value *> t2);
 
 static struct value *search_struct_field (const char *, struct value *, 
 					  struct type *, int);
 
 static struct value *search_struct_method (const char *, struct value **,
-					   struct value **,
+					   gdb::optional<gdb::array_view<value *>>,
 					   LONGEST, int *, struct type *);
 
 static int find_oload_champ_namespace (gdb::array_view<value *> args,
@@ -1197,14 +1197,15 @@ value_assign (struct value *toval, struct value *fromval)
 	struct gdbarch *gdbarch;
 	int value_reg;
 
-	/* Figure out which frame this is in currently.
-	
-	   We use VALUE_FRAME_ID for obtaining the value's frame id instead of
-	   VALUE_NEXT_FRAME_ID due to requiring a frame which may be passed to
-	   put_frame_register_bytes() below.  That function will (eventually)
-	   perform the necessary unwind operation by first obtaining the next
-	   frame.  */
-	frame = frame_find_by_id (VALUE_FRAME_ID (toval));
+	/* Figure out which frame this register value is in.  The value
+	   holds the frame_id for the next frame, that is the frame this
+	   register value was unwound from.
+
+	   Below we will call put_frame_register_bytes which requires that
+	   we pass it the actual frame in which the register value is
+	   valid, i.e. not the next frame.  */
+	frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
+	frame = get_prev_frame_always (frame);
 
 	value_reg = VALUE_REGNUM (toval);
 
@@ -1785,15 +1786,15 @@ value_string (const char *ptr, ssize_t len, struct type *char_type)
 }
 
 
-/* See if we can pass arguments in T2 to a function which takes
-   arguments of types T1.  T1 is a list of NARGS arguments, and T2 is
-   a NULL-terminated vector.  If some arguments need coercion of some
-   sort, then the coerced values are written into T2.  Return value is
+/* See if we can pass arguments in T2 to a function which takes arguments
+   of types T1.  T1 is a list of NARGS arguments, and T2 is an array_view
+   of the values we're trying to pass.  If some arguments need coercion of
+   some sort, then the coerced values are written into T2.  Return value is
    0 if the arguments could be matched, or the position at which they
    differ if not.
 
    STATICP is nonzero if the T1 argument list came from a static
-   member function.  T2 will still include the ``this'' pointer, but
+   member function.  T2 must still include the ``this'' pointer, but
    it will be skipped.
 
    For non-static member functions, we ignore the first argument,
@@ -1803,19 +1804,15 @@ value_string (const char *ptr, ssize_t len, struct type *char_type)
    requested operation is type secure, shouldn't we?  FIXME.  */
 
 static int
-typecmp (int staticp, int varargs, int nargs,
-	 struct field t1[], struct value *t2[])
+typecmp (bool staticp, bool varargs, int nargs,
+	 struct field t1[], gdb::array_view<value *> t2)
 {
   int i;
-
-  if (t2 == 0)
-    internal_error (__FILE__, __LINE__, 
-		    _("typecmp: no argument list"));
 
   /* Skip ``this'' argument if applicable.  T2 will always include
      THIS.  */
   if (staticp)
-    t2 ++;
+    t2 = t2.slice (1);
 
   for (i = 0;
        (i < nargs) && t1[i].type ()->code () != TYPE_CODE_VOID;
@@ -1823,7 +1820,7 @@ typecmp (int staticp, int varargs, int nargs,
     {
       struct type *tt1, *tt2;
 
-      if (!t2[i])
+      if (i == t2.size ())
 	return i + 1;
 
       tt1 = check_typedef (t1[i].type ());
@@ -1868,7 +1865,7 @@ typecmp (int staticp, int varargs, int nargs,
       if (t1[i].type ()->code () != value_type (t2[i])->code ())
 	return i + 1;
     }
-  if (varargs || t2[i] == NULL)
+  if (varargs || i == t2.size ())
     return 0;
   return i + 1;
 }
@@ -2181,13 +2178,18 @@ search_struct_field (const char *name, struct value *arg1,
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
    TYPE.
 
+   ARGS is an optional array of argument values used to help finding NAME.
+   The contents of ARGS can be adjusted if type coercion is required in
+   order to find a matching NAME.
+
    If found, return value, else if name matched and args not return
    (value) -1, else return NULL.  */
 
 static struct value *
 search_struct_method (const char *name, struct value **arg1p,
-		      struct value **args, LONGEST offset,
-		      int *static_memfuncp, struct type *type)
+		      gdb::optional<gdb::array_view<value *>> args,
+		      LONGEST offset, int *static_memfuncp,
+		      struct type *type)
 {
   int i;
   struct value *v;
@@ -2205,10 +2207,10 @@ search_struct_method (const char *name, struct value **arg1p,
 
 	  name_matched = 1;
 	  check_stub_method_group (type, i);
-	  if (j > 0 && args == 0)
+	  if (j > 0 && !args.has_value ())
 	    error (_("cannot resolve overloaded method "
 		     "`%s': no arguments supplied"), name);
-	  else if (j == 0 && args == 0)
+	  else if (j == 0 && !args.has_value ())
 	    {
 	      v = value_fn_field (arg1p, f, j, type, offset);
 	      if (v != NULL)
@@ -2217,10 +2219,11 @@ search_struct_method (const char *name, struct value **arg1p,
 	  else
 	    while (j >= 0)
 	      {
+		gdb_assert (args.has_value ());
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_FN_FIELD_TYPE (f, j)->has_varargs (),
 			      TYPE_FN_FIELD_TYPE (f, j)->num_fields (),
-			      TYPE_FN_FIELD_ARGS (f, j), args))
+			      TYPE_FN_FIELD_ARGS (f, j), *args))
 		  {
 		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		      return value_virtual_fn_field (arg1p, f, j, 
@@ -2319,7 +2322,8 @@ search_struct_method (const char *name, struct value **arg1p,
    found.  */
 
 struct value *
-value_struct_elt (struct value **argp, struct value **args,
+value_struct_elt (struct value **argp,
+		  gdb::optional<gdb::array_view<value *>> args,
 		  const char *name, int *static_memfuncp, const char *err)
 {
   struct type *t;
@@ -2349,7 +2353,7 @@ value_struct_elt (struct value **argp, struct value **args,
   if (static_memfuncp)
     *static_memfuncp = 0;
 
-  if (!args)
+  if (!args.has_value ())
     {
       /* if there are no arguments ...do this...  */
 
@@ -2361,7 +2365,7 @@ value_struct_elt (struct value **argp, struct value **args,
 
       /* C++: If it was not found as a data field, then try to
 	 return it as a pointer to a method.  */
-      v = search_struct_method (name, argp, args, 0, 
+      v = search_struct_method (name, argp, args, 0,
 				static_memfuncp, t);
 
       if (v == (struct value *) - 1)
@@ -2376,9 +2380,9 @@ value_struct_elt (struct value **argp, struct value **args,
       return v;
     }
 
-  v = search_struct_method (name, argp, args, 0, 
+  v = search_struct_method (name, argp, args, 0,
 			    static_memfuncp, t);
-  
+
   if (v == (struct value *) - 1)
     {
       error (_("One of the arguments you tried to pass to %s could not "

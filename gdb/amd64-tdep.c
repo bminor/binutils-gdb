@@ -554,7 +554,6 @@ amd64_has_unaligned_fields (struct type *type)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
-	  int align = type_align(subtype);
 
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
@@ -567,6 +566,10 @@ amd64_has_unaligned_fields (struct type *type)
 
 	  if (bitpos % 8 != 0)
 	    return true;
+
+	  int align = type_align (subtype);
+	  if (align == 0)
+	    error (_("could not determine alignment of type"));
 
 	  int bytepos = bitpos / 8;
 	  if (bytepos % align != 0)
@@ -2018,8 +2021,8 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
      
-     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
-     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
    */
 
   gdb_byte buf[18];
@@ -2182,13 +2185,13 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
      
-     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
-     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
 
      "andl $-XXX, %esp" can be either 3 bytes or 6 bytes:
      
-     	0x83 0xe4 0xf0			andl $-16, %esp
-     	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
+	0x83 0xe4 0xf0			andl $-16, %esp
+	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
    */
 
   gdb_byte buf[19];
@@ -2699,6 +2702,7 @@ amd64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 static const struct frame_unwind amd64_frame_unwind =
 {
+  "amd64 prologue",
   NORMAL_FRAME,
   amd64_frame_unwind_stop_reason,
   amd64_frame_this_id,
@@ -2843,6 +2847,7 @@ amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind amd64_sigtramp_frame_unwind =
 {
+  "amd64 sigtramp",
   SIGTRAMP_FRAME,
   amd64_sigtramp_frame_unwind_stop_reason,
   amd64_sigtramp_frame_this_id,
@@ -2978,6 +2983,7 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
 {
+  "amd64 epilogue",
   NORMAL_FRAME,
   amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,
@@ -3342,9 +3348,9 @@ void
 _initialize_amd64_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NONE,
- 			  amd64_none_init_abi);
+			  amd64_none_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32, GDB_OSABI_NONE,
- 			  amd64_x32_none_init_abi);
+			  amd64_x32_none_init_abi);
 }
 
 

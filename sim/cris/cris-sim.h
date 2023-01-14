@@ -79,7 +79,6 @@ typedef struct {
 
 /* Handler prototypes for functions called from the CGEN description.  */
 
-extern USI cris_bmod_handler (SIM_CPU *, UINT, USI);
 extern void cris_flush_simulator_decode_cache (SIM_CPU *, USI);
 extern USI crisv10f_break_handler (SIM_CPU *, USI, USI);
 extern USI crisv32f_break_handler (SIM_CPU *, USI, USI);

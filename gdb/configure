@@ -633,7 +633,6 @@ LIBXXHASH
 HAVE_LIBXXHASH
 CTF_DEPS
 LIBCTF
-ENABLE_LIBCTF
 LTLIBBABELTRACE
 LIBBABELTRACE
 HAVE_LIBBABELTRACE
@@ -795,6 +794,7 @@ DEPDIR
 am__leading_dot
 CXX_DIALECT
 HAVE_CXX11
+target_noncanonical
 INSTALL_STRIP_PROGRAM
 STRIP
 install_sh
@@ -911,7 +911,6 @@ enable_source_highlight
 with_intel_pt
 with_libipt_prefix
 with_libipt_type
-with_included_regex
 with_sysroot
 with_system_gdbinit
 with_system_gdbinit_dir
@@ -1661,10 +1660,6 @@ Optional Packages:
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
   --with-libipt-type=TYPE     type of library to search for (auto/static/shared)
-  --without-included-regex
-                          don't use included regex; this is the default on
-                          systems with version 2 of the GNU C library (use
-                          with caution on other system)
   --with-sysroot[=DIR]    search for usr/lib et al within DIR
   --with-system-gdbinit=PATH
                           automatically load a system-wide gdbinit file
@@ -2989,6 +2984,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
@@ -5183,6 +5179,24 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 # Set target, target_cpu, target_vendor, and target_os.
+
+
+ case ${build_alias} in
+  "") build_noncanonical=${build} ;;
+  *) build_noncanonical=${build_alias} ;;
+esac
+
+ case ${host_alias} in
+  "") host_noncanonical=${build_noncanonical} ;;
+  *) host_noncanonical=${host_alias} ;;
+esac
+
+ case ${target_alias} in
+  "") target_noncanonical=${host_noncanonical} ;;
+  *) target_noncanonical=${target_alias} ;;
+esac
+
+
 
 
 test "$program_prefix" != NONE &&
@@ -12215,7 +12229,7 @@ fi
 for ac_header in nlist.h machine/reg.h \
                   thread_db.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
-		  sys/resource.h sys/ptrace.h ptrace.h \
+		  sys/procctl.h sys/resource.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h \
 		  termios.h elf_hp.h
 do :
@@ -13811,7 +13825,7 @@ fi
 
   for ac_func in fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
 		  ptrace64 sbrk setns sigaltstack sigprocmask \
-		  setpgid setpgrp getrusage getauxval
+		  setpgid setpgrp getrusage getauxval sigtimedwait
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -13823,80 +13837,6 @@ _ACEOF
 fi
 done
 
-
-      ac_fn_c_check_decl "$LINENO" "ADDR_NO_RANDOMIZE" "ac_cv_have_decl_ADDR_NO_RANDOMIZE" "#include <sys/personality.h>
-"
-if test "x$ac_cv_have_decl_ADDR_NO_RANDOMIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_ADDR_NO_RANDOMIZE $ac_have_decl
-_ACEOF
-
-
-  if test "$cross_compiling" = yes; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/personality.h>
-int
-main ()
-{
-
-  #      if !HAVE_DECL_ADDR_NO_RANDOMIZE
-  #       define ADDR_NO_RANDOMIZE 0x0040000
-  #      endif
-	 /* Test the flag could be set and stays set.  */
-	 personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
-	 if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
-	     return 1
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  have_personality=true
-else
-  have_personality=false
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/personality.h>
-int
-main ()
-{
-
-  #      if !HAVE_DECL_ADDR_NO_RANDOMIZE
-  #       define ADDR_NO_RANDOMIZE 0x0040000
-  #      endif
-	 /* Test the flag could be set and stays set.  */
-	 personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
-	 if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
-	     return 1
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  have_personality=true
-else
-  have_personality=false
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-  if $have_personality
-  then
-
-$as_echo "#define HAVE_PERSONALITY 1" >>confdefs.h
-
-  fi
 
   ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
 if test "x$ac_cv_have_decl_strstr" = xyes; then :
@@ -15889,60 +15829,6 @@ if test "$ac_cv_func_setpgrp_void" = yes; then
   $as_echo "#define SETPGRP_VOID 1" >>confdefs.h
 
 fi
-fi
-
-# Assume we'll default to using the included libiberty regex.
-gdb_use_included_regex=yes
-
-# However, if the system regex is GNU regex, then default to *not*
-# using the included regex.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU regex" >&5
-$as_echo_n "checking for GNU regex... " >&6; }
-if ${gdb_cv_have_gnu_regex+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <gnu-versions.h>
-int
-main ()
-{
-#define REGEX_INTERFACE_VERSION 1
-	 #if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
-	 # error "Version mismatch"
-	 #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_have_gnu_regex=yes
-else
-  gdb_cv_have_gnu_regex=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_gnu_regex" >&5
-$as_echo "$gdb_cv_have_gnu_regex" >&6; }
-if test "$gdb_cv_have_gnu_regex" = yes; then
-  gdb_use_included_regex=no
-fi
-
-
-# Check whether --with-included-regex was given.
-if test "${with_included_regex+set}" = set; then :
-  withval=$with_included_regex; gdb_with_regex=$withval
-else
-  gdb_with_regex=$gdb_use_included_regex
-fi
-
-if test "$gdb_with_regex" = yes; then
-
-$as_echo "#define USE_INCLUDED_REGEX 1" >>confdefs.h
-
 fi
 
 # Check if <sys/proc.h> defines `struct thread' with a td_pcb member.
@@ -19286,7 +19172,6 @@ else
   LIBCTF=
   CTF_DEPS=
 fi
-
 
 
 

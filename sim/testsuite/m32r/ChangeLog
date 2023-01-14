@@ -1,3 +1,8 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-trap.ms: Run sim with --environment virtual.
+	* trap.cgs: Likewise.
+
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* allinsn.exp (arch): Delete.

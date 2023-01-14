@@ -4278,8 +4278,7 @@ format, which is the first one listed by the @option{--help} option.
 @item --preprocessor @var{program}
 When @command{windres} reads an @code{rc} file, it runs it through the C
 preprocessor first.  This option may be used to specify the preprocessor
-to use, including any leading arguments.  The default preprocessor
-argument is @code{gcc -E -xc-header -DRC_INVOKED}.
+to use.  The default preprocessor is @code{gcc}.
 
 @item --preprocessor-arg @var{option}
 When @command{windres} reads an @code{rc} file, it runs it through
@@ -4287,6 +4286,11 @@ the C preprocessor first.  This option may be used to specify additional
 text to be passed to preprocessor on its command line.
 This option can be used multiple times to add multiple options to the
 preprocessor command line.
+If the @option{--preprocessor} option has not been specified then a
+default set of preprocessor arguments will be used, with any
+@option{--preprocessor-arg} options being placed after them on the
+command line.  These default arguments are @code{-E},
+@code{-xc-header} and @code{-DRC_INVOKED}.
 
 @item -I @var{directory}
 @itemx --include-dir @var{directory}
@@ -4788,6 +4792,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{--dyn-syms}|@option{--lto-syms}]
+        [@option{--sym-base=[0|8|10|16]}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
@@ -4916,6 +4921,18 @@ has one.  The output format is the same as the format used by the
 @item --lto-syms
 @cindex LTO symbol table
 Displays the contents of any LTO symbol tables in the file.
+
+@item --sym-base=[0|8|10|16]
+@cindex symbol table size base
+Forces the size field of the symbol table to use the given base.  Any
+unrecognized options will be treated as @samp{0}.  @option{--sym-base=0}
+represents the default and legacy behaviour.  This will output sizes as decimal
+for numbers less than 100000.  For sizes 100000 and greater hexadecimal notation
+will be used with a 0x prefix.
+@option{--sym-base=8} will give the symbol sizes in octal.
+@option{--sym-base=10} will always give the symbol sizes in decimal.
+@option{--sym-base=16} will always give the symbol sizes in hexadecimal with a
+0x prefix.
 
 @item -C
 @itemx --demangle[=@var{style}]

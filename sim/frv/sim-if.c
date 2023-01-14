@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define WANT_CPU
 #define WANT_CPU_FRVBF
 #include "sim-main.h"
@@ -27,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "elf-bfd.h"
 
 static void free_state (SIM_DESC);
-static void print_frv_misc_cpu (SIM_CPU *cpu, int verbose);
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -40,6 +42,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const frv_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -50,6 +54,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
   int i;
   unsigned long elf_flags = 0;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = frv_sim_machs;
+  STATE_MODEL_NAME (sd) = "fr500";
+  current_alignment = STRICT_ALIGNMENT;
+  current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -79,7 +89,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
   /* Allocate core managed memory if none specified by user.
      Use address 4 here in case the user wanted address 0 unmapped.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) == 0)
-    sim_do_commandf (sd, "memory region 0,0x%lx", FRV_DEFAULT_MEM_SIZE);
+    sim_do_commandf (sd, "memory region 0,0x%x", FRV_DEFAULT_MEM_SIZE);
 
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
@@ -97,7 +107,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
     bfd *prog_bfd = STATE_PROG_BFD (sd);
     if (prog_bfd != NULL)
       {
-	struct elf_backend_data *backend_data;
+	const struct elf_backend_data *backend_data;
 
 	if (bfd_get_arch (prog_bfd) != bfd_arch_frv)
 	  {
@@ -143,10 +153,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
       }
     frv_cgen_init_dis (cd);
   }
-
-  /* Initialize various cgen things not done by common framework.
-     Must be done after frv_cgen_cpu_open.  */
-  cgen_init (sd);
 
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)

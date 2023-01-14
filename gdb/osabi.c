@@ -598,8 +598,6 @@ generic_elf_osabi_sniffer (bfd *abfd)
 static void
 set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  struct gdbarch_info info;
-
   if (strcmp (set_osabi_string, "auto") == 0)
     user_osabi_state = osabi_auto;
   else if (strcmp (set_osabi_string, "default") == 0)
@@ -630,7 +628,7 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 
   /* NOTE: At some point (true multiple architectures) we'll need to be more
      graceful here.  */
-  gdbarch_info_init (&info);
+  gdbarch_info info;
   if (! gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("Updating OS ABI failed."));
 }

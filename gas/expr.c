@@ -127,6 +127,52 @@ expr_symbol_where (symbolS *sym, const char **pfile, unsigned int *pline)
 
   return 0;
 }
+
+/* Look up a previously used .startof. / .sizeof. symbol, or make a fresh
+   one.  */
+
+static symbolS *
+symbol_lookup_or_make (const char *name, bool start)
+{
+  static symbolS **seen[2];
+  static unsigned int nr_seen[2];
+  char *buf = concat (start ? ".startof." : ".sizeof.", name, NULL);
+  symbolS *symbolP;
+  unsigned int i;
+
+  for (i = 0; i < nr_seen[start]; ++i)
+    {
+    symbolP = seen[start][i];
+
+    if (! symbolP)
+      break;
+
+    name = S_GET_NAME (symbolP);
+    if ((symbols_case_sensitive
+	 ? strcasecmp (buf, name)
+	 : strcmp (buf, name)) == 0)
+      {
+	free (buf);
+	return symbolP;
+      }
+    }
+
+  symbolP = symbol_make (buf);
+  free (buf);
+
+  if (i >= nr_seen[start])
+    {
+      unsigned int nr = (i + 1) * 2;
+
+      seen[start] = XRESIZEVEC (symbolS *, seen[start], nr);
+      nr_seen[start] = nr;
+      memset (&seen[start][i + 1], 0, (nr - i - 1) * sizeof(seen[0][0]));
+    }
+
+  seen[start][i] = symbolP;
+
+  return symbolP;
+}
 
 /* Utilities for building expressions.
    Since complex expressions are recorded as symbols for use in other
@@ -1159,8 +1205,6 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	    as_bad (_("syntax error in .startof. or .sizeof."));
 	  else
 	    {
-	      char *buf;
-
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      c = get_symbol_name (& name);
@@ -1175,13 +1219,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		  break;
 		}
 
-	      buf = concat (start ? ".startof." : ".sizeof.", name,
-			    (char *) NULL);
-	      symbolP = symbol_make (buf);
-	      free (buf);
-
 	      expressionP->X_op = O_symbol;
-	      expressionP->X_add_symbol = symbolP;
+	      expressionP->X_add_symbol = symbol_lookup_or_make (name, start);
 	      expressionP->X_add_number = 0;
 
 	      *input_line_pointer = c;

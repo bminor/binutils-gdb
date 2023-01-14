@@ -38,11 +38,12 @@ import os
 if len(sys.argv) > 1:
     fmt = sys.argv[1]
 else:
-    fmt = '[%b %d %H:%M:%S]'
+    fmt = "[%b %d %H:%M:%S]"
 
 mypid = os.getpid()
 
-for line in fileinput.input('-'):
-    sys.stdout.write("{} [{}] {}".format(datetime.datetime.now().strftime(fmt),
-                                         mypid, line))
+for line in fileinput.input("-"):
+    sys.stdout.write(
+        "{} [{}] {}".format(datetime.datetime.now().strftime(fmt), mypid, line)
+    )
     sys.stdout.flush()

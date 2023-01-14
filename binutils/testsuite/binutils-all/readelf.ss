@@ -9,6 +9,7 @@ Symbol table '.symtab' contains .* entries:
  +.: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +[34] static_data_symbol
 # v850 targets include extra SECTION symbols here for the .call_table_data
 # and .call_table_text sections.
+# riscv targets add .riscv.attribute symbol here...
 #...
  +[0-9]+: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +1 text_symbol
  +[0-9]+: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +UND external_symbol

@@ -60,11 +60,4 @@ typedef enum
   AARCH64_MAX_REGNO  = 67
 } aarch64_regno;
 
-/* The simulator state structure used to hold all global variables.  */
-struct sim_state
-{
-  sim_cpu *       cpu[MAX_NR_PROCESSORS];
-  sim_state_base  base;
-};
-
 #endif /* _SIM_MAIN_H */

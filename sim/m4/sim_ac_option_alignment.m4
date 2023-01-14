@@ -15,52 +15,19 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl Specify the alignment restrictions of the target architecture.
 dnl Without this option all possible alignment restrictions are accommodated.
-dnl arg[1] is hardwired target alignment
-dnl arg[2] is default target alignment
 AC_DEFUN([SIM_AC_OPTION_ALIGNMENT],
-wire_alignment="[$1]"
-default_alignment="[$2]"
-[
+[dnl
+AC_MSG_CHECKING([whether to force sim alignment])
+sim_alignment=
 AC_ARG_ENABLE(sim-alignment,
 [AS_HELP_STRING([--enable-sim-alignment=align],
 		[Specify strict, nonstrict or forced alignment of memory accesses])],
 [case "${enableval}" in
-  strict | STRICT)       sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  nonstrict | NONSTRICT) sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
-  forced | FORCED)       sim_alignment="-DWITH_ALIGNMENT=FORCED_ALIGNMENT";;
-  yes) if test x"$wire_alignment" != x; then
-	 sim_alignment="-DWITH_ALIGNMENT=${wire_alignment}"
-       else
-         if test x"$default_alignment" != x; then
-           sim_alignment="-DWITH_ALIGNMENT=${default_alignment}"
-         else
-	   echo "No hard-wired alignment for target $target" 1>&6
-	   sim_alignment="-DWITH_ALIGNMENT=0"
-         fi
-       fi;;
-  no)  if test x"$default_alignment" != x; then
-	 sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${default_alignment}"
-       else
-         if test x"$wire_alignment" != x; then
-	   sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${wire_alignment}"
-         else
-           echo "No default alignment for target $target" 1>&6
-           sim_alignment="-DWITH_DEFAULT_ALIGNMENT=0"
-         fi
-       fi;;
-  *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
-  echo "Setting alignment flags = $sim_alignment" 6>&1
-fi],
-[if test x"$default_alignment" != x; then
-  sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${default_alignment}"
-else
-  if test x"$wire_alignment" != x; then
-    sim_alignment="-DWITH_ALIGNMENT=${wire_alignment}"
-  else
-    sim_alignment=
-  fi
-fi])dnl
+  yes | strict | STRICT)      sim_alignment="STRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT) sim_alignment="NONSTRICT_ALIGNMENT";;
+  forced | FORCED)            sim_alignment="FORCED_ALIGNMENT";;
+  *) AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment");;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_ALIGNMENT], [${sim_alignment:-0}], [Sim alignment settings])
+AC_MSG_RESULT([${sim_alignment:-no}])
 ])dnl
-AC_SUBST(sim_alignment)

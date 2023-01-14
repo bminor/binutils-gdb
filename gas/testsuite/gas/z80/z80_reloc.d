@@ -24,4 +24,9 @@ OFFSET[   ]+TYPE[              ]+VALUE\s*
 0000002a[ ]+r_byte1[           ]+data16
 0000002b[ ]+r_word0[           ]+data32
 0000002d[ ]+r_word1[           ]+data32
+0000002f[ ]+r_byte3[           ]+data32
+00000031[ ]+r_byte1[           ]+data24
+00000032[ ]+r_byte2[           ]+data24
+00000033[ ]+r_byte1[           ]+data32
+00000034[ ]+r_byte2[           ]+data32
 #pass

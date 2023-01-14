@@ -18,6 +18,8 @@
     
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "sim-hw.h"
@@ -142,7 +144,7 @@ struct m68hc11cpu {
   int              pending_level;
   struct hw_event  *event;
   unsigned_word    attach_address;
-  int              attach_size;
+  unsigned int     attach_size;
   int              attach_space;
   int              last_oscillator;
   struct input_osc oscillators[NR_OSC];

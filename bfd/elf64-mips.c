@@ -3483,7 +3483,7 @@ mips_elf64_gprel16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf64_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -3523,7 +3523,7 @@ mips_elf64_literal_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf64_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -3565,7 +3565,7 @@ mips_elf64_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf64_final_gp (output_bfd, symbol, relocatable,
@@ -3654,7 +3654,7 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf64_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -4073,6 +4073,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	    }
 
 	  /* Some types require symbols, whereas some do not.  */
+	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  switch (type)
 	    {
 	    case R_MIPS_NONE:
@@ -4080,14 +4081,13 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	    case R_MIPS_INSERT_A:
 	    case R_MIPS_INSERT_B:
 	    case R_MIPS_DELETE:
-	      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      break;
 
 	    default:
 	      if (! used_sym)
 		{
 		  if (rela.r_sym == STN_UNDEF)
-		    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+		    ;
 		  else if (rela.r_sym > symcount)
 		    {
 		      _bfd_error_handler
@@ -4096,8 +4096,6 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 			   " has invalid symbol index %ld"),
 			 abfd, asect, (uint64_t) i, rela.r_sym);
 		      bfd_set_error (bfd_error_bad_value);
-		      relent->sym_ptr_ptr
-			= bfd_abs_section_ptr->symbol_ptr_ptr;
 		    }
 		  else
 		    {
@@ -4118,8 +4116,6 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 		  switch (rela.r_ssym)
 		    {
 		    case RSS_UNDEF:
-		      relent->sym_ptr_ptr =
-			bfd_abs_section_ptr->symbol_ptr_ptr;
 		      break;
 
 		    case RSS_GP:
@@ -4137,9 +4133,6 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 
 		  used_ssym = true;
 		}
-	      else
-		relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-
 	      break;
 	    }
 

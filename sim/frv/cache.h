@@ -234,6 +234,8 @@ frv_cache_write (FRV_CACHE *, SI, char *, unsigned);
 int
 frv_cache_preload (FRV_CACHE *, SI, USI, int);
 int
+frv_cache_unlock (FRV_CACHE *, SI);
+int
 frv_cache_invalidate (FRV_CACHE *, SI, int);
 int
 frv_cache_invalidate_all (FRV_CACHE *, int);

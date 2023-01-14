@@ -696,11 +696,10 @@ the contents of the given line."));
 
   add_basic_prefix_cmd ("dcache", class_obscure, _("\
 Use this command to set number of lines in dcache and line-size."),
-			&dcache_set_list, "set dcache ", /*allow_unknown*/0,
-			&setlist);
+			&dcache_set_list, /*allow_unknown*/0, &setlist);
   add_show_prefix_cmd ("dcache", class_obscure, _("\
 Show dcachesettings."),
-		       &dcache_show_list, "show dcache ", /*allow_unknown*/0,
+		       &dcache_show_list, /*allow_unknown*/0,
 		       &showlist);
 
   add_setshow_zuinteger_cmd ("line-size", class_obscure,

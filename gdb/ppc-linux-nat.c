@@ -1946,9 +1946,7 @@ ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
 const struct target_desc *
 ppc_linux_nat_target::read_description ()
 {
-  int tid = inferior_ptid.lwp ();
-  if (tid == 0)
-    tid = inferior_ptid.pid ();
+  int tid = inferior_ptid.pid ();
 
   if (have_ptrace_getsetevrregs)
     {

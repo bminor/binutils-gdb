@@ -35,4 +35,4 @@ tree_check (tree *t, int i)
     abort();
   tree *x = t;
   return x;
-}
+} // tree_check

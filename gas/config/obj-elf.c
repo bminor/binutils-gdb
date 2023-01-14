@@ -131,6 +131,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"offset", obj_elf_struct, 0},
   {"struct", obj_elf_struct, 0},
   {"text", obj_elf_text, 0},
+  {"bss", obj_elf_bss, 0},
 
   {"tls_common", obj_elf_tls_common, 0},
 
@@ -603,8 +604,8 @@ obj_elf_change_section (const char *name,
       elt->prev_subseg = previous_subsection;
       section_stack = elt;
     }
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+
+  obj_elf_section_change_hook ();
 
   old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
 					(void *) match_p);
@@ -742,6 +743,22 @@ obj_elf_change_section (const char *name,
   if (linkonce)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
+  /* PR 28054: Set the SEC_ELF_OCTETS flag for debugging sections.
+     Based on the code in bfd/elf.c:_bfd_elf_make_section_from_shdr().
+
+     FIXME: We do not set the SEC_DEBUGGING flag because that causes
+     problems for the FT32 and MSP430 targets.  Investigate and fix.  */
+  if ((flags & SEC_ALLOC) == 0 && name [0] == '.')
+    {
+      if (   startswith (name, ".debug")
+	  || startswith (name, ".zdebug")
+	  || startswith (name, ".gnu.debuglto_.debug_")
+	  || startswith (name, ".gnu.linkonce.wi.")
+	  || startswith (name, GNU_BUILD_ATTRS_SECTION_NAME)
+	  || startswith (name, ".note.gnu"))
+	flags |= SEC_ELF_OCTETS;
+    }
+  
   if (old_sec == NULL)
     {
       symbolS *secsym;
@@ -1125,8 +1142,7 @@ obj_elf_section (int push)
       md_flush_pending_output ();
 #endif
 
-      previous_section = now_seg;
-      previous_subsection = now_subseg;
+      obj_elf_section_change_hook ();
 
       s_mri_sect (&mri_type);
 
@@ -1467,6 +1483,28 @@ obj_elf_section (int push)
     subseg_set (now_seg, new_subsection);
 }
 
+/* Change to the .bss section.  */
+
+void
+obj_elf_bss (int i ATTRIBUTE_UNUSED)
+{
+  int temp;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  obj_elf_section_change_hook ();
+
+  temp = get_absolute_expression ();
+  subseg_set (bss_section, (subsegT) temp);
+  demand_empty_rest_of_line ();
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
+}
+
 /* Change to the .data section.  */
 
 void
@@ -1476,8 +1514,8 @@ obj_elf_data (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_data (i);
 
 #ifdef md_elf_section_change_hook
@@ -1494,8 +1532,8 @@ obj_elf_text (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_text (i);
 
 #ifdef md_elf_section_change_hook
@@ -1512,8 +1550,8 @@ obj_elf_struct (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_struct (i);
 
 #ifdef md_elf_section_change_hook
@@ -1530,8 +1568,7 @@ obj_elf_subsection (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
 
   temp = get_absolute_expression ();
   subseg_set (now_seg, (subsegT) temp);
@@ -1570,8 +1607,8 @@ obj_elf_previous (int ignore ATTRIBUTE_UNUSED)
 
   new_section = previous_section;
   new_subsection = previous_subsection;
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   subseg_set (new_section, new_subsection);
 
 #ifdef md_elf_section_change_hook

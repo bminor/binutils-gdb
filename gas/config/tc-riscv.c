@@ -410,12 +410,21 @@ riscv_set_arch (const char *s)
   rps.error_handler = as_bad;
   rps.xlen = &xlen;
   rps.get_default_version = riscv_get_default_ext_version;
+  rps.check_unknown_prefixed_ext = true;
 
   if (s == NULL)
     return;
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&rps, s);
+
+  /* To support .option rvc and rve.  */
+  riscv_set_rvc (false);
+  if (riscv_subset_supports ("c"))
+    riscv_set_rvc (true);
+  riscv_set_rve (false);
+  if (riscv_subset_supports ("e"))
+    riscv_set_rve (true);
 }
 
 /* Indicate -mabi option is explictly set.  */
@@ -441,6 +450,8 @@ riscv_set_abi_by_arch (void)
 	riscv_set_abi (xlen, FLOAT_ABI_QUAD, false);
       else if (riscv_subset_supports ("d"))
 	riscv_set_abi (xlen, FLOAT_ABI_DOUBLE, false);
+      else if (riscv_subset_supports ("e"))
+	riscv_set_abi (xlen, FLOAT_ABI_SOFT, true);
       else
 	riscv_set_abi (xlen, FLOAT_ABI_SOFT, false);
     }
@@ -451,6 +462,22 @@ riscv_set_abi_by_arch (void)
 	as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
       else if (abi_xlen < xlen)
 	as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
+
+      if (riscv_subset_supports ("e") && !rve_abi)
+	as_bad ("only the ilp32e ABI is supported for e extension");
+
+      if (float_abi == FLOAT_ABI_SINGLE
+	  && !riscv_subset_supports ("f"))
+	as_bad ("ilp32f/lp64f ABI can't be used when f extension "
+		"isn't supported");
+      else if (float_abi == FLOAT_ABI_DOUBLE
+	       && !riscv_subset_supports ("d"))
+	as_bad ("ilp32d/lp64d ABI can't be used when d extension "
+		"isn't supported");
+      else if (float_abi == FLOAT_ABI_QUAD
+	       && !riscv_subset_supports ("q"))
+	as_bad ("ilp32q/lp64q ABI can't be used when q extension "
+		"isn't supported");
     }
 
   /* Update the EF_RISCV_FLOAT_ABI field of elf_flags.  */
@@ -1280,7 +1307,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 	{
 	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
 	  if (howto == NULL)
-	    as_bad (_("internal: usupported RISC-V relocation number %d"),
+	    as_bad (_("internal: unsupported RISC-V relocation number %d"),
 		    reloc_type);
 
 	  ip->fixp = fix_new_exp (ip->frag, ip->where,
@@ -2926,16 +2953,6 @@ riscv_after_parse_args (void)
 
   riscv_set_arch (default_arch_with_ext);
 
-  /* Add the RVC extension, regardless of -march, to support .option rvc.  */
-  riscv_set_rvc (false);
-  if (riscv_subset_supports ("c"))
-    riscv_set_rvc (true);
-
-  /* Enable RVE if specified by the -march option.  */
-  riscv_set_rve (false);
-  if (riscv_subset_supports ("e"))
-    riscv_set_rve (true);
-
   /* If the CIE to be produced has not been overridden on the command line,
      then produce version 3 by default.  This allows us to use the full
      range of registers in a .cfi_return_column directive.  */
@@ -3184,8 +3201,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
 
   if (fixP->fx_subsy != NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line,
-		  _("unsupported symbol subtraction"));
+    as_bad_subtract (fixP);
 
   /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
   if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)

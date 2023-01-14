@@ -461,6 +461,10 @@ enum mips_reg_operand_type {
      also be used in some contexts.  */
   OP_REG_COPRO,
 
+  /* Coprocessor control registers $0-$31.  Mnemonic names like c1_fcsr can
+     also be used in some contexts.  */
+  OP_REG_CONTROL,
+
   /* Hardware registers $0-$31.  Mnemonic names like hwr_cpunum can
      also be used in some contexts.  */
   OP_REG_HW,
@@ -841,6 +845,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "H" 3 bit sel field for (d)mtc* and (d)mfc* (OP_*_SEL)
    "P" 5 bit performance-monitor register (OP_*_PERFREG)
    "e" 5 bit vector register byte specifier (OP_*_VECBYTE)
+   "g" 5 bit control destination register (OP_*_RD)
    "%" 3 bit immediate vr5400 vector alignment operand (OP_*_VECALIGN)
 
    Macro instructions:
@@ -899,7 +904,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "$" 1 bit load high flag (OP_*_MT_H)
    "*" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_T)
    "&" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_D)
-   "g" 5 bit coprocessor 1 and 2 destination register (OP_*_RD)
+   "y" 5 bit control target register (OP_*_RT)
    "+t" 5 bit coprocessor 0 destination register (OP_*_RT)
 
    MCU ASE usage:
@@ -1001,7 +1006,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "1234567890"
    "%[]<>(),+-:'@!#$*&\~"
    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-   "abcdefghijklopqrstuvwxz"
+   "abcdef hijkl  opqrstuvwxyz"
 
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:
@@ -1454,16 +1459,29 @@ cpu_is_member (int cpu, unsigned int mask)
     case CPU_INTERAPTIV_MR2:
       return (mask & INSN_INTERAPTIV_MR2) != 0;
 
-    case CPU_MIPS32R6:
-      return (mask & INSN_ISA_MASK) == INSN_ISA32R6;
-
-    case CPU_MIPS64R6:
-      return ((mask & INSN_ISA_MASK) == INSN_ISA32R6)
-	     || ((mask & INSN_ISA_MASK) == INSN_ISA64R6);
-
     default:
       return false;
     }
+}
+
+/* Return true if the given ISA is included in INSN_* mask MASK.  */
+
+static inline bool
+isa_is_member (int isa, unsigned int mask)
+{
+  isa &= INSN_ISA_MASK;
+  mask &= INSN_ISA_MASK;
+
+  if (isa == 0)
+    return false;
+
+  if (mask == 0)
+    return false;
+
+  if (((mips_isa_table[isa - 1] >> (mask - 1)) & 1) == 0)
+    return false;
+
+  return true;
 }
 
 /* Test for membership in an ISA including chip specific ISAs.  INSN
@@ -1475,23 +1493,26 @@ cpu_is_member (int cpu, unsigned int mask)
 static inline bool
 opcode_is_member (const struct mips_opcode *insn, int isa, int ase, int cpu)
 {
-  if (!cpu_is_member (cpu, insn->exclusions))
-    {
-      /* Test for ISA level compatibility.  */
-      if ((isa & INSN_ISA_MASK) != 0
-	  && (insn->membership & INSN_ISA_MASK) != 0
-	  && ((mips_isa_table[(isa & INSN_ISA_MASK) - 1]
-	       >> ((insn->membership & INSN_ISA_MASK) - 1)) & 1) != 0)
-	return true;
+  /* Test for ISA level exclusion.  */
+  if (isa_is_member (isa, insn->exclusions))
+    return false;
 
-      /* Test for ASE compatibility.  */
-      if ((ase & insn->ase) != 0)
-	return true;
+  /* Test for processor-specific exclusion.  */
+  if (cpu_is_member (cpu, insn->exclusions))
+    return false;
 
-      /* Test for processor-specific extensions.  */
-      if (cpu_is_member (cpu, insn->membership))
-	return true;
-    }
+  /* Test for ISA level compatibility.  */
+  if (isa_is_member (isa, insn->membership))
+    return true;
+
+  /* Test for ASE compatibility.  */
+  if ((ase & insn->ase) != 0)
+    return true;
+
+  /* Test for processor-specific extensions.  */
+  if (cpu_is_member (cpu, insn->membership))
+    return true;
+
   return false;
 }
 
@@ -2278,6 +2299,7 @@ extern const int bfd_mips16_num_opcodes;
    "E" 5-bit target register (MICROMIPSOP_*_RT)
    "G" 5-bit source register (MICROMIPSOP_*_RS)
    "H" 3-bit sel field for (D)MTC* and (D)MFC* (MICROMIPSOP_*_SEL)
+   "g" 5-bit control source register (MICROMIPSOP_*_RS)
 
    Macro instructions:
    "A" general 32 bit expression
@@ -2339,7 +2361,7 @@ extern const int bfd_mips16_num_opcodes;
    "12345678 0"
    "<>(),+-.@\^|~"
    "ABCDEFGHI KLMN   RST V    "
-   "abcd f hijklmnopqrstuvw yz"
+   "abcd fghijklmnopqrstuvw yz"
 
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:

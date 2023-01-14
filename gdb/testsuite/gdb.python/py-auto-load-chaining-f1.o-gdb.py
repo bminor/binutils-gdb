@@ -18,20 +18,18 @@
 
 import re
 
-print ("Entering f1.o auto-load script")
+print("Entering f1.o auto-load script")
 
-print ("Current objfile is: %s"
-       % gdb.current_objfile ().filename)
+print("Current objfile is: %s" % gdb.current_objfile().filename)
 
-print ("Chain loading f2.o...")
+print("Chain loading f2.o...")
 
-filename = gdb.current_objfile ().filename
-filename = re.sub (r"-f1.o$", "-f2.o", filename)
-r2 = gdb.lookup_global_symbol ('region_2').value ()
-gdb.execute ("add-symbol-file %s 0x%x" % (filename, r2))
+filename = gdb.current_objfile().filename
+filename = re.sub(r"-f1.o$", "-f2.o", filename)
+r2 = gdb.lookup_global_symbol("region_2").value()
+gdb.execute("add-symbol-file %s 0x%x" % (filename, r2))
 
-print ("After loading f2.o...")
-print ("Current objfile is: %s"
-       % gdb.current_objfile ().filename)
+print("After loading f2.o...")
+print("Current objfile is: %s" % gdb.current_objfile().filename)
 
-print ("Leaving f1.o auto-load script")
+print("Leaving f1.o auto-load script")

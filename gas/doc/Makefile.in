@@ -396,7 +396,8 @@ man_MANS = as.1
 info_TEXINFOS = as.texi
 as_TEXINFOS = asconfig.texi $(CPU_DOCS)
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc \
+		   --no-split
 
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
 		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
@@ -771,7 +772,7 @@ dvi-am: $(DVIS)
 
 html: html-am
 
-html-am: $(HTMLS)
+html-am: $(HTMLS) html-local
 
 info: info-am
 
@@ -924,7 +925,7 @@ uninstall-man: uninstall-man1
 .PHONY: all all-am check check-am clean clean-aminfo clean-generic \
 	clean-libtool cscopelist-am ctags-am dist-info distclean \
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
-	html-am info info-am info-local install install-am \
+	html-am html-local info info-am info-local install install-am \
 	install-data install-data-am install-data-local install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
@@ -965,6 +966,11 @@ as.1: $(srcdir)/as.texi asconfig.texi $(CPU_DOCS)
 	        mv -f $@.T$$$$ $@) || \
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f as.pod
+
+html-local: as/index.html
+as/index.html: as.texi $(as_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/as.texi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

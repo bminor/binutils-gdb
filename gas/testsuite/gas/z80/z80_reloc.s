@@ -25,10 +25,13 @@
 .L_label:
 	.db	data8
 	.dw	data16
-	.d24 data24
-	.d32 data32
+	.d24	data24
+	.d32	data32
 	.db	data16 & 0xff
 	.db	data16 >> 8
 	.dw	data32 & 0xffff
 	.dw	data32 >> 16
+	.dw	data32 >> 24
+	.dw	data24 >> 8
+	.dw	data32 >> 8
 	.end

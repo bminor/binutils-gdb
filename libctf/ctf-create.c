@@ -966,6 +966,39 @@ ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
+ctf_add_unknown (ctf_dict_t *fp, uint32_t flag, const char *name)
+{
+  ctf_dtdef_t *dtd;
+  ctf_id_t type = 0;
+
+  /* If a type is already defined with this name, error (if not CTF_K_UNKNOWN)
+     or just return it.  */
+
+  if (name != NULL && name[0] != '\0' && flag == CTF_ADD_ROOT
+      && (type = ctf_lookup_by_rawname (fp, CTF_K_UNKNOWN, name)))
+    {
+      if (ctf_type_kind (fp, type) == CTF_K_UNKNOWN)
+	return type;
+      else
+	{
+	  ctf_err_warn (fp, 1, ECTF_CONFLICT,
+			_("ctf_add_unknown: cannot add unknown type "
+			  "named %s: type of this name already defined"),
+			name ? name : _("(unnamed type)"));
+	  return (ctf_set_errno (fp, ECTF_CONFLICT));
+	}
+    }
+
+  if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNKNOWN, 0, &dtd)) == CTF_ERR)
+    return CTF_ERR;		/* errno is set for us.  */
+
+  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNKNOWN, flag, 0);
+  dtd->dtd_data.ctt_type = 0;
+
+  return type;
+}
+
+ctf_id_t
 ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
 		 ctf_id_t ref)
 {

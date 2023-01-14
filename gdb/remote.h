@@ -77,4 +77,5 @@ extern int remote_register_number_and_offset (struct gdbarch *gdbarch,
 
 extern void remote_notif_get_pending_events (remote_target *remote,
 					     struct notif_client *np);
+extern bool remote_target_is_non_stop_p (remote_target *t);
 #endif

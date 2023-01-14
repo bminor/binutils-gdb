@@ -30,8 +30,11 @@ cgen-dis.c
 cgen-opc.c
 cr16-dis.c
 cr16-opc.c
+cris-desc.c
+cris-desc.h
 cris-dis.c
 cris-opc.c
+cris-opc.h
 crx-dis.c
 crx-opc.c
 csky-dis.c

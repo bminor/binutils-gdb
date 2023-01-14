@@ -18,7 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "devices.h"
@@ -90,7 +91,8 @@ bfin_otp_write_page_val2 (struct bfin_otp *otp, bu16 page, bu64 lo, bu64 hi)
 static void
 bfin_otp_write_page (struct bfin_otp *otp, bu16 page)
 {
-  bfin_otp_write_page_val (otp, page, (void *)&otp->data0);
+  bfin_otp_write_page_val2 (otp, page, ((bu64)otp->data1 << 32) | otp->data0,
+			    ((bu64)otp->data3 << 32) | otp->data2);
 }
 
 static unsigned

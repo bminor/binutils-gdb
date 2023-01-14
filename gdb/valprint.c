@@ -43,6 +43,8 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "inferior.h"
+#include "gdbsupport/selftest.h"
+#include "selftest-arch.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -1221,8 +1223,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	  else
 	    {
 	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
-	      ULONGEST field_val
-		= val >> (TYPE_FIELD_BITPOS (type, field) - field_len + 1);
+	      ULONGEST field_val = val >> TYPE_FIELD_BITPOS (type, field);
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
@@ -3137,36 +3138,67 @@ make_value_print_options_def_group (value_print_options *opts)
   return {{value_print_option_defs}, opts};
 }
 
+#if GDB_SELF_TEST
+
+/* Test printing of TYPE_CODE_FLAGS values.  */
+
+static void
+test_print_flags (gdbarch *arch)
+{
+  type *flags_type = arch_flags_type (arch, "test_type", 32);
+  type *field_type = builtin_type (arch)->builtin_uint32;
+
+  /* Value:  1010 1010
+     Fields: CCCB BAAA */
+  append_flags_type_field (flags_type, 0, 3, field_type, "A");
+  append_flags_type_field (flags_type, 3, 2, field_type, "B");
+  append_flags_type_field (flags_type, 5, 3, field_type, "C");
+
+  value *val = allocate_value (flags_type);
+  gdb_byte *contents = value_contents_writeable (val);
+  store_unsigned_integer (contents, 4, gdbarch_byte_order (arch), 0xaa);
+
+  string_file out;
+  val_print_type_code_flags (flags_type, val, 0, &out);
+  SELF_CHECK (out.string () == "[ A=2 B=1 C=5 ]");
+}
+
+#endif
+
 void _initialize_valprint ();
 void
 _initialize_valprint ()
 {
+#if GDB_SELF_TEST
+  selftests::register_test_foreach_arch ("print-flags", test_print_flags);
+#endif
+
   cmd_list_element *cmd;
 
-  add_basic_prefix_cmd ("print", no_class,
-			_("Generic command for setting how things print."),
-			&setprintlist, "set print ", 0, &setlist);
-  add_alias_cmd ("p", "print", no_class, 1, &setlist);
+  cmd_list_element *set_print_cmd
+    = add_basic_prefix_cmd ("print", no_class,
+			    _("Generic command for setting how things print."),
+			    &setprintlist, 0, &setlist);
+  add_alias_cmd ("p", set_print_cmd, no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
-  add_alias_cmd ("pr", "print", no_class, 1, &setlist);
+  add_alias_cmd ("pr", set_print_cmd, no_class, 1, &setlist);
 
-  add_show_prefix_cmd ("print", no_class,
-		       _("Generic command for showing print settings."),
-		       &showprintlist, "show print ", 0, &showlist);
-  add_alias_cmd ("p", "print", no_class, 1, &showlist);
-  add_alias_cmd ("pr", "print", no_class, 1, &showlist);
+  cmd_list_element *show_print_cmd
+    = add_show_prefix_cmd ("print", no_class,
+			   _("Generic command for showing print settings."),
+			   &showprintlist, 0, &showlist);
+  add_alias_cmd ("p", show_print_cmd, no_class, 1, &showlist);
+  add_alias_cmd ("pr", show_print_cmd, no_class, 1, &showlist);
 
   cmd = add_basic_prefix_cmd ("raw", no_class,
 			      _("\
 Generic command for setting what things to print in \"raw\" mode."),
-			      &setprintrawlist, "set print raw ", 0,
-			      &setprintlist);
+			      &setprintrawlist, 0, &setprintlist);
   deprecate_cmd (cmd, nullptr);
 
   cmd = add_show_prefix_cmd ("raw", no_class,
 			     _("Generic command for showing \"print raw\" settings."),
-			     &showprintrawlist, "show print raw ", 0,
-			     &showprintlist);
+			     &showprintrawlist, 0, &showprintlist);
   deprecate_cmd (cmd, nullptr);
 
   gdb::option::add_setshow_cmds_for_options

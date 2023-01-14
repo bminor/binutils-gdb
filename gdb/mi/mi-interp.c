@@ -1338,33 +1338,40 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI3, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
-  gdb::observers::signal_received.attach (mi_on_signal_received);
-  gdb::observers::end_stepping_range.attach (mi_on_end_stepping_range);
-  gdb::observers::signal_exited.attach (mi_on_signal_exited);
-  gdb::observers::exited.attach (mi_on_exited);
-  gdb::observers::no_history.attach (mi_on_no_history);
-  gdb::observers::new_thread.attach (mi_new_thread);
-  gdb::observers::thread_exit.attach (mi_thread_exit);
-  gdb::observers::inferior_added.attach (mi_inferior_added);
-  gdb::observers::inferior_appeared.attach (mi_inferior_appeared);
-  gdb::observers::inferior_exit.attach (mi_inferior_exit);
-  gdb::observers::inferior_removed.attach (mi_inferior_removed);
-  gdb::observers::record_changed.attach (mi_record_changed);
-  gdb::observers::normal_stop.attach (mi_on_normal_stop);
-  gdb::observers::target_resumed.attach (mi_on_resume);
-  gdb::observers::solib_loaded.attach (mi_solib_loaded);
-  gdb::observers::solib_unloaded.attach (mi_solib_unloaded);
-  gdb::observers::about_to_proceed.attach (mi_about_to_proceed);
-  gdb::observers::traceframe_changed.attach (mi_traceframe_changed);
-  gdb::observers::tsv_created.attach (mi_tsv_created);
-  gdb::observers::tsv_deleted.attach (mi_tsv_deleted);
-  gdb::observers::tsv_modified.attach (mi_tsv_modified);
-  gdb::observers::breakpoint_created.attach (mi_breakpoint_created);
-  gdb::observers::breakpoint_deleted.attach (mi_breakpoint_deleted);
-  gdb::observers::breakpoint_modified.attach (mi_breakpoint_modified);
-  gdb::observers::command_param_changed.attach (mi_command_param_changed);
-  gdb::observers::memory_changed.attach (mi_memory_changed);
-  gdb::observers::sync_execution_done.attach (mi_on_sync_execution_done);
+  gdb::observers::signal_received.attach (mi_on_signal_received, "mi-interp");
+  gdb::observers::end_stepping_range.attach (mi_on_end_stepping_range,
+					     "mi-interp");
+  gdb::observers::signal_exited.attach (mi_on_signal_exited, "mi-interp");
+  gdb::observers::exited.attach (mi_on_exited, "mi-interp");
+  gdb::observers::no_history.attach (mi_on_no_history, "mi-interp");
+  gdb::observers::new_thread.attach (mi_new_thread, "mi-interp");
+  gdb::observers::thread_exit.attach (mi_thread_exit, "mi-interp");
+  gdb::observers::inferior_added.attach (mi_inferior_added, "mi-interp");
+  gdb::observers::inferior_appeared.attach (mi_inferior_appeared, "mi-interp");
+  gdb::observers::inferior_exit.attach (mi_inferior_exit, "mi-interp");
+  gdb::observers::inferior_removed.attach (mi_inferior_removed, "mi-interp");
+  gdb::observers::record_changed.attach (mi_record_changed, "mi-interp");
+  gdb::observers::normal_stop.attach (mi_on_normal_stop, "mi-interp");
+  gdb::observers::target_resumed.attach (mi_on_resume, "mi-interp");
+  gdb::observers::solib_loaded.attach (mi_solib_loaded, "mi-interp");
+  gdb::observers::solib_unloaded.attach (mi_solib_unloaded, "mi-interp");
+  gdb::observers::about_to_proceed.attach (mi_about_to_proceed, "mi-interp");
+  gdb::observers::traceframe_changed.attach (mi_traceframe_changed,
+					     "mi-interp");
+  gdb::observers::tsv_created.attach (mi_tsv_created, "mi-interp");
+  gdb::observers::tsv_deleted.attach (mi_tsv_deleted, "mi-interp");
+  gdb::observers::tsv_modified.attach (mi_tsv_modified, "mi-interp");
+  gdb::observers::breakpoint_created.attach (mi_breakpoint_created,
+					     "mi-interp");
+  gdb::observers::breakpoint_deleted.attach (mi_breakpoint_deleted,
+					     "mi-interp");
+  gdb::observers::breakpoint_modified.attach (mi_breakpoint_modified,
+					      "mi-interp");
+  gdb::observers::command_param_changed.attach (mi_command_param_changed,
+						"mi-interp");
+  gdb::observers::memory_changed.attach (mi_memory_changed, "mi-interp");
+  gdb::observers::sync_execution_done.attach (mi_on_sync_execution_done,
+					      "mi-interp");
   gdb::observers::user_selected_context_changed.attach
-    (mi_user_selected_context_changed);
+    (mi_user_selected_context_changed, "mi-interp");
 }

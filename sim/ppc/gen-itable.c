@@ -32,11 +32,6 @@
 #include "igen.h"
 #include "gen-itable.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-
 
 static void
 itable_h_insn(insn_table *entry,

@@ -31,7 +31,7 @@ int sim_io_shutdown (SIM_DESC sd);
 
 int sim_io_unlink (SIM_DESC sd, const char *);
 
-long sim_io_time (SIM_DESC sd, long *);
+int64_t sim_io_time (SIM_DESC sd);
 
 int sim_io_system (SIM_DESC sd, const char *);
 
@@ -53,7 +53,7 @@ int sim_io_read (SIM_DESC sd, int, char *, int);
 
 int sim_io_open (SIM_DESC sd, const char *, int);
 
-int sim_io_lseek (SIM_DESC sd, int, long, int);
+int64_t sim_io_lseek (SIM_DESC sd, int, int64_t, int);
 
 int sim_io_isatty (SIM_DESC sd, int);
 
@@ -63,21 +63,23 @@ int sim_io_close (SIM_DESC sd, int);
 
 void sim_io_printf (SIM_DESC sd,
 		    const char *fmt,
-		    ...) __attribute__ ((format (printf, 2, 3)));
+		    ...) ATTRIBUTE_PRINTF (2, 3);
 
-void sim_io_vprintf (SIM_DESC sd, const char *fmt, va_list ap);
+void sim_io_vprintf (SIM_DESC sd, const char *fmt, va_list ap)
+  ATTRIBUTE_PRINTF (2, 0);
 
 void sim_io_eprintf (SIM_DESC sd,
 		     const char *fmt,
-		     ...) __attribute__ ((format (printf, 2, 3)));
+		     ...) ATTRIBUTE_PRINTF (2, 3);
 
-void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap);
+void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap)
+  ATTRIBUTE_PRINTF (2, 0);
 
 void sim_io_error (SIM_DESC sd,
 		   const char *fmt,
 		   ...)
-  __attribute__ ((format (printf, 2, 3)))
-  __attribute__ ((__noreturn__));
+  ATTRIBUTE_PRINTF (2, 3)
+  ATTRIBUTE_NORETURN;
 
 void sim_io_poll_quit (SIM_DESC sd);
 

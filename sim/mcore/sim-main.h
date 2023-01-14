@@ -68,12 +68,5 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-struct sim_state {
-
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  sim_state_base base;
-};
-
 #endif
 

@@ -19,8 +19,10 @@
    Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-/* Don't generate unused section symbols.  */
-#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS false
+/* The assembler should generate a full set of section symbols even
+   when they appear unused.  The linux kernel build tool recordmcount
+   needs them.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS true
 
 #include "sysdep.h"
 #include <stdarg.h>
@@ -4242,7 +4244,7 @@ ppc_elf_inline_plt (struct bfd_link_info *info)
 	      return false;
 
 	    relend = relstart + sec->reloc_count;
-	    for (rel = relstart; rel < relend; )
+	    for (rel = relstart; rel < relend; rel++)
 	      {
 		enum elf_ppc_reloc_type r_type;
 		unsigned long r_symndx;
@@ -5245,7 +5247,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       /* For the non-pic case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
-      if (h->dynamic_adjusted
+      if ((h->dynamic_adjusted
+	   || (h->ref_regular
+	       && h->root.type == bfd_link_hash_undefweak
+	       && (info->dynamic_undefined_weak > 0
+		   || !_bfd_elf_readonly_dynrelocs (h))))
 	  && !h->def_regular
 	  && !ELF_COMMON_DEF_P (h)
 	  && !(h->protected_def
@@ -5296,9 +5302,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       for (ent = h->plt.plist; ent != NULL; ent = ent->next)
 	if (ent->plt.refcount > 0)
 	  {
-	    asection *s = htab->elf.splt;
-	    bool dyn = !use_local_plt (info, h);
+	    asection *s;
+	    bool dyn;
 
+	    if (!ensure_undef_dynamic (info, h))
+	      return false;
+
+	    dyn = !use_local_plt (info, h);
+	    s = htab->elf.splt;
 	    if (!dyn)
 	      {
 		if (h->type == STT_GNU_IFUNC)

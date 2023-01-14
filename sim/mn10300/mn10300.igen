@@ -3624,7 +3624,7 @@
 {
   /* OP_F0FF (); */
   PC = cia;
-  abort ();
+  sim_engine_abort (SD, CPU, cia, "F0FF");
 }
 
 

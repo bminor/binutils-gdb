@@ -18,6 +18,7 @@
 
 from perftest import perftest
 
+
 class SkipPrologue(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, count):
         super(SkipPrologue, self).__init__("skip-prologue")

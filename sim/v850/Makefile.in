@@ -35,8 +35,6 @@ SIM_EXTRA_CFLAGS = \
 	-I$(srcdir)/../../newlib/libc/sys/sysnecv850
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = $(sim_main_headers) $(SIM_EXTRA_DEPS) 
-
 NL_TARGET = -DNL_TARGET_v850
 
 ## COMMON_POST_CONFIG_FRAG
@@ -68,8 +66,8 @@ clean-igen:
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 IGEN_INSN=$(srcdir)/v850.igen
 IGEN_DC=$(srcdir)/v850-dc
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
-	$(IGEN) \
+tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-G gen-direct-access \
 		-G gen-zero-r0 \
@@ -110,7 +108,3 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 
 clean-extra: clean-igen
 	rm -f table.c simops.h gencode
-
-interp.o: interp.c $(INCLUDE)
-simops.o: simops.c simops.h $(INCLUDE) targ-vals.h
-semantics.o: $(INCLUDE)

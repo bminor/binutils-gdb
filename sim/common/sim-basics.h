@@ -26,9 +26,7 @@
 
 /* Basic configuration */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "defs.h"
 
 /* Basic host dependant mess - hopefully <stdio.h> + <stdarg.h> will
    bring potential conflicts out in the open */
@@ -38,25 +36,11 @@
 #include <setjmp.h>
 
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-
-/* Some versions of GCC include an attribute operator, define it */
-
-#if !defined (__attribute__)
-#if (!defined(__GNUC__) || (__GNUC__ < 2) || (__GNUC__ == 2 && __GNUC_MINOR__ < 6))
-#define __attribute__(arg)
-#endif
 #endif
 
 
@@ -128,8 +112,7 @@ typedef enum {
 /* Basic definitions - ordered so that nothing calls what comes after it.  */
 
 #include "ansidecl.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 #include "sim-config.h"
 
@@ -138,11 +121,8 @@ typedef enum {
 #include "sim-types.h"
 #include "sim-bits.h"
 #include "sim-endian.h"
-#include "sim-signal.h"
 
 #include "sim-utils.h"
-
-#include "libiberty.h"
 
 /* Note: Only the simpler interfaces are defined here.  More heavy
    weight objects, such as core and events, are defined in the more

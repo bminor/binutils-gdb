@@ -21,18 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_HW_H
 
 
-/* Establish this object */
-
-SIM_RC sim_hw_install
-(struct sim_state *sd);
-
-
 /* Parse a hardware definition */
 
 struct hw *sim_hw_parse
 (struct sim_state *sd,
  const char *fmt,
- ...) __attribute__ ((format (printf, 2, 3)));
+ ...) ATTRIBUTE_PRINTF (2, 3);
 
 
 /* Print the hardware tree */
@@ -48,7 +42,7 @@ void sim_hw_abort
 (SIM_DESC sd,
  struct hw *hw,
  const char *fmt,
- ...) __attribute__ ((format (printf, 3, 4), noreturn));
+ ...) ATTRIBUTE_PRINTF (3, 4) ATTRIBUTE_NORETURN;
 
 
 

@@ -43,6 +43,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
+#include "gdbsupport/scoped_ignore_signal.h"
 
 
 
@@ -755,6 +756,10 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
 			fnames.source_file ());
 
+  /* If we don't do this, then GDB simply exits
+     when the compiler dies.  */
+  scoped_ignore_sigpipe ignore_sigpipe;
+
   /* Call the compiler and start the compilation process.  */
   compiler->set_source_file (fnames.source_file ());
   ok = compiler->compile (fnames.object_file (), compile_debug);
@@ -930,8 +935,8 @@ _initialize_compile ()
   compile_cmd_element = add_prefix_cmd ("compile", class_obscure,
 					compile_command, _("\
 Command to compile source code and inject it into the inferior."),
-		  &compile_command_list, "compile ", 1, &cmdlist);
-  add_com_alias ("expression", "compile", class_obscure, 0);
+		  &compile_command_list, 1, &cmdlist);
+  add_com_alias ("expression", compile_cmd_element, class_obscure, 0);
 
   const auto compile_opts = make_compile_options_def_group (nullptr);
 

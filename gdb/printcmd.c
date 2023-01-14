@@ -508,7 +508,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	opts.format = 0;
 	if (type->is_unsigned ())
 	  type = builtin_type (gdbarch)->builtin_true_unsigned_char;
- 	else
+	else
 	  type = builtin_type (gdbarch)->builtin_true_char;
 
 	value_print (value_from_longest (type, *val_long), stream, &opts);
@@ -1266,19 +1266,26 @@ print_value (value *val, const value_print_options &opts)
 static bool
 should_validate_memtags (struct value *value)
 {
-  if (target_supports_memory_tagging ()
-      && gdbarch_tagged_address_p (target_gdbarch (), value))
-    {
-      gdb_assert (value != nullptr && value_type (value) != nullptr);
+  gdb_assert (value != nullptr && value_type (value) != nullptr);
 
-      enum type_code code = value_type (value)->code ();
+  if (!target_supports_memory_tagging ())
+    return false;
 
-      return (code == TYPE_CODE_PTR
-	      || code == TYPE_CODE_REF
-	      || code == TYPE_CODE_METHODPTR
-	      || code == TYPE_CODE_MEMBERPTR);
-    }
-  return false;
+  enum type_code code = value_type (value)->code ();
+
+  /* Skip non-address values.  */
+  if (code != TYPE_CODE_PTR
+      && !TYPE_IS_REFERENCE (value_type (value)))
+    return false;
+
+  /* OK, we have an address value.  Check we have a complete value we
+     can extract.  */
+  if (value_optimized_out (value)
+      || !value_entirely_available (value))
+    return false;
+
+  /* We do.  Check whether it includes any tags.  */
+  return gdbarch_tagged_address_p (target_gdbarch (), value);
 }
 
 /* Helper for parsing arguments for print_command_1.  */
@@ -1321,26 +1328,42 @@ print_command_1 (const char *args, int voidprint)
 		    value_type (val)->code () != TYPE_CODE_VOID))
     {
       /* If memory tagging validation is on, check if the tag is valid.  */
-      if (print_opts.memory_tag_violations && should_validate_memtags (val)
-	  && !gdbarch_memtag_matches_p (target_gdbarch (), val))
+      if (print_opts.memory_tag_violations)
 	{
-	  /* Fetch the logical tag.  */
-	  struct value *tag
-	    = gdbarch_get_memtag (target_gdbarch (), val,
-				  memtag_type::logical);
-	  std::string ltag
-	    = gdbarch_memtag_to_string (target_gdbarch (), tag);
+	  try
+	    {
+	      if (should_validate_memtags (val)
+		  && !gdbarch_memtag_matches_p (target_gdbarch (), val))
+		{
+		  /* Fetch the logical tag.  */
+		  struct value *tag
+		    = gdbarch_get_memtag (target_gdbarch (), val,
+					  memtag_type::logical);
+		  std::string ltag
+		    = gdbarch_memtag_to_string (target_gdbarch (), tag);
 
-	  /* Fetch the allocation tag.  */
-	  tag = gdbarch_get_memtag (target_gdbarch (), val,
-				    memtag_type::allocation);
-	  std::string atag
-	    = gdbarch_memtag_to_string (target_gdbarch (), tag);
+		  /* Fetch the allocation tag.  */
+		  tag = gdbarch_get_memtag (target_gdbarch (), val,
+					    memtag_type::allocation);
+		  std::string atag
+		    = gdbarch_memtag_to_string (target_gdbarch (), tag);
 
-	  printf_filtered (_("Logical tag (%s) does not match the "
-			     "allocation tag (%s).\n"),
-			   ltag.c_str (), atag.c_str ());
+		  printf_filtered (_("Logical tag (%s) does not match the "
+				     "allocation tag (%s).\n"),
+				   ltag.c_str (), atag.c_str ());
+		}
+	    }
+	  catch (gdb_exception_error &ex)
+	    {
+	      if (ex.error == TARGET_CLOSE_ERROR)
+		throw;
+
+	      fprintf_filtered (gdb_stderr,
+				_("Could not validate memory tag: %s\n"),
+				ex.message->c_str ());
+	    }
 	}
+
       print_value (val, print_opts);
     }
 }
@@ -1525,8 +1548,7 @@ info_symbol_command (const char *arg, int from_tty)
 
 	sect_addr = overlay_mapped_address (addr, osect);
 
-	if (obj_section_addr (osect) <= sect_addr
-	    && sect_addr < obj_section_endaddr (osect)
+	if (osect->addr () <= sect_addr && sect_addr < osect->endaddr ()
 	    && (msymbol
 		= lookup_minimal_symbol_by_pc_section (sect_addr,
 						       osect).minsym))
@@ -1661,8 +1683,7 @@ info_address_command (const char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, sym->print_name (),
-			   current_language->la_language, DMGL_ANSI);
+  fputs_filtered (sym->print_name (), gdb_stdout);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   if (SYMBOL_OBJFILE_OWNED (sym))
@@ -3186,7 +3207,8 @@ _initialize_printcmd ()
 
   current_display_number = -1;
 
-  gdb::observers::free_objfile.attach (clear_dangling_display_expressions);
+  gdb::observers::free_objfile.attach (clear_dangling_display_expressions,
+				       "printcmd");
 
   add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored.\n\
@@ -3280,7 +3302,7 @@ Use \"set variable\" for variables with names identical to set subcommands.\n\
 \n\
 With a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command."),
-		  &setlist, "set ", 1, &cmdlist);
+		  &setlist, 1, &cmdlist);
   if (dbx_commands)
     add_com ("assign", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR.\n\
@@ -3303,7 +3325,8 @@ current working language.  The result is printed and saved in the value\n\
 history, if it is not void."));
   set_cmd_completer_handle_brkchars (c, print_command_completer);
 
-  add_cmd ("variable", class_vars, set_command, _("\
+  cmd_list_element *set_variable_cmd
+    = add_cmd ("variable", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR.\n\
 Usage: set variable VAR = EXP\n\
 This uses assignment syntax appropriate for the current language\n\
@@ -3312,8 +3335,8 @@ VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\"."),
-	   &setlist);
-  add_alias_cmd ("var", "variable", class_vars, 0, &setlist);
+	       &setlist);
+  add_alias_cmd ("var", set_variable_cmd, class_vars, 0, &setlist);
 
   const auto print_opts = make_value_print_options_def_group (nullptr);
 
@@ -3350,10 +3373,11 @@ EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."),
 					      print_opts);
 
-  c = add_com ("print", class_vars, print_command, print_help.c_str ());
-  set_cmd_completer_handle_brkchars (c, print_command_completer);
-  add_com_alias ("p", "print", class_vars, 1);
-  add_com_alias ("inspect", "print", class_vars, 1);
+  cmd_list_element *print_cmd
+    = add_com ("print", class_vars, print_command, print_help.c_str ());
+  set_cmd_completer_handle_brkchars (print_cmd, print_command_completer);
+  add_com_alias ("p", print_cmd, class_vars, 1);
+  add_com_alias ("inspect", print_cmd, class_vars, 1);
 
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\
@@ -3384,7 +3408,7 @@ treat this string as a command line, and evaluate it."));
   /* Memory tagging commands.  */
   add_prefix_cmd ("memory-tag", class_vars, memory_tag_command, _("\
 Generic command for printing and manipulating memory tag properties."),
-		  &memory_tag_list, "memory-tag ", 0, &cmdlist);
+		  &memory_tag_list, 0, &cmdlist);
   add_cmd ("print-logical-tag", class_vars,
 	   memory_tag_print_logical_tag_command,
 	   ("Print the logical tag from POINTER.\n\

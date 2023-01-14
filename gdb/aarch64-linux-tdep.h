@@ -36,8 +36,8 @@
 /* The pauth regset consists of 2 X sized registers.  */
 #define AARCH64_LINUX_SIZEOF_PAUTH (2 * X_REGISTER_SIZE)
 
-/* The MTE regset consists of a 32-bit register.  */
-#define AARCH64_LINUX_SIZEOF_MTE_REGSET (4)
+/* The MTE regset consists of a 64-bit register.  */
+#define AARCH64_LINUX_SIZEOF_MTE_REGSET (8)
 
 extern const struct regset aarch64_linux_gregset;
 extern const struct regset aarch64_linux_fpregset;

@@ -19,7 +19,6 @@
 #ifndef PRU_H
 #define PRU_H
 
-#include "config.h"
 #include "opcode/pru.h"
 
 /* Needed for handling the dual PRU address space.  */

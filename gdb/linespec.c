@@ -117,7 +117,6 @@ struct linespec
     std::vector<block_symbol> *function_symbols;
   } labels;
 };
-typedef struct linespec *linespec_p;
 
 /* A canonical linespec represented as a symtab-related string.
 
@@ -360,7 +359,7 @@ static void initialize_defaults (struct symtab **default_symtab,
 CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
 static std::vector<symtab_and_line> decode_objc (struct linespec_state *self,
-						 linespec_p ls,
+						 linespec *ls,
 						 const char *arg);
 
 static std::vector<symtab *> symtabs_from_filename
@@ -401,13 +400,13 @@ static std::vector<symtab *>
 
 static std::vector<symtab_and_line> decode_digits_ordinary
   (struct linespec_state *self,
-   linespec_p ls,
+   linespec *ls,
    int line,
    linetable_entry **best_entry);
 
 static std::vector<symtab_and_line> decode_digits_list_mode
   (struct linespec_state *self,
-   linespec_p ls,
+   linespec *ls,
    struct symtab_and_line val);
 
 static void minsym_found (struct linespec_state *self, struct objfile *objfile,
@@ -2063,7 +2062,7 @@ linespec_parse_basic (linespec_parser *parser)
    locations.  */
 
 static void
-canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
+canonicalize_linespec (struct linespec_state *state, const linespec *ls)
 {
   struct event_location *canon;
   struct explicit_location *explicit_loc;
@@ -2107,7 +2106,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 
 static std::vector<symtab_and_line>
 create_sals_line_offset (struct linespec_state *self,
-			 linespec_p ls)
+			 linespec *ls)
 {
   int use_default = 0;
 
@@ -2254,7 +2253,7 @@ convert_address_location_to_sals (struct linespec_state *self,
 /* Create and return SALs from the linespec LS.  */
 
 static std::vector<symtab_and_line>
-convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
+convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 {
   std::vector<symtab_and_line> sals;
 
@@ -2392,7 +2391,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
 static void
 convert_explicit_location_to_linespec (struct linespec_state *self,
-				       linespec_p result,
+				       linespec *result,
 				       const char *source_filename,
 				       const char *function_name,
 				       symbol_name_match_type fname_match_type,
@@ -2464,7 +2463,7 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 
 static std::vector<symtab_and_line>
 convert_explicit_location_to_sals (struct linespec_state *self,
-				   linespec_p result,
+				   linespec *result,
 				   const struct explicit_location *explicit_loc)
 {
   convert_explicit_location_to_linespec (self, result,
@@ -3403,7 +3402,7 @@ linespec_expression_to_pc (const char **exp_ptr)
    the existing C++ code to let the user choose one.  */
 
 static std::vector<symtab_and_line>
-decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
+decode_objc (struct linespec_state *self, linespec *ls, const char *arg)
 {
   struct collect_info info;
   std::vector<const char *> symbol_names;
@@ -4092,7 +4091,7 @@ find_label_symbols (struct linespec_state *self,
 
 static std::vector<symtab_and_line>
 decode_digits_list_mode (struct linespec_state *self,
-			 linespec_p ls,
+			 linespec *ls,
 			 struct symtab_and_line val)
 {
   gdb_assert (self->list_mode);
@@ -4126,7 +4125,7 @@ decode_digits_list_mode (struct linespec_state *self,
 
 static std::vector<symtab_and_line>
 decode_digits_ordinary (struct linespec_state *self,
-			linespec_p ls,
+			linespec *ls,
 			int line,
 			struct linetable_entry **best_entry)
 {

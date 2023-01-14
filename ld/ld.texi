@@ -683,7 +683,7 @@ When creating an ELF shared object, set the internal DT_SONAME field to
 the specified name.  When an executable is linked with a shared object
 which has a DT_SONAME field, then when the executable is run the dynamic
 linker will attempt to load the shared object specified by the DT_SONAME
-field rather than the using the file name given to the linker.
+field rather than using the file name given to the linker.
 
 @kindex -i
 @cindex incremental link
@@ -1293,6 +1293,18 @@ Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
 to indicate compatibility with IBT.  This also implies @option{ibtplt}.
 Supported for Linux/i386 and Linux/x86_64.
 
+@item indirect-extern-access
+@itemx noindirect-extern-access
+Generate GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS in
+.note.gnu.property section to indicate that object file requires
+canonical function pointers and cannot be used with copy relocation.
+This option also implies @option{noextern-protected-data} and
+@option{nocopyreloc}.  Supported for i386 and x86-64.
+
+@option{noindirect-extern-access} removes
+GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS from .note.gnu.property
+section.
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur
@@ -1437,12 +1449,6 @@ specifies a memory segment that should contain only instructions and must
 be in wholly disjoint pages from any other data.  Don't create separate
 code @code{PT_LOAD} segment if @samp{noseparate-code} is used.
 
-@item unique-symbol
-@itemx nounique-symbol
-Avoid duplicated local symbol names in the symbol string table.  Append
-".@code{number}" to duplicated local symbol names if @samp{unique-symbol}
-is used.  @option{nounique-symbol} is the default.
-
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
 to indicate compatibility with Intel Shadow Stack.  Supported for
@@ -1494,6 +1500,12 @@ report an error if @samp{notext} or @samp{textoff}.
 Do not report unresolved symbol references from regular object files,
 either when creating an executable, or when creating a shared library.
 This option is the inverse of @samp{-z defs}.
+
+@item unique-symbol
+@itemx nounique-symbol
+Avoid duplicated local symbol names in the symbol string table.  Append
+".@code{number}" to duplicated local symbol names if @samp{unique-symbol}
+is used.  @option{nounique-symbol} is the default.
 
 @item x86-64-baseline
 @item x86-64-v2
@@ -1632,6 +1644,11 @@ When creating a shared library, bind references to global function
 symbols to the definition within the shared library, if any.
 This option is only meaningful on ELF platforms which support shared
 libraries.
+
+@kindex -Bno-symbolic
+@item -Bno-symbolic
+This option can cancel previously specified @samp{-Bsymbolic} and
+@samp{-Bsymbolic-functions}.
 
 @kindex --dynamic-list=@var{dynamic-list-file}
 @item --dynamic-list=@var{dynamic-list-file}
@@ -2145,6 +2162,11 @@ address the OS chooses for them (which can vary between invocations).  Like
 normal dynamically linked executables they can be executed and symbols
 defined in the executable cannot be overridden by shared libraries.
 
+@kindex -no-pie
+@item -no-pie
+@cindex position dependent executables
+Create a position dependent executable.  This is the default.
+
 @kindex -qmagic
 @item -qmagic
 This option is ignored for Linux compatibility.
@@ -2312,8 +2334,6 @@ For a native ELF linker, the directories in @code{DT_RUNPATH} or
 libraries needed by it. The @code{DT_RPATH} entries are ignored if
 @code{DT_RUNPATH} entries exist.
 @item
-The default directories, normally @file{/lib} and @file{/usr/lib}.
-@item
 For a linker for a Linux system, if the file @file{/etc/ld.so.conf}
 exists, the list of directories found in that file.  Note: the path
 to this file is prefixed with the @code{sysroot} value, if that is
@@ -2324,8 +2344,16 @@ For a native linker on a FreeBSD system, any directories specified by
 the @code{_PATH_ELF_HINTS} macro defined in the @file{elf-hints.h}
 header file.
 @item
-Any directories specifed by a @code{SEARCH_DIR} command in the
-linker script being used.
+Any directories specified by a @code{SEARCH_DIR} command in a
+linker script given on the command line, including scripts specified
+by @option{-T} (but not @option{-dT}).
+@item
+The default directories, normally @file{/lib} and @file{/usr/lib}.
+@item
+Any directories specified by a plugin LDPT_SET_EXTRA_LIBRARY_PATH.
+@item
+Any directories specified by a @code{SEARCH_DIR} command in a default
+linker script.
 @end enumerate
 
 Note however on Linux based systems there is an additional caveat:  If
@@ -2822,6 +2850,12 @@ has been used.
 
 The @option{--reduce-memory-overheads} switch may be also be used to
 enable other tradeoffs in future versions of the linker.
+
+@kindex --max-cache-size=@var{size}
+@item --max-cache-size=@var{size}
+@command{ld} normally caches the relocation information and symbol tables
+of input files in memory with the unlimited size.  This option sets the
+maximum cache size to @var{size}.
 
 @kindex --build-id
 @kindex --build-id=@var{style}
@@ -5440,6 +5474,8 @@ parentheses.  The following types are defined:
 @item NOLOAD
 The section should be marked as not loadable, so that it will not be
 loaded into memory when the program is run.
+@item READONLY
+The section should be marked as read-only.
 @item DSECT
 @itemx COPY
 @itemx INFO

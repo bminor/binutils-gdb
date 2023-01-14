@@ -537,6 +537,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
 	     && !(p == name + 3 && name[1] == ':')		/* "d:/" */
 #endif
+	     && p > name
 	     && IS_DIR_SEPARATOR (p[-1]))
 	/* Sigh.  "foo/" => "foo" */
 	--p;
@@ -1192,6 +1193,34 @@ open_source_file (struct symtab *s)
   return fd;
 }
 
+/* See source.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+find_source_or_rewrite (const char *filename, const char *dirname)
+{
+  gdb::unique_xmalloc_ptr<char> fullname;
+
+  scoped_fd fd = find_and_open_source (filename, dirname, &fullname);
+  if (fd.get () < 0)
+    {
+      /* rewrite_source_path would be applied by find_and_open_source, we
+	 should report the pathname where GDB tried to find the file.  */
+
+      if (dirname == nullptr || IS_ABSOLUTE_PATH (filename))
+	fullname.reset (xstrdup (filename));
+      else
+	fullname.reset (concat (dirname, SLASH_STRING,
+				filename, (char *) nullptr));
+
+      gdb::unique_xmalloc_ptr<char> rewritten
+	= rewrite_source_path (fullname.get ());
+      if (rewritten != nullptr)
+	fullname = std::move (rewritten);
+    }
+
+  return fullname;
+}
+
 /* Finds the fullname that a symtab represents.
 
    This functions finds the fullname and saves it in s->fullname.
@@ -1321,7 +1350,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	    uiout->field_string ("file", symtab_to_filename_for_display (s),
 				 file_name_style.style ());
 	  if (uiout->is_mi_like_p () || !uiout->test_flags (ui_source_list))
- 	    {
+	    {
 	      const char *s_fullname = symtab_to_fullname (s);
 	      char *local_fullname;
 
@@ -1332,7 +1361,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      strcpy (local_fullname, s_fullname);
 
 	      uiout->field_string ("fullname", local_fullname);
- 	    }
+	    }
 
 	  uiout->text ("\n");
 	}
@@ -1393,7 +1422,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  if (iter > start)
 	    {
 	      std::string text (start, iter);
-	      uiout->text (text.c_str ());
+	      uiout->text (text);
 	    }
 	  if (*iter == '\r')
 	    {
@@ -1903,8 +1932,6 @@ void _initialize_source ();
 void
 _initialize_source ()
 {
-  struct cmd_list_element *c;
-
   init_source_path ();
 
   /* The intention is to use POSIX Basic Regular Expressions.
@@ -1913,7 +1940,8 @@ _initialize_source ()
      just an approximation.  */
   re_set_syntax (RE_SYNTAX_GREP);
 
-  c = add_cmd ("directory", class_files, directory_command, _("\
+  cmd_list_element *directory_cmd
+    = add_cmd ("directory", class_files, directory_command, _("\
 Add directory DIR to beginning of search path for source files.\n\
 Forget cached info on source file locations and line positions.\n\
 DIR can also be $cwd for the current working directory, or $cdir for the\n\
@@ -1922,9 +1950,9 @@ With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
 
   if (dbx_commands)
-    add_com_alias ("use", "directory", class_files, 0);
+    add_com_alias ("use", directory_cmd, class_files, 0);
 
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (directory_cmd, filename_completer);
 
   add_setshow_optional_filename_cmd ("directories",
 				     class_files,
@@ -1958,16 +1986,18 @@ This sets the default address for \"x\" to the line's first instruction\n\
 so that \"x/i\" suffices to start examining the machine code.\n\
 The address is also stored as the value of \"$_\"."));
 
-  add_com ("forward-search", class_files, forward_search_command, _("\
+  cmd_list_element *forward_search_cmd
+    = add_com ("forward-search", class_files, forward_search_command, _("\
 Search for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
-  add_com_alias ("search", "forward-search", class_files, 0);
-  add_com_alias ("fo", "forward-search", class_files, 1);
+  add_com_alias ("search", forward_search_cmd, class_files, 0);
+  add_com_alias ("fo", forward_search_cmd, class_files, 1);
 
-  add_com ("reverse-search", class_files, reverse_search_command, _("\
+  cmd_list_element *reverse_search_cmd
+    = add_com ("reverse-search", class_files, reverse_search_command, _("\
 Search backward for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
-  add_com_alias ("rev", "reverse-search", class_files, 1);
+  add_com_alias ("rev", reverse_search_cmd, class_files, 1);
 
   add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\

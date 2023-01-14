@@ -18,8 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -128,8 +129,10 @@ rx_load (bfd *prog, host_callback *callback)
 
       base = p->p_paddr;
       if (verbose > 1)
-	fprintf (stderr, "[load segment: lma=%08x vma=%08x size=%08x]\n",
-		 (int) base, (int) p->p_vaddr, (int) size);
+	fprintf (stderr,
+		 "[load segment: lma=%08" BFD_VMA_FMT "x vma=%08x "
+		 "size=%08" BFD_VMA_FMT "x]\n",
+		 base, (int) p->p_vaddr, size);
       if (callback)
 	xprintf (callback,
 	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
@@ -151,7 +154,7 @@ rx_load (bfd *prog, host_callback *callback)
 	}
       if (bfd_bread (buf, size, prog) != size)
 	{
-	  fprintf (stderr, "Failed to read %lx bytes\n", size);
+	  fprintf (stderr, "Failed to read %" BFD_VMA_FMT "x bytes\n", size);
 	  continue;
 	}
 

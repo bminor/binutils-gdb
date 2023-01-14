@@ -1,3 +1,24 @@
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* gen-itable.c (NULL): Delete.
+	* gen-model.c (NULL): Likewise.
+	* ld-cache.c (NULL): Likewise.
+	* ld-decode.c (NULL): Likewise.
+
+2021-06-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* local.mk (all-recursive): Delete rule.
+	(SIM_ALL_RECURSIVE_DEPS): Append.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* local.mk (igen/libigen.a): New target.
+
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* lf.h: Include ansidecl.h.
+	(lf_printf): Change __attribute__((printf)) to ATTRIBUTE_PRINTF.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* local.mk: New file.

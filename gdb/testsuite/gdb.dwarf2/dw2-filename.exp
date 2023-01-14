@@ -37,7 +37,7 @@ clean_restart ${testfile}
 # the full path to that file.  What we want to verify, most of all,
 # is that the file and fullname fields are now inverted.
 gdb_test "interpreter-exec mi -file-list-exec-source-files" \
-         ".*{file=\"file1\\.txt\",fullname=\".+file1\\.txt\"}.*"
+    ".*{file=\"file1\\.txt\",fullname=\".+file1\\.txt\",debug-fully-read=\"\[^\"\]+\"}.*"
 
 # And `info sources' should return the fullname incl. the directories.
 gdb_test "info sources" {[/]file1\.txt.*}

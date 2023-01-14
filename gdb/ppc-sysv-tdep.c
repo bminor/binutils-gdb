@@ -276,10 +276,10 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      /* 32-bit decimal floats are right aligned in the
 			 doubleword.  */
 		      if (TYPE_LENGTH (type) == 4)
-		      {
-			memcpy (regval + 4, val, 4);
-			p = regval;
-		      }
+			{
+			  memcpy (regval + 4, val, 4);
+			  p = regval;
+			}
 		      else
 			p = val;
 
@@ -1326,7 +1326,7 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
       && type->code () == TYPE_CODE_FLT)
     {
       /* Floats and doubles go in f1 .. f13.  32-bit floats are converted
- 	 to double first.  */
+	 to double first.  */
       if (argpos->regcache && argpos->freg <= 13)
 	{
 	  int regnum = tdep->ppc_fp0_regnum + argpos->freg;

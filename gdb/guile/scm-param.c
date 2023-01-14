@@ -89,8 +89,7 @@ struct param_smob
   /* The corresponding gdb command objects.
      These are NULL if the parameter has not been registered yet, or
      is no longer registered.  */
-  struct cmd_list_element *set_command;
-  struct cmd_list_element *show_command;
+  set_show_commands commands;
 
   /* The value of the parameter.  */
   union pascm_variable value;
@@ -232,7 +231,7 @@ pascm_get_param_smob_arg_unsafe (SCM self, int arg_pos, const char *func_name)
 static int
 pascm_is_valid (param_smob *p_smob)
 {
-  return p_smob->set_command != NULL;
+  return p_smob->commands.set != nullptr;
 }
 
 /* A helper function which return the default documentation string for
@@ -274,7 +273,7 @@ pascm_signal_setshow_error (SCM exception, const char *msg)
 static void
 pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  param_smob *p_smob = (param_smob *) get_cmd_context (c);
+  param_smob *p_smob = (param_smob *) c->context ();
   SCM self, result, exception;
 
   gdb_assert (gdbscm_is_procedure (p_smob->set_func));
@@ -314,7 +313,7 @@ static void
 pascm_show_func (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  param_smob *p_smob = (param_smob *) get_cmd_context (c);
+  param_smob *p_smob = (param_smob *) c->context ();
   SCM value_scm, self, result, exception;
 
   gdb_assert (gdbscm_is_procedure (p_smob->show_func));
@@ -350,111 +349,100 @@ pascm_show_func (struct ui_file *file, int from_tty,
 /* A helper function that dispatches to the appropriate add_setshow
    function.  */
 
-static void
+static set_show_commands
 add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 		     char *cmd_name, param_smob *self,
 		     char *set_doc, char *show_doc, char *help_doc,
-		     cmd_const_sfunc_ftype *set_func,
+		     cmd_func_ftype *set_func,
 		     show_value_ftype *show_func,
 		     struct cmd_list_element **set_list,
-		     struct cmd_list_element **show_list,
-		     struct cmd_list_element **set_cmd,
-		     struct cmd_list_element **show_cmd)
+		     struct cmd_list_element **show_list)
 {
-  struct cmd_list_element *param = NULL;
-  const char *tmp_name = NULL;
+  set_show_commands commands;
 
   switch (param_type)
     {
     case var_boolean:
-      add_setshow_boolean_cmd (cmd_name, cmd_class,
-			       &self->value.boolval,
-			       set_doc, show_doc, help_doc,
-			       set_func, show_func,
-			       set_list, show_list);
-
+      commands = add_setshow_boolean_cmd (cmd_name, cmd_class,
+					  &self->value.boolval, set_doc,
+					  show_doc, help_doc, set_func,
+					  show_func, set_list, show_list);
       break;
 
     case var_auto_boolean:
-      add_setshow_auto_boolean_cmd (cmd_name, cmd_class,
-				    &self->value.autoboolval,
-				    set_doc, show_doc, help_doc,
-				    set_func, show_func,
-				    set_list, show_list);
+      commands = add_setshow_auto_boolean_cmd (cmd_name, cmd_class,
+					       &self->value.autoboolval,
+					       set_doc, show_doc, help_doc,
+					       set_func, show_func, set_list,
+					       show_list);
       break;
 
     case var_uinteger:
-      add_setshow_uinteger_cmd (cmd_name, cmd_class,
-				&self->value.uintval,
-				set_doc, show_doc, help_doc,
-				set_func, show_func,
-				set_list, show_list);
+      commands = add_setshow_uinteger_cmd (cmd_name, cmd_class,
+					   &self->value.uintval, set_doc,
+					   show_doc, help_doc, set_func,
+					   show_func, set_list, show_list);
       break;
 
     case var_zinteger:
-      add_setshow_zinteger_cmd (cmd_name, cmd_class,
-				&self->value.intval,
-				set_doc, show_doc, help_doc,
-				set_func, show_func,
-				set_list, show_list);
+      commands = add_setshow_zinteger_cmd (cmd_name, cmd_class,
+					   &self->value.intval, set_doc,
+					   show_doc, help_doc, set_func,
+					   show_func, set_list, show_list);
       break;
 
     case var_zuinteger:
-      add_setshow_zuinteger_cmd (cmd_name, cmd_class,
-				 &self->value.uintval,
-				 set_doc, show_doc, help_doc,
-				 set_func, show_func,
-				 set_list, show_list);
+      commands = add_setshow_zuinteger_cmd (cmd_name, cmd_class,
+					    &self->value.uintval, set_doc,
+					    show_doc, help_doc, set_func,
+					    show_func, set_list, show_list);
       break;
 
     case var_zuinteger_unlimited:
-      add_setshow_zuinteger_unlimited_cmd (cmd_name, cmd_class,
-					   &self->value.intval,
-					   set_doc, show_doc, help_doc,
-					   set_func, show_func,
-					   set_list, show_list);
+      commands = add_setshow_zuinteger_unlimited_cmd (cmd_name, cmd_class,
+						      &self->value.intval,
+						      set_doc, show_doc,
+						      help_doc, set_func,
+						      show_func, set_list,
+						      show_list);
       break;
 
     case var_string:
-      add_setshow_string_cmd (cmd_name, cmd_class,
-			      &self->value.stringval,
-			      set_doc, show_doc, help_doc,
-			      set_func, show_func,
-			      set_list, show_list);
+      commands = add_setshow_string_cmd (cmd_name, cmd_class,
+					 &self->value.stringval, set_doc,
+					 show_doc, help_doc, set_func,
+					 show_func, set_list, show_list);
       break;
 
     case var_string_noescape:
-      add_setshow_string_noescape_cmd (cmd_name, cmd_class,
-				       &self->value.stringval,
-				       set_doc, show_doc, help_doc,
-				       set_func, show_func,
-				       set_list, show_list);
+      commands = add_setshow_string_noescape_cmd (cmd_name, cmd_class,
+						  &self->value.stringval,
+						  set_doc, show_doc, help_doc,
+						  set_func, show_func, set_list,
+						  show_list);
 
       break;
 
     case var_optional_filename:
-      add_setshow_optional_filename_cmd (cmd_name, cmd_class,
-					 &self->value.stringval,
-					 set_doc, show_doc, help_doc,
-					 set_func, show_func,
-					 set_list, show_list);
+      commands = add_setshow_optional_filename_cmd (cmd_name, cmd_class,
+						    &self->value.stringval,
+						    set_doc, show_doc, help_doc,
+						    set_func, show_func,
+						    set_list, show_list);
       break;
 
     case var_filename:
-      add_setshow_filename_cmd (cmd_name, cmd_class,
-				&self->value.stringval,
-				set_doc, show_doc, help_doc,
-				set_func, show_func,
-				set_list, show_list);
+      commands = add_setshow_filename_cmd (cmd_name, cmd_class,
+					   &self->value.stringval, set_doc,
+					   show_doc, help_doc, set_func,
+					   show_func, set_list, show_list);
       break;
 
     case var_enum:
-      add_setshow_enum_cmd (cmd_name, cmd_class,
-			    self->enumeration,
-			    &self->value.cstringval,
-			    set_doc, show_doc, help_doc,
-			    set_func, show_func,
-			    set_list, show_list);
+      commands = add_setshow_enum_cmd (cmd_name, cmd_class, self->enumeration,
+				       &self->value.cstringval, set_doc,
+				       show_doc, help_doc, set_func, show_func,
+				       set_list, show_list);
       /* Initialize the value, just in case.  */
       self->value.cstringval = self->enumeration[0];
       break;
@@ -463,19 +451,12 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
       gdb_assert_not_reached ("bad param_type value");
     }
 
-  /* Lookup created parameter, and register Scheme object against the
-     parameter context.  Perform this task against both lists.  */
-  tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
-  gdb_assert (param != NULL);
-  set_cmd_context (param, self);
-  *set_cmd = param;
+  /* Register Scheme object against the commandsparameter context.  Perform this
+     task against both lists.  */
+  commands.set->set_context (self);
+  commands.show->set_context (self);
 
-  tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
-  gdb_assert (param != NULL);
-  set_cmd_context (param, self);
-  *show_cmd = param;
+  return commands;
 }
 
 /* Return an array of strings corresponding to the enum values for
@@ -1012,15 +993,12 @@ gdbscm_register_parameter_x (SCM self)
   gdbscm_gdb_exception exc {};
   try
     {
-      add_setshow_generic (p_smob->type, p_smob->cmd_class,
-			   p_smob->cmd_name, p_smob,
-			   p_smob->set_doc, p_smob->show_doc, p_smob->doc,
-			   (gdbscm_is_procedure (p_smob->set_func)
-			    ? pascm_set_func : NULL),
-			   (gdbscm_is_procedure (p_smob->show_func)
-			    ? pascm_show_func : NULL),
-			   set_list, show_list,
-			   &p_smob->set_command, &p_smob->show_command);
+      p_smob->commands = add_setshow_generic
+	(p_smob->type, p_smob->cmd_class, p_smob->cmd_name, p_smob,
+	 p_smob->set_doc, p_smob->show_doc, p_smob->doc,
+	 (gdbscm_is_procedure (p_smob->set_func) ? pascm_set_func : NULL),
+	 (gdbscm_is_procedure (p_smob->show_func) ? pascm_show_func : NULL),
+	 set_list, show_list);
     }
   catch (const gdb_exception &except)
     {

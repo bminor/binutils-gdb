@@ -294,7 +294,7 @@ tui_source_window_base::tui_source_window_base ()
 
   gdb::observers::source_styling_changed.attach
     (std::bind (&tui_source_window::style_changed, this),
-     m_observable);
+     m_observable, "tui-winsource");
 }
 
 tui_source_window_base::~tui_source_window_base ()
@@ -457,14 +457,12 @@ tui_source_window_base::update_breakpoint_info
 	 do with it.  Identify enable/disabled breakpoints as well as
 	 those that we already hit.  */
       tui_bp_flags mode = 0;
-      iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
+      for (breakpoint *bp : all_breakpoints ())
 	{
-	  struct bp_location *loc;
-
 	  if (bp == being_deleted)
 	    return false;
 
-	  for (loc = bp->loc; loc != NULL; loc = loc->next)
+	  for (bp_location *loc : bp->locations ())
 	    {
 	      if (location_matches_p (loc, i))
 		{
@@ -481,7 +479,8 @@ tui_source_window_base::update_breakpoint_info
 		}
 	    }
 	  return false;
-	});
+	}
+
       if (line->break_mode != mode)
 	{
 	  line->break_mode = mode;

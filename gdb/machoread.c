@@ -907,7 +907,7 @@ macho_symfile_offsets (struct objfile *objfile,
   struct obj_section *osect;
 
   /* Allocate section_offsets.  */
-  objfile->section_offsets.assign (bfd_count_sections (objfile->obfd), 0);
+  objfile->section_offsets.assign (gdb_bfd_count_sections (objfile->obfd), 0);
 
   /* This code is run when we first add the objfile with
      symfile_add_with_addrs_or_offsets, when "addrs" not "offsets" are
@@ -926,7 +926,7 @@ macho_symfile_offsets (struct objfile *objfile,
 
 	  if (bfd_sect_name == addrs[i].name)
 	    {
-	      obj_section_offset (osect) = addrs[i].addr;
+	      osect->set_offset (addrs[i].addr);
 	      break;
 	    }
 	}

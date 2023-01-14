@@ -133,17 +133,3 @@ exception_fprintf (struct ui_file *file, const struct gdb_exception &e,
       print_exception (file, e);
     }
 }
-
-/* See exceptions.h.  */
-
-int
-exception_print_same (const struct gdb_exception &e1,
-		      const struct gdb_exception &e2)
-{
-  const char *msg1 = e1.message == nullptr ? "" : e1.what ();
-  const char *msg2 = e2.message == nullptr ? "" : e2.what ();
-
-  return (e1.reason == e2.reason
-	  && e1.error == e2.error
-	  && strcmp (msg1, msg2) == 0);
-}

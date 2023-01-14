@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 
 #include "sim-main.h"
@@ -108,6 +111,8 @@ bpf_free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const bpf_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -121,6 +126,10 @@ sim_open (SIM_OPEN_KIND kind,
      instruction will need that information, to update %fp.  */
 
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = bpf_sim_machs;
+  STATE_MODEL_NAME (sd) = "bpf-def";
 
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     goto error;
@@ -171,10 +180,6 @@ sim_open (SIM_OPEN_KIND kind,
 
     bpf_cgen_init_dis (cd);
   }
-
-  /* Initialize various cgen things not done by common framework.
-     Must be done after bpf_cgen_cpu_open.  */
-  cgen_init (sd);
 
   /* XXX do eBPF sim specific initializations.  */
 

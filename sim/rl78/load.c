@@ -19,8 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -128,12 +129,15 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
 
       base = p->p_paddr;
       if (verbose > 1)
-	fprintf (stderr, "[load segment: lma=%08x vma=%08x size=%08x]\n",
-		 (int) base, (int) p->p_vaddr, (int) size);
+	fprintf (stderr,
+		 "[load segment: lma=%08" BFD_VMA_FMT "x vma=%08x "
+		 "size=%08" BFD_VMA_FMT "x]\n",
+		 base, (int) p->p_vaddr, size);
       if (callbacks)
 	xprintf (callbacks,
-	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
-	         find_section_name_by_offset (prog, p->p_offset),
+		 "Loading section %s, size %#" BFD_VMA_FMT "x "
+		 "lma %08" BFD_VMA_FMT "x vma %08lx\n",
+		 find_section_name_by_offset (prog, p->p_offset),
 		 size, base, p->p_vaddr);
 
       buf = xmalloc (size);
@@ -147,13 +151,16 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
 
       if (bfd_bread (buf, size, prog) != size)
 	{
-	  fprintf (stderr, "%s: Failed to read %lx bytes\n", simname, size);
+	  fprintf (stderr, "%s: Failed to read %" BFD_VMA_FMT "x bytes\n",
+		   simname, size);
 	  continue;
 	}
 
       if (base > 0xeffff || base + size > 0xeffff)
 	{
-	  fprintf (stderr, "%s, Can't load image to RAM/SFR space: 0x%lx - 0x%lx\n",
+	  fprintf (stderr,
+		   "%s, Can't load image to RAM/SFR space: 0x%" BFD_VMA_FMT "x "
+		   "- 0x%" BFD_VMA_FMT "x\n",
 		   simname, base, base+size);
 	  continue;
 	}

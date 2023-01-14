@@ -3001,7 +3001,7 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
    the type for the base class, and a terminating semicolon.
 
    A typical example, with two base classes, would be "!2,020,19;0264,21;".
-   						       ^^ ^ ^ ^  ^ ^  ^
+						       ^^ ^ ^ ^  ^ ^  ^
 	Baseclass information marker __________________|| | | |  | |  |
 	Number of baseclasses __________________________| | | |  | |  |
 	Visibility specifiers (2) ________________________| | |  | |  |

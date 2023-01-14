@@ -1427,7 +1427,7 @@ bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
       return -1;
     }
 #endif
- return (asect->reloc_count + 1) * sizeof (arelent *);
+ return (asect->reloc_count + 1L) * sizeof (arelent *);
 }
 
 /* In addition to the need to byte-swap the symbol number, the bit positions
@@ -5931,7 +5931,8 @@ bfd_mach_o_core_fetch_environment (bfd *abfd,
 		{
 		  unsigned long val;
 
-		  val = *((unsigned long *) (buf + size - offset));
+		  val = bfd_get_32(abfd, buf + size - offset);
+
 		  if (! found_nonnull)
 		    {
 		      if (val != 0)

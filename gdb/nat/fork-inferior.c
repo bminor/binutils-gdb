@@ -281,8 +281,6 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   char **save_our_env;
   int i;
   int save_errno;
-  const char *inferior_cwd;
-  std::string expanded_inferior_cwd;
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
@@ -326,14 +324,13 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 
   /* Check if the user wants to set a different working directory for
      the inferior.  */
-  inferior_cwd = get_inferior_cwd ();
+  std::string inferior_cwd = get_inferior_cwd ();
 
-  if (inferior_cwd != NULL)
+  if (!inferior_cwd.empty ())
     {
       /* Expand before forking because between fork and exec, the child
 	 process may only execute async-signal-safe operations.  */
-      expanded_inferior_cwd = gdb_tilde_expand (inferior_cwd);
-      inferior_cwd = expanded_inferior_cwd.c_str ();
+      inferior_cwd = gdb_tilde_expand (inferior_cwd.c_str ());
     }
 
   /* If there's any initialization of the target layers that must
@@ -373,10 +370,10 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 
       /* Change to the requested working directory if the user
 	 requested it.  */
-      if (inferior_cwd != NULL)
+      if (!inferior_cwd.empty ())
 	{
-	  if (chdir (inferior_cwd) < 0)
-	    trace_start_error_with_name (inferior_cwd);
+	  if (chdir (inferior_cwd.c_str ()) < 0)
+	    trace_start_error_with_name (inferior_cwd.c_str ());
 	}
 
       if (debug_fork)

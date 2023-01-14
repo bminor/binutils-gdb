@@ -1,3 +1,243 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (m32r_trap): Reformat indentation to GNU style.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (TRAPS_OBJ, SIM_EXTRA_CFLAGS): Delete.
+	* configure.ac (traps_obj, sim_extra_cflags): Delete.
+	* sim-if.c (M32R_DEFAULT_MEM_SIZE): New define.
+	(sim_create_inferior): Replace M32R_LINUX with STATE_ENVIRONMENT
+	check.
+	* sim-main.h (M32R_DEFAULT_MEM_SIZE): Delete.
+	* traps-linux.c: Merge with ...
+	* traps.c: ... this file.
+	* configure: Regenerate.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c (conv_endian, conv_endian16,
+	translate_endian): Delete.
+	(translate_endian_h2t): New host-to-target function.
+	(translate_endian_t2h): New target-to-host function.
+	(m32r_trap): Replace conv_endian with H2T_4 & T2H_4, conv_endian16
+	with H2T_2 & T2H_2, and translate_endian with translate_endian_h2t
+	& translate_endian_t2h.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c (m32r_trap): Change OPERATING_ENVIRONMENT check to
+	!USER_ENVIRONMENT.  Jump to default switch case.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* syscall.h: Change __NR_ prefix on all symbols to TARGET_LINUX_SYS_.
+	* traps-linux.c: Likewise.  Include sim/callback.h & stdlib.h.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_SCACHE call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_DEFAULT_MODEL call.
+	* sim-if.c (sim_open): Set STATE_MODEL_NAME.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Rename to ...
+	(m32r_sim_machs): ... this.
+	* sim-if.c (m32r_sim_machs): New decl.
+	(sim_open): Set STATE_MACH.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Mark const.
+
+2021-06-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* cpu.c (m32rbf_record_trace_results): Delete function.
+	* cpu2.c (m32r2f_record_trace_results): Likewise.
+	* cpux.c (m32rxf_record_trace_results): Likewise.
+
+2021-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c (m32r_trap): Set s.arg4, s.arg5, s.arg6, and s.arg7.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_COMMON): Delete.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (CGEN_MAINT): Delete.
+	* configure.ac: Delete SIM_AC_OPTION_CGEN_MAINT call.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c: Include sim-signal.h.
+	* traps.c:
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* sim-if.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c: Include portability.h.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
+	* sim-if.c (sim_open): Set current_alignment.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete cgen_init call.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (struct sim_state): Delete.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-m32r_cache.c, dv-m32r_uart.c: Replace config.h include with
+	defs.h.
+	* m32r.c, m32r2.c, m32rx.c, sim-if.c, traps-linux.c,
+	traps.c: Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-05-04  Tom Tromey  <tromey@adacore.com>
+
+	* mloop.in: Include <stdlib.h>.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (sim-if.o, arch.o, traps.o, traps-linux.o)
+	(devices.o, m32r.o, mloop.o, cpu.o, decode.o, sem.o, model.o)
+	(m32rx.o, mloopx.o, cpux.o, decodex.o, semx.o, modelx.o)
+	(m32r2.o, mloop2.o, cpu2.o, decode2.o, sem2.o, model2.o): Remove.
+	(SIM_EXTRA_DEPS): Add eng.h, engx.h, eng2.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
+2021-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.

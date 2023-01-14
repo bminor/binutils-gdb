@@ -1783,7 +1783,7 @@ _bfd_mips_elf32_gprel16_reloc (bfd *abfd, arelent *reloc_entry,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,
@@ -1830,7 +1830,7 @@ mips_elf_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable,
@@ -1949,7 +1949,7 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   else
     {
       relocatable = false;
-      output_bfd = symbol->section->output_section->owner;
+      output_bfd = input_section->output_section->owner;
     }
 
   ret = mips_elf_final_gp (output_bfd, symbol, relocatable, error_message,

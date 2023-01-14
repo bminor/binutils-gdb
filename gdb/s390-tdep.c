@@ -2634,6 +2634,7 @@ s390_frame_prev_register (struct frame_info *this_frame,
 /* Default S390 frame unwinder.  */
 
 static const struct frame_unwind s390_frame_unwind = {
+  "s390 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   s390_frame_this_id,
@@ -2727,6 +2728,7 @@ s390_stub_frame_sniffer (const struct frame_unwind *self,
 /* S390 stub frame unwinder.  */
 
 static const struct frame_unwind s390_stub_frame_unwind = {
+  "s390 stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   s390_stub_frame_this_id,
@@ -7048,10 +7050,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					s390_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
-  set_gdbarch_displaced_step_prepare (gdbarch, linux_displaced_step_prepare);
-  set_gdbarch_displaced_step_finish (gdbarch, linux_displaced_step_finish);
-  set_gdbarch_displaced_step_restore_all_in_ptid
-    (gdbarch, linux_displaced_step_restore_all_in_ptid);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
   set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
   set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
@@ -7143,12 +7141,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      cause GDB to crash with an internal error when the user tries to set
      an unsupported OSABI.  */
   if (!tdesc_has_registers (tdesc))
-  {
-    if (info.bfd_arch_info->mach == bfd_mach_s390_31)
-      tdesc = tdesc_s390_linux32;
-    else
-      tdesc = tdesc_s390x_linux64;
-  }
+    {
+      if (info.bfd_arch_info->mach == bfd_mach_s390_31)
+	tdesc = tdesc_s390_linux32;
+      else
+	tdesc = tdesc_s390x_linux64;
+    }
   tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */

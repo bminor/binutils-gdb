@@ -142,14 +142,19 @@ set sparc64tests {
      "libgotop64.so"}
 }
 
-if { ![istarget "sparc64-*-elf*"] } {
-    run_ld_link_tests $sparctests
-}
+# The solaris2 targets do not support the generic SPARC ELF targets,
+# ie -melf32_sparc and -melf64_sparc, so we skip the next set of
+# tests for them.  Support could be added, but this then breaks the
+# creation of archives for those targets.  See PR 27666 for more
+# details.
+if { ![istarget "*-*-solaris2*"] } {
+    if { ![istarget "sparc64-*-elf*"] } {
+        run_ld_link_tests $sparctests
+    }
 
-if { !([istarget "sparc-*-elf*"]
-       || [istarget "sparc-sun-solaris2.5*"]
-       || [istarget "sparc-sun-solaris2.6"]) } {
-    run_ld_link_tests $sparc64tests
+    if { ![istarget "sparc-*-elf*"] } {
+        run_ld_link_tests $sparc64tests
+    }
 }
 
 if { [istarget "sparc*-*-linux*"] && [isnative] } {

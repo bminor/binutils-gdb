@@ -30,10 +30,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ansidecl.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 #include "gdb/signals.h"
 
 /* Define the rate at which the simulator should poll the host
@@ -371,6 +372,8 @@ sim_io_flush_stdoutput(void)
   }
 }
 
+/* Glue to use sim-fpu module.  */
+
 void
 sim_io_error (SIM_DESC sd, const char *fmt, ...)
 {
@@ -378,19 +381,23 @@ sim_io_error (SIM_DESC sd, const char *fmt, ...)
   va_start(ap, fmt);
   callbacks->evprintf_filtered (callbacks, fmt, ap);
   va_end(ap);
-  callbacks->error (callbacks, "");
+  /* Printing a space here avoids empty printf compiler warnings.  Not ideal,
+     but we want error's side-effect where it halts processing.  */
+  callbacks->error (callbacks, " ");
 }
 
 /****/
 
-void NORETURN
+void ATTRIBUTE_NORETURN
 error (const char *msg, ...)
 {
   va_list ap;
   va_start(ap, msg);
   callbacks->evprintf_filtered (callbacks, msg, ap);
   va_end(ap);
-  callbacks->error (callbacks, "");
+  /* Printing a space here avoids empty printf compiler warnings.  Not ideal,
+     but we want error's side-effect where it halts processing.  */
+  callbacks->error (callbacks, " ");
 }
 
 void *

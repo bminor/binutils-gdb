@@ -20,9 +20,9 @@
 /* This file provides a standard way for targets to talk to the host OS
    level.  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -32,10 +32,11 @@
 #include <limits.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "targ-vals.h"
 /* For xmalloc.  */
 #include "libiberty.h"
@@ -48,24 +49,10 @@
 #define PIPE_BUF 512
 #endif
 
-/* ??? sim_cb_printf should be cb_printf, but until the callback support is
-   broken out of the simulator directory, these are here to not require
-   sim-utils.h.  */
-void sim_cb_printf (host_callback *, const char *, ...);
-void sim_cb_eprintf (host_callback *, const char *, ...);
-
 extern CB_TARGET_DEFS_MAP cb_init_syscall_map[];
 extern CB_TARGET_DEFS_MAP cb_init_errno_map[];
+extern CB_TARGET_DEFS_MAP cb_init_signal_map[];
 extern CB_TARGET_DEFS_MAP cb_init_open_map[];
-
-/* Set the callback copy of errno from what we see now.  */
-
-static int
-wrap (host_callback *p, int val)
-{
-  p->last_errno = errno;
-  return val;
-}
 
 /* Make sure the FD provided is ok.  If not, return non-zero
    and set errno. */
@@ -143,7 +130,8 @@ os_close (host_callback *p, int fd)
 	  return 0;
 	}
 
-      result = wrap (p, close (fdmap (p, fd)));
+      result = close (fdmap (p, fd));
+      p->last_errno = errno;
     }
   p->fd_buddy[fd] = -1;
 
@@ -154,43 +142,21 @@ os_close (host_callback *p, int fd)
 /* taken from gdb/util.c:notice_quit() - should be in a library */
 
 
-#if defined(__GO32__) || defined (_MSC_VER)
+#if defined(_MSC_VER)
 static int
 os_poll_quit (host_callback *p)
 {
-#if defined(__GO32__)
-  int kbhit ();
-  int getkey ();
-  if (kbhit ())
-    {
-      int k = getkey ();
-      if (k == 1)
-	{
-	  return 1;
-	}
-      else if (k == 2)
-	{
-	  return 1;
-	}
-      else
-	{
-	  sim_cb_eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
-	}
-    }
-#endif
-#if defined (_MSC_VER)
   /* NB - this will not compile! */
   int k = win32pollquit ();
   if (k == 1)
     return 1;
   else if (k == 2)
     return 1;
-#endif
   return 0;
 }
 #else
 #define os_poll_quit 0
-#endif /* defined(__GO32__) || defined(_MSC_VER) */
+#endif /* defined(_MSC_VER) */
 
 static int
 os_get_errno (host_callback *p)
@@ -207,20 +173,23 @@ os_isatty (host_callback *p, int fd)
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, isatty (fdmap (p, fd)));
 
+  result = isatty (fdmap (p, fd));
+  p->last_errno = errno;
   return result;
 }
 
-static int
-os_lseek (host_callback *p, int fd, long off, int way)
+static int64_t
+os_lseek (host_callback *p, int fd, int64_t off, int way)
 {
-  int result;
+  int64_t result;
 
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, lseek (fdmap (p, fd), off, way));
+
+  result = lseek (fdmap (p, fd), off, way);
+  p->last_errno = errno;
   return result;
 }
 
@@ -296,14 +265,19 @@ os_read (host_callback *p, int fd, char *buf, int len)
       return len;
     }
 
-  result = wrap (p, read (fdmap (p, fd), buf, len));
+  result = read (fdmap (p, fd), buf, len);
+  p->last_errno = errno;
   return result;
 }
 
 static int
 os_read_stdin (host_callback *p, char *buf, int len)
 {
-  return wrap (p, read (0, buf, len));
+  int result;
+
+  result = read (0, buf, len);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
@@ -362,7 +336,8 @@ os_write (host_callback *p, int fd, const char *buf, int len)
   switch (real_fd)
     {
     default:
-      result = wrap (p, write (real_fd, buf, len));
+      result = write (real_fd, buf, len);
+      p->last_errno = errno;
       break;
     case 1:
       result = p->write_stdout (p, buf, len);
@@ -401,49 +376,71 @@ os_flush_stderr (host_callback *p ATTRIBUTE_UNUSED)
 static int
 os_rename (host_callback *p, const char *f1, const char *f2)
 {
-  return wrap (p, rename (f1, f2));
+  int result;
+
+  result = rename (f1, f2);
+  p->last_errno = errno;
+  return result;
 }
 
 
 static int
 os_system (host_callback *p, const char *s)
 {
-  return wrap (p, system (s));
+  int result;
+
+  result = system (s);
+  p->last_errno = errno;
+  return result;
 }
 
-static long
-os_time (host_callback *p, long *t)
+static int64_t
+os_time (host_callback *p)
 {
-  return wrap (p, time (t));
+  int64_t result;
+
+  result = time (NULL);
+  p->last_errno = errno;
+  return result;
 }
 
 
 static int
 os_unlink (host_callback *p, const char *f1)
 {
-  return wrap (p, unlink (f1));
+  int result;
+
+  result = unlink (f1);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_stat (host_callback *p, const char *file, struct stat *buf)
 {
+  int result;
+
   /* ??? There is an issue of when to translate to the target layout.
      One could do that inside this function, or one could have the
      caller do it.  It's more flexible to let the caller do it, though
      I'm not sure the flexibility will ever be useful.  */
-  return wrap (p, stat (file, buf));
+  result = stat (file, buf);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_fstat (host_callback *p, int fd, struct stat *buf)
 {
+  int result;
+
   if (fdbad (p, fd))
     return -1;
 
   if (p->ispipe[fd])
     {
 #if defined (HAVE_STRUCT_STAT_ST_ATIME) || defined (HAVE_STRUCT_STAT_ST_CTIME) || defined (HAVE_STRUCT_STAT_ST_MTIME)
-      time_t t = (*p->time) (p, NULL);
+      time_t t = (*p->time) (p);
 #endif
 
       /* We have to fake the struct stat contents, since the pipe is
@@ -475,22 +472,28 @@ os_fstat (host_callback *p, int fd, struct stat *buf)
      One could do that inside this function, or one could have the
      caller do it.  It's more flexible to let the caller do it, though
      I'm not sure the flexibility will ever be useful.  */
-  return wrap (p, fstat (fdmap (p, fd), buf));
+  result = fstat (fdmap (p, fd), buf);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_lstat (host_callback *p, const char *file, struct stat *buf)
 {
+  int result;
+
   /* NOTE: hpn/2004-12-12: Same issue here as with os_fstat.  */
 #ifdef HAVE_LSTAT
-  return wrap (p, lstat (file, buf));
+  result = lstat (file, buf);
 #else
-  return wrap (p, stat (file, buf));
+  result = stat (file, buf);
 #endif
+  p->last_errno = errno;
+  return result;
 }
 
 static int
-os_ftruncate (host_callback *p, int fd, long len)
+os_ftruncate (host_callback *p, int fd, int64_t len)
 {
   int result;
 
@@ -503,7 +506,8 @@ os_ftruncate (host_callback *p, int fd, long len)
   if (result)
     return result;
 #ifdef HAVE_FTRUNCATE
-  result = wrap (p, ftruncate (fdmap (p, fd), len));
+  result = ftruncate (fdmap (p, fd), len);
+  p->last_errno = errno;
 #else
   p->last_errno = EINVAL;
   result = -1;
@@ -512,12 +516,42 @@ os_ftruncate (host_callback *p, int fd, long len)
 }
 
 static int
-os_truncate (host_callback *p, const char *file, long len)
+os_truncate (host_callback *p, const char *file, int64_t len)
 {
 #ifdef HAVE_TRUNCATE
-  return wrap (p, truncate (file, len));
+  int result;
+
+  result = truncate (file, len);
+  p->last_errno = errno;
+  return result;
 #else
   p->last_errno = EINVAL;
+  return -1;
+#endif
+}
+
+static int
+os_getpid (host_callback *p)
+{
+  int result;
+
+  result = getpid ();
+  /* POSIX says getpid always succeeds.  */
+  p->last_errno = 0;
+  return result;
+}
+
+static int
+os_kill (host_callback *p, int pid, int signum)
+{
+#ifdef HAVE_KILL
+  int result;
+
+  result = kill (pid, signum);
+  p->last_errno = errno;
+  return result;
+#else
+  p->last_errno = ENOSYS;
   return -1;
 #endif
 }
@@ -631,6 +665,7 @@ os_init (host_callback *p)
 
   p->syscall_map = cb_init_syscall_map;
   p->errno_map = cb_init_errno_map;
+  p->signal_map = cb_init_signal_map;
   p->open_map = cb_init_open_map;
 
   return 1;
@@ -639,7 +674,7 @@ os_init (host_callback *p)
 /* DEPRECATED */
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 3)
 os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 {
   va_list args;
@@ -650,24 +685,21 @@ os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 }
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 os_vprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 {
   vprintf (format, args);
 }
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 {
   vfprintf (stderr, format, args);
 }
 
 /* VARARGS */
-#ifdef __GNUC__
-__attribute__ ((__noreturn__))
-#endif
-static void
+static void ATTRIBUTE_PRINTF (2, 3) ATTRIBUTE_NORETURN
 os_error (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 {
   va_list args;
@@ -705,6 +737,9 @@ host_callback default_callback =
 
   os_ftruncate,
   os_truncate,
+
+  os_getpid,
+  os_kill,
 
   os_pipe,
   os_pipe_empty,
@@ -880,6 +915,19 @@ cb_target_to_host_open (host_callback *cb, int target_val)
   return host_val;
 }
 
+/* Translate the target's version of a signal number to the host's.
+   This isn't actually the host's version, rather a canonical form.
+   ??? Perhaps this should be renamed to ..._canon_signal.  */
+
+int
+cb_target_to_host_signal (host_callback *cb, int target_val)
+{
+  const CB_TARGET_DEFS_MAP *m =
+    cb_target_map_entry (cb->signal_map, target_val);
+
+  return m ? m->host_val : -1;
+}
+
 /* Utility for e.g. cb_host_to_target_stat to store values in the target's
    stat struct.
 
@@ -915,7 +963,7 @@ cb_store_target_endian (host_callback *cb, char *p, int size, long val)
    or zero if an error occurred during the translation.  */
 
 int
-cb_host_to_target_stat (host_callback *cb, const struct stat *hs, PTR ts)
+cb_host_to_target_stat (host_callback *cb, const struct stat *hs, void *ts)
 {
   const char *m = cb->stat_map;
   char *p;
@@ -1007,35 +1055,6 @@ cb_host_to_target_stat (host_callback *cb, const struct stat *hs, PTR ts)
   return p - (char *) ts;
 }
 
-/* Cover functions to the vfprintf callbacks.
-
-   ??? If one thinks of the callbacks as a subsystem onto itself [or part of
-   a larger "remote target subsystem"] with a well defined interface, then
-   one would think that the subsystem would provide these.  However, until
-   one is allowed to create such a subsystem (with its own source tree
-   independent of any particular user), such a critter can't exist.  Thus
-   these functions are here for the time being.  */
-
-void
-sim_cb_printf (host_callback *p, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  p->vprintf_filtered (p, fmt, ap);
-  va_end (ap);
-}
-
-void
-sim_cb_eprintf (host_callback *p, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  p->evprintf_filtered (p, fmt, ap);
-  va_end (ap);
-}
-
 int
 cb_is_stdin (host_callback *cb, int fd)
 {

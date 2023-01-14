@@ -23,9 +23,9 @@
    tree, nor should it live in the gdb source tree.  K&R C must be
    supported.  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include "libiberty.h"
 #include <stdarg.h>
@@ -40,7 +40,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "targ-vals.h"
 
 #ifndef ENOSYS
@@ -578,13 +578,36 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
       }
       break;
 
+    case CB_SYS_getpid:
+      /* POSIX says getpid always succeeds.  */
+      result = (*cb->getpid) (cb);
+      break;
+
+    case CB_SYS_kill:
+      /* If killing self, leave it to the caller to process so it can send the
+	 signal to the engine.  */
+      if (sc->arg1 == (*cb->getpid) (cb))
+	{
+	  result = -1;
+	  errcode = ENOSYS;
+	}
+      else
+	{
+	  int signum = cb_target_to_host_signal (cb, sc->arg2);
+
+	  result = (*cb->kill) (cb, sc->arg1, signum);
+	  cb->last_errno = errno;
+	  goto ErrorFinish;
+	}
+      break;
+
     case CB_SYS_time :
       {
 	/* FIXME: May wish to change CB_SYS_time to something else.
 	   We might also want gettimeofday or times, but if system calls
 	   can be built on others, we can keep the number we have to support
 	   here down.  */
-	time_t t = (*cb->time) (cb, (time_t *) 0);
+	time_t t = (*cb->time) (cb);
 	result = t;
 	/* It is up to target code to process the argument to time().  */
       }

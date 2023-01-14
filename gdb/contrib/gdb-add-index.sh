@@ -37,6 +37,34 @@ fi
 
 file="$1"
 
+if test -L "$file"; then
+    if ! command -v readlink >/dev/null 2>&1; then
+	echo "$myname: 'readlink' missing.  Failed to follow symlink $1." 1>&2
+	exit 1
+    fi
+
+    # Count number of links followed in order to detect loops.
+    count=0
+    while test -L "$file"; do
+	target=$(readlink "$file")
+
+	case "$target" in
+	    /*)
+		file="$target"
+		;;
+	    *)
+		file="$(dirname "$file")/$target"
+		;;
+	esac
+
+	count="$((count + 1))"
+	if test "$count" -gt 10; then
+	    echo "$myname: Detected loop while following link $file"
+	    exit 1
+	fi
+    done
+fi
+
 if test ! -r "$file"; then
     echo "$myname: unable to access: $file" 1>&2
     exit 1

@@ -25,7 +25,6 @@
 #include <machine/reg.h>
 
 #include "fbsd-nat.h"
-#include "arm-tdep.h"
 #include "arm-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
@@ -38,56 +37,17 @@ struct arm_fbsd_nat_target : public fbsd_nat_target
 
 static arm_fbsd_nat_target the_arm_fbsd_nat_target;
 
-/* Determine if PT_GETREGS fetches REGNUM.  */
-
-static bool
-getregs_supplies (int regnum)
-{
-  return ((regnum >= ARM_A1_REGNUM && regnum <= ARM_PC_REGNUM)
-	  || regnum == ARM_PS_REGNUM);
-}
-
-#ifdef PT_GETVFPREGS
-/* Determine if PT_GETVFPREGS fetches REGNUM.  */
-
-static bool
-getvfpregs_supplies (int regnum)
-{
-  return ((regnum >= ARM_D0_REGNUM && regnum <= ARM_D31_REGNUM)
-	  || regnum == ARM_FPSCR_REGNUM);
-}
-#endif
-
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
 void
 arm_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache->ptid ());
-
-  if (regnum == -1 || getregs_supplies (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
-
-      regcache->supply_regset (&arm_fbsd_gregset, regnum, &regs,
-			       sizeof (regs));
-    }
-
+  fetch_register_set<struct reg> (regcache, regnum, PT_GETREGS,
+				  &arm_fbsd_gregset);
 #ifdef PT_GETVFPREGS
-  if (regnum == -1 || getvfpregs_supplies (regnum))
-    {
-      struct vfpreg vfpregs;
-
-      if (ptrace (PT_GETVFPREGS, pid, (PTRACE_TYPE_ARG3) &vfpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
-
-      regcache->supply_regset (&arm_fbsd_vfpregset, regnum, &vfpregs,
-			       sizeof (vfpregs));
-    }
+  fetch_register_set<struct vfpreg> (regcache, regnum, PT_GETVFPREGS,
+				     &arm_fbsd_vfpregset);
 #endif
 }
 
@@ -97,36 +57,11 @@ arm_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 arm_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache->ptid ());
-
-  if (regnum == -1 || getregs_supplies (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't get registers"));
-
-      regcache->collect_regset (&arm_fbsd_gregset, regnum, &regs,
-			       sizeof (regs));
-
-      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-	perror_with_name (_("Couldn't write registers"));
-    }
-
+  store_register_set<struct reg> (regcache, regnum, PT_GETREGS, PT_SETREGS,
+				  &arm_fbsd_gregset);
 #ifdef PT_GETVFPREGS
-  if (regnum == -1 || getvfpregs_supplies (regnum))
-    {
-      struct vfpreg vfpregs;
-
-      if (ptrace (PT_GETVFPREGS, pid, (PTRACE_TYPE_ARG3) &vfpregs, 0) == -1)
-	perror_with_name (_("Couldn't get floating point status"));
-
-      regcache->collect_regset (&arm_fbsd_vfpregset, regnum, &vfpregs,
-				sizeof (vfpregs));
-
-      if (ptrace (PT_SETVFPREGS, pid, (PTRACE_TYPE_ARG3) &vfpregs, 0) == -1)
-	perror_with_name (_("Couldn't write floating point status"));
-    }
+  store_register_set<struct vfpreg> (regcache, regnum, PT_GETVFPREGS,
+				     PT_SETVFPREGS, &arm_fbsd_vfpregset);
 #endif
 }
 

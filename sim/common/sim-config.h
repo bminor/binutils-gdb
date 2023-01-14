@@ -50,14 +50,6 @@
 
    Possible values are BFD_ENDIAN_UNKNOWN, BFD_ENDIAN_LITTLE, or BFD_ENDIAN_BIG.  */
 
-#ifndef WITH_TARGET_BYTE_ORDER
-#define WITH_TARGET_BYTE_ORDER		BFD_ENDIAN_UNKNOWN
-#endif
-
-#ifndef WITH_DEFAULT_TARGET_BYTE_ORDER
-#define WITH_DEFAULT_TARGET_BYTE_ORDER	BFD_ENDIAN_UNKNOWN
-#endif
-
 extern enum bfd_endian current_target_byte_order;
 #define CURRENT_TARGET_BYTE_ORDER \
   (WITH_TARGET_BYTE_ORDER != BFD_ENDIAN_UNKNOWN \
@@ -195,11 +187,11 @@ extern char *simulator_sysroot;
 
 /* Alignment:
 
-   A processor architecture may or may not handle miss aligned
+   A processor architecture may or may not handle misaligned
    transfers.
 
    As alternatives: both little and big endian modes take an exception
-   (STRICT_ALIGNMENT); big and little endian models handle mis aligned
+   (STRICT_ALIGNMENT); big and little endian models handle misaligned
    transfers (NONSTRICT_ALIGNMENT); or the address is forced into
    alignment using a mask (FORCED_ALIGNMENT).
 
@@ -219,13 +211,6 @@ extern enum sim_alignments current_alignment;
 #if !defined (WITH_ALIGNMENT)
 #define WITH_ALIGNMENT 0
 #endif
-
-#if !defined (WITH_DEFAULT_ALIGNMENT)
-#define WITH_DEFAULT_ALIGNMENT 0 /* fatal */
-#endif
-
-
-
 
 #define CURRENT_ALIGNMENT (WITH_ALIGNMENT \
 			   ? WITH_ALIGNMENT \
@@ -265,29 +250,6 @@ extern int current_floating_point;
 /* do not define WITH_MON by default */
 #define DEFAULT_WITH_MON		(MONITOR_LOAD_STORE_UNIT \
 					 | MONITOR_INSTRUCTION_ISSUE)
-
-
-/* Current CPU model (models are in the generated models.h include file)  */
-#ifndef WITH_MODEL
-#define WITH_MODEL			0
-#endif
-
-#define CURRENT_MODEL (WITH_MODEL	\
-		       ? WITH_MODEL	\
-		       : current_model)
-
-#define MODEL_ISSUE_IGNORE		(-1)
-#define MODEL_ISSUE_PROCESS		1
-
-#ifndef WITH_MODEL_ISSUE
-#define WITH_MODEL_ISSUE		0
-#endif
-
-extern int current_model_issue;
-#define CURRENT_MODEL_ISSUE (WITH_MODEL_ISSUE	\
-			     ? WITH_MODEL_ISSUE	\
-			     : current_model_issue)
-
 
 
 /* Whether or not input/output just uses stdio, or uses printf_filtered for

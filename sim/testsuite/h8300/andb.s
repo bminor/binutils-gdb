@@ -126,6 +126,18 @@ and_b_imm8_rdpostinc:
 	beq	.L2
 	fail
 .L2:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	and.b	r0l, @er0+
+	inc.b	r1l
+	and.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L22
+	fail
+.L22:
 
 and_b_imm8_rdpostdec:
 	mov	#byte_dest, er0
@@ -163,6 +175,18 @@ and_b_imm8_rdpostdec:
 	beq	.L3
 	fail
 .L3:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	and.b	r0l, @er0-
+	dec.b	r1l
+	and.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L23
+	fail
+.L23:
 
 and_b_imm8_rdpreinc:
 	mov	#byte_dest, er0
@@ -200,6 +224,18 @@ and_b_imm8_rdpreinc:
 	beq	.L4
 	fail
 .L4:
+	;; special case same register
+	mov.l	#pre_byte, er0
+	mov.b	@byte_dest, r1h
+	mov.b	r0l, r1l
+	and.b	r0l, @+er0
+	inc.b	r1l
+	and.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L24
+	fail
+.L24:
 
 and_b_imm8_rdpredec:
 	mov	#byte_dest, er0
@@ -237,6 +273,18 @@ and_b_imm8_rdpredec:
 	beq	.L5
 	fail
 .L5:
+	;; special case same register
+	mov.l	#post_byte, er0
+	mov.b	@byte_dest, r1h
+	mov.b	r0l, r1l
+	and.b	r0l, @-er0
+	dec.b	r1l
+	and.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L25
+	fail
+.L25:
 
 .endif				; h8sx
 

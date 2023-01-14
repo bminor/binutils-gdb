@@ -41,7 +41,7 @@ gdb_test "info frame-filter" \
 # Care is taken to put it in the same directory as the binary so that
 # gdb will find it.
 set remote_obj_python_file \
-    [gdb_remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py.in \
+    [gdb_remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py \
 	 ${testfile}-gdb.py]
 
 gdb_reinitialize_dir $srcdir/$subdir
@@ -299,7 +299,7 @@ if { [skip_python_tests] } { continue }
 # Care is taken to put it in the same directory as the binary so that
 # gdb will find it.
 set remote_obj_python_file \
-    [gdb_remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py.in \
+    [gdb_remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py \
 	 ${testfile}-gdb.py]
 
 gdb_reinitialize_dir $srcdir/$subdir

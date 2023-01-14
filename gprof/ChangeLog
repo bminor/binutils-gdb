@@ -1,3 +1,26 @@
+2021-07-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release branch created.
+
+2021-06-03   Ben Asselstine  <benasselstine@gmail.com>
+
+	PR 4283
+	* gprof.texi (Executing): Note GMON_OUT_PREFIX environment variable.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (html-local, doc/gprof/index.html): New targets.
+	* Makefile.in: Regenerate.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (AM_MAKEINFOFLAGS): Add --no-split.
+	* Makefile.in: Regenerate.
+
 2021-04-14  Alan Modra  <amodra@gmail.com>
 
 	PR 27716

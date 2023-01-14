@@ -22,7 +22,6 @@
 #define _MSP430_MAIN_SIM_H_
 
 #include "sim-basics.h"
-#include "sim-signal.h"
 #include "msp430-sim.h"
 #include "sim-base.h"
 
@@ -31,14 +30,6 @@ struct _sim_cpu
   /* Simulator specific members.  */
   struct msp430_cpu_state state;
   sim_cpu_base base;
-};
-
-struct sim_state
-{
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  /* Simulator specific members.  */
-  sim_state_base base;
 };
 
 #define MSP430_CPU(sd)       (STATE_CPU ((sd), 0))

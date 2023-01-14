@@ -102,9 +102,6 @@ SIM_RC sim_profile_set_option (SIM_DESC sd_, const char *name_, int idx_,
 #define WITH_PROFILE_MEMORY_P 0
 #endif
 
-/* Profiling install handler.  */
-MODULE_INSTALL_FN profile_install;
-
 /* Output format macros.  */
 #ifndef PROFILE_HISTOGRAM_WIDTH
 #define PROFILE_HISTOGRAM_WIDTH 40

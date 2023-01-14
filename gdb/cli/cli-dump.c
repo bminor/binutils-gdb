@@ -135,6 +135,9 @@ dump_binary_file (const char *filename, const char *mode,
   int status;
 
   gdb_file_up file = gdb_fopen_cloexec (filename, mode);
+  if (file == nullptr)
+    perror_with_name (filename);
+
   status = fwrite (buf, len, 1, file.get ());
   if (status != 1)
     perror_with_name (filename);
@@ -328,9 +331,9 @@ struct dump_context
 };
 
 static void
-call_dump_func (struct cmd_list_element *c, const char *args, int from_tty)
+call_dump_func (const char *args, int from_tty, cmd_list_element *c)
 {
-  struct dump_context *d = (struct dump_context *) get_cmd_context (c);
+  struct dump_context *d = (struct dump_context *) c->context ();
 
   d->func (args, d->mode);
 }
@@ -349,7 +352,7 @@ add_dump_command (const char *name,
   d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_WB;
-  set_cmd_context (c, d);
+  c->set_context (d);
   c->func = call_dump_func;
 
   c = add_cmd (name, all_commands, descr, &append_cmdlist);
@@ -357,7 +360,7 @@ add_dump_command (const char *name,
   d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_AB;
-  set_cmd_context (c, d);
+  c->set_context (d);
   c->func = call_dump_func;
 
   /* Replace "Dump " at start of docstring with "Append " (borrowed
@@ -569,12 +572,12 @@ _initialize_cli_dump ()
 
   add_basic_prefix_cmd ("dump", class_vars,
 			_("Dump target code/data to a local file."),
-			&dump_cmdlist, "dump ",
+			&dump_cmdlist,
 			0/*allow-unknown*/,
 			&cmdlist);
   add_basic_prefix_cmd ("append", class_vars,
 			_("Append target code/data to a local file."),
-			&append_cmdlist, "append ",
+			&append_cmdlist,
 			0/*allow-unknown*/,
 			&cmdlist);
 
@@ -590,37 +593,37 @@ the specified FILE in raw target ordered bytes.");
 
   add_basic_prefix_cmd ("srec", all_commands,
 			_("Write target code/data to an srec file."),
-			&srec_cmdlist, "dump srec ", 
+			&srec_cmdlist,
 			0 /*allow-unknown*/, 
 			&dump_cmdlist);
 
   add_basic_prefix_cmd ("ihex", all_commands,
 			_("Write target code/data to an intel hex file."),
-			&ihex_cmdlist, "dump ihex ", 
+			&ihex_cmdlist,
 			0 /*allow-unknown*/, 
 			&dump_cmdlist);
 
   add_basic_prefix_cmd ("verilog", all_commands,
 			_("Write target code/data to a verilog hex file."),
-			&verilog_cmdlist, "dump verilog ",
+			&verilog_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
   add_basic_prefix_cmd ("tekhex", all_commands,
 			_("Write target code/data to a tekhex file."),
-			&tekhex_cmdlist, "dump tekhex ", 
+			&tekhex_cmdlist,
 			0 /*allow-unknown*/, 
 			&dump_cmdlist);
 
   add_basic_prefix_cmd ("binary", all_commands,
 			_("Write target code/data to a raw binary file."),
-			&binary_dump_cmdlist, "dump binary ", 
+			&binary_dump_cmdlist,
 			0 /*allow-unknown*/, 
 			&dump_cmdlist);
 
   add_basic_prefix_cmd ("binary", all_commands,
 			_("Append target code/data to a raw binary file."),
-			&binary_append_cmdlist, "append binary ", 
+			&binary_append_cmdlist,
 			0 /*allow-unknown*/, 
 			&append_cmdlist);
 

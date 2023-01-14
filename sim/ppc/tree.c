@@ -528,7 +528,7 @@ parse_reg_property(device *current,
     if (device_nr_size_cells(bus) > 0)
       chp = parse_size(current, bus, chp, &regs[reg_nr].size);
     else
-      memset(&regs[reg_nr].size, 0, sizeof (&regs[reg_nr].size));
+      memset(&regs[reg_nr].size, 0, sizeof (regs[reg_nr].size));
   }
 
   /* create it */

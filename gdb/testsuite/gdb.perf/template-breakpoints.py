@@ -15,9 +15,10 @@
 
 from perftest import perftest
 
-class TemplateBreakpoints (perftest.TestCaseWithBasicMeasurements):
+
+class TemplateBreakpoints(perftest.TestCaseWithBasicMeasurements):
     def __init__(self):
-        super (TemplateBreakpoints, self).__init__ ("template-breakpoints")
+        super(TemplateBreakpoints, self).__init__("template-breakpoints")
 
     def warm_up(self):
         for _ in range(0, 2):

@@ -79,6 +79,7 @@ sentinel_frame_prev_arch (struct frame_info *this_frame,
 
 const struct frame_unwind sentinel_frame_unwind =
 {
+  "sentinel",
   SENTINEL_FRAME,
   default_frame_unwind_stop_reason,
   sentinel_frame_this_id,

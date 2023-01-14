@@ -23,6 +23,7 @@
 #include "registry.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_ref_ptr.h"
+#include "gdbsupport/iterator-range.h"
 #include "gdbsupport/next-iterator.h"
 
 DECLARE_REGISTRY (bfd);
@@ -208,8 +209,7 @@ gdb_bfd_ref_ptr gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
        ... use SECT ...
  */
 
-using gdb_bfd_section_iterator = next_iterator<asection>;
-using gdb_bfd_section_range = next_adapter<asection, gdb_bfd_section_iterator>;
+using gdb_bfd_section_range = next_range<asection>;
 
 static inline gdb_bfd_section_range
 gdb_bfd_sections (bfd *abfd)

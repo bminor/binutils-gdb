@@ -439,9 +439,9 @@ PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_inferior (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);
 PyObject *gdbpy_parameter_value (enum var_types type, void *var);
-char *gdbpy_parse_command_name (const char *name,
-				struct cmd_list_element ***base_list,
-				struct cmd_list_element **start_list);
+gdb::unique_xmalloc_ptr<char> gdbpy_parse_command_name
+  (const char *name, struct cmd_list_element ***base_list,
+   struct cmd_list_element **start_list);
 PyObject *gdbpy_register_tui_window (PyObject *self, PyObject *args,
 				     PyObject *kw);
 

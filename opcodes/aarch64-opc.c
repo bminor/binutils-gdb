@@ -4763,6 +4763,8 @@ const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
     { "cisw",       CPENS (0, C7, C14, 2), F_HASXT },
     { "cigsw",      CPENS (0, C7, C14, 4), F_HASXT | F_ARCHEXT },
     { "cigdsw",     CPENS (0, C7, C14, 6), F_HASXT | F_ARCHEXT },
+    { "cipapa",     CPENS (6, C7, C14, 1), F_HASXT },
+    { "cigdpapa",   CPENS (6, C7, C14, 5), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
@@ -4867,6 +4869,11 @@ const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
     { "rvale3is",   CPENS (6, C8, C2, 5), F_HASXT | F_ARCHEXT },
     { "rvae3os",    CPENS (6, C8, C5, 1), F_HASXT | F_ARCHEXT },
     { "rvale3os",   CPENS (6, C8, C5, 5), F_HASXT | F_ARCHEXT },
+
+    { "rpaos",      CPENS (6, C8, C4, 3), F_HASXT },
+    { "rpalos",     CPENS (6, C8, C4, 7), F_HASXT },
+    { "paallos",    CPENS (6, C8, C1, 4), 0},
+    { "paall",      CPENS (6, C8, C7, 4), 0},
 
     { 0,       CPENS(0,0,0,0), 0 }
 };

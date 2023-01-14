@@ -33,6 +33,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/next-iterator.h"
+#include "gdbsupport/iterator-range.h"
 #include "completer.h"
 #include "gdb-demangle.h"
 
@@ -1137,6 +1138,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     }
 
   symbol (const symbol &) = default;
+  symbol &operator= (const symbol &) = default;
 
   /* Data type of value */
 
@@ -1520,6 +1522,8 @@ struct compunit_symtab
   struct compunit_symtab *user;
 };
 
+using compunit_symtab_range = next_range<compunit_symtab>;
+
 #define COMPUNIT_OBJFILE(cust) ((cust)->objfile)
 #define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
@@ -1535,13 +1539,13 @@ struct compunit_symtab
 /* A range adapter to allowing iterating over all the file tables
    within a compunit.  */
 
-struct compunit_filetabs : public next_adapter<struct symtab>
+using symtab_range = next_range<symtab>;
+
+static inline symtab_range
+compunit_filetabs (compunit_symtab *cu)
 {
-  compunit_filetabs (struct compunit_symtab *cu)
-    : next_adapter<struct symtab> (cu->filetabs)
-  {
-  }
-};
+  return symtab_range (cu->filetabs);
+}
 
 /* Return the primary symtab of CUST.  */
 
@@ -2383,5 +2387,64 @@ private:
   /* Matching non-debug symbols.  */
   std::vector<bound_minimal_symbol> m_minimal_symbols;
 };
+
+/* Class used to encapsulate the filename filtering for the "info sources"
+   command.  */
+
+struct info_sources_filter
+{
+  /* If filename filtering is being used (see M_C_REGEXP) then which part
+     of the filename is being filtered against?  */
+  enum class match_on
+  {
+    /* Match against the full filename.  */
+    FULLNAME,
+
+    /* Match only against the directory part of the full filename.  */
+    DIRNAME,
+
+    /* Match only against the basename part of the full filename.  */
+    BASENAME
+  };
+
+  /* Create a filter of MATCH_TYPE using regular expression REGEXP.  If
+     REGEXP is nullptr then all files will match the filter and MATCH_TYPE
+     is ignored.
+
+     The string pointed too by REGEXP must remain live and unchanged for
+     this lifetime of this object as the object only retains a copy of the
+     pointer.  */
+  info_sources_filter (match_on match_type, const char *regexp);
+
+  DISABLE_COPY_AND_ASSIGN (info_sources_filter);
+
+  /* Does FULLNAME match the filter defined by this object, return true if
+     it does, otherwise, return false.  If there is no filtering defined
+     then this function will always return true.  */
+  bool matches (const char *fullname) const;
+
+private:
+
+  /* The type of filtering in place.  */
+  match_on m_match_type;
+
+  /* Points to the original regexp used to create this filter.  */
+  const char *m_regexp;
+
+  /* A compiled version of M_REGEXP.  This object is only given a value if
+     M_REGEXP is not nullptr and is not the empty string.  */
+  gdb::optional<compiled_regex> m_c_regexp;
+};
+
+/* Perform the core of the 'info sources' command.
+
+   FILTER is used to perform regular expression based filtering on the
+   source files that will be displayed.
+
+   Output is written to UIOUT in CLI or MI style as appropriate.  */
+
+extern void info_sources_worker (struct ui_out *uiout,
+				 bool group_by_objfile,
+				 const info_sources_filter &filter);
 
 #endif /* !defined(SYMTAB_H) */

@@ -1,6 +1,5 @@
 /* Main header for the Hitachi h8/300 architecture.  */
 
-#include "config.h"
 #include "bfd.h"
 
 #ifndef SIM_MAIN_H
@@ -83,7 +82,9 @@ enum h8_typecodes {
   /* FIXME: memory indirect?  */
   OP_INDEXB,		/* Byte index mode */
   OP_INDEXW,		/* Word index mode */
-  OP_INDEXL		/* Long index mode */
+  OP_INDEXL,		/* Long index mode */
+  OP_REG_DEC,		/* Register direct. affect address decrement. */
+  OP_REG_INC,		/* Register direct. affect address increment. */
 };
 
 #include "sim-basics.h"
@@ -131,15 +132,13 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-/* The sim_state struct.  */
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
+struct h8300_sim_state {
   unsigned long memory_size;
 #ifdef ADEBUG
   int stats[O_LAST];
 #endif
-  sim_state_base base;
 };
+#define H8300_SIM_STATE(sd) ((struct h8300_sim_state *) STATE_ARCH_DATA (sd))
 
 /* The current state of the processor; registers, memory, etc.  */
 

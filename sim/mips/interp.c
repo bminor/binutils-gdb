@@ -22,18 +22,18 @@ code on the hardware.
 
 */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim-utils.h"
 #include "sim-options.h"
 #include "sim-assert.h"
 #include "sim-hw.h"
+#include "sim-signal.h"
 
 #include "itable.h"
-
-
-#include "config.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -48,8 +48,8 @@ code on the hardware.
 #include "libiberty.h"
 #include "bfd.h"
 #include "elf-bfd.h"
-#include "gdb/callback.h"   /* GDB simulator callback interface */
-#include "gdb/remote-sim.h" /* GDB simulator interface */
+#include "sim/callback.h"   /* GDB simulator callback interface */
+#include "sim/sim.h" /* GDB simulator interface */
 #include "sim-syscall.h"   /* Simulator system call support */
 
 char* pr_addr (SIM_ADDR addr);
@@ -344,7 +344,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  struct bfd *abfd, char * const *argv)
 {
   int i;
-  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_DESC sd = sim_state_alloc_extra (kind, cb,
+				       sizeof (struct mips_sim_state));
   sim_cpu *cpu;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
@@ -427,7 +428,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	      mem_size = (match->modulo != 0
 			  ? match->modulo : match->nr_bytes);
 	      /* Delete old region. */
-	      sim_do_commandf (sd, "memory delete %d:0x%lx@%d",
+	      sim_do_commandf (sd, "memory delete %d:0x%" PRIxTW "@%d",
 			       match->space, match->addr, match->level);
 	    }	      
 	  else if (mem_size == 0)
@@ -436,8 +437,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  if (mem_size > K1SIZE)
 	    mem_size = K1SIZE;
 	  /* memory alias K1BASE@1,K1SIZE%MEMSIZE,K0BASE */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x%%0x%lx,0x%0x",
 			   K1BASE, K1SIZE, (long)mem_size, K0BASE);
+	  if (WITH_TARGET_WORD_BITSIZE == 64)
+	    sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
+			     (K0BASE), mem_size, EXTENDED(K0BASE));
 	}
 
       device_init(sd);
@@ -450,13 +454,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x9FC00000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x80000000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
@@ -465,7 +469,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       for (i=0; i<8; i++) /* 32 MB total */
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 			   0x88000000 + (i * size), 
 			   size, 
 			   0xA8000000 + (i * size));
@@ -496,13 +500,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       /* --- memory --- */
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x9FC00000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x80000000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
@@ -511,7 +515,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       for (i=0; i<8; i++) /* 32 MB total */
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 			   0x88000000 + (i * size), 
 			   size, 
 			   0xA8000000 + (i * size));
@@ -519,15 +523,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
       /* Dummy memory regions for unsimulated devices - sorted by address */
 
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB1000000, 0x400); /* ISA I/O */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2100000, 0x004); /* ISA ctl */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2500000, 0x004); /* LED/switch */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2700000, 0x004); /* RTC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB3C00000, 0x004); /* RTC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x900); /* DRAMC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB1000000, 0x400); /* ISA I/O */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2100000, 0x004); /* ISA ctl */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2500000, 0x004); /* LED/switch */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2700000, 0x004); /* RTC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB3C00000, 0x004); /* RTC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFF8000, 0x900); /* DRAMC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFF9000, 0x200); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFFE000, 0x01c); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFFF500, 0x300); /* PIO */
 
 
       /* --- simulated devices --- */
@@ -540,8 +544,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       {
 	/* FIXME: poking at dv-sockser internals, use tcp backend if
 	 --sockser_addr option was given.*/
+#ifdef HAVE_DV_SOCKSER
 	extern char* sockser_addr;
-	if(sockser_addr == NULL)
+#else
+# define sockser_addr NULL
+#endif
+	if (sockser_addr == NULL)
 	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend stdio");
 	else
 	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend tcp");
@@ -696,11 +704,16 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   if (idt_monitor_base != 0)
     {
       unsigned loop;
-      unsigned idt_monitor_size = 1 << 11;
+      address_word idt_monitor_size = 1 << 11;
 
       /* the default monitor region */
-      sim_do_commandf (sd, "memory region 0x%x,0x%x",
-		       idt_monitor_base, idt_monitor_size);
+      if (WITH_TARGET_WORD_BITSIZE == 64)
+	sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
+			 idt_monitor_base, idt_monitor_size,
+			 EXTENDED (idt_monitor_base));
+      else
+	sim_do_commandf (sd, "memory region 0x%x,0x%" PRIxTA,
+			 idt_monitor_base, idt_monitor_size);
 
       /* Entry into the IDT monitor is via fixed address vectors, and
 	 not using machine instructions. To avoid clashing with use of
@@ -1014,12 +1027,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
 	  sim_cia pc = bfd_get_start_address (abfd);
 
-	  /* We need to undo brain-dead bfd behavior where it sign-extends
-	     addresses that are supposed to be unsigned.  See the mips bfd
-	     sign_extend_vma setting.  We have to check the ELF data itself
-	     in order to handle o32 & n32 ABIs.  */
-	  if (abfd->tdata.elf_obj_data->elf_header->e_ident[EI_CLASS] ==
-	      ELFCLASS32)
+	  /* The 64-bit BFD sign-extends MIPS addresses to model
+	     32-bit compatibility segments with 64-bit addressing.
+	     These addresses work as is on 64-bit targets but
+	     can be truncated for 32-bit targets.  */
+	  if (WITH_TARGET_WORD_BITSIZE == 32)
 	    pc = (unsigned32) pc;
 
 	  CPU_PC_SET (cpu, pc);
@@ -1377,7 +1389,7 @@ sim_monitor (SIM_DESC sd,
       {
 	address_word s = A0;
 	unsigned char c;
-	signed_word *ap = &A1; /* 1st argument */
+	address_word *ap = &A1; /* 1st argument */
         /* This isn't the quickest way, since we call the host print
            routine for every character almost. But it does avoid
            having to allocate and manage a temporary string buffer. */
@@ -1460,18 +1472,43 @@ sim_monitor (SIM_DESC sd,
 			  sim_io_printf(sd,"<binary not supported>");
 			else
 			  {
-			    sprintf (tmp, "%%%s%c", longlong ? "ll" : "", c);
-			    if (longlong)
-			      sim_io_printf(sd, tmp, lv);
-			    else
-			      sim_io_printf(sd, tmp, (int)lv);
+#define _P(c, fmt64, fmt32) \
+  case c: \
+    if (longlong) \
+      sim_io_printf (sd, "%" fmt64, lv); \
+    else \
+      sim_io_printf (sd, "%" fmt32, (int)lv); \
+    break;
+#define P(c, fmtc) _P(c, PRI##fmtc##64, PRI##fmtc##32)
+			    switch (c)
+			      {
+			      P('d', d)
+			      P('o', o)
+			      P('x', x)
+			      P('X', X)
+			      P('u', u)
+			      }
 			  }
+#undef P
+#undef _P
 		      }
 		    else if (strchr ("eEfgG", c))
 		      {
 			double dbl = *(double*)(ap++);
-			sprintf (tmp, "%%%d.%d%c", width, trunc, c);
-			sim_io_printf (sd, tmp, dbl);
+
+#define P(c, fmtc) \
+  case c: \
+    sim_io_printf (sd, "%*.*" #fmtc, width, trunc, dbl); \
+    break;
+			switch (c)
+			  {
+			  P('e', e)
+			  P('E', E)
+			  P('f', f)
+			  P('g', g)
+			  P('G', G)
+			  }
+#undef P
 			trunc = 0;
 		      }
 		  }
@@ -1686,7 +1723,7 @@ dotrace (SIM_DESC sd,
 	 int type,
 	 SIM_ADDR address,
 	 int width,
-	 char *comment,...)
+	 const char *comment, ...)
 {
   if (STATE & simTRACE) {
     va_list ap;

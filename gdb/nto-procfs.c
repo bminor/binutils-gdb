@@ -1142,7 +1142,7 @@ nto_procfs_target::mourn_inferior ()
    the string "a b c d", and as output it would fill in argv with
    the four arguments "a", "b", "c", "d".  The only additional
    functionality is simple quoting.  The gdb command:
-  	run a "b c d" f
+	run a "b c d" f
    will fill in argv with the three args "a", "b c d", "e".  */
 static void
 breakup_args (char *scratch, char **argv)

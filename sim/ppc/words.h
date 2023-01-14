@@ -43,9 +43,8 @@
 */
 
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
 
 /* bit based */
 typedef char natural8;

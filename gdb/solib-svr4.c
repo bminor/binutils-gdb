@@ -2019,15 +2019,13 @@ svr4_handle_solib_event (void)
 static bool
 svr4_update_solib_event_breakpoint (struct breakpoint *b)
 {
-  struct bp_location *loc;
-
   if (b->type != bp_shlib_event)
     {
       /* Continue iterating.  */
       return false;
     }
 
-  for (loc = b->loc; loc != NULL; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     {
       struct svr4_info *info;
       struct probe_and_action *pa;
@@ -2061,7 +2059,8 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b)
 static void
 svr4_update_solib_event_breakpoints (void)
 {
-  iterate_over_breakpoints (svr4_update_solib_event_breakpoint);
+  for (breakpoint *bp : all_breakpoints_safe ())
+    svr4_update_solib_event_breakpoint (bp);
 }
 
 /* Create and register solib event breakpoints.  PROBES is an array
@@ -3296,5 +3295,6 @@ _initialize_svr4_solib ()
   svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
   svr4_so_ops.handle_event = svr4_handle_solib_event;
 
-  gdb::observers::free_objfile.attach (svr4_free_objfile_observer);
+  gdb::observers::free_objfile.attach (svr4_free_objfile_observer,
+				       "solib-svr4");
 }

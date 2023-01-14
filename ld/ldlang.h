@@ -121,7 +121,8 @@ enum section_type
   first_overlay_section,
   overlay_section,
   noload_section,
-  noalloc_section
+  noalloc_section,
+  readonly_section
 };
 
 /* This structure holds a list of program headers describing

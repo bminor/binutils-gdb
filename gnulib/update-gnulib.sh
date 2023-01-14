@@ -32,13 +32,17 @@
 IMPORTED_GNULIB_MODULES="\
     alloca \
     canonicalize-lgpl \
+    chown \
     count-one-bits \
     dirent \
     dirfd \
     errno \
+    ffs \
     fnmatch-gnu \
     frexpl \
+    gendocs \
     getcwd \
+    getline \
     gettimeofday \
     gitlog-to-changelog \
     glob \
@@ -51,10 +55,12 @@ IMPORTED_GNULIB_MODULES="\
     mkdir \
     mkdtemp \
     mkostemp \
+    netdb \
     pathmax \
     rawmemchr \
     readlink \
     rename \
+    select \
     setenv \
     signal-h \
     strchrnul \

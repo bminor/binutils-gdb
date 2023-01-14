@@ -1434,10 +1434,10 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	  if (!p)
 	    continue;		/* Not a debugging symbol.   */
 
- 	  sym_len = 0;
+	  sym_len = 0;
 	  sym_name = NULL;	/* pacify "gcc -Werror" */
- 	  if (psymtab_language == language_cplus)
- 	    {
+	  if (psymtab_language == language_cplus)
+	    {
 	      std::string name (namestring, p - namestring);
 	      gdb::unique_xmalloc_ptr<char> new_name
 		= cp_canonicalize_string (name.c_str ());
@@ -1449,11 +1449,11 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		}
 	    }
 
- 	  if (sym_len == 0)
- 	    {
- 	      sym_name = namestring;
- 	      sym_len = p - namestring;
- 	    }
+	  if (sym_len == 0)
+	    {
+	      sym_name = namestring;
+	      sym_len = p - namestring;
+	    }
 
 	  /* Main processing section for debugging symbols which
 	     the initial read through the symbol tables needs to worry
@@ -2400,10 +2400,10 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	  struct block *block;
 
 	  if (outermost_context_p ())
- 	    {
+	    {
 	      lbrac_mismatch_complaint (symnum);
- 	      break;
- 	    }
+	      break;
+	    }
 
 	  /* The following check is added before recording line 0 at
 	     end of function so as to handle hand-generated stabs
