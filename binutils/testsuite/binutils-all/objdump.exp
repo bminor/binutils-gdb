@@ -58,38 +58,40 @@ if [regexp $want $got] then {
     fail "objdump -i"
 }
 
+set obj o
+if { [istarget "*-*-vms"] } then {
+    set obj obj
+}
+
 # The remaining tests require a test file.
 
-
-if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
+if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.${obj}]} then {
     fail "objdump (assembling bintest.s)"
     return
 }
-if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest2.o]} then {
+if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest2.${obj}]} then {
     fail "objdump (assembling)"
     return
 }
 if [is_remote host] {
-    set testfile [remote_download host tmpdir/bintest.o]
-    set testfile2 [remote_download host tmpdir/bintest2.o]
+    set testfile [remote_download host tmpdir/bintest.${obj}]
+    set testfile2 [remote_download host tmpdir/bintest2.${obj}]
 } else {
-    set testfile tmpdir/bintest.o
-    set testfile2 tmpdir/bintest2.o
+    set testfile tmpdir/bintest.${obj}
+    set testfile2 tmpdir/bintest2.${obj}
 }
 
 # $testarchive exists only if it is supported.
 set testarchive tmpdir/bintest.a
-remote_file host file delete $testarchive
-if { ![istarget "alpha-*-*"] || [is_elf_format] } then {
-    set got [binutils_run $AR "rc tmpdir/bintest.a $testfile2"]
-    if ![string match "" $got] then {
-	fail "bintest.a"
-	remote_file host delete tmpdir/bintest.a
-    } elseif [is_remote host] {
-	set testarchive [remote_download host tmpdir/bintest.a]
-    }
-    remote_file host delete tmpdir/bintest2.o
+remote_file host delete $testarchive
+set got [binutils_run $AR "rc tmpdir/bintest.a $testfile2"]
+if ![string match "" $got] then {
+    fail "bintest.a"
+    remote_file host delete tmpdir/bintest.a
+} elseif [is_remote host] {
+    set testarchive [remote_download host tmpdir/bintest.a]
 }
+remote_file host delete tmpdir/bintest2.${obj}
 
 # Test objdump -f
 
@@ -100,7 +102,7 @@ proc test_objdump_f { testfile dumpfile } {
 
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -f $testfile"]
 
-    set want "$dumpfile:\[ 	\]*file format.*architecture:\[ 	\]*${cpus_regex}.*HAS_RELOC.*HAS_SYMS"
+    set want "${dumpfile}.*:\[ 	\]*file format.*architecture:\[ 	\]*${cpus_regex}.*HAS_RELOC.*HAS_SYMS"
 
     if ![regexp $want $got] then {
 	fail "objdump -f ($testfile, $dumpfile)"
@@ -111,7 +113,7 @@ proc test_objdump_f { testfile dumpfile } {
 
 test_objdump_f $testfile $testfile
 if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_f $testarchive bintest2.o
+    test_objdump_f $testarchive bintest2.${obj}
 }
 
 # Test objdump -h
@@ -122,7 +124,7 @@ proc test_objdump_h { testfile dumpfile } {
 
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h $testfile"]
 
-    set want "$dumpfile:\[ 	\]*file format.*Sections.*\[0-9\]+\[ 	\]+\[^ 	\]*(text|TEXT|P|\\\$CODE\\\$)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+).*\[0-9\]+\[ 	\]+\[^ 	\]*(\\.data|DATA|D_1)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+)"
+    set want "${dumpfile}.*:\[ 	\]*file format.*Sections.*\[0-9\]+\[ 	\]+\[^ 	\]*(text|TEXT|P|\\\$CODE\\\$)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+).*\[0-9\]+\[ 	\]+\[^ 	\]*(\\.data|DATA|D_1)\[^ 	\]*\[ 	\]*(\[0-9a-fA-F\]+)"
 
     if ![regexp $want $got all text_name text_size data_name data_size] then {
 	fail "objdump -h ($testfile, $dumpfile)"
@@ -152,7 +154,7 @@ proc test_objdump_h { testfile dumpfile } {
 
 test_objdump_h $testfile $testfile
 if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_h $testarchive bintest2.o
+    test_objdump_h $testarchive bintest2.${obj}
 }
 
 # Test objdump -t
@@ -192,7 +194,7 @@ proc test_objdump_r { testfile dumpfile } {
 
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -r $testfile"]
 
-    set want "$dumpfile:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|P|\\\$CODE\\\$)\[^\]\]*\\\].*external_symbol"
+    set want "${dumpfile}.*:\[ 	\]*file format.*RELOCATION RECORDS FOR \\\[\[^\]\]*(text|TEXT|P|\\\$CODE\\\$)\[^\]\]*\\\].*external_symbol"
 
     if [regexp $want $got] then {
 	pass "objdump -r ($testfile, $dumpfile)"
@@ -203,7 +205,7 @@ proc test_objdump_r { testfile dumpfile } {
 
 test_objdump_r $testfile $testfile
 if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_r $testarchive bintest2.o
+    test_objdump_r $testarchive bintest2.${obj}
 }
 
 # Test objdump -d
@@ -213,25 +215,25 @@ proc test_objdump_d { testfile dumpfile } {
 
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -d $testfile"]
 
-    set want "$dumpfile:.*Disassembly of section"
+    set want "${dumpfile}.*:.*Disassembly of section"
     if ![regexp $want $got] then {
 	fail "objdump -d $testfile: No disassembly title"
 	return
     }
 
-    set want "$dumpfile:.*00+0 <text_symbol>"
+    set want "${dumpfile}.*:.*00+0 <text_symbol>"
     if ![regexp $want $got] then {
 	fail "objdump -d $testfile: Missing symbol name and address"
 	return
     }
 
-    set want "$dumpfile:.*00+. <text_symbol2>"
+    set want "${dumpfile}.*:.*00+. <text_symbol2>"
     if ![regexp $want $got] then {
 	fail "objdump -d $testfile: Missing second symbol"
 	return
     }
 
-    set want "$dumpfile:.*00+. <text_symbol3>"
+    set want "${dumpfile}.*:.*00+. <text_symbol3>"
     if ![regexp $want $got] then {
 	fail "objdump -d $testfile: Missing third symbol"
 	return
@@ -242,7 +244,7 @@ proc test_objdump_d { testfile dumpfile } {
 
 test_objdump_d $testfile $testfile
 if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_d $testarchive bintest2.o
+    test_objdump_d $testarchive bintest2.${obj}
 }
 
 # Test objdump --disassemble=<symbol>
@@ -357,13 +359,13 @@ proc test_objdump_d_non_func_sym { testfile dumpfile } {
 # all of func, and does not stop at the next symbol.
 if { [is_elf_format] } then {
 
-    if {![binutils_assemble $srcdir/$subdir/disasm.s tmpdir/disasm.o]} then {
+    if {![binutils_assemble $srcdir/$subdir/disasm.s tmpdir/disasm.${obj}]} then {
 	fail "objdump --disassemble=func (assembling disasm.s)"
     } else {
 	if [is_remote host] {
-	    set elftestfile [remote_download host tmpdir/disasm.o]
+	    set elftestfile [remote_download host tmpdir/disasm.${obj}]
 	} else {
-	    set elftestfile tmpdir/disasm.o
+	    set elftestfile tmpdir/disasm.${obj}
 	}
     
 	test_objdump_d_func_sym $elftestfile $elftestfile
@@ -380,7 +382,7 @@ proc test_objdump_s { testfile dumpfile } {
 
     set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s $testfile"]
 
-    set want "$dumpfile:\[ 	\]*file format.*Contents.*(text|TEXT|P|\\\$CODE\\\$)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000|00000100).*Contents.*(data|DATA|D_1)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000|00000200)"
+    set want "${dumpfile}.*:\[ 	\]*file format.*Contents.*(text|TEXT|P|\\\$CODE\\\$)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000001|01000000|00000100).*Contents.*(data|DATA|D_1)\[^0-9\]*\[ 	\]*\[0-9a-fA-F\]*\[ 	\]*(00000002|02000000|00000200)"
 
     if [regexp $want $got] then {
 	pass "objdump -s ($testfile, $dumpfile)"
@@ -391,20 +393,20 @@ proc test_objdump_s { testfile dumpfile } {
 
 test_objdump_s $testfile $testfile
 if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_s $testarchive bintest2.o
+    test_objdump_s $testarchive bintest2.${obj}
 }
 
 # Test objdump -s on a file that contains a compressed .debug section
 
 if { ![is_elf_format] } then {
     unsupported "objdump compressed debug"
-} elseif { ![binutils_assemble $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o] } then {
+} elseif { ![binutils_assemble $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.${obj}] } then {
     fail "objdump compressed debug"
 } else {
     if [is_remote host] {
-	set compressed_testfile [remote_download host tmpdir/dw2-compressed.o]
+	set compressed_testfile [remote_download host tmpdir/dw2-compressed.${obj}]
     } else {
-	set compressed_testfile tmpdir/dw2-compressed.o
+	set compressed_testfile tmpdir/dw2-compressed.${obj}
     }
 
     set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
@@ -455,14 +457,14 @@ if { ![is_elf_format]
     } else {
         set decodedline_testsrc $srcdir/$subdir/dw2-decodedline.S
     }
-    if { ![binutils_assemble $decodedline_testsrc tmpdir/dw2-decodedline.o] } then {
+    if { ![binutils_assemble $decodedline_testsrc tmpdir/dw2-decodedline.${obj}] } then {
 	fail "objdump decoded line"
     }
 
     if [is_remote host] {
-	set decodedline_testfile [remote_download host tmpdir/dw2-decodedline.o]
+	set decodedline_testfile [remote_download host tmpdir/dw2-decodedline.${obj}]
     } else {
-	set decodedline_testfile tmpdir/dw2-decodedline.o
+	set decodedline_testfile tmpdir/dw2-decodedline.${obj}
     }
 
     set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -WL $decodedline_testfile" "" "/dev/null" "objdump.out"]
@@ -484,13 +486,13 @@ if { ![is_elf_format]
 
 if { ![is_elf_format] } then {
     unsupported "objdump debug_ranges test"
-} elseif { ![binutils_assemble $srcdir/$subdir/dw2-ranges.S tmpdir/dw2-ranges.o] } then {
+} elseif { ![binutils_assemble $srcdir/$subdir/dw2-ranges.S tmpdir/dw2-ranges.${obj}] } then {
     fail "objdump debug_ranges test"
 } else {
     if [is_remote host] {
-	set ranges_testfile [remote_download host tmpdir/dw2-ranges.o]
+	set ranges_testfile [remote_download host tmpdir/dw2-ranges.${obj}]
     } else {
-	set ranges_testfile tmpdir/dw2-ranges.o
+	set ranges_testfile tmpdir/dw2-ranges.${obj}
     }
 
     set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS --dwarf=Ranges $ranges_testfile" "" "/dev/null" "objdump.out"]
@@ -594,14 +596,14 @@ if {[is_elf_format]} then {
 if { [is_elf_format] } then {
     set testsrc $srcdir/$subdir/debuglink.s
 
-    if { ![binutils_assemble $testsrc tmpdir/debuglink.o] } then {
+    if { ![binutils_assemble $testsrc tmpdir/debuglink.${obj}] } then {
 	fail "objdump -Wk (reason: could not assemble source)"
     }
 
     if [is_remote host] {
-	set testfile [remote_download host tmpdir/debuglink.o]
+	set testfile [remote_download host tmpdir/debuglink.${obj}]
     } else {
-	set testfile tmpdir/debuglink.o
+	set testfile tmpdir/debuglink.${obj}
     }
 
     set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk $testfile" "" "/dev/null" "objdump.out"]
@@ -627,10 +629,11 @@ proc test_follow_debuglink { options dumpfile } {
     global srcdir
     global subdir
     global OBJDUMP
+    global obj
     
     set test "follow-debuglink ($options)"
 
-    if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
+    if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.${obj}]} then {
 	fail "$test (reason: assemble first source file)"
 	return
     }
@@ -641,10 +644,10 @@ proc test_follow_debuglink { options dumpfile } {
     }
 
     if ![is_remote host] {
-	set tempfile tmpdir/debuglink.o
+	set tempfile tmpdir/debuglink.${obj}
     } else {
 	set tempfile [remote_download host tmpdir/linkdebug.debug]
-	set tempfile [remote_download host tmpdir/debuglink.o]
+	set tempfile [remote_download host tmpdir/debuglink.${obj}]
     }
     
     set got [remote_exec host "$OBJDUMP $options $tempfile" "" "/dev/null" "tmpdir/objdump.out"]
@@ -716,15 +719,15 @@ if {[is_elf_format]} then {
 	set text ".text"
     }
     # generate a copy of the test object with .text repositioned
-    if { [binutils_run $OBJCOPY "--change-section-address $text=0x80000000 tmpdir/bintest.o tmpdir/bintest_signed.o"] != "" } {
-	fail "Failed to reposition $text to 0x80000000 (tmpdir/bintest.o -> tmpdir/bintest_signed.o)"
+    if { [binutils_run $OBJCOPY "--change-section-address $text=0x80000000 tmpdir/bintest.${obj} tmpdir/bintest_signed.${obj}"] != "" } {
+	fail "Failed to reposition $text to 0x80000000 (tmpdir/bintest.${obj} -> tmpdir/bintest_signed.${obj})"
 	return
     }
 
     if [is_remote host] {
-	set testfile3 [remote_download host tmpdir/bintest_signed.o]
+	set testfile3 [remote_download host tmpdir/bintest_signed.${obj}]
     } else {
-	set testfile3 tmpdir/bintest_signed.o
+	set testfile3 tmpdir/bintest_signed.${obj}
     }
 
     test_objdump_content_limited $testfile3 $text "80000004" "80000008"

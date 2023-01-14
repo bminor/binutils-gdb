@@ -602,6 +602,9 @@ AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
 
+dnl Check for bswap_{16,32,64}
+AC_CHECK_DECLS([bswap_16, bswap_32, bswap_64], [], [], [[#include <byteswap.h>]])
+
 dnl When plugins enabled dynamic loader interface is required. Check headers
 dnl which may provide this interface. Add the necessary library to link.
 AC_CHECK_HEADERS(windows.h)

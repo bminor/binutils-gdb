@@ -385,7 +385,8 @@ ip2k_apply_fix (fixS *fixP, valueT *valueP, segT seg)
       CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
       CGEN_INSN_INT insn_value
 	= cgen_get_insn_value (cd, (unsigned char *) where,
-			       CGEN_INSN_BITSIZE (fixP->fx_cgen.insn));
+			       CGEN_INSN_BITSIZE (fixP->fx_cgen.insn),
+			       gas_cgen_cpu_desc->insn_endian);
       /* Preserve (DP) or (SP) specification.  */
       *valueP += (insn_value & 0x180);
     }

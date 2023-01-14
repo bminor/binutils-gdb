@@ -86,12 +86,12 @@ fbsd_nat_target::pid_to_exec_file (int pid)
 
 #ifdef HAVE_KINFO_GETVMMAP
 /* Iterate over all the memory regions in the current inferior,
-   calling FUNC for each memory region.  OBFD is passed as the last
+   calling FUNC for each memory region.  DATA is passed as the last
    argument to FUNC.  */
 
 int
 fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
-				      void *obfd)
+				      void *data)
 {
   pid_t pid = inferior_ptid.pid ();
   struct kinfo_vmentry *kve;
@@ -133,7 +133,7 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 	 Pass MODIFIED as true, we do not know the real modification state.  */
       func (kve->kve_start, size, kve->kve_protection & KVME_PROT_READ,
 	    kve->kve_protection & KVME_PROT_WRITE,
-	    kve->kve_protection & KVME_PROT_EXEC, 1, obfd);
+	    kve->kve_protection & KVME_PROT_EXEC, 1, data);
     }
   return 0;
 }
@@ -160,12 +160,12 @@ fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
 }
 
 /* Iterate over all the memory regions in the current inferior,
-   calling FUNC for each memory region.  OBFD is passed as the last
+   calling FUNC for each memory region.  DATA is passed as the last
    argument to FUNC.  */
 
 int
 fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
-				      void *obfd)
+				      void *data)
 {
   pid_t pid = inferior_ptid.pid ();
   unsigned long start, end, size;
@@ -202,7 +202,7 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 
       /* Invoke the callback function to create the corefile segment.
 	 Pass MODIFIED as true, we do not know the real modification state.  */
-      func (start, size, read, write, exec, 1, obfd);
+      func (start, size, read, write, exec, 1, data);
     }
 
   return 0;
@@ -1668,6 +1668,12 @@ fbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
 }
 #endif
 #endif
+
+bool
+fbsd_nat_target::supports_multi_process ()
+{
+  return true;
+}
 
 void _initialize_fbsd_nat ();
 void

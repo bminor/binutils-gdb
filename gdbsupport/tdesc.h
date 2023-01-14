@@ -131,6 +131,27 @@ struct tdesc_reg : tdesc_element
 
 typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
 
+/* Declaration of a structure that holds information about one
+   "compatibility" entry within a target description.  */
+
+struct tdesc_compatible_info;
+
+/* A pointer to a single piece of compatibility information.  */
+
+typedef std::unique_ptr<tdesc_compatible_info> tdesc_compatible_info_up;
+
+/* Return a vector of compatibility information pointers from the target
+   description TARGET_DESC.  */
+
+const std::vector<tdesc_compatible_info_up> &tdesc_compatible_info_list
+	(const target_desc *target_desc);
+
+/* Return the architecture name from a compatibility information
+   COMPATIBLE.  */
+
+const char *tdesc_compatible_info_arch_name
+	(const tdesc_compatible_info_up &compatible);
+
 enum tdesc_type_kind
 {
   /* Predefined types.  */
@@ -152,6 +173,7 @@ enum tdesc_type_kind
   TDESC_TYPE_IEEE_DOUBLE,
   TDESC_TYPE_ARM_FPA_EXT,
   TDESC_TYPE_I387_EXT,
+  TDESC_TYPE_BFLOAT16,
 
   /* Types defined by a target feature.  */
   TDESC_TYPE_VECTOR,
@@ -291,6 +313,20 @@ struct tdesc_feature : tdesc_element
 
 typedef std::unique_ptr<tdesc_feature> tdesc_feature_up;
 
+/* A deleter adapter for a target_desc.  There are different
+   implementations of this deleter class in gdb and gdbserver because even
+   though the target_desc name is shared between the two projects, the
+   actual implementations of target_desc are completely different.  */
+
+struct target_desc_deleter
+{
+  void operator() (struct target_desc *desc) const;
+};
+
+/* A unique pointer specialization that holds a target_desc.  */
+
+typedef std::unique_ptr<target_desc, target_desc_deleter> target_desc_up;
+
 /* Allocate a new target_desc.  */
 target_desc *allocate_target_description (void);
 
@@ -389,7 +425,8 @@ class print_xml_feature : public tdesc_element_visitor
 {
 public:
   print_xml_feature (std::string *buffer_)
-    : m_buffer (buffer_)
+    : m_buffer (buffer_),
+      m_depth (0)
   {}
 
   void visit_pre (const target_desc *e) override;
@@ -402,7 +439,27 @@ public:
   void visit (const tdesc_reg *reg) override;
 
 private:
+
+  /* Called with a positive value of ADJUST when we move inside an element,
+     for example inside <target>, and with a negative value when we leave
+     the element.  In this class this function does nothing, but a
+     sub-class can override this to track the current level of nesting.  */
+  void indent (int adjust)
+  {
+    m_depth += (adjust * 2);
+  }
+
+  /* Functions to add lines to the output buffer M_BUFFER.  Each of these
+     functions appends a newline, so don't include one in the strings being
+     passed.  */
+  void add_line (const std::string &str);
+  void add_line (const char *fmt, ...) ATTRIBUTE_PRINTF (2, 3);
+
+  /* The buffer we are writing too.  */
   std::string *m_buffer;
+
+  /* The current indentation depth.  */
+  int m_depth;
 };
 
 #endif /* COMMON_TDESC_H */

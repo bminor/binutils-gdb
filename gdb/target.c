@@ -50,6 +50,7 @@
 #include "terminal.h"
 #include <unordered_map>
 #include "target-connection.h"
+#include "valprint.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -803,81 +804,24 @@ target_xfer_status_to_string (enum target_xfer_status status)
 };
 
 
-#undef	MIN
-#define MIN(A, B) (((A) <= (B)) ? (A) : (B))
+/* See target.h.  */
 
-/* target_read_string -- read a null terminated string, up to LEN bytes,
-   from MEMADDR in target.  Set *ERRNOP to the errno code, or 0 if successful.
-   Set *STRING to a pointer to malloc'd memory containing the data; the caller
-   is responsible for freeing it.  Return the number of bytes successfully
-   read.  */
-
-int
-target_read_string (CORE_ADDR memaddr, gdb::unique_xmalloc_ptr<char> *string,
-		    int len, int *errnop)
+gdb::unique_xmalloc_ptr<char>
+target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
 {
-  int tlen, offset, i;
-  gdb_byte buf[4];
-  int errcode = 0;
-  char *buffer;
-  int buffer_allocated;
-  char *bufptr;
-  unsigned int nbytes_read = 0;
+  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
 
-  gdb_assert (string);
+  int ignore;
+  if (bytes_read == nullptr)
+    bytes_read = &ignore;
 
-  /* Small for testing.  */
-  buffer_allocated = 4;
-  buffer = (char *) xmalloc (buffer_allocated);
-  bufptr = buffer;
+  /* Note that the endian-ness does not matter here.  */
+  int errcode = read_string (memaddr, -1, 1, len, BFD_ENDIAN_LITTLE,
+			     &buffer, bytes_read);
+  if (errcode != 0)
+    return {};
 
-  while (len > 0)
-    {
-      tlen = MIN (len, 4 - (memaddr & 3));
-      offset = memaddr & 3;
-
-      errcode = target_read_memory (memaddr & ~3, buf, sizeof buf);
-      if (errcode != 0)
-	{
-	  /* The transfer request might have crossed the boundary to an
-	     unallocated region of memory.  Retry the transfer, requesting
-	     a single byte.  */
-	  tlen = 1;
-	  offset = 0;
-	  errcode = target_read_memory (memaddr, buf, 1);
-	  if (errcode != 0)
-	    goto done;
-	}
-
-      if (bufptr - buffer + tlen > buffer_allocated)
-	{
-	  unsigned int bytes;
-
-	  bytes = bufptr - buffer;
-	  buffer_allocated *= 2;
-	  buffer = (char *) xrealloc (buffer, buffer_allocated);
-	  bufptr = buffer + bytes;
-	}
-
-      for (i = 0; i < tlen; i++)
-	{
-	  *bufptr++ = buf[i + offset];
-	  if (buf[i + offset] == '\000')
-	    {
-	      nbytes_read += i + 1;
-	      goto done;
-	    }
-	}
-
-      memaddr += tlen;
-      len -= tlen;
-      nbytes_read += tlen;
-    }
-done:
-  string->reset (buffer);
-  if (errnop != NULL)
-    *errnop = errcode;
-  return nbytes_read;
+  return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
 }
 
 struct target_section_table *
@@ -981,8 +925,11 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
       if (res == TARGET_XFER_UNAVAILABLE)
 	break;
 
-      /* We want to continue past core files to executables, but not
-	 past a running target's memory.  */
+      /* Don't continue past targets which have all the memory.
+         At one time, this code was necessary to read data from
+	 executables / shared libraries when data for the requested
+	 addresses weren't available in the core file.  But now the
+	 core target handles this case itself.  */
       if (ops->has_all_memory ())
 	break;
 
@@ -1036,11 +983,17 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  const char *section_name = section->the_bfd_section->name;
 
 	  memaddr = overlay_mapped_address (memaddr, section);
+
+	  auto match_cb = [=] (const struct target_section *s)
+	    {
+	      return (strcmp (section_name, s->the_bfd_section->name) == 0);
+	    };
+
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    table->sections,
 						    table->sections_end,
-						    section_name);
+						    match_cb);
 	}
     }
 
@@ -1058,8 +1011,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    table->sections,
-						    table->sections_end,
-						    NULL);
+						    table->sections_end);
 	}
     }
 
@@ -3164,7 +3116,7 @@ generic_mourn_inferior (void)
 {
   inferior *inf = current_inferior ();
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
 
   /* Mark breakpoints uninserted in case something tries to delete a
      breakpoint while we delete the inferior's threads (which would
@@ -3330,7 +3282,7 @@ target_pass_ctrlc (void)
       if (proc_target == NULL)
 	continue;
 
-      for (thread_info *thr : inf->threads ())
+      for (thread_info *thr : inf->non_exited_threads ())
 	{
 	  /* A thread can be THREAD_STOPPED and executing, while
 	     running an infcall.  */

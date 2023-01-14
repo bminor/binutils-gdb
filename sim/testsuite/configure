@@ -1875,6 +1875,9 @@ case "${target}" in
    bfin-*-*)
        sim_arch=bfin
        ;;
+   bpf-*-*)
+       sim_arch=bpf
+       ;;
    cr16*-*-*)
        sim_arch=cr16
        ;;
@@ -1928,6 +1931,9 @@ case "${target}" in
    or1k-*-* | or1knd-*-*)
        sim_arch=or1k
        ;;
+   pru*-*-*)
+       sim_arch=pru
+       ;;
    rl78-*-*)
        sim_arch=rl78
        ;;
@@ -1945,9 +1951,6 @@ case "${target}" in
        ;;
    powerpc*-*-*)
        sim_arch=ppc
-       ;;
-   pru*-*-*)
-       sim_arch=pru
        ;;
    ft32-*-*)
        sim_arch=ft32

@@ -501,10 +501,10 @@ generate_vla_size (compile_instance *compiler,
     {
     case TYPE_CODE_RANGE:
       {
-	if (TYPE_HIGH_BOUND_KIND (type) == PROP_LOCEXPR
-	    || TYPE_HIGH_BOUND_KIND (type) == PROP_LOCLIST)
+	if (type->bounds ()->high.kind () == PROP_LOCEXPR
+	    || type->bounds ()->high.kind () == PROP_LOCLIST)
 	  {
-	    const struct dynamic_prop *prop = &TYPE_RANGE_DATA (type)->high;
+	    const struct dynamic_prop *prop = &type->bounds ()->high;
 	    std::string name = c_get_range_decl_name (prop);
 
 	    dwarf2_compile_property_to_c (stream, name.c_str (),
@@ -516,7 +516,7 @@ generate_vla_size (compile_instance *compiler,
 
     case TYPE_CODE_ARRAY:
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			 TYPE_INDEX_TYPE (type), sym);
+			 type->index_type (), sym);
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
 			 TYPE_TARGET_TYPE (type), sym);
       break;
@@ -529,7 +529,7 @@ generate_vla_size (compile_instance *compiler,
 	for (i = 0; i < type->num_fields (); ++i)
 	  if (!field_is_static (&type->field (i)))
 	    generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			       TYPE_FIELD_TYPE (type, i), sym);
+			       type->field (i).type (), sym);
       }
       break;
     }

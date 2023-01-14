@@ -59,19 +59,23 @@ proc run_tests { lang } {
 	}
 
 	# Check the backtrace.
-	set bt_stack [multi_line \
-			  "#0\\s+breakpt \\(\\) at \[^\r\n\]+" \
-			  "#1\\s+$hex in mixed_func_1h \\(\\) at \[^\r\n\]+" \
-			  "#2\\s+$hex in mixed_func_1g \\(obj=\\.\\.\\.\\) at \[^\r\n\]+" \
-			  "#3\\s+$hex in mixed_func_1f \\(\\) at \[^\r\n\]+" \
-			  "#4\\s+$hex in mixed_func_1e \\(\\) at \[^\r\n\]+" \
-			  "#5\\s+$hex in mixed_func_1d \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
-			  "#6\\s+$hex in mixed_func_1c \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
-			  "#7\\s+$hex in mixed_func_1b \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
-			  "#8\\s+$hex in mixed_func_1a \\(\\) at \[^\r\n\]+" \
-			  "#9\\s+$hex in mixed_stack_main \\(\\) at \[^\r\n\]+" \
-			  "#10\\s+$hex in main \\(\[^\r\n\]+\\) at .*" ]
-	gdb_test "bt" $bt_stack
+	set e_arg "\['\"\]abcdef\['\"\]"
+	set 1b_args "\[^\r\n\]+$e_arg\[^\r\n\]+"
+	set 1g_args "obj=\[^\r\n\]+"
+	set bt_stack \
+	    [multi_line \
+		 "#0\\s+breakpt \\(\\) at \[^\r\n\]+" \
+		 "#1\\s+$hex in mixed_func_1h \\(\\) at \[^\r\n\]+" \
+		 "#2\\s+$hex in mixed_func_1g \\($1g_args\\) at \[^\r\n\]+" \
+		 "#3\\s+$hex in mixed_func_1f \\(\\) at \[^\r\n\]+" \
+		 "#4\\s+$hex in mixed_func_1e \\(\\) at \[^\r\n\]+" \
+		 "#5\\s+$hex in mixed_func_1d \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
+		 "#6\\s+$hex in mixed_func_1c \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
+		 "#7\\s+$hex in mixed_func_1b \\($1b_args\\) at \[^\r\n\]+" \
+		 "#8\\s+$hex in mixed_func_1a \\(\\) at \[^\r\n\]+" \
+		 "#9\\s+$hex in mixed_stack_main \\(\\) at \[^\r\n\]+" \
+		 "#10\\s+$hex in main \\(\[^\r\n\]+\\) at .*" ]
+	gdb_test "bt -frame-arguments all" $bt_stack
 
 	# Check the language for frame #0.
 	gdb_test "info frame" "source language fortran\..*" \

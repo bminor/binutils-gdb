@@ -472,6 +472,11 @@
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
 #define PT_GNU_PROPERTY	(PT_LOOS + 0x474e553) /* GNU property */
 
+/* OpenBSD segment types.  */
+#define PT_OPENBSD_RANDOMIZE (PT_LOOS + 0x5a3dbe6)  /* Fill with random data.  */
+#define PT_OPENBSD_WXNEEDED  (PT_LOOS + 0x5a3dbe7)  /* Program does W^X violations.  */
+#define PT_OPENBSD_BOOTDATA  (PT_LOOS + 0x5a41be6)  /* Section for boot arguments.  */
+
 /* Mbind segments */
 #define PT_GNU_MBIND_NUM 4096
 #define PT_GNU_MBIND_LO (PT_LOOS + 0x474e555)
@@ -613,6 +618,8 @@
 #define NT_386_IOPERM	0x201		/* x86 io permissions */
 					/*   note name must be "LINUX".  */
 #define NT_X86_XSTATE	0x202		/* x86 XSAVE extended state */
+					/*   note name must be "LINUX".  */
+#define NT_X86_CET	0x203		/* x86 CET state.  */
 					/*   note name must be "LINUX".  */
 #define NT_S390_HIGH_GPRS 0x300		/* S/390 upper halves of GPRs  */
 					/*   note name must be "LINUX".  */
@@ -846,6 +853,7 @@
 #define GNU_PROPERTY_X86_FEATURE_2_XSAVE	(1U << 7)
 #define GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT	(1U << 8)
 #define GNU_PROPERTY_X86_FEATURE_2_XSAVEC	(1U << 9)
+#define GNU_PROPERTY_X86_FEATURE_2_TMM		(1U << 10)
 
 /* AArch64 specific GNU PROPERTY.  */
 #define GNU_PROPERTY_AARCH64_FEATURE_1_AND	0xc0000000
@@ -941,7 +949,7 @@
 
 #define ELF32_R_SYM(i)		((i) >> 8)
 #define ELF32_R_TYPE(i)		((i) & 0xff)
-#define ELF32_R_INFO(s,t)	(((s) << 8) + ((t) & 0xff))
+#define ELF32_R_INFO(s,t)	(((unsigned) (s) << 8) + ((t) & 0xff))
 
 #define ELF64_R_SYM(i)		((i) >> 32)
 #define ELF64_R_TYPE(i)		((i) & 0xffffffff)
@@ -1255,6 +1263,11 @@
 #define AT_FREEBSD_HWCAP        25      /* CPU feature flags. */
 #define AT_FREEBSD_HWCAP2       26      /* CPU feature flags 2. */
 #define AT_FREEBSD_BSDFLAGS     27      /* ELF BSD Flags. */
+#define AT_FREEBSD_ARGC         28      /* Argument count. */
+#define AT_FREEBSD_ARGV         29      /* Argument vector. */
+#define AT_FREEBSD_ENVC         30      /* Environment count. */
+#define AT_FREEBSD_ENVV         31      /* Environment vvector. */
+#define AT_FREEBSD_PS_STRINGS   32      /* struct ps_strings. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */

@@ -274,10 +274,10 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, "(");
       fprintf_filtered (stream, "array ");
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	&& !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+	  && type->bounds ()->high.kind () != PROP_UNDEFINED)
 	fprintf_filtered (stream, "[%s..%s] ",
-			  plongest (TYPE_ARRAY_LOWER_BOUND_VALUE (type)),
-			  plongest (TYPE_ARRAY_UPPER_BOUND_VALUE (type)));
+			  plongest (type->bounds ()->low.const_val ()),
+			  plongest (type->bounds ()->high.const_val ()));
       fprintf_filtered (stream, "of ");
       break;
 
@@ -327,7 +327,7 @@ pascal_print_func_args (struct type *type, struct ui_file *stream,
          {
          fprintf_filtered (stream, "var ");
          } */
-      pascal_print_type (TYPE_FIELD_TYPE (type, i), ""	/* TYPE_FIELD_NAME
+      pascal_print_type (type->field (i).type (), ""	/* TYPE_FIELD_NAME
 							   seems invalid!  */
 			 ,stream, -1, 0, flags);
     }
@@ -561,7 +561,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fprintf_filtered (stream, "\n");
 	  if ((type->num_fields () == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
-	      if (TYPE_STUB (type))
+	      if (type->is_stub ())
 		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
 	      else
 		fprintfi_filtered (level + 4, stream, "<no data fields>\n");
@@ -620,7 +620,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      print_spaces_filtered (level + 4, stream);
 	      if (field_is_static (&type->field (i)))
 		fprintf_filtered (stream, "static ");
-	      pascal_print_type (TYPE_FIELD_TYPE (type, i),
+	      pascal_print_type (type->field (i).type (),
 				 TYPE_FIELD_NAME (type, i),
 				 stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&type->field (i))
@@ -797,15 +797,15 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       {
 	struct type *target = TYPE_TARGET_TYPE (type);
 
-	print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
+	print_type_scalar (target, type->bounds ()->low.const_val (), stream);
 	fputs_filtered ("..", stream);
-	print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
+	print_type_scalar (target, type->bounds ()->high.const_val (), stream);
       }
       break;
 
     case TYPE_CODE_SET:
       fputs_filtered ("set of ", stream);
-      pascal_print_type (TYPE_INDEX_TYPE (type), "", stream,
+      pascal_print_type (type->index_type (), "", stream,
 			 show - 1, level, flags);
       break;
 

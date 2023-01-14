@@ -53,7 +53,7 @@ ZLIBINC = @zlibinc@
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
-AM_CPPFLAGS = -DBINDIR='"$(bindir)"' -DLIBDIR='"$(libdir)"'
+AM_CPPFLAGS = -DBINDIR='"$(bindir)"' -DLIBDIR='"$(libdir)"' @LARGEFILE_CPPFLAGS@
 if PLUGINS
 bfdinclude_HEADERS += $(INCDIR)/plugin-api.h
 LIBDL = @lt_cv_dlopen_libs@
@@ -262,7 +262,6 @@ ALL_MACHINES_CFILES = \
 BFD32_BACKENDS = \
 	aout-cris.lo \
 	aout-ns32k.lo \
-	aout-tic30.lo \
 	aout32.lo \
 	cf-i386lynx.lo \
 	coff-go32.lo \
@@ -371,14 +370,12 @@ BFD32_BACKENDS = \
 	pe-arm.lo \
 	pe-i386.lo \
 	pe-mcore.lo \
-	pe-ppc.lo \
 	pe-sh.lo \
 	pef.lo \
 	pei-arm-wince.lo \
 	pei-arm.lo \
 	pei-i386.lo \
 	pei-mcore.lo \
-	pei-ppc.lo \
 	pei-sh.lo \
 	peigen.lo \
 	plugin.lo \
@@ -398,7 +395,6 @@ BFD32_BACKENDS = \
 BFD32_BACKENDS_CFILES = \
 	aout-cris.c \
 	aout-ns32k.c \
-	aout-tic30.c \
 	aout32.c \
 	cf-i386lynx.c \
 	coff-go32.c \
@@ -507,14 +503,12 @@ BFD32_BACKENDS_CFILES = \
 	pe-arm.c \
 	pe-i386.c \
 	pe-mcore.c \
-	pe-ppc.c \
 	pe-sh.c \
 	pef.c \
 	pei-arm-wince.c \
 	pei-arm.c \
 	pei-i386.c \
 	pei-mcore.c \
-	pei-ppc.c \
 	pei-sh.c \
 	plugin.c \
 	ppcboot.c \

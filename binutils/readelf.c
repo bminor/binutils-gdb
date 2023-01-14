@@ -61,6 +61,7 @@
 #include "elfcomm.h"
 #include "dwarf.h"
 #include "ctf-api.h"
+#include "demangle.h"
 
 #include "elf/common.h"
 #include "elf/external.h"
@@ -234,6 +235,9 @@ static bfd_boolean do_archive_index = FALSE;
 static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
+static bfd_boolean do_not_show_symbol_truncation = FALSE;
+static bfd_boolean do_demangle = FALSE;	/* Pretty print C++ symbol names.  */
+static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 static char *dump_ctf_parent_name;
 static char *dump_ctf_symtab_name;
@@ -533,20 +537,25 @@ print_vma (bfd_vma vma, print_mode mode)
 
    Display at most abs(WIDTH) characters, truncating as necessary, unless do_wide is true.
 
+   If truncation will happen and do_not_show_symbol_truncation is FALSE then display
+   abs(WIDTH) - 5 characters followed by "[...]".
+
    If WIDTH is negative then ensure that the output is at least (- WIDTH) characters,
    padding as necessary.
 
    Returns the number of emitted characters.  */
 
 static unsigned int
-print_symbol (signed int width, const char *symbol)
+print_symbol (signed int width, const char * symbol)
 {
   bfd_boolean extra_padding = FALSE;
+  bfd_boolean do_dots = FALSE;
   signed int num_printed = 0;
 #ifdef HAVE_MBSTATE_T
   mbstate_t state;
 #endif
   unsigned int width_remaining;
+  const void * alloced_symbol = NULL;
 
   if (width < 0)
     {
@@ -562,12 +571,30 @@ print_symbol (signed int width, const char *symbol)
        This simplifies the code below.  */
     width_remaining = INT_MAX;
   else
-    width_remaining = width;
+    {
+      width_remaining = width;
+      if (! do_not_show_symbol_truncation
+	  && (int) strlen (symbol) > width)
+	{
+	  width_remaining -= 5;
+	  if ((int) width_remaining < 0)
+	    width_remaining = 0;
+	  do_dots = TRUE;
+	}
+    }
 
 #ifdef HAVE_MBSTATE_T
   /* Initialise the multibyte conversion state.  */
   memset (& state, 0, sizeof (state));
 #endif
+
+  if (do_demangle && *symbol)
+    {
+      const char * res = cplus_demangle (symbol, demangle_flags);
+
+      if (res != NULL)
+	alloced_symbol = symbol = res;
+    }
 
   while (width_remaining)
     {
@@ -618,6 +645,9 @@ print_symbol (signed int width, const char *symbol)
 	}
     }
 
+  if (do_dots)
+    num_printed += printf ("[...]");
+
   if (extra_padding && num_printed < width)
     {
       /* Fill in the remaining spaces.  */
@@ -625,6 +655,7 @@ print_symbol (signed int width, const char *symbol)
       num_printed = width;
     }
 
+  free ((void *) alloced_symbol);
   return num_printed;
 }
 
@@ -1250,32 +1281,10 @@ dump_relocations (Filedata *          filedata,
 	}
       else
 	{
-#if BFD_HOST_64BIT_LONG
 	  printf (do_wide
-		  ? "%16.16lx  %16.16lx "
-		  : "%12.12lx  %12.12lx ",
+		  ? "%16.16" BFD_VMA_FMT "x  %16.16" BFD_VMA_FMT "x "
+		  : "%12.12" BFD_VMA_FMT "x  %12.12" BFD_VMA_FMT "x ",
 		  offset, inf);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  printf (do_wide
-		  ? "%16.16llx  %16.16llx "
-		  : "%12.12llx  %12.12llx ",
-		  offset, inf);
-#else
-	  printf (do_wide
-		  ? "%16.16I64x  %16.16I64x "
-		  : "%12.12I64x  %12.12I64x ",
-		  offset, inf);
-#endif
-#else
-	  printf (do_wide
-		  ? "%8.8lx%8.8lx  %8.8lx%8.8lx "
-		  : "%4.4lx%8.8lx  %4.4lx%8.8lx ",
-		  _bfd_int64_high (offset),
-		  _bfd_int64_low (offset),
-		  _bfd_int64_high (inf),
-		  _bfd_int64_low (inf));
-#endif
 	}
 
       switch (filedata->file_header.e_machine)
@@ -4021,6 +4030,10 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_GNU_RELRO:  return "GNU_RELRO";
     case PT_GNU_PROPERTY: return "GNU_PROPERTY";
 
+    case PT_OPENBSD_RANDOMIZE: return "OPENBSD_RANDOMIZE";
+    case PT_OPENBSD_WXNEEDED: return "OPENBSD_WXNEEDED";
+    case PT_OPENBSD_BOOTDATA: return "OPENBSD_BOOTDATA";
+      
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
@@ -4254,7 +4267,7 @@ get_tic6x_section_type_name (unsigned int sh_type)
 }
 
 static const char *
-get_msp430x_section_type_name (unsigned int sh_type)
+get_msp430_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
     {
@@ -4298,6 +4311,16 @@ get_riscv_section_type_name (unsigned int sh_type)
     {
     case SHT_RISCV_ATTRIBUTES:  return "RISCV_ATTRIBUTES";
     default: return NULL;
+    }
+}
+
+static const char *
+get_csky_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_CSKY_ATTRIBUTES:  return "CSKY_ATTRIBUTES";
+    default:  return NULL;
     }
 }
 
@@ -4371,7 +4394,7 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	      result = get_tic6x_section_type_name (sh_type);
 	      break;
 	    case EM_MSP430:
-	      result = get_msp430x_section_type_name (sh_type);
+	      result = get_msp430_section_type_name (sh_type);
 	      break;
 	    case EM_NFP:
 	      result = get_nfp_section_type_name (sh_type);
@@ -4383,6 +4406,9 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	      break;
 	    case EM_RISCV:
 	      result = get_riscv_section_type_name (sh_type);
+	      break;
+	    case EM_CSKY:
+	      result = get_csky_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -4453,64 +4479,76 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
     }
 }
 
-#define OPTION_DEBUG_DUMP	512
-#define OPTION_DYN_SYMS		513
-#define OPTION_DWARF_DEPTH	514
-#define OPTION_DWARF_START	515
-#define OPTION_DWARF_CHECK	516
-#define OPTION_CTF_DUMP		517
-#define OPTION_CTF_PARENT	518
-#define OPTION_CTF_SYMBOLS	519
-#define OPTION_CTF_STRINGS	520
+enum long_option_values
+{
+  OPTION_DEBUG_DUMP = 512,
+  OPTION_DYN_SYMS,
+  OPTION_DWARF_DEPTH,
+  OPTION_DWARF_START,
+  OPTION_DWARF_CHECK,
+  OPTION_CTF_DUMP,
+  OPTION_CTF_PARENT,
+  OPTION_CTF_SYMBOLS,
+  OPTION_CTF_STRINGS,
+  OPTION_WITH_SYMBOL_VERSIONS,
+  OPTION_RECURSE_LIMIT,
+  OPTION_NO_RECURSE_LIMIT,
+  OPTION_NO_DEMANGLING
+};
 
 static struct option options[] =
 {
+ /* Note - This table is alpha-sorted on the 'val'
+    field in order to make adding new options easier.  */
+  {"arch-specific",    no_argument, 0, 'A'},
   {"all",	       no_argument, 0, 'a'},
-  {"file-header",      no_argument, 0, 'h'},
-  {"program-headers",  no_argument, 0, 'l'},
-  {"headers",	       no_argument, 0, 'e'},
-  {"histogram",	       no_argument, 0, 'I'},
-  {"segments",	       no_argument, 0, 'l'},
-  {"sections",	       no_argument, 0, 'S'},
-  {"section-headers",  no_argument, 0, 'S'},
-  {"section-groups",   no_argument, 0, 'g'},
-  {"section-details",  no_argument, 0, 't'},
-  {"full-section-name",no_argument, 0, 'N'},
-  {"symbols",	       no_argument, 0, 's'},
-  {"syms",	       no_argument, 0, 's'},
-  {"dyn-syms",	       no_argument, 0, OPTION_DYN_SYMS},
-  {"relocs",	       no_argument, 0, 'r'},
-  {"notes",	       no_argument, 0, 'n'},
+  {"demangle",         optional_argument, 0, 'C'},
+  {"archive-index",    no_argument, 0, 'c'},
+  {"use-dynamic",      no_argument, 0, 'D'},
   {"dynamic",	       no_argument, 0, 'd'},
+  {"headers",	       no_argument, 0, 'e'},
+  {"section-groups",   no_argument, 0, 'g'},
+  {"help",	       no_argument, 0, 'H'},
+  {"file-header",      no_argument, 0, 'h'},
+  {"histogram",	       no_argument, 0, 'I'},
   {"lint",             no_argument, 0, 'L'},
   {"enable-checks",    no_argument, 0, 'L'},
-  {"arch-specific",    no_argument, 0, 'A'},
-  {"version-info",     no_argument, 0, 'V'},
-  {"use-dynamic",      no_argument, 0, 'D'},
-  {"unwind",	       no_argument, 0, 'u'},
-  {"archive-index",    no_argument, 0, 'c'},
-  {"hex-dump",	       required_argument, 0, 'x'},
-  {"relocated-dump",   required_argument, 0, 'R'},
+  {"program-headers",  no_argument, 0, 'l'},
+  {"segments",	       no_argument, 0, 'l'},
+  {"full-section-name",no_argument, 0, 'N'},
+  {"notes",	       no_argument, 0, 'n'},
   {"string-dump",      required_argument, 0, 'p'},
+  {"relocated-dump",   required_argument, 0, 'R'},
+  {"relocs",	       no_argument, 0, 'r'},
+  {"section-headers",  no_argument, 0, 'S'},
+  {"sections",	       no_argument, 0, 'S'},
+  {"symbols",	       no_argument, 0, 's'},
+  {"syms",	       no_argument, 0, 's'},
+  {"silent-truncation",no_argument, 0, 'T'},
+  {"section-details",  no_argument, 0, 't'},
+  {"unwind",	       no_argument, 0, 'u'},
+  {"version-info",     no_argument, 0, 'V'},
+  {"version",	       no_argument, 0, 'v'},
+  {"wide",	       no_argument, 0, 'W'},
+  {"hex-dump",	       required_argument, 0, 'x'},
   {"decompress",       no_argument, 0, 'z'},
-#ifdef SUPPORT_DISASSEMBLY
-  {"instruction-dump", required_argument, 0, 'i'},
-#endif
-  {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
 
+  {"no-demangle",      no_argument, 0, OPTION_NO_DEMANGLING},
+  {"recurse-limit",    no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"dyn-syms",	       no_argument, 0, OPTION_DYN_SYMS},
+  {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
-
+#ifdef ENABLE_LIBCTF
   {"ctf",	       required_argument, 0, OPTION_CTF_DUMP},
-
   {"ctf-symbols",      required_argument, 0, OPTION_CTF_SYMBOLS},
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
   {"ctf-parent",       required_argument, 0, OPTION_CTF_PARENT},
+#endif
 
-  {"version",	       no_argument, 0, 'v'},
-  {"wide",	       no_argument, 0, 'W'},
-  {"help",	       no_argument, 0, 'H'},
   {0,		       no_argument, 0, 0}
 };
 
@@ -4532,6 +4570,13 @@ usage (FILE * stream)
   -s --syms              Display the symbol table\n\
      --symbols           An alias for --syms\n\
      --dyn-syms          Display the dynamic symbol table\n\
+  -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
+                          The STYLE, if specified, can be `auto' (the default),\n\
+                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
+                          or `gnat'\n\
+     --no-demangle       Do not demangle low-level symbol names.  (This is the default)\n\
+     --recurse-limit     Enable a demangling recursion limit.  (This is the default)\n\
+     --no-recurse-limit  Disable a demangling recursion limit\n\
   -n --notes             Display the core notes (if present)\n\
   -r --relocs            Display the relocations (if present)\n\
   -u --unwind            Display the unwind info (if present)\n\
@@ -4548,9 +4593,9 @@ usage (FILE * stream)
   -R --relocated-dump=<number|name>\n\
                          Dump the contents of section <number|name> as relocated bytes\n\
   -z --decompress        Decompress section before dumping it\n\
-  -w[lLiaprmfFsoRtUuTgAckK] or\n\
+  -w[lLiaprmfFsoORtUuTgAckK] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-               =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
+               =frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,\n\
                =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
                =addr,=cu_index,=links,=follow-links]\n\
                          Display the contents of DWARF debug sections\n"));
@@ -4558,6 +4603,7 @@ usage (FILE * stream)
   --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
   --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
                          or deeper\n"));
+#ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
   --ctf=<number|name>    Display CTF info from section <number|name>\n\
   --ctf-parent=<number|name>\n\
@@ -4566,6 +4612,7 @@ usage (FILE * stream)
                          Use section <number|name> as the CTF external symtab\n\n\
   --ctf-strings=<number|name>\n\
                          Use section <number|name> as the CTF external strtab\n\n"));
+#endif
 
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -4575,6 +4622,7 @@ usage (FILE * stream)
   fprintf (stream, _("\
   -I --histogram         Display histogram of bucket list lengths\n\
   -W --wide              Allow output width to exceed 80 characters\n\
+  -T --silent-truncation If a symbol name is truncated, do not add a suffix [...]\n\
   @<file>                Read options from <file>\n\
   -H --help              Display this information\n\
   -v --version           Display the version number of readelf\n"));
@@ -4669,7 +4717,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHILNR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ACDHILNR:STVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4694,6 +4742,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  do_arch = TRUE;
 	  do_notes = TRUE;
 	  break;
+
 	case 'g':
 	  do_section_groups = TRUE;
 	  break;
@@ -4803,12 +4852,15 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  request_dump (dumpdata, CTF_DUMP);
 	  break;
 	case OPTION_CTF_SYMBOLS:
+	  free (dump_ctf_symtab_name);
 	  dump_ctf_symtab_name = strdup (optarg);
 	  break;
 	case OPTION_CTF_STRINGS:
+	  free (dump_ctf_strtab_name);
 	  dump_ctf_strtab_name = strdup (optarg);
 	  break;
 	case OPTION_CTF_PARENT:
+	  free (dump_ctf_parent_name);
 	  dump_ctf_parent_name = strdup (optarg);
 	  break;
 	case OPTION_DYN_SYMS:
@@ -4828,6 +4880,35 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case 'W':
 	  do_wide = TRUE;
 	  break;
+	case 'T':
+	  do_not_show_symbol_truncation = TRUE;
+	  break;
+	case 'C':
+	  do_demangle = TRUE;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling)
+		error (_("unknown demangling style `%s'"), optarg);
+
+	      cplus_demangle_set_style (style);
+	    }
+	  break;
+	case OPTION_NO_DEMANGLING:
+	  do_demangle = FALSE;
+	  break;
+	case OPTION_RECURSE_LIMIT:
+	  demangle_flags &= ~ DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_NO_RECURSE_LIMIT:
+	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_WITH_SYMBOL_VERSIONS:
+	  /* Ignored for backward compatibility.  */
+	  break;
+	  
 	default:
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);
@@ -6388,7 +6469,7 @@ process_section_headers (Filedata * filedata)
       if ((do_debugging || do_debug_info || do_debug_abbrevs
 	   || do_debug_lines || do_debug_pubnames || do_debug_pubtypes
 	   || do_debug_aranges || do_debug_frames || do_debug_macinfo
-	   || do_debug_str || do_debug_loc || do_debug_ranges
+	   || do_debug_str || do_debug_str_offsets || do_debug_loc || do_debug_ranges
 	   || do_debug_addr || do_debug_cu_index || do_debug_links)
 	  && (const_strneq (name, ".debug_")
 	      || const_strneq (name, ".zdebug_")))
@@ -6415,6 +6496,7 @@ process_section_headers (Filedata * filedata)
 	      || (do_debug_macinfo  && const_strneq (name, "macinfo"))
 	      || (do_debug_macinfo  && const_strneq (name, "macro"))
 	      || (do_debug_str      && const_strneq (name, "str"))
+	      || (do_debug_str_offsets && const_strneq (name, "str_offsets"))
 	      || (do_debug_loc      && const_strneq (name, "loc"))
 	      || (do_debug_loc      && const_strneq (name, "loclists"))
 	      || (do_debug_addr     && const_strneq (name, "addr"))
@@ -8225,6 +8307,7 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
   nentries = size / unw_ent_size;
   size = unw_ent_size * nentries;
 
+  aux->table_len = nentries;
   tep = aux->table = (struct hppa_unw_table_entry *)
       xcmalloc (nentries, sizeof (aux->table[0]));
 
@@ -8343,8 +8426,6 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 
       free (rela);
     }
-
-  aux->table_len = nentries;
 
   return TRUE;
 }
@@ -12027,7 +12108,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   enum versioned_symbol_info sym_info;
   unsigned short vna_other;
   Elf_Internal_Sym *psym = symtab + si;
-
+  
   printf ("%6ld: ", si);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
@@ -12048,9 +12129,10 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 	printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
     }
   printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
-  print_symbol (25, VALID_SYMBOL_NAME (strtab, strtab_size,
-				       psym->st_name)
-		? strtab + psym->st_name : _("<corrupt>"));
+
+  bfd_boolean is_valid = VALID_SYMBOL_NAME (strtab, strtab_size,
+					    psym->st_name);
+  const char * sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
 
   version_string
     = get_symbol_version_string (filedata,
@@ -12058,6 +12140,22 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 				  || section->sh_type == SHT_DYNSYM),
 				 strtab, strtab_size, si,
 				 psym, &sym_info, &vna_other);
+  
+  int len_avail = 21;
+  if (! do_wide && version_string != NULL)
+    {
+      char buffer[16];
+
+      len_avail -= 1 + strlen (version_string);
+
+      if (sym_info == symbol_undefined)
+	len_avail -= sprintf (buffer," (%d)", vna_other);
+      else if (sym_info != symbol_hidden)
+	len_avail -= 1;
+    }
+
+  print_symbol (len_avail, sstr);
+    
   if (version_string)
     {
       if (sym_info == symbol_undefined)
@@ -12488,10 +12586,12 @@ target_specific_reloc_handling (Filedata *           filedata,
 	switch (reloc_type)
 	  {
 	  case 10: /* R_MSP430_SYM_DIFF */
+	  case 12: /* R_MSP430_GNU_SUB_ULEB128 */
 	    if (uses_msp430x_relocs (filedata))
 	      break;
 	    /* Fall through.  */
 	  case 21: /* R_MSP430X_SYM_DIFF */
+	  case 23: /* R_MSP430X_GNU_SUB_ULEB128 */
 	    /* PR 21139.  */
 	    if (sym_index >= num_syms)
 	      error (_("MSP430 SYM_DIFF reloc contains invalid symbol index %lu\n"),
@@ -12506,12 +12606,14 @@ target_specific_reloc_handling (Filedata *           filedata,
 
 	  case 5: /* R_MSP430_16_BYTE */
 	  case 9: /* R_MSP430_8 */
+	  case 11: /* R_MSP430_GNU_SET_ULEB128 */
 	    if (uses_msp430x_relocs (filedata))
 	      break;
 	    goto handle_sym_diff;
 
 	  case 2: /* R_MSP430_ABS16 */
 	  case 15: /* R_MSP430X_ABS16 */
+	  case 22: /* R_MSP430X_GNU_SET_ULEB128 */
 	    if (! uses_msp430x_relocs (filedata))
 	      break;
 	    goto handle_sym_diff;
@@ -12519,10 +12621,29 @@ target_specific_reloc_handling (Filedata *           filedata,
 	  handle_sym_diff:
 	    if (saved_sym != NULL)
 	      {
-		int reloc_size = reloc_type == 1 ? 4 : 2;
 		bfd_vma value;
+		unsigned int reloc_size;
+		int leb_ret = 0;
+		switch (reloc_type)
+		  {
+		  case 1: /* R_MSP430_32 or R_MSP430_ABS32 */
+		    reloc_size = 4;
+		    break;
+		  case 11: /* R_MSP430_GNU_SET_ULEB128 */
+		  case 22: /* R_MSP430X_GNU_SET_ULEB128 */
+		    read_leb128 (start + reloc->r_offset, end, FALSE,
+				 &reloc_size, &leb_ret);
+		    break;
+		  default:
+		    reloc_size = 2;
+		    break;
+		  }
 
-		if (sym_index >= num_syms)
+		if (leb_ret != 0)
+		  error (_("MSP430 ULEB128 field at 0x%lx contains invalid "
+			   "ULEB128 value\n"),
+			 (long) reloc->r_offset);
+		else if (sym_index >= num_syms)
 		  error (_("MSP430 reloc contains invalid symbol index %lu\n"),
 			 sym_index);
 		else
@@ -13882,18 +14003,12 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	    }
 	  else
 	    {
-#ifndef __MSVCRT__
-	      /* PR 11128: Use two separate invocations in order to work
-		 around bugs in the Solaris 8 implementation of printf.  */
-	      printf ("  [%6tx]  ", data - start);
-#else
-	      printf ("  [%6Ix]  ", (size_t) (data - start));
-#endif
+	      printf ("  [%6lx]  ", (unsigned long) (data - start));
 	    }
 
 	  if (maxlen > 0)
 	    {
-	      char c;
+	      char c = 0;
 
 	      while (maxlen)
 		{
@@ -14131,6 +14246,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
   return FALSE;
 }
 
+#ifdef ENABLE_LIBCTF
 static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
@@ -14145,8 +14261,9 @@ shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
    it is passed, or a pointer to newly-allocated storage, in which case
    dump_ctf() will free it when it no longer needs it.  */
 
-static char *dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
-				    char *s, void *arg)
+static char *
+dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
+		       char *s, void *arg)
 {
   const char *blanks = arg;
   char *new_s;
@@ -14154,6 +14271,80 @@ static char *dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
   if (asprintf (&new_s, "%s%s", blanks, s) < 0)
     return s;
   return new_s;
+}
+
+/* Dump CTF errors/warnings.  */
+static void
+dump_ctf_errs (ctf_file_t *fp)
+{
+  ctf_next_t *it = NULL;
+  char *errtext;
+  int is_warning;
+  int err;
+
+  /* Dump accumulated errors and warnings.  */
+  while ((errtext = ctf_errwarning_next (fp, &it, &is_warning, &err)) != NULL)
+    {
+      error (_("%s: %s"), is_warning ? _("warning"): _("error"),
+	     errtext);
+      free (errtext);
+    }
+  if (err != ECTF_NEXT_END)
+    error (_("CTF error: cannot get CTF errors: `%s'"), ctf_errmsg (err));
+}
+
+/* Dump one CTF archive member.  */
+
+static int
+dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
+{
+  ctf_file_t *parent = (ctf_file_t *) arg;
+  const char *things[] = {"Header", "Labels", "Data objects",
+			  "Function objects", "Variables", "Types", "Strings",
+			  ""};
+  const char **thing;
+  size_t i;
+  int err = 0;
+
+  /* Only print out the name of non-default-named archive members.
+     The name .ctf appears everywhere, even for things that aren't
+     really archives, so printing it out is liable to be confusing.
+
+     The parent, if there is one, is the default-owned archive member:
+     avoid importing it into itself.  (This does no harm, but looks
+     confusing.)  */
+
+  if (strcmp (name, ".ctf") != 0)
+    {
+      printf (_("\nCTF archive member: %s:\n"), name);
+      ctf_import (ctf, parent);
+    }
+
+  for (i = 0, thing = things; *thing[0]; thing++, i++)
+    {
+      ctf_dump_state_t *s = NULL;
+      char *item;
+
+      printf ("\n  %s:\n", *thing);
+      while ((item = ctf_dump (ctf, &s, i, dump_ctf_indent_lines,
+			       (void *) "    ")) != NULL)
+	{
+	  printf ("%s\n", item);
+	  free (item);
+	}
+
+      if (ctf_errno (ctf))
+	{
+	  error (_("Iteration failed: %s, %s\n"), *thing,
+		 ctf_errmsg (ctf_errno (ctf)));
+	  err = 1;
+	  goto out;
+	}
+    }
+
+ out:
+  dump_ctf_errs (ctf);
+  return err;
 }
 
 static bfd_boolean
@@ -14169,16 +14360,12 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctf_sect_t	       ctfsect, symsect, strsect, parentsect;
   ctf_sect_t *	       symsectp = NULL;
   ctf_sect_t *	       strsectp = NULL;
-  ctf_file_t *	       ctf = NULL;
-  ctf_file_t *	       parent = NULL;
+  ctf_archive_t *      ctfa = NULL;
+  ctf_archive_t *      parenta = NULL, *lookparent;
+  ctf_file_t *         parent = NULL;
 
-  const char *things[] = {"Header", "Labels", "Data objects",
-			  "Function objects", "Variables", "Types", "Strings",
-			  ""};
-  const char **thing;
   int err;
   bfd_boolean ret = FALSE;
-  size_t i;
 
   shdr_to_ctf_sect (&ctfsect, section, filedata);
   data = get_section_contents (section, filedata);
@@ -14205,7 +14392,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       symsectp = shdr_to_ctf_sect (&symsect, symtab_sec, filedata);
       symsect.cts_data = symdata;
     }
-  if (dump_ctf_strtab_name && dump_ctf_symtab_name[0] != 0)
+  if (dump_ctf_strtab_name && dump_ctf_strtab_name[0] != 0)
     {
       if ((strtab_sec = find_section (filedata, dump_ctf_strtab_name)) == NULL)
 	{
@@ -14237,23 +14424,39 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       parentsect.cts_data = parentdata;
     }
 
-  /* Load the CTF file and dump it.  */
+  /* Load the CTF file and dump it.  It may be a raw CTF section, or an archive:
+     libctf papers over the difference, so we can pretend it is always an
+     archive.  Possibly open the parent as well, if one was specified.  */
 
-  if ((ctf = ctf_bufopen (&ctfsect, symsectp, strsectp, &err)) == NULL)
+  if ((ctfa = ctf_arc_bufopen (&ctfsect, symsectp, strsectp, &err)) == NULL)
     {
+      dump_ctf_errs (NULL);
       error (_("CTF open failure: %s\n"), ctf_errmsg (err));
       goto fail;
     }
 
   if (parentdata)
     {
-      if ((parent = ctf_bufopen (&parentsect, symsectp, strsectp, &err)) == NULL)
+      if ((parenta = ctf_arc_bufopen (&parentsect, symsectp, strsectp,
+				      &err)) == NULL)
 	{
+	  dump_ctf_errs (NULL);
 	  error (_("CTF open failure: %s\n"), ctf_errmsg (err));
 	  goto fail;
 	}
+      lookparent = parenta;
+    }
+  else
+    lookparent = ctfa;
 
-      ctf_import (ctf, parent);
+  /* Assume that the applicable parent archive member is the default one.
+     (This is what all known implementations are expected to do, if they
+     put CTFs and their parents in archives together.)  */
+  if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
+    {
+      dump_ctf_errs (NULL);
+      error (_("CTF open failure: %s\n"), ctf_errmsg (err));
+      goto fail;
     }
 
   ret = TRUE;
@@ -14261,36 +14464,20 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   printf (_("\nDump of CTF section '%s':\n"),
 	  printable_section_name (filedata, section));
 
-  for (i = 0, thing = things; *thing[0]; thing++, i++)
-    {
-      ctf_dump_state_t *s = NULL;
-      char *item;
-
-      printf ("\n  %s:\n", *thing);
-      while ((item = ctf_dump (ctf, &s, i, dump_ctf_indent_lines,
-			       (void *) "    ")) != NULL)
-	{
-	  printf ("%s\n", item);
-	  free (item);
-	}
-
-      if (ctf_errno (ctf))
-	{
-	  error (_("Iteration failed: %s, %s\n"), *thing,
-		   ctf_errmsg (ctf_errno (ctf)));
-	  ret = FALSE;
-	}
-    }
+  if (ctf_archive_iter (ctfa, dump_ctf_archive_member, parent) != 0)
+    ret = FALSE;
 
  fail:
-  ctf_file_close (ctf);
   ctf_file_close (parent);
+  ctf_close (ctfa);
+  ctf_close (parenta);
   free (parentdata);
   free (data);
   free (symdata);
   free (strdata);
   return ret;
 }
+#endif
 
 static bfd_boolean
 load_specific_debug_section (enum dwarf_section_display_enum  debug,
@@ -14776,11 +14963,13 @@ process_section_contents (Filedata * filedata)
 	    res = FALSE;
 	}
 
+#ifdef ENABLE_LIBCTF
       if (dump & CTF_DUMP)
 	{
 	  if (! dump_section_as_ctf (section, filedata))
 	    res = FALSE;
 	}
+#endif
     }
 
   /* Check to see if the user requested a
@@ -15364,6 +15553,44 @@ display_gnu_attribute (unsigned char * p,
     return display_proc_gnu_attribute (p, tag, end);
 
   return display_tag_value (tag, p, end);
+}
+
+static unsigned char *
+display_m68k_gnu_attribute (unsigned char * p,
+			    unsigned int tag,
+			    const unsigned char * const end)
+{
+  unsigned int val;
+
+  if (tag == Tag_GNU_M68K_ABI_FP)
+    {
+      printf ("  Tag_GNU_M68K_ABI_FP: ");
+      if (p == end)
+	{
+	  printf (_("<corrupt>\n"));
+	  return p;
+	}
+      READ_ULEB (val, p, end);
+
+      if (val > 3)
+	printf ("(%#x), ", val);
+
+      switch (val & 3)
+	{
+	case 0:
+	  printf (_("unspecified hard/soft float\n"));
+	  break;
+	case 1:
+	  printf (_("hard float\n"));
+	  break;
+	case 2:
+	  printf (_("soft float\n"));
+	  break;
+	}
+      return p;
+    }
+
+  return display_tag_value (tag & 1, p, end);
 }
 
 static unsigned char *
@@ -15983,7 +16210,7 @@ display_raw_attribute (unsigned char * p, unsigned char const * const end)
 }
 
 static unsigned char *
-display_msp430x_attribute (unsigned char * p,
+display_msp430_attribute (unsigned char * p,
 			   const unsigned char * const end)
 {
   unsigned int val;
@@ -16164,6 +16391,110 @@ display_riscv_attribute (unsigned char *p,
       return display_tag_value (tag, p, end);
     }
 
+  return p;
+}
+
+static unsigned char *
+display_csky_attribute (unsigned char * p,
+			const unsigned char * const end)
+{
+  unsigned int tag;
+  unsigned int val;
+  READ_ULEB (tag, p, end);
+
+  if (tag >= Tag_CSKY_MAX)
+    {
+      return display_tag_value (-1, p, end);
+    }
+
+  switch (tag)
+    {
+    case Tag_CSKY_ARCH_NAME:
+      printf ("  Tag_CSKY_ARCH_NAME:\t\t");
+      return display_tag_value (-1, p, end);
+    case Tag_CSKY_CPU_NAME:
+      printf ("  Tag_CSKY_CPU_NAME:\t\t");
+      return display_tag_value (-1, p, end);
+
+    case Tag_CSKY_ISA_FLAGS:
+      printf ("  Tag_CSKY_ISA_FLAGS:\t\t");
+      return display_tag_value (0, p, end);
+    case Tag_CSKY_ISA_EXT_FLAGS:
+      printf ("  Tag_CSKY_ISA_EXT_FLAGS:\t");
+      return display_tag_value (0, p, end);
+
+    case Tag_CSKY_DSP_VERSION:
+      printf ("  Tag_CSKY_DSP_VERSION:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_DSP_VERSION_EXTENSION)
+	printf ("DSP Extension\n");
+      else if (val == VAL_CSKY_DSP_VERSION_2)
+	printf ("DSP 2.0\n");
+      break;
+
+    case Tag_CSKY_VDSP_VERSION:
+      printf ("  Tag_CSKY_VDSP_VERSION:\t");
+      READ_ULEB (val, p, end);
+      printf ("VDSP Version %d\n", val);
+      break;
+
+    case Tag_CSKY_FPU_VERSION:
+      printf ("  Tag_CSKY_FPU_VERSION:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_FPU_VERSION_1)
+	printf ("ABIV1 FPU Version 1\n");
+      else if (val == VAL_CSKY_FPU_VERSION_2)
+	printf ("FPU Version 2\n");
+      break;
+
+    case Tag_CSKY_FPU_ABI:
+      printf ("  Tag_CSKY_FPU_ABI:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_FPU_ABI_HARD)
+	printf ("Hard\n");
+      else if (val == VAL_CSKY_FPU_ABI_SOFTFP)
+	printf ("SoftFP\n");
+      else if (val == VAL_CSKY_FPU_ABI_SOFT)
+	printf ("Soft\n");
+      break;
+    case Tag_CSKY_FPU_ROUNDING:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_ROUNDING:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_DENORMAL:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_DENORMAL:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_Exception:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_Exception:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_NUMBER_MODULE:
+      printf ("  Tag_CSKY_FPU_NUMBER_MODULE:\t");
+      return display_tag_value (-1, p, end);
+    case Tag_CSKY_FPU_HARDFP:
+      printf ("  Tag_CSKY_FPU_HARDFP:\t\t");
+      READ_ULEB (val, p, end);
+      if (val & VAL_CSKY_FPU_HARDFP_HALF)
+	printf (" Half");
+      if (val & VAL_CSKY_FPU_HARDFP_SINGLE)
+	printf (" Single");
+      if (val & VAL_CSKY_FPU_HARDFP_DOUBLE)
+	printf (" Double");
+      printf ("\n");
+      break;
+    default:
+      return display_tag_value (tag, p, end);
+     }
   return p;
 }
 
@@ -16894,47 +17225,28 @@ process_mips_specific (Filedata * filedata)
                                                 sect->sh_size, _("options"));
       if (eopt)
 	{
-	  Elf_Internal_Options * iopt;
-	  Elf_Internal_Options * option;
-	  Elf_Internal_Options * iopt_end;
-
-	  iopt = (Elf_Internal_Options *)
-              cmalloc ((sect->sh_size / sizeof (eopt)), sizeof (* iopt));
-	  if (iopt == NULL)
-	    {
-	      error (_("Out of memory allocating space for MIPS options\n"));
-	      free (eopt);
-	      return FALSE;
-	    }
+	  Elf_Internal_Options option;
 
 	  offset = cnt = 0;
-	  option = iopt;
-	  iopt_end = iopt + (sect->sh_size / sizeof (eopt));
-	  
 	  while (offset <= sect->sh_size - sizeof (* eopt))
 	    {
 	      Elf_External_Options * eoption;
+	      unsigned int optsize;
 
 	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
 
-	      option->kind = BYTE_GET (eoption->kind);
-	      option->size = BYTE_GET (eoption->size);
-	      option->section = BYTE_GET (eoption->section);
-	      option->info = BYTE_GET (eoption->info);
+	      optsize = BYTE_GET (eoption->size);
 
 	      /* PR 17531: file: ffa0fa3b.  */
-	      if (option->size < sizeof (* eopt)
-		  || offset + option->size > sect->sh_size)
+	      if (optsize < sizeof (* eopt)
+		  || optsize > sect->sh_size - offset)
 		{
 		  error (_("Invalid size (%u) for MIPS option\n"),
-			 option->size);
-		  free (iopt);
+			 optsize);
 		  free (eopt);
 		  return FALSE;
 		}
-	      offset += option->size;
-
-	      ++option;
+	      offset += optsize;
 	      ++cnt;
 	    }
 
@@ -16943,18 +17255,25 @@ process_mips_specific (Filedata * filedata)
 			    cnt),
 		  printable_section_name (filedata, sect), cnt);
 
-	  option = iopt;
 	  offset = 0;
-
 	  while (cnt-- > 0)
 	    {
 	      size_t len;
+	      Elf_External_Options * eoption;
 
-	      switch (option->kind)
+	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
+
+	      option.kind = BYTE_GET (eoption->kind);
+	      option.size = BYTE_GET (eoption->size);
+	      option.section = BYTE_GET (eoption->section);
+	      option.info = BYTE_GET (eoption->info);
+
+	      switch (option.kind)
 		{
 		case ODK_NULL:
 		  /* This shouldn't happen.  */
-		  printf (" NULL       %d %lx", option->section, option->info);
+		  printf (" NULL       %" PRId16 " %" PRIx32,
+			  option.section, option.info);
 		  break;
 
 		case ODK_REGINFO:
@@ -16965,7 +17284,8 @@ process_mips_specific (Filedata * filedata)
 		      Elf32_RegInfo reginfo;
 
 		      /* 32bit form.  */
-		      if (option + 2 > iopt_end)
+		      if (option.size < (sizeof (Elf_External_Options)
+					 + sizeof (Elf32_External_RegInfo)))
 			{
 			  printf (_("<corrupt>\n"));
 			  error (_("Truncated MIPS REGINFO option\n"));
@@ -16973,7 +17293,7 @@ process_mips_specific (Filedata * filedata)
 			  break;
 			}
 
-		      ereg = (Elf32_External_RegInfo *) (option + 1);
+		      ereg = (Elf32_External_RegInfo *) (eoption + 1);
 
 		      reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
@@ -16982,10 +17302,11 @@ process_mips_specific (Filedata * filedata)
 		      reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
 		      reginfo.ri_gp_value = BYTE_GET (ereg->ri_gp_value);
 
-		      printf ("GPR %08lx  GP 0x%lx\n",
-			      reginfo.ri_gprmask,
-			      (unsigned long) reginfo.ri_gp_value);
-		      printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+		      printf ("GPR %08" PRIx32 "  GP 0x%" PRIx32 "\n",
+			      reginfo.ri_gprmask, reginfo.ri_gp_value);
+		      printf ("          "
+			      "  CPR0 %08" PRIx32 "  CPR1 %08" PRIx32
+			      "  CPR2 %08" PRIx32 "  CPR3 %08" PRIx32 "\n",
 			      reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
 			      reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
 		    }
@@ -16995,7 +17316,8 @@ process_mips_specific (Filedata * filedata)
 		      Elf64_External_RegInfo * ereg;
 		      Elf64_Internal_RegInfo reginfo;
 
-		      if (option + 2 > iopt_end)
+		      if (option.size < (sizeof (Elf_External_Options)
+					 + sizeof (Elf64_External_RegInfo)))
 			{
 			  printf (_("<corrupt>\n"));
 			  error (_("Truncated MIPS REGINFO option\n"));
@@ -17003,7 +17325,7 @@ process_mips_specific (Filedata * filedata)
 			  break;
 			}
 
-		      ereg = (Elf64_External_RegInfo *) (option + 1);
+		      ereg = (Elf64_External_RegInfo *) (eoption + 1);
 		      reginfo.ri_gprmask    = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
 		      reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
@@ -17011,54 +17333,53 @@ process_mips_specific (Filedata * filedata)
 		      reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
 		      reginfo.ri_gp_value   = BYTE_GET (ereg->ri_gp_value);
 
-		      printf ("GPR %08lx  GP 0x",
-			      reginfo.ri_gprmask);
-		      printf_vma (reginfo.ri_gp_value);
-		      printf ("\n");
-
-		      printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+		      printf ("GPR %08" PRIx32 "  GP 0x%" PRIx64 "\n",
+			      reginfo.ri_gprmask, reginfo.ri_gp_value);
+		      printf ("          "
+			      "  CPR0 %08" PRIx32 "  CPR1 %08" PRIx32
+			      "  CPR2 %08" PRIx32 "  CPR3 %08" PRIx32 "\n",
 			      reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
 			      reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
 		    }
-		  ++option;
+		  offset += option.size;
 		  continue;
 
 		case ODK_EXCEPTIONS:
 		  fputs (" EXCEPTIONS fpe_min(", stdout);
-		  process_mips_fpe_exception (option->info & OEX_FPU_MIN);
+		  process_mips_fpe_exception (option.info & OEX_FPU_MIN);
 		  fputs (") fpe_max(", stdout);
-		  process_mips_fpe_exception ((option->info & OEX_FPU_MAX) >> 8);
+		  process_mips_fpe_exception ((option.info & OEX_FPU_MAX) >> 8);
 		  fputs (")", stdout);
 
-		  if (option->info & OEX_PAGE0)
+		  if (option.info & OEX_PAGE0)
 		    fputs (" PAGE0", stdout);
-		  if (option->info & OEX_SMM)
+		  if (option.info & OEX_SMM)
 		    fputs (" SMM", stdout);
-		  if (option->info & OEX_FPDBUG)
+		  if (option.info & OEX_FPDBUG)
 		    fputs (" FPDBUG", stdout);
-		  if (option->info & OEX_DISMISS)
+		  if (option.info & OEX_DISMISS)
 		    fputs (" DISMISS", stdout);
 		  break;
 
 		case ODK_PAD:
 		  fputs (" PAD       ", stdout);
-		  if (option->info & OPAD_PREFIX)
+		  if (option.info & OPAD_PREFIX)
 		    fputs (" PREFIX", stdout);
-		  if (option->info & OPAD_POSTFIX)
+		  if (option.info & OPAD_POSTFIX)
 		    fputs (" POSTFIX", stdout);
-		  if (option->info & OPAD_SYMBOL)
+		  if (option.info & OPAD_SYMBOL)
 		    fputs (" SYMBOL", stdout);
 		  break;
 
 		case ODK_HWPATCH:
 		  fputs (" HWPATCH   ", stdout);
-		  if (option->info & OHW_R4KEOP)
+		  if (option.info & OHW_R4KEOP)
 		    fputs (" R4KEOP", stdout);
-		  if (option->info & OHW_R8KPFETCH)
+		  if (option.info & OHW_R8KPFETCH)
 		    fputs (" R8KPFETCH", stdout);
-		  if (option->info & OHW_R5KEOP)
+		  if (option.info & OHW_R5KEOP)
 		    fputs (" R5KEOP", stdout);
-		  if (option->info & OHW_R5KCVTL)
+		  if (option.info & OHW_R5KCVTL)
 		    fputs (" R5KCVTL", stdout);
 		  break;
 
@@ -17074,43 +17395,43 @@ process_mips_specific (Filedata * filedata)
 
 		case ODK_HWAND:
 		  fputs (" HWAND     ", stdout);
-		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		  if (option.info & OHWA0_R4KEOP_CHECKED)
 		    fputs (" R4KEOP_CHECKED", stdout);
-		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		  if (option.info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
 
 		case ODK_HWOR:
 		  fputs (" HWOR      ", stdout);
-		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		  if (option.info & OHWA0_R4KEOP_CHECKED)
 		    fputs (" R4KEOP_CHECKED", stdout);
-		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		  if (option.info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
 
 		case ODK_GP_GROUP:
-		  printf (" GP_GROUP  %#06lx  self-contained %#06lx",
-			  option->info & OGP_GROUP,
-			  (option->info & OGP_SELF) >> 16);
+		  printf (" GP_GROUP  %#06x  self-contained %#06x",
+			  option.info & OGP_GROUP,
+			  (option.info & OGP_SELF) >> 16);
 		  break;
 
 		case ODK_IDENT:
-		  printf (" IDENT     %#06lx  self-contained %#06lx",
-			  option->info & OGP_GROUP,
-			  (option->info & OGP_SELF) >> 16);
+		  printf (" IDENT     %#06x  self-contained %#06x",
+			  option.info & OGP_GROUP,
+			  (option.info & OGP_SELF) >> 16);
 		  break;
 
 		default:
 		  /* This shouldn't happen.  */
-		  printf (" %3d ???     %d %lx",
-			  option->kind, option->section, option->info);
+		  printf (" %3d ???     %" PRId16 " %" PRIx32,
+			  option.kind, option.section, option.info);
 		  break;
 		}
 
 	      len = sizeof (* eopt);
-	      while (len < option->size)
+	      while (len < option.size)
 		{
-		  unsigned char datum = * ((unsigned char *) eopt + offset + len);
+		  unsigned char datum = *((unsigned char *) eoption + len);
 
 		  if (ISPRINT (datum))
 		    printf ("%c", datum);
@@ -17120,10 +17441,8 @@ process_mips_specific (Filedata * filedata)
 		}
 	      fputs ("\n", stdout);
 
-	      offset += option->size;
-	      ++option;
+	      offset += option.size;
 	    }
-	  free (iopt);
 	  free (eopt);
 	}
       else
@@ -17634,6 +17953,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_386_IOPERM (x86 I/O permissions)");
       case NT_X86_XSTATE:
 	return _("NT_X86_XSTATE (x86 XSAVE extended state)");
+      case NT_X86_CET:
+	return _("NT_X86_CET (x86 CET state)");
       case NT_S390_HIGH_GPRS:
 	return _("NT_S390_HIGH_GPRS (s390 upper register halves)");
       case NT_S390_TIMER:
@@ -18066,6 +18387,9 @@ decode_x86_feature_2 (unsigned int bitmask)
 	  break;
 	case GNU_PROPERTY_X86_FEATURE_2_ZMM:
 	  printf ("ZMM");
+	  break;
+	case GNU_PROPERTY_X86_FEATURE_2_TMM:
+	  printf ("TMM");
 	  break;
 	case GNU_PROPERTY_X86_FEATURE_2_FXSR:
 	  printf ("FXSR");
@@ -19363,7 +19687,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	while (bytes --)
 	  {
-	    unsigned long byte = (* name ++) & 0xff;
+	    unsigned long long byte = *name++ & 0xff;
 
 	    val |= byte << shift;
 	    shift += 8;
@@ -19928,7 +20252,7 @@ process_arch_specific (Filedata * filedata)
 
     case EM_MSP430:
      return process_attributes (filedata, "mspabi", SHT_MSP430_ATTRIBUTES,
-				display_msp430x_attribute,
+				display_msp430_attribute,
 				display_msp430_gnu_attribute);
 
     case EM_RISCV:
@@ -19938,6 +20262,10 @@ process_arch_specific (Filedata * filedata)
 
     case EM_NDS32:
       return process_nds32_specific (filedata);
+
+    case EM_68K:
+      return process_attributes (filedata, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				 display_m68k_gnu_attribute);
 
     case EM_PPC:
     case EM_PPC64:
@@ -19959,6 +20287,10 @@ process_arch_specific (Filedata * filedata)
       return process_attributes (filedata, "c6xabi", SHT_C6000_ATTRIBUTES,
 				 display_tic6x_attribute,
 				 display_generic_attribute);
+
+    case EM_CSKY:
+      return process_attributes (filedata, "csky", SHT_CSKY_ATTRIBUTES,
+				 display_csky_attribute, NULL);
 
     default:
       return process_attributes (filedata, "gnu", SHT_GNU_ATTRIBUTES,

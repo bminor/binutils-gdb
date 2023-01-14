@@ -1489,10 +1489,12 @@ bfd_ecoff_write_debug (bfd *abfd,
     return FALSE;
 
 #define WRITE(ptr, count, size, offset) \
-  BFD_ASSERT (symhdr->offset == 0 \
-	      || (bfd_vma) bfd_tell (abfd) == symhdr->offset); \
-  if (bfd_bwrite (debug->ptr, (bfd_size_type) size * symhdr->count, abfd)\
-      != size * symhdr->count) \
+  BFD_ASSERT (symhdr->offset == 0				\
+	      || (bfd_vma) bfd_tell (abfd) == symhdr->offset);	\
+  if (symhdr->count != 0					\
+      && bfd_bwrite (debug->ptr,				\
+		     (bfd_size_type) size * symhdr->count,	\
+		     abfd) != size * symhdr->count)		\
     return FALSE;
 
   WRITE (line, cbLine, sizeof (unsigned char), cbLineOffset);
@@ -1650,7 +1652,7 @@ bfd_ecoff_write_accumulated_debug (void * handle,
   /* The external strings and symbol are not converted over to using
      shuffles.  FIXME: They probably should be.  */
   amt = debug->symbolic_header.issExtMax;
-  if (bfd_bwrite (debug->ssext, amt, abfd) != amt)
+  if (amt != 0 && bfd_bwrite (debug->ssext, amt, abfd) != amt)
     goto error_return;
   if ((debug->symbolic_header.issExtMax & (swap->debug_align - 1)) != 0)
     {
@@ -1680,7 +1682,7 @@ bfd_ecoff_write_accumulated_debug (void * handle,
 		  == (bfd_vma) bfd_tell (abfd)));
 
   amt = debug->symbolic_header.iextMax * swap->external_ext_size;
-  if (bfd_bwrite (debug->external_ext, amt, abfd) != amt)
+  if (amt != 0 && bfd_bwrite (debug->external_ext, amt, abfd) != amt)
     goto error_return;
 
   free (space);

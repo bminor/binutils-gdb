@@ -40,6 +40,7 @@
 
 # vmgexit instruction
 	vmgexit
+	repne; vmmcall # vmgexit alternative encoding
 
 # wbnoinvd instruction
 	wbnoinvd

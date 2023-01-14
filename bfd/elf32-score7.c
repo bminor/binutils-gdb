@@ -2815,7 +2815,7 @@ s7_bfd_score_elf_add_symbol_hook (bfd *abfd,
       /* Fall through.  */
     case SHN_SCORE_SCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".scommon");
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
     }
@@ -2840,7 +2840,7 @@ s7_bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the small common section.  */
 	  score_elf_scom_section.name = ".scommon";
-	  score_elf_scom_section.flags = SEC_IS_COMMON;
+	  score_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  score_elf_scom_section.output_section = &score_elf_scom_section;
 	  score_elf_scom_section.symbol = &score_elf_scom_symbol;
 	  score_elf_scom_section.symbol_ptr_ptr = &score_elf_scom_symbol_ptr;

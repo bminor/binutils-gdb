@@ -13,14 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if { [skip_ada_tests] } { return -1 }
+
 standard_testfile .c
 
 if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
-    return -1
-}
-
-if {[exec_has_index_section $binfile]} {
-    unsupported "Ada is not currently supported by the index (PR 24713)"
     return -1
 }
 

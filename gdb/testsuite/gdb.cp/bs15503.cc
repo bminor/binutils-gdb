@@ -59,6 +59,8 @@ void StringTest <T>::testFunction() {
 int main() {
    StringTest<wchar_t> ts;
    ts.runTest();
+
+   return 0;
 }
 
 /* output:

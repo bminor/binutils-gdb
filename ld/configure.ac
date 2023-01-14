@@ -176,6 +176,15 @@ AC_ARG_ENABLE(relro,
   no)  ac_default_ld_z_relro=0 ;;
 esac])dnl
 
+# Decide if DT_TEXTREL check should be enabled in ELF linker.
+ac_default_ld_textrel_check=unset
+AC_ARG_ENABLE([textrel-check],
+	      AC_HELP_STRING([--enable-textrel-check=@<:@yes|no|warning|error@:>@],
+			     [enable DT_TEXTREL check in ELF linker]),
+[case "${enableval}" in
+  yes|no|warning|error) ac_default_ld_textrel_check=${enableval} ;;
+esac])
+
 # Decide if -z separate-code should be enabled in ELF linker by default.
 ac_default_ld_z_separate_code=unset
 AC_ARG_ENABLE(separate-code,
@@ -211,6 +220,13 @@ case "${enable_default_hash_style}" in
   gnu | both) ac_default_emit_gnu_hash=1 ;;
   *) ac_default_emit_gnu_hash=0 ;;
 esac
+
+GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
+if test "${enable_libctf}" = yes; then
+    AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
+fi
+AM_CONDITIONAL(ENABLE_LIBCTF, test "${enable_libctf}" = yes)
+AC_SUBST(enable_libctf)
 
 AM_BINUTILS_WARNINGS
 
@@ -265,7 +281,6 @@ dnl AC_CHECK_HEADERS(sys/mman.h)
 AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([dlopen], [dl])
-AM_CONDITIONAL([ENABLE_PLUGINS], [test x$plugins = xyes])
 
 AC_ARG_ENABLE(initfini-array,
 [  --disable-initfini-array do not use .init_array/.fini_array sections],
@@ -291,7 +306,7 @@ fi
 
 BFD_BINARY_FOPEN
 
-AC_CHECK_DECLS([strstr, free, sbrk, getenv, environ])
+AC_CHECK_DECLS([asprintf, environ, free, getenv, sbrk, strstr])
 
 # Link in zlib if we can.  This allows us to read and write
 # compressed CTF sections.
@@ -447,6 +462,26 @@ AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_RELRO,
   $ac_default_ld_z_relro,
   [Define to 1 if you want to enable -z relro in ELF linker by default.])
 
+ac_default_ld_textrel_check_warning=0
+case "${ac_default_ld_textrel_check}" in
+  unset|no)
+    ac_default_ld_textrel_check=textrel_check_none
+    ;;
+  yes|warning)
+    ac_default_ld_textrel_check=textrel_check_warning
+    ac_default_ld_textrel_check_warning=1
+    ;;
+  error)
+    ac_default_ld_textrel_check=textrel_check_error
+    ;;
+esac
+AC_DEFINE_UNQUOTED(DEFAULT_LD_TEXTREL_CHECK,
+  $ac_default_ld_textrel_check,
+  [The default method for DT_TEXTREL check in ELF linker.])
+AC_DEFINE_UNQUOTED(DEFAULT_LD_TEXTREL_CHECK_WARNING,
+  $ac_default_ld_textrel_check_warning,
+  [Define to 1 if DT_TEXTREL check is warning in ELF linker by default.])
+
 if test "${ac_default_ld_z_separate_code}" = unset; then
   ac_default_ld_z_separate_code=0
 fi
@@ -495,6 +530,9 @@ if test x${enable_static} = xno; then
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
   TESTCTFLIB="../libctf/.libs/libctf.a"
+fi
+if test "${enable_libctf}" = no; then
+    TESTCTFLIB=
 fi
 AC_SUBST(TESTBFDLIB)
 AC_SUBST(TESTCTFLIB)

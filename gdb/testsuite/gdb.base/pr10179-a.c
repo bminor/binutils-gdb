@@ -17,4 +17,5 @@ bar1()
 int
 main()
 {
+  return 0;
 }

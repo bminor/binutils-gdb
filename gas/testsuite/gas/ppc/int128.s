@@ -12,7 +12,7 @@ _start:
 	vmodsq	28,29,30
 	vmoduq	31,0,1
 	vextsd2q 2,3
-	vcmpuq	4,5
+	vcmpuq	0,4,5
 	vcmpsq	1,6,7
 	vcmpequq 8,9,10
 	vcmpequq. 11,12,13

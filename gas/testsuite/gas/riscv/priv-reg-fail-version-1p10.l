@@ -1,7 +1,5 @@
 .*Assembler messages:
 .*Warning: Invalid CSR `mcountinhibit' for the privilege spec `1.10'
-.*Warning: Invalid CSR `dscratch0' for the privilege spec `1.10'
-.*Warning: Invalid CSR `dscratch1' for the privilege spec `1.10'
 .*Warning: Invalid CSR `ubadaddr' for the privilege spec `1.10'
 .*Warning: Invalid CSR `sbadaddr' for the privilege spec `1.10'
 .*Warning: Invalid CSR `sptbr' for the privilege spec `1.10'

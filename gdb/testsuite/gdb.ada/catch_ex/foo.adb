@@ -17,7 +17,7 @@ procedure Foo is
 begin
 
    begin
-      raise Constraint_Error;  -- SPOT1
+      raise Constraint_Error with "ignore C_E";  -- SPOT1
    exception
       when others =>
          null;

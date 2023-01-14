@@ -350,9 +350,6 @@ extern int operator_check_standard (struct expression *exp, int pos,
 
 extern const char *op_name_standard (enum exp_opcode);
 
-extern void null_post_parser (expression_up *, int, int,
-			      innermost_block_tracker *);
-
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
 

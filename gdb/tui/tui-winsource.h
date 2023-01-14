@@ -25,6 +25,23 @@
 #include "tui/tui-data.h"
 #include "symtab.h"
 
+enum tui_line_or_address_kind
+{
+  LOA_LINE,
+  LOA_ADDRESS
+};
+
+/* Structure describing source line or line address.  */
+struct tui_line_or_address
+{
+  enum tui_line_or_address_kind loa;
+  union
+    {
+      int line_no;
+      CORE_ADDR addr;
+    } u;
+};
+
 /* Flags to tell what kind of breakpoint is at current line.  */
 enum tui_bp_flag
 {
@@ -216,6 +233,11 @@ private:
 
 struct tui_source_windows
 {
+  /* Work around Wmaybe-uninitalized warning with g++ 11.0.0, see also
+     PR gcc/96295.  Note that "tui_source_windows () = default" doesn't work
+     around the warning.  */
+  tui_source_windows () {}
+
   tui_source_window_iterator begin () const
   {
     return tui_source_window_iterator (tui_windows.begin (),

@@ -500,7 +500,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
 	}
 
       size = exp.X_add_number;
-      size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+      size &= ((valueT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
       if (exp.X_add_number != size || !exp.X_unsigned)
 	{
 	  as_warn (_("size (%ld) out of range, ignored"),
@@ -1522,15 +1522,15 @@ obj_mach_o_process_stab (int what, const char *string,
   switch (what)
     {
       case 'd':
-	symbolP = symbol_new ("", now_seg, frag_now_fix (), frag_now);
+	symbolP = symbol_new ("", now_seg, frag_now, frag_now_fix ());
 	/* Special stabd NULL name indicator.  */
 	S_SET_NAME (symbolP, NULL);
 	break;
 
       case 'n':
       case 's':
-	symbolP = symbol_new (string, undefined_section, (valueT) 0,
-			      &zero_address_frag);
+	symbolP = symbol_new (string, undefined_section,
+			      &zero_address_frag, 0);
 	pseudo_set (symbolP);
 	break;
 

@@ -119,9 +119,6 @@ extern void sparc64_collect_fpregset (const struct sparc_fpregmap *fpregmap,
 extern const struct sparc_gregmap sparc64_sol2_gregmap;
 extern const struct sparc_fpregmap sparc64_sol2_fpregmap;
 
-extern void sparc64_sol2_init_abi (struct gdbarch_info info,
-				   struct gdbarch *gdbarch);
-
 /* Variables exported from sparc64-fbsd-tdep.c.  */
 
 /* Register offsets for FreeBSD/sparc64.  */

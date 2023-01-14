@@ -79,20 +79,6 @@ ctf_dump_free (ctf_dump_state_t *state)
     }
 }
 
-/* Slices need special handling to distinguish them from their referenced
-   type.  */
-
-static int
-ctf_is_slice (ctf_file_t *fp, ctf_id_t id, ctf_encoding_t *enc)
-{
-  int kind = ctf_type_kind (fp, id);
-
-  return (((kind == CTF_K_INTEGER) || (kind == CTF_K_ENUM)
-	   || (kind == CTF_K_FLOAT))
-	  && ctf_type_reference (fp, id) != CTF_ERR
-	  && ctf_type_encoding (fp, id, enc) == 0);
-}
-
 /* Return a dump for a single type, without member info: but do show the
    type's references.  */
 
@@ -129,26 +115,45 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
 	  goto err;
 	}
 
-      /* Slices get a different print representation.  */
+      if (asprintf (&bit, " %s%lx: ", nonroot_leader, id) < 0)
+	goto oom;
+      str = str_append (str, bit);
+      free (bit);
+      bit = NULL;
 
-      if (ctf_is_slice (fp, id, &enc))
+      if (buf[0] != '\0')
 	{
-	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, " %s%lx: [slice 0x%x:0x%x]%s",
-			nonroot_leader, id, enc.cte_offset, enc.cte_bits,
-			nonroot_trailer) < 0)
-	    goto oom;
+	  str = str_append (str, buf);
+	  str = str_append (str, " ");
 	}
-      else
-	{
-	  if (asprintf (&bit, " %s%lx: %s (size 0x%lx)%s", nonroot_leader,
-			id, buf[0] == '\0' ? "(nameless)" : buf,
-			(unsigned long) ctf_type_size (fp, id),
-			nonroot_trailer) < 0)
-	    goto oom;
-	}
+
       free (buf);
       buf = NULL;
+
+      /* Slices get a different print representation.  */
+      if (ctf_type_kind_unsliced (fp, id) == CTF_K_SLICE)
+	{
+	  ctf_type_encoding (fp, id, &enc);
+	  if (asprintf (&bit, "[slice 0x%x:0x%x] ",
+			enc.cte_offset, enc.cte_bits) < 0)
+	    goto oom;
+	}
+      else if (ctf_type_kind (fp, id) == CTF_K_INTEGER)
+	{
+	  ctf_type_encoding (fp, id, &enc);
+	  if (asprintf (&bit, "[0x%x:0x%x] ",
+			enc.cte_offset, enc.cte_bits) < 0)
+	    goto oom;
+	}
+      str = str_append (str, bit);
+      free (bit);
+      bit = NULL;
+
+      if (asprintf (&bit, "(size 0x%lx)%s",
+		    (unsigned long) ctf_type_size (fp, id),
+		    nonroot_trailer) < 0)
+	goto oom;
+
       str = str_append (str, bit);
       free (bit);
       bit = NULL;
@@ -169,6 +174,7 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
  oom:
   ctf_set_errno (fp, errno);
  err:
+  ctf_err_warn (fp, 1, 0, _("cannot format name dumping type 0x%lx"), id);
   free (buf);
   free (str);
   free (bit);
@@ -318,7 +324,7 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
 				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
-      return -1;			/* errno is set for us.  */
+      return 0;				/* Swallow the error.  */
     }
 
   str = str_append (str, typestr);
@@ -375,7 +381,7 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
 					   CTF_ADD_ROOT)) == NULL)
 	{
 	  free (str);
-	  return -1;			/* errno is set for us.  */
+	  return 0;			/* Swallow the error.  */
 	}
 
       str = str_append (str, typestr);
@@ -397,13 +403,10 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
   for (i = 0; i < fp->ctf_nsyms; i++)
     {
       char *str;
-      char *bit;
-      const char *err;
+      char *bit = NULL;
       const char *sym_name;
       ctf_funcinfo_t fi;
       ctf_id_t type;
-      size_t j;
-      ctf_id_t *args;
 
       if ((type = ctf_func_info (state->cds_fp, i, &fi)) == CTF_ERR)
 	switch (ctf_errno (state->cds_fp))
@@ -418,74 +421,61 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
 	  case ECTF_NOFUNCDAT:
 	    continue;
 	  }
-      if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	return (ctf_set_errno (fp, ENOMEM));
 
-      /* Return type.  */
-      if ((str = ctf_type_aname (state->cds_fp, type)) == NULL)
+      /* Return type and all args.  */
+      if ((bit = ctf_type_aname (state->cds_fp, type)) == NULL)
 	{
-	  err = "look up return type";
-	  goto err;
+	  ctf_err_warn (fp, 1, ctf_errno (state->cds_fp),
+			_("cannot look up return type dumping function type "
+			  "for symbol 0x%li"), (unsigned long) i);
+	  free (bit);
+	  return -1;			/* errno is set for us.  */
 	}
 
-      str = str_append (str, " ");
-
-      /* Function name.  */
+      /* Replace in the returned string, dropping in the function name.  */
 
       sym_name = ctf_lookup_symbol_name (fp, i);
-      if (sym_name[0] == '\0')
+      if (sym_name[0] != '\0')
 	{
-	  if (asprintf (&bit, "0x%lx ", (unsigned long) i) < 0)
+	  char *retstar;
+	  char *new_bit;
+	  char *walk;
+
+	  new_bit = malloc (strlen (bit) + 1 + strlen (sym_name));
+	  if (!new_bit)
 	    goto oom;
+
+	  /* See ctf_type_aname.  */
+	  retstar = strstr (bit, "(*) (");
+	  if (!ctf_assert (fp, retstar))
+	    goto assert_err;
+	  retstar += 2;			/* After the '*' */
+
+	  /* C is not good at search-and-replace.  */
+	  walk = new_bit;
+	  memcpy (walk, bit, retstar - bit);
+	  walk += (retstar - bit);
+	  strcpy (walk, sym_name);
+	  walk += strlen (sym_name);
+	  strcpy (walk, retstar);
+
+	  free (bit);
+	  bit = new_bit;
 	}
-      else
-	{
-	  if (asprintf (&bit, "%s (0x%lx) ", sym_name, (unsigned long) i) < 0)
-	    goto oom;
-	}
-      str = str_append (str, bit);
-      str = str_append (str, " (");
+
+      if (asprintf (&str, "Symbol 0x%lx: %s", (unsigned long) i, bit) < 0)
+	goto oom;
       free (bit);
 
-      /* Function arguments.  */
-
-      if (ctf_func_args (state->cds_fp, i, fi.ctc_argc, args) < 0)
-	{
-	  err = "look up argument type";
-	  goto err;
-	}
-
-      for (j = 0; j < fi.ctc_argc; j++)
-	{
-	  if ((bit = ctf_type_aname (state->cds_fp, args[j])) == NULL)
-	    {
-	      err = "look up argument type name";
-	      goto err;
-	    }
-	  str = str_append (str, bit);
-	  if ((j < fi.ctc_argc - 1) || (fi.ctc_flags & CTF_FUNC_VARARG))
-	    str = str_append (str, ", ");
-	  free (bit);
-	}
-
-      if (fi.ctc_flags & CTF_FUNC_VARARG)
-	str = str_append (str, "...");
-      str = str_append (str, ")");
-
-      free (args);
       ctf_dump_append (state, str);
       continue;
 
     oom:
-      free (args);
-      free (str);
+      free (bit);
       return (ctf_set_errno (fp, errno));
-    err:
-      ctf_dprintf ("Cannot %s dumping function type for symbol 0x%li: %s\n",
-		   err, (unsigned long) i,
-		   ctf_errmsg (ctf_errno (state->cds_fp)));
-      free (args);
-      free (str);
+
+    assert_err:
+      free (bit);
       return -1;		/* errno is set for us.  */
     }
   return 0;
@@ -506,7 +496,7 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
 				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
-      return -1;			/* errno is set for us.  */
+      return 0;			/* Swallow the error.  */
     }
 
   str = str_append (str, typestr);
@@ -525,6 +515,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
   char *typestr = NULL;
   char *bit = NULL;
   ctf_encoding_t ep;
+  int has_encoding = 0;
   ssize_t i;
 
   for (i = 0; i < depth; i++)
@@ -544,24 +535,40 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
 	  return 0;
 	}
 
-      goto oom;
+      return -1;				/* errno is set for us.  */
     }
 
-  if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s %s (aligned at 0x%lx",
-		offset, id, ctf_type_kind (state->cdm_fp, id), typestr, name,
-		(unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
-    goto oom;
+  if (ctf_type_encoding (state->cdm_fp, id, &ep) == 0)
+    {
+      has_encoding = 1;
+      ctf_type_encoding (state->cdm_fp, id, &ep);
+
+      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s:%i "
+		    "(aligned at 0x%lx", offset, id,
+		    ctf_type_kind (state->cdm_fp, id), typestr,
+		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
+		    ep.cte_bits, (unsigned long) ctf_type_align (state->cdm_fp,
+								 id)) < 0)
+	goto oom;
+    }
+  else
+    {
+      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
+		    "(aligned at 0x%lx", offset, id,
+		    ctf_type_kind (state->cdm_fp, id), typestr,
+		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
+		    (unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
+	goto oom;
+    }
+
   *state->cdm_str = str_append (*state->cdm_str, bit);
   free (typestr);
   free (bit);
   typestr = NULL;
   bit = NULL;
 
-  if ((ctf_type_kind (state->cdm_fp, id) == CTF_K_INTEGER)
-      || (ctf_type_kind (state->cdm_fp, id) == CTF_K_FLOAT)
-      || (ctf_is_slice (state->cdm_fp, id, &ep) == CTF_K_ENUM))
+  if (has_encoding)
     {
-      ctf_type_encoding (state->cdm_fp, id, &ep);
       if (asprintf (&bit, ", format 0x%x, offset:bits 0x%x:0x%x", ep.cte_format,
 		    ep.cte_offset, ep.cte_bits) < 0)
 	goto oom;
@@ -584,16 +591,12 @@ static int
 ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
-  const char *err;
   ctf_dump_state_t *state = arg;
   ctf_dump_membstate_t membstate = { &str, state->cds_fp };
   size_t len;
 
   if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
-    {
-      err = "format type";
-      goto err;
-    }
+    goto err;
 
   str = str_append (str, "\n");
   if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
@@ -603,7 +606,8 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 	  ctf_dump_append (state, str);
 	  return 0;
 	}
-      err = "visit members";
+      ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+		    _("cannot visit members dumping type 0x%lx"), id);
       goto err;
     }
 
@@ -616,10 +620,8 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
   return 0;
 
  err:
-  ctf_dprintf ("Cannot %s dumping type 0x%lx: %s\n", err, id,
-	       ctf_errmsg (ctf_errno (state->cds_fp)));
   free (str);
-  return -1;				/* errno is set for us.  */
+  return 0;				/* Swallow the error.  */
 }
 
 /* Dump the string table into the cds_items.  */

@@ -39,9 +39,9 @@
 #include "ldver.h"
 #include "ldemul.h"
 #include "demangle.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 #ifndef PATH_SEPARATOR
 #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN32__))
@@ -113,6 +113,8 @@ static const struct ld_option ld_options[] =
     'd', NULL, N_("Force common symbols to be defined"), ONE_DASH },
   { {"dp", no_argument, NULL, 'd'},
     '\0', NULL, NULL, ONE_DASH },
+  { {"dependency-file", required_argument, NULL, OPTION_DEPENDENCY_FILE},
+    '\0', N_("FILE"), N_("Write dependency file"), TWO_DASHES },
   { {"force-group-allocation", no_argument, NULL,
      OPTION_FORCE_GROUP_ALLOCATION},
     '\0', NULL, N_("Force group members out of groups"), TWO_DASHES },
@@ -174,7 +176,7 @@ static const struct ld_option ld_options[] =
     'O', NULL, N_("Optimize output file"), ONE_DASH },
   { {"out-implib", required_argument, NULL, OPTION_OUT_IMPLIB},
     '\0', N_("FILE"), N_("Generate import library"), TWO_DASHES },
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   { {"plugin", required_argument, NULL, OPTION_PLUGIN},
     '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
   { {"plugin-opt", required_argument, NULL, OPTION_PLUGIN_OPT},
@@ -185,7 +187,12 @@ static const struct ld_option ld_options[] =
   { {"flto-partition=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
     ONE_DASH },
-#endif /* ENABLE_PLUGINS */
+#else
+  { {"plugin", required_argument, NULL, OPTION_IGNORE},
+    '\0', N_("PLUGIN"), N_("Load named plugin (ignored)"), ONE_DASH },
+  { {"plugin-opt", required_argument, NULL, OPTION_IGNORE},
+    '\0', N_("ARG"), N_("Send arg to last-loaded plugin (ignored)"), ONE_DASH },
+#endif /* BFD_SUPPORTS_PLUGINS */
   { {"fuse-ld=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC linker option compatibility"),
     ONE_DASH },
@@ -359,7 +366,7 @@ static const struct ld_option ld_options[] =
   { {"init", required_argument, NULL, OPTION_INIT},
     '\0', N_("SYMBOL"), N_("Call SYMBOL at load-time"), ONE_DASH },
   { {"Map", required_argument, NULL, OPTION_MAP},
-    '\0', N_("FILE"), N_("Write a map file"), ONE_DASH },
+    '\0', N_("FILE/DIR"), N_("Write a linker map to FILE or DIR/<outputname>.map"), ONE_DASH },
   { {"no-define-common", no_argument, NULL, OPTION_NO_DEFINE_COMMON},
     '\0', NULL, N_("Do not define Common storage"), TWO_DASHES },
   { {"no-demangle", no_argument, NULL, OPTION_NO_DEMANGLE },
@@ -504,6 +511,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Use C++ typeinfo dynamic list"), TWO_DASHES },
   { {"dynamic-list", required_argument, NULL, OPTION_DYNAMIC_LIST},
     '\0', N_("FILE"), N_("Read dynamic list"), TWO_DASHES },
+  { {"export-dynamic-symbol", required_argument, NULL, OPTION_EXPORT_DYNAMIC_SYMBOL},
+    '\0', N_("SYMBOL"), N_("Export the specified symbol"), EXACTLY_TWO_DASHES },
+  { {"export-dynamic-symbol-list", required_argument, NULL, OPTION_EXPORT_DYNAMIC_SYMBOL_LIST},
+    '\0', N_("FILE"), N_("Read export dynamic symbol list"), EXACTLY_TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
@@ -517,7 +528,12 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
   { {"warn-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
-    '\0', NULL, N_("Warn if outpout has DT_TEXTREL"),
+    '\0', NULL,
+#if DEFAULT_LD_TEXTREL_CHECK_WARNING
+    N_("Warn if output has DT_TEXTREL (default)"),
+#else
+    N_("Warn if output has DT_TEXTREL"),
+#endif
     TWO_DASHES },
   { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
     '\0', NULL, NULL, NO_HELP },
@@ -556,6 +572,18 @@ static const struct ld_option ld_options[] =
   { {"no-print-map-discarded", no_argument, NULL, OPTION_NO_PRINT_MAP_DISCARDED},
     '\0', NULL, N_("Do not show discarded sections in map file output"),
     TWO_DASHES },
+  { {"ctf-variables", no_argument, NULL, OPTION_CTF_VARIABLES},
+    '\0', NULL, N_("Emit names and types of static variables in CTF"),
+    TWO_DASHES },
+  { {"no-ctf-variables", no_argument, NULL, OPTION_NO_CTF_VARIABLES},
+    '\0', NULL, N_("Do not emit names and types of static variables in CTF"),
+    TWO_DASHES },
+  { {"ctf-share-types=<method>", required_argument, NULL,
+     OPTION_CTF_SHARE_TYPES},
+    '\0', NULL, N_("How to share CTF types between translation units.\n"
+		   "                                <method> is: share-unconflicted (default),\n"
+		   "                                             share-duplicated"),
+    TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -583,12 +611,13 @@ parse_args (unsigned argc, char **argv)
     dynamic_list_data,
     dynamic_list
   } opt_dynamic_list = dynamic_list_unset;
+  struct bfd_elf_dynamic_list *export_list = NULL;
 
   shortopts = (char *) xmalloc (OPTION_COUNT * 3 + 2);
   longopts = (struct option *)
       xmalloc (sizeof (*longopts) * (OPTION_COUNT + 1));
   really_longopts = (struct option *)
-      malloc (sizeof (*really_longopts) * (OPTION_COUNT + 1));
+      xmalloc (sizeof (*really_longopts) * (OPTION_COUNT + 1));
 
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about
@@ -1051,7 +1080,7 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_PRINT_OUTPUT_FORMAT:
 	  command_line.print_output_format = TRUE;
 	  break;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	case OPTION_PLUGIN:
 	  plugin_opt_plugin (optarg);
 	  break;
@@ -1059,7 +1088,7 @@ parse_args (unsigned argc, char **argv)
 	  if (plugin_opt_plugin_arg (optarg))
 	    einfo (_("%F%P: bad -plugin-opt option\n"));
 	  break;
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 	case 'q':
 	  link_info.emitrelocations = TRUE;
 	  break;
@@ -1353,9 +1382,9 @@ parse_args (unsigned argc, char **argv)
 	      int level ATTRIBUTE_UNUSED = strtoul (optarg, &end, 0);
 	      if (*end)
 		einfo (_("%F%P: invalid number `%s'\n"), optarg);
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	      report_plugin_symbols = level > 1;
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 	    }
 	  break;
 	case 'v':
@@ -1414,10 +1443,34 @@ parse_args (unsigned argc, char **argv)
 	    ldfile_open_command_file (optarg);
 	    saved_script_handle = hold_script_handle;
 	    parser_input = input_dynamic_list;
+	    current_dynamic_list_p = &link_info.dynamic_list;
 	    yyparse ();
 	  }
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
+	  break;
+	case OPTION_EXPORT_DYNAMIC_SYMBOL:
+	  {
+	    struct bfd_elf_version_expr *expr
+	      = lang_new_vers_pattern (NULL, xstrdup (optarg), NULL,
+				       FALSE);
+	    lang_append_dynamic_list (&export_list, expr);
+	  }
+	  break;
+	case OPTION_EXPORT_DYNAMIC_SYMBOL_LIST:
+	  /* This option indicates a small script that only specifies
+	     an export list.  Read it, but don't assume that we've
+	     seen a linker script.  */
+	  {
+	    FILE *hold_script_handle;
+
+	    hold_script_handle = saved_script_handle;
+	    ldfile_open_command_file (optarg);
+	    saved_script_handle = hold_script_handle;
+	    parser_input = input_dynamic_list;
+	    current_dynamic_list_p = &export_list;
+	    yyparse ();
+	  }
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;
@@ -1592,6 +1645,62 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_PRINT_MAP_DISCARDED:
 	  config.print_map_discarded = TRUE;
 	  break;
+
+	case OPTION_DEPENDENCY_FILE:
+	  config.dependency_file = optarg;
+	  break;
+
+	case OPTION_CTF_VARIABLES:
+	  config.ctf_variables = TRUE;
+	  break;
+
+	case OPTION_NO_CTF_VARIABLES:
+	  config.ctf_variables = FALSE;
+	  break;
+
+	case OPTION_CTF_SHARE_TYPES:
+	  if (strcmp (optarg, "share-unconflicted") == 0)
+	    config.ctf_share_duplicated = FALSE;
+	  else if (strcmp (optarg, "share-duplicated") == 0)
+	    config.ctf_share_duplicated = TRUE;
+	  else
+	    einfo (_("%F%P: bad --ctf-share-types option: %s\n"), optarg);
+	  break;
+	}
+    }
+
+  /* Run a couple of checks on the map filename.  */
+  if (config.map_filename)
+    {
+      if (config.map_filename[0] == 0)
+	{
+	  einfo (_("%P: no file/directory name provided for map output; ignored\n"));
+	  config.map_filename = NULL;
+	}
+      else
+	{
+	  struct stat s;
+
+	  /* If the map filename is actually a directory then create
+	     a file inside it, based upon the output filename.  */
+	  if (stat (config.map_filename, &s) >= 0
+	      && S_ISDIR (s.st_mode))
+	    {
+	      char * new_name;
+
+	      /* FIXME: This is a (trivial) memory leak.  */
+	      if (asprintf (&new_name, "%s/%s.map",
+			    config.map_filename, output_filename) < 0)
+		{
+		  /* If this alloc fails then something is probably very
+		     wrong.  Better to halt now rather than continue on
+		     into more problems.  */
+		  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
+		  new_name = NULL;
+		}
+
+	      config.map_filename = new_name;
+	    }
 	}
     }
 
@@ -1625,6 +1734,49 @@ parse_args (unsigned argc, char **argv)
   if (bfd_link_relocatable (&link_info)
       && command_line.check_section_addresses < 0)
     command_line.check_section_addresses = 0;
+
+  if (export_list)
+    {
+      struct bfd_elf_version_expr *head = export_list->head.list;
+      struct bfd_elf_version_expr *next;
+
+      /* For --export-dynamic-symbol[-list]:
+	 1. When building executable, treat like --dynamic-list.
+	 2. When building shared object:
+	    a. If -Bsymbolic or --dynamic-list are used, treat like
+	       --dynamic-list.
+	    b. Otherwise, ignored.
+       */
+      if (!bfd_link_relocatable (&link_info)
+	  && (bfd_link_executable (&link_info)
+	      || opt_symbolic != symbolic_unset
+	      || opt_dynamic_list != dynamic_list_unset))
+	{
+	  /* Append the export list to link_info.dynamic_list.  */
+	  if (link_info.dynamic_list)
+	    {
+	      for (next = head; next->next != NULL; next = next->next)
+		;
+	      next->next = link_info.dynamic_list->head.list;
+	      link_info.dynamic_list->head.list = head;
+	    }
+	  else
+	    link_info.dynamic_list = export_list;
+
+	  if (opt_dynamic_list != dynamic_list_data)
+	    opt_dynamic_list = dynamic_list;
+	}
+      else
+	{
+	  /* Free the export list.  */
+	  for (; head->next != NULL; head = next)
+	    {
+	      next = head->next;
+	      free (head);
+	    }
+	  free (export_list);
+	}
+    }
 
   switch (opt_dynamic_list)
     {
@@ -1796,7 +1948,7 @@ elf_shlib_list_options (FILE *file)
   -z nocombreloc              Don't merge dynamic relocs into one section\n"));
   fprintf (file, _("\
   -z global                   Make symbols in DSO available for subsequently\n\
-                               loaded objects\n"));
+                                loaded objects\n"));
   fprintf (file, _("\
   -z initfirst                Mark DSO to be initialized first at runtime\n"));
   fprintf (file, _("\
@@ -1880,10 +2032,10 @@ elf_static_list_options (FILE *file)
                               Compress DWARF debug sections using zlib\n"));
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (file, _("\
-                               Default: zlib-gabi\n"));
+                                Default: zlib-gabi\n"));
 #else
   fprintf (file, _("\
-                               Default: none\n"));
+                                Default: none\n"));
 #endif
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
@@ -1897,6 +2049,10 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  -z unique-symbol            Avoid duplicated local symbol names\n"));
+  fprintf (file, _("\
+  -z nounique-symbol          Keep duplicated local symbol names (default)\n"));
   fprintf (file, _("\
   -z globalaudit              Mark executable requiring global auditing\n"));
 }

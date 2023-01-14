@@ -72,5 +72,5 @@ Disassembly of section .text:
   b8:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%rbp\)
   be:	eb c2                	jmp    (0x)?82( .*)?
   c0:	5d                   	pop    %rbp
-  c1:	c3                   	retq   
+  c1:	c3                   	ret *
 #pass

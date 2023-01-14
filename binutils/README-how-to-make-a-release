@@ -39,8 +39,8 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git branch binutils-2_34-branch
-        git push origin binutils-2_34-branch
+	git branch binutils-2_36-branch
+        git push origin binutils-2_36-branch
 
      If you get a message like:
      
@@ -50,7 +50,7 @@ How to perform a release.
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_34-branch 2.34
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_36-branch 2.36
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -72,7 +72,7 @@ How to perform a release.
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.34 (HEAD)" to 2.34, and create "2.34
+     new one.  E.g. rename "2.36 (HEAD)" to 2.36, and create "2.37
      (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
@@ -80,13 +80,13 @@ How to perform a release.
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.34.50])
+       m4_define([BFD_VERSION], [2.36.50])
        
      Update the release number in bfd/version.m4 for the BRANCH.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 
-       m4_define([BFD_VERSION], [2.33.90])
+       m4_define([BFD_VERSION], [2.35.90])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold" and then building
@@ -196,7 +196,7 @@ When the time comes to actually make the release....
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
-      value.  Eg "2.34.90" becomes "2.35".  Change bfd/development.sh
+      value.  Eg "2.35.90" becomes "2.36".  Change bfd/development.sh
       to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
       updates and add a  "this-is-the-2.3x-release" comment and
@@ -237,10 +237,13 @@ When the time comes to actually make the release....
 	chmod -R -w binutils-2.X
 	mkdir build
 	cd build
-	../binutils-2.X/configure --enable-gold --prefix=`pwd`/install
+	../binutils-2.X/configure --enable-gold --prefix=`pwd`/install --enable-plugins
 	make all-gas all-gold all-ld all-binutils all-gprof
 	make check-gas check-binutils check-ld check-gold
         make install-gas install-gold install-ld install-binutils
+
+        # Needed for step 29...
+        make html
 
   26. Tag the branch with the new release number:
 
@@ -297,9 +300,6 @@ When the time comes to actually make the release....
 
       Update the (local copy of the) index.html file to point to the
       new documentation and mention the new version and then upload it.
-      [NB/ FIXME: Special for updating from 2.34 documentation - restore
-      the link to the GAS/NEWS which has been changed for 2.34 to a
-      specific commit rather than the branch tag].
 
 	 cd ../docs-2.3x
 	 put index.html
@@ -328,7 +328,7 @@ When the time comes to actually make the release....
       Edit the top level binutils index.html file to change the links
       to point to the new documentation.
 
-         cd ../../..
+         cd ../..
 	 get index.html
 	 [edit]
 	 put index.html
@@ -336,10 +336,29 @@ When the time comes to actually make the release....
 	 ln -s docs-2.3x docs
 	 quit
 
-      Check that the new web page is correct.
-
+      Check that the new web page is correct:
+      
+          https://sourceware.org/binutils/
+	  
       For the www.gnu.org site you have to email webmasters@gnu.org
-      and ask them to make the change(s).
+      and ask them to make the change(s):
+---------------------------------------
+Hi FSF Webmasters,
+
+  Please could the GNU Binutils webpage at:
+
+https://www.gnu.org/software/binutils/binutils.html
+
+  be updated to indicate that there is now a newer version available
+  (2.3x).  I have already updated the related page on the sourceware
+  website so this might be useful as a template:
+
+https://sourceware.org/binutils/
+
+  Thanks very much.
+
+Cheers
+--------------------------------------  
 
   30. Send emails to binutils@sourceware.org, info-gnu@gnu.org and
       David Edelsohn <dje.gcc@gmail.com> announcing the new release.
@@ -381,7 +400,7 @@ When the time comes to actually make the release....
       Regenerate files.  Commit these changes.
 
   33. Email the binutils list telling everyone that the 2.3x branch
-      is now open for business as usual and that patched no longer
+      is now open for business as usual and that patches no longer
       need special approval.
 
   34. Examine the bfd/config.bfd file in the mainline sources and move

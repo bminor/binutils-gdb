@@ -63,5 +63,9 @@ gdb_continue_to_breakpoint "marker 3-throw"
 gdb_breakpoint [gdb_get_line_number "marker 3-catch"]
 gdb_continue_to_breakpoint "marker 3-catch"
 
+gdb_breakpoint [gdb_get_line_number "marker test-complete"]
+gdb_continue_to_breakpoint "marker test-complete"
+gdb_test "p test" "= true"
+
 gdb_exit
 return 0

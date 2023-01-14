@@ -338,6 +338,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
+LARGEFILE_CPPFLAGS = @LARGEFILE_CPPFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBINTL = @LIBINTL@
@@ -446,7 +447,7 @@ BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -DDEBUG -I../bfd -I$(srcdir)/../include \
-	-I$(srcdir)/../bfd @INCINTL@ -I. \
+	-I$(srcdir)/../bfd @INCINTL@ @LARGEFILE_CPPFLAGS@ -I. \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \

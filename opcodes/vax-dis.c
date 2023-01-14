@@ -129,8 +129,8 @@ parse_disassembler_options (const char *options)
       if (entry_addr_occupied_slots >= entry_addr_total_slots)
 	{
 	  /* A guesstimate of the number of entries we will have to create.  */
-	  entry_addr_total_slots +=
-	    strlen (options) / (strlen (entry_switch) + 5);
+	  entry_addr_total_slots
+	    += 1 + strlen (options) / (strlen (entry_switch) + 5);
 
 	  entry_addr = realloc (entry_addr, sizeof (bfd_vma)
 				* entry_addr_total_slots);

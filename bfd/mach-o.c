@@ -5017,6 +5017,8 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command,
     case BFD_MACH_O_LC_DATA_IN_CODE:
     case BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS:
     case BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT:
+    case BFD_MACH_O_LC_DYLD_EXPORTS_TRIE:
+    case BFD_MACH_O_LC_DYLD_CHAINED_FIXUPS:
       if (!bfd_mach_o_read_linkedit (abfd, command))
 	return FALSE;
       break;

@@ -361,6 +361,9 @@ struct bfd_link_info
   /* TRUE if the LTO plugin is active.  */
   unsigned int lto_plugin_active: 1;
 
+  /* TRUE if all LTO IR symbols have been read.  */
+  unsigned int lto_all_symbols_read : 1;
+
   /* TRUE if global symbols in discarded sections should be stripped.  */
   unsigned int strip_discarded: 1;
 
@@ -520,6 +523,9 @@ struct bfd_link_info
      the linker.  */
   unsigned int non_contiguous_regions_warnings : 1;
 
+  /* TRUE if all symbol names should be unique.  */
+  unsigned int unique_symbol : 1;
+
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in
      wrap_hash.  Used by PowerPC Linux for 'dot' symbols.  */
@@ -542,10 +548,10 @@ struct bfd_link_info
      Normally these optimizations are disabled by default but some targets
      prefer to enable them by default.  So this field is a tri-state variable.
      The values are:
-     
+
      zero: Enable the optimizations (either from --relax being specified on
        the command line or the backend's before_allocation emulation function.
-       
+
      positive: The user has requested that these optimizations be disabled.
        (Via the --no-relax command line option).
 
@@ -648,6 +654,9 @@ struct bfd_link_info
 
   /* May be used to set DT_FLAGS_1 for ELF. */
   bfd_vma flags_1;
+
+  /* May be used to set ELF visibility for __start_* / __stop_.  */
+  unsigned int start_stop_visibility;
 
   /* Start and end of RELRO region.  */
   bfd_vma relro_start, relro_end;

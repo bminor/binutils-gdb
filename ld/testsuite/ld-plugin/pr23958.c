@@ -3,4 +3,4 @@ dwarf_bytesize (void)
 {
 }
 
-asm (".symver dwarf_bytesize,dwarf_bytesize@@@ELFUTILS_0.143");
+__asm__ (".symver dwarf_bytesize,dwarf_bytesize@@@ELFUTILS_0.143");

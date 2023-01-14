@@ -473,6 +473,10 @@ PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
+PyObject *gdbpy_new_register_descriptor_iterator (struct gdbarch *gdbarch,
+						  const char *group_name);
+PyObject *gdbpy_new_reggroup_iterator (struct gdbarch *gdbarch);
+
 gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
 gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
@@ -539,6 +543,8 @@ int gdbpy_initialize_event (void)
 int gdbpy_initialize_py_events (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_registers ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_xmethods (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
@@ -769,5 +775,24 @@ struct Py_buffer_deleter
 
 /* A unique_ptr specialization for Py_buffer.  */
 typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
+
+/* Parse a register number from PYO_REG_ID and place the register number
+   into *REG_NUM.  The register is a register for GDBARCH.
+
+   If a register is parsed successfully then *REG_NUM will have been
+   updated, and true is returned.  Otherwise the contents of *REG_NUM are
+   undefined, and false is returned.
+
+   The PYO_REG_ID object can be a string, the name of the register.  This
+   is the slowest approach as GDB has to map the name to a number for each
+   call.  Alternatively PYO_REG_ID can be an internal GDB register
+   number.  This is quick but should not be encouraged as this means
+   Python scripts are now dependent on GDB's internal register numbering.
+   Final PYO_REG_ID can be a gdb.RegisterDescriptor object, these objects
+   can be looked up by name once, and then cache the register number so
+   should be as quick as using a register number.  */
+
+extern bool gdbpy_parse_register_id (struct gdbarch *gdbarch,
+				     PyObject *pyo_reg_id, int *reg_num);
 
 #endif /* PYTHON_PYTHON_INTERNAL_H */

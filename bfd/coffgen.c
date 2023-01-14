@@ -1814,7 +1814,7 @@ coff_get_normalized_symtab (bfd *abfd)
       internal_ptr->is_sym = TRUE;
 
       /* PR 17512: Prevent buffer overrun.  */
-      if (symbol_ptr->u.syment.n_numaux > (raw_end - raw_src) / symesz)
+      if (symbol_ptr->u.syment.n_numaux > ((raw_end - 1) - raw_src) / symesz)
 	{
 	  bfd_release (abfd, internal);
 	  return NULL;
@@ -2435,11 +2435,15 @@ coff_find_nearest_line_with_names (bfd *abfd,
 
 		  /* In XCOFF a debugging symbol can follow the
 		     function symbol.  */
-		  if (s->u.syment.n_scnum == N_DEBUG)
+		  if (((size_t) ((char *) s - (char *) obj_raw_syments (abfd))
+		       < obj_raw_syment_count (abfd) * sizeof (*s))
+		      && s->u.syment.n_scnum == N_DEBUG)
 		    s = s + 1 + s->u.syment.n_numaux;
 
 		  /* S should now point to the .bf of the function.  */
-		  if (s->u.syment.n_numaux)
+		  if (((size_t) ((char *) s - (char *) obj_raw_syments (abfd))
+		       < obj_raw_syment_count (abfd) * sizeof (*s))
+		      && s->u.syment.n_numaux)
 		    {
 		      /* The linenumber is stored in the auxent.  */
 		      union internal_auxent *a = &((s + 1)->u.auxent);
@@ -2658,7 +2662,8 @@ _bfd_coff_section_already_linked (bfd *abfd,
 	 .gnu.linkonce.*.<key>.  */
       if (((s_comdat != NULL) == (l_comdat != NULL)
 	   && strcmp (name, l->sec->name) == 0)
-	  || (l->sec->owner->flags & BFD_PLUGIN) != 0)
+	  || (l->sec->owner->flags & BFD_PLUGIN) != 0
+	  || (sec->owner->flags & BFD_PLUGIN) != 0)
 	{
 	  /* The section has already been linked.  See if we should
 	     issue a warning.  */
@@ -3136,16 +3141,22 @@ bfd_coff_group_name (bfd *abfd, const asection *sec)
 bfd_boolean
 _bfd_coff_close_and_cleanup (bfd *abfd)
 {
-  if (abfd->format == bfd_object
-      && bfd_family_coff (abfd)
-      && coff_data (abfd) != NULL)
+  struct coff_tdata *tdata = coff_data (abfd);
+
+  if (tdata != NULL)
     {
       /* PR 25447:
 	 Do not clear the keep_syms and keep_strings flags.
 	 These may have been set by pe_ILF_build_a_bfd() indicating
 	 that the syms and strings pointers are not to be freed.  */
-      if (!_bfd_coff_free_symbols (abfd))
+      if (bfd_get_format (abfd) == bfd_object
+	  && bfd_family_coff (abfd)
+	  && !_bfd_coff_free_symbols (abfd))
 	return FALSE;
+
+      if (bfd_get_format (abfd) == bfd_object
+	  || bfd_get_format (abfd) == bfd_core)
+	_bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
     }
   return _bfd_generic_close_and_cleanup (abfd);
 }

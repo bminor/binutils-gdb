@@ -785,10 +785,6 @@ struct elf_metag_link_hash_entry
      symbol.  */
   struct elf_metag_stub_hash_entry *hsh_cache;
 
-  /* Used to count relocations for delayed sizing of relocation
-     sections.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   enum
     {
       GOT_UNKNOWN = 0, GOT_NORMAL = 1, GOT_TLS_IE = 2, GOT_TLS_LDM = 4, GOT_TLS_GD = 8
@@ -826,9 +822,6 @@ struct elf_metag_link_hash_table
   unsigned int top_index;
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
 
   /* Data for LDM relocations.  */
   union
@@ -913,8 +906,9 @@ metag_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Various hash macros and functions.  */
 #define metag_link_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == METAG_ELF_DATA ? ((struct elf_metag_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == METAG_ELF_DATA)	\
+   ? (struct elf_metag_link_hash_table *) (p)->hash : NULL)
 
 #define metag_elf_hash_entry(ent) \
   ((struct elf_metag_link_hash_entry *)(ent))
@@ -994,7 +988,6 @@ metag_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Initialize the local fields.  */
       hh = (struct elf_metag_link_hash_entry *) entry;
       hh->hsh_cache = NULL;
-      hh->dyn_relocs = NULL;
       hh->tls_type = GOT_UNKNOWN;
     }
 
@@ -1044,6 +1037,7 @@ elf_metag_link_hash_table_create (bfd *abfd)
       return NULL;
     }
   htab->etab.root.hash_table_free = elf_metag_link_hash_table_free;
+  htab->etab.dt_pltgot_required = TRUE;
 
   return &htab->etab.root;
 }
@@ -2102,7 +2096,7 @@ elf_metag_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->etab.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -2328,7 +2322,7 @@ elf_metag_check_relocs (bfd *abfd,
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (hh != NULL)
-		hdh_head = &((struct elf_metag_link_hash_entry *) hh)->dyn_relocs;
+		hdh_head = &hh->eh.dyn_relocs;
 	      else
 		{
 		  /* Track dynamic relocs needed for local syms too.  */
@@ -2395,41 +2389,6 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
   hh_dir = metag_elf_hash_entry (eh_dir);
   hh_ind = metag_elf_hash_entry (eh_ind);
 
-  if (hh_ind->dyn_relocs != NULL)
-    {
-      if (hh_dir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **hdh_pp;
-	  struct elf_dyn_relocs *hdh_p;
-
-	  if (eh_ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
-	     list.  Merge any entries against the same section.  */
-	  for (hdh_pp = &hh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
-	    {
-	      struct elf_dyn_relocs *hdh_q;
-
-	      for (hdh_q = hh_dir->dyn_relocs; hdh_q != NULL;
-		   hdh_q = hdh_q->next)
-		if (hdh_q->sec == hdh_p->sec)
-		  {
-		    hdh_q->pc_count += hdh_p->pc_count;
-		    hdh_q->count += hdh_p->count;
-		    *hdh_pp = hdh_p->next;
-		    break;
-		  }
-	      if (hdh_q == NULL)
-		hdh_pp = &hdh_p->next;
-	    }
-	  *hdh_pp = hh_dir->dyn_relocs;
-	}
-
-      hh_dir->dyn_relocs = hh_ind->dyn_relocs;
-      hh_ind->dyn_relocs = NULL;
-    }
-
   if (eh_ind->root.type == bfd_link_hash_indirect
       && eh_dir->got.refcount <= 0)
     {
@@ -2438,23 +2397,6 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
     }
 
   _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
-}
-
-/* Find dynamic relocs for H that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *p;
-
-  for (p = metag_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return p->sec;
-    }
-  return NULL;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -2532,7 +2474,7 @@ elf_metag_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (!readonly_dynrelocs (eh))
+  if (!_bfd_elf_readonly_dynrelocs (eh))
     {
       eh->non_got_ref = 0;
       return TRUE;
@@ -2580,7 +2522,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_metag_link_hash_table *htab;
-  struct elf_metag_link_hash_entry *hh;
   struct elf_dyn_relocs *hdh_p;
 
   if (eh->root.type == bfd_link_hash_indirect)
@@ -2687,8 +2628,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
   else
     eh->got.offset = (bfd_vma) -1;
 
-  hh = (struct elf_metag_link_hash_entry *) eh;
-  if (hh->dyn_relocs == NULL)
+  if (eh->dyn_relocs == NULL)
     return TRUE;
 
   /* If this is a -Bsymbolic shared link, then we need to discard all
@@ -2702,7 +2642,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	{
 	  struct elf_dyn_relocs **hdh_pp;
 
-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
+	  for (hdh_pp = &eh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
 	      hdh_p->count -= hdh_p->pc_count;
 	      hdh_p->pc_count = 0;
@@ -2715,11 +2655,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (hh->dyn_relocs != NULL
+      if (eh->dyn_relocs != NULL
 	  && eh->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
-	    hh->dyn_relocs = NULL;
+	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -2758,46 +2698,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	    goto keep;
 	}
 
-      hh->dyn_relocs = NULL;
+      eh->dyn_relocs = NULL;
       return TRUE;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
+  for (hdh_p = eh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
     {
       asection *sreloc = elf_section_data (hdh_p->sec)->sreloc;
       sreloc->size += hdh_p->count * sizeof (Elf32_External_Rela);
     }
 
-  return TRUE;
-}
-
-/* Set DF_TEXTREL if we find any dynamic relocs that apply to
-   read-only sections.  */
-
-static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
-{
-  asection *sec;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  sec = readonly_dynrelocs (h);
-  if (sec != NULL)
-    {
-      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
-
-      info->flags |= DF_TEXTREL;
-      info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
-	 sec->owner, h->root.root.string, sec);
-
-      /* Not an error, just cut short the traversal.  */
-      return FALSE;
-    }
   return TRUE;
 }
 
@@ -2988,55 +2901,7 @@ elf_metag_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  if (htab->etab.dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in elf_metag_finish_dynamic_sections, but we
-	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
-	 dynamic linker and used by the debugger.  */
-#define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
-
-      if (!add_dynamic_entry (DT_PLTGOT, 0))
-	return FALSE;
-
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (htab->etab.srelplt->size != 0)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->etab, maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
-    }
-#undef add_dynamic_entry
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

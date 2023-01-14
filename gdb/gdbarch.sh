@@ -325,12 +325,14 @@ v;int;long_bit;;;8 * sizeof (long);4*TARGET_CHAR_BIT;;0
 # machine.
 v;int;long_long_bit;;;8 * sizeof (LONGEST);2*gdbarch->long_bit;;0
 
-# The ABI default bit-size and format for "half", "float", "double", and
+# The ABI default bit-size and format for "bfloat16", "half", "float", "double", and
 # "long double".  These bit/format pairs should eventually be combined
 # into a single object.  For the moment, just initialize them as a pair.
 # Each format describes both the big and little endian layouts (if
 # useful).
 
+v;int;bfloat16_bit;;;16;2*TARGET_CHAR_BIT;;0
+v;const struct floatformat **;bfloat16_format;;;;;floatformats_bfloat16;;pformat (gdbarch->bfloat16_format)
 v;int;half_bit;;;16;2*TARGET_CHAR_BIT;;0
 v;const struct floatformat **;half_format;;;;;floatformats_ieee_half;;pformat (gdbarch->half_format)
 v;int;float_bit;;;8 * sizeof (float);4*TARGET_CHAR_BIT;;0
@@ -414,11 +416,10 @@ M;int;ax_pseudo_register_collect;struct agent_expr *ax, int reg;ax, reg
 # Return -1 if something goes wrong, 0 otherwise.
 M;int;ax_pseudo_register_push_stack;struct agent_expr *ax, int reg;ax, reg
 
-# Some targets/architectures can do extra processing/display of
-# segmentation faults.  E.g., Intel MPX boundary faults.
-# Call the architecture dependent function to handle the fault.
+# Some architectures can display additional information for specific
+# signals.
 # UIOUT is the output stream where the handler will place information.
-M;void;handle_segmentation_fault;struct ui_out *uiout;uiout
+M;void;report_signal_info;struct ui_out *uiout, enum gdb_signal siggnal;uiout, siggnal
 
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
@@ -767,9 +768,7 @@ V;ULONGEST;max_insn_length;;;0;0
 # not the copy at TO.  The caller should update it to point at TO later.
 #
 # Return a pointer to data of the architecture's choice to be passed
-# to gdbarch_displaced_step_fixup.  Or, return NULL to indicate that
-# the instruction's effects have been completely simulated, with the
-# resulting state written back to REGS.
+# to gdbarch_displaced_step_fixup.
 #
 # For a general explanation of displaced stepping and how GDB uses it,
 # see the comments in infrun.c.
@@ -842,8 +841,6 @@ F;void;overlay_update;struct obj_section *osect;osect
 
 M;const struct target_desc *;core_read_description;struct target_ops *target, bfd *abfd;target, abfd
 
-# Handle special encoding of static variables in stabs debug info.
-F;const char *;static_transform_name;const char *name;name
 # Set if the address in N_SO or N_FUN stabs may be zero.
 v;int;sofun_address_maybe_missing;;;0;0;;0
 
@@ -1180,6 +1177,9 @@ m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
 
 # Return a string containing any flags for the given PC in the given FRAME.
 f;std::string;get_pc_address_flags;frame_info *frame, CORE_ADDR pc;frame, pc;;default_get_pc_address_flags;;0
+
+# Read core file mappings
+m;void;read_core_file_mappings;struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb;cbfd, pre_loop_cb, loop_cb;;default_read_core_file_mappings;;0
 
 EOF
 }
@@ -1634,9 +1634,6 @@ typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
 extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
 typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
 extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
-extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-                                         struct gdbarch_data *data,
-			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
@@ -2241,20 +2238,6 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
   gdbarch->data = GDBARCH_OBSTACK_CALLOC (gdbarch, gdbarch->nr_data, void *);
 }
 
-/* Initialize the current value of the specified per-architecture
-   data-pointer.  */
-
-void
-deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-			     struct gdbarch_data *data,
-			     void *pointer)
-{
-  gdb_assert (data->index < gdbarch->nr_data);
-  gdb_assert (gdbarch->data[data->index] == NULL);
-  gdb_assert (data->pre_init == NULL);
-  gdbarch->data[data->index] = pointer;
-}
-
 /* Return the current value of the specified per-architecture
    data-pointer.  */
 
@@ -2284,11 +2267,9 @@ gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 	  data->init_p = 1;
 	}
       else
-	/* The architecture initialization hasn't completed - punt -
-	 hope that the caller knows what they are doing.  Once
-	 deprecated_set_gdbarch_data has been initialized, this can be
-	 changed to an internal error.  */
-	return NULL;
+	internal_error (__FILE__, __LINE__,
+			_("gdbarch post-init data field can only be used "
+			  "after gdbarch is fully initialised"));
       gdb_assert (gdbarch->data[data->index] != NULL);
     }
   return gdbarch->data[data->index];

@@ -79,7 +79,6 @@ inferior::~inferior ()
   discard_all_inferior_continuations (inf);
   inferior_free_data (inf);
   xfree (inf->args);
-  xfree (inf->terminal);
   target_desc_info_free (inf->tdesc_info);
 }
 
@@ -92,6 +91,21 @@ inferior::inferior (int pid_)
   inferior_alloc_data (this);
 
   m_target_stack.push (get_dummy_target ());
+}
+
+void
+inferior::set_tty (const char *terminal_name)
+{
+  if (terminal_name != nullptr && *terminal_name != '\0')
+    m_terminal = make_unique_xstrdup (terminal_name);
+  else
+    m_terminal = NULL;
+}
+
+const char *
+inferior::tty ()
+{
+  return m_terminal.get ();
 }
 
 struct inferior *

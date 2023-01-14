@@ -117,8 +117,6 @@ struct elf64_hppa_link_hash_table
   /* Shortcuts to get to the various linker defined sections.  */
   asection *dlt_sec;
   asection *dlt_rel_sec;
-  asection *plt_sec;
-  asection *plt_rel_sec;
   asection *opd_sec;
   asection *opd_rel_sec;
   asection *other_rel_sec;
@@ -147,8 +145,9 @@ struct elf64_hppa_link_hash_table
 };
 
 #define hppa_link_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == HPPA64_ELF_DATA ? ((struct elf64_hppa_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == HPPA64_ELF_DATA)	\
+   ? (struct elf64_hppa_link_hash_table *) (p)->hash : NULL)
 
 #define hppa_elf_hash_entry(ent) \
   ((struct elf64_hppa_link_hash_entry *)(ent))
@@ -304,6 +303,7 @@ elf64_hppa_hash_table_create (bfd *abfd)
       return NULL;
     }
 
+  htab->root.dt_pltgot_required = TRUE;
   htab->text_segment_base = (bfd_vma) -1;
   htab->data_segment_base = (bfd_vma) -1;
 
@@ -802,7 +802,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 
       if (need_entry & NEED_PLT)
 	{
-	  if (! hppa_info->plt_sec
+	  if (! hppa_info->root.splt
 	      && ! get_plt (abfd, info, hppa_info))
 	    goto err_out;
 
@@ -1181,7 +1181,7 @@ get_plt (bfd *abfd,
   asection *plt;
   bfd *dynobj;
 
-  plt = hppa_info->plt_sec;
+  plt = hppa_info->root.splt;
   if (!plt)
     {
       dynobj = hppa_info->root.dynobj;
@@ -1201,7 +1201,7 @@ get_plt (bfd *abfd,
 	  return FALSE;
 	}
 
-      hppa_info->plt_sec = plt;
+      hppa_info->root.splt = plt;
     }
 
   return TRUE;
@@ -1360,7 +1360,7 @@ elf64_hppa_create_dynamic_sections (bfd *abfd,
   if (s == NULL
       || !bfd_set_section_alignment (s, 3))
     return FALSE;
-  hppa_info->plt_rel_sec = s;
+  hppa_info->root.srelplt = s;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".rela.data",
 					  (SEC_ALLOC | SEC_LOAD
@@ -1454,7 +1454,7 @@ allocate_dynrel_entries (struct elf_link_hash_entry *eh, void *data)
       else if (shared)
 	t = 2 * sizeof (Elf64_External_Rela);
 
-      hppa_info->plt_rel_sec->size += t;
+      hppa_info->root.srelplt->size += t;
     }
 
   return TRUE;
@@ -1528,9 +1528,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   bfd *dynobj;
   bfd *ibfd;
   asection *sec;
-  bfd_boolean plt;
   bfd_boolean relocs;
-  bfd_boolean reltext;
 
   hppa_info = hppa_link_hash_table (info);
   if (hppa_info == NULL)
@@ -1653,8 +1651,8 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	}
       else
 	{
-	  sec = hppa_info->plt_sec;
-	  srel = hppa_info->plt_rel_sec;
+	  sec = hppa_info->root.splt;
+	  srel = hppa_info->root.srelplt;
 	  for (; local_plt < end_local_plt; ++local_plt)
 	    {
 	      if (*local_plt > 0)
@@ -1707,12 +1705,12 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       hppa_info->dlt_sec->size = data.ofs;
     }
 
-  if (hppa_info->plt_sec)
+  if (hppa_info->root.splt)
     {
-      data.ofs = hppa_info->plt_sec->size;
+      data.ofs = hppa_info->root.splt->size;
       elf_link_hash_traverse (&hppa_info->root,
 			      allocate_global_data_plt, &data);
-      hppa_info->plt_sec->size = data.ofs;
+      hppa_info->root.splt->size = data.ofs;
     }
 
   if (hppa_info->stub_sec)
@@ -1738,9 +1736,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 			    allocate_dynrel_entries, &data);
 
   /* The sizes of all the sections are set.  Allocate memory for them.  */
-  plt = FALSE;
   relocs = FALSE;
-  reltext = FALSE;
   for (sec = dynobj->sections; sec != NULL; sec = sec->next)
     {
       const char *name;
@@ -1755,7 +1751,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       if (strcmp (name, ".plt") == 0)
 	{
 	  /* Remember whether there is a PLT.  */
-	  plt = sec->size != 0;
+	  ;
 	}
       else if (strcmp (name, ".opd") == 0
 	       || CONST_STRNEQ (name, ".dlt")
@@ -1768,28 +1764,10 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  if (sec->size != 0)
 	    {
-	      asection *target;
-
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = TRUE;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_section_name (sec->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 4);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = TRUE;
-		}
+		relocs = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1842,8 +1820,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0)
-	  || !add_dynamic_entry (DT_PLTGOT, 0))
+      if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0))
 	return FALSE;
 
       /* Add some entries to the .dynamic section.  We fill in the
@@ -1853,8 +1830,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 dynamic linker and used by the debugger.  */
       if (! bfd_link_pic (info))
 	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0)
-	      || !add_dynamic_entry (DT_HP_DLD_HOOK, 0)
+	  if (!add_dynamic_entry (DT_HP_DLD_HOOK, 0)
 	      || !add_dynamic_entry (DT_HP_LOAD_MAP, 0))
 	    return FALSE;
 	}
@@ -1863,33 +1839,10 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 Required by HPUX 11.00 patch PHSS_26559.  */
       if (!add_dynamic_entry (DT_FLAGS, (info)->flags))
 	return FALSE;
-
-      if (plt)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
-	    return FALSE;
-	}
-
-      if (reltext)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return FALSE;
-	  info->flags |= DF_TEXTREL;
-	}
     }
 #undef add_dynamic_entry
 
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
 }
 
 /* Called after we have output the symbol into the dynamic symbol
@@ -1950,9 +1903,9 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
     return FALSE;
 
   stub = hppa_info->stub_sec;
-  splt = hppa_info->plt_sec;
+  splt = hppa_info->root.splt;
   sopd = hppa_info->opd_sec;
-  spltrel = hppa_info->plt_rel_sec;
+  spltrel = hppa_info->root.srelplt;
 
   /* Incredible.  It is actually necessary to NOT use the symbol's real
      value when building the dynamic symbol table for a shared library.
@@ -2532,13 +2485,13 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_JMPREL:
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2563,7 +2516,7 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      /* There is some question about whether or not the size of
 		 the PLT relocs should be included here.  HP's tools do
 		 it, so we'll emulate them.  */
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_val += s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2981,7 +2934,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 	     that order) and set __gp to the base address of whichever
 	     section is found first.  */
 
-	  sec = hppa_info->plt_sec;
+	  sec = hppa_info->root.splt;
 	  if (sec && ! (sec->flags & SEC_EXCLUDE))
 	    gp_val = (sec->output_offset
 		      + sec->output_section->vma
@@ -3530,8 +3483,8 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	   to the start of the DLT, so we have to compute the absolute
 	   address, then subtract out the value of __gp.  */
 	value = (hh->plt_offset
-		 + hppa_info->plt_sec->output_offset
-		 + hppa_info->plt_sec->output_section->vma);
+		 + hppa_info->root.splt->output_offset
+		 + hppa_info->root.splt->output_section->vma);
 	value -= _bfd_get_gp_value (output_bfd);
 
 	/* All PLTOFF relocations are basically the same at this point,

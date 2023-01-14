@@ -31,8 +31,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%edi\),%ds:\(%esi\)
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%edi\),%ds:\(%esi\)
  *[a-f0-9]+:	f2 0f 38 f1 00       	crc32l \(%eax\),%eax
- *[a-f0-9]+:	f2 0f 2a 00          	cvtsi2sdl \(%eax\),%xmm0
- *[a-f0-9]+:	f3 0f 2a 00          	cvtsi2ssl \(%eax\),%xmm0
+ *[a-f0-9]+:	f2 0f 2a 00          	cvtsi2sd \(%eax\),%xmm0
+ *[a-f0-9]+:	f3 0f 2a 00          	cvtsi2ss \(%eax\),%xmm0
  *[a-f0-9]+:	ff 08                	decl   \(%eax\)
  *[a-f0-9]+:	f7 30                	divl   \(%eax\)
  *[a-f0-9]+:	d8 00                	fadds  \(%eax\)
@@ -96,10 +96,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	ef                   	out    %eax,\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%esi\),\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%esi\),\(%dx\)
- *[a-f0-9]+:	8f 00                	popl   \(%eax\)
+ *[a-f0-9]+:	8f 00                	pop    \(%eax\)
  *[a-f0-9]+:	07                   	pop    %es
- *[a-f0-9]+:	f3 0f ae 20          	ptwritel \(%eax\)
- *[a-f0-9]+:	ff 30                	pushl  \(%eax\)
+ *[a-f0-9]+:	f3 0f ae 20          	ptwrite \(%eax\)
+ *[a-f0-9]+:	ff 30                	push   \(%eax\)
  *[a-f0-9]+:	06                   	push   %es
  *[a-f0-9]+:	d1 10                	rcll   \(%eax\)
  *[a-f0-9]+:	c1 10 02             	rcll   \$0x2,\(%eax\)
@@ -148,12 +148,12 @@ Disassembly of section .text:
  *[a-f0-9]+:	f7 00 89 00 00 00    	testl  \$0x89,\(%eax\)
  *[a-f0-9]+:	f7 00 34 12 00 00    	testl  \$0x1234,\(%eax\)
  *[a-f0-9]+:	f7 00 78 56 34 12    	testl  \$0x12345678,\(%eax\)
- *[a-f0-9]+:	c5 fb 2a 00          	vcvtsi2sdl \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7f 08 2a 00    	vcvtsi2sdl \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	c5 fa 2a 00          	vcvtsi2ssl \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 2a 00    	vcvtsi2ssl \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7f 08 7b 00    	vcvtusi2sdl \(%eax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 7b 00    	vcvtusi2ssl \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	c5 fb 2a 00          	vcvtsi2sd \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7f 08 2a 00    	vcvtsi2sd \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	c5 fa 2a 00          	vcvtsi2ss \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7e 08 2a 00    	vcvtsi2ss \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7f 08 7b 00    	vcvtusi2sd \(%eax\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7e 08 7b 00    	vcvtusi2ss \(%eax\),%xmm0,%xmm0
  *[a-f0-9]+:	83 30 01             	xorl   \$0x1,\(%eax\)
  *[a-f0-9]+:	81 30 89 00 00 00    	xorl   \$0x89,\(%eax\)
  *[a-f0-9]+:	81 30 34 12 00 00    	xorl   \$0x1234,\(%eax\)

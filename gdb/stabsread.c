@@ -723,12 +723,6 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  /* This was an anonymous type that was never fixed up.  */
 	  goto normal;
 
-	case 'X':
-	  /* SunPRO (3.0 at least) static variable encoding.  */
-	  if (gdbarch_static_transform_name_p (gdbarch))
-	    goto normal;
-	  /* fall through */
-
 	default:
 	  complaint (_("Unknown C++ symbol name `%s'"),
 		     string);
@@ -964,7 +958,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
          than the "declared-as" type for unprototyped functions, so
          we treat all functions as if they were prototyped.  This is used
          primarily for promotion when calling the function from GDB.  */
-      TYPE_PROTOTYPED (SYMBOL_TYPE (sym)) = 1;
+      SYMBOL_TYPE (sym)->set_is_prototyped (true);
 
       /* fall into process_prototype_types.  */
 
@@ -1007,11 +1001,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
 	      if (ptype->code () == TYPE_CODE_VOID)
 		ptype = objfile_type (objfile)->builtin_int;
-	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
+	      ftype->field (nparams).set_type (ptype);
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
 	  ftype->set_num_fields (nparams);
-	  TYPE_PROTOTYPED (ftype) = 1;
+	  ftype->set_is_prototyped (true);
 	}
       break;
 
@@ -1097,9 +1091,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      && SYMBOL_TYPE (sym)->code () == TYPE_CODE_INT)
 	    {
 	      SYMBOL_TYPE (sym) =
-		TYPE_UNSIGNED (SYMBOL_TYPE (sym))
-		? objfile_type (objfile)->builtin_unsigned_int
-		: objfile_type (objfile)->builtin_int;
+		(SYMBOL_TYPE (sym)->is_unsigned ()
+		 ? objfile_type (objfile)->builtin_unsigned_int
+		 : objfile_type (objfile)->builtin_int);
 	    }
 	  break;
 	}
@@ -1186,23 +1180,6 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
-	     != sym->linkage_name ())
-	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
-	  if (msym.minsym != NULL)
-	    {
-	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, sym->linkage_name ());
-
-	      sym->set_linkage_name (new_name);
-	      SET_SYMBOL_VALUE_ADDRESS (sym,
-					BMSYMBOL_VALUE_ADDRESS (msym));
-	    }
-	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, get_file_symbols ());
       break;
@@ -1367,24 +1344,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
-	     != sym->linkage_name ())
-	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
-	  if (msym.minsym != NULL)
-	    {
-	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, sym->linkage_name ());
-
-	      sym->set_linkage_name (new_name);
-	      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
-	    }
-	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-	add_symbol_to_list (sym, get_local_symbols ());
+      add_symbol_to_list (sym, get_local_symbols ());
       break;
 
     case 'v':
@@ -1689,7 +1650,7 @@ again:
 	type->set_code (code);
 	type->set_name (type_name);
 	INIT_CPLUS_SPECIFIC (type);
-	TYPE_STUB (type) = 1;
+	type->set_is_stub (true);
 
 	add_undefined_type (type, typenums);
 	return type;
@@ -1755,7 +1716,7 @@ again:
 	  }
 	else
 	  {
-	    TYPE_TARGET_STUB (type) = 1;
+	    type->set_target_is_stub (true);
 	    TYPE_TARGET_TYPE (type) = xtype;
 	  }
       }
@@ -1849,10 +1810,10 @@ again:
              when we read it, so the list is reversed.  Build the
              fields array right-to-left.  */
           for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
-            TYPE_FIELD_TYPE (func_type, i) = t->type;
+            func_type->field (i).set_type (t->type);
         }
         func_type->set_num_fields (num_args);
-        TYPE_PROTOTYPED (func_type) = 1;
+	func_type->set_is_prototyped (true);
 
         type = func_type;
         break;
@@ -2105,7 +2066,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 2:
       rettype = init_integer_type (objfile, 8, 0, "char");
-      TYPE_NOSIGN (rettype) = 1;
+      rettype->set_has_no_signedness (true);
       break;
     case 3:
       rettype = init_integer_type (objfile, 16, 0, "short");
@@ -2375,7 +2336,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 			== TYPE_CODE_METHOD);
 
 	  /* If this is just a stub, then we don't have the real name here.  */
-	  if (TYPE_STUB (new_sublist->fn_field.type))
+	  if (new_sublist->fn_field.type->is_stub ())
 	    {
 	      if (!TYPE_SELF_TYPE (new_sublist->fn_field.type))
 		set_type_self_type (new_sublist->fn_field.type, type);
@@ -2788,7 +2749,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	  invalid_cpp_abbrev_complaint (*pp);
 	  return 0;
 	}
-      fip->list->field.type = read_type (pp, objfile);
+      fip->list->field.set_type (read_type (pp, objfile));
       if (**pp == ',')
 	(*pp)++;		/* Skip the comma.  */
       else
@@ -2840,7 +2801,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
       fip->list->visibility = VISIBILITY_PUBLIC;
     }
 
-  fip->list->field.type = read_type (pp, objfile);
+  fip->list->field.set_type (read_type (pp, objfile));
   if (**pp == ':')
     {
       p = ++(*pp);
@@ -2917,7 +2878,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
          Note that forward refs cannot be packed,
          and treat enums as if they had the width of ints.  */
 
-      struct type *field_type = check_typedef (FIELD_TYPE (fip->list->field));
+      struct type *field_type = check_typedef (fip->list->field.type ());
 
       if (field_type->code () != TYPE_CODE_INT
 	  && field_type->code () != TYPE_CODE_RANGE
@@ -3161,8 +3122,8 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
          base class.  Read it, and remember it's type name as this
          field's name.  */
 
-      newobj->field.type = read_type (pp, objfile);
-      newobj->field.name = newobj->field.type->name ();
+      newobj->field.set_type (read_type (pp, objfile));
+      newobj->field.name = newobj->field.type ()->name ();
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')
@@ -3468,7 +3429,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
      scribbling on existing structure type objects when new definitions
      appear.  */
   if (! (type->code () == TYPE_CODE_UNDEF
-         || TYPE_STUB (type)))
+         || type->is_stub ()))
     {
       complain_about_struct_wipeout (type);
 
@@ -3478,7 +3439,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
 
   INIT_CPLUS_SPECIFIC (type);
   type->set_code (type_code);
-  TYPE_STUB (type) = 0;
+  type->set_is_stub (false);
 
   /* First comes the total size in bytes.  */
 
@@ -3653,9 +3614,9 @@ read_enum_type (const char **pp, struct type *type,
   TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   set_length_in_type_chain (type);
   type->set_code (TYPE_CODE_ENUM);
-  TYPE_STUB (type) = 0;
+  type->set_is_stub (false);
   if (unsigned_enum)
-    TYPE_UNSIGNED (type) = 1;
+    type->set_is_unsigned (true);
   type->set_num_fields (nsyms);
   type->set_fields
     ((struct field *)
@@ -3770,7 +3731,8 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
       struct type *type = init_type (objfile, TYPE_CODE_VOID,
 				     TARGET_CHAR_BIT, NULL);
       if (unsigned_type)
-        TYPE_UNSIGNED (type) = 1;
+	type->set_is_unsigned (true);
+
       return type;
     }
 
@@ -4128,7 +4090,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
     {
       struct type *type = init_integer_type (objfile, TARGET_CHAR_BIT,
 					     0, NULL);
-      TYPE_NOSIGN (type) = 1;
+      type->set_has_no_signedness (true);
       return type;
     }
   /* We used to do this only for subrange of self or subrange of int.  */
@@ -4242,7 +4204,7 @@ read_args (const char **pp, int end, struct objfile *objfile, int *nargsp,
 
   rval = XCNEWVEC (struct field, n);
   for (i = 0; i < n; i++)
-    rval[i].type = types[i];
+    rval[i].set_type (types[i]);
   *nargsp = n;
   return rval;
 }
@@ -4491,7 +4453,7 @@ cleanup_undefined_types_1 (void)
 	       as well as in check_typedef to deal with the (legitimate in
 	       C though not C++) case of several types with the same name
 	       in different source files.  */
-	    if (TYPE_STUB (*type))
+	    if ((*type)->is_stub ())
 	      {
 		struct pending *ppt;
 		int i;

@@ -1,3 +1,134 @@
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc): Add tprel_opt_ and accessors.
+	(Target_powerpc::Scan::local): Sanity check tprel high relocs.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Control tprel optimisation
+	with tprel_opt_ and enable for 32-bit.
+
+2020-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2020-07-27  Alan Modra  <amodra@gmail.com>
+
+	* options.h (DEFINE_enum): Add optional_arg__ param, adjust
+	all uses.
+	(General_options): Add --power10-stubs and --no-power10-stubs.
+	* options.cc (General_options::parse_no_power10_stubs): New.
+	(General_options::finalize): Handle --power10-stubs.
+	* powerpc.cc (set_power10_stubs): Don't set when --power10-stubs=no.
+	(power10_stubs_auto): New.
+	(struct Plt_stub_ent): Add toc_ and tocoff_.  Don't use a bitfield
+	for indx_.
+	(struct Branch_stub_ent): Add toc_and tocoff_.  Use bitfields for
+	iter_, notoc_ and save_res_.
+	(add_plt_call_entry): Set toc_.  Adjust resizing conditions for
+	--power10-stubs=auto.
+	(add_long_branch_entry): Set toc_.
+	(add_eh_frame, define_stub_syms): No longer use const_iterators
+	for plt and long branch stub iteration.
+	(build_tls_opt_head, build_tls_opt_tail): Change parameters and
+	return value.  Move tests for __tls_get_addr to callers.
+	(plt_call_size): Handle --power10-stubs=auto.
+	(branch_stub_size): Likewise.
+	(Stub_table::do_write): Likewise.
+	(relocate): Likewise.
+
+2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/bnd_ifunc_1.sh: Updated.
+	* testsuite/bnd_plt_1.sh: Likewise.
+	* testsuite/split_x32.sh: Likewise.
+	* testsuite/split_x86_64.sh: Likewise.
+	* testsuite/x86_64_indirect_call_to_direct.sh: Likewise.
+
+2020-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/script_test_7.sh: Adjust expected address of the .bss
+	section.
+	* testsuite/script_test_9.sh: Do not expect the .init section to
+	immediately follow the .text section in the mapping of sections to
+	segments.
+
+2020-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* target-reloc.h: (Default_comdat_behaviour:get): Ignore discarded
+	relocs that refer to the .gnu.build.attributes section.
+
+2020-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
+	Binutils 2.35 branch created.
+
+2020-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR 26028
+	* testsuite/Makefile.am (file_in_many_sections.stdout): Add -W
+	to readelf options.
+	* testsuite/Makefile.in: Regenerate.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Check for bswap_16, bswap_32, and bswap_64 decls.
+	* configure: Regenerated.
+	* config.h.in: Likewise.
+
+2020-06-24  Nick Clifton  <nickc@redhat.com>
+
+	* target-reloc.h (issue_discarded_error): Initialise the
+	key_symndx variable.
+
+2020-06-23  Roland McGrath  <mcgrathr@google.com>
+
+	PR 22843
+	* options.h (class General_options): Add --dependency-file option.
+	* fileread.cc (File_read::files_read): New static variable.
+	(File_read::open): Add the file to the files_read list.
+	(File_read::record_file_read): New static member function.
+	(File_read::write_dependency_file): New static member function.
+	* fileread.h (class File_read): Declare them.
+	* layout.cc (Layout::read_layout_from_file): Call record_file_read.
+	(Close_task_runner::run): Call write_dependency_file if
+	--dependency-file was passed.
+
+2020-06-18  Fangrui Song  <i@maskray.me>
+
+	PR gold/26039
+	* layout.cc (Layout::finish_dynamic_section): Set DF_1_PIE.
+
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/discard_locals_test.c: Replace uses of asm with __asm__.
+	* testsuite/discard_locals_relocatable_test.c: Likewise.
+
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (export_dynamic_plugin.o): Use CXXCOMPILE.
+	(plugin_test_wrap_symbols_1.o): Likewise.
+	(plugin_test_wrap_symbols_2.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2020-06-15  Roland McGrath  <mcgrathr@google.com>
+
+	Implement -z start-stop-visibility=... option.
+	* options.h (class General_options): Handle -z start-stop-visibility=.
+	(General_options::start_stop_visibility_enum): New public method.
+	(General_options::set_start_stop_visibility_enum): New private method.
+	(General_options::start_stop_visibility_enum_): New private member.
+	* options.cc (General_options::General_options): Add initializer.
+	(General_options::finalize): Set this->start_stop_visibility_enum_
+	from string value.
+	* layout.cc (Layout::define_section_symbols): Use option setting.
+
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Update throughout for reloc renaming.
+
 2020-05-22  Alan Modra  <amodra@gmail.com>
 
 	PR 25882

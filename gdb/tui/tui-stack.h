@@ -28,12 +28,13 @@ struct frame_info;
 
 /* Locator window class.  */
 
-struct tui_locator_window : public tui_gen_win_info
+struct tui_locator_window : public tui_win_info
 {
-  tui_locator_window ()
+  tui_locator_window () = default;
+
+  const char *name () const override
   {
-    full_name[0] = 0;
-    proc_name[0] = 0;
+    return STATUS_NAME;
   }
 
   int max_height () const override
@@ -44,6 +45,11 @@ struct tui_locator_window : public tui_gen_win_info
   int min_height () const override
   {
     return 1;
+  }
+
+  bool can_box () const override
+  {
+    return false;
   }
 
   void rerender () override;
@@ -65,6 +71,16 @@ struct tui_locator_window : public tui_gen_win_info
   CORE_ADDR addr = 0;
   /* Architecture associated with code at this location.  */
   struct gdbarch *gdbarch = nullptr;
+
+protected:
+
+  void do_scroll_vertical (int n) override
+  {
+  }
+
+  void do_scroll_horizontal (int n) override
+  {
+  }
 
 private:
 

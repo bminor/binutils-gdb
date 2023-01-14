@@ -309,25 +309,6 @@ elf32_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSE
 
 #include "elf32-target.h"
 
-/* A wrapper around _bfd_sparc_elf_link_hash_table_create that identifies
-   the target system as VxWorks.  */
-
-static struct bfd_link_hash_table *
-elf32_sparc_vxworks_link_hash_table_create (bfd *abfd)
-{
-  struct bfd_link_hash_table *ret;
-
-  ret = _bfd_sparc_elf_link_hash_table_create (abfd);
-  if (ret)
-    {
-      struct _bfd_sparc_elf_link_hash_table *htab;
-
-      htab = (struct _bfd_sparc_elf_link_hash_table *) ret;
-      htab->is_vxworks = 1;
-    }
-  return ret;
-}
-
 /* A final_write_processing hook that does both the SPARC- and VxWorks-
    specific handling.  */
 
@@ -346,9 +327,8 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd)
 #undef  ELF_MINPAGESIZE
 #define ELF_MINPAGESIZE	0x1000
 
-#undef bfd_elf32_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_create \
-  elf32_sparc_vxworks_link_hash_table_create
+#undef	ELF_TARGET_OS
+#define	ELF_TARGET_OS	is_vxworks
 
 #undef  elf_backend_want_got_plt
 #define elf_backend_want_got_plt		1

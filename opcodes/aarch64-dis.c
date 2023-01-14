@@ -35,6 +35,7 @@ enum map_type
   MAP_DATA
 };
 
+static aarch64_feature_set arch_variant; /* See select_aarch64_variant.  */
 static enum map_type last_type;
 static int last_mapping_sym = -1;
 static bfd_vma last_stop_offset = 0;
@@ -2690,6 +2691,13 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	  DEBUG_TRACE ("skip %s as base opcode not match", alias->name);
 	  continue;
 	}
+
+      if (!AARCH64_CPU_HAS_FEATURE (arch_variant, *alias->avariant))
+	{
+	  DEBUG_TRACE ("skip %s: we're missing features", alias->name);
+	  continue;
+	}
+
       /* No need to do any complicated transformation on operands, if the alias
 	 opcode does not have any operand.  */
       if (aarch64_num_of_operands (alias) == 0 && alias->opcode == inst->value)
@@ -3074,7 +3082,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
-			     &info->target, &notes);
+			     &info->target, &notes, arch_variant);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')
@@ -3321,6 +3329,7 @@ static int
 get_sym_code_type (struct disassemble_info *info, int n,
 		   enum map_type *map_type)
 {
+  asymbol * as;
   elf_symbol_type *es;
   unsigned int type;
   const char *name;
@@ -3329,7 +3338,14 @@ get_sym_code_type (struct disassemble_info *info, int n,
   if (info->section != NULL && info->section != info->symtab[n]->section)
     return FALSE;
 
-  es = *(elf_symbol_type **)(info->symtab + n);
+  if (n >= info->symtab_size)
+    return FALSE;
+
+  as = info->symtab[n];
+  if (bfd_asymbol_flavour (as) != bfd_target_elf_flavour)
+    return FALSE;
+  es = (elf_symbol_type *) as;
+
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */
@@ -3352,6 +3368,24 @@ get_sym_code_type (struct disassemble_info *info, int n,
   return FALSE;
 }
 
+/* Set the feature bits in arch_variant in order to get the correct disassembly
+   for the chosen architecture variant.
+
+   Currently we only restrict disassembly for Armv8-R and otherwise enable all
+   non-R-profile features.  */
+static void
+select_aarch64_variant (unsigned mach)
+{
+  switch (mach)
+    {
+    case bfd_mach_aarch64_8R:
+      arch_variant = AARCH64_ARCH_V8_R;
+      break;
+    default:
+      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8_R);
+    }
+}
+
 /* Entry-point of the AArch64 disassembler.  */
 
 int
@@ -3366,6 +3400,7 @@ print_insn_aarch64 (bfd_vma pc,
   unsigned int	size = 4;
   unsigned long	data;
   aarch64_operand_error errors;
+  static bfd_boolean set_features;
 
   if (info->disassembler_options)
     {
@@ -3375,6 +3410,12 @@ print_insn_aarch64 (bfd_vma pc,
 
       /* To avoid repeated parsing of these options, we remove them here.  */
       info->disassembler_options = NULL;
+    }
+
+  if (!set_features)
+    {
+      select_aarch64_variant (info->mach);
+      set_features = TRUE;
     }
 
   /* Aarch64 instructions are always little-endian */

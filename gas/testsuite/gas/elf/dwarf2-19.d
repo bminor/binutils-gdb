@@ -18,4 +18,4 @@ dwarf2-19\.c +2 +0 +1 +x
 dwarf2-19\.c +4 +0x8 +x
 dwarf2-19\.c +5 +0x8 +1 +x
 dwarf2-19\.c +3 +0x8 +2 +x
-dwarf2-19\.c +3 +0x8 +3 +x
+dwarf2-19\.c +- +0x8

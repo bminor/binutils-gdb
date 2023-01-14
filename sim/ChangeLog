@@ -1,3 +1,63 @@
+2020-09-08  David Faust  <david.faust@oracle.com>
+
+	* bpf/sem-be.c: Regenerate.
+	* bpf/sem-le.c: Likewise.
+
+2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf/bpf.c: Include bpf-helpers.h.
+	* bpf/bpf-helpers.h: Provide a prototype for bpf_trace_printk.
+	* bpf/configure.ac: Set simulator bitsize to 64.
+	* bpf/configure (includedir): Regenerate.
+	* bpf/sim-if.c: Include stdlib.h.
+	* bpf/traps.c: Likewise.
+
+2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac: Do not configure sim/testsuite nor sim/igen if the
+	primary target doesn't have a simulator.
+	* configure: Regenerate.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* bpf/arch.c: Likewise.
+	* bpf/arch.h: Likewise.
+	* bpf/cpu.c: Likewise.
+	* bpf/cpu.h: Likewise.
+	* bpf/cpuall.h: Likewise.
+	* bpf/decode-be.c: Likewise.
+	* bpf/decode-be.h: Likewise.
+	* bpf/decode-le.c: Likewise.
+	* bpf/decode-le.h: Likewise.
+	* bpf/defs-be.h: Likewise.
+	* bpf/defs-le.h: Likewise.
+	* bpf/sem-be.c: Likewise.
+	* bpf/sem-le.c: Likewise.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* configure.tgt (sim_arch): Add entry for bpf-*-*.
+	* configure: Regenerate.
+	* MAINTAINERS: Add maintainer for the BPF simulator.
+	* bpf/Makefile.in: New file.
+	* bpf/bpf-helpers.c: Likewise.
+	* bpf/bpf-helpers.def: Likewise.
+	* bpf/bpf-helpers.h: Likewise.
+	* bpf/bpf-sim.h: Likewise.
+	* bpf/bpf.c: Likewise.
+	* bpf/config.in: Likewise.
+	* bpf/configure.ac: Likewise.
+	* bpf/decode.h: Likewise.
+	* bpf/eng.h: Likewise.
+	* bpf/mloop.in: Likewise.
+	* bpf/sim-if.c: Likewise.
+	* bpf/sim-main.h: Likewise.
+	* bpf/traps.c: Likewise.
+	* bpf/configure: Generate.
+	* bpf/aclocal.m4: Likewise.
+
 2019-12-19  Tom Tromey  <tromey@adacore.com>
 
 	PR build/24572:

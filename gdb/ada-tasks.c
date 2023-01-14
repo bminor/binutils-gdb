@@ -376,7 +376,7 @@ ada_get_task_info_from_ptid (ptid_t ptid)
    terminated yet.  */
 
 void
-iterate_over_live_ada_tasks (ada_task_list_iterator_ftype *iterator)
+iterate_over_live_ada_tasks (ada_task_list_iterator_ftype iterator)
 {
   struct ada_tasks_inferior_data *data;
 
@@ -430,7 +430,7 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
       array_fieldno = ada_get_field_index (type, "P_ARRAY", 0);
       bounds_fieldno = ada_get_field_index (type, "P_BOUNDS", 0);
 
-      bounds_type = TYPE_FIELD_TYPE (type, bounds_fieldno);
+      bounds_type = type->field (bounds_fieldno).type ();
       if (bounds_type->code () == TYPE_CODE_PTR)
         bounds_type = TYPE_TARGET_TYPE (bounds_type);
       if (bounds_type->code () != TYPE_CODE_STRUCT)
@@ -894,14 +894,15 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	    eltype = check_typedef (TYPE_TARGET_TYPE (type));
 	  if (eltype != NULL
 	      && eltype->code () == TYPE_CODE_PTR)
-	    idxtype = check_typedef (TYPE_INDEX_TYPE (type));
+	    idxtype = check_typedef (type->index_type ());
 	  if (idxtype != NULL
-	      && !TYPE_LOW_BOUND_UNDEFINED (idxtype)
-	      && !TYPE_HIGH_BOUND_UNDEFINED (idxtype))
+	      && idxtype->bounds ()->low.kind () != PROP_UNDEFINED
+	      && idxtype->bounds ()->high.kind () != PROP_UNDEFINED)
 	    {
 	      data->known_tasks_element = eltype;
 	      data->known_tasks_length =
-		TYPE_HIGH_BOUND (idxtype) - TYPE_LOW_BOUND (idxtype) + 1;
+		(idxtype->bounds ()->high.const_val ()
+		 - idxtype->bounds ()->low.const_val () + 1);
 	      return;
 	    }
 	}

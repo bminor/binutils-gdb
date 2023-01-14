@@ -170,7 +170,7 @@ s390_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
   struct elf_dyn_relocs *p;
   struct elf_link_hash_table *htab;
   struct elf_s390_link_hash_entry *eh = (struct elf_s390_link_hash_entry*)h;
-  struct elf_dyn_relocs **head = &eh->dyn_relocs;
+  struct elf_dyn_relocs **head = &h->dyn_relocs;
 
   htab = elf_hash_table (info);
   eh->ifunc_resolver_address = h->root.u.def.value;

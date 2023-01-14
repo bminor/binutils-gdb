@@ -43,7 +43,8 @@ static void free_saved_stabs (void);
    pointer.  */
 
 void *
-read_debugging_info (bfd *abfd, asymbol **syms, long symcount, bfd_boolean no_messages)
+read_debugging_info (bfd *abfd, asymbol **syms, long symcount,
+		     bfd_boolean no_messages)
 {
   void *dhandle;
   bfd_boolean found;
@@ -54,13 +55,13 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount, bfd_boolean no_me
 
   if (! read_section_stabs_debugging_info (abfd, syms, symcount, dhandle,
 					   &found))
-    return NULL;
+    goto err_exit;
 
   if (bfd_get_flavour (abfd) == bfd_target_aout_flavour)
     {
       if (! read_symbol_stabs_debugging_info (abfd, syms, symcount, dhandle,
 					      &found))
-	return NULL;
+	goto err_exit;
     }
 
   /* Try reading the COFF symbols if we didn't find any stabs in COFF
@@ -70,7 +71,7 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount, bfd_boolean no_me
       && symcount > 0)
     {
       if (! parse_coff (abfd, syms, symcount, dhandle))
-	return NULL;
+	goto err_exit;
       found = TRUE;
     }
 
@@ -79,6 +80,8 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount, bfd_boolean no_me
       if (! no_messages)
 	non_fatal (_("%s: no recognized debugging information"),
 		   bfd_get_filename (abfd));
+    err_exit:
+      free (dhandle);
       return NULL;
     }
 

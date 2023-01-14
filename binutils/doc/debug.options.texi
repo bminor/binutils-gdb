@@ -80,6 +80,10 @@ Displays the contents of the @samp{.debug_macro} and/or
 Displays the contents of the @samp{.debug_loc} and/or
 @samp{.debug_loclists} sections.
 
+@item O
+@itemx =str-offsets
+Displays the contents of the @samp{.debug_str_offsets} section.
+
 @item p
 @itemx =pubnames
 Displays the contents of the @samp{.debug_pubnames} and/or

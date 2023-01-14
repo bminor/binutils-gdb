@@ -223,6 +223,12 @@ enum
   /* CET instructions support required */
   CpuIBT,
   CpuSHSTK,
+  /* AMX-INT8 instructions required */
+  CpuAMX_INT8,
+  /* AMX-BF16 instructions required */
+  CpuAMX_BF16,
+  /* AMX-TILE instructions required */
+  CpuAMX_TILE,
   /* GFNI instructions required */
   CpuGFNI,
   /* VAES instructions required */
@@ -372,6 +378,9 @@ typedef union i386_cpu_flags
       unsigned int cpuptwrite:1;
       unsigned int cpuibt:1;
       unsigned int cpushstk:1;
+      unsigned int cpuamx_int8:1;
+      unsigned int cpuamx_bf16:1;
+      unsigned int cpuamx_tile:1;
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
       unsigned int cpuvpclmulqdq:1;
@@ -566,15 +575,17 @@ enum
 #define XOP2SOURCES	1
 #define VEX3SOURCES	2
   VexSources,
-  /* Instruction with vector SIB byte:
+  /* Instruction with a mandatory SIB byte:
 	1: 128bit vector register.
 	2: 256bit vector register.
 	3: 512bit vector register.
    */
-#define VecSIB128	1
-#define VecSIB256	2
-#define VecSIB512	3
-  VecSIB,
+#define VECSIB128	1
+#define VECSIB256	2
+#define VECSIB512	3
+#define SIBMEM		4
+  SIB,
+
   /* SSE to AVX support required */
   SSE2AVX,
   /* No AVX equivalent */
@@ -634,6 +645,9 @@ enum
      It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
    */
   ImplicitQuadGroup,
+
+  /* Two source operands are swapped.  */
+  SwapSources,
 
   /* Support encoding optimization.  */
   Optimize,
@@ -699,7 +713,7 @@ typedef struct i386_opcode_modifier
   unsigned int vexw:2;
   unsigned int vexopcode:3;
   unsigned int vexsources:2;
-  unsigned int vecsib:2;
+  unsigned int sib:3;
   unsigned int sse2avx:1;
   unsigned int noavx:1;
   unsigned int evex:3;
@@ -710,6 +724,7 @@ typedef struct i386_opcode_modifier
   unsigned int disp8memshift:3;
   unsigned int nodefmask:1;
   unsigned int implicitquadgroup:1;
+  unsigned int swapsources:1;
   unsigned int optimize:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
@@ -803,6 +818,8 @@ enum
   Ymmword,
   /* ZMMWORD size.  */
   Zmmword,
+  /* TMMWORD size.  */
+  Tmmword,
   /* Unspecified memory size.  */
   Unspecified,
 
@@ -847,6 +864,7 @@ typedef union i386_operand_type
       unsigned int xmmword:1;
       unsigned int ymmword:1;
       unsigned int zmmword:1;
+      unsigned int tmmword:1;
       unsigned int unspecified:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
@@ -870,6 +888,18 @@ typedef struct insn_template
 #define Opcode_FloatD 0x400 /* Direction bit for float insns. */
 #define Opcode_SIMD_FloatD 0x1 /* Direction bit for SIMD fp insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
+
+/* Pseudo prefixes.  */
+#define Prefix_Disp8		0	/* {disp8} */
+#define Prefix_Disp16		1	/* {disp16} */
+#define Prefix_Disp32		2	/* {disp32} */
+#define Prefix_Load		3	/* {load} */
+#define Prefix_Store		4	/* {store} */
+#define Prefix_VEX		5	/* {vex} */
+#define Prefix_VEX3		6	/* {vex3} */
+#define Prefix_EVEX		7	/* {evex} */
+#define Prefix_REX		8	/* {rex} */
+#define Prefix_NoOptimize	9	/* {nooptimize} */
 
   /* extension_opcode is the 3 bit extension for group <n> insns.
      This field is also used to store the 8-bit opcode suffix for the
@@ -906,7 +936,7 @@ extern const insn_template i386_optab[];
 /* these are for register name --> number & type hash lookup */
 typedef struct
 {
-  char *reg_name;
+  const char *reg_name;
   i386_operand_type reg_type;
   unsigned char reg_flags;
 #define RegRex	    0x1  /* Extended register.  */

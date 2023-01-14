@@ -593,14 +593,14 @@ proc test_catch_syscall_multi_arch {} {
 	gdb_start
 
 	gdb_test "set architecture $arch1" \
-	    "The target architecture is assumed to be $arch1"
+	    "The target architecture is set to \"$arch1\"\\."
 
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall1_name}. \\\[${syscall_number}\\\]\\)" \
 	    "insert catch syscall on syscall $syscall_number -- $syscall1_name on $arch1"
 
 	gdb_test "set architecture $arch2" \
-	    "The target architecture is assumed to be $arch2"
+	    "The target architecture is set to \"$arch2\"\\."
 
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall2_name}. \\\[${syscall_number}\\\]\\)" \

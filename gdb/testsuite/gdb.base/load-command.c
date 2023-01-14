@@ -19,4 +19,5 @@ int the_variable = 0x1234;
 
 int main ()
 {
+  return 0;
 }

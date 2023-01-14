@@ -83,7 +83,7 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 
   for (p = name, end = name + strlen (name); *p != '\0'; p = q)
     {
-      while (isspace (*p))
+      while (isspace ((int) *p))
 	p++;			/* Skip leading whitespace.  */
 
       if (p == end)
@@ -133,13 +133,13 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 	       strncmp (p, lp->ctl_prefix, (size_t) (q - p)) == 0) &&
 	      (size_t) (q - p) >= lp->ctl_len)
 	    {
-	      for (p += lp->ctl_len; isspace (*p); p++)
+	      for (p += lp->ctl_len; isspace ((int) *p); p++)
 		continue;	/* Skip prefix and next whitespace.  */
 
 	      if ((q = strchr (p, '*')) == NULL)
 		q = end;	/* Compare until end.  */
 
-	      while (isspace (q[-1]))
+	      while (isspace ((int) q[-1]))
 		q--;		/* Exclude trailing whitespace.  */
 
 	      /* Expand and/or allocate storage for a slice of the name, then
@@ -305,6 +305,18 @@ ctf_lookup_by_symbol (ctf_file_t *fp, unsigned long symidx)
   return type;
 }
 
+/* Return the native dict of a given type: if called on a child and the
+   type is in the parent, return the parent.  Needed if you plan to access
+   the type directly, without using the API.  */
+ctf_file_t *
+ctf_get_dict (ctf_file_t *fp, ctf_id_t type)
+{
+    if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
+      return fp->ctf_parent;
+
+    return fp;
+}
+
 /* Return the pointer to the internal CTF type data corresponding to the
    given type ID.  If the ID is invalid, the function returns NULL.
    This function is not exported outside of the library.  */
@@ -312,17 +324,16 @@ ctf_lookup_by_symbol (ctf_file_t *fp, unsigned long symidx)
 const ctf_type_t *
 ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
 {
-  ctf_file_t *fp = *fpp;	/* Caller passes in starting CTF container.  */
+  ctf_file_t *fp = *fpp;	/* Caller passes in starting CTF dict.  */
   ctf_id_t idx;
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type)
-      && (fp = fp->ctf_parent) == NULL)
+  if ((fp = ctf_get_dict (fp, type)) == NULL)
     {
       (void) ctf_set_errno (*fpp, ECTF_NOPARENT);
       return NULL;
     }
 
-  /* If this container is writable, check for a dynamic type.  */
+  /* If this dict is writable, check for a dynamic type.  */
 
   if (fp->ctf_flags & LCTF_RDWR)
     {

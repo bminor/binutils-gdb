@@ -281,46 +281,6 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
-/* la_sniff_from_mangled_name for ObjC.  */
-
-static int
-objc_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = objc_demangle (mangled, 0);
-  return *demangled != NULL;
-}
-
-/* Determine if we are currently in the Objective-C dispatch function.
-   If so, get the address of the method function that the dispatcher
-   would call and use that as the function to step into instead.  Also
-   skip over the trampoline for the function (if any).  This is better
-   for the user since they are only interested in stepping into the
-   method function anyway.  */
-static CORE_ADDR 
-objc_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
-{
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR real_stop_pc;
-  CORE_ADDR method_stop_pc;
-  
-  real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
-
-  if (real_stop_pc != 0)
-    find_objc_msgcall (real_stop_pc, &method_stop_pc);
-  else
-    find_objc_msgcall (stop_pc, &method_stop_pc);
-
-  if (method_stop_pc)
-    {
-      real_stop_pc = gdbarch_skip_trampoline_code
-		       (gdbarch, frame, method_stop_pc);
-      if (real_stop_pc == 0)
-	real_stop_pc = method_stop_pc;
-    }
-
-  return real_stop_pc;
-}
-
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -364,7 +324,10 @@ static const char *objc_extensions[] =
   ".m", NULL
 };
 
-extern const struct language_defn objc_language_defn = {
+/* Constant data representing the Objective-C language.  */
+
+extern const struct language_data objc_language_data =
+{
   "objective-c",		/* Language name */
   "Objective-C",
   language_objc,
@@ -374,43 +337,93 @@ extern const struct language_defn objc_language_defn = {
   macro_expansion_c,
   objc_extensions,
   &exp_descriptor_standard,
-  c_parse,
-  null_post_parser,
-  c_printchar,		       /* Print a character constant */
-  c_printstr,		       /* Function to print string constant */
-  c_emit_char,
-  c_print_type,			/* Print a type using appropriate syntax */
-  c_print_typedef,		/* Print a typedef using appropriate syntax */
-  c_value_print_inner,		/* la_value_print_inner */
-  c_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
-  objc_skip_trampoline, 	/* Language specific skip_trampoline */
   "self",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
-  objc_demangle,		/* Language specific symbol demangler */
-  objc_sniff_from_mangled_name,
-  NULL,				/* Language specific
-				   class_name_from_physname */
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
   0,				/* String lower bound */
-  default_word_break_characters,
-  default_collect_symbol_completion_matches,
-  c_language_arch_info,
-  default_print_array_index,
-  default_pass_by_reference,
-  c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
-  iterate_over_symbols,
-  default_search_name_hash,
   &default_varobj_ops,
-  NULL,
-  NULL,
-  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Objective-C language.  */
+
+class objc_language : public language_defn
+{
+public:
+  objc_language ()
+    : language_defn (language_objc, objc_language_data)
+  { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    c_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = objc_demangle (mangled, 0);
+    return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return objc_demangle (mangled, options);
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  */
+
+  CORE_ADDR skip_trampoline (struct frame_info *frame,
+			     CORE_ADDR stop_pc) const override
+  {
+    struct gdbarch *gdbarch = get_frame_arch (frame);
+    CORE_ADDR real_stop_pc;
+    CORE_ADDR method_stop_pc;
+
+    /* Determine if we are currently in the Objective-C dispatch function.
+       If so, get the address of the method function that the dispatcher
+       would call and use that as the function to step into instead.  Also
+       skip over the trampoline for the function (if any).  This is better
+       for the user since they are only interested in stepping into the
+       method function anyway.  */
+
+    real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
+
+    if (real_stop_pc != 0)
+      find_objc_msgcall (real_stop_pc, &method_stop_pc);
+    else
+      find_objc_msgcall (stop_pc, &method_stop_pc);
+
+    if (method_stop_pc)
+      {
+	real_stop_pc = gdbarch_skip_trampoline_code
+	  (gdbarch, frame, method_stop_pc);
+	if (real_stop_pc == 0)
+	  real_stop_pc = method_stop_pc;
+      }
+
+    return real_stop_pc;
+  }
+};
+
+/* Single instance of the class representing the Objective-C language.  */
+
+static objc_language objc_language_defn;
 
 /*
  * ObjC:

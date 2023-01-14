@@ -31,7 +31,7 @@ if [get_compiler_info] {
 }
 
 set additional_flags ""
-if [test_compiler_info gcc*] {
+if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     set additional_flags "additional_flags=-msse -I${srcdir}/.."
 }
 

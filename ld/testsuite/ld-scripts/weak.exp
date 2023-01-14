@@ -43,10 +43,9 @@ if {! [ld_assemble $as $srcdir/$subdir/weak1.s tmpdir/weak1.o]
     return
 }
 
-global LDFLAGS
 set saved_LDFLAGS "$LDFLAGS"
-if [istarget "x86_64-*-mingw*"] then {
-  set LDFLAGS "$LDFLAGS --image-base 0"
+if { [is_pecoff_format] } then {
+    set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
 set weak_regexp_big \

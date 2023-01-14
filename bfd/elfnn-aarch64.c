@@ -2570,9 +2570,6 @@ struct elf_aarch64_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* Since PLT entries have variable size, we need to record the
      index into .got.plt instead of recomputing it from the PLT
      offset.  */
@@ -2646,9 +2643,6 @@ struct elf_aarch64_link_hash_table
   /* The bytes of the subsequent PLT entry.  */
   const bfd_byte *plt_entry;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* For convenience in allocate_dynrelocs.  */
   bfd *obfd;
 
@@ -2685,19 +2679,8 @@ struct elf_aarch64_link_hash_table
   /* JUMP_SLOT relocs for variant PCS symbols may be present.  */
   int variant_pcs;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma tlsdesc_plt;
-
   /* The number of bytes in the PLT enty for the TLS descriptor.  */
   bfd_size_type tlsdesc_plt_entry_size;
-
-  /* The GOT offset for the lazy trampoline.  Communicated to the
-     loader via DT_TLSDESC_GOT.  The magic value (bfd_vma) -1
-     indicates an offset is not allocated.  */
-  bfd_vma dt_tlsdesc_got;
 
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
@@ -2728,7 +2711,6 @@ elfNN_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
 				     table, string));
   if (ret != NULL)
     {
-      ret->dyn_relocs = NULL;
       ret->got_type = GOT_UNKNOWN;
       ret->plt_got_offset = (bfd_vma) - 1;
       ret->stub_cache = NULL;
@@ -2855,37 +2837,6 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_aarch64_link_hash_entry *) dir;
   eind = (struct elf_aarch64_link_hash_entry *) ind;
 
-  if (eind->dyn_relocs != NULL)
-    {
-      if (edir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
-	    {
-	      struct elf_dyn_relocs *q;
-
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
-		if (q->sec == p->sec)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = edir->dyn_relocs;
-	}
-
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
-    }
-
   if (ind->root.type == bfd_link_hash_indirect)
     {
       /* Copy over PLT info.  */
@@ -2967,7 +2918,7 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   ret->plt_entry = elfNN_aarch64_small_plt_entry;
   ret->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
   ret->obfd = abfd;
-  ret->dt_tlsdesc_got = (bfd_vma) - 1;
+  ret->root.tlsdesc_got = (bfd_vma) - 1;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf_aarch64_stub_hash_entry)))
@@ -3974,8 +3925,9 @@ _bfd_aarch64_erratum_835769_scan (bfd *input_bfd,
 
       sec_data = elf_aarch64_section_data (section);
 
-      qsort (sec_data->map, sec_data->mapcount,
-	     sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
+      if (sec_data->mapcount)
+	qsort (sec_data->map, sec_data->mapcount,
+	       sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
 
       for (span = 0; span < sec_data->mapcount; span++)
 	{
@@ -4258,8 +4210,9 @@ _bfd_aarch64_erratum_843419_scan (bfd *input_bfd, asection *section,
 
       sec_data = elf_aarch64_section_data (section);
 
-      qsort (sec_data->map, sec_data->mapcount,
-	     sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
+      if (sec_data->mapcount)
+	qsort (sec_data->map, sec_data->mapcount,
+	       sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
 
       for (span = 0; span < sec_data->mapcount; span++)
 	{
@@ -5494,7 +5447,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_vma orig_value = value;
   bfd_boolean resolved_to_zero;
   bfd_boolean abs_symbol_p;
-  bfd_boolean via_plt_p;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5516,8 +5468,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		  : bfd_is_und_section (sym_sec));
   abs_symbol_p = h != NULL && bfd_is_abs_symbol (&h->root);
 
-  via_plt_p = (globals->root.splt != NULL && h != NULL
-	       && h->plt.offset != (bfd_vma) - 1);
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
      it here if it is defined in a non-shared object.  */
@@ -5853,23 +5803,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value += signed_addend;
       break;
 
-    case BFD_RELOC_AARCH64_BRANCH19:
-    case BFD_RELOC_AARCH64_TSTBR14:
-      /* A conditional branch to an undefined weak symbol is converted to a
-	 branch to itself.  */
-      if (weak_undef_p && !via_plt_p)
-	{
-	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
-						       place, value,
-						       signed_addend,
-						       weak_undef_p);
-	  break;
-	}
-      /* Fall through.  */
     case BFD_RELOC_AARCH64_CALL26:
     case BFD_RELOC_AARCH64_JUMP26:
       {
 	asection *splt = globals->root.splt;
+	bfd_boolean via_plt_p =
+	  splt != NULL && h != NULL && h->plt.offset != (bfd_vma) - 1;
 
 	/* A call to an undefined weak symbol is converted to a jump to
 	   the next instruction unless a PLT entry will be created.
@@ -5947,6 +5886,23 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	       "recompile with -fPIC"),
 	     input_bfd, elfNN_aarch64_howto_table[howto_index].name,
 	     h->root.root.string);
+	  bfd_set_error (bfd_error_bad_value);
+	  return bfd_reloc_notsupported;
+	}
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
+						   signed_addend,
+						   weak_undef_p);
+      break;
+
+    case BFD_RELOC_AARCH64_BRANCH19:
+    case BFD_RELOC_AARCH64_TSTBR14:
+      if (h && h->root.type == bfd_link_hash_undefined)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB: conditional branch to undefined symbol `%s' "
+	       "not allowed"), input_bfd, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 	}
@@ -7186,7 +7142,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		 Try to catch this situation here and provide a more helpful
 		 error message to the user.  */
-	      if (addend & ((1 << howto->rightshift) - 1)
+	      if (addend & (((bfd_vma) 1 << howto->rightshift) - 1)
 		  /* FIXME: Are we testing all of the appropriate reloc
 		     types here ?  */
 		  && (real_r_type == BFD_RELOC_AARCH64_LD_LO19_PCREL
@@ -7385,23 +7341,6 @@ elfNN_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
   return TRUE;
 }
 
-/* Find dynamic relocs for H that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *p;
-
-  for (p = elf_aarch64_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return p->sec;
-    }
-  return NULL;
-}
-
 /* Return true if we need copy relocation against EH.  */
 
 static bfd_boolean
@@ -7410,7 +7349,7 @@ need_copy_relocation_p (struct elf_aarch64_link_hash_entry *eh)
   struct elf_dyn_relocs *p;
   asection *s;
 
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = eh->root.dyn_relocs; p != NULL; p = p->next)
     {
       /* If there is any pc-relative reference, we need to keep copy relocation
 	 to avoid propagating the relocation into runtime that current glibc
@@ -7673,7 +7612,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -7889,9 +7828,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	       relocations we need for this symbol.  */
 	    if (h != NULL)
 	      {
-		struct elf_aarch64_link_hash_entry *eh;
-		eh = (struct elf_aarch64_link_hash_entry *) h;
-		head = &eh->dyn_relocs;
+		head = &h->dyn_relocs;
 	      }
 	    else
 	      {
@@ -7902,7 +7839,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		asection *s;
 		void **vpp;
 
-		isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 					      abfd, r_symndx);
 		if (isym == NULL)
 		  return FALSE;
@@ -8034,8 +7971,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
-	case BFD_RELOC_AARCH64_BRANCH19:
-	case BFD_RELOC_AARCH64_TSTBR14:
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
 	  /* If this is a local symbol then we resolve it
@@ -8736,7 +8671,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		     type.  */
 
 		  /* TLSDESC PLT is now needed, but not yet determined.  */
-		  htab->tlsdesc_plt = (bfd_vma) - 1;
+		  htab->root.tlsdesc_plt = (bfd_vma) - 1;
 		}
 
 	      if (got_type & GOT_TLS_GD)
@@ -8752,7 +8687,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->got.offset = (bfd_vma) - 1;
     }
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -8773,7 +8708,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL;)
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -8786,11 +8721,11 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL && h->root.type == bfd_link_hash_undefweak)
+      if (h->dyn_relocs != NULL && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -8829,13 +8764,13 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep:;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc;
 
@@ -8858,7 +8793,6 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
 {
   struct bfd_link_info *info;
   struct elf_aarch64_link_hash_table *htab;
-  struct elf_aarch64_link_hash_entry *eh;
 
   /* An example of a bfd_link_hash_indirect symbol is versioned
      symbol. For example: __gxx_personality_v0(bfd_link_hash_indirect)
@@ -8878,15 +8812,12 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
   info = (struct bfd_link_info *) inf;
   htab = elf_aarch64_hash_table (info);
 
-  eh = (struct elf_aarch64_link_hash_entry *) h;
-
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &eh->dyn_relocs,
-					       NULL,
+					       &h->dyn_relocs,
 					       htab->plt_entry_size,
 					       htab->plt_header_size,
 					       GOT_ENTRY_SIZE,
@@ -8911,33 +8842,6 @@ elfNN_aarch64_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
     abort ();
 
   return elfNN_aarch64_allocate_ifunc_dynrelocs (h, inf);
-}
-
-/* Set DF_TEXTREL if we find any dynamic relocs that apply to
-   read-only sections.  */
-
-static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
-{
-  asection *sec;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  sec = readonly_dynrelocs (h);
-  if (sec != NULL)
-    {
-      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
-
-      info->flags |= DF_TEXTREL;
-      info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
-	 sec->owner, h->root.root.string, sec);
-
-      /* Not an error, just cut short the traversal.  */
-      return FALSE;
-    }
-  return TRUE;
 }
 
 /* This is the most important function of all . Innocuosly named
@@ -9052,7 +8956,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    {
 		      htab->root.srelplt->size += RELOC_SIZE (htab);
 		      /* Note RELOC_COUNT not incremented here! */
-		      htab->tlsdesc_plt = (bfd_vma) - 1;
+		      htab->root.tlsdesc_plt = (bfd_vma) - 1;
 		    }
 
 		  if (got_type & GOT_TLS_GD)
@@ -9095,19 +8999,21 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->root.srelplt)
     htab->sgotplt_jump_table_size = aarch64_compute_jump_table_size (htab);
 
-  if (htab->tlsdesc_plt)
+  if (htab->root.tlsdesc_plt)
     {
       if (htab->root.splt->size == 0)
 	htab->root.splt->size += htab->plt_header_size;
 
       /* If we're not using lazy TLS relocations, don't generate the
 	 GOT and PLT entry required.  */
-      if (!(info->flags & DF_BIND_NOW))
+      if ((info->flags & DF_BIND_NOW))
+	htab->root.tlsdesc_plt = 0;
+      else
 	{
-	  htab->tlsdesc_plt = htab->root.splt->size;
+	  htab->root.tlsdesc_plt = htab->root.splt->size;
 	  htab->root.splt->size += htab->tlsdesc_plt_entry_size;
 
-	  htab->dt_tlsdesc_got = htab->root.sgot->size;
+	  htab->root.tlsdesc_got = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE;
 	}
     }
@@ -9195,28 +9101,13 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL)			\
       _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info, relocs))
+	return FALSE;
 
       if (htab->root.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-
 	  if (htab->variant_pcs
 	      && !add_dynamic_entry (DT_AARCH64_VARIANT_PCS, 0))
-	    return FALSE;
-
-	  if (htab->tlsdesc_plt
-	      && !(info->flags & DF_BIND_NOW)
-	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
-		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
 
 	  if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI_PAC)
@@ -9231,25 +9122,6 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  else if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_PAC)
 		   && !add_dynamic_entry (DT_AARCH64_PAC_PLT, 0))
 	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, RELOC_SIZE (htab)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->root, maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
 	}
     }
 #undef add_dynamic_entry
@@ -9640,8 +9512,11 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   memcpy (htab->root.splt->contents, htab->plt0_entry,
 	  htab->plt_header_size);
-  elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize =
-    htab->plt_header_size;
+
+  /* PR 26312: Explicitly set the sh_entsize to 0 so that
+     consumers do not think that the section contains fixed
+     sized objects.  */
+  elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize = 0;
 
   plt_got_2nd_ent = (htab->root.sgotplt->output_section->vma
 		  + htab->root.sgotplt->output_offset
@@ -9722,14 +9597,14 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_TLSDESC_PLT:
 	      s = htab->root.splt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->tlsdesc_plt;
+		+ htab->root.tlsdesc_plt;
 	      break;
 
 	    case DT_TLSDESC_GOT:
 	      s = htab->root.sgot;
-	      BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
+	      BFD_ASSERT (htab->root.tlsdesc_got != (bfd_vma)-1);
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->dt_tlsdesc_got;
+		+ htab->root.tlsdesc_got;
 	      break;
 	    }
 
@@ -9743,15 +9618,11 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
     {
       elfNN_aarch64_init_small_plt0_entry (output_bfd, htab);
 
-      elf_section_data (htab->root.splt->output_section)->
-	this_hdr.sh_entsize = htab->plt_entry_size;
-
-
-      if (htab->tlsdesc_plt && !(info->flags & DF_BIND_NOW))
+      if (htab->root.tlsdesc_plt && !(info->flags & DF_BIND_NOW))
 	{
-	  BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
+	  BFD_ASSERT (htab->root.tlsdesc_got != (bfd_vma)-1);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
-		      htab->root.sgot->contents + htab->dt_tlsdesc_got);
+		      htab->root.sgot->contents + htab->root.tlsdesc_got);
 
 	  const bfd_byte *entry = elfNN_aarch64_tlsdesc_small_plt_entry;
 	  htab->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
@@ -9762,13 +9633,14 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      entry = elfNN_aarch64_tlsdesc_small_plt_bti_entry;
 	    }
 
-	  memcpy (htab->root.splt->contents + htab->tlsdesc_plt,
+	  memcpy (htab->root.splt->contents + htab->root.tlsdesc_plt,
 		  entry, htab->tlsdesc_plt_entry_size);
 
 	  {
 	    bfd_vma adrp1_addr =
 	      htab->root.splt->output_section->vma
-	      + htab->root.splt->output_offset + htab->tlsdesc_plt + 4;
+	      + htab->root.splt->output_offset
+	      + htab->root.tlsdesc_plt + 4;
 
 	    bfd_vma adrp2_addr = adrp1_addr + 4;
 
@@ -9780,10 +9652,10 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      htab->root.sgotplt->output_section->vma
 	      + htab->root.sgotplt->output_offset;
 
-	    bfd_vma dt_tlsdesc_got = got_addr + htab->dt_tlsdesc_got;
+	    bfd_vma dt_tlsdesc_got = got_addr + htab->root.tlsdesc_got;
 
 	    bfd_byte *plt_entry =
-	      htab->root.splt->contents + htab->tlsdesc_plt;
+	      htab->root.splt->contents + htab->root.tlsdesc_plt;
 
 	   /* First instruction in BTI enabled PLT stub is a BTI
 	      instruction so skip it.  */

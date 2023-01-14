@@ -57,3 +57,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f4041aab\s*fuitod\s*fr11,\s*fr4
 \s*[0-9a-f]*:\s*f4081ac2\s*fdtos\s*fr2,\s*fr8
 \s*[0-9a-f]*:\s*f40b1ae5\s*fstod\s*fr5,\s*fr11
+#...

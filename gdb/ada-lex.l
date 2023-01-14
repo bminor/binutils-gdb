@@ -45,7 +45,9 @@ POSEXP  (e"+"?{NUM10})
 
 /* Some old versions of flex generate code that uses the "register" keyword,
    which clang warns about.  This was observed for example with flex 2.5.35,
-   as shipped with macOS 10.12.  */
+   as shipped with macOS 10.12.  The same happens with flex 2.5.37 and g++ 11
+   which defaults to ISO C++17, that does not allow register storage class
+   specifiers.  */
 DIAGNOSTIC_PUSH
 DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER
 

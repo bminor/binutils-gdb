@@ -52,11 +52,11 @@
 
 /* Instruction data for plt generation and relaxation.  */
 
-#define OP_LDA		0x08
-#define OP_LDAH		0x09
-#define OP_LDQ		0x29
-#define OP_BR		0x30
-#define OP_BSR		0x34
+#define OP_LDA		0x08U
+#define OP_LDAH		0x09U
+#define OP_LDQ		0x29U
+#define OP_BR		0x30U
+#define OP_BSR		0x34U
 
 #define INSN_LDA	(OP_LDA << 26)
 #define INSN_LDAH	(OP_LDAH << 26)
@@ -73,11 +73,11 @@
 #define INSN_JMP	0x68000000
 #define INSN_JSR_MASK	0xfc00c000
 
-#define INSN_A(I,A)		(I | (A << 21))
-#define INSN_AB(I,A,B)		(I | (A << 21) | (B << 16))
-#define INSN_ABC(I,A,B,C)	(I | (A << 21) | (B << 16) | C)
-#define INSN_ABO(I,A,B,O)	(I | (A << 21) | (B << 16) | ((O) & 0xffff))
-#define INSN_AD(I,A,D)		(I | (A << 21) | (((D) >> 2) & 0x1fffff))
+#define INSN_A(I,A)		(I | ((unsigned) A << 21))
+#define INSN_AB(I,A,B)		(INSN_A (I, A) | (B << 16))
+#define INSN_ABC(I,A,B,C)	(INSN_A (I, A) | (B << 16) | C)
+#define INSN_ABO(I,A,B,O)	(INSN_A (I, A) | (B << 16) | ((O) & 0xffff))
+#define INSN_AD(I,A,D)		(INSN_A (I, A) | (((D) >> 2) & 0x1fffff))
 
 /* PLT/GOT Stuff */
 
@@ -216,8 +216,9 @@ struct alpha_elf_link_hash_table
 /* Get the Alpha ELF linker hash table from a link_info structure.  */
 
 #define alpha_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == ALPHA_ELF_DATA ? ((struct alpha_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == ALPHA_ELF_DATA)	\
+   ? (struct alpha_elf_link_hash_table *) (p)->hash : NULL)
 
 /* Get the object's symbols as our own entry type.  */
 
@@ -1240,6 +1241,7 @@ elf64_alpha_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	  scomm = bfd_make_section_with_flags (abfd, ".scommon",
 					       (SEC_ALLOC
 						| SEC_IS_COMMON
+						| SEC_SMALL_DATA
 						| SEC_LINKER_CREATED));
 	  if (scomm == NULL)
 	    return FALSE;
@@ -1780,15 +1782,6 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel, *relend;
 
   if (bfd_link_relocatable (info))
-    return TRUE;
-
-  /* Don't do anything special with non-loaded, non-alloced sections.
-     In particular, any relocs in such sections should not affect GOT
-     and PLT reference counting (ie. we don't allow them to create GOT
-     or PLT entries), there's no possibility or desire to optimize TLS
-     relocs, and there's not much point in propagating relocs to shared
-     libs that the dynamic linker won't relocate.  */
-  if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
   BFD_ASSERT (is_alpha_elf (abfd));
@@ -2919,38 +2912,14 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info,
+				      relocs || relplt))
+	return FALSE;
 
-      if (relplt)
-	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-
-	  if (elf64_alpha_use_secureplt
-	      && !add_dynamic_entry (DT_ALPHA_PLTRO, 1))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
-	    return FALSE;
-
-	  if (info->flags & DF_TEXTREL)
-	    {
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
+      if (relplt
+	  && elf64_alpha_use_secureplt
+	  && !add_dynamic_entry (DT_ALPHA_PLTRO, 1))
+	return FALSE;
     }
 #undef add_dynamic_entry
 
@@ -3026,7 +2995,8 @@ elf64_alpha_relax_got_load (struct alpha_relax_info *info, bfd_vma symval,
     }
 
   /* Can't relax dynamic symbols.  */
-  if (alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info))
+  if (info->h != NULL
+      && alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info))
     return TRUE;
 
   /* Can't use local-exec relocations in shared libraries.  */
@@ -3494,7 +3464,8 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   bfd_boolean dynamic, use_gottprel;
   unsigned long new_symndx;
 
-  dynamic = alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info);
+  dynamic = (info->h != NULL
+	     && alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info));
 
   /* If a TLS symbol is accessed using IE at least once, there is no point
      to use dynamic model for it.  */

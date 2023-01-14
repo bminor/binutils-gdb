@@ -173,7 +173,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
    Perform various error checking on the header.  */
 
 static void
-error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
+error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 			    struct comp_unit_head *header,
 			    struct dwarf2_section_info *section,
 			    struct dwarf2_section_info *abbrev_section)
@@ -181,7 +181,7 @@ error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
   const char *filename = section->get_file_name ();
 
   if (to_underlying (header->abbrev_sect_off)
-      >= abbrev_section->get_size (dwarf2_per_objfile->objfile))
+      >= abbrev_section->get_size (per_objfile->objfile))
     error (_("Dwarf Error: bad offset (%s) in compilation unit header "
 	   "(offset %s + 6) [in module %s]"),
 	   sect_offset_str (header->abbrev_sect_off),
@@ -201,7 +201,7 @@ error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
 /* See comp-unit.h.  */
 
 const gdb_byte *
-read_and_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
+read_and_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 			       struct comp_unit_head *header,
 			       struct dwarf2_section_info *section,
 			       struct dwarf2_section_info *abbrev_section,
@@ -216,8 +216,7 @@ read_and_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   header->first_die_cu_offset = (cu_offset) (info_ptr - beg_of_comp_unit);
 
-  error_check_comp_unit_head (dwarf2_per_objfile, header, section,
-			      abbrev_section);
+  error_check_comp_unit_head (per_objfile, header, section, abbrev_section);
 
   return info_ptr;
 }

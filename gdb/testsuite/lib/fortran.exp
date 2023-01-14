@@ -99,6 +99,34 @@ proc fortran_complex4 {} {
     }
 }
 
+proc fortran_complex8 {} {
+    if {[test_compiler_info {gcc-4-[012]-*}]} {
+	return "complex8"
+    } elseif {[test_compiler_info {gcc-*}]} {
+	return "complex\\(kind=8\\)"
+    } elseif {[test_compiler_info {clang-*}]} {
+	return "double complex"
+    } elseif {[test_compiler_info {icc-*}]} {
+	return "COMPLEX\\(8\\)"
+    } else {
+	return "unknown"
+    }
+}
+
+proc fortran_complex16 {} {
+    if {[test_compiler_info {gcc-4-[012]-*}]} {
+	return "complex16"
+    } elseif {[test_compiler_info {gcc-*}]} {
+	return "complex\\(kind=16\\)"
+    } elseif {[test_compiler_info {clang-*}]} {
+	return "quad complex"
+    } elseif {[test_compiler_info {icc-*}]} {
+	return "COMPLEX\\(16\\)"
+    } else {
+	return "unknown"
+    }
+}
+
 proc fortran_logical4 {} {
     if {[test_compiler_info {gcc-4-[012]-*}]} {
 	return "logical4"

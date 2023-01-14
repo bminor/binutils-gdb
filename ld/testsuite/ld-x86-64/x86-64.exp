@@ -22,19 +22,11 @@
 # Test x86_64 linking; all types of relocs.  This tests the assembler and
 # tools like objdump as well as the linker.
 
-if { !([istarget "x86_64-*-elf*"]
-       || [istarget "x86_64-*-nacl*"]
-       || [istarget "x86_64-*-linux*"]) } {
+if { !([istarget "x86_64-*-elf*"] || [istarget "x86_64-*-linux*"]) } {
     return
 }
 
-if [istarget "*-*-nacl*"] {
-    set emul "elf_x86_64_nacl"
-} else {
-    set emul "elf_x86_64"
-}
-
-global ASFLAGS
+set emul "elf_x86_64"
 set saved_ASFLAGS "$ASFLAGS"
 set ASFLAGS "$ASFLAGS -mx86-used-note=no"
 
@@ -231,42 +223,7 @@ set x86_64tests {
      "--64" { dummy.s } {} "pr20550"}
 }
 
-# So as to avoid rewriting every last test case here in a nacl variant,
-# we use black magic to massage the generic cases into nacl-variant cases.
-if [istarget "*-*-nacl*"] {
-    set emul elf_x86_64_nacl
-
-    set lhs {elf(32)?_(i386|x86_64)[[:>:]]}
-    set rhs {&_nacl}
-
-    # Change all the -melf_x86_64 to -melf_x86_64_nacl so linking can succeed.
-    regsub -all -- $lhs $x86_64tests $rhs x86_64tests
-
-    set zlhs {-z noseparate-code -z max-page-size=0x200000}
-    set zrhs {}
-
-    # Remove -z max-page-size=0x200000 -z noseparate-code since they
-    # generate different addresses for nacl targets.
-    regsub -all -- $zlhs $x86_64tests $zrhs x86_64tests
-
-    # Same, applied to all the run_dump_test cases.
-    set options_regsub(ld) [list $lhs $rhs]
-
-    # The section/segment layout differs too much for the vanilla
-    # readelf output files to match.  So massage the cases so that
-    # they refer to a foo-nacl.rd file instead of a foo.rd file.
-    regsub -all -- {([a-z0-9]+)\.rd} $x86_64tests {\1-nacl.rd} x86_64tests
-
-    # Likewise for PLTs.
-    regsub -all -- {([a-z0-9]+)\.pd} $x86_64tests {\1-nacl.pd} x86_64tests
-} else {
-    set emul elf_x86_64
-}
-
 run_ld_link_tests $x86_64tests
-
-global link_output
-global ld
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
@@ -289,6 +246,7 @@ if { ![ld_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] }
 }
 
 run_dump_test "abs"
+run_dump_test "abs-k1om"
 run_dump_test "abs-l1om"
 run_dump_test "apic"
 run_dump_test "pcrel8"
@@ -306,8 +264,10 @@ run_dump_test "hidden4"
 run_dump_test "hidden5"
 run_dump_test "protected1"
 run_dump_test "protected2"
+run_dump_test "protected2-k1om"
 run_dump_test "protected2-l1om"
 run_dump_test "protected3"
+run_dump_test "protected3-k1om"
 run_dump_test "protected3-l1om"
 run_dump_test "protected4"
 run_dump_test "protected5"
@@ -336,7 +296,6 @@ run_dump_test "gotplt1"
 run_dump_test "pie1"
 run_dump_test "pie2"
 run_dump_test "pie3"
-run_dump_test "pie3-nacl"
 run_dump_test "pic1"
 run_dump_test "largecomm-1a"
 run_dump_test "largecomm-1b"
@@ -413,7 +372,6 @@ run_dump_test "property-x86-cet5b-x32"
 run_dump_test "property-x86-cet6"
 run_dump_test "property-x86-cet6-x32"
 run_dump_test "pr21884"
-run_dump_test "pr21884-nacl"
 run_dump_test "pr22071"
 run_dump_test "pr22115-1a"
 run_dump_test "pr22115-1a-x32"
@@ -473,38 +431,39 @@ run_dump_test "pr25416-2b"
 run_dump_test "pr25416-3"
 run_dump_test "pr25416-4"
 run_dump_test "pr26018"
+run_dump_test "pr26263"
 
-if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
+if ![istarget "x86_64-*-linux*"] {
     return
 }
 
 if ![ld_assemble $as "--x32 $srcdir/$subdir/start.s" tmpdir/startx32.o] {
-    unresolved "Build ILP32 start.o"
+    fail "Build ILP32 start.o"
     return
 }
 
 if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
-    unresolved "Build ia32 start.o"
+    fail "Build ia32 start.o"
     return
 }
 
 if ![ld_assemble $as "--64 $srcdir/$subdir/start.s" tmpdir/start64.o] {
-    unresolved "Build LP64 start.o"
+    fail "Build LP64 start.o"
     return
 }
 
 if ![ld_assemble $as "--x32 $srcdir/$subdir/foo.s" tmpdir/foox32.o] {
-    unresolved "Build ILP32 foo.o"
+    fail "Build ILP32 foo.o"
     return
 }
 
 if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
-    unresolved "Build ia32 foo.o"
+    fail "Build ia32 foo.o"
     return
 }
 
 if ![ld_assemble $as "--64 $srcdir/$subdir/foo.s" tmpdir/foo64.o] {
-    unresolved "Build LP64 foo.o"
+    fail "Build LP64 foo.o"
     return
 }
 
@@ -513,7 +472,6 @@ run_dump_test "ilp32-1"
 run_dump_test "ilp32-2"
 run_dump_test "ilp32-3"
 run_dump_test "ilp32-4"
-run_dump_test "ilp32-4-nacl"
 run_dump_test "ilp32-5"
 run_dump_test "ilp32-6"
 run_dump_test "ilp32-7"
@@ -565,10 +523,6 @@ run_dump_test "load1a"
 run_dump_test "load1b"
 run_dump_test "load1c"
 run_dump_test "load1d"
-run_dump_test "load1a-nacl"
-run_dump_test "load1b-nacl"
-run_dump_test "load1c-nacl"
-run_dump_test "load1d-nacl"
 run_dump_test "load2"
 run_dump_test "call1a"
 run_dump_test "call1b"
@@ -585,10 +539,13 @@ run_dump_test "pr18160"
 run_dump_test "pr18176"
 run_dump_test "pr18801a"
 run_dump_test "pr18801b"
+run_dump_test "ifunc-textrel-1a"
+run_dump_test "ifunc-textrel-1b"
+run_dump_test "ifunc-textrel-2a"
+run_dump_test "ifunc-textrel-2b"
 run_dump_test "pr18815"
 run_dump_test "pr19013"
 run_dump_test "pr19013-x32"
-run_dump_test "pr19013-nacl"
 run_dump_test "pr19162"
 run_dump_test "pr19175"
 run_dump_test "pr18591"
@@ -607,7 +564,6 @@ run_dump_test "pr19636-2a"
 run_dump_test "pr19636-2b"
 run_dump_test "pr19636-2c"
 run_dump_test "pr19636-2d"
-run_dump_test "pr19636-2d-nacl"
 run_dump_test "pr19636-2e"
 run_dump_test "pr19636-2f"
 run_dump_test "pr19636-2g"
@@ -742,19 +698,15 @@ proc undefined_weak {cflags ldflags} {
     }
 }
 
-# Add $PLT_CFLAGS if PLT is expected.
-global PLT_CFLAGS
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-# Add $NOCF_PROTECTION_CFLAGS if -fcf-protection=none is required.
-global NOCF_PROTECTION_CFLAGS
-
 # Must be native with the C compiler
 if { [isnative] && [check_compiler_available] } {
-    run_cc_link_tests {
-	{"Helper X32 DSO from x86-64 object" "" "-m64 -fPIC -g"
-	 {simple.c} {} "libsimple.a"}
-    }
+    run_cc_link_tests [list \
+	[list \
+	    "Helper X32 DSO from x86-64 object" "" \
+	    "-m64 $NOSANITIZE_CFLAGS -fPIC -g" \
+	    {simple.c} {} "libsimple.a" \
+	] \
+    ]
 
     set convertx32 "$objcopy -O elf32-x86-64 tmpdir/simple.o tmpdir/simple-x32.o"
     send_log "$convertx32\n"
@@ -765,12 +717,16 @@ if { [isnative] && [check_compiler_available] } {
 	return
     }
 
-    run_ld_link_tests {
-	{"X32 DSO from x86-64 object"
-	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" ""
-	 "--x32 -mx86-used-note=yes"
-	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
-    }
+    run_ld_link_tests [list \
+	[list \
+	    "X32 DSO from x86-64 object" \
+	    "-shared -melf32_x86_64 tmpdir/simple-x32.o" \
+	    "$NOSANITIZE_CFLAGS" \
+	    "--x32 -mx86-used-note=yes" \
+	    {dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} \
+	    "x86-64-x32" \
+	] \
+    ]
 
     run_cc_link_tests [list \
 	[list \
@@ -2140,7 +2096,6 @@ run_ld_link_tests [list \
 ]
 
 # Linux only tests
-global LD_CLASS
 if { "$LD_CLASS" == "64bit" } then {
     # This test needs 64-bit linker.
     run_dump_test "pr17618"

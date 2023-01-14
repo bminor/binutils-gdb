@@ -28,7 +28,7 @@ ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
 INCDIR = $(srcdir)/../include
-AM_CPPFLAGS = -D_GNU_SOURCE -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -I../bfd
+AM_CPPFLAGS = -D_GNU_SOURCE -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -I../bfd @INCINTL@
 AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
 
 if INSTALL_LIBBFD
@@ -41,14 +41,22 @@ endif
 
 libctf_nobfd_la_LIBADD = @SHARED_LIBADD@ $(ZLIB)
 libctf_nobfd_la_LDFLAGS = -version-info 0:0:0 @SHARED_LDFLAGS@ @VERSION_FLAGS@
+libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
-			  ctf-hash.c ctf-labels.c ctf-link.c ctf-lookup.c ctf-open.c \
-			  ctf-string.c ctf-subr.c ctf-types.c ctf-util.c
+			  ctf-hash.c ctf-labels.c ctf-dedup.c ctf-link.c ctf-lookup.c \
+			  ctf-open.c ctf-sha1.c ctf-string.c ctf-subr.c ctf-types.c \
+			  ctf-util.c
 if NEED_CTF_QSORT_R
 libctf_nobfd_la_SOURCES += ctf-qsort_r.c
 endif
 
 libctf_la_LIBADD = @BFD_LIBADD@ $(libctf_nobfd_la_LIBADD)
+libctf_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=0
 libctf_la_DEPENDENCIES = @BFD_DEPENDENCIES@
 libctf_la_LDFLAGS = $(libctf_nobfd_la_LDFLAGS)
 libctf_la_SOURCES = $(libctf_nobfd_la_SOURCES) ctf-open-bfd.c
+
+BUILT_SOURCES = ctf-error.h
+
+ctf-error.h: $(srcdir)/mkerrors.sed $(srcdir)/../include/ctf-api.h
+	sed -nf $(srcdir)/mkerrors.sed < $(srcdir)/../include/ctf-api.h > $@

@@ -31,8 +31,6 @@ if ![istarget sh*-*-*] {
     return
 }
 
-global ASFLAGS
-global LDFLAGS
 set asflags_save "$ASFLAGS"
 set ldflags_save "$LDFLAGS"
 

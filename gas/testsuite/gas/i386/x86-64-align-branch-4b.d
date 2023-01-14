@@ -17,7 +17,7 @@ Disassembly of section .text:
   17:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   1a:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   1d:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  20:	c3                   	retq   
+  20:	c3                   	ret *
   21:	2e 2e 55             	cs cs push %rbp
   24:	64 89 04 25 01 00 00 00 	mov    %eax,%fs:0x1
   2c:	55                   	push   %rbp
@@ -28,6 +28,6 @@ Disassembly of section .text:
   37:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   3a:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   3d:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  40:	c2 1e 00             	retq   \$0x1e
+  40:	c2 1e 00             	ret    \$0x1e
   43:	55                   	push   %rbp
 #pass

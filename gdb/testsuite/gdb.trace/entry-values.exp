@@ -62,8 +62,6 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     # returns.  The only exception is JALRC, in which case execution
     # resumes from `insn1' instead.
     set call_insn {jalrc|[jb]al[sxr]*[ \t][^\r\n]+\r\n}
-} elseif [is_amd64_regs_target] {
-    set call_insn "callq"
 } else {
     set call_insn "call"
 }
@@ -110,7 +108,7 @@ Dwarf::assemble $asm_file {
 
 	    foo_label: subprogram {
 		{decl_file 0 udata}
-		{MACRO_AT_func { foo ${srcdir}/${subdir}/${srcfile} }}
+		{MACRO_AT_func { foo }}
 	    } {
 		formal_parameter {
 		    {type :$int_label}

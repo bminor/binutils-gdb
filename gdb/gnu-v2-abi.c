@@ -312,7 +312,7 @@ vb_match (struct type *type, int index, struct type *basetype)
 
   /* It's a virtual baseclass pointer, now we just need to find out whether
      it is for this baseclass.  */
-  fieldtype = TYPE_FIELD_TYPE (type, index);
+  fieldtype = type->field (index).type ();
   if (fieldtype == NULL
       || fieldtype->code () != TYPE_CODE_PTR)
     /* "Can't happen".  */
@@ -362,7 +362,7 @@ gnuv2_baseclass_offset (struct type *type, int index,
 	      int field_length;
 	      CORE_ADDR addr;
 
-	      field_type = check_typedef (TYPE_FIELD_TYPE (type, i));
+	      field_type = check_typedef (type->field (i).type ());
 	      field_offset = TYPE_FIELD_BITPOS (type, i) / 8;
 	      field_length = TYPE_LENGTH (field_type);
 

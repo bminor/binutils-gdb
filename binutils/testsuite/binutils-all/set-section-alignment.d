@@ -2,7 +2,8 @@
 #PROG: objcopy
 #objcopy: --set-section-alignment .text=16
 #objdump: --section-headers
-#notarget: *-*-*aout *-*-*coff *-*-cygwin* *-*-darwin *-*-mingw* *-*-go32 *-*-*pe hppa*-*-hpux* ns32k-*-* powerpc-*-aix* rs6000-*-* rx-*-* *-*-vms
+#target: [is_elf_format]
+#xfail: rx-*-*
 
 #...
 .*\.text.*2\*\*4

@@ -49,6 +49,8 @@ AC_DEFUN([gl_EARLY],
   # Code from module arpa_inet:
   # Code from module assure:
   # Code from module at-internal:
+  # Code from module attribute:
+  # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module c99:
   # Code from module canonicalize-lgpl:
@@ -58,12 +60,12 @@ AC_DEFUN([gl_EARLY],
   # Code from module close:
   # Code from module closedir:
   # Code from module count-one-bits:
+  # Code from module ctype:
   # Code from module d-ino:
   # Code from module d-type:
   # Code from module dirent:
   # Code from module dirfd:
   # Code from module dirname-lgpl:
-  # Code from module dosname:
   # Code from module double-slash-root:
   # Code from module dup:
   # Code from module dup2:
@@ -98,6 +100,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module getdtablesize:
   # Code from module getlogin_r:
   # Code from module getprogname:
+  # Code from module getrandom:
   # Code from module gettext-h:
   # Code from module gettimeofday:
   # Code from module glob:
@@ -108,6 +111,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module intprops:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
+  # Code from module isblank:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
   # Code from module largefile:
@@ -125,11 +129,13 @@ AC_DEFUN([gl_EARLY],
   # Code from module mbrtowc:
   # Code from module mbsinit:
   # Code from module mbsrtowcs:
+  # Code from module mbtowc:
   # Code from module memchr:
   # Code from module memmem:
   # Code from module memmem-simple:
   # Code from module mempcpy:
   # Code from module memrchr:
+  # Code from module minmax:
   # Code from module mkdir:
   # Code from module mkdtemp:
   # Code from module mkostemp:
@@ -179,10 +185,12 @@ AC_DEFUN([gl_EARLY],
   # Code from module strerror-override:
   # Code from module strerror_r-posix:
   # Code from module string:
+  # Code from module strnlen:
   # Code from module strnlen1:
   # Code from module strstr:
   # Code from module strstr-simple:
   # Code from module strtok_r:
+  # Code from module sys_random:
   # Code from module sys_socket:
   # Code from module sys_stat:
   # Code from module sys_time:
@@ -204,6 +212,8 @@ AC_DEFUN([gl_EARLY],
   # Code from module windows-once:
   # Code from module windows-recmutex:
   # Code from module windows-rwlock:
+  # Code from module wmemchr:
+  # Code from module wmempcpy:
   # Code from module xalloc-oversized:
 ])
 
@@ -226,6 +236,13 @@ AC_DEFUN([gl_INIT],
   gl_FUNC_ALLOCA
   gl_HEADER_ARPA_INET
   AC_PROG_MKDIR_P
+  AC_REQUIRE([AC_CANONICAL_HOST])
+  gl_FUNC_BTOWC
+  if test $HAVE_BTOWC = 0 || test $REPLACE_BTOWC = 1; then
+    AC_LIBOBJ([btowc])
+    gl_PREREQ_BTOWC
+  fi
+  gl_WCHAR_MODULE_INDICATOR([btowc])
   gl___BUILTIN_EXPECT
   gl_CANONICALIZE_LGPL
   if test $HAVE_CANONICALIZE_FILE_NAME = 0 || test $REPLACE_CANONICALIZE_FILE_NAME = 1; then
@@ -251,6 +268,7 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([closedir])
   fi
   gl_DIRENT_MODULE_INDICATOR([closedir])
+  gl_CTYPE_H
   gl_CHECK_TYPE_STRUCT_DIRENT_D_INO
   gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
   gl_DIRENT_H
@@ -376,6 +394,12 @@ AC_DEFUN([gl_INIT],
   gl_UNISTD_MODULE_INDICATOR([getlogin_r])
   AC_REQUIRE([gl_LIB_GETLOGIN])
   gl_FUNC_GETPROGNAME
+  AC_REQUIRE([AC_CANONICAL_HOST])
+  gl_FUNC_GETRANDOM
+  if test $HAVE_GETRANDOM = 0 || test $REPLACE_GETRANDOM = 1; then
+    AC_LIBOBJ([getrandom])
+  fi
+  gl_SYS_RANDOM_MODULE_INDICATOR([getrandom])
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
@@ -406,6 +430,12 @@ AC_DEFUN([gl_INIT],
   gl_ARPA_INET_MODULE_INDICATOR([inet_ntop])
   gl_INTTYPES_H
   gl_INTTYPES_INCOMPLETE
+  gl_FUNC_ISBLANK
+  if test $HAVE_ISBLANK = 0; then
+    AC_LIBOBJ([isblank])
+  fi
+  gl_MODULE_INDICATOR([isblank])
+  gl_CTYPE_MODULE_INDICATOR([isblank])
   gl_FUNC_ISNAND_NO_LIBM
   if test $gl_func_isnand_no_libm != yes; then
     AC_LIBOBJ([isnand])
@@ -465,6 +495,12 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_MBSRTOWCS
   fi
   gl_WCHAR_MODULE_INDICATOR([mbsrtowcs])
+  gl_FUNC_MBTOWC
+  if test $HAVE_MBTOWC = 0 || test $REPLACE_MBTOWC = 1; then
+    AC_LIBOBJ([mbtowc])
+    gl_PREREQ_MBTOWC
+  fi
+  gl_STDLIB_MODULE_INDICATOR([mbtowc])
   gl_FUNC_MEMCHR
   if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
     AC_LIBOBJ([memchr])
@@ -492,6 +528,7 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_MEMRCHR
   fi
   gl_STRING_MODULE_INDICATOR([memrchr])
+  gl_MINMAX
   gl_FUNC_MKDIR
   if test $REPLACE_MKDIR = 1; then
     AC_LIBOBJ([mkdir])
@@ -644,6 +681,12 @@ AC_DEFUN([gl_INIT],
   dnl For the modules argp, error.
   gl_MODULE_INDICATOR([strerror_r-posix])
   gl_HEADER_STRING_H
+  gl_FUNC_STRNLEN
+  if test $HAVE_DECL_STRNLEN = 0 || test $REPLACE_STRNLEN = 1; then
+    AC_LIBOBJ([strnlen])
+    gl_PREREQ_STRNLEN
+  fi
+  gl_STRING_MODULE_INDICATOR([strnlen])
   gl_FUNC_STRSTR
   if test $REPLACE_STRSTR = 1; then
     AC_LIBOBJ([strstr])
@@ -659,6 +702,8 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_STRTOK_R
   fi
   gl_STRING_MODULE_INDICATOR([strtok_r])
+  gl_HEADER_SYS_RANDOM
+  AC_PROG_MKDIR_P
   AC_REQUIRE([gl_HEADER_SYS_SOCKET])
   AC_PROG_MKDIR_P
   gl_HEADER_SYS_STAT_H
@@ -712,6 +757,16 @@ AC_DEFUN([gl_INIT],
       AC_LIBOBJ([windows-rwlock])
       ;;
   esac
+  gl_FUNC_WMEMCHR
+  if test $HAVE_WMEMCHR = 0; then
+    AC_LIBOBJ([wmemchr])
+  fi
+  gl_WCHAR_MODULE_INDICATOR([wmemchr])
+  gl_FUNC_WMEMPCPY
+  if test $HAVE_WMEMPCPY = 0; then
+    AC_LIBOBJ([wmempcpy])
+  fi
+  gl_WCHAR_MODULE_INDICATOR([wmempcpy])
   # End of code from modules
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
@@ -860,7 +915,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/arpa_inet.in.h
   lib/assure.h
   lib/at-func.c
+  lib/attribute.h
   lib/basename-lgpl.c
+  lib/btowc.c
   lib/c++defs.h
   lib/canonicalize-lgpl.c
   lib/cdefs.h
@@ -872,12 +929,12 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/closedir.c
   lib/count-one-bits.c
   lib/count-one-bits.h
+  lib/ctype.in.h
   lib/dirent-private.h
   lib/dirent.in.h
   lib/dirfd.c
   lib/dirname-lgpl.c
   lib/dirname.h
-  lib/dosname.h
   lib/dup-safer-flag.c
   lib/dup-safer.c
   lib/dup.c
@@ -916,6 +973,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getlogin_r.c
   lib/getprogname.c
   lib/getprogname.h
+  lib/getrandom.c
   lib/gettext.h
   lib/gettimeofday.c
   lib/glob-libc.h
@@ -932,6 +990,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/inet_ntop.c
   lib/intprops.h
   lib/inttypes.in.h
+  lib/isblank.c
   lib/isnan.c
   lib/isnand-nolibm.h
   lib/isnand.c
@@ -964,13 +1023,16 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/mbsrtowcs-impl.h
   lib/mbsrtowcs-state.c
   lib/mbsrtowcs.c
+  lib/mbtowc-impl.h
   lib/mbtowc-lock.c
   lib/mbtowc-lock.h
+  lib/mbtowc.c
   lib/memchr.c
   lib/memchr.valgrind
   lib/memmem.c
   lib/mempcpy.c
   lib/memrchr.c
+  lib/minmax.h
   lib/mkdir.c
   lib/mkdtemp.c
   lib/mkostemp.c
@@ -1027,10 +1089,12 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strerror_r.c
   lib/string.in.h
   lib/stripslash.c
+  lib/strnlen.c
   lib/strnlen1.c
   lib/strnlen1.h
   lib/strstr.c
   lib/strtok_r.c
+  lib/sys_random.in.h
   lib/sys_socket.c
   lib/sys_socket.in.h
   lib/sys_stat.in.h
@@ -1060,18 +1124,23 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/windows-recmutex.h
   lib/windows-rwlock.c
   lib/windows-rwlock.h
+  lib/wmemchr-impl.h
+  lib/wmemchr.c
+  lib/wmempcpy.c
   lib/xalloc-oversized.h
   m4/00gnulib.m4
   m4/__inline.m4
   m4/absolute-header.m4
   m4/alloca.m4
   m4/arpa_inet_h.m4
+  m4/btowc.m4
   m4/builtin-expect.m4
   m4/canonicalize.m4
   m4/chdir-long.m4
   m4/close.m4
   m4/closedir.m4
   m4/codeset.m4
+  m4/ctype.m4
   m4/d-ino.m4
   m4/d-type.m4
   m4/dirent_h.m4
@@ -1111,6 +1180,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/getlogin_r.m4
   m4/getpagesize.m4
   m4/getprogname.m4
+  m4/getrandom.m4
   m4/gettimeofday.m4
   m4/glob.m4
   m4/glob_h.m4
@@ -1119,6 +1189,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/inet_ntop.m4
   m4/inttypes-pri.m4
   m4/inttypes.m4
+  m4/isblank.m4
   m4/isnand.m4
   m4/isnanl.m4
   m4/largefile.m4
@@ -1138,10 +1209,12 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/mbsinit.m4
   m4/mbsrtowcs.m4
   m4/mbstate_t.m4
+  m4/mbtowc.m4
   m4/memchr.m4
   m4/memmem.m4
   m4/mempcpy.m4
   m4/memrchr.m4
+  m4/minmax.m4
   m4/mkdir.m4
   m4/mkdtemp.m4
   m4/mkostemp.m4
@@ -1188,8 +1261,10 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strerror.m4
   m4/strerror_r.m4
   m4/string_h.m4
+  m4/strnlen.m4
   m4/strstr.m4
   m4/strtok_r.m4
+  m4/sys_random_h.m4
   m4/sys_socket_h.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
@@ -1207,5 +1282,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/wchar_t.m4
   m4/wctype_h.m4
   m4/wint_t.m4
+  m4/wmemchr.m4
+  m4/wmempcpy.m4
   m4/zzgnulib.m4
 ])

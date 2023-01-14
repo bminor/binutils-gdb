@@ -44,4 +44,6 @@ int main()
   add1();
   subr2();
   subr3();
+
+  return 0;
 }

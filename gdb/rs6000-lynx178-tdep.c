@@ -274,7 +274,7 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 
   /* AltiVec extension: Functions that declare a vector data type as a
      return value place that return value in VR2.  */
-  if (valtype->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
+  if (valtype->code () == TYPE_CODE_ARRAY && valtype->is_vector ()
       && TYPE_LENGTH (valtype) == 16)
     {
       if (readbuf)

@@ -78,7 +78,7 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct value *function,
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION)
       && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
-	    && TYPE_VECTOR (valtype))
+	    && valtype->is_vector ())
       && !(TYPE_LENGTH (valtype) == 1
 	   || TYPE_LENGTH (valtype) == 2
 	   || TYPE_LENGTH (valtype) == 4

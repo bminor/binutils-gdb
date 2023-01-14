@@ -1119,7 +1119,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   try
     {
-      lang->la_parser (&ps);
+      lang->parser (&ps);
     }
   catch (const gdb_exception &except)
     {
@@ -1146,8 +1146,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (out_subexp)
     *out_subexp = subexp;
 
-  lang->la_post_parser (&result, void_context_p, ps.parse_completion,
-			tracker);
+  lang->post_parser (&result, void_context_p, ps.parse_completion, tracker);
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
@@ -1239,14 +1238,6 @@ parse_expression_for_completion (const char *string,
   val = evaluate_subexpression_type (exp.get (), subexp);
 
   return value_type (val);
-}
-
-/* A post-parser that does nothing.  */
-
-void
-null_post_parser (expression_up *exp, int void_context_p, int completin,
-		  innermost_block_tracker *tracker)
-{
 }
 
 /* Parse floating point value P of length LEN.

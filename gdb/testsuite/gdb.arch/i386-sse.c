@@ -51,7 +51,7 @@ v4sf_t data[] =
 int
 have_sse (void)
 {
-  int edx;
+  unsigned int edx;
 
   if (!x86_cpuid (1, NULL, NULL, NULL, &edx))
     return 0;

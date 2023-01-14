@@ -30,14 +30,9 @@ struct fix;
 #define TARGET_BYTES_BIG_ENDIAN 1
 #endif
 
-/* If OBJ_COFF is defined, and TE_PE is not defined, we are assembling
-   XCOFF for AIX or PowerMac.  If TE_PE is defined, we are assembling
-   COFF for Windows NT.  */
-
+/* If OBJ_COFF is defined we are assembling XCOFF for AIX or PowerMac.  */
 #ifdef OBJ_COFF
-#ifndef TE_PE
 #define OBJ_XCOFF
-#endif
 #endif
 
 /* The target BFD architecture.  */
@@ -107,17 +102,6 @@ extern ppc_cpu_t ppc_cpu;
 #define TC_INIT_FIX_DATA(FIXP) \
   do { (FIXP)->tc_fix_data.ppc_cpu = ppc_cpu; } while (0)
 
-#ifdef TE_PE
-
-/* Question marks are permitted in symbol names.  */
-#define LEX_QM 1
-
-/* Don't adjust TOC relocs.  */
-#define tc_fix_adjustable(FIX) ppc_pe_fix_adjustable (FIX)
-extern int ppc_pe_fix_adjustable (struct fix *);
-
-#endif
-
 #ifdef OBJ_XCOFF
 
 /* Declarations needed when generating XCOFF code.  XCOFF is an

@@ -160,7 +160,7 @@ int pe_dll_extra_pe_debug = 0;
 int pe_use_nul_prefixed_import_tables = 0;
 int pe_use_coff_long_section_names = -1;
 int pe_leading_underscore = -1;
-int pe_dll_enable_reloc_section = 0;
+int pe_dll_enable_reloc_section = 1;
 
 /* Static variables and types.  */
 
@@ -565,8 +565,9 @@ auto_export (bfd *abfd, def_file *d, const char *n)
   key.name = key.its_name = (char *) n;
 
   /* Return false if n is in the d->exports table.  */
-  if (bsearch (&key, d->exports, d->num_exports,
-	       sizeof (pe_def_file->exports[0]), pe_export_sort))
+  if (d->num_exports != 0
+      && bsearch (&key, d->exports, d->num_exports,
+		  sizeof (pe_def_file->exports[0]), pe_export_sort))
     return 0;
 
   if (pe_dll_do_default_excludes)
@@ -1505,7 +1506,6 @@ pe_find_data_imports (const char *symhead,
 static void
 generate_reloc (bfd *abfd, struct bfd_link_info *info)
 {
-
   /* For .reloc stuff.  */
   reloc_data_type *reloc_data;
   int total_relocs = 0;
@@ -1516,6 +1516,8 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   bfd *b;
   struct bfd_section *s;
 
+  if (reloc_s == NULL)
+    return;
   total_relocs = 0;
   for (b = info->input_bfds; b; b = b->link.next)
     for (s = b->sections; s; s = s->next)
@@ -1547,9 +1549,11 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  if (s->output_section->vma == 0)
 	    {
 	      /* Huh?  Shouldn't happen, but punt if it does.  */
+#if 0 /* This happens when linking with --just-symbols=<file>, so do not generate an error.  */
 	      einfo (_("%P: zero vma section reloc detected: `%s' #%d f=%d\n"),
 		     s->output_section->name, s->output_section->index,
 		     s->output_section->flags);
+#endif
 	      continue;
 	    }
 
@@ -3344,6 +3348,8 @@ pe_implied_import_dll (const char *filename)
       return FALSE;
     }
 
+  track_dependency_files (filename);
+
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
@@ -3628,7 +3634,8 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
       /* Do the assignments again.  */
       lang_do_assignments (lang_final_phase_enum);
     }
-  reloc_s->contents = reloc_d;
+  if (reloc_s)
+    reloc_s->contents = reloc_d;
 }
 
 bfd_boolean

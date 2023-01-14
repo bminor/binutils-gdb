@@ -56,6 +56,20 @@ rl78_sym_diff_handler (bfd * abfd,
   return bfd_reloc_continue;
 }
 
+/* Special handler for relocations which don't have to be relocated.
+   This function just simply returns bfd_reloc_ok.  */
+static bfd_reloc_status_type
+msp430_elf_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+			asymbol *symbol ATTRIBUTE_UNUSED,
+			void *data ATTRIBUTE_UNUSED, asection *input_section,
+			bfd *output_bfd, char **error_message ATTRIBUTE_UNUSED)
+{
+  if (output_bfd != NULL)
+    reloc_entry->address += input_section->output_offset;
+
+  return bfd_reloc_ok;
+}
+
 static reloc_howto_type elf_msp430_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
@@ -220,7 +234,40 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE)			/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
+
+  /* The length of unsigned-leb128 is variable, just assume the
+     size is one byte here.  */
+  HOWTO (R_MSP430_GNU_SET_ULEB128,	/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 msp430_elf_ignore_reloc,	/* special handler.  */
+	 "R_MSP430_GNU_SET_ULEB128",	/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* The length of unsigned-leb128 is variable, just assume the
+     size is one byte here.  */
+  HOWTO (R_MSP430_GNU_SUB_ULEB128,	/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 msp430_elf_ignore_reloc,	/* special handler.  */
+	 "R_MSP430_GNU_SUB_ULEB128",	/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
 };
 
 static reloc_howto_type elf_msp430x_howto_table[] =
@@ -523,7 +570,40 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE)			/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
+
+  /* The length of unsigned-leb128 is variable, just assume the
+     size is one byte here.  */
+  HOWTO (R_MSP430X_GNU_SET_ULEB128,	/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 msp430_elf_ignore_reloc,	/* special handler.  */
+	 "R_MSP430X_GNU_SET_ULEB128",	/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
+  /* The length of unsigned-leb128 is variable, just assume the
+     size is one byte here.  */
+  HOWTO (R_MSP430X_GNU_SUB_ULEB128,	/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 msp430_elf_ignore_reloc,	/* special handler.  */
+	 "R_MSP430X_GNU_SUB_ULEB128",	/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 FALSE),			/* pcrel_offset */
+
 };
 
 /* Map BFD reloc types to MSP430 ELF reloc types.  */
@@ -547,7 +627,9 @@ static const struct msp430_reloc_map msp430_reloc_map[] =
   {BFD_RELOC_MSP430_2X_PCREL,	   R_MSP430_2X_PCREL},
   {BFD_RELOC_MSP430_RL_PCREL,	   R_MSP430_RL_PCREL},
   {BFD_RELOC_8,			   R_MSP430_8},
-  {BFD_RELOC_MSP430_SYM_DIFF,	   R_MSP430_SYM_DIFF}
+  {BFD_RELOC_MSP430_SYM_DIFF,	   R_MSP430_SYM_DIFF},
+  {BFD_RELOC_MSP430_SET_ULEB128,   R_MSP430_GNU_SET_ULEB128 },
+  {BFD_RELOC_MSP430_SUB_ULEB128,   R_MSP430_GNU_SUB_ULEB128 }
 };
 
 static const struct msp430_reloc_map msp430x_reloc_map[] =
@@ -573,7 +655,9 @@ static const struct msp430_reloc_map msp430x_reloc_map[] =
   {BFD_RELOC_MSP430_10_PCREL,	      R_MSP430X_10_PCREL},
   {BFD_RELOC_MSP430_2X_PCREL,	      R_MSP430X_2X_PCREL},
   {BFD_RELOC_MSP430_RL_PCREL,	      R_MSP430X_PCR16},
-  {BFD_RELOC_MSP430_SYM_DIFF,	      R_MSP430X_SYM_DIFF}
+  {BFD_RELOC_MSP430_SYM_DIFF,	      R_MSP430X_SYM_DIFF},
+  {BFD_RELOC_MSP430_SET_ULEB128,      R_MSP430X_GNU_SET_ULEB128 },
+  {BFD_RELOC_MSP430_SUB_ULEB128,      R_MSP430X_GNU_SUB_ULEB128 }
 };
 
 static inline bfd_boolean
@@ -755,6 +839,9 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
      if (uses_msp430x_relocs (input_bfd))
        switch (howto->type)
 	 {
+	 case R_MSP430X_GNU_SET_ULEB128:
+	   relocation += (!is_rel_reloc ? rel->r_addend : 0);
+	   /* Fall through.  */
 	 case R_MSP430_ABS32:
 	  /* If we are computing a 32-bit value for the location lists
 	     and the result is 0 then we add one to the value.  A zero
@@ -780,6 +867,9 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
      else
        switch (howto->type)
 	 {
+	 case R_MSP430_GNU_SET_ULEB128:
+	   relocation += (!is_rel_reloc ? rel->r_addend : 0);
+	   /* Fall through.  */
 	 case R_MSP430_32:
 	 case R_MSP430_16:
 	 case R_MSP430_16_BYTE:
@@ -794,16 +884,63 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
       sym_diff_section = NULL;
     }
 
-  if (uses_msp430x_relocs (input_bfd))
+  if ((uses_msp430x_relocs (input_bfd)
+       && howto->type == R_MSP430X_GNU_SET_ULEB128)
+      || (!uses_msp430x_relocs (input_bfd)
+	  && howto->type == R_MSP430_GNU_SET_ULEB128))
+    {
+      unsigned int len, new_len = 0;
+      bfd_byte *endp, *p;
+      unsigned int val = relocation;
+
+      _bfd_read_unsigned_leb128 (input_bfd, contents + rel->r_offset, &len);
+
+      /* Clean the contents value to zero.  Do not reduce the length.  */
+      p = contents + rel->r_offset;
+      endp = (p + len) - 1;
+      memset (p, 0x80, len - 1);
+      *(endp) = 0;
+
+      /* Get the length of the new uleb128 value.  */
+      do
+	{
+	  new_len++;
+	  val >>= 7;
+	} while (val);
+
+      if (new_len > len)
+	{
+	  _bfd_error_handler
+	    (_("error: final size of uleb128 value at offset 0x%lx in %pA "
+	       "from %pB exceeds available space"),
+	     (long) rel->r_offset, input_section, input_bfd);
+	}
+      else
+	{
+	  /* If the number of bytes required to store the new value has
+	     decreased, "right align" the new value within the available space,
+	     so the MSB side is padded with uleb128 zeros (0x80).  */
+	  p = _bfd_write_unsigned_leb128 (p + (len - new_len), endp,
+					  relocation);
+	  /* We checked there is enough space for the new value above, so this
+	     should never be NULL.  */
+	  BFD_ASSERT (p);
+	}
+
+      return bfd_reloc_ok;
+    }
+  else if (uses_msp430x_relocs (input_bfd))
     switch (howto->type)
       {
       case R_MSP430X_SYM_DIFF:
+      case R_MSP430X_GNU_SUB_ULEB128:
 	/* Cache the input section and value.
 	   The offset is unreliable, since relaxation may
 	   have reduced the following reloc's offset.  */
 	BFD_ASSERT (! is_rel_reloc);
 	sym_diff_section = input_section;
-	sym_diff_value = relocation;
+	sym_diff_value = relocation + (howto->type == R_MSP430X_GNU_SUB_ULEB128
+				       ? rel->r_addend : 0);
 	return bfd_reloc_ok;
 
       case R_MSP430_ABS16:
@@ -1254,11 +1391,13 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
       break;
 
     case R_MSP430_SYM_DIFF:
+    case R_MSP430_GNU_SUB_ULEB128:
       /* Cache the input section and value.
 	 The offset is unreliable, since relaxation may
 	 have reduced the following reloc's offset.  */
       sym_diff_section = input_section;
-      sym_diff_value = relocation;
+      sym_diff_value = relocation + (howto->type == R_MSP430_GNU_SUB_ULEB128
+				     ? rel->r_addend : 0);
       return bfd_reloc_ok;
 
       default:

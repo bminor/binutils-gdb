@@ -892,9 +892,6 @@ struct elf_or1k_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* Track type of TLS access.  */
   unsigned char tls_type;
 };
@@ -919,16 +916,14 @@ struct elf_or1k_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_cache sym_sec;
-
   bfd_boolean saw_plta;
 };
 
 /* Get the ELF linker hash table from a link_info structure.  */
 #define or1k_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-   == OR1K_ELF_DATA ? ((struct elf_or1k_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == OR1K_ELF_DATA)		\
+   ? (struct elf_or1k_link_hash_table *) (p)->hash : NULL)
 
 static bfd_boolean
 elf_or1k_mkobject (bfd *abfd)
@@ -964,7 +959,6 @@ or1k_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       struct elf_or1k_link_hash_entry *eh;
 
       eh = (struct elf_or1k_link_hash_entry *) ret;
-      eh->dyn_relocs = NULL;
       eh->tls_type = TLS_UNKNOWN;
     }
 
@@ -1884,15 +1878,6 @@ or1k_elf_check_relocs (bfd *abfd,
   if (bfd_link_relocatable (info))
     return TRUE;
 
-  /* Don't do anything special with non-loaded, non-alloced sections.
-     In particular, any relocs in such sections should not affect GOT
-     and PLT reference counting (ie. we don't allow them to create GOT
-     or PLT entries), there's no possibility or desire to optimize TLS
-     relocs, and there's not much point in propagating relocs to shared
-     libs that the dynamic linker won't relocate.  */
-  if ((sec->flags & SEC_ALLOC) == 0)
-    return TRUE;
-
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -2153,7 +2138,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		/* If this is a global symbol, we count the number of
 		   relocations we need for this symbol.  */
 		if (h != NULL)
-		  head = &((struct elf_or1k_link_hash_entry *) h)->dyn_relocs;
+		  head = &h->dyn_relocs;
 		else
 		  {
 		    /* Track dynamic relocs needed for local syms too.
@@ -2164,7 +2149,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		    Elf_Internal_Sym *isym;
 		    void *vpp;
 
-		    isym = bfd_sym_from_r_symndx (&htab->sym_sec,
+		    isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 						  abfd, r_symndx);
 		    if (isym == NULL)
 		      return FALSE;
@@ -2551,26 +2536,6 @@ or1k_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
     }
 }
 
-/* Find dynamic relocs for H that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *sec_relocs;
-  struct elf_or1k_link_hash_entry *eh = (struct elf_or1k_link_hash_entry *) h;
-
-  for (sec_relocs = eh->dyn_relocs;
-       sec_relocs != NULL;
-       sec_relocs = sec_relocs->next)
-    {
-      asection *s = sec_relocs->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return sec_relocs->sec;
-    }
-  return NULL;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -2657,7 +2622,7 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (!readonly_dynrelocs (h))
+  if (!_bfd_elf_readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -2758,7 +2723,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
   struct elf_or1k_link_hash_table *htab;
-  struct elf_or1k_link_hash_entry *eh;
   struct elf_dyn_relocs *sec_relocs;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -2768,8 +2732,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   htab = or1k_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  eh = (struct elf_or1k_link_hash_entry *) h;
 
   if (htab->root.dynamic_sections_created
       && h->plt.refcount > 0)
@@ -2857,7 +2819,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -2872,7 +2834,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (sec_relocs = *pp) != NULL;)
+	  for (pp = &h->dyn_relocs; (sec_relocs = *pp) != NULL;)
 	    {
 	      sec_relocs->count -= sec_relocs->pc_count;
 	      sec_relocs->pc_count = 0;
@@ -2885,11 +2847,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL
+      if (h->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -2929,13 +2891,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (sec_relocs = eh->dyn_relocs;
+  for (sec_relocs = h->dyn_relocs;
        sec_relocs != NULL;
        sec_relocs = sec_relocs->next)
     {
@@ -2943,33 +2905,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       sreloc->size += sec_relocs->count * sizeof (Elf32_External_Rela);
     }
 
-  return TRUE;
-}
-
-/* Set DF_TEXTREL if we find any dynamic relocs that apply to
-   read-only sections.  */
-
-static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
-{
-  asection *sec;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  sec = readonly_dynrelocs (h);
-  if (sec != NULL)
-    {
-      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
-
-      info->flags |= DF_TEXTREL;
-      info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
-	 sec->owner, h->root.root.string, sec);
-
-      /* Not an error, just cut short the traversal.  */
-      return FALSE;
-    }
   return TRUE;
 }
 
@@ -3141,54 +3076,7 @@ or1k_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	return FALSE;
     }
 
-  if (htab->root.dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in or1k_elf_finish_dynamic_sections, but we
-	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
-	 dynamic linker and used by the debugger.  */
-#define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
-
-     if (bfd_link_executable (info))
-       {
-	 if (! add_dynamic_entry (DT_DEBUG, 0))
-	   return FALSE;
-       }
-
-     if (htab->root.splt->size != 0)
-       {
-	 if (! add_dynamic_entry (DT_PLTGOT, 0)
-	     || ! add_dynamic_entry (DT_PLTRELSZ, 0)
-	     || ! add_dynamic_entry (DT_PLTREL, DT_RELA)
-	     || ! add_dynamic_entry (DT_JMPREL, 0))
-	   return FALSE;
-	}
-
-     if (relocs)
-       {
-	 if (! add_dynamic_entry (DT_RELA, 0)
-	     || ! add_dynamic_entry (DT_RELASZ, 0)
-	     || ! add_dynamic_entry (DT_RELAENT,
-				     sizeof (Elf32_External_Rela)))
-	   return FALSE;
-
-	 /* If any dynamic relocs apply to a read-only section,
-	    then we need a DT_TEXTREL entry.  */
-	 if ((info->flags & DF_TEXTREL) == 0)
-	   elf_link_hash_traverse (&htab->root, maybe_set_textrel, info);
-
-	 if ((info->flags & DF_TEXTREL) != 0)
-	   {
-	     if (! add_dynamic_entry (DT_TEXTREL, 0))
-	       return FALSE;
-	   }
-       }
-    }
-
-#undef add_dynamic_entry
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -3203,37 +3091,6 @@ or1k_elf_copy_indirect_symbol (struct bfd_link_info *info,
 
   edir = (struct elf_or1k_link_hash_entry *) dir;
   eind = (struct elf_or1k_link_hash_entry *) ind;
-
-  if (eind->dyn_relocs != NULL)
-    {
-      if (edir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
-	    {
-	      struct elf_dyn_relocs *q;
-
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
-		if (q->sec == p->sec)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = edir->dyn_relocs;
-	}
-
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
-    }
 
   if (ind->root.type == bfd_link_hash_indirect)
     {

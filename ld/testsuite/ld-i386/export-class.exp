@@ -32,7 +32,6 @@ if { ![is_elf_format] } {
 # Exclude some more targets; feel free to include your favorite one
 # if you like.
 if { !([istarget i?86-*-linux*]
-       || [istarget i?86-*-nacl*]
        || [istarget i?86-*-gnu*]) } {
     return
 }

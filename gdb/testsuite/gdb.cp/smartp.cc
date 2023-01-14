@@ -131,12 +131,12 @@ int main(){
   sp3->foo(1);
   sp3->foo('a');
 
-  sp4->a;
-  sp4->b;
+  (void) sp4->a;
+  (void) sp4->b;
 
   Type4 *mt4p = &mt4;
-  mt4p->a;
-  mt4p->b;
+  (void) mt4p->a;
+  (void) mt4p->b;
 
   A a;
   B b;

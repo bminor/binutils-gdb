@@ -1,3 +1,128 @@
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
+	"-break-insert --qualified" and "-dprintf-insert --qualified".
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Document LP_START, LP_END and BTA.
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Update the documentation for ARC
+	Features.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Ravenscar Profile): Add examples.
+	Document runtime initialization limitation.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.texinfo (Contributors): Add information for the eBPF
+	support.
+	(BPF): New section.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Unwinding Frames in Python): Update descriptions
+	for PendingFrame.read_register and
+	gdb.UnwindInfo.add_saved_register.
+	(Frames In Python): Update description of Frame.read_register.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Registers In Python): Document new find function.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Add documentation for
+	new command "maintenance print core-file-backed-mappings".
+
+2020-07-22  Reuben Thomas  <rrt@sc3d.org>
+
+	* gdb.texinfo (Remote Protocol, Overview): Correct the description
+	of which remote protocol commands are mandatory for a stub to
+	implement.
+
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+
+	* doc/guile.texi (Guile Introduction): Mention Guile 3.0.
+
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+
+	* guile.texi (Memory Ports in Guile): Mark
+	'memory-port-read-buffer-size',
+	'set-memory-port-read-buffer-size!',
+	'memory-port-write-buffer-size',
+	'set-memory-port-read-buffer-size!' as deprecated.
+	(Guile Introduction): Clarify which Guile
+	versions are supported.
+
+2020-07-13 Paul Carroll <pcarroll@codesourcery.com>
+
+	PR gdb/25716
+
+	* gdb.texinfo (Frame Apply): Remove anchor for 'frame
+	apply' and adjust xrefs to it.
+
+2020-07-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Attach): Update exec-file-mismatch doc.
+
+2020-07-08  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdb.texinfo: Document Windows drive conversion of
+	'set auto-load scripts-directory'.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texi (Registers): Add @anchor for 'info registers
+	<reggroup>' command.
+	* python.texi (Architectures In Python): Document new
+	register_groups method.
+	(Registers In Python): Document two new object types related to
+	register groups.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Python API): Add new section to the menu.
+	(Frames In Python): Add new @anchor.
+	(Architectures In Python): Document new registers method.
+	(Registers In Python): New section.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Unwinding Frames in Python): Document
+	PendingFrame.architecture method.
+
+2020-06-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Shell Commands): More accurate description of use
+	of $SHELL.  Reported by Sandra Loosemore <sandra@codesourcery.com>.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new 'maint print
+	xml-desc' command.
+
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Command aliases default args): New node documenting
+	how to use default args for a command using aliases.
+	(Aliases): Document the new 'DEFAULT-ARGS...' option.
+	(Help): Update help aliases text and describe when full alias
+	definition is provided.
+
+2020-06-11  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Index Files): Reword.  Remove Ada limitation.
+
+2020-06-10  Jonny Grant  <jg@jguk.org>
+
+	* gdb.texinfo: Remove broken links Previous and Up from
+	contents.
+
 2020-05-23  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Output Styling): Don't mention completion styling.

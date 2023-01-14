@@ -238,7 +238,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}]
  [@b{--no-pad-sections}]
  [@b{-o} @var{objfile}] [@b{-R}]
- [@b{--hash-size}=@var{NUM}] [@b{--reduce-memory-overheads}]
  [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}]
  [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
@@ -626,6 +625,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--[no-]transform}]
  [@b{--rename-section} @var{oldname}=@var{newname}]
  [@b{--[no-]trampolines}]
+ [@b{--abi-windowed}|@b{--abi-call0}]
 @end ifset
 @ifset Z80
 
@@ -745,7 +745,9 @@ compiler output).
 @itemx --gen-debug
 Generate debugging information for each assembler source line using whichever
 debug format is preferred by the target.  This currently means either STABS,
-ECOFF or DWARF2.
+ECOFF or DWARF2.  When the debug format is DWARF then a @code{.debug_info} and
+@code{.debug_line} section is only emitted when the assembly file doesn't
+generate one itself.
 
 @item --gstabs
 Generate stabs debugging information for each assembler line.  This
@@ -767,21 +769,21 @@ option is only supported by some targets, not all of them.
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 3 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-4
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 4 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-5
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 5 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-sections
@@ -873,18 +875,6 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 
 @item -R
 Fold the data section into the text section.
-
-@item --hash-size=@var{number}
-Set the default size of GAS's hash tables to a prime number close to
-@var{number}.  Increasing this value can reduce the length of time it takes the
-assembler to perform its tasks, at the expense of increasing the assembler's
-memory requirements.  Similarly reducing this value can reduce the memory
-requirements at the expense of speed.
-
-@item --reduce-memory-overheads
-This option reduces GAS's memory requirements, at the expense of making the
-assembly processes slower.  Currently this switch is a synonym for
-@samp{--hash-size=4051}, but in the future it may have other effects as well.
 
 @ifset ELF
 @item --sectname-subst
@@ -2957,7 +2947,7 @@ of a file is not a possible symbol delimiter).  @xref{Symbols}.
 
 Symbol names may also be enclosed in double quote @code{"} characters.  In such
 cases any characters are allowed, except for the NUL character.  If a double
-quote character is to be included in the symbol name it must be preceeded by a
+quote character is to be included in the symbol name it must be preceded by a
 backslash @code{\} character.
 @cindex length of symbols
 
@@ -4519,6 +4509,9 @@ Some machine configurations provide additional directives.
 
 * Text::                        @code{.text @var{subsection}}
 * Title::                       @code{.title "@var{heading}"}
+@ifset ELF
+* Tls_common::                  @code{.tls_common @var{symbol}, @var{length}[, @var{alignment}]}
+@end ifset
 @ifset COFF-ELF
 * Type::                        @code{.type <@var{int} | @var{name} , @var{type description}>}
 @end ifset
@@ -5866,7 +5859,8 @@ the @code{.loc} directive will add a row to the @code{.debug_line} line
 number matrix corresponding to the immediately following assembly
 instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
 arguments will be applied to the @code{.debug_line} state machine before
-the row is added.
+the row is added.  It is an error for the input assembly file to generate
+a non-empty @code{.debug_line} and also use @code{loc} directives.
 
 The @var{options} are a sequence of the following tokens in any order:
 
@@ -7194,6 +7188,16 @@ source file name and pagenumber) when generating assembly listings.
 This directive affects subsequent pages, as well as the current page if
 it appears within ten lines of the top of a page.
 
+@ifset ELF
+@node Tls_common
+@section @code{.tls_common @var{symbol}, @var{length}[, @var{alignment}]}
+
+@cindex @code{tls_common} directive
+This directive behaves in the same way as the @code{.comm} directive
+(@pxref{Comm}) except that @var{symbol} has type of STT_TLS instead of
+STT_OBJECT.
+@end ifset
+
 @ifset COFF-ELF
 @node Type
 @section @code{.type}
@@ -7580,6 +7584,22 @@ the flag value is 0, the file is compatible with other toolchains.  If it is 1,
 then the file is only compatible with the named toolchain.  If it is greater
 than 1, the file can only be processed by other toolchains under some private
 arrangement indicated by the flag value and the vendor name.
+@end table
+
+@subsection M680x0 Attributes
+
+@table @r
+@item Tag_GNU_M68K_ABI_FP (4)
+The floating-point ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the floating-point ABI.
+@item
+1 for files using double-precision hardware floating-point ABI.
+@item
+2 for files using the software floating-point ABI.
+@end itemize
 @end table
 
 @subsection MIPS Attributes

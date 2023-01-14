@@ -25,6 +25,9 @@ if {[get_compiler_info]} {
 
 load_lib jit-elf-helpers.exp
 
+# Increase this to see more detail.
+set test_verbose 0
+
 # The main code that loads and registers JIT objects.
 set main_basename "jit-elf-main"
 set main_srcfile ${srcdir}/${subdir}/${main_basename}.c
@@ -82,13 +85,13 @@ proc one_jit_test {jit_solibs_target match_str reattach} {
     set count [llength $jit_solibs_target]
 
     with_test_prefix "one_jit_test-$count" {
-	global verbose
+	global test_verbose
 	global main_binfile main_srcfile
 
 	clean_restart ${main_binfile}
 
 	# This is just to help debugging when things fail
-	if {$verbose > 0} {
+	if {$test_verbose > 0} {
 	    gdb_test "set debug jit 1"
 	}
 
@@ -117,7 +120,7 @@ proc one_jit_test {jit_solibs_target match_str reattach} {
 	gdb_test "info function ^jit_function" "$match_str"
 
 	# This is just to help debugging when things fail
-	if {$verbose > 0} {
+	if {$test_verbose > 0} {
 	    gdb_test "maintenance print objfiles"
 	    gdb_test "maintenance info break"
 	}

@@ -99,12 +99,13 @@ typedef enum insn_op_size {
 
 /* Enum declaration for machine type selection.  */
 typedef enum mach_attr {
-  MACH_BASE, MACH_BPF, MACH_MAX
+  MACH_BASE, MACH_BPF, MACH_XBPF, MACH_MAX
 } MACH_ATTR;
 
 /* Enum declaration for instruction set selection.  */
 typedef enum isa_attr {
-  ISA_EBPFLE, ISA_EBPFBE, ISA_MAX
+  ISA_EBPFLE, ISA_EBPFBE, ISA_XBPFLE, ISA_XBPFBE
+ , ISA_MAX
 } ISA_ATTR;
 
 /* Number of architecture variants.  */

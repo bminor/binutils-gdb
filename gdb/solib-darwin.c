@@ -251,8 +251,6 @@ darwin_current_sos (void)
       CORE_ADDR path_addr;
       struct mach_o_header_external hdr;
       unsigned long hdr_val;
-      gdb::unique_xmalloc_ptr<char> file_path;
-      int errcode;
 
       /* Read image info from inferior.  */
       if (target_read_memory (iinfo, buf, image_info_size))
@@ -275,9 +273,9 @@ darwin_current_sos (void)
       if (hdr_val == BFD_MACH_O_MH_EXECUTE)
         continue;
 
-      target_read_string (path_addr, &file_path,
-			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
-      if (errcode)
+      gdb::unique_xmalloc_ptr<char> file_path
+	= target_read_string (path_addr, SO_NAME_MAX_PATH_SIZE - 1);
+      if (file_path == nullptr)
 	break;
 
       /* Create and fill the new so_list element.  */

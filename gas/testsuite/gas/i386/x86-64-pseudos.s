@@ -17,6 +17,11 @@ _start:
 	{evex} {disp8} vmovaps (%rax),%xmm2
 	{evex} {disp32} vmovaps (%rax),%xmm2
 
+	{vex} {disp8} vmovaps 128(%rax),%xmm2
+	{vex} {disp32} vmovaps 128(%rax),%xmm2
+	{evex} {disp8} vmovaps 128(%rax),%xmm2
+	{evex} {disp32} vmovaps 128(%rax),%xmm2
+
 	mov %rcx, %rax
 	{load} mov %rcx, %rax
 	{store} mov %rcx, %rax
@@ -305,6 +310,11 @@ _start:
 	{disp8} movaps 128(%rax),%xmm2
 	{disp32} movaps 128(%rax),%xmm2
 	{rex} mov %al,%ah
+	{rex} shl %cl, %eax
+	{rex} movabs 1, %al
+	{rex} cmp %cl, %dl
+	{rex} mov $1, %bl
+	{rex} crc32 %cl, %eax
 	{rex} movl %eax,%ebx
 	{rex} movl %eax,%r14d
 	{rex} movl %eax,(%r8)
@@ -314,9 +324,22 @@ _start:
 	{rex} movaps (%r8),%xmm2
 	{rex} phaddw (%rcx),%mm0
 	{rex} phaddw (%r8),%mm0
-	{rex} vmovaps %xmm7,%xmm2
-	{rex} vmovaps %xmm17,%xmm2
-	{rex} rorx $7,%eax,%ebx
+
+	movb (%rbp),%al
+	{disp8} movb (%rbp),%al
+	{disp32} movb (%rbp),%al
+
+	movb (%ebp),%al
+	{disp8} movb (%ebp),%al
+	{disp32} movb (%ebp),%al
+
+	movb (%r13),%al
+	{disp8} movb (%r13),%al
+	{disp32} movb (%r13),%al
+
+	movb (%r13d),%al
+	{disp8} movb (%r13d),%al
+	{disp32} movb (%r13d),%al
 
 	.intel_syntax noprefix
 	{vex3} vmovaps xmm2,xmm7
@@ -333,6 +356,12 @@ _start:
 	{disp32} vmovaps xmm2,XMMWORD PTR [rax]
 	{evex} {disp8} vmovaps xmm2,XMMWORD PTR [rax]
 	{evex} {disp32} vmovaps xmm2,XMMWORD PTR [rax]
+
+	{vex} {disp8} vmovaps xmm2,XMMWORD PTR [rax+128]
+	{vex} {disp32} vmovaps xmm2,XMMWORD PTR [rax+128]
+	{evex} {disp8} vmovaps xmm2,XMMWORD PTR [rax+128]
+	{evex} {disp32} vmovaps xmm2,XMMWORD PTR [rax+128]
+
 	mov rax,rcx
 	{load} mov rax,rcx
 	{store} mov rax,rcx
@@ -357,6 +386,19 @@ _start:
 	{rex} movaps xmm2,XMMWORD PTR [r8]
 	{rex} phaddw mm0,QWORD PTR [rcx]
 	{rex} phaddw mm0,QWORD PTR [r8]
-	{rex} vmovaps xmm2,xmm7
-	{rex} vmovaps xmm2,xmm17
-	{rex} rorx ebx,eax,0x7
+
+	mov al, BYTE PTR [rbp]
+	{disp8} mov al, BYTE PTR [rbp]
+	{disp32} mov al, BYTE PTR [rbp]
+
+	mov al, BYTE PTR [ebp]
+	{disp8} mov al, BYTE PTR [ebp]
+	{disp32} mov al, BYTE PTR [ebp]
+
+	mov al, BYTE PTR [r13]
+	{disp8} mov al, BYTE PTR [r13]
+	{disp32} mov al, BYTE PTR [r13]
+
+	mov al, BYTE PTR [r13]
+	{disp8} mov al, BYTE PTR [r13d]
+	{disp32} mov al, BYTE PTR [r13d]

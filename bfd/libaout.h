@@ -609,9 +609,6 @@ extern bfd_boolean NAME (aout, bfd_free_cached_info)
 #define	aout_32_get_section_contents	_bfd_generic_get_section_contents
 
 #define	aout_64_get_section_contents	_bfd_generic_get_section_contents
-#ifndef NO_WRITE_HEADER_KLUDGE
-#define NO_WRITE_HEADER_KLUDGE 0
-#endif
 
 #ifndef aout_32_bfd_is_local_label_name
 #define aout_32_bfd_is_local_label_name bfd_generic_is_local_label_name

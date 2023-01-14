@@ -1,6 +1,6 @@
 #PROG: objcopy
 #source: compressed-1.s
-#as: --32 --compress-debug-sections
+#as: --32 --compress-debug-sections --gdwarf-3
 #objcopy:
 #readelf: -w
 #name: objcopy on compressed debug sections

@@ -3685,6 +3685,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS),
     0xe320f010, 0xffffffff, "esb"},
 
+  /* V8-R instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8R),
+    0xf57ff04c, 0xffffffff, "dfb"},
+
   /* V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0x0320f005, 0x0fffffff, "sevl"},
@@ -4734,6 +4738,10 @@ static const struct opcode32 thumb32_opcodes[] =
     0xe8d00fef, 0xfff00fff, "ldaex%c\t%12-15r, [%16-19R]"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0xe8d000ff, 0xfff000ff, "ldaexd%c\t%12-15r, %8-11r, [%16-19R]"},
+
+  /* V8-R instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8R),
+    0xf3bf8f4c, 0xffffffff, "dfb%c"},
 
   /* CRC32 instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC),
@@ -7026,14 +7034,14 @@ print_simd_imm8 (struct disassemble_info *info, unsigned long given,
       return;
     }
 
-  // printU determines whether the immediate value should be printed as
-  // unsigned.
+  /* printU determines whether the immediate value should be printed as
+     unsigned.  */
   unsigned printU = 0;
   switch (insn->mve_op)
     {
     default:
       break;
-    // We want this for instructions that don't have a 'signed' type
+    /* We want this for instructions that don't have a 'signed' type.  */
     case MVE_VBIC_IMM:
     case MVE_VORR_IMM:
     case MVE_VMVN_IMM:

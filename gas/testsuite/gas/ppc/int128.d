@@ -20,7 +20,7 @@ Disassembly of section \.text:
 .*:	(13 9d f7 0b|0b f7 9d 13) 	vmodsq  v28,v29,v30
 .*:	(13 e0 0e 0b|0b 0e e0 13) 	vmoduq  v31,v0,v1
 .*:	(10 5b 1e 02|02 1e 5b 10) 	vextsd2q v2,v3
-.*:	(10 04 29 01|01 29 04 10) 	vcmpuq  v4,v5
+.*:	(10 04 29 01|01 29 04 10) 	vcmpuq  cr0,v4,v5
 .*:	(10 86 39 41|41 39 86 10) 	vcmpsq  cr1,v6,v7
 .*:	(11 09 51 c7|c7 51 09 11) 	vcmpequq v8,v9,v10
 .*:	(11 6c 6d c7|c7 6d 6c 11) 	vcmpequq. v11,v12,v13

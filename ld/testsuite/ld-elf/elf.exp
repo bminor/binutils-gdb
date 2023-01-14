@@ -46,13 +46,6 @@ if { [istarget alpha*-*-* ] } {
     set ASFLAGS "$ASFLAGS --defsym NO_SET=1"
 }
 
-if { [istarget "*-*-nacl*"] } {
-    # The eh[1-4] cases are written to expect ELFCLASS64 layout on x86-64.
-    # But the target default is ELFCLASS32.  So the cases explicitly use
-    # -melf_x86_64 to select that, but NaCl needs a different emulation name.
-    set options_regsub(ld) {-melf_x86_64 -melf_x86_64_nacl}
-}
-
 if { [istarget "*-*-solaris*"] } {
     # Same for Solaris
     set options_regsub(ld) {-melf_x86_64 -melf_x86_64_sol2}
@@ -121,7 +114,6 @@ if [is_underscore_target] {
     set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
 }
 
-global ASFLAGS
 set saved_ASFLAGS "$ASFLAGS"
 if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
     set ASFLAGS "$ASFLAGS -mx86-used-note=no"
@@ -366,5 +358,126 @@ if { [istarget *-*-linux*]
 }
 
 run_ld_link_exec_tests $array_tests_static $xfails
+
+run_cc_link_tests [list \
+    [list \
+	"Build pr26391-1" \
+	"-Wl,-z,unique-symbol" \
+	"-fno-function-sections" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-1" \
+    ] \
+    [list \
+	"Build pr26391-2" \
+	"-Wl,-z,unique-symbol" \
+	"-ffunction-sections" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-2" \
+    ] \
+    [list \
+	"Build pr26391-3" \
+	"-Wl,-z,unique-symbol,--emit-relocs" \
+	"-fno-function-sections" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-3" \
+    ] \
+    [list \
+	"Build pr26391-4" \
+	"-Wl,-z,unique-symbol,--emit-relocs" \
+	"-ffunction-sections" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-4" \
+    ] \
+]
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr26391-5.o" \
+	"-z unique-symbol -r" \
+	"" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-5.o" \
+	"-fno-function-sections" \
+    ] \
+    [list \
+	"Build pr26391-6.o" \
+	"-z unique-symbol -r" \
+	"" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	{{nm "" pr26391.nd}} \
+	"pr26391-6.o" \
+	"-ffunction-sections" \
+    ] \
+]
+
+run_ld_link_exec_tests [list \
+    [list \
+	"Run pr26391-1" \
+	"-Wl,-z,unique-symbol" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	"pr26391-1" \
+	"pr26391.out" \
+	"-fno-function-sections" \
+    ] \
+    [list \
+	"Run pr26391-2" \
+	"-Wl,-z,unique-symbol" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	"pr26391-2" \
+	"pr26391.out" \
+	"-ffunction-sections" \
+    ] \
+    [list \
+	"Run pr26391-3" \
+	"-Wl,-z,unique-symbol,--emit-relocs" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	"pr26391-3" \
+	"pr26391.out" \
+	"-fno-function-sections" \
+    ] \
+    [list \
+	"Run pr26391-4" \
+	"-Wl,-z,unique-symbol,--emit-relocs" \
+	"" \
+	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
+	"pr26391-4" \
+	"pr26391.out" \
+	"-ffunction-sections" \
+    ] \
+    [list \
+	"Run pr26391-5" \
+	"-Wl,-z,unique-symbol" \
+	"" \
+	{dummy.c} \
+	"pr26391-5" \
+	"pr26391.out" \
+	"" \
+	"c" \
+	"" \
+	"tmpdir/pr26391-5.o" \
+    ] \
+    [list \
+	"Run pr26391-6" \
+	"-Wl,-z,unique-symbol" \
+	"" \
+	{dummy.c} \
+	"pr26391-6" \
+	"pr26391.out" \
+	"" \
+	"c" \
+	"" \
+	"tmpdir/pr26391-6.o" \
+    ] \
+]
 
 catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status

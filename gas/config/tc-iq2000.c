@@ -106,7 +106,7 @@ struct iq2000_hi_fixup
 static struct iq2000_hi_fixup * iq2000_hi_fixup_list;
 
 /* Macro hash table, which we will add to.  */
-extern struct hash_control *macro_hash;
+extern struct htab *macro_hash;
 
 const char *md_shortopts = "";
 struct option md_longopts[] =
@@ -246,7 +246,10 @@ iq2000_add_macro (const char *  name,
       formal_entry ** p = &macro->formals;
 
       macro->formal_count = 0;
-      macro->formal_hash = hash_new ();
+      macro->formal_hash = htab_create_alloc (7, hash_formal_entry,
+					      eq_formal_entry,
+					      NULL, xcalloc, free);
+
 
       while (*arguments != NULL)
 	{
@@ -272,8 +275,10 @@ iq2000_add_macro (const char *  name,
 	    sb_add_string (& formal->name, *arguments);
 
 	  /* Add to macro's hash table.  */
-	  hash_jam (macro->formal_hash, sb_terminate (& formal->name), formal);
-
+	  htab_insert (macro->formal_hash,
+		       formal_entry_alloc (sb_terminate (& formal->name),
+					   formal),
+		       1);
 	  formal->index = macro->formal_count;
 	  macro->formal_count++;
 	  *p = formal;
@@ -285,7 +290,7 @@ iq2000_add_macro (const char *  name,
 
   sb_add_string (&macro_name, name);
   namestr = sb_terminate (&macro_name);
-  hash_jam (macro_hash, namestr, macro);
+  htab_insert (macro_hash, macro_entry_alloc (namestr, macro), 1);
 
   macro_defined = 1;
 }

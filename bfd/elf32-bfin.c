@@ -1668,9 +1668,10 @@ struct bfinfdpic_elf_link_hash_table
 
 /* Get the Blackfin ELF linker hash table from a link_info structure.  */
 
-#define bfinfdpic_hash_table(info) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((info)->hash)) \
-  == BFIN_ELF_DATA ? ((struct bfinfdpic_elf_link_hash_table *) ((info)->hash)) : NULL)
+#define bfinfdpic_hash_table(p) \
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == BFIN_ELF_DATA)		\
+   ? (struct bfinfdpic_elf_link_hash_table *) (p)->hash : NULL)
 
 #define bfinfdpic_got_section(info) \
   (bfinfdpic_hash_table (info)->elf.sgot)
@@ -2552,6 +2553,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
+      picrel = NULL;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -2614,6 +2616,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	case R_BFIN_FUNCDESC_GOTOFFLO:
 	case R_BFIN_FUNCDESC:
 	case R_BFIN_FUNCDESC_VALUE:
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL)
 	    picrel = bfinfdpic_relocs_info_for_global (bfinfdpic_relocs_info
 						       (info), input_bfd, h,
@@ -4063,26 +4068,6 @@ elf32_bfinfdpic_size_dynamic_sections (bfd *output_bfd,
   if (!_bfinfdpic_size_got_plt (output_bfd, &gpinfo))
       return FALSE;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      if (bfinfdpic_got_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
-	  return FALSE;
-
-      if (bfinfdpic_pltrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (bfinfdpic_gotrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
-					    sizeof (Elf32_External_Rel)))
-	  return FALSE;
-    }
-
   s = bfd_get_linker_section (dynobj, ".dynbss");
   if (s && s->size == 0)
     s->flags |= SEC_EXCLUDE;
@@ -4091,7 +4076,7 @@ elf32_bfinfdpic_size_dynamic_sections (bfd *output_bfd,
   if (s && s->size == 0)
     s->flags |= SEC_EXCLUDE;
 
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, TRUE);
 }
 
 static bfd_boolean
@@ -4807,16 +4792,6 @@ struct bfin_link_hash_entry
   struct bfin_pcrel_relocs_copied *pcrel_relocs_copied;
 };
 
-/* bfin ELF linker hash table.  */
-
-struct bfin_link_hash_table
-{
-  struct elf_link_hash_table root;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-};
-
 #define bfin_hash_entry(ent) ((struct bfin_link_hash_entry *) (ent))
 
 static struct bfd_hash_entry *
@@ -4845,15 +4820,14 @@ bfin_link_hash_newfunc (struct bfd_hash_entry *entry,
 static struct bfd_link_hash_table *
 bfin_link_hash_table_create (bfd * abfd)
 {
-  struct bfin_link_hash_table *ret;
-  size_t amt = sizeof (struct bfin_link_hash_table);
+  struct elf_link_hash_table *ret;
+  size_t amt = sizeof (struct elf_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      bfin_link_hash_newfunc,
+  if (!_bfd_elf_link_hash_table_init (ret, abfd, bfin_link_hash_newfunc,
 				      sizeof (struct elf_link_hash_entry),
 				      BFIN_ELF_DATA))
     {
@@ -4861,9 +4835,7 @@ bfin_link_hash_table_create (bfd * abfd)
       return NULL;
     }
 
-  ret->sym_cache.abfd = NULL;
-
-  return &ret->root.root;
+  return &ret->root;
 }
 
 /* The size in bytes of an entry in the procedure linkage table.  */
@@ -5434,10 +5406,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 
 #define bfd_elf32_bfd_is_local_label_name \
 					bfin_is_local_label_name
-#define bfin_hash_table(p) \
-  ((struct bfin_link_hash_table *) (p)->hash)
-
-
 
 #define elf_backend_create_dynamic_sections \
 					_bfd_elf_create_dynamic_sections

@@ -105,12 +105,6 @@
 #define HighBitSet(val)      ((val) & 0x80000000)
 #define SetHighBit(val)      ((val) | 0x80000000)
 #define WithoutHighBit(val)  ((val) & 0x7fffffff)
-
-/* FIXME: This file has various tests of POWERPC_LE_PE.  Those tests
-   worked when the code was in peicode.h, but no longer work now that
-   the code is in peigen.c.  PowerPC NT is said to be dead.  If
-   anybody wants to revive the code, you will have to figure out how
-   to handle those issues.  */
 
 void
 _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
@@ -221,12 +215,6 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	}
       in->n_sclass = C_STAT;
     }
-#endif
-
-#ifdef coff_swap_sym_in_hook
-  /* This won't work in peigen.c, but since it's for PPC PE, it's not
-     worth fixing.  */
-  coff_swap_sym_in_hook (abfd, ext1, in1);
 #endif
 }
 
@@ -591,15 +579,6 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
       aouthdr_int->data_start += a->ImageBase;
       aouthdr_int->data_start &= 0xffffffff;
     }
-#endif
-
-#ifdef POWERPC_LE_PE
-  /* These three fields are normally set up by ppc_relocate_section.
-     In the case of reading a file in, we can pick them up from the
-     DataDirectory.  */
-  first_thunk_address = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress;
-  thunk_size = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size;
-  import_table_size = a->DataDirectory[PE_IMPORT_TABLE].Size;
 #endif
 }
 
@@ -1010,7 +989,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
        (0x02000000).  Also, the resource data should also be read and
        writable.  */
 
-    /* FIXME: Alignment is also encoded in this field, at least on PPC and
+    /* FIXME: Alignment is also encoded in this field, at least on
        ARM-WINCE.  Although - how do we get the original alignment field
        back ?  */
 
@@ -1147,15 +1126,21 @@ CODEVIEW_INFO *
 _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
 {
   char buffer[256+1];
+  bfd_size_type nread;
 
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return NULL;
 
-  if (bfd_bread (buffer, 256, abfd) < 4)
+  if (length <= sizeof (CV_INFO_PDB70) && length <= sizeof (CV_INFO_PDB20))
+    return NULL;
+  if (length > 256)
+    length = 256;
+  nread = bfd_bread (buffer, length, abfd);
+  if (length != nread)
     return NULL;
 
   /* Ensure null termination of filename.  */
-  buffer[256] = '\0';
+  memset (buffer + nread, 0, sizeof (buffer) - nread);
 
   cvinfo->CVSignature = H_GET_32 (abfd, buffer);
   cvinfo->Age = 0;
@@ -1176,7 +1161,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       memcpy (&(cvinfo->Signature[8]), &(cvinfo70->Signature[8]), 8);
 
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
-      // cvinfo->PdbFileName = cvinfo70->PdbFileName;
+      /* cvinfo->PdbFileName = cvinfo70->PdbFileName;  */
 
       return cvinfo;
     }
@@ -1187,7 +1172,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->Age = H_GET_32(abfd, cvinfo20->Age);
       memcpy (cvinfo->Signature, cvinfo20->Signature, 4);
       cvinfo->SignatureLength = 4;
-      // cvinfo->PdbFileName = cvinfo20->PdbFileName;
+      /* cvinfo->PdbFileName = cvinfo20->PdbFileName;  */
 
       return cvinfo;
     }
@@ -1250,14 +1235,6 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_("Reserved")
 };
 
-#ifdef POWERPC_LE_PE
-/* The code for the PPC really falls in the "architecture dependent"
-   category.  However, it's not clear that anyone will ever care, so
-   we're ignoring the issue for now; if/when PPC matters, some of this
-   may need to go into peicode.h, or arguments passed to enable the
-   PPC- specific code.  */
-#endif
-
 static bfd_boolean
 pe_print_idata (bfd * abfd, void * vfile)
 {
@@ -1265,11 +1242,6 @@ pe_print_idata (bfd * abfd, void * vfile)
   bfd_byte *data;
   asection *section;
   bfd_signed_vma adj;
-
-#ifdef POWERPC_LE_PE
-  asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
-#endif
-
   bfd_size_type datasize = 0;
   bfd_size_type dataoff;
   bfd_size_type i;
@@ -1324,56 +1296,6 @@ pe_print_idata (bfd * abfd, void * vfile)
 	   section->name, (unsigned long) addr);
 
   dataoff = addr - section->vma;
-
-#ifdef POWERPC_LE_PE
-  if (rel_section != 0 && rel_section->size != 0)
-    {
-      /* The toc address can be found by taking the starting address,
-	 which on the PPC locates a function descriptor. The
-	 descriptor consists of the function code starting address
-	 followed by the address of the toc. The starting address we
-	 get from the bfd, and the descriptor is supposed to be in the
-	 .reldata section.  */
-
-      bfd_vma loadable_toc_address;
-      bfd_vma toc_address;
-      bfd_vma start_address;
-      bfd_byte *data;
-      bfd_vma offset;
-
-      if (!bfd_malloc_and_get_section (abfd, rel_section, &data))
-	{
-	  free (data);
-	  return FALSE;
-	}
-
-      offset = abfd->start_address - rel_section->vma;
-
-      if (offset >= rel_section->size || offset + 8 > rel_section->size)
-	{
-	  free (data);
-	  return FALSE;
-	}
-
-      start_address = bfd_get_32 (abfd, data + offset);
-      loadable_toc_address = bfd_get_32 (abfd, data + offset + 4);
-      toc_address = loadable_toc_address - 32768;
-
-      fprintf (file,
-	       _("\nFunction descriptor located at the start address: %04lx\n"),
-	       (unsigned long int) (abfd->start_address));
-      fprintf (file,
-	       /* xgettext:c-format */
-	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
-	       start_address, loadable_toc_address, toc_address);
-      free (data);
-    }
-  else
-    {
-      fprintf (file,
-	       _("\nNo reldata section! Function descriptor not decoded.\n"));
-    }
-#endif
 
   fprintf (file,
 	   _("\nThe Import Tables (interpreted %s section contents)\n"),
@@ -1978,33 +1900,6 @@ pe_print_pdata (bfd * abfd, void * vfile)
       bfd_fprintf_vma (abfd, file, eh_data); fputc (' ', file);
       bfd_fprintf_vma (abfd, file, prolog_end_addr);
       fprintf (file, "   %x", em_data);
-#endif
-
-#ifdef POWERPC_LE_PE
-      if (eh_handler == 0 && eh_data != 0)
-	{
-	  /* Special bits here, although the meaning may be a little
-	     mysterious. The only one I know for sure is 0x03
-	     Code Significance
-	     0x00 None
-	     0x01 Register Save Millicode
-	     0x02 Register Restore Millicode
-	     0x03 Glue Code Sequence.  */
-	  switch (eh_data)
-	    {
-	    case 0x01:
-	      fprintf (file, _(" Register save millicode"));
-	      break;
-	    case 0x02:
-	      fprintf (file, _(" Register restore millicode"));
-	      break;
-	    case 0x03:
-	      fprintf (file, _(" Glue code sequence"));
-	      break;
-	    default:
-	      break;
-	    }
-	}
 #endif
       fprintf (file, "\n");
     }
@@ -2929,7 +2824,7 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
       subsystem_name = "Wince CUI";
       break;
-    // These are from UEFI Platform Initialization Specification 1.1.
+    /* These are from UEFI Platform Initialization Specification 1.1.  */
     case IMAGE_SUBSYSTEM_EFI_APPLICATION:
       subsystem_name = "EFI application";
       break;
@@ -2942,11 +2837,11 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER:
       subsystem_name = "SAL runtime driver";
       break;
-    // This is from revision 8.0 of the MS PE/COFF spec
+    /* This is from revision 8.0 of the MS PE/COFF spec  */
     case IMAGE_SUBSYSTEM_XBOX:
       subsystem_name = "XBOX";
       break;
-    // Added default case for clarity - subsystem_name is NULL anyway.
+    /* Added default case for clarity - subsystem_name is NULL anyway.  */
     default:
       subsystem_name = NULL;
     }
@@ -3048,28 +2943,32 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
     {
       bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
 	+ ope->pe_opthdr.ImageBase;
-      asection *section = find_section_by_vma (obfd, addr);
+      /* In particular a .buildid section may overlap (in VA space) with
+	 whatever section comes ahead of it (largely because of section->size
+	 representing s_size, not virt_size).  Therefore don't look for the
+	 section containing the first byte, but for that covering the last
+	 one.  */
+      bfd_vma last = addr + ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size - 1;
+      asection *section = find_section_by_vma (obfd, last);
       bfd_byte *data;
+
+      /* PR 17512: file: 0f15796a.  */
+      if (section && addr < section->vma)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler
+	    (_("%pB: Data Directory (%lx bytes at %" PRIx64 ") "
+	       "extends across section boundary at %" PRIx64),
+	     obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+	     (uint64_t) addr, (uint64_t) section->vma);
+	  return FALSE;
+	}
 
       if (section && bfd_malloc_and_get_section (obfd, section, &data))
 	{
 	  unsigned int i;
 	  struct external_IMAGE_DEBUG_DIRECTORY *dd =
 	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
-
-	  /* PR 17512: file: 0f15796a.  */
-	  if ((unsigned long) ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
-	      > section->size - (addr - section->vma))
-	    {
-	      /* xgettext:c-format */
-	      _bfd_error_handler
-		(_("%pB: Data Directory size (%lx) "
-		   "exceeds space left in section (%" PRIx64 ")"),
-		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
-		 (uint64_t) (section->size - (addr - section->vma)));
-	      free (data);
-	      return FALSE;
-	    }
 
 	  for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)

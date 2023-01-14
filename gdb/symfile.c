@@ -1051,6 +1051,7 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
   struct objfile *objfile;
   const int from_tty = add_flags & SYMFILE_VERBOSE;
   const int mainline = add_flags & SYMFILE_MAINLINE;
+  const int always_confirm = add_flags & SYMFILE_ALWAYS_CONFIRM;
   const int should_print = (print_symbol_loading_p (from_tty, mainline, 1)
 			    && (readnow_symbol_files
 				|| (add_flags & SYMFILE_NO_READ) == 0));
@@ -1069,12 +1070,13 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
   if ((add_flags & SYMFILE_NOT_FILENAME) != 0)
     flags |= OBJF_NOT_FILENAME;
 
-  /* Give user a chance to burp if we'd be
+  /* Give user a chance to burp if ALWAYS_CONFIRM or we'd be
      interactively wiping out any existing symbols.  */
 
-  if ((have_full_symbols () || have_partial_symbols ())
-      && mainline
-      && from_tty
+  if (from_tty
+      && (always_confirm
+	  || ((have_full_symbols () || have_partial_symbols ())
+	      && mainline))
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 

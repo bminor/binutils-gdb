@@ -163,7 +163,7 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*c4139c40\s*mthi\s*r19
 \s*[0-9a-f]*:\s*c4009c83\s*mflo\s*r3
 \s*[0-9a-f]*:\s*c4089d00\s*mtlo\s*r8
-\s*[0-9a-f]*:\s*c0000420\s*sync\s*0
+\s*[0-9a-f]*:\s*c0000420\s*sync
 \s*[0-9a-f]*:\s*c0200420\s*sync\s*1
 \s*[0-9a-f]*:\s*c2800420\s*sync\s*20
 \s*[0-9a-f]*:\s*c0601c20\s*idly\s*4
@@ -323,3 +323,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*cc480000\s*lrs\.w\s*r2,\s*\[0x0\].*
 \s*[0-9a-f]*:\s*ec430002\s*ori\s*r2,\s*r3,\s*2
 \s*[0-9a-f]*:\s*ec43000a\s*ori\s*r2,\s*r3,\s*10
+#...

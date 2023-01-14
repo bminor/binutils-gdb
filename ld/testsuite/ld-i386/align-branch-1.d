@@ -1,7 +1,6 @@
 #as: --32 -mbranches-within-32B-boundaries
 #ld: -melf_i386
 #objdump: -dw
-#notarget: i?86-*-nacl* x86_64-*-nacl*
 
 .*: +file format .*
 

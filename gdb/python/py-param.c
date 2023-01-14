@@ -569,12 +569,12 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
   /* Lookup created parameter, and register Python object against the
      parameter context.  Perform this task against both lists.  */
   tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *show_list, "", 0, 1);
+  param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
   if (param)
     set_cmd_context (param, self);
 
   tmp_name = cmd_name;
-  param = lookup_cmd (&tmp_name, *set_list, "", 0, 1);
+  param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
   if (param)
     set_cmd_context (param, self);
 }

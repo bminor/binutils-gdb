@@ -25,7 +25,7 @@
 # with mixed types.
 
 if [skip_ctf_tests] {
-    unsupported "no ctf debug format support"
+    unsupported "no CTF debug format support, or CTF disabled in GDB"
     return 0
 }
 

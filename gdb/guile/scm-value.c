@@ -888,7 +888,7 @@ gdbscm_value_to_integer (SCM self)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  if (TYPE_UNSIGNED (type))
+  if (type->is_unsigned ())
     return gdbscm_scm_from_ulongest (l);
   else
     return gdbscm_scm_from_longest (l);
@@ -930,7 +930,7 @@ gdbscm_value_to_real (SCM self)
 	  d = target_float_to_host_double (value_contents (value), type);
 	  check = value_from_host_double (type, d);
 	}
-      else if (TYPE_UNSIGNED (type))
+      else if (type->is_unsigned ())
 	{
 	  d = (ULONGEST) value_as_long (value);
 	  check = value_from_ulongest (type, (ULONGEST) d);

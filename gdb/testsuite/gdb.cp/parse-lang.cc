@@ -37,4 +37,6 @@ main ()
 
   c.m ();
   marker ();
+
+  return 0;
 }

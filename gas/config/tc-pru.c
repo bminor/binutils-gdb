@@ -132,14 +132,14 @@ typedef struct pru_insn_info
 } pru_insn_infoS;
 
 /* Opcode hash table.  */
-static struct hash_control *pru_opcode_hash = NULL;
+static htab_t pru_opcode_hash = NULL;
 #define pru_opcode_lookup(NAME) \
-  ((struct pru_opcode *) hash_find (pru_opcode_hash, (NAME)))
+  ((struct pru_opcode *) str_hash_find (pru_opcode_hash, (NAME)))
 
 /* Register hash table.  */
-static struct hash_control *pru_reg_hash = NULL;
+static htab_t pru_reg_hash = NULL;
 #define pru_reg_lookup(NAME) \
-  ((struct pru_reg *) hash_find (pru_reg_hash, (NAME)))
+  ((struct pru_reg *) str_hash_find (pru_reg_hash, (NAME)))
 
 /* The known current alignment of the current section.  */
 static int pru_current_align;
@@ -1557,41 +1557,20 @@ void
 md_begin (void)
 {
   int i;
-  const char *inserted;
 
   /* Create and fill a hashtable for the PRU opcodes, registers and
      arguments.  */
-  pru_opcode_hash = hash_new ();
-  pru_reg_hash = hash_new ();
+  pru_opcode_hash = str_htab_create ();
+  pru_reg_hash = str_htab_create ();
 
   for (i = 0; i < NUMOPCODES; ++i)
-    {
-      inserted
-	= hash_insert (pru_opcode_hash, pru_opcodes[i].name,
-		       (PTR) & pru_opcodes[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   pru_opcodes[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-    }
+    if (str_hash_insert (pru_opcode_hash, pru_opcodes[i].name,
+			 &pru_opcodes[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), pru_opcodes[i].name);
 
   for (i = 0; i < pru_num_regs; ++i)
-    {
-      inserted
-	= hash_insert (pru_reg_hash, pru_regs[i].name,
-		       (PTR) & pru_regs[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   pru_regs[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-
-    }
+    if (str_hash_insert (pru_reg_hash, pru_regs[i].name, &pru_regs[i], 0))
+      as_fatal (_("duplicate %s"), pru_regs[i].name);
 
   linkrelax = pru_opt.link_relax;
   /* Initialize the alignment data.  */
@@ -1811,8 +1790,8 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 void
 md_end (void)
 {
-  hash_die (pru_opcode_hash);
-  hash_die (pru_reg_hash);
+  htab_delete (pru_opcode_hash);
+  htab_delete (pru_reg_hash);
 }
 
 symbolS *

@@ -974,7 +974,7 @@ process_next_line (const char *p, struct command_line **command,
       /* Resolve command abbreviations (e.g. 'ws' for 'while-stepping').  */
       const char *cmd_name = p;
       struct cmd_list_element *cmd
-	= lookup_cmd_1 (&cmd_name, cmdlist, NULL, 1);
+	= lookup_cmd_1 (&cmd_name, cmdlist, NULL, NULL, 1);
       cmd_name = skip_spaces (cmd_name);
       bool inline_cmd = *cmd_name != '\0';
 
@@ -1331,7 +1331,7 @@ validate_comname (const char **comname)
       std::string prefix (*comname, last_word - 1);
       const char *tem = prefix.c_str ();
 
-      c = lookup_cmd (&tem, cmdlist, "", 0, 1);
+      c = lookup_cmd (&tem, cmdlist, "", NULL, 0, 1);
       if (c->prefixlist == NULL)
 	error (_("\"%s\" is not a prefix command."), prefix.c_str ());
 
@@ -1387,7 +1387,7 @@ do_define_command (const char *comname, int from_tty,
 
   /* Look it up, and verify that we got an exact match.  */
   tem = comname;
-  c = lookup_cmd (&tem, *list, "", -1, 1);
+  c = lookup_cmd (&tem, *list, "", NULL, -1, 1);
   if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
@@ -1432,7 +1432,7 @@ do_define_command (const char *comname, int from_tty,
     {
       /* Look up cmd it hooks, and verify that we got an exact match.  */
       tem = comname + hook_name_size;
-      hookc = lookup_cmd (&tem, *list, "", -1, 0);
+      hookc = lookup_cmd (&tem, *list, "", NULL, -1, 0);
       if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
       if (!hookc && commands == nullptr)
@@ -1518,7 +1518,7 @@ document_command (const char *comname, int from_tty)
   list = validate_comname (&comname);
 
   tem = comname;
-  c = lookup_cmd (&tem, *list, "", 0, 1);
+  c = lookup_cmd (&tem, *list, "", NULL, 0, 1);
 
   if (c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
@@ -1566,7 +1566,7 @@ define_prefix_command (const char *comname, int from_tty)
 
   /* Look it up, and verify that we got an exact match.  */
   tem = comname;
-  c = lookup_cmd (&tem, *list, "", -1, 1);
+  c = lookup_cmd (&tem, *list, "", NULL, -1, 1);
   if (c != nullptr && strcmp (comname, c->name) != 0)
     c = nullptr;
 

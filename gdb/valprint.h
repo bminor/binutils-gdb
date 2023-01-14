@@ -171,6 +171,20 @@ extern int read_string (CORE_ADDR addr, int len, int width,
 			gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 			int *bytes_read);
 
+/* Helper function to check the validity of some bits of a value.
+
+   If TYPE represents some aggregate type (e.g., a structure), return 1.
+
+   Otherwise, any of the bytes starting at OFFSET and extending for
+   TYPE_LENGTH(TYPE) bytes are invalid, print a message to STREAM and
+   return 0.  The checking is done using FUNCS.
+
+   Otherwise, return 1.  */
+
+extern int valprint_check_validity (struct ui_file *stream, struct type *type,
+				    LONGEST embedded_offset,
+				    const struct value *val);
+
 extern void val_print_optimized_out (const struct value *val,
 				     struct ui_file *stream);
 

@@ -30,8 +30,6 @@ if [istarget "h8300-*-*"] {
   return
 }
 
-load_lib ld-lib.exp
-
 set sort_test_list [lsort [glob -nocomplain $srcdir/$subdir/sort*.d]]
 for { set i 0 } { $i < [llength $sort_test_list] } { incr i } {
     verbose [file rootname [lindex $sort_test_list $i]]

@@ -80,5 +80,5 @@ gdb_test "guile (print x)" "= 23"
 gdb_test_no_output "guile (define a (execute \"help\" #:to-string #t))" \
     "collect help from uiout"
 
-gdb_test "guile (print a)" "= .*aliases -- Aliases of other commands.*" \
+gdb_test "guile (print a)" "= .*aliases -- User-defined aliases of other commands.*" \
     "verify help to uiout"

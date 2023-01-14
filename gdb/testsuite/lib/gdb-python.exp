@@ -27,25 +27,6 @@ proc gdb_py_test_silent_cmd { cmd name report_pass } {
     }
 }
 
-# Usage: gdb_py_test_multiple NAME INPUT RESULT {INPUT RESULT}...
-# Run a test named NAME, consisting of multiple lines of input.
-# After each input line INPUT, search for result line RESULT.
-# Succeed if all results are seen; fail otherwise.
-
-proc gdb_py_test_multiple { name args } {
-    global gdb_prompt
-    foreach {input result} $args {
-	if {[gdb_test_multiple $input "$name - $input" {
-	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
-		pass "$name - $input"
-	    }
-	}]} {
-	    return 1
-	}
-    }
-    return 0
-}
-
 # Return the result of python expression EXPR.  DEFAULT is returned if
 # there's an error.  TEST is the test message to use.  It can be
 # omitted, in which case a test message is built from EXP.  This is

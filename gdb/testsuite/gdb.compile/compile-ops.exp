@@ -362,7 +362,6 @@ Dwarf::assemble $asm_file {
     cu { addr_size 4 } {
 
 	declare_labels int_label
-	extern func_start func_end ptr
 
 	compile_unit {
 	    {name file1.txt}

@@ -220,3 +220,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*ffe08002\s*\.long\s*0xffe08002
 \s*[0-9a-f]*:\s*ffe20002\s*\.long\s*0xffe20002
 \s*[0-9a-f]*:\s*ffe18002\s*\.long\s*0xffe18002
+#...

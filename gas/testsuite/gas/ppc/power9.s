@@ -390,3 +390,7 @@ power9:
 	dcbf	    0,4,1
 	dcbflp	    0,5
 	dcbf	    0,5,3
+	ori	    31,31,0
+	exser
+	msgsndu     3
+	msgclru     27

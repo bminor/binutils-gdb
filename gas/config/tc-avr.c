@@ -524,13 +524,13 @@ typedef union
 } mod_index;
 
 /* Opcode hash table.  */
-static struct hash_control *avr_hash;
+static htab_t avr_hash;
 
 /* Reloc modifiers hash control (hh8,hi8,lo8,pm_xx).  */
-static struct hash_control *avr_mod_hash;
+static htab_t avr_mod_hash;
 
 /* Whether some opcode does not change SREG.  */
-static struct hash_control *avr_no_sreg_hash;
+static htab_t avr_no_sreg_hash;
 
 static const char* const avr_no_sreg[] =
   {
@@ -780,7 +780,7 @@ avr_undefined_symbol (char *name)
 	  char xname[30];
 	  sprintf (xname, "%s.%03u", name, (++suffix) % 1000);
 	  avr_isr.sym_n_pushed = symbol_new (xname, undefined_section,
-					     (valueT) 0, &zero_address_frag);
+					     &zero_address_frag, (valueT) 0);
 	}
       return avr_isr.sym_n_pushed;
     }
@@ -808,33 +808,35 @@ md_begin (void)
   unsigned int i;
   struct avr_opcodes_s *opcode;
 
-  avr_hash = hash_new ();
+  avr_hash = str_htab_create ();
 
   /* Insert unique names into hash table.  This hash table then provides a
      quick index to the first opcode with a particular name in the opcode
      table.  */
   for (opcode = avr_opcodes; opcode->name; opcode++)
-    hash_insert (avr_hash, opcode->name, (char *) opcode);
+    str_hash_insert (avr_hash, opcode->name, opcode, 0);
 
-  avr_mod_hash = hash_new ();
+  avr_mod_hash = str_htab_create ();
 
   for (i = 0; i < ARRAY_SIZE (exp_mod); ++i)
     {
       mod_index m;
 
       m.index = i + 10;
-      hash_insert (avr_mod_hash, EXP_MOD_NAME (i), m.ptr);
+      str_hash_insert (avr_mod_hash, EXP_MOD_NAME (i), m.ptr, 0);
     }
 
-  avr_no_sreg_hash = hash_new ();
+  avr_no_sreg_hash = str_htab_create ();
 
   for (i = 0; i < ARRAY_SIZE (avr_no_sreg); ++i)
     {
-      gas_assert (hash_find (avr_hash, avr_no_sreg[i]));
-      hash_insert (avr_no_sreg_hash, avr_no_sreg[i], (char*) 4 /* dummy */);
+      gas_assert (str_hash_find (avr_hash, avr_no_sreg[i]));
+      str_hash_insert (avr_no_sreg_hash, avr_no_sreg[i],
+		       (void *) 4 /* dummy */, 0);
     }
 
-  avr_gccisr_opcode = (struct avr_opcodes_s*) hash_find (avr_hash, "__gcc_isr");
+  avr_gccisr_opcode = (struct avr_opcodes_s*) str_hash_find (avr_hash,
+							     "__gcc_isr");
   gas_assert (avr_gccisr_opcode);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
@@ -923,7 +925,7 @@ avr_ldi_expression (expressionS *exp)
     {
       mod_index m;
 
-      m.ptr = hash_find (avr_mod_hash, op);
+      m.ptr = str_hash_find (avr_mod_hash, op);
       mod = m.index;
 
       if (mod)
@@ -1874,7 +1876,7 @@ md_assemble (char *str)
   if (!op[0])
     as_bad (_("can't find opcode "));
 
-  opcode = (struct avr_opcodes_s *) hash_find (avr_hash, op);
+  opcode = (struct avr_opcodes_s *) str_hash_find (avr_hash, op);
 
   if (opcode && !avr_opt.all_opcodes)
     {
@@ -2453,7 +2455,7 @@ avr_update_gccisr (struct avr_opcodes_s *opcode, int reg1, int reg2)
   /* SREG: Look up instructions that don't clobber SREG.  */
 
   if (!avr_isr.need_sreg
-      && !hash_find (avr_no_sreg_hash, opcode->name))
+      && !str_hash_find (avr_no_sreg_hash, opcode->name))
     {
       avr_isr.need_sreg = 1;
     }
@@ -2497,7 +2499,7 @@ avr_emit_insn (const char *insn, int reg, char **pwhere)
   const int sreg = 0x3f;
   unsigned bin = 0;
   const struct avr_opcodes_s *op
-    = (struct avr_opcodes_s*) hash_find (avr_hash, insn);
+    = (struct avr_opcodes_s*) str_hash_find (avr_hash, insn);
 
   /* We only have to deal with: IN, OUT, PUSH, POP, CLR, LDI 0.  All of
      these deal with at least one Reg and are 1-word instructions.  */

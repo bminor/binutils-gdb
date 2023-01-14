@@ -18,7 +18,7 @@
 #
 # Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1765117
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
@@ -47,6 +47,7 @@ if { ![gdb_gcore_cmd "$core" "save a corefile"] } {
 Term::clean_restart 24 80 $testfile
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 set text [Term::get_all_lines]

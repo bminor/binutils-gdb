@@ -81,6 +81,12 @@ proc test_truncated_comp_dir {} {
     # find the source file no matter what we added to the directory
     # search path, this should now be fixed.
 
+    # All of these pathname and directory manipulations assume
+    # host == build, so do not attempt this set of tests on remote host.
+    if [is_remote host] {
+        return
+    }
+
     set original_dir [pwd]
     set working_dir [standard_output_file ""]
     cd ${working_dir}
@@ -108,7 +114,11 @@ proc test_truncated_comp_dir {} {
 
     clean_restart ${binfile}
 
-    gdb_test_no_output "set directories \$cdir:\$cwd"
+    if { [ishost *-*-mingw*] } {
+        gdb_test_no_output "set directories \$cdir;\$cwd"
+    } else {
+	gdb_test_no_output "set directories \$cdir:\$cwd"
+    }
     gdb_test "show directories" \
 	"\r\nSource directories searched: \\\$cdir\[:;\]\\\$cwd"
 

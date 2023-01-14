@@ -1,6 +1,6 @@
 ;;; dwarf-mode.el --- Browser for DWARF information. -*-lexical-binding:t-*-
 
-;; Version: 1.5
+;; Version: 1.6
 
 ;; Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
@@ -27,7 +27,7 @@
 (defconst dwarf-font-lock-keywords
   '(
     ;; Name and linkage name.
-    ("DW_AT_[a-z_]*name\\s *: .*:\\(.*\\)\\s *$"
+    ("DW_AT_[a-zA-Z_]*name\\s *:\\(?:\\s *(.*):\\)?\\s *\\(.*\\)\\s *$"
      (1 font-lock-function-name-face))
 
     ("Compilation Unit @ offset 0x[0-9a-f]+"
@@ -120,9 +120,11 @@ A prefix argument means expand all children."
 ;; Either follows a DIE reference, or expands a "...".
 (defun dwarf-die-button-action (button)
   (let* ((die (button-get button 'die))
-	 ;; Note that the first number can only be decimal.
-	 (die-rx (concat "^\\s *\\(<[0-9]+>\\)?<"
-			 die ">[^<]"))
+	 ;; Note that the first number can only be decimal.  It is
+	 ;; included in this search because otherwise following a ref
+	 ;; might lead to a zero-length boolean attribute in the
+	 ;; previous DIE.
+	 (die-rx (concat "^\\s *<[0-9]+><" die ">:"))
 	 (old (point))
 	 (is-ref (button-get button 'die-ref)))
     (if is-ref

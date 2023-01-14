@@ -154,7 +154,7 @@ if { ![ld_assemble_flags $as "-mpic -mpid=near" $srcdir/$subdir/shlib-1.s tmpdir
      || ![ld_link $ld tmpdir/shlibb.o "-r -EB tmpdir/shlib-1b.o tmpdir/shlib-2b.o"]
      || ![ld_link $ld tmpdir/dynapp-1 "tmpdir/libtest.so tmpdir/shlib-app-1.o"]
      || ![ld_link $ld tmpdir/dynapp-1b "-EB tmpdir/libtestb.so tmpdir/shlib-app-1b.o"] } {
-    unresolved "TIC6X OSABI tests"
+    fail "TIC6X OSABI tests"
     return
 }
 

@@ -24,7 +24,6 @@
 #include "riscv-opc.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "bfd.h"
 
 typedef uint64_t insn_t;
 
@@ -205,7 +204,7 @@ static const char * const riscv_pred_succ[16] =
 #define OP_SH_RS2		20
 #define OP_MASK_RS1		0x1f
 #define OP_SH_RS1		15
-#define OP_MASK_RS3		0x1f
+#define OP_MASK_RS3		0x1fU
 #define OP_SH_RS3		27
 #define OP_MASK_RD		0x1f
 #define OP_SH_RD		7
@@ -224,14 +223,14 @@ static const char * const riscv_pred_succ[16] =
 #define OP_MASK_RL		0x1
 #define OP_SH_RL		25
 
-#define OP_MASK_CUSTOM_IMM	0x7f
+#define OP_MASK_CUSTOM_IMM	0x7fU
 #define OP_SH_CUSTOM_IMM	25
-#define OP_MASK_CSR		0xfff
+#define OP_MASK_CSR		0xfffU
 #define OP_SH_CSR		20
 
 #define OP_MASK_FUNCT3         0x7
 #define OP_SH_FUNCT3           12
-#define OP_MASK_FUNCT7         0x7f
+#define OP_MASK_FUNCT7         0x7fU
 #define OP_SH_FUNCT7           25
 #define OP_MASK_FUNCT2         0x3
 #define OP_SH_FUNCT2           25
@@ -374,6 +373,7 @@ enum riscv_csr_class
   CSR_CLASS_I,
   CSR_CLASS_I_32,      /* rv32 only */
   CSR_CLASS_F,         /* f-ext only */
+  CSR_CLASS_DEBUG      /* debug CSR */
 };
 
 /* The current supported privilege spec versions.  */
@@ -382,7 +382,6 @@ enum riscv_priv_spec_class
 {
   PRIV_SPEC_CLASS_NONE,
 
-  PRIV_SPEC_CLASS_1P9,
   PRIV_SPEC_CLASS_1P9P1,
   PRIV_SPEC_CLASS_1P10,
   PRIV_SPEC_CLASS_1P11,
@@ -490,11 +489,7 @@ extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
 extern const struct riscv_ext_version riscv_ext_version_table[];
 
-extern bfd_boolean
+extern int
 riscv_get_isa_spec_class (const char *, enum riscv_isa_spec_class *);
-extern bfd_boolean
-riscv_get_priv_spec_class (const char *, enum riscv_priv_spec_class *);
-extern const char *
-riscv_get_priv_spec_name (enum riscv_priv_spec_class);
 
 #endif /* _RISCV_H_ */

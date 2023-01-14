@@ -534,7 +534,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
        || type->code () == TYPE_CODE_UNION)
        && type->num_fields () == 1)
     {
-      fld_type = TYPE_FIELD_TYPE (type, 0);
+      fld_type = type->field (0).type ();
       if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
 	return 0;
 
@@ -550,12 +550,12 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
      and which contains no arrays of more than two elements -> returned in
      register.  */
   if (type->code () == TYPE_CODE_STRUCT
-      && v850_type_is_scalar (TYPE_FIELD_TYPE (type, 0))
-      && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
+      && v850_type_is_scalar (type->field (0).type ())
+      && TYPE_LENGTH (type->field (0).type ()) == 4)
     {
       for (i = 1; i < type->num_fields (); ++i)
         {
-	  fld_type = TYPE_FIELD_TYPE (type, 0);
+	  fld_type = type->field (0).type ();
 	  if (fld_type->code () == TYPE_CODE_ARRAY)
 	    {
 	      tgt_type = TYPE_TARGET_TYPE (fld_type);
@@ -574,7 +574,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
     {
       for (i = 0; i < type->num_fields (); ++i)
         {
-	  fld_type = TYPE_FIELD_TYPE (type, 0);
+	  fld_type = type->field (0).type ();
 	  if (!v850_use_struct_convention (gdbarch, fld_type))
 	    return 0;
 	}
@@ -983,7 +983,7 @@ v850_eight_byte_align_p (struct type *type)
 
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  if (v850_eight_byte_align_p (TYPE_FIELD_TYPE (type, i)))
+	  if (v850_eight_byte_align_p (type->field (i).type ()))
 	    return 1;
 	}
     }

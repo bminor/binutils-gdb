@@ -12,5 +12,5 @@ file1\.c                                        1 .*
 
 \./dw2-decodedline\.c:\[\+\+\]
 dw2-decodedline\.c                              2 .*
-dw2-decodedline\.c                              2 .*
+dw2-decodedline\.c                              - .*
 

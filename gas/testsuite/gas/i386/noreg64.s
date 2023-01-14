@@ -1,152 +1,178 @@
+	.macro pfx insn:vararg
+	.ifdef DATA16
+	data16 \insn
+	.else
+	.ifdef REX64
+	rex64 \insn
+	.else
+	\insn
+	.endif
+	.endif
+	.endm
+
+	.macro pfx16 insn:vararg
+	.ifndef REX64
+	pfx \insn
+	.endif
+	.endm
+
+	.macro pfx64 insn:vararg
+	.ifndef DATA16
+	pfx \insn
+	.endif
+	.endm
+
 	.text
 noreg:
-	adc	$1, (%rax)
-	adc	$0x89, (%rax)
-	adc	$0x1234, (%rax)
-	adc	$0x12345678, (%rax)
-	add	$1, (%rax)
-	add	$0x89, (%rax)
-	add	$0x1234, (%rax)
-	add	$0x12345678, (%rax)
-	and	$1, (%rax)
-	and	$0x89, (%rax)
-	and	$0x1234, (%rax)
-	and	$0x12345678, (%rax)
-	bt	$1, (%rax)
-	btc	$1, (%rax)
-	btr	$1, (%rax)
-	bts	$1, (%rax)
-	call	*(%rax)
-	cmp	$1, (%rax)
-	cmp	$0x89, (%rax)
-	cmp	$0x1234, (%rax)
-	cmp	$0x12345678, (%rax)
-	cmps
-	cmps	%es:(%rdi), (%rsi)
-	crc32	(%rax), %eax
-	crc32	(%rax), %rax
-	dec	(%rax)
-	div	(%rax)
-	fadd	(%rax)
-	fcom	(%rax)
-	fcomp	(%rax)
-	fdiv	(%rax)
-	fdivr	(%rax)
-	fiadd	(%rax)
-	ficom	(%rax)
-	ficomp	(%rax)
-	fidiv	(%rax)
-	fidivr	(%rax)
-	fild	(%rax)
-	fimul	(%rax)
-	fist	(%rax)
-	fistp	(%rax)
-	fisttp	(%rax)
-	fisub	(%rax)
-	fisubr	(%rax)
-	fld	(%rax)
-	fmul	(%rax)
-	fst	(%rax)
-	fstp	(%rax)
-	fsub	(%rax)
-	fsubr	(%rax)
-	idiv	(%rax)
-	imul	(%rax)
-	in	$0
-	in	%dx
-	inc	(%rax)
-	ins
-	ins	%dx, %es:(%rdi)
-	iret
-	jmp	*(%rax)
-	lgdt	(%rax)
-	lidt	(%rax)
-	lldt	(%rax)
-	lmsw	(%rax)
-	lods
-	lods	(%rsi)
-	lret
-	lret	$4
-	ltr	(%rax)
-	mov	$0x12, (%rax)
-	mov	$0x1234, (%rax)
-	mov	$0x12345678, (%rax)
-	mov	%es, (%rax)
-	mov	(%rax), %es
-	movs
-	movs	(%rsi), %es:(%rdi)
-	movsx	(%rax), %ax
-	movsx	(%rax), %eax
-	movsx	(%rax), %rax
-	movzx	(%rax), %ax
-	movzx	(%rax), %eax
-	movzx	(%rax), %rax
-	mul	(%rax)
-	neg	(%rax)
-	nop	(%rax)
-	not	(%rax)
-	or	$1, (%rax)
-	or	$0x89, (%rax)
-	or	$0x1234, (%rax)
-	or	$0x12345678, (%rax)
-	out	$0
-	out	%dx
-	outs
-	outs	(%rsi), %dx
-	pop	(%rax)
-	pop	%fs
-	ptwrite	(%rax)
-	push	(%rax)
-	push	%fs
-	rcl	$1, (%rax)
-	rcl	$2, (%rax)
-	rcl	%cl, (%rax)
-	rcl	(%rax)
-	rcr	$1, (%rax)
-	rcr	$2, (%rax)
-	rcr	%cl, (%rax)
-	rcr	(%rax)
-	rol	$1, (%rax)
-	rol	$2, (%rax)
-	rol	%cl, (%rax)
-	rol	(%rax)
-	ror	$1, (%rax)
-	ror	$2, (%rax)
-	ror	%cl, (%rax)
-	ror	(%rax)
-	sbb	$1, (%rax)
-	sbb	$0x89, (%rax)
-	sbb	$0x1234, (%rax)
-	sbb	$0x12345678, (%rax)
-	scas
-	scas	%es:(%rdi)
-	sal	$1, (%rax)
-	sal	$2, (%rax)
-	sal	%cl, (%rax)
-	sal	(%rax)
-	sar	$1, (%rax)
-	sar	$2, (%rax)
-	sar	%cl, (%rax)
-	sar	(%rax)
-	shl	$1, (%rax)
-	shl	$2, (%rax)
-	shl	%cl, (%rax)
-	shl	(%rax)
-	shr	$1, (%rax)
-	shr	$2, (%rax)
-	shr	%cl, (%rax)
-	shr	(%rax)
-	stos
-	stos	%es:(%rdi)
-	sub	$1, (%rax)
-	sub	$0x89, (%rax)
-	sub	$0x1234, (%rax)
-	sub	$0x12345678, (%rax)
-	sysret
-	test	$0x89, (%rax)
-	test	$0x1234, (%rax)
-	test	$0x12345678, (%rax)
-	xor	$1, (%rax)
-	xor	$0x89, (%rax)
-	xor	$0x1234, (%rax)
-	xor	$0x12345678, (%rax)
+	pfx adc		$1, (%rax)
+	pfx adc		$0x89, (%rax)
+	pfx adc		$0x1234, (%rax)
+	pfx adc		$0x12345678, (%rax)
+	pfx add		$1, (%rax)
+	pfx add		$0x89, (%rax)
+	pfx add		$0x1234, (%rax)
+	pfx add		$0x12345678, (%rax)
+	pfx and		$1, (%rax)
+	pfx and		$0x89, (%rax)
+	pfx and		$0x1234, (%rax)
+	pfx and		$0x12345678, (%rax)
+	pfx bt		$1, (%rax)
+	pfx btc		$1, (%rax)
+	pfx btr		$1, (%rax)
+	pfx bts		$1, (%rax)
+	pfx call	*(%rax)
+	pfx cmp		$1, (%rax)
+	pfx cmp		$0x89, (%rax)
+	pfx cmp		$0x1234, (%rax)
+	pfx cmp		$0x12345678, (%rax)
+	pfx cmps
+	pfx cmps	%es:(%rdi), (%rsi)
+	pfx crc32	(%rax), %eax
+	pfx16 crc32	(%rax), %rax
+	pfx dec		(%rax)
+	pfx div		(%rax)
+	pfx fadd	(%rax)
+	pfx fcom	(%rax)
+	pfx fcomp	(%rax)
+	pfx fdiv	(%rax)
+	pfx fdivr	(%rax)
+	pfx fiadd	(%rax)
+	pfx ficom	(%rax)
+	pfx ficomp	(%rax)
+	pfx fidiv	(%rax)
+	pfx fidivr	(%rax)
+	pfx fild	(%rax)
+	pfx fimul	(%rax)
+	pfx fist	(%rax)
+	pfx fistp	(%rax)
+	pfx fisttp	(%rax)
+	pfx fisub	(%rax)
+	pfx fisubr	(%rax)
+	pfx fld		(%rax)
+	pfx fmul	(%rax)
+	pfx fst		(%rax)
+	pfx fstp	(%rax)
+	pfx fsub	(%rax)
+	pfx fsubr	(%rax)
+	pfx idiv	(%rax)
+	pfx imul	(%rax)
+	pfx in		$0
+	pfx in		%dx
+	pfx inc		(%rax)
+	pfx ins
+	pfx ins		%dx, %es:(%rdi)
+	pfx iret
+	pfx jmp		*(%rax)
+	pfx lcall	*(%rax)
+	pfx lgdt	(%rax)
+	pfx lidt	(%rax)
+	pfx ljmp	*(%rax)
+	pfx lldt	(%rax)
+	pfx lmsw	(%rax)
+	pfx lods
+	pfx lods	(%rsi)
+	pfx lret
+	pfx lret	$4
+	pfx ltr		(%rax)
+	pfx mov		$0x12, (%rax)
+	pfx mov		$0x1234, (%rax)
+	pfx mov		$0x12345678, (%rax)
+	pfx mov		%es, (%rax)
+	pfx mov		(%rax), %es
+	pfx movs
+	pfx movs	(%rsi), %es:(%rdi)
+	pfx64 movsx	(%rax), %ax
+	pfx movsx	(%rax), %eax
+	pfx16 movsx	(%rax), %rax
+	pfx64 movzx	(%rax), %ax
+	pfx movzx	(%rax), %eax
+	pfx16 movzx	(%rax), %rax
+	pfx mul		(%rax)
+	pfx neg		(%rax)
+	pfx nop		(%rax)
+	pfx not		(%rax)
+	pfx or		$1, (%rax)
+	pfx or		$0x89, (%rax)
+	pfx or		$0x1234, (%rax)
+	pfx or		$0x12345678, (%rax)
+	pfx out		$0
+	pfx out		%dx
+	pfx outs
+	pfx outs	(%rsi), %dx
+	pfx pop		(%rax)
+	pfx pop		%fs
+	pfx64 ptwrite	(%rax)
+	pfx push	(%rax)
+	pfx push	%fs
+	pfx rcl		$1, (%rax)
+	pfx rcl		$2, (%rax)
+	pfx rcl		%cl, (%rax)
+	pfx rcl		(%rax)
+	pfx rcr		$1, (%rax)
+	pfx rcr		$2, (%rax)
+	pfx rcr		%cl, (%rax)
+	pfx rcr		(%rax)
+	pfx rol		$1, (%rax)
+	pfx rol		$2, (%rax)
+	pfx rol		%cl, (%rax)
+	pfx rol		(%rax)
+	pfx ror		$1, (%rax)
+	pfx ror		$2, (%rax)
+	pfx ror		%cl, (%rax)
+	pfx ror		(%rax)
+	pfx sbb		$1, (%rax)
+	pfx sbb		$0x89, (%rax)
+	pfx sbb		$0x1234, (%rax)
+	pfx sbb		$0x12345678, (%rax)
+	pfx scas
+	pfx scas	%es:(%rdi)
+	pfx sal		$1, (%rax)
+	pfx sal		$2, (%rax)
+	pfx sal		%cl, (%rax)
+	pfx sal		(%rax)
+	pfx sar		$1, (%rax)
+	pfx sar		$2, (%rax)
+	pfx sar		%cl, (%rax)
+	pfx sar		(%rax)
+	pfx shl	$1, (%rax)
+	pfx shl	$2, (%rax)
+	pfx shl	%cl, (%rax)
+	pfx shl	(%rax)
+	pfx shr	$1, (%rax)
+	pfx shr	$2, (%rax)
+	pfx shr	%cl, (%rax)
+	pfx shr	(%rax)
+	pfx stos
+	pfx stos	%es:(%rdi)
+	pfx sub	$1, (%rax)
+	pfx sub	$0x89, (%rax)
+	pfx sub	$0x1234, (%rax)
+	pfx sub	$0x12345678, (%rax)
+	pfx sysret
+	pfx test	$0x89, (%rax)
+	pfx test	$0x1234, (%rax)
+	pfx test	$0x12345678, (%rax)
+	pfx xor	$1, (%rax)
+	pfx xor	$0x89, (%rax)
+	pfx xor	$0x1234, (%rax)
+	pfx xor	$0x12345678, (%rax)

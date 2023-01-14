@@ -277,7 +277,8 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs,
       unsigned int flags;
 
       /* Extract key length.  */
-      if (bfd_libdata (abfd)->ver == LBR_MAJORID)
+      if (bfd_libdata (abfd)->ver == LBR_MAJORID
+	  && offsetof (struct vms_idx, keyname) <= (size_t) (endp - p))
 	{
 	  struct vms_idx *ridx = (struct vms_idx *)p;
 
@@ -288,7 +289,8 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs,
 	  flags = 0;
 	  keyname = ridx->keyname;
 	}
-      else if (bfd_libdata (abfd)->ver == LBR_ELFMAJORID)
+      else if (bfd_libdata (abfd)->ver == LBR_ELFMAJORID
+	       && offsetof (struct vms_elfidx, keyname) <= (size_t) (endp - p))
 	{
 	  struct vms_elfidx *ridx = (struct vms_elfidx *)p;
 

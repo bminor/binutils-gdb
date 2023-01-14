@@ -206,14 +206,20 @@ coff_link_check_archive_element (bfd *abfd,
 {
   *pneeded = FALSE;
 
+  /* PR 22369 - Skip non COFF objects in the archive.  */
+  if (! bfd_family_coff (abfd))
+    return TRUE;
+
   /* We are only interested in symbols that are currently undefined.
      If a symbol is currently known to be common, COFF linkers do not
      bring in an object file which defines it.  */
   if (h->type != bfd_link_hash_undefined)
     return TRUE;
 
-  /* PR 22369 - Skip non COFF objects in the archive.  */
-  if (! bfd_family_coff (abfd))
+  /* If the archive element has already been loaded then one
+     of the symbols defined by that element might have been
+     made undefined due to being in a discarded section.  */
+  if (((struct coff_link_hash_entry *) h)->indx == -3)
     return TRUE;
 
   /* Include this element?  */
@@ -286,6 +292,7 @@ coff_link_add_symbols (bfd *abfd,
 	  asection *section;
 	  bfd_vma value;
 	  bfd_boolean addit;
+	  bfd_boolean discarded = FALSE;
 
 	  /* This symbol is externally visible.  */
 
@@ -311,7 +318,10 @@ coff_link_add_symbols (bfd *abfd,
 	      flags = BSF_EXPORT | BSF_GLOBAL;
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	      if (discarded_section (section))
-		section = bfd_und_section_ptr;
+		{
+		  discarded = TRUE;
+		  section = bfd_und_section_ptr;
+		}
 	      else if (! obj_pe (abfd))
 		value -= section->vma;
 	      break;
@@ -408,6 +418,9 @@ coff_link_add_symbols (bfd *abfd,
 		      (const char *) NULL, copy, FALSE,
 		      (struct bfd_link_hash_entry **) sym_hash)))
 		goto error_return;
+
+	      if (discarded)
+		(*sym_hash)->indx = -3;
 	    }
 
 	  if (obj_pe (abfd) && (flags & BSF_SECTION_SYM) != 0)
@@ -2567,6 +2580,9 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
       return FALSE;
 
     case bfd_link_hash_undefined:
+      if (h->indx == -3)
+	return TRUE;
+      /* Fall through.  */
     case bfd_link_hash_undefweak:
       isym.n_scnum = N_UNDEF;
       isym.n_value = 0;
@@ -3037,9 +3053,15 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	    }
 
 	  else if (! bfd_link_relocatable (info))
-	    (*info->callbacks->undefined_symbol)
-	      (info, h->root.root.string, input_bfd, input_section,
-	       rel->r_vaddr - input_section->vma, TRUE);
+	    {
+	      (*info->callbacks->undefined_symbol)
+		(info, h->root.root.string, input_bfd, input_section,
+		 rel->r_vaddr - input_section->vma, TRUE);
+	      /* Stop the linker from issueing errors about truncated relocs
+		 referencing this undefined symbol by giving it an address
+		 that should be in range.  */
+	      val = input_section->output_section->vma;
+	    }
 	}
 
       /* If the input section defining the symbol has been discarded

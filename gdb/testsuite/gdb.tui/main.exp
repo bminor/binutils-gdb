@@ -15,7 +15,7 @@
 
 # Test that "file" shows "main".
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
@@ -31,6 +31,7 @@ gdb_test_no_output "set interactive-mode off"
 
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 Term::command "file [standard_output_file $testfile]"

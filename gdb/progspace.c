@@ -198,6 +198,12 @@ program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
 void
 program_space::remove_objfile (struct objfile *objfile)
 {
+  /* Removing an objfile from the objfile list invalidates any frame
+     that was built using frame info found in the objfile.  Reinit the
+     frame cache to get rid of any frame that might otherwise
+     reference stale info.  */
+  reinit_frame_cache ();
+
   auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
 			    [=] (const std::shared_ptr<::objfile> &objf)
 			    {
@@ -296,7 +302,6 @@ print_program_space (struct ui_out *uiout, int requested)
 
   for (struct program_space *pspace : program_spaces)
     {
-      struct inferior *inf;
       int printed_header;
 
       if (requested != -1 && requested != pspace->num)
@@ -322,9 +327,16 @@ print_program_space (struct ui_out *uiout, int requested)
 	 e.g., both parent/child inferiors in a vfork, or, on targets
 	 that share pspaces between inferiors.  */
       printed_header = 0;
-      for (inf = inferior_list; inf; inf = inf->next)
+
+      /* We're going to switch inferiors.  */
+      scoped_restore_current_thread restore_thread;
+
+      for (inferior *inf : all_inferiors ())
 	if (inf->pspace == pspace)
 	  {
+	    /* Switch to inferior in order to call target methods.  */
+	    switch_to_inferior_no_thread (inf);
+
 	    if (!printed_header)
 	      {
 		printed_header = 1;

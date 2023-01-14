@@ -28,7 +28,7 @@ set testline "undefined line"
 
 if ![ld_assemble $as "-x $srcdir/$subdir/undefined.s" tmpdir/undefined.o] {
     verbose "Unable to assemble test file!" 1
-    unresolved $testline
+    fail $testline
     return
 }
 

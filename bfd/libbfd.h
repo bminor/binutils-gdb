@@ -901,6 +901,8 @@ extern bfd_signed_vma _bfd_read_signed_leb128
 extern bfd_vma _bfd_safe_read_leb128
   (bfd *, bfd_byte *, unsigned int *, bfd_boolean, const bfd_byte * const)
   ATTRIBUTE_HIDDEN;
+extern bfd_byte * _bfd_write_unsigned_leb128
+  (bfd_byte *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
 
 #if GCC_VERSION >= 7000
 #define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
@@ -1603,10 +1605,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_PPC64_DTPREL16_HIGHESTA",
   "BFD_RELOC_PPC64_TPREL34",
   "BFD_RELOC_PPC64_DTPREL34",
-  "BFD_RELOC_PPC64_GOT_TLSGD34",
-  "BFD_RELOC_PPC64_GOT_TLSLD34",
-  "BFD_RELOC_PPC64_GOT_TPREL34",
-  "BFD_RELOC_PPC64_GOT_DTPREL34",
+  "BFD_RELOC_PPC64_GOT_TLSGD_PCREL34",
+  "BFD_RELOC_PPC64_GOT_TLSLD_PCREL34",
+  "BFD_RELOC_PPC64_GOT_TPREL_PCREL34",
+  "BFD_RELOC_PPC64_GOT_DTPREL_PCREL34",
   "BFD_RELOC_PPC64_TLS_PCREL",
   "BFD_RELOC_I370_D12",
   "BFD_RELOC_CTOR",
@@ -2802,6 +2804,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MSP430_ABS_HI16",
   "BFD_RELOC_MSP430_PREL31",
   "BFD_RELOC_MSP430_SYM_DIFF",
+  "BFD_RELOC_MSP430_SET_ULEB128",
+  "BFD_RELOC_MSP430_SUB_ULEB128",
   "BFD_RELOC_NIOS2_S16",
   "BFD_RELOC_NIOS2_U16",
   "BFD_RELOC_NIOS2_CALL26",

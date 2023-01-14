@@ -117,7 +117,7 @@ with_test_prefix "debugging" {
     gdb_test "set debug infrun 1"
     gdb_test "set logging on" \
     "Copying output to /dev/null.*Copying debug output to /dev/null\\."
-    gdb_test "continue" "Continuing.*infrun:.*infrun:.*Breakpoint \[0-9\]+, foo.*"
+    gdb_test "continue" {Continuing.*\[infrun\] .*\[infrun\] .*Breakpoint [0-9]+, foo.*}
     gdb_test "set debug infrun 0"
     gdb_test "set logging off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"

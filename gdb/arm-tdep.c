@@ -60,6 +60,8 @@
 #include "record-full.h"
 #include <algorithm>
 
+#include "producer.h"
+
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #endif
@@ -467,7 +469,7 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 }
 
 /* Determine if the address specified equals any of these magic return
-   values, called EXC_RETURN, defined by the ARM v6-M and v7-M
+   values, called EXC_RETURN, defined by the ARM v6-M, v7-M and v8-M
    architectures.
 
    From ARMv6-M Reference Manual B1.5.8
@@ -498,13 +500,25 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
    0xFFFFFFFD    Thread mode      Process         Basic
 
    For more details see "B1.5.8 Exception return behavior"
-   in both ARMv6-M and ARMv7-M Architecture Reference Manuals.  */
+   in both ARMv6-M and ARMv7-M Architecture Reference Manuals.
+
+   In the ARMv8-M Architecture Technical Reference also adds
+   for implementations without the Security Extension:
+
+   EXC_RETURN    Condition
+   0xFFFFFFB0    Return to Handler mode.
+   0xFFFFFFB8    Return to Thread mode using the main stack.
+   0xFFFFFFBC    Return to Thread mode using the process stack.  */
 
 static int
 arm_m_addr_is_magic (CORE_ADDR addr)
 {
   switch (addr)
     {
+      /* Values from ARMv8-M Architecture Technical Reference.  */
+      case 0xffffffb0:
+      case 0xffffffb8:
+      case 0xffffffbc:
       /* Values from Tables in B1.5.8 the EXC_RETURN definitions of
 	 the exception return behavior.  */
       case 0xffffffe1:
@@ -1351,7 +1365,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  && (cust == NULL
 	      || COMPUNIT_PRODUCER (cust) == NULL
 	      || startswith (COMPUNIT_PRODUCER (cust), "GNU ")
-	      || startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      || producer_is_llvm (COMPUNIT_PRODUCER (cust))))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)
@@ -2921,14 +2935,64 @@ arm_m_exception_cache (struct frame_info *this_frame)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct arm_prologue_cache *cache;
+  CORE_ADDR lr;
+  CORE_ADDR sp;
   CORE_ADDR unwound_sp;
   LONGEST xpsr;
+  uint32_t exc_return;
+  uint32_t process_stack_used;
+  uint32_t extended_frame_used;
+  uint32_t secure_stack_used;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  unwound_sp = get_frame_register_unsigned (this_frame,
-					    ARM_SP_REGNUM);
+  /* ARMv7-M Architecture Reference "B1.5.6 Exception entry behavior"
+     describes which bits in LR that define which stack was used prior
+     to the exception and if FPU is used (causing extended stack frame).  */
+
+  lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
+  sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+
+  /* Check EXC_RETURN indicator bits.  */
+  exc_return = (((lr >> 28) & 0xf) == 0xf);
+
+  /* Check EXC_RETURN bit SPSEL if Main or Thread (process) stack used.  */
+  process_stack_used = ((lr & (1 << 2)) != 0);
+  if (exc_return && process_stack_used)
+    {
+      /* Thread (process) stack used.
+         Potentially this could be other register defined by target, but PSP
+         can be considered a standard name for the "Process Stack Pointer".
+         To be fully aware of system registers like MSP and PSP, these could
+         be added to a separate XML arm-m-system-profile that is valid for
+         ARMv6-M and ARMv7-M architectures. Also to be able to debug eg a
+         corefile off-line, then these registers must be defined by GDB,
+         and also be included in the corefile regsets.  */
+
+      int psp_regnum = user_reg_map_name_to_regnum (gdbarch, "psp", -1);
+      if (psp_regnum == -1)
+        {
+          /* Thread (process) stack could not be fetched,
+             give warning and exit.  */
+
+          warning (_("no PSP thread stack unwinding supported."));
+
+          /* Terminate any further stack unwinding by refer to self.  */
+          cache->prev_sp = sp;
+          return cache;
+        }
+      else
+        {
+          /* Thread (process) stack used, use PSP as SP.  */
+          unwound_sp = get_frame_register_unsigned (this_frame, psp_regnum);
+        }
+    }
+  else
+    {
+      /* Main stack used, use MSP as SP.  */
+      unwound_sp = sp;
+    }
 
   /* The hardware saves eight 32-bit words, comprising xPSR,
      ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
@@ -2938,15 +3002,62 @@ arm_m_exception_cache (struct frame_info *this_frame)
   cache->saved_regs[1].addr = unwound_sp + 4;
   cache->saved_regs[2].addr = unwound_sp + 8;
   cache->saved_regs[3].addr = unwound_sp + 12;
-  cache->saved_regs[12].addr = unwound_sp + 16;
-  cache->saved_regs[14].addr = unwound_sp + 20;
-  cache->saved_regs[15].addr = unwound_sp + 24;
+  cache->saved_regs[ARM_IP_REGNUM].addr = unwound_sp + 16;
+  cache->saved_regs[ARM_LR_REGNUM].addr = unwound_sp + 20;
+  cache->saved_regs[ARM_PC_REGNUM].addr = unwound_sp + 24;
   cache->saved_regs[ARM_PS_REGNUM].addr = unwound_sp + 28;
+
+  /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
+     type used.  */
+  extended_frame_used = ((lr & (1 << 4)) == 0);
+  if (exc_return && extended_frame_used)
+    {
+      int i;
+      int fpu_regs_stack_offset;
+
+      /* This code does not take into account the lazy stacking, see "Lazy
+         context save of FP state", in B1.5.7, also ARM AN298, supported
+         by Cortex-M4F architecture.
+         To fully handle this the FPCCR register (Floating-point Context
+         Control Register) needs to be read out and the bits ASPEN and LSPEN
+         could be checked to setup correct lazy stacked FP registers.
+         This register is located at address 0xE000EF34.  */
+
+      /* Extended stack frame type used.  */
+      fpu_regs_stack_offset = unwound_sp + 0x20;
+      for (i = 0; i < 16; i++)
+        {
+          cache->saved_regs[ARM_D0_REGNUM + i].addr = fpu_regs_stack_offset;
+          fpu_regs_stack_offset += 4;
+        }
+      cache->saved_regs[ARM_FPSCR_REGNUM].addr = unwound_sp + 0x60;
+
+      /* Offset 0x64 is reserved.  */
+      cache->prev_sp = unwound_sp + 0x68;
+    }
+  else
+    {
+      /* Standard stack frame type used.  */
+      cache->prev_sp = unwound_sp + 0x20;
+    }
+
+  /* Check EXC_RETURN bit S if Secure or Non-secure stack used.  */
+  secure_stack_used = ((lr & (1 << 6)) != 0);
+  if (exc_return && secure_stack_used)
+    {
+      /* ARMv8-M Exception and interrupt handling is not considered here.
+	 In the ARMv8-M architecture also EXC_RETURN bit S is controlling if
+	 the Secure or Non-secure stack was used. To separate Secure and
+	 Non-secure stacks, processors that are based on the ARMv8-M
+	 architecture support 4 stack pointers: MSP_S, PSP_S, MSP_NS, PSP_NS.
+	 In addition, a stack limit feature is provided using stack limit
+	 registers (accessible using MSR and MRS instructions) in Privileged
+	 level.  */
+    }
 
   /* If bit 9 of the saved xPSR is set, then there is a four-byte
      aligner between the top of the 32-byte stack frame and the
      previous context's stack pointer.  */
-  cache->prev_sp = unwound_sp + 32;
   if (safe_read_memory_integer (unwound_sp + 28, 4, byte_order, &xpsr)
       && (xpsr & (1 << 9)) != 0)
     cache->prev_sp += 4;
@@ -3306,7 +3417,7 @@ static ULONGEST
 arm_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
-  if (t->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
+  if (t->code () == TYPE_CODE_ARRAY && t->is_vector ())
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 64-bit.  */
@@ -3451,7 +3562,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 
     case TYPE_CODE_ARRAY:
       {
-	if (TYPE_VECTOR (t))
+	if (t->is_vector ())
 	  {
 	    /* A 64-bit or 128-bit containerized vector type are VFP
 	       CPRCs.  */
@@ -3502,7 +3613,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	    int sub_count = 0;
 
 	    if (!field_is_static (&t->field (i)))
-	      sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+	      sub_count = arm_vfp_cprc_sub_candidate (t->field (i).type (),
 						      base_type);
 	    if (sub_count == -1)
 	      return -1;
@@ -3528,7 +3639,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	int i;
 	for (i = 0; i < t->num_fields (); i++)
 	  {
-	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+	    int sub_count = arm_vfp_cprc_sub_candidate (t->field (i).type (),
 							base_type);
 	    if (sub_count == -1)
 	      return -1;
@@ -3583,7 +3694,7 @@ arm_vfp_abi_for_function (struct gdbarch *gdbarch, struct type *func_type)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* Variadic functions always use the base ABI.  Assume that functions
      without debug info are not variadic.  */
-  if (func_type && TYPE_VARARGS (check_typedef (func_type)))
+  if (func_type && check_typedef (func_type)->has_varargs ())
     return 0;
   /* The VFP ABI is only supported as a variant of AAPCS.  */
   if (tdep->arm_abi != ARM_ABI_AAPCS)
@@ -3919,7 +4030,7 @@ arm_neon_double_type (struct gdbarch *gdbarch)
       elem = builtin_type (gdbarch)->builtin_double;
       append_composite_type_field (t, "f64", elem);
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("neon_d");
       tdep->neon_double_type = t;
     }
@@ -3958,7 +4069,7 @@ arm_neon_quad_type (struct gdbarch *gdbarch)
       elem = builtin_type (gdbarch)->builtin_double;
       append_composite_type_field (t, "f64", init_vector_type (elem, 2));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("neon_q");
       tdep->neon_quad_type = t;
     }
@@ -7906,7 +8017,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       && TYPE_CODE_ARRAY != code && TYPE_CODE_COMPLEX != code)
     return 0;
 
-  if (TYPE_CODE_ARRAY == code && TYPE_VECTOR (type))
+  if (TYPE_CODE_ARRAY == code && type->is_vector ())
     {
       /* Vector values should be returned using ARM registers if they
 	 are not over 16 bytes.  */
@@ -7975,7 +8086,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 	      enum type_code field_type_code;
 
 	      field_type_code
-		= check_typedef (TYPE_FIELD_TYPE (type, i))->code ();
+		= check_typedef (type->field (i).type ())->code ();
 
 	      /* Is it a floating point type field?  */
 	      if (field_type_code == TYPE_CODE_FLT)

@@ -3,7 +3,6 @@
 #as: --64 -defsym __64_bit__=1 -mx86-used-note=yes
 #objcopy: -O elf32-x86-64 --decompress-debug-sections
 #readelf: -n
-#notarget: x86_64-*-nacl*
 
 Displaying notes found in: .note.gnu.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description

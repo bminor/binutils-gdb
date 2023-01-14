@@ -163,6 +163,7 @@ optional arguments while skipping others.  Example:
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
+* Registers In Python::         Python representation of registers.
 * TUI Windows In Python::       Implementing new TUI windows.
 @end menu
 
@@ -2457,12 +2458,11 @@ provides a method to read frame's registers:
 
 @defun PendingFrame.read_register (reg)
 This method returns the contents of the register @var{reg} in the
-frame as a @code{gdb.Value} object.  @var{reg} can be either a
-register number or a register name; the values are platform-specific.
-They are usually found in the corresponding
-@file{@var{platform}-tdep.h} file in the @value{GDBN} source tree.  If
-@var{reg} does not name a register for the current architecture, this
-method will throw an exception.
+frame as a @code{gdb.Value} object.  For a description of the
+acceptable values of @var{reg} see
+@ref{gdbpy_frame_read_register,,Frame.read_register}.  If @var{reg}
+does not name a register for the current architecture, this method
+will throw an exception.
 
 Note that this method will always return a @code{gdb.Value} for a
 valid register name.  This does not mean that the value will be valid.
@@ -2518,6 +2518,12 @@ Each attribute value should be an instance of @code{gdb.Value}.
 
 @end defun
 
+@defun PendingFrame.architecture ()
+Return the @code{gdb.Architecture} (@pxref{Architectures In Python})
+for this @code{gdb.PendingFrame}.  This represents the architecture of
+the particular frame being unwound.
+@end defun
+
 @subheading Unwinder Output: UnwindInfo
 
 Use @code{PendingFrame.create_unwind_info} method described above to
@@ -2525,8 +2531,8 @@ create a @code{gdb.UnwindInfo} instance.  Use the following method to
 specify caller registers that have been saved in this frame:
 
 @defun gdb.UnwindInfo.add_saved_register (reg, value)
-@var{reg} identifies the register.  It can be a number or a name, just
-as for the @code{PendingFrame.read_register} method above.
+@var{reg} identifies the register, for a description of the acceptable
+values see @ref{gdbpy_frame_read_register,,Frame.read_register}.
 @var{value} is a register value (a @code{gdb.Value} object).
 @end defun
 
@@ -4678,11 +4684,31 @@ Return the frame's symtab and line object.
 @xref{Symbol Tables In Python}.
 @end defun
 
+@anchor{gdbpy_frame_read_register}
 @defun Frame.read_register (register)
-Return the value of @var{register} in this frame.  The @var{register}
-argument must be a string (e.g., @code{'sp'} or @code{'rax'}).
-Returns a @code{Gdb.Value} object.  Throws an exception if @var{register}
-does not exist.
+Return the value of @var{register} in this frame.  Returns a
+@code{Gdb.Value} object.  Throws an exception if @var{register} does
+not exist.  The @var{register} argument must be one of the following:
+@enumerate
+@item
+A string that is the name of a valid register (e.g., @code{'sp'} or
+@code{'rax'}).
+@item
+A @code{gdb.RegisterDescriptor} object (@pxref{Registers In Python}).
+@item
+A @value{GDBN} internal, platform specific number.  Using these
+numbers is supported for historic reasons, but is not recommended as
+future changes to @value{GDBN} could change the mapping between
+numbers and the registers they represent, breaking any Python code
+that uses the platform-specific numbers.  The numbers are usually
+found in the corresponding @file{@var{platform}-tdep.h} file in the
+@value{GDBN} source tree.
+@end enumerate
+Using a string to access registers will be slightly slower than the
+other two methods as @value{GDBN} must look up the mapping between
+name and internal register number.  If performance is critical
+consider looking up and caching a @code{gdb.RegisterDescriptor}
+object.
 @end defun
 
 @defun Frame.read_var (variable @r{[}, block@r{]})
@@ -5708,6 +5734,78 @@ instruction in bytes.
 
 @end table
 @end defun
+
+@anchor{gdbpy_architecture_registers}
+@defun Architecture.registers (@r{[} @var{reggroup} @r{]})
+Return a @code{gdb.RegisterDescriptorIterator} (@pxref{Registers In
+Python}) for all of the registers in @var{reggroup}, a string that is
+the name of a register group.  If @var{reggroup} is omitted, or is the
+empty string, then the register group @samp{all} is assumed.
+@end defun
+
+@anchor{gdbpy_architecture_reggroups}
+@defun Architecture.register_groups ()
+Return a @code{gdb.RegisterGroupsIterator} (@pxref{Registers In
+Python}) for all of the register groups available for the
+@code{gdb.Architecture}.
+@end defun
+
+@node Registers In Python
+@subsubsection Registers In Python
+@cindex Registers In Python
+
+Python code can request from a @code{gdb.Architecture} information
+about the set of registers available
+(@pxref{gdbpy_architecture_registers,,@code{Architecture.registers}}).
+The register information is returned as a
+@code{gdb.RegisterDescriptorIterator}, which is an iterator that in
+turn returns @code{gdb.RegisterDescriptor} objects.
+
+A @code{gdb.RegisterDescriptor} does not provide the value of a
+register (@pxref{gdbpy_frame_read_register,,@code{Frame.read_register}}
+for reading a register's value), instead the @code{RegisterDescriptor}
+is a way to discover which registers are available for a particular
+architecture.
+
+A @code{gdb.RegisterDescriptor} has the following read-only properties:
+
+@defvar RegisterDescriptor.name
+The name of this register.
+@end defvar
+
+It is also possible to lookup a register descriptor based on its name
+using the following @code{gdb.RegisterDescriptorIterator} function:
+
+@defun RegisterDescriptorIterator.find (@var{name})
+Takes @var{name} as an argument, which must be a string, and returns a
+@code{gdb.RegisterDescriptor} for the register with that name, or
+@code{None} if there is no register with that name.
+@end defun
+
+Python code can also request from a @code{gdb.Architecture}
+information about the set of register groups available on a given
+architecture
+(@pxref{gdbpy_architecture_reggroups,,@code{Architecture.register_groups}}).
+
+Every register can be a member of zero or more register groups.  Some
+register groups are used internally within @value{GDBN} to control
+things like which registers must be saved when calling into the
+program being debugged (@pxref{Calling,,Calling Program Functions}).
+Other register groups exist to allow users to easily see related sets
+of registers in commands like @code{info registers}
+(@pxref{info_registers_reggroup,,@code{info registers
+@var{reggroup}}}).
+
+The register groups information is returned as a
+@code{gdb.RegisterGroupsIterator}, which is an iterator that in turn
+returns @code{gdb.RegisterGroup} objects.
+
+A @code{gdb.RegisterGroup} object has the following read-only
+properties:
+
+@defvar RegisterGroup.name
+A string that is the name of this register group.
+@end defvar
 
 @node TUI Windows In Python
 @subsubsection Implementing new TUI windows

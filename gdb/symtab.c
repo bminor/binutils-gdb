@@ -807,7 +807,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
     {
       const struct language_defn *lang = language_def (gsymbol->language ());
 
-      language_sniff_from_mangled_name (lang, mangled, &demangled);
+      lang->sniff_from_mangled_name (mangled, &demangled);
       return demangled;
     }
 
@@ -816,7 +816,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
       enum language l = (enum language) i;
       const struct language_defn *lang = language_def (l);
 
-      if (language_sniff_from_mangled_name (lang, mangled, &demangled))
+      if (lang->sniff_from_mangled_name (mangled, &demangled))
 	{
 	  gsymbol->m_language = l;
 	  return demangled;
@@ -1016,7 +1016,7 @@ symbol_matches_search_name (const struct general_symbol_info *gsymbol,
 			    const lookup_name_info &name)
 {
   symbol_name_matcher_ftype *name_match
-    = get_symbol_name_matcher (language_def (gsymbol->language ()), name);
+    = language_def (gsymbol->language ())->get_symbol_name_matcher (name);
   return name_match (gsymbol->search_name (), name, NULL);
 }
 
@@ -1855,7 +1855,7 @@ demangle_for_lookup (const char *name, enum language lang,
 unsigned int
 search_name_hash (enum language language, const char *search_name)
 {
-  return language_def (language)->la_search_name_hash (search_name);
+  return language_def (language)->search_name_hash (search_name);
 }
 
 /* See symtab.h.
@@ -2086,7 +2086,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  result = langdef->la_lookup_symbol_nonlocal (langdef, name, block, domain);
+  result = langdef->lookup_symbol_nonlocal (name, block, domain);
   if (result.symbol != NULL)
     {
       if (symbol_lookup_debug)
@@ -2401,13 +2401,12 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
   return result;
 }
 
-/* See symtab.h.  */
+/* See language.h.  */
 
 struct block_symbol
-basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
-			      const char *name,
-			      const struct block *block,
-			      const domain_enum domain)
+language_defn::lookup_symbol_nonlocal (const char *name,
+				       const struct block *block,
+				       const domain_enum domain) const
 {
   struct block_symbol result;
 
@@ -2433,7 +2432,7 @@ basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
 	gdbarch = target_gdbarch ();
       else
 	gdbarch = block_gdbarch (block);
-      result.symbol = language_lookup_primitive_type_as_symbol (langdef,
+      result.symbol = language_lookup_primitive_type_as_symbol (this,
 								gdbarch, name);
       result.block = NULL;
       if (result.symbol != NULL)
@@ -2722,7 +2721,7 @@ symbol_matches_domain (enum language symbol_language,
 struct type *
 lookup_transparent_type (const char *name)
 {
-  return current_language->la_lookup_transparent_type (name);
+  return current_language->lookup_transparent_type (name);
 }
 
 /* A helper for basic_lookup_transparent_type that interfaces with the
@@ -3237,12 +3236,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       struct linetable_entry *last = item + len;
       item = std::upper_bound (first, last, pc, pc_compare);
       if (item != first)
-	{
-	  /* Found a matching item.  Skip backwards over any end of
-	     sequence markers.  */
-	  for (prev = item - 1; prev->line == 0 && prev != first; prev--)
-	    /* Nothing.  */;
-	}
+	prev = item - 1;		/* Found a matching item.  */
 
       /* At this point, prev points at the line whose start addr is <= pc, and
          item points at the next line.  If we ran off the end of the linetable
@@ -5196,6 +5190,11 @@ rbreak_command (const char *regexp, int from_tty)
     {
       const char *colon = strchr (regexp, ':');
 
+      /* Ignore the colon if it is part of a Windows drive.  */
+      if (HAS_DRIVE_SPEC (regexp)
+	  && (regexp[2] == '/' || regexp[2] == '\\'))
+	colon = strchr (STRIP_DRIVE_SPEC (regexp), ':');
+
       if (colon && *(colon + 1) != ':')
 	{
 	  int colon_index;
@@ -5253,7 +5252,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
   const language_defn *lang = language_def (symbol_language);
 
   symbol_name_matcher_ftype *name_match
-    = get_symbol_name_matcher (lang, lookup_name);
+    = lang->get_symbol_name_matcher (lookup_name);
 
   return name_match (symbol_name, lookup_name, &match_res);
 }
@@ -5801,19 +5800,6 @@ default_collect_symbol_completion_matches_break_on
     }
 }
 
-void
-default_collect_symbol_completion_matches (completion_tracker &tracker,
-					   complete_symbol_mode mode,
-					   symbol_name_match_type name_match_type,
-					   const char *text, const char *word,
-					   enum type_code code)
-{
-  return default_collect_symbol_completion_matches_break_on (tracker, mode,
-							     name_match_type,
-							     text, word, "",
-							     code);
-}
-
 /* Collect all symbols (regardless of class) which begin by matching
    TEXT.  */
 
@@ -5823,10 +5809,10 @@ collect_symbol_completion_matches (completion_tracker &tracker,
 				   symbol_name_match_type name_match_type,
 				   const char *text, const char *word)
 {
-  current_language->la_collect_symbol_completion_matches (tracker, mode,
-							  name_match_type,
-							  text, word,
-							  TYPE_CODE_UNDEF);
+  current_language->collect_symbol_completion_matches (tracker, mode,
+						       name_match_type,
+						       text, word,
+						       TYPE_CODE_UNDEF);
 }
 
 /* Like collect_symbol_completion_matches, but only collect
@@ -5843,9 +5829,9 @@ collect_symbol_completion_matches_type (completion_tracker &tracker,
   gdb_assert (code == TYPE_CODE_UNION
 	      || code == TYPE_CODE_STRUCT
 	      || code == TYPE_CODE_ENUM);
-  current_language->la_collect_symbol_completion_matches (tracker, mode,
-							  name_match_type,
-							  text, word, code);
+  current_language->collect_symbol_completion_matches (tracker, mode,
+						       name_match_type,
+						       text, word, code);
 }
 
 /* Like collect_symbol_completion_matches, but collects a list of

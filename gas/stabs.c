@@ -144,8 +144,7 @@ aout_process_stab (int what, const char *string, int type, int other, int desc)
      symbol chain.  This is to avoid "continuation symbols" (where one
      ends in "\" and the debug info is continued in the next .stabs
      directive) from being separated by other random symbols.  */
-  symbol = symbol_create (string, undefined_section, 0,
-			  &zero_address_frag);
+  symbol = symbol_create (string, undefined_section, &zero_address_frag, 0);
   if (what == 's' || what == 'n')
     {
       /* Pick up the value from the input line.  */
@@ -378,7 +377,7 @@ s_stab_generic (int what,
 	  expressionS exp;
 
 	  /* Arrange for a value representing the current location.  */
-	  symbol = symbol_temp_new (saved_seg, dot, saved_frag);
+	  symbol = symbol_temp_new (saved_seg, saved_frag, dot);
 
 	  exp.X_op = O_symbol;
 	  exp.X_add_symbol = symbol;

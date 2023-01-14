@@ -1006,7 +1006,6 @@ captured_main_1 (struct captured_main_args *context)
   if (print_help)
     {
       print_gdb_help (gdb_stdout);
-      fputs_unfiltered ("\n", gdb_stdout);
       exit (0);
     }
 
@@ -1172,7 +1171,7 @@ captured_main_1 (struct captured_main_args *context)
     }
 
   if (ttyarg != NULL)
-    set_inferior_io_terminal (ttyarg);
+    current_inferior ()->set_tty (ttyarg);
 
   /* Error messages should no longer be distinguished with extra output.  */
   warning_pre_print = _("warning: ");
@@ -1392,7 +1391,11 @@ For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 "), stream);
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
-    fprintf_unfiltered (stream, _("\
-Report bugs to \"%s\".\n\
+    fprintf_unfiltered (stream, _("\n\
+Report bugs to %s.\n\
 "), REPORT_BUGS_TO);
+  if (stream == gdb_stdout)
+    fprintf_unfiltered (stream, _("\n\
+You can ask GDB-related questions on the GDB users mailing list\n\
+(gdb@sourceware.org) or on GDB's IRC channel (#gdb on Freenode).\n"));
 }

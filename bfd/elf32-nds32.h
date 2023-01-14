@@ -104,10 +104,10 @@ extern void	   bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
 						      int, int, FILE *,
 						      int, int, int);
 
-#define nds32_elf_hash_table(info) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((info)->hash)) \
-   == NDS32_ELF_DATA ? \
-   ((struct elf_nds32_link_hash_table *) ((info)->hash)) : NULL)
+#define nds32_elf_hash_table(p) \
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == NDS32_ELF_DATA)	\
+   ? (struct elf_nds32_link_hash_table *) (p)->hash : NULL)
 
 #define elf32_nds32_compute_jump_table_size(htab) \
   ((htab)->next_tls_desc_index * 4)
@@ -122,13 +122,6 @@ struct elf_nds32_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
-  /* Small local sym to section mapping cache.  */
-  struct sym_cache sym_cache;
-
   /* Target dependent options.  */
   int relax_fp_as_gp;		/* --mrelax-omit-fp.  */
   int eliminate_gc_relocs;	/* --meliminate-gc-relocs.  */
@@ -137,16 +130,6 @@ struct elf_nds32_link_hash_table
   int tls_desc_trampoline;	/* --m[no-]tlsdesc-trampoline.  */
   /* Disable if linking a dynamically linked executable.  */
   int load_store_relax;
-
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma dt_tlsdesc_plt;
-
-  /* The offset into sgot of the GOT entry used by the PLT entry
-     above.  */
-  bfd_vma dt_tlsdesc_got;
 
   /* Offset in .plt section of tls_nds32_trampoline.  */
   bfd_vma tls_trampoline;

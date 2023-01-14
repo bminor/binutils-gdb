@@ -296,7 +296,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 
       if (h != NULL)
 	{
-	  // TODO: This should not be here.
+	  /* TODO: This should not be here.  */
 	  reloc_data->sym_value = h->root.u.def.value;
 	  reloc_data->sym_section = h->root.u.def.section;
 

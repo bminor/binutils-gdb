@@ -23,10 +23,10 @@
 
 # Make sure that binutils can correctly handle ld output in ELF.
 
-if { ![istarget *-*-linux*]
-     && ![istarget arm*-*-uclinuxfdpiceabi]
-     && ![istarget *-*-nacl*]
-     && ![istarget *-*-gnu*]} {
+if { !([istarget *-*-linux*]
+       || [istarget arm*-*-uclinuxfdpiceabi]
+       || [istarget *-*-nacl*]
+       || [istarget *-*-gnu*]) || [istarget *ecoff] } then {
     return
 }
 
@@ -165,9 +165,7 @@ if { ([istarget "i?86-*-elf*"]
       || [istarget "i?86-*-linux*"]
       || [istarget "i?86-*-gnu*"]
       || [istarget "x86_64-*-linux*"]
-      || [istarget "amd64-*-linux*"]
-      || [istarget "i?86-*nacl*"]
-      || [istarget "x86_64-*nacl*"]) } {
+      || [istarget "amd64-*-linux*"]) } {
     binutils_test strip "-z relro -shared" relro2
     binutils_test objcopy "-z relro -shared" relro2
 }

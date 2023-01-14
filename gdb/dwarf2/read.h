@@ -22,11 +22,13 @@
 
 #include <queue>
 #include <unordered_map>
+#include "dwarf2/comp-unit.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
+#include "gdbsupport/function-view.h"
 #include "psympriv.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
@@ -42,11 +44,13 @@ struct tu_stats
   int nr_all_type_units_reallocs;
 };
 
+struct dwarf2_cu;
 struct dwarf2_debug_sections;
 struct dwarf2_per_cu_data;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
+struct type_unit_group;
 
 /* One item on the queue of compilation units to read in full symbols
    for.  */
@@ -112,9 +116,6 @@ struct dwarf2_per_bfd
      This differs from get_cutu in that it's for when you know INDEX refers to a
      TU.  */
   signatured_type *get_tu (int index);
-
-  /* Free all cached compilation units.  */
-  void free_cached_comp_units ();
 
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
@@ -187,10 +188,6 @@ public:
      are doing.  */
   struct tu_stats tu_stats {};
 
-  /* A chain of compilation units that are currently read in, so that
-     they can be freed later.  */
-  dwarf2_per_cu_data *read_in_chain = NULL;
-
   /* A table mapping DW_AT_dwo_name values to struct dwo_file objects.
      This is NULL if the table hasn't been allocated yet.  */
   htab_up dwo_files;
@@ -238,9 +235,6 @@ public:
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu_data *> just_read_cus;
 
-  /* Table containing line_header indexed by offset and offset_in_dwz.  */
-  htab_up line_header_hash;
-
   /* Table containing all filenames.  This is an optional because the
      table is lazily constructed on first access.  */
   gdb::optional<filename_seen_cache> filenames_cache;
@@ -258,11 +252,40 @@ public:
   /* CUs that are queued to be read.  */
   std::queue<dwarf2_queue_item> queue;
 
+  /* We keep a separate reference to the partial symtabs, in case we
+     are sharing them between objfiles.  This is only set after
+     partial symbols have been read the first time.  */
+  std::shared_ptr<psymtab_storage> partial_symtabs;
+
 private:
 
   /* The total number of per_cu and signatured_type objects that have
      been created so far for this reader.  */
   size_t m_num_psymtabs = 0;
+};
+
+/* This is the per-objfile data associated with a type_unit_group.  */
+
+struct type_unit_group_unshareable
+{
+  /* The compunit symtab.
+     Type units in a group needn't all be defined in the same source file,
+     so we create an essentially anonymous symtab as the compunit symtab.  */
+  struct compunit_symtab *compunit_symtab = nullptr;
+
+  /* The number of symtabs from the line header.
+     The value here must match line_header.num_file_names.  */
+  unsigned int num_symtabs = 0;
+
+  /* The symbol tables for this TU (obtained from the files listed in
+     DW_AT_stmt_list).
+     WARNING: The order of entries here must match the order of entries
+     in the line header.  After the first TU using this type_unit_group, the
+     line header for the subsequent TUs is recreated from this.  This is done
+     because we need to use the same symtabs for each TU using the same
+     DW_AT_stmt_list value.  Also note that symtabs may be repeated here,
+     there's no guarantee the line header doesn't have duplicate entries.  */
+  struct symtab **symtabs = nullptr;
 };
 
 /* Collection of data recorded per objfile.
@@ -276,6 +299,8 @@ struct dwarf2_per_objfile
   dwarf2_per_objfile (struct objfile *objfile, dwarf2_per_bfd *per_bfd)
     : objfile (objfile), per_bfd (per_bfd)
   {}
+
+  ~dwarf2_per_objfile ();
 
   /* Return pointer to string at .debug_line_str offset as read from BUF.
      BUF is assumed to be in a compilation unit described by CU_HEADER.
@@ -304,9 +329,35 @@ struct dwarf2_per_objfile
   /* Set the compunit_symtab associated to PER_CU.  */
   void set_symtab (const dwarf2_per_cu_data *per_cu, compunit_symtab *symtab);
 
+  /* Get the type_unit_group_unshareable corresponding to TU_GROUP.  If one
+     does not exist, create it.  */
+  type_unit_group_unshareable *get_type_unit_group_unshareable
+    (type_unit_group *tu_group);
+
+  struct type *get_type_for_signatured_type (signatured_type *sig_type) const;
+
+  void set_type_for_signatured_type (signatured_type *sig_type,
+				     struct type *type);
+
   /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
      UNSIGNED_P controls if the integer is unsigned or not.  */
   struct type *int_type (int size_in_bytes, bool unsigned_p) const;
+
+  /* Get the dwarf2_cu matching PER_CU for this objfile.  */
+  dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);
+
+  /* Set the dwarf2_cu matching PER_CU for this objfile.  */
+  void set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu *cu);
+
+  /* Remove/free the dwarf2_cu matching PER_CU for this objfile.  */
+  void remove_cu (dwarf2_per_cu_data *per_cu);
+
+  /* Free all cached compilation units.  */
+  void remove_all_cus ();
+
+  /* Increase the age counter on each CU compilation unit and free
+     any that are too old.  */
+  void age_comp_units ();
 
   /* Back link.  */
   struct objfile *objfile;
@@ -320,11 +371,29 @@ struct dwarf2_per_objfile
      The mapping is done via (CU/TU + DIE offset) -> type.  */
   htab_up die_type_hash;
 
+  /* Table containing line_header indexed by offset and offset_in_dwz.  */
+  htab_up line_header_hash;
+
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This
      is indexed by dwarf2_per_cu_data::index.  A NULL value means
      that the CU/TU has not been expanded yet.  */
   std::vector<compunit_symtab *> m_symtabs;
+
+  /* Map from a type unit group to the corresponding unshared
+     structure.  */
+  typedef std::unique_ptr<type_unit_group_unshareable>
+    type_unit_group_unshareable_up;
+
+  std::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
+    m_type_units;
+
+  /* Map from signatured types to the corresponding struct type.  */
+  std::unordered_map<signatured_type *, struct type *> m_type_map;
+
+  /* Map from the objfile-independent dwarf2_per_cu_data instances to the
+     corresponding objfile-dependent dwarf2_cu instances.  */
+  std::unordered_map<dwarf2_per_cu_data *, dwarf2_cu *> m_dwarf2_cus;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -408,22 +477,29 @@ struct dwarf2_per_cu_data
      not the DWO file.  */
   struct dwarf2_section_info *section;
 
-  /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
-     of the CU cache it gets reset to NULL again.  This is left as NULL for
-     dummy CUs (a CU header, but nothing else).  */
-  struct dwarf2_cu *cu;
-
   /* The unit type of this CU.  */
   enum dwarf_unit_type unit_type;
 
   /* The language of this CU.  */
   enum language lang;
 
-  /* The corresponding dwarf2_per_objfile.  */
-  struct dwarf2_per_objfile *dwarf2_per_objfile;
-
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *per_bfd;
+
+  /* DWARF header of this CU.  Note that dwarf2_cu reads its own version of the
+     header, which may differ from this one, since it may pass rcuh_kind::TYPE
+     to read_comp_unit_head, whereas for dwarf2_per_cu_data we always pass
+     rcuh_kind::COMPILE.
+
+     Don't access this field directly, use the get_header method instead.  It
+     should be private, but we can't make it private at the moment.  */
+  mutable comp_unit_head m_header;
+
+  /* True if HEADER has been read in.
+
+     Don't access this field directly.  It should be private, but we can't make
+     it private at the moment.  */
+  mutable bool m_header_read_in;
 
   /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */
@@ -494,6 +570,9 @@ struct dwarf2_per_cu_data
     imported_symtabs = nullptr;
   }
 
+  /* Get the header of this per_cu, reading it if necessary.  */
+  const comp_unit_head *get_header () const;
+
   /* Return the address size given in the compilation unit header for
      this CU.  */
   int addr_size () const;
@@ -549,11 +628,6 @@ struct signatured_type
      can share them.  This points to the containing symtab.  */
   struct type_unit_group *type_unit_group;
 
-  /* The type.
-     The first time we encounter this type we fully read it in and install it
-     in the symbol tables.  Subsequent times we only need the type.  */
-  struct type *type;
-
   /* Containing DWO unit.
      This field is valid iff per_cu.reading_dwo_directly.  */
   struct dwo_unit *dwo_unit;
@@ -578,7 +652,7 @@ struct type *dwarf2_get_die_type (cu_offset die_offset,
    may no longer exist.  */
 
 CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
-				  dwarf2_per_objfile *dwarf2_per_objfile,
+				  dwarf2_per_objfile *per_objfile,
 				  unsigned int addr_index);
 
 /* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.
@@ -589,8 +663,8 @@ CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
   (sect_offset sect_off, dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   CORE_ADDR (*get_frame_pc) (void *baton),
-   void *baton, bool resolve_abstract_p = false);
+   gdb::function_view<CORE_ADDR ()> get_frame_pc,
+   bool resolve_abstract_p = false);
 
 /* Like dwarf2_fetch_die_loc_sect_off, but take a CU
    offset.  */
@@ -598,8 +672,7 @@ struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
   (cu_offset offset_in_cu, dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   CORE_ADDR (*get_frame_pc) (void *baton),
-   void *baton);
+   gdb::function_view<CORE_ADDR ()> get_frame_pc);
 
 /* If the DIE at SECT_OFF in PER_CU has a DW_AT_const_value, return a
    pointer to the constant bytes and set LEN to the length of the

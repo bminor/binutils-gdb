@@ -271,7 +271,7 @@ struct lang_input_statement_flags
   /* Set if reloading an archive or --as-needed lib.  */
   unsigned int reload : 1;
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   /* Set if the file was claimed by a plugin.  */
   unsigned int claimed : 1;
 
@@ -280,7 +280,7 @@ struct lang_input_statement_flags
 
   /* Set if added by the lto plugin add_input_file callback.  */
   unsigned int lto_output : 1;
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   /* Head of list of pushed flags.  */
   struct lang_input_statement_flags *pushed;
@@ -513,6 +513,8 @@ extern bfd_boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
 extern lang_statement_list_type input_file_chain;
 
+extern struct bfd_elf_dynamic_list **current_dynamic_list_p;
+
 extern int lang_statement_iteration;
 extern struct asneeded_minfo **asneeded_list_tail;
 
@@ -673,7 +675,8 @@ extern struct bfd_elf_version_deps *lang_add_vers_depend
   (struct bfd_elf_version_deps *, const char *);
 extern void lang_register_vers_node
   (const char *, struct bfd_elf_version_tree *, struct bfd_elf_version_deps *);
-extern void lang_append_dynamic_list (struct bfd_elf_version_expr *);
+extern void lang_append_dynamic_list (struct bfd_elf_dynamic_list **,
+				      struct bfd_elf_version_expr *);
 extern void lang_append_dynamic_list_cpp_typeinfo (void);
 extern void lang_append_dynamic_list_cpp_new (void);
 extern void lang_add_unique

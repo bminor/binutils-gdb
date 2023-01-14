@@ -71,4 +71,9 @@ extern CORE_ADDR fbsd_get_thread_local_address (struct gdbarch *gdbarch,
 						CORE_ADDR lm_addr,
 						CORE_ADDR offset);
 
+/* Implement the "skip_solib_resolver" gdbarch method.  */
+
+extern CORE_ADDR fbsd_skip_solib_resolver (struct gdbarch *gdbarch,
+					   CORE_ADDR pc);
+
 #endif /* fbsd-tdep.h */

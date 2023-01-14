@@ -100,27 +100,6 @@ enum stop_stack_kind stop_stack_dummy;
 int stopped_by_random_signal;
 
 
-/* Accessor routines.  */
-
-/* Set the io terminal for the current inferior.  Ownership of
-   TERMINAL_NAME is not transferred.  */
-
-void 
-set_inferior_io_terminal (const char *terminal_name)
-{
-  xfree (current_inferior ()->terminal);
-
-  if (terminal_name != NULL && *terminal_name != '\0')
-    current_inferior ()->terminal = xstrdup (terminal_name);
-  else
-    current_inferior ()->terminal = NULL;
-}
-
-const char *
-get_inferior_io_terminal (void)
-{
-  return current_inferior ()->terminal;
-}
 
 static void
 set_inferior_tty_command (const char *args, int from_tty,
@@ -128,7 +107,7 @@ set_inferior_tty_command (const char *args, int from_tty,
 {
   /* CLI has assigned the user-provided value to inferior_io_terminal_scratch.
      Now route it to current inferior.  */
-  set_inferior_io_terminal (inferior_io_terminal_scratch);
+  current_inferior ()->set_tty (inferior_io_terminal_scratch);
 }
 
 static void
@@ -137,13 +116,13 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 {
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
-  const char *inferior_io_terminal = get_inferior_io_terminal ();
+  const char *inferior_tty = current_inferior ()->tty ();
 
-  if (inferior_io_terminal == NULL)
-    inferior_io_terminal = "";
+  if (inferior_tty == nullptr)
+    inferior_tty = "";
   fprintf_filtered (gdb_stdout,
 		    _("Terminal for future runs of program being debugged "
-		      "is \"%s\".\n"), inferior_io_terminal);
+		      "is \"%s\".\n"), inferior_tty);
 }
 
 const char *
@@ -928,7 +907,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
       thr->thread_fsm->clean_up (thr);
       proceeded = normal_stop ();
       if (!proceeded)
-	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+	inferior_event_handler (INF_EXEC_COMPLETE);
       all_uis_check_sync_execution_done ();
     }
 }
@@ -2155,7 +2134,7 @@ default_print_one_register_info (struct ui_file *file,
       common_val_print (val, &format_stream, 0, &opts, current_language);
       /* If not a vector register, print it also according to its
 	 natural format.  */
-      if (print_raw_format && TYPE_VECTOR (regtype) == 0)
+      if (print_raw_format && regtype->is_vector () == 0)
 	{
 	  pad_to_column (format_stream, value_column_2);
 	  get_user_print_options (&opts);
@@ -3052,7 +3031,7 @@ is restored."),
 				     show_inferior_tty_command,
 				     &setlist, &showlist);
   cmd_name = "inferior-tty";
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
 
@@ -3065,7 +3044,7 @@ Follow this command with any number of args, to be passed to the program."),
 				   set_args_command,
 				   show_args_command,
 				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   set_cmd_completer (c, filename_completer);
 
@@ -3084,7 +3063,7 @@ working directory."),
 				   set_cwd_command,
 				   show_cwd_command,
 				   &setlist, &showlist);
-  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  c = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   gdb_assert (c != NULL);
   set_cmd_completer (c, filename_completer);
 

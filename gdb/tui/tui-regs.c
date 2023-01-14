@@ -42,15 +42,55 @@
 
 #include "gdb_curses.h"
 
+/* A subclass of string_file that expands tab characters.  */
+class tab_expansion_file : public string_file
+{
+public:
+
+  tab_expansion_file () = default;
+
+  void write (const char *buf, long length_buf) override;
+
+private:
+
+  int m_column = 0;
+};
+
+void
+tab_expansion_file::write (const char *buf, long length_buf)
+{
+  for (long i = 0; i < length_buf; ++i)
+    {
+      if (buf[i] == '\t')
+	{
+	  do
+	    {
+	      string_file::write (" ", 1);
+	      ++m_column;
+	    }
+	  while ((m_column % 8) != 0);
+	}
+      else
+	{
+	  string_file::write (&buf[i], 1);
+	  if (buf[i] == '\n')
+	    m_column = 0;
+	  else
+	    ++m_column;
+	}
+    }
+}
+
 /* Get the register from the frame and return a printable
    representation of it.  */
 
-static gdb::unique_xmalloc_ptr<char>
+static std::string
 tui_register_format (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
-  string_file stream;
+  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
+  tab_expansion_file stream;
 
   scoped_restore save_pagination
     = make_scoped_restore (&pagination_enabled, 0);
@@ -64,8 +104,7 @@ tui_register_format (struct frame_info *frame, int regnum)
   if (!str.empty () && str.back () == '\n')
     str.resize (str.size () - 1);
 
-  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  return tui_expand_tabs (str.c_str ());
+  return str;
 }
 
 /* Get the register value from the given frame and format it for the
@@ -80,11 +119,9 @@ tui_get_register (struct frame_info *frame,
     *changedp = false;
   if (target_has_registers)
     {
-      gdb::unique_xmalloc_ptr<char> new_content
-	= tui_register_format (frame, regnum);
+      std::string new_content = tui_register_format (frame, regnum);
 
-      if (changedp != NULL
-	  && strcmp (data->content.get (), new_content.get ()) != 0)
+      if (changedp != NULL && data->content != new_content)
 	*changedp = true;
 
       data->content = std::move (new_content);
@@ -220,16 +257,12 @@ tui_data_window::show_register_group (struct reggroup *group,
 	continue;
 
       data_item_win = &m_regs_content[pos];
-      if (data_item_win)
+      if (!refresh_values_only)
 	{
-	  if (!refresh_values_only)
-	    {
-	      data_item_win->item_no = regnum;
-	      data_item_win->name = name;
-	      data_item_win->highlight = false;
-	    }
-	  tui_get_register (frame, data_item_win, regnum, 0);
+	  data_item_win->regno = regnum;
+	  data_item_win->highlight = false;
 	}
+      tui_get_register (frame, data_item_win, regnum, 0);
       pos++;
     }
 }
@@ -239,42 +272,36 @@ tui_data_window::show_register_group (struct reggroup *group,
 void
 tui_data_window::display_registers_from (int start_element_no)
 {
-  int j, item_win_width, cur_y;
-
   int max_len = 0;
   for (auto &&data_item_win : m_regs_content)
     {
-      const char *p;
-      int len;
-
-      len = 0;
-      p = data_item_win.content.get ();
-      if (p != 0)
-	len = strlen (p);
+      int len = data_item_win.content.size ();
 
       if (len > max_len)
 	max_len = len;
     }
-  item_win_width = max_len + 1;
+  m_item_width = max_len + 1;
   int i = start_element_no;
 
-  m_regs_column_count = (width - 2) / item_win_width;
+  m_regs_column_count = (width - 2) / m_item_width;
   if (m_regs_column_count == 0)
     m_regs_column_count = 1;
-  item_win_width = (width - 2) / m_regs_column_count;
+  m_item_width = (width - 2) / m_regs_column_count;
 
   /* Now create each data "sub" window, and write the display into
      it.  */
-  cur_y = 1;
+  int cur_y = 1;
   while (i < m_regs_content.size () && cur_y <= height - 2)
     {
-      for (j = 0;
+      for (int j = 0;
 	   j < m_regs_column_count && i < m_regs_content.size ();
 	   j++)
 	{
 	  /* Create the window if necessary.  */
-	  m_regs_content[i].resize (1, item_win_width,
-				    x + (item_win_width * j) + 1, y + cur_y);
+	  m_regs_content[i].x = (m_item_width * j) + 1;
+	  m_regs_content[i].y = cur_y;
+	  m_regs_content[i].visible = true;
+	  m_regs_content[i].rerender (handle.get (), m_item_width);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */
@@ -345,10 +372,7 @@ tui_data_window::first_data_item_displayed ()
 {
   for (int i = 0; i < m_regs_content.size (); i++)
     {
-      struct tui_gen_win_info *data_item_win;
-
-      data_item_win = &m_regs_content[i];
-      if (data_item_win->is_visible ())
+      if (m_regs_content[i].visible)
 	return i;
     }
 
@@ -360,8 +384,8 @@ tui_data_window::first_data_item_displayed ()
 void
 tui_data_window::delete_data_content_windows ()
 {
-  for (auto &&win : m_regs_content)
-    win.handle.reset (nullptr);
+  for (auto &win : m_regs_content)
+    win.visible = false;
 }
 
 
@@ -424,24 +448,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     }
 }
 
-/* See tui-regs.h.  */
-
-void
-tui_data_window::refresh_window ()
-{
-  tui_gen_win_info::refresh_window ();
-  for (auto &&win : m_regs_content)
-    win.refresh_window ();
-}
-
-void
-tui_data_window::no_refresh ()
-{
-  tui_gen_win_info::no_refresh ();
-  for (auto &&win : m_regs_content)
-    win.no_refresh ();
-}
-
 /* This function check all displayed registers for changes in values,
    given a particular frame.  If the values have changed, they are
    updated with the new value and highlighted.  */
@@ -459,37 +465,32 @@ tui_data_window::check_register_values (struct frame_info *frame)
 	  was_hilighted = data_item_win.highlight;
 
 	  tui_get_register (frame, &data_item_win,
-			    data_item_win.item_no,
+			    data_item_win.regno,
 			    &data_item_win.highlight);
 
 	  if (data_item_win.highlight || was_hilighted)
-	    data_item_win.rerender ();
+	    data_item_win.rerender (handle.get (), m_item_width);
 	}
     }
+
+  tui_wrefresh (handle.get ());
 }
 
 /* Display a register in a window.  If hilite is TRUE, then the value
    will be displayed in reverse video.  */
 void
-tui_data_item_window::rerender ()
+tui_data_item_window::rerender (WINDOW *handle, int field_width)
 {
-  int i;
-
-  scrollok (handle.get (), FALSE);
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandout (handle.get ());
+    (void) wstandout (handle);
       
-  wmove (handle.get (), 0, 0);
-  for (i = 1; i < width; i++)
-    waddch (handle.get (), ' ');
-  wmove (handle.get (), 0, 0);
-  if (content)
-    waddstr (handle.get (), content.get ());
+  mvwaddnstr (handle, y, x, content.c_str (), field_width - 1);
+  waddstr (handle, n_spaces (field_width - content.size ()));
 
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
@@ -497,21 +498,7 @@ tui_data_item_window::rerender ()
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandend (handle.get ());
-  refresh_window ();
-}
-
-void
-tui_data_item_window::refresh_window ()
-{
-  if (handle != nullptr)
-    {
-      /* This seems to be needed because the data items are nested
-	 windows, which according to the ncurses man pages aren't well
-	 supported.  */
-      touchwin (handle.get ());
-      tui_wrefresh (handle.get ());
-    }
+    (void) wstandend (handle);
 }
 
 /* Helper for "tui reg next", wraps a call to REGGROUP_NEXT, but adds wrap
@@ -631,18 +618,11 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
 			completion_tracker &tracker,
 			const char *text, const char *word)
 {
-  static const char *extra[] = { "next", "prev", NULL };
-  size_t len = strlen (word);
-  const char **tmp;
+  static const char * const extra[] = { "next", "prev", NULL };
 
   reggroup_completer (ignore, tracker, text, word);
 
-  /* XXXX use complete_on_enum instead?  */
-  for (tmp = extra; *tmp != NULL; ++tmp)
-    {
-      if (strncmp (word, *tmp, len) == 0)
-	tracker.add_completion (make_unique_xstrdup (*tmp));
-    }
+  complete_on_enum (tracker, extra, text, word);
 }
 
 void _initialize_tui_regs ();

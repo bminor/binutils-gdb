@@ -43,29 +43,37 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 #else
 #include <elfutils/debuginfod.h>
 
-/* TODO: Use debuginfod API extensions instead of these globals.  */
-static std::string desc;
-static std::string fname;
-static bool has_printed;
+struct user_data
+{
+  user_data (const char *desc, const char *fname)
+    : desc (desc), fname (fname), has_printed (false)
+  { }
+
+  const char * const desc;
+  const char * const fname;
+  bool has_printed;
+};
 
 static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
+  user_data *data = static_cast<user_data *> (debuginfod_get_user_data (c));
+
   if (check_quit_flag ())
     {
       printf_filtered ("Cancelling download of %s %ps...\n",
-		       desc.c_str (),
-		       styled_string (file_name_style.style (), fname.c_str ()));
+		       data->desc,
+		       styled_string (file_name_style.style (), data->fname));
       return 1;
     }
 
-  if (!has_printed && total != 0)
+  if (!data->has_printed && total != 0)
     {
       /* Print this message only once.  */
-      has_printed = true;
+      data->has_printed = true;
       printf_filtered ("Downloading %s %ps...\n",
-		       desc.c_str (),
-		       styled_string (file_name_style.style (), fname.c_str ()));
+		       data->desc,
+		       styled_string (file_name_style.style (), data->fname));
     }
 
   return 0;
@@ -98,10 +106,9 @@ debuginfod_source_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  desc = std::string ("source file");
-  fname = std::string (srcpath);
-  has_printed = false;
+  user_data data ("source file", srcpath);
 
+  debuginfod_set_user_data (c, &data);
   scoped_fd fd (debuginfod_find_source (c,
 					build_id,
 					build_id_len,
@@ -136,11 +143,10 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  desc = std::string ("separate debug info for");
-  fname = std::string (filename);
-  has_printed = false;
   char *dname = nullptr;
+  user_data data ("separate debug info for", filename);
 
+  debuginfod_set_user_data (c, &data);
   scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len, &dname));
 
   if (fd.get () < 0 && fd.get () != -ENOENT)

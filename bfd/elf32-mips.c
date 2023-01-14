@@ -63,6 +63,8 @@ static bfd_boolean mips_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean mips_elf_sym_is_global
   (bfd *, asymbol *);
+static bfd_boolean mips_elf32_elfsym_local_is_section
+  (bfd *);
 static bfd_boolean mips_elf32_object_p
   (bfd *);
 static bfd_boolean mips_elf_is_local_label_name
@@ -2284,6 +2286,14 @@ mips_elf_sym_is_global (bfd *abfd ATTRIBUTE_UNUSED, asymbol *sym)
 	    || bfd_is_und_section (bfd_asymbol_section (sym))
 	    || bfd_is_com_section (bfd_asymbol_section (sym)));
 }
+
+/* Likewise, return TRUE if the symbol table split overall must be
+   between section symbols and all other symbols.  */
+static bfd_boolean
+mips_elf32_elfsym_local_is_section (bfd *abfd)
+{
+  return SGI_COMPAT (abfd);
+}
 
 /* Set the right machine number for a MIPS ELF file.  */
 
@@ -2552,6 +2562,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_ignore_discarded_relocs \
 					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_write_section	_bfd_mips_elf_write_section
+#define elf_backend_elfsym_local_is_section \
+					mips_elf32_elfsym_local_is_section
 #define elf_backend_mips_irix_compat	elf32_mips_irix_compat
 #define elf_backend_mips_rtype_to_howto	mips_elf32_rtype_to_howto
 #define elf_backend_sort_relocs_p	_bfd_mips_elf_sort_relocs_p
@@ -2669,6 +2681,9 @@ mips_vxworks_final_write_processing (bfd *abfd)
 
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
+
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS			is_vxworks
 
 #undef elf_backend_want_got_plt
 #define elf_backend_want_got_plt		1

@@ -25,6 +25,60 @@ if {$tool == ""} {
     exit 2
 }
 
+# List of procs to run in gdb_finish.
+set gdb_finish_hooks [list]
+
+# Variable in which we keep track of globals that are allowed to be live
+# across test-cases.
+array set gdb_persistent_globals {}
+
+# Mark variable names in ARG as a persistent global, and declare them as
+# global in the calling context.  Can be used to rewrite "global var_a var_b"
+# into "gdb_persistent_global var_a var_b".
+proc gdb_persistent_global { args } {
+    global gdb_persistent_globals
+    foreach varname $args {
+	uplevel 1 global $varname
+	set gdb_persistent_globals($varname) 1
+    }
+}
+
+# Mark variable names in ARG as a persistent global.
+proc gdb_persistent_global_no_decl { args } {
+    global gdb_persistent_globals
+    foreach varname $args {
+	set gdb_persistent_globals($varname) 1
+    }
+}
+
+# Override proc load_lib.
+rename load_lib saved_load_lib
+# Run the runtest version of load_lib, and mark all variables that were
+# created by this call as persistent.
+proc load_lib { file } {
+    array set known_global {}
+    foreach varname [info globals] {
+       set known_globals($varname) 1
+    }
+
+    set code [catch "saved_load_lib $file" result]
+
+    foreach varname [info globals] {
+       if { ![info exists known_globals($varname)] } {
+           gdb_persistent_global_no_decl $varname
+       }
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+
+    return $result
+}
+
 load_lib libgloss.exp
 load_lib cache.exp
 load_lib gdb-utils.exp
@@ -598,9 +652,9 @@ proc runto { function args } {
 	    return 0
 	}
 	-re ".*A problem internal to GDB has been detected" {
-	    if { $print_fail } {
-		fail "$test_name (GDB internal error)"
-	    }
+	    # Always emit a FAIL if we encounter an internal error: internal
+	    # errors are never expected.
+	    fail "$test_name (GDB internal error)"
 	    gdb_internal_error_resync
 	    return 0
 	}
@@ -1182,6 +1236,28 @@ proc gdb_test_multiple { command message args } {
     return $result
 }
 
+# Usage: gdb_test_multiline NAME INPUT RESULT {INPUT RESULT} ...
+# Run a test named NAME, consisting of multiple lines of input.
+# After each input line INPUT, search for result line RESULT.
+# Succeed if all results are seen; fail otherwise.
+
+proc gdb_test_multiline { name args } {
+    global gdb_prompt
+    set inputnr 0
+    foreach {input result} $args {
+	incr inputnr
+	if {[gdb_test_multiple $input "$name: input $inputnr: $input" {
+	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
+		pass $gdb_test_name
+	    }
+	}]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+
 # gdb_test COMMAND PATTERN MESSAGE QUESTION RESPONSE
 # Send a command to gdb; test the result.
 #
@@ -1761,6 +1837,8 @@ proc gdb_file_cmd { arg } {
     }
 
     send_gdb "file $arg\n"
+    set new_symbol_table 0
+    set basename [file tail $arg]
     gdb_expect 120 {
 	-re "Reading symbols from.*LZMA support was disabled.*$gdb_prompt $" {
 	    verbose "\t\tLoaded $arg into $GDB; .gnu_debugdata found but no LZMA available"
@@ -1778,45 +1856,40 @@ proc gdb_file_cmd { arg } {
 	    return 0
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
+	    if { $new_symbol_table > 0 } {
+		perror [join [list "Couldn't load $basename,"
+			      "interactive prompt loop detected."]]
+		return -1
+	    }
             send_gdb "y\n" answer
-            gdb_expect 120 {
-                -re "Reading symbols from.*$gdb_prompt $" {
-                    verbose "\t\tLoaded $arg with new symbol table into $GDB"
-		    set gdb_file_cmd_debug_info "debug"
-		    return 0
-                }
-                timeout {
-                    perror "Couldn't load $arg, other program already loaded (timeout)."
-		    return -1
-                }
-		eof {
-		    perror "Couldn't load $arg, other program already loaded (eof)."
-		    return -1
-		}
-            }
+	    incr new_symbol_table
+	    set suffix "-- with new symbol table"
+	    set arg "$arg $suffix"
+	    set basename "$basename $suffix"
+	    exp_continue
 	}
         -re "No such file or directory.*$gdb_prompt $" {
-            perror "($arg) No such file or directory"
+            perror "($basename) No such file or directory"
 	    return -1
         }
 	-re "A problem internal to GDB has been detected" {
-	    fail "($arg) (GDB internal error)"
+	    perror "Couldn't load $basename into GDB (GDB internal error)."
 	    gdb_internal_error_resync
 	    return -1
 	}
         -re "$gdb_prompt $" {
-            perror "Couldn't load $arg into $GDB."
+            perror "Couldn't load $basename into GDB."
 	    return -1
             }
         timeout {
-            perror "Couldn't load $arg into $GDB (timeout)."
+            perror "Couldn't load $basename into GDB (timeout)."
 	    return -1
         }
         eof {
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # gdb_expect does not seem to have a way to do that.
-            perror "Couldn't load $arg into $GDB (eof)."
+            perror "Couldn't load $basename into GDB (eof)."
 	    return -1
         }
     }
@@ -2988,6 +3061,57 @@ gdb_caching_proc skip_tsx_tests {
     return $skip_tsx_tests
 }
 
+# Run a test on the target to see if it supports avx512bf16.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+gdb_caching_proc skip_avx512bf16_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_avx512bf16_tests"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me:  target does not support avx512bf16, returning 1" 2
+        return 1
+    }
+
+    # Compile a test program.
+    set src {
+        int main() {
+            asm volatile ("vcvtne2ps2bf16 %xmm0, %xmm1, %xmm0");
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512bf16 hardware not detected."
+            set skip_avx512bf16_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512bf16 hardware detected."
+            set skip_avx512bf16_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_avx512bf16_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_avx512bf16_tests" 2
+    return $skip_avx512bf16_tests
+}
+
 # Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
@@ -3621,6 +3745,8 @@ proc current_target_name { } {
 
 set gdb_wrapper_initialized 0
 set gdb_wrapper_target ""
+set gdb_wrapper_file ""
+set gdb_wrapper_flags ""
 
 proc gdb_wrapper_init { args } {
     global gdb_wrapper_initialized
@@ -3628,27 +3754,25 @@ proc gdb_wrapper_init { args } {
     global gdb_wrapper_flags
     global gdb_wrapper_target
 
-    # If the wrapper is initialized but the wrapper file cannot be
-    # found anymore, the wrapper file must be built again.
-    if { $gdb_wrapper_initialized == 1 && \
-	    [info exists gdb_wrapper_file] && \
-	    ![file exists $gdb_wrapper_file] } {
-	verbose "reinitializing the wrapper"
-	set gdb_wrapper_initialized 0
-    }
-
     if { $gdb_wrapper_initialized == 1 } { return; }
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0"} {
-	set result [build_wrapper [standard_output_file "testglue.o"]]
+	set result [build_wrapper "testglue.o"]
 	if { $result != "" } {
 	    set gdb_wrapper_file [lindex $result 0]
+	    if ![is_remote host] {
+		set gdb_wrapper_file [file join [pwd] $gdb_wrapper_file]
+	    }
 	    set gdb_wrapper_flags [lindex $result 1]
 	} else {
 	    warning "Status wrapper failed to build."
 	}
+    } else {
+	set gdb_wrapper_file ""
+	set gdb_wrapper_flags ""
     }
+    verbose "set gdb_wrapper_file = $gdb_wrapper_file"
     set gdb_wrapper_initialized 1
     set gdb_wrapper_target [current_target_name]
 }
@@ -3775,7 +3899,8 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - ldflags=flag: Add FLAG to the linker flags.
 #   - incdir=path: Add PATH to the searched include directories.
 #   - libdir=path: Add PATH to the linker searched directories.
-#   - ada, c++, f77: Compile the file as Ada, C++ or Fortran.
+#   - ada, c++, f77, f90, go, rust: Compile the file as Ada, C++,
+#     Fortran 77, Fortran 90, Go or Rust.
 #   - debug: Build with debug information.
 #   - optimize: Build with optimization.
 
@@ -3783,7 +3908,6 @@ proc gdb_compile {source dest type options} {
     global GDB_TESTCASE_OPTIONS
     global gdb_wrapper_file
     global gdb_wrapper_flags
-    global gdb_wrapper_initialized
     global srcdir
     global objdir
     global gdb_saved_set_unbuffered_mode_obj
@@ -3797,6 +3921,31 @@ proc gdb_compile {source dest type options} {
 	# -fdiagnostics-color is not a rustcc option.
     } else {
 	set new_options [universal_compile_options]
+    }
+
+    # Some C/C++ testcases unconditionally pass -Wno-foo as additional
+    # options to disable some warning.  That is OK with GCC, because
+    # by design, GCC accepts any -Wno-foo option, even if it doesn't
+    # support -Wfoo.  Clang however warns about unknown -Wno-foo by
+    # default, unless you pass -Wno-unknown-warning-option as well.
+    # We do that here, so that individual testcases don't have to
+    # worry about it.
+    if {[lsearch -exact $options getting_compiler_info] == -1
+	&& [lsearch -exact $options rust] == -1
+	&& [lsearch -exact $options ada] == -1
+	&& [lsearch -exact $options f77] == -1
+	&& [lsearch -exact $options f90] == -1
+	&& [lsearch -exact $options go] == -1
+	&& [test_compiler_info "clang-*"]} {
+	lappend new_options "additional_flags=-Wno-unknown-warning-option"
+    }
+
+    # Treating .c input files as C++ is deprecated in Clang, so
+    # explicitly force C++ language.
+    if { [lsearch -exact $options getting_compiler_info] == -1
+	 && [lsearch -exact $options c++] != -1
+	 && [test_compiler_info "clang-*"]} {
+	lappend new_options additional_flags=-x\ c++
     }
 
     # Place (and look for) Fortran `.mod` files in the output
@@ -3895,7 +4044,7 @@ proc gdb_compile {source dest type options} {
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0" && \
-	    [info exists gdb_wrapper_file]} {
+	    $gdb_wrapper_file != "" } {
 	lappend options "libs=${gdb_wrapper_file}"
 	lappend options "ldflags=${gdb_wrapper_flags}"
     }
@@ -4851,6 +5000,7 @@ proc gdb_continue { function } {
     return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"]
 }
 
+# Default implementation of gdb_init.
 proc default_gdb_init { test_file_name } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
@@ -4858,6 +5008,107 @@ proc default_gdb_init { test_file_name } {
     global cleanfiles
     global pf_prefix
     
+    # Reset the timeout value to the default.  This way, any testcase
+    # that changes the timeout value without resetting it cannot affect
+    # the timeout used in subsequent testcases.
+    global gdb_test_timeout
+    global timeout
+    set timeout $gdb_test_timeout
+
+    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
+	 && [target_info exists gdb_reverse_timeout] } {
+	set timeout [target_info gdb_reverse_timeout]
+    }
+
+    # If GDB_INOTIFY is given, check for writes to '.'.  This is a
+    # debugging tool to help confirm that the test suite is
+    # parallel-safe.  You need "inotifywait" from the
+    # inotify-tools package to use this.
+    global GDB_INOTIFY inotify_pid
+    if {[info exists GDB_INOTIFY] && ![info exists inotify_pid]} {
+	global outdir tool inotify_log_file
+
+	set exclusions {outputs temp gdb[.](log|sum) cache}
+	set exclusion_re ([join $exclusions |])
+
+	set inotify_log_file [standard_temp_file inotify.out]
+	set inotify_pid [exec inotifywait -r -m -e move,create,delete . \
+			     --exclude $exclusion_re \
+			     |& tee -a $outdir/$tool.log $inotify_log_file &]
+
+	# Wait for the watches; hopefully this is long enough.
+	sleep 2
+
+	# Clear the log so that we don't emit a warning the first time
+	# we check it.
+	set fd [open $inotify_log_file w]
+	close $fd
+    }
+
+    # Block writes to all banned variables, and invocation of all
+    # banned procedures...
+    global banned_variables
+    global banned_procedures
+    global banned_traced
+    if (!$banned_traced) {
+	foreach banned_var $banned_variables {
+            global "$banned_var"
+            trace add variable "$banned_var" write error
+	}
+	foreach banned_proc $banned_procedures {
+	    global "$banned_proc"
+	    trace add execution "$banned_proc" enter error
+	}
+	set banned_traced 1
+    }
+
+    # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
+    # messages as expected.
+    setenv LC_ALL C
+    setenv LC_CTYPE C
+    setenv LANG C
+
+    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
+    # the test results.  Even if /dev/null doesn't exist on the particular
+    # platform, the readline library will use the default setting just by
+    # failing to open the file.  OTOH, opening /dev/null successfully will
+    # also result in the default settings being used since nothing will be
+    # read from this file.
+    setenv INPUTRC "/dev/null"
+
+    # This disables style output, which would interfere with many
+    # tests.
+    setenv TERM "dumb"
+
+    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
+    # environment, we don't want these modifications to the history
+    # settings.
+    unset -nocomplain ::env(GDBHISTFILE)
+    unset -nocomplain ::env(GDBHISTSIZE)
+
+    # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
+    # during startup.  See "man expect" for details about stty_init.
+    global stty_init
+    set stty_init "rows 25 cols 80"
+
+    # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
+    # grep.  Clear GREP_OPTIONS to make the behavior predictable,
+    # especially having color output turned on can cause tests to fail.
+    setenv GREP_OPTIONS ""
+
+    # Clear $gdbserver_reconnect_p.
+    global gdbserver_reconnect_p
+    set gdbserver_reconnect_p 1
+    unset gdbserver_reconnect_p
+
+    # Clear $last_loaded_file
+    global last_loaded_file
+    unset -nocomplain last_loaded_file
+
+    # Reset GDB number of instances
+    global gdb_instances
+    set gdb_instances 0
+
     set cleanfiles {}
 
     gdb_clear_suppressed
@@ -4890,6 +5141,22 @@ proc default_gdb_init { test_file_name } {
     global use_gdb_stub
     if [info exists use_gdb_stub] {
 	unset use_gdb_stub
+    }
+
+    gdb_setup_known_globals
+
+    if { [info procs ::gdb_tcl_unknown] != "" } {
+	# Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
+	# test-case but abort the entire test run.  To fix this, we install a
+	# local version here, which reverts dejagnu's override, and restore
+	# dejagnu's version in gdb_finish.
+	rename ::unknown ::dejagnu_unknown
+	proc unknown { args } {
+	    # Use tcl's unknown.
+	    set cmd [lindex $args 0]
+	    unresolved "testcase aborted due to invalid command name: $cmd"
+	    return [uplevel 1 ::gdb_tcl_unknown $args]
+	}
     }
 }
 
@@ -5094,115 +5361,73 @@ set banned_procedures { strace }
 # if the banned variables and procedures are already traced.
 set banned_traced 0
 
-proc gdb_init { test_file_name } {
-    # Reset the timeout value to the default.  This way, any testcase
-    # that changes the timeout value without resetting it cannot affect
-    # the timeout used in subsequent testcases.
-    global gdb_test_timeout
-    global timeout
-    set timeout $gdb_test_timeout
+# Global array that holds the name of all global variables at the time
+# a test script is started.  After the test script has completed any
+# global not in this list is deleted.
+array set gdb_known_globals {}
 
-    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
-	 && [target_info exists gdb_reverse_timeout] } {
-	set timeout [target_info gdb_reverse_timeout]
+# Setup the GDB_KNOWN_GLOBALS array with the names of all current
+# global variables.
+proc gdb_setup_known_globals {} {
+    global gdb_known_globals
+
+    array set gdb_known_globals {}
+    foreach varname [info globals] {
+	set gdb_known_globals($varname) 1
     }
-
-    # If GDB_INOTIFY is given, check for writes to '.'.  This is a
-    # debugging tool to help confirm that the test suite is
-    # parallel-safe.  You need "inotifywait" from the
-    # inotify-tools package to use this.
-    global GDB_INOTIFY inotify_pid
-    if {[info exists GDB_INOTIFY] && ![info exists inotify_pid]} {
-	global outdir tool inotify_log_file
-
-	set exclusions {outputs temp gdb[.](log|sum) cache}
-	set exclusion_re ([join $exclusions |])
-
-	set inotify_log_file [standard_temp_file inotify.out]
-	set inotify_pid [exec inotifywait -r -m -e move,create,delete . \
-			     --exclude $exclusion_re \
-			     |& tee -a $outdir/$tool.log $inotify_log_file &]
-
-	# Wait for the watches; hopefully this is long enough.
-	sleep 2
-
-	# Clear the log so that we don't emit a warning the first time
-	# we check it.
-	set fd [open $inotify_log_file w]
-	close $fd
-    }
-
-    # Block writes to all banned variables, and invocation of all
-    # banned procedures...
-    global banned_variables
-    global banned_procedures
-    global banned_traced
-    if (!$banned_traced) {
-    	foreach banned_var $banned_variables {
-            global "$banned_var"
-            trace add variable "$banned_var" write error
-	}
-	foreach banned_proc $banned_procedures {
-	    global "$banned_proc"
-	    trace add execution "$banned_proc" enter error
-	}
-	set banned_traced 1
-    }
-
-    # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
-    # messages as expected.
-    setenv LC_ALL C
-    setenv LC_CTYPE C
-    setenv LANG C
-
-    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
-    # the test results.  Even if /dev/null doesn't exist on the particular
-    # platform, the readline library will use the default setting just by
-    # failing to open the file.  OTOH, opening /dev/null successfully will
-    # also result in the default settings being used since nothing will be
-    # read from this file.
-    setenv INPUTRC "/dev/null"
-
-    # This disables style output, which would interfere with many
-    # tests.
-    setenv TERM "dumb"
-
-    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
-    # environment, we don't want these modifications to the history
-    # settings.
-    unset -nocomplain ::env(GDBHISTFILE)
-    unset -nocomplain ::env(GDBHISTSIZE)
-
-    # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
-    # during startup.  See "man expect" for details about stty_init.
-    global stty_init
-    set stty_init "rows 25 cols 80"
-
-    # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
-    # grep.  Clear GREP_OPTIONS to make the behavior predictable,
-    # especially having color output turned on can cause tests to fail.
-    setenv GREP_OPTIONS ""
-
-    # Clear $gdbserver_reconnect_p.
-    global gdbserver_reconnect_p
-    set gdbserver_reconnect_p 1
-    unset gdbserver_reconnect_p
-
-    # Clear $last_loaded_file
-    global last_loaded_file
-    unset -nocomplain last_loaded_file
-
-    # Reset GDB number of instances
-    global gdb_instances
-    set gdb_instances 0
-
-    return [default_gdb_init $test_file_name]
 }
 
+# Cleanup the global namespace.  Any global not in the
+# GDB_KNOWN_GLOBALS array is unset, this ensures we don't "leak"
+# globals from one test script to another.
+proc gdb_cleanup_globals {} {
+    global gdb_known_globals gdb_persistent_globals
+
+    foreach varname [info globals] {
+	if {![info exists gdb_known_globals($varname)]} {
+	    if { [info exists gdb_persistent_globals($varname)] } {
+		continue
+	    }
+	    uplevel #0 unset $varname
+	}
+    }
+}
+
+# Create gdb_tcl_unknown, a copy tcl's ::unknown, provided it's present as a
+# proc.
+set temp [interp create]
+if { [interp eval $temp "info procs ::unknown"] != "" } {
+    set old_args [interp eval $temp "info args ::unknown"]
+    set old_body [interp eval $temp "info body ::unknown"]
+    eval proc gdb_tcl_unknown {$old_args} {$old_body}
+}
+interp delete $temp
+unset temp
+
+# GDB implementation of ${tool}_init.  Called right before executing the
+# test-case.
+# Overridable function -- you can override this function in your
+# baseboard file.
+proc gdb_init { args } {
+    # A baseboard file overriding this proc and calling the default version
+    # should behave the same as this proc.  So, don't add code here, but to
+    # the default version instead.
+    return [default_gdb_init {*}$args]
+}
+
+# GDB implementation of ${tool}_finish.  Called right after executing the
+# test-case.
 proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
     global cleanfiles
+    global known_globals
+
+    if { [info procs ::gdb_tcl_unknown] != "" } {
+	# Restore dejagnu's version of proc unknown.
+	rename ::unknown ""
+	rename ::dejagnu_unknown ::unknown
+    }
 
     # Exit first, so that the files are no longer in use.
     gdb_exit
@@ -5228,6 +5453,14 @@ proc gdb_finish { } {
 	}
 	set banned_traced 0
     }
+
+    global gdb_finish_hooks
+    foreach gdb_finish_hook $gdb_finish_hooks {
+	$gdb_finish_hook
+    }
+    set gdb_finish_hooks [list]
+
+    gdb_cleanup_globals
 }
 
 global debug_format
@@ -6935,7 +7168,7 @@ proc gdbserver_debug_enabled { } {
 # Open the file for logging gdb input
 
 proc gdb_stdin_log_init { } {
-    global in_file
+    gdb_persistent_global in_file
 
     if {[info exists in_file]} {
       # Close existing file.
@@ -7010,9 +7243,16 @@ proc cmp_file_string { file str msg } {
 }
 
 # Does the compiler support CTF debug output using '-gt' compiler
-# flag?  If not then we should skip these tests.
+# flag?  If not then we should skip these tests.  We should also
+# skip them if libctf was explicitly disabled.
 
 gdb_caching_proc skip_ctf_tests {
+    global enable_libctf
+
+    if {$enable_libctf eq "no"} {
+	return 1
+    }
+
     return ![gdb_can_simple_compile ctfdebug {
 	int main () {
 	    return 0;
@@ -7201,6 +7441,77 @@ proc hex_in_list { val hexlist } {
     set re 0x0*$val
     set index [lsearch -regexp $hexlist $re]
     return [expr $index != -1]
+}
+
+# Override proc NAME to proc OVERRIDE for the duration of the execution of
+# BODY.
+
+proc with_override { name override body } {
+    # Implementation note: It's possible to implement the override using
+    # rename, like this:
+    #   rename $name save_$name
+    #   rename $override $name
+    #   set code [catch {uplevel 1 $body} result]
+    #   rename $name $override
+    #   rename save_$name $name
+    # but there are two issues here:
+    # - the save_$name might clash with an existing proc
+    # - the override is no longer available under its original name during
+    #   the override
+    # So, we use this more elaborate but cleaner mechanism.
+
+    # Save the old proc.
+    set old_args [info args $name]
+    set old_body [info body $name]
+
+    # Install the override.
+    set new_args [info args $override]
+    set new_body [info body $override]
+    eval proc $name {$new_args} {$new_body}
+
+    # Execute body.
+    set code [catch {uplevel 1 $body} result]
+
+    # Restore old proc.
+    eval proc $name {$old_args} {$old_body}
+
+    # Return as appropriate.
+    if { $code == 1 } {
+        global errorInfo errorCode
+        return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif { $code > 1 } {
+        return -code $code $result
+    }
+
+    return $result
+}
+
+# Setup tuiterm.exp environment.  To be used in test-cases instead of
+# "load_lib tuiterm.exp".  Calls initialization function and schedules
+# finalization function.
+proc tuiterm_env { } {
+    load_lib tuiterm.exp
+
+    # Do initialization.
+    tuiterm_env_init
+
+    # Schedule finalization.
+    global gdb_finish_hooks
+    lappend gdb_finish_hooks tuiterm_env_finish
+}
+
+# Dejagnu has a version of note, but usage is not allowed outside of dejagnu.
+# Define a local version.
+proc gdb_note { message } {
+    verbose -- "NOTE: $message" 0
+}
+
+# Return 1 if compiler supports -fuse-ld=gold, otherwise return 0.
+gdb_caching_proc have_fuse_ld_gold {
+    set me "have_fuse_ld_gold"
+    set flags "additional_flags=-fuse-ld=gold"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
 }
 
 # Always load compatibility stuff.

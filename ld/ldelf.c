@@ -262,6 +262,8 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
       return FALSE;
     }
 
+  track_dependency_files (name);
+
   /* Linker needs to decompress sections.  */
   abfd->flags |= BFD_DECOMPRESS;
 
@@ -1037,6 +1039,18 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
     }
 
   get_elf_backend_data (link_info.output_bfd)->setup_gnu_properties (&link_info);
+
+  /* Do not allow executable files to be used as inputs to the link.  */
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+    {
+      if (!bfd_input_just_syms (abfd)
+	  && elf_tdata (abfd) != NULL
+	  && elf_tdata (abfd)->elf_header != NULL
+	  /* FIXME: Maybe check for other non-supportable types as well ?  */
+	  && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
+	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	       abfd);
+    }
 
   if (bfd_link_relocatable (&link_info))
     {
@@ -2176,6 +2190,7 @@ ldelf_before_place_orphans (void)
 	      if (discarded_section (linked_to_sec))
 		{
 		  isec->output_section = bfd_abs_section_ptr;
+		  isec->flags |= SEC_EXCLUDE;
 		  break;
 		}
 	  }

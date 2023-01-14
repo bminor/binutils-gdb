@@ -48,15 +48,6 @@ run_ld_link_tests [list \
 ]
 
 # Test very simple native Linux/x86 programs with linux-x86.S.
-if { ![isnative] || ![check_compiler_available] } {
-    return
-}
-
-# Add $PLT_CFLAGS if PLT is expected.
-global PLT_CFLAGS
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-
 run_ld_link_exec_tests [list \
     [list \
 	"Run PR ld/23428 test" \
@@ -65,7 +56,7 @@ run_ld_link_exec_tests [list \
 	{ linux-x86.S pr23428.c dummy.s } \
 	"pr23428" \
 	"pass.out" \
-	"$NOPIE_CFLAGS -fno-asynchronous-unwind-tables" \
+	"$NOPIE_CFLAGS $NOSANITIZE_CFLAGS -fno-asynchronous-unwind-tables" \
 	"asm" \
     ] \
 ]
@@ -133,7 +124,11 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	}
     }
 
+    # Suppress warning for unsupported attribute from older GCC.
+    append cflags " -w"
+
     exec cp $srcdir/$subdir/$srcfilea $srcfilea
+    exec chmod +w $srcfilea
     set pr25749_bin "$objcopy -B $output_arch -I binary -O $output_target $srcfilea tmpdir/pr25749-bin.o"
     send_log "$pr25749_bin\n"
     set got [remote_exec host "$pr25749_bin"]
@@ -182,7 +177,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 check_pr25749a "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
 check_pr25749a "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "-fPIE" "-pie" ""
 check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
-if { [istarget "i?86-*-linux*"] } {
+if { [istarget "i?86-*-linux*"] || ![at_least_gcc_version 5 1] } {
     check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" ""
 } else {
     check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" "pr25749-1b.err"
@@ -219,7 +214,7 @@ if { [istarget "i?86-*-linux*"] } {
     }
 }
 
-proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
+proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags args} {
     global objcopy
     global srcdir
     global subdir
@@ -237,6 +232,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
     }
 
     exec cp $srcdir/$subdir/$srcfilea $srcfilea
+    exec chmod +w $srcfilea
     set pr25749_bin "$objcopy -B $output_arch -I binary -O $output_target $srcfilea tmpdir/pr25749-bin.o"
     send_log "$pr25749_bin\n"
     set got [remote_exec host "$pr25749_bin"]
@@ -256,6 +252,12 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
 	    "lib${testname}.so" \
 	] \
     ]
+
+    set pass "pass.out"
+    if { [llength $args] > 0 } {
+	set pass [lindex $args 0]
+    }
+
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run ${testname}b ($ldflags $cflags)" \
@@ -263,7 +265,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
 	    "" \
 	    [list $srcfilea]\
 	    "${testname}b" \
-	    "pass.out" \
+	    "$pass" \
 	    "$cflags -I../bfd" \
 	] \
     ]
@@ -272,13 +274,13 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
 check_pr25749b "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
 check_pr25749b "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "-fPIE" "-pie" ""
 check_pr25749b "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "-fPIE" "-pie" "-Wl,-Bsymbolic"
-check_pr25749b "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
-check_pr25749b "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" ""
+check_pr25749b "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" "" "passall.out"
+check_pr25749b "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" "" "passall.out"
 check_pr25749b "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" "-Wl,-Bsymbolic"
 check_pr25749b "pr25749-1d" "pr25749-1.c" "pr25749-1d.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" "-Wl,-defsym=_begin=0"
 check_pr25749b "pr25749-1d" "pr25749-1.c" "pr25749-1d.c" "-fPIE" "-pie" "-Wl,-defsym=_begin=0"
 check_pr25749b "pr25749-1d" "pr25749-1.c" "pr25749-1d.c" "-fPIE" "-pie" "-Wl,-Bsymbolic -Wl,-defsym=_begin=0"
-check_pr25749b "pr25749-2a" "pr25749-2.c" "pr25749-2a.s" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
-check_pr25749b "pr25749-2a" "pr25749-2.c" "pr25749-2a.s" "-fPIE" "-pie" ""
+check_pr25749b "pr25749-2a" "pr25749-2.c" "pr25749-2a.s" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" "" "passall.out"
+check_pr25749b "pr25749-2a" "pr25749-2.c" "pr25749-2a.s" "-fPIE" "-pie" "" "passall.out"
 check_pr25749b "pr25749-2b" "pr25749-2.c" "pr25749-2b.s" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
 check_pr25749b "pr25749-2b" "pr25749-2.c" "pr25749-2b.s" "-fPIE" "-pie" ""

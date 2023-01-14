@@ -39,7 +39,7 @@ gdb_test "python print (gdb.parameter ('directories'))" $directories
 
 # Test a simple boolean parameter.
 with_test_prefix "boolean parameter" {
-    gdb_py_test_multiple "Simple gdb booleanparameter" \
+    gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestParam (gdb.Parameter):" "" \
 	"   \"\"\"When enabled, test param does something useful. When disabled, does nothing.\"\"\"" "" \
@@ -79,7 +79,7 @@ with_test_prefix "boolean parameter" {
 
 # Test an enum parameter.
 with_test_prefix "enum parameter" {
-    gdb_py_test_multiple "enum gdb parameter" \
+    gdb_test_multiline "enum gdb parameter" \
 	"python" "" \
 	"class TestEnumParam (gdb.Parameter):" "" \
 	"   \"\"\"When set, test param does something useful. When disabled, does nothing.\"\"\"" "" \
@@ -112,7 +112,7 @@ with_test_prefix "enum parameter" {
 
 # Test a file parameter.
 with_test_prefix "file parameter" {
-    gdb_py_test_multiple "file gdb parameter" \
+    gdb_test_multiline "file gdb parameter" \
 	"python" "" \
 	"class TestFileParam (gdb.Parameter):" "" \
 	"   \"\"\"When set, test param does something useful. When disabled, does nothing.\"\"\"" "" \
@@ -144,7 +144,7 @@ with_test_prefix "file parameter" {
 
 # Test a parameter that is not documented.
 with_test_prefix "undocumented parameter" {
-    gdb_py_test_multiple "Simple gdb booleanparameter" \
+    gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestUndocParam (gdb.Parameter):" "" \
 	"   def get_show_string (self, pvalue):" ""\
@@ -179,7 +179,7 @@ with_test_prefix "undocumented parameter" {
 
 # Test a parameter that is not documented in any way..
 with_test_prefix "really undocumented parameter" {
-    gdb_py_test_multiple "Simple gdb booleanparameter" \
+    gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestNodocParam (gdb.Parameter):" "" \
 	"   def __init__ (self, name):" "" \
@@ -207,7 +207,7 @@ with_test_prefix "really undocumented parameter" {
 
 # Test deprecated API. Do not use in your own implementations.
 with_test_prefix "deprecated API parameter" {
-    gdb_py_test_multiple "Simple gdb booleanparameter" \
+    gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestParam (gdb.Parameter):" "" \
 	"   \"\"\"When enabled, test param does something useful. When disabled, does nothing.\"\"\"" "" \
@@ -238,7 +238,7 @@ with_test_prefix "deprecated API parameter" {
 }
 
 foreach kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
-    gdb_py_test_multiple "Simple gdb $kind" \
+    gdb_test_multiline "Simple gdb $kind" \
 	"python" "" \
 	"class TestNodocParam (gdb.Parameter):" "" \
 	"   def __init__ (self, name):" "" \
@@ -261,7 +261,7 @@ foreach kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
     }
 }
 
-gdb_py_test_multiple "Throwing gdb parameter" \
+gdb_test_multiline "Throwing gdb parameter" \
     "python" "" \
     "class TestThrowParam (gdb.Parameter):" "" \
     "   def __init__ (self, name):" "" \

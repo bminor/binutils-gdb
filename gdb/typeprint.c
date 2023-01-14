@@ -116,7 +116,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
       return;
     }
 
-  struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
+  struct type *ftype = check_typedef (type->field (field_idx).type ());
   if (type->code () == TYPE_CODE_UNION)
     {
       /* Since union fields don't have the concept of offsets, we just
@@ -366,15 +366,6 @@ void
 typedef_print (struct type *type, struct symbol *newobj, struct ui_file *stream)
 {
   LA_PRINT_TYPEDEF (type, newobj, stream);
-}
-
-/* The default way to print a typedef.  */
-
-void
-default_print_typedef (struct type *type, struct symbol *new_symbol,
-		       struct ui_file *stream)
-{
-  error (_("Language not supported."));
 }
 
 /* Print a description of a type TYPE in the form of a declaration of a
@@ -638,7 +629,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_INT:
-      print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0, val);
+      print_longest (stream, type->is_unsigned () ? 'u' : 'd', 0, val);
       break;
 
     case TYPE_CODE_CHAR:

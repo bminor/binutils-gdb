@@ -22,8 +22,6 @@ if ![is_elf_format] {
     return
 }
 
-load_lib ld-lib.exp
-
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --no-overlays"

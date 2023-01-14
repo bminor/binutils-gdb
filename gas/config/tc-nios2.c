@@ -184,20 +184,20 @@ typedef struct nios2_ps_insn_info
 } nios2_ps_insn_infoS;
 
 /* Opcode hash table.  */
-static struct hash_control *nios2_opcode_hash = NULL;
+static htab_t nios2_opcode_hash = NULL;
 #define nios2_opcode_lookup(NAME) \
-  ((struct nios2_opcode *) hash_find (nios2_opcode_hash, (NAME)))
+  ((struct nios2_opcode *) str_hash_find (nios2_opcode_hash, (NAME)))
 
 /* Register hash table.  */
-static struct hash_control *nios2_reg_hash = NULL;
+static htab_t nios2_reg_hash = NULL;
 #define nios2_reg_lookup(NAME) \
-  ((struct nios2_reg *) hash_find (nios2_reg_hash, (NAME)))
+  ((struct nios2_reg *) str_hash_find (nios2_reg_hash, (NAME)))
 
 
 /* Pseudo-op hash table.  */
-static struct hash_control *nios2_ps_hash = NULL;
+static htab_t nios2_ps_hash = NULL;
 #define nios2_ps_lookup(NAME) \
-  ((nios2_ps_insn_infoS *) hash_find (nios2_ps_hash, (NAME)))
+  ((nios2_ps_insn_infoS *) str_hash_find (nios2_ps_hash, (NAME)))
 
 /* The known current alignment of the current section.  */
 static int nios2_current_align;
@@ -238,10 +238,10 @@ md_chars_to_number (char *buf, int n)
   val = 0;
   if (target_big_endian)
     for (i = 0; i < n; ++i)
-      val = val | ((buf[i] & 0xff) << 8 * (n - (i + 1)));
+      val = val | ((valueT) (buf[i] & 0xff) << 8 * (n - (i + 1)));
   else
     for (i = 0; i < n; ++i)
-      val = val | ((buf[i] & 0xff) << 8 * i);
+      val = val | ((valueT) (buf[i] & 0xff) << 8 * i);
   return val;
 }
 
@@ -1400,7 +1400,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      break;
 	    default:
 	      {
-		fixup &= ((valueT) 1 << howto->bitsize) - 1;
+		fixup &= ((valueT) 2 << (howto->bitsize - 1)) - 1;
 		break;
 	      }
 	    }
@@ -1631,7 +1631,7 @@ nios2_parse_reglist (char *token, const struct nios2_opcode *op)
 	    }
 	}
 
-      mask |= 1 << regno;
+      mask |= 1UL << regno;
       last = regno;
     }
 
@@ -3603,7 +3603,6 @@ void
 md_begin (void)
 {
   int i;
-  const char *inserted;
 
   switch (nios2_architecture)
     {
@@ -3620,52 +3619,25 @@ md_begin (void)
 
   /* Create and fill a hashtable for the Nios II opcodes, registers and
      arguments.  */
-  nios2_opcode_hash = hash_new ();
-  nios2_reg_hash = hash_new ();
-  nios2_ps_hash = hash_new ();
+  nios2_opcode_hash = str_htab_create ();
+  nios2_reg_hash = str_htab_create ();
+  nios2_ps_hash = str_htab_create ();
 
   for (i = 0; i < nios2_num_opcodes; ++i)
-    {
-      inserted
-	= hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
-		       (PTR) & nios2_opcodes[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_opcodes[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-    }
+    if (str_hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
+			 &nios2_opcodes[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_opcodes[i].name);
 
   for (i = 0; i < nios2_num_regs; ++i)
-    {
-      inserted
-	= hash_insert (nios2_reg_hash, nios2_regs[i].name,
-		       (PTR) & nios2_regs[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_regs[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-
-    }
+    if (str_hash_insert (nios2_reg_hash, nios2_regs[i].name,
+			 &nios2_regs[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_regs[i].name);
 
   for (i = 0; i < nios2_num_ps_insn_info_structs; ++i)
-    {
-      inserted
-	= hash_insert (nios2_ps_hash, nios2_ps_insn_info_structs[i].pseudo_insn,
-		       (PTR) & nios2_ps_insn_info_structs[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_ps_insn_info_structs[i].pseudo_insn, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-    }
+    if (str_hash_insert (nios2_ps_hash,
+			 nios2_ps_insn_info_structs[i].pseudo_insn,
+			 &nios2_ps_insn_info_structs[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_ps_insn_info_structs[i].pseudo_insn);
 
   /* Assembler option defaults.  */
   nios2_as_options.noat = FALSE;
@@ -3939,7 +3911,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 	    as_bad ("GOT already in the symbol table");
 
 	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+				   &zero_address_frag, 0);
 	}
 
       return GOT_symbol;

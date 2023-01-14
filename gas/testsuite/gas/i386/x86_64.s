@@ -307,3 +307,6 @@ movzx rax, WORD PTR [rax]
 
 movnti dword ptr [rax], eax
 movnti qword ptr [rax], rax
+
+mov eax, tr1
+mov tr0, rcx

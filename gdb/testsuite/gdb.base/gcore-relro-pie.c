@@ -18,7 +18,7 @@
 void
 break_here (void)
 {
-  *(int *) 0 = 0;
+  *(volatile int *) 0 = 0;
 }
 
 void

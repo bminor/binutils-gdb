@@ -223,7 +223,7 @@ getprogname (void)
   int fd;
 
   sprintf (filename, "/proc/pinfo/%d", (int) getpid ());
-  fd = open (filename, O_RDONLY);
+  fd = open (filename, O_RDONLY | O_CLOEXEC);
   if (0 <= fd)
     {
       prpsinfo_t buf;

@@ -25,7 +25,6 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
-#include "opcode/riscv.h"
 #include "libiberty.h"
 #include "elfxx-riscv.h"
 #include "safe-ctype.h"
@@ -1520,9 +1519,15 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
     }
   else
     {
-      rps->error_handler
-	(_("-march=%s: ISA string must begin with rv32 or rv64"),
-	 arch);
+      /* Arch string shouldn't be NULL or empty here.  However,
+	 it might be empty only when we failed to merge the arch
+	 string in the riscv_merge_attributes.  We have already
+	 issued the correct error message in another side, so do
+	 not issue this error when the arch string is empty.  */
+      if (strlen (arch))
+	rps->error_handler (
+	  _("-march=%s: ISA string must begin with rv32 or rv64"),
+	  arch);
       return FALSE;
     }
 

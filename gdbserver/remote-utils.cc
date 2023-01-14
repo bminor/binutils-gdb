@@ -68,10 +68,6 @@
 #include <ws2tcpip.h>
 #endif
 
-#if __QNX__
-#include <sys/iomgr.h>
-#endif /* __QNX__ */
-
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
@@ -804,28 +800,6 @@ block_unblock_async_io (int block)
 #endif
 }
 
-#ifdef __QNX__
-static void
-nto_comctrl (int enable)
-{
-  struct sigevent event;
-
-  if (enable)
-    {
-      event.sigev_notify = SIGEV_SIGNAL_THREAD;
-      event.sigev_signo = SIGIO;
-      event.sigev_code = 0;
-      event.sigev_value.sival_ptr = NULL;
-      event.sigev_priority = -1;
-      ionotify (remote_desc, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_INPUT,
-		&event);
-    }
-  else
-    ionotify (remote_desc, _NOTIFY_ACTION_POLL, _NOTIFY_COND_INPUT, NULL);
-}
-#endif /* __QNX__ */
-
-
 /* Current state of asynchronous I/O.  */
 static int async_io_enabled;
 
@@ -839,9 +813,6 @@ enable_async_io (void)
   block_unblock_async_io (0);
 
   async_io_enabled = 1;
-#ifdef __QNX__
-  nto_comctrl (1);
-#endif /* __QNX__ */
 }
 
 /* Disable asynchronous I/O.  */
@@ -854,10 +825,6 @@ disable_async_io (void)
   block_unblock_async_io (1);
 
   async_io_enabled = 0;
-#ifdef __QNX__
-  nto_comctrl (0);
-#endif /* __QNX__ */
-
 }
 
 void

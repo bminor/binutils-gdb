@@ -33,9 +33,9 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f 18 55 00          	prefetcht1 0x0\(%rbp\)
  +[a-f0-9]+:	0f 18 5d 00          	prefetcht2 0x0\(%rbp\)
  +[a-f0-9]+:	0f 0d 4d 00          	prefetchw 0x0\(%rbp\)
- +[a-f0-9]+:	0f a1                	popq   %fs
+ +[a-f0-9]+:	0f a1                	pop    %fs
  +[a-f0-9]+:	0f ae e8             	lfence 
- +[a-f0-9]+:	9d                   	popfq  
+ +[a-f0-9]+:	9d                   	popf *
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	d7                   	xlat   %ds:\(%rbx\)
  +[a-f0-9]+:	0f ae e8             	lfence 
@@ -79,7 +79,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	0f 0f 66 02 b0       	pfcmpeq 0x2\(%rsi\),%mm4
  +[a-f0-9]+:	0f ae e8             	lfence 
- +[a-f0-9]+:	8f 00                	popq   \(%rax\)
+ +[a-f0-9]+:	8f 00                	pop    \(%rax\)
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	58                   	pop    %rax
  +[a-f0-9]+:	0f ae e8             	lfence 
@@ -100,7 +100,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	f7 29                	imull  \(%rcx\)
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	48 8d 04 40          	lea    \(%rax,%rax,2\),%rax
- +[a-f0-9]+:	c9                   	leaveq 
+ +[a-f0-9]+:	c9                   	leave *
  +[a-f0-9]+:	6e                   	outsb  %ds:\(%rsi\),\(%dx\)
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	ac                   	lods   %ds:\(%rsi\),%al

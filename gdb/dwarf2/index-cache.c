@@ -87,9 +87,9 @@ index_cache::disable ()
 /* See dwarf-index-cache.h.  */
 
 void
-index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
+index_cache::store (dwarf2_per_objfile *per_objfile)
 {
-  objfile *obj = dwarf2_per_objfile->objfile;
+  objfile *obj = per_objfile->objfile;
 
   if (!enabled ())
     return;
@@ -108,7 +108,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* Get build id of dwz file, if present.  */
   gdb::optional<std::string> dwz_build_id_str;
-  const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
+  const dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
   const char *dwz_build_id_ptr = NULL;
 
   if (dwz != nullptr)
@@ -149,7 +149,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
       /* Write the index itself to the directory, using the build id as the
          filename.  */
-      write_psymtabs_to_index (dwarf2_per_objfile, m_dir.c_str (),
+      write_psymtabs_to_index (per_objfile, m_dir.c_str (),
 			       build_id_str.c_str (), dwz_build_id_ptr,
 			       dw_index_kind::GDB_INDEX);
     }

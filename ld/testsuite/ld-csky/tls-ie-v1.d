@@ -4,7 +4,7 @@
 #ld: -shared --hash-style=sysv
 #readelf: -d -r
 
-Dynamic section at offset 0x[0-9a-f]+ contains 13 entries:
+Dynamic section at offset 0x[0-9a-f]+ contains 10 entries:
   Tag        Type                         Name/Value
  0x00000004 \(HASH\)                       .*
  0x00000005 \(STRTAB\)                     .*
@@ -12,9 +12,6 @@ Dynamic section at offset 0x[0-9a-f]+ contains 13 entries:
  0x0000000a \(STRSZ\)                      .* \(bytes\)
  0x0000000b \(SYMENT\)                     .* \(bytes\)
  0x00000003 \(PLTGOT\)                     0x[0-9a-f]+
- 0x00000002 \(PLTRELSZ\)                   0 \(bytes\)
- 0x00000014 \(PLTREL\)                     RELA
- 0x00000017 \(JMPREL\)                     0x[0-9a-f]+
  0x00000007 \(RELA\)                       0x[0-9a-f]+
  0x00000008 \(RELASZ\)                     12 \(bytes\)
  0x00000009 \(RELAENT\)                    12 \(bytes\)

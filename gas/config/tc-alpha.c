@@ -297,10 +297,10 @@ static unsigned alpha_target = AXP_OPCODE_BASE;
 static const char *alpha_target_name = "<all>";
 
 /* The hash table of instruction opcodes.  */
-static struct hash_control *alpha_opcode_hash;
+static htab_t alpha_opcode_hash;
 
 /* The hash table of macro opcodes.  */
-static struct hash_control *alpha_macro_hash;
+static htab_t alpha_macro_hash;
 
 #ifdef OBJ_ECOFF
 /* The $gp relocation symbol.  */
@@ -514,7 +514,7 @@ struct alpha_reloc_tag
 };
 
 /* Hash table to link up literals with the appropriate lituse.  */
-static struct hash_control *alpha_literal_hash;
+static htab_t alpha_literal_hash;
 
 /* Sequence numbers for internal use by macros.  */
 static long next_sequence_num = -1;
@@ -589,11 +589,10 @@ get_alpha_reloc_tag (long sequence)
 
   sprintf (buffer, "!%ld", sequence);
 
-  info = (struct alpha_reloc_tag *) hash_find (alpha_literal_hash, buffer);
+  info = (struct alpha_reloc_tag *) str_hash_find (alpha_literal_hash, buffer);
   if (! info)
     {
       size_t len = strlen (buffer);
-      const char *errmsg;
 
       info = (struct alpha_reloc_tag *)
           xcalloc (sizeof (struct alpha_reloc_tag) + len, 1);
@@ -601,9 +600,7 @@ get_alpha_reloc_tag (long sequence)
       info->segment = now_seg;
       info->sequence = sequence;
       strcpy (info->string, buffer);
-      errmsg = hash_insert (alpha_literal_hash, info->string, (void *) info);
-      if (errmsg)
-	as_fatal ("%s", errmsg);
+      str_hash_insert (alpha_literal_hash, info->string, info, 0);
 #ifdef OBJ_EVAX
       info->sym = 0;
       info->psym = 0;
@@ -1171,7 +1168,8 @@ assemble_tokens_to_insn (const char *opname,
   const struct alpha_opcode *opcode;
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
+							opname);
   if (opcode)
     {
       int cpumatch;
@@ -3318,8 +3316,8 @@ assemble_tokens (const char *opname,
 #endif
   if (local_macros_on)
     {
-      macro = ((const struct alpha_macro *)
-	       hash_find (alpha_macro_hash, opname));
+      macro = (const struct alpha_macro *) str_hash_find (alpha_macro_hash,
+							  opname);
       if (macro)
 	{
 	  found_something = 1;
@@ -3333,7 +3331,8 @@ assemble_tokens (const char *opname,
     }
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
+							opname);
   if (opcode)
     {
       found_something = 1;
@@ -3406,8 +3405,7 @@ add_to_link_pool (symbolS *sym, offsetT addend)
 
   /* Not found, add a new entry.  */
   subseg_set (alpha_link_section, 0);
-  linksym = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  linksym = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now, frag_now_fix ());
   p = frag_more (8);
   memset (p, 0, 8);
 
@@ -3906,8 +3904,8 @@ s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 
   arg = get_absolute_expression ();
   demand_empty_rest_of_line ();
-  alpha_prologue_label = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  alpha_prologue_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				     frag_now_fix ());
 
   if (ECOFF_DEBUGGING)
     sym = ecoff_get_cur_proc_sym ();
@@ -4058,8 +4056,8 @@ alpha_elf_md_end (void)
 	/* Create a temporary symbol at the same location as our
 	   function symbol.  This prevents problems with globals.  */
 	cfi_new_fde (symbol_temp_new (S_GET_SEGMENT (p->func_sym),
-				      S_GET_VALUE (p->func_sym),
-				      symbol_get_frag (p->func_sym)));
+				      symbol_get_frag (p->func_sym),
+				      S_GET_VALUE (p->func_sym)));
 
 	cfi_set_sections ();
 	cfi_set_return_column (p->ra_regno);
@@ -4472,8 +4470,8 @@ static void
 s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
-  alpha_prologue_label = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  alpha_prologue_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				     frag_now_fix ());
 }
 
 /* Parse .pdesc <entry_name>,{null|stack|reg}
@@ -4708,8 +4706,8 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
 	 BFD_RELOC_ALPHA_LINKAGE);
 
       if (alpha_insn_label == NULL)
-	alpha_insn_label = symbol_new
-	  (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+	alpha_insn_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				       frag_now_fix ());
 
       /* Create a linkage element.  */
       linkage_fixup = XNEW (struct alpha_linkage_fixups);
@@ -5419,17 +5417,15 @@ md_begin (void)
   }
 
   /* Create the opcode hash table.  */
-  alpha_opcode_hash = hash_new ();
+  alpha_opcode_hash = str_htab_create ();
 
   for (i = 0; i < alpha_num_opcodes;)
     {
-      const char *name, *retval, *slash;
+      const char *name, *slash;
 
       name = alpha_opcodes[i].name;
-      retval = hash_insert (alpha_opcode_hash, name, (void *) &alpha_opcodes[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode `%s': %s"),
-		  name, retval);
+      if (str_hash_insert (alpha_opcode_hash, name, &alpha_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
 
       /* Some opcodes include modifiers of various sorts with a "/mod"
 	 syntax, like the architecture manual suggests.  However, for
@@ -5443,7 +5439,7 @@ md_begin (void)
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
 
-	  (void) hash_insert (alpha_opcode_hash, p, (void *) &alpha_opcodes[i]);
+	  (void) str_hash_insert (alpha_opcode_hash, p, &alpha_opcodes[i], 0);
 	  /* Ignore failures -- the opcode table does duplicate some
 	     variants in different forms, like "hw_stq" and "hw_st/q".  */
 	}
@@ -5455,17 +5451,15 @@ md_begin (void)
     }
 
   /* Create the macro hash table.  */
-  alpha_macro_hash = hash_new ();
+  alpha_macro_hash = str_htab_create ();
 
   for (i = 0; i < alpha_num_macros;)
     {
-      const char *name, *retval;
+      const char *name;
 
       name = alpha_macros[i].name;
-      retval = hash_insert (alpha_macro_hash, name, (void *) &alpha_macros[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash macro `%s': %s"),
-		  name, retval);
+      if (str_hash_insert (alpha_macro_hash, name, &alpha_macros[i], 0))
+	as_fatal (_("duplicate %s"), name);
 
       while (++i < alpha_num_macros
 	     && (alpha_macros[i].name == name
@@ -5479,8 +5473,8 @@ md_begin (void)
       char name[4];
 
       sprintf (name, "$%d", i);
-      alpha_register_table[i] = symbol_create (name, reg_section, i,
-					       &zero_address_frag);
+      alpha_register_table[i] = symbol_create (name, reg_section,
+					       &zero_address_frag, i);
     }
 
   for (; i < 64; ++i)
@@ -5488,8 +5482,8 @@ md_begin (void)
       char name[5];
 
       sprintf (name, "$f%d", i - 32);
-      alpha_register_table[i] = symbol_create (name, reg_section, i,
-					       &zero_address_frag);
+      alpha_register_table[i] = symbol_create (name, reg_section,
+					       &zero_address_frag, i);
     }
 
   /* Create the special symbols and sections we'll be using.  */
@@ -5502,8 +5496,8 @@ md_begin (void)
 
   /* For handling the GP, create a symbol that won't be output in the
      symbol table.  We'll edit it out of relocs later.  */
-  alpha_gp_symbol = symbol_create ("<GP value>", alpha_lita_section, 0x8000,
-				   &zero_address_frag);
+  alpha_gp_symbol = symbol_create ("<GP value>", alpha_lita_section,
+				   &zero_address_frag, 0x8000);
 #endif
 
 #ifdef OBJ_EVAX
@@ -5520,7 +5514,7 @@ md_begin (void)
 #endif
 
   /* Create literal lookup hash table.  */
-  alpha_literal_hash = hash_new ();
+  alpha_literal_hash = str_htab_create ();
 
   subseg_set (text_section, 0);
 }

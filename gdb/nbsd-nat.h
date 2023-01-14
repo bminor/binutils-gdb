@@ -48,6 +48,15 @@ struct nbsd_nat_target : public inf_ptrace_target
 			      gdb::array_view<const int> syscall_counts)
     override;
 
+  bool supports_multi_process () override;
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+  bool supports_dumpcore () override;
+  void dumpcore (const char *filename) override;
 };
 
 #endif /* nbsd-nat.h */

@@ -157,6 +157,11 @@ arc*-*-elf32)
 	gdb_target_obs="arc-newlib-tdep.o"
 	;;
 
+arc*-*-linux*)
+	# Target: ARC machine running Linux
+	gdb_target_obs="arc-linux-tdep.o linux-tdep.o solib-svr4.o"
+	;;
+
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
 	gdb_target_obs="arm-wince-tdep.o windows-tdep.o"
@@ -203,6 +208,12 @@ bfin-*-*)
 	# Target: Blackfin processor
 	gdb_target_obs="bfin-tdep.o"
 	gdb_sim=../sim/bfin/libsim.a
+	;;
+
+bpf-*-*)
+	# Target: eBPF
+	gdb_target_obs="bpf-tdep.o"
+	gdb_sim=../sim/bpf/libsim.a
 	;;
 
 cris*)
@@ -585,20 +596,20 @@ sh*)
 
 sparc-*-linux*)
 	# Target: GNU/Linux SPARC
-	gdb_target_obs="sparc-tdep.o sparc-sol2-tdep.o sol2-tdep.o \
+	gdb_target_obs="sparc-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux UltraSPARC
-	    gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o \
+	    gdb_target_obs="sparc64-tdep.o \
 			    sparc64-linux-tdep.o ${gdb_target_obs}"
 	fi
 	;;
 sparc64-*-linux*)
 	# Target: GNU/Linux UltraSPARC
-	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sol2-tdep.o \
-			sparc64-linux-tdep.o sparc-tdep.o sparc-sol2-tdep.o \
+	gdb_target_obs="sparc64-tdep.o \
+			sparc64-linux-tdep.o sparc-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o linux-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;

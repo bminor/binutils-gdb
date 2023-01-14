@@ -89,9 +89,9 @@ frag_alloc (struct obstack *ob)
 }
 
 /* Try to augment current frag by nchars chars.
-   If there is no room, close of the current frag with a ".fill 0"
-   and begin a new frag. Unless the new frag has nchars chars available
-   do not return. Do not set up any fields of *now_frag.  */
+   If there is no room, close off the current frag with a ".fill 0"
+   and begin a new frag.  Then loop until the new frag has at least
+   nchars chars available.  Does not set up any fields in frag_now.  */
 
 void
 frag_grow (size_t nchars)

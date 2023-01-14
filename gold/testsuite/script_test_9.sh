@@ -38,5 +38,6 @@ check()
 
 check script_test_9.stdout "LOAD .*R E "
 check script_test_9.stdout "LOAD .*RW "
-check script_test_9.stdout "00 .*\.text .init"
+check script_test_9.stdout "00 .*\.text"
+check script_test_9.stdout "00 .*\.init"
 check script_test_9.stdout "01 .*\.data "

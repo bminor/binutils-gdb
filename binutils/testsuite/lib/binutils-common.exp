@@ -94,15 +94,20 @@ proc is_aout_format {} {
 
 # True if the object format is known to be PE COFF.
 #
-proc is_pecoff_format {} {
-    if { [istarget *-*-beospe*]
-	 || [istarget *-*-cegcc*]
-	 || [istarget *-*-cygwin*]
-	 || [istarget *-*-interix*]
-	 || [istarget *-*-mingw*]
-	 || [istarget *-*-netbsdpe*]
-	 || [istarget *-*-pe*]
-	 || [istarget *-*-winnt*] } {
+proc is_pecoff_format args {
+    if { [llength $args] == 1 } {
+	set m_os [lindex $args 0]
+    } else {
+	set m_os *-*
+    }
+    if { [istarget $m_os-beospe*]
+	 || [istarget $m_os-cegcc*]
+	 || [istarget $m_os-cygwin*]
+	 || [istarget $m_os-interix*]
+	 || [istarget $m_os-mingw*]
+	 || [istarget $m_os-netbsdpe*]
+	 || [istarget $m_os-pe*]
+	 || [istarget $m_os-winnt*] } {
 	return 1
     }
     return 0
@@ -116,6 +121,16 @@ proc is_som_format {} {
 	     || [istarget {*-*-h[ip]ux*}] \
 	     || [istarget *-*-mpeix*] \
 	     || [istarget *-*-bsd*] } {
+	return 1;
+    }
+    return 0;
+}
+
+proc is_xcoff_format {} {
+    if { [istarget rs6000-*-*]
+	 || [istarget powerpc*-*-aix*]
+	 || [istarget powerpc*-*-beos*]
+	 || [istarget powerpc*-*-macos*] } {
 	return 1;
     }
     return 0;
@@ -306,6 +321,25 @@ proc check_pie_support { } {
 	}
     }
     return $pie_available_saved
+}
+
+proc check_relro_support { } {
+    global relro_available_saved
+    global ld
+
+    if {![info exists relro_available_saved]} {
+	remote_file host delete norelro
+	set ld_output [remote_exec host $ld "-z norelro"]
+	if { [string first "not supported" $ld_output] >= 0
+	     || [string first "unrecognized option" $ld_output] >= 0
+	     || [string first "-z norelro ignored" $ld_output] >= 0
+	     || [string first "cannot find norelro" $ld_output] >= 0 } {
+	    set relro_available_saved 0
+	} else {
+	    set relro_available_saved 1
+	}
+    }
+    return $relro_available_saved
 }
 
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
@@ -542,6 +576,7 @@ if ![string length [info proc prune_warnings]] {
 # run_dump_test FILE (optional:) EXTRA_OPTIONS
 #
 # Assemble a .s file, then run some utility on it and check the output.
+# Optionally generate the .s file first by running the compiler.
 #
 # There should be an assembly language file named FILE.s in the test
 # suite directory, and a pattern file called FILE.d.  run_dump_test
@@ -599,6 +634,11 @@ if ![string length [info proc prune_warnings]] {
 #
 #   ld_after_inputfiles: FLAGS
 #	Similar to "ld", but put FLAGS after all input files.
+#
+#   cc: FLAGS
+#       Run the compiler with FLAGS (to which -S is added) to generate assembler
+#       source first.  source: must be provided and should consist of .c files.
+#       Source-specific CC flags are not supported.
 #
 #   objcopy_objects: FLAGS
 #	Run objcopy with the specified flags after assembling any source
@@ -726,10 +766,10 @@ if ![string length [info proc prune_warnings]] {
 # regexps in FILE.d.
 #
 proc run_dump_test { name {extra_options {}} } {
-    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS ELFEDIT ELFEDITFLAGS LD LDFLAGS
-    global NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
+    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS CC CFLAGS ELFEDIT ELFEDITFLAGS
+    global LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
     global READELF READELFFLAGS STRIP STRIPFLAGS
-    global copyfile env ld_elf_shared_opt runtests srcdir subdir verbose
+    global copyfile env runtests srcdir subdir verbose
 
     if [string match "*/*" $name] {
 	set file $name
@@ -761,6 +801,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(as) {}
     set as_final_flags {}
     set as_additional_flags {}
+    set opts(cc) {}
     set opts(dump) {}
     set opts(elfedit) {}
     set opts(error) {}
@@ -804,10 +845,10 @@ proc run_dump_test { name {extra_options {}} } {
 	    return
 	}
 
-	# Allow more substitutions, including tcl functions, for as and ld.
-	# Not done in general because extra quoting is needed for glob
+	# Allow more substitutions, including tcl functions, for as, ld,
+	# and cc.  Not done in general because extra quoting is needed for glob
 	# args used for example in binutils-all/remove-relocs-04.d.
-	if { $opt_name == "as" || $opt_name == "ld" } {
+	if { $opt_name == "as" || $opt_name == "ld" || $opt_name == "cc" } {
 	    set opt_val [subst $opt_val]
 	} else {
 	    # Just substitute $srcdir and $subdir
@@ -1013,6 +1054,47 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
+    # Possibly compile some of the inputs, and build up a replacement
+    # for opts(source) with the output .s names substituted in as we go.
+    # Set the .s names from the objfile_names to take advantage of the
+    # uniquification that happened earlier.
+    if { $opts(cc) != ""} {
+	set cmdret 0
+	set new_source ""
+
+	foreach cfile $opts(source) ofile $objfile_names {
+	    if { [file extension $cfile] != ".c" } {
+		lappend new_source "$cfile"
+		continue
+	    }
+
+	    if { ! [string match "./*" $cfile] } {
+		set cfile "$srcdir/$subdir/$cfile"
+	    }
+	    # ofile is never absolute, so this always works to protect sfile
+	    # from later absolutization.
+	    set sfile "./[file rootname $ofile].s"
+	    set cmd "$CC $CFLAGS -S $opts(cc) -o $sfile $cfile"
+	    send_log "$cmd\n"
+	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
+	    remote_upload host "dump.tmp"
+	    set comp_output [prune_warnings [file_contents "dump.tmp"]]
+	    remote_file host delete "dump.tmp"
+	    remote_file build delete "dump.tmp"
+	    lappend new_source "$sfile"
+	    set cmdret [lindex $cmdret 0]
+
+	    regsub "\n$" $comp_output "" comp_output
+	    if { $cmdret != 0} {
+		send_log "compilation of $cfile failed, exit status $cmdret with <$comp_output>"
+                # Should this be 'unresolved', or is that too silent?
+		fail $testname
+		return 0
+	    }
+	}
+	set opts(source) $new_source
+    }
+
     if { $opts(source) == "" } {
 	set sourcefiles [list ${file}.s]
 	set asflags [list ""]
@@ -1119,9 +1201,9 @@ proc run_dump_test { name {extra_options {}} } {
             set ld_extra_opt ""
             global ld
             set ld "$LD"
-            if { [is_elf_format] && [check_shared_lib_support] } {
-                set ld_extra_opt "$ld_elf_shared_opt"
-            }
+	    if [check_relro_support] {
+		set ld_extra_opt "-z norelro"
+	    }
 
             # Add -L$srcdir/$subdir so that the linker command can use
             # linker scripts in the source directory.

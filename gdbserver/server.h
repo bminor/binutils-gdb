@@ -31,10 +31,6 @@
 
 gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
-#ifdef __MINGW32CE__
-#include "wincecompat.h"
-#endif
-
 #include "gdbsupport/version.h"
 
 #if !HAVE_DECL_PERROR

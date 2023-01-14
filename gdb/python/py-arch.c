@@ -226,6 +226,42 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   return result_list.release ();
 }
 
+/* Implementation of gdb.Architecture.registers (self, reggroup) -> Iterator.
+   Returns an iterator over register descriptors for registers in GROUP
+   within the architecture SELF.  */
+
+static PyObject *
+archpy_registers (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static const char *keywords[] = { "reggroup", NULL };
+  struct gdbarch *gdbarch = NULL;
+  const char *group_name = NULL;
+
+  /* Parse method arguments.  */
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "|s", keywords,
+					&group_name))
+    return NULL;
+
+  /* Extract the gdbarch from the self object.  */
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
+
+  return gdbpy_new_register_descriptor_iterator (gdbarch, group_name);
+}
+
+/* Implementation of gdb.Architecture.register_groups (self) -> Iterator.
+   Returns an iterator that will give up all valid register groups in the
+   architecture SELF.  */
+
+static PyObject *
+archpy_register_groups (PyObject *self, PyObject *args)
+{
+  struct gdbarch *gdbarch = NULL;
+
+  /* Extract the gdbarch from the self object.  */
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
+  return gdbpy_new_reggroup_iterator (gdbarch);
+}
+
 /* Initializes the Architecture class in the gdb module.  */
 
 int
@@ -249,6 +285,15 @@ Return the name of the architecture as a string value." },
     "disassemble (start_pc [, end_pc [, count]]) -> List.\n\
 Return a list of at most COUNT disassembled instructions from START_PC to\n\
 END_PC." },
+  { "registers", (PyCFunction) archpy_registers,
+    METH_VARARGS | METH_KEYWORDS,
+    "registers ([ group-name ]) -> Iterator.\n\
+Return an iterator of register descriptors for the registers in register\n\
+group GROUP-NAME." },
+  { "register_groups", archpy_register_groups,
+    METH_NOARGS,
+    "register_groups () -> Iterator.\n\
+Return an iterator over all of the register groups in this architecture." },
   {NULL}  /* Sentinel */
 };
 

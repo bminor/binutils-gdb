@@ -1962,7 +1962,7 @@ static const  struct bm bm_table[] = {
   { 0x84, 0x00,     BM_REG_IMM},
   { 0x06, 0x06,     BM_REG_IMM},
   { 0xC6, 0x44,     BM_RESERVED0},
-  // 00
+
   { 0x8F, 0x80,     BM_OPR_B},
   { 0x8E, 0x82,     BM_OPR_W},
   { 0x8C, 0x88,     BM_OPR_L},

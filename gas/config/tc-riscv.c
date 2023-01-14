@@ -126,8 +126,6 @@ riscv_set_default_priv_spec (const char *s)
   enum riscv_priv_spec_class class;
   unsigned major, minor, revision;
   obj_attribute *attr;
-  size_t buf_size;
-  char *buf;
 
   /* Find the corresponding priv spec class.  */
   if (riscv_get_priv_spec_class (s, &class))
@@ -149,40 +147,24 @@ riscv_set_default_priv_spec (const char *s)
   minor = (unsigned) attr[Tag_RISCV_priv_spec_minor].i;
   revision = (unsigned) attr[Tag_RISCV_priv_spec_revision].i;
 
-  /* The priv attributes setting 0.0.0 is meaningless.  We should have set
-     the default_priv_spec by md_parse_option and riscv_after_parse_args,
-     so just skip the following setting.  */
-  if (major == 0 && minor == 0 && revision == 0)
-    return 1;
+  if (riscv_get_priv_spec_class_from_numbers (major,
+					      minor,
+					      revision,
+					      &class))
+    {
+      /* The priv attributes setting 0.0.0 is meaningless.  We should have set
+	 the default_priv_spec by md_parse_option and riscv_after_parse_args,
+	 so just skip the following setting.  */
+      if (class == PRIV_SPEC_CLASS_NONE)
+	return 1;
 
-  buf_size = riscv_estimate_digit (major)
-            + 1 /* '.' */
-            + riscv_estimate_digit (minor)
-            + 1; /* string terminator */
-  if (revision != 0)
-    {
-      buf_size += 1 /* '.' */
-                 + riscv_estimate_digit (revision);
-      buf = xmalloc (buf_size);
-      snprintf (buf, buf_size, "%d.%d.%d", major, minor, revision);
-    }
-  else
-    {
-      buf = xmalloc (buf_size);
-      snprintf (buf, buf_size, "%d.%d", major, minor);
-    }
-
-  if (riscv_get_priv_spec_class (buf, &class))
-    {
       default_priv_spec = class;
-      free (buf);
       return 1;
     }
 
   /* Still can not find the priv spec class.  */
-  as_bad (_("Unknown default privilege spec `%d.%d.%d' set by  "
+  as_bad (_("Unknown default privilege spec `%d.%d.%d' set by "
            "privilege attributes"),  major, minor, revision);
-  free (buf);
   return 0;
 }
 
@@ -260,28 +242,19 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
 }
 
 /* Handle of the extension with version hash table.  */
-static struct hash_control *ext_version_hash = NULL;
+static htab_t ext_version_hash = NULL;
 
-static struct hash_control *
+static htab_t
 init_ext_version_hash (const struct riscv_ext_version *table)
 {
   int i = 0;
-  struct hash_control *hash = hash_new ();
+  htab_t hash = str_htab_create ();
 
   while (table[i].name)
     {
       const char *name = table[i].name;
-      const char *hash_error =
-       hash_insert (hash, name, (void *) &table[i]);
-
-      if (hash_error != NULL)
-       {
-         fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-                  table[i].name, hash_error);
-         /* Probably a memory allocation problem?  Give up now.  */
-         as_fatal (_("Broken assembler.  No assembly attempted."));
-         return NULL;
-       }
+      if (str_hash_insert (hash, name, &table[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       i++;
       while (table[i].name
@@ -305,7 +278,7 @@ riscv_get_default_ext_version (const char *name,
   if (name == NULL || default_isa_spec == ISA_SPEC_CLASS_NONE)
     return;
 
-  ext = (struct riscv_ext_version *) hash_find (ext_version_hash, name);
+  ext = (struct riscv_ext_version *) str_hash_find (ext_version_hash, name);
   while (ext
         && ext->name
         && strcmp (ext->name, name) == 0)
@@ -339,10 +312,10 @@ riscv_set_arch (const char *s)
 }
 
 /* Handle of the OPCODE hash table.  */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* Handle of the type of .insn hash table.  */
-static struct hash_control *insn_type_hash = NULL;
+static htab_t insn_type_hash = NULL;
 
 /* This array holds the chars that always start a comment.  If the
     pre-processor is disabled, these aren't very useful */
@@ -373,6 +346,9 @@ static bfd_boolean start_assemble = FALSE;
 
 /* Indicate ELF attributes are explictly set.  */
 static bfd_boolean explicit_attr = FALSE;
+
+/* Indicate CSR or priv instructions are explictly used.  */
+static bfd_boolean explicit_priv_attr = FALSE;
 
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */
 #define RELAX_BRANCH_ENCODE(uncond, rvc, length)	\
@@ -574,23 +550,17 @@ static const struct opcode_name_t opcode_name_list[] =
 };
 
 /* Hash table for lookup opcode name.  */
-static struct hash_control *opcode_names_hash = NULL;
+static htab_t opcode_names_hash = NULL;
 
 /* Initialization for hash table of opcode name.  */
 static void
 init_opcode_names_hash (void)
 {
-  const char *retval;
   const struct opcode_name_t *opcode;
 
   for (opcode = &opcode_name_list[0]; opcode->name != NULL; ++opcode)
-    {
-      retval = hash_insert (opcode_names_hash, opcode->name, (void *)opcode);
-
-      if (retval != NULL)
-	as_fatal (_("internal error: can't hash `%s': %s"),
-		  opcode->name, retval);
-    }
+    if (str_hash_insert (opcode_names_hash, opcode->name, opcode, 0) != NULL)
+      as_fatal (_("duplicate %s"), opcode->name);
 }
 
 /* Find `s` is a valid opcode name or not,
@@ -613,7 +583,7 @@ opcode_name_lookup (char **s)
   save_c = *e;
   *e = '\0';
 
-  o = (struct opcode_name_t *) hash_find (opcode_names_hash, *s);
+  o = (struct opcode_name_t *) str_hash_find (opcode_names_hash, *s);
 
   /* Advance to next token if one was recognized.  */
   if (o)
@@ -634,8 +604,8 @@ enum reg_class
   RCLASS_CSR
 };
 
-static struct hash_control *reg_names_hash = NULL;
-static struct hash_control *csr_extra_hash = NULL;
+static htab_t reg_names_hash = NULL;
+static htab_t csr_extra_hash = NULL;
 
 #define ENCODE_REG_HASH(cls, n) \
   ((void *)(uintptr_t)((n) * RCLASS_MAX + (cls) + 1))
@@ -646,10 +616,8 @@ static void
 hash_reg_name (enum reg_class class, const char *name, unsigned n)
 {
   void *hash = ENCODE_REG_HASH (class, n);
-  const char *retval = hash_insert (reg_names_hash, name, hash);
-
-  if (retval != NULL)
-    as_fatal (_("internal error: can't hash `%s': %s"), name, retval);
+  if (str_hash_insert (reg_names_hash, name, hash, 0) != NULL)
+    as_fatal (_("duplicate %s"), name);
 }
 
 static void
@@ -670,11 +638,10 @@ riscv_init_csr_hash (const char *name,
                     enum riscv_priv_spec_class abort_version)
 {
   struct riscv_csr_extra *entry, *pre_entry;
-  const char *hash_error = NULL;
   bfd_boolean need_enrty = TRUE;
 
   pre_entry = NULL;
-  entry = (struct riscv_csr_extra *) hash_find (csr_extra_hash, name);
+  entry = (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, name);
   while (need_enrty && entry != NULL)
     {
       if (entry->csr_class == class
@@ -695,72 +662,60 @@ riscv_init_csr_hash (const char *name,
   entry->address = address;
   entry->define_version = define_version;
   entry->abort_version = abort_version;
+  entry->next = NULL;
 
   /* If the CSR hasn't been inserted in the hash table, then insert it.
      Otherwise, attach the extra information to the entry which is already
      in the hash table.  */
   if (pre_entry == NULL)
-    {
-      hash_error = hash_insert (csr_extra_hash, name, (void *) entry);
-      if (hash_error != NULL)
-       {
-         fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-                  name, hash_error);
-         /* Probably a memory allocation problem?  Give up now.  */
-         as_fatal (_("Broken assembler.  No assembly attempted."));
-       }
-    }
+    str_hash_insert (csr_extra_hash, name, entry, 0);
   else
     pre_entry->next = entry;
 }
 
-/* Check wether the CSR is valid according to the ISA.  */
+/* Return the suitable CSR address after checking the ISA dependency and
+   priv spec versions.  */
 
-static void
-riscv_csr_class_check (const char *s,
-		       enum riscv_csr_class csr_class)
+static unsigned int
+riscv_csr_address (const char *csr_name,
+		   struct riscv_csr_extra *entry)
 {
+  struct riscv_csr_extra *saved_entry = entry;
+  enum riscv_csr_class csr_class = entry->csr_class;
+  bfd_boolean need_check_version = TRUE;
   bfd_boolean result = TRUE;
-
-  /* Don't check the ISA dependency when -mcsr-check isn't set.  */
-  if (!riscv_opts.csr_check)
-    return;
 
   switch (csr_class)
     {
     case CSR_CLASS_I:
       result = riscv_subset_supports ("i");
       break;
-    case CSR_CLASS_F:
-      result = riscv_subset_supports ("f");
-      break;
     case CSR_CLASS_I_32:
       result = (xlen == 32 && riscv_subset_supports ("i"));
+      break;
+    case CSR_CLASS_F:
+      result = riscv_subset_supports ("f");
+      need_check_version = FALSE;
+      break;
+    case CSR_CLASS_DEBUG:
+      need_check_version = FALSE;
       break;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }
 
-  if (!result)
-    as_warn (_("Invalid CSR `%s' for the current ISA"), s);
-}
-
-/* Check and find the CSR address according to the privilege spec version.  */
-
-static void
-riscv_csr_version_check (const char *csr_name,
-			 struct riscv_csr_extra **entryP)
-{
-  struct riscv_csr_extra *entry = *entryP;
+  /* Don't report the ISA conflict when -mcsr-check isn't set.  */
+  if (riscv_opts.csr_check && !result)
+    as_warn (_("Invalid CSR `%s' for the current ISA"), csr_name);
 
   while (entry != NULL)
     {
-      if (default_priv_spec >= entry->define_version
-	  && default_priv_spec < entry->abort_version)
+      if (!need_check_version
+	  || (default_priv_spec >= entry->define_version
+	      && default_priv_spec < entry->abort_version))
        {
          /* Find the suitable CSR according to the specific version.  */
-         *entryP = entry;
-         return;
+         return entry->address;
        }
       entry = entry->next;
     }
@@ -777,6 +732,8 @@ riscv_csr_version_check (const char *csr_name,
 	as_warn (_("Invalid CSR `%s' for the privilege spec `%s'"),
 		 csr_name, priv_name);
     }
+
+  return saved_entry->address;
 }
 
 /* Once the CSR is defined, including the old privilege spec, then we call
@@ -788,7 +745,7 @@ static unsigned int
 reg_csr_lookup_internal (const char *s)
 {
   struct riscv_csr_extra *r =
-    (struct riscv_csr_extra *) hash_find (csr_extra_hash, s);
+    (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, s);
 
   if (r == NULL)
     return -1U;
@@ -799,10 +756,7 @@ reg_csr_lookup_internal (const char *s)
      will regard it as a "Unknown CSR" and report error.  If user use number
      to set the CSR, but over the range (> 0xfff), then assembler will report
      "Improper CSR" error for it.  */
-  riscv_csr_class_check (s, r->csr_class);
-  riscv_csr_version_check (s, &r);
-
-  return r->address;
+  return riscv_csr_address (s, r);
 }
 
 static unsigned int
@@ -813,7 +767,7 @@ reg_lookup_internal (const char *s, enum reg_class class)
   if (class == RCLASS_CSR)
     return reg_csr_lookup_internal (s);
 
-  r = hash_find (reg_names_hash, s);
+  r = str_hash_find (reg_names_hash, s);
   if (r == NULL || DECODE_REG_CLASS (r) != class)
     return -1;
 
@@ -1037,26 +991,18 @@ struct percent_op_match
 
 /* Common hash table initialization function for
    instruction and .insn directive.  */
-static struct hash_control *
+static htab_t
 init_opcode_hash (const struct riscv_opcode *opcodes,
 		  bfd_boolean insn_directive_p)
 {
   int i = 0;
   int length;
-  struct hash_control *hash = hash_new ();
+  htab_t hash = str_htab_create ();
   while (opcodes[i].name)
     {
       const char *name = opcodes[i].name;
-      const char *hash_error =
-	hash_insert (hash, name, (void *) &opcodes[i]);
-
-      if (hash_error != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   opcodes[i].name, hash_error);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
+      if (str_hash_insert (hash, name, &opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       do
 	{
@@ -1093,7 +1039,7 @@ md_begin (void)
   op_hash = init_opcode_hash (riscv_opcodes, FALSE);
   insn_type_hash = init_opcode_hash (riscv_insn_types, TRUE);
 
-  reg_names_hash = hash_new ();
+  reg_names_hash = str_htab_create ();
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_numeric, NGPR);
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_abi, NGPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
@@ -1102,7 +1048,7 @@ md_begin (void)
   hash_reg_name (RCLASS_GPR, "fp", 8);
 
   /* Create and insert CSR hash tables.  */
-  csr_extra_hash = hash_new ();
+  csr_extra_hash = str_htab_create ();
 #define DECLARE_CSR(name, num, class, define_version, abort_version) \
   riscv_init_csr_hash (#name, num, class, define_version, abort_version);
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
@@ -1110,7 +1056,7 @@ md_begin (void)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 
-  opcode_names_hash = hash_new ();
+  opcode_names_hash = str_htab_create ();
   init_opcode_names_hash ();
 
   /* Set the default alignment for the text section.  */
@@ -1215,7 +1161,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   va_start (args, fmt);
 
   r = BFD_RELOC_UNUSED;
-  mo = (struct riscv_opcode *) hash_find (op_hash, name);
+  mo = (struct riscv_opcode *) str_hash_find (op_hash, name);
   gas_assert (mo);
 
   /* Find a non-RVC variant of the instruction.  append_insn will compress
@@ -1324,8 +1270,8 @@ check_absolute_expr (struct riscv_cl_insn *ip, expressionS *ex,
 static symbolS *
 make_internal_label (void)
 {
-  return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg,
-					(valueT) frag_now_fix (), frag_now);
+  return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg, frag_now,
+					frag_now_fix ());
 }
 
 /* Load an entry from the GOT.  */
@@ -1780,13 +1726,42 @@ riscv_csr_read_only_check (insn_t insn)
   return TRUE;
 }
 
+/* Return True if it is a privileged instruction.  Otherwise, return FALSE.
+
+   uret is actually a N-ext instruction.  So it is better to regard it as
+   an user instruction rather than the priv instruction.
+
+   hret is used to return from traps in H-mode.  H-mode is removed since
+   the v1.10 priv spec, but probably be added in the new hypervisor spec.
+   Therefore, hret should be controlled by the hypervisor spec rather than
+   priv spec in the future.
+
+   dret is defined in the debug spec, so it should be checked in the future,
+   too.  */
+
+static bfd_boolean
+riscv_is_priv_insn (insn_t insn)
+{
+  return (((insn ^ MATCH_SRET) & MASK_SRET) == 0
+	  || ((insn ^ MATCH_MRET) & MASK_MRET) == 0
+	  || ((insn ^ MATCH_SFENCE_VMA) & MASK_SFENCE_VMA) == 0
+	  || ((insn ^ MATCH_WFI) & MASK_WFI) == 0
+  /* The sfence.vm is dropped in the v1.10 priv specs, but we still need to
+     check it here to keep the compatible.  Maybe we should issue warning
+     if sfence.vm is used, but the priv spec newer than v1.10 is chosen.
+     We already have a similar check for CSR, but not yet for instructions.
+     It would be good if we could check the spec versions both for CSR and
+     instructions, but not here.  */
+	  || ((insn ^ MATCH_SFENCE_VM) & MASK_SFENCE_VM) == 0);
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
 
 static const char *
 riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
-	  bfd_reloc_code_real_type *imm_reloc, struct hash_control *hash)
+	  bfd_reloc_code_real_type *imm_reloc, htab_t hash)
 {
   char *s;
   const char *args;
@@ -1802,7 +1777,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   bfd_boolean insn_with_csr = FALSE;
 
   /* Parse the name of the instruction.  Terminate the string if whitespace
-     is found so that hash_find only sees the name part of the string.  */
+     is found so that str_hash_find only sees the name part of the string.  */
   for (s = str; *s != '\0'; ++s)
     if (ISSPACE (*s))
       {
@@ -1811,7 +1786,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	break;
       }
 
-  insn = (struct riscv_opcode *) hash_find (hash, str);
+  insn = (struct riscv_opcode *) str_hash_find (hash, str);
 
   argsStart = s;
   for ( ; insn && insn->name && strcmp (insn->name, str) == 0; insn++)
@@ -1846,6 +1821,9 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 					 : insn->match) == 2
 		      && !riscv_opts.rvc)
 		    break;
+
+		  if (riscv_is_priv_insn (ip->insn_opcode))
+		    explicit_priv_attr = TRUE;
 
 		  /* Check if we write a read-only CSR by the CSR
 		     instruction.  */
@@ -1927,18 +1905,18 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case '<':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_IMM (imm_expr->X_add_number)
 		      || imm_expr->X_add_number <= 0
-		      || imm_expr->X_add_number >= 32)
+		      || imm_expr->X_add_number >= 32
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case '8':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_UIMM8 (imm_expr->X_add_number)
 		      || imm_expr->X_add_number < 0
-		      || imm_expr->X_add_number >= 256)
+		      || imm_expr->X_add_number >= 256
+		      || !VALID_RVC_UIMM8 ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_UIMM8 (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1946,7 +1924,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_SIMM3 (imm_expr->X_add_number))
+		      || !VALID_RVC_SIMM3 ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_SIMM3 (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1954,7 +1932,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1963,7 +1941,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LW_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LW_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_LW_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1972,7 +1950,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LD_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LD_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_LD_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1981,7 +1959,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LWSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_LWSP_IMM (imm_expr->X_add_number);
@@ -1991,7 +1969,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LDSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_LDSP_IMM (imm_expr->X_add_number);
@@ -2002,15 +1980,15 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      /* C.addiw, c.li, and c.andi allow zero immediate.
 			 C.addi allows zero immediate as hint.  Otherwise this
 			 is same as 'j'.  */
-		      || !VALID_RVC_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'K':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_ADDI4SPN_IMM (imm_expr->X_add_number)
-		      || imm_expr->X_add_number == 0)
+		      || imm_expr->X_add_number == 0
+		      || !VALID_RVC_ADDI4SPN_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_ADDI4SPN_IMM (imm_expr->X_add_number);
@@ -2018,8 +1996,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case 'L':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_ADDI16SP_IMM (imm_expr->X_add_number)
-		      || imm_expr->X_add_number == 0)
+		      || imm_expr->X_add_number == 0
+		      || !VALID_RVC_ADDI16SP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_ADDI16SP_IMM (imm_expr->X_add_number);
@@ -2029,7 +2007,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SWSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_SWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_SWSP_IMM (imm_expr->X_add_number);
@@ -2039,7 +2017,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SDSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_SDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_SDSP_IMM (imm_expr->X_add_number);
@@ -2211,6 +2189,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 	    case 'E':		/* Control register.  */
 	      insn_with_csr = TRUE;
+	      explicit_priv_attr = TRUE;
 	      if (reg_lookup (&s, RCLASS_CSR, &regno))
 		INSERT_OPERAND (CSR, *ip, regno);
 	      else
@@ -3602,6 +3581,15 @@ riscv_write_out_attrs (void)
      it seems strange.  */
   if (!start_assemble
       && !riscv_set_default_priv_spec (NULL))
+    return;
+
+  /* If we already have set elf priv attributes, then no need to do anything,
+     assembler will generate them according to what you set.  Otherwise, don't
+     generate or update them when no CSR and priv instructions are used.
+     Generate the priv attributes according to default_priv_spec, which can be
+     set by -mpriv-spec and --with-priv-spec, and be updated by the original
+     priv attribute sets.  */
+  if (!explicit_priv_attr)
     return;
 
   /* Re-write priv attributes by default_priv_spec.  */

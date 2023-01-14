@@ -133,10 +133,10 @@ libunwind_descr (struct gdbarch *gdbarch)
 }
 
 static void *
-libunwind_descr_init (struct gdbarch *gdbarch)
+libunwind_descr_init (struct obstack *obstack)
 {
   struct libunwind_descr *descr
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct libunwind_descr);
+    = OBSTACK_ZALLOC (obstack, struct libunwind_descr);
 
   return descr;
 }
@@ -151,14 +151,7 @@ libunwind_frame_set_descr (struct gdbarch *gdbarch,
 
   arch_descr = ((struct libunwind_descr *)
 		gdbarch_data (gdbarch, libunwind_descr_handle));
-
-  if (arch_descr == NULL)
-    {
-      /* First time here.  Must initialize data area.  */
-      arch_descr = (struct libunwind_descr *) libunwind_descr_init (gdbarch);
-      deprecated_set_gdbarch_data (gdbarch,
-				   libunwind_descr_handle, arch_descr);
-    }
+  gdb_assert (arch_descr != NULL);
 
   /* Copy new descriptor info into arch descriptor.  */
   arch_descr->gdb2uw = descr->gdb2uw;
@@ -596,7 +589,7 @@ void
 _initialize_libunwind_frame ()
 {
   libunwind_descr_handle
-    = gdbarch_data_register_post_init (libunwind_descr_init);
+    = gdbarch_data_register_pre_init (libunwind_descr_init);
 
   libunwind_initialized = libunwind_load ();
 }

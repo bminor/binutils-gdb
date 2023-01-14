@@ -260,7 +260,7 @@ extern int ada_is_tagged_type (struct type *, int);
 
 extern int ada_is_tag_type (struct type *);
 
-extern const char *ada_tag_name (struct value *);
+extern gdb::unique_xmalloc_ptr<char> ada_tag_name (struct value *);
 
 extern struct value *ada_tag_value_at_base_address (struct value *obj);
 
@@ -375,9 +375,10 @@ extern struct ada_task_info *ada_get_task_info_from_ptid (ptid_t ptid);
 
 extern int ada_get_task_number (thread_info *thread);
 
-typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
+typedef gdb::function_view<void (struct ada_task_info *task)>
+  ada_task_list_iterator_ftype;
 extern void iterate_over_live_ada_tasks
-  (ada_task_list_iterator_ftype *iterator);
+  (ada_task_list_iterator_ftype iterator);
 
 extern const char *ada_get_tcb_types_info (void);
 

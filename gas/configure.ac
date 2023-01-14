@@ -242,6 +242,13 @@ for this_target in $target $canon_targets ; do
 	AC_DEFINE(STRICTCOFF, 1, [Using strict COFF?])
 	;;
 
+      i386-*-linux-* | x86_64-*-linux-*)
+	if test ${this_target} = $target \
+	   && test ${ac_default_generate_x86_used_note} = unset; then
+	  ac_default_generate_x86_used_note=1
+	fi
+	;;
+
       i386-*-solaris2 \
       | x86_64-*-solaris2 \
       | i386-*-solaris2.[[0-9]] \

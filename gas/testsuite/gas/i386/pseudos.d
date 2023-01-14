@@ -22,6 +22,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f8 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 50 00 	vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
@@ -288,6 +292,21 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	8a 45 00             	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	8a 45 00             	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	8a 85 00 00 00 00    	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	67 8a 04             	mov    \(%si\),%al
+ +[a-f0-9]+:	67 8a 44 00          	mov    0x0\(%si\),%al
+ +[a-f0-9]+:	67 8a 84 00 00       	mov    0x0\(%si\),%al
+ +[a-f0-9]+:	67 8a 05             	mov    \(%di\),%al
+ +[a-f0-9]+:	67 8a 45 00          	mov    0x0\(%di\),%al
+ +[a-f0-9]+:	67 8a 85 00 00       	mov    0x0\(%di\),%al
+ +[a-f0-9]+:	67 8a 07             	mov    \(%bx\),%al
+ +[a-f0-9]+:	67 8a 47 00          	mov    0x0\(%bx\),%al
+ +[a-f0-9]+:	67 8a 87 00 00       	mov    0x0\(%bx\),%al
+ +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
+ +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
+ +[a-f0-9]+:	67 8a 86 00 00       	mov    0x0\(%bp\),%al
  +[a-f0-9]+:	c4 e1 78 28 d7       	vmovaps %xmm7,%xmm2
  +[a-f0-9]+:	c4 e1 78 28 d7       	vmovaps %xmm7,%xmm2
  +[a-f0-9]+:	c4 e1 78 29 fa       	vmovaps %xmm7,%xmm2
@@ -302,6 +321,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f8 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 50 00 	vmovaps 0x0\(%eax\),%xmm2
  +[a-f0-9]+:	62 f1 7c 08 28 90 00 00 00 00 	vmovaps 0x0\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f8 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 50 08 	vmovaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	62 f1 7c 08 28 90 80 00 00 00 	vmovaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
  +[a-f0-9]+:	8b c1                	mov    %ecx,%eax
  +[a-f0-9]+:	89 c8                	mov    %ecx,%eax
@@ -316,4 +339,19 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%eax\),%xmm2
+ +[a-f0-9]+:	8a 45 00             	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	8a 45 00             	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	8a 85 00 00 00 00    	mov    0x0\(%ebp\),%al
+ +[a-f0-9]+:	67 8a 04             	mov    \(%si\),%al
+ +[a-f0-9]+:	67 8a 44 00          	mov    0x0\(%si\),%al
+ +[a-f0-9]+:	67 8a 84 00 00       	mov    0x0\(%si\),%al
+ +[a-f0-9]+:	67 8a 05             	mov    \(%di\),%al
+ +[a-f0-9]+:	67 8a 45 00          	mov    0x0\(%di\),%al
+ +[a-f0-9]+:	67 8a 85 00 00       	mov    0x0\(%di\),%al
+ +[a-f0-9]+:	67 8a 07             	mov    \(%bx\),%al
+ +[a-f0-9]+:	67 8a 47 00          	mov    0x0\(%bx\),%al
+ +[a-f0-9]+:	67 8a 87 00 00       	mov    0x0\(%bx\),%al
+ +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
+ +[a-f0-9]+:	67 8a 46 00          	mov    0x0\(%bp\),%al
+ +[a-f0-9]+:	67 8a 86 00 00       	mov    0x0\(%bp\),%al
 #pass

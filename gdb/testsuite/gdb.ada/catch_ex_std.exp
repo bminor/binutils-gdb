@@ -19,6 +19,8 @@ if {[skip_shlib_tests]} {
 
 load_lib "ada.exp"
 
+if { [skip_ada_tests] } { return -1 }
+
 standard_ada_testfile foo
 
 set ofile ${binfile}.o

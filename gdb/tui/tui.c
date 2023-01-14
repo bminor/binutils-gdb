@@ -268,8 +268,14 @@ tui_set_key_mode (enum tui_key_mode mode)
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
 void
-tui_initialize_readline (void)
+tui_ensure_readline_initialized ()
 {
+  static bool initialized;
+
+  if (initialized)
+    return;
+  initialized = true;
+
   int i;
   Keymap tui_ctlx_keymap;
 
@@ -325,6 +331,9 @@ tui_initialize_readline (void)
   rl_bind_key_in_map ('q', tui_rl_next_keymap, tui_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, emacs_ctlx_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, tui_ctlx_keymap);
+
+  /* Initialize readline after the above.  */
+  rl_initialize ();
 }
 
 /* Return the TERM variable from the environment, or "<unset>"

@@ -62,6 +62,7 @@ create_map (const char *name)
   m->keys = NULL;
   m->values = NULL;
   m->show_header = 0;
+  return m;
 }
 
 void
@@ -85,6 +86,7 @@ create_map_map (void)
   mm->length = 0;
   mm->values = NULL;
   mm->show_header = 0;
+  return mm;
 }
 
 void

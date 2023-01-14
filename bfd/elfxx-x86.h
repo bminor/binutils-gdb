@@ -133,9 +133,9 @@
 	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
 	     && (!(RESOLVED_TO_ZERO) || PC32_RELOC)) \
 	    || (EH)->elf.root.type != bfd_link_hash_undefweak)) \
-    && ((!X86_PCREL_TYPE_P (R_TYPE) \
-	 && !X86_SIZE_TYPE_P (R_TYPE)) \
-	 || ! SYMBOL_CALLS_LOCAL ((INFO), &(EH)->elf))) \
+    && ((!X86_PCREL_TYPE_P (R_TYPE) && !X86_SIZE_TYPE_P (R_TYPE)) \
+	|| ! SYMBOL_CALLS_LOCAL ((INFO), \
+				 (struct elf_link_hash_entry *) (EH)))) \
    || (ELIMINATE_COPY_RELOCS \
        && !bfd_link_pic (INFO) \
        && (EH) != NULL \
@@ -249,9 +249,6 @@
 struct elf_x86_link_hash_entry
 {
   struct elf_link_hash_entry elf;
-
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
 
   unsigned char tls_type;
 
@@ -439,14 +436,6 @@ struct elf_x86_plt_layout
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
 
-enum elf_x86_target_os
-{
-  is_normal,
-  is_solaris,
-  is_vxworks,
-  is_nacl
-};
-
 /* x86 ELF linker hash table.  */
 
 struct elf_x86_link_hash_table
@@ -479,9 +468,6 @@ struct elf_x86_link_hash_table
   /* The amount of space used by the jump slots in the GOT.  */
   bfd_vma sgotplt_jump_table_size;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
 
@@ -489,18 +475,10 @@ struct elf_x86_link_hash_table
   htab_t loc_hash_table;
   void * loc_hash_memory;
 
-  /* The offset into sgot of the GOT entry used by the PLT entry
-     above.  */
-  bfd_vma tlsdesc_got;
-
   /* The index of the next R_X86_64_JUMP_SLOT entry in .rela.plt.  */
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
-
-  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
-     to read-only sections.  */
-  bfd_boolean readonly_dynrelocs_against_ifunc;
 
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
@@ -509,12 +487,6 @@ struct elf_x86_link_hash_table
   /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
      is only used for i386.  */
   bfd_vma next_tls_desc_index;
-
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  This is only used for x86-64.  */
-  bfd_vma tlsdesc_plt;
 
    /* Value used to fill the unused bytes of the first PLT entry.  This
       is only used for i386.  */
@@ -534,12 +506,7 @@ struct elf_x86_link_hash_table
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
-  enum elf_target_id target_id;
-  enum elf_x86_target_os target_os;
   unsigned int sizeof_reloc;
-  unsigned int dt_reloc;
-  unsigned int dt_reloc_sz;
-  unsigned int dt_reloc_ent;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;
@@ -549,18 +516,6 @@ struct elf_x86_link_hash_table
   /* Options passed from the linker.  */
   struct elf_linker_x86_params *params;
 };
-
-/* Architecture-specific backend data for x86.  */
-
-struct elf_x86_backend_data
-{
-  /* Target system.  */
-  enum elf_x86_target_os target_os;
-};
-
-#define get_elf_x86_backend_data(abfd) \
-  ((const struct elf_x86_backend_data *) \
-   get_elf_backend_data (abfd)->arch_data)
 
 struct elf_x86_init_table
 {
@@ -632,7 +587,7 @@ struct elf_x86_plt
 #define is_x86_elf(bfd, htab)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == (htab)->target_id)
+   && elf_object_id (bfd) == (htab)->elf.hash_table_id)
 
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);

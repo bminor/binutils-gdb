@@ -67,4 +67,6 @@ main()
   func5 ();
   func6 ();
   outside_scope ();
+
+  return 0;
 }

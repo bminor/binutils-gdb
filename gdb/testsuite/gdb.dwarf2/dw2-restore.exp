@@ -21,8 +21,15 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
 }
 standard_testfile .S
 
+set opts [list {additional_flags=-nostdlib}]
+
+# Clang's integrated assembler doesn't support .func or .endfunc.
+if { [test_compiler_info clang*] } {
+    lappend opts [list {additional_flags=-fno-integrated-as}]
+}
+
 if {[prepare_for_testing "failed to prepare" $testfile [list $srcfile] \
-	 [list {additional_flags=-nostdlib}]]} {
+	 $opts]} {
     return -1
 }
 

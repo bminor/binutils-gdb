@@ -19,10 +19,10 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-/* This is a BFD backend which may be used to write binary objects.
-   It may only be used for output, not input.  The intention is that
-   this may be used as an output format for objcopy in order to
-   generate raw binary data.
+/* This is a BFD backend which may be used to read or write binary
+   objects.  Historically, it was used as an output format for objcopy
+   in order to generate raw binary data, but is now used for other
+   purposes as well.
 
    This is very simple.  The only complication is that the real data
    will start at some address X, and in some cases we will not want to
@@ -97,12 +97,12 @@ binary_object_p (bfd *abfd)
 
 static bfd_boolean
 binary_get_section_contents (bfd *abfd,
-			     asection *section ATTRIBUTE_UNUSED,
+			     asection *section,
 			     void * location,
 			     file_ptr offset,
 			     bfd_size_type count)
 {
-  if (bfd_seek (abfd, offset, SEEK_SET) != 0
+  if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
     return FALSE;
   return TRUE;

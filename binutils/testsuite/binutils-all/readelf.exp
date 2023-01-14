@@ -188,7 +188,7 @@ proc readelf_wi_test {} {
 	".*DW_TAG_subprogram.*"
 	".*DW_TAG_base_type.*"
 	".*DW_AT_producer.*(GNU C|indirect string).*"
-	".*DW_AT_language.*ANSI C.*"
+	".*DW_AT_language.*(ANSI C|C11).*"
 	".*DW_AT_name.*(testprog.c|indirect string).*"
 	".*DW_AT_name.*fn.*"
 	".*DW_AT_name.*(main|indirect string).*"
@@ -345,11 +345,27 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     readelf_test -r $tempfile readelf.r  {}
 }
 
+# Test demangling symbol names.
+if {![binutils_assemble $srcdir/$subdir/mangled.s tmpdir/mangled.o]} then {
+    unresolved "readelf -s -C bintest (failed to assemble)"
+} else {
+
+    if ![is_remote host] {
+	set tempfile tmpdir/mangled.o
+    } else {
+	set tempfile [remote_download host tmpdir/mangled.o]
+    }
+
+    # Run the test.
+    readelf_test {--syms --demangle --wide} $tempfile readelf.demangled {}
+}
+
 readelf_wi_test
 readelf_compressed_wa_test
 
 readelf_dump_test
 run_dump_test "pr25543"
+
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
@@ -448,7 +464,7 @@ if ![istarget "riscv*-*-*"] then {
 	readelf_find_size $tempfile 2
 
 	# Make sure that readelf can decode the contents.
-	readelf_test -wiaoRlL $tempfile dw5.W { nds32*-elf }
+	readelf_test -wiaoRlL $tempfile dw5.W {}
     }
 }
 
@@ -518,3 +534,16 @@ if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
     readelf_test {--enable-checks --sections --wide} $tempfile zero-sec.r {}
 }
 
+if ![is_remote host] {
+    set test $srcdir/$subdir/pr26112.o.bz2
+    # We need to strip the ".bz2", but can leave the dirname.
+    set t $subdir/[file tail $test]
+    set testname [file rootname $t]
+    verbose $testname
+    set tempfile tmpdir/pr26112.o
+    if {[catch "system \"bzip2 -dc $test > $tempfile\""] != 0} {
+	untested "bzip2 -dc ($testname)"
+    } else {
+	readelf_test {--debug-dump=macro} $tempfile pr26112.r {}
+    }
+}

@@ -1611,10 +1611,6 @@ enum bfd_architecture
   bfd_arch_k1om,      /* Intel K1OM.  */
 #define bfd_mach_k1om                  (1 << 6)
 #define bfd_mach_k1om_intel_syntax     (bfd_mach_k1om | bfd_mach_i386_intel_syntax)
-#define bfd_mach_i386_nacl             (1 << 7)
-#define bfd_mach_i386_i386_nacl        (bfd_mach_i386_i386 | bfd_mach_i386_nacl)
-#define bfd_mach_x86_64_nacl           (bfd_mach_x86_64 | bfd_mach_i386_nacl)
-#define bfd_mach_x64_32_nacl           (bfd_mach_x64_32 | bfd_mach_i386_nacl)
   bfd_arch_iamcu,     /* Intel MCU.  */
 #define bfd_mach_iamcu                 (1 << 8)
 #define bfd_mach_i386_iamcu            (bfd_mach_i386_i386 | bfd_mach_iamcu)
@@ -1815,6 +1811,7 @@ enum bfd_architecture
 #define bfd_mach_iq10          2
   bfd_arch_bpf,       /* Linux eBPF.  */
 #define bfd_mach_bpf           1
+#define bfd_mach_xbpf          2
   bfd_arch_epiphany,  /* Adapteva EPIPHANY.  */
 #define bfd_mach_epiphany16    1
 #define bfd_mach_epiphany32    2
@@ -1933,6 +1930,7 @@ enum bfd_architecture
 #define bfd_mach_tilegx32      2
   bfd_arch_aarch64,   /* AArch64.  */
 #define bfd_mach_aarch64 0
+#define bfd_mach_aarch64_8R    1
 #define bfd_mach_aarch64_ilp32 32
   bfd_arch_nios2,     /* Nios II.  */
 #define bfd_mach_nios2         0
@@ -1956,6 +1954,7 @@ enum bfd_architecture
 #define bfd_mach_ck803         5
 #define bfd_mach_ck807         6
 #define bfd_mach_ck810         7
+#define bfd_mach_ck860         8
   bfd_arch_last
   };
 
@@ -3045,10 +3044,10 @@ instruction.  */
   BFD_RELOC_PPC64_DTPREL16_HIGHESTA,
   BFD_RELOC_PPC64_TPREL34,
   BFD_RELOC_PPC64_DTPREL34,
-  BFD_RELOC_PPC64_GOT_TLSGD34,
-  BFD_RELOC_PPC64_GOT_TLSLD34,
-  BFD_RELOC_PPC64_GOT_TPREL34,
-  BFD_RELOC_PPC64_GOT_DTPREL34,
+  BFD_RELOC_PPC64_GOT_TLSGD_PCREL34,
+  BFD_RELOC_PPC64_GOT_TLSLD_PCREL34,
+  BFD_RELOC_PPC64_GOT_TPREL_PCREL34,
+  BFD_RELOC_PPC64_GOT_DTPREL_PCREL34,
   BFD_RELOC_PPC64_TLS_PCREL,
 
 /* IBM 370/390 relocations  */
@@ -5115,6 +5114,8 @@ then it may be truncated to 8 bits.  */
   BFD_RELOC_MSP430_ABS_HI16,
   BFD_RELOC_MSP430_PREL31,
   BFD_RELOC_MSP430_SYM_DIFF,
+  BFD_RELOC_MSP430_SET_ULEB128,
+  BFD_RELOC_MSP430_SUB_ULEB128,
 
 /* Relocations used by the Altera Nios II core.  */
   BFD_RELOC_NIOS2_S16,
@@ -6681,6 +6682,10 @@ struct bfd
 
   /* Set if this is a slim LTO object not loaded with a compiler plugin.  */
   unsigned int lto_slim_object : 1;
+
+  /* Do not attempt to modify this file.  Set when detecting errors
+     that BFD is not prepared to handle for objcopy/strip.  */
+  unsigned int read_only : 1;
 
   /* Set to dummy BFD created when claimed by a compiler plug-in
      library.  */

@@ -23,15 +23,12 @@ if ![check_gc_sections_available] {
     return
 }
 
-set cflags "-ffunction-sections -fdata-sections"
+set cflags "-ffunction-sections -fdata-sections $NOSANITIZE_CFLAGS"
 set objfile "tmpdir/gc.o"
 
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-
-if [istarget powerpc64*-*-*] {
-    # otherwise with -mcmodel=medium gcc we get XPASSes.
-    set cflags "$cflags -mminimal-toc"
+if { [istarget powerpc*-*-*] && ![istarget powerpc64*-*-*] } {
+    # Avoid using .got2 for powerpc -m32
+    set cflags "$cflags $NOPIE_CFLAGS"
 }
 
 if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] } {
@@ -64,7 +61,7 @@ proc test_gc { testname filename linker ldflags} {
 	return
     }
     if ![ld_nm $nm "" $outfile] {
-	unresolved $testname
+	fail $testname
 	return
     }
     if {![info exists nm_output(used_func)] \
@@ -74,9 +71,6 @@ proc test_gc { testname filename linker ldflags} {
 	fail $testname
 	return
     }
-    #ppc64_elf_gc_mark_hook needs to be taught how to look through
-    #the .toc section to properly mark variable sections for gc.
-    setup_xfail "powerpc64*-*-*"
     if {[info exists nm_output(unused_func)] \
 	    || [info exists nm_output(unused_var)]} {
 	send_log "unused section still here\n"

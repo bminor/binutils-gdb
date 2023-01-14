@@ -33,7 +33,7 @@ Disassembly of section .text:
   38:	c1 e9 02             	shr    \$0x2,%ecx
   3b:	c1 e9 02             	shr    \$0x2,%ecx
   3e:	f6 c2 02             	test   \$0x2,%dl
-  41:	e8 00 00 00 00       	callq  (0x)?46( .*)?
+  41:	e8 00 00 00 00       	call   (0x)?46( .*)?
   46:	75 e3                	jne    (0x)?2b( .*)?
   48:	31 c0                	xor    %eax,%eax
 #pass

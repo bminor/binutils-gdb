@@ -675,13 +675,13 @@ static int g_switch_seen = 0;
 static int nopic_need_relax (symbolS *, int);
 
 /* Handle of the OPCODE hash table.  */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* The opcode hash table we use for the mips16.  */
-static struct hash_control *mips16_op_hash = NULL;
+static htab_t mips16_op_hash = NULL;
 
 /* The opcode hash table we use for the microMIPS ASE.  */
-static struct hash_control *micromips_op_hash = NULL;
+static htab_t micromips_op_hash = NULL;
 
 /* This array holds the chars that always start a comment.  If the
     pre-processor is disabled, these aren't very useful.  */
@@ -888,11 +888,6 @@ struct mips_hi_fixup
 /* The list of unmatched HI relocs.  */
 
 static struct mips_hi_fixup *mips_hi_fixup_list;
-
-/* The frag containing the last explicit relocation operator.
-   Null if explicit relocations have not been used.  */
-
-static fragS *prev_reloc_op_frag;
 
 /* Map mips16 register numbers to normal MIPS register numbers.  */
 
@@ -3673,7 +3668,6 @@ validate_micromips_insn (const struct mips_opcode *opc,
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int i = 0;
   int broken = 0;
 
@@ -3693,21 +3687,15 @@ md_begin (void)
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, file_mips_opts.arch))
     as_warn (_("could not set architecture and machine"));
 
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   mips_operands = XCNEWVEC (struct mips_operand_array, NUMOPCODES);
   for (i = 0; i < NUMOPCODES;)
     {
       const char *name = mips_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, (void *) &mips_opcodes[i]);
-      if (retval != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   mips_opcodes[i].name, retval);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("broken assembler, no assembly attempted"));
-	}
+      if (str_hash_insert (op_hash, name, &mips_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
@@ -3730,7 +3718,7 @@ md_begin (void)
       while ((i < NUMOPCODES) && !strcmp (mips_opcodes[i].name, name));
     }
 
-  mips16_op_hash = hash_new ();
+  mips16_op_hash = str_htab_create ();
   mips16_operands = XCNEWVEC (struct mips_operand_array,
 			      bfd_mips16_num_opcodes);
 
@@ -3739,10 +3727,8 @@ md_begin (void)
     {
       const char *name = mips16_opcodes[i].name;
 
-      retval = hash_insert (mips16_op_hash, name, (void *) &mips16_opcodes[i]);
-      if (retval != NULL)
-	as_fatal (_("internal: can't hash `%s': %s"),
-		  mips16_opcodes[i].name, retval);
+      if (str_hash_insert (mips16_op_hash, name, &mips16_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  if (!validate_mips16_insn (&mips16_opcodes[i], &mips16_operands[i]))
@@ -3758,7 +3744,7 @@ md_begin (void)
 	     && strcmp (mips16_opcodes[i].name, name) == 0);
     }
 
-  micromips_op_hash = hash_new ();
+  micromips_op_hash = str_htab_create ();
   micromips_operands = XCNEWVEC (struct mips_operand_array,
 				 bfd_micromips_num_opcodes);
 
@@ -3767,11 +3753,8 @@ md_begin (void)
     {
       const char *name = micromips_opcodes[i].name;
 
-      retval = hash_insert (micromips_op_hash, name,
-			    (void *) &micromips_opcodes[i]);
-      if (retval != NULL)
-	as_fatal (_("internal: can't hash `%s': %s"),
-		  micromips_opcodes[i].name, retval);
+      if (str_hash_insert (micromips_op_hash, name, &micromips_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  struct mips_cl_insn *micromips_nop_insn;
@@ -3808,37 +3791,37 @@ md_begin (void)
      helps us detect invalid uses of them.  */
   for (i = 0; reg_names[i].name; i++)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
-				     reg_names[i].num, /* & RNUM_MASK, */
-				     &zero_address_frag));
+				     &zero_address_frag,
+				     reg_names[i].num));
   if (HAVE_NEWABI)
     for (i = 0; reg_names_n32n64[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
-				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
-				       &zero_address_frag));
+				       &zero_address_frag,
+				       reg_names_n32n64[i].num));
   else
     for (i = 0; reg_names_o32[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
-				       reg_names_o32[i].num, /* & RNUM_MASK, */
-				       &zero_address_frag));
+				       &zero_address_frag,
+				       reg_names_o32[i].num));
 
   for (i = 0; i < 32; i++)
     {
-      char regname[6];
+      char regname[16];
 
       /* R5900 VU0 floating-point register.  */
       sprintf (regname, "$vf%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_VF | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_VF | i));
 
       /* R5900 VU0 integer register.  */
       sprintf (regname, "$vi%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_VI | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_VI | i));
 
       /* MSA register.  */
       sprintf (regname, "$w%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_MSA | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_MSA | i));
     }
 
   obstack_init (&mips_operand_tokens);
@@ -4673,7 +4656,7 @@ operand_reg_mask (const struct mips_cl_insn *insn,
 	if (!(type_mask & (1 << reg_op->reg_type)))
 	  return 0;
 	uval = insn_extract_operand (insn, operand);
-	return 1 << mips_decode_reg_operand (reg_op, uval);
+	return 1u << mips_decode_reg_operand (reg_op, uval);
       }
 
     case OP_REG_PAIR:
@@ -4684,28 +4667,28 @@ operand_reg_mask (const struct mips_cl_insn *insn,
 	if (!(type_mask & (1 << pair_op->reg_type)))
 	  return 0;
 	uval = insn_extract_operand (insn, operand);
-	return (1 << pair_op->reg1_map[uval]) | (1 << pair_op->reg2_map[uval]);
+	return (1u << pair_op->reg1_map[uval]) | (1u << pair_op->reg2_map[uval]);
       }
 
     case OP_CLO_CLZ_DEST:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
-      return (1 << (uval & 31)) | (1 << (uval >> 5));
+      return (1u << (uval & 31)) | (1u << (uval >> 5));
 
     case OP_SAME_RS_RT:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
       gas_assert ((uval & 31) == (uval >> 5));
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_CHECK_PREV:
     case OP_NON_ZERO_REG:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_LWM_SWM_LIST:
       abort ();
@@ -4720,12 +4703,12 @@ operand_reg_mask (const struct mips_cl_insn *insn,
       vsel = uval >> 5;
       if ((vsel & 0x18) == 0x18)
 	return 0;
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_REG_INDEX:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
-      return 1 << insn_extract_operand (insn, operand);
+      return 1u << insn_extract_operand (insn, operand);
     }
   abort ();
 }
@@ -9027,7 +9010,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   bfd_reloc_code_real_type r[3];
   const struct mips_opcode *amo;
   const struct mips_operand *operand;
-  struct hash_control *hash;
+  htab_t hash;
   struct mips_cl_insn insn;
   va_list args;
   unsigned int uval;
@@ -9045,7 +9028,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   r[1] = BFD_RELOC_UNUSED;
   r[2] = BFD_RELOC_UNUSED;
   hash = mips_opts.micromips ? micromips_op_hash : op_hash;
-  amo = (struct mips_opcode *) hash_find (hash, name);
+  amo = (struct mips_opcode *) str_hash_find (hash, name);
   gas_assert (amo);
   gas_assert (strcmp (name, amo->name) == 0);
 
@@ -9203,7 +9186,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
   bfd_reloc_code_real_type r[3]
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
-  mo = (struct mips_opcode *) hash_find (mips16_op_hash, name);
+  mo = (struct mips_opcode *) str_hash_find (mips16_op_hash, name);
   gas_assert (mo);
   gas_assert (strcmp (name, mo->name) == 0);
 
@@ -9581,11 +9564,11 @@ load_register (int reg, expressionS *ep, int dbl)
 	  if (shift < 32)
 	    {
 	      himask = 0xffff >> (32 - shift);
-	      lomask = (0xffff << shift) & 0xffffffff;
+	      lomask = (0xffffU << shift) & 0xffffffff;
 	    }
 	  else
 	    {
-	      himask = 0xffff << (shift - 32);
+	      himask = 0xffffU << (shift - 32);
 	      lomask = 0;
 	    }
 	  if ((hi32.X_add_number & ~(offsetT) himask) == 0
@@ -9620,8 +9603,11 @@ load_register (int reg, expressionS *ep, int dbl)
 	      lo >>= 1;
 	      ++bit;
 	    }
-	  lo |= (hi & (((unsigned long) 1 << bit) - 1)) << (32 - bit);
-	  hi >>= bit;
+	  if (bit != 0)
+	    {
+	      lo |= (hi & ((2UL << (bit - 1)) - 1)) << (32 - bit);
+	      hi >>= bit;
+	    }
 	}
       else
 	{
@@ -14263,7 +14249,7 @@ mips16_macro (struct mips_cl_insn *ip)
    opcode bits in *OPCODE_EXTRA.  */
 
 static struct mips_opcode *
-mips_lookup_insn (struct hash_control *hash, const char *start,
+mips_lookup_insn (htab_t hash, const char *start,
 		  ssize_t length, unsigned int *opcode_extra)
 {
   char *name, *dot, *p;
@@ -14275,7 +14261,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
   name = xstrndup (start, length);
 
   /* Look up the instruction as-is.  */
-  insn = (struct mips_opcode *) hash_find (hash, name);
+  insn = (struct mips_opcode *) str_hash_find (hash, name);
   if (insn)
     goto end;
 
@@ -14287,7 +14273,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
       if (*p == 0 && mask != 0)
 	{
 	  *dot = 0;
-	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  insn = (struct mips_opcode *) str_hash_find (hash, name);
 	  *dot = '.';
 	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
 	    {
@@ -14313,7 +14299,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
       if (suffix)
 	{
 	  memmove (name + opend - 2, name + opend, length - opend + 1);
-	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  insn = (struct mips_opcode *) str_hash_find (hash, name);
 	  if (insn)
 	    {
 	      forced_insn_length = suffix;
@@ -14338,7 +14324,7 @@ static void
 mips_ip (char *str, struct mips_cl_insn *insn)
 {
   const struct mips_opcode *first, *past;
-  struct hash_control *hash;
+  htab_t hash;
   char format;
   size_t end;
   struct mips_operand_token *tokens;
@@ -14434,7 +14420,7 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   forced_insn_length = l;
 
   *end = 0;
-  first = (struct mips_opcode *) hash_find (mips16_op_hash, str);
+  first = (struct mips_opcode *) str_hash_find (mips16_op_hash, str);
   *end = c;
 
   if (!first)
@@ -14720,12 +14706,8 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
   expr_end = str;
 
-  if (reloc_index != 0)
-    {
-      prev_reloc_op_frag = frag_now;
-      for (i = 0; i < reloc_index; i++)
-	reloc[i] = reversed_reloc[reloc_index - 1 - i];
-    }
+  for (i = 0; i < reloc_index; i++)
+    reloc[i] = reversed_reloc[reloc_index - 1 - i];
 
   return reloc_index;
 }
@@ -18899,7 +18881,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	    }
 
 	  /* Make a label at the end for use with the branch.  */
-	  l = symbol_new (micromips_label_name (), asec, fragp->fr_fix, fragp);
+	  l = symbol_new (micromips_label_name (), asec, fragp, fragp->fr_fix);
 	  micromips_label_inc ();
 	  S_SET_OTHER (l, ELF_ST_SET_MICROMIPS (S_GET_OTHER (l)));
 

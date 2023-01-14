@@ -28,10 +28,11 @@ if ![ld_assemble $as $srcdir/$subdir/extern.s tmpdir/extern.o] {
 
 if ![ld_link $ld tmpdir/extern "-T $srcdir/$subdir/extern.t tmpdir/extern.o"] {
     fail $testname
+    return
 }
 
 if ![ld_nm $nm "" tmpdir/extern] {
-    unresolved $testname
+    fail $testname
     return
 }
 

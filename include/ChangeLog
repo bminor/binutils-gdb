@@ -1,3 +1,491 @@
+2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26391
+	* bfdlink.h (bfd_link_info): Add unique_symbol.
+
+2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	Sync with GCC
+	2020-09-08  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* floatformat.h (floatformat_bfloat16_big): New.
+	(floatformat_bfloat16_little): New.
+
+2020-09-12 Cooper Qu <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKYV1_ISA_E1): Convert to bfd_uint64_t type.
+	(CSKYV2_ISA_E1): Likewise.
+	(CSKYV2_ISA_1E2>): Likewise.
+	(CSKYV2_ISA_2E3>): Likewise.
+	(CSKYV2_ISA_3E7>): Likewise.
+	(CSKYV2_ISA_7E10): Likewise.
+	(CSKYV2_ISA_3E3R1): Likewise.
+	(CSKYV2_ISA_3E3R2): Likewise.
+	(CSKYV2_ISA_10E60): Likewise.
+	(CSKYV2_ISA_3E3R3): Likewise.
+	(CSKY_ISA_TRUST): Likewise.
+	(CSKY_ISA_CACHE): Likewise.
+	(CSKY_ISA_NVIC): Likewise.
+	(CSKY_ISA_CP): Likewise.
+	(CSKY_ISA_MP): Likewise.
+	(CSKY_ISA_MP_1E2): Likewise.
+	(CSKY_ISA_JAVA): Likewise.
+	(CSKY_ISA_MAC): Likewise.
+	(CSKY_ISA_MAC_DSP): Likewise.
+	(CSKY_ISA_DSP): Likewise.
+	(CSKY_ISA_DSP_1E2): Likewise.
+	(CSKY_ISA_DSP_ENHANCE): Likewise.
+	(CSKY_ISA_DSPE60): Likewise.
+	(CSKY_ISA_FLOAT_E1): Likewise.
+	(CSKY_ISA_FLOAT_1E2): Likewise.
+	(CSKY_ISA_FLOAT_1E3): Likewise.
+	(CSKY_ISA_FLOAT_3E4): Likewise.
+	(CSKY_ISA_FLOAT_7E60): Likewise.
+	(CSKY_ISA_VDSP): Likewise.
+	(CSKY_ISA_VDSP_2): Likewise.
+	(CSKY_ARCH_804): Define.
+	(CSKY_ARCH_805): Define.
+	(CSKY_ARCH_800): Define.
+
+2020-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (NT_X86_CET): New.
+
+2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKY_ARCH_804): Define.
+	(CSKY_ARCH_805): Define.
+	(CSKY_ARCH_800): Define.
+
+2020-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/csky.h (CSKY_ISA_FLOAT_7E60): Use a long long type for
+	this value.
+
+2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKY_ISA_DSPE60): Define.
+
+2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKY_ISA_FLOAT_7E60): Define.
+
+2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf/msp430.h (elf_msp430_reloc_type): Add
+	R_MSP430_GNU_{SET,SUB}_ULEB128.
+	(elf_msp430x_reloc_type): Add R_MSP430X_GNU_{SET,SUB}_ULEB128.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (aarch64_sys_ins_reg_supported_p): Also take
+	system register name in order to simplify validation for v8-R.
+	(aarch64_print_operand): Also take CPU feature set, as disassembly for
+	system registers now depends on arch variant.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_V8_A): New.
+	(AARCH64_FEATURE_V8_R): New.
+	(AARCH64_ARCH_V8): Include new A-profile feature bit.
+	(AARCH64_ARCH_V8_R): New.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* opcode/v850.h (struct v850_operand <insert>): Make param op an
+	unsigned long.
+
+2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKYV2_ISA_3E3R3): Define.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR 26493
+	* opcode/riscv.h (OP_MASK_CSR, OP_MASK_CUSTOM_IMM)
+	(OP_MASK_FUNCT7, OP_MASK_RS3): Make unsigned.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
+	PR 26457
+	* som/aout.h (SOM_SUBSPACE_ACCESS_CONTROL_BITS_MASK): Make unsigned.
+	(SOM_SUBSPACE_MEMORY_RESIDENT, SOM_SUBSPACE_DUP_COMMON)
+	(SOM_SUBSPACE_IS_COMMON, SOM_SUBSPACE_IS_LOADABLE)
+	(SOM_SUBSPACE_QUADRANT_MASK, SOM_SUBSPACE_INITIALLY_FROZEN)
+	(SOM_SUBSPACE_IS_FIRST, SOM_SUBSPACE_CODE_ONLY)
+	(SOM_SUBSPACE_SORT_KEY_MASK, SOM_SUBSPACE_REPLICATE_INIT)
+	(SOM_SUBSPACE_CONTINUATION, SOM_SUBSPACE_IS_TSPECIFIC)
+	(SOM_SUBSPACE_IS_COMDAT): Likewise.
+
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* elf/csky.h (SHT_CSKY_ATTRIBUTES): Define.
+	(Tag_CSKY_ARCH_NAME): New enum constant.
+	(Tag_CSKY_CPU_NAME): Likewise.
+	(Tag_CSKY_ISA_FLAGS): Likewise.
+	(Tag_CSKY_DSP_VERSION): Likewise.
+	(Tag_CSKY_VDSP_VERSION): Likewise.
+	(Tag_CSKY_FPU_VERSION): Likewise.
+	(Tag_CSKY_FPU_ABI): Likewise.
+	(Tag_CSKY_FPU_ROUNDING): Likewise.
+	(Tag_CSKY_FPU_DENORMAL): Likewise.
+	(Tag_CSKY_FPU_Exception): Likewise.
+	(Tag_CSKY_FPU_NUMBER_MODULE): Likewise.
+	(Tag_CSKY_FPU_HARDFP): Likewise.
+	(Tag_CSKY_MAX): Likewise.
+	(VAL_CSKY_DSP_VERSION_EXTENSION): Likewise.
+	(VAL_CSKY_DSP_VERSION_2): Likewise.
+	(VAL_CSKY_VDSP_VERSION_1): Likewise.
+	(VAL_CSKY_VDSP_VERSION_2): Likewise.
+	(VAL_CSKY_FPU_ABI_SOFT): Likewise.
+	(VAL_CSKY_FPU_ABI_SOFTFP): Likewise.
+	(VAL_CSKY_FPU_ABI_HARD): Likewise.
+	(VAL_CSKY_FPU_HARDFP_HALF): Likewise.
+	(VAL_CSKY_FPU_HARDFP_SINGLE): Likewise.
+	(VAL_CSKY_FPU_HARDFP_DOUBLE): Likewise.
+	* opcode/csky.h (CSKY_ISA_VDSP_V2): Define.
+	CSKYV1_ISA_E1: Change to long constant type.
+	CSKYV2_ISA_E1: Likewise.
+	CSKYV2_ISA_1E2: Likewise.
+	CSKYV2_ISA_2E3: Likewise.
+	CSKYV2_ISA_3E7: Likewise.
+	CSKYV2_ISA_7E10: Likewise.
+	CSKYV2_ISA_3E3R1: Likewise.
+	CSKYV2_ISA_3E3R2: Likewise.
+	CSKYV2_ISA_10E60: Likewise.
+	CSKY_ISA_TRUST: Likewise.
+	CSKY_ISA_CACHE: Likewise.
+	CSKY_ISA_NVIC: Likewise.
+	CSKY_ISA_CP: Likewise.
+	CSKY_ISA_MP: Likewise.
+	CSKY_ISA_MP_1E2: Likewise.
+	CSKY_ISA_JAVA: Likewise.
+	CSKY_ISA_MAC: Likewise.
+	CSKY_ISA_MAC_DSP: Likewise.
+	CSKY_ISA_DSP: Likewise.
+	CSKY_ISA_DSP_1E2: Likewise.
+	CSKY_ISA_DSP_ENHANCE: Likewise.
+	CSKY_ISA_FLOAT_E1: Likewise.
+	CSKY_ISA_FLOAT_1E2: Likewise.
+	CSKY_ISA_FLOAT_1E3: Likewise.
+	CSKY_ISA_FLOAT_3E4: Likewise.
+	CSKY_ISA_VDSP: Likewise.
+
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_errwarning_next): New err parameter.
+
+2020-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 26405
+	* elf/common.h (PT_OPENBSD_BOOTDATA): Define.
+	(PT_OPENBSD_RANDOMIZE): Define.
+	(PT_OPENBSD_WXNEEDED): Define.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26458
+	* elf/common.h (ELF32_R_INFO): Cast symbol index to unsigned.
+
+2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKYV2_ISA_10E60): New.
+	(CSKY_ARCH_860): New.
+
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky.h (CSKYV2_ISA_3E3R2): New.
+
+2020-08-21  Mark Wielaard  <mark@klomp.org>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER): Also define
+	for GCC 7.0 or higher.
+
+2020-08-10  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (AARCH64_MAX_SYSREG_NAME_LEN): New.
+
+2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (aarch64_sys_reg_deprecated_p): Functions
+	paramaters changed.
+	(aarch64_sys_reg_supported_p): Function removed.
+	(aarch64_sys_ins_reg_supported_p): Functions paramaters changed.
+
+2020-07-28  Caroline Tice  <cmtice@google.com>
+
+        * dwarf2.h (enum dwarf_sect_v5): A new enum section for	the
+	sections in a DWARF 5 DWP file (DWP version 5).
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_NONDEDUP): New, turn off the
+	deduplicator.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_OMIT_VARIABLES_SECTION): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_SHARE_DUPLICATED): No longer unimplemented.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_link_variable_filter_t): New.
+	(ctf_link_set_variable_filter): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_EMPTY_CU_MAPPINGS): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NEEDSBFD): New.
+	(ECTF_NERR): Adjust.
+	(ctf_link): Rename share_mode arg to flags.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_INTERNAL): Adjust error text.
+	(ctf_errwarning_next): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_FLAGS): New.
+	(ECTF_NERR): Adjust.
+	* ctf.h (CTF_F_MAX): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NEXT_END): New error.
+	(ECTF_NEXT_WRONGFUN): Likewise.
+	(ECTF_NEXT_WRONGFP): Likewise.
+	(ECTF_NERR): Adjust.
+	(ctf_next_t): New.
+	(ctf_next_create): New prototype.
+	(ctf_next_destroy): Likewise.
+	(ctf_next_copy): Likewise.
+	(ctf_member_next): Likewise.
+	(ctf_enum_next): Likewise.
+	(ctf_type_next): Likewise.
+	(ctf_label_next): Likewise.
+	(ctf_variable_next): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_ref): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_archive_count): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_member_count): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_type_kind_forwarded): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.c (ctf_type_name_raw): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_*): Improve comments.
+	(ECTF_NERR): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h: Fix typos in comments.
+
+2020-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26262
+	PR ld/26267
+	* bfdlink.h (bfd_link_info): Add lto_all_symbols_read.
+
+2020-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_2_TMM): New.
+
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_ARGC, AT_FREEBSD_ARGV, AT_FREEBSD_ENVC)
+	(AT_FREEBSD_ENVV, AT_FREEBSD_PS_STRINGS): Define.
+
+2020-07-09  Alan Modra  <amodra@gmail.com>
+
+	* coff/powerpc.h: Delete.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
+	Binutils 2.35 branch created.
+
+2020-06-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Support the unprivileged CSR.  The versions
+	of the unprivileged CSR should be PRIV_SPEC_CLASS_NONE for now.
+	* opcode/riscv.h (enum riscv_csr_class): Add CSR_CLASS_DEBUG.
+
+2020-06-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Cleanup and remove the unused macros.
+
+2020-06-29  Alan Modra  <amodra@gmail.com>
+
+	* coff/internal.h: Use C style comments.
+	* coff/pe.h: Likewise.
+	* elf/ppc64.h: Likewise.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_arc_bufopen): New.
+
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* elf/m68k.h: Add enum for GNU object attribute with floating point
+	tag name and values.
+
+2020-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* libiberty.h (bsearch_r): Remove use of the register keyword from
+	the prototype.
+
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2020-06-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* libiberty.h (bsearch_r): New.
+
+	2020-04-17  Martin Liska  <mliska@suse.cz>
+		    Jonathan Yong <10walls@gmail.com>
+
+	PR gcov-profile/94570
+	* filenames.h (defined): Do not define HAVE_DOS_BASED_FILE_SYSTEM
+	for CYGWIN.
+
+2020-06-22  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_SHA2): Normalize.
+	(AARCH64_FEATURE_AES): Likewise.
+	(AARCH64_FEATURE_V8_4): Likewise.
+	(AARCH64_FEATURE_SM4): Likewise.
+	(AARCH64_FEATURE_SHA3): Likewise.
+	(AARCH64_FEATURE_V8): Likewise.
+	(AARCH64_FEATURE_V8_2): Likewise.
+	(AARCH64_FEATURE_V8_3): Likewise.
+	(AARCH64_FEATURE_FP): Likewise.
+	(AARCH64_FEATURE_SIMD): Likewise.
+	(AARCH64_FEATURE_CRC): Likewise.
+	(AARCH64_FEATURE_LSE): Likewise.
+	(AARCH64_FEATURE_PAN): Likewise.
+	(AARCH64_FEATURE_LOR): Likewise.
+	(AARCH64_FEATURE_RDMA): Likewise.
+	(AARCH64_FEATURE_V8_1): Likewise.
+	(AARCH64_FEATURE_F16): Likewise.
+	(AARCH64_FEATURE_RAS): Likewise.
+	(AARCH64_FEATURE_PROFILE): Likewise.
+	(AARCH64_FEATURE_SVE): Likewise.
+	(AARCH64_FEATURE_RCPC): Likewise.
+	(AARCH64_FEATURE_COMPNUM): Likewise.
+	(AARCH64_FEATURE_DOTPROD): Likewise.
+	(AARCH64_FEATURE_F16_FML): Likewise.
+	(AARCH64_FEATURE_V8_5): Likewise.
+	(AARCH64_FEATURE_V8_6): Likewise.
+	(AARCH64_FEATURE_BFLOAT16): Likewise.
+	(AARCH64_FEATURE_FLAGMANIP): Likewise.
+	(AARCH64_FEATURE_FRINTTS): Likewise.
+	(AARCH64_FEATURE_SB): Likewise.
+	(AARCH64_FEATURE_PREDRES): Likewise.
+	(AARCH64_FEATURE_CVADP): Likewise.
+	(AARCH64_FEATURE_RNG): Likewise.
+	(AARCH64_FEATURE_BTI): Likewise.
+	(AARCH64_FEATURE_SCXTNUM): Likewise.
+	(AARCH64_FEATURE_ID_PFR2): Likewise.
+	(AARCH64_FEATURE_SSBS): Likewise.
+	(AARCH64_FEATURE_MEMTAG): Likewise.
+	(AARCH64_FEATURE_TME): Likewise.
+	(AARCH64_FEATURE_I8MM): Likewise.
+	(AARCH64_FEATURE_F32MM): Likewise.
+	(AARCH64_FEATURE_F64MM): Likewise.
+	(AARCH64_FEATURE_SVE2): Likewise.
+	(AARCH64_FEATURE_SVE2_AES): Likewise.
+	(AARCH64_FEATURE_SVE2_BITPERM): Likewise.
+	(AARCH64_FEATURE_SVE2_SM4): Likewise.
+	(AARCH64_FEATURE_SVE2_SHA3): Likewise.
+
+2020-06-22  Saagar Jha  <saagar@saagarjha.com>
+
+	* mach-o/loader.h: Add declarations of two new Mach-O load
+	commands.
+
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h (riscv_get_priv_spec_class): Move the function
+	forward declarations to bfd/elfxx-riscv.h.
+	(riscv_get_priv_spec_name): Likewise.
+
+2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf/xtensa.h (xtensa_abi_choice): New declaration.
+
+2020-06-12  Roland McGrath  <mcgrathr@google.com>
+
+	* bfdlink.h (struct bfd_link_info): New field start_stop_visibility.
+
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Update the defined versions of CSR from
+	PRIV_SPEC_CLASS_1P9 to PRIV_SPEC_CLASS_1P9P1.  Also, drop the
+	MISA DECLARE_CSR_ALIAS since it's aborted version is v1.9.
+	* opcode/riscv.h (enum riscv_priv_spec_class): Remove
+	PRIV_SPEC_CLASS_1P9.
+
+2020-06-11  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (aarch64_sys_reg): Add required features to struct
+	describing system registers.
+
+2020-06-11  Alan Modra  <amodra@gmail.com>
+
+	* elf/mips.h (Elf32_RegInfo): Use fixed width integer types.
+	(Elf64_Internal_RegInfo, Elf_Internal_Options): Likewise.
+
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h (elf_ppc64_reloc_type): Rename
+	R_PPC64_GOT_TLSGD34 to R_PPC64_GOT_TLSGD_PCREL34,
+	R_PPC64_GOT_TLSLD34 to R_PPC64_GOT_TLSLD_PCREL34,
+	R_PPC64_GOT_TPREL34 to R_PPC64_GOT_TPREL_PCREL34, and
+	R_PPC64_GOT_DTPREL34 to R_PPC64_GOT_DTPREL_PCREL34.
+
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/cgen.h: Get an `endian' argument in both
+	cgen_get_insn_value and cgen_put_insn_value.
+
+2020-06-04  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* opcode/cgen.h (enum cgen_cpu_open_arg): New value
+	CGEN_CPU_OPEN_INSN_ENDIAN.
+
+2020-06-03  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Remove #include "bfd.h".  And change the return
+	types of riscv_get_isa_spec_class and riscv_get_priv_spec_class
+	from bfd_boolean to int.
+
+2020-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26044
+	* opcode/tilepro.h (TILEPRO_NUM_PIPELINE_ENCODINGS): Move to
+	tilepro_pipeline enum.
+
 2020-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22909

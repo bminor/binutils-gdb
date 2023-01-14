@@ -75,4 +75,6 @@ main (int argc, char **argv, char **envp)
   (void) info_fun2bis ('b');
   (void) info_fun2xxx ('c', 1, 2);
   (void) info_fun2yyy ('d', 3, 4);
+
+  return 0;
 }

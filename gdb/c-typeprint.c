@@ -133,7 +133,7 @@ c_print_type_1 (struct type *type,
 	      && (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
 		  || code == TYPE_CODE_METHOD
 		  || (code == TYPE_CODE_ARRAY
-		      && !TYPE_VECTOR (type))
+		      && !type->is_vector ())
 		  || code == TYPE_CODE_MEMBERPTR
 		  || code == TYPE_CODE_METHODPTR
 		  || TYPE_IS_REFERENCE (type))))
@@ -279,7 +279,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 {
   struct field *args = mtype->fields ();
   int nargs = mtype->num_fields ();
-  int varargs = TYPE_VARARGS (mtype);
+  int varargs = mtype->has_varargs ();
   int i;
 
   fprintf_symbol_filtered (stream, prefix,
@@ -302,7 +302,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 	  if (FIELD_ARTIFICIAL (arg))
 	    continue;
 
-	  c_print_type (arg.type, "", stream, 0, 0, flags);
+	  c_print_type (arg.type (), "", stream, 0, 0, flags);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
@@ -327,8 +327,8 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
       struct type *domain;
 
       gdb_assert (nargs > 0);
-      gdb_assert (args[0].type->code () == TYPE_CODE_PTR);
-      domain = TYPE_TARGET_TYPE (args[0].type);
+      gdb_assert (args[0].type ()->code () == TYPE_CODE_PTR);
+      domain = TYPE_TARGET_TYPE (args[0].type ());
 
       if (TYPE_CONST (domain))
 	fprintf_filtered (stream, " const");
@@ -573,7 +573,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	  wrap_here ("    ");
 	}
 
-      param_type = TYPE_FIELD_TYPE (type, i);
+      param_type = type->field (i).type ();
 
       if (language == language_cplus && linkage_name)
 	{
@@ -591,12 +591,12 @@ c_type_print_args (struct type *type, struct ui_file *stream,
       printed_any = 1;
     }
 
-  if (printed_any && TYPE_VARARGS (type))
+  if (printed_any && type->has_varargs ())
     {
       /* Print out a trailing ellipsis for varargs functions.  Ignore
 	 TYPE_VARARGS if the function has no named arguments; that
 	 represents unprototyped (K&R style) C functions.  */
-      if (printed_any && TYPE_VARARGS (type))
+      if (printed_any && type->has_varargs ())
 	{
 	  fprintf_filtered (stream, ", ");
 	  wrap_here ("    ");
@@ -604,7 +604,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	}
     }
   else if (!printed_any
-	   && (TYPE_PROTOTYPED (type) || language == language_cplus))
+	   && (type->is_prototyped () || language == language_cplus))
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");
@@ -772,7 +772,7 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_ARRAY:
       {
 	LONGEST low_bound, high_bound;
-	int is_vector = TYPE_VECTOR (type);
+	int is_vector = type->is_vector ();
 
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ")");
@@ -780,8 +780,8 @@ c_type_print_varspec_suffix (struct type *type,
 	fprintf_filtered (stream, (is_vector ?
 				   " __attribute__ ((vector_size(" : "["));
 	/* Bounds are not yet resolved, print a bounds placeholder instead.  */
-	if (TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCEXPR
-	    || TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCLIST)
+	if (type->bounds ()->high.kind () == PROP_LOCEXPR
+	    || type->bounds ()->high.kind () == PROP_LOCLIST)
 	  fprintf_filtered (stream, "variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "%s", 
@@ -1118,7 +1118,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       if (type->num_fields () == 0 && TYPE_NFN_FIELDS (type) == 0
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
-	  if (TYPE_STUB (type))
+	  if (type->is_stub ())
 	    fprintfi_filtered (level + 4, stream,
 			       _("%p[<incomplete type>%p]\n"),
 			       metadata_style.style ().ptr (), nullptr);
@@ -1179,8 +1179,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  int newshow = show - 1;
 
 	  if (!is_static && flags->print_offsets
-	      && (TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_STRUCT
-		  || TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_UNION))
+	      && (type->field (i).type ()->code () == TYPE_CODE_STRUCT
+		  || type->field (i).type ()->code () == TYPE_CODE_UNION))
 	    {
 	      /* If we're printing offsets and this field's type is
 		 either a struct or an union, then we're interested in
@@ -1200,10 +1200,10 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		 the whole struct/union.  */
 	      local_podata.end_bitpos
 		= podata->end_bitpos
-		  - TYPE_LENGTH (TYPE_FIELD_TYPE (type, i)) * TARGET_CHAR_BIT;
+		  - TYPE_LENGTH (type->field (i).type ()) * TARGET_CHAR_BIT;
 	    }
 
-	  c_print_type_1 (TYPE_FIELD_TYPE (type, i),
+	  c_print_type_1 (type->field (i).type (),
 			  TYPE_FIELD_NAME (type, i),
 			  stream, newshow, level + 4,
 			  language, &local_flags, &local_podata);
@@ -1629,7 +1629,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    fprintf_filtered (stream, "{\n");
 	    if (type->num_fields () == 0)
 	      {
-		if (TYPE_STUB (type))
+		if (type->is_stub ())
 		  fprintfi_filtered (level + 4, stream,
 				     _("%p[<incomplete type>%p]\n"),
 				     metadata_style.style ().ptr (), nullptr);
@@ -1645,7 +1645,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		print_spaces_filtered (level + 4, stream);
 		/* We pass "show" here and not "show - 1" to get enum types
 		   printed.  There's no other way to see them.  */
-		c_print_type_1 (TYPE_FIELD_TYPE (type, i),
+		c_print_type_1 (type->field (i).type (),
 				TYPE_FIELD_NAME (type, i),
 				stream, show, level + 4,
 				language, &local_flags, podata);

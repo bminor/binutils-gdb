@@ -27,20 +27,15 @@
 #include "cli-script.h"
 #include "completer.h"
 
-#if 0
-/* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
-   cmd_types'' can be moved from "command.h" to "cli-decode.h".  */
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
    not fall into one of the following categories.  */
-typedef enum cmd_types
-  {
-    not_set_cmd,
-    set_cmd,
-    show_cmd
-  }
-cmd_types;
-#endif
+enum cmd_types
+{
+  not_set_cmd,
+  set_cmd,
+  show_cmd
+};
 
 /* This structure records one command'd definition.  */
 
@@ -182,6 +177,10 @@ struct cmd_list_element
 
     /* Hook for another command to be executed after this command.  */
     struct cmd_list_element *hook_post = nullptr;
+
+    /* Default arguments to automatically prepend to the user
+       provided arguments when running this command or alias.  */
+    std::string default_args;
 
     /* Nonzero identifies a prefix command.  For them, the address
        of the variable containing the list of subcommands.  */

@@ -120,9 +120,6 @@ struct m68hc11_elf_link_hash_table
   int top_index;
   asection **input_list;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   bfd_boolean (* size_one_stub)  (struct bfd_hash_entry*, void*);
   bfd_boolean (* build_one_stub) (struct bfd_hash_entry*, void*);
 };
@@ -130,8 +127,9 @@ struct m68hc11_elf_link_hash_table
 /* Get the Sparc64 ELF linker hash table from a link_info structure.  */
 
 #define m68hc11_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == M68HC11_ELF_DATA ? ((struct m68hc11_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == M68HC11_ELF_DATA)	\
+   ? (struct m68hc11_elf_link_hash_table *) (p)->hash : NULL)
 
 /* Create a 68HC11/68HC12 ELF linker hash table.  */
 

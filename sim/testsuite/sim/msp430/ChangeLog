@@ -1,3 +1,7 @@
+2020-08-05  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* mpyull_hwmult.s: New test.
+
 2020-01-22  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* rrux.s: New test.

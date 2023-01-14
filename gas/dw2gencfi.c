@@ -115,7 +115,7 @@ static bfd_boolean compact_eh;
 #define compact_eh 0
 #endif
 
-static struct hash_control *dwcfi_hash;
+static htab_t dwcfi_hash;
 
 /* Emit a single byte into the current segment.  */
 
@@ -325,20 +325,10 @@ make_debug_seg (segT cseg, char *name, int sflags)
   return r;
 }
 
-static void
-dwcfi_hash_insert (const char *name, struct dwcfi_seg_list *item)
-{
-  const char *error_string;
-
-  if ((error_string = hash_jam (dwcfi_hash, name, (char *) item)))
-    as_fatal (_("Inserting \"%s\" into structure table failed: %s"),
-	      name, error_string);
-}
-
 static struct dwcfi_seg_list *
 dwcfi_hash_find (char *name)
 {
-  return (struct dwcfi_seg_list *) hash_find (dwcfi_hash, name);
+  return (struct dwcfi_seg_list *) str_hash_find (dwcfi_hash, name);
 }
 
 static struct dwcfi_seg_list *
@@ -349,7 +339,7 @@ dwcfi_hash_find_or_make (segT cseg, const char *base_name, int flags)
 
   /* Initialize dwcfi_hash once.  */
   if (!dwcfi_hash)
-    dwcfi_hash = hash_new ();
+    dwcfi_hash = str_htab_create ();
 
   name = get_debugseg_name (cseg, base_name);
 
@@ -358,7 +348,7 @@ dwcfi_hash_find_or_make (segT cseg, const char *base_name, int flags)
     {
       item = alloc_debugseg_item (make_debug_seg (cseg, name, flags), 0, name);
 
-      dwcfi_hash_insert (item->seg_name, item);
+      str_hash_insert (dwcfi_hash, item->seg_name, item, 0);
     }
   else
     free (name);

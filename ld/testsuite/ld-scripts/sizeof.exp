@@ -33,7 +33,7 @@ if ![ld_link $ld tmpdir/sizeof "-T $srcdir/$subdir/sizeof.t tmpdir/sizeof.o"] {
 }
 
 if ![ld_nm $nm "" tmpdir/sizeof] {
-    unresolved $testname
+    fail $testname
     return
 }
 

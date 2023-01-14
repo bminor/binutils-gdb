@@ -1,3 +1,4 @@
+#as: --gdwarf-3
 #readelf: -wl
 #name: DWARF2 3
 #xfail: ft32*-* h8300-*-*

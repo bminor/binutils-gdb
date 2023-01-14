@@ -298,10 +298,10 @@ val_print_scalar_or_string_type_p (struct type *type,
 				   const struct language_defn *language)
 {
   return (val_print_scalar_type_p (type)
-	  || language->la_is_string_type_p (type));
+	  || language->is_string_type_p (type));
 }
 
-/* See its definition in value.h.  */
+/* See valprint.h.  */
 
 int
 valprint_check_validity (struct ui_file *stream,
@@ -769,7 +769,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (value);
 
       LONGEST val = unpack_long (type, valaddr);
-      if (TYPE_UNSIGNED (type))
+      if (type->is_unsigned ())
 	fprintf_filtered (stream, "%u", (unsigned int) val);
       else
 	fprintf_filtered (stream, "%d", (int) val);
@@ -781,19 +781,15 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
 /* generic_val_print helper for TYPE_CODE_FLT and TYPE_CODE_DECFLOAT.  */
 
 static void
-generic_val_print_float (struct type *type,
-			 int embedded_offset, struct ui_file *stream,
+generic_val_print_float (struct type *type, struct ui_file *stream,
 			 struct value *original_value,
 			 const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
-
   gdb_assert (!options->format);
 
   const gdb_byte *valaddr = value_contents_for_printing (original_value);
 
-  print_floating (valaddr + embedded_offset * unit_size, type, stream);
+  print_floating (valaddr, type, stream);
 }
 
 /* generic_value_print helper for TYPE_CODE_COMPLEX.  */
@@ -896,8 +892,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       if (options->format)
 	value_print_scalar_formatted (val, options, 0, stream);
       else
-	generic_val_print_float (type, 0, stream,
-				 val, options);
+	generic_val_print_float (type, stream, val, options);
       break;
 
     case TYPE_CODE_VOID:
@@ -952,7 +947,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
      only a stub and we can't find and substitute its complete type, then
      print appropriate string and return.  */
 
-  if (TYPE_STUB (real_type))
+  if (real_type->is_stub ())
     {
       fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
       return;
@@ -984,7 +979,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
 
   try
     {
-      language->la_value_print_inner (value, stream, recurse, &local_opts);
+      language->value_print_inner (value, stream, recurse, &local_opts);
     }
   catch (const gdb_exception_error &except)
     {
@@ -1144,7 +1139,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
     {
       if (TYPE_FIELD_NAME (type, field)[0] != '\0')
 	{
-	  struct type *field_type = TYPE_FIELD_TYPE (type, field);
+	  struct type *field_type = type->field (field).type ();
 
 	  if (field_type == bool_type
 	      /* We require boolean types here to be one bit wide.  This is a
@@ -1880,7 +1875,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = type_length_units (check_typedef (elttype));
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
     index_type = TYPE_TARGET_TYPE (index_type);
 
@@ -2032,13 +2027,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 
    Unless an exception is thrown, BUFFER will always be allocated, even on
    failure.  In this case, some characters might have been read before the
-   failure happened.  Check BYTES_READ to recognize this situation.
-
-   Note: There was a FIXME asking to make this code use target_read_string,
-   but this function is more general (can read past null characters, up to
-   given LEN).  Besides, it is used much more often than target_read_string
-   so it is more tested.  Perhaps callers of target_read_string should use
-   this function instead?  */
+   failure happened.  Check BYTES_READ to recognize this situation.  */
 
 int
 read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,

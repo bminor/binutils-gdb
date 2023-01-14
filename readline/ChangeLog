@@ -1,3 +1,7 @@
+2020-06-30  Tom Tromey  <tom@tromey.com>
+
+	* README: Update instructions.
+
 2019-11-15  Tom Tromey  <tromey@adacore.com>
 
 	* configure, Makefile.in: Rebuild.

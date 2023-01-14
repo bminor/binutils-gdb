@@ -2116,9 +2116,6 @@ struct ppc_elf_link_hash_entry
      from the beginning of the section.  */
   elf_linker_section_pointers_t *linker_section_pointer;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* Contexts in which symbol is used in the GOT.
      Bits are or'd into the mask as the corresponding relocs are
      encountered during check_relocs, with TLS_TLS being set when any
@@ -2198,9 +2195,6 @@ struct ppc_elf_link_hash_table
   /* The type of PLT we have chosen to use.  */
   enum ppc_elf_plt_type plt_type;
 
-  /* True if the target system is VxWorks.  */
-  unsigned int is_vxworks:1;
-
   /* Whether there exist local gnu indirect function resolvers,
      referenced by dynamic relocations.  */
   unsigned int local_ifunc_resolver:1;
@@ -2218,9 +2212,6 @@ struct ppc_elf_link_hash_table
   int plt_slot_size;
   /* The size of the first PLT entry.  */
   int plt_initial_entry_size;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
 };
 
 /* Rename some of the generic section flags to better document how they
@@ -2239,8 +2230,9 @@ struct ppc_elf_link_hash_table
 /* Get the PPC ELF linker hash table from a link_info structure.  */
 
 #define ppc_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == PPC32_ELF_DATA ? ((struct ppc_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == PPC32_ELF_DATA)	\
+   ? (struct ppc_elf_link_hash_table *) (p)->hash : NULL)
 
 /* Create an entry in a PPC ELF linker hash table.  */
 
@@ -2264,7 +2256,6 @@ ppc_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (entry != NULL)
     {
       ppc_elf_hash_entry (entry)->linker_section_pointer = NULL;
-      ppc_elf_hash_entry (entry)->dyn_relocs = NULL;
       ppc_elf_hash_entry (entry)->tls_mask = 0;
       ppc_elf_hash_entry (entry)->has_sda_refs = 0;
     }
@@ -2339,7 +2330,7 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   htab = ppc_elf_hash_table (info);
-  if (!htab->is_vxworks)
+  if (htab->elf.target_os != is_vxworks)
     {
       /* The powerpc .got has a blrl instruction in it.  Mark it
 	 executable.  */
@@ -2499,7 +2490,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  if (htab->is_vxworks
+  if (htab->elf.target_os == is_vxworks
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
     return FALSE;
 
@@ -2538,20 +2529,20 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   if (eind->elf.root.type != bfd_link_hash_indirect)
     return;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -2562,11 +2553,11 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   /* Copy over the GOT refcount entries that we may have already seen to
@@ -2639,7 +2630,7 @@ ppc_elf_add_symbol_hook (bfd *abfd,
       htab = ppc_elf_hash_table (info);
       if (htab->sbss == NULL)
 	{
-	  flagword flags = SEC_IS_COMMON | SEC_LINKER_CREATED;
+	  flagword flags = SEC_IS_COMMON | SEC_SMALL_DATA | SEC_LINKER_CREATED;
 
 	  if (!htab->elf.dynobj)
 	    htab->elf.dynobj = abfd;
@@ -2892,15 +2883,6 @@ ppc_elf_check_relocs (bfd *abfd,
   if (bfd_link_relocatable (info))
     return TRUE;
 
-  /* Don't do anything special with non-loaded, non-alloced sections.
-     In particular, any relocs in such sections should not affect GOT
-     and PLT reference counting (ie. we don't allow them to create GOT
-     or PLT entries), there's no possibility or desire to optimize TLS
-     relocs, and there's not much point in propagating relocs to shared
-     libs that the dynamic linker won't relocate.  */
-  if ((sec->flags & SEC_ALLOC) == 0)
-    return TRUE;
-
 #ifdef DEBUG
   _bfd_error_handler ("ppc_elf_check_relocs called for section %pA in %pB",
 		      sec, abfd);
@@ -2966,9 +2948,9 @@ ppc_elf_check_relocs (bfd *abfd,
       tls_type = 0;
       r_type = ELF32_R_TYPE (rel->r_info);
       ifunc = NULL;
-      if (h == NULL && !htab->is_vxworks)
+      if (h == NULL && htab->elf.target_os != is_vxworks)
 	{
-	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 							  abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -3005,7 +2987,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	}
 
-      if (!htab->is_vxworks
+      if (htab->elf.target_os != is_vxworks
 	  && is_branch_reloc (r_type)
 	  && h != NULL
 	  && h == tga)
@@ -3320,12 +3302,14 @@ ppc_elf_check_relocs (bfd *abfd,
 	    return FALSE;
 	  break;
 
+	case R_PPC_TPREL16_HI:
+	case R_PPC_TPREL16_HA:
+	  sec->has_tls_reloc = 1;
+	  /* Fall through.  */
 	  /* We shouldn't really be seeing TPREL32.  */
 	case R_PPC_TPREL32:
 	case R_PPC_TPREL16:
 	case R_PPC_TPREL16_LO:
-	case R_PPC_TPREL16_HI:
-	case R_PPC_TPREL16_HA:
 	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
@@ -3351,7 +3335,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      asection *s;
 	      Elf_Internal_Sym *isym;
 
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	      isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					    abfd, r_symndx);
 	      if (isym == NULL)
 		return FALSE;
@@ -3482,7 +3466,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  struct elf_dyn_relocs *p;
 		  struct elf_dyn_relocs **rel_head;
 
-		  rel_head = &ppc_elf_hash_entry (h)->dyn_relocs;
+		  rel_head = &h->dyn_relocs;
 		  p = *rel_head;
 		  if (p == NULL || p->sec != sec)
 		    {
@@ -3511,7 +3495,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;
@@ -4435,6 +4419,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   if (htab == NULL)
     return FALSE;
 
+  htab->do_tls_opt = 1;
+
   /* Make two passes through the relocs.  First time check that tls
      relocs involved in setting up a tls_get_addr call are indeed
      followed by such a call.  If they are not, don't do any tls
@@ -4600,6 +4586,37 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      tls_clear = 0;
 		      break;
 
+		    case R_PPC_TPREL16_HA:
+		      if (pass == 0)
+			{
+			  unsigned char buf[4];
+			  unsigned int insn;
+			  bfd_vma off = rel->r_offset & ~3;
+			  if (!bfd_get_section_contents (ibfd, sec, buf,
+							 off, 4))
+			    {
+			      if (elf_section_data (sec)->relocs != relstart)
+				free (relstart);
+			      return FALSE;
+			    }
+			  insn = bfd_get_32 (ibfd, buf);
+			  /* addis rt,2,imm */
+			  if ((insn & ((0x3fu << 26) | 0x1f << 16))
+			      != ((15u << 26) | (2 << 16)))
+			    {
+			      /* xgettext:c-format */
+			      info->callbacks->minfo
+				(_("%H: warning: %s unexpected insn %#x.\n"),
+				 ibfd, sec, off, "R_PPC_TPREL16_HA", insn);
+			      htab->do_tls_opt = 0;
+			    }
+			}
+		      continue;
+
+		    case R_PPC_TPREL16_HI:
+		      htab->do_tls_opt = 0;
+		      continue;
+
 		    default:
 		      continue;
 		    }
@@ -4694,27 +4711,9 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		free (relstart);
 	    }
       }
-  htab->do_tls_opt = 1;
   return TRUE;
 }
 
-/* Find dynamic relocs for H that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *p;
-
-  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return p->sec;
-    }
-  return NULL;
-}
-
 /* Return true if we have dynamic relocs against H or any of its weak
    aliases, that apply to read-only sections.  Cannot be used after
    size_dynamic_sections.  */
@@ -4725,7 +4724,7 @@ alias_readonly_dynrelocs (struct elf_link_hash_entry *h)
   struct ppc_elf_link_hash_entry *eh = ppc_elf_hash_entry (h);
   do
     {
-      if (readonly_dynrelocs (&eh->elf))
+      if (_bfd_elf_readonly_dynrelocs (&eh->elf))
 	return TRUE;
       eh = ppc_elf_hash_entry (eh->elf.u.alias);
     } while (eh != NULL && &eh->elf != h);
@@ -4740,7 +4739,7 @@ pc_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     if (p->pc_count != 0)
       return TRUE;
   return FALSE;
@@ -4784,7 +4783,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       /* Discard dyn_relocs when non-pic if we've decided that a
 	 function symbol is local.  */
       if (!bfd_link_pic (info) && local)
-	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
 
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
@@ -4828,9 +4827,9 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	       || (h->non_got_ref
 		   && !h->ref_regular_nonweak
 		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
-	      && !htab->is_vxworks
+	      && htab->elf.target_os != is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
-	      && !readonly_dynrelocs (h))
+	      && !_bfd_elf_readonly_dynrelocs (h))
 	    {
 	      h->pointer_equality_needed = 0;
 	      /* If we haven't seen a branch reloc and the symbol
@@ -4841,7 +4840,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  else if (!bfd_link_pic (info))
 	    /* We are going to be defining the function symbol on the
 	       plt stub, so no dyn_relocs needed when non-pic.  */
-	    ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 	}
       h->protected_def = 0;
       /* Function symbols can't have copy relocs.  */
@@ -4862,7 +4861,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (def->root.u.def.section == htab->elf.sdynbss
 	  || def->root.u.def.section == htab->elf.sdynrelro
 	  || def->root.u.def.section == htab->dynsbss)
-	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
       return TRUE;
     }
 
@@ -4914,7 +4913,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       executable.  */
   if (ELIMINATE_COPY_RELOCS
       && !ppc_elf_hash_entry (h)->has_sda_refs
-      && !htab->is_vxworks
+      && htab->elf.target_os != is_vxworks
       && !h->def_regular
       && !alias_readonly_dynrelocs (h))
     return TRUE;
@@ -4958,7 +4957,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   /* We no longer want dyn_relocs.  */
-  ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+  h->dyn_relocs = NULL;
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
@@ -5168,19 +5167,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      IFUNCs which are handled even in static executables.  */
   if (!htab->elf.dynamic_sections_created
       && h->type != STT_GNU_IFUNC)
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
   /* Discard relocs on undefined symbols that must be local.  */
   else if (h->root.type == bfd_link_hash_undefined
 	   && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
   /* Also discard relocs on undefined weak syms with non-default
      visibility, or when dynamic_undefined_weak says so.  */
   else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     ;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -5200,7 +5199,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -5211,11 +5210,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
 		*pp = p->next;
@@ -5224,7 +5223,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (eh->dyn_relocs != NULL)
+      if (h->dyn_relocs != NULL)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (!ensure_undef_dynamic (info, h))
@@ -5249,14 +5248,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    return FALSE;
 
 	  if (h->dynindx == -1)
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 	}
       else
-	eh->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
     }
 
   /* Allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       if (eh->elf.type == STT_GNU_IFUNC)
@@ -5444,33 +5443,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Set DF_TEXTREL if we find any dynamic relocs that apply to
-   read-only sections.  */
-
-static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
-{
-  asection *sec;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  sec = readonly_dynrelocs (h);
-  if (sec != NULL)
-    {
-      struct bfd_link_info *info = (struct bfd_link_info *) info_p;
-
-      info->flags |= DF_TEXTREL;
-      info->callbacks->minfo
-	(_("%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"),
-	 sec->owner, h->root.root.string, sec);
-
-      /* Not an error, just cut short the traversal.  */
-      return FALSE;
-    }
-  return TRUE;
-}
-
 static const unsigned char glink_eh_frame_cie[] =
 {
   0, 0, 0, 16,				/* length.  */
@@ -5552,7 +5524,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->is_vxworks
+	      else if (htab->elf.target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -5617,7 +5589,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	else
 	  *local_got = (bfd_vma) -1;
 
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	continue;
 
       /* Allocate space for calls to local STT_GNU_IFUNC syms in .iplt.  */
@@ -5882,20 +5854,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.splt != NULL && htab->elf.splt->size != 0)
-	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_maybe_vxworks_add_dynamic_tags (output_bfd, info,
+						    relocs))
+	return FALSE;
 
       if (htab->plt_type == PLT_NEW
 	  && htab->glink != NULL
@@ -5909,29 +5870,6 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	      && !add_dynamic_entry (DT_PPC_OPT, PPC_OPT_TLS))
 	    return FALSE;
 	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      /* If any dynamic relocs apply to a read-only section, then we
-	 need a DT_TEXTREL entry.  */
-      if ((info->flags & DF_TEXTREL) == 0)
-	elf_link_hash_traverse (elf_hash_table (info), maybe_set_textrel,
-				info);
-
-      if ((info->flags & DF_TEXTREL) != 0)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return FALSE;
-	}
-      if (htab->is_vxworks
-	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
-	return FALSE;
    }
 #undef add_dynamic_entry
 
@@ -7036,7 +6974,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
   sym_hashes = elf_sym_hashes (input_bfd);
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab->is_vxworks && bfd_link_pic (info)
+  is_vxworks_tls = (htab->elf.target_os == is_vxworks && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
   if (input_section->sec_info_type == SEC_INFO_TYPE_TARGET)
@@ -7568,7 +7506,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
 
       ifunc = NULL;
-      if (!htab->is_vxworks)
+      if (htab->elf.target_os != is_vxworks)
 	{
 	  struct plt_entry *ent;
 
@@ -7648,39 +7586,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
       howto = NULL;
       if (r_type < R_PPC_max)
 	howto = ppc_elf_howto_table[r_type];
-
-      switch (r_type)
-	{
-	default:
-	  break;
-
-	case R_PPC_TPREL16_HA:
-	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
-	    {
-	      bfd_byte *p = contents + (rel->r_offset & ~3);
-	      unsigned int insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
-		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
-		/* xgettext:c-format */
-		info->callbacks->minfo
-		  (_("%H: warning: %s unexpected insn %#x.\n"),
-		   input_bfd, input_section, rel->r_offset, howto->name, insn);
-	      else
-		bfd_put_32 (input_bfd, NOP, p);
-	    }
-	  break;
-
-	case R_PPC_TPREL16_LO:
-	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
-	    {
-	      bfd_byte *p = contents + (rel->r_offset & ~3);
-	      unsigned int insn = bfd_get_32 (input_bfd, p);
-	      insn &= ~(0x1f << 16);
-	      insn |= 2 << 16;
-	      bfd_put_32 (input_bfd, insn, p);
-	    }
-	  break;
-	}
 
       tls_type = 0;
       switch (r_type)
@@ -8111,11 +8016,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	  if (bfd_link_pic (info)
 	      ? ((h == NULL
-		  || ppc_elf_hash_entry (h)->dyn_relocs != NULL)
+		  || h->dyn_relocs != NULL)
 		 && ((h != NULL && pc_dynrelocs (h))
 		     || must_be_dyn_reloc (info, r_type)))
 	      : (h != NULL
-		 && ppc_elf_hash_entry (h)->dyn_relocs != NULL))
+		 && h->dyn_relocs != NULL))
 	    {
 	      int skip;
 	      bfd_byte *loc;
@@ -8844,6 +8749,31 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
 	  goto copy_reloc;
+	}
+
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC_TPREL16_HA:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      bfd_put_32 (input_bfd, NOP, p);
+	    }
+	  break;
+
+	case R_PPC_TPREL16_LO:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      insn &= ~(0x1f << 16);
+	      insn |= 2 << 16;
+	      bfd_put_32 (input_bfd, insn, p);
+	    }
+	  break;
 	}
 
       switch (r_type)
@@ -9940,7 +9870,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    case DT_PLTGOT:
-	      if (htab->is_vxworks)
+	      if (htab->elf.target_os == is_vxworks)
 		s = htab->elf.sgotplt;
 	      else
 		s = htab->elf.splt;
@@ -9972,7 +9902,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 
 	    default:
-	      if (htab->is_vxworks
+	      if (htab->elf.target_os == is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		break;
 	      continue;
@@ -10024,7 +9954,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* Fill in the first entry in the VxWorks procedure linkage table.  */
-  if (htab->is_vxworks
+  if (htab->elf.target_os == is_vxworks
       && htab->elf.splt != NULL
       && htab->elf.splt->size != 0
       && htab->elf.splt->output_section != bfd_abs_section_ptr)
@@ -10433,6 +10363,9 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 #undef  ELF_OSABI
 
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS		is_vxworks
+
 /* VxWorks uses the elf default section flags for .plt.  */
 static const struct bfd_elf_special_section *
 ppc_elf_vxworks_get_sec_type_attr (bfd *abfd, asection *sec)
@@ -10458,7 +10391,6 @@ ppc_elf_vxworks_link_hash_table_create (bfd *abfd)
     {
       struct ppc_elf_link_hash_table *htab
 	= (struct ppc_elf_link_hash_table *)ret;
-      htab->is_vxworks = 1;
       htab->plt_type = PLT_VXWORKS;
       htab->plt_entry_size = VXWORKS_PLT_ENTRY_SIZE;
       htab->plt_slot_size = VXWORKS_PLT_ENTRY_SIZE;

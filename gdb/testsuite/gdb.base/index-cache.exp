@@ -119,16 +119,18 @@ proc_with_prefix test_basic_stuff { } {
 
 # Test loading a binary with the cache disabled.  No file should be created.
 
-proc_with_prefix test_cache_disabled { cache_dir } {
-    lassign [ls_host $cache_dir] ret files_before
+proc_with_prefix test_cache_disabled { cache_dir test_prefix } {
+    with_test_prefix $test_prefix {
+	lassign [ls_host $cache_dir] ret files_before
 
-    run_test_with_flags $cache_dir off {
-	lassign [ls_host $cache_dir] ret files_after
+	run_test_with_flags $cache_dir off {
+	    lassign [ls_host $cache_dir] ret files_after
 
-	set nfiles_created [expr [llength $files_after] - [llength $files_before]]
-	gdb_assert "$nfiles_created == 0" "no files were created"
+	    set nfiles_created [expr [llength $files_after] - [llength $files_before]]
+	    gdb_assert "$nfiles_created == 0" "no files were created"
 
-	check_cache_stats 0 0
+	    check_cache_stats 0 0
+	}
     }
 }
 
@@ -217,10 +219,10 @@ if { $ret != 0 } {
 # The ouput of mktemp contains an end of line, remove it.
 set cache_dir [string trimright $cache_dir \r\n]
 
-test_cache_disabled $cache_dir
+test_cache_disabled $cache_dir "before populate"
 test_cache_enabled_miss $cache_dir
 test_cache_enabled_hit $cache_dir
 
 # Test again with the cache disabled, now that it is populated.
-test_cache_disabled $cache_dir
+test_cache_disabled $cache_dir "after populate"
 

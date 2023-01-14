@@ -141,8 +141,8 @@ get_ctt_size_v2 (const ctf_file_t *fp, const ctf_type_t *tp,
 }
 
 static ssize_t
-get_vbytes_common (unsigned short kind, ssize_t size _libctf_unused_,
-		   size_t vlen)
+get_vbytes_common (ctf_file_t *fp, unsigned short kind,
+		   ssize_t size _libctf_unused_, size_t vlen)
 {
   switch (kind)
     {
@@ -162,13 +162,14 @@ get_vbytes_common (unsigned short kind, ssize_t size _libctf_unused_,
     case CTF_K_RESTRICT:
       return 0;
     default:
-      ctf_dprintf ("detected invalid CTF kind -- %x\n", kind);
-      return ECTF_CORRUPT;
+      ctf_set_errno (fp, ECTF_CORRUPT);
+      ctf_err_warn (fp, 0, 0, _("detected invalid CTF kind: %x"), kind);
+      return -1;
     }
 }
 
 static ssize_t
-get_vbytes_v1 (unsigned short kind, ssize_t size, size_t vlen)
+get_vbytes_v1 (ctf_file_t *fp, unsigned short kind, ssize_t size, size_t vlen)
 {
   switch (kind)
     {
@@ -184,11 +185,11 @@ get_vbytes_v1 (unsigned short kind, ssize_t size, size_t vlen)
 	return (sizeof (ctf_lmember_v1_t) * vlen);
     }
 
-  return (get_vbytes_common (kind, size, vlen));
+  return (get_vbytes_common (fp, kind, size, vlen));
 }
 
 static ssize_t
-get_vbytes_v2 (unsigned short kind, ssize_t size, size_t vlen)
+get_vbytes_v2 (ctf_file_t *fp, unsigned short kind, ssize_t size, size_t vlen)
 {
   switch (kind)
     {
@@ -204,7 +205,7 @@ get_vbytes_v2 (unsigned short kind, ssize_t size, size_t vlen)
 	return (sizeof (ctf_lmember_t) * vlen);
     }
 
-  return (get_vbytes_common (kind, size, vlen));
+  return (get_vbytes_common (fp, kind, size, vlen));
 }
 
 static const ctf_fileops_t ctf_fileops[] = {
@@ -428,11 +429,11 @@ upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
       unsigned long vlen = CTF_V1_INFO_VLEN (tp->ctt_info);
 
       size = get_ctt_size_v1 (fp, (const ctf_type_t *) tp, NULL, &increment);
-      vbytes = get_vbytes_v1 (kind, size, vlen);
+      vbytes = get_vbytes_v1 (fp, kind, size, vlen);
 
       get_ctt_size_v2_unconverted (fp, (const ctf_type_t *) tp, NULL,
 				   &v2increment);
-      v2bytes = get_vbytes_v2 (kind, size, vlen);
+      v2bytes = get_vbytes_v2 (fp, kind, size, vlen);
 
       if ((vbytes < 0) || (size < 0))
 	return ECTF_CORRUPT;
@@ -485,7 +486,7 @@ upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
       void *vdata, *v2data;
 
       size = get_ctt_size_v1 (fp, (const ctf_type_t *) tp, NULL, &increment);
-      vbytes = get_vbytes_v1 (kind, size, vlen);
+      vbytes = get_vbytes_v1 (fp, kind, size, vlen);
 
       t2p->ctt_name = tp->ctt_name;
       t2p->ctt_info = CTF_TYPE_INFO (kind, isroot, vlen);
@@ -519,7 +520,7 @@ upgrade_types_v1 (ctf_file_t *fp, ctf_header_t *cth)
 	}
 
       v2size = get_ctt_size_v2 (fp, t2p, NULL, &v2increment);
-      v2bytes = get_vbytes_v2 (kind, v2size, vlen);
+      v2bytes = get_vbytes_v2 (fp, kind, v2size, vlen);
 
       /* Catch out-of-sync get_ctt_size_*().  The count goes wrong if
 	 these are not identical (and having them different makes no
@@ -692,17 +693,11 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
       if (vbytes < 0)
 	return ECTF_CORRUPT;
 
+      /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
+	 so bump that population count too.  */
       if (kind == CTF_K_FORWARD)
-	{
-	  /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
-	     so bump that population count too.  If ctt_type is unknown, treat
-	     the tag as a struct.  */
+	pop[tp->ctt_type]++;
 
-	  if (tp->ctt_type == CTF_K_UNKNOWN || tp->ctt_type >= CTF_K_MAX)
-	    pop[CTF_K_STRUCT]++;
-	  else
-	    pop[tp->ctt_type]++;
-	}
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
       pop[kind]++;
     }
@@ -765,7 +760,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
   for (id = 1, tp = tbuf; tp < tend; xp++, id++)
     {
       unsigned short kind = LCTF_INFO_KIND (fp, tp->ctt_info);
-      unsigned short flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
+      unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
       unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
       ssize_t size, increment, vbytes;
 
@@ -773,6 +768,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 
       (void) ctf_get_ctt_size (fp, tp, &size, &increment);
       name = ctf_strptr (fp, tp->ctt_name);
+      /* Cannot fail: shielded by call in loop above.  */
       vbytes = LCTF_VBYTES (fp, kind, size, vlen);
 
       switch (kind)
@@ -787,7 +783,7 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 
 	  if (((ctf_hash_lookup_type (fp->ctf_names.ctn_readonly,
 				      fp, name)) == 0)
-	      || (flag & CTF_ADD_ROOT))
+	      || isroot)
 	    {
 	      err = ctf_hash_define_type (fp->ctf_names.ctn_readonly, fp,
 					  LCTF_INDEX_TO_TYPE (fp, id, child),
@@ -804,6 +800,9 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_FUNCTION:
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
@@ -812,6 +811,12 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_STRUCT:
+	  if (size >= CTF_LSTRUCT_THRESH)
+	    nlstructs++;
+
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_define_type (fp->ctf_structs.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
@@ -819,23 +824,27 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  if (err != 0)
 	    return err;
 
-	  if (size >= CTF_LSTRUCT_THRESH)
-	    nlstructs++;
 	  break;
 
 	case CTF_K_UNION:
+	  if (size >= CTF_LSTRUCT_THRESH)
+	    nlunions++;
+
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_define_type (fp->ctf_unions.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
 
 	  if (err != 0)
 	    return err;
-
-	  if (size >= CTF_LSTRUCT_THRESH)
-	    nlunions++;
 	  break;
 
 	case CTF_K_ENUM:
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_define_type (fp->ctf_enums.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
@@ -845,6 +854,9 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_TYPEDEF:
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
@@ -855,6 +867,10 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	case CTF_K_FORWARD:
 	  {
 	    ctf_names_t *np = ctf_name_table (fp, tp->ctt_type);
+
+	    if (!isroot)
+	      break;
+
 	    /* Only insert forward tags into the given hash if the type or tag
 	       name is not already present.  */
 	    if (ctf_hash_lookup_type (np->ctn_readonly, fp, name) == 0)
@@ -881,6 +897,9 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
+	  if (!isroot)
+	    break;
+
 	  err = ctf_hash_insert_type (fp->ctf_names.ctn_readonly, fp,
 				      LCTF_INDEX_TO_TYPE (fp, id, child),
 				      tp->ctt_name);
@@ -888,8 +907,8 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
 	    return err;
 	  break;
 	default:
-	  ctf_dprintf ("unhandled CTF kind in endianness conversion -- %x\n",
-		       kind);
+	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
+			_("init_types(): unhandled CTF kind: %x"), kind);
 	  return ECTF_CORRUPT;
 	}
 
@@ -1026,7 +1045,7 @@ flip_vars (void *start, size_t len)
    ctf_stype followed by variable data.  */
 
 static int
-flip_types (void *start, size_t len)
+flip_types (ctf_file_t *fp, void *start, size_t len)
 {
   ctf_type_t *t = start;
 
@@ -1039,7 +1058,7 @@ flip_types (void *start, size_t len)
       uint32_t kind = CTF_V2_INFO_KIND (t->ctt_info);
       size_t size = t->ctt_size;
       uint32_t vlen = CTF_V2_INFO_VLEN (t->ctt_info);
-      size_t vbytes = get_vbytes_v2 (kind, size, vlen);
+      size_t vbytes = get_vbytes_v2 (fp, kind, size, vlen);
 
       if (_libctf_unlikely_ (size == CTF_LSIZE_SENT))
 	{
@@ -1164,8 +1183,9 @@ flip_types (void *start, size_t len)
 	    break;
 	  }
 	default:
-	  ctf_dprintf ("unhandled CTF kind in endianness conversion -- %x\n",
-		       kind);
+	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
+			_("unhandled CTF kind in endianness conversion: %x"),
+			kind);
 	  return ECTF_CORRUPT;
 	}
 
@@ -1183,7 +1203,7 @@ flip_types (void *start, size_t len)
    data, this is no real loss.  */
 
 static int
-flip_ctf (ctf_header_t *cth, unsigned char *buf)
+flip_ctf (ctf_file_t *fp, ctf_header_t *cth, unsigned char *buf)
 {
   flip_lbls (buf + cth->cth_lbloff, cth->cth_objtoff - cth->cth_lbloff);
   flip_objts (buf + cth->cth_objtoff, cth->cth_funcoff - cth->cth_objtoff);
@@ -1191,7 +1211,7 @@ flip_ctf (ctf_header_t *cth, unsigned char *buf)
   flip_objts (buf + cth->cth_objtidxoff, cth->cth_funcidxoff - cth->cth_objtidxoff);
   flip_objts (buf + cth->cth_funcidxoff, cth->cth_varoff - cth->cth_funcidxoff);
   flip_vars (buf + cth->cth_varoff, cth->cth_typeoff - cth->cth_varoff);
-  return flip_types (buf + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
+  return flip_types (fp, buf + cth->cth_typeoff, cth->cth_stroff - cth->cth_typeoff);
 }
 
 /* Set up the ctl hashes in a ctf_file_t.  Called by both writable and
@@ -1359,13 +1379,16 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	 info.  We do not support dynamically upgrading such entries (none
 	 should exist in any case, since dwarf2ctf does not create them).  */
 
-      ctf_dprintf ("ctf_bufopen: CTF version %d symsect not "
-		   "supported\n", pp->ctp_version);
+      ctf_err_warn (NULL, 0, 0, _("ctf_bufopen: CTF version %d symsect not "
+				  "supported"), pp->ctp_version);
       return (ctf_set_open_errno (errp, ECTF_NOTSUP));
     }
 
   if (pp->ctp_version < CTF_VERSION_3)
     hdrsz = sizeof (ctf_header_v2_t);
+
+  if (_libctf_unlikely_ (pp->ctp_flags > CTF_F_MAX))
+    return (ctf_set_open_errno (errp, ECTF_FLAGS));
 
   if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
@@ -1450,16 +1473,17 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
       if ((rc = uncompress (fp->ctf_base, &dstlen, src, srclen)) != Z_OK)
 	{
-	  ctf_dprintf ("zlib inflate err: %s\n", zError (rc));
+	  ctf_err_warn (NULL, 0, ECTF_DECOMPRESS, _("zlib inflate err: %s"),
+			zError (rc));
 	  err = ECTF_DECOMPRESS;
 	  goto bad;
 	}
 
       if ((size_t) dstlen != fp->ctf_size)
 	{
-	  ctf_dprintf ("zlib inflate short -- got %lu of %lu "
-		       "bytes\n", (unsigned long) dstlen,
-		       (unsigned long) fp->ctf_size);
+	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+			_("zlib inflate short: got %lu of %lu bytes"),
+			(unsigned long) dstlen, (unsigned long) fp->ctf_size);
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
@@ -1539,7 +1563,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_syn_ext_strtab = syn_strtab;
 
   if (foreign_endian &&
-      (err = flip_ctf (hp, fp->ctf_buf)) != 0)
+      (err = flip_ctf (fp, hp, fp->ctf_buf)) != 0)
     {
       /* We can be certain that flip_ctf() will have endian-flipped everything
 	 other than the types table when we return.  In particular the header
@@ -1599,8 +1623,20 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
 bad:
   ctf_set_open_errno (errp, err);
+  ctf_err_warn_to_open (fp);
   ctf_file_close (fp);
   return NULL;
+}
+
+/* Bump the refcount on the specified CTF container, to allow export of
+   ctf_file_t's from iterators that open and close the ctf_file_t around the
+   loop.  (This does not extend their lifetime beyond that of the ctf_archive_t
+   in which they are contained.)  */
+
+void
+ctf_ref (ctf_file_t *fp)
+{
+  fp->ctf_refcnt++;
 }
 
 /* Close the specified CTF container and free associated data structures.  Note
@@ -1613,6 +1649,7 @@ ctf_file_close (ctf_file_t *fp)
 {
   ctf_dtdef_t *dtd, *ntd;
   ctf_dvdef_t *dvd, *nvd;
+  ctf_err_warning_t *err, *nerr;
 
   if (fp == NULL)
     return;		   /* Allow ctf_file_close(NULL) to simplify caller code.  */
@@ -1625,9 +1662,17 @@ ctf_file_close (ctf_file_t *fp)
       return;
     }
 
+  /* It is possible to recurse back in here, notably if dicts in the
+     ctf_link_inputs or ctf_link_outputs cite this dict as a parent without
+     using ctf_import_unref.  Do nothing in that case.  */
+  if (fp->ctf_refcnt == 0)
+    return;
+
+  fp->ctf_refcnt--;
   free (fp->ctf_dyncuname);
   free (fp->ctf_dynparname);
-  ctf_file_close (fp->ctf_parent);
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
@@ -1676,8 +1721,19 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_inputs);
   ctf_dynhash_destroy (fp->ctf_link_outputs);
   ctf_dynhash_destroy (fp->ctf_link_type_mapping);
-  ctf_dynhash_destroy (fp->ctf_link_cu_mapping);
+  ctf_dynhash_destroy (fp->ctf_link_in_cu_mapping);
+  ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
+  ctf_dedup_fini (fp, NULL, 0);
+  ctf_dynset_destroy (fp->ctf_dedup_atoms_alloc);
+
+  for (err = ctf_list_next (&fp->ctf_errs_warnings); err != NULL; err = nerr)
+    {
+      nerr = ctf_list_next (err);
+      ctf_list_delete (&fp->ctf_errs_warnings, err);
+      free (err->cew_text);
+      free (err);
+    }
 
   free (fp->ctf_sxlate);
   free (fp->ctf_txlate);
@@ -1776,12 +1832,9 @@ ctf_import (ctf_file_t *fp, ctf_file_t *pfp)
   if (pfp != NULL && pfp->ctf_dmodel != fp->ctf_dmodel)
     return (ctf_set_errno (fp, ECTF_DMODEL));
 
-  if (fp->ctf_parent != NULL)
-    {
-      fp->ctf_parent->ctf_refcnt--;
-      ctf_file_close (fp->ctf_parent);
-      fp->ctf_parent = NULL;
-    }
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
+  fp->ctf_parent = NULL;
 
   if (pfp != NULL)
     {
@@ -1793,6 +1846,40 @@ ctf_import (ctf_file_t *fp, ctf_file_t *pfp)
 
       fp->ctf_flags |= LCTF_CHILD;
       pfp->ctf_refcnt++;
+      fp->ctf_parent_unreffed = 0;
+    }
+
+  fp->ctf_parent = pfp;
+  return 0;
+}
+
+/* Like ctf_import, but does not increment the refcount on the imported parent
+   or close it at any point: as a result it can go away at any time and the
+   caller must do all freeing itself.  Used internally to avoid refcount
+   loops.  */
+int
+ctf_import_unref (ctf_file_t *fp, ctf_file_t *pfp)
+{
+  if (fp == NULL || fp == pfp || (pfp != NULL && pfp->ctf_refcnt == 0))
+    return (ctf_set_errno (fp, EINVAL));
+
+  if (pfp != NULL && pfp->ctf_dmodel != fp->ctf_dmodel)
+    return (ctf_set_errno (fp, ECTF_DMODEL));
+
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
+  fp->ctf_parent = NULL;
+
+  if (pfp != NULL)
+    {
+      int err;
+
+      if (fp->ctf_parname == NULL)
+	if ((err = ctf_parent_name_set (fp, "PARENT")) < 0)
+	  return err;
+
+      fp->ctf_flags |= LCTF_CHILD;
+      fp->ctf_parent_unreffed = 1;
     }
 
   fp->ctf_parent = pfp;

@@ -2991,6 +2991,31 @@ gdb_realpath_tests ()
   gdb_realpath_check_trailer ("", "");
 }
 
+/* Test the gdb_argv::as_array_view method.  */
+
+static void
+gdb_argv_as_array_view_test ()
+{
+  {
+    gdb_argv argv;
+
+    gdb::array_view<char *> view = argv.as_array_view ();
+
+    SELF_CHECK (view.data () == nullptr);
+    SELF_CHECK (view.size () == 0);
+  }
+  {
+    gdb_argv argv ("une bonne 50");
+
+    gdb::array_view<char *> view = argv.as_array_view ();
+
+    SELF_CHECK (view.size () == 3);
+    SELF_CHECK (strcmp (view[0], "une") == 0);
+    SELF_CHECK (strcmp (view[1], "bonne") == 0);
+    SELF_CHECK (strcmp (view[2], "50") == 0);
+  }
+}
+
 #endif /* GDB_SELF_TEST */
 
 /* Allocation function for the libiberty hash table which uses an
@@ -3489,5 +3514,6 @@ When set, debugging messages will be marked with seconds and microseconds."),
 
 #if GDB_SELF_TEST
   selftests::register_test ("gdb_realpath", gdb_realpath_tests);
+  selftests::register_test ("gdb_argv_array_view", gdb_argv_as_array_view_test);
 #endif
 }

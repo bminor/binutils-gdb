@@ -158,11 +158,17 @@ extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bit);
 
-/* The ABI default bit-size and format for "half", "float", "double", and
+/* The ABI default bit-size and format for "bfloat16", "half", "float", "double", and
    "long double".  These bit/format pairs should eventually be combined
    into a single object.  For the moment, just initialize them as a pair.
    Each format describes both the big and little endian layouts (if
    useful). */
+
+extern int gdbarch_bfloat16_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfloat16_bit (struct gdbarch *gdbarch, int bfloat16_bit);
+
+extern const struct floatformat ** gdbarch_bfloat16_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfloat16_format (struct gdbarch *gdbarch, const struct floatformat ** bfloat16_format);
 
 extern int gdbarch_half_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_half_bit (struct gdbarch *gdbarch, int half_bit);
@@ -321,16 +327,15 @@ typedef int (gdbarch_ax_pseudo_register_push_stack_ftype) (struct gdbarch *gdbar
 extern int gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch, struct agent_expr *ax, int reg);
 extern void set_gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch, gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack);
 
-/* Some targets/architectures can do extra processing/display of
-   segmentation faults.  E.g., Intel MPX boundary faults.
-   Call the architecture dependent function to handle the fault.
+/* Some architectures can display additional information for specific
+   signals.
    UIOUT is the output stream where the handler will place information. */
 
-extern int gdbarch_handle_segmentation_fault_p (struct gdbarch *gdbarch);
+extern int gdbarch_report_signal_info_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_handle_segmentation_fault_ftype) (struct gdbarch *gdbarch, struct ui_out *uiout);
-extern void gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, struct ui_out *uiout);
-extern void set_gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, gdbarch_handle_segmentation_fault_ftype *handle_segmentation_fault);
+typedef void (gdbarch_report_signal_info_ftype) (struct gdbarch *gdbarch, struct ui_out *uiout, enum gdb_signal siggnal);
+extern void gdbarch_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout, enum gdb_signal siggnal);
+extern void set_gdbarch_report_signal_info (struct gdbarch *gdbarch, gdbarch_report_signal_info_ftype *report_signal_info);
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
@@ -1007,9 +1012,7 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
    not the copy at TO.  The caller should update it to point at TO later.
   
    Return a pointer to data of the architecture's choice to be passed
-   to gdbarch_displaced_step_fixup.  Or, return NULL to indicate that
-   the instruction's effects have been completely simulated, with the
-   resulting state written back to REGS.
+   to gdbarch_displaced_step_fixup.
   
    For a general explanation of displaced stepping and how GDB uses it,
    see the comments in infrun.c.
@@ -1111,14 +1114,6 @@ extern int gdbarch_core_read_description_p (struct gdbarch *gdbarch);
 typedef const struct target_desc * (gdbarch_core_read_description_ftype) (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
 extern const struct target_desc * gdbarch_core_read_description (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
 extern void set_gdbarch_core_read_description (struct gdbarch *gdbarch, gdbarch_core_read_description_ftype *core_read_description);
-
-/* Handle special encoding of static variables in stabs debug info. */
-
-extern int gdbarch_static_transform_name_p (struct gdbarch *gdbarch);
-
-typedef const char * (gdbarch_static_transform_name_ftype) (const char *name);
-extern const char * gdbarch_static_transform_name (struct gdbarch *gdbarch, const char *name);
-extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_static_transform_name_ftype *static_transform_name);
 
 /* Set if the address in N_SO or N_FUN stabs may be zero. */
 
@@ -1638,6 +1633,12 @@ typedef std::string (gdbarch_get_pc_address_flags_ftype) (frame_info *frame, COR
 extern std::string gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, frame_info *frame, CORE_ADDR pc);
 extern void set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, gdbarch_get_pc_address_flags_ftype *get_pc_address_flags);
 
+/* Read core file mappings */
+
+typedef void (gdbarch_read_core_file_mappings_ftype) (struct gdbarch *gdbarch, struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb);
+extern void gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb);
+extern void set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, gdbarch_read_core_file_mappings_ftype *read_core_file_mappings);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
@@ -1849,9 +1850,6 @@ typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
 extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
 typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
 extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
-extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-                                         struct gdbarch_data *data,
-			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 

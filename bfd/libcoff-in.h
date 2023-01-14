@@ -243,8 +243,9 @@ struct coff_link_hash_entry
 {
   struct bfd_link_hash_entry root;
 
-  /* Symbol index in output file.  Set to -1 initially.  Set to -2 if
-     there is a reloc against this symbol.  */
+  /* Symbol index in output file.  This is initialized to -1.  It is
+     set to -2 if the symbol is used by a reloc.  It is set to -3 if
+     this symbol is defined in a discarded section.  */
   long indx;
 
   /* Symbol type.  */
@@ -615,11 +616,3 @@ extern bfd_boolean _bfd_xcoff_define_common_symbol
 extern bfd_boolean _bfd_ppc_xcoff_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    struct internal_reloc *, struct internal_syment *, asection **);
-
-/* Functions in coff-ppc.c.  FIXME: These are called by pe.em in the
-   linker, and so should start with bfd and be declared in bfd.h.  */
-
-extern bfd_boolean ppc_allocate_toc_section
-  (struct bfd_link_info *);
-extern bfd_boolean ppc_process_before_allocation
-  (bfd *, struct bfd_link_info *);

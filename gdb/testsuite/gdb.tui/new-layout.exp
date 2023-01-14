@@ -15,12 +15,19 @@
 
 # Test "tui new-layout".
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
 if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
     return -1
+}
+
+# Make sure TUI is supported before continuing.
+Term::clean_restart 24 80 $testfile
+if {![Term::enter_tui]} {
+    unsupported "TUI not supported"
+    return
 }
 
 Term::clean_restart 24 80 $testfile
@@ -59,6 +66,7 @@ gdb_test "help layout h" \
 
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 set text [Term::get_all_lines]

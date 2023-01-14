@@ -145,7 +145,7 @@ proc load_description { file errmsg xml_file } {
     close $ofd
 
     if {[is_remote host]} {
-	set regs_file [remote_download host "$subdir/$xml_file" $xml_file]
+	set regs_file [remote_download host "$regs_file" $xml_file]
     }
 
     # Anchor the test output, so that error messages are detected.
@@ -165,7 +165,7 @@ if {![is_remote host]} {
 }
 
 load_description "extra-regs.xml" "" "test-extra-regs.xml"
-gdb_test "ptype \$extrareg" "type = (int|long|long long)"
+gdb_test "ptype \$extrareg" "type = (int32_t|int|long|long long)"
 gdb_test "ptype \$uintreg" "type = uint32_t"
 gdb_test "ptype \$vecreg" "type = int8_t __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
 gdb_test "ptype \$unionreg" \

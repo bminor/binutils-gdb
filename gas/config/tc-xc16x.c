@@ -323,6 +323,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
+  /* FIXME: This absolute nonsense apparently is to make relative
+     jumps "work".  Of course, it breaks any other type of fixup.  */
   if (!strstr (seg->name,".debug"))
     {
       if (*valP < 128)

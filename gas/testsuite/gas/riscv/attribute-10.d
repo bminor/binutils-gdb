@@ -4,6 +4,3 @@
 Attribute Section: riscv
 File Attributes
   Tag_RISCV_arch: "rv32i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_zicsr2p0"
-  Tag_RISCV_priv_spec: [0-9_\"].*
-  Tag_RISCV_priv_spec_minor: [0-9_\"].*
-#...

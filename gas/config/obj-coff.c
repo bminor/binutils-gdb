@@ -117,28 +117,24 @@ stack_pop (stack *st)
 
 /* Maintain a list of the tagnames of the structures.  */
 
-static struct hash_control *tag_hash;
+static htab_t tag_hash;
 
 static void
 tag_init (void)
 {
-  tag_hash = hash_new ();
+  tag_hash = str_htab_create ();
 }
 
 static void
 tag_insert (const char *name, symbolS *symbolP)
 {
-  const char *error_string;
-
-  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
-    as_fatal (_("Inserting \"%s\" into structure table failed: %s"),
-	      name, error_string);
+  str_hash_insert (tag_hash, name, symbolP, 1);
 }
 
 static symbolS *
 tag_find (char *name)
 {
-  return (symbolS *) hash_find (tag_hash, name);
+  return (symbolS *) str_hash_find (tag_hash, name);
 }
 
 static symbolS *
@@ -148,8 +144,7 @@ tag_find_or_make (char *name)
 
   if ((symbolP = tag_find (name)) == NULL)
     {
-      symbolP = symbol_new (name, undefined_section,
-			    0, &zero_address_frag);
+      symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
       tag_insert (S_GET_NAME (symbolP), symbolP);
       symbol_table_insert (symbolP);
@@ -328,7 +323,7 @@ c_dot_file_symbol (const char *filename, int appfile ATTRIBUTE_UNUSED)
 
   /* BFD converts filename to a .file symbol with an aux entry.  It
      also handles chaining.  */
-  symbolP = symbol_new (filename, bfd_abs_section_ptr, 0, &zero_address_frag);
+  symbolP = symbol_new (filename, bfd_abs_section_ptr, &zero_address_frag, 0);
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);

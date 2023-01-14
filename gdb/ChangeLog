@@ -1,3 +1,4465 @@
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <stub_is_supported, set_stub_is_supported>: New methods.
+	(TYPE_STUB_SUPPORTED): Use type::stub_is_supported, change all write call sites to
+	use type::set_stub_is_supported.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_VECTOR): Remove, replace all
+	uses with type::is_vector.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <is_vector, set_is_vector>: New methods.
+	(TYPE_VECTOR): Use type::is_vector, change all write call sites to
+	use type::set_is_vector.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_VARARGS): Remove, replace all
+	uses with type::has_varargs.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <has_varargs, set_has_varargs>: New methods.
+	(TYPE_VARARGS): Use type::has_varargs, change all write call sites to
+	use type::set_has_varargs.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_PROTOTYPED): Remove, replace all
+	uses with type::is_prototyped.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <is_prototyped, set_is_prototyped>:
+	New methods.
+	(TYPE_PROTOTYPED): Use type::is_prototyped, change all write
+	call sites to use type::set_is_prototyped.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_TARGET_STUB): Remove, replace all
+	uses with type::target_is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <target_is_stub, set_target_is_stub>:
+	New methods.
+	(TYPE_TARGET_STUB): Use type::is_stub, change all write call
+	sites to use type::set_target_is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_STUB): Remove, replace all
+	uses with type::is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <is_stub, set_is_stub>: New methods.
+	(TYPE_STUB): Use type::is_stub, change all write call sites to
+	use type::set_is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_NOSIGN): Remove, replace all uses with
+	type::has_no_signedness.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <has_no_signedness,
+	set_has_no_signedness>: New methods.
+	(TYPE_NOSIGN): Use type::has_no_signedness, change all write
+	call sites to use type::set_has_no_signedness.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_UNSIGNED): Remove, replace all uses with
+	type::is_unsigned.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <is_unsigned, set_is_unsigned>: New
+	methods.
+	(TYPE_UNSIGNED): Use type::is_unsigned.  Change all write call
+	sites to use type::set_is_unsigned.
+
+2020-09-14  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
+            Adam Renquinha <arenquinha@cimeq.qc.ca>
+
+        * arm-tdep.c (arm_m_exception_cache): Try use correct stack
+        pointer and stack frame offset when unwinding.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* NEWS: Document "-break-insert --qualified".
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Handle "--qualified".
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* linespec.c (classify_mtype, compare_msyms): Delete.
+	(search_minsyms_for_name): Remove classification logic.  Instead
+	filter out trampoline symbols if we also found an external
+	function of the same name.
+
+2020-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2020-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 10 branch created (8087c3fa8b5d695e3e29e69d70d0b35ec902ac59):
+	* version.in: Bump version to 11.0.50.DATE-git.
+
+2020-09-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (namespace selftests): Only define #if GDB_SELF_TEST.
+
+2020-09-11  Moritz Riesterer  <moritz.riesterer@intel.com>
+	    Felix Willgerodt  <Felix.Willgerodt@intel.com>
+
+	* gdbarch.sh: Added bfloat16 type.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* gdbtypes.c (floatformats_bfloat16): New struct.
+	(gdbtypes_post_init): Add builtin_bfloat16.
+	* gdbtypes.h (struct builtin_type) <builtin_bfloat16>: New member.
+	(floatformats_bfloat16): New struct.
+	* i386-tdep.c (i386_zmm_type): Add field "v32_bfloat16"
+	(i386_ymm_type): Add field "v16_bfloat16"
+	(i386_gdbarch_init): Add set_gdbarch_bfloat16_format.
+	* target-descriptions.c (make_gdb_type): Add case TDESC_TYPE_BFLOAT16.
+	* gdbsupport/tdesc.cc (tdesc_predefined_types): New member bfloat16.
+	* gdbsupport/tdesc.h (tdesc_type_kind): New member TDESC_TYPE_BFLOAT16.
+	* features/i386/64bit-avx512.xml: Add bfloat16 type.
+	* features/i386/64bit-avx512.c: Regenerated.
+	* features/i386/64bit-sse.xml: Add bfloat16 type.
+	* features/i386/64bit-sse.c: Regenerated.
+
+2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* i386-tdep.c (i386_zmm_type): Fix field names.
+	(i386_ymm_type): Fix field names.
+
+2020-09-11  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c: Fix typo in the help message of the
+	"set breakpoint condition-evaluation" command.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c: Include "nat/netbsd-nat.h".
+	* (nbsd_nat_target::pid_to_exec_file)
+	(nbsd_nat_target::thread_alive, nbsd_nat_target::thread_name)
+	(nbsd_nat_target::post_startup_inferior)
+	(nbsd_nat_target::post_attach, nbsd_nat_target::xfer_partial)
+	(nbsd_add_threads): Switch local code to common gdb/nat functions.
+	* (nbsd_pid_to_cmdline): Call sysctl from the global namespace.
+	* (nbsd_thread_lister): Remove.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* fork-inferior.c (startup_inferior): Avoid double free.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h (netbsd_nat::qxfer_siginfo): Add.
+	* netbsd-nat.c (netbsd_nat::qxfer_siginfo): Likewise.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h (netbsd_nat::enable_proc_events): Add.
+	* netbsd-nat.c: Include <sys/ptrace.h>.
+	* (netbsd_nat::enable_proc_events): Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h: Include "gdbsupport/function-view.h".
+	* (netbsd_nat::thread_alive, netbsd_nat::thread_name)
+	(netbsd_nat::for_each_thread): Add.
+	* netbsd-nat.c: Include "gdbsupport/common-defs.h" and
+	"gdbsupport/common-debug.h".
+	* (netbsd_nat::netbsd_thread_lister)
+	(netbsd_nat::thread_alive, netbsd_nat::thread_name)
+	(netbsd_nat::for_each_thread): Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h: Include <unistd.h>.
+	* (netbsd_nat::pid_to_exec_file): Add.
+	* netbsd-nat.c: Include <sys/types.h> and <sys/sysctl.h>.
+	* (netbsd_nat::pid_to_exec_file) Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* configure.nat (NATDEPFILES): Add nat/netbsd-nat.o when needed.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h: New file.
+	* netbsd-nat.c: Likewise.
+
+2020-09-09  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (remove_extra_symbols): Do not increment when
+	removing an element
+
+2020-09-08  Tom Tromey  <tromey@adacore.com>
+
+	* gdb_bfd.c (gdb_bfd_open): Call bfd_fopen when fstat fails.
+
+2020-09-08  Tom Tromey  <tromey@adacore.com>
+
+	PR win32/25302:
+	* gdb_bfd.c (gdb_bfd_data): Add "st" parameter.
+	(gdb_bfd_init_data): New function.
+	(gdb_bfd_open, gdb_bfd_ref): Use gdb_bfd_init_data.
+
+2020-09-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (fetch_inferior_event): Use
+	`switch_to_target_no_thread` to switch the target.
+
+2020-09-06  Tom Tromey  <tom@tromey.com>
+
+	* symfile.h (dwarf2_free_objfile): Don't declare.
+
+2020-09-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* gdb/i386-tdep.c (i386_floatformat_for_type): Added conditions
+	to match 16 byte real/complex type generated by Flang compiler.
+
+2020-09-03  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoint/26546
+	* dwarf2/read.c (new_symbol): Tag label symbol without DW_AT_low_pc as
+	LOC_OPTIMIZED_OUT instead of LOC_LABEL.
+
+2020-09-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (index_digits): New function.
+	(struct maint_print_section_data): Remove.
+	(print_bfd_section_info): Remove print_data parameter, add arg
+	and index_digits.
+	(print_objfile_section_info): Likewise.
+	(print_bfd_section_info_maybe_relocated): Likewise (plus
+	objfile).
+	(maintenance_info_sections): Adjust calls.
+
+2020-09-02  Tom Tromey  <tromey@adacore.com>
+
+	* ada-varobj.c (ada_varobj_get_ptr_number_of_children): Return 0
+	for null pointers.
+	(ada_varobj_adjust_for_child_access): Special-case null pointers.
+
+2020-09-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* bcache.h (struct bcache) <insert>: Change type of `added` to
+	pointer to bool.
+	* bcache.c (bcache::insert): Likewise.
+	* gdbtypes.c (check_types_worklist): Adjust.
+	* psymtab.c (add_psymbol_to_bcache): Adjust.
+
+2020-08-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (unordered_set): Include.
+	(class core_target): Add field 'm_core_unavailable_mappings'.
+	(core_target::build_file_mappings): Print only one warning
+	per inaccessible file.  Add unavailable/broken mappings
+	to m_core_unavailable_mappings.
+	(core_target::xfer_partial): Call...
+	(core_target::xfer_memory_via_mappings): New method.
+
+2020-08-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (struct field_info) <non_public_fields>: Change
+	type to bool.
+
+2020-08-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (struct field_info): Fix indentation.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame-unwind.h (frame_prev_register_ftype): Fix adjective
+	ordering in comment.
+	* frame.c (frame_id_eq): Fix indentation.
+
+2020-08-31  Scott Linder  <scott@scottlinder.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* inline-frame.c (inline_frame_this_id): Remove assert that prevents
+	inline frame ids in outer frame.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.h (enum frame_id_stack_status) <FID_STACK_OUTER>: New.
+	* frame.c (fprint_frame_id): Handle FID_STACK_OUTER.
+	(outer_frame_id): Use FID_STACK_OUTER instead of
+	FID_STACK_INVALID.
+	(frame_id_p): Don't check for outer_frame_id.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame-unwind.c (frame_unwind_got_optimized): Don't set
+	regnum/frame in value.  Call allocate_value_lazy.
+	* frame.c (frame_unwind_register_value): Use
+	val_print_not_saved.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (NULL_TYPE): Remove, change all uses to nullptr.
+
+2020-08-29  Pedro Alves  <pedro@palves.net>
+
+	* progspace.c (print_program_space): Use all_inferiors.  Switch to
+	the inferior before calling target_pid_to_str.
+
+2020-08-28  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (xcoff_end_psymtab): Update comment.
+	* dbxread.c (dbx_end_psymtab): Update comment.
+
+2020-08-28  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoint/26544
+	* breakpoint.c (parse_breakpoint_sals): Remove const from struct
+	event_location.
+	(create_breakpoint): Same.
+	(base_breakpoint_decode_location): Same.
+	(bkpt_create_sals_from_location): Same.
+	(bkpt_decode_location): Same.
+	(bkpt_probe_create_sals_from_location): Same.
+	(bkpt_probe_decode_location): Same.
+	(tracepoint_create_sals_from_location): Same.
+	(tracepoint_decode_location): Same.
+	(tracepoint_probe_decode_location): Same.
+	(strace_marker_create_sals_from_location): Same.
+	(strace_marker_decode_location): Same.
+	(create_sals_from_location_default): Same.
+	(decode_location_default): Same.
+	* breakpoint.h (struct breakpoint_ops): Same.
+	(create_breakpoint): Same.
+	* linespec.h (decode_line_full): Same.
+	* linespec.c (decode_line_full): Same.  Throw error if
+	result.size () == 0.
+
+2020-08-27  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26524
+	* breakpoint.c (until_break_fsm) <location_breakpoint,
+	caller_breakpoint>: Delete fields.
+	<breakpoints>: New field.
+	<until_break_fsm>: Adjust to save a breakpoint vector instead of
+	two individual breakpoints.
+	(until_break_fsm::should_stop): Loop over breakpoints in the
+	breakpoint vector.
+	(until_break_fsm::clean_up): Adjust to clear the breakpoints
+	vector.
+	(until_break_command): Handle location expanding into multiple
+	sals.
+
+2020-08-27  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26523
+	* inline-frame.c (stopped_by_user_bp_inline_frame): Also consider
+	bp_until breakpoints user-specified locations.  Update intro
+	comment.
+
+2020-08-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb_bfd.h (gdb_bfd_section_iterator, gdb_bfd_section_range,
+	gdb_bfd_sections): New.
+	* maint.c (print_bfd_section_info): Change param type to
+	maint_print_section_data.
+	(print_objfile_section_info): Likewise.
+	(print_bfd_section_info_maybe_relocated): Likewise.
+	(maintenance_info_sections): Use gdb_bfd_sections.
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* MAINTAINERS: Add ARC target and maintainer.
+
+2020-08-25  Anton Kolesov  <anton.kolesov@synopsys.com>
+
+	* configure.tgt: ARC support for GNU/Linux.
+	* Makefile.in (ALL_TARGET_OBJS): Likewise.
+	* arc-linux-tdep.c: New file.
+	* arc-tdep.h (ARC_STATUS32_L_MASK, ARC_STATUS32_DE_MASK): Declare.
+	* arc-tdep.c (arc_write_pc): Use it.
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-tdep.c (arc_check_for_hardware_loop): New.
+	* arc-tdep.h (gdbarch_tdep): New field has_hw_loops.
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-tdep.h: Include "gdbarch.h".
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arch/arc.h
+	(arc_gdbarch_features): New class to stir the selection of target XML.
+	(arc_create_target_description): Use FEATURES to choose XML target.
+	(arc_lookup_target_description): Use arc_create_target_description
+	to create _new_ target descriptions or return the already created
+	ones if the FEATURES is the same.
+	* arch/arc.c: Implementation of prototypes described above.
+	* gdb/arc-tdep.h (arc_regnum enum): Add more registers.
+	(arc_gdbarch_features_init): Initialize the FEATURES struct.
+	* arc-tdep.c (*_feature_name): Make feature names consistent.
+	(arc_register_feature): A new struct to hold information about
+	registers of a particular target/feature.
+	(arc_check_tdesc_feature): Check if XML provides registers in
+	compliance with ARC_REGISTER_FEATURE structs.
+	(arc_update_acc_reg_names): Add aliases for r58 and r59.
+	(determine_*_reg_feature_set): Which feature name to look for.
+	(arc_gdbarch_features_init): Given MACH and ABFD, initialize FEATURES.
+	(mach_type_to_arc_isa): Convert from a set of binutils machine types
+	to expected ISA enums to be used in arc_gdbarch_features structs.
+	* features/Makefile (FEATURE_XMLFILES): Add new files.
+	* gdb/features/arc/v1-aux.c: New file.
+	* gdb/features/arc/v1-aux.xml: Likewise.
+	* gdb/features/arc/v1-core.c: Likewise.
+	* gdb/features/arc/v1-core.xml: Likewise.
+	* gdb/features/arc/v2-aux.c: Likewise.
+	* gdb/features/arc/v2-aux.xml: Likewise.
+	* gdb/features/arc/v2-core.c: Likewise.
+	* gdb/features/arc/v2-core.xml: Likewise.
+	* NEWS (Changes since GDB 9): Announce obsolence of old feature names.
+
+2020-08-25  Gaius Mulley  <gaiusmod2@gmail.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR m2/26372
+	* m2-exp.y (exp): Improve comment for non_empty_arglist case, add
+	an assert.  Remove single element array indexing pattern as the
+	MULTI_SUBSCRIPT support will handle this case too.
+
+2020-08-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* value.h (valprint_check_validity): Move declaration from
+	here...
+	* valprint.h (valprint_check_validity): ... to here.
+
+2020-08-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* debug.h: New file.
+	* debug.c (debug_prefixed_vprintf): New function.
+	* infrun.c (infrun_debug_printf_1): Use debug_prefixed_vprintf.
+	* linux-nat.c (linux_nat_debug_printf_1): Likewise.
+
+2020-08-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.h (infrun_debug_printf_1): New function declaration.
+	(infrun_debug_printf): New macro.
+	* infrun.c (infrun_debug_printf_1): Use infrun_debug_printf
+	throughout.
+	(infrun_debug_printf): New function.
+	* breakpoint.c (should_be_inserted): Use infrun_debug_printf.
+	(handle_jit_event): Likewise.
+
+2020-08-21  Mark Wielaard  <mark@klomp.org>
+
+	* ada-lex.l: Extend register warnings diagnostics comment for g++.
+
+2020-08-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.c (enum class frame_id_status): New.
+	(struct frame_info) <this_id::p>: Change type to frame_id_status.
+	(fprintf_frame): Update.
+	(compute_frame_id): Set frame id status to "computing" on entry.
+	Set it back to "not_computed" on failure and to "computed" on
+	success.
+	(get_frame_id): Assert the frame id is not being computed.
+	(create_sentinel_frame): Use frame_id_status::COMPUTED.
+	(create_new_frame): Likewise.
+	(frame_cleanup_after_sniffer): Update assert.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (pid_ptid_regcache_map): New type.
+	(target_ptid_regcache_map): Remove.
+	(target_pid_ptid_regcache_map): New type.
+	(regcaches): Change type to target_pid_ptid_regcache_map.
+	(get_thread_arch_aspace_regcache): Update.
+	(regcache_thread_ptid_changed): Update, handle pid-like ptid
+	case.
+	(regcaches_size): Update.
+	(regcache_count): Update.
+	(registers_changed_ptid_target_pid_test): New.
+	(_initialize_regcache): Register new test.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (regcache_count): New.
+	(struct regcache_test_data): New.
+	(regcache_test_data_up): New.
+	(populate_regcaches_for_test): New.
+	(regcaches_test): Remove.
+	(get_thread_arch_aspace_regcache_test): New.
+	(registers_changed_ptid_all_test): New.
+	(registers_changed_ptid_target_test): New.
+	(registers_changed_ptid_target_ptid_test): New.
+	(regcache_thread_ptid_changed): Remove regcache_count lambda.
+	(_initialize_regcache): Register new tests.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (test_get_thread_arch_aspace_regcache): Rename to...
+	(get_thread_arch_aspace_regcache_and_check): ... this.  Remove
+	gdbarch and aspace parameter.  Use current inferior's aspace.
+	Validate regcache's arch value.
+	(regcaches_test): Update.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (regcaches_test): Call registers_changed.
+
+2020-08-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (process_event_stop_test): Fix typo "breapoint".
+
+2020-08-19  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* amd64-tdep.c (amd64_skip_prologue): Using symbol table
+	to find the end of prologue for flang compiled binaries.
+	* arm-tdep.c (arm_skip_prologue): Likewise.
+	* i386-tdep.c (i386_skip_prologue): Likewise.
+	* producer.c (producer_is_llvm): New function.
+	(producer_parsing_tests): Added new tests for clang/flang.
+	* producer.h (producer_is_llvm): New declaration.
+
+2020-08-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* linux-nat.c (linux_nat_debug_printf): New function.
+	(linux_nat_debug_printf_1): New macro.  Use throughout the file.
+
+2020-08-18  Aaron Merey  <amerey@redhat.com>
+
+	* Makefile.in (DEBUGINFOD_CFLAGS, DEBUGINFOD_LIBS): New variables.
+	(INTERNAL_CFLAGS_BASE): Add DEBUGINFOD_CFLAGS.
+	(CLIBS): Add DEBUGINFOD_LIBS.
+
+2020-08-17  Sergei Trofimovich  <siarheit@google.com>
+
+	* ia64-linux-nat.c: Include "gdbarch.h" to declare used
+	'gdbarch_num_regs'.
+
+2020-08-17  Tom Tromey  <tromey@adacore.com>
+
+	* ada-varobj.c (ada_varobj_decode_var): Handle case where
+	ada_get_decoded_value returns NULL.
+
+2020-08-17  Tom Tromey  <tromey@adacore.com>
+
+	* python/py-inferior.c (infpy_search_memory): Use
+	gdb_py_object_from_ulongest.
+	* python/py-infevents.c (create_inferior_call_event_object)
+	(create_memory_changed_event_object): Use
+	gdb_py_object_from_ulongest.
+	* python/py-linetable.c (ltpy_entry_get_pc): Use
+	gdb_py_object_from_ulongest.
+
+2020-08-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* loc.c (class symbol_needs_eval_context): Fix indentation.
+
+2020-08-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/loc.c (dwarf2_loc_desc_get_symbol_read_needs): Use
+	bool.
+
+2020-08-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/26393
+	* gdbtypes.c (dump_dynamic_prop): New function.
+	(recursive_dump_type): Use dump_dynamic_prop for TYPE_CODE_RANGE.
+
+2020-08-15  Tom de Vries  <tdevries@suse.de>
+
+	PR backtrace/26390
+	* stack.c (print_frame_args): Temporarily set the selected
+	frame to FRAME while printing the frame's arguments.
+
+2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	PR breakpoints/26385
+	* ppc-linux-nat.c (ppc_linux_nat_target::low_prepare_to_resume):
+	Always clear watchpoint with PTRACE_SET_DEBUGREG.
+
+2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_dreg_interface::detect)
+	(ppc_linux_nat_target::low_prepare_to_resume): Use ptrace () < 0
+	and >= to check return value instead of == -1 and != -1.
+
+2020-08-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* utils.h (class gdb_argv) <as_array_view>: New method.
+	* utils.c (gdb_argv_as_array_view_test): New.
+	(_initialize_utils): Register selftest.
+	* maint.c (maintenance_selftest): Use the new method.
+
+2020-08-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* target.h (supports_dumpcore, dumpcore): New
+	function declarations.
+	* target.c (supports_dumpcore, dumpcore): New
+	functions.
+	* target-delegates.c: Rebuild.
+	* gcore.c (gcore_command): Use target_supports_dumpcore ()
+	and target_dumpcore ().
+
+2020-08-13  Aaron Merey  <amerey@redhat.com>
+
+	* debuginfod-support.c: Replace global variables with user_data.
+
+2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (maintenance_selftest): Split args and pass array_view
+	to run_tests.
+
+2020-08-12  Luis Machado  <luis.machado@linaro.org>
+
+	* value.c (check_type_length_before_alloc): Use ULONGEST to store a
+	type's length.
+	Use %s and pulongest to print the length.
+
+2020-08-12  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Move "Multi-target debugging support" item to the
+	"Changes since GDB 9" section.
+
+2020-08-12  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/26336
+	* progspace.c (program_space::remove_objfile): Invalidate the
+	frame cache.
+
+2020-08-11  Tom de Vries  <tdevries@suse.de>
+
+	* MAINTAINERS: Mark ms1 as deleted.
+
+2020-08-10  Luis Machado  <luis.machado@linaro.org>
+
+	PR gdb/26310
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): Track use of SP/FP and
+	act accordingly.
+	(aarch64_analyze_prologue_test): Add more unit tests to exercise
+	movz/str/stur/stp skipping behavior.
+
+2020-08-10  Luis Machado  <luis.machado@linaro.org>
+
+	* nat/aarch64-sve-linux-sigcontext.h (SVE_PT_REGS_OFFSET): Use
+	struct user_sve_header instead of struct sve_context.
+
+2020-08-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* read.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off): Replace function pointer +
+	`void *` parameter with function_view.
+	* read.c (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off): Likewise.
+	* loc.c (get_frame_pc_for_per_cu_dwarf_call): Remove.
+	(per_cu_dwarf_call): Adjust.
+	(get_frame_address_in_block_wrapper): Remove.
+	(indirect_synthetic_pointer): Adjust.
+	(get_ax_pc): Remove.
+	(dwarf2_compile_expr_to_ax): Adjust.
+
+2020-08-08  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26344
+	* arch/riscv.c (riscv_lookup_target_description): Use an explicit
+	constructor.
+	* regcache.c (get_thread_arch_aspace_regcache): Same.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c
+	(ravenscar_thread_target::set_base_thread_from_ravenscar_task):
+	New method.
+	(ravenscar_thread_target::wait): Check
+	runtime_initialized.
+	(ravenscar_thread_target::prepare_to_store)
+	(ravenscar_thread_target::stopped_by_sw_breakpoint)
+	(ravenscar_thread_target::stopped_by_hw_breakpoint)
+	(ravenscar_thread_target::stopped_by_watchpoint)
+	(ravenscar_thread_target::stopped_data_address)
+	(ravenscar_thread_target::core_of_thread): Use
+	scoped_restore_current_thread and
+	set_base_thread_from_ravenscar_task.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (update_thread_list): Set inferior_ptid.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Call
+	update_inferior_ptid before update_thread_list.
+	(temporarily_change_regcache_ptid): New class.
+	(ravenscar_thread_target::fetch_registers)
+	(ravenscar_thread_target::store_registers)
+	(ravenscar_thread_target::prepare_to_store): Use base thread when
+	forwarding operation.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::resume): Handle
+	"is_pid" case.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (xfer_partial, enable_btrace, add_thread):
+	New methods.
+	(ravenscar_thread_target::get_thread_base_cpu): Check m_cpu_map
+	first.
+	(ravenscar_thread_target::add_thread): Rename from
+	ravenscar_add_thread.
+	(ravenscar_thread_target::update_thread_list): Use a lambda.
+	(ravenscar_thread_target::xfer_partial): New method.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.h (ada_task_list_iterator_ftype): Now a
+	gdb::function_view.
+	(iterate_over_live_ada_tasks): Change type of argument.
+	* ada-tasks.c (iterate_over_live_ada_tasks): Change type
+	of argument.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target) <extra_thread_info>:
+	Remove.
+	(ravenscar_thread_target::extra_thread_info): Remove.
+	(ravenscar_thread_target::pid_to_str): Mention Ravenscar in result;
+	defer to target beneath for non-Ravenscar threads.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target) <get_base_cpu,
+	get_base_thread_from_ravenscar_task>: Now methods.
+	<m_cpu_map>: New member.
+	(ravenscar_thread_target::get_thread_base_cpu): Rename from
+	ravenscar_get_thread_base_cpu.  Check m_cpu_map.
+	(ravenscar_thread_target::task_is_currently_active): Update.
+	(ravenscar_thread_target::get_base_thread_from_ravenscar_task):
+	Now a method.
+	(ravenscar_thread_target::add_active_thread): Put initial thread
+	into the m_cpu_map.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Return
+	event_ptid.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Check
+	runtime_initialized.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target): Don't call
+	add_active_thread.
+	(ravenscar_thread_target::add_active_thread): Now public.
+	(ravenscar_inferior_created): Call add_active_thread after pushing
+	the target.
+
+2020-08-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (ptid_regcache_map): New type.
+	(target_ptid_regcache_map): New type.
+	(regcaches): Change type to target_ptid_regcache_map.
+	(get_thread_arch_aspace_regcache): Update to regcaches' new
+	type.
+	(regcache_thread_ptid_changed): Likewise.
+	(registers_changed_ptid): Likewise.
+	(regcaches_size): Likewise.
+	(regcaches_test): Update.
+	(regcache_thread_ptid_changed): Update.
+	* regcache.h (regcache_up): New type.
+	* gdbsupport/ptid.h (hash_ptid): New struct.
+
+2020-08-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* observable.h (thread_ptid_changed): Add parameter
+	`process_stratum_target *`.
+	* infrun.c (infrun_thread_ptid_changed): Add parameter
+	`process_stratum_target *` and use it.
+	(selftests): New namespace.
+	(infrun_thread_ptid_changed): New function.
+	(_initialize_infrun): Register selftest.
+	* regcache.c (regcache_thread_ptid_changed): Add parameter
+	`process_stratum_target *` and use it.
+	(regcache_thread_ptid_changed): New function.
+	(_initialize_regcache): Register selftest.
+	* thread.c (thread_change_ptid): Pass target to
+	thread_ptid_changed observable.
+
+2020-08-06  Caroline Tice <cmtice@google.com>
+
+	* dwarf2/read.c (struct dwo_file): Update comment on 'sections' field.
+	(struct dwp_sections): Update field comments.  Add loclists and
+	rnglists fields.
+	(struct virtual_v2_dwo_sections): Rename struct to
+	'virtual_v2_or_v5_dwo_sections'; update comments at top of struct; add
+	size & offset fields for loclists and rnglists.
+	(struct dwp_hash_table): Add a 'v5' struct field to the union section.
+	(create_debug_type_hash_table): Add 'DW_UT_split_type' to the check for
+	skipping dummy type units.
+	(create_dwp_hash_table): Update the large comment above the function to
+	discuss Version 5 DWP files as well, with references.  Update all the
+	version checks in the function to check for version 5 as well.  Add new
+	section at the end to create dwp hash table for version 5.
+	(create_dwp_v2_section): Rename function to
+	'create_dwp_v2_or_v5_section'.  Update function comment appropriately.
+	Add V5 to error message text.
+	(create_dwo_unit_in_dwp_v2): Change calls to create_dwp_v2_section
+	into calls to create_dwp_v2_or_v5_section.
+	(create_dwo_unit_in_dwp_v5): New function.
+	(lookup_dwo_unit_in_dwp): Update conditional statement to explicitly
+	check for version2; add else clause to handle version 5.
+	(open_and_init_dwo_file): Add code to check dwarf version & only call
+	create_debug_types_hash_table (with sections.types) if version is not 5;
+	else call create_debug_type_hash_table, with sections.info.
+	(dwarf2_locate_v2_dwp_sections): Update function comment to mention
+	version 5.
+	(dwarf2_locate_v5_dwp_sections): New function.
+	(open_and_init_dwp_file): Add else-if clause for version 5 to call
+	bfd_map_over_sections with dwarf2_locate_v5_dwp_sections.
+
+2020-08-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* regcache.h (class regcache): Remove friend
+	registers_changed_ptid.
+	<regcache_thread_ptid_changed>: Remove.
+	<regcaches>: Remove.
+	* regcache.c (regcache::regcaches): Rename to...
+	(regcaches): ... this.  Make static.
+	(get_thread_arch_aspace_regcache): Update.
+	(regcache::regcache_thread_ptid_changed): Rename to...
+	(regcache_thread_ptid_changed): ... this.  Update.
+	(class regcache_access): Remove.
+	(regcaches_test): Update.
+	(_initialize_regcache): Update.
+	* sparc64-tdep.c, dwarf2/index-write.c, record-btrace.c: Include
+	<forward_list>.
+
+2020-08-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* regcache.h (class regcache) <current_regcache>: Rename to...
+	<regcaches>: ... this.  Move doc here.
+	* regcache.c (regcache::current_regcache) Rename to...
+	(regcache::regcaches): ... this.  Move doc to header.
+	(get_thread_arch_aspace_regcache): Update.
+	(regcache::regcache_thread_ptid_changed): Update.
+	(registers_changed_ptid): Update.
+	(class regcache_access) <current_regcache_size>: Rename to...
+	<regcaches_size>: ... this.
+	(current_regcache_test): Rename to...
+	(regcaches_test): ... this.
+	(_initialize_regcache): Update.
+
+2020-08-06  Victor Collod  <vcollod@nvidia.com>
+
+	* amd64-tdep.c (amd64_analyze_prologue): Fix incorrect comment.
+
+2020-08-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (core_target::build_file_mappings): Don't output
+	null pathname in warning.
+
+2020-08-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.dwarf2/clztest.exp, gdb.dwarf2/dw2-common-block.exp,
+	gdb.dwarf2/dw2-dup-frame.exp, gdb.dwarf2/dw2-reg-undefined.exp,
+	gdb.dwarf2/dw2-single-line-discriminators.exp,
+	dw2-undefined-ret-addr.exp: Pass nopie to compilation options.
+
+2020-08-05  Tom Tromey  <tromey@adacore.com>
+
+	PR rust/26197:
+	* dwarf2/read.c (alloc_rust_variant): Handle univariant case.
+	(quirk_rust_enum): Call alloc_rust_variant for univariant case.
+	Fix off-by-one and type size errors in ordinary case.
+
+2020-08-05  Tom de Vries  <tdevries@suse.de>
+
+	* gdbtypes.c (type_not_allocated, type_not_associated): Use
+	"prop->const_val () == 0" instead of "prop->const_val () != 0".
+
+2020-08-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.h (frame_id_p): Return bool.
+	(frame_id_artificial_p): Return bool.
+	(frame_id_eq): Return bool.
+	(has_stack_frames): Return bool.
+	(get_selected_frame): Fix typo in comment.
+	(get_frame_pc_if_available): Return bool.
+	(get_frame_address_in_block_if_available): Return bool.
+	(get_frame_func_if_available): Return bool.
+	(read_frame_register_unsigned): Return bool.
+	(get_frame_register_bytes): Return bool.
+	(safe_frame_unwind_memory): Return bool.
+	(deprecated_frame_register_read): Return bool.
+	(frame_unwinder_is): Return bool.
+	* frame.c (struct frame_info) <prev_arch::p>: Change type to
+	bool.
+	<this_id::p>: Likewise.
+	<prev_p>: Likewise.
+	(frame_stash_add): Return bool.
+	(get_frame_id): Use bool.
+	(frame_id_build_special) Use bool.
+	(frame_id_build_unavailable_stack): Use bool.
+	(frame_id_build): Use bool.
+	(frame_id_p): Return bool, use true/false instead of 1/0.
+	(frame_id_artificial_p): Likewise.
+	(frame_id_eq): Likewise.
+	(frame_id_inner): Likewise.
+	(get_frame_func_if_available): Likewise.
+	(read_frame_register_unsigned): Likewise.
+	(deprecated_frame_register_read): Likewise.
+	(get_frame_register_bytes): Likewise.
+	(has_stack_frames): Likewise.
+	(inside_main_func): Likewise.
+	(inside_entry_func): Likewise.
+	(get_frame_pc_if_available): Likewise.
+	(get_frame_address_in_block_if_available): Likewise.
+	(frame_unwinder_is): Likewise.
+	(safe_frame_unwind_memory): Likewise.
+	(frame_unwind_arch): Likewise.
+
+2020-08-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.c (frame_info) <prev_func> <p>: Rename to status, change
+	type to cached_copy_status.
+	(fprintf_frame): Adjust.
+	(get_frame_func_if_available): Adjust.
+	(frame_cleanup_after_sniffer): Adjust.
+
+2020-08-04  Mark Wielaard  <mark@klomp.org>
+
+	* MAINTAINERS (Write After Approval): Update email address.
+
+2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_DYN_PROP_ADDR): Remove, replace uses with
+	dynamic_prop::const_val.
+
+2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_DYN_PROP_KIND): Remove, replace uses with
+	dynamic_prop::kind.
+
+2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_DYN_PROP_BATON): Remove.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.tgt: Set gdb_sim for bpf-*-* targets.
+
+2020-08-04  Weimin Pan <weimin.pan@oracle.com>
+	    Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.tgt: Add entry for bpf-*-*.
+	* Makefile.in (ALL_TARGET_OBS): Add bpf-tdep.o
+	(ALLDEPFILES): Add bpf-tdep.c.
+	* bpf-tdep.c: New file.
+	* MAINTAINERS: Add bpf target and maintainer.
+	* NEWS: Mention the support for the new target.
+
+2020-08-04  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/23270
+	* dwarf2/read.c (find_partial_die): Change internal error into Dwarf
+	Error.
+
+2020-08-03  John Baldwin  <jhb@FreeBSD.org>
+
+	* syscalls/freebsd.xml: Regenerate.
+
+2020-08-03  John Baldwin  <jhb@FreeBSD.org>
+
+	* syscalls/update-freebsd.sh: Fix usage and year range.
+
+2020-08-03  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26333
+	* dwarf2/read.c (dwarf_decode_lines_1): Ignore
+	DW_LNE_lo_user/DW_LNE_hi_user range.
+
+2020-07-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR ada/26318
+	* ada-lang.c (ada_modulus): Return 0 if property is not of const
+	kind.
+
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c (set_breakpoint_condition): Do minor refactoring.
+
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c (set_breakpoint_condition): Update the condition
+	expressions after checking that the input condition string parses
+	successfully and does not contain junk at the end.
+
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c (set_breakpoint_condition): Update the
+	condition string after parsing the new condition successfully.
+
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* proc-api.c (_STRUCTURED_PROC): Don't define.
+	* proc-events.c: Likewise.
+	* proc-flags.c: Likewise.
+	* proc-why.c: Likewise.
+	* procfs.c: Likewise.
+
+	* Makefile.in (INTERNAL_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* configure, config.in: Regenerate.
+
+2020-07-30  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26320
+	* ui-style.h (struct ui_file_style::color): Wrap m_value and
+	m_red/m_green/m_blue in a union.
+
+2020-07-29  Tom de Vries  <tdevries@suse.de>
+
+	PR tdep/26280
+	* s390-tdep.c (s390_displaced_step_fixup): Fix Wmaybe-uninitialized.
+
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
+	PR symtab/26270:
+	* symtab.h (find_pc_partial_function_sym): Declare.
+	* cli/cli-cmds.c (disassemble_command): Use
+	find_pc_partial_function_sym.  Check asm_demangle.
+	* blockframe.c (cache_pc_function_sym): New global.
+	(cache_pc_function_name): Remove.
+	(clear_pc_function_cache): Update.
+	(find_pc_partial_function_sym): New function, from
+	find_pc_partial_function.
+	(find_pc_partial_function): Rewrite using
+	find_pc_partial_function_sym.
+
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Rearrange "disassemble"
+	help.  Add usage.
+
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/expr.c (dwarf_expr_context::execute_stack_op)
+	<DW_OP_GNU_variable_value>: Cast to address type.
+
+2020-07-28  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (nbsd_nat_target::xfer_partial): New declaration.
+	* nbsd-nat.c (nbsd_nat_target::xfer_partial): New function.
+	* nbsd-tdep.c (nbsd_gdbarch_data_handle, struct nbsd_gdbarch_data)
+	(init_nbsd_gdbarch_data, get_nbsd_gdbarch_data)
+	(nbsd_get_siginfo_type): New.
+	(nbsd_init_abi): Install gdbarch "get_siginfo_type" method.
+	(_initialize_nbsd_tdep): New.
+
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
+	* configure: Regenerated.
+
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
+	* configure: Regenerated.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-frame.c: Remove 'user-regs.h' include.
+	(frapy_read_register): Rewrite to make use of
+	gdbpy_parse_register_id.
+	* python/py-registers.c (gdbpy_parse_register_id): New function,
+	moved here from python/py-unwind.c.  Updated the return type, and
+	also accepts register descriptor objects.
+	* python/py-unwind.c: Remove 'user-regs.h' include.
+	(pyuw_parse_register_id): Moved to python/py-registers.c.
+	(unwind_infopy_add_saved_register): Update to use
+	gdbpy_parse_register_id.
+	(pending_framepy_read_register): Likewise.
+	* python/python-internal.h (gdbpy_parse_register_id): Declare.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c: Add 'user-regs.h' include.
+	(register_descriptor_iter_find): New function.
+	(register_descriptor_iterator_object_methods): New static global
+	methods array.
+	(register_descriptor_iterator_object_type): Add pointer to methods
+	array.
+
+2020-07-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.h: Include <osreldate.h>.  Define USE_SIGTRAP_SIGINFO
+	for all architectures on FreeBSD 11.3 and later.
+
+2020-07-27  Tom Tromey  <tromey@adacore.com>
+
+	* gcore.h (load_corefile): Don't declare.
+
+2020-07-27  Tom de Vries  <tdevries@suse.de>
+
+	* configure.ac: Fix sys/sockets.h -> sys/socket.h typo.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2020-07-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Check for sys/socket.h and
+	ws2tcpip.h.  When checking whether socklen_t type is defined, use
+	ws2tcpip.h if it is available and sys/socket.h isn't.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2020-07-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR fortran/23051
+	PR fortran/26139
+	* valops.c (value_ind): Pass address to
+	readjust_indirect_value_type.
+	* value.c (readjust_indirect_value_type): Make parameter
+	non-const, and add extra address parameter.  Resolve original type
+	before using it.
+	* value.h (readjust_indirect_value_type): Update function
+	signature and comment.
+
+2020-07-25  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26243
+	* dwarf2/read.c (lnp_state_machine::record_line): Ignore zero line
+	entries.
+
+2020-07-24  Aaron Merey  <amerey@redhat.com>
+
+	* Makefile.in: Replace LIBDEBUGINFOD with DEBUGINFOD_LIBS.
+	* configure: Rebuild.
+
+2020-07-23  Kevin Buettner  <kevinb@redhat.com>
+
+	PR corefiles/26294
+	* corelow.c (_initialize_corelow): Add period to help text
+	for "maintenance print core-file-backed-mappings".
+
+2020-07-23  Pedro Alves  <pedro@palves.net>
+
+	* frame-unwind.c (frame_unwind_try_unwinder): On exception, don't
+	touch THIS_CACHE/THIS_FRAME if the frame cache was cleared
+	meanwhile.
+	* frame.c (frame_cache_generation, get_frame_cache_generation):
+	New.
+	(reinit_frame_cache): Increment FRAME_CACHE_GENERATION.
+	(get_prev_frame_if_no_cycle): On exception, don't touch
+	PREV_FRAME/THIS_FRAME if the frame cache was cleared meanwhile.
+	* frame.h (get_frame_cache_generation): Declare.
+
+2020-07-23  Tom de Vries  <tdevries@suse.de>
+
+	PR tui/26282
+	* tui/tui-winsource.h (struct tui_source_windows::tui_source_windows):
+	New default constructor.
+
+2020-07-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Don't
+	exclude non-statement entries.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* NEWS (New commands): Mention new command
+	"maintenance print core-file-backed-mappings".
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (gdbcmd.h): Include.
+	(core_target::info_proc_mappings): New method.
+	(get_current_core_target): New function.
+	(maintenance_print_core_file_backed_mappings): New function.
+	(_initialize_corelow): Add core-file-backed-mappings to
+	"maint print" commands.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* linux-tdep.c (dump_note_entry_p): New function.
+	(linux_dump_mapping_p_ftype): New typedef.
+	(linux_find_memory_regions_full): Add new parameter,
+	should_dump_mapping_p.
+	(linux_find_memory_regions): Adjust call to
+	linux_find_memory_regions_full.
+	(linux_make_mappings_core_file_notes): Use dump_note_entry_p in
+	call to linux_find_memory_regions_full.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (solist.h, unordered_map): Include.
+	(class core_target): Add field m_core_file_mappings and
+	method build_file_mappings.
+	(core_target::core_target): Call build_file_mappings.
+	(core_target::~core_target): Free memory associated with
+	m_core_file_mappings.
+	(core_target::build_file_mappings): New method.
+	(core_target::xfer_partial): Use m_core_file_mappings
+	for memory transfers.
+	* linux-tdep.c (linux_read_core_file_mappings): New
+	function.
+	(linux_core_info_proc_mappings): Rewrite to use
+	linux_read_core_file_mappings.
+	(linux_init_abi): Register linux_read_core_file_mappings.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* arch-utils.c (default_read_core_file_mappings): New function.
+	* arch-utils.c (default_read_core_file_mappings): Declare.
+	* gdbarch.sh (read_core_file_mappings): New gdbarch method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	PR corefiles/25631
+	* corelow.c (core_target:xfer_partial):  Revise
+	TARGET_OBJECT_MEMORY case to consider non-SEC_HAS_CONTENTS
+	case after first checking the stratum beneath the core
+	target.
+	(has_all_memory): Return true.
+	* target.c (raw_memory_xfer_partial): Revise comment
+	regarding use of has_all_memory.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* exec.h (section_table_xfer_memory): Revise declaration,
+	replacing section name parameter with an optional callback
+	predicate.
+	* exec.c (section_table_xfer_memory): Likewise.
+	* bfd-target.c, exec.c, target.c, corelow.c: Adjust all callers
+	of section_table_xfer_memory.
+
+2020-07-22  Tom Tromey  <tromey@adacore.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Use
+	lookup_symbol_search_name.
+
+2020-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c (gdbpy_register_object_data_init): Remove
+	redundant local variable.
+	(gdbpy_get_register_descriptor): Extract descriptor vector as a
+	reference, not pointer, update code accordingly.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* objfiles.h (struct objfile) <skip_jit_symbol_lookup>: New field.
+	* jit.c (jit_breakpoint_re_set_internal): Use the
+	`skip_jit_symbol_lookup` field.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.c (jit_read_descriptor): Define the descriptor address once,
+	use twice.
+	(jit_breakpoint_deleted): Move the declaration of the loop variable
+	`iter` into the loop header.
+	(jit_breakpoint_re_set_internal): Move the declaration of the local
+	variable `objf_data` to the first point of definition.
+	(jit_event_handler): Move the declaration of local variables
+	`code_entry`, `entry_addr`, and `objf` to their first point of use.
+	Rename `objf` to `jited`.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h (struct jiter_objfile_data) <jiter_objfile_data, objfile>:
+	Remove.
+	* jit.c (get_jiter_objfile_data): Update.
+
+2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (struct jit_program_space_data): Remove.
+	(jit_program_space_key): Remove.
+	(jiter_objfile_data::~jiter_objfile_data): Remove program space
+	stuff.
+	(get_jit_program_space_data): Remove.
+	(jit_breakpoint_deleted): Iterate on all of the program space's
+	objfiles.
+	(jit_inferior_init): Likewise.
+	(jit_breakpoint_re_set_internal): Likewise.  Also change return
+	type to void.
+	(jit_breakpoint_re_set): Pass current_program_space to
+	jit_breakpoint_re_set_internal.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h (struct jiter_objfile_data) <cached_code_address,
+	jit_breakpoint>: Move to here from ...
+	* jit.c (jit_program_space_data): ... here.
+	(jiter_objfile_data::~jiter_objfile_data): Update.
+	(jit_breakpoint_deleted): Update.
+	(jit_breakpoint_re_set_internal): Update.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jiter_objfile_data::~jiter_objfile_data): Remove some
+	checks.
+	(jit_read_descriptor): Remove NULL check.
+	(jit_event_handler): Add an assertion.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h (struct jit_objfile_data):  Split into...
+	(struct jiter_objfile_data): ... this ...
+	(struct jited_objfile_data): ... and this.
+	* objfiles.h (struct objfile) <jit_data>: Remove.
+	<jiter_data, jited_data>: New fields.
+	* jit.c (jit_objfile_data::~jit_objfile_data): Rename to ...
+	(jiter_objfile_data::~jiter_objfile_data): ... this.
+	(get_jit_objfile_data): Rename to ...
+	(get_jiter_objfile_data): ... this.
+	(add_objfile_entry): Update.
+	(jit_read_descriptor): Use get_jiter_objfile_data.
+	(jit_find_objf_with_entry_addr): Use objfile's jited_data field.
+	(jit_breakpoint_re_set_internal): Use get_jiter_objfile_data.
+	(jit_inferior_exit_hook): Use objfile's jited_data field.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h: Forward-declare `struct minimal_symbol`.
+	(struct jit_objfile_data): Migrate to here from jit.c; also add a
+	constructor, destructor, and an objfile* field.
+	* jit.c (jit_objfile_data): Remove.
+	(struct jit_objfile_data): Migrate from here to jit.h.
+	(jit_objfile_data::~jit_objfile_data): New destructor
+	implementation with code moved from free_objfile_data.
+	(free_objfile_data): Delete.
+	(get_jit_objfile_data): Update to use the jit_data field of objfile.
+	(jit_find_objf_with_entry_addr): Ditto.
+	(jit_inferior_exit_hook): Ditto.
+	(_initialize_jit): Remove the call to
+	register_objfile_data_with_cleanup.
+	* objfiles.h (struct objfile) <jit_data>: New field.
+
+2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.h: Forward-declare `struct objfile`.
+	(jit_event_handler): Add a second parameter, the JITer objfile.
+	* jit.c (jit_read_descriptor): Change the signature to take the
+	JITer objfile as an argument instead of the jit_program_space_data.
+	(jit_inferior_init): Update the call to jit_read_descriptor.
+	(jit_event_handler): Use the new JITer objfile argument when calling
+	jit_read_descriptor.
+	* breakpoint.c (handle_jit_event): Update the call to
+	jit_event_handler to pass the JITer objfile.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (handle_segmentation_fault): Remove method.
+	* infrun.c (handle_segmentation_fault): Remove.
+	(print_signal_received_reason): Remove call to
+	handle_segmentation_fault.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* sparc64-linux-tdep.c (sparc64_linux_handle_segmentation_fault):
+	Rename to sparc64_linux_report_signal_info and add siggnal
+	argument.
+	(sparc64_linux_init_abi): Use sparc64_linux_report_signal_info
+	instead of sparc64_linux_handle_segmentation_fault.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Use
+	i386_linux_report_signal_info instead of
+	i386_linux_handle_segmentation_fault.
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault): Rename
+	to i386_linux_report_signal_info and add siggnal argument.
+	(i386_linux_init_abi): Use i386_linux_report_signal_info instead
+	of i386_linux_handle_segmentation_fault.
+	* i386-linux-tdep.h (i386_linux_handle_segmentation_fault): Rename
+	to i386_linux_report_signal_info and add siggnal argument.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (core_target_open): Invoke gdbarch report_signal_info
+	hook if present.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (report_signal_info): New method.
+	* infrun.c (print_signal_received_reason): Invoke gdbarch
+	report_signal_info hook if present.
+
+2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c : Add 'unordered_map' include.
+	(gdbpy_new_reggroup): Renamed to...
+	(gdbpy_get_reggroup): ...this.  Update to only create register
+	group descriptors when needed.
+	(gdbpy_reggroup_iter_next): Update.
+
+2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c (gdbpy_register_object_data): New static
+	global.
+	(gdbpy_register_object_data_init): New function.
+	(gdbpy_new_register_descriptor): Renamed to...
+	(gdbpy_get_register_descriptor): ...this, and update to reuse
+	existing register descriptors where possible.
+	(gdbpy_register_descriptor_iter_next): Update.
+	(gdbpy_initialize_registers): Register new gdbarch data.
+
+2020-07-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* linux-nat.c (stopped_pids): Make static.
+
+2020-07-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR ada/26235
+	* gdbtypes.c (ada_discrete_type_low_bound,
+	ada_discrete_type_high_bound): Handle undefined bounds.
+
+2020-07-21  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (nbsd_nat_target::supports_multi_process): New
+	declaration.
+	* nbsd-nat.c (nbsd_nat_target::supports_multi_process): New
+	function.
+
+2020-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_skip_solib_resolver): New function.
+	(fbsd_init_abi): Install gdbarch "skip_solib_resolver" method.
+	* fbsd-tdep.h (fbsd_skip_solib_resolver): New prototype.
+	* mips-fbsd-tdep.c (mips_fbsd_skip_solib_resolver): New function.
+	(mips_fbsd_init_abi): Install gdbarch "skip_solib_resolver"
+	method.
+
+2020-07-20 Ludovic Courtès  <ludo@gnu.org>
+
+	* guile/scm-math.c (vlscm_integer_fits_p): Use 'uintmax_t'
+	and 'intmax_t' instead of 'scm_t_uintmax' and 'scm_t_intmax',
+	which are deprecated in Guile 3.0.
+	* configure.ac (try_guile_versions): Add "guile-3.0".
+	* configure (try_guile_versions): Regenerate.
+	* NEWS: Update entry.
+
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <dje@google.com>
+
+	PR gdb/21104
+	* guile/scm-ports.c (USING_GUILE_BEFORE_2_2): New macro.
+	(ioscm_memory_port)[read_buf_size, write_buf_size]: Wrap in #if
+	USING_GUILE_BEFORE_2_2.
+	(stdio_port_desc, memory_port_desc) [!USING_GUILE_BEFORE_2_2]:
+	Change type to 'scm_t_port_type *'.
+	(natural_buffer_size) [!USING_GUILE_BEFORE_2_2]: New variable.
+	(ioscm_open_port) [USING_GUILE_BEFORE_2_2]: Add 'stream'
+	parameter and honor it.  Update callers.
+	(ioscm_open_port) [!USING_GUILE_BEFORE_2_2]: New function.
+	(ioscm_read_from_port, ioscm_write) [!USING_GUILE_BEFORE_2_2]: New
+	functions.
+	(ioscm_fill_input, ioscm_input_waiting, ioscm_flush): Wrap in #if
+	USING_GUILE_BEFORE_2_2.
+	(ioscm_init_gdb_stdio_port) [!USING_GUILE_BEFORE_2_2]: Use
+	'ioscm_read_from_port'.  Call 'scm_set_port_read_wait_fd'.
+	(ioscm_init_stdio_buffers) [!USING_GUILE_BEFORE_2_2]: New function.
+	(gdbscm_stdio_port_p) [!USING_GUILE_BEFORE_2_2]: Use 'SCM_PORTP'
+	and 'SCM_PORT_TYPE'.
+	(gdbscm_memory_port_end_input, gdbscm_memory_port_seek)
+	(ioscm_reinit_memory_port): Wrap in #if USING_GUILE_BEFORE_2_2.
+	(gdbscm_memory_port_read, gdbscm_memory_port_write)
+	(gdbscm_memory_port_seek, gdbscm_memory_port_close)
+	[!USING_GUILE_BEFORE_2_2]: New functions.
+	(gdbscm_memory_port_print): Remove use of 'SCM_PTOB_NAME'.
+	(ioscm_init_memory_port_type) [!USING_GUILE_BEFORE_2_2]: Use
+	'gdbscm_memory_port_read'.
+	Wrap 'scm_set_port_end_input', 'scm_set_port_flush', and
+	'scm_set_port_free' calls in #if USING_GUILE_BEFORE_2_2.
+	(gdbscm_get_natural_buffer_sizes) [!USING_GUILE_BEFORE_2_2]: New
+	function.
+	(ioscm_init_memory_port): Remove.
+	(ioscm_init_memory_port_stream): New function
+	(ioscm_init_memory_port_buffers) [USING_GUILE_BEFORE_2_2]: New
+	function.
+	(gdbscm_memory_port_read_buffer_size) [!USING_GUILE_BEFORE_2_2]:
+	Return scm_from_uint (0).
+	(gdbscm_set_memory_port_read_buffer_size_x)
+	[!USING_GUILE_BEFORE_2_2]: Call 'scm_setvbuf'.
+	(gdbscm_memory_port_write_buffer_size) [!USING_GUILE_BEFORE_2_2]:
+	Return scm_from_uint (0).
+	(gdbscm_set_memory_port_write_buffer_size_x)
+	[!USING_GUILE_BEFORE_2_2]: Call 'scm_setvbuf'.
+	* configure.ac (try_guile_versions): Add "guile-2.2".
+	* configure: Regenerate.
+	* NEWS: Add entry.
+
+2020-07-18  Tom Tromey  <tom@tromey.com>
+
+	* linux-nat.c (linux_multi_process): Remove.
+	(linux_nat_target::supports_multi_process): Return true.
+
+2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.c (riscv_tdesc_cache): Change map type.
+	(riscv_lookup_target_description): Return pointer out of
+	unique_ptr.
+	* target-descriptions.c (allocate_target_description): Add
+	comment.
+	(target_desc_deleter::operator()): Likewise.
+	* target-descriptions.h (struct target_desc_deleter): Moved to
+	gdbsupport/tdesc.h.
+	(target_desc_up): Likewise.
+
+2020-07-17  Tom Tromey  <tromey@adacore.com>
+
+	* linux-nat.c (linux_nat_target::supports_non_stop)
+	(linux_nat_target::always_non_stop_p): Use "true".
+	(linux_nat_target::supports_disable_randomization): Use "true" and
+	"false".
+
+2020-07-16  Caroline Tice  <cmtice@google.com>
+
+	* dwarf2/read.c (RNGLIST_HEADER_SIZE32) New constant definition.
+	(RNGLIST_HEADER_SIZE64): New constant definition.
+	(struct dwop_section_names): Add rnglists_dwo.
+	(dwop_section_names): Add .debug_rnglists.dwo, .zdebug_rnglists.dwo.
+	(struct loclist_header): Rename to 'loclists_rnglists_header'.
+	(struct dwo_sections): Add rnglists field.
+	(read_attribut_reprocess): Add tag parameter.
+	(dwarf2_ranges_read): Add tag parameter & remove forward function decl.
+	(cu_debug_rnglists_section): New function (decl & definition).
+	(dwarf2_locate_dwo_sections): Add code to read rnglists_dwo section.
+	(dwarf2_rnglists_process): Add a dwarf_tag parameter, for the kind of
+	die whose range is being checked; get rnglist section from
+	cu_debug_rnglists_section, to get from either objfile or dwo file as
+	appropriate.  Add cases for DW_RLE_base_addressx,
+	DW_RLE_startx_length, DW_RLE_startx_endx.  Also, update to only add
+	the base address to DW_RLE_offset_pairs (not to all ranges), moving
+	test inside if-condition and updating complaint message.
+	(dwarf2_ranges_process): Add dwarf tag parameter and pass it to
+	dwarf2_rnglists_process.
+	(dwarf2_ranges_read): Add dwarf tag parameter and pass it to
+	dwarf2_ranges_process.
+	(dwarf2_get_pc_bounds): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to dwarf2_ranges_read.
+	(dwarf2_record_block_ranges): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to dwarf2_ranges_process.
+	(read_full_die_1): Add code to read DW_AT_rnglists_base and assign to
+	cu->ranges_base.  Also pass die tag to read_attribute_reprocess.
+	(partial_die_info::read): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to read_attribute_reprocess and dwarf2_ranges_read.
+	(read_loclist_header): Rename function to read_loclists_rnglists_header,
+	and update function comment appropriately.
+	(read_loclist_index): Call read_loclists_rnglists_header instead of
+	read_loclist_header.
+	(read_rnglist_index): New function.
+	(read_attribute_reprocess):  Add tag parameter. Add code for
+	DW_FORM_rnglistx, passing tag to read_rnglist_index.
+	(read_attribute_value): Mark DW_FORM_rnglistx with need_reprocess.
+
+2020-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-typeprint.c (f_type_print_base): Allow for dynamic types not
+	being resolved.
+
+2020-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch-utils.c (show_architecture): Update formatting of messages.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <bounds>: Handle array and string
+	types.
+	* ada-lang.c (assign_aggregate): Use type::bounds on
+	array/string type.
+	* c-typeprint.c (c_type_print_varspec_suffix): Likewise.
+	* c-varobj.c (c_number_of_children): Likewise.
+	(c_describe_child): Likewise.
+	* eval.c (evaluate_subexp_for_sizeof): Likewise.
+	* f-typeprint.c (f_type_print_varspec_suffix): Likewise.
+	(f_type_print_base): Likewise.
+	* f-valprint.c (f77_array_offset_tbl): Likewise.
+	(f77_get_upperbound): Likewise.
+	(f77_print_array_1): Likewise.
+	* guile/scm-type.c (gdbscm_type_range): Likewise.
+	* m2-typeprint.c (m2_array): Likewise.
+	(m2_is_long_set_of_type): Likewise.
+	* m2-valprint.c (get_long_set_bounds): Likewise.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Likewise.
+	* python/py-type.c (typy_range): Likewise.
+	* rust-lang.c (rust_internal_print_type): Likewise.
+	* type-stack.c (type_stack::follow_types): Likewise.
+	* valarith.c (value_subscripted_rvalue): Likewise.
+	* valops.c (value_cast): Likewise.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.c (TYPE_ARRAY_BIT_STRIDE): Remove.  Update all
+	callers to use the equivalent accessor methods.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct range_bounds) <bit_stride>: New method.
+	(struct type) <bit_stride>: New method.
+	(TYPE_BIT_STRIDE): Remove.
+	* gdbtypes.c (update_static_array_size): Use type::bit_stride.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_ARRAY_LOWER_BOUND_VALUE,
+	TYPE_ARRAY_UPPER_BOUND_VALUE): Remove.  Update all
+	callers to use the equivalent accessor methods instead.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED,
+	TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED): Remove.  Update all
+	callers to use the equivalent accessor methods instead.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_LOW_BOUND_KIND,
+	TYPE_HIGH_BOUND_KIND): Remove.  Update all callers
+	to use dynamic_prop::kind.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_LOW_BOUND_UNDEFINED,
+	TYPE_HIGH_BOUND_UNDEFINED): Remove.  Update all callers
+	to get the bound property's kind and check against
+	PROP_UNDEFINED.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_LOW_BOUND, TYPE_HIGH_BOUND): Remove.  Update
+	all callers to use type::range_bounds followed by
+	dynamic_prop::{low,high}.
+
+2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (struct dynamic_prop) <kind, set_undefined,
+	const_val, set_const_val, baton, set_locexpr, set_loclist,
+	set_addr_offset, variant_parts, set_variant_parts,
+	original_type, set_original_type>: New methods.
+	<kind>: Rename to...
+	<m_kind>: ... this.  Update all users to use the new methods
+	instead.
+	<data>: Rename to...
+	<m_data>: ... this.  Update all users to use the new methods
+	instead.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.c (get_discrete_bounds): Return failure if
+	the range type's bounds are not both defined and constant
+	values.
+	(get_array_bounds): Update comment.  Remove undefined bound check.
+
+2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_RANGE_DATA): Remove.  Update callers to use
+	the type::bounds method directly.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <bounds, set_bounds>: New methods.
+	(TYPE_RANGE_DATA): Use type::bounds.  Change all uses that
+	are used to set the range type's bounds to use set_bounds.
+
+2020-07-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* exec.c (_initialize_exec): Update exec-file-mismatch help.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	* gdbthread.h (inferior_ref): Define.
+	(scoped_restore_current_thread) <m_thread>: Now a thread_info_ref.
+	(scoped_restore_current_thread) <m_inf>: Now an inferior_ref.
+	* thread.c
+	(scoped_restore_current_thread::restore):
+	Adjust to gdb::ref_ptr.
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	Remove manual decref handling.
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Adjust to use
+	inferior_ref::new_reference/thread_info_ref::new_reference.
+	Incref the thread before calling get_frame_id instead of after.
+	Let TARGET_CLOSE_ERROR propagate.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	* frame-tailcall.c (dwarf2_tailcall_sniffer_first): Only swallow
+	NO_ENTRY_VALUE_ERROR / MEMORY_ERROR / OPTIMIZED_OUT_ERROR /
+	NOT_AVAILABLE_ERROR.
+	* value.c (value_optimized_out): Only swallow MEMORY_ERROR /
+	OPTIMIZED_OUT_ERROR / NOT_AVAILABLE_ERROR.
+
+2020-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* infrun.c (threads_are_resumed_pending_p): Delete.
+	(do_target_wait): Remove threads_are_executing and
+	threads_are_resumed_pending_p checks from the inferior_matches
+	lambda.  Update comments.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* infrun.c (handle_no_resumed): Transfer terminal to inferior with
+	executing threads.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* infrun.c (handle_no_resumed): Handle multiple targets.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* infrun.c (prepare_to_wait): Check target_can_async_p instead of
+	target_is_async_p.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* target.c (target_pass_ctrlc): Look at the inferior's non-exited
+	threads, not all threads.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* remote.c (remote_target::open_1): Pass remote target pointer as
+	data to create_async_event_handler.
+	(remote_async_inferior_event_handler): Mark async event handler
+	before returning if the remote target still has either pending
+	events or unacknowledged notifications.
+
+2020-07-10  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.h (fbsd_nat_target::supports_multi_process): New
+	declaration.
+	* fbsd-nat.c (fbsd_nat_target::supports_multi_process): New
+	function.
+
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* inf-ptrace.c (inf_ptrace_target::wait): Don't compare against
+	inferior_ptid.
+
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_FREEBSD_ARGC,
+	AT_FREEBSD_ARGV, AT_FREEBSD_ENVC, AT_FREEBSD_ENVV,
+	AT_FREEBSD_PS_STRINGS.
+
+2020-07-08  Hannes Domani  <ssbssa@yahoo.de>
+
+	* auto-load.c (auto_load_objfile_script_1): Convert drive part
+	of debugfile path on Windows.
+
+2020-07-08  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_nat_target::find_memory_regions): Rename 'obfd'
+	argument to 'data'.
+
+2020-07-08  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_exception_message_1): Use read_memory.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR python/22748
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Remove
+	special handling for inline frames.
+	* findvar.c (value_of_register_lazy): Skip inline frames when
+	creating lazy register values.
+	* frame.c (frame_id_computed_p): Delete definition.
+	* frame.h (frame_id_computed_p): Delete declaration.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention additions to Python API.
+	* python/py-arch.c (archpy_register_groups): New function.
+	(arch_object_methods): Add 'register_groups' method.
+	* python/py-registers.c (reggroup_iterator_object): New struct.
+	(reggroup_object): New struct.
+	(gdbpy_new_reggroup): New function.
+	(gdbpy_reggroup_to_string): New function.
+	(gdbpy_reggroup_name): New function.
+	(gdbpy_reggroup_iter): New function.
+	(gdbpy_reggroup_iter_next): New function.
+	(gdbpy_new_reggroup_iterator): New function
+	(gdbpy_initialize_registers): Register new types.
+	(reggroup_iterator_object_type): Define new Python type.
+	(gdbpy_reggroup_getset): New static global.
+	(reggroup_object_type): Define new Python type.
+	* python/python-internal.h
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (SUBDIR_PYTHON_SRCS): Add py-registers.c
+	* python/py-arch.c (archpy_registers): New function.
+	(arch_object_methods): Add 'registers' method.
+	* python/py-registers.c: New file.
+	* python/python-internal.h
+	(gdbpy_new_register_descriptor_iterator): Declare.
+	(gdbpy_initialize_registers): Declare.
+	* python/python.c (do_start_initialization): Call
+	gdbpy_initialize_registers.
+	* NEWS: Mention additions to the Python API.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention new Python API method.
+	* python/py-unwind.c (pending_framepy_architecture): New function.
+	(pending_frame_object_methods): Add architecture method.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (deprecated_set_gdbarch_data): Delete.
+	(gdbarch_data): Use internal_error for the case where
+	deprecated_set_gdbarch_data was originally needed.
+	* ia64-libunwind-tdep.c (libunwind_descr_init): Update parameters,
+	and use passed in obstack.
+	(libunwind_frame_set_descr): Should no longer get back NULL from
+	gdbarch_data.
+	(_initialize_libunwind_frame): Register as a pre-init gdbarch data
+	type.
+	* user-regs.c (user_regs_init): Update parameters, and use passed
+	in obstack.
+	(user_reg_add): Should no longer get back NULL from gdbarch_data.
+	(_initialize_user_regs): Register as a pre-init gdbarch data type.
+
+2020-07-06  Tom de Vries  <tdevries@suse.de>
+
+	* buildsym.c (buildsym_compunit::end_symtab_with_blockvector): Handle
+	End-Of-Sequence in lte_is_less_than.
+	* symtab.c (find_pc_sect_line): Revert change from commit 3d92a3e313
+	"gdb: Don't reorder line table entries too much when sorting".
+
+2020-07-06  Tom de Vries  <tdevries@suse.de>
+
+	PR tui/26205
+	* tui/tui-win.c (tui_partial_win_by_name): Don't test for NULL name.
+
+2020-07-05  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26187
+	* inferior.h (struct infcall_suspend_state_deleter): If available, use
+	std::uncaught_exceptions instead of deprecated
+	std::uncaught_exception.
+
+2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* macroexp.h (macro_stringify): Return
+	gdb::unique_xmalloc_ptr<char>.
+	* macroexp.c (macro_stringify): Likewise.
+	* macrotab.c (fixup_definition): Update.
+
+2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* c-exp.y (scan_macro_expansion): Don't free `expansion`.
+	(lex_one_token): Update.
+	* macroexp.c (struct macro_buffer) <release>: Return
+	gdb::unique_xmalloc_ptr<char>.
+	(macro_stringify): Update.
+	(macro_expand): Update.
+	(macro_expand_next): Return gdb::unique_xmalloc_ptr<char>.
+	* macroexp.h (macro_expand_next): Likewise.
+
+2020-07-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* macroexp.h (macro_lookup_ftype): Remove.
+	(macro_expand, macro_expand_once, macro_expand_next): Remove
+	lookup function parameters, add scope parameter.
+	* macroexp.c (scan, substitute_args, expand, maybe_expand,
+	macro_expand, macro_expand_once, macro_expand_next): Likewise.
+	* macroscope.h (standard_macro_lookup): Change parameter type
+	to macro_scope.
+	* macroscope.c (standard_macro_lookup): Likewise.
+	* c-exp.y (lex_one_token): Update.
+	* macrocmd.c (macro_expand_command): Likewise.
+	(macro_expand_once_command): Likewise.
+
+2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inf-loop.c (inferior_event_handler): Remove client_data param.
+	* inf-loop.h (inferior_event_handler): Likewise.
+	* infcmd.c (step_1): Adjust.
+	* infrun.c (proceed): Adjust.
+	(fetch_inferior_event): Remove client_data param.
+	(infrun_async_inferior_event_handler): Adjust.
+	* infrun.h (fetch_inferior_event): Remove `void *` param.
+	* linux-nat.c (handle_target_event): Adjust.
+	* record-btrace.c (record_btrace_handle_async_inferior_event):
+	Adjust.
+	* record-full.c (record_full_async_inferior_event_handler):
+	Adjust.
+	* remote.c (remote_async_inferior_event_handler): Adjust.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (struct tui_win_info) <name>: Now pure virtual.
+	* tui/tui-stack.h (struct tui_locator_window) <name>: New method.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-wingeneral.c (tui_win_info::refresh_window): Move from
+	tui_gen_win_info.
+	(tui_win_info::make_window): Merge with
+	tui_gen_win_info::make_window.
+	(tui_win_info::make_visible): Move from tui_gen_win_info.
+	* tui/tui-win.c (tui_win_info::max_width): Move from
+	tui_gen_win_info.
+	* tui/tui-layout.h (class tui_layout_window) <m_window>: Change
+	type.
+	<window_factory>: Likewise.
+	* tui/tui-layout.c (tui_win_info::resize): Move from
+	tui_gen_win_info.
+	(make_standard_window): Change return type.
+	(get_locator_window, tui_get_window_by_name): Likewise.
+	(tui_layout_window::apply): Remove a cast.
+	* tui/tui-data.h (MIN_WIN_HEIGHT): Move earlier.
+	(struct tui_win_info): Merge with tui_gen_win_info.
+	(struct tui_gen_win_info): Remove.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-stack.h (struct tui_locator_window): Derive from
+	tui_win_info.
+	<do_scroll_horizontal, do_scroll_vertical>: New methods.
+	<can_box>: New method.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-stack.h (struct tui_locator_window): Remove body.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::display_registers_from)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::first_data_item_displayed)
+	(tui_data_window::delete_data_content_windows): Update.
+	(tui_data_window::refresh_window, tui_data_window::no_refresh):
+	Remove.
+	(tui_data_window::check_register_values): Update.
+	(tui_data_item_window::rerender): Add parameters.  Update.
+	(tui_data_item_window::refresh_window): Remove.
+	* tui/tui-data.h (struct tui_gen_win_info) <no_refresh>: No longer
+	virtual.
+	* tui/tui-regs.h (struct tui_data_item_window): Don't derive from
+	tui_gen_win_info.
+	<refresh_window, max_height, min_height>: Remove.
+	<rerender>: Add parameters.
+	<x, y, visible>: New members.
+	(struct tui_data_window) <refresh_window, no_refresh>: Remove.
+	<m_item_width>: New member.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::show_register_group)
+	(tui_data_window::check_register_values): Update.
+	* tui/tui-regs.h (struct tui_data_item_window) <regno>: Rename
+	from item_no.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::show_register_group): Remove
+	useless "if".
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_data_window::show_register_group): Update.
+	* tui/tui-regs.h (struct tui_data_item_window) <name>: Remove.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-stack.c (SINGLE_KEY): Move from tui-data.h
+	* tui/tui-winsource.h (enum tui_line_or_address_kind)
+	(struct tui_line_or_address): Move from tui-data.h.
+	* tui/tui-win.c (DEFAULT_TAB_LEN): Move from tui-data.h.
+	* tui/tui-data.h (DEFAULT_TAB_LEN): Move to tui-win.c.
+	(tui_cmd_window, tui_source_window_base, tui_source_window)
+	(tui_disasm_window): Don't declare.
+	(enum tui_line_or_address_kind, struct tui_line_or_address): Move
+	to tui-winsource.h.
+	(SINGLE_KEY): Move to tui-stack.c.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.h (struct tui_data_item_window) <content>: Now a
+	std::string.
+	* tui/tui-regs.c (class tab_expansion_file): New.
+	(tab_expansion_file::write): New method.
+	(tui_register_format): Change return type.  Use
+	tab_expansion_file.
+	(tui_get_register, tui_data_window::display_registers_from)
+	(tui_data_item_window::rerender): Update.
+	* tui/tui-io.h (tui_expand_tabs): Don't declare.
+	* tui/tui-io.c (tui_expand_tabs): Remove.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-regs.c (tui_reggroup_completer): Use complete_on_enum.
+
+2020-07-01  Fangrui Song  <maskray@google.com>
+
+	* dwarf2/read.c (lnp_state_machine::check_line_address): Test -1.
+
+2020-07-01  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* dwarf2/read.c (set_die_type): Removed conditions to restrict
+	forms for DW_AT_associated and DW_AT_allocated attributes,
+	which is already checked in function attr_to_dynamic_prop.
+
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (quirk_rust_enum): Correctly call
+	alloc_rust_variant for default-less enum.
+
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26183:
+	* ada-lang.c (ada_lookup_name_info::ada_lookup_name_info): Use
+	gdb::to_string.
+
+2020-06-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh (displaced_step_copy_insn): Update doc.
+	* gdbarch.h: Re-generate.
+
+2020-06-28  Tom Tromey  <tom@tromey.com>
+
+	* command.h (cmd_types): Remove.
+	(cmd_type): Don't declare.
+	* cli/cli-decode.h (enum cmd_types): Uncomment.  No longer a
+	typedef.
+	* cli/cli-cmds.c (setting_cmd): Use cmd->type directly.
+	* cli/cli-decode.c (cmd_type): Remove.
+
+2020-06-27  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (prefork_hook): Adjust.
+	* infcmd.c (set_inferior_io_terminal, get_inferior_io_terminal):
+	Delete.
+	(set_inferior_tty_command, show_inferior_tty_command): Adjust.
+	* inferior.c (inferior::set_tty, inferior::tty): New methods.
+	* inferior.h (set_inferior_io_terminal, get_inferior_io_terminal):
+	Remove declarations.
+	(struct inferior) <set_tty, tty>: New methods.
+	(struct inferior) <terminal>: Rename to ...
+	(struct inferior) <m_terminal>: ... this and make private.
+	* main.c (captured_main_1): Adjust.
+	* mi/mi-cmd-env.c (mi_cmd_inferior_tty_set): Adjust.
+	(mi_cmd_inferior_tty_show): Adjust.
+	* nto-procfs.c (nto_procfs_target::create_inferior): Adjust.
+	* windows-nat.c (windows_nat_target::create_inferior): Adjust.
+
+2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Add --enable-libctf: handle --disable-static
+	properly.
+	* acinclude.m4: sinclude ../config/enable.m4.
+	* Makefile.in (aclocal_m4_deps): Adjust accordingly.
+	(LIBCTF): Substitute in.
+	(CTF_DEPS): New, likewise.
+	(CLIBS): libctf needs symbols from libbfd: move earlier.
+	(CDEPS): Use CTF_DEPS, not LIBCTF, now LIBCTF can include rpath
+	flags.
+	* ctfread.c: Surround in ENABLE_LIBCTF.
+	(elfctf_build_psymtabs) [!ENABLE_LIBCTF]: New stub.
+	* configure: Regenerate.
+	* config.in: Likewise.
+
+2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infcmd.c (set_inferior_io_terminal): Use make_unique_xstrdup.
+
+2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
+
+	* inferior.h (struct inferior) <terminal>: Change type to
+	gdb::unique_xmalloc_ptr<char>.
+	* inferior.c (inferior::~inferior): Don't free inf->terminal.
+	* infcmd.c (set_inferior_io_terminal): Don't free terminal
+	field, adjust to unique pointer.
+	(get_inferior_io_terminal): Adjust to unique pointer.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_print_registers_info): Loop over all
+	registers, not just the known core set of registers.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_register_name): Return NULL for duplicate
+	fflags, frm, and fcsr registers.
+	(riscv_register_reggroup_p): Remove unknown CSRs from save and
+	restore groups.
+	(riscv_tdesc_unknown_reg): New function.
+	(riscv_gdbarch_init): Pass riscv_tdesc_unknown_reg to
+	tdesc_use_registers.
+	* riscv-tdep.h (struct gdbarch_tdep): Add
+	unknown_csrs_first_regnum, unknown_csrs_count,
+	duplicate_fflags_regnum, duplicate_frm_regnum, and
+	duplicate_fcsr_regnum fields.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* target-descriptions.c (tdesc_use_registers): Add new parameter a
+	callback, use the callback (when not null) to help number unknown
+	registers.
+	* target-descriptions.h (tdesc_unknown_register_ftype): New typedef.
+	(tdesc_use_registers): Add extra parameter to declaration.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (value_of_riscv_user_reg): Moved to here from later
+	in the file.
+	(class riscv_pending_register_alias): Likewise.
+	(riscv_register_feature::register_info): Change 'required_p' field
+	to 'required', and change its type.  Add 'check' member function.
+	(riscv_register_feature::register_info::check): Define new member
+	function.
+	(riscv_xreg_feature): Change initialisation of 'required' field.
+	(riscv_freg_feature): Likewise.
+	(riscv_virtual_feature): Likewise.
+	(riscv_csr_feature): Likewise.
+	(riscv_check_tdesc_feature): Take extra parameter, the csr
+	tdesc_feature, rewrite the function to use the new
+	riscv_register_feature::register_info::check function.
+	(riscv_gdbarch_init): Pass the csr tdesc_feature where needed.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* features/Makefile: Remove all references to the deleted files
+	below.
+	* features/riscv/32bit-csr.c: Deleted.
+	* features/riscv/32bit-csr.xml: Deleted.
+	* features/riscv/64bit-csr.c: Deleted.
+	* features/riscv/64bit-csr.xml: Deleted.
+	* features/riscv/rebuild-csr-xml.sh: Deleted.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (struct riscv_register_feature::register_info): Fix
+	whitespace error for declaration of names member variable.
+	(struct riscv_register_feature): Add new prefer_first_name member
+	variable, and fix whitespace error in declaration of registers.
+	(riscv_xreg_feature): Initialize prefer_first_name field.
+	(riscv_freg_feature): Likewise.
+	(riscv_virtual_feature): Likewise.
+	(riscv_csr_feature): Likewise.
+	(riscv_register_name): Expand on comments.  Remove register name
+	modifications for CSR and virtual registers.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (struct riscv_register_feature): Fix whitespace
+	errors.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_create_csr_aliases): Handle csr aliases from
+	riscv-opc.h.
+	(class riscv_pending_register_alias): New class.
+	(riscv_check_tdesc_feature): Take vector of pending aliases and
+	populate it as appropriate.
+	(riscv_setup_register_aliases): Delete.
+	(riscv_gdbarch_init): Create vector of pending aliases and pass it
+	to riscv_check_tdesc_feature in all cases.  Use the vector to
+	create the register aliases.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* sol2-tdep.c (sol2_static_transform_name): Remove.
+	(sol2_init_abi): Don't register it.
+	* gdbarch.sh (static_transform_name): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* dbxread.c (read_dbx_symtab) <'S'>: Remove call to
+	gdbarch_static_transform_name.
+	* mdebugread.c (parse_partial_symbols) <'S'>: Likewise.
+	* stabsread.c (define_symbol) <'X'>: Remove.
+	(define_symbol) <'S'>: Remove gdbarch_static_transform_name
+	handling.
+	<'V'>: Likewise.
+	* xcoffread.c (scan_xcoff_symtab): Remove gdbarch.
+	<'S'>: Remove call to gdbarch_static_transform_name.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (procfs_pre_trace): New function.
+	(procfs_target::create_inferior): Pass it to fork_inferior.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.tgt <sparc-*-linux*> (gdb_target_obs): Remove
+	sparc-sol2-tdep.o, sol2-tdep.o, sparc64-sol2-tdep.o.
+	<sparc64-*-linux*> (gdb_target_obs): Remove sparc64-sol2-tdep.o,
+	sol2-tdep.o, sparc-sol2-tdep.o.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Make static.
+	* sparc-tdep.h (sparc32_sol2_init_abi): Remove.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Make static.
+	* sparc64-tdep.h (sparc64_sol2_init_abi): Remove.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* amd64-sol2-tdep.c (amd64_sol2_sigtramp_p): Remove.
+	(amd64_sol2_init_abi): Use sol2_sigtramp_p.
+	Call sol2_init_abi.
+ 	Remove calls to set_gdbarch_skip_solib_resolver,
+	set_gdbarch_core_pid_to_str.
+	* i386-sol2-tdep.c (i386_sol2_sigtramp_p): Remove.
+	(i386_sol2_static_transform_name): Remove.
+	(i386_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver, set_gdbarch_core_pid_to_str.
+	Use sol2_sigtramp_p.
+	* sol2-tdep.c (sol2_pc_in_sigtramp): New function.
+	(sol2_sigtramp_p): New function.
+	(sol2_static_transform_name): New function.
+	(sol2_skip_solib_resolver, sol2_core_pid_to_str): Make static.
+	(sol2_init_abi): New function.
+	* sol2-tdep.h (sol2_sigtramp_p, sol2_init_abi): Declare.
+	(sol2_skip_solib_resolver, sol2_core_pid_to_str): Remove.
+	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Remove.
+	(sparc32_sol2_sigtramp_frame_sniffer): Just call sol2_sigtramp_p.
+	(sparc_sol2_static_transform_name): Remove.
+	(sparc32_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver,
+	set_gdbarch_core_pid_to_str.
+	* sparc-tdep.h (sparc_sol2_pc_in_sigtramp)
+	(sparc_sol2_static_transform_name): Remove
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_sniffer): Just
+	call sol2_sigtramp_p.
+	(sparc64_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver, set_gdbarch_core_pid_to_str.
+
+2020-06-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symfile-add-flags.h: New flag SYMFILE_ALWAYS_CONFIRM.
+	* exec.c (validate_exec_file): If from_tty, set both
+	SYMFILE_VERBOSE (== from_tty) and SYMFILE_ALWAYS_CONFIRM.
+	* symfile.c (symbol_file_add_with_addrs): if always_confirm
+	and from_tty, unconditionally ask a confirmation.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* target-descriptions.c (tdesc_architecture_name): Protect against
+	NULL pointer dereference.
+	(maint_print_xml_tdesc_cmd): New function.
+	(_initialize_target_descriptions): Register new 'maint print
+	xml-tdesc' command and give it the filename completer.
+	* NEWS: Mention new 'maint print xml-tdesc' command.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* target-descriptions.c (class tdesc_compatible_info): New class.
+	(struct target_desc): Change type of compatible vector.
+	(tdesc_compatible_p): Update for change in type of
+	target_desc::compatible.
+	(tdesc_compatible_info_list): New function.
+	(tdesc_compatible_info_arch_name): New function.
+	(tdesc_add_compatible): Update for change in type of
+	target_desc::compatible.
+	(print_c_tdesc::visit_pre): Likewise.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* target-descriptions.c (print_c_tdesc::print_c_tdesc): Change
+	whitespace to underscore.
+	(maint_print_c_tdesc_cmd): Use fake filename for target
+	descriptions that came from the target.
+	(_initialize_target_descriptions): Add filename command completion
+	for 'maint print c-tdesc'.
+
+2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (decode_debug_loclists_addresses): Add empty
+	lines.
+
+2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (decode_debug_loc_dwo_addresses): Add empty
+	lines.
+	(dwarf2_find_location_expression): Likewise.
+	(call_site_parameter_matches): Likewise.
+	(dwarf2_compile_expr_to_ax): Likewise.
+	(disassemble_dwarf_expression): Likewise.
+	(loclist_describe_location): Likewise.
+
+2020-06-23  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch-selftests.c: Don't include inferior.h, gdbthread.h or
+	progspace-and-thread.h.  Include scoped-mock-context.h instead.
+	(register_to_value_test): Use scoped_mock_context.
+	* regcache.c: Include "scoped-mock-context.h".
+	(cooked_read_test): Don't error out if a target is already pushed.
+	Use scoped_mock_context.  Adjust.
+	* scoped-mock-context.h: New file.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_is_string_type_p
+	initializer.
+	(ada_language::is_string_type_p): New member function.
+	* c-lang.c (c_language_data): Delete la_is_string_type_p
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_is_string_type_p): Delete function, implementation
+	moved to f_language::is_string_type_p.
+	(f_language_data): Delete la_is_string_type_p initializer.
+	(f_language::is_string_type_p): New member function,
+	implementation from f_is_string_type_p.
+	* go-lang.c (go_is_string_type_p): Delete function, implementation
+	moved to go_language::is_string_type_p.
+	(go_language_data): Delete la_is_string_type_p initializer.
+	(go_language::is_string_type_p): New member function,
+	implementation from go_is_string_type_p.
+	* language.c (language_defn::is_string_type_p): Define new member
+	function.
+	(default_is_string_type_p): Make static, add comment copied from
+	header file.
+	(unknown_language_data): Delete la_is_string_type_p initializer.
+	(unknown_language::is_string_type_p): New member function.
+	(auto_language_data): Delete la_is_string_type_p initializer.
+	(auto_language::is_string_type_p): New member function.
+	* language.h (language_data): Delete la_is_string_type_p field.
+	(language_defn::is_string_type_p): Declare new function.
+	(default_is_string_type_p): Delete desclaration, move comment to
+	definition.
+	* m2-lang.c (m2_is_string_type_p): Delete function, implementation
+	moved to m2_language::is_string_type_p.
+	(m2_language_data): Delete la_is_string_type_p initializer.
+	(m2_language::is_string_type_p): New member function,
+	implementation from m2_is_string_type_p.
+	* objc-lang.c (objc_language_data): Delete la_is_string_type_p
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_is_string_type_p): Delete function,
+	implementation moved to pascal_language::is_string_type_p.
+	(pascal_language_data): Delete la_is_string_type_p initializer.
+	(pascal_language::is_string_type_p): New member function,
+	implementation from pascal_is_string_type_p.
+	* rust-lang.c (rust_is_string_type_p): Delete function,
+	implementation moved to rust_language::is_string_type_p.
+	(rust_language_data): Delete la_is_string_type_p initializer.
+	(rust_language::is_string_type_p): New member function,
+	implementation from rust_is_string_type_p.
+	* valprint.c (val_print_scalar_or_string_type_p): Update call to
+	is_string_type_p.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_print_typedef
+	initializer.
+	(ada_language::print_typedef): New member function.
+	* c-lang.c (c_language_data): Delete la_print_typedef initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::print_typedef): New member function.
+	* go-lang.c (go_language_data): Delete la_print_typedef
+	initializer.
+	* language.c (language_defn::print_typedef): Define member
+	function.
+	(unknown_language_data): Delete la_print_typedef initializer.
+	(unknown_language::print_typedef): New member function.
+	(auto_language_data): Delete la_print_typedef initializer.
+	(auto_language::print_typedef): New member function.
+	* language.h (language_data): Delete la_print_typedef field.
+	(language_defn::print_typedef): Declare new member function.
+	(LA_PRINT_TYPEDEF): Update call to print_typedef.
+	(default_print_typedef): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_print_typedef
+	initializer.
+	(m2_language::print_typedef): New member function.
+	* objc-lang.c (objc_language_data): Delete la_print_typedef
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::print_typedef): New member function.
+	* rust-lang.c (rust_print_typedef): Delete function,
+	implementation moved to rust_language::print_typedef.
+	(rust_language): Delete la_print_typedef initializer.
+	(rust_language::print_typedef): New member function,
+	implementation from rust_print_typedef.
+	* typeprint.c (default_print_typedef): Delete.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_printstr initializer.
+	(ada_language::printstr): New member function.
+	* c-lang.c (c_language_data): Delete la_printstr initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_printstr): Rename to f_language::printstr.
+	(f_language_data): Delete la_printstr initializer.
+	(f_language::printstr): New member function, implementation from
+	f_printstr.
+	* go-lang.c (go_language_data): Delete la_printstr initializer.
+	* language.c (language_defn::printstr): Define new member
+	function.
+	(unk_lang_printstr): Delete.
+	(unknown_language_data): Delete la_printstr initializer.
+	(unknown_language::printstr): New member function.
+	(auto_language_data): Delete la_printstr initializer.
+	(auto_language::printstr): New member function.
+	* language.h (language_data): Delete la_printstr field.
+	(language_defn::printstr): Declare new member function.
+	(LA_PRINT_STRING): Update call to printstr.
+	* m2-lang.c (m2_printstr): Rename to m2_language::printstr.
+	(m2_language_data): Delete la_printstr initializer.
+	(m2_language::printstr): New member function, implementation from
+	m2_printstr.
+	* objc-lang.c (objc_language_data): Delete la_printstr
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_printstr): Rename to pascal_language::printstr.
+	(pascal_language_data): Delete la_printstr initializer.
+	(pascal_language::printstr): New member function, implementation
+	from pascal_printstr.
+	* p-lang.h (pascal_printstr): Delete declaration.
+	* rust-lang.c (rust_printstr): Update header comment.
+	(rust_language_data): Delete la_printstr initializer.
+	(rust_language::printstr): New member function.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_printchar initializer.
+	(ada_language::printchar): New member function.
+	* c-lang.c (c_language_data): Delete la_printchar initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_printchar): Rename to f_language::printchar.
+	(f_language_data): Delete la_printchar initializer.
+	(f_language::printchar): New member function, implementation from
+	f_printchar.
+	* go-lang.c (go_language_data): Delete la_printchar initializer.
+	* language.c (unk_lang_printchar): Delete.
+	(language_defn::printchar): Define new member function.
+	(unknown_language_data): Delete la_printchar initializer.
+	(unknown_language::printchar): New member function.
+	(auto_language_data): Delete la_printchar initializer.
+	(auto_language::printchar): New member function.
+	* language.h (language_data): Delete la_printchar field.
+	(language_defn::printchar): Declare new member function.
+	(LA_PRINT_CHAR): Update call to printchar.
+	* m2-lang.c (m2_language_data): Delete la_printchar initializer.
+	(m2_language::printchar): New member function.
+	* objc-lang.c (objc_language_data): Delete la_printchar
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Delete la_printchar
+	initializer.
+	(pascal_language::printchar): New member function.
+	* rust-lang.c (rust_printchar): Rename to
+	rust_language::printchar.
+	(rust_language_data): Delete la_printchar initializer.
+	(rust_language::printchar): New member function, implementation
+	from rust_printchar.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (emit_char): Renamed to ada_language::emitchar.
+	(ada_language_data): Delete la_emitchar initializer.
+	(ada_language::emitchar): New member function, implementation from
+	emit_char.
+	* c-lang.c (c_language_data): Delete la_emitchar initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_emit_char): Rename to f_language::emitchar.
+	(f_language_data): Delete la_emitchar initializer.
+	(f_language::emitchar): New member function, implementation from
+	f_emit_char.
+	* go-lang.c (go_language_data): Delete la_emitchar initializer.
+	* language.c (unk_lang_emit_char): Delete.
+	(language_defn::emitchar): New member function definition.
+	(unknown_language_data): Delete la_emitchar initializer.
+	(unknown_language::emitchar): New member function.
+	(auto_language_data): Delete la_emitchar initializer.
+	(auto_language::emitchar): New member function.
+	* language.h (language_data): Delete la_emitchar field.
+	(language_defn::emitchar): New member field declaration.
+	(LA_EMIT_CHAR): Update call to emitchar.
+	* m2-lang.c (m2_emit_char): Rename to m2_language::emitchar.
+	(m2_language_data): Delete la_emitchar initializer.
+	(m2_language::emitchar): New member function, implementation from
+	m2_emit_char.
+	* objc-lang.c (objc_language_data): Delete la_emitchar
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_emit_char): Rename to pascal_language::emitchar.
+	(pascal_language_data): Delete la_emitchar initializer.
+	(pascal_language::emitchar): New member function, implementation
+	from pascal_emit_char.
+	* rust-lang.c (rust_emitchar): Rename to rust_language::emitchar.
+	(rust_language_data): Delete la_emitchar initializer.
+	(rust_language::emitchar): New member function, implementation
+	from rust_emitchar.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (resolve): Rename to ada_language::post_parser.
+	(ada_language_data): Delete la_post_parser initializer.
+	(ada_language::post_parser): New member function.
+	* c-lang.c (c_language_data): Delete la_post_parser initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_post_parser field.
+	(language_defn::post_parser): New member function.
+	* m2-lang.c (m2_language_data): Delete la_post_parser initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* parse.c (parse_exp_in_context): Update call to post_parser.
+	(null_post_parser): Delete definition.
+	* parser-defs.h (null_post_parser): Delete declaration.
+	* rust-lang.c (rust_language_data): Delete la_post_parser
+	initializer.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (parse): Rename to ada_language::parser.
+	(ada_language_data): Delete la_parser initializer.
+	(ada_language::parser): New member function, implementation from
+	parse.
+	* c-lang.c (c_language_data): Delete la_parser initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	(d_language::parser): New member function.
+	* f-lang.c (f_language_data): Delete la_parser initializer.
+	(f_language::parser): New member function.
+	* go-lang.c (go_language_data): Delete la_parser initializer.
+	(go_language::parser): New member function.
+	* language.c (unk_lang_parser): Delete.
+	(language_defn::parser): Define new member function.
+	(unknown_language_data): Delete la_parser initializer.
+	(unknown_language::parser): New member function.
+	(auto_language_data): Delete la_parser initializer.
+	(auto_language::parser): New member function.
+	* language.h (language_data): Delete la_parser field.
+	(language_defn::parser): Declare new member function.
+	* m2-lang.c (m2_language_data): Delete la_parser initializer.
+	(m2_language::parser): New member function.
+	* objc-lang.c (objc_language_data): Delete la_parser initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::parser): New member function.
+	* parse.c (parse_exp_in_context): Update call to parser.
+	* rust-lang.c (rust_language_data): Delete la_parser initializer.
+	(rust_language::parser): New member function.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* top.c (print_gdb_configuration): Print --with-python-libdir
+	configuration value.
+
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Mention change to the alias command.
+
+2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (lookup_cmd_for_default_args)
+	(alias_command_completer)
+	(make_alias_options_def_group): New functions.
+	(alias_opts, alias_option_defs): New struct and array.
+	(alias_usage_error): Update usage.
+	(alias_command): Handles optional DEFAULT-ARGS... arguments.
+	Use option framework.
+	(_initialize_cli_cmds): Update alias command help.
+	Update aliases command help.
+	(show_user):
+	Add NULL for new default_args lookup_cmd argument.
+	(valid_command_p): Rename to validate_aliased_command.
+	Add NULL for new default_args lookup_cmd argument.  Verify that the
+	aliased_command has no default args.
+	* cli/cli-decode.c (help_cmd): Show aliases definitions.
+	(lookup_cmd_1, lookup_cmd): New argument default_args.
+	(add_alias_cmd):
+	Add NULL for new default_args lookup_cmd argument.
+	(print_help_for_command): Show default args under the layout
+	 alias some_alias = some_aliased_cmd some_alias_default_arg.
+	* cli/cli-decode.h (struct cmd_list_element): New member default_args.
+	xfree default_args in destructor.
+	* cli/cli-script.c (process_next_line, do_define_command):
+	Add NULL for new default_args lookup_cmd argument.
+	* command.h: Declare new default_args argument in lookup_cmd
+	and lookup_cmd_1.
+	* completer.c (complete_line_internal_1):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	* guile/scm-param.c (add_setshow_generic, pascm_parameter_defined_p):
+	Likewise.
+	* infcmd.c (_initialize_infcmd): Likewise.
+	* python/py-auto-load.c (gdbpy_initialize_auto_load): Likewise.
+	* python/py-cmd.c (gdbpy_parse_command_name): Likewise.
+	* python/py-param.c (add_setshow_generic): Likewise.
+	* remote.c (_initialize_remote): Likewise.
+	* top.c (execute_command): Prepend default_args if command has some.
+	(set_verbose):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+	* tracepoint.c (validate_actionline, encode_actions_1):
+	Add NULL for new default_args lookup_cmd or lookup_cmd_1 argument.
+
+2020-06-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.c (jit_read_descriptor): Use bool as the return type.
+	(jit_breakpoint_re_set_internal): Use bool as the return type.
+	Invert the return value logic; return true if the jit breakpoint
+	has been successfully initialized.
+	(jit_inferior_init): Update the call to
+	jit_breakpoint_re_set_internal.
+
+2020-06-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25939
+	* procfs.c (procfs_target::wait): Don't reference inferior_ptid.
+	Use the current inferior instead.  Don't return
+	TARGET_WAITKIND_SPURIOUS/inferior_ptid -- instead continue and
+	wait again.
+	* sol-thread.c (sol_thread_target::wait): Don't reference
+	inferior_ptid.
+	(ps_lgetregs, ps_lsetregs, ps_lgetfpregs, ps_lsetfpregs)
+	(sol_update_thread_list_callback): Use the current inferior's pid
+	instead of inferior_ptid.
+
+2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c: Cleanup many comments.
+
+	(READ_WATCHFLAG, WRITE_WATCHFLAG, EXEC_WATCHFLAG)
+	(AFTER_WATCHFLAG): Replace by value.
+
+	(MAIN_PROC_NAME_FORMAT): Inline ...
+	(create_procinfo): ... here.
+
+	(procfs_debug_inferior): Remove SYS_exec handling.
+	(syscall_is_exec): Likewise.
+	(procfs_set_exec_trap): Likewise.
+
+	(syscall_is_lwp_exit): Inline in callers.
+	(syscall_is_exit): Likewise.
+	(syscall_is_exec): Likewise.
+	(syscall_is_lwp_create): Likewise.
+
+	(invalidate_cache): Remove #if 0 code.
+
+	(make_signal_thread_runnable):  Remove.
+	(procfs_target::resume): Remove #if 0 code.
+
+2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gdb/25939
+	* procfs.c (procfs_target::procfs_init_inferior): Move push_target
+	call ...
+	(procfs_target::create_inferior): ... here.
+
+2020-06-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* exec.c (validate_exec_file): Ensure the build-id is up to
+	date by calling reopen_exec_file (that checks file timestamp
+	to decide to re-read the file).
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25412
+	* gdbthread.h (delete_thread, delete_thread_silent)
+	(find_thread_ptid): Update comments.
+	* thread.c (current_thread_): New global.
+	(is_current_thread): Move higher, and reimplement.
+	(inferior_thread): Reimplement.
+	(set_thread_exited): Use bool.  Add assertions.
+	(add_thread_silent): Simplify thread-reuse handling by always
+	calling delete_thread.
+	(delete_thread): Remove intro comment.
+	(find_thread_ptid): Skip exited threads.
+	(switch_to_thread_no_regs): Write to current_thread_.
+	(switch_to_no_thread): Check CURRENT_THREAD_ instead of
+	INFERIOR_PTID.  Clear current_thread_.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* aix-thread.c (pd_update): Use switch_to_thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target): Update.
+	(ravenscar_thread_target::update_inferior_ptid): Rename to ...
+	(ravenscar_thread_target::add_active_thread): ... this.  Don't
+	set m_base_ptid here.  Update to avoid referencing inferior_ptid.
+	(ravenscar_thread_target::wait): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* nat/windows-nat.c (current_windows_thread): Remove.
+	* nat/windows-nat.h (current_windows_thread): Remove.
+	* windows-nat.c (windows_nat_target::stopped_by_sw_breakpoint):
+	Adjust.
+	(display_selectors): Adjust to fetch the current
+	windows_thread_info based on inferior_ptid.
+	(fake_create_process): No longer write to current_windows_thread.
+	(windows_nat_target::get_windows_debug_event):
+	Don't set inferior_ptid or current_windows_thread.
+	(windows_nat_target::wait): Adjust to not rely on
+	current_windows_thread.
+	(do_initial_windows_stuff): Now a method of windows_nat_target.
+	Switch to the last_ptid thread.
+	(windows_nat_target::attach): Adjust.
+	(windows_nat_target::detach): Use switch_to_no_thread instead of
+	writing to inferior_ptid directly.
+	(windows_nat_target::create_inferior): Adjust.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (do_initial_windows_stuff): No longer set inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_nat_target::create_inferior): Switch to thread
+	after creating it, instead of writing to inferior_ptid.  Don't
+	write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (postfork_hook): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* bsd-kvm.c (bsd_kvm_target_open): Switch to thread after adding
+	it, instead of writing to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* btrace.c (btrace_fetch): Use switch_to_thread instead of writing
+	to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* bsd-kvm.c (bsd_kvm_target::close): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* corelow.c (core_target::close): Use switch_to_no_thread instead
+	of writing to inferior_ptid directly.
+	(add_to_thread_list, core_target_open): Use switch_to_thread
+	instead of writing to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_nat_target::decode_message): Don't write to
+	inferior_ptid.
+	(darwin_nat_target::stop_inferior, darwin_nat_target::kill): Avoid
+	inferior_ptid.
+	(darwin_attach_pid): Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+	(darwin_nat_target::init_thread_list): Switch to thread, instead
+	of writing to inferior_ptid.
+	(darwin_nat_target::attach): Don't write to inferior_ptid.
+	(darwin_nat_target::get_ada_task_ptid): Avoid inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* gnu-nat.c (gnu_nat_target::create_inferior): Switch to the added
+	thread.
+	(gnu_nat_target::attach): Don't write to inferior_ptid directly.
+	Instead use switch_to_thread.
+	(gnu_nat_target::detach): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.  Used passed-in
+	inferior instead of looking up the inferior by pid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_nat_target::create_inferior): Don't write to
+	inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* nto-procfs.c (nto_procfs_target::update_thread_list): Avoid
+	inferior_ptid.
+	(nto_procfs_target::attach): Avoid inferior_ptid.  Switch to
+	thread.
+	(nto_procfs_target::detach): Avoid referencing
+	inferior_ptid.  Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+	(nto_procfs_target::mourn_inferior): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.
+	(nto_procfs_target::create_inferior): Avoid inferior_ptid.  Switch
+	to thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (gdbsim_target::create_inferior): Switch to thread
+	after creating it, instead of writing to inferior_ptid.
+	(gdbsim_target_open): Use switch_to_no_thread instead of writing
+	to inferior_ptid directly.
+	(gdbsim_target::wait): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_target::remote_notice_new_inferior): Use
+	switch_to_thread instead of writing to inferior_ptid directly.
+	(remote_target::add_current_inferior_and_thread): Use
+	switch_to_no_thread instead of writing to inferior_ptid directly.
+	(extended_remote_target::attach): Use switch_to_inferior_no_thread
+	and switch_to_thread instead of using set_current_inferior or
+	writing to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* tracectf.c (ctf_target_open): Switch to added thread instead of
+	writing to inferior_ptid directly.
+	(ctf_target::close): Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* tracefile-tfile.c (tfile_target_open): Don't write to
+	inferior_ptid directly, instead switch to added thread.
+	(tfile_target::close): Use switch_to_no_thread instead of writing
+	to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_target::attach): Don't write to inferior_ptid.
+	(procfs_target::detach): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.
+	(do_attach): Change return type to void.  Switch to the added
+	thread.
+	(procfs_target::create_inferior): Switch to the added thread.
+	(procfs_do_thread_registers): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (generic_mourn_inferior): Use switch_to_thread instead
+	of writing to inferior_ptid.
+	(scoped_restore_exited_inferior): Delete.
+	(handle_vfork_child_exec_or_exit): Simplify using
+	scoped_restore_current_pspace_and_thread.  Use switch_to_thread
+	instead of writing to inferior_ptid.
+	(THREAD_STOPPED_BY): Delete.
+	(thread_stopped_by_watchpoint, thread_stopped_by_sw_breakpoint)
+	(thread_stopped_by_hw_breakpoint): Delete.
+	(save_waitstatus): Use
+	scoped_restore_current_thread+switch_to_thread, and call
+	target_stopped_by_watchpoint instead of
+	thread_stopped_by_watchpoint, target_stopped_by_sw_breakpoint
+	instead of thread_stopped_by_sw_breakpoint, and
+	target_stopped_by_hw_breakpoint instead of
+	thread_stopped_by_hw_breakpoint.
+	(handle_inferior_event)
+	<TARGET_WAITKIND_EXITED/TARGET_WAITKIND_SIGNALLED>: Don't write to
+	inferior_ptid directly, nor
+	set_current_inferior/set_current_program_space.  Use
+	switch_to_thread / switch_to_inferior_no_thread instead.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* target.c (generic_mourn_inferior): Use switch_to_no_thread
+	instead of writing to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* inf-ptrace.c (inf_ptrace_target::create_inferior): Switch to the
+	added thread.
+	(inf_ptrace_target::attach): Don't write to inferior_ptid.  Switch
+	to the added thread.
+	(inf_ptrace_target::detach_success): Use switch_to_no_thread
+	instead of writing to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch-selftests.c: Include "progspace-and-thread.h".
+	(register_to_value_test): Mock a program_space too.  Heap-allocate
+	the address space.  Don't write to inferior_ptid.  Use
+	switch_to_thread instead.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c (find_signalled_thread(thread_info *,void *)):
+	Delete.
+	(find_signalled_thread()): New, factored out from
+	linux_make_corefile_notes and adjusted to handle exited threads.
+	(linux_make_corefile_notes): Adjust to use the new
+	find_signalled_thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c (btrace_fetch): Save/restore current thread instead
+	of saving/restoring inferior_ptid.
+
+2020-06-17  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.h (tui_scroll_forward, tui_scroll_backward)
+	(tui_scroll_left, tui_scroll_right, struct tui_win_info): Don't
+	declare.
+	* tui/tui-data.h (MIN_CMD_WIN_HEIGHT): Remove.
+
+2020-06-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (dwarf2_initialize_objfile): Check for presence
+	of partial symtabs.
+
+2020-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* regformats/reg-arm.dat: Remove.
+	* regformats/reg-bfin.dat: Remove.
+	* regformats/reg-cris.dat: Remove.
+	* regformats/reg-crisv32.dat: Remove.
+	* regformats/reg-m32r.dat: Remove.
+	* regformats/reg-tilegx.dat: Remove.
+	* regformats/reg-tilegx32.dat: Remove.
+
+2020-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* features/Makefile (WHICH): Remove arm files.
+	* regformats/arm/arm-with-iwmmxt.dat: Remove.
+	* regformats/arm/arm-with-neon.dat: Remove.
+	* regformats/arm/arm-with-vfpv2.dat: Remove.
+	* regformats/arm/arm-with-vfpv3.dat: Remove.
+
+2020-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* features/Makefile (XMLTOC): Remove rx.xml.
+
+2020-06-17  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (thread_control_state) <trap_expected> Update
+	comments.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_lookup_symbol_nonlocal): Rename to
+	ada_language::lookup_symbol_nonlocal.
+	(ada_language_data): Delete la_lookup_symbol_nonlocal initializer.
+	(ada_language::lookup_symbol_nonlocal): New member function,
+	implementation from ada_lookup_symbol_nonlocal.
+	* c-lang.c (c_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(cplus_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(cplus_language::lookup_symbol_nonlocal): New member function.
+	(asm_language_data): Delete la_lookup_symbol_nonlocal initializer.
+	(minimal_language_data) Likewise.
+	* cp-namespace.c (cp_lookup_nested_symbol): Update comment.
+	* d-lang.c (d_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(d_language::lookup_symbol_nonlocal): New member function.
+	* f-lang.c (f_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(f_language::lookup_symbol_nonlocal): New member function.
+	* go-lang.c (go_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_lookup_symbol_nonlocal
+	field.
+	(language_defn::lookup_symbol_nonlocal): New member function.
+	* m2-lang.c (m2_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_lookup_symbol_nonlocal): Rename to
+	rust_language::lookup_symbol_nonlocal.
+	(rust_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(rust_language::lookup_symbol_nonlocal): New member function,
+	implementation from rust_lookup_symbol_nonlocal.
+	* symtab.c (lookup_symbol_aux): Update call to
+	lookup_symbol_nonlocal.
+	(basic_lookup_symbol_nonlocal): Rename to...
+	(language_defn::lookup_symbol_nonlocal): ...this, and update
+	header comment.  Remove language_defn parameter, and replace with
+	uses of `this'.
+	* symtab.h (basic_lookup_symbol_nonlocal): Delete declaration.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_value_print_inner
+	initializer.
+	(ada_language::value_print_inner): New member function.
+	* c-lang.c (c_language_data): Delete la_value_print_inner
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	(d_language::value_print_inner): New member function.
+	* f-lang.c (f_language_data): Delete la_value_print_inner
+	initializer.
+	(f_language::value_print_inner): New member function.
+	* f-lang.h (f_value_print_innner): Rename to...
+	(f_value_print_inner): ...this (note spelling of 'inner').
+	* f-valprint.c (f_value_print_innner): Rename to...
+	(f_value_print_inner): ...this (note spelling of 'inner').
+	* go-lang.c (go_language_data): Delete la_value_print_inner
+	initializer.
+	(go_language::value_print_inner): New member function.
+	* language.c (language_defn::value_print_inner): Define new member
+	function.
+	(unk_lang_value_print_inner): Delete.
+	(unknown_language_data): Delete la_value_print_inner initializer.
+	(unknown_language::value_print_inner): New member function.
+	(auto_language_data): Delete la_value_print_inner initializer.
+	(auto_language::value_print_inner): New member function.
+	* language.h (language_data): Delete la_value_print_inner field.
+	(language_defn::value_print_inner): Delcare new member function.
+	* m2-lang.c (m2_language_data): Delete la_value_print_inner
+	initializer.
+	(m2_language::value_print_inner): New member function.
+	* objc-lang.c (objc_language_data): Delete la_value_print_inner
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::value_print_inner): New member function.
+	* rust-lang.c (rust_language_data): Delete la_value_print_inner
+	initializer.
+	(rust_language::value_print_inner): New member function.
+	* valprint.c (do_val_print): Update call to value_print_inner.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_value_print
+	initializer.
+	(ada_language::value_print): New member function.
+	* c-lang.c (c_language_data): Delete la_value_print initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unk_lang_value_print): Delete.
+	(language_defn::value_print): Define new member function.
+	(unknown_language_data): Delete la_value_print initializer.
+	(unknown_language::value_print): New member function.
+	(auto_language_data): Delete la_value_print initializer.
+	(auto_language::value_print): New member function.
+	* language.h (language_data): Delete la_value_print field.
+	(language_defn::value_print): Declare new member function.
+	(LA_VALUE_PRINT): Update call to value_print.
+	* m2-lang.c (m2_language_data): Delete la_value_print initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::value_print): New member function.
+	* rust-lang.c (rust_language_data): Delete la_value_print
+	initializer.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_watch_location_expression): Rename to
+	ada_language::watch_location_expression.
+	(ada_language_data): Delete la_watch_location_expression
+	initializer.
+	(ada_language::watch_location_expression): New member function,
+	implementation from ada_watch_location_expression.
+	* breakpoint.c (watch_command_1): Update call to
+	watch_location_expression.
+	* c-lang.c (c_watch_location_expression): Rename to
+	language_defn::watch_location_expression.
+	(c_language_data): Delete la_watch_location_expression
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_watch_location_expression): Delete declaration.
+	* d-lang.c (d_language_data): Delete la_watch_location_expression
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_defn::watch_location_expression): Member
+	function implementation from c_watch_location_expression.
+	(unknown_language_data): Delete la_watch_location_expression
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_watch_location_expression
+	field.
+	(language_defn::watch_location_expression): Declare new member
+	function.
+	* m2-lang.c (m2_language_data): Delete
+	la_watch_location_expression initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_watch_location_expression): Rename to
+	rust_language::watch_location_expression.
+	(rust_language_data): Delete la_watch_location_expression
+	initializer.
+	(rust_language::watch_location_expression): New member function,
+	implementation from rust_watch_location_expression.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_collect_symbol_completion_matches): Rename to
+	ada_language::collect_symbol_completion_matches.
+	(ada_language_data): Delete la_collect_symbol_completion_matches
+	initializer.
+	(ada_language::collect_symbol_completion_matches): New member
+	function, implementation from
+	ada_collect_symbol_completion_matches.
+	* c-lang.c (c_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_collect_symbol_completion_matches): Rename to
+	f_language::collect_symbol_completion_matches.
+	(f_language_data): Delete la_collect_symbol_completion_matches
+	initializer.
+	(f_language::collect_symbol_completion_matches) New member
+	function, implementation from f_collect_symbol_completion_matches.
+	* go-lang.c (go_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete
+	la_collect_symbol_completion_matches field.
+	(language_defn::collect_symbol_completion_matches): New member
+	function.
+	* m2-lang.c (m2_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (default_collect_symbol_completion_matches): Delete.
+	(collect_symbol_completion_matches): Update call to
+	collect_symbol_completion_matches.
+	(collect_symbol_completion_matches_type): Likewise.
+	* symtab.h (default_collect_symbol_completion_matches): Delete
+	declaration.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_get_gdb_completer_word_break_characters): Delete.
+	(ada_language_data): Delete la_word_break_characters initializer.
+	(ada_language::word_break_characters): New member function.
+	* c-lang.c (c_language_data): Delete la_word_break_characters
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* completer.c: Update global comment.
+	(advance_to_expression_complete_word_point): Update call to
+	word_break_characters.
+	(complete_files_symbols): Likewise.
+	(complete_line_internal_1): Likewise.
+	(default_completer_handle_brkchars): Likewise.
+	(skip_quoted_chars): Likewise.
+	* d-lang.c (d_language_data): Delete la_word_break_characters
+	initializer.
+	* f-lang.c (f_word_break_characters): Delete.
+	(f_language_data): Delete la_word_break_characters initializer.
+	(f_language::word_break_characters): New member function.
+	* go-lang.c (go_language_data): Delete la_word_break_characters
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (default_word_break_characters): Move declaration to
+	earlier in the file.
+	(language_data): Delete la_word_break_characters field.
+	(language_defn::word_break_characters): New member function.
+	* m2-lang.c (m2_language_data): Delete la_word_break_characters
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_get_symbol_name_matcher): Update header comment.
+	(ada_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(language_defn::get_symbol_name_matcher_inner): New member
+	function.
+	* c-lang.c (c_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(cplus_language_data): Likewise.
+	(cplus_language::get_symbol_name_matcher_inner): New member
+	function.
+	(asm_language_data): Delete la_get_symbol_name_matcher initializer.
+	(minimal_language_data): Likewise.
+	* cp-support.h (cp_get_symbol_name_matcher): Update header comment.
+	* d-lang.c (d_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* dictionary.c (iter_match_first_hashed): Update call to
+	get_symbol_name_matcher.
+	(iter_match_next_hashed): Likewise.
+	(iter_match_next_linear): Likewise.
+	* dwarf2/read.c (dw2_expand_symtabs_matching_symbol): Likewise.
+	* f-lang.c (f_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(f_language::get_symbol_name_matcher_inner): New member function.
+	* go-lang.c (go_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* language.c (default_symbol_name_matcher): Update header comment,
+	make static.
+	(language_defn::get_symbol_name_matcher): New definition.
+	(language_defn::get_symbol_name_matcher_inner): Likewise.
+	(get_symbol_name_matcher): Delete.
+	(unknown_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_get_symbol_name_matcher
+	field.
+	(language_defn::get_symbol_name_matcher): New member function.
+	(language_defn::get_symbol_name_matcher_inner): Likewise.
+	(default_symbol_name_matcher): Delete declaration.
+	* linespec.c (find_methods): Update call to
+	get_symbol_name_matcher.
+	* m2-lang.c (m2_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* minsyms.c (lookup_minimal_symbol): Update call to
+	get_symbol_name_matcher.
+	(iterate_over_minimal_symbols): Likewise.
+	* objc-lang.c (objc_language_data): Delete
+	la_get_symbol_name_matcher initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* psymtab.c (psymbol_name_matches): Update call to
+	get_symbol_name_matcher.
+	* rust-lang.c (rust_language_data): Delete
+	la_get_symbol_name_matcher initializer.
+	* symtab.c (symbol_matches_search_name): Update call to
+	get_symbol_name_matcher.
+	(compare_symbol_name): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_compute_program
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(c_language::compute_program): New member function.
+	(cplus_language_data): Delete la_compute_program initializer.
+	(cplus_language::compute_program): New member function.
+	(asm_language_data): Delete la_compute_program initializer.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_compute_program): Update comment.
+	(cplus_compute_program): Likewise.
+	* compile/compile-c-support.c (c_compute_program): Likewise.
+	(cplus_compute_program): Likewise.
+	* compile/compile.c (compile_to_object): Update call to
+	la_compute_program.
+	* d-lang.c (d_language_data): Delete la_compute_program
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_compute_program field.
+	(language_defn::compute_program): New member function.
+	* m2-lang.c (m2_language_data): Delete la_compute_program
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data) Delete
+	la_class_name_from_physname initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::class_name_from_physname): New member function.
+	(asm_language_data): Delete la_class_name_from_physname
+	initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* dwarf2/read.c (guess_partial_die_structure_name): Update to call
+	method on language_defn class.
+	(guess_full_die_structure_name): Likewise.
+	* f-lang.c (f_language_data): Delete la_class_name_from_physname
+	initializer.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_class_name_from_physname): Delete.
+	(unk_lang_class_name): Delete.
+	(unknown_language_data): Delete la_class_name_from_physname
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_class_name_from_physname
+	field.
+	(language_defn::class_name_from_physname): New function.
+	(language_class_name_from_physname): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_class_name_from_physname
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-data.h (STATUS_NAME): New macro.
+	* tui/tui-layout.c (tui_remove_some_windows)
+	(initialize_known_windows, tui_register_window)
+	(tui_layout_split::remove_windows, initialize_layouts)
+	(tui_new_layout_command): Don't use hard-coded window names.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
+	PR tui/25348:
+	* tui/tui.c (tui_ensure_readline_initialized): Rename from
+	tui_initialize_readline.  Only run once.  Call rl_initialize.
+	* tui/tui.h (tui_ensure_readline_initialized): Rename from
+	tui_initialize_readline.
+	* tui/tui-io.c (tui_setup_io): Call
+	tui_ensure_readline_initialized.
+	* tui/tui-interp.c (tui_interp::init): Update.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-layout.c (tui_layout_split::remove_windows): Fix logic.
+	Also preserve the status window.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
+	* python/py-tui.c (tui_py_window::~tui_py_window): Handle case
+	where m_window==nullptr.
+
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat::handle_output_debug_string):
+	Update.
+	(windows_nat::handle_ms_vc_exception): Update.
+	* target.h (target_read_string): Change API.
+	* target.c (target_read_string): Change API.
+	* solib-svr4.c (open_symbol_file_object, svr4_read_so_list):
+	Update.
+	* solib-frv.c (frv_current_sos): Update.
+	* solib-dsbt.c (dsbt_current_sos): Update.
+	* solib-darwin.c (darwin_current_sos): Update.
+	* linux-thread-db.c (inferior_has_bug): Update.
+	* expprint.c (print_subexp_standard): Update.
+	* ada-lang.c (ada_main_name, ada_tag_name_from_tsd)
+	(ada_exception_message_1): Update.
+
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
+	* linux-tdep.c (dump_mapping_p): Use target_read_memory.
+
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
+	* valprint.c (read_string): Update comment.
+	* target.c (MIN): Remove.
+	(target_read_string): Rewrite.
+
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
+	* corefile.c (read_memory_string): Remove.
+	* ada-valprint.c (ada_value_print_ptr): Update.
+	* ada-lang.h (ada_tag_name): Change return type.
+	* ada-lang.c (type_from_tag): Update.
+	(ada_tag_name_from_tsd): Change return type.  Use
+	target_read_string.
+	(ada_tag_name): Likewise.
+	* gdbcore.h (read_memory_string): Don't declare.
+
+2020-06-14  Hannes Domani  <ssbssa@yahoo.de>
+
+	* symtab.c (rbreak_command): Ignore Windows drive colon.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* NEWS: Mention removed GDBserver host support.
+
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* features/riscv/rebuild-csr-xml.sh: Updated.
+
+2020-06-11  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/18318:
+	* c-exp.y (lex_one_token): Handle 'p' like 'e'.
+
+2020-06-09  Jonny Grant  <jg@jguk.org>
+2020-06-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* main.c (captured_main_1): Don't print new line after help.
+	(print_gdb_help): add mailing list and IRC channel information
+	to --help.  Add new lines between items in the footer.  Remove
+	quotes around bug url.
+
+2020-06-11  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/21356
+	* gdbtypes.c (resolve_dynamic_union, resolve_dynamic_struct):
+	Resolve typedefs for type length calculations.
+
+2020-06-10  Tom de Vries  <tdevries@suse.de>
+
+	PR ada/24713
+	* dwarf2/index-write.c (struct mapped_symtab): Add m_string_obstack.
+	(write_psymbols): Enable .gdb_index for ada.
+	* dwarf2/read.c: Remove comment stating .gdb_index is unsupported for
+	ada.
+
+2020-06-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (dw2_symtab_iter_init_common): Factor out of ...
+	(dw2_symtab_iter_init): ... here.  Add variant with "offset_type
+	namei" instead of "const char *name" argument.
+	(dw2_map_matching_symbols): Use "offset_type namei" variant of
+	dw2_symtab_iter_init.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_FIELD_TYPE): Remove.  Change all call sites
+	to use type::field and field::type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (FIELD_TYPE): Remove.  Change all call sites
+	to use field::type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct field) <type, set_type>: New methods.
+	Rename `type` field to...
+	<m_type>: ... this.  Change references throughout to use type or
+	set_type methods.
+	(FIELD_TYPE): Use field::type.  Change call sites that modify
+	the field's type to use field::set_type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_INDEX_TYPE): Remove.  Change all call sites
+	to use type::index_type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <index_type, set_index_type>: New
+	methods.
+	(TYPE_INDEX_TYPE): Use type::index_type.
+	* gdbtypes.c (create_array_type_with_stride): Likewise.
+
+2020-06-07  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_float): Remove "embedded_offset"
+	parameter.
+	(generic_value_print): Update.
+
+2020-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Revert commit 982a38f60b0.
+	* python/py-tui.c (gdbpy_tui_set_title): Restore use of get.
+
+2020-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-tui.c (gdbpy_tui_set_title): Use release, not get, to
+	avoid use after free.
+
+2020-06-05  Tom de Vries  <tdevries@suse.de>
+
+	* NEWS: Fix typos.
+
+2020-06-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (dwarf2_read_gdb_index): Save partial_symtabs in
+	the per_bfd object.
+	(dwarf2_read_debug_names): Likewise.
+	(dwarf2_initialize_objfile): Use partial_symtabs from per_bfd
+	object when re-using a per_bfd object with an index.
+
+2020-06-03  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26046
+	* dwarf2/read.c (scan_partial_symbols): Recurse into DW_TAG_subprogram
+	children for C++.
+	(load_partial_dies): Don't skip DW_TAG_inlined_subroutine child of
+	DW_TAG_subprogram.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete skip_trampoline
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::skip_trampoline): New member function.
+	(asm_language_data): Delete skip_trampoline initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unk_lang_trampoline): Delete function.
+	(skip_language_trampoline): Update.
+	(unknown_language_data): Delete skip_trampoline initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete skip_trampoline field.
+	(language_defn::skip_trampoline): New function.
+	* m2-lang.c (m2_language_data): Delete skip_trampoline
+	initializer.
+	* objc-lang.c (objc_skip_trampoline): Delete function, move
+	implementation to objc_language::skip_trampoline.
+	(objc_language_data): Delete skip_trampoline initializer.
+	(objc_language::skip_trampoline): New member function with
+	implementation from objc_skip_trampoline.
+	* opencl-lang.c (opencl_language_data): Delete skip_trampoline
+	initializer.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_demangle initializer.
+	(ada_language::demangle): New member function.
+	* c-lang.c (c_language_data): Delete la_demangle initializer.
+	(cplus_language_data): Delete la_demangle initializer.
+	(cplus_language::demangle): New member function.
+	(asm_language_data): Delete la_demangle initializer.
+	(minimal_language_data): Delete la_demangle initializer.
+	* d-lang.c (d_language_data): Delete la_demangle initializer.
+	(d_language::demangle): New member function.
+	* f-lang.c (f_language_data): Delete la_demangle initializer.
+	(f_language::demangle): New member function.
+	* go-lang.c (go_language_data): Delete la_demangle initializer.
+	(go_language::demangle): New member function.
+	* language.c (language_demangle): Update.
+	(unk_lang_demangle): Delete.
+	(unknown_language_data): Delete la_demangle initializer.
+	(unknown_language::demangle): New member function.
+	(auto_language_data): Delete la_demangle initializer.
+	(auto_language::demangle): New member function.
+	* language.h (language_data): Delete la_demangle field.
+	(language_defn::demangle): New function.
+	* m2-lang.c (m2_language_data): Delete la_demangle initializer.
+	* objc-lang.c (objc_language_data): Delete la_demangle
+	initializer.
+	(objc_language::demangle): New member function.
+	* opencl-lang.c (opencl_language_data): Delete la_demangle
+	initializer.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	(rust_language::demangle): New member function.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_print_type
+	initializer.
+	(ada_language::print_type): New member function.
+	* c-lang.c (c_language_data): Delete la_print_type initializer.
+	(c_language::print_type): New member function.
+	(cplus_language_data): Delete la_print_type initializer.
+	(cplus_language::print_type): New member function.
+	(asm_language_data): Delete la_print_type initializer.
+	(asm_language::print_type): New member function.
+	(minimal_language_data): Delete la_print_type initializer.
+	(minimal_language::print_type): New member function.
+	* d-lang.c (d_language_data): Delete la_print_type initializer.
+	(d_language::print_type): New member function.
+	* f-lang.c (f_language_data): Delete la_print_type initializer.
+	(f_language::print_type): New member function.
+	* go-lang.c (go_language_data): Delete la_print_type initializer.
+	(go_language::print_type): New member function.
+	* language.c (unk_lang_print_type): Delete.
+	(unknown_language_data): Delete la_print_type initializer.
+	(unknown_language::print_type): New member function.
+	(auto_language_data): Delete la_print_type initializer.
+	(auto_language::print_type): New member function.
+	* language.h (language_data): Delete la_print_type field.
+	(language_defn::print_type): New function.
+	(LA_PRINT_TYPE): Update.
+	* m2-lang.c (m2_language_data): Delete la_print_type initializer.
+	(m2_language::print_type): New member function.
+	* objc-lang.c (objc_language_data): Delete la_print_type
+	initializer.
+	(objc_language::print_type): New member function.
+	* opencl-lang.c (opencl_print_type): Delete, implementation moved
+	to opencl_language::print_type.
+	(opencl_language_data): Delete la_print_type initializer.
+	(opencl_language::print_type): New member function, implementation
+	from opencl_print_type.
+	* p-lang.c (pascal_language_data): Delete la_print_type
+	initializer.
+	(pascal_language::print_type): New member function.
+	* rust-lang.c (rust_print_type): Delete, implementation moved to
+	rust_language::print_type.
+	(rust_language_data): Delete la_print_type initializer.
+	(rust_language::print_type): New member function, implementation
+	from rust_print_type.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_sniff_from_mangled_name): Delete function,
+	implementation moves to...
+	(ada_language::sniff_from_mangled_name): ...here.  Update return
+	type.
+	(ada_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::sniff_from_mangled_name): New member function,
+	implementation taken from gdb_sniff_from_mangled_name.
+	(asm_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	(minimal_language_data): Likewise.
+	* cp-support.c (gdb_sniff_from_mangled_name): Delete,
+	implementation moves to cplus_language::sniff_from_mangled_name.
+	* cp-support.h (gdb_sniff_from_mangled_name): Delete declaration.
+	* d-lang.c (d_sniff_from_mangled_name): Delete, implementation
+	moves to...
+	(d_language::sniff_from_mangled_name): ...here.
+	(d_language_data): Delete la_sniff_from_mangled_name initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_sniff_from_mangled_name): Delete, implementation
+	moves to...
+	(go_language::sniff_from_mangled_name): ...here.
+	(go_language_data): Delete la_sniff_from_mangled_name initializer.
+	* language.c (language_sniff_from_mangled_name): Delete.
+	(unknown_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_sniff_from_mangled_name
+	field.
+	(language_defn::sniff_from_mangled_name): New function.
+	(language_sniff_from_mangled_name): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_sniff_from_mangled_name
+	field.
+	* objc-lang.c (objc_sniff_from_mangled_name): Delete,
+	implementation moves to...
+	(objc_language::sniff_from_mangled_name): ...here.
+	(objc_language_data): Delete la_sniff_from_mangled_name initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_sniff_from_mangled_name): Delete,
+	implementation moves to...
+	(rust_language::sniff_from_mangled_name): ...here.
+	(rust_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	* symtab.c (symbol_find_demangled_name): Call
+	sniff_from_mangled_name member function.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_search_name_hash
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::search_name_hash): New member function.
+	(asm_language_data): Delete la_search_name_hash initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* dictionary.c (default_search_name_hash): Rename to...
+	(language_defn::search_name_hash): ...this.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::search_name_hash): New member function.
+	* go-lang.c (go_language_data): Delete la_search_name_hash
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_search_name_hash
+	field.
+	(language_defn::search_name_hash): Declare new member function.
+	(default_search_name_hash): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_search_name_hash
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (search_name_hash): Update call.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_get_compile_instance
+	initializer.
+	* c-lang.c (class compile_instance): Declare.
+	(c_language_data): Delete la_get_compile_instance initializer.
+	(c_language::get_compile_instance): New member function.
+	(cplus_language_data): Delete la_get_compile_instance initializer.
+	(cplus_language::get_compile_instance): New member function.
+	(asm_language_data): Delete la_get_compile_instance initializer.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_get_compile_context): Update comment.
+	(cplus_get_compile_context): Update comment.
+	* compile/compile.c (compile_to_object): Update calls, don't rely
+	on function pointer being NULL.
+	* d-lang.c (d_language_data): Delete la_get_compile_instance
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_get_compile_instance field.
+	(language_defn::get_compile_instance): New member function.
+	* m2-lang.c (m2_language_data): Delete la_get_compile_instance
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_add_all_symbols): Update comment.
+	(ada_iterate_over_symbols): Delete, move implementation to...
+	(ada_language::iterate_over_symbols): ...here, a new member
+	function, rewrite to use range based for loop.
+	(ada_language_data): Delete la_iterate_over_symbols initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_iterate_over_symbols field.
+	(language_defn::iterate_over_symbols): New member function.
+	(LA_ITERATE_OVER_SYMBOLS): Update.
+	* linespec.c (iterate_over_all_matching_symtabs): Update.
+	* m2-lang.c (m2_language_data): Delete la_iterate_over_symbols
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete
+	la_lookup_transparent_type initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::lookup_transparent_type): New member function.
+	(asm_language_data): Delete la_lookup_transparent_type
+	initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete
+	la_lookup_transparent_type field.
+	(language_defn::lookup_transparent_type): New member function.
+	* m2-lang.c (m2_language_data): Delete la_lookup_transparent_type
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (symbol_matches_domain): Update call.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_arch_info): Delete function, move
+	implementation to...
+	(ada_language::language_arch_info): ...here, a new member
+	function.
+	(ada_language_data): Delete la_language_arch_info.
+	* c-lang.c (c_language_data): Likewise.
+	(c_language::language_arch_info): New member function.
+	(cplus_language_arch_info): Delete function, move
+	implementation to...
+	(cplus_language::language_arch_info): ...here, a new member
+	function.
+	(cplus_language_data): Delete la_language_arch_info.
+	(asm_language_data): Likewise.
+	(asm_language::language_arch_info): New member function.
+	(minimal_language_data): Delete la_language_arch_info.
+	(minimal_language::language_arch_info): New member function.
+	* d-lang.c (d_language_arch_info): Delete function, move
+	implementation to...
+	(d_language::language_arch_info): ...here, a new member
+	function.
+	(d_language_data): Delete la_language_arch_info.
+	* f-lang.c (f_language_arch_info): Delete function, move
+	implementation to...
+	(f_language::language_arch_info): ...here, a new member
+	function.
+	(f_language_data): Delete la_language_arch_info.
+	* go-lang.c (go_language_arch_info): Delete function, move
+	implementation to...
+	(go_language::language_arch_info): ...here, a new member
+	function.
+	(go_language_data): Delete la_language_arch_info.
+	* language.c (unknown_language_data): Likewise.
+	(unknown_language::language_arch_info): New member function.
+	(auto_language_data): Delete la_language_arch_info.
+	(auto_language::language_arch_info): New member function.
+	(language_gdbarch_post_init): Update call to
+	la_language_arch_info.
+	* language.h (language_data): Delete la_language_arch_info
+	function pointer.
+	(language_defn::language_arch_info): New function.
+	* m2-lang.c (m2_language_arch_info): Delete function, move
+	implementation to...
+	(m2_language::language_arch_info): ...here, a new member
+	function.
+	(m2_language_data): Delete la_language_arch_info.
+	* objc-lang.c (objc_language_arch_info): Delete function, move
+	implementation to...
+	(objc_language::language_arch_info): ...here, a new member
+	function.
+	(objc_language_data): Delete la_language_arch_info.
+	* opencl-lang.c (opencl_language_arch_info): Delete function, move
+	implementation to...
+	(opencl_language::language_arch_info): ...here, a new member
+	function.
+	(opencl_language_data): Delete la_language_arch_info.
+	* p-lang.c (pascal_language_arch_info): Delete function, move
+	implementation to...
+	(pascal_language::language_arch_info): ...here, a new member
+	function.
+	(pascal_language_data): Delete la_language_arch_info.
+	* rust-lang.c (rust_language_arch_info): Delete function, move
+	implementation to...
+	(rust_language::language_arch_info): ...here, a new member
+	function.
+	(rust_language_data): Delete la_language_arch_info.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Delete la_pass_by_reference
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::pass_by_reference_info): New method.
+	(asm_language_data): Delete la_pass_by_reference initializer.
+	(minimal_language_data): Likewise.
+	* cp-abi.c (cp_pass_by_reference): Remove use of
+	default_pass_by_reference.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Remove use of
+	default_pass_by_reference.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_pass_by_reference): Update.
+	(default_pass_by_reference): Delete.
+	(unknown_language_data): Delete la_pass_by_reference
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_pass_by_reference
+	field.
+	(language_defn::pass_by_reference_info): New member function.
+	(default_pass_by_reference): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_pass_by_reference
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_read_var_value): Delete function, move
+	implementation to...
+	(ada_language::read_var_value): ...here.
+	(ada_language_data): Delete la_read_var_value initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* findvar.c (default_read_var_value): Rename to...
+	(language_defn::read_var_value): ...this.
+	* findvar.c (read_var_value): Update header comment, and change to
+	call member function instead of function pointer.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Delete la_read_var_value
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_read_var_value
+	field.
+	(language_defn::read_var_value): New member function.
+	(default_read_var_value): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_read_var_value
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* value.h (default_read_var_value): Delete declaration.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_print_array_index): Delete function, move
+	implementation to...
+	(ada_language::print_array_index): ...here.
+	(ada_language_data): Delete la_print_array_index initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (default_print_array_index): Delete function, move
+	implementation to...
+	(language_defn::print_array_index): ...here.
+	(unknown_language_data): Delete la_print_array_index initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_print_array_index
+	field.
+	(language_defn::print_array_index): New member function.
+	(LA_PRINT_ARRAY_INDEX): Update.
+	(default_print_array_index): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_print_array_index
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb/ada-lang.c (ada_language_defn): Convert to...
+	(ada_language_data): ...this.
+	(class ada_language): New class.
+	(ada_language_defn): New static global.
+	* gdb/c-lang.c (c_language_defn): Convert to...
+	(c_language_data): ...this.
+	(class c_language): New class.
+	(c_language_defn): New static global.
+	(cplus_language_defn): Convert to...
+	(cplus_language_data): ...this.
+	(class cplus_language): New class.
+	(cplus_language_defn): New static global.
+	(asm_language_defn): Convert to...
+	(asm_language_data): ...this.
+	(class asm_language): New class.
+	(asm_language_defn): New static global.
+	(minimal_language_defn): Convert to...
+	(minimal_language_data): ...this.
+	(class minimal_language): New class.
+	(minimal_language_defn): New static global.
+	* gdb/d-lang.c (d_language_defn): Convert to...
+	(d_language_data): ...this.
+	(class d_language): New class.
+	(d_language_defn): New static global.
+	* gdb/f-lang.c (f_language_defn): Convert to...
+	(f_language_data): ...this.
+	(class f_language): New class.
+	(f_language_defn): New static global.
+	* gdb/go-lang.c (go_language_defn): Convert to...
+	(go_language_data): ...this.
+	(class go_language): New class.
+	(go_language_defn): New static global.
+	* gdb/language.c (unknown_language_defn): Remove declaration.
+	(current_language): Initialize to nullptr, real initialization is
+	moved to _initialize_language.
+	(languages): Delete global.
+	(language_defn::languages): Define.
+	(set_language_command): Use language_defn::languages.
+	(set_language): Likewise.
+	(range_error): Likewise.
+	(language_enum): Likewise.
+	(language_def): Likewise.
+	(add_set_language_command): Use language_def::languages for the
+	language list, and language_def to lookup language pointers.
+	(skip_language_trampoline): Use language_defn::languages.
+	(unknown_language_defn): Convert to...
+	(unknown_language_data): ...this.
+	(class unknown_language): New class.
+	(unknown_language_defn): New static global.
+	(auto_language_defn): Convert to...
+	(auto_language_data): ...this.
+	(class auto_language): New class.
+	(auto_language_defn): New static global.
+	(language_gdbarch_post_init): Use language_defn::languages.
+	(_initialize_language): Initialize current_language.
+	* gdb/language.h (struct language_defn): Rename to...
+	(struct language_data): ...this.
+	(struct language_defn): New.
+	(auto_language_defn): Delete.
+	(unknown_language_defn): Delete.
+	(minimal_language_defn): Delete.
+	(ada_language_defn): Delete.
+	(asm_language_defn): Delete.
+	(c_language_defn): Delete.
+	(cplus_language_defn): Delete.
+	(d_language_defn): Delete.
+	(f_language_defn): Delete.
+	(go_language_defn): Delete.
+	(m2_language_defn): Delete.
+	(objc_language_defn): Delete.
+	(opencl_language_defn): Delete.
+	(pascal_language_defn): Delete.
+	(rust_language_defn): Delete.
+	* gdb/m2-lang.c (m2_language_defn): Convert to...
+	(m2_language_data): ...this.
+	(class m2_language): New class.
+	(m2_language_defn): New static global.
+	* gdb/objc-lang.c (objc_language_defn): Convert to...
+	(objc_language_data): ...this.
+	(class objc_language): New class.
+	(objc_language_defn): New static global.
+	* gdb/opencl-lang.c (opencl_language_defn): Convert to...
+	(opencl_language_data): ...this.
+	(class opencl_language): New class.
+	(opencl_language_defn): New static global.
+	* gdb/p-lang.c (pascal_language_defn): Convert to...
+	(pascal_language_data): ...this.
+	(class pascal_language): New class.
+	(pascal_language_defn): New static global.
+	* gdb/rust-exp.y (rust_lex_tests): Use language_def to find
+	language pointer, update comment format.
+	* gdb/rust-lang.c (rust_language_defn): Convert to...
+	(rust_language_data): ...this.
+	(class rust_language): New class.
+	(rust_language_defn): New static global.
+
+2020-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2/read.c (class lnp_state_machine) <m_last_address>: New
+	member variable.
+	<m_stmt_at_address>: New member variable.
+	(lnp_state_machine::record_line): Don't record some lines, update
+	tracking of is_stmt at the same address.
+	(lnp_state_machine::lnp_state_machine): Initialise new member
+	variables.
+
+2020-06-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* config/i386/i386gnu.mn [%_S.o %_U.o] (COMPILE.post): Add
+	"-include gnu-nat-mig.h".
+	* gnu-nat-mig.h: New file.
+	* gnu-nat.c: Include "gnu-nat-mig.h".
+	(exc_server, msg_reply_server, notify_server,
+	process_reply_server): Remove declarations.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.h (inf_validate_procs, inf_suspend, inf_set_traced,
+	steal_exc_port, proc_get_state, inf_clear_wait, inf_cleanup,
+	inf_startup, inf_update_suspends, inf_set_pid, inf_steal_exc_ports,
+	inf_validate_procinfo, inf_validate_task_sc, inf_restore_exc_ports,
+	inf_set_threads_resume_sc, inf_set_threads_resume_sc_for_signal_thread,
+	inf_resume, inf_set_step_thread, inf_detach, inf_attach, inf_signal,
+	inf_continue, make_proc, proc_abort, _proc_free, proc_update_sc,
+	proc_get_exception_port, proc_set_exception_port, _proc_get_exc_port,
+	proc_steal_exc_port, proc_restore_exc_port, proc_trace): Move functions
+	to gnu_nat_target class.
+	* gnu-nat.c: Likewise.
+	(inf_update_procs, S_proc_wait_reply, set_task_pause_cmd,
+	set_task_exc_port_cmd, set_signals_cmd, set_thread_pause_cmd,
+	set_thread_exc_port_cmd): Call inf_validate_procs through gnu_target
+	object.
+	(gnu_nat_target::create_inferior, gnu_nat_target::detach): Pass `this'
+	instead of `gnu_target'.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* i386-gnu-tdep.c: Include "gdbcore.h"
+	(gnu_sigtramp_code, i386_gnu_sc_reg_offset): New arrays.
+	(GNU_SIGTRAMP_LEN, GNU_SIGTRAMP_TAIL,
+	I386_GNU_SIGCONTEXT_THREAD_STATE_OFFSET): New macros
+	(i386_gnu_sigtramp_start, i386_gnu_sigtramp_p,
+	i386_gnu_sigcontext_addr): New functions
+	(i386gnu_init_abi): Register i386_gnu_sigtramp_p,
+	i386_gnu_sigcontext_addr, and i386_gnu_sc_reg_offset in the gdbarch
+	tdep.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.c (gnu_nat_target::create_inferior): Move push_target call
+	before fork_inferior call. Avoid calling it if target_is_pushed returns
+	true.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.h (gnu_target): New variable declaration.
+	* i386-gnu-nat.c (_initialize_i386gnu_nat): Initialize
+	gnu_target.
+	* gnu-nat.c (gnu_target): New variable.
+	(inf_validate_procs): Pass gnu_target to thread_change_ptid,
+	add_thread_silent, and add_thread calls.
+	(gnu_nat_target::create_inferior): Pass gnu_target to
+	add_thread_silent, thread_change_ptid call.
+	(gnu_nat_target::detach): Pass gnu_target to detach_inferior
+	call.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.c (gnu_xfer_auxv): Remove unused `res' variable.
+	(gnu_nat_target::find_memory_regions): Remove unused
+	`old_address' variable.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.c: Include "gdbarch.h".
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* reply_mig_hack.awk (Error return): Cast function through
+	void *, to bypass compiler function call check.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* config/i386/i386gnu.mn (%_reply_S.c): Add dependency on
+	$(srcdir)/reply_mig_hack.awk.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* gnu-nat.h (gnu_debug_flag): Set type to bool.
+
+2020-05-30  Jonny Grant  <jg@jguk.org>
+
+	* configure.ac (ACX_BUGURL): change bug URL to https.
+
+2020-05-30  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (replace_typedefs_template): New.
+	(replace_typedefs_qualified_name): Handle
+	DEMANGLE_COMPONENT_TEMPLATE.
+
+2020-05-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/comp-unit.c, dwarf2/comp-unit.h, dwarf2/index-cache.c,
+	dwarf2/index-cache.h, dwarf2/index-write.c,
+	dwarf2/index-write.h, dwarf2/line-header.c,
+	dwarf2/line-header.h, dwarf2/macro.c, dwarf2/macro.h,
+	dwarf2/read.c, dwarf2/read.h: Rename struct dwarf2_per_objfile
+	variables and fields from `dwarf2_per_objfile` to just
+	`per_objfile` throughout.
+
+2020-05-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)
+	<push_dwarf_reg_entry_value>: Add comment.
+
+2020-05-28  Kevin Buettner  <kevinb@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* python/python.c (do_start_initialization): Call PyEval_SaveThread
+	instead of PyEval_ReleaseLock.
+	(class gdbpy_gil): Move to earlier in file.
+	(finalize_python): Set gdb_python_initialized.
+	(gdbpy_check_quit_flag): Acquire GIL via gdbpy_gil.  Return early
+	when not initialized.
+
+2020-05-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)
+	<push_dwarf_reg_entry_value>: Remove assert.  Override
+	per_objfile with caller_per_objfile.
+
+2020-05-28  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c	(dw2_symtab_iter_next, dw2_expand_marked_cus): Limit
+	PR gold/15646 workaround to symbol kind "type".
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (load_partial_dies): Use add_partial_symbol.
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/abbrev.h (struct abbrev_table) <lookup_abbrev>: Inline.
+	Use htab_find_with_hash.
+	<add_abbrev>: Remove "abbrev_number" parameter.
+	* dwarf2/abbrev.c (abbrev_table::add_abbrev): Remove
+	"abbrev_number" parameter.  Use htab_find_slot_with_hash.
+	(hash_abbrev): Add comment.
+	(abbrev_table::lookup_abbrev): Move to header file.
+	(abbrev_table::read): Update.
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (struct partial_die_info) <name>: Declare new
+	method.
+	<canonical_name>: New member.
+	<raw_name>: Rename from "name".
+	(partial_die_info): Initialize canonical_name.
+	(scan_partial_symbols): Check raw_name.
+	(partial_die_parent_scope, partial_die_full_name)
+	(add_partial_symbol, add_partial_subprogram)
+	(add_partial_enumeration, load_partial_dies): Use "name" method.
+	(partial_die_info::name): New method.
+	(partial_die_info::read, guess_partial_die_structure_name)
+	(partial_die_info::fixup): Update.
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/attribute.h (struct attribute) <form_is_ref>: Inline.
+	<get_ref_die_offset>: Inline.
+	<get_ref_die_offset_complaint>: New method.
+	* dwarf2/attribute.c (attribute::form_is_ref): Move to header.
+	(attribute::get_ref_die_offset_complaint): Rename from
+	get_ref_die_offset.  Just issue complaint.
+
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* cli/cli-cmds.c (shell_escape): Move exit_status_set_internal_vars.
+
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* exec.c (exec_file_attach): Use errno value of first openp failure.
+
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* nat/windows-nat.c (windows_thread_info::~windows_thread_info):
+	Don't close thread handle.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* objfiles.h (struct objfile) <partial_symtabs>: Now a
+	shared_ptr.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <partial_symtabs>: New
+	member.
+	* dwarf2/read.c (dwarf2_per_bfd_bfd_data_key,
+	dwarf2_per_bfd_objfile_data_key>: New globals.
+	(dwarf2_has_info): Use shared dwarf2_per_bfd if possible.
+	(dwarf2_get_section_info): Use get_dwarf2_per_objfile.
+	(dwarf2_initialize_objfile): Consider cases where per_bfd can be
+	shared.
+	(dwarf2_build_psymtabs): Set objfile::partial_symtabs and
+	short-circuit when sharing.
+	(dwarf2_build_psymtabs): Set dwarf2_per_objfile::partial_symtabs.
+	(dwarf2_psymtab::expand_psymtab): Use free_cached_comp_units.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <line_header_hash>: Move
+	to...
+	(struct dwarf2_per_objfile) <line_header_hash>: ... here.
+	* dwarf2/read.c (handle_DW_AT_stmt_list): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (struct mapped_index_base) <symbol_name_at,
+	build_name_components, find_name_components_bounds>:
+	Add per_objfile parameter.
+	(struct mapped_index) <symbol_name_at>: Likewise.
+	(struct mapped_debug_names): Remove constructor.
+	<dwarf2_per_objfile>: Remove field.
+	<namei_to_name, symbol_name_at>: Add per_objfile parameter.
+	(mapped_index_base::find_name_components_bounds,
+	mapped_index_base::build_name_components,
+	dw2_expand_symtabs_matching_symbol): Likewise.
+	(class mock_mapped_index) <symbol_name_at>: Likewise.
+	(check_match): Likewise.
+	(check_find_bounds_finds): Likewise.
+	(test_mapped_index_find_name_component_bounds): Update.
+	(CHECK_MATCH): Update.
+	(dw2_expand_symtabs_matching): Update.
+	(class dw2_debug_names_iterator) <dw2_debug_names_iterator>: Add
+	per_objfile parameter.
+	<find_vec_in_debug_names>: Likewise.
+	<m_per_objfile>: New field.
+	(mapped_debug_names::namei_to_name): Add dwarf2_per_objfile
+	parameter.
+	(dw2_debug_names_iterator::find_vec_in_debug_names): Likewise.
+	(dw2_debug_names_iterator::next): Update.
+	(dw2_debug_names_lookup_symbol): Update.
+	(dw2_debug_names_expand_symtabs_for_function): Update.
+	(dw2_debug_names_map_matching_symbols): Update.
+	(dw2_debug_names_expand_symtabs_matching): Update.
+	(dwarf2_read_debug_names): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_cu): Forward-declare.
+	(struct dwarf2_per_bfd) <free_cached_comp_units>: Remove,
+	move to dwarf2_per_objfile.
+	<read_in_chain>: Remove.
+	(struct dwarf2_per_objfile) <get_cu, set_cu, remove_cu,
+	remove_all_cus, age_comp_units>: New methods.
+	<m_dwarf2_cus>: New member.
+	(struct dwarf2_per_cu_data) <cu>: Remove.
+	* dwarf2/read.c (struct dwarf2_cu) <read_in_chain>: Remove.
+	(age_cached_comp_units, free_one_cached_comp_unit): Remove,
+	moved to methods of dwarf2_per_objfile.
+	(dwarf2_clear_marks): Remove.
+	(dwarf2_queue_item::~dwarf2_queue_item): Update.
+	(dwarf2_per_bfd::~dwarf2_per_bfd): Don't free dwarf2_cus.
+	(dwarf2_per_bfd::free_cached_comp_units): Remove.
+	(dwarf2_per_objfile::remove_all_cus): New.
+	(class free_cached_comp_units) <~free_cached_comp_units>:
+	Update.
+	(load_cu): Update.
+	(dw2_do_instantiate_symtab): Adjust.
+	(fill_in_sig_entry_from_dwo_entry): Adjust.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Likewise.
+	(cutu_reader::keep): Use dwarf2_per_objfile::set_cu.
+	(cutu_reader::cutu_reader): Use dwarf2_per_objfile::get_cu.
+	(process_psymtab_comp_unit): Use dwarf2_per_objfile::remove_cu
+	and dwarf2_per_objfile::age_comp_units.
+	(load_partial_comp_unit): Update.
+	(maybe_queue_comp_unit): Use dwarf2_per_objfile::get_cu.
+	(process_queue): Likewise.
+	(find_partial_die): Use dwarf2_per_objfile::get_cu instead of cu
+	backlink.
+	(dwarf2_read_addr_index): Likewise.
+	(follow_die_offset): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(dwarf2_fetch_die_type_sect_off): Likewise.
+	(follow_die_sig_1): Likewise.
+	(load_full_type_unit): Likewise.
+	(read_signatured_type): Likewise.
+	(dwarf2_cu::dwarf2_cu): Don't set cu field.
+	(dwarf2_cu::~dwarf2_cu): Remove.
+	(dwarf2_per_objfile::get_cu): New.
+	(dwarf2_per_objfile::set_cu): New.
+	(age_cached_comp_units): Rename to...
+	(dwarf2_per_objfile::age_comp_units): ... this.  Adjust
+	to std::unordered_map.
+	(free_one_cached_comp_unit): Rename to...
+	(dwarf2_per_objfile::remove_cu): ... this.  Adjust
+	to std::unordered_map.
+	(dwarf2_per_objfile::~dwarf2_per_objfile): New.
+	(dwarf2_mark_helper): Use dwarf2_per_objfile::get_cu, expect
+	a dwarf2_per_objfile in data.
+	(dwarf2_mark): Pass dwarf2_per_objfile in data to htab_traverse.
+	(dwarf2_clear_marks): Remove.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Replace
+	`int use_existing_cu` parameter with `dwarf2_cu *existing_cu`.
+	(init_tu_and_read_dwo_dies): Likewise.
+	(cutu_reader::init_tu_and_read_dwo_dies): Likewise.
+	(cutu_reader::cutu_reader): Likewise.
+	(load_partial_comp_unit): Likewise.
+	(process_psymtab_comp_unit): Update.
+	(build_type_psymtabs_1): Update.
+	(process_skeletonless_type_unit): Update.
+	(load_full_comp_unit): Update.
+	(find_partial_die): Update.
+	(dwarf2_read_addr_index): Update.
+	(read_signatured_type): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <m_header,
+	m_header_read_in>: New fields.
+	<get_header>: New method.
+	* dwarf2/read.c (per_cu_header_read_in): Remove.
+	(dwarf2_per_cu_data::get_header): New.
+	(dwarf2_per_cu_data::addr_size): Update.
+	(dwarf2_per_cu_data::offset_size): Update.
+	(dwarf2_per_cu_data::ref_addr_size): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (load_cu): Return dwarf2_cu.
+	(dw2_do_instantiate_symtab): Update.
+	(queue_and_load_all_dwo_tus): Change parameter from
+	dwarf2_per_cu_data to dwarf2_cu.
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	(dwarf2_fetch_constant_bytes): Update.
+	(dwarf2_fetch_die_type_sect_off): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (process_full_comp_unit,
+	process_full_type_unit): Remove per_cu, per_objfile paramters.
+	Add dwarf2_cu parameter.
+	(process_queue): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (create_cu_from_index_list): Replace
+	dwarf2_per_objfile parameter with dwarf2_per_bfd.
+	(create_cus_from_index_list): Likewise.
+	(create_cus_from_index): Likewise.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_cus_from_debug_names_list): Likewise.
+	(create_cus_from_debug_names): Likewise.
+	(dwarf2_read_gdb_index): Update.
+	(dwarf2_read_debug_names): Update.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile)
+	<get_type_for_signatured_type, set_type_for_signatured_type>:
+	New methods.
+	<m_type_map>: New member.
+	(struct signatured_type) <type>: Remove.
+	* dwarf2/read.c
+	(dwarf2_per_objfile::get_type_for_signatured_type,
+	dwarf2_per_objfile::set_type_for_signatured_type): New.
+	(get_signatured_type): Use new methods.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct type_unit_group_unshareable): New.
+	(struct dwarf2_per_objfile) <type_units>: New member.
+	<get_type_unit_group_unshareable>: New method.
+	* dwarf2/read.c (struct type_unit_group) <compunit_symtab,
+	num_symtabs, symtabs>: Remove; move to
+	type_unit_group_unshareable.
+	(dwarf2_per_objfile::get_type_unit_group_unshareable): New.
+	(process_full_type_unit, dwarf2_cu::setup_type_unit_groups)
+	(dwarf2_cu::setup_type_unit_groups): Use type_unit_group_unshareable.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data):
+	<dwarf2_per_objfile>: Remove.
+	* dwarf2/read.c (create_cu_from_index_list): Don't assign
+	dwarf2_per_objfile.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_signatured_type_table_from_debug_names): Likewise.
+	(create_debug_type_hash_table): Likewise.
+	(fill_in_sig_entry_from_dwo_entry): Likewise.
+	(create_type_unit_group): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(create_cus_hash_table): Likewise.
+
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (process_psymtab_comp_unit): Remove reference to
@@ -649,7 +5111,7 @@
 2020-05-20  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (bound_name, MAX_ADA_DIMENS): Remove.
-        (desc_one_bound, desc_index_type): Compute field name.
+	(desc_one_bound, desc_index_type): Compute field name.
 
 2020-05-20  Tom de Vries  <tdevries@suse.de>
 
@@ -1505,8 +5967,8 @@
 
 2020-04-25  Kamil Rytarowski  <n54@gmx.com>
 
-       * inf-ptrace.c (inf_ptrace_target::wait): Remove
-       `PT_GET_PROCESS_STATE' block.
+	* inf-ptrace.c (inf_ptrace_target::wait): Remove
+	`PT_GET_PROCESS_STATE' block.
 
 2020-04-24  Tom Tromey  <tom@tromey.com>
 

@@ -515,14 +515,13 @@ yy_create_string_buffer (const char *string, size_t size)
 {
   YY_BUFFER_STATE b;
 
-  /* Calls to m-alloc get turned by sed into xm-alloc.  */
-  b = malloc (sizeof (struct yy_buffer_state));
+  b = xmalloc (sizeof (struct yy_buffer_state));
   b->yy_input_file = 0;
   b->yy_buf_size = size;
 
   /* yy_ch_buf has to be 2 characters longer than the size given because
      we need to put in 2 end-of-buffer characters.  */
-  b->yy_ch_buf = malloc ((unsigned) (b->yy_buf_size + 3));
+  b->yy_ch_buf = xmalloc ((size_t) b->yy_buf_size + 3);
 
   b->yy_ch_buf[0] = '\n';
   strcpy (b->yy_ch_buf+1, string);

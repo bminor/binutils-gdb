@@ -428,16 +428,16 @@ enum mach_selection_type
 static enum mach_selection_type mach_selection_mode = MACH_SELECTION_NONE;
 
 /* The hash table of instruction opcodes.  */
-static struct hash_control *arc_opcode_hash;
+static htab_t arc_opcode_hash;
 
 /* The hash table of register symbols.  */
-static struct hash_control *arc_reg_hash;
+static htab_t arc_reg_hash;
 
 /* The hash table of aux register symbols.  */
-static struct hash_control *arc_aux_hash;
+static htab_t arc_aux_hash;
 
 /* The hash table of address types.  */
-static struct hash_control *arc_addrtype_hash;
+static htab_t arc_addrtype_hash;
 
 #define ARC_CPU_TYPE_A6xx(NAME,EXTRA)			\
   { #NAME, ARC_OPCODE_ARC600, bfd_mach_arc_arc600,	\
@@ -704,7 +704,7 @@ arc_find_opcode (const char *name)
 {
   const struct arc_opcode_hash_entry *entry;
 
-  entry = hash_find (arc_opcode_hash, name);
+  entry = str_hash_find (arc_opcode_hash, name);
   return entry;
 }
 
@@ -754,28 +754,23 @@ arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
 static void
 arc_insert_opcode (const struct arc_opcode *opcode)
 {
-  const char *name, *retval;
+  const char *name;
   struct arc_opcode_hash_entry *entry;
   name = opcode->name;
 
-  entry = hash_find (arc_opcode_hash, name);
+  entry = str_hash_find (arc_opcode_hash, name);
   if (entry == NULL)
     {
       entry = XNEW (struct arc_opcode_hash_entry);
       entry->count = 0;
       entry->opcode = NULL;
 
-      retval = hash_insert (arc_opcode_hash, name, (void *) entry);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode '%s': %s"),
-		  name, retval);
+      if (str_hash_insert (arc_opcode_hash, name, entry, 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
     }
 
   entry->opcode = XRESIZEVEC (const struct arc_opcode *, entry->opcode,
 			      entry->count + 1);
-
-  if (entry->opcode == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   entry->opcode[entry->count] = opcode;
   entry->count++;
@@ -1758,8 +1753,9 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
   int ntok = *pntok;
   int got_cpu_match = 0;
   expressionS bktok[MAX_INSN_ARGS];
-  int bkntok;
+  int bkntok, maxerridx = 0;
   expressionS emptyE;
+  const char *tmpmsg = NULL;
 
   arc_opcode_hash_entry_iterator_init (&iter);
   memset (&emptyE, 0, sizeof (emptyE));
@@ -1806,7 +1802,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	    {
             case ARC_OPERAND_ADDRTYPE:
 	      {
-		*errmsg = NULL;
+		tmpmsg = NULL;
 
 		/* Check to be an address type.  */
 		if (tok[tokidx].X_op != O_addrtype)
@@ -1817,8 +1813,8 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		   address type.  */
 		gas_assert (operand->insert != NULL);
 		(*operand->insert) (0, tok[tokidx].X_add_number,
-				    errmsg);
-		if (*errmsg != NULL)
+				    &tmpmsg);
+		if (tmpmsg != NULL)
 		  goto match_failed;
 	      }
               break;
@@ -1844,11 +1840,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	      /* Special handling?  */
 	      if (operand->insert)
 		{
-		  *errmsg = NULL;
+		  tmpmsg = NULL;
 		  (*operand->insert)(0,
 				     regno (tok[tokidx].X_add_number),
-				     errmsg);
-		  if (*errmsg)
+				     &tmpmsg);
+		  if (tmpmsg)
 		    {
 		      if (operand->flags & ARC_OPERAND_IGNORE)
 			{
@@ -1920,7 +1916,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    tmpp = strdup (p);
 		    for (pp = tmpp; *pp; ++pp) *pp = TOLOWER (*pp);
 
-		    auxr = hash_find (arc_aux_hash, tmpp);
+		    auxr = str_hash_find (arc_aux_hash, tmpp);
 		    if (auxr)
 		      {
 			/* We modify the token array here, safe in the
@@ -1957,26 +1953,35 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			}
 
 		      if (val < min || val > max)
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is out of bounds");
+			  goto match_failed;
+			}
 
 		      /* Check alignments.  */
 		      if ((operand->flags & ARC_OPERAND_ALIGNED32)
 			  && (val & 0x03))
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is not 32bit aligned");
+			  goto match_failed;
+			}
 
 		      if ((operand->flags & ARC_OPERAND_ALIGNED16)
 			  && (val & 0x01))
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is not 16bit aligned");
+			  goto match_failed;
+			}
 		    }
 		  else if (operand->flags & ARC_OPERAND_NCHK)
 		    {
 		      if (operand->insert)
 			{
-			  *errmsg = NULL;
+			  tmpmsg = NULL;
 			  (*operand->insert)(0,
 					     tok[tokidx].X_add_number,
-					     errmsg);
-			  if (*errmsg)
+					     &tmpmsg);
+			  if (tmpmsg)
 			    goto match_failed;
 			}
 		      else if (!(operand->flags & ARC_OPERAND_IGNORE))
@@ -1997,11 +2002,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      regs |= get_register (tok[tokidx].X_op_symbol);
 		      if (operand->insert)
 			{
-			  *errmsg = NULL;
+			  tmpmsg = NULL;
 			  (*operand->insert)(0,
 					     regs,
-					     errmsg);
-			  if (*errmsg)
+					     &tmpmsg);
+			  if (tmpmsg)
 			    goto match_failed;
 			}
 		      else
@@ -2044,7 +2049,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      || t->X_op == O_absent
 		      || t->X_op == O_register
 		      || (t->X_add_number != tok[tokidx].X_add_number))
-		    goto match_failed;
+		    {
+		      tmpmsg = _("operand is not duplicate of the "
+				 "previous one");
+		      goto match_failed;
+		    }
 		}
 	      t = &tok[tokidx];
 	      break;
@@ -2060,7 +2069,10 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 
       /* Setup ready for flag parsing.  */
       if (!parse_opcode_flags (opcode, nflgs, first_pflag))
-	goto match_failed;
+	{
+	  tmpmsg = _("flag mismatch");
+	  goto match_failed;
+	}
 
       pr_debug ("flg");
       /* Possible match -- did we use all of our input?  */
@@ -2070,12 +2082,19 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  pr_debug ("\n");
 	  return opcode;
 	}
+      tmpmsg = _("too many arguments");
 
     match_failed:;
       pr_debug ("\n");
       /* Restore the original parameters.  */
       memcpy (tok, bktok, MAX_INSN_ARGS * sizeof (*tok));
       ntok = bkntok;
+      if (tokidx >= maxerridx
+	  && tmpmsg)
+	{
+	  maxerridx = tokidx;
+	  *errmsg = tmpmsg;
+	}
     }
 
   if (*pcpumatch)
@@ -2528,14 +2547,11 @@ md_assemble (char *str)
 static void
 declare_register (const char *name, int number)
 {
-  const char *err;
   symbolS *regS = symbol_create (name, reg_section,
-				 number, &zero_address_frag);
+				 &zero_address_frag, number);
 
-  err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
-  if (err)
-    as_fatal (_("Inserting \"%s\" into register table failed: %s"),
-	      name, err);
+  if (str_hash_insert (arc_reg_hash, S_GET_NAME (regS), regS, 0) != NULL)
+    as_fatal (_("duplicate %s"), name);
 }
 
 /* Construct symbols for each of the general registers.  */
@@ -2546,7 +2562,7 @@ declare_register_set (void)
   int i;
   for (i = 0; i < 64; ++i)
     {
-      char name[7];
+      char name[32];
 
       sprintf (name, "r%d", i);
       declare_register (name, i);
@@ -2563,15 +2579,11 @@ declare_register_set (void)
 static void
 declare_addrtype (const char *name, int number)
 {
-  const char *err;
   symbolS *addrtypeS = symbol_create (name, undefined_section,
-                                      number, &zero_address_frag);
+				      &zero_address_frag, number);
 
-  err = hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
-                     (void *) addrtypeS);
-  if (err)
-    as_fatal (_("Inserting \"%s\" into address type table failed: %s"),
-              name, err);
+  if (str_hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS), addrtypeS, 0))
+    as_fatal (_("duplicate %s"), name);
 }
 
 /* Port-specific assembler initialization.  This function is called
@@ -2595,9 +2607,7 @@ md_begin (void)
   bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   /* Set up a hash table for the instructions.  */
-  arc_opcode_hash = hash_new ();
-  if (arc_opcode_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  arc_opcode_hash = str_htab_create ();
 
   /* Initialize the hash table with the insns.  */
   do
@@ -2613,9 +2623,7 @@ md_begin (void)
     }while (opcode->name);
 
   /* Register declaration.  */
-  arc_reg_hash = hash_new ();
-  if (arc_reg_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  arc_reg_hash = str_htab_create ();
 
   declare_register_set ();
   declare_register ("gp", 26);
@@ -2666,16 +2674,12 @@ md_begin (void)
   memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
 
   /* Aux register declaration.  */
-  arc_aux_hash = hash_new ();
-  if (arc_aux_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  arc_aux_hash = str_htab_create ();
 
   const struct arc_aux_reg *auxr = &arc_aux_regs[0];
   unsigned int i;
   for (i = 0; i < arc_num_aux_regs; i++, auxr++)
     {
-      const char *retval;
-
       if (!(auxr->cpu & selected_cpu.flags))
 	continue;
 
@@ -2683,16 +2687,12 @@ md_begin (void)
 	  && !check_cpu_feature (auxr->subclass))
 	continue;
 
-      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
-      if (retval)
-	as_fatal (_("internal error: can't hash aux register '%s': %s"),
-		  auxr->name, retval);
+      if (str_hash_insert (arc_aux_hash, auxr->name, auxr, 0) != 0)
+	as_fatal (_("duplicate %s"), auxr->name);
     }
 
   /* Address type declaration.  */
-  arc_addrtype_hash = hash_new ();
-  if (arc_addrtype_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  arc_addrtype_hash = str_htab_create ();
 
   declare_addrtype ("bd", ARC_NPS400_ADDRTYPE_BD);
   declare_addrtype ("jid", ARC_NPS400_ADDRTYPE_JID);
@@ -3342,7 +3342,7 @@ md_undefined_symbol (char *name)
 	    as_bad ("GOT already in symbol table");
 
 	  GOT_symbol = symbol_new (GLOBAL_OFFSET_TABLE_NAME, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+				   &zero_address_frag, 0);
 	};
       return GOT_symbol;
     }
@@ -3396,7 +3396,7 @@ arc_parse_name (const char *name,
       && e->X_md == O_absent)
     return FALSE;
 
-  sym = hash_find (arc_reg_hash, name);
+  sym = str_hash_find (arc_reg_hash, name);
   if (sym)
     {
       e->X_op = O_register;
@@ -3404,7 +3404,7 @@ arc_parse_name (const char *name,
       return TRUE;
     }
 
-  sym = hash_find (arc_addrtype_hash, name);
+  sym = str_hash_find (arc_addrtype_hash, name);
   if (sym)
     {
       e->X_op = O_addrtype;
@@ -4369,7 +4369,7 @@ tc_arc_regname_to_dw2regnum (char *regname)
 {
   struct symbol *sym;
 
-  sym = hash_find (arc_reg_hash, regname);
+  sym = str_hash_find (arc_reg_hash, regname);
   if (sym)
     return S_GET_VALUE (sym);
 
@@ -4859,7 +4859,6 @@ arc_extcorereg (int opertype)
 {
   extRegister_t ereg;
   struct arc_aux_reg *auxr;
-  const char *retval;
   struct arc_flag_operand *ccode;
 
   memset (&ereg, 0, sizeof (ereg));
@@ -4882,10 +4881,8 @@ arc_extcorereg (int opertype)
       auxr->cpu = selected_cpu.flags;
       auxr->subclass = NONE;
       auxr->address = ereg.number;
-      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
-      if (retval)
-	as_fatal (_("internal error: can't hash aux register '%s': %s"),
-		  auxr->name, retval);
+      if (str_hash_insert (arc_aux_hash, auxr->name, auxr, 0) != NULL)
+	as_bad (_("duplicate aux register %s"), auxr->name);
       break;
     case EXT_COND_CODE:
       /* Condition code.  */
@@ -4896,8 +4893,6 @@ arc_extcorereg (int opertype)
       ext_condcode.arc_ext_condcode =
 	XRESIZEVEC (struct arc_flag_operand, ext_condcode.arc_ext_condcode,
 		    ext_condcode.size + 1);
-      if (ext_condcode.arc_ext_condcode == NULL)
-	as_fatal (_("Virtual memory exhausted"));
 
       ccode = ext_condcode.arc_ext_condcode + ext_condcode.size - 1;
       ccode->name   = ereg.name;
@@ -4963,8 +4958,6 @@ arc_stralloc (char * s1, const char * s2)
   len += strlen (s2) + 1;
 
   p = (char *) xmalloc (len);
-  if (p == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   if (s1)
     {

@@ -13,10 +13,6 @@
 	csr utval		# Added in 1.10
 	csr uip
 
-	csr fflags
-	csr frm
-	csr fcsr
-
 	csr cycle
 	csr time
 	csr instret
@@ -231,23 +227,12 @@
 	csr mhpmevent30
 	csr mhpmevent31
 
-	csr tselect
-	csr tdata1
-	csr tdata2
-	csr tdata3
-
-	csr dcsr
-	csr dpc
-	csr dscratch0		# Added in 1.11
-	csr dscratch1		# Added in 1.11
-
 	# Supported in previous priv spec, but dropped now.
 	csr ubadaddr		# 0x043 in 1.9.1, but the value is utval since 1.10
 	csr sbadaddr		# 0x143 in 1.9.1, but the value is stval since 1.10
 	csr sptbr		# 0x180 in 1.9.1, but the value is satp since 1.10
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
-	csr dscratch		# 0x7b2 in 1.10,  but the value is dscratch0 since 1.11
 
 	csr hstatus		# 0x200, dropped in 1.10
 	csr hedeleg		# 0x202, dropped in 1.10
@@ -267,3 +252,33 @@
 	csr mdbound		# 0x385, dropped in 1.10
 	csr mscounteren		# 0x321, dropped in 1.10
 	csr mhcounteren		# 0x322, dropped in 1.10
+
+	# Unprivileged CSR which are not controlled by privilege spec.
+
+	# Float
+	csr fflags
+	csr frm
+	csr fcsr
+
+	# Core debug
+	csr dcsr
+	csr dpc
+	csr dscratch0
+	csr dscratch1
+	csr dscratch		# 0x7b2, alias to dscratch0
+
+	# Trigger debug
+	csr tselect
+	csr tdata1
+	csr tdata2
+	csr tdata3
+	csr tinfo
+	csr tcontrol
+	csr mcontext
+	csr scontext
+	csr mcontrol		# 0x7a1, alias to tdata1
+	csr icount		# 0x7a1, alias to tdata1
+	csr itrigger		# 0x7a1, alias to tdata1
+	csr etrigger		# 0x7a1, alias to tdata1
+	csr textra32		# 0x7a3, alias to tdata3
+	csr textra64		# 0x7a3, alias to tdata3

@@ -93,10 +93,20 @@ init_target_desc (struct target_desc *tdesc,
 #endif
 }
 
+/* See gdbsupport/tdesc.h.  */
+
 struct target_desc *
 allocate_target_description (void)
 {
   return new target_desc ();
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+void
+target_desc_deleter::operator() (struct target_desc *target_desc) const
+{
+  delete target_desc;
 }
 
 #ifndef IN_PROCESS_AGENT
@@ -120,6 +130,27 @@ current_target_desc (void)
     return &default_description;
 
   return current_process ()->tdesc;
+}
+
+/* An empty structure.  */
+
+struct tdesc_compatible_info { };
+
+/* See gdbsupport/tdesc.h.  */
+
+const std::vector<tdesc_compatible_info_up> &
+tdesc_compatible_info_list (const target_desc *target_desc)
+{
+  static std::vector<tdesc_compatible_info_up> empty;
+  return empty;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+const char *
+tdesc_compatible_info_arch_name (const tdesc_compatible_info_up &c_info)
+{
+  return nullptr;
 }
 
 /* See gdbsupport/tdesc.h.  */

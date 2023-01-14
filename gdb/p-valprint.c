@@ -305,12 +305,10 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	  /* Extract the address, assume that it is unsigned.  */
 	  print_address_demangle
 	    (options, gdbarch,
-	     extract_unsigned_integer (valaddr
-				       + TYPE_FIELD_BITPOS (type,
-							    VTBL_FNADDR_OFFSET) / 8,
-				       TYPE_LENGTH (TYPE_FIELD_TYPE (type,
-								     VTBL_FNADDR_OFFSET)),
-				       byte_order),
+	     extract_unsigned_integer
+	       (valaddr + TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
+		TYPE_LENGTH (type->field (VTBL_FNADDR_OFFSET).type ()),
+		byte_order),
 	     stream, demangle);
 	}
       else
@@ -330,9 +328,9 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
       break;
 
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = type->index_type ();
       elttype = check_typedef (elttype);
-      if (TYPE_STUB (elttype))
+      if (elttype->is_stub ())
 	{
 	  fprintf_styled (stream, metadata_style.style (), "<incomplete type>");
 	  break;
@@ -352,7 +350,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	      maximum value.  */
 	      bound_info = 0;
 	      high_bound = TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1;
-	      TYPE_HIGH_BOUND (range) = high_bound;
+	      range->bounds ()->high.set_const_val (high_bound);
 	    }
 	maybe_bad_bstring:
 	  if (bound_info < 0)
@@ -580,7 +578,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
 
-	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+	  annotate_field_begin (type->field (i).type ());
 
 	  if (field_is_static (&type->field (i)))
 	    {

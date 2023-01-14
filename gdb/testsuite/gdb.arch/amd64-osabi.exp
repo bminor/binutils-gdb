@@ -24,7 +24,7 @@ if { ![istarget x86_64-*-* ] } {
 proc test_osabi_none { arch void_ptr_size long_double_size } {
     clean_restart
 
-    gdb_test "set architecture i386:x86-64" "The target architecture is assumed to be i386:x86-64"
+    gdb_test "set architecture i386:x86-64" "The target architecture is set to \"i386:x86-64\"\\."
     gdb_test_no_output "set osabi none" "set osabi none"
     gdb_test "print sizeof (void*)" " = 8"
     gdb_test "print sizeof (long double)" " = 16"

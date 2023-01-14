@@ -210,53 +210,11 @@ enum type_instance_flag_value : unsigned
 
 DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
-/* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
-   the type is signed (unless TYPE_NOSIGN (below) is set).  */
-
-#define TYPE_UNSIGNED(t)	(TYPE_MAIN_TYPE (t)->flag_unsigned)
-
-/* * No sign for this type.  In C++, "char", "signed char", and
-   "unsigned char" are distinct types; so we need an extra flag to
-   indicate the absence of a sign!  */
-
-#define TYPE_NOSIGN(t)		(TYPE_MAIN_TYPE (t)->flag_nosign)
-
 /* * A compiler may supply dwarf instrumentation
    that indicates the desired endian interpretation of the variable
    differs from the native endian representation. */
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
-
-/* * This appears in a type's flags word if it is a stub type (e.g.,
-   if someone referenced a type that wasn't defined in a source file
-   via (struct sir_not_appearing_in_this_film *)).  */
-
-#define TYPE_STUB(t)		(TYPE_MAIN_TYPE (t)->flag_stub)
-
-/* * The target type of this type is a stub type, and this type needs
-   to be updated if it gets un-stubbed in check_typedef.  Used for
-   arrays and ranges, in which TYPE_LENGTH of the array/range gets set
-   based on the TYPE_LENGTH of the target type.  Also, set for
-   TYPE_CODE_TYPEDEF.  */
-
-#define TYPE_TARGET_STUB(t)	(TYPE_MAIN_TYPE (t)->flag_target_stub)
-
-/* * This is a function type which appears to have a prototype.  We
-   need this for function calls in order to tell us if it's necessary
-   to coerce the args, or to just do the standard conversions.  This
-   is used with a short field.  */
-
-#define TYPE_PROTOTYPED(t)	(TYPE_MAIN_TYPE (t)->flag_prototyped)
-
-/* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
-   to functions.  */
-
-#define TYPE_VARARGS(t)		(TYPE_MAIN_TYPE (t)->flag_varargs)
-
-/* * Identify a vector type.  Gcc is handling this by adding an extra
-   attribute to the array type.  We slurp that in as a new flag of a
-   type.  This is used only in dwarf2read.c.  */
-#define TYPE_VECTOR(t)		(TYPE_MAIN_TYPE (t)->flag_vector)
 
 /* * The debugging formats (especially STABS) do not contain enough
    information to represent all Ada types---especially those whose
@@ -275,7 +233,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only
    guessed the TYPE_STUB(t) value (see dwarfread.c).  */
 
-#define TYPE_STUB_SUPPORTED(t)   (TYPE_MAIN_TYPE (t)->flag_stub_supported)
+#define TYPE_STUB_SUPPORTED(t)   ((t)->stub_is_supported ())
 
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
@@ -511,11 +469,87 @@ union dynamic_prop_data
 
 struct dynamic_prop
 {
+  dynamic_prop_kind kind () const
+  {
+    return m_kind;
+  }
+
+  void set_undefined ()
+  {
+    m_kind = PROP_UNDEFINED;
+  }
+
+  LONGEST const_val () const
+  {
+    gdb_assert (m_kind == PROP_CONST);
+
+    return m_data.const_val;
+  }
+
+  void set_const_val (LONGEST const_val)
+  {
+    m_kind = PROP_CONST;
+    m_data.const_val = const_val;
+  }
+
+  void *baton () const
+  {
+    gdb_assert (m_kind == PROP_LOCEXPR
+		|| m_kind == PROP_LOCLIST
+		|| m_kind == PROP_ADDR_OFFSET);
+
+    return m_data.baton;
+  }
+
+  void set_locexpr (void *baton)
+  {
+    m_kind = PROP_LOCEXPR;
+    m_data.baton = baton;
+  }
+
+  void set_loclist (void *baton)
+  {
+    m_kind = PROP_LOCLIST;
+    m_data.baton = baton;
+  }
+
+  void set_addr_offset (void *baton)
+  {
+    m_kind = PROP_ADDR_OFFSET;
+    m_data.baton = baton;
+  }
+
+  const gdb::array_view<variant_part> *variant_parts () const
+  {
+    gdb_assert (m_kind == PROP_VARIANT_PARTS);
+
+    return m_data.variant_parts;
+  }
+
+  void set_variant_parts (gdb::array_view<variant_part> *variant_parts)
+  {
+    m_kind = PROP_VARIANT_PARTS;
+    m_data.variant_parts = variant_parts;
+  }
+
+  struct type *original_type () const
+  {
+    gdb_assert (m_kind == PROP_TYPE);
+
+    return m_data.original_type;
+  }
+
+  void set_original_type (struct type *original_type)
+  {
+    m_kind = PROP_TYPE;
+    m_data.original_type = original_type;
+  }
+
   /* Determine which field of the union dynamic_prop.data is used.  */
-  enum dynamic_prop_kind kind;
+  enum dynamic_prop_kind m_kind;
 
   /* Storage for dynamic or static value.  */
-  union dynamic_prop_data data;
+  union dynamic_prop_data m_data;
 };
 
 /* Compare two dynamic_prop objects for equality.  dynamic_prop
@@ -635,6 +669,16 @@ union field_location
 
 struct field
 {
+  struct type *type () const
+  {
+    return this->m_type;
+  }
+
+  void set_type (struct type *type)
+  {
+    this->m_type = type;
+  }
+
   union field_location loc;
 
   /* * For a function or member type, this is 1 if the argument is
@@ -660,7 +704,7 @@ struct field
      - In a function or member type, type of this argument.
      - In an array type, the domain-type of the array.  */
 
-  struct type *type;
+  struct type *m_type;
 
   /* * Name of field, value or argument.
      NULL for range bounds, array domains, and member function
@@ -671,6 +715,14 @@ struct field
 
 struct range_bounds
 {
+  ULONGEST bit_stride () const
+  {
+    if (this->flag_is_byte_stride)
+      return this->stride.const_val () * 8;
+    else
+      return this->stride.const_val ();
+  }
+
   /* * Low bound of range.  */
 
   struct dynamic_prop low;
@@ -761,14 +813,14 @@ struct main_type
      because they packs nicely here.  See the TYPE_* macros for
      documentation about these fields.  */
 
-  unsigned int flag_unsigned : 1;
-  unsigned int flag_nosign : 1;
-  unsigned int flag_stub : 1;
-  unsigned int flag_target_stub : 1;
-  unsigned int flag_prototyped : 1;
-  unsigned int flag_varargs : 1;
-  unsigned int flag_vector : 1;
-  unsigned int flag_stub_supported : 1;
+  unsigned int m_flag_unsigned : 1;
+  unsigned int m_flag_nosign : 1;
+  unsigned int m_flag_stub : 1;
+  unsigned int m_flag_target_stub : 1;
+  unsigned int m_flag_prototyped : 1;
+  unsigned int m_flag_varargs : 1;
+  unsigned int m_flag_vector : 1;
+  unsigned int m_flag_stub_supported : 1;
   unsigned int flag_gnu_ifunc : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
@@ -933,6 +985,156 @@ struct type
     this->main_type->flds_bnds.fields = fields;
   }
 
+  type *index_type () const
+  {
+    return this->field (0).type ();
+  }
+
+  void set_index_type (type *index_type)
+  {
+    this->field (0).set_type (index_type);
+  }
+
+  /* Get the bounds bounds of this type.  The type must be a range type.  */
+  range_bounds *bounds () const
+  {
+    switch (this->code ())
+      {
+      case TYPE_CODE_RANGE:
+	return this->main_type->flds_bnds.bounds;
+
+      case TYPE_CODE_ARRAY:
+      case TYPE_CODE_STRING:
+	return this->index_type ()->bounds ();
+
+      default:
+	gdb_assert_not_reached
+	  ("type::bounds called on type with invalid code");
+      }
+  }
+
+  /* Set the bounds of this type.  The type must be a range type.  */
+  void set_bounds (range_bounds *bounds)
+  {
+    gdb_assert (this->code () == TYPE_CODE_RANGE);
+
+    this->main_type->flds_bnds.bounds = bounds;
+  }
+
+  ULONGEST bit_stride () const
+  {
+    return this->bounds ()->bit_stride ();
+  }
+
+  /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
+     the type is signed (unless TYPE_NOSIGN is set).  */
+
+  bool is_unsigned () const
+  {
+    return this->main_type->m_flag_unsigned;
+  }
+
+  void set_is_unsigned (bool is_unsigned)
+  {
+    this->main_type->m_flag_unsigned = is_unsigned;
+  }
+
+  /* No sign for this type.  In C++, "char", "signed char", and
+     "unsigned char" are distinct types; so we need an extra flag to
+     indicate the absence of a sign!  */
+
+  bool has_no_signedness () const
+  {
+    return this->main_type->m_flag_nosign;
+  }
+
+  void set_has_no_signedness (bool has_no_signedness)
+  {
+    this->main_type->m_flag_nosign = has_no_signedness;
+  }
+
+  /* This appears in a type's flags word if it is a stub type (e.g.,
+     if someone referenced a type that wasn't defined in a source file
+     via (struct sir_not_appearing_in_this_film *)).  */
+
+  bool is_stub () const
+  {
+    return this->main_type->m_flag_stub;
+  }
+
+  void set_is_stub (bool is_stub)
+  {
+    this->main_type->m_flag_stub = is_stub;
+  }
+
+  /* The target type of this type is a stub type, and this type needs
+     to be updated if it gets un-stubbed in check_typedef.  Used for
+     arrays and ranges, in which TYPE_LENGTH of the array/range gets set
+     based on the TYPE_LENGTH of the target type.  Also, set for
+     TYPE_CODE_TYPEDEF.  */
+
+  bool target_is_stub () const
+  {
+    return this->main_type->m_flag_target_stub;
+  }
+
+  void set_target_is_stub (bool target_is_stub)
+  {
+    this->main_type->m_flag_target_stub = target_is_stub;
+  }
+
+  /* This is a function type which appears to have a prototype.  We
+     need this for function calls in order to tell us if it's necessary
+     to coerce the args, or to just do the standard conversions.  This
+     is used with a short field.  */
+
+  bool is_prototyped () const
+  {
+    return this->main_type->m_flag_prototyped;
+  }
+
+  void set_is_prototyped (bool is_prototyped)
+  {
+    this->main_type->m_flag_prototyped = is_prototyped;
+  }
+
+  /* FIXME drow/2002-06-03:  Only used for methods, but applies as well
+     to functions.  */
+
+  bool has_varargs () const
+  {
+    return this->main_type->m_flag_varargs;
+  }
+
+  void set_has_varargs (bool has_varargs)
+  {
+    this->main_type->m_flag_varargs = has_varargs;
+  }
+
+  /* Identify a vector type.  Gcc is handling this by adding an extra
+     attribute to the array type.  We slurp that in as a new flag of a
+     type.  This is used only in dwarf2read.c.  */
+
+  bool is_vector () const
+  {
+    return this->main_type->m_flag_vector;
+  }
+
+  void set_is_vector (bool is_vector)
+  {
+    this->main_type->m_flag_vector = is_vector;
+  }
+
+  bool stub_is_supported () const
+  {
+    return this->main_type->m_flag_stub_supported;
+  }
+
+  void set_stub_is_supported (bool stub_is_supported)
+  {
+    this->main_type->m_flag_stub_supported = stub_is_supported;
+  }
+
   /* * Return the dynamic property of the requested KIND from this type's
      list of dynamic properties.  */
   dynamic_prop *dyn_prop (dynamic_prop_node_kind kind) const;
@@ -1012,8 +1214,6 @@ struct type
 
   struct main_type *main_type;
 };
-
-#define	NULL_TYPE ((struct type *) 0)
 
 struct fn_fieldlist
 {
@@ -1482,33 +1682,15 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
-#define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
-#define TYPE_LOW_BOUND(range_type) \
-  TYPE_RANGE_DATA(range_type)->low.data.const_val
-#define TYPE_HIGH_BOUND(range_type) \
-  TYPE_RANGE_DATA(range_type)->high.data.const_val
-#define TYPE_LOW_BOUND_UNDEFINED(range_type) \
-  (TYPE_RANGE_DATA(range_type)->low.kind == PROP_UNDEFINED)
-#define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
-  (TYPE_RANGE_DATA(range_type)->high.kind == PROP_UNDEFINED)
-#define TYPE_HIGH_BOUND_KIND(range_type) \
-  TYPE_RANGE_DATA(range_type)->high.kind
-#define TYPE_LOW_BOUND_KIND(range_type) \
-  TYPE_RANGE_DATA(range_type)->low.kind
-#define TYPE_BIT_STRIDE(range_type) \
-  (TYPE_RANGE_DATA(range_type)->stride.data.const_val \
-   * (TYPE_RANGE_DATA(range_type)->flag_is_byte_stride ? 8 : 1))
-
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION))
 #define TYPE_DATA_LOCATION_BATON(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.baton
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
-  TYPE_DATA_LOCATION (thistype)->data.const_val
+  (TYPE_DATA_LOCATION (thistype)->const_val ())
 #define TYPE_DATA_LOCATION_KIND(thistype) \
-  TYPE_DATA_LOCATION (thistype)->kind
+  (TYPE_DATA_LOCATION (thistype)->kind ())
 #define TYPE_DYNAMIC_LENGTH(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_BYTE_SIZE))
 
@@ -1517,32 +1699,6 @@ extern bool set_type_align (struct type *, ULONGEST);
   ((thistype)->dyn_prop (DYN_PROP_ALLOCATED))
 #define TYPE_ASSOCIATED_PROP(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
-
-/* Attribute accessors for dynamic properties.  */
-#define TYPE_DYN_PROP_BATON(dynprop) \
-  dynprop->data.baton
-#define TYPE_DYN_PROP_ADDR(dynprop) \
-  dynprop->data.const_val
-#define TYPE_DYN_PROP_KIND(dynprop) \
-  dynprop->kind
-
-
-/* Accessors for struct range_bounds data attached to an array type's
-   index type.  */
-
-#define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
-#define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_LOW_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
-
-#define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
-   (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
-
-#define TYPE_ARRAY_LOWER_BOUND_VALUE(arraytype) \
-   (TYPE_LOW_BOUND(TYPE_INDEX_TYPE((arraytype))))
-
-#define TYPE_ARRAY_BIT_STRIDE(arraytype) \
-  (TYPE_BIT_STRIDE(TYPE_INDEX_TYPE((arraytype))))
 
 /* C++ */
 
@@ -1579,7 +1735,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention
 #define TYPE_NO_RETURN(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->is_noreturn
 #define TYPE_TAIL_CALL_LIST(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->tail_call_list
-#define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
+#define TYPE_BASECLASS(thistype,index) ((thistype)->field (index).type ())
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)
 #define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
@@ -1591,7 +1747,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_TYPE(thisfld) ((thisfld).type)
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
 #define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)
@@ -1619,7 +1774,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE((thistype)->field (n))
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME((thistype)->field (n))
 #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
@@ -1728,7 +1882,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
    && ((thistype)->num_fields () == 0) \
    && (!HAVE_CPLUS_STRUCT (thistype) \
        || TYPE_NFN_FIELDS (thistype) == 0) \
-   && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
+   && ((thistype)->is_stub () || !TYPE_STUB_SUPPORTED (thistype)))
 
 /* * A helper macro that returns the name of a type or "unnamed type"
    if the type has no name.  */
@@ -1760,6 +1914,7 @@ struct builtin_type
   struct type *builtin_unsigned_short;
   struct type *builtin_unsigned_int;
   struct type *builtin_unsigned_long;
+  struct type *builtin_bfloat16;
   struct type *builtin_half;
   struct type *builtin_float;
   struct type *builtin_double;
@@ -1894,7 +2049,7 @@ extern const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
-
+extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 /* Allocate space for storing data associated with a particular
    type.  We ensure that the space is allocated using the same

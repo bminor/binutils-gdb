@@ -31,12 +31,6 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     global srcdir subdir srcfile
 
-    lassign [function_range first ${srcdir}/${subdir}/${srcfile}] \
-	first_start first_length
-
-    lassign [function_range second ${srcdir}/${subdir}/${srcfile}] \
-	second_start second_length
-
     cu {} {
 	DW_TAG_compile_unit {
                 {DW_AT_language @DW_LANG_Ada95}
@@ -55,16 +49,14 @@ Dwarf::assemble $asm_file {
             DW_TAG_subprogram {
                 {name system__namefirst}
 		{linkage_name __gnat_namefirst}
-                {low_pc $first_start addr}
-                {high_pc "$first_start + $first_length" addr}
+		{MACRO_AT_range {first}}
                 {type :$b_l}
 	    }
 	    # Here the linkage name comes first and the name second.
             DW_TAG_subprogram {
 		{linkage_name __gnat_namesecond}
                 {name system__namesecond}
-                {low_pc $second_start addr}
-                {high_pc "$second_start + $second_length" addr}
+                {MACRO_AT_range {second}}
                 {type :$b_l}
 	    }
 	}

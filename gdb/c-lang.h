@@ -116,9 +116,6 @@ extern void c_emit_char (int c, struct type *type,
 
 extern const struct op_print c_op_print_tab[];
 
-extern gdb::unique_xmalloc_ptr<char> c_watch_location_expression
-     (struct type *type, CORE_ADDR addr);
-
 /* These are in c-typeprint.c: */
 
 extern void c_type_print_base (struct type *, struct ui_file *,
@@ -157,7 +154,7 @@ extern int c_textual_element_type (struct type *, char);
    compiler is owned by the caller and must be freed using the destroy
    method.  This function never returns NULL, but rather throws an
    exception on failure.  This is suitable for use as the
-   la_get_compile_instance language method.  */
+   language_defn::get_compile_instance method.  */
 
 extern compile_instance *c_get_compile_context (void);
 
@@ -165,14 +162,14 @@ extern compile_instance *c_get_compile_context (void);
    compiler is owned by the caller and must be freed using the destroy
    method.  This function never returns NULL, but rather throws an
    exception on failure.  This is suitable for use as the
-   la_get_compile_instance language method.  */
+   language_defn::get_compile_instance method.  */
 
 extern compile_instance *cplus_get_compile_context ();
 
 /* This takes the user-supplied text and returns a new bit of code to
    compile.
 
-   This is used as the la_compute_program language method; see that
+   This is used as the compute_program language method; see that
    for a description of the arguments.  */
 
 extern std::string c_compute_program (compile_instance *inst,
@@ -183,7 +180,7 @@ extern std::string c_compute_program (compile_instance *inst,
 
 /* This takes the user-supplied text and returns a new bit of code to compile.
 
-   This is used as the la_compute_program language method; see that
+   This is used as the compute_program language method; see that
    for a description of the arguments.  */
 
 extern std::string cplus_compute_program (compile_instance *inst,

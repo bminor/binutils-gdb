@@ -91,6 +91,8 @@ test_op_array::operator[] (T *t)
 
 /* Code for operator new tests.  */
 
+static int dummy;
+
 struct test_op_new
 {
   void *operator new (size_t);
@@ -99,7 +101,7 @@ struct test_op_new
 void *
 test_op_new::operator new (size_t)
 {
-  return NULL;
+  return &dummy;
 }
 
 /* Code for operator delete tests.  */
@@ -124,7 +126,7 @@ struct test_op_new_array
 void *
 test_op_new_array::operator new[] (size_t)
 {
-  return NULL;
+  return &dummy;
 }
 
 /* Code for operator delete[] tests.  */

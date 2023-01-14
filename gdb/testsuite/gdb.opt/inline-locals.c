@@ -29,9 +29,18 @@ volatile int *array_p;
 
 void bar(void);
 
+void
+init_array (int *array, int n)
+{
+  int i;
+  for (i = 0; i < n; ++i)
+    array[i] = 0;
+}
+
 inline ATTR int func1(int arg1)
 {
   int array[64];
+  init_array (array, 64);
   array_p = array;
   array[0] = result;
   array[1] = arg1;

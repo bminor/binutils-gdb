@@ -508,7 +508,7 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
   if (func_type->num_fields () == 0)
     return NULL;
 
-  regsp_type = check_typedef (TYPE_FIELD_TYPE (func_type, 0));
+  regsp_type = check_typedef (func_type->field (0).type ());
   if (regsp_type->code () != TYPE_CODE_PTR)
     error (_("Invalid type code %d of first parameter of function \"%s\" "
 	     "in compiled module \"%s\"."),
@@ -540,8 +540,8 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
       ULONGEST reg_bitpos = TYPE_FIELD_BITPOS (regs_type, fieldno);
       ULONGEST reg_bitsize = TYPE_FIELD_BITSIZE (regs_type, fieldno);
       ULONGEST reg_offset;
-      struct type *reg_type = check_typedef (TYPE_FIELD_TYPE (regs_type,
-							      fieldno));
+      struct type *reg_type
+	= check_typedef (regs_type->field (fieldno).type ());
       ULONGEST reg_size = TYPE_LENGTH (reg_type);
       int regnum;
       struct value *regval;

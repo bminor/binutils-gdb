@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "dosname.h"
+#include "filename.h"
 
 #undef rmdir
 

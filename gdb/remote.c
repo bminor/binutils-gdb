@@ -2493,8 +2493,9 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
 	    thread_change_ptid (this, inferior_ptid, currthread);
 	  else
 	    {
-	      remote_add_thread (currthread, running, executing);
-	      inferior_ptid = currthread;
+	      thread_info *thr
+		= remote_add_thread (currthread, running, executing);
+	      switch_to_thread (thr);
 	    }
 	  return;
 	}
@@ -4346,9 +4347,10 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
   struct remote_state *rs = get_remote_state ();
   bool fake_pid_p = false;
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
 
-  /* Now, if we have thread information, update inferior_ptid.  */
+  /* Now, if we have thread information, update the current thread's
+     ptid.  */
   ptid_t curr_ptid = get_current_thread (wait_status);
 
   if (curr_ptid != null_ptid)
@@ -5603,8 +5605,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   /* Register extra event sources in the event loop.  */
   rs->remote_async_inferior_event_token
-    = create_async_event_handler (remote_async_inferior_event_handler,
-				  remote);
+    = create_async_event_handler (remote_async_inferior_event_handler, remote);
   rs->notif_state = remote_notif_state_allocate (remote);
 
   /* Reset the target state; these things will be queried either by
@@ -5760,7 +5761,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
     }
   else
     {
-      inferior_ptid = null_ptid;
+      switch_to_no_thread ();
       detach_inferior (current_inferior ());
     }
 }
@@ -5906,33 +5907,33 @@ extended_remote_target::attach (const char *args, int from_tty)
 	     target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
-  set_current_inferior (remote_add_inferior (false, pid, 1, 0));
+  switch_to_inferior_no_thread (remote_add_inferior (false, pid, 1, 0));
 
   inferior_ptid = ptid_t (pid);
 
   if (target_is_non_stop_p ())
     {
-      struct thread_info *thread;
-
       /* Get list of threads.  */
       update_thread_list ();
 
-      thread = first_thread_of_inferior (current_inferior ());
-      if (thread)
-	inferior_ptid = thread->ptid;
-      else
-	inferior_ptid = ptid_t (pid);
+      thread_info *thread = first_thread_of_inferior (current_inferior ());
+      if (thread != nullptr)
+	switch_to_thread (thread);
 
       /* Invalidate our notion of the remote current thread.  */
       record_currthread (rs, minus_one_ptid);
     }
   else
     {
-      /* Now, if we have thread information, update inferior_ptid.  */
-      inferior_ptid = remote_current_thread (inferior_ptid);
+      /* Now, if we have thread information, update the main thread's
+	 ptid.  */
+      ptid_t curr_ptid = remote_current_thread (ptid_t (pid));
 
       /* Add the main thread to the thread list.  */
-      thread_info *thr = add_thread_silent (this, inferior_ptid);
+      thread_info *thr = add_thread_silent (this, curr_ptid);
+
+      switch_to_thread (thr);
+
       /* Don't consider the thread stopped until we've processed the
 	 saved stop reply.  */
       set_executing (this, thr->ptid, true);
@@ -14156,13 +14157,26 @@ remote_async_serial_handler (struct serial *scb, void *context)
 {
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
-  inferior_event_handler (INF_REG_EVENT, NULL);
+  inferior_event_handler (INF_REG_EVENT);
 }
 
 static void
 remote_async_inferior_event_handler (gdb_client_data data)
 {
-  inferior_event_handler (INF_REG_EVENT, data);
+  inferior_event_handler (INF_REG_EVENT);
+
+  remote_target *remote = (remote_target *) data;
+  remote_state *rs = remote->get_remote_state ();
+
+  /* inferior_event_handler may have consumed an event pending on the
+     infrun side without calling target_wait on the REMOTE target, or
+     may have pulled an event out of a different target.  Keep trying
+     for this remote target as long it still has either pending events
+     or unacknowledged notifications.  */
+
+  if (rs->notif_state->pending_event[notif_client_stop.id] != NULL
+      || !rs->stop_reply_queue.empty ())
+    mark_async_event_handler (rs->remote_async_inferior_event_token);
 }
 
 int
@@ -14422,10 +14436,10 @@ If set, a break, instead of a cntrl-c, is sent to the remote target."),
 			   set_remotebreak, show_remotebreak,
 			   &setlist, &showlist);
   cmd_name = "remotebreak";
-  cmd = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "set remote interrupt-sequence");
   cmd_name = "remotebreak"; /* needed because lookup_cmd updates the pointer */
-  cmd = lookup_cmd (&cmd_name, showlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, showlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "show remote interrupt-sequence");
 
   add_setshow_enum_cmd ("interrupt-sequence", class_support,

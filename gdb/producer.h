@@ -52,4 +52,8 @@ extern int producer_is_gcc (const char *producer, int *major, int *minor);
        running on Intel(R) 64, Version 18.0 Beta ....".  */
 extern bool producer_is_icc (const char *producer, int *major, int *minor);
 
+/* Returns true if the given PRODUCER string is LLVM (clang/flang) or
+   false otherwise.*/
+extern bool producer_is_llvm (const char *producer);
+
 #endif

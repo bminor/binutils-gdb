@@ -102,7 +102,7 @@ make_expr_symbol (expressionS *expressionP)
 			    : expressionP->X_op == O_register
 			      ? reg_section
 			      : expr_section),
-			   0, &zero_address_frag);
+			   &zero_address_frag, 0);
   symbol_set_value_expression (symbolP, expressionP);
 
   if (expressionP->X_op == O_constant)
@@ -224,8 +224,8 @@ static valueT
 generic_bignum_to_int32 (void)
 {
   valueT number =
-	   ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	   | (generic_bignum[0] & LITTLENUM_MASK);
+    ((((valueT) generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+     | ((valueT) generic_bignum[0] & LITTLENUM_MASK));
   number &= 0xffffffff;
   return number;
 }
@@ -1722,7 +1722,7 @@ add_to_result (expressionS *resultP, offsetT amount, int rhs_highbit)
   valueT ures = resultP->X_add_number;
   valueT uamount = amount;
 
-  resultP->X_add_number += amount;
+  resultP->X_add_number += uamount;
 
   resultP->X_extrabit ^= rhs_highbit;
 
@@ -1738,7 +1738,7 @@ subtract_from_result (expressionS *resultP, offsetT amount, int rhs_highbit)
   valueT ures = resultP->X_add_number;
   valueT uamount = amount;
 
-  resultP->X_add_number -= amount;
+  resultP->X_add_number -= uamount;
 
   resultP->X_extrabit ^= rhs_highbit;
 
@@ -1933,12 +1933,21 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    case O_multiply:		resultP->X_add_number *= v; break;
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
-	    case O_left_shift:		resultP->X_add_number <<= v; break;
+	    case O_left_shift:
+	      /* We always use unsigned shifts.  According to the ISO
+		 C standard, left shift of a signed type having a
+		 negative value is undefined behaviour, and right
+		 shift of a signed type having negative value is
+		 implementation defined.  Left shift of a signed type
+		 when the result overflows is also undefined
+		 behaviour.  So don't trigger ubsan warnings or rely
+		 on characteristics of the compiler.  */
+	      resultP->X_add_number
+		= (valueT) resultP->X_add_number << (valueT) v;
+	      break;
 	    case O_right_shift:
-	      /* We always use unsigned shifts, to avoid relying on
-		 characteristics of the compiler used to compile gas.  */
-	      resultP->X_add_number =
-		(offsetT) ((valueT) resultP->X_add_number >> (valueT) v);
+	      resultP->X_add_number
+		= (valueT) resultP->X_add_number >> (valueT) v;
 	      break;
 	    case O_bit_inclusive_or:	resultP->X_add_number |= v; break;
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;

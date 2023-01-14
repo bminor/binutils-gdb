@@ -520,7 +520,7 @@ struct s7_reg_map
 {
   const struct s7_reg_entry *names;
   int max_regno;
-  struct hash_control *htab;
+  htab_t htab;
   const char *expected;
 };
 
@@ -531,8 +531,8 @@ static struct s7_reg_map s7_all_reg_maps[] =
   {s7_score_crn_table, 31, NULL, N_("S+core co-processor register expected")},
 };
 
-static struct hash_control *s7_score_ops_hsh = NULL;
-static struct hash_control *s7_dependency_insn_hsh = NULL;
+static htab_t s7_score_ops_hsh = NULL;
+static htab_t s7_dependency_insn_hsh = NULL;
 
 
 struct s7_datafield_range
@@ -1112,7 +1112,7 @@ s7_end_of_line (char *str)
 }
 
 static int
-s7_score_reg_parse (char **ccp, struct hash_control *htab)
+s7_score_reg_parse (char **ccp, htab_t htab)
 {
   char *start = *ccp;
   char c;
@@ -1129,7 +1129,7 @@ s7_score_reg_parse (char **ccp, struct hash_control *htab)
     c = *p++;
 
   *--p = 0;
-  reg = (struct s7_reg_entry *) hash_find (htab, start);
+  reg = (struct s7_reg_entry *) str_hash_find (htab, start);
   *p = c;
 
   if (reg)
@@ -2321,7 +2321,8 @@ s7_dependency_type_from_insn (char *insn_name)
   const struct s7_insn_to_dependency *tmp;
 
   strcpy (name, insn_name);
-  tmp = (const struct s7_insn_to_dependency *) hash_find (s7_dependency_insn_hsh, name);
+  tmp = (const struct s7_insn_to_dependency *)
+    str_hash_find (s7_dependency_insn_hsh, name);
 
   if (tmp)
     return tmp->type;
@@ -2789,7 +2790,8 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s7_asm_opcode *) hash_find (s7_score_ops_hsh, operator);
+  opcode = (const struct s7_asm_opcode *) str_hash_find (s7_score_ops_hsh,
+							 operator);
   *p = c;
 
   memset (&s7_inst, '\0', sizeof (s7_inst));
@@ -5103,8 +5105,8 @@ s7_build_score_ops_hsh (void)
       new_opcode->relax_value = insn->relax_value;
       new_opcode->type = insn->type;
       new_opcode->bitmask = insn->bitmask;
-      hash_insert (s7_score_ops_hsh, new_opcode->template_name,
-                   (void *) new_opcode);
+      str_hash_insert (s7_score_ops_hsh, new_opcode->template_name,
+		       new_opcode, 0);
     }
 }
 
@@ -5130,8 +5132,7 @@ s7_build_dependency_insn_hsh (void)
       strcpy (insn_name, tmp->insn_name);
       new_i2d->insn_name = insn_name;
       new_i2d->type = tmp->type;
-      hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name,
-                   (void *) new_i2d);
+      str_hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name, new_i2d, 0);
     }
 }
 
@@ -5345,7 +5346,7 @@ s7_parse_pce_inst (char *insnstr)
 
 
 static void
-s7_insert_reg (const struct s7_reg_entry *r, struct hash_control *htab)
+s7_insert_reg (const struct s7_reg_entry *r, htab_t htab)
 {
   int i = 0;
   int len = strlen (r->name) + 2;
@@ -5359,8 +5360,8 @@ s7_insert_reg (const struct s7_reg_entry *r, struct hash_control *htab)
     }
   buf2[i] = '\0';
 
-  hash_insert (htab, buf, (void *) r);
-  hash_insert (htab, buf2, (void *) r);
+  str_hash_insert (htab, buf, r, 0);
+  str_hash_insert (htab, buf2, r, 0);
 }
 
 static void
@@ -5368,14 +5369,9 @@ s7_build_reg_hsh (struct s7_reg_map *map)
 {
   const struct s7_reg_entry *r;
 
-  if ((map->htab = hash_new ()) == NULL)
-    {
-      as_fatal (_("virtual memory exhausted"));
-    }
+  map->htab = str_htab_create ();
   for (r = map->names; r->name != NULL; r++)
-    {
-      s7_insert_reg (r, map->htab);
-    }
+    s7_insert_reg (r, map->htab);
 }
 
 
@@ -6115,13 +6111,11 @@ s7_begin (void)
   segT seg;
   subsegT subseg;
 
-  if ((s7_score_ops_hsh = hash_new ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s7_score_ops_hsh = str_htab_create ();
 
   s7_build_score_ops_hsh ();
 
-  if ((s7_dependency_insn_hsh = hash_new ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s7_dependency_insn_hsh = str_htab_create ();
 
   s7_build_dependency_insn_hsh ();
 
@@ -6619,11 +6613,11 @@ s7_section_align (segT segment, valueT size)
 static void
 s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
-  offsetT value = *valP;
-  offsetT abs_value = 0;
-  offsetT newval;
-  offsetT content;
-  unsigned short HI, LO;
+  valueT value = *valP;
+  valueT abs_value = 0;
+  valueT newval;
+  valueT content;
+  valueT HI, LO;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
@@ -6654,7 +6648,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)
         {                       /* For la rd, imm32.  */
           newval = s7_md_chars_to_number (buf, s7_INSN_SIZE);
-          HI = (value) >> 16;   /* mul to 2, then take the hi 16 bit.  */
+          HI = value >> 16;   /* mul to 2, then take the hi 16 bit.  */
           newval |= (HI & 0x3fff) << 1;
           newval |= ((HI >> 14) & 0x3) << 16;
           s7_number_to_chars (buf, newval, s7_INSN_SIZE);
@@ -6664,7 +6658,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)        /* For la rd, imm32.  */
         {
           newval = s7_md_chars_to_number (buf, s7_INSN_SIZE);
-          LO = (value) & 0xffff;
+          LO = value & 0xffff;
           newval |= (LO & 0x3fff) << 1; /* 16 bit: imm -> 14 bit in lo, 2 bit in hi.  */
           newval |= ((LO >> 14) & 0x3) << 16;
           s7_number_to_chars (buf, newval, s7_INSN_SIZE);
@@ -6674,7 +6668,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       {
         content = s7_md_chars_to_number (buf, s7_INSN_SIZE);
         value = fixP->fx_offset;
-        if (!(value >= 0 && value <= 0x1ffffff))
+        if (value > 0x1ffffff)
           {
             as_bad_where (fixP->fx_file, fixP->fx_line,
                           _("j or jl truncate (0x%x)  [0 ~ 2^25-1]"), (unsigned int) value);
@@ -6729,7 +6723,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       content = s7_md_chars_to_number (buf, s7_INSN16_SIZE);
       content &= 0xf001;
       value = fixP->fx_offset;
-      if (!(value >= 0 && value <= 0xfff))
+      if (value > 0xfff)
         {
           as_bad_where (fixP->fx_file, fixP->fx_line,
                         _("j! or jl! truncate (0x%x)  [0 ~ 2^12-1]"), (unsigned int) value);

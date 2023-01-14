@@ -245,13 +245,6 @@ extern int sparc_is_annulled_branch_insn (CORE_ADDR pc);
 extern const struct sparc_gregmap sparc32_sol2_gregmap;
 extern const struct sparc_fpregmap sparc32_sol2_fpregmap;
 
-extern int sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, const char *name);
-
-extern const char *sparc_sol2_static_transform_name (const char *name);
-
-extern void sparc32_sol2_init_abi (struct gdbarch_info info,
-				   struct gdbarch *gdbarch);
-
 /* Functions and variables exported from sparcnbsd-tdep.c.  */
 
 /* Register offsets for NetBSD.  */

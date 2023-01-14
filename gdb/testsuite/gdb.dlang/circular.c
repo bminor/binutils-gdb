@@ -13,16 +13,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-asm ("circular1_found_start: .globl circular1_found_start");
-
 /* DWARF will describe this function as being inside a D module.  */
 
 void
 found (void)
 {
+  asm ("found_label: .globl found_label");
 }
-
-asm ("circular1_found_end: .globl circular1_found_end");
 
 int
 main (void)

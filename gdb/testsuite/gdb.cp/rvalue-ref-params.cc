@@ -80,4 +80,6 @@ main ()
   MultiChild &MQR = MQ;
 
   mf2 (std::move (MQ));			/* Set breakpoint MQ here.  */
+
+  return 0;
 }

@@ -651,6 +651,7 @@ LIBINTL
 USE_NLS
 CXX_DIALECT
 HAVE_CXX11
+LARGEFILE_CPPFLAGS
 EGREP
 GREP
 CPP
@@ -5627,15 +5628,56 @@ fi
 
 
 case "${host}" in
-  sparc-*-solaris*|i[3-7]86-*-solaris*)
-    # On native 32bit sparc and ia32 solaris, large-file and procfs support
-    # are mutually exclusive; and without procfs support, the bfd/ elf module
-    # cannot provide certain routines such as elfcore_write_prpsinfo
-    # or elfcore_write_prstatus.  So unless the user explicitly requested
-    # large-file support through the --enable-largefile switch, disable
-    # large-file support in favor of procfs support.
-    test "${target}" = "${host}" -a "x$plugins" = xno \
-      && : ${enable_largefile="no"}
+  sparc-*-solaris*|i?86-*-solaris*)
+    # On native 32-bit Solaris/SPARC and x86, large-file and procfs support
+    # were mutually exclusive until Solaris 11.3.  Without procfs support,
+    # the bfd/ elf module cannot provide certain routines such as
+    # elfcore_write_prpsinfo or elfcore_write_prstatus.  So unless the user
+    # explicitly requested large-file support through the
+    # --enable-largefile switch, disable large-file support in favor of
+    # procfs support.
+    #
+    # Check if <sys/procfs.h> is incompatible with large-file support.
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#define _FILE_OFFSET_BITS 64
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  acx_cv_procfs_lfs=yes
+else
+  acx_cv_procfs_lfs=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    #
+    # Forcefully disable large-file support only if necessary, gdb is in
+    # tree and enabled.
+    if test "${target}" = "${host}" -a "$acx_cv_procfs_lfs" = no \
+         -a -d $srcdir/../gdb -a "$enable_gdb" != no; then
+      : ${enable_largefile="no"}
+      if test "$plugins" = yes; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
+plugin support disabled; require large-file support which is incompatible with GDB." >&5
+$as_echo "$as_me: WARNING:
+plugin support disabled; require large-file support which is incompatible with GDB." >&2;}
+	plugins=no
+      fi
+    fi
+    #
+    # Explicitly undef _FILE_OFFSET_BITS if enable_largefile=no for the
+    # benefit of g++ 9+ which predefines it on Solaris.
+    if test "$enable_largefile" = no; then
+      LARGEFILE_CPPFLAGS="-U_FILE_OFFSET_BITS"
+
+    fi
     ;;
 esac
 
@@ -8404,7 +8446,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h 		   dlfcn.h 		   linux/elf.h sys/procfs.h proc_service.h 		   poll.h sys/poll.h sys/select.h
+  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h 		   dlfcn.h 		   linux/elf.h proc_service.h 		   poll.h sys/poll.h sys/select.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -10300,8 +10342,24 @@ fi
     fi
   fi
 
+
+$as_echo "#define _STRUCTURED_PROC 1" >>confdefs.h
+
+ for ac_header in sys/procfs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/procfs.h" "ac_cv_header_sys_procfs_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_procfs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_PROCFS_H 1
+_ACEOF
+
+fi
+
+done
+
   if test "$ac_cv_header_sys_procfs_h" = yes; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gregset_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for gregset_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_gregset_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10310,8 +10368,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10338,7 +10394,8 @@ $as_echo "#define HAVE_GREGSET_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_gregset_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_gregset_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fpregset_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fpregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for fpregset_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_fpregset_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10347,8 +10404,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10375,7 +10430,8 @@ $as_echo "#define HAVE_FPREGSET_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_fpregset_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_fpregset_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prgregset_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prgregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for prgregset_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_prgregset_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10384,8 +10440,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10412,7 +10466,8 @@ $as_echo "#define HAVE_PRGREGSET_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prgregset_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_prgregset_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prfpregset_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prfpregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for prfpregset_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_prfpregset_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10421,8 +10476,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10449,7 +10502,8 @@ $as_echo "#define HAVE_PRFPREGSET_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prfpregset_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_prfpregset_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prgregset32_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prgregset32_t in sys/procfs.h" >&5
 $as_echo_n "checking for prgregset32_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_prgregset32_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10458,8 +10512,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10486,7 +10538,8 @@ $as_echo "#define HAVE_PRGREGSET32_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prgregset32_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_prgregset32_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lwpid_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lwpid_t in sys/procfs.h" >&5
 $as_echo_n "checking for lwpid_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_lwpid_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10495,8 +10548,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10523,7 +10574,8 @@ $as_echo "#define HAVE_LWPID_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_lwpid_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_lwpid_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psaddr_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psaddr_t in sys/procfs.h" >&5
 $as_echo_n "checking for psaddr_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_psaddr_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10532,8 +10584,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -10560,7 +10610,8 @@ $as_echo "#define HAVE_PSADDR_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_psaddr_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_psaddr_t" >&6; }
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for elf_fpregset_t in sys/procfs.h" >&5
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for elf_fpregset_t in sys/procfs.h" >&5
 $as_echo_n "checking for elf_fpregset_t in sys/procfs.h... " >&6; }
  if ${bfd_cv_have_sys_procfs_type_elf_fpregset_t+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10569,8 +10620,6 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
-/* Needed for new procfs interface on sparc-solaris.  */
-#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()

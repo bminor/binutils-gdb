@@ -317,17 +317,17 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
   if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
     if (gdbarch_byte_order (get_current_arch ()) == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
-				  "(currently big endian)\n"));
+				  "(currently big endian).\n"));
     else
       fprintf_unfiltered (file, _("The target endianness is set automatically "
-				  "(currently little endian)\n"));
+				  "(currently little endian).\n"));
   else
     if (target_byte_order_user == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file,
-			  _("The target is assumed to be big endian\n"));
+			  _("The target is set to big endian.\n"));
     else
       fprintf_unfiltered (file,
-			  _("The target is assumed to be little endian\n"));
+			  _("The target is set to little endian.\n"));
 }
 
 static void
@@ -476,11 +476,11 @@ show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   if (target_architecture_user == NULL)
-    fprintf_filtered (file, _("The target architecture is set "
-			      "automatically (currently %s)\n"),
+    fprintf_filtered (file, _("The target architecture is set to "
+			      "\"auto\" (currently \"%s\").\n"),
 		      gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
   else
-    fprintf_filtered (file, _("The target architecture is assumed to be %s\n"),
+    fprintf_filtered (file, _("The target architecture is set to \"%s\".\n"),
 		      set_architecture_string);
 }
 
@@ -1034,6 +1034,22 @@ std::string
 default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
 {
   return "";
+}
+
+/* See arch-utils.h.  */
+void
+default_read_core_file_mappings (struct gdbarch *gdbarch,
+                                 struct bfd *cbfd,
+				 gdb::function_view<void (ULONGEST count)>
+				   pre_loop_cb,
+				 gdb::function_view<void (int num,
+				                          ULONGEST start,
+							  ULONGEST end,
+							  ULONGEST file_ofs,
+							  const char *filename,
+							  const void *other)>
+				   loop_cb)
+{
 }
 
 void _initialize_gdbarch_utils ();

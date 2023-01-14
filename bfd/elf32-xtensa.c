@@ -37,6 +37,22 @@
 
 #define XTENSA_NO_NOP_REMOVAL 0
 
+#ifndef XSHAL_ABI
+#define XSHAL_ABI 0
+#endif
+
+#ifndef XTHAL_ABI_UNDEFINED
+#define XTHAL_ABI_UNDEFINED -1
+#endif
+
+#ifndef XTHAL_ABI_WINDOWED
+#define XTHAL_ABI_WINDOWED 0
+#endif
+
+#ifndef XTHAL_ABI_CALL0
+#define XTHAL_ABI_CALL0 1
+#endif
+
 /* Local helper functions.  */
 
 static bfd_boolean add_extra_plt_sections (struct bfd_link_info *, int);
@@ -163,6 +179,10 @@ int elf32xtensa_no_literal_movement = 1;
    with xt.prop. prefix.  */
 
 bfd_boolean elf32xtensa_separate_props = FALSE;
+
+/* Xtensa ABI.  It affects PLT entry code.  */
+
+int elf32xtensa_abi = XTHAL_ABI_UNDEFINED;
 
 /* Rename one of the generic section flags to better document how it
    is used here.  */
@@ -685,8 +705,9 @@ struct elf_xtensa_link_hash_table
 /* Get the Xtensa ELF linker hash table from a link_info structure.  */
 
 #define elf_xtensa_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == XTENSA_ELF_DATA ? ((struct elf_xtensa_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == XTENSA_ELF_DATA)	\
+   ? (struct elf_xtensa_link_hash_table *) (p)->hash : NULL)
 
 /* Create an entry in an Xtensa ELF linker hash table.  */
 
@@ -746,6 +767,7 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
   tlsbase->root.type = bfd_link_hash_new;
   tlsbase->root.u.undef.abfd = NULL;
   tlsbase->non_elf = 0;
+  ret->elf.dt_pltgot_required = TRUE;
   ret->tlsbase = elf_xtensa_hash_entry (tlsbase);
   ret->tlsbase->tls_type = GOT_UNKNOWN;
 
@@ -1039,7 +1061,7 @@ elf_xtensa_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (bfd_link_relocatable (info) || (sec->flags & SEC_ALLOC) == 0)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   BFD_ASSERT (is_xtensa_elf (abfd));
@@ -1747,30 +1769,11 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info,
+				      relplt || relgot))
+	return FALSE;
 
-      if (relplt)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relgot)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      if (!add_dynamic_entry (DT_PLTGOT, 0)
-	  || !add_dynamic_entry (DT_XTENSA_GOT_LOC_OFF, 0)
+      if (!add_dynamic_entry (DT_XTENSA_GOT_LOC_OFF, 0)
 	  || !add_dynamic_entry (DT_XTENSA_GOT_LOC_SZ, 0))
 	return FALSE;
     }
@@ -2247,6 +2250,13 @@ bfd_elf_xtensa_reloc (bfd *abfd,
   return flag;
 }
 
+int xtensa_abi_choice (void)
+{
+  if (elf32xtensa_abi == XTHAL_ABI_UNDEFINED)
+    return XSHAL_ABI;
+  else
+    return elf32xtensa_abi;
+}
 
 /* Set up an entry in the procedure linkage table.  */
 
@@ -2259,6 +2269,7 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
   bfd_vma plt_base, got_base;
   bfd_vma code_offset, lit_offset, abi_offset;
   int chunk;
+  int abi = xtensa_abi_choice ();
 
   chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
   splt = elf_xtensa_get_plt_section (info, chunk);
@@ -2279,10 +2290,10 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
   /* Fill in the entry in the procedure linkage table.  */
   memcpy (splt->contents + code_offset,
 	  (bfd_big_endian (output_bfd)
-	   ? elf_xtensa_be_plt_entry[XSHAL_ABI != XTHAL_ABI_WINDOWED]
-	   : elf_xtensa_le_plt_entry[XSHAL_ABI != XTHAL_ABI_WINDOWED]),
+	   ? elf_xtensa_be_plt_entry[abi != XTHAL_ABI_WINDOWED]
+	   : elf_xtensa_le_plt_entry[abi != XTHAL_ABI_WINDOWED]),
 	  PLT_ENTRY_SIZE);
-  abi_offset = XSHAL_ABI == XTHAL_ABI_WINDOWED ? 3 : 0;
+  abi_offset = abi == XTHAL_ABI_WINDOWED ? 3 : 0;
   bfd_put_16 (output_bfd, l32r_offset (got_base + 0,
 				       plt_base + code_offset + abi_offset),
 	      splt->contents + code_offset + abi_offset + 1);
@@ -3106,6 +3117,9 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
   int n, m, num;
 
   section_size = sxtlit->size;
+  if (section_size == 0)
+    return 0;
+
   BFD_ASSERT (section_size % 8 == 0);
   num = section_size / 8;
 
@@ -5979,13 +5993,13 @@ map_removed_literal (removed_literal_list *removed_list)
 static int
 removed_literal_compare (const void *a, const void *b)
 {
-  const removed_literal_map_entry *pa = a;
-  const removed_literal_map_entry *pb = b;
+  const bfd_vma *key = a;
+  const removed_literal_map_entry *memb = b;
 
-  if (pa->addr == pb->addr)
+  if (*key == memb->addr)
     return 0;
   else
-    return pa->addr < pb->addr ? -1 : 1;
+    return *key < memb->addr ? -1 : 1;
 }
 
 /* Check if the list of removed literals contains an entry for the
@@ -6000,13 +6014,16 @@ find_removed_literal (removed_literal_list *removed_list, bfd_vma addr)
   if (removed_list->map == NULL)
     map_removed_literal (removed_list);
 
-  p = bsearch (&addr, removed_list->map, removed_list->n_map,
-	       sizeof (*removed_list->map), removed_literal_compare);
-  if (p)
+  if (removed_list->map != NULL)
     {
-      while (p != removed_list->map && (p - 1)->addr == addr)
-	--p;
-      r = p->literal;
+      p = bsearch (&addr, removed_list->map, removed_list->n_map,
+		   sizeof (*removed_list->map), removed_literal_compare);
+      if (p)
+	{
+	  while (p != removed_list->map && (p - 1)->addr == addr)
+	    --p;
+	  r = p->literal;
+	}
     }
   return r;
 }

@@ -34,13 +34,12 @@
 /* General function to handle events in the inferior.  */
 
 void
-inferior_event_handler (enum inferior_event_type event_type, 
-			gdb_client_data client_data)
+inferior_event_handler (enum inferior_event_type event_type)
 {
   switch (event_type)
     {
     case INF_REG_EVENT:
-      fetch_inferior_event (client_data);
+      fetch_inferior_event ();
       break;
 
     case INF_EXEC_COMPLETE:

@@ -184,9 +184,6 @@ struct elf_arc_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   struct got_entry *got_ents;
 };
 
@@ -340,7 +337,6 @@ elf_arc_link_hash_newfunc (struct bfd_hash_entry *entry,
 				     table, string));
   if (ret != NULL)
     {
-      ret->dyn_relocs = NULL;
       ret->got_ents = NULL;
     }
 
@@ -1786,6 +1782,7 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
 	    if (bfd_link_pic (info)
+		&& (input_section->flags & SEC_ALLOC) != 0
 		&& (!IS_ARC_PCREL_TYPE (r_type)
 		    || (h != NULL
 			&& h->dynindx != -1
@@ -1942,8 +1939,9 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 }
 
 #define elf_arc_hash_table(p) \
-    (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == ARC_ELF_DATA ? ((struct elf_arc_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == ARC_ELF_DATA)		\
+   ? (struct elf_arc_link_hash_table *) (p)->hash : NULL)
 
 static bfd_boolean
 elf_arc_check_relocs (bfd *			 abfd,
@@ -2710,7 +2708,6 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *s;
   bfd_boolean relocs_exist = FALSE;
-  bfd_boolean reltext_exist = FALSE;
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   dynobj = htab->dynobj;
@@ -2765,29 +2762,7 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (strncmp (s->name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0 && s != htab->srelplt)
-	    {
-	      if (!reltext_exist)
-		{
-		  const char *name = s->name + 5;
-		  bfd *ibfd;
-		  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-			&& ibfd->flags & DYNAMIC)
-		      {
-			asection *target = bfd_get_section_by_name (ibfd, name);
-			if (target != NULL
-			    && elf_section_data (target)->sreloc == s
-			    && ((target->output_section->flags
-				 & (SEC_READONLY | SEC_ALLOC))
-				== (SEC_READONLY | SEC_ALLOC)))
-			  {
-			    reltext_exist = TRUE;
-			    break;
-			  }
-		      }
-		}
-	      relocs_exist = TRUE;
-	    }
+	    relocs_exist = TRUE;
 
 	  /* We use the reloc_count field as a counter if we need to
 	     copy relocs into the output file.  */
@@ -2814,33 +2789,7 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	return FALSE;
     }
 
-  if (htab->dynamic_sections_created)
-    {
-      /* TODO: Check if this is needed.  */
-      if (!bfd_link_pic (info))
-	if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
-		return FALSE;
-
-      if (htab->splt && (htab->splt->flags & SEC_EXCLUDE) == 0)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (relocs_exist)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf32_External_Rela)))
-	  return FALSE;
-
-      if (reltext_exist)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
-	  return FALSE;
-    }
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs_exist);
 }
 
 

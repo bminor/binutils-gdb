@@ -1,3 +1,66 @@
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* eintr.h: New file.
+
+2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* selftest.h (run_tests): Change parameter to array_view.
+	* selftest.c (run_tests): Change parameter to array_view and use
+	it.
+
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* common.m4 (GDB_AC_COMMON): Use BFD_SYS_PROCFS_H to check for
+	<sys/procfs.h>.
+	* Makefile.in: Regenerate.
+	* configure, config.in: Regenerate.
+
+2020-07-28  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26281
+	* gdb_optional.h (class optional): Add volatile member to union
+	contaning m_dummy and m_item.
+
+2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.h (struct target_desc_deleter): Moved here
+	from gdb/target-descriptions.h, extend comment.
+	(target_desc_up): Likewise.
+
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26183:
+	* gdb_string_view.h (basic_string_view::to_string): Remove.
+	(gdb::to_string): New function.
+
+2020-06-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* tdesc.h (class print_xml_feature) <add_line>: Add
+	ATTRIBUTE_PRINTF.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (print_xml_feature::visit_pre): Use add_line to add
+	output content, and call indent as needed in all overloaded
+	variants.
+	(print_xml_feature::visit_post): Likewise.
+	(print_xml_feature::visit): Likewise.
+	(print_xml_feature::add_line): Two new overloaded functions.
+	* tdesc.h (print_xml_feature::indent): New member function.
+	(print_xml_feature::add_line): Two new overloaded member
+	functions.
+	(print_xml_feature::m_depth): New member variable.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (print_xml_feature::visit_pre): Print compatible
+	information.
+	* tdesc.h (struct tdesc_compatible_info): Declare new struct.
+	(tdesc_compatible_info_up): New typedef.
+	(tdesc_compatible_info_list): Declare new function.
+	(tdesc_compatible_info_arch_name): Declare new function.
+
 2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
 
 	* common-utils.cc, common-utils.h (stringify_argv): Drop

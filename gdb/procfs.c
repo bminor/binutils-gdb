@@ -33,8 +33,6 @@
 #include "nat/fork-inferior.h"
 #include "gdbarch.h"
 
-#define _STRUCTURED_PROC 1	/* Should be done by configure script.  */
-
 #include <sys/procfs.h>
 #include <sys/fault.h>
 #include <sys/syscall.h>
@@ -197,18 +195,6 @@ procfs_target::auxv_parse (gdb_byte **readptr,
 
 /* =================== END, TARGET_OPS "MODULE" =================== */
 
-/* World Unification:
-
-   Put any typedefs, defines etc. here that are required for the
-   unification of code that handles different versions of /proc.  */
-
-enum { READ_WATCHFLAG  = WA_READ,
-       WRITE_WATCHFLAG = WA_WRITE,
-       EXEC_WATCHFLAG  = WA_EXEC,
-       AFTER_WATCHFLAG = WA_TRAPAFTER
-};
-
-
 /* =================== STRUCT PROCINFO "MODULE" =================== */
 
      /* FIXME: this comment will soon be out of date W.R.T. threads.  */
@@ -231,7 +217,6 @@ enum { READ_WATCHFLAG  = WA_READ,
    inferior's procinfo information.  */
 
 /* format strings for /proc paths */
-#define MAIN_PROC_NAME_FMT   "/proc/%d"
 #define CTL_PROC_NAME_FMT    "/proc/%d/ctl"
 #define AS_PROC_NAME_FMT     "/proc/%d/as"
 #define MAP_PROC_NAME_FMT    "/proc/%d/map"
@@ -387,14 +372,14 @@ open_procinfo_files (procinfo *pi, int which)
      several.  Here is some rationale:
 
      There are several file descriptors that may need to be open
-       for any given process or LWP.  The ones we're interested in are:
+     for any given process or LWP.  The ones we're interested in are:
 	 - control	 (ctl)	  write-only	change the state
 	 - status	 (status) read-only	query the state
 	 - address space (as)	  read/write	access memory
 	 - map		 (map)	  read-only	virtual addr map
-       Most of these are opened lazily as they are needed.
-       The pathnames for the 'files' for an LWP look slightly
-       different from those of a first-class process:
+     Most of these are opened lazily as they are needed.
+     The pathnames for the 'files' for an LWP look slightly
+     different from those of a first-class process:
 	 Pathnames for a process (<proc-id>):
 	   /proc/<proc-id>/ctl
 	   /proc/<proc-id>/status
@@ -403,8 +388,8 @@ open_procinfo_files (procinfo *pi, int which)
 	 Pathnames for an LWP (lwp-id):
 	   /proc/<proc-id>/lwp/<lwp-id>/lwpctl
 	   /proc/<proc-id>/lwp/<lwp-id>/lwpstatus
-       An LWP has no map or address space file descriptor, since
-       the memory map and address space are shared by all LWPs.  */
+     An LWP has no map or address space file descriptor, since
+     the memory map and address space are shared by all LWPs.  */
 
   /* In this case, there are several different file descriptors that
      we might be asked to open.  The control file descriptor will be
@@ -479,7 +464,7 @@ create_procinfo (int pid, int tid)
   /* Chain into list.  */
   if (tid == 0)
     {
-      xsnprintf (pi->pathname, sizeof (pi->pathname), MAIN_PROC_NAME_FMT, pid);
+      xsnprintf (pi->pathname, sizeof (pi->pathname), "/proc/%d", pid);
       pi->next = procinfo_list;
       procinfo_list = pi;
     }
@@ -592,7 +577,7 @@ dead_procinfo (procinfo *pi, const char *msg, int kill_p)
 
 /* =================== END, STRUCT PROCINFO "MODULE" =================== */
 
-/* ===================  /proc  "MODULE" =================== */
+/* ===================  /proc "MODULE" =================== */
 
 /* This "module" is the interface layer between the /proc system API
    and the gdb target vector functions.  This layer consists of access
@@ -600,9 +585,7 @@ dead_procinfo (procinfo *pi, const char *msg, int kill_p)
    need to use from the /proc API.
 
    The main motivation for this layer is to hide the fact that there
-   are two very different implementations of the /proc API.  Rather
-   than have a bunch of #ifdefs all thru the gdb target vector
-   functions, we do our best to hide them all in here.  */
+   were two very different implementations of the /proc API.  */
 
 static long proc_flags (procinfo *pi);
 static int proc_why (procinfo *pi);
@@ -931,10 +914,6 @@ proc_wait_for_stop (procinfo *pi)
      - clear current signal
      - abort the current system call
      - stop as soon as finished with system call
-     - (ioctl): set traced signal set
-     - (ioctl): set held   signal set
-     - (ioctl): set traced fault  set
-     - (ioctl): set start pc (vaddr)
 
    Always clears the current fault.  PI is the process or LWP to
    operate on.  If STEP is true, set the process or LWP to trap after
@@ -1573,9 +1552,6 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
 
 /* =================== Thread "MODULE" =================== */
 
-/* NOTE: you'll see more ifdefs and duplication of functions here,
-   since there is a different way to do threads on every OS.  */
-
 /* Returns the number of threads for the process.  */
 
 static int
@@ -1592,9 +1568,7 @@ proc_get_nthreads (procinfo *pi)
   return pi->prstatus.pr_nlwp;
 }
 
-/* LWP version.
-
-   Return the ID of the thread that had an event of interest.
+/* Return the ID of the thread that had an event of interest.
    (ie. the one that hit a breakpoint or other traced event).  All
    other things being equal, this should be the ID of a thread that is
    currently executing.  */
@@ -1618,8 +1592,7 @@ proc_get_current_thread (procinfo *pi)
 }
 
 /* Discover the IDs of all the threads within the process, and create
-   a procinfo for each of them (chained to the parent).  This
-   unfortunately requires a different method on every OS.  Returns
+   a procinfo for each of them (chained to the parent).  Returns
    non-zero for success, zero for failure.  */
 
 static int
@@ -1726,7 +1699,7 @@ proc_iterate_over_threads (procinfo *pi,
 /* Here are all of the gdb target vector functions and their
    friends.  */
 
-static ptid_t do_attach (ptid_t ptid);
+static void do_attach (ptid_t ptid);
 static void do_detach ();
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
@@ -1770,16 +1743,8 @@ procfs_debug_inferior (procinfo *pi)
     return __LINE__;
 
   /* Method for tracing exec syscalls.  */
-  /* GW: Rationale...
-     Not all systems with /proc have all the exec* syscalls with the same
-     names.  On the SGI, for example, there is no SYS_exec, but there
-     *is* a SYS_execv.  So, we try to account for that.  */
-
   traced_syscall_exits = XNEW (sysset_t);
   premptyset (traced_syscall_exits);
-#ifdef SYS_exec
-  praddset (traced_syscall_exits, SYS_exec);
-#endif
   praddset (traced_syscall_exits, SYS_execve);
   praddset (traced_syscall_exits, SYS_lwp_create);
   praddset (traced_syscall_exits, SYS_lwp_exit);
@@ -1815,7 +1780,7 @@ procfs_target::attach (const char *args, int from_tty)
 
       fflush (stdout);
     }
-  inferior_ptid = do_attach (ptid_t (pid));
+  do_attach (ptid_t (pid));
   if (!target_is_pushed (this))
     push_target (this);
 }
@@ -1839,12 +1804,12 @@ procfs_target::detach (inferior *inf, int from_tty)
 
   do_detach ();
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
   detach_inferior (inf);
   maybe_unpush_target ();
 }
 
-static ptid_t
+static void
 do_attach (ptid_t ptid)
 {
   procinfo *pi;
@@ -1912,9 +1877,8 @@ do_attach (ptid_t ptid)
 
   /* Add it to gdb's thread list.  */
   ptid = ptid_t (pi->pid, lwpid, 0);
-  add_thread (&the_procfs_target, ptid);
-
-  return ptid;
+  thread_info *thr = add_thread (&the_procfs_target, ptid);
+  switch_to_thread (thr);
 }
 
 static void
@@ -1961,10 +1925,6 @@ do_detach ()
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.
-
-   ??? Is the following note still relevant?  We can't get individual
-   registers with the PT_GETREGS ptrace(2) request either, yet we
-   don't bother with caching at all in that case.
 
    NOTE: Since the /proc interface cannot give us individual
    registers, we pay no attention to REGNUM, and just fetch them all.
@@ -2065,42 +2025,6 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
     }
 }
 
-static int
-syscall_is_lwp_exit (procinfo *pi, int scall)
-{
-  if (scall == SYS_lwp_exit)
-    return 1;
-  return 0;
-}
-
-static int
-syscall_is_exit (procinfo *pi, int scall)
-{
-  if (scall == SYS_exit)
-    return 1;
-  return 0;
-}
-
-static int
-syscall_is_exec (procinfo *pi, int scall)
-{
-#ifdef SYS_exec
-  if (scall == SYS_exec)
-    return 1;
-#endif
-  if (scall == SYS_execve)
-    return 1;
-  return 0;
-}
-
-static int
-syscall_is_lwp_create (procinfo *pi, int scall)
-{
-  if (scall == SYS_lwp_create)
-    return 1;
-  return 0;
-}
-
 /* Retrieve the next stop event from the child process.  If child has
    not stopped yet, wait for it to stop.  Translate /proc eventcodes
    (or possibly wait eventcodes) into gdb internal event codes.
@@ -2126,7 +2050,11 @@ wait_again:
   retval   = ptid_t (-1);
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
+
+  /* procfs_target currently only supports one inferior.  */
+  inferior *inf = current_inferior ();
+
+  pi = find_procinfo_or_die (inf->pid, 0);
   if (pi)
     {
       /* We must assume that the status is stale now...  */
@@ -2153,10 +2081,10 @@ wait_again:
 	      wait_retval = ::wait (&wstat); /* "wait" for the child's exit.  */
 
 	      /* Wrong child?  */
-	      if (wait_retval != inferior_ptid.pid ())
+	      if (wait_retval != inf->pid)
 		error (_("procfs: couldn't stop "
 			 "process %d: wait returned %d."),
-		       inferior_ptid.pid (), wait_retval);
+		       inf->pid, wait_retval);
 	      /* FIXME: might I not just use waitpid?
 		 Or try find_procinfo to see if I know about this child?  */
 	      retval = ptid_t (wait_retval);
@@ -2205,19 +2133,17 @@ wait_again:
 		wstat = (what << 8) | 0177;
 		break;
 	      case PR_SYSENTRY:
-		if (syscall_is_lwp_exit (pi, what))
+		if (what == SYS_lwp_exit)
 		  {
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (this, retval));
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return retval;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
-		else if (syscall_is_exit (pi, what))
+		else if (what == SYS_exit)
 		  {
-		    struct inferior *inf;
-
 		    /* Handle SYS_exit call only.  */
 		    /* Stopped at entry to SYS_exit.
 		       Make it runnable, resume it, then use
@@ -2232,14 +2158,13 @@ wait_again:
 		    if (!proc_run_process (pi, 0, 0))
 		      proc_error (pi, "target_wait, run_process", __LINE__);
 
-		    inf = find_inferior_pid (this, pi->pid);
 		    if (inf->attach_flag)
 		      {
 			/* Don't call wait: simulate waiting for exit,
 			   return a "success" exit code.  Bogus: what if
 			   it returns something else?  */
 			wstat = 0;
-			retval = inferior_ptid;  /* ? ? ? */
+			retval = ptid_t (inf->pid);  /* ? ? ? */
 		      }
 		    else
 		      {
@@ -2278,23 +2203,13 @@ wait_again:
 					   i, sysargs[i]);
 		      }
 
-		    if (status)
-		      {
-			/* How to exit gracefully, returning "unknown
-			   event".  */
-			status->kind = TARGET_WAITKIND_SPURIOUS;
-			return inferior_ptid;
-		      }
-		    else
-		      {
-			/* How to keep going without returning to wfi: */
-			target_continue_no_signal (ptid);
-			goto wait_again;
-		      }
+		    /* How to keep going without returning to wfi: */
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		break;
 	      case PR_SYSEXIT:
-		if (syscall_is_exec (pi, what))
+		if (what == SYS_execve)
 		  {
 		    /* Hopefully this is our own "fork-child" execing
 		       the real child.  Hoax this event into a trap, and
@@ -2302,7 +2217,7 @@ wait_again:
 		       address.  */
 		    wstat = (SIGTRAP << 8) | 0177;
 		  }
-		else if (syscall_is_lwp_create (pi, what))
+		else if (what == SYS_lwp_create)
 		  {
 		    /* This syscall is somewhat like fork/exec.  We
 		       will get the event twice: once for the parent
@@ -2322,11 +2237,10 @@ wait_again:
 		    if (!in_thread_list (this, temp_ptid))
 		      add_thread (this, temp_ptid);
 
-		    /* Return to WFI, but tell it to immediately resume.  */
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return inferior_ptid;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
-		else if (syscall_is_lwp_exit (pi, what))
+		else if (what == SYS_lwp_exit)
 		  {
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
@@ -2334,15 +2248,6 @@ wait_again:
 		    delete_thread (find_thread_ptid (this, retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
-		  }
-		else if (0)
-		  {
-		    /* FIXME:  Do we need to handle SYS_sproc,
-		       SYS_fork, or SYS_vfork here?  The old procfs
-		       seemed to use this event to handle threads on
-		       older (non-LWP) systems, where I'm assuming
-		       that threads were actually separate processes.
-		       Irix, maybe?  Anyway, low priority for now.  */
 		  }
 		else
 		  {
@@ -2364,8 +2269,8 @@ wait_again:
 					   i, sysargs[i]);
 		      }
 
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return inferior_ptid;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		break;
 	      case PR_REQUESTED:
@@ -2416,7 +2321,6 @@ wait_again:
 	      /* Got this far without error: If retval isn't in the
 		 threads database, add it.  */
 	      if (retval.pid () > 0
-		  && retval != inferior_ptid
 		  && !in_thread_list (this, retval))
 		{
 		  /* We have a new thread.  We need to add it both to
@@ -2529,20 +2433,6 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
   /* About to run the child; invalidate caches and do any other
      cleanup.  */
 
-#if 0
-  if (pi->gregs_dirty)
-    if (parent == NULL || proc_get_current_thread (parent) != pi->tid)
-      if (!proc_set_gregs (pi))	/* flush gregs cache */
-	proc_warn (pi, "target_resume, set_gregs",
-		   __LINE__);
-  if (gdbarch_fp0_regnum (target_gdbarch ()) >= 0)
-    if (pi->fpregs_dirty)
-      if (parent == NULL || proc_get_current_thread (parent) != pi->tid)
-	if (!proc_set_fpregs (pi))	/* flush fpregs cache */
-	  proc_warn (pi, "target_resume, set_fpregs",
-		     __LINE__);
-#endif
-
   if (parent != NULL)
     {
       /* The presence of a parent indicates that this is an LWP.
@@ -2553,35 +2443,11 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
     }
   pi->gregs_valid   = 0;
   pi->fpregs_valid  = 0;
-#if 0
-  pi->gregs_dirty   = 0;
-  pi->fpregs_dirty  = 0;
-#endif
   pi->status_valid  = 0;
   pi->threads_valid = 0;
 
   return 0;
 }
-
-#if 0
-/* A callback function for iterate_over_threads.  Find the
-   asynchronous signal thread, and make it runnable.  See if that
-   helps matters any.  */
-
-static int
-make_signal_thread_runnable (procinfo *process, procinfo *pi, void *ptr)
-{
-#ifdef PR_ASLWP
-  if (proc_flags (pi) & PR_ASLWP)
-    {
-      if (!proc_run_process (pi, 0, -1))
-	proc_error (pi, "make_signal_thread_runnable", __LINE__);
-      return 1;
-    }
-#endif
-  return 0;
-}
-#endif
 
 /* Make the child process runnable.  Normally we will then call
    procfs_wait and wait for it to stop again (unless gdb is async).
@@ -2599,21 +2465,14 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   procinfo *pi, *thread;
   int native_signo;
 
-  /* 2.1:
-     prrun.prflags |= PRSVADDR;
-     prrun.pr_vaddr = $PC;	   set resume address
-     prrun.prflags |= PRSTRACE;    trace signals in pr_trace (all)
-     prrun.prflags |= PRSFAULT;    trace faults in pr_fault (all but PAGE)
-     prrun.prflags |= PRCFAULT;    clear current fault.
+  /* FIXME: Check/reword.  */
 
-     PRSTRACE and PRSFAULT can be done by other means
-	(proc_trace_signals, proc_trace_faults)
-     PRSVADDR is unnecessary.
-     PRCFAULT may be replaced by a PIOCCFAULT call (proc_clear_current_fault)
+  /* prrun.prflags |= PRCFAULT;    clear current fault.
+     PRCFAULT may be replaced by a PCCFAULT call (proc_clear_current_fault)
      This basically leaves PRSTEP and PRCSIG.
-     PRCSIG is like PIOCSSIG (proc_clear_current_signal).
+     PRCSIG is like PCSSIG (proc_clear_current_signal).
      So basically PR_STEP is the sole argument that must be passed
-     to proc_run_process (for use in the prrun struct by ioctl).  */
+     to proc_run_process.  */
 
   /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
@@ -2648,11 +2507,6 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 		 others.  Set the child process's PR_ASYNC flag.  */
 	      if (!proc_set_async (pi))
 		proc_error (pi, "target_resume, set_async", __LINE__);
-#if 0
-	      proc_iterate_over_threads (pi,
-					 make_signal_thread_runnable,
-					 NULL);
-#endif
 	      pi = thread;	/* Substitute the thread's procinfo
 				   for run.  */
 	    }
@@ -2782,11 +2636,6 @@ procfs_target::procfs_init_inferior (int pid)
   int fail;
   int lwpid;
 
-  /* This routine called on the parent side (GDB side)
-     after GDB forks the inferior.  */
-  if (!target_is_pushed (this))
-    push_target (this);
-
   pi = create_procinfo (pid, 0);
   if (pi == NULL)
     perror (_("procfs: out of memory in 'init_inferior'"));
@@ -2802,8 +2651,6 @@ procfs_target::procfs_init_inferior (int pid)
     procfs_notice_signals
     prfillset (fault)
     prdelset (FLTPAGE)
-    PIOCWSTOP
-    PIOCSFAULT
     */
 
   /* If not stopped yet, wait for it to stop.  */
@@ -2882,17 +2729,8 @@ procfs_set_exec_trap (void)
       _exit (127);
     }
 
-  /* Method for tracing exec syscalls.  */
-  /* GW: Rationale...
-     Not all systems with /proc have all the exec* syscalls with the same
-     names.  On the SGI, for example, there is no SYS_exec, but there
-     *is* a SYS_execv.  So, we try to account for that.  */
-
   exitset = XNEW (sysset_t);
   premptyset (exitset);
-#ifdef SYS_exec
-  praddset (exitset, SYS_exec);
-#endif
   praddset (exitset, SYS_execve);
 
   if (!proc_set_traced_sysexit (pi, exitset))
@@ -2917,6 +2755,13 @@ procfs_set_exec_trap (void)
   /* FIXME: No need to destroy the procinfo --
      we have our own address space, and we're about to do an exec!  */
   /*destroy_procinfo (pi);*/
+}
+
+/* Dummy function to be sure fork_inferior uses fork(2) and not vfork(2).
+   This avoids a possible deadlock gdb and its vfork'ed child.  */
+static void
+procfs_pre_trace (void)
+{
 }
 
 /* This function is called BEFORE gdb forks the inferior process.  Its
@@ -3007,13 +2852,17 @@ procfs_target::create_inferior (const char *exec_file,
       shell_file = tryname;
     }
 
+  if (!target_is_pushed (this))
+    push_target (this);
+
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
-		       NULL, NULL, shell_file, NULL);
+		       NULL, procfs_pre_trace, shell_file, NULL);
 
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (this, ptid_t (pid));
+  thread_info *thr = add_thread_silent (this, ptid_t (pid));
+  switch_to_thread (thr);
 
   procfs_init_inferior (pid);
 }
@@ -3142,22 +2991,22 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
     {
       switch (rwflag) {		/* FIXME: need an enum!  */
       case hw_write:		/* default watchpoint (write) */
-	pflags = WRITE_WATCHFLAG;
+	pflags = WA_WRITE;
 	break;
       case hw_read:		/* read watchpoint */
-	pflags = READ_WATCHFLAG;
+	pflags = WA_READ;
 	break;
       case hw_access:		/* access watchpoint */
-	pflags = READ_WATCHFLAG | WRITE_WATCHFLAG;
+	pflags = WA_READ | WA_WRITE;
 	break;
       case hw_execute:		/* execution HW breakpoint */
-	pflags = EXEC_WATCHFLAG;
+	pflags = WA_EXEC;
 	break;
       default:			/* Something weird.  Return error.  */
 	return -1;
       }
       if (after)		/* Stop after r/w access is completed.  */
-	pflags |= AFTER_WATCHFLAG;
+	pflags |= WA_TRAPAFTER;
     }
 
   if (!proc_set_watchpoint (pi, addr, len, pflags))
@@ -3176,11 +3025,7 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 /* Return non-zero if we can set a hardware watchpoint of type TYPE.  TYPE
    is one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint,
    or bp_hardware_watchpoint.  CNT is the number of watchpoints used so
-   far.
-
-   Note:  procfs_can_use_hw_breakpoint() is not yet used by all
-   procfs.c targets due to the fact that some of them still define
-   target_can_use_hardware_watchpoint.  */
+   far.  */
 
 int
 procfs_target::can_use_hw_breakpoint (enum bptype type, int cnt, int othertype)
@@ -3676,8 +3521,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
      once it is implemented in this platform:
      gdbarch_iterate_over_regset_sections().  */
 
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = ptid;
   target_fetch_registers (regcache, -1);
 
   fill_gregset (regcache, &gregs, -1);

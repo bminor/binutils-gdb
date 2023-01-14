@@ -88,6 +88,26 @@ ctf_list_empty_p (ctf_list_t *lp)
   return (lp->l_next == NULL && lp->l_prev == NULL);
 }
 
+/* Splice one entire list onto the end of another one.  The existing list is
+   emptied.  */
+
+void
+ctf_list_splice (ctf_list_t *lp, ctf_list_t *append)
+{
+  if (ctf_list_empty_p (append))
+    return;
+
+  if (lp->l_prev != NULL)
+    lp->l_prev->l_next = append->l_next;
+  else
+    lp->l_next = append->l_next;
+
+  append->l_next->l_prev = lp->l_prev;
+  lp->l_prev = append->l_prev;
+  append->l_next = NULL;
+  append->l_prev = NULL;
+}
+
 /* Convert a 32-bit ELF symbol into Elf64 and return a pointer to it.  */
 
 Elf64_Sym *
@@ -172,4 +192,50 @@ ctf_set_errno (ctf_file_t * fp, int err)
 {
   fp->ctf_errno = err;
   return CTF_ERR;
+}
+
+/* Create a ctf_next_t.  */
+
+ctf_next_t *
+ctf_next_create (void)
+{
+  return calloc (1, sizeof (struct ctf_next));
+}
+
+/* Destroy a ctf_next_t, for early exit from iterators.  */
+
+void
+ctf_next_destroy (ctf_next_t *i)
+{
+  if (i == NULL)
+    return;
+
+  if (i->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
+    free (i->u.ctn_sorted_hkv);
+  free (i);
+}
+
+/* Copy a ctf_next_t.  */
+
+ctf_next_t *
+ctf_next_copy (ctf_next_t *i)
+{
+  ctf_next_t *i2;
+
+  if ((i2 = ctf_next_create()) == NULL)
+    return NULL;
+  memcpy (i2, i, sizeof (struct ctf_next));
+
+  if (i2->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
+    {
+      size_t els = ctf_dynhash_elements ((ctf_dynhash_t *) i->cu.ctn_h);
+      if ((i2->u.ctn_sorted_hkv = calloc (els, sizeof (ctf_next_hkv_t))) == NULL)
+	{
+	  free (i2);
+	  return NULL;
+	}
+      memcpy (i2->u.ctn_sorted_hkv, i->u.ctn_sorted_hkv,
+	      els * sizeof (ctf_next_hkv_t));
+    }
+  return i2;
 }

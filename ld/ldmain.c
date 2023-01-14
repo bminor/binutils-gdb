@@ -27,6 +27,7 @@
 #include "bfdlink.h"
 #include "ctf-api.h"
 #include "filenames.h"
+#include "elf/common.h"
 
 #include "ld.h"
 #include "ldmain.h"
@@ -39,10 +40,10 @@
 #include "ldfile.h"
 #include "ldemul.h"
 #include "ldctor.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #include "plugin-api.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
@@ -159,11 +160,58 @@ static bfd_error_handler_type default_bfd_error_handler;
 
 struct bfd_link_info link_info;
 
+struct dependency_file
+{
+  struct dependency_file *next;
+  char *name;
+};
+
+static struct dependency_file *dependency_files, *dependency_files_tail;
+
+void
+track_dependency_files (const char *filename)
+{
+  struct dependency_file *dep
+    = (struct dependency_file *) xmalloc (sizeof (*dep));
+  dep->name = xstrdup (filename);
+  dep->next = NULL;
+  if (dependency_files == NULL)
+    dependency_files = dep;
+  else
+    dependency_files_tail->next = dep;
+  dependency_files_tail = dep;
+}
+
+static void
+write_dependency_file (void)
+{
+  FILE *out;
+  struct dependency_file *dep;
+
+  out = fopen (config.dependency_file, FOPEN_WT);
+  if (out == NULL)
+    {
+      einfo (_("%F%P: cannot open dependency file %s: %E\n"),
+	     config.dependency_file);
+    }
+
+  fprintf (out, "%s:", output_filename);
+
+  for (dep = dependency_files; dep != NULL; dep = dep->next)
+    fprintf (out, " \\\n  %s", dep->name);
+
+  fprintf (out, "\n");
+  for (dep = dependency_files; dep != NULL; dep = dep->next)
+    fprintf (out, "\n%s:\n", dep->name);
+
+  fclose (out);
+}
+
 static void
 ld_cleanup (void)
 {
   bfd_cache_close_all ();
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   plugin_call_cleanup ();
 #endif
   if (output_filename && delete_output_file_on_failure)
@@ -238,7 +286,7 @@ main (int argc, char **argv)
       /* is_sysrooted_pathname() relies on no trailing dirsep.  */
       if (ld_canon_sysroot_len > 0
 	  && IS_DIR_SEPARATOR (ld_canon_sysroot [ld_canon_sysroot_len - 1]))
-        ld_canon_sysroot [--ld_canon_sysroot_len] = '\0';
+	ld_canon_sysroot [--ld_canon_sysroot_len] = '\0';
     }
   else
     ld_canon_sysroot_len = -1;
@@ -286,6 +334,7 @@ main (int argc, char **argv)
   link_info.combreloc = TRUE;
   link_info.strip_discarded = TRUE;
   link_info.prohibit_multiple_definition_absolute = FALSE;
+  link_info.textrel_check = DEFAULT_LD_TEXTREL_CHECK;
   link_info.emit_hash = DEFAULT_EMIT_SYSV_HASH;
   link_info.emit_gnu_hash = DEFAULT_EMIT_GNU_HASH;
   link_info.callbacks = &link_callbacks;
@@ -306,6 +355,7 @@ main (int argc, char **argv)
 #ifdef DEFAULT_NEW_DTAGS
   link_info.new_dtags = DEFAULT_NEW_DTAGS;
 #endif
+  link_info.start_stop_visibility = STV_PROTECTED;
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);
@@ -320,10 +370,10 @@ main (int argc, char **argv)
   if (config.hash_table_size != 0)
     bfd_hash_set_default_size (config.hash_table_size);
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   /* Now all the plugin arguments have been gathered, we can load them.  */
   plugin_load_plugins ();
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   ldemul_set_symbols ();
 
@@ -477,6 +527,9 @@ main (int argc, char **argv)
 #endif
   ldexp_finish ();
   lang_finish ();
+
+  if (config.dependency_file != NULL)
+    write_dependency_file ();
 
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
@@ -819,15 +872,11 @@ add_archive_element (struct bfd_link_info *info,
   input->local_sym_name = bfd_get_filename (abfd);
   input->the_bfd = abfd;
 
-  parent = bfd_usrdata (abfd->my_archive);
-  if (parent != NULL && !parent->flags.reload)
-    parent->next = input;
-
   /* Save the original data for trace files/tries below, as plugins
      (if enabled) may possibly alter it to point to a replacement
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       /* We must offer this archive member to the plugins to claim.  */
@@ -848,7 +897,24 @@ add_archive_element (struct bfd_link_info *info,
 	  *subsbfd = input->the_bfd;
 	}
     }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
+
+  if (link_info.input_bfds_tail == &input->the_bfd->link.next
+      || input->the_bfd->link.next != NULL)
+    {
+      /* We have already loaded this element, and are attempting to
+	 load it again.  This can happen when the archive map doesn't
+	 match actual symbols defined by the element.  */
+      free (input);
+      bfd_set_error (bfd_error_malformed_archive);
+      return FALSE;
+    }
+
+  /* Set the file_chain pointer of archives to the last element loaded
+     from the archive.  See ldlang.c:find_rescan_insertion.  */
+  parent = bfd_usrdata (abfd->my_archive);
+  if (parent != NULL && !parent->flags.reload)
+    parent->next = input;
 
   ldlang_add_file (input);
 

@@ -126,8 +126,14 @@ struct ui_file_style
   private:
 
     bool m_simple;
-    int m_value;
-    uint8_t m_red, m_green, m_blue;
+    union
+    {
+      int m_value;
+      struct
+      {
+	uint8_t m_red, m_green, m_blue;
+      };
+    };
   };
 
   /* Intensity settings that are available.  */

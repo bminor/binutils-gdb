@@ -607,7 +607,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
   if (type->num_fields () != 1)
     return 1;
   /* Get field type.  */
-  ftype = type->field (0).type;
+  ftype = type->field (0).type ();
   /* The field type must have size 8, otherwise pass by address.  */
   if (TYPE_LENGTH (ftype) != 8)
     return 1;

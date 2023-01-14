@@ -19,7 +19,7 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 AC_PREREQ(2.64)
-AC_INIT([libctf library], 1.2.0-pre)
+AC_INIT([libctf], 1.2.0)
 AC_CONFIG_SRCDIR(ctf-impl.h)
 AC_CONFIG_MACRO_DIR(../config)
 AC_CONFIG_MACRO_DIR(../bfd)
@@ -31,6 +31,7 @@ AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_RANLIB
 AM_PROG_AR
+ZW_GNU_GETTEXT_SISTER_DIR
 
 dnl Default to a non shared library.  This may be overridden by the
 dnl configure option --enable-shared.
@@ -66,6 +67,12 @@ AC_FUNC_MMAP
 AC_SEARCH_LIBS(dlopen, dl)
 AM_ZLIB
 
+GCC_ENABLE([libctf-hash-debugging], [no], [], [Enable expensive debugging of CTF deduplication type hashing])
+if test "${enable_libctf_hash_debugging}" = yes; then
+    AC_DEFINE(ENABLE_LIBCTF_HASH_DEBUGGING, 1, [Enable expensive debugging of CTF deduplication type hashing])
+fi
+AM_CONDITIONAL(ENABLE_LIBCTF_HASH_DEBUGGING, test "${enable_libctf_hash_debugging}" = yes)
+
 # Similar to GDB_AC_CHECK_BFD.
 OLD_CFLAGS=$CFLAGS
 OLD_LDFLAGS=$LDFLAGS
@@ -99,7 +106,9 @@ AC_C_BIGENDIAN
 AC_CHECK_HEADERS(byteswap.h endian.h)
 AC_CHECK_FUNCS(pread)
 
-AC_CHECK_DECLS([asprintf])
+dnl Check for bswap_{16,32,64}
+AC_CHECK_DECLS([bswap_16, bswap_32, bswap_64], [], [], [[#include <byteswap.h>]])
+AC_CHECK_DECLS([asprintf, vasprintf, stpcpy])
 
 dnl Check for qsort_r.  (Taken from gnulib.)
 AC_CHECK_FUNCS_ONCE([qsort_r])

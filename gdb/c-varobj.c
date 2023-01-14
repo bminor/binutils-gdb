@@ -192,7 +192,7 @@ c_number_of_children (const struct varobj *var)
     {
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0
-	  && !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+	  && (type->bounds ()->high.kind () != PROP_UNDEFINED))
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
 	/* If we don't know how many elements there are, don't display
@@ -306,13 +306,13 @@ c_describe_child (const struct varobj *parent, int index,
     {
     case TYPE_CODE_ARRAY:
       if (cname)
-	*cname = int_string (index
-			     + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
+	*cname = int_string (index + type->bounds ()->low.const_val (),
 			     10, 1, 0, 0);
 
       if (cvalue && value)
 	{
-	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
+	  int real_index
+	    = index + type->bounds ()->low.const_val ();
 
 	  try
 	    {
@@ -327,12 +327,10 @@ c_describe_child (const struct varobj *parent, int index,
 	*ctype = get_target_type (type);
 
       if (cfull_expression)
-	*cfull_expression = 
-	  string_printf ("(%s)[%s]", parent_expression.c_str (),
-			 int_string (index
-				     + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
-				     10, 1, 0, 0));
-
+	*cfull_expression = string_printf
+	  ("(%s)[%s]", parent_expression.c_str (),
+	   int_string (index + type->bounds ()->low.const_val (),
+		       10, 1, 0, 0));
 
       break;
 
@@ -348,7 +346,7 @@ c_describe_child (const struct varobj *parent, int index,
 	  {
 	    if (cname)
 	      {
-		if (TYPE_FIELD_TYPE (type, index)->code ()
+		if (type->field (index).type ()->code ()
 		    == TYPE_CODE_STRUCT)
 		  *cname = ANONYMOUS_STRUCT_NAME;
 		else
@@ -380,7 +378,7 @@ c_describe_child (const struct varobj *parent, int index,
 	  }
 
 	if (ctype)
-	  *ctype = TYPE_FIELD_TYPE (type, index);
+	  *ctype = type->field (index).type ();
       }
       break;
 
@@ -771,10 +769,10 @@ cplus_describe_child (const struct varobj *parent, int index,
 	    {
 	      if (cname)
 		{
-		  if (TYPE_FIELD_TYPE (type, type_index)->code ()
+		  if (type->field (type_index).type ()->code ()
 		      == TYPE_CODE_STRUCT)
 		    *cname = ANONYMOUS_STRUCT_NAME;
-		  else if (TYPE_FIELD_TYPE (type, type_index)->code ()
+		  else if (type->field (type_index).type ()->code ()
 			   == TYPE_CODE_UNION)
 		    *cname = ANONYMOUS_UNION_NAME;
 		}
@@ -797,7 +795,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	    *cvalue = value_struct_element_index (value, type_index);
 
 	  if (ctype)
-	    *ctype = TYPE_FIELD_TYPE (type, type_index);
+	    *ctype = type->field (type_index).type ();
 	}
       else if (index < TYPE_N_BASECLASSES (type))
 	{
@@ -806,11 +804,11 @@ cplus_describe_child (const struct varobj *parent, int index,
 	    *cname = TYPE_FIELD_NAME (type, index);
 
 	  if (cvalue && value)
-	    *cvalue = value_cast (TYPE_FIELD_TYPE (type, index), value);
+	    *cvalue = value_cast (type->field (index).type (), value);
 
 	  if (ctype)
 	    {
-	      *ctype = TYPE_FIELD_TYPE (type, index);
+	      *ctype = type->field (index).type ();
 	    }
 
 	  if (cfull_expression)

@@ -45,8 +45,6 @@
 
 static std::string jit_reader_dir;
 
-static const struct objfile_data *jit_objfile_data;
-
 static const char *const jit_break_name = "__jit_debug_register_code";
 
 static const char *const jit_descriptor_name = "__jit_debug_descriptor";
@@ -241,65 +239,24 @@ jit_reader_unload_command (const char *args, int from_tty)
   loaded_jit_reader = NULL;
 }
 
-/* Per-program space structure recording which objfile has the JIT
-   symbols.  */
+/* Destructor for jiter_objfile_data.  */
 
-struct jit_program_space_data
+jiter_objfile_data::~jiter_objfile_data ()
 {
-  /* The objfile.  This is NULL if no objfile holds the JIT
-     symbols.  */
+  if (this->jit_breakpoint != nullptr)
+    delete_breakpoint (this->jit_breakpoint);
+}
 
-  struct objfile *objfile = nullptr;
-
-  /* If this program space has __jit_debug_register_code, this is the
-     cached address from the minimal symbol.  This is used to detect
-     relocations requiring the breakpoint to be re-created.  */
-
-  CORE_ADDR cached_code_address = 0;
-
-  /* This is the JIT event breakpoint, or NULL if it has not been
-     set.  */
-
-  struct breakpoint *jit_breakpoint = nullptr;
-};
-
-static program_space_key<jit_program_space_data> jit_program_space_key;
-
-/* Per-objfile structure recording the addresses in the program space.
-   This object serves two purposes: for ordinary objfiles, it may
-   cache some symbols related to the JIT interface; and for
-   JIT-created objfiles, it holds some information about the
-   jit_code_entry.  */
-
-struct jit_objfile_data
-{
-  /* Symbol for __jit_debug_register_code.  */
-  struct minimal_symbol *register_code;
-
-  /* Symbol for __jit_debug_descriptor.  */
-  struct minimal_symbol *descriptor;
-
-  /* Address of struct jit_code_entry in this objfile.  This is only
-     non-zero for objfiles that represent code created by the JIT.  */
-  CORE_ADDR addr;
-};
-
-/* Fetch the jit_objfile_data associated with OBJF.  If no data exists
+/* Fetch the jiter_objfile_data associated with OBJF.  If no data exists
    yet, make a new structure and attach it.  */
 
-static struct jit_objfile_data *
-get_jit_objfile_data (struct objfile *objf)
+static jiter_objfile_data *
+get_jiter_objfile_data (objfile *objf)
 {
-  struct jit_objfile_data *objf_data;
+  if (objf->jiter_data == nullptr)
+    objf->jiter_data.reset (new jiter_objfile_data ());
 
-  objf_data = (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-  if (objf_data == NULL)
-    {
-      objf_data = XCNEW (struct jit_objfile_data);
-      set_objfile_data (objf, jit_objfile_data, objf_data);
-    }
-
-  return objf_data;
+  return objf->jiter_data.get ();
 }
 
 /* Remember OBJFILE has been created for struct jit_code_entry located
@@ -308,33 +265,18 @@ get_jit_objfile_data (struct objfile *objf)
 static void
 add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
 {
-  struct jit_objfile_data *objf_data;
+  gdb_assert (objfile->jited_data == nullptr);
 
-  objf_data = get_jit_objfile_data (objfile);
-  objf_data->addr = entry;
-}
-
-/* Return jit_program_space_data for current program space.  Allocate
-   if not already present.  */
-
-static struct jit_program_space_data *
-get_jit_program_space_data ()
-{
-  struct jit_program_space_data *ps_data;
-
-  ps_data = jit_program_space_key.get (current_program_space);
-  if (ps_data == NULL)
-    ps_data = jit_program_space_key.emplace (current_program_space);
-  return ps_data;
+  objfile->jited_data.reset (new jited_objfile_data (entry));
 }
 
 /* Helper function for reading the global JIT descriptor from remote
-   memory.  Returns 1 if all went well, 0 otherwise.  */
+   memory.  Returns true if all went well, false otherwise.  */
 
-static int
-jit_read_descriptor (struct gdbarch *gdbarch,
-		     struct jit_descriptor *descriptor,
-		     struct jit_program_space_data *ps_data)
+static bool
+jit_read_descriptor (gdbarch *gdbarch,
+		     jit_descriptor *descriptor,
+		     objfile *jiter)
 {
   int err;
   struct type *ptr_type;
@@ -342,19 +284,17 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   int desc_size;
   gdb_byte *desc_buf;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct jit_objfile_data *objf_data;
 
-  if (ps_data->objfile == NULL)
-    return 0;
-  objf_data = get_jit_objfile_data (ps_data->objfile);
-  if (objf_data->descriptor == NULL)
-    return 0;
+  gdb_assert (jiter != nullptr);
+  jiter_objfile_data *objf_data = jiter->jiter_data.get ();
+  gdb_assert (objf_data != nullptr);
+
+  CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (jiter, objf_data->descriptor);
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
-								  objf_data->descriptor)));
+			paddress (gdbarch, addr));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -363,14 +303,12 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   desc_buf = (gdb_byte *) alloca (desc_size);
 
   /* Read the descriptor.  */
-  err = target_read_memory (MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
-						   objf_data->descriptor),
-			    desc_buf, desc_size);
+  err = target_read_memory (addr, desc_buf, desc_size);
   if (err)
     {
       printf_unfiltered (_("Unable to read JIT descriptor from "
 			   "remote memory\n"));
-      return 0;
+      return false;
     }
 
   /* Fix the endianness to match the host.  */
@@ -381,7 +319,7 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   descriptor->first_entry =
       extract_typed_address (&desc_buf[8 + ptr_size], ptr_type);
 
-  return 1;
+  return true;
 }
 
 /* Helper function for reading a JITed code entry from remote memory.  */
@@ -915,13 +853,10 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
   for (objfile *objf : current_program_space->objfiles ())
     {
-      struct jit_objfile_data *objf_data;
-
-      objf_data
-	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-      if (objf_data != NULL && objf_data->addr == entry_addr)
+      if (objf->jited_data != nullptr && objf->jited_data->addr == entry_addr)
 	return objf;
     }
+
   return NULL;
 }
 
@@ -931,80 +866,84 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 static void
 jit_breakpoint_deleted (struct breakpoint *b)
 {
-  struct bp_location *iter;
-
   if (b->type != bp_jit_event)
     return;
 
-  for (iter = b->loc; iter != NULL; iter = iter->next)
+  for (bp_location *iter = b->loc; iter != nullptr; iter = iter->next)
     {
-      struct jit_program_space_data *ps_data;
-
-      ps_data = jit_program_space_key.get (iter->pspace);
-      if (ps_data != NULL && ps_data->jit_breakpoint == iter->owner)
+      for (objfile *objf : iter->pspace->objfiles ())
 	{
-	  ps_data->cached_code_address = 0;
-	  ps_data->jit_breakpoint = NULL;
+	  jiter_objfile_data *jiter_data = objf->jiter_data.get ();
+
+	  if (jiter_data != nullptr
+	      && jiter_data->jit_breakpoint == iter->owner)
+	    {
+	      jiter_data->cached_code_address = 0;
+	      jiter_data->jit_breakpoint = nullptr;
+	    }
 	}
     }
 }
 
-/* (Re-)Initialize the jit breakpoint if necessary.
-   Return 0 if the jit breakpoint has been successfully initialized.  */
+/* (Re-)Initialize the jit breakpoints for JIT-producing objfiles in
+   PSPACE.  */
 
-static int
-jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
-				struct jit_program_space_data *ps_data)
+static void
+jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 {
-  struct bound_minimal_symbol reg_symbol;
-  struct bound_minimal_symbol desc_symbol;
-  struct jit_objfile_data *objf_data;
-  CORE_ADDR addr;
-
-  if (ps_data->objfile == NULL)
+  for (objfile *the_objfile : pspace->objfiles ())
     {
+      if (the_objfile->skip_jit_symbol_lookup)
+	continue;
+
       /* Lookup the registration symbol.  If it is missing, then we
 	 assume we are not attached to a JIT.  */
-      reg_symbol = lookup_bound_minimal_symbol (jit_break_name);
+      bound_minimal_symbol reg_symbol
+	= lookup_minimal_symbol (jit_break_name, nullptr, the_objfile);
       if (reg_symbol.minsym == NULL
 	  || BMSYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
-	return 1;
+	{
+	  /* No need to repeat the lookup the next time.  */
+	  the_objfile->skip_jit_symbol_lookup = true;
+	  continue;
+	}
 
-      desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL,
-					   reg_symbol.objfile);
+      bound_minimal_symbol desc_symbol
+	= lookup_minimal_symbol (jit_descriptor_name, NULL, the_objfile);
       if (desc_symbol.minsym == NULL
 	  || BMSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
-	return 1;
+	{
+	  /* No need to repeat the lookup the next time.  */
+	  the_objfile->skip_jit_symbol_lookup = true;
+	  continue;
+	}
 
-      objf_data = get_jit_objfile_data (reg_symbol.objfile);
+      jiter_objfile_data *objf_data
+	= get_jiter_objfile_data (reg_symbol.objfile);
       objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol.minsym;
 
-      ps_data->objfile = reg_symbol.objfile;
+      CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (the_objfile,
+					      objf_data->register_code);
+
+      if (jit_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "jit_breakpoint_re_set_internal, "
+			    "breakpoint_addr = %s\n",
+			    paddress (gdbarch, addr));
+
+      /* Check if we need to re-create the breakpoint.  */
+      if (objf_data->cached_code_address == addr)
+	continue;
+
+      /* Delete the old breakpoint.  */
+      if (objf_data->jit_breakpoint != nullptr)
+	delete_breakpoint (objf_data->jit_breakpoint);
+
+      /* Put a breakpoint in the registration symbol.  */
+      objf_data->cached_code_address = addr;
+      objf_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
     }
-  else
-    objf_data = get_jit_objfile_data (ps_data->objfile);
-
-  addr = MSYMBOL_VALUE_ADDRESS (ps_data->objfile, objf_data->register_code);
-
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_breakpoint_re_set_internal, "
-			"breakpoint_addr = %s\n",
-			paddress (gdbarch, addr));
-
-  if (ps_data->cached_code_address == addr)
-    return 0;
-
-  /* Delete the old breakpoint.  */
-  if (ps_data->jit_breakpoint != NULL)
-    delete_breakpoint (ps_data->jit_breakpoint);
-
-  /* Put a breakpoint in the registration symbol.  */
-  ps_data->cached_code_address = addr;
-  ps_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
-
-  return 0;
 }
 
 /* The private data passed around in the frame unwind callback
@@ -1243,7 +1182,6 @@ jit_inferior_init (struct gdbarch *gdbarch)
 {
   struct jit_descriptor descriptor;
   struct jit_code_entry cur_entry;
-  struct jit_program_space_data *ps_data;
   CORE_ADDR cur_entry_addr;
 
   if (jit_debug)
@@ -1251,38 +1189,43 @@ jit_inferior_init (struct gdbarch *gdbarch)
 
   jit_prepend_unwinder (gdbarch);
 
-  ps_data = get_jit_program_space_data ();
-  if (jit_breakpoint_re_set_internal (gdbarch, ps_data) != 0)
-    return;
+  jit_breakpoint_re_set_internal (gdbarch, current_program_space);
 
-  /* Read the descriptor so we can check the version number and load
-     any already JITed functions.  */
-  if (!jit_read_descriptor (gdbarch, &descriptor, ps_data))
-    return;
-
-  /* Check that the version number agrees with that we support.  */
-  if (descriptor.version != 1)
+  for (objfile *jiter : current_program_space->objfiles ())
     {
-      printf_unfiltered (_("Unsupported JIT protocol version %ld "
-			   "in descriptor (expected 1)\n"),
-			 (long) descriptor.version);
-      return;
-    }
-
-  /* If we've attached to a running program, we need to check the descriptor
-     to register any functions that were already generated.  */
-  for (cur_entry_addr = descriptor.first_entry;
-       cur_entry_addr != 0;
-       cur_entry_addr = cur_entry.next_entry)
-    {
-      jit_read_code_entry (gdbarch, cur_entry_addr, &cur_entry);
-
-      /* This hook may be called many times during setup, so make sure we don't
-	 add the same symbol file twice.  */
-      if (jit_find_objf_with_entry_addr (cur_entry_addr) != NULL)
+      if (jiter->jiter_data == nullptr)
 	continue;
 
-      jit_register_code (gdbarch, cur_entry_addr, &cur_entry);
+      /* Read the descriptor so we can check the version number and load
+	 any already JITed functions.  */
+      if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
+	continue;
+
+      /* Check that the version number agrees with that we support.  */
+      if (descriptor.version != 1)
+	{
+	  printf_unfiltered (_("Unsupported JIT protocol version %ld "
+			       "in descriptor (expected 1)\n"),
+			     (long) descriptor.version);
+	  continue;
+	}
+
+      /* If we've attached to a running program, we need to check the
+	 descriptor to register any functions that were already
+	 generated.  */
+      for (cur_entry_addr = descriptor.first_entry;
+	   cur_entry_addr != 0;
+	   cur_entry_addr = cur_entry.next_entry)
+	{
+	  jit_read_code_entry (gdbarch, cur_entry_addr, &cur_entry);
+
+	  /* This hook may be called many times during setup, so make sure
+	     we don't add the same symbol file twice.  */
+	  if (jit_find_objf_with_entry_addr (cur_entry_addr) != NULL)
+	    continue;
+
+	  jit_register_code (gdbarch, cur_entry_addr, &cur_entry);
+	}
     }
 }
 
@@ -1308,8 +1251,7 @@ jit_inferior_created_hook (void)
 void
 jit_breakpoint_re_set (void)
 {
-  jit_breakpoint_re_set_internal (target_gdbarch (),
-				  get_jit_program_space_data ());
+  jit_breakpoint_re_set_internal (target_gdbarch (), current_program_space);
 }
 
 /* This function cleans up any code entries left over when the
@@ -1321,75 +1263,56 @@ jit_inferior_exit_hook (struct inferior *inf)
 {
   for (objfile *objf : current_program_space->objfiles_safe ())
     {
-      struct jit_objfile_data *objf_data
-	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-
-      if (objf_data != NULL && objf_data->addr != 0)
+      if (objf->jited_data != nullptr && objf->jited_data->addr != 0)
 	objf->unlink ();
     }
 }
 
 void
-jit_event_handler (struct gdbarch *gdbarch)
+jit_event_handler (gdbarch *gdbarch, objfile *jiter)
 {
   struct jit_descriptor descriptor;
-  struct jit_code_entry code_entry;
-  CORE_ADDR entry_addr;
-  struct objfile *objf;
+
+  /* If we get a JIT breakpoint event for this objfile, it is necessarily a
+     JITer.  */
+  gdb_assert (jiter->jiter_data != nullptr);
 
   /* Read the descriptor from remote memory.  */
-  if (!jit_read_descriptor (gdbarch, &descriptor,
-			    get_jit_program_space_data ()))
+  if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
     return;
-  entry_addr = descriptor.relevant_entry;
+  CORE_ADDR entry_addr = descriptor.relevant_entry;
 
   /* Do the corresponding action.  */
   switch (descriptor.action_flag)
     {
     case JIT_NOACTION:
       break;
-    case JIT_REGISTER:
-      jit_read_code_entry (gdbarch, entry_addr, &code_entry);
-      jit_register_code (gdbarch, entry_addr, &code_entry);
-      break;
-    case JIT_UNREGISTER:
-      objf = jit_find_objf_with_entry_addr (entry_addr);
-      if (objf == NULL)
-	printf_unfiltered (_("Unable to find JITed code "
-			     "entry at address: %s\n"),
-			   paddress (gdbarch, entry_addr));
-      else
-	objf->unlink ();
 
-      break;
+    case JIT_REGISTER:
+      {
+	jit_code_entry code_entry;
+	jit_read_code_entry (gdbarch, entry_addr, &code_entry);
+	jit_register_code (gdbarch, entry_addr, &code_entry);
+	break;
+      }
+
+    case JIT_UNREGISTER:
+      {
+	objfile *jited = jit_find_objf_with_entry_addr (entry_addr);
+	if (jited == nullptr)
+	  printf_unfiltered (_("Unable to find JITed code "
+			       "entry at address: %s\n"),
+			     paddress (gdbarch, entry_addr));
+	else
+	  jited->unlink ();
+
+	break;
+      }
+
     default:
       error (_("Unknown action_flag value in JIT descriptor!"));
       break;
     }
-}
-
-/* Called to free the data allocated to the jit_program_space_data slot.  */
-
-static void
-free_objfile_data (struct objfile *objfile, void *data)
-{
-  struct jit_objfile_data *objf_data = (struct jit_objfile_data *) data;
-
-  if (objf_data->register_code != NULL)
-    {
-      struct jit_program_space_data *ps_data;
-
-      ps_data = jit_program_space_key.get (objfile->pspace);
-      if (ps_data != NULL && ps_data->objfile == objfile)
-	{
-	  ps_data->objfile = NULL;
-	  if (ps_data->jit_breakpoint != NULL)
-	    delete_breakpoint (ps_data->jit_breakpoint);
-	  ps_data->cached_code_address = 0;
-	}
-    }
-
-  xfree (data);
 }
 
 /* Initialize the jit_gdbarch_data slot with an instance of struct
@@ -1424,8 +1347,6 @@ _initialize_jit ()
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 
-  jit_objfile_data =
-    register_objfile_data_with_cleanup (NULL, free_objfile_data);
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {

@@ -85,20 +85,20 @@ insert_1 (CGEN_CPU_DESC cd,
 	  int word_length,
 	  unsigned char *bufp)
 {
-  unsigned long x,mask;
+  unsigned long x, mask;
   int shift;
 
-  x = cgen_get_insn_value (cd, bufp, word_length);
+  x = cgen_get_insn_value (cd, bufp, word_length, cd->endian);
 
   /* Written this way to avoid undefined behaviour.  */
-  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  mask = (1UL << (length - 1) << 1) - 1;
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
   else
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
 
-  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x);
+  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x, cd->endian);
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -131,12 +131,14 @@ insert_normal (CGEN_CPU_DESC cd,
 	       CGEN_INSN_BYTES_PTR buffer)
 {
   static char errbuf[100];
-  /* Written this way to avoid undefined behaviour.  */
-  unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  unsigned long mask;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value.  */
   if (length == 0)
     return NULL;
+
+  /* Written this way to avoid undefined behaviour.  */
+  mask = (1UL << (length - 1) << 1) - 1;
 
   if (word_length > 8 * sizeof (CGEN_INSN_INT))
     abort ();
@@ -153,7 +155,7 @@ insert_normal (CGEN_CPU_DESC cd,
   /* Ensure VALUE will fit.  */
   if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGN_OPT))
     {
-      long minval = - (1L << (length - 1));
+      long minval = - (1UL << (length - 1));
       unsigned long maxval = mask;
 
       if ((value > 0 && (unsigned long) value > maxval)
@@ -191,8 +193,8 @@ insert_normal (CGEN_CPU_DESC cd,
     {
       if (! cgen_signed_overflow_ok_p (cd))
 	{
-	  long minval = - (1L << (length - 1));
-	  long maxval =   (1L << (length - 1)) - 1;
+	  long minval = - (1UL << (length - 1));
+	  long maxval =   (1UL << (length - 1)) - 1;
 
 	  if (value < minval || value > maxval)
 	    {
@@ -269,8 +271,8 @@ insert_insn_normal (CGEN_CPU_DESC cd,
 #else
 
   cgen_put_insn_value (cd, buffer, min ((unsigned) cd->base_insn_bitsize,
-					(unsigned) CGEN_FIELDS_BITSIZE (fields)),
-		       value);
+                                        (unsigned) CGEN_FIELDS_BITSIZE (fields)),
+		       value, cd->insn_endian);
 
 #endif /* ! CGEN_INT_INSN_P */
 
@@ -314,7 +316,7 @@ put_insn_int_value (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     {
       int shift = insn_length - length;
       /* Written this way to avoid undefined behaviour.  */
-      CGEN_INSN_INT mask = (((1L << (length - 1)) - 1) << 1) | 1;
+      CGEN_INSN_INT mask = length == 0 ? 0 : (1UL << (length - 1) << 1) - 1;
 
       *buf = (*buf & ~(mask << shift)) | ((value & mask) << shift);
     }
@@ -387,7 +389,7 @@ extract_1 (CGEN_CPU_DESC cd,
   unsigned long x;
   int shift;
 
-  x = cgen_get_insn_value (cd, bufp, word_length);
+  x = cgen_get_insn_value (cd, bufp, word_length, cd->endian);
 
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
@@ -491,12 +493,12 @@ extract_normal (CGEN_CPU_DESC cd,
 #endif /* ! CGEN_INT_INSN_P */
 
   /* Written this way to avoid undefined behaviour.  */
-  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  mask = (1UL << (length - 1) << 1) - 1;
 
   value &= mask;
   /* sign extend? */
   if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED)
-      && (value & (1L << (length - 1))))
+      && (value & (1UL << (length - 1))))
     value |= ~mask;
 
   *valuep = value;
@@ -1622,7 +1624,7 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 4, 11, 32, total_length, pc, & value);
-        value = ((((value) << (1))) + (pc));
+        value = ((((value) * (2))) + (pc));
         fields->f_12s4a2 = value;
       }
       break;
@@ -1630,7 +1632,7 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 16, 16, 32, total_length, pc, & value);
-        value = ((((value) << (1))) + (pc));
+        value = ((((value) * (2))) + (pc));
         fields->f_17s16a2 = value;
       }
       break;
@@ -1640,14 +1642,14 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
         if (length <= 0) break;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_PCREL_ADDR), 0, 5, 7, 32, total_length, pc, & fields->f_24s5a2n_lo);
         if (length <= 0) break;
-  FLD (f_24s5a2n) = ((((((FLD (f_24s5a2n_hi)) << (8))) | (((FLD (f_24s5a2n_lo)) << (1))))) + (pc));
+  FLD (f_24s5a2n) = ((((((FLD (f_24s5a2n_hi)) * (256))) | (((FLD (f_24s5a2n_lo)) << (1))))) + (pc));
       }
       break;
     case MEP_OPERAND_PCREL8A2 :
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 8, 7, 32, total_length, pc, & value);
-        value = ((((value) << (1))) + (pc));
+        value = ((((value) * (2))) + (pc));
         fields->f_8s8a2 = value;
       }
       break;
@@ -1763,7 +1765,7 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 9, 6, 32, total_length, pc, & value);
-        value = ((value) << (1));
+        value = ((value) * (2));
         fields->f_7u9a2 = value;
       }
       break;

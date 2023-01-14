@@ -1,3 +1,85 @@
+2020-09-08  David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (define-alu-instructions): Correct semantic operators
+	for div, mod to unsigned versions.
+
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
+	* mep-core.cpu (f-8s8a2, f-12s4a2, f-17s16a2): Multiply signed
+	value by two rather than shifting left.
+	(f-24s5a2n): Similarly multiply signed f-24s5a2n-hi to extract.
+
+2020-08-26  David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (arch bpf): Add xbpf mach and isas.
+	(define-xbpf-isa) New pmacro.
+	(all-isas) Add xbpfle,xbpfbe.
+	(endian-isas): New pmacro.
+	(mach xbpf): New.
+	(model xbpf-def): Likewise.
+	(h-gpr): Add xbpf mach.
+	(f-dstle, f-srcle, dstle, srcle): Add xbpfle isa.
+	(f-dstbe, f-srcbe, dstbe, srcbe): Add xbpfbe isa.
+	(define-alu-insn-un): Use new endian-isas pmacro.
+	(define-alu-insn-bin, define-alu-insn-mov): Likewise.
+	(define-endian-insn, define-lddw): Likewise.
+	(dlind, dxli, dxsi, dsti): Likewise.
+	(define-cond-jump-insn, define-call-insn): Likewise.
+	(define-atomic-insns): Likewise.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
+	Binutils 2.35 branch created.
+
+2020-06-25 David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (f-offset16): Change type from INT to HI.
+	(dxli): Simplify memory access.
+	(dxsi): Likewise.
+	(define-endian-insn): Update c-call in semantics.
+	(dlabs) Likewise.
+	(dlind) Likewise.
+
+2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.cpu (define-bpf-isa): Set base-insn-bitsize to 64.
+	* bpf.opc (bpf_print_insn): Do not set endian_code here.
+
+2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* mep.opc (print_slot_insn): Pass the insn endianness to
+	cgen_get_insn_value.
+
+2020-05-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* bpf.cpu (define-alu-insn-un): Add definitions of semantics.
+	(define-alu-insn-mov): Likewise.
+	(daib): Likewise.
+	(define-alu-instructions): Likewise.
+	(define-endian-insn): Likewise.
+	(define-lddw): Likewise.
+	(dlabs): Likewise.
+	(dlind): Likewise.
+	(dxli): Likewise.
+	(dxsi): Likewise.
+	(dsti): Likewise.
+	(define-ldstx-insns): Likewise.
+	(define-st-insns): Likewise.
+	(define-cond-jump-insn): Likewise.
+	(dcji): Likewise.
+	(define-condjump-insns): Likewise.
+	(define-call-insn): Likewise.
+	(ja): Likewise.
+	("exit"): Likewise.
+	(define-atomic-insns): Likewise.
+	(sem-exchange-and-add): New macro.
+	* bpf.cpu ("brkpt"): New instruction.
+	(bpfbf): Set word-bitsize to 32 and insn-endian big.
+	(h-gpr): Prefer r0 to `a' and r6 to `ctx'.
+	(h-pc): Expand definition.
+	* bpf.opc (bpf_print_insn): Set endian_code to BIG.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	* mep.opc (mep_cgen_expand_macros_and_parse_operand): Replace

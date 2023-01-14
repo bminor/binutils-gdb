@@ -295,10 +295,6 @@ start:
 	lhzu	10,2(11)
 	lhzux	10,11,12
 	lhzx	10,11,12
-	lmw	20,16(10)
-	lswi	10,11,1
-	lswi	12,11,32
-	lswx	10,11,12
 	lwa	10,-4(11)
 	lwa	10,4(11)
 	lwarx	10,11,12,0
@@ -486,10 +482,6 @@ start:
 	sthu	10,2(11)
 	sthux	10,11,12
 	sthx	10,11,12
-	stmw	20,16(10)
-	stswi	10,11,1
-	stswi	10,11,32
-	stswx	10,11,12
 	stwbrx	10,11,12
 	stwcx.	10,11,12
 	stwepx	10,11,12

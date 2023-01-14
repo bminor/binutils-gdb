@@ -87,12 +87,6 @@ extern ULONGEST read_code_unsigned_integer (CORE_ADDR memaddr,
 					    int len,
 					    enum bfd_endian byte_order);
 
-/* Read a null-terminated string from the debuggee's memory, given
-   address, a buffer into which to place the string, and the maximum
-   available space.  */
-
-extern void read_memory_string (CORE_ADDR, char *, int);
-
 /* Read the pointer of type TYPE at ADDR, and return the address it
    represents.  */
 

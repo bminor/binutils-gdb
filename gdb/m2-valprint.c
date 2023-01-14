@@ -55,9 +55,8 @@ get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
-      *low = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i)));
-      *high = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type,
-								 len-1)));
+      *low = type->field (i).type ()->bounds ()->low.const_val ();
+      *high = type->field (len - 1).type ()->bounds ()->high.const_val ();
       return 1;
     }
   error (_("expecting long_set"));
@@ -87,7 +86,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
   if (get_long_set_bounds (type, &low_bound, &high_bound))
     {
       field = TYPE_N_BASECLASSES (type);
-      range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, field));
+      range = type->field (field).type ()->index_type ();
     }
   else
     {
@@ -102,7 +101,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
     {
       for (i = low_bound; i <= high_bound; i++)
 	{
-	  bitval = value_bit_index (TYPE_FIELD_TYPE (type, field),
+	  bitval = value_bit_index (type->field (field).type (),
 				    (TYPE_FIELD_BITPOS (type, field) / 8) +
 				    valaddr + embedded_offset, i);
 	  if (bitval < 0)
@@ -137,7 +136,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      field++;
 	      if (field == len)
 		break;
-	      range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, field));
+	      range = type->field (field).type ()->index_type ();
 	      if (get_discrete_bounds (range, &field_low, &field_high) < 0)
 		break;
 	      target = TYPE_TARGET_TYPE (range);
@@ -168,11 +167,11 @@ m2_print_unbounded_array (struct value *value,
   struct type *type = check_typedef (value_type (value));
   const gdb_byte *valaddr = value_contents_for_printing (value);
 
-  addr = unpack_pointer (TYPE_FIELD_TYPE (type, 0),
+  addr = unpack_pointer (type->field (0).type (),
 			 (TYPE_FIELD_BITPOS (type, 0) / 8) +
 			 valaddr);
 
-  val = value_at_lazy (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0)),
+  val = value_at_lazy (TYPE_TARGET_TYPE (type->field (0).type ()),
 		       addr);
   len = unpack_field_as_long (type, valaddr, 1);
 
@@ -382,9 +381,9 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = type->index_type ();
       elttype = check_typedef (elttype);
-      if (TYPE_STUB (elttype))
+      if (elttype->is_stub ())
 	{
 	  fprintf_styled (stream, metadata_style.style (),
 			  _("<incomplete type>"));

@@ -42,8 +42,8 @@ static void
 adjust_type_signedness (struct type *type)
 {
   if (type != NULL && type->code () == TYPE_CODE_RANGE
-      && TYPE_LOW_BOUND (type) >= 0)
-    TYPE_UNSIGNED (type) = 1;
+      && type->bounds ()->low.const_val () >= 0)
+    type->set_is_unsigned (true);
 }
 
 /* Assuming TYPE is a simple array type, prints its lower bound on STREAM,
@@ -71,7 +71,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
   if (low_bound > high_bound)
     return 0;
 
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
 
   while (index_type->code () == TYPE_CODE_RANGE)
     {
@@ -131,7 +131,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   LONGEST low = 0;
 
   elttype = TYPE_TARGET_TYPE (type);
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
 
   {
     LONGEST high;
@@ -398,7 +398,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_INT:
-      print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0, val);
+      print_longest (stream, type->is_unsigned () ? 'u' : 'd', 0, val);
       break;
 
     case TYPE_CODE_CHAR:
@@ -542,7 +542,7 @@ print_variant_part (struct value *value, int field_num,
 		    const struct language_defn *language)
 {
   struct type *type = value_type (value);
-  struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
+  struct type *var_type = type->field (field_num).type ();
   int which = ada_which_variant_applies (var_type, outer_value);
 
   if (which < 0)
@@ -617,7 +617,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	  wrap_here (n_spaces (2 + 2 * recurse));
 	}
 
-      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+      annotate_field_begin (type->field (i).type ());
       fprintf_filtered (stream, "%.*s",
 			ada_name_prefix_len (TYPE_FIELD_NAME (type, i)),
 			TYPE_FIELD_NAME (type, i));
@@ -641,12 +641,12 @@ print_field_values (struct value *value, struct value *outer_value,
 	      int bit_size = TYPE_FIELD_BITSIZE (type, i);
 	      struct value_print_options opts;
 
-	      adjust_type_signedness (TYPE_FIELD_TYPE (type, i));
+	      adjust_type_signedness (type->field (i).type ());
 	      v = ada_value_primitive_packed_val
 		    (value, nullptr,
 		     bit_pos / HOST_CHAR_BIT,
 		     bit_pos % HOST_CHAR_BIT,
-		     bit_size, TYPE_FIELD_TYPE (type, i));
+		     bit_size, type->field (i).type ());
 	      opts = *options;
 	      opts.deref_ref = 0;
 	      common_val_print (v, stream, recurse + 1, &opts, language);
@@ -754,10 +754,10 @@ ada_value_print_ptr (struct value *val,
   struct type *type = ada_check_typedef (value_type (val));
   if (ada_is_tag_type (type))
     {
-      const char *name = ada_tag_name (val);
+      gdb::unique_xmalloc_ptr<char> name = ada_tag_name (val);
 
       if (name != NULL)
-	fprintf_filtered (stream, " (%s)", name);
+	fprintf_filtered (stream, " (%s)", name.get ());
     }
 }
 
@@ -1129,7 +1129,7 @@ ada_value_print (struct value *val0, struct ui_file *stream,
          type is indicated by the quoted string anyway.  */
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) != sizeof (char)
 	  || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_INT
-	  || TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
+	  || TYPE_TARGET_TYPE (type)->is_unsigned ())
 	{
 	  fprintf_filtered (stream, "(");
 	  type_print (type, "", stream, -1);

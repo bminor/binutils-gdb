@@ -70,7 +70,12 @@ proc gdb_load { file } {
 
     # Close any previous simavr instance.
     if { $simavr_spawn_id != "" } {
-	close -i $simavr_spawn_id
+	verbose -log "simavr: closing previous spawn id $simavr_spawn_id"
+	if [catch { close -i $simavr_spawn_id } != 0] {
+	    warning "simavr: failed to close connection to previous simavr instance"
+	}
+
+	wait -i $simavr_spawn_id
 	set simavr_spawn_id ""
     }
 
@@ -79,16 +84,40 @@ proc gdb_load { file } {
     verbose -log "Spawning simavr: $cmd"
     eval $cmd
     set simavr_spawn_id $spawn_id
-    gdb_expect {
+
+    verbose -log "simavr: simavr spawned with spawn id $simavr_spawn_id, pid [exp_pid $simavr_spawn_id]"
+
+    # Wait for "listening on port" message of simavr.
+    expect {
 	-i $simavr_spawn_id -re ".*avr_gdb_init listening on port 1234" {}
-	timeout { error "unable to start simavr" }
+	timeout {
+	    verbose -log "simavr: timeout, closing simavr spawn id"
+	    close -i $simavr_spawn_id
+	    verbose -log "simavr: timeout, waiting for simavr process exit"
+	    wait -i $simavr_spawn_id
+	    set simavr_spawn_id ""
+	    error "unable to start simavr: timeout"
+	}
+	eof {
+	    verbose -log "simavr: eof, waiting for simavr process exit"
+	    wait -i $simavr_spawn_id
+	    set simavr_spawn_id ""
+	    error "unable to start simavr: eof"
+	}
     }
 
     # Connect to simavr.
     send_gdb "target remote :1234\n"
     gdb_expect {
 	-re ".*Remote debugging using :1234.*\[\r\n\]+$gdb_prompt $" {}
-	timeout { error "unable to connect to simavr stub" }
+	timeout {
+	    verbose -log "simavr: unable to connect to simavr, closing simavr spawn id"
+	    close -i $simavr_spawn_id
+	    verbose -log "simavr: unable to connect to simavr, waiting for simavr process exit"
+	    wait -i $simavr_spawn_id
+	    set simavr_spawn_id ""
+	    error "unable to connect to simavr stub"
+	}
     }
 
     return 0

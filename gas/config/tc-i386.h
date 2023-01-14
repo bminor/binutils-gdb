@@ -59,10 +59,6 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_FORMAT64	"elf64-x86-64-freebsd"
 #elif defined (TE_VXWORKS)
 #define ELF_TARGET_FORMAT	"elf32-i386-vxworks"
-#elif defined (TE_NACL)
-#define ELF_TARGET_FORMAT	"elf32-i386-nacl"
-#define ELF_TARGET_FORMAT32	"elf32-x86-64-nacl"
-#define ELF_TARGET_FORMAT64	"elf64-x86-64-nacl"
 #elif defined TE_CLOUDABI
 #define ELF_TARGET_FORMAT64	"elf64-x86-64-cloudabi"
 #endif

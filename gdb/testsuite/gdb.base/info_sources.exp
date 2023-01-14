@@ -71,7 +71,9 @@ test_info_sources "--" 1 1
 
 # List both files with regexp matching anywhere in the filenames:
 test_info_sources "info_sources" 1 1
-test_info_sources "gdb.base" 1 1
+if { ! [is_remote host] } {
+    test_info_sources "gdb.base" 1 1
+}
 
 # List both files with regexp matching the filename basenames,
 # using various parts of the -basename option:
@@ -88,8 +90,10 @@ test_info_sources "-b base" 0 1
 
 # List the files with dirname matching regexp,
 # using various part of the -dirname option:
-test_info_sources "-d base" 1 1
-test_info_sources "-dirname base" 1 1
+if { ! [is_remote host] } {
+    test_info_sources "-d base" 1 1
+    test_info_sources "-dirname base" 1 1
+}
 
 # Test non matching regexp, with option terminator:
 test_info_sources "-b -- -d" 0 0

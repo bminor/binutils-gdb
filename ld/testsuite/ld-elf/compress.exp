@@ -36,7 +36,6 @@ if { ![check_compiler_available] } {
     return
 }
 
-global as
 if { ![ld_assemble $as "--compress-debug-sections $srcdir/$subdir/empty.s" tmpdir/empty.o ] } {
     fail "linker compressed debug sections"
 }
@@ -123,8 +122,6 @@ if { [catch {exec cmp tmpdir/libfoo.so tmpdir/libfoozlib.so}] } then {
 } else {
     pass "$test_name"
 }
-
-global READELF
 
 set test_name "Link -r with zlib compressed debug output"
 set test zlibbegin

@@ -23,6 +23,7 @@
 
 /* Need disassemble_info.  */
 #include "dis-asm.h"
+#include "gdbarch.h"
 #include "arch/arc.h"
 
 /* To simplify GDB code this enum assumes that internal regnums should be same
@@ -35,7 +36,6 @@ enum arc_regnum
   {
     /* Core registers.  */
     ARC_R0_REGNUM = 0,
-    ARC_FIRST_CORE_REGNUM = ARC_R0_REGNUM,
     ARC_R1_REGNUM = 1,
     ARC_R4_REGNUM = 4,
     ARC_R7_REGNUM = 7,
@@ -54,6 +54,9 @@ enum arc_regnum
     ARC_R30_REGNUM,
     /* Return address from function.  */
     ARC_BLINK_REGNUM,
+    /* Accumulator registers.  */
+    ARC_R58_REGNUM = 58,
+    ARC_R59_REGNUM,
     /* Zero-delay loop counter.  */
     ARC_LP_COUNT_REGNUM = 60,
     /* Reserved register number.  There should never be a register with such
@@ -69,14 +72,21 @@ enum arc_regnum
     /* Program counter, aligned to 4-bytes, read-only.  */
     ARC_PCL_REGNUM,
     ARC_LAST_CORE_REGNUM = ARC_PCL_REGNUM,
+
     /* AUX registers.  */
     /* Actual program counter.  */
     ARC_PC_REGNUM,
     ARC_FIRST_AUX_REGNUM = ARC_PC_REGNUM,
     /* Status register.  */
     ARC_STATUS32_REGNUM,
-    ARC_LAST_REGNUM = ARC_STATUS32_REGNUM,
-    ARC_LAST_AUX_REGNUM = ARC_STATUS32_REGNUM,
+    /* Zero-delay loop start instruction.  */
+    ARC_LP_START_REGNUM,
+    /* Zero-delay loop next-after-last instruction.  */
+    ARC_LP_END_REGNUM,
+    /* Branch target address.  */
+    ARC_BTA_REGNUM,
+    ARC_LAST_AUX_REGNUM = ARC_BTA_REGNUM,
+    ARC_LAST_REGNUM = ARC_LAST_AUX_REGNUM,
 
     /* Additional ABI constants.  */
     ARC_FIRST_ARG_REGNUM = ARC_R0_REGNUM,
@@ -90,6 +100,11 @@ enum arc_regnum
    Longer registers are represented as pairs of 32-bit registers.  */
 #define ARC_REGISTER_SIZE  4
 
+/* STATUS32 register: hardware loops disabled bit.  */
+#define ARC_STATUS32_L_MASK (1 << 12)
+/* STATUS32 register: current instruction is a delay slot.  */
+#define ARC_STATUS32_DE_MASK (1 << 6)
+
 #define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
 
 extern int arc_debug;
@@ -101,6 +116,9 @@ struct gdbarch_tdep
   /* Offset to PC value in jump buffer.  If this is negative, longjmp
      support will be disabled.  */
   int jb_pc;
+
+  /* Whether target has hardware (aka zero-delay) loops.  */
+  bool has_hw_loops;
 };
 
 /* Utility functions used by other ARC-specific modules.  */
@@ -163,8 +181,5 @@ CORE_ADDR arc_insn_get_branch_target (const struct arc_instruction &insn);
    instruction length with LIMM".  */
 
 CORE_ADDR arc_insn_get_linear_next_pc (const struct arc_instruction &insn);
-
-/* Get the correct ARC target description for the given system type.  */
-const target_desc *arc_read_description (arc_sys_type sys_type);
 
 #endif /* ARC_TDEP_H */

@@ -29,8 +29,6 @@
 
 
 
-set prototypes 0
-
 standard_testfile .c
 
 if [get_compiler_info] {

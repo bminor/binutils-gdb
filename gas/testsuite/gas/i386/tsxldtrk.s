@@ -2,5 +2,5 @@
 
 	.text
 _start:
-	xsuspldtrk
+	xsusldtrk
 	xresldtrk

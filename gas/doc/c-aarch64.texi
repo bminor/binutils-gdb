@@ -78,8 +78,9 @@ on the target processor.  The following processor names are recognized:
 @code{thunderx},
 @code{vulcan},
 @code{xgene1}
+@code{xgene2},
 and
-@code{xgene2}.
+@code{cortex-r82}.
 The special name @code{all} may be used to allow the assembler to accept
 instructions valid for any supported processor, including all optional
 extensions.
@@ -100,7 +101,7 @@ issue an error message if an attempt is made to assemble an
 instruction which will not execute on the target architecture.  The
 following architecture names are recognized: @code{armv8-a},
 @code{armv8.1-a}, @code{armv8.2-a}, @code{armv8.3-a}, @code{armv8.4-a}
-@code{armv8.5-a}, and @code{armv8.6-a}.
+@code{armv8.5-a}, @code{armv8.6-a}, and @code{armv8-r}.
 
 If both @option{-mcpu} and @option{-march} are specified, the
 assembler will use the setting for @option{-mcpu}.  If neither are

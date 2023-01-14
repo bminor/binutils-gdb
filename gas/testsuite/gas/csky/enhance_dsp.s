@@ -7,6 +7,7 @@ hello:
     ldbi.w r2, (r3)
 .loop_end:
     bloop r2, .loop_start, .loop_end
+    bloop r2, .loop_start
     pldbi.d r2, (r3)
     ldbi.hs r2, (r3)
     ldbi.bs r2, (r3)
@@ -108,7 +109,7 @@ hello:
     plsr.u16     r2, r3, r4
     plsri.u16.r  r2, r3, 8
     plsr.u16.r   r2, r3, r4
-    plsli.u16    r2, r3, 8
+    plsli.16    r2, r3, 8
     plsl.u16     r2, r3, r16
     plsli.u16.s  r2, r3, 8
     plsli.s16.s  r2, r3, 8

@@ -736,7 +736,7 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
   GDB_PY_HANDLE_EXCEPTION (except);
 
   if (found)
-    return PyLong_FromLong (found_addr);
+    return gdb_py_object_from_ulongest (found_addr).release ();
   else
     Py_RETURN_NONE;
 }

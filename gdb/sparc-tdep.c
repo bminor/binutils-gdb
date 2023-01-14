@@ -303,7 +303,7 @@ sparc_structure_or_union_p (const struct type *type)
 static bool
 sparc_structure_return_p (const struct type *type)
 {
-  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       /* Float vectors are always returned by memory.  */
       if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
@@ -331,7 +331,7 @@ sparc_structure_return_p (const struct type *type)
 static bool
 sparc_arg_by_memory_p (const struct type *type)
 {
-  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       /* Float vectors are always passed by memory.  */
       if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))

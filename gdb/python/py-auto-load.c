@@ -84,12 +84,12 @@ Show the debugger's behaviour regarding auto-loaded Python scripts, "
 			   NULL, NULL, show_auto_load_python_scripts,
 			   &setlist, &showlist);
   cmd_name = "auto-load-scripts";
-  cmd = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, setlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "set auto-load python-scripts");
 
   /* It is needed because lookup_cmd updates the CMD_NAME pointer.  */
   cmd_name = "auto-load-scripts";
-  cmd = lookup_cmd (&cmd_name, showlist, "", -1, 1);
+  cmd = lookup_cmd (&cmd_name, showlist, "", NULL, -1, 1);
   deprecate_cmd (cmd, "show auto-load python-scripts");
 
   add_cmd ("python-scripts", class_info, info_auto_load_python_scripts,

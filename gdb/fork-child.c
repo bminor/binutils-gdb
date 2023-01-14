@@ -61,8 +61,6 @@ static struct ui *saved_ui = NULL;
 void
 prefork_hook (const char *args)
 {
-  const char *inferior_io_terminal = get_inferior_io_terminal ();
-
   gdb_assert (saved_ui == NULL);
   /* Retain a copy of our UI, since the child will replace this value
      and if we're vforked, we have to restore it.  */
@@ -70,7 +68,7 @@ prefork_hook (const char *args)
 
   /* Tell the terminal handling subsystem what tty we plan to run on;
      it will just record the information for later.  */
-  new_tty_prefork (inferior_io_terminal);
+  new_tty_prefork (current_inferior ()->tty ());
 }
 
 /* See nat/fork-inferior.h.  */
@@ -81,9 +79,6 @@ postfork_hook (pid_t pid)
   inferior *inf = current_inferior ();
 
   inferior_appeared (inf, pid);
-
-  /* Needed for wait_for_inferior stuff.  */
-  inferior_ptid = ptid_t (pid);
 
   gdb_assert (saved_ui != NULL);
   current_ui = saved_ui;

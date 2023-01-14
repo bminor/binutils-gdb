@@ -786,7 +786,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* All functions in C++ have prototypes.  For C we don't have enough
          information in the debug info.  */
       if (s->language () == language_cplus)
-	TYPE_PROTOTYPED (SYMBOL_TYPE (s)) = 1;
+	SYMBOL_TYPE (s)->set_is_prototyped (true);
 
       /* Create and enter a new lexical context.  */
       b = new_block (FUNCTION_BLOCK, s->language ());
@@ -1051,7 +1051,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  break;
 
 		SET_FIELD_ENUMVAL (*f, tsym.value);
-		FIELD_TYPE (*f) = t;
+		f->set_type (t);
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
 
@@ -1072,7 +1072,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		f++;
 	      }
 	    if (unsigned_enum)
-	      TYPE_UNSIGNED (t) = 1;
+	      t->set_is_unsigned (true);
 	  }
 	/* Make this the current type.  */
 	top_stack->cur_type = t;
@@ -1086,7 +1086,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	   do not create a symbol for it either.  */
 	if (t->num_fields () == 0)
 	  {
-	    TYPE_STUB (t) = 1;
+	    t->set_is_stub (true);
 	    break;
 	  }
 
@@ -1198,7 +1198,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 		      if (SYMBOL_IS_ARGUMENT (sym))
 			{
-			  TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+			  ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
 			  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 			  iparams++;
 			}
@@ -1238,8 +1238,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	FIELD_NAME (*f) = name;
 	SET_FIELD_BITPOS (*f, sh->value);
 	bitsize = 0;
-	FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index,
-				      &bitsize, bigend, name);
+	f->set_type (parse_type (cur_fd, ax, sh->index, &bitsize, bigend,
+				 name));
 	FIELD_BITSIZE (*f) = bitsize;
       }
       break;
@@ -1387,7 +1387,7 @@ basic_type (int bt, struct objfile *objfile)
 
     case btChar:
       tp = init_integer_type (objfile, 8, 0, "char");
-      TYPE_NOSIGN (tp) = 1;
+      tp->set_has_no_signedness (true);
       break;
 
     case btUChar:
@@ -1734,11 +1734,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   if (t->bt == btRange)
     {
       tp->set_num_fields (0);
-      TYPE_RANGE_DATA (tp) = ((struct range_bounds *)
-			  TYPE_ZALLOC (tp, sizeof (struct range_bounds)));
-      TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);
+      tp->set_bounds (((struct range_bounds *)
+			TYPE_ZALLOC (tp, sizeof (struct range_bounds))));
+      tp->bounds ()->low.set_const_val (AUX_GET_DNLOW (bigend, ax));
       ax++;
-      TYPE_HIGH_BOUND (tp) = AUX_GET_DNHIGH (bigend, ax);
+      tp->bounds ()->high.set_const_val (AUX_GET_DNHIGH (bigend, ax));
       ax++;
     }
 
@@ -1866,7 +1866,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
       /* TYPE_TARGET_STUB now takes care of the zero TYPE_LENGTH problem.  */
       if (TYPE_LENGTH (*tpp) == 0)
-	TYPE_TARGET_STUB (t) = 1;
+	t->set_target_is_stub (true);
 
       *tpp = t;
       return 4 + off;
@@ -3029,10 +3029,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    switch (p[1])
 		      {
 		      case 'S':
-			if (gdbarch_static_transform_name_p (gdbarch))
-			  namestring = gdbarch_static_transform_name
-					 (gdbarch, namestring);
-
 			add_psymbol_to_list (gdb::string_view (namestring,
 							       p - namestring),
 					     true, VAR_DOMAIN, LOC_STATIC,
@@ -4278,7 +4274,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
     {
       *pname = "<undefined>";
       *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
-      TYPE_STUB (*tpp) = 1;
+      (*tpp)->set_is_stub (true);
       return result;
     }
 

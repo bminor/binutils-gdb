@@ -81,6 +81,9 @@
 #include "block.h"
 #include "ctfread.h"
 #include "psympriv.h"
+
+#if ENABLE_LIBCTF
+
 #include "ctf.h"
 #include "ctf-api.h"
 
@@ -379,7 +382,7 @@ ctf_add_member_cb (const char *name,
   if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
     process_struct_members (ccp, tid, t);
 
-  FIELD_TYPE (*fp) = t;
+  fp->set_type (t);
   SET_FIELD_BITPOS (*fp, offset / TARGET_CHAR_BIT);
   FIELD_BITSIZE (*fp) = get_bitsize (ccp->fp, tid, kind);
 
@@ -401,7 +404,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
   fp = &new_field.field;
   FIELD_NAME (*fp) = name;
-  FIELD_TYPE (*fp) = NULL;
+  fp->set_type (NULL);
   SET_FIELD_ENUMVAL (*fp, enum_value);
   FIELD_BITSIZE (*fp) = 0;
 
@@ -563,7 +566,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
     }
 
   if (name != NULL && strcmp (name, "char") == 0)
-    TYPE_NOSIGN (type) = 1;
+    type->set_has_no_signedness (true);
 
   return set_tid_type (of, tid, type);
 }
@@ -771,9 +774,9 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
   type = create_array_type (NULL, element_type, range_type);
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
     {
-      TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
+      range_type->bounds ()->high.set_undefined ();
       TYPE_LENGTH (type) = 0;
-      TYPE_TARGET_STUB (type) = 1;
+      type->set_target_is_stub (true);
     }
   else
     TYPE_LENGTH (type) = ctf_type_size (fp, tid);
@@ -873,7 +876,8 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
     TYPE_TARGET_TYPE (this_type) = target_type;
   else
     TYPE_TARGET_TYPE (this_type) = NULL;
-  TYPE_TARGET_STUB (this_type) = TYPE_TARGET_TYPE (this_type) ? 1 : 0;
+
+  this_type->set_target_is_stub (TYPE_TARGET_TYPE (this_type) != nullptr);
 
   return set_tid_type (objfile, tid, this_type);
 }
@@ -1138,7 +1142,7 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
   tid = ctf_lookup_by_symbol (ccp->fp, idx);
   ftype = get_tid_type (ccp->of, tid);
   if (finfo.ctc_flags & CTF_FUNC_VARARG)
-    TYPE_VARARGS (ftype) = 1;
+    ftype->set_has_varargs (true);
   ftype->set_num_fields (argc);
 
   /* If argc is 0, it has a "void" type.  */
@@ -1152,9 +1156,9 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
     {
       atyp = get_tid_type (ccp->of, argv[iparam]);
       if (atyp)
-	TYPE_FIELD_TYPE (ftype, iparam) = atyp;
+	ftype->field (iparam).set_type (atyp);
       else
-	TYPE_FIELD_TYPE (ftype, iparam) = void_type;
+	ftype->field (iparam).set_type (void_type);
     }
 
   sym = new_symbol (ccp, ftype, tid);
@@ -1485,3 +1489,13 @@ elfctf_build_psymtabs (struct objfile *of)
 
   scan_partial_symbols (fp, of);
 }
+
+#else
+
+void
+elfctf_build_psymtabs (struct objfile *of)
+{
+  /* Nothing to do if CTF is disabled.  */
+}
+
+#endif /* ENABLE_LIBCTF */

@@ -302,20 +302,6 @@ extern struct value *allocate_computed_value (struct type *type,
 					      const struct lval_funcs *funcs,
 					      void *closure);
 
-/* Helper function to check the validity of some bits of a value.
-
-   If TYPE represents some aggregate type (e.g., a structure), return 1.
-   
-   Otherwise, any of the bytes starting at OFFSET and extending for
-   TYPE_LENGTH(TYPE) bytes are invalid, print a message to STREAM and
-   return 0.  The checking is done using FUNCS.
-   
-   Otherwise, return 1.  */
-
-extern int valprint_check_validity (struct ui_file *stream, struct type *type,
-				    LONGEST embedded_offset,
-				    const struct value *val);
-
 extern struct value *allocate_optimized_out_value (struct type *type);
 
 /* If VALUE is lval_computed, return its lval_funcs structure.  */
@@ -488,7 +474,9 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 
 /* Setup a new value type and enclosing value type for dereferenced value VALUE.
    ENC_TYPE is the new enclosing type that should be set.  ORIGINAL_TYPE and
-   ORIGINAL_VAL are the type and value of the original reference or pointer.
+   ORIGINAL_VAL are the type and value of the original reference or
+   pointer.  ORIGINAL_VALUE_ADDRESS is the address within VALUE, that is
+   the address that was dereferenced.
 
    Note, that VALUE is modified by this function.
 
@@ -497,7 +485,8 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 extern struct value * readjust_indirect_value_type (struct value *value,
 						    struct type *enc_type,
 						    const struct type *original_type,
-						    const struct value *original_val);
+						    struct value *original_val,
+						    CORE_ADDR original_value_address);
 
 /* Convert a REF to the object referenced.  */
 
@@ -743,10 +732,6 @@ extern int symbol_read_needs_frame (struct symbol *);
 extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
 				     struct frame_info *frame);
-
-extern struct value *default_read_var_value (struct symbol *var,
-					     const struct block *var_block,
-					     struct frame_info *frame);
 
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);

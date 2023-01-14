@@ -430,7 +430,7 @@ AC_ARG_ENABLE([codesign],
 AC_SUBST([CODESIGN_CERT])
 
 ACX_PKGVERSION([GDB])
-ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
@@ -1088,7 +1088,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-2.0"
+try_guile_versions="guile-3.0 guile-2.2 guile-2.0"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -1248,6 +1248,9 @@ AC_CHECK_HEADERS(term.h, [], [],
 #endif
 ])
 
+AC_CHECK_HEADERS([sys/socket.h])
+AC_CHECK_HEADERS([ws2tcpip.h])
+
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -1263,7 +1266,11 @@ AM_LC_MESSAGES
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
-#include <sys/socket.h>
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#elif HAVE_WS2TCPIP_H
+# include <ws2tcpip.h>
+#endif
 ])
 
 # ------------------------------------- #
@@ -2065,6 +2072,27 @@ fi
 AC_ARG_WITH(xxhash,
   AC_HELP_STRING([--with-xxhash], [use libxxhash for hashing (faster) (auto/yes/no)]),
   [], [with_xxhash=auto])
+
+GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
+if test x${enable_static} = xno; then
+  LIBCTF="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
+  CTF_DEPS="../libctf/.libs/libctf.so"
+else
+  LIBCTF="../libctf/.libs/libctf.a"
+  CTF_DEPS="$LIBCTF"
+fi
+if test "${enable_libctf}" = yes; then
+  AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
+else
+  LIBCTF=
+  CTF_DEPS=
+fi
+AC_SUBST(ENABLE_LIBCTF)
+AC_SUBST(LIBCTF)
+AC_SUBST(CTF_DEPS)
+
+# If nativefile (NAT_FILE) is not set in configure.nat, we link to an
+# empty version.
 
 if test "x$with_xxhash" != "xno"; then
   AC_LIB_HAVE_LINKFLAGS([xxhash], [],

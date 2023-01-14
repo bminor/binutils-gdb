@@ -86,6 +86,13 @@ lf_open (char *name,
 }
 
 
+lf_file_type
+lf_get_file_type (const lf *file)
+{
+  return file->type;
+}
+
+
 void
 lf_close (lf *file)
 {

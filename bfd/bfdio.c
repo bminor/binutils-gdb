@@ -493,13 +493,17 @@ bfd_get_file_size (bfd *abfd)
       && !bfd_is_thin_archive (abfd->my_archive))
     {
       struct areltdata *adata = (struct areltdata *) abfd->arelt_data;
-      archive_size = adata->parsed_size;
-      /* If the archive is compressed we can't compare against file size.  */
-      if (adata->arch_header != NULL
-	  && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
-		     "Z\012", 2) == 0)
-	return archive_size;
-      abfd = abfd->my_archive;
+      if (adata != NULL)
+	{
+	  archive_size = adata->parsed_size;
+	  /* If the archive is compressed we can't compare against
+	     file size.  */
+	  if (adata->arch_header != NULL
+	      && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
+			 "Z\012", 2) == 0)
+	    return archive_size;
+	  abfd = abfd->my_archive;
+	}
     }
 
   file_size = bfd_get_size (abfd);

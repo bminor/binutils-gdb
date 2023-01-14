@@ -214,6 +214,8 @@ static const bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
   { "version_min_watchos", BFD_MACH_O_LC_VERSION_MIN_WATCHOS},
   { "note", BFD_MACH_O_LC_NOTE},
   { "build_version", BFD_MACH_O_LC_BUILD_VERSION},
+  { "exports_trie", BFD_MACH_O_LC_DYLD_EXPORTS_TRIE},
+  { "chained_fixups", BFD_MACH_O_LC_DYLD_CHAINED_FIXUPS},
   { NULL, 0}
 };
 
@@ -1610,6 +1612,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_FUNCTION_STARTS:
     case BFD_MACH_O_LC_DATA_IN_CODE:
     case BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS:
+    case BFD_MACH_O_LC_DYLD_EXPORTS_TRIE:
+    case BFD_MACH_O_LC_DYLD_CHAINED_FIXUPS:
       {
         bfd_mach_o_linkedit_command *linkedit = &cmd->command.linkedit;
         printf

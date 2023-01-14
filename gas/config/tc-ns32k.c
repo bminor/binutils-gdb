@@ -84,7 +84,7 @@ struct addr_mode
 typedef struct addr_mode addr_modeS;
 
 char *freeptr, *freeptr_static;	/* Points at some number of free bytes.  */
-struct hash_control *inst_hash_handle;
+htab_t inst_hash_handle;
 
 struct ns32k_opcode *desc;	/* Pointer at description of instruction.  */
 addr_modeS addr_modeP;
@@ -1103,7 +1103,8 @@ parse (const char *line, int recursive_level)
       c = *lineptr;
       *(char *) lineptr = '\0';
 
-      if (!(desc = (struct ns32k_opcode *) hash_find (inst_hash_handle, line)))
+      desc = (struct ns32k_opcode *) str_hash_find (inst_hash_handle, line);
+      if (!desc)
 	as_fatal (_("No such opcode"));
 
       *(char *) lineptr = c;
@@ -1895,18 +1896,14 @@ md_begin (void)
 {
   /* Build a hashtable of the instructions.  */
   const struct ns32k_opcode *ptr;
-  const char *status;
   const struct ns32k_opcode *endop;
 
-  inst_hash_handle = hash_new ();
+  inst_hash_handle = str_htab_create ();
 
   endop = ns32k_opcodes + sizeof (ns32k_opcodes) / sizeof (ns32k_opcodes[0]);
   for (ptr = ns32k_opcodes; ptr < endop; ptr++)
-    {
-      if ((status = hash_insert (inst_hash_handle, ptr->name, (char *) ptr)))
-	/* Fatal.  */
-	as_fatal (_("Can't hash %s: %s"), ptr->name, status);
-    }
+    if (str_hash_insert (inst_hash_handle, ptr->name, ptr, 0) != NULL)
+      as_fatal (_("duplicate %s"), ptr->name);
 
   /* Some private space please!  */
   freeptr_static = XNEWVEC (char, PRIVATE_SIZE);

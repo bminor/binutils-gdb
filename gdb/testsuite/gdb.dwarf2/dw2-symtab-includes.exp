@@ -31,8 +31,6 @@ Dwarf::assemble $asm_file {
     declare_labels partial_label lines_label
     global srcdir subdir srcfile
 
-    extern main
-
     cu {} {
 	partial_label: partial_unit {} {
 	}

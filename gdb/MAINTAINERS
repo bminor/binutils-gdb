@@ -242,10 +242,16 @@ the native maintainer when resolving ABI issues.
 
 	alpha		--target=alpha-elf ,-Werror
 
+	arc		--target=arc-elf
+			Shahab Vahedi		shahab@synopsys.com
+
 	arm		--target=arm-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
 
 	avr		--target=avr ,-Werror
+
+	bpf		--target=bpf-unknown-none
+			Jose E. Marchesi	jose.marchesi@oracle.com
 
 	cris		--target=cris-elf ,-Werror ,
 			(sim does not build with -Werror)
@@ -286,8 +292,7 @@ the native maintainer when resolving ABI issues.
 	moxie		--target=moxie-elf ,-Werror
 			Anthony Green		green@moxielogic.com
 
-	ms1		--target=ms1-elf ,-Werror
-			Kevin Buettner		kevinb@redhat.com
+	ms1		Deleted
 
 	nios2		--target=nios2-elf ,-Werror
 			--target=nios2-linux-gnu ,-Werror
@@ -677,7 +682,7 @@ Philippe Waroquiers				philippe.waroquiers@skynet.be
 Ulrich Weigand					uweigand@de.ibm.com
 Ken Werner					ken.werner@de.ibm.com
 Tim Wiederhake					tim.wiederhake@intel.com
-Mark Wielaard					mjw@redhat.com
+Mark Wielaard					mark@klomp.org
 Nathan Williams					nathanw@wasabisystems.com
 Bob Wilson					bob.wilson@acm.org
 Jim Wilson					wilson@tuliptree.org

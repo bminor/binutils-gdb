@@ -44,7 +44,7 @@
 
 /* The macro hash table.  */
 
-struct hash_control *macro_hash;
+struct htab *macro_hash;
 
 /* Whether any macros have been defined.  */
 
@@ -76,7 +76,8 @@ void
 macro_init (int alternate, int mri, int strip_at,
 	    size_t (*exp) (const char *, size_t, sb *, offsetT *))
 {
-  macro_hash = hash_new ();
+  macro_hash = htab_create_alloc (16, hash_macro_entry, eq_macro_entry,
+				  NULL, xcalloc, free);
   macro_defined = 0;
   macro_alternate = alternate;
   macro_mri = mri;
@@ -504,6 +505,7 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
     {
       formal_entry *formal = new_formal ();
       size_t cidx;
+      formal_hash_entry_t *elt;
 
       idx = get_token (idx, in, &formal->name);
       if (formal->name.len == 0)
@@ -566,14 +568,15 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
 	}
 
       /* Add to macro's hash table.  */
-      if (! hash_find (macro->formal_hash, name))
-	hash_jam (macro->formal_hash, name, formal);
-      else
-	as_bad_where (macro->file,
-		      macro->line,
-		      _("A parameter named `%s' already exists for macro `%s'"),
-		      name,
-		      macro->name);
+      elt = formal_entry_alloc (name, formal);
+      if (htab_insert (macro->formal_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  as_bad_where (macro->file, macro->line,
+			_("A parameter named `%s' "
+			  "already exists for macro `%s'"),
+			name, macro->name);
+	}
 
       formal->index = macro->formal_count++;
       *p = formal;
@@ -592,6 +595,7 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
   if (macro_mri)
     {
       formal_entry *formal = new_formal ();
+      formal_hash_entry_t *elt;
 
       /* Add a special NARG formal, which macro_expand will set to the
 	 number of arguments.  */
@@ -605,13 +609,14 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
       sb_add_string (&formal->name, name);
 
       /* Add to macro's hash table.  */
-      if (hash_find (macro->formal_hash, name))
-	as_bad_where (macro->file,
-		      macro->line,
-		      _("Reserved word `%s' used as parameter in macro `%s'"),
-		      name,
-		      macro->name);
-      hash_jam (macro->formal_hash, name, formal);
+      elt = formal_entry_alloc (name, formal);
+      if (htab_insert (macro->formal_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  as_bad_where (macro->file, macro->line,
+			_("Reserved word `%s' used as parameter in macro `%s'"),
+			name, macro->name);
+	}
 
       formal->index = NARG_INDEX;
       *p = formal;
@@ -635,7 +640,7 @@ free_macro (macro_entry *macro)
       formal = formal->next;
       del_formal (f);
     }
-  hash_die (macro->formal_hash);
+  htab_delete (macro->formal_hash);
   sb_kill (&macro->sub);
   free (macro);
 }
@@ -662,7 +667,8 @@ define_macro (size_t idx, sb *in, sb *label,
 
   macro->formal_count = 0;
   macro->formals = 0;
-  macro->formal_hash = hash_new_sized (7);
+  macro->formal_hash = htab_create_alloc (7, hash_formal_entry, eq_formal_entry,
+					  NULL, xcalloc, free);
 
   idx = sb_skip_white (idx, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
@@ -707,10 +713,15 @@ define_macro (size_t idx, sb *in, sb *label,
   /* And stick it in the macro hash table.  */
   for (idx = 0; idx < name.len; idx++)
     name.ptr[idx] = TOLOWER (name.ptr[idx]);
-  if (hash_find (macro_hash, macro->name))
-    error = _("Macro `%s' was already defined");
   if (!error)
-    error = hash_jam (macro_hash, macro->name, (void *) macro);
+    {
+      macro_hash_entry_t *elt = macro_entry_alloc (macro->name, macro);
+      if (htab_insert (macro_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  error = _("Macro `%s' was already defined");
+	}
+    }
 
   if (namep != NULL)
     *namep = macro->name;
@@ -740,7 +751,7 @@ get_apost_token (size_t idx, sb *in, sb *name, int kind)
 /* Substitute the actual value for a formal parameter.  */
 
 static size_t
-sub_actual (size_t start, sb *in, sb *t, struct hash_control *formal_hash,
+sub_actual (size_t start, sb *in, sb *t, struct htab *formal_hash,
 	    int kind, sb *out, int copyifnotthere)
 {
   size_t src;
@@ -754,7 +765,7 @@ sub_actual (size_t start, sb *in, sb *t, struct hash_control *formal_hash,
       && (src == start || in->ptr[src - 1] != '@'))
     ptr = NULL;
   else
-    ptr = (formal_entry *) hash_find (formal_hash, sb_terminate (t));
+    ptr = formal_entry_find (formal_hash, sb_terminate (t));
   if (ptr)
     {
       if (ptr->actual.len)
@@ -790,7 +801,7 @@ sub_actual (size_t start, sb *in, sb *t, struct hash_control *formal_hash,
 
 static const char *
 macro_expand_body (sb *in, sb *out, formal_entry *formals,
-		   struct hash_control *formal_hash, const macro_entry *macro)
+		   struct htab *formal_hash, const macro_entry *macro)
 {
   sb t;
   size_t src = 0;
@@ -909,10 +920,20 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 		{
 		  const char *name;
 		  formal_entry *f = new_formal ();
+		  formal_hash_entry_t *elt;
 
 		  src = get_token (src, in, &f->name);
 		  name = sb_terminate (&f->name);
-		  if (! hash_find (formal_hash, name))
+		  elt = formal_entry_alloc (name, f);
+		  if (htab_insert (formal_hash, elt, 0) != NULL)
+		    {
+		      free (elt);
+		      as_bad_where (macro->file, macro->line + macro_line,
+				    _("`%s' was already used as parameter "
+				      "(or another local) name"), name);
+		      del_formal (f);
+		    }
+		  else
 		    {
 		      static int loccnt;
 		      char buf[20];
@@ -923,18 +944,6 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 
 		      sprintf (buf, IS_ELF ? ".LL%04x" : "LL%04x", ++loccnt);
 		      sb_add_string (&f->actual, buf);
-
-		      err = hash_jam (formal_hash, name, f);
-		      if (err != NULL)
-			break;
-		    }
-		  else
-		    {
-		      as_bad_where (macro->file,
-				    macro->line + macro_line,
-				    _("`%s' was already used as parameter (or another local) name"),
-				    name);
-		      del_formal (f);
 		    }
 
 		  src = sb_skip_comma (src, in);
@@ -966,7 +975,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 
 	  sb_reset (&t);
 	  src = get_token (src + 2, in, &t);
-	  ptr = (formal_entry *) hash_find (formal_hash, sb_terminate (&t));
+	  ptr = formal_entry_find (formal_hash, sb_terminate (&t));
 	  if (ptr == NULL)
 	    {
 	      /* FIXME: We should really return a warning string here,
@@ -1010,7 +1019,8 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 
       f = loclist->next;
       name = sb_terminate (&loclist->name);
-      hash_delete (formal_hash, name, f == NULL);
+      formal_hash_entry_t needle = { name, NULL };
+      htab_remove_elt (formal_hash, &needle);
       del_formal (loclist);
       loclist = f;
     }
@@ -1095,7 +1105,7 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 	    }
 
 	  /* Lookup the formal in the macro's list.  */
-	  ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
+	  ptr = formal_entry_find (m->formal_hash, sb_terminate (&t));
 	  if (!ptr)
 	    {
 	      as_bad (_("Parameter named `%s' does not exist for macro `%s'"),
@@ -1193,7 +1203,7 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 
 	  sb_reset (&t);
 	  sb_add_string (&t, macro_strip_at ? "$NARG" : "NARG");
-	  ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
+	  ptr = formal_entry_find (m->formal_hash, sb_terminate (&t));
 	  sprintf (buffer, "%d", narg);
 	  sb_add_string (&ptr->actual, buffer);
 	}
@@ -1253,7 +1263,7 @@ check_macro (const char *line, sb *expand,
   for (cls = copy; *cls != '\0'; cls ++)
     *cls = TOLOWER (*cls);
 
-  macro = (macro_entry *) hash_find (macro_hash, copy);
+  macro = macro_entry_find (macro_hash, copy);
   free (copy);
 
   if (macro == NULL)
@@ -1283,7 +1293,8 @@ delete_macro (const char *name)
 {
   char *copy;
   size_t i, len;
-  macro_entry *macro;
+  void **slot;
+  macro_hash_entry_t needle;
 
   len = strlen (name);
   copy = XNEWVEC (char, len + 1);
@@ -1291,13 +1302,13 @@ delete_macro (const char *name)
     copy[i] = TOLOWER (name[i]);
   copy[i] = '\0';
 
-  /* We can only ask hash_delete to free memory if we are deleting
-     macros in reverse order to their definition.
-     So just clear out the entry.  */
-  if ((macro = (macro_entry *) hash_find (macro_hash, copy)) != NULL)
+  needle.name = copy;
+  needle.macro = NULL;
+  slot = htab_find_slot (macro_hash, &needle, NO_INSERT);
+  if (slot)
     {
-      hash_jam (macro_hash, copy, NULL);
-      free_macro (macro);
+      free_macro (((macro_hash_entry_t *) *slot)->macro);
+      htab_clear_slot (macro_hash, slot);
     }
   else
     as_warn (_("Attempt to purge non-existing macro `%s'"), copy);
@@ -1313,8 +1324,8 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 {
   sb sub;
   formal_entry f;
-  struct hash_control *h;
-  const char *err;
+  struct htab *h;
+  const char *err = NULL;
 
   idx = sb_skip_white (idx, in);
 
@@ -1330,10 +1341,10 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
   if (f.name.len == 0)
     return _("missing model parameter");
 
-  h = hash_new ();
-  err = hash_jam (h, sb_terminate (&f.name), &f);
-  if (err != NULL)
-    return err;
+  h = htab_create_alloc (16, hash_formal_entry, eq_formal_entry,
+			 NULL, xcalloc, free);
+
+  htab_insert (h, formal_entry_alloc (sb_terminate (&f.name), &f), 0);
 
   f.index = 1;
   f.next = NULL;
@@ -1392,7 +1403,7 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 	}
     }
 
-  hash_die (h);
+  htab_delete (h);
   sb_kill (&f.actual);
   sb_kill (&f.def);
   sb_kill (&f.name);

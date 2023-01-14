@@ -4,7 +4,6 @@
 .*Warning: Invalid CSR `sptbr' for the privilege spec `1.11'
 .*Warning: Invalid CSR `mbadaddr' for the privilege spec `1.11'
 .*Warning: Invalid CSR `mucounteren' for the privilege spec `1.11'
-.*Warning: Invalid CSR `dscratch' for the privilege spec `1.11'
 .*Warning: Invalid CSR `hstatus' for the privilege spec `1.11'
 .*Warning: Invalid CSR `hedeleg' for the privilege spec `1.11'
 .*Warning: Invalid CSR `hideleg' for the privilege spec `1.11'

@@ -427,16 +427,6 @@ ptid_t
 sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			 int options)
 {
-  ptid_t rtnval;
-  ptid_t save_ptid;
-
-  save_ptid = inferior_ptid;
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-
-  inferior_ptid = thread_to_lwp (inferior_ptid, main_ph.ptid.pid ());
-  if (inferior_ptid.pid () == -1)
-    inferior_ptid = procfs_first_available ();
-
   if (ptid.pid () != -1)
     {
       ptid_t ptid_for_warning = ptid;
@@ -449,17 +439,17 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 ptid_for_warning.tid ());
     }
 
-  rtnval = beneath ()->wait (ptid, ourstatus, options);
+  ptid_t rtnval = beneath ()->wait (ptid, ourstatus, options);
 
   if (ourstatus->kind != TARGET_WAITKIND_EXITED)
     {
       /* Map the LWP of interest back to the appropriate thread ID.  */
-      rtnval = lwp_to_thread (rtnval);
-      if (rtnval.pid () == -1)
-	rtnval = save_ptid;
+      ptid_t thr_ptid = lwp_to_thread (rtnval);
+      if (thr_ptid.pid () != -1)
+	rtnval = thr_ptid;
 
       /* See if we have a new thread.  */
-      if (rtnval.tid_p () && rtnval != save_ptid)
+      if (rtnval.tid_p ())
 	{
 	  thread_info *thr = find_thread_ptid (current_inferior (), rtnval);
 	  if (thr == NULL || thr->state == THREAD_EXITED)
@@ -855,7 +845,7 @@ ps_ptwrite (struct ps_prochandle *ph, psaddr_t addr,
 ps_err_e
 ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
+  ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (current_inferior ()->process_target (),
 				ptid, target_gdbarch ());
@@ -872,7 +862,7 @@ ps_err_e
 ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
-  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
+  ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (current_inferior ()->process_target (),
 				ptid, target_gdbarch ());
@@ -925,7 +915,7 @@ ps_err_e
 ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
-  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
+  ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (current_inferior ()->process_target (),
 				ptid, target_gdbarch ());
@@ -942,7 +932,7 @@ ps_err_e
 ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
-  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
+  ptid_t ptid = ptid_t (current_inferior ()->pid, lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (current_inferior ()->process_target (),
 				ptid, target_gdbarch ());
@@ -1012,7 +1002,7 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
   if (retval != TD_OK)
     return -1;
 
-  ptid_t ptid = ptid_t (inferior_ptid.pid (), 0, ti.ti_tid);
+  ptid_t ptid = ptid_t (current_inferior ()->pid, 0, ti.ti_tid);
   thread_info *thr = find_thread_ptid (current_inferior (), ptid);
   if (thr == NULL || thr->state == THREAD_EXITED)
     {

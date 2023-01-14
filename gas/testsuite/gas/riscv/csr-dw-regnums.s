@@ -15,9 +15,6 @@ _start:
 	.cfi_offset ucause, 264
 	.cfi_offset utval, 268
 	.cfi_offset uip, 272
-	.cfi_offset fflags, 4
-	.cfi_offset frm, 8
-	.cfi_offset fcsr, 12
 	.cfi_offset cycle, 12288
 	.cfi_offset time, 12292
 	.cfi_offset instret, 12296
@@ -222,16 +219,7 @@ _start:
 	.cfi_offset mhpmevent29, 3316
 	.cfi_offset mhpmevent30, 3320
 	.cfi_offset mhpmevent31, 3324
-	.cfi_offset tselect, 7808
-	.cfi_offset tdata1, 7812
-	.cfi_offset tdata2, 7816
-	.cfi_offset tdata3, 7820
-	.cfi_offset dcsr, 7872
-	.cfi_offset dpc, 7876
-	.cfi_offset dscratch0, 7880
-	.cfi_offset dscratch1, 7884
-
-	# dropped in the current 1.11 priv spec.
+	# dropped
 	.cfi_offset hstatus, 2048
 	.cfi_offset hedeleg, 2056
 	.cfi_offset hideleg, 2060
@@ -250,11 +238,34 @@ _start:
 	.cfi_offset mdbound, 3604
 	.cfi_offset mscounteren, 3204
 	.cfi_offset mhcounteren, 3208
+	# unprivileged
+	.cfi_offset fflags, 4
+	.cfi_offset frm, 8
+	.cfi_offset fcsr, 12
+	.cfi_offset dcsr, 7872
+	.cfi_offset dpc, 7876
+	.cfi_offset dscratch0, 7880
+	.cfi_offset dscratch1, 7884
+	.cfi_offset tselect, 7808
+	.cfi_offset tdata1, 7812
+	.cfi_offset tdata2, 7816
+	.cfi_offset tdata3, 7820
+	.cfi_offset tinfo, 7824
+	.cfi_offset tcontrol, 7828
+	.cfi_offset mcontext, 7840
+	.cfi_offset scontext, 7848
+	# aliases
 	.cfi_offset ubadaddr, 268
 	.cfi_offset sbadaddr, 1292
 	.cfi_offset sptbr, 1536
 	.cfi_offset mbadaddr, 3340
 	.cfi_offset mucounteren, 3200
 	.cfi_offset dscratch, 7880
+	.cfi_offset mcontrol, 7812
+	.cfi_offset icount, 7812
+	.cfi_offset itrigger, 7812
+	.cfi_offset etrigger, 7812
+	.cfi_offset textra32, 7820
+	.cfi_offset textra64, 7820
 	nop
 	.cfi_endproc

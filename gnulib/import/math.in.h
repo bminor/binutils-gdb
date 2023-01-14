@@ -127,6 +127,12 @@ static void (*_gl_math_fix_itold) (long double *, int) = _Qp_itoq;
 #endif
 
 
+/* For clang: Use __has_builtin to determine whether a builtin is available.  */
+#ifndef __has_builtin
+# define __has_builtin(name) 0
+#endif
+
+
 /* POSIX allows platforms that don't support NAN.  But all major
    machines in the past 15 years have supported something close to
    IEEE NaN, so we define this unconditionally.  We also must define
@@ -2318,7 +2324,7 @@ _GL_WARN_REAL_FLOATING_DECL (isinf);
 # if @HAVE_ISNANF@
 /* The original <math.h> included above provides a declaration of isnan macro
    or (older) isnanf function.  */
-#  if __GNUC__ >= 4
+#  if __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanf))
     /* GCC 4.0 and newer provides three built-ins for isnan.  */
 #   undef isnanf
 #   define isnanf(x) __builtin_isnanf ((float)(x))
@@ -2362,7 +2368,7 @@ _GL_EXTERN_C int isnand (double x);
 # if @HAVE_ISNANL@
 /* The original <math.h> included above provides a declaration of isnan
    macro or (older) isnanl function.  */
-#  if __GNUC__ >= 4
+#  if __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanl))
     /* GCC 4.0 and newer provides three built-ins for isnan.  */
 #   undef isnanl
 #   define isnanl(x) __builtin_isnanl ((long double)(x))
@@ -2385,7 +2391,7 @@ _GL_EXTERN_C int isnanl (long double x) _GL_ATTRIBUTE_CONST;
    isnanf.h (e.g.) here, because those may end up being macros
    that recursively expand back to isnan.  So use the gnulib
    replacements for them directly. */
-#  if @HAVE_ISNANF@ && __GNUC__ >= 4
+#  if @HAVE_ISNANF@ && __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanf))
 #   define gl_isnan_f(x) __builtin_isnanf ((float)(x))
 #  else
 _GL_EXTERN_C int rpl_isnanf (float x);
@@ -2397,7 +2403,7 @@ _GL_EXTERN_C int rpl_isnanf (float x);
 _GL_EXTERN_C int rpl_isnand (double x);
 #   define gl_isnan_d(x) rpl_isnand (x)
 #  endif
-#  if @HAVE_ISNANL@ && __GNUC__ >= 4
+#  if @HAVE_ISNANL@ && __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanl))
 #   define gl_isnan_l(x) __builtin_isnanl ((long double)(x))
 #  else
 _GL_EXTERN_C int rpl_isnanl (long double x) _GL_ATTRIBUTE_CONST;
@@ -2408,7 +2414,7 @@ _GL_EXTERN_C int rpl_isnanl (long double x) _GL_ATTRIBUTE_CONST;
    (sizeof (x) == sizeof (long double) ? gl_isnan_l (x) : \
     sizeof (x) == sizeof (double) ? gl_isnan_d (x) : \
     gl_isnan_f (x))
-# elif __GNUC__ >= 4
+# elif __GNUC__ >= 4 && (!defined __clang__ || (__has_builtin (__builtin_isnanf) && __has_builtin (__builtin_isnanl)))
 #  undef isnan
 #  define isnan(x) \
    (sizeof (x) == sizeof (long double) ? __builtin_isnanl ((long double)(x)) : \

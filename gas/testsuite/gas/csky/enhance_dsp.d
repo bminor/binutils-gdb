@@ -11,6 +11,7 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*d0038802\s*ldbi.w\s*r2,\s*\(r3\)
 #...
 \s*[0-9a-f]*:\s*e9c20ffa\s*bloop\s*r2,\s*0x0,\s*0xc.*
+\s*[0-9a-f]*:\s*e9c2eff8\s*bloop\s*r2,\s*0x0,\s*0xc.*
 \s*[0-9a-f]*:\s*d0038c02\s*pldbi.d\s*r2,\s*\(r3\)
 \s*[0-9a-f]*:\s*d0039002\s*ldbi.hs\s*r2,\s*\(r3\)
 \s*[0-9a-f]*:\s*d0039402\s*ldbi.bs\s*r2,\s*\(r3\)
@@ -108,7 +109,7 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f883d242\s*plsr\.u16\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8e3d302\s*plsri\.u16\.r\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*f883d342\s*plsr\.u16\.r\s*r2,\s*r3,\s*r4
-\s*[0-9a-f]*:\s*f8e3d402\s*plsli\.u16\s*r2,\s*r3,\s*8
+\s*[0-9a-f]*:\s*f8e3d402\s*plsli\.16\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*fa03d442\s*plsl\.u16\s*r2,\s*r3,\s*r16
 \s*[0-9a-f]*:\s*f8e3d502\s*plsli\.u16\.s\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*f8e3d582\s*plsli\.s16\.s\s*r2,\s*r3,\s*8
@@ -215,3 +216,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f8838ce2\s*mulsca\.s16\.e\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8838ce2\s*mulsca\.s16\.e\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8838442\s*mula\.32\.l\s*r2,\s*r3,\s*r4
+#...

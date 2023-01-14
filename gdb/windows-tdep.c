@@ -754,7 +754,7 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
   type->set_num_fields (count);
   type->set_fields
     ((struct field *) TYPE_ZALLOC (type, sizeof (struct field) * count));
-  TYPE_UNSIGNED (type) = 1;
+  type->set_is_unsigned (true);
 
   for (i = 0; i < count; i++)
   {

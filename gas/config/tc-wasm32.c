@@ -92,7 +92,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Opcode hash table.  */
 
-static struct hash_control *wasm32_hash;
+static htab_t wasm32_hash;
 
 struct option md_longopts[] =
 {
@@ -158,13 +158,13 @@ md_begin (void)
 {
   struct wasm32_opcode_s *opcode;
 
-  wasm32_hash = hash_new ();
+  wasm32_hash = str_htab_create ();
 
   /* Insert unique names into hash table.  This hash table then
      provides a quick index to the first opcode with a particular name
      in the opcode table.  */
   for (opcode = wasm32_opcodes; opcode->name; opcode++)
-    hash_insert (wasm32_hash, opcode->name, (char *) opcode);
+    str_hash_insert (wasm32_hash, opcode->name, opcode, 0);
 
   linkrelax = 0;
   flag_sectname_subst = 1;
@@ -746,7 +746,7 @@ md_assemble (char *str)
   if (!op[0])
     as_bad (_("can't find opcode "));
 
-  opcode = (struct wasm32_opcode_s *) hash_find (wasm32_hash, op);
+  opcode = (struct wasm32_opcode_s *) str_hash_find (wasm32_hash, op);
 
   if (opcode == NULL)
     {

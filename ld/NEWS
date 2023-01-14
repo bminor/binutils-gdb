@@ -1,5 +1,35 @@
 -*- text -*-
 
+* Add -z unique-symbol to avoid duplicated local symbol names.
+
+* The creation of PE format DLLs now defaults to using a more secure set of DLL
+  characteristics.
+
+* The linker now deduplicates the types in .ctf sections.  The new
+  command-line option --ctf-share-types describes how to do this:
+  its default value, share-unconflicted, produces the most compact
+  output.
+
+* The linker now omits the "variable section" from .ctf sections by
+  default, saving space.  This is almost certainly what you want
+  unless you are working on a project that has its own analogue
+  of symbol tables that are not reflected in the ELF symtabs.
+
+Changes in 2.35:
+
+* X86 NaCl target support is removed.
+
+* Add ELF linker command-line options, --export-dynamic-symbol and
+  --export-dynamic-symbol-list, to make symbols dynamic.
+
+* Add a configure option, --enable-textrel-check=[no|yes|warning|error],
+  to decide what ELF linker should do by default with DT_TEXTREL in an
+  executable or shared library.  Default to yes for Linux/x86 targets.
+
+* The -Map=<filename> command line option has been extended so that if
+  <filename> is a directory then <filename>/<output-filename>.map will be
+  created.
+
 * Add a command-line option for ELF linker, --warn-textrel, to warn that
   DT_TEXTREL is set in a position-independent executable or shared object.
 
@@ -13,6 +43,13 @@
 * Relative pathnames in INPUT() and GROUP() directives in linker scripts are
   searched relative to the directory of the linker script before other search
   paths.
+
+* Add ELF linker command-line option `-z start-stop-visibility=...' to control
+  the visibility of synthetic `__start_SECNAME` and `__stop_SECNAME` symbols.
+
+* Add command-line option --dependency-file to write a Make-style dependency
+  file listing the input files consulted by the linker, like the files written
+  by the compiler's -M -MP options.
 
 Changes in 2.34:
 

@@ -5,11 +5,12 @@ Introduction:
 
 This is GDBserver, a remote server for Un*x-like systems.  It can be used to
 control the execution of a program on a target system from a GDB on a different
-host.  GDB and GDBserver communicate using the standard remote serial protocol
-implemented in remote.c, and various *-stub.c files.  They communicate via
-either a serial line or a TCP connection.
+host.  GDB and GDBserver communicate using the standard remote serial protocol.
+They communicate via either a serial line or a TCP connection.
 
-For more information about GDBserver, see the GDB manual.
+For more information about GDBserver, see the GDB manual:
+
+    https://sourceware.org/gdb/current/onlinedocs/gdb/Remote-Protocol.html
 
 Usage (server (target) side):
 
@@ -38,13 +39,13 @@ To use a TCP connection, you could say:
 
 This says pretty much the same thing as the last example, except that we are
 going to communicate with the host GDB via TCP.  The `host:2345' argument means
-that we are expecting to see a TCP connection from `host' to local TCP port
-2345.  (Currently, the `host' part is ignored.)  You can choose any number you
-want for the port number as long as it does not conflict with any existing TCP
-ports on the target system.  This same port number must be used in the host
-GDBs `target remote' command, which will be described shortly.  Note that if
-you chose a port number that conflicts with another service, GDBserver will
-print an error message and exit.
+that we are expecting to see a TCP connection to local TCP port 2345.
+(Currently, the `host' part is ignored.)  You can choose any number you want for
+the port number as long as it does not conflict with any existing TCP ports on
+the target system.  This same port number must be used in the host GDB's
+`target remote' command, which will be described shortly. Note that if you chose
+a port number that conflicts with another service, GDBserver will print an error
+message and exit.
 
 On some targets, GDBserver can also attach to running programs.  This is
 accomplished via the --attach argument.  The syntax is:
@@ -79,26 +80,8 @@ command, otherwise you may get an error that looks something like
 
 Building GDBserver:
 
-The supported targets as of November 2006 are:
-	arm-*-linux*
-	bfin-*-uclinux
-	bfin-*-linux-uclibc
-	crisv32-*-linux*
-	cris-*-linux*
-	i[34567]86-*-cygwin*
-	i[34567]86-*-linux*
-	i[34567]86-*-mingw*
-	ia64-*-linux*
-	m32r*-*-linux*
-	m68*-*-linux*
-	m68*-*-uclinux*
-	mips*64*-*-linux*
-	mips*-*-linux*
-	powerpc[64]-*-linux*
-	s390[x]-*-linux*
-	sh-*-linux*
-	spu*-*-*
-	x86_64-*-linux*
+See the `configure.srv` file for the list of host triplets you can build
+GDBserver for.
 
 Building GDBserver for your host is very straightforward.  If you build
 GDB natively on a host which GDBserver supports, it will be built
@@ -114,11 +97,11 @@ disable other directories when configuring, e.g., binutils, gas, gold,
 gprof, and ld.)
 
 If you prefer to cross-compile to your target, then you can also build
-GDBserver that way.  In a Bourne shell, for example:
+GDBserver that way.  For example:
 
 	% export CC=your-cross-compiler
-	% path-to-topevel-sources/configure your-target-name --disable-gdb
-	% make
+	% path-to-topevel-sources/configure --disable-gdb
+	% make all-gdbserver
 
 Using GDBreplay:
 

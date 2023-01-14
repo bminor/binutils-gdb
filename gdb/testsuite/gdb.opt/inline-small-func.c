@@ -19,4 +19,5 @@ int
 main ()
 {		/* caller: before call.  */
   callee ();	/* caller: the call.  */
-}		/* caller: after call.  */
+  return 0;	/* caller: after call.  */
+}

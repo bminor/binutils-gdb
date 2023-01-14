@@ -68,8 +68,12 @@ set run_tests {
      "-g -feliminate-dwarf2-dups"}
 }
 
+# Disable all sanitizers.
+set old_CFLAGS "$CFLAGS"
+append CFLAGS " $NOSANITIZE_CFLAGS"
 run_cc_link_tests $build_tests
 run_ld_link_exec_tests $run_tests
+set CFLAGS "$old_CFLAGS"
 
 proc strip_test {} {
     global ld

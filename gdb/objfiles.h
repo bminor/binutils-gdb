@@ -36,6 +36,7 @@
 #include "bcache.h"
 #include "gdbarch.h"
 #include "gdbsupport/refcounted-object.h"
+#include "jit.h"
 
 struct htab;
 struct objfile_data;
@@ -576,7 +577,7 @@ public:
 
   /* The partial symbol tables.  */
 
-  std::unique_ptr<psymtab_storage> partial_symtabs;
+  std::shared_ptr<psymtab_storage> partial_symtabs;
 
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
@@ -697,6 +698,20 @@ public:
      store these here rather than in struct block.  Static links must be
      allocated on the objfile's obstack.  */
   htab_up static_links;
+
+  /* JIT-related data for this objfile, if the objfile is a JITer;
+     that is, it produces JITed objfiles.  */
+  std::unique_ptr<jiter_objfile_data> jiter_data = nullptr;
+
+  /* JIT-related data for this objfile, if the objfile is JITed;
+     that is, it was produced by a JITer.  */
+  std::unique_ptr<jited_objfile_data> jited_data = nullptr;
+
+  /* A flag that is set to true if the JIT interface symbols are not
+     found in this objfile, so that we can skip the symbol lookup the
+     next time.  If an objfile does not have the symbols, it will
+     never have them.  */
+  bool skip_jit_symbol_lookup = false;
 };
 
 /* A deleter for objfile.  */

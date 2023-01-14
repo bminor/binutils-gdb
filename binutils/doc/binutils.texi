@@ -796,7 +796,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{--plugin} @var{name}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
    [@option{--size-sort}] [@option{--special-syms}]
-   [@option{--synthetic}] [@option{--with-symbol-versions}] [@option{--target=}@var{bfdname}]
+   [@option{--synthetic}] [@option{--target=}@var{bfdname}]
    [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -924,7 +924,13 @@ The symbol type is unknown, or object file format specific.
 @end table
 
 @item
-The symbol name.
+The symbol name.  If a symbol has version information associated with it,
+then the version information is displayed as well.  If the versioned
+symbol is undefined or hidden from linker, the version string is displayed
+as a suffix to the symbol name, preceded by an @@ character.  For example
+@samp{foo@@VER_1}.  If the version is the default version to be used when
+resolving unversioned references to the symbol, then it is displayed as a
+suffix preceded by two @@ characters.  For example @samp{foo@@@@VER_2}.
 @end itemize
 
 @c man end
@@ -1129,14 +1135,6 @@ used to mark transitions between ARM code, THUMB code and data.
 Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
-
-@item --with-symbol-versions
-Enables the display of symbol version information if any exists.  The
-version string is displayed as a suffix to the symbol name, preceeded by
-an @@ character.  For example @samp{foo@@VER_1}.  If the version is
-the default version to be used when resolving unversioned references
-to the symbol then it is displayed as a suffix preceeded by two @@
-characters.  For example @samp{foo@@@@VER_2}.
 
 @item --target=@var{bfdname}
 @cindex object code format
@@ -2153,8 +2151,8 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
-        [@option{-W[lLiaprmfFsoRtUuTgAckK]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
+        [@option{-W[lLiaprmfFsoORtUuTgAckK]}|
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
         [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
@@ -2471,8 +2469,7 @@ option or whether instruction notes should be generated as comments in the
 disasssembly using @option{-M notes}.
 
 For the x86, some of the options duplicate functions of the @option{-m}
-switch, but allow finer grained control.  Multiple selections from the
-following may be specified as a comma separated string.
+switch, but allow finer grained control.
 @table @code
 @item x86-64
 @itemx i386
@@ -2503,8 +2500,10 @@ will be overridden if @code{x86-64}, @code{i386} or @code{i8086}
 appear later in the option string.
 
 @item suffix
-When in AT&T mode, instructs the disassembler to print a mnemonic
-suffix even when the suffix could be inferred by the operands.
+When in AT&T mode and also for a limited set of instructions when in Intel
+mode, instructs the disassembler to print a mnemonic suffix even when the
+suffix could be inferred by the operands or, for certain instructions, the
+execution mode's defaults.
 @end table
 
 For PowerPC, the @option{-M} argument @option{raw} selects
@@ -2520,10 +2519,10 @@ rather than @code{li}.  All of the @option{-m} arguments for
 @option{e300}, @option{e500}, @option{e500mc}, @option{e500mc64},
 @option{e500x2}, @option{e5500}, @option{e6500}, @option{efs},
 @option{power4}, @option{power5}, @option{power6}, @option{power7},
-@option{power8}, @option{power9}, @option{ppc}, @option{ppc32},
-@option{ppc64}, @option{ppc64bridge}, @option{ppcps}, @option{pwr},
-@option{pwr2}, @option{pwr4}, @option{pwr5}, @option{pwr5x},
-@option{pwr6}, @option{pwr7}, @option{pwr8}, @option{pwr9},
+@option{power8}, @option{power9}, @option{power10}, @option{ppc},
+@option{ppc32}, @option{ppc64}, @option{ppc64bridge}, @option{ppcps},
+@option{pwr}, @option{pwr2}, @option{pwr4}, @option{pwr5}, @option{pwr5x},
+@option{pwr6}, @option{pwr7}, @option{pwr8}, @option{pwr9}, @option{pwr10},
 @option{pwrx}, @option{titan}, and @option{vle}.
 @option{32} and @option{64} modify the default or a prior CPU
 selection, disabling and enabling 64-bit insns respectively.  In
@@ -2704,8 +2703,8 @@ If it is necessary to disable the @option{visualize-jumps} option
 after it has previously been enabled then use
 @option{visualize-jumps=off}.
 
-@item -W[lLiaprmfFsoRtUuTgAckK]
-@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@item -W[lLiaprmfFsoORtUuTgAckK]
+@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
 
 @item --dwarf-check
@@ -3136,7 +3135,7 @@ unprintable character.
 Depending upon how the strings program was configured it will default
 to either displaying all the printable sequences that it can find in
 each file, or only those sequences that are in loadable, initialized
-data sections.  If the file type in unrecognizable, or if strings is
+data sections.  If the file type is unrecognizable, or if strings is
 reading from stdin then it will always display all of the printable
 sequences that it can find.
 
@@ -4701,6 +4700,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{--dyn-syms}]
+        [@option{--demangle@var{=style}}|@option{--no-demangle}]
+        [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
         [@option{-u}|@option{--unwind}]
@@ -4714,8 +4715,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
-        [@option{-w[lLiaprmfFsoRtUuTgAckK]}|
-         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
+        [@option{-w[lLiaprmfFsoORtUuTgAckK]}|
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{--ctf=}@var{section}]
@@ -4725,6 +4726,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
+        [@option{-T}|@option{--silent-truncation}]
         [@option{-H}|@option{--help}]
         @var{elffile}@dots{}
 @c man end
@@ -4803,10 +4805,10 @@ Displays the detailed section information. Implies @option{-S}.
 Displays the entries in symbol table section of the file, if it has one.
 If a symbol has version information associated with it then this is
 displayed as well.  The version string is displayed as a suffix to the
-symbol name, preceeded by an @@ character.  For example
+symbol name, preceded by an @@ character.  For example
 @samp{foo@@VER_1}.  If the version is the default version to be used
 when resolving unversioned references to the symbol then it is
-displayed as a suffix preceeded by two @@ characters.  For example
+displayed as a suffix preceded by two @@ characters.  For example
 @samp{foo@@@@VER_2}.
 
 @item --dyn-syms
@@ -4814,6 +4816,34 @@ displayed as a suffix preceeded by two @@ characters.  For example
 Displays the entries in dynamic symbol table section of the file, if it
 has one.  The output format is the same as the format used by the
 @option{--syms} option.
+
+@item -C
+@itemx --demangle[=@var{style}]
+@cindex demangling in nm
+Decode (@dfn{demangle}) low-level symbol names into user-level names.
+This makes C++ function names readable.  Different compilers have
+different mangling styles.  The optional demangling style argument can
+be used to choose an appropriate demangling style for your
+compiler. @xref{c++filt}, for more information on demangling.
+
+@item --no-demangle
+Do not demangle low-level symbol names.  This is the default.
+
+@item --recurse-limit
+@itemx --no-recurse-limit
+@itemx --recursion-limit
+@itemx --no-recursion-limit
+Enables or disables a limit on the amount of recursion performed
+whilst demangling strings.  Since the name mangling formats allow for
+an inifinite level of recursion it is possible to create strings whose
+decoding will exhaust the amount of stack space available on the host
+machine, triggering a memory fault.  The limit tries to prevent this
+from happening by restricting recursion to 2048 levels of nesting.
+
+The default is for this limit to be enabled, but disabling it may be
+necessary in order to demangle truly complicated names.  Note however
+that if the recursion limit is disabled then stack exhaustion is
+possible and any bug reports about such an event will be rejected.
 
 @item -e
 @itemx --headers
@@ -4907,8 +4937,8 @@ Displays the file symbol index information contained in the header part
 of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
-@item -w[lLiaprmfFsoRtUuTgAckK]
-@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
+@item -w[lLiaprmfFsOoRtUuTgAckK]
+@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
 
 @include ctf.options.texi
@@ -4937,6 +4967,15 @@ Don't break output lines to fit into 80 columns. By default
 64-bit ELF files, so that they fit into 80 columns. This option causes
 @command{readelf} to print each section header resp. each segment one a
 single line, which is far more readable on terminals wider than 80 columns.
+
+@item -T
+@itemx --silent-truncation
+Normally when readelf is displaying a symbol name, and it has to
+truncate the name to fit into an 80 column display, it will add a
+suffix of @code{[...]} to the name.  This command line option
+disables this behaviour, allowing 5 more characters of the name to be
+displayed and restoring the old behaviour of readelf (prior to release
+2.35).
 
 @item -H
 @itemx --help

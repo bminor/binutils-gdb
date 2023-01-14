@@ -24,31 +24,18 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 
-# Tests below are about tab-completion, which doesn't work if readline
-# library isn't used.  Check it first.
-
-if { ![readline_is_used] } {
-    untested "no tab completion support without readline"
-    return -1
-}
-
 # Disable the completion limit for the whole testcase.
 gdb_test_no_output "set max-completions unlimited"
 
-test_gdb_complete_tab_unique "break get_v" \
-    "break get_value\\(object_p\\)" " "
+test_gdb_complete_unique \
+    "break get_v" \
+    "break get_value(object_p)"
 
-test_gdb_complete_cmd_unique "break get_v" \
-    "break get_value\\(object_p\\)"
+test_gdb_complete_unique \
+    "break gr" \
+    "break grab_it(int_magic_t*)"
 
-test_gdb_complete_tab_unique "break gr" \
-    "break grab_it\\(int_magic_t\\*\\)" " "
-
-test_gdb_complete_cmd_unique "break gr" \
-    "break grab_it\\(int_magic_t\\*\\)"
-
-test_gdb_complete_tab_multiple "break get_som" "ething(" \
-    { "get_something(my_string_t)" "get_something(object_p)" }
-
-test_gdb_complete_cmd_multiple "break " "get_som" \
-    { "get_something(my_string_t)" "get_something(object_p)" }
+test_gdb_complete_multiple "break " "get_som" "ething(" {
+    "get_something(my_string_t)"
+    "get_something(object_p)"
+}

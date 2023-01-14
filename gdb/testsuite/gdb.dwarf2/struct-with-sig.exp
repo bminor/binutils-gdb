@@ -24,14 +24,6 @@ standard_testfile main-foo.c .S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile
-
-    lassign [function_range main ${srcdir}/${subdir}/${srcfile}] \
-	main_start main_length
-
-    lassign [function_range foo ${srcdir}/${subdir}/${srcfile}] \
-	foo_start foo_length
-
     cu {} {
 	compile_unit {
 	    {DW_AT_language @DW_LANG_C}
@@ -43,9 +35,7 @@ Dwarf::assemble $asm_file {
 		{declaration 1 flag}
 	    }
 	    DW_TAG_subprogram {
-		{name "main"}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_length" addr}
+		{MACRO_AT_func {main}}
 	    }
 	}
     }
@@ -61,9 +51,7 @@ Dwarf::assemble $asm_file {
 		{declaration 1 flag}
 	    }
 	    DW_TAG_subprogram {
-		{name "foo"}
-		{low_pc $foo_start addr}
-		{high_pc "$foo_start + $foo_length" addr}
+		{MACRO_AT_func {foo}}
 	    }
 	}
     }

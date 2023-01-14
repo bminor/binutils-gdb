@@ -21,10 +21,10 @@
 
 # Make sure that binutils can correctly handle TLS.
 
-if { ![istarget *-*-linux*]
-     && ![istarget arm*-*-uclinuxfdpiceabi]
-     && ![istarget *-*-nacl*]
-     && ![istarget *-*-gnu*] } {
+if { !([istarget *-*-linux*]
+       || [istarget arm*-*-uclinuxfdpiceabi]
+       || [istarget *-*-nacl*]
+       || [istarget *-*-gnu*]) || [istarget *ecoff] } then {
     return
 }
 
@@ -48,6 +48,6 @@ run_ld_link_tests [list \
 	{ pr22263-1a.c pr22263-1b.c } \
 	{{readelf -r pr22263-1.rd}} \
 	"pr22263-1" \
-	"-fPIE -O2" \
+	"-fPIE -O2 $NOSANITIZE_CFLAGS" \
     ] \
 ]

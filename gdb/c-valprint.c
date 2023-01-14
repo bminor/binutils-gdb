@@ -375,7 +375,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
 	 TYPE_CODE_PTR.)  */
       struct gdbarch *gdbarch = get_type_arch (type);
       int offset = TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8;
-      struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
+      struct type *field_type = type->field (VTBL_FNADDR_OFFSET).type ();
       const gdb_byte *valaddr = value_contents_for_printing (val);
       CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
 

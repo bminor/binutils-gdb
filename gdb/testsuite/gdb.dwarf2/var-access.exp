@@ -50,7 +50,6 @@ standard_testfile .c ${gdb_test_file_name}-dw.S
 
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile
     global dwarf_regnum regname
 
     set buf_var [gdb_target_symbol buf]
@@ -162,7 +161,7 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    DW_TAG_subprogram {
-		{MACRO_AT_func { main ${srcdir}/${subdir}/${srcfile} }}
+		{MACRO_AT_func { main }}
 		{DW_AT_external 1 flag}
 	    } {
 		# Simple memory location.

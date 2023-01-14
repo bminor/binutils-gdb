@@ -39,8 +39,9 @@ extern uint64_t i386_linux_core_read_xcr0 (bfd *abfd);
 
 /* Handle and display information related to the MPX bound violation
    to the user.  */
-extern void i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
-						  struct ui_out *uiout);
+extern void i386_linux_report_signal_info (struct gdbarch *gdbarch,
+					   struct ui_out *uiout,
+					   enum gdb_signal siggnal);
 
 /* Return the target description according to XCR0.  */
 extern const struct target_desc *i386_linux_read_description (uint64_t xcr0);

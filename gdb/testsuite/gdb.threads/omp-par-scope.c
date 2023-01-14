@@ -18,6 +18,28 @@
 #include <stdio.h>
 #include <omp.h>
 
+omp_lock_t lock;
+omp_lock_t lock2;
+
+/* Enforce execution order between two threads using a lock.  */
+
+static void
+omp_set_lock_in_order (int num, omp_lock_t *lock)
+{
+  /* Ensure that thread num 0 first sets the lock.  */
+  if (num == 0)
+    omp_set_lock (lock);
+  #pragma omp barrier
+
+  /* Block thread num 1 until it can set the lock.  */
+  if (num == 1)
+    omp_set_lock (lock);
+
+  /* This bit here is guaranteed to be executed first by thread num 0, and
+     once thread num 0 unsets the lock, to be executed by thread num 1.  */
+  ;
+}
+
 /* Testcase for checking access to variables in a single / outer scope.
    Make sure that variables not referred to in the parallel section are
    accessible from the debugger.  */
@@ -31,6 +53,7 @@ single_scope (void)
 #pragma omp parallel num_threads (2) shared (s1, i1) private (s2, i2)
   {
     int thread_num = omp_get_thread_num ();
+    omp_set_lock_in_order (thread_num, &lock);
 
     s2 = 100 * (thread_num + 1) + 2;
     i2 = s2 + 10;
@@ -38,6 +61,8 @@ single_scope (void)
     #pragma omp critical
     printf ("single_scope: thread_num=%d, s1=%d, i1=%d, s2=%d, i2=%d\n",
 	    thread_num, s1, i1, s2, i2);
+
+    omp_unset_lock (&lock);
   }
 
   printf ("single_scope: s1=%d, s2=%d, s3=%d, i1=%d, i2=%d, i3=%d\n",
@@ -67,11 +92,15 @@ multi_scope (void)
 		     private (i21)
 	{
 	  int thread_num = omp_get_thread_num ();
+	  omp_set_lock_in_order (thread_num, &lock);
+
 	  i21 = 100 * (thread_num + 1) + 21;
 
 	  #pragma omp critical
 	  printf ("multi_scope: thread_num=%d, i01=%d, i11=%d, i21=%d\n",
 		  thread_num, i01, i11, i21);
+
+	  omp_unset_lock (&lock);
 	}
 
 	printf ("multi_scope: i01=%d, i02=%d, i11=%d, "
@@ -105,6 +134,7 @@ nested_func (void)
 #pragma omp parallel num_threads (2) shared (i, p, x) private (j, q, y)
       {
 	int tn = omp_get_thread_num ();
+	omp_set_lock_in_order (tn, &lock);
 
 	j = 1000 * (tn + 1);
 	q = j + 1;
@@ -112,6 +142,8 @@ nested_func (void)
 	#pragma omp critical
 	printf ("nested_func: tn=%d: i=%d, p=%d, x=%d, j=%d, q=%d, y=%d\n",
 		 tn, i, p, x, j, q, y);
+
+	omp_unset_lock (&lock);
       }
     }
   }
@@ -137,6 +169,8 @@ nested_parallel (void)
 #pragma omp parallel num_threads (2) private (l)
   {
     int num = omp_get_thread_num ();
+    omp_set_lock_in_order (num, &lock);
+
     int nthr = omp_get_num_threads ();
     int off = num * nthr;
     int k = off + 101;
@@ -144,23 +178,36 @@ nested_parallel (void)
 #pragma omp parallel num_threads (2) shared (num)
     {
       int inner_num = omp_get_thread_num ();
+      omp_set_lock_in_order (inner_num, &lock2);
+
       #pragma omp critical
       printf ("nested_parallel (inner threads): outer thread num = %d, thread num = %d\n", num, inner_num);
+
+      omp_unset_lock (&lock2);
     }
     #pragma omp critical
     printf ("nested_parallel (outer threads) %d: k = %d, l = %d\n", num, k, l);
+
+    omp_unset_lock (&lock);
   }
 }
 
 int
 main (int argc, char **argv)
 {
+  omp_init_lock (&lock);
+  omp_init_lock (&lock2);
+
   single_scope ();
   multi_scope ();
 #if HAVE_NESTED_FUNCTION_SUPPORT
   nested_func ();
 #endif
   nested_parallel ();
+
+  omp_destroy_lock (&lock);
+  omp_destroy_lock (&lock2);
+
   return 0;
 }
 

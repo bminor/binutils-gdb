@@ -63,6 +63,11 @@
 
 #elif defined (__GNUC__) /* GCC */
 
+# if __GNUC__ >= 7
+#  define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER \
+   DIAGNOSTIC_IGNORE ("-Wregister")
+# endif
+
 # define DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION \
   DIAGNOSTIC_IGNORE ("-Wstringop-truncation")
 

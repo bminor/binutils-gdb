@@ -79,6 +79,21 @@ struct gdbarch_tdep
 
   /* ISA-specific data types.  */
   struct type *riscv_fpreg_d_type = nullptr;
+
+  /* Use for tracking unknown CSRs in the target description.
+     UNKNOWN_CSRS_FIRST_REGNUM is the number assigned to the first unknown
+     CSR.  All other unknown CSRs will be assigned sequential numbers after
+     this, with UNKNOWN_CSRS_COUNT being the total number of unknown CSRs.  */
+  int unknown_csrs_first_regnum = -1;
+  int unknown_csrs_count = 0;
+
+  /* Some targets (QEMU) are reporting three registers twice in the target
+     description they send.  These three register numbers, when not set to
+     -1, are for the duplicate copies of these registers.  */
+  int duplicate_fflags_regnum = -1;
+  int duplicate_frm_regnum = -1;
+  int duplicate_fcsr_regnum = -1;
+
 };
 
 

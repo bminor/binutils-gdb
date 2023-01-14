@@ -432,8 +432,9 @@ DESCRIPTION
 .
 */
 
-/* N_ONES produces N one bits, without overflowing machine arithmetic.  */
-#define N_ONES(n) (((((bfd_vma) 1 << ((n) - 1)) - 1) << 1) | 1)
+/* N_ONES produces N one bits, without undefined behaviour for N
+   between zero and the number of bits in a bfd_vma.  */
+#define N_ONES(n) ((n) == 0 ? 0 : ((bfd_vma) 1 << ((n) - 1) << 1) - 1)
 
 /*
 FUNCTION
@@ -465,6 +466,9 @@ bfd_check_overflow (enum complain_overflow how,
 {
   bfd_vma fieldmask, addrmask, signmask, ss, a;
   bfd_reloc_status_type flag = bfd_reloc_ok;
+
+  if (bitsize == 0)
+    return flag;
 
   /* Note: BITSIZE should always be <= ADDRSIZE, but in case it's not,
      we'll be permissive: extra bits in the field mask will
@@ -3025,13 +3029,13 @@ ENUMX
 ENUMX
   BFD_RELOC_PPC64_DTPREL34
 ENUMX
-  BFD_RELOC_PPC64_GOT_TLSGD34
+  BFD_RELOC_PPC64_GOT_TLSGD_PCREL34
 ENUMX
-  BFD_RELOC_PPC64_GOT_TLSLD34
+  BFD_RELOC_PPC64_GOT_TLSLD_PCREL34
 ENUMX
-  BFD_RELOC_PPC64_GOT_TPREL34
+  BFD_RELOC_PPC64_GOT_TPREL_PCREL34
 ENUMX
-  BFD_RELOC_PPC64_GOT_DTPREL34
+  BFD_RELOC_PPC64_GOT_DTPREL_PCREL34
 ENUMX
   BFD_RELOC_PPC64_TLS_PCREL
 ENUMDOC
@@ -6363,6 +6367,11 @@ ENUMX
   BFD_RELOC_MSP430_PREL31
 ENUMX
   BFD_RELOC_MSP430_SYM_DIFF
+ENUMX
+  BFD_RELOC_MSP430_SET_ULEB128
+ENUMX
+  BFD_RELOC_MSP430_SUB_ULEB128
+
 ENUMDOC
   msp430 specific relocation codes
 

@@ -50,7 +50,9 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on XCOFF targets, because XCOFF
     # does not enter static symbols in the symbol table.
-    setup_xfail "*-*-aix*"
+    if [is_xcoff_format] {
+	setup_xfail *-*-*
+    }
 
     set got [binutils_run $NM "$NMFLAGS $tempfile"]
 
@@ -108,7 +110,9 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
     # This test does not work correctly on XCOFF targets, because XCOFF
     # does not enter static symbols in the symbol table.
-    setup_xfail "*-*-aix*"
+    if [is_xcoff_format] {
+	setup_xfail *-*-*
+    }
 
     set got [binutils_run $NM "$NMFLAGS -P $tempfile"]
 

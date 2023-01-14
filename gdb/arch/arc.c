@@ -17,42 +17,106 @@
 
 
 #include "gdbsupport/common-defs.h"
-#include <stdlib.h>
-
 #include "arc.h"
+#include <stdlib.h>
+#include <unordered_map>
+#include <string>
 
 /* Target description features.  */
-#include "features/arc/core-v2.c"
-#include "features/arc/aux-v2.c"
-#include "features/arc/core-arcompact.c"
-#include "features/arc/aux-arcompact.c"
+#include "features/arc/v1-core.c"
+#include "features/arc/v1-aux.c"
+#include "features/arc/v2-core.c"
+#include "features/arc/v2-aux.c"
 
-/* See arc.h.  */
+#ifndef GDBSERVER
+#define STATIC_IN_GDB static
+#else
+#define STATIC_IN_GDB
+#endif
 
-target_desc *
-arc_create_target_description (arc_sys_type sys_type)
+STATIC_IN_GDB target_desc *
+arc_create_target_description (const struct arc_gdbarch_features &features)
 {
+  /* Create a new target description.  */
   target_desc *tdesc = allocate_target_description ();
+
+#ifndef IN_PROCESS_AGENT
+  std::string arch_name;
+
+  /* Architecture names here must match the ones in
+     ARCH_INFO_STRUCT in bfd/cpu-arc.c.  */
+  if (features.isa == ARC_ISA_ARCV1 && features.reg_size == 4)
+      arch_name = "arc:ARC700";
+  else if (features.isa == ARC_ISA_ARCV2 && features.reg_size == 4)
+      arch_name = "arc:ARCv2";
+  else
+    {
+      std::string msg = string_printf
+	("Cannot determine architecture: ISA=%d; bitness=%d",
+	 features.isa, 8 * features.reg_size);
+      gdb_assert_not_reached (msg.c_str ());
+    }
+
+  set_tdesc_architecture (tdesc, arch_name.c_str ());
+#endif
 
   long regnum = 0;
 
-#ifndef IN_PROCESS_AGENT
-  if (sys_type == ARC_SYS_TYPE_ARCV2)
-    set_tdesc_architecture (tdesc, "arc:ARCv2");
-  else
-    set_tdesc_architecture (tdesc, "arc:ARC700");
-#endif
-
-  if (sys_type == ARC_SYS_TYPE_ARCV2)
+  switch (features.isa)
     {
-      regnum = create_feature_arc_core_v2 (tdesc, regnum);
-      regnum = create_feature_arc_aux_v2 (tdesc, regnum);
-    }
-  else
-    {
-      regnum = create_feature_arc_core_arcompact (tdesc, regnum);
-      regnum = create_feature_arc_aux_arcompact (tdesc, regnum);
+    case ARC_ISA_ARCV1:
+      regnum = create_feature_arc_v1_core (tdesc, regnum);
+      regnum = create_feature_arc_v1_aux (tdesc, regnum);
+      break;
+    case ARC_ISA_ARCV2:
+      regnum = create_feature_arc_v2_core (tdesc, regnum);
+      regnum = create_feature_arc_v2_aux (tdesc, regnum);
+      break;
+    default:
+      std::string msg = string_printf
+	("Cannot choose target description XML: %d", features.isa);
+      gdb_assert_not_reached (msg.c_str ());
     }
 
   return tdesc;
 }
+
+#ifndef GDBSERVER
+
+/* Wrapper used by std::unordered_map to generate hash for features set.  */
+struct arc_gdbarch_features_hasher
+{
+  std::size_t
+  operator() (const arc_gdbarch_features &features) const noexcept
+  {
+    return features.hash ();
+  }
+};
+
+/* Cache of previously created target descriptions, indexed by the hash
+   of the features set used to create them.  */
+static std::unordered_map<arc_gdbarch_features,
+			  const target_desc_up,
+			  arc_gdbarch_features_hasher> arc_tdesc_cache;
+
+/* See arch/arc.h.  */
+
+const target_desc *
+arc_lookup_target_description (const struct arc_gdbarch_features &features)
+{
+  /* Lookup in the cache first.  If found, return the pointer from the
+     "target_desc_up" type which is a "unique_ptr".  This should be fine
+     as the "arc_tdesc_cache" will persist until GDB terminates.  */
+  const auto it = arc_tdesc_cache.find (features);
+  if (it != arc_tdesc_cache.end ())
+    return it->second.get ();
+
+  target_desc *tdesc = arc_create_target_description (features);
+
+  /* Add the newly created target description to the repertoire.  */
+  arc_tdesc_cache.emplace (features, tdesc);
+
+  return tdesc;
+}
+
+#endif /* !GDBSERVER */

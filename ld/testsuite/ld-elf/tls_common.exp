@@ -23,19 +23,12 @@
 
 # Make sure that binutils can correctly handle ld output in ELF.
 
-if { ![istarget *-*-linux*]
-     && ![istarget arm*-*-uclinuxfdpiceabi]
-     && ![istarget *-*-nacl*]
-     && ![istarget *-*-gnu*] } {
+if { !([istarget *-*-linux*]
+       || [istarget arm*-*-uclinuxfdpiceabi]
+       || [istarget *-*-nacl*]
+       || [istarget *-*-gnu*]) || [istarget *ecoff] } then {
     return
 }
-
-global as
-global ld
-global READELF
-global srcdir
-global subdir
-global link_output
 
 if { ![ld_assemble $as "--elf-stt-common=no $srcdir/$subdir/tls_common.s" tmpdir/tls_commona.o]
       || ![ld_assemble $as "--elf-stt-common=yes $srcdir/$subdir/tls_common.s" tmpdir/tls_commonb.o] } {

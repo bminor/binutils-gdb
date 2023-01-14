@@ -379,7 +379,7 @@ public:
     bool no_features = false;
 
     if (ptrace (PPC_PTRACE_GETHWDBGINFO, ptid.lwp (), 0, &m_hwdebug_info)
-	!= -1)
+	>= 0)
       {
 	/* If there are no advertised features, we don't use the
 	   HWDEBUG interface and try the DEBUGREG interface instead.
@@ -425,7 +425,7 @@ public:
       {
 	unsigned long wp;
 
-	if (ptrace (PTRACE_GET_DEBUGREG, ptid.lwp (), 0, &wp) != -1)
+	if (ptrace (PTRACE_GET_DEBUGREG, ptid.lwp (), 0, &wp) >= 0)
 	  {
 	    m_interface.emplace (DEBUGREG);
 	    return;
@@ -2867,7 +2867,7 @@ ppc_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
 		 the debug register state when fork and clone events are
 		 detected.  */
 	      if (ptrace (PPC_PTRACE_DELHWDEBUG, lp->ptid.lwp (), 0,
-			  bp_it->first) == -1)
+			  bp_it->first) < 0)
 		if (errno != ENOENT)
 		  perror_with_name (_("Error deleting hardware "
 				      "breakpoint or watchpoint"));
@@ -2909,20 +2909,23 @@ ppc_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
     {
       gdb_assert (m_dreg_interface.debugreg_p ());
 
-      /* Passing 0 to PTRACE_SET_DEBUGREG will clear the
-	 watchpoint.  */
-      long wp = 0;
+      /* Passing 0 to PTRACE_SET_DEBUGREG will clear the watchpoint.  We
+	 always clear the watchpoint instead of just overwriting it, in
+	 case there is a request for a new watchpoint, because on some
+	 older kernel versions and configurations simply overwriting the
+	 watchpoint after it was hit would not re-enable it.  */
+      if (ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (), 0, 0) < 0)
+	perror_with_name (_("Error clearing hardware watchpoint"));
 
       /* GDB requested a watchpoint to be installed.  */
       if (process_it != m_process_info.end ()
 	  && process_it->second.requested_wp_val.has_value ())
-	wp = *(process_it->second.requested_wp_val);
+	{
+	  long wp = *(process_it->second.requested_wp_val);
 
-      long ret = ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (),
-			 0, wp);
-
-      if (ret == -1)
-	perror_with_name (_("Error setting hardware watchpoint"));
+	  if (ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (), 0, wp) < 0)
+	    perror_with_name (_("Error setting hardware watchpoint"));
+	}
     }
 
   lp_arch_info->debug_regs_stale = false;

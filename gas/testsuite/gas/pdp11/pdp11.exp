@@ -23,4 +23,5 @@ if [expr [istarget "pdp11-*-*"]]  then {
     run_dump_test "absreloc"
     run_dump_test "pr14480"
     run_dump_test "pr23481"
+    run_dump_test "pr26001"
 }

@@ -525,7 +525,7 @@ xcoff_get_archive_info (struct bfd_link_info *info, bfd *archive)
   entryp = *slot;
   if (!entryp)
     {
-      entryp = bfd_zalloc (archive, sizeof (entry));
+      entryp = bfd_zalloc (info->output_bfd, sizeof (entry));
       if (!entryp)
 	return NULL;
 
@@ -2685,9 +2685,17 @@ xcoff_need_ldrel_p (struct bfd_link_info *info, struct internal_reloc *rel,
     case R_RLA:
       /* Absolute relocations against absolute symbols can be
 	 resolved statically.  */
-      if (h != NULL && bfd_is_abs_symbol (&h->root))
-	return FALSE;
-
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && !h->root.rel_from_abs)
+	{
+	  asection *sec = h->root.u.def.section;
+	  if (bfd_is_abs_section (sec)
+	      || (sec != NULL
+		  && bfd_is_abs_section (sec->output_section)))
+	    return FALSE;
+	}
       return TRUE;
     }
 }
@@ -2898,7 +2906,7 @@ xcoff_mark_symbol_by_name (struct bfd_link_info *info,
 static bfd_boolean
 xcoff_mark (struct bfd_link_info *info, asection *sec)
 {
-  if (bfd_is_abs_section (sec)
+  if (bfd_is_const_section (sec)
       || (sec->flags & SEC_MARK) != 0)
     return TRUE;
 
@@ -3118,9 +3126,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
 
   if (val != (bfd_vma) -1)
     {
-      if (h->root.type == bfd_link_hash_defined
-	  && (!bfd_is_abs_symbol (&h->root)
-	      || h->root.u.def.value != val))
+      if (h->root.type == bfd_link_hash_defined)
 	(*info->callbacks->multiple_definition) (info, &h->root, output_bfd,
 						 bfd_abs_section_ptr, val);
 
@@ -3210,7 +3216,13 @@ bfd_xcoff_link_count_reloc (bfd *output_bfd,
 }
 
 /* This function is called for each symbol to which the linker script
-   assigns a value.  */
+   assigns a value.
+   FIXME: In cases like the linker test ld-scripts/defined5 where a
+   symbol is defined both by an input object file and the script,
+   the script definition doesn't override the object file definition
+   as is usual for other targets.  At least not when the symbol is
+   output.  Other uses of the symbol value by the linker do use the
+   script value.  */
 
 bfd_boolean
 bfd_xcoff_record_link_assignment (bfd *output_bfd,
@@ -6327,7 +6339,9 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Write out the loader section contents.  */
   o = xcoff_hash_table (info)->loader_section;
-  if (o)
+  if (o != NULL
+      && o->size != 0
+      && o->output_section != bfd_abs_section_ptr)
     {
       BFD_ASSERT ((bfd_byte *) flinfo.ldrel
 		  == (xcoff_hash_table (info)->loader_section->contents
@@ -6339,19 +6353,25 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Write out the magic sections.  */
   o = xcoff_hash_table (info)->linkage_section;
-  if (o->size > 0
+  if (o != NULL
+      && o->size != 0
+      && o->output_section != bfd_abs_section_ptr
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
 				     o->size))
     goto error_return;
   o = xcoff_hash_table (info)->toc_section;
-  if (o->size > 0
+  if (o != NULL
+      && o->size != 0
+      && o->output_section != bfd_abs_section_ptr
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
 				     o->size))
     goto error_return;
   o = xcoff_hash_table (info)->descriptor_section;
-  if (o->size > 0
+  if (o != NULL
+      && o->size != 0
+      && o->output_section != bfd_abs_section_ptr
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
 				     o->size))
@@ -6374,7 +6394,9 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Write out the debugging string table.  */
   o = xcoff_hash_table (info)->debug_section;
-  if (o != NULL)
+  if (o != NULL
+      && o->size != 0
+      && o->output_section != bfd_abs_section_ptr)
     {
       struct bfd_strtab_hash *debug_strtab;
 

@@ -19,6 +19,10 @@
 
 standard_testfile
 
+if { [have_fuse_ld_gold] == 0} {
+    return -1
+}
+
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-fpie "ldflags=-pie -fuse-ld=gold"}]} {
     return -1
 }

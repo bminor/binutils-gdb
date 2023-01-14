@@ -29,7 +29,7 @@ if {[istarget "mips*-*-vxworks"]} {
 	{"VxWorks executable test 1 (dynamic)" \
 	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q --force-dynamic" ""
 	 "-mips2" {vxworks1.s}
-	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+        {{readelf {--relocs -T} vxworks1.rd} {objdump -dr vxworks1.dd}}
 	 "vxworks1"}
 	{"VxWorks executable test 2 (dynamic)" \
 	 "-Tvxworks1.ld -q --force-dynamic" ""
@@ -248,6 +248,7 @@ if {[istarget *-*-openbsd*] } {
     set abi_asflags(o32) -32
     set irixemul 1
 }
+set tmips [expr $irixemul ? {""} : {"t"}]
 
 if { $linux_gnu } {
     run_ld_link_tests [list \
@@ -1575,7 +1576,7 @@ proc run_mips_undefweak_test { name abi args } {
 		[list \
 		    [list objdump -d pr21375${objsuf}.dd] \
 		    [list readelf -A pr21375${rdesuf}.gd] \
-		    [list readelf --dyn-syms pr21375${rdesuf}${irixsuf}.sd] \
+		    [list readelf {--dyn-syms --wide} pr21375${rdesuf}${irixsuf}.sd] \
 		    [list readelf -h pr21375${abisuf}.hd]] \
 		"pr21375${binsuf}${dsosuf}"]]
     }
@@ -1657,3 +1658,14 @@ run_dump_test_n64 "pic-reloc-7" [list [list name (microMIPS)] \
 				      [list as "-mmicromips"]]
 
 run_dump_test_o32 "reloc-pcrel-r6"
+
+# Global/local symbol table split tests.
+run_dump_test_o32 "global-local-symtab-o32${tmips}"
+run_dump_test_n32 "global-local-symtab-n32${tmips}"
+run_dump_test_n64 "global-local-symtab-n64"
+run_dump_test_o32 "global-local-symtab-sort-o32${tmips}"
+run_dump_test_n32 "global-local-symtab-sort-n32${tmips}"
+run_dump_test_n64 "global-local-symtab-sort-n64${tmips}"
+run_dump_test_o32 "global-local-symtab-final-o32"
+run_dump_test_n32 "global-local-symtab-final-n32"
+run_dump_test_n64 "global-local-symtab-final-n64"

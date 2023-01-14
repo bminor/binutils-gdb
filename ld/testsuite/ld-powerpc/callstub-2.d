@@ -27,9 +27,9 @@ Disassembly of section \.text:
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 
-#...
-.*:	(4b ff ff bd|bd ff ff 4b) 	bl      .*\.plt_call\.f1>
+.*<_start>:
+.*:	(4b ff .. ..|.. .. ff 4b) 	bl      .*\.plt_call\.f1>
 .*:	(e8 41 00 18|18 00 41 e8) 	ld      r2,24\(r1\)
-.*:	(4b ff ff b9|b9 ff ff 4b) 	bl      .*\.plt_call\.f1\+0x4>
-.*:	(4b ff ff d5|d5 ff ff 4b) 	bl      .*\.plt_call\.f2>
+.*:	(4b ff .. ..|.. .. ff 4b) 	bl      .*\.plt_call\.f1\+0x4>
+.*:	(4b ff .. ..|.. .. ff 4b) 	bl      .*\.plt_call\.f2>
 #pass

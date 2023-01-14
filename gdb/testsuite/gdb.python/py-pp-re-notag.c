@@ -20,7 +20,7 @@ typedef long time_t;
 static void
 tick_tock (time_t *t)
 {
-  *t++;
+  (void) *t++;
 }
 
 int

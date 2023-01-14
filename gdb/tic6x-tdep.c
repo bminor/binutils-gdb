@@ -889,7 +889,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* For a variadic C function, the last explicitly declared argument and all
      remaining arguments are passed on the stack.  */
-  if (TYPE_VARARGS (func_type))
+  if (func_type->has_varargs ())
     first_arg_on_stack = func_type->num_fields () - 1;
 
   /* Now make space on the stack for the args.  */

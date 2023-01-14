@@ -57,7 +57,7 @@ static void spu_brinfo (int);
 static void spu_cons (int);
 
 extern char *myname;
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* These bits should be turned off in the first address of every segment */
 int md_seg_align = 7;
@@ -110,26 +110,14 @@ unsigned int brinfo;
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int i;
 
-  /* initialize hash table */
+  op_hash = str_htab_create ();
 
-  op_hash = hash_new ();
-
-  /* loop until you see the end of the list */
-
+  /* Hash each mnemonic and record its position.  There are
+     duplicates, keep just the first.  */
   for (i = 0; i < spu_num_opcodes; i++)
-    {
-      /* hash each mnemonic and record its position */
-
-      retval = hash_insert (op_hash, spu_opcodes[i].mnemonic,
-			    (void *) &spu_opcodes[i]);
-
-      if (retval != NULL && strcmp (retval, "exists") != 0)
-	as_fatal (_("Can't hash instruction '%s':%s"),
-		  spu_opcodes[i].mnemonic, retval);
-    }
+    str_hash_insert (op_hash, spu_opcodes[i].mnemonic, &spu_opcodes[i], 0);
 }
 
 const char *md_shortopts = "";
@@ -285,7 +273,7 @@ md_assemble (char *op)
 
   /* try to find the instruction in the hash table */
 
-  if ((format = (struct spu_opcode *) hash_find (op_hash, op)) == NULL)
+  if ((format = (struct spu_opcode *) str_hash_find (op_hash, op)) == NULL)
     {
       as_bad (_("Invalid mnemonic '%s'"), op);
       return;

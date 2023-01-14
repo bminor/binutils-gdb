@@ -157,7 +157,7 @@ all:
    mthi   r19
    mflo   r3
    mtlo   r8
-   sync   0
+   sync
    sync   1
    sync   20
    idly   0

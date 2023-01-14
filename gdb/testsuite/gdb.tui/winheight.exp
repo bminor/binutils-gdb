@@ -15,7 +15,7 @@
 
 # Test the "winheight" command.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
@@ -26,6 +26,7 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
 Term::clean_restart 24 80 $testfile
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 Term::check_box "source box" 0 0 80 15

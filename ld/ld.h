@@ -286,6 +286,8 @@ typedef struct
   char *map_filename;
   FILE *map_file;
 
+  char *dependency_file;
+
   unsigned int split_by_reloc;
   bfd_size_type split_by_file;
 
@@ -300,6 +302,14 @@ typedef struct
 
   /* If set, print discarded sections in map file output.  */
   bfd_boolean print_map_discarded;
+
+  /* If set, emit the names and types of statically-linked variables
+     into the CTF.  */
+  bfd_boolean ctf_variables;
+
+  /* If set, share only duplicated types in CTF, rather than sharing
+     all types that are not in conflict.  */
+  bfd_boolean ctf_share_duplicated;
 } ld_config_type;
 
 extern ld_config_type config;

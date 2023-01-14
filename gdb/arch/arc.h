@@ -20,29 +20,68 @@
 
 #include "gdbsupport/tdesc.h"
 
-/* Supported ARC system hardware types.  */
-enum arc_sys_type
+/* Supported ARC ISAs.  */
+enum arc_isa
 {
-  ARC_SYS_TYPE_ARCOMPACT = 0,	  /* ARC600 or ARC700 */
-  ARC_SYS_TYPE_ARCV2,		  /* ARC EM or ARC HS */
-  ARC_SYS_TYPE_NUM
+  ARC_ISA_ARCV1 = 1,  /* a.k.a. ARCompact (ARC600, ARC700)  */
+  ARC_ISA_ARCV2	      /* such as ARC EM and ARC HS  */
 };
 
-static inline const char *
-arc_sys_type_to_str (const arc_sys_type type)
+struct arc_gdbarch_features
 {
-  switch (type)
-    {
-    case ARC_SYS_TYPE_ARCOMPACT:
-      return "ARC_SYS_TYPE_ARCOMPACT";
-    case ARC_SYS_TYPE_ARCV2:
-      return "ARC_SYS_TYPE_ARCV2";
-    default:
-      return "Invalid";
-    }
-}
+  arc_gdbarch_features (int reg_size, arc_isa isa)
+    : reg_size (reg_size), isa (isa)
+  {}
 
-/* Create target description for the specified system type.  */
-target_desc *arc_create_target_description (arc_sys_type sys_type);
+  /* Register size in bytes.  Possible values are 4, and 8.  A 0 indicates
+     an uninitialised value.  */
+  const int reg_size;
+
+  /* See ARC_ISA enum.  */
+  const arc_isa isa;
+
+  /* Equality operator.  */
+  bool operator== (const struct arc_gdbarch_features &rhs) const
+  {
+    return (reg_size == rhs.reg_size && isa == rhs.isa);
+  }
+
+  /* Inequality operator.  */
+  bool operator!= (const struct arc_gdbarch_features &rhs) const
+  {
+    return !(*this == rhs);
+  }
+
+  /* Used by std::unordered_map to hash the feature sets.  The hash is
+     calculated in the manner below:
+     REG_SIZE |  ISA
+      5-bits  | 4-bits  */
+
+  std::size_t hash () const noexcept
+  {
+    std::size_t val = ((reg_size & 0x1f) << 8 | (isa & 0xf) << 0);
+    return val;
+  }
+};
+
+#ifdef GDBSERVER
+
+/* Create and return a target description that is compatible with FEATURES.
+   The only external client of this must be the gdbserver which manipulates
+   the returned data.  */
+
+target_desc *arc_create_target_description
+	(const struct arc_gdbarch_features &features);
+
+#else
+
+/* Lookup the cache for a target description matching the FEATURES.
+   If nothing is found, then create one and return it.  */
+
+const target_desc *arc_lookup_target_description
+	(const struct arc_gdbarch_features &features);
+
+#endif /* GDBSERVER */
+
 
 #endif /* ARCH_ARC_H */

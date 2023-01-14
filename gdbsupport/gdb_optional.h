@@ -208,6 +208,8 @@ private:
   {
     struct { } m_dummy;
     T m_item;
+    volatile char dont_use; /* Silences -Wmaybe-uninitialized warning, see
+			       PR gcc/80635.  */
   };
 
   /* True if the object was ever emplaced.  */

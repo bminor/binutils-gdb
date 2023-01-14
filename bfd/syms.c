@@ -653,10 +653,10 @@ bfd_decode_symclass (asymbol *symbol)
 
   if (symbol->section && bfd_is_com_section (symbol->section))
     {
-      if (symbol->section == bfd_com_section_ptr)
-	return 'C';
-      else
+      if (symbol->section->flags & SEC_SMALL_DATA)
 	return 'c';
+      else
+	return 'C';
     }
   if (bfd_is_und_section (symbol->section))
     {

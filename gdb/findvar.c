@@ -292,6 +292,14 @@ value_of_register_lazy (struct frame_info *frame, int regnum)
 
   next_frame = get_next_frame_sentinel_okay (frame);
 
+  /* In some cases NEXT_FRAME may not have a valid frame-id yet.  This can
+     happen if we end up trying to unwind a register as part of the frame
+     sniffer.  The only time that we get here without a valid frame-id is
+     if NEXT_FRAME is an inline frame.  If this is the case then we can
+     avoid getting into trouble here by skipping past the inline frames.  */
+  while (get_frame_type (next_frame) == INLINE_FRAME)
+    next_frame = get_next_frame_sentinel_okay (next_frame);
+
   /* We should have a valid next frame.  */
   gdb_assert (frame_id_p (get_frame_id (next_frame)));
 
@@ -578,12 +586,12 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
   return frame;
 }
 
-/* A default implementation for the "la_read_var_value" hook in
-   the language vector which should work in most situations.  */
+/* See language.h.  */
 
 struct value *
-default_read_var_value (struct symbol *var, const struct block *var_block,
-			struct frame_info *frame)
+language_defn::read_var_value (struct symbol *var,
+			       const struct block *var_block,
+			       struct frame_info *frame) const
 {
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
@@ -801,7 +809,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
   return v;
 }
 
-/* Calls VAR's language la_read_var_value hook with the given arguments.  */
+/* Calls VAR's language read_var_value hook with the given arguments.  */
 
 struct value *
 read_var_value (struct symbol *var, const struct block *var_block,
@@ -810,9 +818,8 @@ read_var_value (struct symbol *var, const struct block *var_block,
   const struct language_defn *lang = language_def (var->language ());
 
   gdb_assert (lang != NULL);
-  gdb_assert (lang->la_read_var_value != NULL);
 
-  return lang->la_read_var_value (var, var_block, frame);
+  return lang->read_var_value (var, var_block, frame);
 }
 
 /* Install default attributes for register values.  */

@@ -1325,20 +1325,20 @@ mul_reg_opr_opr (const struct instruction *insn)
 
 static const uint8_t reg_map [] =
   {
-    0x02,  // D2
-    0x01,  // D3
+    0x02,  /* D2 */
+    0x01,  /* D3 */
     0x20,
-    0x10,  // D5
-    0x08,  // D0
-    0x04,  // D1
-    0x08,  // D6
-    0x04,  // D7
+    0x10,  /* D5 */
+    0x08,  /* D0 */
+    0x04,  /* D1 */
+    0x08,  /* D6 */
+    0x04,  /* D7 */
     0x02,
-    0x01,  // Y
+    0x01,  /* Y */
     0x00,
     0x00,
-    0x20,   // CCH
-    0x10,   // CCL
+    0x20,  /* CCH */
+    0x10,  /* CCL */
     0x00
   };
 
@@ -3595,8 +3595,6 @@ static const struct instruction opcodes[] = {
   {"divu.lp", 2,  0x30,  mul_reg_opr_opr, 0},
   {"divu.ll", 2,  0x30,  mul_reg_opr_opr, 0},
 
-  //
-
   {"qmuls",   2,  0xb0,  mul_reg_reg_reg, 0},
   {"qmulu",   2,  0xb0,  mul_reg_reg_reg, 0},
 
@@ -3656,9 +3654,6 @@ static const struct instruction opcodes[] = {
   {"qmulu.lp", 2,  0xb0,  mul_reg_opr_opr, 0},
   {"qmulu.ll", 2,  0xb0,  mul_reg_opr_opr, 0},
 
-
-  //
-
   {"macs",   2,  0x48,  mul_reg_reg_reg, 0},
   {"macu",   2,  0x48,  mul_reg_reg_reg, 0},
 
@@ -3717,9 +3712,6 @@ static const struct instruction opcodes[] = {
   {"macu.lw", 2,  0x48,  mul_reg_opr_opr, 0},
   {"macu.lp", 2,  0x48,  mul_reg_opr_opr, 0},
   {"macu.ll", 2,  0x48,  mul_reg_opr_opr, 0},
-
-
-  //
 
   {"mods",   2,  0x38,  mul_reg_reg_reg, 0},
   {"modu",   2,  0x38,  mul_reg_reg_reg, 0},

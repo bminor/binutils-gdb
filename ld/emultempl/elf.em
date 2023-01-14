@@ -82,7 +82,13 @@ gld${EMULATION_NAME}_before_parse (void)
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
   link_info.check_relocs_after_open_input = TRUE;
+EOF
+if test -n "$COMMONPAGESIZE"; then
+fragment <<EOF
   link_info.relro = DEFAULT_LD_Z_RELRO;
+EOF
+fi
+fragment <<EOF
   link_info.separate_code = DEFAULT_LD_Z_SEPARATE_CODE;
 }
 
@@ -745,9 +751,28 @@ fragment <<EOF
 	  link_info.noexecstack = TRUE;
 	  link_info.execstack = FALSE;
 	}
+      else if (strcmp (optarg, "unique-symbol") == 0)
+	link_info.unique_symbol = TRUE;
+      else if (strcmp (optarg, "nounique-symbol") == 0)
+	link_info.unique_symbol = FALSE;
       else if (strcmp (optarg, "globalaudit") == 0)
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
+	}
+      else if (CONST_STRNEQ (optarg, "start-stop-visibility="))
+	{
+	  if (strcmp (optarg, "start-stop-visibility=default") == 0)
+	    link_info.start_stop_visibility = STV_DEFAULT;
+	  else if (strcmp (optarg, "start-stop-visibility=internal") == 0)
+	    link_info.start_stop_visibility = STV_INTERNAL;
+	  else if (strcmp (optarg, "start-stop-visibility=hidden") == 0)
+	    link_info.start_stop_visibility = STV_HIDDEN;
+	  else if (strcmp (optarg, "start-stop-visibility=protected") == 0)
+	    link_info.start_stop_visibility = STV_PROTECTED;
+	  else
+	    einfo (_("%F%P: invalid visibility in \`-z %s'; "
+		     "must be default, internal, hidden, or protected"),
+		   optarg);
 	}
 EOF
 
@@ -790,10 +815,16 @@ fragment <<EOF
 	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
 	link_info.nocopyreloc = TRUE;
+EOF
+if test -n "$COMMONPAGESIZE"; then
+fragment <<EOF
       else if (strcmp (optarg, "relro") == 0)
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+EOF
+fi
+fragment <<EOF
       else if (strcmp (optarg, "separate-code") == 0)
 	link_info.separate_code = TRUE;
       else if (strcmp (optarg, "noseparate-code") == 0)

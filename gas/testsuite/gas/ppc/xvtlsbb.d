@@ -7,7 +7,7 @@
 Disassembly of section \.text:
 
 0+0 <_start>:
-.*:	(f0 02 ff 6e|6e ff 02 f0) 	xvtlsbb vs63
+.*:	(f0 02 ff 6e|6e ff 02 f0) 	xvtlsbb cr0,vs63
 .*:	(f0 82 07 6c|6c 07 82 f0) 	xvtlsbb cr1,vs0
 .*:	(f1 02 f7 6e|6e f7 02 f1) 	xvtlsbb cr2,vs62
 .*:	(f1 82 0f 6c|6c 0f 82 f1) 	xvtlsbb cr3,vs1

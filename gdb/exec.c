@@ -256,6 +256,14 @@ validate_exec_file (int from_tty)
 
   /* Try validating via build-id, if available.  This is the most
      reliable check.  */
+
+  /* In case current_exec_file was changed, reopen_exec_file ensures
+     an up to date build_id (will do nothing if the file timestamp
+     did not change).  If exec file changed, reopen_exec_file has
+     allocated another file name, so get_exec_file again.  */
+  reopen_exec_file ();
+  current_exec_file = get_exec_file (0);
+
   const bfd_build_id *exec_file_build_id = build_id_bfd_get (exec_bfd);
   if (exec_file_build_id != nullptr)
     {
@@ -297,7 +305,7 @@ validate_exec_file (int from_tty)
 	exec_file_target = TARGET_SYSROOT_PREFIX + exec_file_target;
 
       warning
-	(_("Mismatch between current exec-file %ps\n"
+	(_("Build ID mismatch between current exec-file %ps\n"
 	   "and automatically determined exec-file %ps\n"
 	   "exec-file-mismatch handling is currently \"%s\""),
 	 styled_string (file_name_style.style (), current_exec_file),
@@ -307,7 +315,10 @@ validate_exec_file (int from_tty)
 	{
 	  symfile_add_flags add_flags = SYMFILE_MAINLINE;
 	  if (from_tty)
-	    add_flags |= SYMFILE_VERBOSE;
+	    {
+	      add_flags |= SYMFILE_VERBOSE;
+	      add_flags |= SYMFILE_ALWAYS_CONFIRM;
+	    }
 	  try
 	    {
 	      symbol_file_add_main (exec_file_target.c_str (), add_flags);
@@ -435,6 +446,7 @@ exec_file_attach (const char *filename, int from_tty)
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
+	      int first_errno = errno;
 	      char *exename = (char *) alloca (strlen (filename) + 5);
 
 	      strcat (strcpy (exename, filename), ".exe");
@@ -443,6 +455,8 @@ exec_file_attach (const char *filename, int from_tty)
 				    O_RDWR | O_BINARY
 				    : O_RDONLY | O_BINARY,
 				    &scratch_storage);
+	      if (scratch_chan < 0)
+		errno = first_errno;
 	    }
 #endif
 	  if (scratch_chan < 0)
@@ -942,7 +956,8 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST *xfered_len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
-				   const char *section_name)
+				   gdb::function_view<bool
+				     (const struct target_section *)> match_cb)
 {
   int res;
   struct target_section *p;
@@ -956,7 +971,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       struct bfd_section *asect = p->the_bfd_section;
       bfd *abfd = asect->owner;
 
-      if (section_name && strcmp (section_name, asect->name) != 0)
+      if (match_cb != nullptr && !match_cb (p))
 	continue;		/* not the section we need.  */
       if (memaddr >= p->addr)
         {
@@ -1029,8 +1044,7 @@ exec_target::xfer_partial (enum target_object object,
     return section_table_xfer_memory_partial (readbuf, writebuf,
 					      offset, len, xfered_len,
 					      table->sections,
-					      table->sections_end,
-					      NULL);
+					      table->sections_end);
   else
     return TARGET_XFER_E_IO;
 }
@@ -1255,7 +1269,11 @@ loaded by GDB and the exec-file automatically determined when attaching\n\
 to a process:\n\n\
  ask  - warn the user and ask whether to load the determined exec-file.\n\
  warn - warn the user, but do not change the exec-file.\n\
- off  - do not check for mismatch."),
+ off  - do not check for mismatch.\n\
+\n\
+GDB detects a mismatch by comparing the build IDs of the files.\n\
+If the user confirms loading the determined exec-file, then its symbols\n\
+will be loaded as well."),
 			set_exec_file_mismatch_command,
 			show_exec_file_mismatch_command,
 			&setlist, &showlist);

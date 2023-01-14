@@ -211,10 +211,6 @@ DESCRIPTION
 .  bfd_arch_k1om,      {* Intel K1OM.  *}
 .#define bfd_mach_k1om			(1 << 6)
 .#define bfd_mach_k1om_intel_syntax	(bfd_mach_k1om | bfd_mach_i386_intel_syntax)
-.#define bfd_mach_i386_nacl		(1 << 7)
-.#define bfd_mach_i386_i386_nacl	(bfd_mach_i386_i386 | bfd_mach_i386_nacl)
-.#define bfd_mach_x86_64_nacl		(bfd_mach_x86_64 | bfd_mach_i386_nacl)
-.#define bfd_mach_x64_32_nacl		(bfd_mach_x64_32 | bfd_mach_i386_nacl)
 .  bfd_arch_iamcu,     {* Intel MCU.  *}
 .#define bfd_mach_iamcu			(1 << 8)
 .#define bfd_mach_i386_iamcu		(bfd_mach_i386_i386 | bfd_mach_iamcu)
@@ -415,6 +411,7 @@ DESCRIPTION
 .#define bfd_mach_iq10		2
 .  bfd_arch_bpf,       {* Linux eBPF.  *}
 .#define bfd_mach_bpf		1
+.#define bfd_mach_xbpf		2
 .  bfd_arch_epiphany,  {* Adapteva EPIPHANY.  *}
 .#define bfd_mach_epiphany16	1
 .#define bfd_mach_epiphany32	2
@@ -533,6 +530,7 @@ DESCRIPTION
 .#define bfd_mach_tilegx32	2
 .  bfd_arch_aarch64,   {* AArch64.  *}
 .#define bfd_mach_aarch64 0
+.#define bfd_mach_aarch64_8R	1
 .#define bfd_mach_aarch64_ilp32	32
 .  bfd_arch_nios2,     {* Nios II.  *}
 .#define bfd_mach_nios2		0
@@ -556,6 +554,7 @@ DESCRIPTION
 .#define bfd_mach_ck803		5
 .#define bfd_mach_ck807		6
 .#define bfd_mach_ck810		7
+.#define bfd_mach_ck860		8
 .  bfd_arch_last
 .  };
 */

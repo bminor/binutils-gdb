@@ -189,6 +189,8 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_VERSION_MIN_WATCHOS = 0x30,	/* Minimal watchOS version.  */
   BFD_MACH_O_LC_NOTE = 0x31,			/* Region of arbitrary data.  */
   BFD_MACH_O_LC_BUILD_VERSION = 0x32,		/* Generic build version.  */
+  BFD_MACH_O_LC_DYLD_EXPORTS_TRIE = 0x33,	/* Exports trie. */
+  BFD_MACH_O_LC_DYLD_CHAINED_FIXUPS = 0x34,	/* Chained fixups. */
 }
 bfd_mach_o_load_command_type;
 

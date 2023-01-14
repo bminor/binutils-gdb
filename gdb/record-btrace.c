@@ -43,6 +43,7 @@
 #include "gdbarch.h"
 #include "cli/cli-style.h"
 #include "async-event.h"
+#include <forward_list>
 
 static const target_info record_btrace_target_info = {
   "record-btrace",
@@ -325,7 +326,7 @@ record_btrace_auto_disable (void)
 static void
 record_btrace_handle_async_inferior_event (gdb_client_data data)
 {
-  inferior_event_handler (INF_REG_EVENT, NULL);
+  inferior_event_handler (INF_REG_EVENT);
 }
 
 /* See record-btrace.h.  */

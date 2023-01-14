@@ -59,6 +59,7 @@
  %pR info about a relent
  %pS print script file and linenumber from etree_type.
  %pT symbol name
+ %pU print script file without linenumber from etree_type.
  %s arbitrary string, like printf
  %u integer, like printf
  %v hex bfd_vma, no leading zeros
@@ -483,9 +484,9 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 			  relent->addend,
 			  relent->howto->name);
 		}
-	      else if (*fmt == 'S')
+	      else if (*fmt == 'S' || *fmt == 'U')
 		{
-		  /* Print script file and linenumber.  */
+		  /* Print script file and perhaps the associated linenumber.  */
 		  etree_type node;
 		  etree_type *tp = (etree_type *) args[arg_no].p;
 
@@ -497,8 +498,10 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		      tp->type.filename = ldlex_filename ();
 		      tp->type.lineno = lineno;
 		    }
-		  if (tp->type.filename != NULL)
+		  if (tp->type.filename != NULL && fmt[-1] == 'S')
 		    fprintf (fp, "%s:%u", tp->type.filename, tp->type.lineno);
+		  else if (tp->type.filename != NULL && fmt[-1] == 'U')
+		    fprintf (fp, "%s", tp->type.filename);
 		}
 	      else if (*fmt == 'T')
 		{

@@ -54,7 +54,8 @@ static tdesc_type_builtin tdesc_predefined_types[] =
   { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
   { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
   { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
-  { "i387_ext", TDESC_TYPE_I387_EXT }
+  { "i387_ext", TDESC_TYPE_I387_EXT },
+  { "bfloat16", TDESC_TYPE_BFLOAT16 }
 };
 
 void tdesc_feature::accept (tdesc_element_visitor &v) const
@@ -294,12 +295,14 @@ tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 
 void print_xml_feature::visit_pre (const tdesc_feature *e)
 {
-  string_appendf (*m_buffer, "<feature name=\"%s\">\n", e->name.c_str ());
+  add_line ("<feature name=\"%s\">", e->name.c_str ());
+  indent (1);
 }
 
 void print_xml_feature::visit_post (const tdesc_feature *e)
 {
-  string_appendf (*m_buffer, "</feature>\n");
+  indent (-1);
+  add_line ("</feature>");
 }
 
 void print_xml_feature::visit (const tdesc_type_builtin *t)
@@ -309,8 +312,8 @@ void print_xml_feature::visit (const tdesc_type_builtin *t)
 
 void print_xml_feature::visit (const tdesc_type_vector *t)
 {
-  string_appendf (*m_buffer, "<vector id=\"%s\" type=\"%s\" count=\"%d\"/>\n",
-		  t->name.c_str (), t->element_type->name.c_str (), t->count);
+  add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>",
+	    t->name.c_str (), t->element_type->name.c_str (), t->count);
 }
 
 void print_xml_feature::visit (const tdesc_type_with_fields *t)
@@ -319,7 +322,9 @@ void print_xml_feature::visit (const tdesc_type_with_fields *t)
 
   gdb_assert (t->kind >= TDESC_TYPE_STRUCT && t->kind <= TDESC_TYPE_ENUM);
 
-  string_appendf (*m_buffer,
+  std::string tmp;
+
+  string_appendf (tmp,
 		  "<%s id=\"%s\"", types[t->kind - TDESC_TYPE_STRUCT],
 		  t->name.c_str ());
 
@@ -328,33 +333,37 @@ void print_xml_feature::visit (const tdesc_type_with_fields *t)
     case TDESC_TYPE_STRUCT:
     case TDESC_TYPE_FLAGS:
       if (t->size > 0)
-	string_appendf (*m_buffer, " size=\"%d\"", t->size);
-      string_appendf (*m_buffer, ">\n");
+	string_appendf (tmp, " size=\"%d\"", t->size);
+      string_appendf (tmp, ">");
+      add_line (tmp);
 
       for (const tdesc_type_field &f : t->fields)
 	{
-	  string_appendf (*m_buffer, "  <field name=\"%s\" ", f.name.c_str ());
-	  if (f.start == -1)
-	    string_appendf (*m_buffer, "type=\"%s\"/>\n",
-			    f.type->name.c_str ());
-	  else
-	    string_appendf (*m_buffer, "start=\"%d\" end=\"%d\"/>\n", f.start,
+	  tmp.clear ();
+	  string_appendf (tmp, "  <field name=\"%s\"", f.name.c_str ());
+	  if (f.start != -1)
+	    string_appendf (tmp, " start=\"%d\" end=\"%d\"", f.start,
 			    f.end);
+	  string_appendf (tmp, " type=\"%s\"/>",
+			  f.type->name.c_str ());
+	  add_line (tmp);
 	}
       break;
 
     case TDESC_TYPE_ENUM:
-      string_appendf (*m_buffer, ">\n");
+      string_appendf (tmp, ">");
+      add_line (tmp);
       for (const tdesc_type_field &f : t->fields)
-	string_appendf (*m_buffer, "  <field name=\"%s\" start=\"%d\"/>\n",
-			f.name.c_str (), f.start);
+	add_line ("  <field name=\"%s\" start=\"%d\"/>",
+		  f.name.c_str (), f.start);
       break;
 
     case TDESC_TYPE_UNION:
-      string_appendf (*m_buffer, ">\n");
+      string_appendf (tmp, ">");
+      add_line (tmp);
       for (const tdesc_type_field &f : t->fields)
-	string_appendf (*m_buffer, "  <field name=\"%s\" type=\"%s\"/>\n",
-			f.name.c_str (), f.type->name.c_str ());
+	add_line ("  <field name=\"%s\" type=\"%s\"/>",
+		  f.name.c_str (), f.type->name.c_str ());
       break;
 
     default:
@@ -362,40 +371,78 @@ void print_xml_feature::visit (const tdesc_type_with_fields *t)
 	     t->name.c_str ());
     }
 
-  string_appendf (*m_buffer, "</%s>\n", types[t->kind - TDESC_TYPE_STRUCT]);
+  add_line ("</%s>", types[t->kind - TDESC_TYPE_STRUCT]);
 }
 
 void print_xml_feature::visit (const tdesc_reg *r)
 {
-  string_appendf (*m_buffer,
+  std::string tmp;
+
+  string_appendf (tmp,
 		  "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
 		  r->name.c_str (), r->bitsize, r->type.c_str (),
 		  r->target_regnum);
 
   if (r->group.length () > 0)
-    string_appendf (*m_buffer, " group=\"%s\"", r->group.c_str ());
+    string_appendf (tmp, " group=\"%s\"", r->group.c_str ());
 
   if (r->save_restore == 0)
-    string_appendf (*m_buffer, " save-restore=\"no\"");
+    string_appendf (tmp, " save-restore=\"no\"");
 
-  string_appendf (*m_buffer, "/>\n");
+  string_appendf (tmp, "/>");
+
+  add_line (tmp);
 }
 
 void print_xml_feature::visit_pre (const target_desc *e)
 {
 #ifndef IN_PROCESS_AGENT
-  string_appendf (*m_buffer, "<?xml version=\"1.0\"?>\n");
-  string_appendf (*m_buffer, "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">\n");
-  string_appendf (*m_buffer, "<target>\n<architecture>%s</architecture>\n",
-		  tdesc_architecture_name (e));
+  add_line ("<?xml version=\"1.0\"?>");
+  add_line ("<!DOCTYPE target SYSTEM \"gdb-target.dtd\">");
+  add_line ("<target>");
+  indent (1);
+  if (tdesc_architecture_name (e))
+    add_line ("<architecture>%s</architecture>",
+	      tdesc_architecture_name (e));
 
   const char *osabi = tdesc_osabi_name (e);
   if (osabi != nullptr)
-    string_appendf (*m_buffer, "<osabi>%s</osabi>", osabi);
+    add_line ("<osabi>%s</osabi>", osabi);
+
+  const std::vector<tdesc_compatible_info_up> &compatible_list
+    = tdesc_compatible_info_list (e);
+  for (const auto &c : compatible_list)
+    add_line ("<compatible>%s</compatible>",
+	      tdesc_compatible_info_arch_name (c));
 #endif
 }
 
 void print_xml_feature::visit_post (const target_desc *e)
 {
-  string_appendf (*m_buffer, "</target>\n");
+  indent (-1);
+  add_line ("</target>");
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+void
+print_xml_feature::add_line (const std::string &str)
+{
+  string_appendf (*m_buffer, "%*s", m_depth, "");
+  string_appendf (*m_buffer, "%s", str.c_str ());
+  string_appendf (*m_buffer, "\n");
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+void
+print_xml_feature::add_line (const char *fmt, ...)
+{
+  std::string tmp;
+
+  va_list ap;
+  va_start (ap, fmt);
+  string_vappendf (tmp, fmt, ap);
+  va_end (ap);
+  add_line (tmp);
 }

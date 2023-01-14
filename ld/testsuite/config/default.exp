@@ -76,9 +76,6 @@ if {[file exists tmpdir/libpath.exp]} {
     }
 }
 
-# Many ELF testcases expect that "-z relro" is off.
-set ld_elf_shared_opt "-z norelro"
-
 # The "make check" target in the Makefile passes in
 # "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly
 # (as when testing an installed linker), these flags may not be set.  
@@ -121,7 +118,6 @@ if {![info exists CXXFLAGS]} {
 # \param Edit - The override command to perform.
 # \param SavedStrings - Set to use for storing string representations.
 
-global env
 # Only set up the environment variable if the user has not already provided one.
 if {! [info exists env(CCC_OVERRIDE_OPTIONS)]} {
     set env(CCC_OVERRIDE_OPTIONS) "#\
@@ -577,5 +573,43 @@ if { ![info exists STATIC_PIE_LDFLAGS] } then {
 	}
     } else {
 	set STATIC_PIE_LDFLAGS ""
+    }
+}
+
+# Set NOSANITIZE_CFLAGS to "-fno-sanitize=all" if target compiler
+# supports it.
+
+if { ![info exists NOSANITIZE_CFLAGS] } then {
+    if { [check_compiler_available] } {
+	# Check if gcc supports -fno-sanitize=all.
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/available[pid]"
+	set src ${basename}.c
+	set output ${basename}
+	set f [open $src "w"]
+	puts $f "int main (void) { return 0; }"
+	close $f
+	if [is_remote host] {
+	    set src [remote_download host $src]
+	}
+	set available [run_host_cmd_yesno "$CC" "$flags -fno-sanitize=all $src -o $output"]
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+
+	if { $available == 1 } then {
+	    set NOSANITIZE_CFLAGS "-fno-sanitize=all"
+	} else {
+	    set NOSANITIZE_CFLAGS ""
+	}
+    } else {
+	set NOSANITIZE_CFLAGS ""
     }
 }

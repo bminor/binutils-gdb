@@ -9,7 +9,7 @@
 <target>
   <architecture>arc:HS</architecture>
 
-  <feature name="org.gnu.gdb.arc.core.v2">
+  <feature name="org.gnu.gdb.arc.core">
     <reg name="r0"  bitsize="32"/>
     <reg name="r1"  bitsize="32"/>
     <reg name="r2"  bitsize="32"/>
@@ -46,7 +46,7 @@
     <reg name="pcl" bitsize="32"/>
   </feature>
 
-  <feature name="org.gnu.gdb.arc.aux-minimal">
+  <feature name="org.gnu.gdb.arc.aux">
     <reg name="pc"       bitsize="32"/>
     <reg name="status32" bitsize="32"/>
   </feature>

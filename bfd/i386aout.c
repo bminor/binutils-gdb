@@ -38,7 +38,6 @@
    the tokens.  */
 #define MY(OP) CONCAT2 (i386_aout_,OP)
 #define TARGETNAME "a.out-i386"
-#define NO_WRITE_HEADER_KLUDGE 1
 
 #include "sysdep.h"
 #include "bfd.h"

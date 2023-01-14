@@ -37,7 +37,9 @@ proc at_least_gcc_version { major minor } {
     if { $CC == "" } {
 	return 0
     }
-    set state [remote_exec host $CC --version]
+    # Filter out -Wl, options.
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    set state [remote_exec host $cc_cmd --version]
     if { [lindex $state 0] != 0 } {
 	return 0;
     }
@@ -289,7 +291,6 @@ proc default_ld_compile { cc source object } {
 	return 1
     } else {
 	verbose -log "$exec_output"
-	perror "$source: compilation failed"
 	return 0
     }
 }
@@ -310,7 +311,6 @@ proc default_ld_assemble { as in_flags source object } {
     if [string match "" $exec_output] then {
 	return 1
     } else {
-	perror "$source: assembly failed"
 	return 0
     }
 }
@@ -361,7 +361,6 @@ proc default_ld_nm { nm nmflags object } {
 	return 1
     } else {
 	verbose -log "$exec_output"
-	perror "$object: nm failed"
 	return 0
     }
 }
@@ -379,7 +378,7 @@ proc ld_link_defsyms {} {
 
     # Windows targets need __main, some prefixed with underscore.
     if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
-        append flags " --defsym __main=0 --defsym ___main=0"
+        append flags " --defsym __main=main --defsym ___main=main"
     }
 
     # PowerPC EABI code calls __eabi.
@@ -414,7 +413,7 @@ proc ld_link_defsyms {} {
 proc ar_simple_create { ar aropts target objects } {
     remote_file host delete $target
 
-    set exec_output [run_host_cmd "$ar" "-rc $aropts $target $objects"]
+    set exec_output [run_host_cmd "$ar" "$aropts rc $target $objects"]
     set exec_output [prune_warnings $exec_output]
 
     if [string match "" $exec_output] then {
@@ -463,12 +462,10 @@ proc run_ld_link_tests { ldtests args } {
     global CFLAGS
     global runtests
     global exec_output
-    global ld_elf_shared_opt
 
-    if { [is_elf_format] && [check_shared_lib_support] } {
-	set ld_extra_opt "$ld_elf_shared_opt"
-    } else {
-	set ld_extra_opt ""
+    set ld_extra_opt ""
+    if [check_relro_support] {
+	set ld_extra_opt "-z norelro"
     }
 
     foreach testitem $ldtests {
@@ -522,12 +519,17 @@ proc run_ld_link_tests { ldtests args } {
 		set as_file "$srcdir/$subdir/$src_file"
 	    }
 	    if ![ld_assemble $as "$as_options $as_file" $objfile] {
-		set is_unresolved 1
+		set failed 1
 		break
 	    }
 	}
 
 	# Catch assembler errors.
+	if { $failed } {
+	    fail $testname
+	    continue
+	}
+	# Catch compiler errors.
 	if { $is_unresolved } {
 	    unresolved $testname
 	    continue
@@ -693,6 +695,11 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    continue
 	}
 
+	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
+	if {[check_lto_available]} {
+	    set cflags "-fno-lto $cflags"
+	}
+
 	foreach target $args {
 	    if [match_target $target] {
 		setup_xfail "*-*-*"
@@ -773,14 +780,9 @@ proc run_ld_link_exec_tests { ldtests args } {
 		verbose "$exec_output" 1
 		set failed 1
 	    } else {
-		send_log "diff $binfile.out $srcdir/$subdir/$expfile\n"
-		verbose "diff $binfile.out $srcdir/$subdir/$expfile"
-		catch "exec diff $binfile.out $srcdir/$subdir/$expfile" exec_output
-		set exec_output [prune_warnings $exec_output]
-
-		if ![string match "" $exec_output] then {
-		    send_log "$exec_output\n"
-		    verbose "$exec_output" 1
+		send_log [file_contents $binfile.out]
+		verbose [file_contents $binfile.out] 2
+		if [regexp_diff "$binfile.out" "$srcdir/$subdir/$expfile"] {
 		    set failed 1
 		}
 	    }
@@ -855,6 +857,11 @@ proc run_cc_link_tests { ldtests } {
 	if { ![check_compiler_available] } {
 	    unsupported $testname
 	    continue
+	}
+
+	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
+	if {[check_lto_available]} {
+	    set cflags "-fno-lto $cflags"
 	}
 
 	#verbose -log "testname  is $testname"
@@ -1135,7 +1142,8 @@ proc check_plugin_api_available { } {
     if {![info exists plugin_api_available_saved]} {
 	# Check if the ld used by gcc supports --plugin.
 	set ld_output [remote_exec host $ld "--help"]
-	if { [ string first "-plugin PLUGIN" $ld_output ] >= 0 } {
+	if { [regexp -- "-plugin PLUGIN \[^\n\r\]*" $ld_output line]
+	     && ![regexp "ignored" $line] } {
 	    set plugin_api_available_saved 1
 	} else {
 	    set plugin_api_available_saved 0
@@ -1213,7 +1221,9 @@ proc check_gcc_plugin_enabled { } {
     if { $CC == ""} {
 	return 0
     }
-    set state [remote_exec host $CC -v]
+    # Filter out -Wl, options.
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    set state [remote_exec host $cc_cmd -v]
     if { [lindex $state 0] != 0 } {
 	return 0;
     }
@@ -1373,11 +1383,7 @@ proc check_as_cfi { } {
     close $as_fh
     remote_download host $as_file
     verbose -log "Checking CFI support:"
-    rename "perror" "check_as_cfi_perror"
-    proc perror { args } { }
     set success [ld_assemble $as $as_file "/dev/null"]
-    rename "perror" ""
-    rename "check_as_cfi_perror" "perror"
     #remote_file host delete $as_file
     set check_as_cfi_result $success
     return $success
@@ -1576,4 +1582,60 @@ proc check_gnu2_tls_available { } {
 	file delete $src1 $src2
     }
     return $gnu2_tls_available_saved
+}
+
+# Compile a C source file, with the specified additional_flags.
+proc compile_one_cc { src output additional_flags } {
+    global CC
+    global CFLAGS
+
+    set flags ""
+    if [board_info [target_info name] exists cflags] {
+	append flags " [board_info [target_info name] cflags]"
+    }
+    if [board_info [target_info name] exists ldflags] {
+	append flags " [board_info [target_info name] ldflags]"
+    }
+
+    if [is_remote host] {
+	set src [remote_download host $src]
+    }
+    return [run_host_cmd_yesno "$CC" "$flags $CFLAGS $additional_flags $src -o $output"]
+}
+
+# Returns true if the target compiler supports -gt
+proc check_ctf_available { } {
+    global ctf_available_saved
+
+    if {![info exists ctf_available_saved]} {
+	if { ![check_compiler_available] } {
+	    set ctf_available_saved 0
+	} else {
+	    set basename "tmpdir/ctf_available[pid]"
+	    set src ${basename}.c
+	    set output ${basename}.o
+	    set f [open $src "w"]
+	    puts $f "int main() { return 0; }"
+	    close $f
+	    set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
+	    remote_file host delete $src
+	    remote_file host delete $output
+	    file delete $src
+	}
+    }
+    return $ctf_available_saved
+}
+
+proc skip_ctf_tests { } {
+    global enable_libctf
+
+    if {$enable_libctf eq "no"} {
+	return 1
+    }
+
+    if [check_ctf_available] {
+	return 0
+    }
+
+    return 1
 }

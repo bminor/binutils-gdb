@@ -82,7 +82,16 @@ struct attribute
   /* DW_ADDR is always stored already as sect_offset; despite for the forms
      besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
 
-  bool form_is_ref () const;
+  bool form_is_ref () const
+  {
+    return (form == DW_FORM_ref_addr
+	    || form == DW_FORM_ref1
+	    || form == DW_FORM_ref2
+	    || form == DW_FORM_ref4
+	    || form == DW_FORM_ref8
+	    || form == DW_FORM_ref_udata
+	    || form == DW_FORM_GNU_ref_alt);
+  }
 
   /* Check if the attribute's form is a DW_FORM_block*
      if so return true else false.  */
@@ -92,7 +101,13 @@ struct attribute
   /* Return DIE offset of this attribute.  Return 0 with complaint if
      the attribute is not of the required kind.  */
 
-  sect_offset get_ref_die_offset () const;
+  sect_offset get_ref_die_offset () const
+  {
+    if (form_is_ref ())
+      return (sect_offset) u.unsnd;
+    get_ref_die_offset_complaint ();
+    return {};
+  }
 
   /* Return the constant value held by this attribute.  Return
      DEFAULT_VALUE if the value held by the attribute is not
@@ -119,6 +134,12 @@ struct attribute
       ULONGEST signature;
     }
   u;
+
+private:
+
+  /* Used by get_ref_die_offset to issue a complaint.  */
+
+  void get_ref_die_offset_complaint () const;
 };
 
 /* Get at parts of an attribute structure.  */

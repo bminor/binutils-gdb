@@ -63,10 +63,10 @@ static void
 ada_varobj_decode_var (struct value **value_ptr, struct type **type_ptr)
 {
   if (*value_ptr)
-    {
-      *value_ptr = ada_get_decoded_value (*value_ptr);
-      *type_ptr = ada_check_typedef (value_type (*value_ptr));
-    }
+    *value_ptr = ada_get_decoded_value (*value_ptr);
+
+  if (*value_ptr != nullptr)
+    *type_ptr = ada_check_typedef (value_type (*value_ptr));
   else
     *type_ptr = ada_get_decoded_type (*type_ptr);
 }
@@ -105,7 +105,7 @@ ada_varobj_struct_elt (struct value *parent_value,
       type = value_type (value);
     }
   else
-    type = TYPE_FIELD_TYPE (parent_type, fieldno);
+    type = parent_type->field (fieldno).type ();
 
   if (child_value)
     *child_value = value;
@@ -178,7 +178,7 @@ ada_varobj_simple_array_elt (struct value *parent_value,
   if (parent_value)
     {
       struct value *index_value =
-	value_from_longest (TYPE_INDEX_TYPE (parent_type), elt_index);
+	value_from_longest (parent_type->index_type (), elt_index);
 
       value = ada_value_subscript (parent_value, 1, &index_value);
       type = value_type (value);
@@ -209,6 +209,8 @@ ada_varobj_adjust_for_child_access (struct value **value,
   if ((*type)->code () == TYPE_CODE_PTR
       && (TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_STRUCT
           || TYPE_TARGET_TYPE (*type)->code () == TYPE_CODE_UNION)
+      && *value != nullptr
+      && value_as_address (*value) != 0
       && !ada_is_array_descriptor_type (TYPE_TARGET_TYPE (*type))
       && !ada_is_constrained_packed_array_type (TYPE_TARGET_TYPE (*type)))
     ada_varobj_ind (*value, *type, value, type);
@@ -234,7 +236,7 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
   LONGEST lo, hi;
 
   if (parent_value == NULL
-      && is_dynamic_type (TYPE_INDEX_TYPE (parent_type)))
+      && is_dynamic_type (parent_type->index_type ()))
     {
       /* This happens when listing the children of an object
 	 which does not exist in memory (Eg: when requesting
@@ -331,6 +333,10 @@ ada_varobj_get_ptr_number_of_children (struct value *parent_value,
      you cannot print what they point to.  */
   if (child_type->code () == TYPE_CODE_FUNC
       || child_type->code () == TYPE_CODE_VOID)
+    return 0;
+
+  /* Only show children for non-null pointers.  */
+  if (parent_value == nullptr || value_as_address (parent_value) == 0)
     return 0;
 
   /* All other types have 1 child.  */
@@ -589,7 +595,7 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 
   gdb_assert (parent_type->code () == TYPE_CODE_ARRAY);
 
-  index_type = TYPE_INDEX_TYPE (parent_type);
+  index_type = parent_type->index_type ();
   real_index = child_index + ada_discrete_type_low_bound (index_type);
 
   if (child_name)

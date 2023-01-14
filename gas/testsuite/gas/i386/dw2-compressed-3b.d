@@ -1,5 +1,5 @@
 #source: dw2-compress-3.s
-#as: --compress-debug-sections=zlib-gabi --elf-stt-common=yes
+#as: --compress-debug-sections=zlib-gabi --elf-stt-common=yes --gdwarf-3
 #readelf: -w
 #name: DWARF2 debugging information 3 with SHF_COMPRESSED with STT_COMMON
 

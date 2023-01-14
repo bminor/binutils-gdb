@@ -145,17 +145,22 @@ gcore_command (const char *args, int from_tty)
 		      "Opening corefile '%s' for output.\n",
 		      corefilename.get ());
 
-  /* Open the output file.  */
-  gdb_bfd_ref_ptr obfd (create_gcore_bfd (corefilename.get ()));
+  if (target_supports_dumpcore ())
+    target_dumpcore (corefilename.get ());
+  else
+    {
+      /* Open the output file.  */
+      gdb_bfd_ref_ptr obfd (create_gcore_bfd (corefilename.get ()));
 
-  /* Arrange to unlink the file on failure.  */
-  gdb::unlinker unlink_file (corefilename.get ());
+      /* Arrange to unlink the file on failure.  */
+      gdb::unlinker unlink_file (corefilename.get ());
 
-  /* Call worker function.  */
-  write_gcore_file (obfd.get ());
+      /* Call worker function.  */
+      write_gcore_file (obfd.get ());
 
-  /* Succeeded.  */
-  unlink_file.keep ();
+      /* Succeeded.  */
+      unlink_file.keep ();
+    }
 
   fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename.get ());
 }

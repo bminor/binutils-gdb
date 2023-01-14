@@ -56,12 +56,9 @@ gdb::unique_xmalloc_ptr<struct macro_scope> user_macro_scope (void);
    the user macro scope.  */
 gdb::unique_xmalloc_ptr<struct macro_scope> default_macro_scope (void);
 
-
 /* Look up the definition of the macro named NAME in scope at the source
-   location given by BATON, which must be a pointer to a `struct
-   macro_scope' structure.  This function is suitable for use as
-   a macro_lookup_ftype function.  */
-struct macro_definition *standard_macro_lookup (const char *name, void *baton);
-
+   location given by MS.  */
+macro_definition *standard_macro_lookup (const char *name,
+					 const macro_scope &ms);
 
 #endif /* MACROSCOPE_H */

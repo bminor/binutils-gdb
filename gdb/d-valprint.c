@@ -35,7 +35,7 @@ dynamic_array_type (struct type *type,
 		    const struct value_print_options *options)
 {
   if (type->num_fields () == 2
-      && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_INT
+      && type->field (0).type ()->code () == TYPE_CODE_INT
       && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
       && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0
       && !value_bits_any_optimized_out (val,
@@ -52,7 +52,7 @@ dynamic_array_type (struct type *type,
 
       length = unpack_field_as_long (type, valaddr + embedded_offset, 0);
 
-      ptr_type = TYPE_FIELD_TYPE (type, 1);
+      ptr_type = type->field (1).type ();
       elttype = check_typedef (TYPE_TARGET_TYPE (ptr_type));
       addr = unpack_pointer (ptr_type,
 			     valaddr + TYPE_FIELD_BITPOS (type, 1) / 8

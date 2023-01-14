@@ -333,6 +333,12 @@ lappend opts "additional_flags=-DFDIR=\"fdir\""
 # CU's DW_AT_name and .debug_line's filename.
 lappend opts "additional_flags=-DFILE=\"${srctmpfile}\""
 
+# Clang's integrated assembler doesn't support .ascii directives
+# with multiple string literals.
+if { [test_compiler_info clang*] } {
+    lappend opts "additional_flags=-fno-integrated-as"
+}
+
 if { [gdb_compile "${asmsrcfile} ${srcdir}/${subdir}/$srcfile" "${binfile}" executable $opts] != "" } {
     untested "failed to compile"
     return -1

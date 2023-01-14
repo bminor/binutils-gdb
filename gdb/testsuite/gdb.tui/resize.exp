@@ -15,7 +15,7 @@
 
 # Test TUI resizing.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
@@ -32,6 +32,7 @@ if {![runto_main]} {
 
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 
 Term::check_contents "source at startup" "\\|.*21 *return 0"

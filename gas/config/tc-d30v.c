@@ -118,7 +118,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 /* Opcode hash table.  */
-static struct hash_control *d30v_hash;
+static htab_t d30v_hash;
 
 /* Do a binary search of the pre_defined_registers array to see if
    NAME is a valid register name.  Return the register number from the
@@ -310,11 +310,11 @@ void
 md_begin (void)
 {
   struct d30v_opcode *opcode;
-  d30v_hash = hash_new ();
+  d30v_hash = str_htab_create ();
 
   /* Insert opcode names into a hash table.  */
   for (opcode = (struct d30v_opcode *) d30v_opcode_table; opcode->name; opcode++)
-      hash_insert (d30v_hash, opcode->name, (char *) opcode);
+      str_hash_insert (d30v_hash, opcode->name, opcode, 0);
 
   fixups = &FixUps[0];
   FixUps[0].next = &FixUps[1];
@@ -862,9 +862,9 @@ parallel_ok (struct d30v_insn *op1,
 		      for (r = regno; r <= regno + z; r++)
 			{
 			  if (r >= 32)
-			    used_reg[j][1] |= 1L << (r - 32);
+			    used_reg[j][1] |= 1UL << (r - 32);
 			  else
-			    used_reg[j][0] |= 1L << r;
+			    used_reg[j][0] |= 1UL << r;
 			}
 		    }
 		}
@@ -1390,7 +1390,7 @@ do_assemble (char *str,
     }
 
   /* Find the first opcode with the proper name.  */
-  opcode->op = (struct d30v_opcode *) hash_find (d30v_hash, name);
+  opcode->op = (struct d30v_opcode *) str_hash_find (d30v_hash, name);
   if (opcode->op == NULL)
     {
       as_bad (_("unknown opcode: %s"), name);

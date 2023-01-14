@@ -261,7 +261,6 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   char * lower_name;
   char * upper_name;
   char * name;
-  char * buf = NULL;
   lang_output_section_statement_type * lower;
   lang_output_section_statement_type * upper;
 
@@ -294,7 +293,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
      only use the part of the name before the second dot.  */
   if (strchr (secname + 1, '.') != NULL)
     {
-      buf = name = xstrdup (secname);
+      name = xstrdup (secname);
 
       * strchr (name + 1, '.') = 0;
     }
@@ -330,7 +329,6 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
  end:
   free (upper_name);
   free (lower_name);
-  free (buf);
   return lower;
 }
 EOF
@@ -339,9 +337,10 @@ fi
 fragment <<EOF
 
 static bfd_boolean
-change_output_section (lang_statement_union_type ** head,
+change_output_section (lang_statement_union_type **head,
 		       asection *s,
-		       lang_output_section_statement_type * new_output_section)
+		       lang_output_section_statement_type *new_os,
+		       lang_output_section_statement_type *old_os)
 {
   asection *is;
   lang_statement_union_type * prev = NULL;
@@ -356,20 +355,27 @@ change_output_section (lang_statement_union_type ** head,
 	  is = curr->input_section.section;
 	  if (is == s)
 	    {
+	      lang_statement_list_type *old_list
+		= (lang_statement_list_type *) &old_os->children;
 	      s->output_section = NULL;
-	      lang_add_section (& (new_output_section->children), s, NULL,
-				new_output_section);
+	      lang_add_section (&new_os->children, s, NULL, new_os);
+
 	      /* Remove the section from the old output section.  */
 	      if (prev == NULL)
 		*head = curr->header.next;
 	      else
 		prev->header.next = curr->header.next;
+	      /* If the input section we just moved is the tail of the old
+		 output section, then we also need to adjust that tail.  */
+	      if (old_list->tail == (lang_statement_union_type **) curr)
+		old_list->tail = (lang_statement_union_type **) prev;
+
 	      return TRUE;
 	    }
 	  break;
 	case lang_wild_statement_enum:
 	  if (change_output_section (&(curr->wild_statement.children.head),
-				     s, new_output_section))
+				     s, new_os, old_os))
 	    return TRUE;
 	  break;
 	default:
@@ -606,11 +612,15 @@ eval_upper_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
       upper_size = &upper_size_ram;
     }
 
-  /* Move sections in the upper region that would fit in the lower
-     region to the lower region.  */
-  if (*lower_size + s->size < lower->region->length)
+  /* If the upper region is overflowing, try moving sections to the lower
+     region.
+     Note that there isn't any general benefit to using lower memory over upper
+     memory, so we only move sections around with the goal of making the program
+     fit.  */
+  if (*upper_size > upper->region->length
+      && *lower_size + s->size < lower->region->length)
     {
-      if (change_output_section (&(upper->children.head), s, lower))
+      if (change_output_section (&(upper->children.head), s, lower, upper))
 	{
 	  *upper_size -= s->size;
 	  *lower_size += s->size;
@@ -700,7 +710,7 @@ eval_lower_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
     }
   /* Move sections that cause the lower region to overflow to the upper region.  */
   if (*lower_size + s->size > output_sec->region->length)
-    change_output_section (&(output_sec->children.head), s, upper);
+    change_output_section (&(output_sec->children.head), s, upper, output_sec);
   else
     *lower_size += s->size;
  end:
@@ -816,6 +826,85 @@ msp430_elf_after_allocation (void)
   gld${EMULATION_NAME}_after_allocation ();
 }
 
+/* Return TRUE if a non-debug input section in L has positive size and matches
+   the given name.  */
+static int
+input_section_exists (lang_statement_union_type * l, const char * name)
+{
+  while (l != NULL)
+    {
+      switch (l->header.type)
+	{
+	case lang_input_section_enum:
+	  if ((l->input_section.section->flags & SEC_ALLOC)
+	      && l->input_section.section->size > 0
+	      && !strcmp (l->input_section.section->name, name))
+	    return TRUE;
+	  break;
+
+	case lang_wild_statement_enum:
+	  if (input_section_exists (l->wild_statement.children.head, name))
+	    return TRUE;
+	  break;
+
+	default:
+	  break;
+	}
+      l = l->header.next;
+    }
+  return FALSE;
+}
+
+/* Some MSP430 linker scripts do not include ALIGN directives to ensure
+   __preinit_array_start, __init_array_start or __fini_array_start are word
+   aligned.
+   If __*_array_start symbols are not word aligned, the code in crt0 to run
+   through the array and call the functions will crash.
+   To avoid warning unnecessarily when the .*_array sections are not being
+   used for running constructors/destructors, only emit the warning if
+   the associated section exists and has size.  */
+static void
+check_array_section_alignment (void)
+{
+  int i;
+  lang_output_section_statement_type * rodata_sec;
+  lang_output_section_statement_type * rodata2_sec;
+  const char * array_names[3][2] = { { ".init_array", "__init_array_start" },
+	{ ".preinit_array", "__preinit_array_start" },
+	{ ".fini_array", "__fini_array_start" } };
+
+  /* .{preinit,init,fini}_array could be in either .rodata or .rodata2.  */
+  rodata_sec = lang_output_section_find (".rodata");
+  rodata2_sec = lang_output_section_find (".rodata2");
+  if (rodata_sec == NULL && rodata2_sec == NULL)
+    return;
+
+  /* There are 3 .*_array sections which must be checked for alignment.  */
+  for (i = 0; i < 3; i++)
+    {
+      struct bfd_link_hash_entry * sym;
+      if (((rodata_sec && input_section_exists (rodata_sec->children.head,
+						array_names[i][0]))
+	   || (rodata2_sec && input_section_exists (rodata2_sec->children.head,
+						    array_names[i][0])))
+	  && (sym = bfd_link_hash_lookup (link_info.hash, array_names[i][1],
+					  FALSE, FALSE, TRUE))
+	  && sym->type == bfd_link_hash_defined
+	  && sym->u.def.value % 2)
+	{
+	  einfo ("%P: warning: \"%s\" symbol (%pU) is not word aligned\n",
+		 array_names[i][1], NULL);
+	}
+    }
+}
+
+static void
+gld${EMULATION_NAME}_finish (void)
+{
+  finish_default ();
+  check_array_section_alignment ();
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
@@ -832,7 +921,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  ${LDEMUL_FINISH-finish_default},
+  gld${EMULATION_NAME}_finish,
   ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-NULL},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},

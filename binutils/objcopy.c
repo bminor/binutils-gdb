@@ -2604,7 +2604,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
     {
       /* PR 17636: Call non-fatal so that we return to our parent who
 	 may need to tidy temporary files.  */
-      non_fatal (_("Unable to change endianness of input file(s)"));
+      non_fatal (_("unable to change endianness of '%s'"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  if (ibfd->read_only)
+    {
+      non_fatal (_("unable to modify '%s' due to errors"),
+		 bfd_get_archive_filename (ibfd));
       return FALSE;
     }
 
@@ -3003,7 +3011,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 
 	  bfd_size_type size = bfd_section_size (osec);
-	  /* Note - we allow the dumping of zero-sized sections.  */
+	  /* Note - we allow the dumping of zero-sized sections,
+	     creating an empty file.  */
 
 	  f = fopen (pdump->filename, FOPEN_WB);
 	  if (f == NULL)
@@ -3015,7 +3024,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 	  if (bfd_malloc_and_get_section (ibfd, osec, &contents))
 	    {
-	      if (fwrite (contents, 1, size, f) != size)
+	      if (size != 0 && fwrite (contents, 1, size, f) != size)
 		{
 		  non_fatal (_("error writing section contents to %s (error: %s)"),
 			     pdump->filename,
@@ -4294,6 +4303,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	      status = 1;
 	      bfd_nonfatal_message (NULL, ibfd, isection,
 				    _("relocation count is negative"));
+	      free (relpp);
 	      return;
 	    }
 	}
@@ -4318,7 +4328,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 		  temp_relpp [temp_relcount++] = relpp [i];
 	    }
 	  relcount = temp_relcount;
-	  if (isection->orelocation == NULL)
+	  if (relpp != isection->orelocation)
 	    free (relpp);
 	  relpp = temp_relpp;
 	}
@@ -4327,7 +4337,8 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (relcount == 0)
 	{
 	  osection->flags &= ~SEC_RELOC;
-	  free (relpp);
+	  if (relpp != isection->orelocation)
+	    free (relpp);
 	}
     }
 }

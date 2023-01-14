@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdbarch.h"
 #include "gdbcore.h"
 #include "regcache.h"
 #include "ia64-tdep.h"

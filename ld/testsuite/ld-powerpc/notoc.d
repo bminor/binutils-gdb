@@ -1,6 +1,6 @@
 #source: notoc.s
 #as: -a64
-#ld: --no-plt-localentry -T ext.lnk
+#ld: --no-plt-localentry --no-power10-stubs -T ext.lnk
 #objdump: -d
 #target: powerpc64*-*-*
 

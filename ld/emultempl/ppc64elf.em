@@ -38,7 +38,7 @@ static struct ppc64_elf_params params = { NULL,
 					  &ppc_layout_sections_again,
 					  1, -1, -1, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 5,
-					  -1, 0, -1, -1, 0};
+					  -1, -1, 0, 0, -1, -1, 0};
 
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
@@ -684,6 +684,9 @@ enum ppc64_opt
   OPTION_NO_PLT_ALIGN,
   OPTION_PLT_LOCALENTRY,
   OPTION_NO_PLT_LOCALENTRY,
+  OPTION_POWER10_STUBS,
+  OPTION_NO_POWER10_STUBS,
+  OPTION_NO_PCREL_OPT,
   OPTION_STUBSYMS,
   OPTION_NO_STUBSYMS,
   OPTION_SAVRES,
@@ -714,6 +717,9 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "plt-localentry", optional_argument, NULL, OPTION_PLT_LOCALENTRY },
   { "no-plt-localentry", no_argument, NULL, OPTION_NO_PLT_LOCALENTRY },
+  { "power10-stubs", optional_argument, NULL, OPTION_POWER10_STUBS },
+  { "no-pcrel-optimize", no_argument, NULL, OPTION_NO_PCREL_OPT },
+  { "no-power10-stubs", no_argument, NULL, OPTION_NO_POWER10_STUBS },
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
@@ -767,6 +773,15 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
 		   ));
   fprintf (file, _("\
   --no-plt-localentry         Don'\''t optimize ELFv2 calls\n"
+		   ));
+  fprintf (file, _("\
+  --power10-stubs [=auto]     Use Power10 PLT call stubs (default auto)\n"
+		   ));
+  fprintf (file, _("\
+  --no-pcrel-optimize         Don'\''t perform R_PPC64_PCREL_OPT optimization\n"
+		   ));
+  fprintf (file, _("\
+  --no-power10-stubs          Don'\''t use Power10 PLT call stubs\n"
 		   ));
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol\n"
@@ -878,6 +893,31 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       params.plt_localentry0 = 0;
       break;
 
+    case OPTION_POWER10_STUBS:
+      if (optarg != NULL)
+	{
+	  if (strcasecmp (optarg, "auto") == 0)
+	    params.power10_stubs = -1;
+	  else if (strcasecmp (optarg, "yes") == 0)
+	    params.power10_stubs = 1;
+	  else if (strcasecmp (optarg, "no") == 0)
+	    params.power10_stubs = 0;
+	  else
+	    einfo (_("%F%P: invalid --power10-stubs argument `%s'\''\n"),
+		   optarg);
+	}
+      else
+	params.power10_stubs = 1;
+      break;
+
+    case OPTION_NO_POWER10_STUBS:
+      params.power10_stubs = 0;
+      break;
+
+    case OPTION_NO_PCREL_OPT:
+      params.no_pcrel_opt = 1;
+      break;
+
     case OPTION_STUBSYMS:
       params.emit_stub_syms = 1;
       break;
@@ -954,6 +994,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       params.no_multi_toc = 1;
       no_toc_sort = 1;
       params.plt_static_chain = 1;
+      params.no_pcrel_opt = 1;
       return FALSE;
 '
 

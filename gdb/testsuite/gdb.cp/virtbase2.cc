@@ -46,4 +46,6 @@ int main()
 {
   derived().func_d();
   foo().func_f();
+
+  return 0;
 }

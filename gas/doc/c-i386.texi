@@ -204,6 +204,7 @@ accept various extension mnemonics.  For example,
 @code{avx512_vbmi2},
 @code{avx512_vnni},
 @code{avx512_bitalg},
+@code{avx512_vp2intersect},
 @code{avx512_bf16},
 @code{noavx512f},
 @code{noavx512cd},
@@ -225,6 +226,12 @@ accept various extension mnemonics.  For example,
 @code{noenqcmd},
 @code{noserialize},
 @code{notsxldtrk},
+@code{amx_int8},
+@code{noamx_int8},
+@code{amx_bf16},
+@code{noamx_bf16},
+@code{amx_tile},
+@code{noamx_tile},
 @code{vmx},
 @code{vmfunc},
 @code{smx},
@@ -818,6 +825,9 @@ Different encoding options can be specified via pseudo prefixes:
 @samp{@{disp32@}} -- prefer 32-bit displacement.
 
 @item
+@samp{@{disp16@}} -- prefer 16-bit displacement.
+
+@item
 @samp{@{load@}} -- prefer load-form instruction.
 
 @item
@@ -1050,16 +1060,6 @@ With the AVX extensions more registers were made available:
 the 16 256-bit SSE @samp{%ymm0}--@samp{%ymm15} (only the first 8
 available in 32-bit mode).  The bottom 128 bits are overlaid with the
 @samp{xmm0}--@samp{xmm15} registers.
-
-@end itemize
-
-The AVX2 extensions made in 64-bit mode more registers available:
-
-@itemize @bullet
-
-@item
-the 16 128-bit registers @samp{%xmm16}--@samp{%xmm31} and the 16 256-bit
-registers @samp{%ymm16}--@samp{%ymm31}.
 
 @end itemize
 
@@ -1503,6 +1503,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd} @tab @samp{.tsxldtrk}
+@item @samp{.amx_int8} @tab @samp{.amx_bf16} @tab @samp{.amx_tile}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}

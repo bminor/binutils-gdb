@@ -40,28 +40,28 @@ static gcc_type
 convert_array (compile_c_instance *context, struct type *type)
 {
   gcc_type element_type;
-  struct type *range = TYPE_INDEX_TYPE (type);
+  struct type *range = type->index_type ();
 
   element_type = context->convert_type (TYPE_TARGET_TYPE (type));
 
-  if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
+  if (range->bounds ()->low.kind () != PROP_CONST)
     return context->plugin ().error (_("array type with non-constant"
 				       " lower bound is not supported"));
-  if (TYPE_LOW_BOUND (range) != 0)
+  if (range->bounds ()->low.const_val () != 0)
     return context->plugin ().error (_("cannot convert array type with "
 				       "non-zero lower bound to C"));
 
-  if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
-      || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
+  if (range->bounds ()->high.kind () == PROP_LOCEXPR
+      || range->bounds ()->high.kind () == PROP_LOCLIST)
     {
       gcc_type result;
 
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	return context->plugin ().error (_("variably-sized vector type"
 					   " is not supported"));
 
       std::string upper_bound
-	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
+	= c_get_range_decl_name (&range->bounds ()->high);
       result = context->plugin ().build_vla_array_type (element_type,
 							upper_bound.c_str ());
       return result;
@@ -78,7 +78,7 @@ convert_array (compile_c_instance *context, struct type *type)
 	  count = high_bound + 1;
 	}
 
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	return context->plugin ().build_vector_type (element_type, count);
       return context->plugin ().build_array_type (element_type, count);
     }
@@ -108,9 +108,9 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
       gcc_type field_type;
       unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
 
-      field_type = context->convert_type (TYPE_FIELD_TYPE (type, i));
+      field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)
-	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
+	bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
       context->plugin ().build_add_field (result,
 					  TYPE_FIELD_NAME (type, i),
 					  field_type,
@@ -130,7 +130,7 @@ convert_enum (compile_c_instance *context, struct type *type)
   gcc_type int_type, result;
   int i;
 
-  int_type = context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
+  int_type = context->plugin ().int_type_v0 (type->is_unsigned (),
 					     TYPE_LENGTH (type));
 
   result = context->plugin ().build_enum_type (int_type);
@@ -153,7 +153,7 @@ convert_func (compile_c_instance *context, struct type *type)
   int i;
   gcc_type result, return_type;
   struct gcc_type_array array;
-  int is_varargs = TYPE_VARARGS (type) || !TYPE_PROTOTYPED (type);
+  int is_varargs = type->has_varargs () || !type->is_prototyped ();
 
   struct type *target_type = TYPE_TARGET_TYPE (type);
 
@@ -178,7 +178,7 @@ convert_func (compile_c_instance *context, struct type *type)
   array.n_elements = type->num_fields ();
   array.elements = XNEWVEC (gcc_type, type->num_fields ());
   for (i = 0; i < type->num_fields (); ++i)
-    array.elements[i] = context->convert_type (TYPE_FIELD_TYPE (type, i));
+    array.elements[i] = context->convert_type (type->field (i).type ());
 
   result = context->plugin ().build_function_type (return_type,
 						   &array, is_varargs);
@@ -194,17 +194,17 @@ convert_int (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
     {
-      if (TYPE_NOSIGN (type))
+      if (type->has_no_signedness ())
 	{
 	  gdb_assert (TYPE_LENGTH (type) == 1);
 	  return context->plugin ().char_type ();
 	}
-      return context->plugin ().int_type (TYPE_UNSIGNED (type),
+      return context->plugin ().int_type (type->is_unsigned (),
 					  TYPE_LENGTH (type),
 					  type->name ());
     }
   else
-    return context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
+    return context->plugin ().int_type_v0 (type->is_unsigned (),
 					   TYPE_LENGTH (type));
 }
 

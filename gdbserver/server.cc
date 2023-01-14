@@ -48,6 +48,7 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb_select.h"
+#include "gdbsupport/scoped_restore.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -1678,19 +1679,54 @@ handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
   buffer_xml_printf (buffer, "/>\n");
 }
 
-/* Helper for handle_qxfer_threads.  */
+/* Helper for handle_qxfer_threads.  Return true on success, false
+   otherwise.  */
 
-static void
+static bool
 handle_qxfer_threads_proper (struct buffer *buffer)
 {
+  client_state &cs = get_client_state ();
+
+  scoped_restore save_current_thread
+    = make_scoped_restore (&current_thread);
+  scoped_restore save_current_general_thread
+    = make_scoped_restore (&cs.general_thread);
+
   buffer_grow_str (buffer, "<threads>\n");
 
-  for_each_thread ([&] (thread_info *thread)
+  process_info *error_proc = find_process ([&] (process_info *process)
     {
-      handle_qxfer_threads_worker (thread, buffer);
+      /* The target may need to access memory and registers (e.g. via
+	 libthread_db) to fetch thread properties.  Prepare for memory
+	 access here, so that we potentially pause threads just once
+	 for all accesses.  Note that even if someday we stop needing
+	 to pause threads to access memory, we will need to be able to
+	 access registers, or other ptrace accesses like
+	 PTRACE_GET_THREAD_AREA.  */
+
+      /* Need to switch to each process in turn, because
+	 prepare_to_access_memory prepares for an access in the
+	 current process pointed to by general_thread.  */
+      switch_to_process (process);
+      cs.general_thread = current_thread->id;
+
+      int res = prepare_to_access_memory ();
+      if (res == 0)
+	{
+	  for_each_thread (process->pid, [&] (thread_info *thread)
+	    {
+	      handle_qxfer_threads_worker (thread, buffer);
+	    });
+
+	  done_accessing_memory ();
+	  return false;
+	}
+      else
+	return true;
     });
 
   buffer_grow_str0 (buffer, "</threads>\n");
+  return error_proc == nullptr;
 }
 
 /* Handle qXfer:threads:read.  */
@@ -1719,11 +1755,14 @@ handle_qxfer_threads (const char *annex,
 
       buffer_init (&buffer);
 
-      handle_qxfer_threads_proper (&buffer);
+      bool res = handle_qxfer_threads_proper (&buffer);
 
       result = buffer_finish (&buffer);
       result_length = strlen (result);
       buffer_free (&buffer);
+
+      if (!res)
+	return -1;
     }
 
   if (offset >= result_length)
@@ -2269,10 +2308,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 ';'.  */
       if (*p == ':')
 	{
-	  char **qsupported = NULL;
-	  int count = 0;
-	  int unknown = 0;
-	  int i;
+	  std::vector<std::string> qsupported;
+	  std::vector<const char *> unknowns;
 
 	  /* Two passes, to avoid nested strtok calls in
 	     target_process_qsupported.  */
@@ -2280,28 +2317,23 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  for (p = strtok_r (p + 1, ";", &saveptr);
 	       p != NULL;
 	       p = strtok_r (NULL, ";", &saveptr))
-	    {
-	      count++;
-	      qsupported = XRESIZEVEC (char *, qsupported, count);
-	      qsupported[count - 1] = xstrdup (p);
-	    }
+	    qsupported.emplace_back (p);
 
-	  for (i = 0; i < count; i++)
+	  for (const std::string &feature : qsupported)
 	    {
-	      p = qsupported[i];
-	      if (strcmp (p, "multiprocess+") == 0)
+	      if (feature == "multiprocess+")
 		{
 		  /* GDB supports and wants multi-process support if
 		     possible.  */
 		  if (target_supports_multi_process ())
 		    cs.multi_process = 1;
 		}
-	      else if (strcmp (p, "qRelocInsn+") == 0)
+	      else if (feature == "qRelocInsn+")
 		{
 		  /* GDB supports relocate instruction requests.  */
 		  gdb_supports_qRelocInsn = 1;
 		}
-	      else if (strcmp (p, "swbreak+") == 0)
+	      else if (feature == "swbreak+")
 		{
 		  /* GDB wants us to report whether a trap is caused
 		     by a software breakpoint and for us to handle PC
@@ -2309,36 +2341,36 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_stopped_by_sw_breakpoint ())
 		    cs.swbreak_feature = 1;
 		}
-	      else if (strcmp (p, "hwbreak+") == 0)
+	      else if (feature == "hwbreak+")
 		{
 		  /* GDB wants us to report whether a trap is caused
 		     by a hardware breakpoint.  */
 		  if (target_supports_stopped_by_hw_breakpoint ())
 		    cs.hwbreak_feature = 1;
 		}
-	      else if (strcmp (p, "fork-events+") == 0)
+	      else if (feature == "fork-events+")
 		{
 		  /* GDB supports and wants fork events if possible.  */
 		  if (target_supports_fork_events ())
 		    cs.report_fork_events = 1;
 		}
-	      else if (strcmp (p, "vfork-events+") == 0)
+	      else if (feature == "vfork-events+")
 		{
 		  /* GDB supports and wants vfork events if possible.  */
 		  if (target_supports_vfork_events ())
 		    cs.report_vfork_events = 1;
 		}
-	      else if (strcmp (p, "exec-events+") == 0)
+	      else if (feature == "exec-events+")
 		{
 		  /* GDB supports and wants exec events if possible.  */
 		  if (target_supports_exec_events ())
 		    cs.report_exec_events = 1;
 		}
-	      else if (strcmp (p, "vContSupported+") == 0)
+	      else if (feature == "vContSupported+")
 		cs.vCont_supported = 1;
-	      else if (strcmp (p, "QThreadEvents+") == 0)
+	      else if (feature == "QThreadEvents+")
 		;
-	      else if (strcmp (p, "no-resumed+") == 0)
+	      else if (feature == "no-resumed+")
 		{
 		  /* GDB supports and wants TARGET_WAITKIND_NO_RESUMED
 		     events.  */
@@ -2347,19 +2379,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	      else
 		{
 		  /* Move the unknown features all together.  */
-		  qsupported[i] = NULL;
-		  qsupported[unknown] = p;
-		  unknown++;
+		  unknowns.push_back (feature.c_str ());
 		}
 	    }
 
 	  /* Give the target backend a chance to process the unknown
 	     features.  */
-	  target_process_qsupported (qsupported, unknown);
-
-	  for (i = 0; i < count; i++)
-	    free (qsupported[i]);
-	  free (qsupported);
+	  target_process_qsupported (unknowns);
 	}
 
       sprintf (own_buf,
@@ -3584,7 +3610,7 @@ captured_main (int argc, char *argv[])
   int was_running;
   bool selftest = false;
 #if GDB_SELF_TEST
-  const char *selftest_filter = NULL;
+  std::vector<const char *> selftest_filters;
 #endif
 
   current_directory = getcwd (NULL, 0);
@@ -3721,8 +3747,16 @@ captured_main (int argc, char *argv[])
       else if (startswith (*next_arg, "--selftest="))
 	{
 	  selftest = true;
+
 #if GDB_SELF_TEST
-	  selftest_filter = *next_arg + strlen ("--selftest=");
+	  const char *filter = *next_arg + strlen ("--selftest=");
+	  if (*filter == '\0')
+	    {
+	      fprintf (stderr, _("Error: selftest filter is empty.\n"));
+	      exit (1);
+	    }
+
+	  selftest_filters.push_back (filter);
 #endif
 	}
       else
@@ -3799,7 +3833,7 @@ captured_main (int argc, char *argv[])
   if (selftest)
     {
 #if GDB_SELF_TEST
-      selftests::run_tests (selftest_filter);
+      selftests::run_tests (selftest_filters);
 #else
       printf (_("Selftests have been disabled for this build.\n"));
 #endif

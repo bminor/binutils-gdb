@@ -569,6 +569,24 @@ Note that this option is specific to ELF targeted ports.  PE targets
 support a similar function to export all symbols from a DLL or EXE; see
 the description of @samp{--export-all-symbols} below.
 
+@kindex --export-dynamic-symbol=@var{glob}
+@cindex export dynamic symbol
+@item --export-dynamic-symbol=@var{glob}
+When creating a dynamically linked executable, symbols matching
+@var{glob} will be added to the dynamic symbol table. When creating a
+shared library, references to symbols matching @var{glob} will not be
+bound to the definitions within the shared library. This option is a
+no-op when creating a shared library and @samp{-Bsymbolic} or
+@samp{--dynamic-list} are not specified. This option is only meaningful
+on ELF platforms which support shared libraries.
+
+@kindex --export-dynamic-symbol-list=@var{file}
+@cindex export dynamic symbol list
+@item --export-dynamic-symbol-list=@var{file}
+Specify a @samp{--export-dynamic-symbol} for each pattern in the file.
+The format of the file is the same as the version node without
+scope and node name.  See @ref{VERSION} for more information.
+
 @ifclear SingleFormat
 @cindex big-endian objects
 @cindex endianness
@@ -874,6 +892,21 @@ shared libraries.  Use @option{-Bdynamic} for this.
 Use @var{output} as the name for the program produced by @command{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
+
+@kindex --dependency-file=@var{depfile}
+@cindex dependency file
+@item --dependency-file=@var{depfile}
+Write a @dfn{dependency file} to @var{depfile}.  This file contains a rule
+suitable for @code{make} describing the output file and all the input files
+that were read to produce it.  The output is similar to the compiler's
+output with @samp{-M -MP} (@pxref{Preprocessor Options,, Options
+Controlling the Preprocessor, gcc.info, Using the GNU Compiler
+Collection}).  Note that there is no option like the compiler's @samp{-MM},
+to exclude ``system files'' (which is not a well-specified concept in the
+linker, unlike ``system headers'' in the compiler).  So the output from
+@samp{--dependency-file} is always specific to the exact state of the
+installation where it was produced, and should not be copied into
+distributed makefiles without careful editing.
 
 @kindex -O @var{level}
 @cindex generating optimized output
@@ -1345,6 +1378,12 @@ specifies a memory segment that should contain only instructions and must
 be in wholly disjoint pages from any other data.  Don't create separate
 code @code{PT_LOAD} segment if @samp{noseparate-code} is used.
 
+@item unique-symbol
+@itemx nounique-symbol
+Avoid duplicated local symbol names in the symbol string table.  Append
+".@code{number}" to duplicated local symbol names if @samp{unique-symbol}
+is used.  @option{nounique-symbol} is the default.
+
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
 to indicate compatibility with Intel Shadow Stack.  Supported for
@@ -1354,6 +1393,19 @@ Linux/i386 and Linux/x86_64.
 Specify a stack size for an ELF @code{PT_GNU_STACK} segment.
 Specifying zero will override any default non-zero sized
 @code{PT_GNU_STACK} segment creation.
+
+@item start-stop-visibility=@var{value}
+@cindex visibility
+@cindex ELF symbol visibility
+Specify the ELF symbol visibility for synthesized
+@code{__start_SECNAME} and @code{__stop_SECNAME} symbols (@pxref{Input
+Section Example}).  @var{value} must be exactly @samp{default},
+@samp{internal}, @samp{hidden}, or @samp{protected}.  If no @samp{-z
+start-stop-visibility} option is given, @samp{protected} is used for
+compatibility with historical practice.  However, it's highly
+recommended to use @samp{-z start-stop-visibility=hidden} in new
+programs and shared libraries so that these symbols are not exported
+between shared objects, which is not usually what's intended.
 
 @item text
 @itemx notext
@@ -1566,6 +1618,40 @@ definition.  If the symbol is defined as a common value then any files
 where this happens appear next.  Finally any files that reference the
 symbol are listed.
 
+@cindex ctf variables
+@kindex --ctf-variables
+@kindex --no-ctf-variables
+@item --ctf-variables
+@item --no-ctf-variables
+The CTF debuginfo format supports a section which encodes the names and
+types of variables found in the program which do not appear in any symbol
+table. These variables clearly cannot be looked up by address by
+conventional debuggers, so the space used for their types and names is
+usually wasted: the types are usually small but the names are often not.
+@option{--ctf-variables} causes the generation of such a section.
+The default behaviour can be restored with @option{--no-ctf-variables}.
+
+@cindex ctf type sharing
+@kindex --ctf-share-types
+@item --ctf-share-types=@var{method}
+Adjust the method used to share types between translation units in CTF.
+
+@table @samp
+@item share-unconflicted
+Put all types that do not have ambiguous definitions into the shared dictionary,
+where debuggers can easily access them, even if they only occur in one
+translation unit.  This is the default.
+
+@item share-duplicated
+Put only types that occur in multiple translation units into the shared
+dictionary: types with only one definition go into per-translation-unit
+dictionaries.  Types with ambiguous definitions in multiple translation units
+always go into per-translation-unit dictionaries.  This tends to make the CTF
+larger, but may reduce the amount of CTF in the shared dictionary.  For very
+large projects this may speed up opening the CTF and save memory in the CTF
+consumer at runtime.
+@end table
+
 @cindex common allocation
 @kindex --no-define-common
 @item --no-define-common
@@ -1760,7 +1846,10 @@ Print a summary of all target-specific options on the standard output and exit.
 @kindex -Map=@var{mapfile}
 @item -Map=@var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
-@option{-M} option, above.
+@option{-M} option, above.  Specifying a directory as @var{mapfile}
+causes the linker map to be written into a file inside the directory.
+The name of the file is based upon the @var{output} filename with
+@code{.map} appended.
 
 @cindex memory usage
 @kindex --no-keep-memory
@@ -1947,7 +2036,7 @@ This option is only supported on a few targets.
 @xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
 @end ifset
 
-On some platforms the @samp{--relax} option performs target-specific,
+On some platforms the @option{--relax} option performs target specific,
 global optimizations that become possible when the linker resolves
 addressing in the program, such as relaxing address modes,
 synthesizing new instructions, selecting shorter version of current
@@ -1960,14 +2049,12 @@ This is known to be the case for the Matsushita MN10200 and MN10300
 family of processors.
 @end ifset
 
-@ifset GENERIC
-On platforms where this is not supported, @samp{--relax} is accepted,
-but ignored.
-@end ifset
+On platforms where the feature is supported, the option
+@option{--no-relax} will disable it.
 
-On platforms where @samp{--relax} is accepted the option
-@samp{--no-relax} can be used to disable the feature.
-
+On platforms where the feature is not supported, both @option{--relax}
+and @option{--no-relax} are accepted, but ignored.
+ 
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
@@ -3048,47 +3135,63 @@ of the PE file header:
 
 @kindex --high-entropy-va
 @item --high-entropy-va
+@itemx --disable-high-entropy-va
 Image is compatible with 64-bit address space layout randomization
-(ASLR).
+(ASLR).  This option is enabled by default for 64-bit PE images.
+
 This option also implies @option{--dynamicbase} and
 @option{--enable-reloc-section}.
 
 @kindex --dynamicbase
 @item --dynamicbase
+@itemx --disable-dynamicbase
 The image base address may be relocated using address space layout
 randomization (ASLR).  This feature was introduced with MS Windows
-Vista for i386 PE targets.
+Vista for i386 PE targets.  This option is enabled by default but
+can be disabled via the @option{--disable-dynamicbase} option.
 This option also implies @option{--enable-reloc-section}.
 
 @kindex --forceinteg
 @item --forceinteg
-Code integrity checks are enforced.
+@itemx --disable-forceinteg
+Code integrity checks are enforced.  This option is disabled by
+default.
 
 @kindex --nxcompat
 @item --nxcompat
+@item --disable-nxcompat
 The image is compatible with the Data Execution Prevention.
-This feature was introduced with MS Windows XP SP2 for i386 PE targets.
+This feature was introduced with MS Windows XP SP2 for i386 PE
+targets.  The option is enabled by default.
 
 @kindex --no-isolation
 @item --no-isolation
+@itemx --disable-no-isolation
 Although the image understands isolation, do not isolate the image.
+This option is disabled by default.
 
 @kindex --no-seh
 @item --no-seh
+@itemx --disable-no-seh
 The image does not use SEH. No SE handler may be called from
-this image.
+this image.  This option is disabled by default.
 
 @kindex --no-bind
 @item --no-bind
-Do not bind this image.
+@itemx --disable-no-bind
+Do not bind this image.  This option is disabled by default.
 
 @kindex --wdmdriver
 @item --wdmdriver
-The driver uses the MS Windows Driver Model.
+@itemx --disable-wdmdriver
+The driver uses the MS Windows Driver Model.  This option is disabled
+by default.
 
 @kindex --tsaware
 @item --tsaware
-The image is Terminal Server aware.
+@itemx --disable-tsaware
+The image is Terminal Server aware.  This option is disabled by
+default.
 
 @kindex --insert-timestamp
 @item --insert-timestamp
@@ -3104,8 +3207,10 @@ identically.
 
 @kindex --enable-reloc-section
 @item --enable-reloc-section
+@itemx --disable-reloc-section
 Create the base relocation table, which is necessary if the image
 is loaded at a different image base than specified in the PE header.
+This option is enabled by default.
 @end table
 
 @c man end
@@ -7774,6 +7879,16 @@ reliably for compiler generated code, but may be incorrect if assembly
 code is used to insert TOC entries.  Use this option to disable the
 optimization.
 
+@cindex PowerPC64 inline PLT call optimization
+@kindex --no-inline-optimize
+@item --no-inline-optimize
+PowerPC64 @command{ld} normally replaces inline PLT call sequences
+marked with @code{R_PPC64_PLTSEQ}, @code{R_PPC64_PLTCALL},
+@code{R_PPC64_PLT16_HA} and @code{R_PPC64_PLT16_LO_DS} relocations by
+a number of @code{nop}s and a direct call when the function is defined
+locally and can't be overridden by some other definition.  This option
+disables that optimization.
+
 @cindex PowerPC64 multi-TOC
 @kindex --no-multi-toc
 @item --no-multi-toc
@@ -7855,6 +7970,21 @@ including system libraries, can cause a function that was localentry:0
 to become localentry:8.  This will result in a dynamic loader
 complaint and failure to run.  The option is experimental, use with
 care.  @option{--no-plt-localentry} is the default.
+
+@cindex PowerPC64 Power10 stubs
+@kindex --power10-stubs
+@kindex --no-power10-stubs
+@item --power10-stubs
+@itemx --no-power10-stubs
+When PowerPC64 @command{ld} links input object files containing
+relocations used on power10 prefixed instructions it normally creates
+linkage stubs (PLT call and long branch) using power10 instructions
+for @code{@@notoc} PLT calls where @code{r2} is not known.  The
+power10 notoc stubs are smaller and faster, so are preferred for
+power10.  @option{--power10-stubs} and @option{--no-power10-stubs}
+allow you to override the linker's selection of stub instructions.
+@option{--power10-stubs=auto} allows the user to select the default
+auto mode.
 @end table
 
 @ifclear GENERIC
@@ -8531,6 +8661,17 @@ more than performance.  With this option, the linker will not insert
 no-ops or widen density instructions to preserve branch target
 alignment.  There may still be some cases where no-ops are required to
 preserve the correctness of the code.
+
+@item --abi-windowed
+@itemx --abi-call0
+Choose ABI for the output object and for the generated PLT code.
+PLT code inserted by the linker must match ABI of the output object
+because windowed and call0 ABI use incompatible function call
+conventions.
+Default ABI is chosen by the ABI tag in the @code{.xtensa.info} section
+of the first input object.
+A warning is issued if ABI tags of input objects do not match each other
+or the chosen output object ABI.
 @end table
 
 @ifclear GENERIC

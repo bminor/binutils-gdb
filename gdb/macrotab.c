@@ -882,25 +882,19 @@ macro_undef (struct macro_source_file *source, int line,
 static struct macro_definition *
 fixup_definition (const char *filename, int line, struct macro_definition *def)
 {
-  static char *saved_expansion;
-
-  if (saved_expansion)
-    {
-      xfree (saved_expansion);
-      saved_expansion = NULL;
-    }
+  static gdb::unique_xmalloc_ptr<char> saved_expansion;
 
   if (def->kind == macro_object_like)
     {
       if (def->argc == macro_FILE)
 	{
 	  saved_expansion = macro_stringify (filename);
-	  def->replacement = saved_expansion;
+	  def->replacement = saved_expansion.get ();
 	}
       else if (def->argc == macro_LINE)
 	{
-	  saved_expansion = xstrprintf ("%d", line);
-	  def->replacement = saved_expansion;
+	  saved_expansion.reset (xstrprintf ("%d", line));
+	  def->replacement = saved_expansion.get ();
 	}
     }
 

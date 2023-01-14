@@ -53,6 +53,8 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
+ arm*-*-symbianelf* | \
+ ia64*-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -141,6 +143,7 @@ case $targ in
  mips*-sgi-* | \
  mips*el-*-rtems* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
+ powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
  sparc*-*-*aout* | \
  sparc*-*-chorus* | \
@@ -151,6 +154,7 @@ case $targ in
  vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
  w65-*-* | \
  we32k-*-* | \
+ xc16x-*-* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -338,15 +342,11 @@ case "${targ}" in
     ;;
   arm-*-nacl*)
     targ_defvec=arm_elf32_nacl_le_vec
-    targ_selvecs="arm_elf32_nacl_be_vec i386_elf32_nacl_vec"
-    targ64_selvecs="x86_64_elf32_nacl_vec x86_64_elf64_nacl_vec"
-    targ_archs="$targ_archs bfd_i386_arch"
+    targ_selvecs="arm_elf32_nacl_be_vec"
     ;;
   armeb-*-nacl*)
     targ_defvec=arm_elf32_nacl_be_vec
-    targ_selvecs="arm_elf32_nacl_le_vec i386_elf32_nacl_vec"
-    targ64_selvecs="x86_64_elf32_nacl_vec x86_64_elf64_nacl_vec"
-    targ_archs="$targ_archs bfd_i386_arch"
+    targ_selvecs="arm_elf32_nacl_le_vec"
     ;;
   armeb-*-netbsdelf*)
     targ_defvec=arm_elf32_be_vec
@@ -413,9 +413,6 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  c30-*-*aout* | tic30-*-*aout*)
-    targ_defvec=tic30_aout_vec
-    ;;
   c30-*-*coff* | tic30-*-*coff*)
     targ_defvec=tic30_coff_vec
     ;;
@@ -637,12 +634,6 @@ case "${targ}" in
     targ_selvecs="iamcu_elf32_vec i386_pei_vec"
     targ64_selvecs="x86_64_elf64_vec x86_64_elf32_vec x86_64_pei_vec l1om_elf64_vec k1om_elf64_vec"
     ;;
-  i[3-7]86-*-nacl*)
-    targ_defvec=i386_elf32_nacl_vec
-    targ_selvecs="arm_elf32_nacl_be_vec arm_elf32_nacl_le_vec"
-    targ64_selvecs="x86_64_elf64_nacl_vec x86_64_elf32_nacl_vec"
-    targ_archs="$targ_archs bfd_arm_arch"
-    ;;
   i[3-7]86-*-redox*)
     targ_defvec=i386_elf32_vec
     targ_selvecs=
@@ -691,12 +682,6 @@ case "${targ}" in
   x86_64-*-linux-*)
     targ_defvec=x86_64_elf64_vec
     targ_selvecs="i386_elf32_vec iamcu_elf32_vec x86_64_elf32_vec i386_pei_vec x86_64_pei_vec l1om_elf64_vec k1om_elf64_vec"
-    want64=true
-    ;;
-  x86_64-*-nacl*)
-    targ_defvec=x86_64_elf32_nacl_vec
-    targ_selvecs="i386_elf32_nacl_vec x86_64_elf64_nacl_vec arm_elf32_nacl_be_vec arm_elf32_nacl_le_vec"
-    targ_archs="$targ_archs bfd_arm_arch"
     want64=true
     ;;
   x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep | x86_64-*-cygwin)
@@ -1162,10 +1147,6 @@ case "${targ}" in
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_vec powerpc_boot_vec"
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec"
     ;;
-  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
-    targ_defvec=powerpc_pe_le_vec
-    targ_selvecs="powerpc_pei_le_vec powerpc_pei_vec powerpc_pe_le_vec powerpc_pe_vec"
-    ;;
 
   pru-*-*)
     targ_defvec=pru_elf32_vec
@@ -1387,6 +1368,10 @@ case "${targ}" in
     targ_selvecs="wasm_vec"
     ;;
 
+  xc16x-*-elf)
+    targ_defvec=xc16x_elf32_vec
+    ;;
+
   xgate-*-*)
     targ_defvec=xgate_elf32_vec
     targ_selvecs="xgate_elf32_vec"
@@ -1399,9 +1384,6 @@ case "${targ}" in
   xtensa*-*-*)
     targ_defvec=xtensa_elf32_le_vec
     targ_selvecs=xtensa_elf32_be_vec
-    ;;
- xc16x-*-elf)
-    targ_defvec=xc16x_elf32_vec
     ;;
 
   z80-*-coff)

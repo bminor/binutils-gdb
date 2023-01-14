@@ -56,7 +56,7 @@ test_abbrev_alias set6 "alias -a -- set6 = set" 46
 test_abbrev_alias -a "alias -a -- -a = set" 47
 
 gdb_test "alias set2=set" "already exists: set2"
-gdb_test "alias foo=bar" "Invalid command to alias to: bar"
+gdb_test "alias foo=bar" "Undefined command: \"bar\".  Try \"help\"."
 
 gdb_test_no_output "alias spe = set p elem"
 gdb_test_no_output "spe 50"

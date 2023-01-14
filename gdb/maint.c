@@ -245,37 +245,16 @@ maint_print_section_info (const char *name, flagword flags,
   printf_filtered ("\n");
 }
 
-/* Information passed between the "maintenance info sections" command, and
-   the worker function that prints each section.  */
-struct maint_print_section_data
+/* Return the number of digits required to display COUNT in decimal.
+
+   Used when pretty printing index numbers to ensure all of the indexes line
+   up.*/
+
+static int
+index_digits (int count)
 {
-  /* The GDB objfile we're printing this section for.  */
-  struct objfile *objfile;
-
-  /* The argument string passed by the user to the top level maintenance
-     info sections command.  Used for filtering which sections are
-     printed.  */
-  const char *arg;
-
-  /* The number of digits in the highest section index for all sections
-     from the bfd object associated with OBJFILE.  Used when pretty
-     printing the index number to ensure all of the indexes line up.  */
-  int index_digits;
-
-  /* Constructor.  */
-  maint_print_section_data (struct objfile *objfile, const char *arg,
-			    bfd *abfd)
-    : objfile (objfile),
-      arg(arg)
-  {
-    int section_count = gdb_bfd_count_sections (abfd);
-    index_digits = ((int) log10 ((float) section_count)) + 1;
-  }
-
-private:
-  maint_print_section_data () = delete;
-  maint_print_section_data (const maint_print_section_data &) = delete;
-};
+  return ((int) log10 ((float) count)) + 1;
+}
 
 /* Helper function to pretty-print the section index of ASECT from ABFD.
    The INDEX_DIGITS is the number of digits in the largest index that will
@@ -292,21 +271,20 @@ print_section_index (bfd *abfd,
   printf_filtered ("%-*s", (index_digits + 4), result.c_str ());
 }
 
-/* Print information about ASECT from ABFD.  DATUM holds a pointer to a
-   maint_print_section_data object.  The section will be printed using the
-   VMA's from the bfd, which will not be the relocated addresses for bfds
-   that should be relocated.  The information must be printed with the
-   same layout as PRINT_OBJFILE_SECTION_INFO below.  */
+/* Print information about ASECT from ABFD.  The section will be printed using
+   the VMA's from the bfd, which will not be the relocated addresses for bfds
+   that should be relocated.  The information must be printed with the same
+   layout as PRINT_OBJFILE_SECTION_INFO below.
+
+   ARG is the argument string passed by the user to the top level maintenance
+   info sections command.  Used for filtering which sections are printed.  */
 
 static void
-print_bfd_section_info (bfd *abfd,
-			asection *asect,
-			void *datum)
+print_bfd_section_info (bfd *abfd, asection *asect, const char *arg,
+			int index_digits)
 {
   flagword flags = bfd_section_flags (asect);
   const char *name = bfd_section_name (asect);
-  maint_print_section_data *print_data = (maint_print_section_data *) datum;
-  const char *arg = print_data->arg;
 
   if (arg == NULL || *arg == '\0'
       || match_substring (arg, name)
@@ -318,7 +296,7 @@ print_bfd_section_info (bfd *abfd,
 
       addr = bfd_section_vma (asect);
       endaddr = addr + bfd_section_size (asect);
-      print_section_index (abfd, asect, print_data->index_digits);
+      print_section_index (abfd, asect, index_digits);
       maint_print_section_info (name, flags, addr, endaddr,
 				asect->filepos, addr_size);
     }
@@ -327,26 +305,26 @@ print_bfd_section_info (bfd *abfd,
 /* Print information about ASECT which is GDB's wrapper around a section
    from ABFD.  The information must be printed with the same layout as
    PRINT_BFD_SECTION_INFO above.  PRINT_DATA holds information used to
-   filter which sections are printed, and for formatting the output.  */
+   filter which sections are printed, and for formatting the output.
+
+   ARG is the argument string passed by the user to the top level maintenance
+   info sections command.  Used for filtering which sections are printed.  */
 
 static void
-print_objfile_section_info (bfd *abfd,
-			    struct obj_section *asect,
-			    maint_print_section_data *print_data)
+print_objfile_section_info (bfd *abfd, struct obj_section *asect,
+			    const char *arg, int index_digits)
 {
   flagword flags = bfd_section_flags (asect->the_bfd_section);
   const char *name = bfd_section_name (asect->the_bfd_section);
-  const char *string = print_data->arg;
 
-  if (string == NULL || *string == '\0'
-      || match_substring (string, name)
-      || match_bfd_flags (string, flags))
+  if (arg == NULL || *arg == '\0'
+      || match_substring (arg, name)
+      || match_bfd_flags (arg, flags))
     {
       struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
       int addr_size = gdbarch_addr_bit (gdbarch) / 8;
 
-      print_section_index (abfd, asect->the_bfd_section,
-			   print_data->index_digits);
+      print_section_index (abfd, asect->the_bfd_section, index_digits);
       maint_print_section_info (name, flags,
 				obj_section_addr (asect),
 				obj_section_endaddr (asect),
@@ -376,26 +354,25 @@ maint_obj_section_from_bfd_section (bfd *abfd,
   return osect;
 }
 
-/* Print information about ASECT from ABFD.  DATUM holds a pointer to a
-   maint_print_section_data object.  Where possible the information for
-   ASECT will print the relocated addresses of the section.  */
+/* Print information about ASECT from ABFD.  Where possible the information for
+   ASECT will print the relocated addresses of the section.
+
+   ARG is the argument string passed by the user to the top level maintenance
+   info sections command.  Used for filtering which sections are printed.  */
 
 static void
-print_bfd_section_info_maybe_relocated (bfd *abfd,
-					asection *asect,
-					void *datum)
+print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
+					objfile *objfile, const char *arg,
+					int index_digits)
 {
-  maint_print_section_data *print_data = (maint_print_section_data *) datum;
-  objfile *objfile = print_data->objfile;
-
   gdb_assert (objfile->sections != NULL);
   obj_section *osect
     = maint_obj_section_from_bfd_section (abfd, asect, objfile);
 
   if (osect->the_bfd_section == NULL)
-    print_bfd_section_info (abfd, asect, datum);
+    print_bfd_section_info (abfd, asect, arg, index_digits);
   else
-    print_objfile_section_info (abfd, osect, print_data);
+    print_objfile_section_info (abfd, osect, arg, index_digits);
 }
 
 /* Implement the "maintenance info sections" command.  */
@@ -430,24 +407,26 @@ maintenance_info_sections (const char *arg, int from_tty)
 	  else if (ofile->obfd != exec_bfd)
 	    continue;
 
-	  maint_print_section_data print_data (ofile, arg, ofile->obfd);
+	  int section_count = gdb_bfd_count_sections (ofile->obfd);
 
-	  bfd_map_over_sections (ofile->obfd,
-				 print_bfd_section_info_maybe_relocated,
-				 (void *) &print_data);
+	  for (asection *sect : gdb_bfd_sections (ofile->obfd))
+	    print_bfd_section_info_maybe_relocated
+	      (ofile->obfd, sect, ofile, arg, index_digits (section_count));
 	}
     }
 
   if (core_bfd)
     {
-      maint_print_section_data print_data (nullptr, arg, core_bfd);
-
       printf_filtered (_("Core file:\n"));
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
       printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
-      bfd_map_over_sections (core_bfd, print_bfd_section_info,
-			     (void *) &print_data);
+
+      int section_count = gdb_bfd_count_sections (core_bfd);
+
+      for (asection *sect : gdb_bfd_sections (core_bfd))
+	print_bfd_section_info (core_bfd, sect, arg,
+				index_digits (section_count));
     }
 }
 
@@ -1041,7 +1020,8 @@ static void
 maintenance_selftest (const char *args, int from_tty)
 {
 #if GDB_SELF_TEST
-  selftests::run_tests (args);
+  gdb_argv argv (args);
+  selftests::run_tests (argv.as_array_view ());
 #else
   printf_filtered (_("\
 Selftests have been disabled for this build.\n"));

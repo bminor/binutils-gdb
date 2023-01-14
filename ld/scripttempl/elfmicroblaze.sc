@@ -136,6 +136,7 @@ SECTIONS
   ${RELOCATING+ _fdata = .;}
   .data : {
     *(.data)
+    ${RELOCATING+*(.data.*)}
     ${RELOCATING+*(.gnu.linkonce.d.*)}
     ${CONSTRUCTING+CONSTRUCTORS;} /* Is this needed? */
   }

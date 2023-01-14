@@ -30,7 +30,7 @@
 
 #ifdef	__cplusplus
 extern "C"
-  {
+{
 #endif
 
 /* Clients can open one or more CTF containers and obtain a pointer to an
@@ -78,13 +78,23 @@ typedef struct ctf_link_sym
   uint32_t st_value;
 } ctf_link_sym_t;
 
-/* Indication of how to share types when linking.  */
+/* Flags applying to this specific link.  */
 
-/* Share all types thare are not in conflict.  The default.  */
+/* Share all types that are not in conflict.  The default.  */
 #define CTF_LINK_SHARE_UNCONFLICTED 0x0
 
-/* Share only types that are used by multiple inputs.  Not implemented yet.  */
+/* Share only types that are used by multiple inputs.  */
 #define CTF_LINK_SHARE_DUPLICATED 0x1
+
+/* Do a nondeduplicating link.  */
+#define CTF_LINK_NONDEDUP 0x2
+
+/* Create empty outputs for all registered CU mappings even if no types are
+   emitted into them.  */
+#define CTF_LINK_EMPTY_CU_MAPPINGS 0x4
+
+/* Omit the content of the variables section.  */
+#define CTF_LINK_OMIT_VARIABLES_SECTION 0x8
 
 /* Symbolic names for CTF sections.  */
 
@@ -153,59 +163,66 @@ typedef struct ctf_snapshot_id
 
 enum
   {
-   ECTF_FMT = ECTF_BASE,	/* File is not in CTF or ELF format.  */
-   ECTF_BFDERR,			/* BFD error.  */
-   ECTF_CTFVERS,		/* CTF version is more recent than libctf.  */
-   ECTF_BFD_AMBIGUOUS,		/* Ambiguous BFD target.  */
-   ECTF_SYMTAB,			/* Symbol table uses invalid entry size.  */
-   ECTF_SYMBAD,			/* Symbol table data buffer invalid.  */
-   ECTF_STRBAD,			/* String table data buffer invalid.  */
-   ECTF_CORRUPT,		/* File data corruption detected.  */
-   ECTF_NOCTFDATA,		/* ELF file does not contain CTF data.  */
-   ECTF_NOCTFBUF,		/* Buffer does not contain CTF data.  */
-   ECTF_NOSYMTAB,		/* Symbol table data is not available.  */
-   ECTF_NOPARENT,		/* Parent CTF container is not available.  */
-   ECTF_DMODEL,			/* Data model mismatch.  */
-   ECTF_LINKADDEDLATE,		/* File added to link too late.  */
-   ECTF_ZALLOC,			/* Failed to allocate (de)compression buffer.  */
-   ECTF_DECOMPRESS,		/* Failed to decompress CTF data.  */
-   ECTF_STRTAB,			/* String table for this string is missing.  */
-   ECTF_BADNAME,		/* String offset is corrupt w.r.t. strtab.  */
-   ECTF_BADID,			/* Invalid type ID number.  */
-   ECTF_NOTSOU,			/* Type is not a struct or union.  */
-   ECTF_NOTENUM,		/* Type is not an enum.  */
-   ECTF_NOTSUE,			/* Type is not a struct, union, or enum.  */
-   ECTF_NOTINTFP,		/* Type is not an integer, float, or enum.  */
-   ECTF_NOTARRAY,		/* Type is not an array.  */
-   ECTF_NOTREF,			/* Type does not reference another type.  */
-   ECTF_NAMELEN,		/* Buffer is too small to hold type name.  */
-   ECTF_NOTYPE,			/* No type found corresponding to name.  */
-   ECTF_SYNTAX,			/* Syntax error in type name.  */
-   ECTF_NOTFUNC,		/* Symbol entry or type is not a function.  */
-   ECTF_NOFUNCDAT,		/* No func info available for function.  */
-   ECTF_NOTDATA,		/* Symtab entry does not refer to a data obj.  */
-   ECTF_NOTYPEDAT,		/* No type info available for object.  */
-   ECTF_NOLABEL,		/* No label found corresponding to name.  */
-   ECTF_NOLABELDATA,		/* File does not contain any labels.  */
-   ECTF_NOTSUP,			/* Feature not supported.  */
-   ECTF_NOENUMNAM,		/* Enum element name not found.  */
-   ECTF_NOMEMBNAM,		/* Member name not found.  */
-   ECTF_RDONLY,			/* CTF container is read-only.  */
-   ECTF_DTFULL,			/* CTF type is full (no more members allowed).  */
-   ECTF_FULL,			/* CTF container is full.  */
-   ECTF_DUPLICATE,		/* Duplicate member or variable name.  */
-   ECTF_CONFLICT,		/* Conflicting type definition present.  */
-   ECTF_OVERROLLBACK,		/* Attempt to roll back past a ctf_update.  */
-   ECTF_COMPRESS,		/* Failed to compress CTF data.  */
-   ECTF_ARCREATE,		/* Error creating CTF archive.  */
-   ECTF_ARNNAME,		/* Name not found in CTF archive.  */
-   ECTF_SLICEOVERFLOW,		/* Overflow of type bitness or offset in slice.  */
-   ECTF_DUMPSECTUNKNOWN,	/* Unknown section number in dump.  */
-   ECTF_DUMPSECTCHANGED,	/* Section changed in middle of dump.  */
-   ECTF_NOTYET,			/* Feature not yet implemented.  */
-   ECTF_INTERNAL,		/* Internal error in link.  */
-   ECTF_NONREPRESENTABLE	/* Type not representable in CTF.  */
+   ECTF_FMT = ECTF_BASE, /* File is not in CTF or ELF format.  */
+   ECTF_BFDERR,		/* BFD error.  */
+   ECTF_CTFVERS,	/* CTF dict version is too new for libctf.  */
+   ECTF_BFD_AMBIGUOUS,	/* Ambiguous BFD target.  */
+   ECTF_SYMTAB,		/* Symbol table uses invalid entry size.  */
+   ECTF_SYMBAD,		/* Symbol table data buffer is not valid.  */
+   ECTF_STRBAD,		/* String table data buffer is not valid.  */
+   ECTF_CORRUPT,	/* File data structure corruption detected.  */
+   ECTF_NOCTFDATA,	/* File does not contain CTF data.  */
+   ECTF_NOCTFBUF,	/* Buffer does not contain CTF data.  */
+   ECTF_NOSYMTAB,	/* Symbol table information is not available.  */
+   ECTF_NOPARENT,	/* The parent CTF dictionary is unavailable.  */
+   ECTF_DMODEL,		/* Data model mismatch.  */
+   ECTF_LINKADDEDLATE,	/* File added to link too late.  */
+   ECTF_ZALLOC,		/* Failed to allocate (de)compression buffer.  */
+   ECTF_DECOMPRESS,	/* Failed to decompress CTF data.  */
+   ECTF_STRTAB,		/* External string table is not available.  */
+   ECTF_BADNAME,	/* String name offset is corrupt.  */
+   ECTF_BADID,		/* Invalid type identifier.  */
+   ECTF_NOTSOU,		/* Type is not a struct or union.  */
+   ECTF_NOTENUM,	/* Type is not an enum.  */
+   ECTF_NOTSUE,		/* Type is not a struct, union, or enum.  */
+   ECTF_NOTINTFP,	/* Type is not an integer, float, or enum.  */
+   ECTF_NOTARRAY,	/* Type is not an array.  */
+   ECTF_NOTREF,		/* Type does not reference another type.  */
+   ECTF_NAMELEN,	/* Buffer is too small to hold type name.  */
+   ECTF_NOTYPE,		/* No type found corresponding to name.  */
+   ECTF_SYNTAX,		/* Syntax error in type name.  */
+   ECTF_NOTFUNC,	/* Symbol table entry or type is not a function.  */
+   ECTF_NOFUNCDAT,	/* No function information available for function.  */
+   ECTF_NOTDATA,	/* Symbol table entry does not refer to a data object.  */
+   ECTF_NOTYPEDAT,	/* No type information available for symbol.  */
+   ECTF_NOLABEL,	/* No label found corresponding to name.  */
+   ECTF_NOLABELDATA,	/* File does not contain any labels.  */
+   ECTF_NOTSUP,		/* Feature not supported.  */
+   ECTF_NOENUMNAM,	/* Enum element name not found.  */
+   ECTF_NOMEMBNAM,	/* Member name not found.  */
+   ECTF_RDONLY,		/* CTF container is read-only.  */
+   ECTF_DTFULL,		/* CTF type is full (no more members allowed).  */
+   ECTF_FULL,		/* CTF container is full.  */
+   ECTF_DUPLICATE,	/* Duplicate member or variable name.  */
+   ECTF_CONFLICT,	/* Conflicting type is already defined.  */
+   ECTF_OVERROLLBACK,	/* Attempt to roll back past a ctf_update.  */
+   ECTF_COMPRESS,	/* Failed to compress CTF data.  */
+   ECTF_ARCREATE,	/* Error creating CTF archive.  */
+   ECTF_ARNNAME,	/* Name not found in CTF archive.  */
+   ECTF_SLICEOVERFLOW,	/* Overflow of type bitness or offset in slice.  */
+   ECTF_DUMPSECTUNKNOWN, /* Unknown section number in dump.  */
+   ECTF_DUMPSECTCHANGED, /* Section changed in middle of dump.  */
+   ECTF_NOTYET,		/* Feature not yet implemented.  */
+   ECTF_INTERNAL,	/* Internal error: assertion failure.  */
+   ECTF_NONREPRESENTABLE, /* Type not representable in CTF.  */
+   ECTF_NEXT_END,	/* End of iteration.  */
+   ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
+   ECTF_NEXT_WRONGFP,	/* Iteration entity changed in mid-iterate.  */
+   ECTF_FLAGS,		/* CTF header contains flags unknown to libctf.  */
+   ECTF_NEEDSBFD	/* This feature needs a libctf with BFD support.  */
   };
+
+#define ECTF_NERR (ECTF_NEEDSBFD - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel() is explicitly called.  */
@@ -225,8 +242,9 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
-/* These typedefs are used to define the signature for callback functions
-   that can be used with the iteration and visit functions below.  */
+/* These typedefs are used to define the signature for callback functions that
+   can be used with the iteration and visit functions below.  There is also a
+   family of iteration functions that do not require callbacks.  */
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
@@ -246,6 +264,15 @@ typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
 
 typedef struct ctf_dump_state ctf_dump_state_t;
 
+/* Iteration state for the _next() functions, and allocators/copiers/freers for
+   it.  (None of these are needed for the simple case of iterating to the end:
+   the _next() function allocate and free the iterators for you.)  */
+
+typedef struct ctf_next ctf_next_t;
+extern ctf_next_t *ctf_next_create (void);
+extern void ctf_next_destroy (ctf_next_t *);
+extern ctf_next_t *ctf_next_copy (ctf_next_t *);
+
 /* Opening.  These mostly return an abstraction over both CTF files and CTF
    archives: so they can be used to open both.  CTF files will appear to be an
    archive with one member named '.ctf'.  The low-level functions
@@ -263,6 +290,10 @@ extern void ctf_close (ctf_archive_t *);
 extern ctf_sect_t ctf_getdatasect (const ctf_file_t *);
 extern ctf_archive_t *ctf_get_arc (const ctf_file_t *);
 extern ctf_archive_t *ctf_arc_open (const char *, int *);
+extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,
+				       const ctf_sect_t *,
+				       const ctf_sect_t *,
+				       int *);
 extern void ctf_arc_close (ctf_archive_t *);
 extern ctf_file_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
@@ -270,6 +301,7 @@ extern ctf_file_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
 						  const ctf_sect_t *,
 						  const ctf_sect_t *,
 						  const char *, int *);
+extern size_t ctf_archive_count (const ctf_archive_t *);
 
 /* The next functions return or close real CTF files, or write out CTF archives,
    not opaque containers around either.  */
@@ -278,6 +310,7 @@ extern ctf_file_t *ctf_simple_open (const char *, size_t, const char *, size_t,
 				   size_t, const char *, size_t, int *);
 extern ctf_file_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
 				const ctf_sect_t *, int *);
+extern void ctf_ref (ctf_file_t *);
 extern void ctf_file_close (ctf_file_t *);
 
 extern int ctf_arc_write (const char *, ctf_file_t **, size_t,
@@ -318,9 +351,11 @@ extern char *ctf_type_aname (ctf_file_t *, ctf_id_t);
 extern char *ctf_type_aname_raw (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_lname (ctf_file_t *, ctf_id_t, char *, size_t);
 extern char *ctf_type_name (ctf_file_t *, ctf_id_t, char *, size_t);
+extern const char *ctf_type_name_raw (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_size (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_align (ctf_file_t *, ctf_id_t);
 extern int ctf_type_kind (ctf_file_t *, ctf_id_t);
+extern int ctf_type_kind_forwarded (ctf_file_t *, ctf_id_t);
 extern ctf_id_t ctf_type_reference (ctf_file_t *, ctf_id_t);
 extern ctf_id_t ctf_type_pointer (ctf_file_t *, ctf_id_t);
 extern int ctf_type_encoding (ctf_file_t *, ctf_id_t, ctf_encoding_t *);
@@ -341,14 +376,27 @@ extern const char *ctf_label_get (ctf_file_t *);
 extern const char *ctf_label_topmost (ctf_file_t *);
 extern int ctf_label_info (ctf_file_t *, const char *, ctf_lblinfo_t *);
 
+extern int ctf_member_count (ctf_file_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_file_t *, ctf_id_t, ctf_member_f *, void *);
+extern ssize_t ctf_member_next (ctf_file_t *, ctf_id_t, ctf_next_t **,
+				const char **name, ctf_id_t *membtype);
 extern int ctf_enum_iter (ctf_file_t *, ctf_id_t, ctf_enum_f *, void *);
+extern const char *ctf_enum_next (ctf_file_t *, ctf_id_t, ctf_next_t **,
+				  int *);
 extern int ctf_type_iter (ctf_file_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_file_t *, ctf_type_all_f *, void *);
+extern ctf_id_t ctf_type_next (ctf_file_t *, ctf_next_t **,
+			       int *flag, int want_hidden);
 extern int ctf_label_iter (ctf_file_t *, ctf_label_f *, void *);
+extern int ctf_label_next (ctf_file_t *, ctf_next_t **, const char **); /* TBD */
 extern int ctf_variable_iter (ctf_file_t *, ctf_variable_f *, void *);
+extern ctf_id_t ctf_variable_next (ctf_file_t *, ctf_next_t **,
+				   const char **);
 extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
 			     void *);
+extern ctf_file_t *ctf_archive_next (const ctf_archive_t *, ctf_next_t **,
+				     const char **, int skip_parent, int *errp);
+
 /* This function alone does not currently operate on CTF files masquerading
    as archives, and returns -EINVAL: the raw data is no longer available.  It is
    expected to be used only by archiving tools, in any case, which have no need
@@ -358,6 +406,12 @@ extern int ctf_archive_raw_iter (const ctf_archive_t *,
 extern char *ctf_dump (ctf_file_t *, ctf_dump_state_t **state,
 		       ctf_sect_names_t sect, ctf_dump_decorate_f *,
 		       void *arg);
+
+/* Error-warning reporting: an 'iterator' that returns errors and warnings from
+   the error/warning list, in order of emission.  Errors and warnings are popped
+   after return: the caller must free the returned error-text pointer.  */
+extern char *ctf_errwarning_next (ctf_file_t *, ctf_next_t **,
+				  int *is_warning, int *errp);
 
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);
@@ -409,10 +463,14 @@ extern int ctf_gzwrite (ctf_file_t *fp, gzFile fd);
 extern int ctf_compress_write (ctf_file_t * fp, int fd);
 extern unsigned char *ctf_write_mem (ctf_file_t *, size_t *, size_t threshold);
 
-/* The ctf_link interfaces are not stable yet.  No guarantees!  */
-
 extern int ctf_link_add_ctf (ctf_file_t *, ctf_archive_t *, const char *);
-extern int ctf_link (ctf_file_t *, int share_mode);
+/* The variable filter should return nonzero if a variable should not
+   appear in the output.  */
+typedef int ctf_link_variable_filter_f (ctf_file_t *, const char *, ctf_id_t,
+					void *);
+extern int ctf_link_set_variable_filter (ctf_file_t *,
+					 ctf_link_variable_filter_f *, void *);
+extern int ctf_link (ctf_file_t *, int flags);
 typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
 extern int ctf_link_add_strtab (ctf_file_t *, ctf_link_strtab_string_f *,
 				void *);
@@ -424,7 +482,7 @@ extern unsigned char *ctf_link_write (ctf_file_t *, size_t *size,
 				      size_t threshold);
 
 /* Specialist linker functions.  These functions are not used by ld, but can be
-   used by other prgorams making use of the linker machinery for other purposes
+   used by other programs making use of the linker machinery for other purposes
    to customize its output.  */
 extern int ctf_link_add_cu_mapping (ctf_file_t *, const char *from,
 				    const char *to);

@@ -118,6 +118,17 @@
 # include <netdb.h>
 #endif
 
+/* Mac OS X 10.13, Solaris 11.4, and Android 9.0 declare getentropy in
+   <sys/random.h>, not in <unistd.h>.  */
+/* But avoid namespace pollution on glibc systems.  */
+#if (@GNULIB_GETENTROPY@ || defined GNULIB_POSIXCHECK) \
+    && ((defined __APPLE__ && defined __MACH__) || defined __sun \
+        || defined __ANDROID__) \
+    && @UNISTD_H_HAVE_SYS_RANDOM_H@ \
+    && !defined __GLIBC__
+# include <sys/random.h>
+#endif
+
 /* Android 4.3 declares fchownat in <sys/stat.h>, not in <unistd.h>.  */
 /* But avoid namespace pollution on glibc systems.  */
 #if (@GNULIB_FCHOWNAT@ || defined GNULIB_POSIXCHECK) && defined __ANDROID__ \
@@ -763,6 +774,22 @@ _GL_WARN_ON_USE (getdtablesize, "getdtablesize is unportable - "
 #endif
 
 
+#if @GNULIB_GETENTROPY@
+/* Fill a buffer with random bytes.  */
+# if !@HAVE_GETENTROPY@
+_GL_FUNCDECL_SYS (getentropy, int, (void *buffer, size_t length));
+# endif
+_GL_CXXALIAS_SYS (getentropy, int, (void *buffer, size_t length));
+_GL_CXXALIASWARN (getentropy);
+#elif defined GNULIB_POSIXCHECK
+# undef getentropy
+# if HAVE_RAW_DECL_GETENTROPY
+_GL_WARN_ON_USE (getentropy, "getentropy is unportable - "
+                 "use gnulib module getentropy for portability");
+# endif
+#endif
+
+
 #if @GNULIB_GETGROUPS@
 /* Return the supplemental groups that the current process belongs to.
    It is unspecified whether the effective group id is in the list.
@@ -1370,18 +1397,22 @@ _GL_CXXALIASWARN (read);
 #   define readlink rpl_readlink
 #  endif
 _GL_FUNCDECL_RPL (readlink, ssize_t,
-                  (const char *file, char *buf, size_t bufsize)
+                  (const char *restrict file,
+                   char *restrict buf, size_t bufsize)
                   _GL_ARG_NONNULL ((1, 2)));
 _GL_CXXALIAS_RPL (readlink, ssize_t,
-                  (const char *file, char *buf, size_t bufsize));
+                  (const char *restrict file,
+                   char *restrict buf, size_t bufsize));
 # else
 #  if !@HAVE_READLINK@
 _GL_FUNCDECL_SYS (readlink, ssize_t,
-                  (const char *file, char *buf, size_t bufsize)
+                  (const char *restrict file,
+                   char *restrict buf, size_t bufsize)
                   _GL_ARG_NONNULL ((1, 2)));
 #  endif
 _GL_CXXALIAS_SYS (readlink, ssize_t,
-                  (const char *file, char *buf, size_t bufsize));
+                  (const char *restrict file,
+                   char *restrict buf, size_t bufsize));
 # endif
 _GL_CXXALIASWARN (readlink);
 #elif defined GNULIB_POSIXCHECK
@@ -1399,18 +1430,22 @@ _GL_WARN_ON_USE (readlink, "readlink is unportable - "
 #   define readlinkat rpl_readlinkat
 #  endif
 _GL_FUNCDECL_RPL (readlinkat, ssize_t,
-                  (int fd, char const *file, char *buf, size_t len)
+                  (int fd, char const *restrict file,
+                   char *restrict buf, size_t len)
                   _GL_ARG_NONNULL ((2, 3)));
 _GL_CXXALIAS_RPL (readlinkat, ssize_t,
-                  (int fd, char const *file, char *buf, size_t len));
+                  (int fd, char const *restrict file,
+                   char *restrict buf, size_t len));
 # else
 #  if !@HAVE_READLINKAT@
 _GL_FUNCDECL_SYS (readlinkat, ssize_t,
-                  (int fd, char const *file, char *buf, size_t len)
+                  (int fd, char const *restrict file,
+                   char *restrict buf, size_t len)
                   _GL_ARG_NONNULL ((2, 3)));
 #  endif
 _GL_CXXALIAS_SYS (readlinkat, ssize_t,
-                  (int fd, char const *file, char *buf, size_t len));
+                  (int fd, char const *restrict file,
+                   char *restrict buf, size_t len));
 # endif
 _GL_CXXALIASWARN (readlinkat);
 #elif defined GNULIB_POSIXCHECK

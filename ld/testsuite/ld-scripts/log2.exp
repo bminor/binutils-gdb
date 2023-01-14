@@ -22,12 +22,12 @@
 set testname "binary logarithm"
 
 if {![ld_assemble $as $srcdir/$subdir/log2.s tmpdir/log2.o]} {
-	unresolved $testname
-	return
+    unresolved $testname
+    return
 }
 
 if {![ld_link $ld tmpdir/log2 "-T $srcdir/$subdir/log2.t tmpdir/log2.o"]} {
-	fail $testname
+    fail $testname
 } else {
-	pass $testname
+    pass $testname
 }

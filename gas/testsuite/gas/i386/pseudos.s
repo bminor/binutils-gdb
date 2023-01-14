@@ -17,6 +17,11 @@ _start:
 	{evex} {disp8} vmovaps (%eax),%xmm2
 	{evex} {disp32} vmovaps (%eax),%xmm2
 
+	{vex} {disp8} vmovaps 128(%eax),%xmm2
+	{vex} {disp32} vmovaps 128(%eax),%xmm2
+	{evex} {disp8} vmovaps 128(%eax),%xmm2
+	{evex} {disp32} vmovaps 128(%eax),%xmm2
+
 	mov %ecx, %eax
 	{load} mov %ecx, %eax
 	{store} mov %ecx, %eax
@@ -293,6 +298,26 @@ _start:
 	{disp8} movaps 128(%eax),%xmm2
 	{disp32} movaps 128(%eax),%xmm2
 
+	movb (%ebp),%al
+	{disp8} movb (%ebp),%al
+	{disp32} movb (%ebp),%al
+
+	movb (%si),%al
+	{disp8} movb (%si),%al
+	{disp16} movb (%si),%al
+
+	movb (%di),%al
+	{disp8} movb (%di),%al
+	{disp16} movb (%di),%al
+
+	movb (%bx),%al
+	{disp8} movb (%bx),%al
+	{disp16} movb (%bx),%al
+
+	movb (%bp),%al
+	{disp8} movb (%bp),%al
+	{disp16} movb (%bp),%al
+
 	.intel_syntax noprefix
 	{vex3} vmovaps xmm2,xmm7
 	{vex3} {load} vmovaps xmm2,xmm7
@@ -308,6 +333,12 @@ _start:
 	{disp32} vmovaps xmm2,XMMWORD PTR [eax]
 	{evex} {disp8} vmovaps xmm2,XMMWORD PTR [eax]
 	{evex} {disp32} vmovaps xmm2,XMMWORD PTR [eax]
+
+	{vex} {disp8} vmovaps xmm2,XMMWORD PTR [eax+128]
+	{vex} {disp32} vmovaps xmm2,XMMWORD PTR [eax+128]
+	{evex} {disp8} vmovaps xmm2,XMMWORD PTR [eax+128]
+	{evex} {disp32} vmovaps xmm2,XMMWORD PTR [eax+128]
+
 	mov eax,ecx
 	{load} mov eax,ecx
 	{store} mov eax,ecx
@@ -322,3 +353,23 @@ _start:
 	movaps xmm2,XMMWORD PTR [eax+128]
 	{disp8} movaps xmm2,XMMWORD PTR [eax+128]
 	{disp32} movaps xmm2,XMMWORD PTR [eax+128]
+
+	mov al, BYTE PTR [ebp]
+	{disp8} mov al, BYTE PTR [ebp]
+	{disp32} mov al, BYTE PTR [ebp]
+
+	mov al, BYTE PTR [si]
+	{disp8} mov al, BYTE PTR [si]
+	{disp16} mov al, BYTE PTR [si]
+
+	mov al, BYTE PTR [di]
+	{disp8} mov al, BYTE PTR [di]
+	{disp16} mov al, BYTE PTR [di]
+
+	mov al, BYTE PTR [bx]
+	{disp8} mov al, BYTE PTR [bx]
+	{disp16} mov al, BYTE PTR [bx]
+
+	mov al, BYTE PTR [bp]
+	{disp8} mov al, BYTE PTR [bp]
+	{disp16} mov al, BYTE PTR [bp]

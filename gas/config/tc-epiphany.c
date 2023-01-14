@@ -550,7 +550,7 @@ md_assemble (char *str)
 
   if (push && regmask)
     {
-      char buff[20];
+      char buff[32];
       int i,p ATTRIBUTE_UNUSED;
 
       epiphany_assemble ("mov r15,4");
@@ -570,7 +570,7 @@ md_assemble (char *str)
     }
   else if (pop && regmask)
     {
-      char buff[20];
+      char buff[32];
       int i,p;
 
       epiphany_assemble ("mov r15,4");

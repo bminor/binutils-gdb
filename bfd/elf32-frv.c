@@ -826,8 +826,9 @@ struct frvfdpic_elf_link_hash_table
 /* Get the FRV ELF linker hash table from a link_info structure.  */
 
 #define frvfdpic_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == FRV_ELF_DATA ? ((struct frvfdpic_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == FRV_ELF_DATA)		\
+   ? (struct frvfdpic_elf_link_hash_table *) (p)->hash : NULL)
 
 #define frvfdpic_got_section(info) \
   (frvfdpic_hash_table (info)->elf.sgot)
@@ -2712,7 +2713,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       const char *name;
       int r_type;
       asection *osec;
-      struct frvfdpic_relocs_info *picrel;
+      struct frvfdpic_relocs_info *picrel = NULL;
       bfd_vma orig_addend = rel->r_addend;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2806,6 +2807,9 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_FRV_GETTLSOFF_RELAX:
 	case R_FRV_TLSOFF_RELAX:
 	case R_FRV_TLSMOFF:
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL)
 	    picrel = frvfdpic_relocs_info_for_global (frvfdpic_relocs_info
 						      (info), input_bfd, h,
@@ -4119,6 +4123,7 @@ elf32_frv_add_symbol_hook (bfd *abfd,
 	  scomm = bfd_make_section_with_flags (abfd, ".scommon",
 					       (SEC_ALLOC
 						| SEC_IS_COMMON
+						| SEC_SMALL_DATA
 						| SEC_LINKER_CREATED));
 	  if (scomm == NULL)
 	    return FALSE;
@@ -5463,27 +5468,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   if (!_frvfdpic_size_got_plt (output_bfd, &gpinfo))
     return FALSE;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      if (frvfdpic_got_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
-	  return FALSE;
-
-      if (frvfdpic_pltrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (frvfdpic_gotrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
-					    sizeof (Elf32_External_Rel)))
-	  return FALSE;
-    }
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, TRUE);
 }
 
 static bfd_boolean

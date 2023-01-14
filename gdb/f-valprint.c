@@ -46,16 +46,16 @@ int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
 LONGEST
 f77_get_lowerbound (struct type *type)
 {
-  if (TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED (type))
+  if (type->bounds ()->low.kind () == PROP_UNDEFINED)
     error (_("Lower bound may not be '*' in F77"));
 
-  return TYPE_ARRAY_LOWER_BOUND_VALUE (type);
+  return type->bounds ()->low.const_val ();
 }
 
 LONGEST
 f77_get_upperbound (struct type *type)
 {
-  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+  if (type->bounds ()->high.kind () == PROP_UNDEFINED)
     {
       /* We have an assumed size array on our hands.  Assume that
 	 upper_bound == lower_bound so that we show at least 1 element.
@@ -65,7 +65,7 @@ f77_get_upperbound (struct type *type)
       return f77_get_lowerbound (type);
     }
 
-  return TYPE_ARRAY_UPPER_BOUND_VALUE (type);
+  return type->bounds ()->high.const_val ();
 }
 
 /* Obtain F77 adjustable array dimensions.  */
@@ -112,7 +112,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		   const struct value_print_options *options,
 		   int *elts)
 {
-  struct type *range_type = TYPE_INDEX_TYPE (check_typedef (type));
+  struct type *range_type = check_typedef (type)->index_type ();
   CORE_ADDR addr = address + embedded_offset;
   LONGEST lowerbound, upperbound;
   LONGEST i;
@@ -124,7 +124,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
       struct gdbarch *gdbarch = get_type_arch (type);
       size_t dim_size = type_length_units (TYPE_TARGET_TYPE (type));
       int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
-      size_t byte_stride = TYPE_ARRAY_BIT_STRIDE (type) / (unit_size * 8);
+      size_t byte_stride = type->bit_stride () / (unit_size * 8);
       if (byte_stride == 0)
 	byte_stride = dim_size;
       size_t offs = 0;
@@ -211,7 +211,7 @@ static const struct generic_val_print_decorations f_decorations =
 /* See f-lang.h.  */
 
 void
-f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
+f_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		      const struct value_print_options *options)
 {
   struct type *type = check_typedef (value_type (val));
@@ -317,7 +317,7 @@ f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
         {
 	  struct value *field = value_field (val, index);
 
-	  struct type *field_type = check_typedef (TYPE_FIELD_TYPE (type, index));
+	  struct type *field_type = check_typedef (type->field (index).type ());
 
 
 	  if (field_type->code () != TYPE_CODE_FUNC)

@@ -40,14 +40,6 @@ Dwarf::assemble $asm_file {
     declare_labels aaa_label
     set int_size [get_sizeof "int" 4]
 
-    global srcdir subdir srcfile
-
-    extern main
-
-    set main_range [function_range main ${srcdir}/${subdir}/${srcfile}]
-    set main_start [lindex $main_range 0]
-    set main_length [lindex $main_range 1]
-
     cu {} {
 	cu_label: partial_unit {
 	    {language @DW_LANG_C}
@@ -83,8 +75,7 @@ Dwarf::assemble $asm_file {
 	    }
 	    subprogram {
 		{abstract_origin %$main_label}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_length" addr}
+		{MACRO_AT_range {main}}
 	    }
 	}
     }

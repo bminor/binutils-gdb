@@ -16,6 +16,8 @@
 standard_testfile "vla.f90"
 load_lib "fortran.exp"
 
+if {[skip_fortran_tests]} { return -1 }
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     {debug f90 quiet}] } {
     return -1

@@ -131,28 +131,10 @@ struct thread_control_state
      any inlined frames).  */
   struct frame_id step_stack_frame_id {};
 
-  /* Nonzero if we are presently stepping over a breakpoint.
-
-     If we hit a breakpoint or watchpoint, and then continue, we need
-     to single step the current thread with breakpoints disabled, to
-     avoid hitting the same breakpoint or watchpoint again.  And we
-     should step just a single thread and keep other threads stopped,
-     so that other threads don't miss breakpoints while they are
-     removed.
-
-     So, this variable simultaneously means that we need to single
-     step the current thread, keep other threads stopped, and that
-     breakpoints should be removed while we step.
-
-     This variable is set either:
-     - in proceed, when we resume inferior on user's explicit request
-     - in keep_going, if handle_inferior_event decides we need to
-     step over breakpoint.
-
-     The variable is cleared in normal_stop.  The proceed calls
-     wait_for_inferior, which calls handle_inferior_event in a loop,
-     and until wait_for_inferior exits, this variable is changed only
-     by keep_going.  */
+  /* True if the the thread is presently stepping over a breakpoint or
+     a watchpoint, either with an inline step over or a displaced (out
+     of line) step, and we're now expecting it to report a trap for
+     the finished single step.  */
   int trap_expected = 0;
 
   /* Nonzero if the thread is being proceeded for a "finish" command
@@ -413,6 +395,13 @@ public:
 using thread_info_ref
   = gdb::ref_ptr<struct thread_info, refcounted_object_ref_policy>;
 
+/* A gdb::ref_ptr pointer to an inferior.  This would ideally be in
+   inferior.h, but it can't due to header dependencies (inferior.h
+   includes gdbthread.h).  */
+
+using inferior_ref
+  = gdb::ref_ptr<struct inferior, refcounted_object_ref_policy>;
+
 /* Create an empty thread list, or empty the existing one.  */
 extern void init_thread_list (void);
 
@@ -433,12 +422,13 @@ extern struct thread_info *add_thread_with_info (process_stratum_target *targ,
 						 ptid_t ptid,
 						 private_thread_info *);
 
-/* Delete an existing thread list entry.  */
+/* Delete thread THREAD and notify of thread exit.  If the thread is
+   currently not deletable, don't actually delete it but still tag it
+   as exited and do the notification.  */
 extern void delete_thread (struct thread_info *thread);
 
-/* Delete an existing thread list entry, and be quiet about it.  Used
-   after the process this thread having belonged to having already
-   exited, for example.  */
+/* Like delete_thread, but be quiet about it.  Used when the process
+   this thread belonged to has already exited, for example.  */
 extern void delete_thread_silent (struct thread_info *thread);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
@@ -478,15 +468,15 @@ extern bool in_thread_list (process_stratum_target *targ, ptid_t ptid);
    global id, not the system's).  */
 extern int valid_global_thread_id (int global_id);
 
-/* Find thread PTID of inferior INF.  */
+/* Find (non-exited) thread PTID of inferior INF.  */
 extern thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 
-/* Search function to lookup a thread by 'pid'.  */
+/* Search function to lookup a (non-exited) thread by 'ptid'.  */
 extern struct thread_info *find_thread_ptid (process_stratum_target *targ,
 					     ptid_t ptid);
 
-/* Search function to lookup a thread by 'ptid'.  Only searches in
-   threads of INF.  */
+/* Search function to lookup a (non-exited) thread by 'ptid'.  Only
+   searches in threads of INF.  */
 extern struct thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 
 /* Find thread by GDB global thread ID.  */
@@ -677,10 +667,9 @@ private:
   void restore ();
 
   bool m_dont_restore = false;
-  /* Use the "class" keyword here, because of a clash with a "thread_info"
-     function in the Darwin API.  */
-  class thread_info *m_thread;
-  inferior *m_inf;
+  thread_info_ref m_thread;
+  inferior_ref m_inf;
+
   frame_id m_selected_frame_id;
   int m_selected_frame_level;
   bool m_was_stopped;

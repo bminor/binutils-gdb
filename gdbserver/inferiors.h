@@ -138,6 +138,9 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
+/* Switch to a thread of PROC.  */
+void switch_to_process (process_info *proc);
+
 void clear_inferiors (void);
 
 void *thread_target_data (struct thread_info *);

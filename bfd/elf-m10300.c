@@ -128,8 +128,9 @@ struct elf_mn10300_obj_tdata
 /* Get the MN10300 ELF linker hash table from a link_info structure.  */
 
 #define elf32_mn10300_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == MN10300_ELF_DATA ? ((struct elf32_mn10300_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == MN10300_ELF_DATA)	\
+   ? (struct elf32_mn10300_link_hash_table *) (p)->hash : NULL)
 
 #define elf32_mn10300_link_hash_traverse(table, func, info)		\
   (elf_link_hash_traverse						\
@@ -2066,12 +2067,12 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && !SYMBOL_REFERENCES_LOCAL (info, hh))
 		  || (r_type == R_MN10300_32
+		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
 		      /* _32 relocs in executables force _COPY relocs,
 			 such that the address of the symbol ends up
 			 being local.  */
-		      && !bfd_link_executable (info)
-		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
-		      && ((input_section->flags & SEC_ALLOC) != 0
+		      && (((input_section->flags & SEC_ALLOC) != 0
+			   && !bfd_link_executable (info))
 			  /* DWARF will emit R_MN10300_32 relocations
 			     in its sections against symbols defined
 			     externally in shared libraries.  We can't
@@ -2417,17 +2418,19 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	 are deleting.  */
       for (; irel < irelend; irel++)
 	{
-	  int alignment = 1 << irel->r_addend;
-
 	  if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
 	      && irel->r_offset > addr
-	      && irel->r_offset < toaddr
-	      && (count < alignment
-		  || alignment % count != 0))
+	      && irel->r_offset < toaddr)
 	    {
-	      irelalign = irel;
-	      toaddr = irel->r_offset;
-	      break;
+	      int alignment = 1 << irel->r_addend;
+
+	      if (count < alignment
+		  || alignment % count != 0)
+		{
+		  irelalign = irel;
+		  toaddr = irel->r_offset;
+		  break;
+		}
 	    }
 	}
     }
@@ -3931,7 +3934,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* See if the value will fit in 24 bits.
 	     We allow any 16bit match here.  We prune those we can't
 	     handle below.  */
-	  if ((long) value < 0x7fffff && (long) value > -0x800000)
+	  if (value + 0x800000 < 0x1000000 && irel->r_offset >= 3)
 	    {
 	      unsigned char code;
 
@@ -4002,7 +4005,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
 	     handle below.  */
-	  if ((long) value < 0x7fff && (long) value > -0x8000)
+	  if (value + 0x8000 < 0x10000 && irel->r_offset >= 2)
 	    {
 	      unsigned char code;
 
@@ -5012,9 +5015,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
   struct elf32_mn10300_link_hash_table *htab = elf32_mn10300_hash_table (info);
   bfd * dynobj;
   asection * s;
-  bfd_boolean plt;
   bfd_boolean relocs;
-  bfd_boolean reltext;
 
   dynobj = htab->root.dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -5052,9 +5053,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  plt = FALSE;
   relocs = FALSE;
-  reltext = FALSE;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char * name;
@@ -5069,34 +5068,16 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
       if (streq (name, ".plt"))
 	{
 	  /* Remember whether there is a PLT.  */
-	  plt = s->size != 0;
+	  ;
 	}
       else if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
-	      asection * target;
-
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
 	      if (! streq (name, ".rela.plt"))
-		{
-		  const char * outname;
-
-		  relocs = TRUE;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_section_name (s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = TRUE;
-		}
+		relocs = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -5136,45 +5117,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
 	return FALSE;
     }
 
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in _bfd_mn10300_elf_finish_dynamic_sections,
-	 but we must add the entries now so that we get the correct
-	 size for the .dynamic section.  The DT_DEBUG entry is filled
-	 in by the dynamic linker and used by the debugger.  */
-      if (! bfd_link_pic (info))
-	{
-	  if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (plt)
-	{
-	  if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
-	      || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
-					      sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      if (reltext)
-	{
-	  if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
-	    return FALSE;
-	}
-    }
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

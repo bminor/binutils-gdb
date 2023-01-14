@@ -18,7 +18,7 @@ Disassembly of section .text:
   15:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   18:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   1b:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  1e:	ff e0                	jmpq   \*%rax
+  1e:	ff e0                	jmp    \*%rax
   20:	55                   	push   %rbp
   21:	55                   	push   %rbp
   22:	64 89 04 25 01 00 00 00 	mov    %eax,%fs:0x1
@@ -28,7 +28,7 @@ Disassembly of section .text:
   33:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   36:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   39:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  3c:	ff d0                	callq  \*%rax
+  3c:	ff d0                	call   \*%rax
   3e:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   41:	55                   	push   %rbp
   42:	55                   	push   %rbp
@@ -37,7 +37,7 @@ Disassembly of section .text:
   4e:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   51:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   54:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  57:	e8 [0-9a-f ]+       	callq  .*
+  57:	e8 [0-9a-f ]+       	call   .*
   5c:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   5f:	55                   	push   %rbp
   60:	55                   	push   %rbp
@@ -45,6 +45,6 @@ Disassembly of section .text:
   62:	64 89 04 25 01 00 00 00 	mov    %eax,%fs:0x1
   6a:	48 89 e5             	mov    %rsp,%rbp
   6d:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
-  70:	ff 14 25 00 00 00 00 	callq  \*0x0
+  70:	ff 14 25 00 00 00 00 	call   \*0x0
   77:	55                   	push   %rbp
 #pass

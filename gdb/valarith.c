@@ -149,7 +149,7 @@ value_subscript (struct value *array, LONGEST index)
   if (tarray->code () == TYPE_CODE_ARRAY
       || tarray->code () == TYPE_CODE_STRING)
     {
-      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      struct type *range_type = tarray->index_type ();
       LONGEST lowerbound, upperbound;
 
       get_discrete_bounds (range_type, &lowerbound, &upperbound);
@@ -191,7 +191,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
 
   /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
      in a byte.  */
-  LONGEST stride = TYPE_ARRAY_BIT_STRIDE (array_type);
+  LONGEST stride = array_type->bit_stride ();
   if (stride != 0)
     {
       struct gdbarch *arch = get_type_arch (elt_type);
@@ -200,12 +200,13 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
     }
 
   LONGEST elt_offs = elt_size * (index - lowerbound);
+  bool array_upper_bound_undefined
+    = array_type->bounds ()->high.kind () == PROP_UNDEFINED;
 
   if (index < lowerbound
-      || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
-          && elt_offs >= type_length_units (array_type))
-      || (VALUE_LVAL (array) != lval_memory
-          && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)))
+      || (!array_upper_bound_undefined
+	  && elt_offs >= type_length_units (array_type))
+      || (VALUE_LVAL (array) != lval_memory && array_upper_bound_undefined))
     {
       if (type_not_associated (array_type))
         error (_("no such vector element (vector not associated)"));
@@ -882,7 +883,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   else if (is_integral_type (type1))
     {
       *eff_type_x = type2;
-      if (TYPE_UNSIGNED (type1))
+      if (type1->is_unsigned ())
 	target_float_from_ulongest (x, *eff_type_x, value_as_long (arg1));
       else
 	target_float_from_longest (x, *eff_type_x, value_as_long (arg1));
@@ -901,7 +902,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   else if (is_integral_type (type2))
     {
       *eff_type_y = type1;
-      if (TYPE_UNSIGNED (type2))
+      if (type2->is_unsigned ())
 	target_float_from_ulongest (y, *eff_type_y, value_as_long (arg2));
       else
 	target_float_from_longest (y, *eff_type_y, value_as_long (arg2));
@@ -939,9 +940,9 @@ promotion_type (struct type *type1, struct type *type2)
 	result_type = type1;
       else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
 	result_type = type2;
-      else if (TYPE_UNSIGNED (type1))
+      else if (type1->is_unsigned ())
 	result_type = type1;
-      else if (TYPE_UNSIGNED (type2))
+      else if (type2->is_unsigned ())
 	result_type = type2;
       else
 	result_type = type1;
@@ -1161,7 +1162,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	result_type = promotion_type (type1, type2);
 
-      if (TYPE_UNSIGNED (result_type))
+      if (result_type->is_unsigned ())
 	{
 	  LONGEST v2_signed = value_as_long (arg2);
 	  ULONGEST v1, v2, v = 0;
@@ -1439,7 +1440,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
   vector_type = check_typedef (vector_type);
 
   gdb_assert (vector_type->code () == TYPE_CODE_ARRAY
-	      && TYPE_VECTOR (vector_type));
+	      && vector_type->is_vector ());
 
   if (!get_array_bounds (vector_type, &low_bound, &high_bound))
     error (_("Could not determine the vector bounds"));
@@ -1479,9 +1480,9 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
   type2 = check_typedef (value_type (val2));
 
   t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
-	       && TYPE_VECTOR (type1)) ? 1 : 0;
+	       && type1->is_vector ()) ? 1 : 0;
   t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
-	       && TYPE_VECTOR (type2)) ? 1 : 0;
+	       && type2->is_vector ()) ? 1 : 0;
 
   if (!t1_is_vec || !t2_is_vec)
     error (_("Vector operations are only supported among vectors"));
@@ -1496,7 +1497,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 
   if (eltype1->code () != eltype2->code ()
       || elsize != TYPE_LENGTH (eltype2)
-      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2)
+      || eltype1->is_unsigned () != eltype2->is_unsigned ()
       || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
 
@@ -1524,9 +1525,9 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
   int t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type1));
+		   && type1->is_vector ());
   int t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type2));
+		   && type2->is_vector ());
 
   if (!t1_is_vec && !t2_is_vec)
     val = scalar_binop (arg1, arg2, op);
@@ -1766,7 +1767,7 @@ value_pos (struct value *arg1)
   type = check_typedef (value_type (arg1));
 
   if (is_integral_type (type) || is_floating_value (arg1)
-      || (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+      || (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
       || type->code () == TYPE_CODE_COMPLEX)
     return value_from_contents (type, value_contents (arg1));
   else
@@ -1783,7 +1784,7 @@ value_neg (struct value *arg1)
 
   if (is_integral_type (type) || is_floating_type (type))
     return value_binop (value_from_longest (type, 0), arg1, BINOP_SUB);
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *tmp, *val = allocate_value (type);
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -1825,7 +1826,7 @@ value_complement (struct value *arg1)
 
   if (is_integral_type (type))
     val = value_from_longest (type, ~value_as_long (arg1));
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *tmp;
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -1870,7 +1871,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
-  struct type *range = TYPE_INDEX_TYPE (type);
+  struct type *range = type->index_type ();
 
   if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
     return -2;

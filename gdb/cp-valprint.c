@@ -223,7 +223,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
 
-	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+	  annotate_field_begin (type->field (i).type ());
 
 	  if (field_is_static (&type->field (i)))
 	    {
@@ -301,7 +301,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		    {
 		      struct value *v = value_static_field (type, i);
 
-		      cp_print_static_field (TYPE_FIELD_TYPE (type, i),
+		      cp_print_static_field (type->field (i).type (),
 					     v, stream, recurse + 1,
 					     opts);
 		    }
@@ -315,7 +315,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
 		  int i_offset = TYPE_FIELD_BITPOS (type, i) / 8;
-		  struct type *i_type = TYPE_FIELD_TYPE (type, i);
+		  struct type *i_type = type->field (i).type ();
 
 		  if (valprint_check_validity (stream, i_type, i_offset, val))
 		    {
@@ -655,11 +655,11 @@ cp_find_class_member (struct type **self_p, int *fieldno,
   for (i = 0; i < TYPE_N_BASECLASSES (self); i++)
     {
       LONGEST bitpos = TYPE_FIELD_BITPOS (self, i);
-      LONGEST bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (self, i));
+      LONGEST bitsize = 8 * TYPE_LENGTH (self->field (i).type ());
 
       if (offset >= bitpos && offset < bitpos + bitsize)
 	{
-	  *self_p = TYPE_FIELD_TYPE (self, i);
+	  *self_p = self->field (i).type ();
 	  cp_find_class_member (self_p, fieldno, offset - bitpos);
 	  return;
 	}

@@ -550,7 +550,7 @@ static struct call_info *last_call_info;
 static struct call_desc last_call_desc;
 
 /* handle of the OPCODE hash table */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* These characters can be suffixes of opcode names and they may be
    followed by meaningful whitespace.  We don't include `,' and `!'
@@ -3214,7 +3214,7 @@ pa_ip (char *str)
     }
 
   /* Look up the opcode in the hash table.  */
-  if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
+  if ((insn = (struct pa_opcode *) str_hash_find (op_hash, str)) == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), str);
       return;
@@ -5989,8 +5989,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
   else
     {
       symbolP = symbol_new (name, now_seg,
-			    S_GET_VALUE (call_info->start_symbol),
-			    symbol_get_frag (call_info->start_symbol));
+			    symbol_get_frag (call_info->start_symbol),
+			    S_GET_VALUE (call_info->start_symbol));
       gas_assert (symbolP);
       S_CLEAR_EXTERNAL (symbolP);
       symbol_table_insert (symbolP);
@@ -6439,8 +6439,7 @@ hppa_elf_mark_end_of_function (void)
     {
       /* symbol value should be the offset of the
 	 last instruction of the function */
-      symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
-			    frag_now);
+      symbolP = symbol_new (name, now_seg, frag_now, frag_now_fix () - 4);
 
       gas_assert (symbolP);
       S_CLEAR_EXTERNAL (symbolP);
@@ -8215,7 +8214,6 @@ pa_lsym (int unused ATTRIBUTE_UNUSED)
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int lose = 0;
   unsigned int i = 0;
 
@@ -8238,18 +8236,14 @@ md_begin (void)
   pa_spaces_begin ();
 #endif
 
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   while (i < NUMOPCODES)
     {
       const char *name = pa_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, (struct pa_opcode *) &pa_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
-	{
-	  as_fatal (_("Internal error: can't hash `%s': %s\n"), name, retval);
-	  lose = 1;
-	}
+      if (str_hash_insert (op_hash, name, &pa_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       do
 	{

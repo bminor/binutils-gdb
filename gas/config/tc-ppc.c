@@ -31,10 +31,6 @@
 #include "dwarf2dbg.h"
 #endif
 
-#ifdef TE_PE
-#include "coff/pe.h"
-#endif
-
 #ifdef OBJ_XCOFF
 #include "coff/xcoff.h"
 #include "libxcoff.h"
@@ -50,11 +46,7 @@ static int set_target_endian = 0;
 
 /* Whether to use user friendly register names.  */
 #ifndef TARGET_REG_NAMES_P
-#ifdef TE_PE
-#define TARGET_REG_NAMES_P TRUE
-#else
 #define TARGET_REG_NAMES_P FALSE
-#endif
 #endif
 
 /* Macros for calculating LO, HI, HA, HIGHER, HIGHERA, HIGHEST,
@@ -134,20 +126,6 @@ static void ppc_elf_lcomm (int);
 static void ppc_elf_localentry (int);
 static void ppc_elf_abiversion (int);
 static void ppc_elf_gnu_attribute (int);
-#endif
-
-#ifdef TE_PE
-static void ppc_previous (int);
-static void ppc_pdata (int);
-static void ppc_ydata (int);
-static void ppc_reldata (int);
-static void ppc_rdata (int);
-static void ppc_ualong (int);
-static void ppc_znop (int);
-static void ppc_pe_comm (int);
-static void ppc_pe_section (int);
-static void ppc_pe_function (int);
-static void ppc_pe_tocd (int);
 #endif
 
 /* Generic assembler global variables which must be defined by all
@@ -272,22 +250,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "localentry", ppc_elf_localentry,	0 },
   { "abiversion", ppc_elf_abiversion,	0 },
   { "gnu_attribute", ppc_elf_gnu_attribute, 0},
-#endif
-
-#ifdef TE_PE
-  /* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format.  */
-  { "previous", ppc_previous,   0 },
-  { "pdata",    ppc_pdata,      0 },
-  { "ydata",    ppc_ydata,      0 },
-  { "reldata",  ppc_reldata,    0 },
-  { "rdata",    ppc_rdata,      0 },
-  { "ualong",   ppc_ualong,     0 },
-  { "znop",     ppc_znop,       0 },
-  { "comm",	ppc_pe_comm,	0 },
-  { "lcomm",	ppc_pe_comm,	1 },
-  { "section",  ppc_pe_section, 0 },
-  { "function",	ppc_pe_function,0 },
-  { "tocd",     ppc_pe_tocd,    0 },
 #endif
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
@@ -1004,10 +966,10 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
 static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 
 /* Opcode hash table.  */
-static struct hash_control *ppc_hash;
+static htab_t ppc_hash;
 
 /* Macro hash table.  */
-static struct hash_control *ppc_macro_hash;
+static htab_t ppc_macro_hash;
 
 #ifdef OBJ_ELF
 /* What type of shared library support to use.  */
@@ -1094,21 +1056,6 @@ static struct dw_section {
   struct dw_subsection *anon_subseg;
 } dw_sections[XCOFF_DWSECT_NBR_NAMES];
 #endif /* OBJ_XCOFF */
-
-#ifdef TE_PE
-
-/* Various sections that we need for PE coff support.  */
-static segT ydata_section;
-static segT pdata_section;
-static segT reldata_section;
-static segT rdata_section;
-static segT tocdata_section;
-
-/* The current section and the previous section. See ppc_previous.  */
-static segT ppc_previous_section;
-static segT ppc_current_section;
-
-#endif /* TE_PE */
 
 #ifdef OBJ_ELF
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
@@ -1410,6 +1357,8 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mpower9, -mpwr9        generate code for Power9 architecture\n"));
   fprintf (stream, _("\
+-mpower10, -mpwr10      generate code for Power10 architecture\n"));
+  fprintf (stream, _("\
 -mcell                  generate code for Cell Broadband Engine architecture\n"));
   fprintf (stream, _("\
 -mcom                   generate code for Power/PowerPC common instructions\n"));
@@ -1550,9 +1499,7 @@ extern const char*
 ppc_target_format (void)
 {
 #ifdef OBJ_COFF
-#ifdef TE_PE
-  return target_big_endian ? "pe-powerpc" : "pe-powerpcle";
-#elif TE_POWERMAC
+#if TE_POWERMAC
   return "xcoff-powermac";
 #else
 #  ifdef TE_AIX5
@@ -1654,12 +1601,12 @@ ppc_setup_opcodes (void)
   bfd_boolean bad_insn = FALSE;
 
   if (ppc_hash != NULL)
-    hash_die (ppc_hash);
+    htab_delete (ppc_hash);
   if (ppc_macro_hash != NULL)
-    hash_die (ppc_macro_hash);
+    htab_delete (ppc_macro_hash);
 
   /* Insert the opcodes into a hash table.  */
-  ppc_hash = hash_new ();
+  ppc_hash = str_htab_create ();
 
   if (ENABLE_CHECKING)
     {
@@ -1735,23 +1682,17 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
 	}
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = powerpc_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, op, 0);
 
   op_end = prefix_opcodes + prefix_num_opcodes;
   for (op = prefix_opcodes; op < op_end; op++)
@@ -1779,23 +1720,17 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
 	}
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = prefix_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, op, 0);
 
   op_end = vle_opcodes + vle_num_opcodes;
   for (op = vle_opcodes; op < op_end; op++)
@@ -1824,17 +1759,11 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
 	}
     }
 
@@ -1868,42 +1797,31 @@ ppc_setup_opcodes (void)
 	      bad_insn |= insn_validate (op);
 	    }
 
-	  if ((ppc_cpu & op->flags) != 0 && !(ppc_cpu & op->deprecated))
+	  if ((ppc_cpu & op->flags) != 0
+	      && !(ppc_cpu & op->deprecated)
+	      && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	    {
-	      const char *retval;
-
-	      retval = hash_insert (ppc_hash, op->name, (void *) op);
-	      if (retval != NULL)
-		{
-		  as_bad (_("duplicate instruction %s"),
-			  op->name);
-		  bad_insn = TRUE;
-		}
+	      as_bad (_("duplicate %s"), op->name);
+	      bad_insn = TRUE;
 	    }
 	}
 
       for (op = spe2_opcodes; op < op_end; op++)
-	hash_insert (ppc_hash, op->name, (void *) op);
+	str_hash_insert (ppc_hash, op->name, op, 0);
     }
 
   /* Insert the macros into a hash table.  */
-  ppc_macro_hash = hash_new ();
+  ppc_macro_hash = str_htab_create ();
 
   macro_end = powerpc_macros + powerpc_num_macros;
   for (macro = powerpc_macros; macro < macro_end; macro++)
-    {
-      if ((macro->flags & ppc_cpu) != 0 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_macro_hash, macro->name, (void *) macro);
-	  if (retval != (const char *) NULL)
-	    {
-	      as_bad (_("duplicate macro %s"), macro->name);
-	      bad_insn = TRUE;
-	    }
-	}
-    }
+    if (((macro->flags & ppc_cpu) != 0
+	 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
+	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
+      {
+	as_bad (_("duplicate %s"), macro->name);
+	bad_insn = TRUE;
+      }
 
   if (bad_insn)
     abort ();
@@ -1947,13 +1865,6 @@ md_begin (void)
   symbol_get_tc (ppc_text_csects)->within = ppc_text_csects;
   ppc_data_csects = symbol_make ("dummy\001");
   symbol_get_tc (ppc_data_csects)->within = ppc_data_csects;
-#endif
-
-#ifdef TE_PE
-
-  ppc_current_section = text_section;
-  ppc_previous_section = 0;
-
 #endif
 }
 
@@ -2233,10 +2144,10 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("got@pcrel",		BFD_RELOC_PPC64_GOT_PCREL34),
     MAP64 ("plt@pcrel",		BFD_RELOC_PPC64_PLT_PCREL34),
     MAP64 ("tls@pcrel",		BFD_RELOC_PPC64_TLS_PCREL),
-    MAP64 ("got@tlsgd@pcrel",	BFD_RELOC_PPC64_GOT_TLSGD34),
-    MAP64 ("got@tlsld@pcrel",	BFD_RELOC_PPC64_GOT_TLSLD34),
-    MAP64 ("got@tprel@pcrel",	BFD_RELOC_PPC64_GOT_TPREL34),
-    MAP64 ("got@dtprel@pcrel",	BFD_RELOC_PPC64_GOT_DTPREL34),
+    MAP64 ("got@tlsgd@pcrel",	BFD_RELOC_PPC64_GOT_TLSGD_PCREL34),
+    MAP64 ("got@tlsld@pcrel",	BFD_RELOC_PPC64_GOT_TLSLD_PCREL34),
+    MAP64 ("got@tprel@pcrel",	BFD_RELOC_PPC64_GOT_TPREL_PCREL34),
+    MAP64 ("got@dtprel@pcrel",	BFD_RELOC_PPC64_GOT_DTPREL_PCREL34),
     MAP64 ("higher34",		BFD_RELOC_PPC64_ADDR16_HIGHER34),
     MAP64 ("highera34",		BFD_RELOC_PPC64_ADDR16_HIGHERA34),
     MAP64 ("highest34",		BFD_RELOC_PPC64_ADDR16_HIGHEST34),
@@ -2736,101 +2647,6 @@ ppc_elf_adjust_symtab (void)
 }
 #endif /* OBJ_ELF */
 
-#ifdef TE_PE
-
-/*
- * Summary of parse_toc_entry.
- *
- * in:	Input_line_pointer points to the '[' in one of:
- *
- *        [toc] [tocv] [toc32] [toc64]
- *
- *      Anything else is an error of one kind or another.
- *
- * out:
- *   return value: success or failure
- *   toc_kind:     kind of toc reference
- *   input_line_pointer:
- *     success: first char after the ']'
- *     failure: unchanged
- *
- * settings:
- *
- *     [toc]   - rv == success, toc_kind = default_toc
- *     [tocv]  - rv == success, toc_kind = data_in_toc
- *     [toc32] - rv == success, toc_kind = must_be_32
- *     [toc64] - rv == success, toc_kind = must_be_64
- *
- */
-
-enum toc_size_qualifier
-{
-  default_toc, /* The toc cell constructed should be the system default size */
-  data_in_toc, /* This is a direct reference to a toc cell                   */
-  must_be_32,  /* The toc cell constructed must be 32 bits wide              */
-  must_be_64   /* The toc cell constructed must be 64 bits wide              */
-};
-
-static int
-parse_toc_entry (enum toc_size_qualifier *toc_kind)
-{
-  char *start;
-  char *toc_spec;
-  char c;
-  enum toc_size_qualifier t;
-
-  /* Save the input_line_pointer.  */
-  start = input_line_pointer;
-
-  /* Skip over the '[' , and whitespace.  */
-  ++input_line_pointer;
-  SKIP_WHITESPACE ();
-
-  /* Find the spelling of the operand.  */
-  c = get_symbol_name (&toc_spec);
-
-  if (strcmp (toc_spec, "toc") == 0)
-    {
-      t = default_toc;
-    }
-  else if (strcmp (toc_spec, "tocv") == 0)
-    {
-      t = data_in_toc;
-    }
-  else if (strcmp (toc_spec, "toc32") == 0)
-    {
-      t = must_be_32;
-    }
-  else if (strcmp (toc_spec, "toc64") == 0)
-    {
-      t = must_be_64;
-    }
-  else
-    {
-      as_bad (_("syntax error: invalid toc specifier `%s'"), toc_spec);
-      *input_line_pointer = c;
-      input_line_pointer = start;
-      return 0;
-    }
-
-  /* Now find the ']'.  */
-  *input_line_pointer = c;
-
-  SKIP_WHITESPACE_AFTER_NAME ();	/* leading whitespace could be there.  */
-  c = *input_line_pointer++; /* input_line_pointer->past char in c.  */
-
-  if (c != ']')
-    {
-      as_bad (_("syntax error: expected `]', found  `%c'"), c);
-      input_line_pointer = start;
-      return 0;
-    }
-
-  *toc_kind = t;
-  return 1;
-}
-#endif
-
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
 /* See whether a symbol is in the TOC section.  */
 
@@ -2995,7 +2811,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
       /* This switch statement must handle all BFD_RELOC values
 	 possible in instruction fixups.  As is, it handles all
 	 BFD_RELOC values used in bfd/elf64-ppc.c, bfd/elf32-ppc.c,
-	 bfd/coff-ppc, bfd/coff-rs6000.c and bfd/coff64-rs6000.c.
+	 bfd/coff-rs6000.c and bfd/coff64-rs6000.c.
 	 Overkill since data and marker relocs need not be handled
 	 here, but this way we can be sure a needed fixup reloc isn't
 	 accidentally omitted.  */
@@ -3133,9 +2949,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
       pcrel = TRUE;
       break;
 
-    case BFD_RELOC_16_GOT_PCREL: /* coff reloc, bad name re size.  */
     case BFD_RELOC_32:
-    case BFD_RELOC_32_GOTOFF:
     case BFD_RELOC_32_PLTOFF:
 #ifdef OBJ_XCOFF
     case BFD_RELOC_CTOR:
@@ -3219,10 +3033,10 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_64_PCREL:
     case BFD_RELOC_64_PLT_PCREL:
     case BFD_RELOC_PPC64_GOT_PCREL34:
-    case BFD_RELOC_PPC64_GOT_TLSGD34:
-    case BFD_RELOC_PPC64_GOT_TLSLD34:
-    case BFD_RELOC_PPC64_GOT_TPREL34:
-    case BFD_RELOC_PPC64_GOT_DTPREL34:
+    case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+    case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+    case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+    case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
     case BFD_RELOC_PPC64_PCREL28:
     case BFD_RELOC_PPC64_PCREL34:
     case BFD_RELOC_PPC64_PLT_PCREL34:
@@ -3317,12 +3131,13 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Look up the opcode in the hash table.  */
-  opcode = (const struct powerpc_opcode *) hash_find (ppc_hash, str);
+  opcode = (const struct powerpc_opcode *) str_hash_find (ppc_hash, str);
   if (opcode == (const struct powerpc_opcode *) NULL)
     {
       const struct powerpc_macro *macro;
 
-      macro = (const struct powerpc_macro *) hash_find (ppc_macro_hash, str);
+      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash,
+							    str);
       if (macro == (const struct powerpc_macro *) NULL)
 	as_bad (_("unrecognized opcode: `%s'"), str);
       else
@@ -3333,6 +3148,15 @@ md_assemble (char *str)
     }
 
   insn = opcode->opcode;
+  if (!target_big_endian
+      && ((insn & ~(1 << 26)) == 46u << 26
+	  || (insn & ~(0xc0 << 1)) == (31u << 26 | 533 << 1)))
+    {
+       /* lmw, stmw, lswi, lswx, stswi, stswx */
+      as_bad (_("`%s' invalid when little-endian"), str);
+      ppc_clear_labels ();
+      return;
+    }
 
   str = s;
   while (ISSPACE (*str))
@@ -3433,137 +3257,22 @@ md_assemble (char *str)
       hold = input_line_pointer;
       input_line_pointer = str;
 
-#ifdef TE_PE
-      if (*input_line_pointer == '[')
+      if ((reg_names_p
+	   && (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
+	       || ((operand->flags & PPC_OPERAND_CR_REG) != 0)))
+	  || !register_name (&ex))
 	{
-	  /* We are expecting something like the second argument here:
-	   *
-	   *    lwz r4,[toc].GS.0.static_int(rtoc)
-	   *           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	   * The argument following the `]' must be a symbol name, and the
-	   * register must be the toc register: 'rtoc' or '2'
-	   *
-	   * The effect is to 0 as the displacement field
-	   * in the instruction, and issue an IMAGE_REL_PPC_TOCREL16 (or
-	   * the appropriate variation) reloc against it based on the symbol.
-	   * The linker will build the toc, and insert the resolved toc offset.
-	   *
-	   * Note:
-	   * o The size of the toc entry is currently assumed to be
-	   *   32 bits. This should not be assumed to be a hard coded
-	   *   number.
-	   * o In an effort to cope with a change from 32 to 64 bits,
-	   *   there are also toc entries that are specified to be
-	   *   either 32 or 64 bits:
-	   *     lwz r4,[toc32].GS.0.static_int(rtoc)
-	   *     lwz r4,[toc64].GS.0.static_int(rtoc)
-	   *   These demand toc entries of the specified size, and the
-	   *   instruction probably requires it.
-	   */
+	  char save_lex = lex_type['%'];
 
-	  int valid_toc;
-	  enum toc_size_qualifier toc_kind;
-	  bfd_reloc_code_real_type toc_reloc;
-
-	  /* Go parse off the [tocXX] part.  */
-	  valid_toc = parse_toc_entry (&toc_kind);
-
-	  if (!valid_toc)
+	  if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
+	      || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
 	    {
-	      ignore_rest_of_line ();
-	      break;
+	      cr_operand = TRUE;
+	      lex_type['%'] |= LEX_BEGIN_NAME;
 	    }
-
-	  /* Now get the symbol following the ']'.  */
 	  expression (&ex);
-
-	  switch (toc_kind)
-	    {
-	    case default_toc:
-	      /* In this case, we may not have seen the symbol yet,
-		 since  it is allowed to appear on a .extern or .globl
-		 or just be a label in the .data section.  */
-	      toc_reloc = BFD_RELOC_PPC_TOC16;
-	      break;
-	    case data_in_toc:
-	      /* 1. The symbol must be defined and either in the toc
-		 section, or a global.
-		 2. The reloc generated must have the TOCDEFN flag set
-		 in upper bit mess of the reloc type.
-		 FIXME: It's a little confusing what the tocv
-		 qualifier can be used for.  At the very least, I've
-		 seen three uses, only one of which I'm sure I can
-		 explain.  */
-	      if (ex.X_op == O_symbol)
-		{
-		  gas_assert (ex.X_add_symbol != NULL);
-		  if (symbol_get_bfdsym (ex.X_add_symbol)->section
-		      != tocdata_section)
-		    {
-		      as_bad (_("[tocv] symbol is not a toc symbol"));
-		    }
-		}
-
-	      toc_reloc = BFD_RELOC_PPC_TOC16;
-	      break;
-	    case must_be_32:
-	      /* FIXME: these next two specifically specify 32/64 bit
-		 toc entries.  We don't support them today.  Is this
-		 the right way to say that?  */
-	      toc_reloc = BFD_RELOC_NONE;
-	      as_bad (_("unimplemented toc32 expression modifier"));
-	      break;
-	    case must_be_64:
-	      /* FIXME: see above.  */
-	      toc_reloc = BFD_RELOC_NONE;
-	      as_bad (_("unimplemented toc64 expression modifier"));
-	      break;
-	    default:
-	      fprintf (stderr,
-		       _("Unexpected return value [%d] from parse_toc_entry!\n"),
-		       toc_kind);
-	      abort ();
-	      break;
-	    }
-
-	  /* We need to generate a fixup for this expression.  */
-	  if (fc >= MAX_INSN_FIXUPS)
-	    as_fatal (_("too many fixups"));
-
-	  fixups[fc].reloc = toc_reloc;
-	  fixups[fc].exp = ex;
-	  fixups[fc].opindex = *opindex_ptr;
-	  ++fc;
-
-	  /* Ok. We've set up the fixup for the instruction. Now make it
-	     look like the constant 0 was found here.  */
-	  ex.X_unsigned = 1;
-	  ex.X_op = O_constant;
-	  ex.X_add_number = 0;
-	  ex.X_add_symbol = NULL;
-	  ex.X_op_symbol = NULL;
-	}
-
-      else
-#endif		/* TE_PE */
-	{
-	  if ((reg_names_p
-               && (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
-		   || ((operand->flags & PPC_OPERAND_CR_REG) != 0)))
-	      || !register_name (&ex))
-	    {
-	      char save_lex = lex_type['%'];
-
-	      if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
-		  || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
-		{
-		  cr_operand = TRUE;
-		  lex_type['%'] |= LEX_BEGIN_NAME;
-		}
-	      expression (&ex);
-	      cr_operand = FALSE;
-	      lex_type['%'] = save_lex;
-	    }
+	  cr_operand = FALSE;
+	  lex_type['%'] = save_lex;
 	}
 
       str = input_line_pointer;
@@ -3804,10 +3513,10 @@ md_assemble (char *str)
 		  /* Fall through.  */
 		case BFD_RELOC_PPC64_GOT_PCREL34:
 		case BFD_RELOC_PPC64_PLT_PCREL34:
-		case BFD_RELOC_PPC64_GOT_TLSGD34:
-		case BFD_RELOC_PPC64_GOT_TLSLD34:
-		case BFD_RELOC_PPC64_GOT_TPREL34:
-		case BFD_RELOC_PPC64_GOT_DTPREL34:
+		case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+		case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+		case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+		case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
 		  if (operand->bitm != 0x3ffffffffULL
 		      || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		    as_warn (_("%s unsupported on this instruction"), "@pcrel");
@@ -4173,7 +3882,8 @@ md_assemble (char *str)
 
   /* The prefix part of an 8-byte instruction always occupies the lower
      addressed word in a doubleword, regardless of endianness.  */
-  if (!target_big_endian && insn_length == 8)
+  if (insn_length == 8
+      && (sizeof (insn) > sizeof (valueT) || !target_big_endian))
     {
       md_number_to_chars (f, PPC_GET_PREFIX (insn), 4);
       md_number_to_chars (f + 4, PPC_GET_SUFFIX (insn), 4);
@@ -5214,8 +4924,9 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 	    {
 	      /* The fifth argument is the function size.  */
 	      ++input_line_pointer;
-	      symbol_get_tc (ext_sym)->u.size = symbol_new
-                ("L0\001", absolute_section,(valueT) 0, &zero_address_frag);
+	      symbol_get_tc (ext_sym)->u.size
+		= symbol_new ("L0\001", absolute_section,
+			      &zero_address_frag, 0);
 	      pseudo_set (symbol_get_tc (ext_sym)->u.size);
 	    }
 	}
@@ -5762,574 +5473,6 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 }
 #endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
 
-#ifdef TE_PE
-
-/* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format.  */
-
-/* Set the current section.  */
-static void
-ppc_set_current_section (segT new)
-{
-  ppc_previous_section = ppc_current_section;
-  ppc_current_section = new;
-}
-
-/* pseudo-op: .previous
-   behaviour: toggles the current section with the previous section.
-   errors:    None
-   warnings:  "No previous section"  */
-
-static void
-ppc_previous (int ignore ATTRIBUTE_UNUSED)
-{
-  if (ppc_previous_section == NULL)
-    {
-      as_warn (_("no previous section to return to, ignored."));
-      return;
-    }
-
-  subseg_set (ppc_previous_section, 0);
-
-  ppc_set_current_section (ppc_previous_section);
-}
-
-/* pseudo-op: .pdata
-   behaviour: predefined read only data section
-	      double word aligned
-   errors:    None
-   warnings:  None
-   initial:   .section .pdata "adr3"
-	      a - don't know -- maybe a misprint
-	      d - initialized data
-	      r - readable
-	      3 - double word aligned (that would be 4 byte boundary)
-
-   commentary:
-   Tag index tables (also known as the function table) for exception
-   handling, debugging, etc.  */
-
-static void
-ppc_pdata (int ignore ATTRIBUTE_UNUSED)
-{
-  if (pdata_section == 0)
-    {
-      pdata_section = subseg_new (".pdata", 0);
-
-      bfd_set_section_flags (pdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-					     | SEC_READONLY | SEC_DATA));
-
-      bfd_set_section_alignment (pdata_section, 2);
-    }
-  else
-    {
-      pdata_section = subseg_new (".pdata", 0);
-    }
-  ppc_set_current_section (pdata_section);
-}
-
-/* pseudo-op: .ydata
-   behaviour: predefined read only data section
-	      double word aligned
-   errors:    None
-   warnings:  None
-   initial:   .section .ydata "drw3"
-	      a - don't know -- maybe a misprint
-	      d - initialized data
-	      r - readable
-	      3 - double word aligned (that would be 4 byte boundary)
-   commentary:
-   Tag tables (also known as the scope table) for exception handling,
-   debugging, etc.  */
-
-static void
-ppc_ydata (int ignore ATTRIBUTE_UNUSED)
-{
-  if (ydata_section == 0)
-    {
-      ydata_section = subseg_new (".ydata", 0);
-      bfd_set_section_flags (ydata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-					     | SEC_READONLY | SEC_DATA ));
-
-      bfd_set_section_alignment (ydata_section, 3);
-    }
-  else
-    {
-      ydata_section = subseg_new (".ydata", 0);
-    }
-  ppc_set_current_section (ydata_section);
-}
-
-/* pseudo-op: .reldata
-   behaviour: predefined read write data section
-	      double word aligned (4-byte)
-	      FIXME: relocation is applied to it
-	      FIXME: what's the difference between this and .data?
-   errors:    None
-   warnings:  None
-   initial:   .section .reldata "drw3"
-	      d - initialized data
-	      r - readable
-	      w - writable
-	      3 - double word aligned (that would be 8 byte boundary)
-
-   commentary:
-   Like .data, but intended to hold data subject to relocation, such as
-   function descriptors, etc.  */
-
-static void
-ppc_reldata (int ignore ATTRIBUTE_UNUSED)
-{
-  if (reldata_section == 0)
-    {
-      reldata_section = subseg_new (".reldata", 0);
-
-      bfd_set_section_flags (reldata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-					       | SEC_DATA));
-
-      bfd_set_section_alignment (reldata_section, 2);
-    }
-  else
-    {
-      reldata_section = subseg_new (".reldata", 0);
-    }
-  ppc_set_current_section (reldata_section);
-}
-
-/* pseudo-op: .rdata
-   behaviour: predefined read only data section
-	      double word aligned
-   errors:    None
-   warnings:  None
-   initial:   .section .rdata "dr3"
-	      d - initialized data
-	      r - readable
-	      3 - double word aligned (that would be 4 byte boundary)  */
-
-static void
-ppc_rdata (int ignore ATTRIBUTE_UNUSED)
-{
-  if (rdata_section == 0)
-    {
-      rdata_section = subseg_new (".rdata", 0);
-      bfd_set_section_flags (rdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-					     | SEC_READONLY | SEC_DATA ));
-
-      bfd_set_section_alignment (rdata_section, 2);
-    }
-  else
-    {
-      rdata_section = subseg_new (".rdata", 0);
-    }
-  ppc_set_current_section (rdata_section);
-}
-
-/* pseudo-op: .ualong
-   behaviour: much like .int, with the exception that no alignment is
-	      performed.
-	      FIXME: test the alignment statement
-   errors:    None
-   warnings:  None  */
-
-static void
-ppc_ualong (int ignore ATTRIBUTE_UNUSED)
-{
-  /* Try for long.  */
-  cons (4);
-}
-
-/* pseudo-op: .znop  <symbol name>
-   behaviour: Issue a nop instruction
-	      Issue a IMAGE_REL_PPC_IFGLUE relocation against it, using
-	      the supplied symbol name.
-   errors:    None
-   warnings:  Missing symbol name  */
-
-static void
-ppc_znop (int ignore ATTRIBUTE_UNUSED)
-{
-  unsigned long insn;
-  const struct powerpc_opcode *opcode;
-  char *f;
-  symbolS *sym;
-  char *symbol_name;
-  char c;
-  char *name;
-
-  /* Strip out the symbol name.  */
-  c = get_symbol_name (&symbol_name);
-
-  name = xstrdup (symbol_name);
-
-  sym = symbol_find_or_make (name);
-
-  *input_line_pointer = c;
-
-  SKIP_WHITESPACE_AFTER_NAME ();
-
-  /* Look up the opcode in the hash table.  */
-  opcode = (const struct powerpc_opcode *) hash_find (ppc_hash, "nop");
-
-  /* Stick in the nop.  */
-  insn = opcode->opcode;
-
-  /* Write out the instruction.  */
-  f = frag_more (4);
-  md_number_to_chars (f, insn, 4);
-  fix_new (frag_now,
-	   f - frag_now->fr_literal,
-	   4,
-	   sym,
-	   0,
-	   0,
-	   BFD_RELOC_16_GOT_PCREL);
-
-}
-
-/* pseudo-op:
-   behaviour:
-   errors:
-   warnings:  */
-
-static void
-ppc_pe_comm (int lcomm)
-{
-  char *name;
-  char c;
-  char *p;
-  offsetT temp;
-  symbolS *symbolP;
-  offsetT align;
-
-  c = get_symbol_name (&name);
-
-  /* just after name is now '\0'.  */
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad (_("expected comma after symbol-name: rest of line ignored."));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  input_line_pointer++;		/* skip ',' */
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_warn (_(".COMMon length (%ld.) <0! Ignored."), (long) temp);
-      ignore_rest_of_line ();
-      return;
-    }
-
-  if (! lcomm)
-    {
-      /* The third argument to .comm is the alignment.  */
-      if (*input_line_pointer != ',')
-	align = 3;
-      else
-	{
-	  ++input_line_pointer;
-	  align = get_absolute_expression ();
-	  if (align <= 0)
-	    {
-	      as_warn (_("ignoring bad alignment"));
-	      align = 3;
-	    }
-	}
-    }
-
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-
-  *p = c;
-  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
-    {
-      as_bad (_("ignoring attempt to re-define symbol `%s'."),
-	      S_GET_NAME (symbolP));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  if (S_GET_VALUE (symbolP))
-    {
-      if (S_GET_VALUE (symbolP) != (valueT) temp)
-	as_bad (_("length of .comm \"%s\" is already %ld. Not changed to %ld."),
-		S_GET_NAME (symbolP),
-		(long) S_GET_VALUE (symbolP),
-		(long) temp);
-    }
-  else
-    {
-      S_SET_VALUE (symbolP, (valueT) temp);
-      S_SET_EXTERNAL (symbolP);
-      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
-    }
-
-  demand_empty_rest_of_line ();
-}
-
-/*
- * implement the .section pseudo op:
- *	.section name {, "flags"}
- *                ^         ^
- *                |         +--- optional flags: 'b' for bss
- *                |                              'i' for info
- *                +-- section name               'l' for lib
- *                                               'n' for noload
- *                                               'o' for over
- *                                               'w' for data
- *						 'd' (apparently m88k for data)
- *                                               'x' for text
- * But if the argument is not a quoted string, treat it as a
- * subsegment number.
- *
- * FIXME: this is a copy of the section processing from obj-coff.c, with
- * additions/changes for the moto-pas assembler support. There are three
- * categories:
- *
- * FIXME: I just noticed this. This doesn't work at all really. It it
- *        setting bits that bfd probably neither understands or uses. The
- *        correct approach (?) will have to incorporate extra fields attached
- *        to the section to hold the system specific stuff. (krk)
- *
- * Section Contents:
- * 'a' - unknown - referred to in documentation, but no definition supplied
- * 'c' - section has code
- * 'd' - section has initialized data
- * 'u' - section has uninitialized data
- * 'i' - section contains directives (info)
- * 'n' - section can be discarded
- * 'R' - remove section at link time
- *
- * Section Protection:
- * 'r' - section is readable
- * 'w' - section is writable
- * 'x' - section is executable
- * 's' - section is sharable
- *
- * Section Alignment:
- * '0' - align to byte boundary
- * '1' - align to halfword boundary
- * '2' - align to word boundary
- * '3' - align to doubleword boundary
- * '4' - align to quadword boundary
- * '5' - align to 32 byte boundary
- * '6' - align to 64 byte boundary
- *
- */
-
-void
-ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
-{
-  /* Strip out the section name.  */
-  char *section_name;
-  char c;
-  char *name;
-  unsigned int exp;
-  flagword flags;
-  segT sec;
-  int align;
-
-  c = get_symbol_name (&section_name);
-
-  name = xstrdup (section_name);
-
-  *input_line_pointer = c;
-
-  SKIP_WHITESPACE_AFTER_NAME ();
-
-  exp = 0;
-  flags = SEC_NO_FLAGS;
-
-  if (strcmp (name, ".idata$2") == 0)
-    {
-      align = 0;
-    }
-  else if (strcmp (name, ".idata$3") == 0)
-    {
-      align = 0;
-    }
-  else if (strcmp (name, ".idata$4") == 0)
-    {
-      align = 2;
-    }
-  else if (strcmp (name, ".idata$5") == 0)
-    {
-      align = 2;
-    }
-  else if (strcmp (name, ".idata$6") == 0)
-    {
-      align = 1;
-    }
-  else
-    /* Default alignment to 16 byte boundary.  */
-    align = 4;
-
-  if (*input_line_pointer == ',')
-    {
-      ++input_line_pointer;
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer != '"')
-	exp = get_absolute_expression ();
-      else
-	{
-	  ++input_line_pointer;
-	  while (*input_line_pointer != '"'
-		 && ! is_end_of_line[(unsigned char) *input_line_pointer])
-	    {
-	      switch (*input_line_pointer)
-		{
-		  /* Section Contents */
-		case 'a': /* unknown */
-		  as_bad (_("unsupported section attribute -- 'a'"));
-		  break;
-		case 'c': /* code section */
-		  flags |= SEC_CODE;
-		  break;
-		case 'd': /* section has initialized data */
-		  flags |= SEC_DATA;
-		  break;
-		case 'u': /* section has uninitialized data */
-		  /* FIXME: This is IMAGE_SCN_CNT_UNINITIALIZED_DATA
-		     in winnt.h */
-		  flags |= SEC_ROM;
-		  break;
-		case 'i': /* section contains directives (info) */
-		  /* FIXME: This is IMAGE_SCN_LNK_INFO
-		     in winnt.h */
-		  flags |= SEC_HAS_CONTENTS;
-		  break;
-		case 'n': /* section can be discarded */
-		  flags &=~ SEC_LOAD;
-		  break;
-		case 'R': /* Remove section at link time */
-		  flags |= SEC_NEVER_LOAD;
-		  break;
-#if IFLICT_BRAIN_DAMAGE
-		  /* Section Protection */
-		case 'r': /* section is readable */
-		  flags |= IMAGE_SCN_MEM_READ;
-		  break;
-		case 'w': /* section is writable */
-		  flags |= IMAGE_SCN_MEM_WRITE;
-		  break;
-		case 'x': /* section is executable */
-		  flags |= IMAGE_SCN_MEM_EXECUTE;
-		  break;
-		case 's': /* section is sharable */
-		  flags |= IMAGE_SCN_MEM_SHARED;
-		  break;
-
-		  /* Section Alignment */
-		case '0': /* align to byte boundary */
-		  flags |= IMAGE_SCN_ALIGN_1BYTES;
-		  align = 0;
-		  break;
-		case '1':  /* align to halfword boundary */
-		  flags |= IMAGE_SCN_ALIGN_2BYTES;
-		  align = 1;
-		  break;
-		case '2':  /* align to word boundary */
-		  flags |= IMAGE_SCN_ALIGN_4BYTES;
-		  align = 2;
-		  break;
-		case '3':  /* align to doubleword boundary */
-		  flags |= IMAGE_SCN_ALIGN_8BYTES;
-		  align = 3;
-		  break;
-		case '4':  /* align to quadword boundary */
-		  flags |= IMAGE_SCN_ALIGN_16BYTES;
-		  align = 4;
-		  break;
-		case '5':  /* align to 32 byte boundary */
-		  flags |= IMAGE_SCN_ALIGN_32BYTES;
-		  align = 5;
-		  break;
-		case '6':  /* align to 64 byte boundary */
-		  flags |= IMAGE_SCN_ALIGN_64BYTES;
-		  align = 6;
-		  break;
-#endif
-		default:
-		  as_bad (_("unknown section attribute '%c'"),
-			  *input_line_pointer);
-		  break;
-		}
-	      ++input_line_pointer;
-	    }
-	  if (*input_line_pointer == '"')
-	    ++input_line_pointer;
-	}
-    }
-
-  sec = subseg_new (name, (subsegT) exp);
-
-  ppc_set_current_section (sec);
-
-  if (flags != SEC_NO_FLAGS)
-    {
-      if (!bfd_set_section_flags (sec, flags))
-	as_bad (_("error setting flags for \"%s\": %s"),
-		bfd_section_name (sec),
-		bfd_errmsg (bfd_get_error ()));
-    }
-
-  bfd_set_section_alignment (sec, align);
-}
-
-static void
-ppc_pe_function (int ignore ATTRIBUTE_UNUSED)
-{
-  char *name;
-  char endc;
-  symbolS *ext_sym;
-
-  endc = get_symbol_name (&name);
-
-  ext_sym = symbol_find_or_make (name);
-
-  (void) restore_line_pointer (endc);
-
-  S_SET_DATA_TYPE (ext_sym, DT_FCN << N_BTSHFT);
-  SF_SET_FUNCTION (ext_sym);
-  SF_SET_PROCESS (ext_sym);
-  coff_add_linesym (ext_sym);
-
-  demand_empty_rest_of_line ();
-}
-
-static void
-ppc_pe_tocd (int ignore ATTRIBUTE_UNUSED)
-{
-  if (tocdata_section == 0)
-    {
-      tocdata_section = subseg_new (".tocd", 0);
-      /* FIXME: section flags won't work.  */
-      bfd_set_section_flags (tocdata_section, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-					       | SEC_READONLY | SEC_DATA));
-
-      bfd_set_section_alignment (tocdata_section, 2);
-    }
-  else
-    {
-      rdata_section = subseg_new (".tocd", 0);
-    }
-
-  ppc_set_current_section (tocdata_section);
-
-  demand_empty_rest_of_line ();
-}
-
-/* Don't adjust TOC relocs to use the section symbol.  */
-
-int
-ppc_pe_fix_adjustable (fixS *fix)
-{
-  return fix->fx_r_type != BFD_RELOC_PPC_TOC16;
-}
-
-#endif
-
 #ifdef OBJ_XCOFF
 
 /* XCOFF specific symbol and file handling.  */
@@ -6757,7 +5900,7 @@ ppc_adjust_symtab (void)
 	continue;
 
       csect = symbol_create (".abs[XO]", absolute_section,
-			     S_GET_VALUE (sym), &zero_address_frag);
+			     &zero_address_frag, S_GET_VALUE (sym));
       symbol_get_bfdsym (csect)->value = S_GET_VALUE (sym);
       S_SET_STORAGE_CLASS (csect, C_HIDEXT);
       i = S_GET_NUMBER_AUXILIARY (csect);
@@ -7072,8 +6215,6 @@ ppc_fix_adjustable (fixS *fix)
 	  && fix->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_PPC64_GOT16_DS
 	  && fix->fx_r_type != BFD_RELOC_PPC64_GOT16_LO_DS
-	  && fix->fx_r_type != BFD_RELOC_16_GOT_PCREL
-	  && fix->fx_r_type != BFD_RELOC_32_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_PPC64_GOT_PCREL34
 	  && fix->fx_r_type != BFD_RELOC_24_PLT_PCREL
 	  && fix->fx_r_type != BFD_RELOC_32_PLTOFF
@@ -7532,10 +6673,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
 	case BFD_RELOC_PPC64_TPREL34:
 	case BFD_RELOC_PPC64_DTPREL34:
-	case BFD_RELOC_PPC64_GOT_TLSGD34:
-	case BFD_RELOC_PPC64_GOT_TLSLD34:
-	case BFD_RELOC_PPC64_GOT_TPREL34:
-	case BFD_RELOC_PPC64_GOT_DTPREL34:
+	case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+	case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+	case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+	case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
 	  gas_assert (fixP->fx_addsy != NULL);
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  fieldval = 0;
@@ -7926,16 +7067,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     fixP->fx_addnumber = 0;
   else
     {
-#ifdef TE_PE
-      fixP->fx_addnumber = 0;
-#else
       /* We want to use the offset within the toc, not the actual VMA
 	 of the symbol.  */
       fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
 			    - S_GET_VALUE (ppc_toc_csect));
       /* Set *valP to avoid errors.  */
       *valP = value;
-#endif
     }
 #endif
 }

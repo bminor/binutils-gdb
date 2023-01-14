@@ -24,18 +24,18 @@ SECTIONS
 {
   .text ${RELOCATING+ ${TEXT_START_ADDR}}:
   {
+    /* FIXME: Move .init, .fini, .ctors and .dtors to their own sections.  */
+    ${RELOCATING+ PROVIDE (_init_start = .);}
+    ${RELOCATING+ PROVIDE (_init = .);}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
+    ${RELOCATING+ PROVIDE (_init_end = .);}
+
     *(.text)
     ${RELOCATING+*(.text.*)}
     ${RELOCATING+*(.gnu.linkonce.t*)}
     ${RELOCATING+*(.rodata)}
     ${RELOCATING+*(.rodata.*)}
     ${RELOCATING+*(.gnu.linkonce.r*)}
-
-    /* FIXME: Move .init, .fini, .ctors and .dtors to their own sections.  */
-    ${RELOCATING+ PROVIDE (_init_start = .);}
-    ${RELOCATING+ PROVIDE (_init = .);}
-    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
-    ${RELOCATING+ PROVIDE (_init_end = .);}
 
     ${RELOCATING+ PROVIDE (_fini_start = .);}
     ${RELOCATING+ PROVIDE (_fini = .);}

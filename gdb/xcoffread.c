@@ -2038,8 +2038,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       && pst->n_global_syms == 0
       && pst->n_static_syms == 0)
     {
-      /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-         it is on the obstack, but we can forget to chain it on the list.  */
+      /* Throw away this psymtab, it's empty.  */
       /* Empty psymtabs happen as a result of header files which don't have
          any symbols in them.  There can be a lot of them.  */
 
@@ -2114,7 +2113,6 @@ static void
 scan_xcoff_symtab (minimal_symbol_reader &reader,
 		   struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section.  */
   const char *filestring = NULL;
 
@@ -2577,10 +2575,6 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    switch (p[1])
 	      {
 	      case 'S':
-		if (gdbarch_static_transform_name_p (gdbarch))
-		  namestring = gdbarch_static_transform_name
-				 (gdbarch, namestring);
-
 		add_psymbol_to_list (gdb::string_view (namestring,
 						       p - namestring),
 				     true, VAR_DOMAIN, LOC_STATIC,

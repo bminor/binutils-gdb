@@ -21,7 +21,6 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }
 
-global ldemul
 if {[istarget mips*-*-irix6*]} {
     set ldemul "-melf32bsmip"
 } elseif {[istarget mips*el-*-linux*]} {
@@ -104,7 +103,7 @@ proc good_combination {arglist flags args} {
     }
 
     if {$objs == ""} {
-	unresolved $testname
+	fail $testname
     } elseif {![ld_link "$ld $ldemul" $finalobj "-r $objs"]} {
 	fail $testname
     } else {
@@ -202,7 +201,7 @@ proc bad_combination {arglist message} {
     }
 
     if {$objs == ""} {
-	unresolved $testname
+	fail $testname
     } elseif {[ld_link "$ld $ldemul" $finalobj "-r $objs"]
 	      || [string first $message $link_output] < 0} {
 	fail $testname

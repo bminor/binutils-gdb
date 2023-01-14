@@ -161,12 +161,12 @@ struct bcache
   /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
      never seen those bytes before, add a copy of them to BCACHE.  In
      either case, return a pointer to BCACHE's copy of that string.
-     Since the cached value is ment to be read-only, return a const
+     Since the cached value is meant to be read-only, return a const
      buffer.  If ADDED is not NULL, set *ADDED to true if the bytes
      were newly added to the cache, or to false if the bytes were
      found in the cache.  */
 
-  const void *insert (const void *addr, int length, int *added = nullptr);
+  const void *insert (const void *addr, int length, bool *added = nullptr);
 
   /* Print statistics on this bcache's memory usage and efficacity at
      eliminating duplication.  TYPE should be a string describing the

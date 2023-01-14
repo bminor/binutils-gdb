@@ -305,6 +305,7 @@ read_history_range (const char *filename, int from, int to)
   if (file_size == 0)
     {
       free (input);
+      close (file);
       return 0;	/* don't waste time if we don't have to */
     }
 
@@ -368,9 +369,11 @@ read_history_range (const char *filename, int from, int to)
     }
 
   has_timestamps = HIST_TIMESTAMP_START (buffer);
-  history_multiline_entries += has_timestamps && history_write_timestamps;  
+  history_multiline_entries += has_timestamps && history_write_timestamps;
 
   /* Skip lines until we are at FROM. */
+  if (has_timestamps)
+    last_ts = buffer;
   for (line_start = line_end = buffer; line_end < bufend && current_line < from; line_end++)
     if (*line_end == '\n')
       {
@@ -379,7 +382,18 @@ read_history_range (const char *filename, int from, int to)
 	   line.  We should check more extensively here... */
 	if (HIST_TIMESTAMP_START(p) == 0)
 	  current_line++;
+	else
+	  last_ts = p;
 	line_start = p;
+	/* If we are at the last line (current_line == from) but we have
+	   timestamps (has_timestamps), then line_start points to the
+	   text of the last command, and we need to skip to its end. */
+	if (current_line >= from && has_timestamps)
+	  {
+	    for (line_end = p; line_end < bufend && *line_end != '\n'; line_end++)
+	      ;
+	    line_start = (*line_end == '\n') ? line_end + 1 : line_end;
+	  }
       }
 
   /* If there are lines left to gobble, then gobble them now. */
@@ -606,6 +620,7 @@ history_truncate_file (const char *fname, int lines)
 
   if (rv != 0)
     {
+      rv = errno;
       if (tempname)
 	unlink (tempname);
       history_lines_written_to_file = 0;
@@ -753,6 +768,7 @@ mmap_error:
 
   if (rv != 0)
     {
+      rv = errno;
       if (tempname)
 	unlink (tempname);
       history_lines_written_to_file = 0;

@@ -16,15 +16,10 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-if {!([istarget "x86_64-*-linux*"]
-      || [istarget "x86_64-*-nacl*"])
-    || [is_remote host]} {
+if {![istarget "x86_64-*-linux*"] || [is_remote host]} {
     return
 }
 
-global OBJCOPY
-global OBJCOPYFLAGS
-global READELF
 set tempfile tmpdir/x86-64-object-temp.o
 set copyfile tmpdir/x86-64-object-copy.o
 

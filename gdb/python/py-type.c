@@ -242,10 +242,10 @@ convert_field (struct type *type, int field)
     return NULL;
 
   /* A field can have a NULL type in some situations.  */
-  if (TYPE_FIELD_TYPE (type, field) == NULL)
+  if (type->field (field).type () == NULL)
     arg = gdbpy_ref<>::new_reference (Py_None);
   else
-    arg.reset (type_to_type_object (TYPE_FIELD_TYPE (type, field)));
+    arg.reset (type_to_type_object (type->field (field).type ()));
   if (arg == NULL)
     return NULL;
   if (PyObject_SetAttrString (result.get (), "type", arg.get ()) < 0)
@@ -592,12 +592,9 @@ typy_range (PyObject *self, PyObject *args)
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
-      low = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
-      high = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (type));
-      break;
     case TYPE_CODE_RANGE:
-      low = TYPE_LOW_BOUND (type);
-      high = TYPE_HIGH_BOUND (type);
+      low = type->bounds ()->low.const_val ();
+      high = type->bounds ()->high.const_val ();;
       break;
     }
 
@@ -1366,7 +1363,7 @@ type_to_type_object (struct type *type)
   try
     {
       /* Try not to let stub types leak out to Python.  */
-      if (TYPE_STUB (type))
+      if (type->is_stub ())
 	type = check_typedef (type);
     }
   catch (...)

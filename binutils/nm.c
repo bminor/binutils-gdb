@@ -161,7 +161,6 @@ static int show_version = 0;	/* Show the version number.  */
 static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
 static int allow_special_symbols = 0;  /* Allow special symbols.  */
-static int with_symbol_versions = 0; /* Include symbol version information in the output.  */
 
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
@@ -192,7 +191,8 @@ enum long_option_values
   OPTION_PLUGIN,
   OPTION_SIZE_SORT,
   OPTION_RECURSE_LIMIT,
-  OPTION_NO_RECURSE_LIMIT
+  OPTION_NO_RECURSE_LIMIT,
+  OPTION_WITH_SYMBOL_VERSIONS
 };
 
 static struct option long_options[] =
@@ -226,7 +226,8 @@ static struct option long_options[] =
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
   {"version", no_argument, &show_version, 1},
-  {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
+  {"with-symbol-versions", no_argument, NULL,
+   OPTION_WITH_SYMBOL_VERSIONS},
   {0, no_argument, 0, 0}
 };
 
@@ -420,7 +421,10 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	= bfd_get_symbol_version_string (abfd, &info->elfinfo->symbol,
 					 FALSE, &hidden);
       if (version_string && version_string[0])
-	printf ("%s%s", hidden ? "@" : "@@", version_string);
+	printf ("%s%s",
+	       (hidden || bfd_is_und_section (info->elfinfo->symbol.section)
+		? "@" : "@@"),
+	       version_string);
     }
 }
 
@@ -900,22 +904,6 @@ print_symbol (bfd *        abfd,
     }
 
   format->print_symbol_info (&info, abfd);
-
-  if (with_symbol_versions)
-    {
-      const char *  version_string = NULL;
-      bfd_boolean   hidden = FALSE;
-
-      if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
-	version_string = bfd_get_symbol_version_string (abfd, sym,
-							TRUE, &hidden);
-
-      if (bfd_is_und_section (bfd_asymbol_section (sym)))
-	hidden = TRUE;
-
-      if (version_string && *version_string != '\0')
-	printf (hidden ? "@%s" : "@@%s", version_string);
-    }
 
   if (line_numbers)
     {
@@ -1760,6 +1748,9 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_NO_RECURSE_LIMIT:
 	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_WITH_SYMBOL_VERSIONS:
+	  /* Ignored for backward compatibility.  */
 	  break;
 	case 'D':
 	  dynamic = 1;

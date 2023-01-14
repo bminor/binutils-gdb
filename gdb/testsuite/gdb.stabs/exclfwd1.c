@@ -30,4 +30,5 @@ a_t v1;
 int
 main ()
 {
+  return 0;
 }

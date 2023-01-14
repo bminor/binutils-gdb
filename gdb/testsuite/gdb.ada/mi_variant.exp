@@ -16,6 +16,8 @@
 load_lib "ada.exp"
 load_lib "gdb-python.exp"
 
+if { [skip_ada_tests] } { return -1 }
+
 standard_ada_testfile pkg
 
 load_lib mi-support.exp

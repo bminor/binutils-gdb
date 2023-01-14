@@ -135,30 +135,30 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* ptrdiff_t vcall_and_vbase_offsets[0]; */
   FIELD_NAME (*field) = "vcall_and_vbase_offsets";
-  FIELD_TYPE (*field) = lookup_array_range_type (ptrdiff_type, 0, -1);
+  field->set_type (lookup_array_range_type (ptrdiff_type, 0, -1));
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   /* ptrdiff_t offset_to_top; */
   FIELD_NAME (*field) = "offset_to_top";
-  FIELD_TYPE (*field) = ptrdiff_type;
+  field->set_type (ptrdiff_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   /* void *type_info; */
   FIELD_NAME (*field) = "type_info";
-  FIELD_TYPE (*field) = void_ptr_type;
+  field->set_type (void_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   /* void (*virtual_functions[0]) (); */
   FIELD_NAME (*field) = "virtual_functions";
-  FIELD_TYPE (*field) = lookup_array_range_type (ptr_to_void_fn_type, 0, -1);
+  field->set_type (lookup_array_range_type (ptr_to_void_fn_type, 0, -1));
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   /* We assumed in the allocation above that there were four fields.  */
@@ -182,7 +182,7 @@ vtable_ptrdiff_type (struct gdbarch *gdbarch)
     = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
   /* The "offset_to_top" field has the appropriate (ptrdiff_t) type.  */
-  return TYPE_FIELD_TYPE (vtable_type, vtable_field_offset_to_top);
+  return vtable_type->field (vtable_field_offset_to_top).type ();
 }
 
 /* Return the offset from the start of the imaginary `struct
@@ -221,7 +221,7 @@ gnuv3_dynamic_class (struct type *type)
 
   for (fieldnum = 0; fieldnum < TYPE_N_BASECLASSES (type); fieldnum++)
     if (BASETYPE_VIA_VIRTUAL (type, fieldnum)
-	|| gnuv3_dynamic_class (TYPE_FIELD_TYPE (type, fieldnum)))
+	|| gnuv3_dynamic_class (type->field (fieldnum).type ()))
       {
 	TYPE_CPLUS_DYNAMIC (type) = 1;
 	return 1;
@@ -467,12 +467,11 @@ gnuv3_baseclass_offset (struct type *type, int index,
     {
       struct dwarf2_property_baton baton;
       baton.property_type
-	= lookup_pointer_type (TYPE_FIELD_TYPE (type, index));
+	= lookup_pointer_type (type->field (index).type ());
       baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (type, index);
 
       struct dynamic_prop prop;
-      prop.kind = PROP_LOCEXPR;
-      prop.data.baton = &baton;
+      prop.set_locexpr (&baton);
 
       struct property_addr_info addr_stack;
       addr_stack.type = type;
@@ -550,7 +549,7 @@ gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
 	continue;
 
       pos = TYPE_BASECLASS_BITPOS (domain, i) / 8;
-      basetype = TYPE_FIELD_TYPE (domain, i);
+      basetype = domain->field (i).type ();
       /* Recurse with a modified adjustment.  We don't need to adjust
 	 voffset.  */
       if (adjustment >= pos && adjustment < pos + TYPE_LENGTH (basetype))
@@ -1039,16 +1038,16 @@ build_std_type_info_type (struct gdbarch *arch)
 
   /* The vtable.  */
   FIELD_NAME (*field) = "_vptr.type_info";
-  FIELD_TYPE (*field) = void_ptr_type;
+  field->set_type (void_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   /* The name.  */
   FIELD_NAME (*field) = "__name";
-  FIELD_TYPE (*field) = char_ptr_type;
+  field->set_type (char_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  offset += TYPE_LENGTH (field->type ());
   field++;
 
   gdb_assert (field == (field_list + 2));
@@ -1331,7 +1330,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
 
   /* ...and the second argument should be the same as the class
      type, with the expected type code...  */
-  struct type *arg_type = TYPE_FIELD_TYPE (method_type, 1);
+  struct type *arg_type = method_type->field (1).type ();
 
   if (arg_type->code () != expected)
     return false;
@@ -1345,7 +1344,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
      constructor.  */
   for (int i = 2; i < method_type->num_fields (); i++)
     {
-      arg_type = TYPE_FIELD_TYPE (method_type, i);
+      arg_type = method_type->field (i).type ();
       /* FIXME aktemur/2019-10-31: As of this date, neither
 	 clang++-7.0.0 nor g++-8.2.0 produce a DW_AT_default_value
 	 attribute.  GDB is also not set to read this attribute, yet.
@@ -1406,8 +1405,7 @@ gnuv3_pass_by_reference (struct type *type)
   type = check_typedef (type);
 
   /* Start with the default values.  */
-  struct language_pass_by_ref_info info
-    = default_pass_by_reference (type);
+  struct language_pass_by_ref_info info;
 
   bool has_cc_attr = false;
   bool is_pass_by_value = false;
@@ -1530,7 +1528,7 @@ gnuv3_pass_by_reference (struct type *type)
   for (fieldnum = 0; fieldnum < type->num_fields (); fieldnum++)
     if (!field_is_static (&type->field (fieldnum)))
       {
-	struct type *field_type = TYPE_FIELD_TYPE (type, fieldnum);
+	struct type *field_type = type->field (fieldnum).type ();
 
 	/* For arrays, make the decision based on the element type.  */
 	if (field_type->code () == TYPE_CODE_ARRAY)

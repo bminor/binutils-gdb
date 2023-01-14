@@ -551,7 +551,7 @@ amd64_has_unaligned_fields (struct type *type)
     {
       for (int i = 0; i < type->num_fields (); i++)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 	  int align = type_align(subtype);
 
@@ -587,7 +587,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
 				enum amd64_reg_class theclass[2],
 				unsigned int bitoffset)
 {
-  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+  struct type *subtype = check_typedef (type->field (i).type ());
   int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
   int pos = bitpos / 64;
   enum amd64_reg_class subclass[2];
@@ -2433,7 +2433,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
 	  return pc + 4;
 	}
 
-      /* For X32, also check for `movq %esp, %ebp'.  */
+      /* For X32, also check for `movl %esp, %ebp'.  */
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	{
 	  if (memcmp (buf, mov_esp_ebp_1, 2) == 0
@@ -2547,12 +2547,13 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	= skip_prologue_using_sal (gdbarch, func_addr);
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
-      /* Clang always emits a line note before the prologue and another
-	 one after.  We trust clang to emit usable line notes.  */
+      /* LLVM backend (Clang/Flang) always emits a line note before the
+         prologue and another one after.  We trust clang to emit usable
+         line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
         return std::max (start_pc, post_prologue_pc);
     }
 

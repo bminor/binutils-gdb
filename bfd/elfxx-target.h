@@ -362,6 +362,10 @@
 #define ELF_TARGET_ID	GENERIC_ELF_DATA
 #endif
 
+#ifndef ELF_TARGET_OS
+#define ELF_TARGET_OS	is_normal
+#endif
+
 #ifndef ELF_OSABI
 #define ELF_OSABI ELFOSABI_NONE
 #endif
@@ -656,6 +660,9 @@
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
+#ifndef elf_backend_elfsym_local_is_section
+#define elf_backend_elfsym_local_is_section	NULL
+#endif
 #ifndef elf_backend_mips_irix_compat
 #define elf_backend_mips_irix_compat		NULL
 #endif
@@ -799,6 +806,7 @@ static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_TARGET_ID,		/* target_id */
+  ELF_TARGET_OS,		/* target_os */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_OSABI,			/* elf_osabi  */
   ELF_MAXPAGESIZE,		/* maxpagesize */
@@ -879,6 +887,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_can_make_lsda_relative_eh_frame,
   elf_backend_encode_eh_address,
   elf_backend_write_section,
+  elf_backend_elfsym_local_is_section,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,

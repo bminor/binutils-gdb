@@ -87,7 +87,7 @@ set seen 0
 
 set test "stepi"
 if {[gdb_test_multiple "stepi" "$test" {
-    -re "infrun: random signal" {
+    -re {\[infrun\] handle_signal_stop: random signal} {
 	set seen 1
 	exp_continue
     }

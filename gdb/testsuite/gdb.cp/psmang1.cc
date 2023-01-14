@@ -37,6 +37,8 @@ main (int argc, char **argv)
 
   si.method1 ();
   si.method2 ();
+
+  return 0;
 }
 
 

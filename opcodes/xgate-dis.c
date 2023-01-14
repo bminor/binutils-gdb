@@ -254,7 +254,6 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info)
             }
           else if (!strcmp (decodePTR->opcodePTR->constraints, XGATE_OP_INH))
             {
-        	  //
             }
           else
             {

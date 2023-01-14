@@ -753,14 +753,14 @@ go32_nat_target::create_inferior (const char *exec_file,
   save_npx ();
 #endif
 
-  inferior_ptid = ptid_t (SOME_PID);
   inf = current_inferior ();
   inferior_appeared (inf, SOME_PID);
 
   if (!target_is_pushed (this))
     push_target (this);
 
-  add_thread_silent (inferior_ptid);
+  thread_info *thr = add_thread_silent (ptid_t (SOME_PID));
+  switch_to_thread (thr);
 
   clear_proceed_status (0);
   insert_breakpoints ();
@@ -770,8 +770,6 @@ go32_nat_target::create_inferior (const char *exec_file,
 void
 go32_nat_target::mourn_inferior ()
 {
-  ptid_t ptid;
-
   redir_cmdline_delete (&child_cmd);
   resume_signal = -1;
   resume_is_step = 0;
@@ -787,8 +785,6 @@ go32_nat_target::mourn_inferior ()
      the OS cleans up when the debuggee exits.  */
   x86_cleanup_dregs ();
 
-  ptid = inferior_ptid;
-  inferior_ptid = null_ptid;
   prog_has_started = 0;
 
   generic_mourn_inferior ();

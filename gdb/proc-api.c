@@ -28,8 +28,6 @@
 #include "gdbcmd.h"
 #include "completer.h"
 
-#define _STRUCTURED_PROC 1
-
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/proc.h>	/* for struct proc */

@@ -2273,7 +2273,7 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v8_int8",
 				   init_vector_type (bt->builtin_int8, 8));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("ppc_builtin_type_vec64");
       tdep->ppc_builtin_type_vec64 = t;
     }
@@ -2320,7 +2320,7 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v16_int8",
 				   init_vector_type (bt->builtin_int8, 16));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("ppc_builtin_type_vec128");
       tdep->ppc_builtin_type_vec128 = t;
     }

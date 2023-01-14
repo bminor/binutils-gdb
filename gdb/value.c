@@ -997,16 +997,16 @@ show_max_value_size (struct ui_file *file, int from_tty,
 static void
 check_type_length_before_alloc (const struct type *type)
 {
-  unsigned int length = TYPE_LENGTH (type);
+  ULONGEST length = TYPE_LENGTH (type);
 
   if (max_value_size > -1 && length > max_value_size)
     {
       if (type->name () != NULL)
-	error (_("value of type `%s' requires %u bytes, which is more "
-		 "than max-value-size"), type->name (), length);
+	error (_("value of type `%s' requires %s bytes, which is more "
+		 "than max-value-size"), type->name (), pulongest (length));
       else
-	error (_("value requires %u bytes, which is more than "
-		 "max-value-size"), length);
+	error (_("value requires %s bytes, which is more than "
+		 "max-value-size"), pulongest (length));
     }
 }
 
@@ -1412,7 +1412,18 @@ value_optimized_out (struct value *value)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  /* Fall back to checking value->optimized_out.  */
+	  switch (ex.error)
+	    {
+	    case MEMORY_ERROR:
+	    case OPTIMIZED_OUT_ERROR:
+	    case NOT_AVAILABLE_ERROR:
+	      /* These can normally happen when we try to access an
+		 optimized out or unavailable register, either in a
+		 physical register or spilled to memory.  */
+	      break;
+	    default:
+	      throw;
+	    }
 	}
     }
 
@@ -2750,7 +2761,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
   enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
-  int nosign = TYPE_UNSIGNED (type);
+  int nosign = type->is_unsigned ();
 
   switch (code)
     {
@@ -2770,7 +2781,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	else
 	  result = extract_signed_integer (valaddr, len, byte_order);
 	if (code == TYPE_CODE_RANGE)
-	  result += TYPE_RANGE_DATA (type)->bias;
+	  result += type->bounds ()->bias;
 	return result;
       }
 
@@ -2838,7 +2849,7 @@ value_static_field (struct type *type, int fieldno)
   switch (TYPE_FIELD_LOC_KIND (type, fieldno))
     {
     case FIELD_LOC_KIND_PHYSADDR:
-      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
+      retval = value_at_lazy (type->field (fieldno).type (),
 			      TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
       break;
     case FIELD_LOC_KIND_PHYSNAME:
@@ -2853,7 +2864,7 @@ value_static_field (struct type *type, int fieldno)
 	     reported as non-debuggable symbols.  */
 	  struct bound_minimal_symbol msym
 	    = lookup_minimal_symbol (phys_name, NULL, NULL);
-	  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+	  struct type *field_type = type->field (fieldno).type ();
 
 	  if (!msym.minsym)
 	    retval = allocate_optimized_out_value (field_type);
@@ -2906,7 +2917,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   arg_type = check_typedef (arg_type);
-  type = TYPE_FIELD_TYPE (arg_type, fieldno);
+  type = arg_type->field (fieldno).type ();
 
   /* Call check_typedef on our type to make sure that, if TYPE
      is a TYPE_CODE_TYPEDEF, its length is set to the length
@@ -3134,7 +3145,7 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
     {
       valmask = (((ULONGEST) 1) << bitsize) - 1;
       val &= valmask;
-      if (!TYPE_UNSIGNED (field_type))
+      if (!field_type->is_unsigned ())
 	{
 	  if (val & (valmask ^ (valmask >> 1)))
 	    {
@@ -3158,7 +3169,7 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+  struct type *field_type = type->field (fieldno).type ();
   int bit_offset;
 
   gdb_assert (val != NULL);
@@ -3181,7 +3192,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+  struct type *field_type = type->field (fieldno).type ();
 
   return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
 }
@@ -3246,7 +3257,7 @@ value_field_bitfield (struct type *type, int fieldno,
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct value *res_val = allocate_value (TYPE_FIELD_TYPE (type, fieldno));
+  struct value *res_val = allocate_value (type->field (fieldno).type ());
 
   unpack_value_bitfield (res_val, bitpos, bitsize,
 			 valaddr, embedded_offset, val);
@@ -3320,7 +3331,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      num -= TYPE_RANGE_DATA (type)->bias;
+      num -= type->bounds ()->bias;
       /* Fall through.  */
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -3618,10 +3629,20 @@ coerce_ref_if_computed (const struct value *arg)
 struct value *
 readjust_indirect_value_type (struct value *value, struct type *enc_type,
 			      const struct type *original_type,
-			      const struct value *original_value)
+			      struct value *original_value,
+			      CORE_ADDR original_value_address)
 {
+  gdb_assert (original_type->code () == TYPE_CODE_PTR
+	      || TYPE_IS_REFERENCE (original_type));
+
+  struct type *original_target_type = TYPE_TARGET_TYPE (original_type);
+  gdb::array_view<const gdb_byte> view;
+  struct type *resolved_original_target_type
+    = resolve_dynamic_type (original_target_type, view,
+			    original_value_address);
+
   /* Re-adjust type.  */
-  deprecated_set_value_type (value, TYPE_TARGET_TYPE (original_type));
+  deprecated_set_value_type (value, resolved_original_target_type);
 
   /* Add embedding info.  */
   set_value_enclosing_type (value, enc_type);
@@ -3648,12 +3669,11 @@ coerce_ref (struct value *arg)
   enc_type = check_typedef (value_enclosing_type (arg));
   enc_type = TYPE_TARGET_TYPE (enc_type);
 
-  retval = value_at_lazy (enc_type,
-                          unpack_pointer (value_type (arg),
-                                          value_contents (arg)));
+  CORE_ADDR addr = unpack_pointer (value_type (arg), value_contents (arg));
+  retval = value_at_lazy (enc_type, addr);
   enc_type = value_type (retval);
-  return readjust_indirect_value_type (retval, enc_type,
-                                       value_type_arg_tmp, arg);
+  return readjust_indirect_value_type (retval, enc_type, value_type_arg_tmp,
+				       arg, addr);
 }
 
 struct value *
@@ -3667,7 +3687,7 @@ coerce_array (struct value *arg)
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
-      if (!TYPE_VECTOR (type) && current_language->c_style_arrays)
+      if (!type->is_vector () && current_language->c_style_arrays)
 	arg = value_coerce_array (arg);
       break;
     case TYPE_CODE_FUNC:

@@ -196,11 +196,11 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       else if (type_not_allocated (type))
 	print_rank_only = true;
       else if ((TYPE_ASSOCIATED_PROP (type)
-		&& PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ASSOCIATED_PROP (type)))
+		&& PROP_CONST != TYPE_ASSOCIATED_PROP (type)->kind ())
 	       || (TYPE_ALLOCATED_PROP (type)
-		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ALLOCATED_PROP (type)))
+		   && PROP_CONST != TYPE_ALLOCATED_PROP (type)->kind ())
 	       || (TYPE_DATA_LOCATION (type)
-		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_DATA_LOCATION (type))))
+		   && PROP_CONST != TYPE_DATA_LOCATION (type)->kind ()))
 	{
 	  /* This case exist when we ptype a typename which has the dynamic
 	     properties but cannot be resolved as there is no object.  */
@@ -223,7 +223,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	  /* Make sure that, if we have an assumed size array, we
 	       print out a warning and print the upperbound as '*'.  */
 
-	  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+	  if (type->bounds ()->high.kind () == PROP_UNDEFINED)
 	    fprintf_filtered (stream, "*");
 	  else
 	    {
@@ -262,7 +262,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ") ");
 	fprintf_filtered (stream, "(");
-	if (nfields == 0 && TYPE_PROTOTYPED (type))
+	if (nfields == 0 && type->is_prototyped ())
 	  f_print_type (builtin_f_type (get_type_arch (type))->builtin_void,
 			"", stream, -1, 0, 0);
 	else
@@ -273,7 +273,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 		  fputs_filtered (", ", stream);
 		  wrap_here ("    ");
 		}
-	      f_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0, 0);
+	      f_print_type (type->field (i).type (), "", stream, -1, 0, 0);
 	    }
 	fprintf_filtered (stream, ")");
       }
@@ -406,16 +406,20 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_STRING:
-      /* Strings may have dynamic upperbounds (lengths) like arrays.  */
+      /* Strings may have dynamic upperbounds (lengths) like arrays.  We
+	 check specifically for the PROP_CONST case to indicate that the
+	 dynamic type has been resolved.  If we arrive here having been
+	 asked to print the type of a value with a dynamic type then the
+	 bounds will not have been resolved.  */
 
-      if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
-	fprintfi_filtered (level, stream, "character*(*)");
-      else
+      if (type->bounds ()->high.kind () == PROP_CONST)
 	{
 	  LONGEST upper_bound = f77_get_upperbound (type);
 
 	  fprintf_filtered (stream, "character*%s", pulongest (upper_bound));
 	}
+      else
+	fprintfi_filtered (level, stream, "character*(*)");
       break;
 
     case TYPE_CODE_STRUCT:
@@ -432,12 +436,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fputs_filtered ("\n", stream);
 	  for (index = 0; index < type->num_fields (); index++)
 	    {
-	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
+	      f_type_print_base (type->field (index).type (), stream,
 				 show - 1, level + 4);
 	      fputs_filtered (" :: ", stream);
 	      fputs_styled (TYPE_FIELD_NAME (type, index),
 			    variable_name_style.style (), stream);
-	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
+	      f_type_print_varspec_suffix (type->field (index).type (),
 					   stream, show - 1, 0, 0, 0, false);
 	      fputs_filtered ("\n", stream);
 	    }

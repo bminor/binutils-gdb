@@ -23,6 +23,86 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
+#include "elfxx-riscv.h"
+
+/* Record the priv spec version string and the corresponding class.  */
+
+struct priv_spec_t
+{
+  const char *name;
+  enum riscv_priv_spec_class class;
+};
+
+/* List for all supported privilege versions.  */
+
+static const struct priv_spec_t priv_specs[] =
+{
+  {"1.9.1", PRIV_SPEC_CLASS_1P9P1},
+  {"1.10",  PRIV_SPEC_CLASS_1P10},
+  {"1.11",  PRIV_SPEC_CLASS_1P11},
+
+/* Terminate the list.  */
+  {NULL, 0}
+};
+
+/* Get the corresponding CSR version class by giving a privilege
+   version string.  */
+
+int
+riscv_get_priv_spec_class (const char *s,
+			   enum riscv_priv_spec_class *class)
+{
+  const struct priv_spec_t *version;
+
+  if (s == NULL)
+    return 0;
+
+  for (version = &priv_specs[0]; version->name != NULL; ++version)
+    if (strcmp (version->name, s) == 0)
+      {
+	*class = version->class;
+	return 1;
+      }
+
+  /* Can not find the supported privilege version.  */
+  return 0;
+}
+
+/* Get the corresponding CSR version class by giving privilege
+   version numbers.  It is usually used to convert the priv
+   attribute numbers into the corresponding class.  */
+
+int
+riscv_get_priv_spec_class_from_numbers (unsigned int major,
+					unsigned int minor,
+					unsigned int revision,
+					enum riscv_priv_spec_class *class)
+{
+  char buf[36];
+
+  if (major == 0 && minor == 0 && revision == 0)
+    {
+      *class = PRIV_SPEC_CLASS_NONE;
+      return 1;
+    }
+
+  if (revision != 0)
+    snprintf (buf, sizeof (buf), "%u.%u.%u", major, minor, revision);
+  else
+    snprintf (buf, sizeof (buf), "%u.%u", major, minor);
+
+  return riscv_get_priv_spec_class (buf, class);
+}
+
+/* Get the corresponding privilege version string by giving a CSR
+   version class.  */
+
+const char *
+riscv_get_priv_spec_name (enum riscv_priv_spec_class class)
+{
+  /* The first enum is PRIV_SPEC_CLASS_NONE.  */
+  return priv_specs[class - 1].name;
+}
 
 /* This routine is provided two arch_infos and returns an arch_info
    that is compatible with both, or NULL if none exists.  */
@@ -47,10 +127,20 @@ riscv_scan (const struct bfd_arch_info *info, const char *string)
   if (bfd_default_scan (info, string))
     return TRUE;
 
-  /* The string might have extra characters for supported subsets.  So allow
-     a match that ignores trailing characters in string.  */
-  if (strncasecmp (string, info->printable_name,
-		   strlen (info->printable_name)) == 0)
+  /* The incoming STRING might take the form of riscv:rvXXzzz, where XX is
+     32 or 64, and zzz are one or more extension characters.  As we
+     currently only have 3 architectures defined, 'riscv', 'riscv:rv32',
+     and 'riscv:rv64', we would like to ignore the zzz for the purpose of
+     matching here.
+
+     However, we don't want the default 'riscv' to match over a more
+     specific 'riscv:rv32' or 'riscv:rv64', so in the case of the default
+     architecture (with the shorter 'riscv' name) we don't allow any
+     special matching, but for the 'riscv:rvXX' cases, we allow a match
+     with any additional trailing characters being ignored.  */
+  if (!info->the_default
+      && strncasecmp (string, info->printable_name,
+                      strlen (info->printable_name)) == 0)
     return TRUE;
 
   return FALSE;

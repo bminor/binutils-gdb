@@ -65,6 +65,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include <unordered_set>
+#include "producer.h"
 
 /* Register names.  */
 
@@ -1847,12 +1848,13 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	= skip_prologue_using_sal (gdbarch, func_addr);
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
-      /* Clang always emits a line note before the prologue and another
-	 one after.  We trust clang to emit usable line notes.  */
+      /* LLVM backend (Clang/Flang) always emits a line note before the
+         prologue and another one after.  We trust clang to emit usable
+         line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
         return std::max (start_pc, post_prologue_pc);
     }
  
@@ -2634,7 +2636,7 @@ i386_16_byte_align_p (struct type *type)
 {
   type = check_typedef (type);
   if ((type->code () == TYPE_CODE_DECFLOAT
-       || (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
+       || (type->code () == TYPE_CODE_ARRAY && type->is_vector ()))
       && TYPE_LENGTH (type) == 16)
     return 1;
   if (type->code () == TYPE_CODE_ARRAY)
@@ -2645,7 +2647,7 @@ i386_16_byte_align_p (struct type *type)
       int i;
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  if (i386_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
+	  if (i386_16_byte_align_p (type->field (i).type ()))
 	    return 1;
 	}
     }
@@ -2954,7 +2956,7 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
      double' member are returned in %st(0).  */
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      type = check_typedef (type->field (0).type ());
       if (type->code () == TYPE_CODE_FLT)
 	return (len == 4 || len == 8 || len == 12);
     }
@@ -3022,7 +3024,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
      here.  */
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      type = check_typedef (type->field (0).type ());
       return i386_return_value (gdbarch, function, type, regcache,
 				readbuf, writebuf);
     }
@@ -3103,13 +3105,14 @@ i386_zmm_type (struct gdbarch *gdbarch)
 #if 0
       union __gdb_builtin_type_vec512i
       {
-	int128_t uint128[4];
-	int64_t v4_int64[8];
-	int32_t v8_int32[16];
-	int16_t v16_int16[32];
-	int8_t v32_int8[64];
-	double v4_double[8];
-	float v8_float[16];
+	int128_t v4_int128[4];
+	int64_t v8_int64[8];
+	int32_t v16_int32[16];
+	int16_t v32_int16[32];
+	int8_t v64_int8[64];
+	double v8_double[8];
+	float v16_float[16];
+	bfloat16_t v32_bfloat16[32];
       };
 #endif
 
@@ -3117,6 +3120,8 @@ i386_zmm_type (struct gdbarch *gdbarch)
 
       t = arch_composite_type (gdbarch,
 			       "__gdb_builtin_type_vec512i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "v32_bfloat16",
+				   init_vector_type (bt->builtin_bfloat16, 32));
       append_composite_type_field (t, "v16_float",
 				   init_vector_type (bt->builtin_float, 16));
       append_composite_type_field (t, "v8_double",
@@ -3132,7 +3137,7 @@ i386_zmm_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v4_int128",
 				   init_vector_type (bt->builtin_int128, 4));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec512i");
       tdep->i386_zmm_type = t;
     }
@@ -3156,13 +3161,14 @@ i386_ymm_type (struct gdbarch *gdbarch)
 #if 0
       union __gdb_builtin_type_vec256i
       {
-        int128_t uint128[2];
-        int64_t v2_int64[4];
-        int32_t v4_int32[8];
-        int16_t v8_int16[16];
-        int8_t v16_int8[32];
-        double v2_double[4];
-        float v4_float[8];
+        int128_t v2_int128[2];
+        int64_t v4_int64[4];
+        int32_t v8_int32[8];
+        int16_t v16_int16[16];
+        int8_t v32_int8[32];
+        double v4_double[4];
+        float v8_float[8];
+        bfloat16_t v16_bfloat16[16];
       };
 #endif
 
@@ -3170,6 +3176,8 @@ i386_ymm_type (struct gdbarch *gdbarch)
 
       t = arch_composite_type (gdbarch,
 			       "__gdb_builtin_type_vec256i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "v16_bfloat16",
+				   init_vector_type (bt->builtin_bfloat16, 16));
       append_composite_type_field (t, "v8_float",
 				   init_vector_type (bt->builtin_float, 8));
       append_composite_type_field (t, "v4_double",
@@ -3185,7 +3193,7 @@ i386_ymm_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v2_int128",
 				   init_vector_type (bt->builtin_int128, 2));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec256i");
       tdep->i386_ymm_type = t;
     }
@@ -3227,7 +3235,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v8_int8",
 				   init_vector_type (bt->builtin_int8, 8));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec64i");
       tdep->i386_mmx_type = t;
     }
@@ -8209,7 +8217,9 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
 	|| strcmp (name, "_Float128") == 0
 	|| strcmp (name, "complex _Float128") == 0
 	|| strcmp (name, "complex(kind=16)") == 0
-	|| strcmp (name, "real(kind=16)") == 0)
+	|| strcmp (name, "quad complex") == 0
+	|| strcmp (name, "real(kind=16)") == 0
+	|| strcmp (name, "real*16") == 0)
       return floatformats_ia64_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);
@@ -8482,6 +8492,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
+
+  /* Support of bfloat16 format.  */
+  set_gdbarch_bfloat16_format (gdbarch, floatformats_bfloat16);
 
   /* Support for floating-point data type variants.  */
   set_gdbarch_floatformat_for_type (gdbarch, i386_floatformat_for_type);

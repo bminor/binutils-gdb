@@ -91,7 +91,7 @@ struct riscv_gdbarch_features_hasher
 /* Cache of previously seen target descriptions, indexed by the feature set
    that created them.  */
 static std::unordered_map<riscv_gdbarch_features,
-			  const target_desc *,
+			  const target_desc_up,
 			  riscv_gdbarch_features_hasher> riscv_tdesc_cache;
 
 /* See arch/riscv.h.  */
@@ -99,15 +99,18 @@ static std::unordered_map<riscv_gdbarch_features,
 const target_desc *
 riscv_lookup_target_description (const struct riscv_gdbarch_features features)
 {
-  /* Lookup in the cache.  */
+  /* Lookup in the cache.  If we find it then return the pointer out of
+     the target_desc_up (which is a unique_ptr).  This is safe as the
+     riscv_tdesc_cache will exist until GDB exits.  */
   const auto it = riscv_tdesc_cache.find (features);
   if (it != riscv_tdesc_cache.end ())
-    return it->second;
+    return it->second.get ();
 
   target_desc *tdesc = riscv_create_target_description (features);
 
-  /* Add to the cache.  */
-  riscv_tdesc_cache.emplace (features, tdesc);
+  /* Add to the cache.  Work around a problem with g++ 4.8 (PR96537):
+     Call the target_desc_up constructor explictly instead of implicitly.  */
+  riscv_tdesc_cache.emplace (features, target_desc_up (tdesc));
 
   return tdesc;
 }

@@ -1,7 +1,6 @@
 #as: --64 -mbranches-within-32B-boundaries
 #ld: -melf_x86_64
 #objdump: -dw
-#notarget: i?86-*-nacl* x86_64-*-nacl*
 
 .*: +file format .*
 
@@ -17,5 +16,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	2e 2e 2e 2e 48 8b 98 fc ff ff ff 	cs cs cs mov %cs:-0x4\(%rax\),%rbx
  +[a-f0-9]+:	48 85 db             	test   %rbx,%rbx
  +[a-f0-9]+:	74 00                	je     [a-f0-9]+ <_start\+0x25>
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 #pass

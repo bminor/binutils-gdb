@@ -172,8 +172,7 @@ type_stack::follow_types (struct type *follow_type)
 	  lookup_array_range_type (follow_type,
 				   0, array_size >= 0 ? array_size - 1 : 0);
 	if (array_size < 0)
-	  TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (follow_type))
-	    = PROP_UNDEFINED;
+	  follow_type->bounds ()->high.set_undefined ();
 	break;
       case tp_function:
 	/* FIXME-type-allocation: need a way to free this type when we are

@@ -42,9 +42,9 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -118,11 +118,11 @@ lang_statement_list_type file_chain = { NULL, NULL };
    lang_statement_union).  */
 lang_statement_list_type input_file_chain;
 static const char *current_input_file;
+struct bfd_elf_dynamic_list **current_dynamic_list_p;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
 struct lang_input_statement_flags input_flags;
 bfd_boolean entry_from_cmdline;
-bfd_boolean undef_from_cmdline;
 bfd_boolean lang_has_input_file = FALSE;
 bfd_boolean had_output_filename = FALSE;
 bfd_boolean lang_float_flag = FALSE;
@@ -130,7 +130,9 @@ bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
+#ifdef ENABLE_LIBCTF
 static ctf_file_t *ctf_output;
+#endif
 
 /* Functions that traverse the linker script and might evaluate
    DEFINED() need to increment this at the start of the traversal.  */
@@ -3525,7 +3527,7 @@ enum open_bfd_mode
     OPEN_BFD_FORCE = 1,
     OPEN_BFD_RESCAN = 2
   };
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 static lang_input_statement_type *plugin_insert = NULL;
 static struct bfd_link_hash_entry *plugin_undefs = NULL;
 #endif
@@ -3555,7 +3557,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 	case lang_group_statement_enum:
 	  {
 	    struct bfd_link_hash_entry *undefs;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	    lang_input_statement_type *plugin_insert_save;
 #endif
 
@@ -3565,7 +3567,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 
 	    do
 	      {
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		plugin_insert_save = plugin_insert;
 #endif
 		undefs = link_info.hash->undefs_tail;
@@ -3573,7 +3575,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 				 mode | OPEN_BFD_FORCE);
 	      }
 	    while (undefs != link_info.hash->undefs_tail
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		   /* Objects inserted by a plugin, which are loaded
 		      before we hit this loop, may have added new
 		      undefs.  */
@@ -3600,7 +3602,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		 has been loaded already.  Do the same for a rescan.
 		 Likewise reload --as-needed shared libs.  */
 	      if (mode != OPEN_BFD_NORMAL
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		  && ((mode & OPEN_BFD_RESCAN) == 0
 		      || plugin_insert == NULL)
 #endif
@@ -3647,7 +3649,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		    }
 		}
 	    }
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	  /* If we have found the point at which a plugin added new
 	     files, clear plugin_insert to enable archive rescan.  */
 	  if (&s->input_statement == plugin_insert)
@@ -3666,6 +3668,35 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
   /* Exit if any of the files were missing.  */
   if (input_flags.missing_file)
     einfo ("%F");
+}
+
+#ifdef ENABLE_LIBCTF
+/* Emit CTF errors and warnings.  fp can be NULL to report errors/warnings
+   that happened specifically at CTF open time.  */
+static void
+lang_ctf_errs_warnings (ctf_file_t *fp)
+{
+  ctf_next_t *i = NULL;
+  char *text;
+  int is_warning;
+  int err;
+
+  while ((text = ctf_errwarning_next (fp, &i, &is_warning, &err)) != NULL)
+    {
+      einfo (_("%s: %s\n"), is_warning ? _("CTF warning"): _("CTF error"),
+	     text);
+      free (text);
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      einfo (_("CTF error: cannot get CTF errors: `%s'\n"),
+	     ctf_errmsg (err));
+    }
+
+  /* `err' returns errors from the error/warning iterator in particular.
+     These never assert.  But if we have an fp, that could have recorded
+     an assertion failure: assert if it has done so.  */
+  ASSERT (!fp || ctf_errno (fp) != ECTF_INTERNAL);
 }
 
 /* Open the CTF sections in the input files with libctf: if any were opened,
@@ -3690,19 +3721,25 @@ ldlang_open_ctf (void)
       if ((file->the_ctf = ctf_bfdopen (file->the_bfd, &err)) == NULL)
 	{
 	  if (err != ECTF_NOCTFDATA)
-	    einfo (_("%P: warning: CTF section in `%pI' not loaded: "
-		     "its types will be discarded: `%s'\n"), file,
+	    {
+	      lang_ctf_errs_warnings (NULL);
+	      einfo (_("%P: warning: CTF section in %pB not loaded; "
+		       "its types will be discarded: %s\n"), file->the_bfd,
 		     ctf_errmsg (err));
+	    }
 	  continue;
 	}
 
       /* Prevent the contents of this section from being written, while
-	 requiring the section itself to be duplicated in the output.  */
+	 requiring the section itself to be duplicated in the output, but only
+	 once.  */
       /* This section must exist if ctf_bfdopen() succeeded.  */
       sect = bfd_get_section_by_name (file->the_bfd, ".ctf");
       sect->size = 0;
       sect->flags |= SEC_NEVER_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED;
 
+      if (any_ctf)
+	sect->flags |= SEC_EXCLUDE;
       any_ctf = 1;
     }
 
@@ -3729,6 +3766,7 @@ static void
 lang_merge_ctf (void)
 {
   asection *output_sect;
+  int flags = 0;
 
   if (!ctf_output)
     return;
@@ -3754,20 +3792,29 @@ lang_merge_ctf (void)
       if (!file->the_ctf)
 	continue;
 
-      /* Takes ownership of file->u.the_ctfa.  */
+      /* Takes ownership of file->the_ctf.  */
       if (ctf_link_add_ctf (ctf_output, file->the_ctf, file->filename) < 0)
 	{
-	  einfo (_("%F%P: cannot link with CTF in %pB: %s\n"), file->the_bfd,
-		 ctf_errmsg (ctf_errno (ctf_output)));
+	  einfo (_("%P: warning: CTF section in %pB cannot be linked: `%s'\n"),
+		 file->the_bfd, ctf_errmsg (ctf_errno (ctf_output)));
 	  ctf_close (file->the_ctf);
 	  file->the_ctf = NULL;
 	  continue;
 	}
     }
 
-  if (ctf_link (ctf_output, CTF_LINK_SHARE_UNCONFLICTED) < 0)
+  if (!config.ctf_share_duplicated)
+    flags = CTF_LINK_SHARE_UNCONFLICTED;
+  else
+    flags = CTF_LINK_SHARE_DUPLICATED;
+  if (!config.ctf_variables)
+    flags |= CTF_LINK_OMIT_VARIABLES_SECTION;
+
+  if (ctf_link (ctf_output, flags) < 0)
     {
-      einfo (_("%F%P: CTF linking failed; output will have no CTF section: %s\n"),
+      lang_ctf_errs_warnings (ctf_output);
+      einfo (_("%P: warning: CTF linking failed; "
+	       "output will have no CTF section: %s\n"),
 	     ctf_errmsg (ctf_errno (ctf_output)));
       if (output_sect)
 	{
@@ -3775,6 +3822,8 @@ lang_merge_ctf (void)
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
     }
+  /* Output any lingering errors that didn't come from ctf_link.  */
+  lang_ctf_errs_warnings (ctf_output);
 }
 
 /* Let the emulation examine the symbol table and strtab to help it optimize the
@@ -3821,10 +3870,12 @@ lang_write_ctf (int late)
       output_sect->size = output_size;
       output_sect->flags |= SEC_IN_MEMORY | SEC_KEEP;
 
+      lang_ctf_errs_warnings (ctf_output);
       if (!output_sect->contents)
 	{
-	  einfo (_("%F%P: CTF section emission failed; output will have no "
-		   "CTF section: %s\n"), ctf_errmsg (ctf_errno (ctf_output)));
+	  einfo (_("%P: warning: CTF section emission failed; "
+		   "output will have no CTF section: %s\n"),
+		 ctf_errmsg (ctf_errno (ctf_output)));
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
@@ -3847,6 +3898,38 @@ ldlang_write_ctf_late (void)
 
   lang_write_ctf (1);
 }
+#else
+static void
+ldlang_open_ctf (void)
+{
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
+    {
+      asection *sect;
+
+      /* If built without CTF, warn and delete all CTF sections from the output.
+	 (The alternative would be to simply concatenate them, which does not
+	 yield a valid CTF section.)  */
+
+      if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL)
+	{
+	    einfo (_("%P: warning: CTF section in %pB not linkable: "
+		     "%P was built without support for CTF\n"), file->the_bfd);
+	    sect->size = 0;
+	    sect->flags |= SEC_EXCLUDE;
+	}
+    }
+}
+
+static void lang_merge_ctf (void) {}
+void
+ldlang_ctf_apply_strsym (struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
+			 bfd_size_type symcount ATTRIBUTE_UNUSED,
+			 struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)
+{
+}
+static void lang_write_ctf (int late ATTRIBUTE_UNUSED) {}
+void ldlang_write_ctf_late (void) {}
+#endif
 
 /* Add the supplied name to the symbol table as an undefined reference.
    This is a two step process as the symbol table doesn't even exist at
@@ -3859,11 +3942,10 @@ typedef struct bfd_sym_chain ldlang_undef_chain_list_type;
 #define ldlang_undef_chain_list_head entry_symbol.next
 
 void
-ldlang_add_undef (const char *const name, bfd_boolean cmdline)
+ldlang_add_undef (const char *const name, bfd_boolean cmdline ATTRIBUTE_UNUSED)
 {
   ldlang_undef_chain_list_type *new_undef;
 
-  undef_from_cmdline = undef_from_cmdline || cmdline;
   new_undef = stat_alloc (sizeof (*new_undef));
   new_undef->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new_undef;
@@ -6803,10 +6885,24 @@ lang_end (void)
      --gc-sections, unless --gc-keep-exported was also given.  */
   if (bfd_link_relocatable (&link_info)
       && link_info.gc_sections
-      && !link_info.gc_keep_exported
-      && !(entry_from_cmdline || undef_from_cmdline))
-    einfo (_("%F%P: gc-sections requires either an entry or "
-	     "an undefined symbol\n"));
+      && !link_info.gc_keep_exported)
+    {
+      struct bfd_sym_chain *sym;
+
+      for (sym = link_info.gc_sym_list; sym != NULL; sym = sym->next)
+	{
+	  h = bfd_link_hash_lookup (link_info.hash, sym->name,
+				    FALSE, FALSE, FALSE);
+	  if (h != NULL
+	      && (h->type == bfd_link_hash_defined
+		  || h->type == bfd_link_hash_defweak)
+	      && !bfd_is_const_section (h->u.def.section))
+	    break;
+	}
+      if (!sym)
+	einfo (_("%F%P: --gc-sections requires a defined symbol root "
+		 "specified by -e or -u\n"));
+    }
 
   if (entry_symbol.name == NULL)
     {
@@ -6898,11 +6994,11 @@ lang_check (void)
        file != NULL;
        file = file->next)
     {
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
       /* Don't check format of files claimed by plugin.  */
       if (file->flags.claimed)
 	continue;
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
       input_bfd = file->the_bfd;
       compatible
 	= bfd_arch_get_compatible (input_bfd, link_info.output_bfd,
@@ -6914,8 +7010,9 @@ lang_check (void)
 	 input format may not have equivalent representations in
 	 the output format (and besides BFD does not translate
 	 relocs for other link purposes than a final link).  */
-      if ((bfd_link_relocatable (&link_info)
-	   || link_info.emitrelocations)
+      if (!file->flags.just_syms
+	  && (bfd_link_relocatable (&link_info)
+	      || link_info.emitrelocations)
 	  && (compatible == NULL
 	      || (bfd_get_flavour (input_bfd)
 		  != bfd_get_flavour (link_info.output_bfd)))
@@ -6939,8 +7036,9 @@ lang_check (void)
 
       /* If the input bfd has no contents, it shouldn't set the
 	 private data of the output bfd.  */
-      else if ((input_bfd->flags & DYNAMIC) != 0
-	       || bfd_count_sections (input_bfd) != 0)
+      else if (!file->flags.just_syms
+	       && ((input_bfd->flags & DYNAMIC) != 0
+		   || bfd_count_sections (input_bfd) != 0))
 	{
 	  bfd_error_handler_type pfn = NULL;
 
@@ -7265,7 +7363,8 @@ ldlang_add_file (lang_input_statement_type *entry)
 
   /* The BFD linker needs to have a list of all input BFDs involved in
      a link.  */
-  ASSERT (entry->the_bfd->link.next == NULL);
+  ASSERT (link_info.input_bfds_tail != &entry->the_bfd->link.next
+	  && entry->the_bfd->link.next == NULL);
   ASSERT (entry->the_bfd != link_info.output_bfd);
 
   *link_info.input_bfds_tail = entry->the_bfd;
@@ -7437,7 +7536,7 @@ lang_gc_sections (void)
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  asection *sec;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	  if (f->flags.claimed)
 	    continue;
 #endif
@@ -7584,7 +7683,7 @@ lang_relax_sections (bfd_boolean need_layout)
     }
 }
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 /* Find the insert point for the plugin's replacement files.  We
    place them after the first claimed real object file, or if the
    first claimed object is an archive member, after the last real
@@ -7727,7 +7826,7 @@ find_next_input_statement (lang_statement_union_type **s)
     }
   return s;
 }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Add NAME to the list of garbage collection entry points.  */
 
@@ -7818,7 +7917,7 @@ lang_process (void)
      to symbolic origin/length now.  */
   lang_do_memory_regions ();
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       lang_statement_list_type added;
@@ -7837,6 +7936,7 @@ lang_process (void)
       if (plugin_call_all_symbols_read ())
 	einfo (_("%F%P: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
+      link_info.lto_all_symbols_read = TRUE;
       /* Open any newly added files, updating the file chains.  */
       plugin_undefs = link_info.hash->undefs_tail;
       open_input_bfds (*added.tail, OPEN_BFD_NORMAL);
@@ -7921,7 +8021,7 @@ lang_process (void)
 	    }
 	}
     }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   /* Make sure that nobody has tried to add a symbol to this list
      before now.  */
@@ -9324,15 +9424,16 @@ lang_add_unique (const char *name)
 /* Append the list of dynamic symbols to the existing one.  */
 
 void
-lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
+lang_append_dynamic_list (struct bfd_elf_dynamic_list **list_p,
+			  struct bfd_elf_version_expr *dynamic)
 {
-  if (link_info.dynamic_list)
+  if (*list_p)
     {
       struct bfd_elf_version_expr *tail;
       for (tail = dynamic; tail->next != NULL; tail = tail->next)
 	;
-      tail->next = link_info.dynamic_list->head.list;
-      link_info.dynamic_list->head.list = dynamic;
+      tail->next = (*list_p)->head.list;
+      (*list_p)->head.list = dynamic;
     }
   else
     {
@@ -9341,7 +9442,7 @@ lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
       d = (struct bfd_elf_dynamic_list *) xcalloc (1, sizeof *d);
       d->head.list = dynamic;
       d->match = lang_vers_match;
-      link_info.dynamic_list = d;
+      *list_p = d;
     }
 }
 
@@ -9363,7 +9464,7 @@ lang_append_dynamic_list_cpp_typeinfo (void)
     dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
 				     FALSE);
 
-  lang_append_dynamic_list (dynamic);
+  lang_append_dynamic_list (&link_info.dynamic_list, dynamic);
 }
 
 /* Append the list of C++ operator new and delete dynamic symbols to the
@@ -9384,7 +9485,7 @@ lang_append_dynamic_list_cpp_new (void)
     dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
 				     FALSE);
 
-  lang_append_dynamic_list (dynamic);
+  lang_append_dynamic_list (&link_info.dynamic_list, dynamic);
 }
 
 /* Scan a space and/or comma separated string of features.  */

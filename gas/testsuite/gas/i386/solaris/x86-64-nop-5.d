@@ -23,5 +23,5 @@ Disassembly of section .altinstr_replacement:
  +[a-f0-9]+:	89 c0                	mov    %eax,%eax
  +[a-f0-9]+:	89 c0                	mov    %eax,%eax
  +[a-f0-9]+:	89 c0                	mov    %eax,%eax
- +[a-f0-9]+:	e9 00 00 00 00       	jmpq   d <_start\+0xd>	9: R_X86_64_PC32	foo-0x4
+ +[a-f0-9]+:	e9 00 00 00 00       	jmp    d <_start\+0xd>	9: R_X86_64_PC32	foo-0x4
 #pass

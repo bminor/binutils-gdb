@@ -524,9 +524,7 @@ print_insn_arg (int d,
 	  /* Immediate.  */
 	  switch (d)
 	    {
-	    case 'I':
-	    case 'Z':
-	    case 'A':
+	    default:
 	      /* I and Z are output operands and can`t be immediate
 	         A is an address and we can`t have the address of
 	         an immediate either. We don't know how much to increase

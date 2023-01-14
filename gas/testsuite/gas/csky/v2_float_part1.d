@@ -52,3 +52,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f4830202\s*fmuls\s*fr2,\s*fr3,\s*fr4
 \s*[0-9a-f]*:\s*f4830022\s*fsubs\s*fr2,\s*fr3,\s*fr4
 \s*[0-9a-f]*:\s*f4830002\s*fadds\s*fr2,\s*fr3,\s*fr4
+#...

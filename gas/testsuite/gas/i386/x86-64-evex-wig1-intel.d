@@ -23,9 +23,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c5 c0 00 	vpextrw rax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 c0 00 	vpextrw rax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 00 00 	vpextrw WORD PTR \[rax\],xmm0,0x0
-[ 	]*[a-f0-9]+:	62 f3 fd 08 20 c0 00 	vpinsrb xmm0,xmm0,eax,0x0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 20 c0 00 	vpinsrb xmm0,xmm0,rax,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 20 00 00 	vpinsrb xmm0,xmm0,BYTE PTR \[rax\],0x0
-[ 	]*[a-f0-9]+:	62 f1 fd 08 c4 c0 00 	vpinsrw xmm0,xmm0,eax,0x0
+[ 	]*[a-f0-9]+:	62 f1 fd 08 c4 c0 00 	vpinsrw xmm0,xmm0,rax,0x0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 00 00 	vpinsrw xmm0,xmm0,WORD PTR \[rax\],0x0
 [ 	]*[a-f0-9]+:	62 02 fd 4f 21 f5    	vpmovsxbd zmm30\{k7\},xmm29
 [ 	]*[a-f0-9]+:	62 02 fd cf 21 f5    	vpmovsxbd zmm30\{k7\}\{z\},xmm29

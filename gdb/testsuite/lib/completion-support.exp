@@ -555,10 +555,19 @@ proc test_gdb_completion_offers_commands {input_line} {
     # Force showing two commands.
     gdb_test_no_output "set max-completions 2" ""
 
-    test_gdb_complete_multiple $input_line "" "" {
-	"!"
-	"+"
-    } "" "" 1
+    # TUI adds additional commands to the possible completions, so we
+    # need different patterns depending on whether or not it is enabled.
+    if { [skip_tui_tests] } {
+	test_gdb_complete_multiple $input_line "" "" {
+	    "!"
+	    "actions"
+	} "" "" 1
+    } else {
+	test_gdb_complete_multiple $input_line "" "" {
+	    "!"
+	    "+"
+	} "" "" 1
+    }
 
     # Restore.
     gdb_test_no_output "set max-completions $max_completions" ""

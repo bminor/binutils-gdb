@@ -73,29 +73,6 @@ case "${gdbserver_host}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
-			srv_tgtobj="win32-low.o windows-nat.o win32-arm-low.o"
-			srv_tgtobj="${srv_tgtobj} wincecompat.o"
-			# hostio_last_error implementation is in win32-low.c
-			srv_hostio_err_objs=""
-			srv_mingw=yes
-			srv_mingwce=yes
-			;;
-  bfin-*-*linux*)	srv_regobj=reg-bfin.o
-			srv_tgtobj="$srv_linux_obj linux-bfin-low.o"
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
-  crisv32-*-linux*)	srv_regobj=reg-crisv32.o
-			srv_tgtobj="$srv_linux_obj linux-crisv32-low.o"
-			srv_linux_regsets=yes
-			srv_linux_thread_db=yes
-			;;
-  cris-*-linux*)	srv_regobj=reg-cris.o
-			srv_tgtobj="$srv_linux_obj linux-cris-low.o"
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
   i[34567]86-*-cygwin*)	srv_regobj=""
 			srv_tgtobj="x86-low.o nat/x86-dregs.o win32-low.o"
 			srv_tgtobj="${srv_tgtobj} win32-i386-low.o"
@@ -117,24 +94,6 @@ case "${gdbserver_host}" in
 			ipa_obj="linux-i386-ipa.o linux-x86-tdesc-ipa.o"
 			ipa_obj="${ipa_obj} arch/i386-ipa.o"
 			;;
-  i[34567]86-*-lynxos*)	srv_regobj=""
-			srv_tgtobj="lynx-low.o lynx-i386-low.o fork-child.o"
-			srv_tgtobj="${srv_tgtobj} nat/fork-inferior.o"
-			srv_tgtobj="${srv_tgtobj} arch/i386.o"
-			srv_lynxos=yes
-			;;
-  i[34567]86-*-mingw32ce*)
-			srv_regobj=""
-			srv_tgtobj="x86-low.o nat/x86-dregs.o win32-low.o"
-			srv_tgtobj="${srv_tgtobj} win32-i386-low.o"
-			srv_tgtobj="${srv_tgtobj} nat/windows-nat.o"
-			srv_tgtobj="${srv_tgtobj} arch/i386.o"
-			srv_tgtobj="${srv_tgtobj} wincecompat.o"
-			# hostio_last_error implementation is in win32-low.c
-			srv_hostio_err_objs=""
-			srv_mingw=yes
-			srv_mingwce=yes
-			;;
   i[34567]86-*-mingw*)	srv_regobj=""
 			srv_tgtobj="x86-low.o nat/x86-dregs.o win32-low.o"
 			srv_tgtobj="${srv_tgtobj} win32-i386-low.o"
@@ -142,18 +101,9 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} arch/i386.o"
 			srv_mingw=yes
 			;;
-  i[34567]86-*-nto*)	srv_regobj=""
-			srv_tgtobj="nto-low.o nto-x86-low.o arch/i386.o"
-			srv_qnx="yes"
-			;;
   ia64-*-linux*)	srv_regobj=reg-ia64.o
 			srv_tgtobj="$srv_linux_obj linux-ia64-low.o"
 			srv_linux_usrregs=yes
-			;;
-  m32r*-*-linux*)	srv_regobj=reg-m32r.o
-			srv_tgtobj="$srv_linux_obj linux-m32r-low.o"
-			srv_linux_usrregs=yes
- 			srv_linux_thread_db=yes
 			;;
   m68*-*-linux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
                           srv_regobj=reg-cf.o
@@ -273,13 +223,6 @@ case "${gdbserver_host}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			ipa_obj="${ipa_ppc_linux_regobj} linux-ppc-ipa.o"
-			;;
-  powerpc-*-lynxos*)	srv_regobj="powerpc-32.o"
-			srv_tgtobj="lynx-low.o lynx-ppc-low.o"
-			srv_xmlfiles="rs6000/powerpc-32.xml"
-			srv_xmlfiles="${srv_xmlfiles} rs6000/power-core.xml"
-			srv_xmlfiles="${srv_xmlfiles} rs6000/power-fpu.xml"
-			srv_lynxos=yes
 			;;
   riscv*-*-linux*)	srv_tgtobj="arch/riscv.o nat/riscv-linux-tdesc.o"
 			srv_tgtobj="${srv_tgtobj} linux-riscv-low.o"
@@ -406,15 +349,15 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} nat/windows-nat.o"
 			srv_tgtobj="${srv_tgtobj} arch/amd64.o arch/i386.o"
 			;;
+  x86_64-*-netbsd*)	srv_regobj=""
+			srv_tgtobj="netbsd-low.o netbsd-amd64-low.o fork-child.o"
+			srv_tgtobj="${srv_tgtobj} nat/fork-inferior.o"
+			srv_tgtobj="${srv_tgtobj} nat/netbsd-nat.o"
+			srv_tgtobj="${srv_tgtobj} arch/amd64.o"
+			;;
 
   xtensa*-*-linux*)	srv_regobj=reg-xtensa.o
 			srv_tgtobj="$srv_linux_obj linux-xtensa-low.o"
-			srv_linux_regsets=yes
-			srv_linux_thread_db=yes
-			;;
-  tilegx-*-linux*)	srv_regobj=reg-tilegx.o
-			srv_regobj="${srv_regobj} reg-tilegx32.o"
-			srv_tgtobj="$srv_linux_obj linux-tile-low.o"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;

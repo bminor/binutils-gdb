@@ -253,7 +253,7 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION)
       && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
-	   && TYPE_VECTOR (valtype)))
+	   && valtype->is_vector ()))
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     return ppc_sysv_abi_return_value (gdbarch, function, valtype, regcache,

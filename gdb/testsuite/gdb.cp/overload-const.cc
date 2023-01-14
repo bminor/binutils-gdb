@@ -25,4 +25,6 @@ int
 main ()
 {
   myclass::func (42);
+
+  return 0;
 }

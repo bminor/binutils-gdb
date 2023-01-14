@@ -222,7 +222,7 @@ section_symbol (segT sec)
   if (! EMIT_SECTION_SYMBOLS || symbol_table_frozen)
     {
       /* Here we know it won't be going into the symbol table.  */
-      s = symbol_create (sec->symbol->name, sec, 0, &zero_address_frag);
+      s = symbol_create (sec->symbol->name, sec, &zero_address_frag, 0);
     }
   else
     {
@@ -233,7 +233,7 @@ section_symbol (segT sec)
       if (s == NULL
 	  || ((seg = S_GET_SEGMENT (s)) != sec
 	      && seg != undefined_section))
-	s = symbol_new (sec->symbol->name, sec, 0, &zero_address_frag);
+	s = symbol_new (sec->symbol->name, sec, &zero_address_frag, 0);
       else if (seg == undefined_section)
 	{
 	  S_SET_SEGMENT (s, sec);

@@ -5,7 +5,6 @@
 .*:16: Error: .*
 .*:19: Error: .*
 .*:20: Error: .*
-.*:23: Error: .*
 .*:26: Error: .*
 .*:29: Error: .*
 .*:32: Error: .*
@@ -44,9 +43,8 @@ GAS LISTING .*
 .*  Error: SSE instruction `pcmpgtq' is used
 [ 	]*20[ 	]+C1
 [ 	]*21[ 	]+
-[ 	]*22[ 	]+\# SSE4a instruction
+[ 	]*22[ 	]+\# SSE4a instruction.*
 [ 	]*23[ 	]+\?\?\?\? 660F78C0 		extrq \$0, \$0, %xmm0
-.*  Error: SSE instruction `extrq' is used
 [ 	]*23[ 	]+0000
 [ 	]*24[ 	]+
 [ 	]*25[ 	]+\# PCMUL instruction
@@ -70,7 +68,7 @@ GAS LISTING .*
 [ 	]*36[ 	]+\?\?\?\? 62F27D09 		vgf2p8mulb %xmm0, %xmm0, %xmm0\{%k1\}
 [ 	]*36[ 	]+CFC0
 [ 	]*37[ 	]+\?\?\?\? 62F27D48 		vgf2p8mulb %zmm0, %zmm0, %zmm0
+[ 	]*37[ 	]+CFC0
 GAS LISTING .*
 
 
-[ 	]*37[ 	]+CFC0

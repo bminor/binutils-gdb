@@ -21,7 +21,6 @@ if { ! [istarget rx-*-*] } {
     return
 }
 
-global ASFLAGS
 set ASFLAGS "--mcpu=rxv3-dfpu"
 
 foreach test [lsort [glob $srcdir/$subdir/*.sm]] {

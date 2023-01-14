@@ -30,7 +30,7 @@ if {[istarget "arm-*-vxworks"]} {
 	{"VxWorks executable test 1 (dynamic)"
 	 "tmpdir/libvxworks1.so -Tvxworks1.ld --hash-style=sysv -q --force-dynamic" ""
 	 "" {vxworks1.s}
-	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+	 {{readelf {--relocs --wide} vxworks1.rd} {objdump -dr vxworks1.dd}}
 	 "vxworks1"}
 	{"VxWorks executable test 2 (dynamic)" \
 	 "-Tvxworks1.ld --hash-style=sysv -q --force-dynamic" ""
@@ -794,7 +794,7 @@ set armeabitests_nonacl {
      "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
      "-march=armv8-m.base -mthumb --defsym VER=1"
      {cmse-implib.s}
-     {{readelf {-s tmpdir/cmse-implib.lib} cmse-implib.rd}
+     {{readelf {-s --wide tmpdir/cmse-implib.lib} cmse-implib.rd}
       {readelf {-h tmpdir/cmse-implib.lib} cmse-implib.type}}
      "cmse-implib"}
     {"Input secure gateway import library"
@@ -802,7 +802,7 @@ set armeabitests_nonacl {
      "-march=armv8-m.base -mthumb --defsym VER=2"
      {cmse-implib.s}
      {{ld cmse-new-implib.out}
-      {readelf {-s tmpdir/cmse-new-implib.lib} cmse-new-implib.rd}}
+      {readelf {-s --wide tmpdir/cmse-new-implib.lib} cmse-new-implib.rd}}
      "cmse-new-implib"}
     {"Input secure gateway import library: no output import library"
      "--section-start .gnu.sgstubs=0x20000 --in-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
@@ -832,7 +832,7 @@ set armeabitests_nonacl {
      "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-new-comeback-implib.lib --in-implib=tmpdir/cmse-implib.lib --cmse-implib" ""
      "-march=armv8-m.base -mthumb --defsym VER=3"
      {cmse-implib.s}
-     {{readelf {-s tmpdir/cmse-new-comeback-implib.lib} cmse-new-comeback-implib.rd}}
+     {{readelf {-s --wide tmpdir/cmse-new-comeback-implib.lib} cmse-new-comeback-implib.rd}}
      "cmse-new-comeback-implib"}
     {"Input secure gateway import library: entry function change"
      "--section-start .gnu.sgstubs=0x20000 --out-implib=tmpdir/cmse-new-wrong-implib.lib --in-implib=tmpdir/cmse-implib.lib --cmse-implib" ""

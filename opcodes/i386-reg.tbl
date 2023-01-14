@@ -278,6 +278,15 @@ zmm28, Class=RegSIMD|Zmmword, RegVRex|RegRex, 4, Dw2Inval, Dw2Inval
 zmm29, Class=RegSIMD|Zmmword, RegVRex|RegRex, 5, Dw2Inval, Dw2Inval
 zmm30, Class=RegSIMD|Zmmword, RegVRex|RegRex, 6, Dw2Inval, Dw2Inval
 zmm31, Class=RegSIMD|Zmmword, RegVRex|RegRex, 7, Dw2Inval, Dw2Inval
+// TMM registers for AMX
+tmm0, Class=RegSIMD|Tmmword, 0, 0, Dw2Inval, Dw2Inval
+tmm1, Class=RegSIMD|Tmmword, 0, 1, Dw2Inval, Dw2Inval
+tmm2, Class=RegSIMD|Tmmword, 0, 2, Dw2Inval, Dw2Inval
+tmm3, Class=RegSIMD|Tmmword, 0, 3, Dw2Inval, Dw2Inval
+tmm4, Class=RegSIMD|Tmmword, 0, 4, Dw2Inval, Dw2Inval
+tmm5, Class=RegSIMD|Tmmword, 0, 5, Dw2Inval, Dw2Inval
+tmm6, Class=RegSIMD|Tmmword, 0, 6, Dw2Inval, Dw2Inval
+tmm7, Class=RegSIMD|Tmmword, 0, 7, Dw2Inval, Dw2Inval
 // Bound registers for MPX
 bnd0, Class=RegBND, 0, 0, Dw2Inval, Dw2Inval
 bnd1, Class=RegBND, 0, 1, Dw2Inval, Dw2Inval

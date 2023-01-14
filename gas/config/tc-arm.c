@@ -517,13 +517,13 @@ struct arm_it
 {
   const char *	error;
   unsigned long instruction;
-  int		size;
-  int		size_req;
-  int		cond;
+  unsigned int	size;
+  unsigned int	size_req;
+  unsigned int	cond;
   /* "uncond_value" is set to the value in place of the conditional field in
-     unconditional versions of the instruction, or -1 if nothing is
+     unconditional versions of the instruction, or -1u if nothing is
      appropriate.  */
-  int		uncond_value;
+  unsigned int	uncond_value;
   struct neon_type vectype;
   /* This does not indicate an actual NEON instruction, only that
      the mnemonic accepts neon-style type suffixes.  */
@@ -945,15 +945,15 @@ struct asm_opcode
 #define BAD_EL_TYPE	_("bad element type for instruction")
 #define MVE_BAD_QREG	_("MVE vector register Q[0..7] expected")
 
-static struct hash_control * arm_ops_hsh;
-static struct hash_control * arm_cond_hsh;
-static struct hash_control * arm_vcond_hsh;
-static struct hash_control * arm_shift_hsh;
-static struct hash_control * arm_psr_hsh;
-static struct hash_control * arm_v7m_psr_hsh;
-static struct hash_control * arm_reg_hsh;
-static struct hash_control * arm_reloc_hsh;
-static struct hash_control * arm_barrier_opt_hsh;
+static htab_t  arm_ops_hsh;
+static htab_t  arm_cond_hsh;
+static htab_t  arm_vcond_hsh;
+static htab_t  arm_shift_hsh;
+static htab_t  arm_psr_hsh;
+static htab_t  arm_v7m_psr_hsh;
+static htab_t  arm_reg_hsh;
+static htab_t  arm_reloc_hsh;
+static htab_t  arm_barrier_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -1427,7 +1427,7 @@ arm_reg_parse_multi (char **ccp)
     p++;
   while (ISALPHA (*p) || ISDIGIT (*p) || *p == '_');
 
-  reg = (struct reg_entry *) hash_find_n (arm_reg_hsh, start, p - start);
+  reg = (struct reg_entry *) str_hash_find_n (arm_reg_hsh, start, p - start);
 
   if (!reg)
     return NULL;
@@ -2175,9 +2175,9 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype,
 
   do
     {
-      int setmask = 1, addregs = 1;
+      unsigned int setmask = 1, addregs = 1;
       const char vpr_str[] = "vpr";
-      int vpr_str_len = strlen (vpr_str);
+      size_t vpr_str_len = strlen (vpr_str);
 
       new_base = arm_typed_reg_parse (&str, regtype, &regtype, NULL);
 
@@ -2546,7 +2546,7 @@ parse_reloc (char **str)
     return -1;
 
   if ((r = (struct reloc_entry *)
-       hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
+       str_hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
     return -1;
 
   *str = q + 1;
@@ -2561,7 +2561,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   struct reg_entry *new_reg;
   const char *name;
 
-  if ((new_reg = (struct reg_entry *) hash_find (arm_reg_hsh, str)) != 0)
+  if ((new_reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, str)) != 0)
     {
       if (new_reg->builtin)
 	as_warn (_("ignoring attempt to redefine built-in register '%s'"), str);
@@ -2583,8 +2583,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   new_reg->builtin = FALSE;
   new_reg->neon = NULL;
 
-  if (hash_insert (arm_reg_hsh, name, (void *) new_reg))
-    abort ();
+  str_hash_insert (arm_reg_hsh, name, new_reg, 0);
 
   return new_reg;
 }
@@ -2632,7 +2631,7 @@ create_register_alias (char * newname, char *p)
   if (*oldname == '\0')
     return FALSE;
 
-  old = (struct reg_entry *) hash_find (arm_reg_hsh, oldname);
+  old = (struct reg_entry *) str_hash_find (arm_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
@@ -2884,8 +2883,8 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      struct reg_entry *reg = (struct reg_entry *) hash_find (arm_reg_hsh,
-							      name);
+      struct reg_entry *reg
+	= (struct reg_entry *) str_hash_find (arm_reg_hsh, name);
 
       if (!reg)
 	as_bad (_("unknown register alias '%s'"), name);
@@ -2897,7 +2896,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  char * p;
 	  char * nbuf;
 
-	  hash_delete (arm_reg_hsh, name, FALSE);
+	  str_hash_delete (arm_reg_hsh, name);
 	  free ((char *) reg->name);
 	  free (reg->neon);
 	  free (reg);
@@ -2909,10 +2908,10 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  nbuf = strdup (name);
 	  for (p = nbuf; *p; p++)
 	    *p = TOUPPER (*p);
-	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (arm_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg->neon);
 	      free (reg);
@@ -2920,10 +2919,10 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 	  for (p = nbuf; *p; p++)
 	    *p = TOLOWER (*p);
-	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (arm_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg->neon);
 	      free (reg);
@@ -2972,7 +2971,7 @@ make_mapping_symbol (enum mstate state, valueT value, fragS *frag)
       abort ();
     }
 
-  symbolP = symbol_new (symname, now_seg, value, frag);
+  symbolP = symbol_new (symname, now_seg, frag, value);
   symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
 
   switch (state)
@@ -3311,12 +3310,12 @@ s_thumb_set (int equiv)
 	  memset (dummy_frag, 0, sizeof (fragS));
 	  dummy_frag->fr_type = rs_fill;
 	  dummy_frag->line = listing_tail;
-	  symbolP = symbol_new (name, undefined_section, 0, dummy_frag);
+	  symbolP = symbol_new (name, undefined_section, dummy_frag, 0);
 	  dummy_frag->fr_symbol = symbolP;
 	}
       else
 #endif
-	symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+	symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
 #ifdef OBJ_COFF
       /* "set" symbols are local unless otherwise specified.  */
@@ -3544,7 +3543,7 @@ find_or_make_literal_pool (void)
   if (pool->symbol == NULL)
     {
       pool->symbol = symbol_create (FAKE_LABEL_NAME, undefined_section,
-				    (valueT) 0, &zero_address_frag);
+				    &zero_address_frag, 0);
       pool->id = latest_pool_num ++;
     }
 
@@ -5264,12 +5263,12 @@ parse_big_immediate (char **str, int i, expressionS *in_exp,
 
       inst.operands[i].imm = 0;
       for (j = 0; j < parts; j++, idx++)
-	inst.operands[i].imm |= generic_bignum[idx]
-				<< (LITTLENUM_NUMBER_OF_BITS * j);
+	inst.operands[i].imm |= ((unsigned) generic_bignum[idx]
+				 << (LITTLENUM_NUMBER_OF_BITS * j));
       inst.operands[i].reg = 0;
       for (j = 0; j < parts; j++, idx++)
-	inst.operands[i].reg |= generic_bignum[idx]
-				<< (LITTLENUM_NUMBER_OF_BITS * j);
+	inst.operands[i].reg |= ((unsigned) generic_bignum[idx]
+				 << (LITTLENUM_NUMBER_OF_BITS * j));
       inst.operands[i].regisimm = 1;
     }
   else if (!(exp_p->X_op == O_symbol && allow_symbol_p))
@@ -5537,8 +5536,9 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       return FAIL;
     }
 
-  shift_name = (const struct asm_shift_name *) hash_find_n (arm_shift_hsh, *str,
-							    p - *str);
+  shift_name
+    = (const struct asm_shift_name *) str_hash_find_n (arm_shift_hsh, *str,
+						       p - *str);
 
   if (shift_name == NULL)
     {
@@ -6338,8 +6338,8 @@ parse_psr (char **str, bfd_boolean lhs)
 	  || strncasecmp (start, "psr", 3) == 0)
 	p = start + strcspn (start, "rR") + 1;
 
-      psr = (const struct asm_psr *) hash_find_n (arm_v7m_psr_hsh, start,
-						  p - start);
+      psr = (const struct asm_psr *) str_hash_find_n (arm_v7m_psr_hsh, start,
+						      p - start);
 
       if (!psr)
 	return FAIL;
@@ -6441,8 +6441,8 @@ parse_psr (char **str, bfd_boolean lhs)
 	}
       else
 	{
-	  psr = (const struct asm_psr *) hash_find_n (arm_psr_hsh, start,
-						      p - start);
+	  psr = (const struct asm_psr *) str_hash_find_n (arm_psr_hsh, start,
+							  p - start);
 	  if (!psr)
 	    goto error;
 
@@ -6633,7 +6633,7 @@ parse_cond (char **str)
       n++;
     }
 
-  c = (const struct asm_cond *) hash_find_n (arm_cond_hsh, cond, n);
+  c = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, cond, n);
   if (!c)
     {
       inst.error = _("condition required");
@@ -6656,8 +6656,8 @@ parse_barrier (char **str)
   while (ISALPHA (*q))
     q++;
 
-  o = (const struct asm_barrier_opt *) hash_find_n (arm_barrier_opt_hsh, p,
-						    q - p);
+  o = (const struct asm_barrier_opt *) str_hash_find_n (arm_barrier_opt_hsh, p,
+							q - p);
   if (!o)
     return FAIL;
 
@@ -8289,7 +8289,7 @@ encode_thumb32_immediate (unsigned int val)
   for (i = 1; i <= 24; i++)
     {
       a = val >> i;
-      if ((val & ~(0xff << i)) == 0)
+      if ((val & ~(0xffU << i)) == 0)
 	return ((val >> i) & 0x7f) | ((32 - i) << 7);
     }
 
@@ -8773,9 +8773,9 @@ is_double_a_single (bfd_int64_t v)
 static int
 double_to_single (bfd_int64_t v)
 {
-  int sign = (int) ((v >> 63) & 1l);
-  int exp = (int) ((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
+  unsigned int sign = (v >> 63) & 1;
+  int exp = (v >> 52) & 0x7FF;
+  bfd_int64_t mantissa = (v & (bfd_int64_t) 0xFFFFFFFFFFFFFULL);
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8867,17 +8867,16 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	    l = generic_bignum;
 
 #if defined BFD_HOST_64_BIT
-	  v =
-	    ((((((((bfd_int64_t) l[3] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-		 | ((bfd_int64_t) l[2] & LITTLENUM_MASK))
+	  v = ((((bfd_uint64_t) l[3] & LITTLENUM_MASK)
 		<< LITTLENUM_NUMBER_OF_BITS)
-	       | ((bfd_int64_t) l[1] & LITTLENUM_MASK))
-	      << LITTLENUM_NUMBER_OF_BITS)
-	     | ((bfd_int64_t) l[0] & LITTLENUM_MASK));
+	       | (((bfd_int64_t) l[2] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+	       | (((bfd_uint64_t) l[1] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+	       | (l[0] & LITTLENUM_MASK));
 #else
-	  v = ((l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	    |  (l[0] & LITTLENUM_MASK);
+	  v = ((((valueT) l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+	       | (l[0] & LITTLENUM_MASK));
 #endif
 	}
       else
@@ -8898,16 +8897,13 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  /* Check if on thumb2 it can be done with a mov.w, mvn or
 		     movw instruction.  */
 		  unsigned int newimm;
-		  bfd_boolean isNegated;
+		  bfd_boolean isNegated = FALSE;
 
 		  newimm = encode_thumb32_immediate (v);
-		  if (newimm != (unsigned int) FAIL)
-		    isNegated = FALSE;
-		  else
+		  if (newimm == (unsigned int) FAIL)
 		    {
 		      newimm = encode_thumb32_immediate (~v);
-		      if (newimm != (unsigned int) FAIL)
-			isNegated = TRUE;
+		      isNegated = TRUE;
 		    }
 
 		  /* The number can be loaded with a mov.w or mvn
@@ -15606,7 +15602,7 @@ do_vfp_nsyn_opcode (const char *opname)
 {
   const struct asm_opcode *opcode;
 
-  opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, opname);
+  opcode = (const struct asm_opcode *) str_hash_find (arm_ops_hsh, opname);
 
   if (!opcode)
     abort ();
@@ -16837,7 +16833,7 @@ if (!thumb_mode && (check & NEON_CHECK_CC))
 	first_error (_(BAD_COND));
 	return FAIL;
       }
-    if (inst.uncond_value != -1)
+    if (inst.uncond_value != -1u)
       inst.instruction |= inst.uncond_value << 28;
   }
 
@@ -19087,6 +19083,16 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
       return;
     }
 
+  if ((rs == NS_FD || rs == NS_QQI) && mode == neon_cvt_mode_n
+      && ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      /* We are dealing with vcvt with the 'ne' condition.  */
+      inst.cond = 0x1;
+      inst.instruction = N_MNEM_vcvt;
+      do_neon_cvt_1 (neon_cvt_mode_z);
+      return;
+    }
+
   /* VFP rather than Neon conversions.  */
   if (flavour >= neon_cvt_flavour_first_fp)
     {
@@ -19114,14 +19120,6 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	  if (!check_simd_pred_availability (TRUE,
 					     NEON_CHECK_CC | NEON_CHECK_ARCH))
 	    return;
-	}
-      else if (mode == neon_cvt_mode_n)
-	{
-	  /* We are dealing with vcvt with the 'ne' condition.  */
-	  inst.cond = 0x1;
-	  inst.instruction = N_MNEM_vcvt;
-	  do_neon_cvt_1 (neon_cvt_mode_z);
-	  return;
 	}
       /* fall through.  */
     case NS_DDI:
@@ -19555,6 +19553,9 @@ do_neon_mvn (void)
 	rs = neon_select_shape (NS_QQ, NS_NULL);
       else
 	rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+
+      if (rs == NS_NULL)
+	return;
 
       NEON_ENCODE (INTEGER, inst);
       inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
@@ -20635,6 +20636,8 @@ static void
 do_neon_swp (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (rs == NS_NULL)
+    return;
   neon_two_same (neon_quad (rs), 1, -1);
 }
 
@@ -22025,7 +22028,7 @@ vcx_handle_common_checks (unsigned num_args, enum neon_shape rs)
 		  && mark_feature_used (&armv8m_fp))
 		&& !mark_feature_used (&mve_ext),
 		_("vcx instructions with S or D registers require either MVE"
-		  " or Armv8-M floating point etension."));
+		  " or Armv8-M floating point extension."));
 }
 
 static void
@@ -22618,8 +22621,9 @@ opcode_lookup (char **str)
     *str = end;
 
   /* Look for unaffixed or special-case affixed mnemonic.  */
-  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
-						    end - base);
+  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
+							end - base);
+  cond = NULL;
   if (opcode)
     {
       /* step U */
@@ -22632,7 +22636,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax)
 	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
-      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
 
       inst.cond = cond->value;
@@ -22645,9 +22649,9 @@ opcode_lookup (char **str)
     if (end - base < 2)
       return NULL;
      affix = end - 1;
-     cond = (const struct asm_cond *) hash_find_n (arm_vcond_hsh, affix, 1);
-     opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
-						      affix - base);
+     cond = (const struct asm_cond *) str_hash_find_n (arm_vcond_hsh, affix, 1);
+     opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
+							   affix - base);
      /* If this opcode can not be vector predicated then don't accept it with a
 	vector predication code.  */
      if (opcode && !opcode->mayBeVecPred)
@@ -22662,9 +22666,9 @@ opcode_lookup (char **str)
 
       /* Look for suffixed mnemonic.  */
       affix = end - 2;
-      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
-      opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
-							affix - base);
+      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
+      opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
+							    affix - base);
     }
 
   if (opcode && cond)
@@ -22713,14 +22717,14 @@ opcode_lookup (char **str)
 
   /* Look for infixed mnemonic in the usual position.  */
   affix = base + 3;
-  cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+  cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
   if (!cond)
     return NULL;
 
   memcpy (save, affix, 2);
   memmove (affix, affix + 2, (end - affix) - 2);
-  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
-						    (end - base) - 2);
+  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
+							(end - base) - 2);
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
 
@@ -23060,7 +23064,8 @@ handle_pred_state (void)
 
     case MANUAL_PRED_BLOCK:
       {
-	int cond, is_last;
+	unsigned int cond;
+	int is_last;
 	if (now_pred.type == SCALAR_PRED)
 	  {
 	    /* Check conditional suffixes.  */
@@ -23456,7 +23461,7 @@ md_assemble (char *str)
 
   /* The value which unconditional instructions should have in place of the
      condition field.  */
-  inst.uncond_value = (opcode->tag == OT_csuffixF) ? 0xf : -1;
+  inst.uncond_value = (opcode->tag == OT_csuffixF) ? 0xf : -1u;
 
   if (thumb_mode)
     {
@@ -24950,6 +24955,13 @@ static const struct asm_opcode insns[] =
 							ldrexd, t_ldrexd),
  TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
 							strexd, t_strexd),
+#undef THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8r
+#undef ARM_VARIANT
+#define ARM_VARIANT & arm_ext_v8r
+
+/* ARMv8-R instructions.  */
+ TUF("dfb",	57ff04c, f3bf8f4c, 0, (), noargs, noargs),
 
 /* Defined in V8 but is in undefined encoding space for earlier
    architectures.  However earlier architectures are required to treat
@@ -27980,16 +27992,19 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
 
       for (p = nbuf; *p; p++)
 	*p = TOLOWER (*p);
-      if (hash_find (arm_ops_hsh, nbuf) != NULL)
+      if (str_hash_find (arm_ops_hsh, nbuf) != NULL)
 	{
-	  static struct hash_control * already_warned = NULL;
+	  static htab_t  already_warned = NULL;
 
 	  if (already_warned == NULL)
-	    already_warned = hash_new ();
+	    already_warned = str_htab_create ();
 	  /* Only warn about the symbol once.  To keep the code
-	     simple we let hash_insert do the lookup for us.  */
-	  if (hash_insert (already_warned, nbuf, NULL) == NULL)
-	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	     simple we let str_hash_insert do the lookup for us.  */
+	  if (str_hash_find (already_warned, nbuf) == NULL)
+	    {
+	      as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	      str_hash_insert (already_warned, nbuf, NULL, 0);
+	    }
 	}
       else
 	free (nbuf);
@@ -28014,7 +28029,7 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
 	    as_bad (_("GOT already in the symbol table"));
 
 	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT) 0, & zero_address_frag);
+				   &zero_address_frag, 0);
 	}
 
       return GOT_symbol;
@@ -28163,10 +28178,10 @@ negate_data_op (unsigned long * instruction,
 /* Like negate_data_op, but for Thumb-2.   */
 
 static unsigned int
-thumb32_negate_data_op (offsetT *instruction, unsigned int value)
+thumb32_negate_data_op (valueT *instruction, unsigned int value)
 {
-  int op, new_inst;
-  int rd;
+  unsigned int op, new_inst;
+  unsigned int rd;
   unsigned int negated, inverted;
 
   negated = encode_thumb32_immediate (-value);
@@ -28302,8 +28317,8 @@ md_apply_fix (fixS *	fixP,
 	       valueT * valP,
 	       segT	seg)
 {
-  offsetT	 value = * valP;
-  offsetT	 newval;
+  valueT	 value = * valP;
+  valueT	 newval;
   unsigned int	 newimm;
   unsigned long	 temp;
   int		 sign;
@@ -28366,7 +28381,7 @@ md_apply_fix (fixS *	fixP,
       temp = md_chars_to_number (buf, INSN_SIZE);
 
       /* If the offset is negative, we should use encoding A2 for ADR.  */
-      if ((temp & 0xfff0000) == 0x28f0000 && value < 0)
+      if ((temp & 0xfff0000) == 0x28f0000 && (offsetT) value < 0)
 	newimm = negate_data_op (&temp, value);
       else
 	{
@@ -28384,7 +28399,7 @@ md_apply_fix (fixS *	fixP,
 	      && ((temp >> DATA_OP_SHIFT) & 0xf) == OPCODE_MOV
 	      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
 	      && !((temp >> SBIT_SHIFT) & 0x1)
-	      && value >= 0 && value <= 0xffff)
+	      && value <= 0xffff)
 	    {
 	      /* Clear bits[23:20] to change encoding from A1 to A2.  */
 	      temp &= 0xff0fffff;
@@ -28481,9 +28496,9 @@ md_apply_fix (fixS *	fixP,
       /* Fall through.  */
 
     case BFD_RELOC_ARM_LITERAL:
-      sign = value > 0;
+      sign = (offsetT) value > 0;
 
-      if (value < 0)
+      if ((offsetT) value < 0)
 	value = - value;
 
       if (validate_offset_imm (value, 0) == FAIL)
@@ -28511,9 +28526,9 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_OFFSET_IMM8:
     case BFD_RELOC_ARM_HWLITERAL:
-      sign = value > 0;
+      sign = (offsetT) value > 0;
 
-      if (value < 0)
+      if ((offsetT) value < 0)
 	value = - value;
 
       if (validate_offset_imm (value, 1) == FAIL)
@@ -28540,7 +28555,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_T32_OFFSET_U8:
-      if (value < 0 || value > 1020 || value % 4 != 0)
+      if (value > 1020 || value % 4 != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("bad immediate value for offset (%ld)"), (long) value);
       value /= 4;
@@ -28576,7 +28591,7 @@ md_apply_fix (fixS *	fixP,
       if ((newval & 0xf0000000) == 0xe0000000)
 	{
 	  /* Doubleword load/store: 8-bit offset, scaled by 4.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 23);
 	  else
 	    value = -value;
@@ -28598,7 +28613,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x000f0000) == 0x000f0000)
 	{
 	  /* PC-relative, 12-bit offset.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 23);
 	  else
 	    value = -value;
@@ -28613,7 +28628,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x00000100) == 0x00000100)
 	{
 	  /* Writeback: 8-bit, +/- offset.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 9);
 	  else
 	    value = -value;
@@ -28628,7 +28643,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x00000f00) == 0x00000e00)
 	{
 	  /* T-instruction: positive 8-bit offset.  */
-	  if (value < 0 || value > 0xff)
+	  if (value > 0xff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
@@ -28640,8 +28655,8 @@ md_apply_fix (fixS *	fixP,
       else
 	{
 	  /* Positive 12-bit or negative 8-bit offset.  */
-	  int limit;
-	  if (value >= 0)
+	  unsigned int limit;
+	  if ((offsetT) value >= 0)
 	    {
 	      newval |= (1 << 23);
 	      limit = 0xfff;
@@ -28667,7 +28682,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_SHIFT_IMM:
       newval = md_chars_to_number (buf, INSN_SIZE);
-      if (((unsigned long) value) > 32
+      if (value > 32
 	  || (value == 32
 	      && (((newval & 0x60) == 0) || (newval & 0x60) == 0x60)))
 	{
@@ -28730,7 +28745,7 @@ md_apply_fix (fixS *	fixP,
 	      if ((newval & 0x00100000) == 0)
 		{
 		  /* 12 bit immediate for addw/subw.  */
-		  if (value < 0)
+		  if ((offsetT) value < 0)
 		    {
 		      value = -value;
 		      newval ^= 0x00a00000;
@@ -28753,7 +28768,7 @@ md_apply_fix (fixS *	fixP,
 		  && (((newval >> 16) & 0xf) == 0xf)
 		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m)
 		  && !((newval >> T2_SBIT_SHIFT) & 0x1)
-		  && value >= 0 && value <= 0xffff)
+		  && value <= 0xffff)
 		{
 		  /* Toggle bit[25] to change encoding from T2 to T3.  */
 		  newval ^= 1 << 25;
@@ -28784,7 +28799,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_SMC:
-      if (((unsigned long) value) > 0xf)
+      if (value > 0xf)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid smc expression"));
 
@@ -28794,7 +28809,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_HVC:
-      if (((unsigned long) value) > 0xffff)
+      if (value > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid hvc expression"));
       newval = md_chars_to_number (buf, INSN_SIZE);
@@ -28805,7 +28820,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_SWI:
       if (fixP->tc_fix_data != 0)
 	{
-	  if (((unsigned long) value) > 0xff)
+	  if (value > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
@@ -28814,7 +28829,7 @@ md_apply_fix (fixS *	fixP,
 	}
       else
 	{
-	  if (((unsigned long) value) > 0x00ffffff)
+	  if (value > 0x00ffffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, INSN_SIZE);
@@ -28824,7 +28839,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_MULTI:
-      if (((unsigned long) value) > 0xffff)
+      if (value > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid expression in load/store multiple"));
       newval = value | md_chars_to_number (buf, INSN_SIZE);
@@ -28908,8 +28923,8 @@ md_apply_fix (fixS *	fixP,
       if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));
-      if ((value & (offsetT)0xfe000000) != (offsetT)0
-	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
+      if ((value & 0xfe000000) != 0
+	  && (value & 0xfe000000) != 0xfe000000)
 	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
@@ -28937,7 +28952,7 @@ md_apply_fix (fixS *	fixP,
 
 	 FIXME: It may be better to remove the instruction completely and
 	 perform relaxation.  */
-      if (value == -2)
+      if ((offsetT) value == -2)
 	{
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
 	  newval = 0xbf00; /* NOP encoding T1 */
@@ -29210,24 +29225,24 @@ md_apply_fix (fixS *	fixP,
       if ((newval & 0x0f200f00) == 0x0d000900)
 	{
 	  /* This is a fp16 vstr/vldr.  The immediate offset in the mnemonic
-	     has permitted values that are multiples of 2, in the range 0
+	     has permitted values that are multiples of 2, in the range -510
 	     to 510.  */
-	  if (value < -510 || value > 510 || (value & 1))
+	  if (value + 510 > 510 + 510 || (value & 1))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("co-processor offset out of range"));
 	}
       else if ((newval & 0xfe001f80) == 0xec000f80)
 	{
-	  if (value < -511 || value > 512 || (value & 3))
+	  if (value + 511 > 512 + 511 || (value & 3))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("co-processor offset out of range"));
 	}
-      else if (value < -1023 || value > 1023 || (value & 3))
+      else if (value + 1023 > 1023 + 1023 || (value & 3))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
     cp_off_common:
-      sign = value > 0;
-      if (value < 0)
+      sign = (offsetT) value > 0;
+      if ((offsetT) value < 0)
 	value = -value;
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
 	  || fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2)
@@ -29269,7 +29284,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_CP_OFF_IMM_S2:
     case BFD_RELOC_ARM_T32_CP_OFF_IMM_S2:
-      if (value < -255 || value > 255)
+      if (value + 255 > 255 + 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
       value *= 4;
@@ -29375,11 +29390,11 @@ md_apply_fix (fixS *	fixP,
 			_("invalid Hi register with immediate"));
 
 	/* If value is negative, choose the opposite instruction.  */
-	if (value < 0)
+	if ((offsetT) value < 0)
 	  {
 	    value = -value;
 	    subtract = !subtract;
-	    if (value < 0)
+	    if ((offsetT) value < 0)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("immediate value out of range"));
 	  }
@@ -29463,7 +29478,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_THUMB_IMM:
       newval = md_chars_to_number (buf, THUMB_SIZE);
-      if (value < 0 || value > 255)
+      if (value > 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid immediate: %ld is out of range"),
 		      (long) value);
@@ -29475,7 +29490,7 @@ md_apply_fix (fixS *	fixP,
       /* 5bit shift value (0..32).  LSL cannot take 32.	 */
       newval = md_chars_to_number (buf, THUMB_SIZE) & 0xf83f;
       temp = newval & 0xf800;
-      if (value < 0 || value > 32 || (value == 32 && temp == T_OPCODE_LSL_I))
+      if (value > 32 || (value == 32 && temp == T_OPCODE_LSL_I))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid shift value: %ld"), (long) value);
       /* Shifts of zero must be encoded as LSL.	 */
@@ -29502,7 +29517,7 @@ md_apply_fix (fixS *	fixP,
 	  /* REL format relocations are limited to a 16-bit addend.  */
 	  if (!fixP->fx_done)
 	    {
-	      if (value < -0x8000 || value > 0x7fff)
+	      if (value + 0x8000 > 0x7fff + 0x8000)
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
 				_("offset out of range"));
 	    }
@@ -29545,7 +29560,7 @@ md_apply_fix (fixS *	fixP,
 	bfd_vma encoded_addend = value;
 
 	/* Check that addend can be encoded in instruction.  */
-	if (!seg->use_rela_p && (value < 0 || value > 255))
+	if (!seg->use_rela_p && value > 255)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("the offset 0x%08lX is not representable"),
 			(unsigned long) encoded_addend);
@@ -29611,7 +29626,7 @@ md_apply_fix (fixS *	fixP,
        {
 	 bfd_vma insn;
 	 bfd_vma encoded_addend;
-	 bfd_vma addend_abs = llabs (value);
+	 bfd_vma addend_abs = llabs ((offsetT) value);
 
 	 /* Check that the absolute value of the addend can be
 	    expressed as an 8-bit constant plus a rotation.  */
@@ -29627,7 +29642,7 @@ md_apply_fix (fixS *	fixP,
 	 /* If the addend is positive, use an ADD instruction.
 	    Otherwise use a SUB.  Take care not to destroy the S bit.  */
 	 insn &= 0xff1fffff;
-	 if (value < 0)
+	 if ((offsetT) value < 0)
 	   insn |= 1 << 22;
 	 else
 	   insn |= 1 << 23;
@@ -29652,7 +29667,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend can be
 	     encoded in 12 bits.  */
@@ -29666,7 +29681,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29691,7 +29706,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend can be
 	     encoded in 8 bits.  */
@@ -29705,7 +29720,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29731,7 +29746,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend is a multiple of
 	     four and, when divided by four, fits in 8 bits.  */
@@ -29750,7 +29765,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29798,7 +29813,7 @@ md_apply_fix (fixS *	fixP,
 	{
 	  fixP->fx_done = 0;
 	}
-      if ((value & ~0x7f) && ((value & ~0x3f) != ~0x3f))
+      if ((value & ~0x7f) && ((value & ~0x3f) != (valueT) ~0x3f))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch out of range"));
 
@@ -30362,6 +30377,7 @@ arm_force_relocation (struct fix * fixp)
       || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2
       || fixp->fx_r_type == BFD_RELOC_ARM_THUMB_OFFSET
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH12
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMM12
@@ -30706,37 +30722,37 @@ md_begin (void)
   unsigned mach;
   unsigned int i;
 
-  if (	 (arm_ops_hsh = hash_new ()) == NULL
-      || (arm_cond_hsh = hash_new ()) == NULL
-      || (arm_vcond_hsh = hash_new ()) == NULL
-      || (arm_shift_hsh = hash_new ()) == NULL
-      || (arm_psr_hsh = hash_new ()) == NULL
-      || (arm_v7m_psr_hsh = hash_new ()) == NULL
-      || (arm_reg_hsh = hash_new ()) == NULL
-      || (arm_reloc_hsh = hash_new ()) == NULL
-      || (arm_barrier_opt_hsh = hash_new ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  arm_ops_hsh = str_htab_create ();
+  arm_cond_hsh = str_htab_create ();
+  arm_vcond_hsh = str_htab_create ();
+  arm_shift_hsh = str_htab_create ();
+  arm_psr_hsh = str_htab_create ();
+  arm_v7m_psr_hsh = str_htab_create ();
+  arm_reg_hsh = str_htab_create ();
+  arm_reloc_hsh = str_htab_create ();
+  arm_barrier_opt_hsh = str_htab_create ();
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
-    hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
+    if (str_hash_find (arm_ops_hsh, insns[i].template_name) == NULL)
+      str_hash_insert (arm_ops_hsh, insns[i].template_name, insns + i, 0);
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
+    str_hash_insert (arm_cond_hsh, conds[i].template_name, conds + i, 0);
   for (i = 0; i < sizeof (vconds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_vcond_hsh, vconds[i].template_name, (void *) (vconds + i));
+    str_hash_insert (arm_vcond_hsh, vconds[i].template_name, vconds + i, 0);
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
-    hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
+    str_hash_insert (arm_shift_hsh, shift_names[i].name, shift_names + i, 0);
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_psr_hsh, psrs[i].template_name, (void *) (psrs + i));
+    str_hash_insert (arm_psr_hsh, psrs[i].template_name, psrs + i, 0);
   for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
-		 (void *) (v7m_psrs + i));
+    str_hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
+		     v7m_psrs + i, 0);
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
-    hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
+    str_hash_insert (arm_reg_hsh, reg_names[i].name, reg_names + i, 0);
   for (i = 0;
        i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
        i++)
-    hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
-		 (void *) (barrier_opt_names + i));
+    str_hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
+		     barrier_opt_names + i, 0);
 #ifdef OBJ_ELF
   for (i = 0; i < ARRAY_SIZE (reloc_names); i++)
     {
@@ -30746,7 +30762,7 @@ md_begin (void)
 	/* This makes encode_branch() use the EABI versions of this relocation.  */
 	entry->reloc = BFD_RELOC_UNUSED;
 
-      hash_insert (arm_reloc_hsh, entry->name, (void *) entry);
+      str_hash_insert (arm_reloc_hsh, entry->name, entry, 0);
     }
 #endif
 

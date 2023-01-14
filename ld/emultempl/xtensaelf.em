@@ -30,8 +30,16 @@ fragment <<EOF
 #include "bfd.h"
 
 /* Provide default values for new configuration settings.  */
-#ifndef XSHAL_ABI
-#define XSHAL_ABI 0
+#ifndef XTHAL_ABI_UNDEFINED
+#define XTHAL_ABI_UNDEFINED -1
+#endif
+
+#ifndef XTHAL_ABI_WINDOWED
+#define XTHAL_ABI_WINDOWED 0
+#endif
+
+#ifndef XTHAL_ABI_CALL0
+#define XTHAL_ABI_CALL0 1
 #endif
 
 static void xtensa_wild_group_interleave (lang_statement_union_type *);
@@ -48,6 +56,10 @@ static bfd_vma xtensa_page_power = 12; /* 4K pages.  */
 static bfd_boolean xtensa_use_literal_pages = FALSE;
 
 #define EXTRA_VALIDATION 0
+
+/* Xtensa ABI.
+   This option is defined in BDF library.  */
+extern int elf32xtensa_abi;
 
 
 static char *
@@ -306,7 +318,7 @@ xt_config_info_unpack_and_check (char *data,
 				 char **pmsg)
 {
   char *d, *key;
-  unsigned num;
+  int num;
 
   *pmismatch = FALSE;
 
@@ -341,7 +353,11 @@ xt_config_info_unpack_and_check (char *data,
 
 	  if (! strcmp (key, "ABI"))
 	    {
-	      if (num != XSHAL_ABI)
+	      if (elf32xtensa_abi == XTHAL_ABI_UNDEFINED)
+		{
+		  elf32xtensa_abi = num;
+		}
+	      else if (num != elf32xtensa_abi)
 		{
 		  *pmismatch = TRUE;
 		  *pmsg = "ABI does not match";
@@ -489,7 +505,7 @@ elf_xtensa_before_allocation (void)
 
       data = xmalloc (100);
       sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
-	       XSHAL_USE_ABSOLUTE_LITERALS, XSHAL_ABI);
+	       XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
       xtensa_info_size = strlen (data) + 1;
 
       /* Add enough null terminators to pad to a word boundary.  */
@@ -1920,20 +1936,29 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_OPT_SIZEOPT              (300)
 #define OPTION_LITERAL_MOVEMENT		(OPTION_OPT_SIZEOPT + 1)
 #define OPTION_NO_LITERAL_MOVEMENT	(OPTION_LITERAL_MOVEMENT + 1)
+#define OPTION_ABI_WINDOWED		(OPTION_NO_LITERAL_MOVEMENT + 1)
+#define OPTION_ABI_CALL0		(OPTION_ABI_WINDOWED + 1)
 extern int elf32xtensa_size_opt;
 extern int elf32xtensa_no_literal_movement;
+extern int elf32xtensa_abi;
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "size-opt", no_argument, NULL, OPTION_OPT_SIZEOPT},
   { "literal-movement", no_argument, NULL, OPTION_LITERAL_MOVEMENT},
   { "no-literal-movement", no_argument, NULL, OPTION_NO_LITERAL_MOVEMENT},
+  { "abi-windowed", no_argument, NULL, OPTION_ABI_WINDOWED},
+  { "abi-call0", no_argument, NULL, OPTION_ABI_CALL0},
 '
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --size-opt                  When relaxing longcalls, prefer size\n\
                                 optimization over branch target alignment\n"));
+  fprintf (file, _("\
+  --abi-windowed              Choose windowed ABI for the output object\n"));
+  fprintf (file, _("\
+  --abi-call0                 Choose call0 ABI for the output object\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -1945,6 +1970,12 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
     case OPTION_NO_LITERAL_MOVEMENT:
       elf32xtensa_no_literal_movement = 1;
+      break;
+    case OPTION_ABI_WINDOWED:
+      elf32xtensa_abi = XTHAL_ABI_WINDOWED;
+      break;
+    case OPTION_ABI_CALL0:
+      elf32xtensa_abi = XTHAL_ABI_CALL0;
       break;
 '
 

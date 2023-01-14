@@ -746,6 +746,10 @@ tui_setup_io (int mode)
 
   if (mode)
     {
+      /* Ensure that readline has been initialized before saving any
+	 of its variables.  */
+      tui_ensure_readline_initialized ();
+
       /* Redirect readline to TUI.  */
       tui_old_rl_redisplay_function = rl_redisplay_function;
       tui_old_rl_deprep_terminal = rl_deprep_term_function;
@@ -1045,56 +1049,4 @@ tui_getc (FILE *fp)
 	 character.  */
       return 0;
     }
-}
-
-/* See tui-io.h.  */
-
-gdb::unique_xmalloc_ptr<char>
-tui_expand_tabs (const char *string)
-{
-  int n_adjust, ncol;
-  const char *s;
-  char *ret, *q;
-
-  /* 1. How many additional characters do we need?  */
-  for (ncol = 0, n_adjust = 0, s = string; s; )
-    {
-      s = strpbrk (s, "\t");
-      if (s)
-	{
-	  ncol += (s - string) + n_adjust;
-	  /* Adjustment for the next tab stop, minus one for the TAB
-	     we replace with spaces.  */
-	  n_adjust += 8 - (ncol % 8) - 1;
-	  s++;
-	}
-    }
-
-  /* Allocate the copy.  */
-  ret = q = (char *) xmalloc (strlen (string) + n_adjust + 1);
-
-  /* 2. Copy the original string while replacing TABs with spaces.  */
-  for (ncol = 0, s = string; s; )
-    {
-      const char *s1 = strpbrk (s, "\t");
-      if (s1)
-	{
-	  if (s1 > s)
-	    {
-	      strncpy (q, s, s1 - s);
-	      q += s1 - s;
-	      ncol += s1 - s;
-	    }
-	  do {
-	    *q++ = ' ';
-	    ncol++;
-	  } while ((ncol % 8) != 0);
-	  s1++;
-	}
-      else
-	strcpy (q, s);
-      s = s1;
-    }
-
-  return gdb::unique_xmalloc_ptr<char> (ret);
 }

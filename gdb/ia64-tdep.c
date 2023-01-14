@@ -329,7 +329,7 @@ ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int raw_p;
   if (group == all_reggroup)
     return 1;
-  vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
+  vector_p = register_type (gdbarch, regnum)->is_vector ();
   float_p = register_type (gdbarch, regnum)->code () == TYPE_CODE_FLT;
   raw_p = regnum < NUM_IA64_RAW_REGS;
   if (group == float_reggroup)
@@ -3342,7 +3342,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
 
 	for (i = 0; i < t->num_fields (); i++)
 	  if (!is_float_or_hfa_type_recurse
-	      (check_typedef (TYPE_FIELD_TYPE (t, i)), etp))
+	      (check_typedef (t->field (i).type ()), etp))
 	    return 0;
 	return 1;
       }
@@ -3391,7 +3391,7 @@ slot_alignment_is_next_even (struct type *t)
 
 	for (i = 0; i < t->num_fields (); i++)
 	  if (slot_alignment_is_next_even
-	      (check_typedef (TYPE_FIELD_TYPE (t, i))))
+	      (check_typedef (t->field (i).type ())))
 	    return 1;
 	return 0;
       }

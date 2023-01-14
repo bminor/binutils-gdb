@@ -18,6 +18,7 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <string.h>
 
 enum region { oriental, egyptian, greek, etruscan, roman };
 
@@ -129,8 +130,8 @@ int main()
     }
   catch (exception& obj)
     {
-      if (obj.what() != "gdb.1")	// marker 3-catch
+      if (strcmp (obj.what(), "gdb.1") != 0)	// marker 3-catch
 	test &= false;
     }
-  return 0;
+  return 0;	// marker test-complete
 }

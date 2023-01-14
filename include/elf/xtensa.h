@@ -225,6 +225,9 @@ xtensa_read_table_entries (bfd *abfd,
 extern int
 xtensa_compute_fill_extra_space (property_table_entry *entry);
 
+extern int
+xtensa_abi_choice (void);
+
 #ifdef __cplusplus
 }
 #endif

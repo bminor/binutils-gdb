@@ -38,8 +38,7 @@ Guile support in @value{GDBN} follows the Python support in @value{GDBN}
 reasonably closely, so concepts there should carry over.
 However, some things are done differently where it makes sense.
 
-@value{GDBN} requires Guile version 2.0 or greater.
-Older versions are not supported.
+@value{GDBN} requires Guile version 3.0, 2.2, or 2.0.
 
 @cindex guile scripts directory
 Guile scripts used by @value{GDBN} should be installed in
@@ -3559,21 +3558,36 @@ inclusive.
 @deffn {Scheme Procedure} memory-port-read-buffer-size memory-port
 Return the size of the read buffer of @code{<gdb:memory-port>}
 @var{memory-port}.
+
+This procedure is deprecated and will be removed in @value{GDBN} 11.
+It returns 0 when using Guile 2.2 or later.
 @end deffn
 
 @deffn {Scheme Procedure} set-memory-port-read-buffer-size! memory-port size
 Set the size of the read buffer of @code{<gdb:memory-port>}
 @var{memory-port} to @var{size}.  The result is unspecified.
+
+This procedure is deprecated and will be removed in @value{GDBN} 11.
+When @value{GDBN} is built with Guile 2.2 or later, you can call
+@code{setvbuf} instead (@pxref{Buffering, @code{setvbuf},, guile, GNU
+Guile Reference Manual}).
 @end deffn
 
 @deffn {Scheme Procedure} memory-port-write-buffer-size memory-port
 Return the size of the write buffer of @code{<gdb:memory-port>}
 @var{memory-port}.
+
+This procedure is deprecated and will be removed in @value{GDBN} 11.
+It returns 0 when @value{GDBN} is built with Guile 2.2 or later.
 @end deffn
 
 @deffn {Scheme Procedure} set-memory-port-write-buffer-size! memory-port size
 Set the size of the write buffer of @code{<gdb:memory-port>}
 @var{memory-port} to @var{size}.  The result is unspecified.
+
+This procedure is deprecated and will be removed in @value{GDBN} 11.
+When @value{GDBN} is built with Guile 2.2 or later, you can call
+@code{setvbuf} instead.
 @end deffn
 
 A memory port is closed like any other port, with @code{close-port}.

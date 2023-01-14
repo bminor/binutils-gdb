@@ -133,7 +133,10 @@ tui_py_window::~tui_py_window ()
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  if (PyObject_HasAttrString (m_window.get (), "close"))
+  /* This can be null if the user-provided Python construction
+     function failed.  */
+  if (m_window != nullptr
+      && PyObject_HasAttrString (m_window.get (), "close"))
     {
       gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "close",
 					       nullptr));

@@ -23,7 +23,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	0f ba 38 01          	btcl   \$0x1,\(%rax\)
  *[a-f0-9]+:	0f ba 30 01          	btrl   \$0x1,\(%rax\)
  *[a-f0-9]+:	0f ba 28 01          	btsl   \$0x1,\(%rax\)
- *[a-f0-9]+:	ff 10                	callq  \*\(%rax\)
+ *[a-f0-9]+:	ff 10                	call   \*\(%rax\)
  *[a-f0-9]+:	83 38 01             	cmpl   \$0x1,\(%rax\)
  *[a-f0-9]+:	81 38 89 00 00 00    	cmpl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 38 34 12 00 00    	cmpl   \$0x1234,\(%rax\)
@@ -65,9 +65,11 @@ Disassembly of section .text:
  *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	cf                   	iret *
- *[a-f0-9]+:	ff 20                	jmpq   \*\(%rax\)
+ *[a-f0-9]+:	ff 20                	jmp    \*\(%rax\)
+ *[a-f0-9]+:	ff 18                	lcall  \*\(%rax\)
  *[a-f0-9]+:	0f 01 10             	lgdt   \(%rax\)
  *[a-f0-9]+:	0f 01 18             	lidt   \(%rax\)
+ *[a-f0-9]+:	ff 28                	ljmp   \*\(%rax\)
  *[a-f0-9]+:	0f 00 10             	lldt   \(%rax\)
  *[a-f0-9]+:	0f 01 30             	lmsw   \(%rax\)
  *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax
@@ -100,11 +102,11 @@ Disassembly of section .text:
  *[a-f0-9]+:	ef                   	out    %eax,\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%rsi\),\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%rsi\),\(%dx\)
- *[a-f0-9]+:	8f 00                	popq   \(%rax\)
- *[a-f0-9]+:	0f a1                	popq   %fs
+ *[a-f0-9]+:	8f 00                	pop    \(%rax\)
+ *[a-f0-9]+:	0f a1                	pop    %fs
  *[a-f0-9]+:	f3 0f ae 20          	ptwritel \(%rax\)
- *[a-f0-9]+:	ff 30                	pushq  \(%rax\)
- *[a-f0-9]+:	0f a0                	pushq  %fs
+ *[a-f0-9]+:	ff 30                	push   \(%rax\)
+ *[a-f0-9]+:	0f a0                	push   %fs
  *[a-f0-9]+:	d1 10                	rcll   \(%rax\)
  *[a-f0-9]+:	c1 10 02             	rcll   \$0x2,\(%rax\)
  *[a-f0-9]+:	d3 10                	rcll   %cl,\(%rax\)
