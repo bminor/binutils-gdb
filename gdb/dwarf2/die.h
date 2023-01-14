@@ -23,6 +23,17 @@
 /* This data structure holds a complete die structure.  */
 struct die_info
 {
+  /* Return the named attribute or NULL if not there, but do not
+     follow DW_AT_specification, etc.  */
+  struct attribute *attr (dwarf_attribute name)
+  {
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == name)
+	return &attrs[i];
+    return NULL;
+  }
+
+
   /* DWARF-2 tag for this DIE.  */
   ENUM_BITFIELD(dwarf_tag) tag : 16;
 
