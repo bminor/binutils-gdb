@@ -40,70 +40,6 @@
 #include "libcoff.h"
 
 static bfd_reloc_status_type
-coff_aarch64_addr64_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			   arelent *reloc_entry,
-			   asymbol *symbol ATTRIBUTE_UNUSED,
-			   void *data,
-			   asection *input_section ATTRIBUTE_UNUSED,
-			   bfd *output_bfd ATTRIBUTE_UNUSED,
-			   char **error_message ATTRIBUTE_UNUSED)
-{
-  uint64_t val = reloc_entry->addend;
-
-  bfd_putl64 (val, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
-coff_aarch64_addr32_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			   arelent *reloc_entry,
-			   asymbol *symbol ATTRIBUTE_UNUSED,
-			   void *data,
-			   asection *input_section ATTRIBUTE_UNUSED,
-			   bfd *output_bfd ATTRIBUTE_UNUSED,
-			   char **error_message ATTRIBUTE_UNUSED)
-{
-  uint64_t val;
-
-  if ((int64_t) reloc_entry->addend > 0x7fffffff
-      || (int64_t) reloc_entry->addend < -0x7fffffff)
-    return bfd_reloc_overflow;
-
-  val = reloc_entry->addend;
-
-  bfd_putl32 ((uint32_t) val, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
-coff_aarch64_branch26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			     arelent *reloc_entry,
-			     asymbol *symbol ATTRIBUTE_UNUSED,
-			     void *data,
-			     asection *input_section ATTRIBUTE_UNUSED,
-			     bfd *output_bfd ATTRIBUTE_UNUSED,
-			     char **error_message ATTRIBUTE_UNUSED)
-{
-  uint32_t op;
-  int32_t param;
-
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend;
-
-  if (param > 0x7ffffff || param < -0x8000000)
-    return bfd_reloc_overflow;
-
-  op &= 0xfc000000;
-  op |= (param >> 2) & 0x3ffffff;
-
-  bfd_putl32 (op, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
 coff_aarch64_rel21_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 			  arelent *reloc_entry,
 			  asymbol *symbol ATTRIBUTE_UNUSED,
@@ -171,81 +107,6 @@ coff_aarch64_po12l_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static bfd_reloc_status_type
-coff_aarch64_branch19_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			     arelent *reloc_entry,
-			     asymbol *symbol ATTRIBUTE_UNUSED,
-			     void *data,
-			     asection *input_section ATTRIBUTE_UNUSED,
-			     bfd *output_bfd ATTRIBUTE_UNUSED,
-			     char **error_message ATTRIBUTE_UNUSED)
-{
-  uint32_t op;
-  int32_t param;
-
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend;
-
-  if (param > 0xfffff || param < -0x100000)
-    return bfd_reloc_overflow;
-
-  op &= 0xff00001f;
-  op |= ((param >> 2) & 0x7ffff) << 5;
-
-  bfd_putl32 (op, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
-coff_aarch64_branch14_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			     arelent *reloc_entry,
-			     asymbol *symbol ATTRIBUTE_UNUSED,
-			     void *data,
-			     asection *input_section ATTRIBUTE_UNUSED,
-			     bfd *output_bfd ATTRIBUTE_UNUSED,
-			     char **error_message ATTRIBUTE_UNUSED)
-{
-  uint32_t op;
-  int32_t param;
-
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend;
-
-  if (param > 0x7fff || param < -0x8000)
-    return bfd_reloc_overflow;
-
-  op &= 0xfff8001f;
-  op |= ((param >> 2) & 0x3fff) << 5;
-
-  bfd_putl32 (op, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
-coff_aarch64_po12a_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			  arelent *reloc_entry,
-			  asymbol *symbol ATTRIBUTE_UNUSED,
-			  void *data,
-			  asection *input_section ATTRIBUTE_UNUSED,
-			  bfd *output_bfd ATTRIBUTE_UNUSED,
-			  char **error_message ATTRIBUTE_UNUSED)
-{
-  uint32_t op;
-  int32_t param;
-
-  op = bfd_getl32 (data + reloc_entry->address);
-  param = reloc_entry->addend;
-
-  op &= 0xffc003ff;
-  op |= (param & 0xfff) << 10;
-
-  bfd_putl32 (op, data + reloc_entry->address);
-
-  return bfd_reloc_ok;
-}
-
-static bfd_reloc_status_type
 coff_aarch64_addr32nb_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 			     arelent *reloc_entry,
 			     asymbol *symbol ATTRIBUTE_UNUSED,
@@ -282,61 +143,63 @@ coff_aarch64_secrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 #define coff_aarch64_NULL NULL
-#define HOW(type, right, size, bits, pcrel, left, ovf, func, mask, pcrel_off) \
+#undef HOWTO_INSTALL_ADDEND
+#define HOWTO_INSTALL_ADDEND 1
+#define HOW(type, right, size, bits, pcrel, left, ovf, func, mask) \
   HOWTO (type, right, size, bits, pcrel, left, complain_overflow_##ovf, \
-	 coff_aarch64_##func, #type, false, mask, mask, pcrel_off)
+	 coff_aarch64_##func, #type, true, mask, mask, false)
 
 static const reloc_howto_type arm64_reloc_howto_abs
 = HOW (IMAGE_REL_ARM64_ABSOLUTE,
-       0, 1, 0, false, 0, dont, NULL, 0, false);
+       0, 0, 0, false, 0, dont, NULL, 0);
 
 static const reloc_howto_type arm64_reloc_howto_64
 = HOW (IMAGE_REL_ARM64_ADDR64,
-       0, 8, 64, false, 0, bitfield, addr64_reloc, UINT64_C (-1), false);
+       0, 8, 64, false, 0, dont, NULL, UINT64_C (-1));
 
 static const reloc_howto_type arm64_reloc_howto_32
 = HOW (IMAGE_REL_ARM64_ADDR32,
-       0, 4, 32, false, 0, bitfield, addr32_reloc, 0xffffffff, false);
+       0, 4, 32, false, 0, signed, NULL, 0xffffffff);
 
 static const reloc_howto_type arm64_reloc_howto_32_pcrel
 = HOW (IMAGE_REL_ARM64_REL32,
-       0, 4, 32, true, 0, bitfield, NULL, 0xffffffff, true);
+       0, 4, 32, true, 0, signed, NULL, 0xffffffff);
 
 static const reloc_howto_type arm64_reloc_howto_branch26
 = HOW (IMAGE_REL_ARM64_BRANCH26,
-       0, 4, 26, true, 0, bitfield, branch26_reloc, 0x03ffffff, true);
+       2, 4, 26, true, 0, signed, NULL, 0x3ffffff);
 
 static const reloc_howto_type arm64_reloc_howto_page21
 = HOW (IMAGE_REL_ARM64_PAGEBASE_REL21,
-       12, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff, false);
+       12, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff);
 
 static const reloc_howto_type arm64_reloc_howto_lo21
 = HOW (IMAGE_REL_ARM64_REL21,
-       0, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff, true);
+       0, 4, 21, true, 0, signed, rel21_reloc, 0x1fffff);
 
 static const reloc_howto_type arm64_reloc_howto_pgoff12l
 = HOW (IMAGE_REL_ARM64_PAGEOFFSET_12L,
-       1, 4, 12, true, 0, signed, po12l_reloc, 0xffe, true);
+       0, 4, 12, true, 10, signed, po12l_reloc, 0x3ffc00);
 
 static const reloc_howto_type arm64_reloc_howto_branch19
 = HOW (IMAGE_REL_ARM64_BRANCH19,
-       2, 4, 19, true, 0, signed, branch19_reloc, 0x7ffff, true);
+       2, 4, 19, true, 5, signed, NULL, 0xffffe0);
 
 static const reloc_howto_type arm64_reloc_howto_branch14
 = HOW (IMAGE_REL_ARM64_BRANCH14,
-       2, 4, 14, true, 0, signed, branch14_reloc, 0x3fff, true);
+       2, 4, 14, true, 5, signed, NULL, 0x7ffe0);
 
 static const reloc_howto_type arm64_reloc_howto_pgoff12a
 = HOW (IMAGE_REL_ARM64_PAGEOFFSET_12A,
-       2, 4, 12, true, 10, dont, po12a_reloc, 0x3ffc00, false);
+       0, 4, 12, true, 10, dont, NULL, 0x3ffc00);
 
 static const reloc_howto_type arm64_reloc_howto_32nb
 = HOW (IMAGE_REL_ARM64_ADDR32NB,
-       0, 4, 32, false, 0, bitfield, addr32nb_reloc, 0xffffffff, false);
+       0, 4, 32, false, 0, signed, addr32nb_reloc, 0xffffffff);
 
 static const reloc_howto_type arm64_reloc_howto_secrel
 = HOW (IMAGE_REL_ARM64_SECREL,
-       0, 4, 32, false, 0, bitfield, secrel_reloc, 0xffffffff, false);
+       0, 4, 32, false, 0, dont, secrel_reloc, 0xffffffff);
 
 static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_abs,
@@ -353,6 +216,13 @@ static const reloc_howto_type* const arm64_howto_table[] = {
      &arm64_reloc_howto_32nb,
      &arm64_reloc_howto_secrel
 };
+
+/* No adjustment to addends should be needed.  The actual relocation
+   addend is in the section contents.  Unfortunately this means actual
+   addends are not shown by objdump -r, but that's true for most
+   COFF/PE targets where arelent.addend is an adjustment.  */
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)		\
+  cache_ptr->addend = 0;
 
 #ifndef NUM_ELEM
 #define NUM_ELEM(a) ((sizeof (a)) / sizeof ((a)[0]))
@@ -455,15 +325,32 @@ coff_aarch64_rtype_lookup (unsigned int code)
     case IMAGE_REL_ARM64_SECREL:
       return &arm64_reloc_howto_secrel;
     default:
-      BFD_FAIL ();
       return NULL;
   }
 
   return NULL;
 }
 
-#define RTYPE2HOWTO(cache_ptr, dst)				\
-  ((cache_ptr)->howto =	coff_aarch64_rtype_lookup((dst)->r_type))
+#define RTYPE2HOWTO(cache_ptr, dst)					\
+  ((cache_ptr)->howto = coff_aarch64_rtype_lookup((dst)->r_type))
+
+static reloc_howto_type *
+coff_aarch64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+			     asection *sec ATTRIBUTE_UNUSED,
+			     struct internal_reloc *rel,
+			     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED,
+			     struct internal_syment *sym ATTRIBUTE_UNUSED,
+			     bfd_vma *addendp)
+{
+  reloc_howto_type *howto = coff_aarch64_rtype_lookup (rel->r_type);
+
+  /* Cancel out code in _bfd_coff_generic_relocate_section.  */
+  *addendp = 0;
+
+  return howto;
+}
+
+#define coff_rtype_to_howto coff_aarch64_rtype_to_howto
 
 #define SELECT_RELOC(x,howto) { (x).r_type = (howto)->type; }
 
